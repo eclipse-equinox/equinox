@@ -24,7 +24,7 @@ import org.osgi.framework.*;
  */
 class StateBuilder {
 	static final String[] DEFINED_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
-	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REEXPORT_PACKAGE, Constants.REQUIRE_BUNDLE};
+	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
@@ -87,11 +87,10 @@ class StateBuilder {
 		if (host != null)
 			result.setHost(createHostSpecification(host[0]));
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
-		ManifestElement[] reexports = ManifestElement.parseHeader(Constants.REEXPORT_PACKAGE, (String) manifest.get(Constants.REEXPORT_PACKAGE));
 		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, (String) manifest.get(Constants.PROVIDE_PACKAGE)); // TODO this is null for now until the framwork is updated to handle the new re-export semantics
 		boolean strict = state != null && state.inStrictMode();
 		ArrayList providedExports = new ArrayList(provides == null ? 0 : provides.length);
-		result.setExportPackages(createExportPackages(exports, reexports, provides, providedExports, manifestVersion, strict));
+		result.setExportPackages(createExportPackages(exports, provides, providedExports, manifestVersion, strict));
 		ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, (String) manifest.get(Constants.IMPORT_PACKAGE));
 		ManifestElement[] dynamicImports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, (String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		result.setImportPackages(createImportPackages(result.getExportPackages(), providedExports, imports, dynamicImports, manifestVersion));
@@ -182,8 +181,6 @@ class StateBuilder {
 			if (header != null) {
 				ManifestElement[] elements = ManifestElement.parseHeader(DEFINED_OSGI_VALIDATE_HEADERS[i], header);
 				checkForDuplicateDirectives(elements);
-				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.REEXPORT_PACKAGE)
-					checkForUsesDirective(elements);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
 					checkImportExportSyntax(elements, false, false, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
@@ -287,23 +284,20 @@ class StateBuilder {
 		return result;
 	}
 
-	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] reexported, ManifestElement[] provides, ArrayList providedExports, int manifestVersion, boolean strict) throws BundleException {
-		int numExports = (exported == null ? 0 : exported.length) + (reexported == null ? 0 : reexported.length) + (provides == null ? 0 : provides.length);
+	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] provides, ArrayList providedExports, int manifestVersion, boolean strict) throws BundleException {
+		int numExports = (exported == null ? 0 : exported.length) + (provides == null ? 0 : provides.length);
 		if (numExports == 0)
 			return null;
 		ArrayList allExports = new ArrayList(numExports);
 		if (exported != null)
 			for (int i = 0; i < exported.length; i++)
-				addExportPackages(exported[i], allExports, manifestVersion, false, strict);
-		if (reexported != null)
-			for (int i = 0; i < reexported.length; i++)
-				addExportPackages(reexported[i], allExports, manifestVersion, true, strict);
+				addExportPackages(exported[i], allExports, manifestVersion, strict);
 		if (provides != null)
 			addProvidePackages(provides, allExports, providedExports);
 		return (ExportPackageDescription[]) allExports.toArray(new ExportPackageDescription[allExports.size()]);
 	}
 
-	private static void addExportPackages(ManifestElement exportPackage, ArrayList allExports, int manifestVersion, boolean reexported, boolean strict) throws BundleException {
+	private static void addExportPackages(ManifestElement exportPackage, ArrayList allExports, int manifestVersion, boolean strict) throws BundleException {
 		String[] exportNames = exportPackage.getValueComponents();
 		for (int i = 0; i < exportNames.length; i++) {
 			// if we are in strict mode and the package is marked as internal, skip it.
@@ -323,7 +317,6 @@ class StateBuilder {
 			result.setDirective(Constants.INTERNAL_DIRECTIVE, Boolean.valueOf(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE)));
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.MANDATORY_DIRECTIVE)));
 			result.setAttributes(getAttributes(exportPackage, DEFINED_MATCHING_ATTRS));
-			result.setRoot(!reexported);
 			allExports.add(result);
 		}
 	}
@@ -340,7 +333,6 @@ class StateBuilder {
 			if (!duplicate) {
 				ExportPackageDescriptionImpl result = new ExportPackageDescriptionImpl();
 				result.setName(provides[i].getValue());
-				result.setRoot(true);
 				allExports.add(result);
 			}
 			providedExports.add(provides[i].getValue());
@@ -575,12 +567,6 @@ class StateBuilder {
 				}
 			}
 		}
-	}
-
-	private static void checkForUsesDirective(ManifestElement[] elements) throws BundleException {
-		for (int i = 0; i < elements.length; i++)
-			if (elements[i].getDirective(Constants.USES_DIRECTIVE) != null)
-				throw new BundleException(NLS.bind(StateMsg.HEADER_REEXPORT_USES, Constants.USES_DIRECTIVE, Constants.REEXPORT_PACKAGE));
 	}
 
 	private static void checkExtensionBundle(ManifestElement[] elements) throws BundleException {

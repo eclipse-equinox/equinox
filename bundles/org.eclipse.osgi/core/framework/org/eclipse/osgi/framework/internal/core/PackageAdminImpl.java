@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,8 +89,6 @@ public class PackageAdminImpl implements PackageAdmin {
 		synchronized (framework.bundles) {
 			ExportPackageDescription[] allDescriptions = framework.adaptor.getState().getExportedPackages();
 			for (int i = 0; i < allDescriptions.length; i++) {
-				if (!allDescriptions[i].isRoot())
-					continue;
 				ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
 				if (exportedPackage == null)
 					continue;

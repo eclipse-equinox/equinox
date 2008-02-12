@@ -211,15 +211,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			}
 		}
 		imp.addPossibleSupplier(matchingExport);
-		// Check if we wired to a reprovided package (in which case the ResolverExport doesn't exist)
-		if (matchingExport == null && exporter != null) {
-			ResolverExport reprovidedExport = new ResolverExport(exporter, importSupplier);
-			if (exporter.getExport(imp.getName()) == null) {
-				exporter.addExport(reprovidedExport);
-				resolverExports.put(reprovidedExport.getName(), reprovidedExport);
-			}
-			imp.addPossibleSupplier(reprovidedExport);
-		}
 		// If we still have a null wire and it's not optional, then we have an error
 		if (imp.getSelectedSupplier() == null && !imp.isOptional()) {
 			System.err.println("Could not find matching export for " + imp.getVersionConstraint()); //$NON-NLS-1$
@@ -483,7 +474,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					resolvedOptional = true;
 			}
 		if (resolvedOptional) {
-			state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
+			state.resolveBundle(bundle.getBundle(), false, null, null, null, null, null);
 			stateResolveConstraints(bundle);
 			stateResolveBundle(bundle);
 		}
@@ -917,7 +908,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				// check for dropped exports
 				while (imports[j].getSelectedSupplier() != null) {
 					ResolverExport importSupplier = (ResolverExport) imports[j].getSelectedSupplier();
-					if (importSupplier.isDropped())
+					if (importSupplier.getSubstitute() != null)
 						imports[j].selectNextSupplier();
 					else
 						break;
@@ -1273,8 +1264,6 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				int originalState = export.getExporter().getState();
 				if (imp.isDynamic() && originalState != ResolverBundle.RESOLVED)
 					continue; // Must not attempt to resolve an exporter when dynamic
-				if (imp.getBundle() == export.getExporter() && !export.getExportPackageDescription().isRoot())
-					continue; // Can't wire to our own re-export
 				if (imp.getSelectedSupplier() != null && ((ResolverExport) imp.getSelectedSupplier()).getExporter() == imp.getBundle())
 					break; // We wired to ourselves; nobody else matters
 				export.getExporter().addRef(imp.getBundle());
@@ -1284,22 +1273,21 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				if (imp.getBundle() != export.getExporter()) {
 					// Save the exports of this package from the importer in case we need to add them back
 					importerExps = imp.getBundle().getExports(imp.getName());
-					for (int j = 0; j < importerExps.length; j++) {
-						if (importerExps[j].getExportPackageDescription().isRoot() && !export.getExportPackageDescription().isRoot())
-							continue exportsloop; // to prevent imports from getting wired to re-exports if we offer a root export
-						if (importerExps[j].getExportPackageDescription().isRoot()) // do not drop reexports when import wins
-							resolverExports.remove(importerExps[j]); // Import wins, remove export
-					}
+					for (int j = 0; j < importerExps.length; j++)
+						if (importerExps[j].getSubstitute() == null)
+							importerExps[j].setSubstitute(export); // Import wins, drop export
 					// if in dev mode then allow a constraint to resolve to an unresolved bundle
-					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle) && !developmentMode) || export.isDropped()) {
+					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle) && !developmentMode) || export.getSubstitute() != null) {
 						// remove the possible supplier
 						imp.removePossibleSupplier(export);
 						// add back the exports of this package from the importer
-						for (int j = 0; j < importerExps.length; j++)
-							resolverExports.put(importerExps[j].getName(), importerExps[j]);
+						if (imp.getSelectedSupplier() == null)
+							for (int j = 0; j < importerExps.length; j++)
+								if (importerExps[j].getSubstitute() == export)
+									importerExps[j].setSubstitute(null);
 						continue; // Bundle hasn't resolved || export has not been selected and is unavailable
 					}
-				} else if (export.isDropped())
+				} else if (export.getSubstitute() != null)
 					continue; // we already found a possible import that satisifies us; our export is dropped
 
 				// Record any cyclic dependencies
@@ -1320,63 +1308,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 		if (result)
 			return true;
-		if (resolveImportReprovide(imp, cycle))
-			return true;
 		if (imp.isOptional())
 			return true; // If the import is optional then just return true
-		return false;
-	}
-
-	// Check if the import can be resolved to a re-exported package (has no export object to match to)
-	private boolean resolveImportReprovide(ResolverImport imp, ArrayList cycle) {
-		String bsn = ((ImportPackageSpecification) imp.getVersionConstraint()).getBundleSymbolicName();
-		// If no symbolic name specified then just return (since this is a
-		// re-export an import not specifying a bsn will wire to the root)
-		if (bsn == null)
-			return false;
-		if (DEBUG_IMPORTS)
-			ResolverImpl.log("Checking reprovides: " + imp.getName()); //$NON-NLS-1$
-		// Find bundle with specified bsn
-		Object[] bundles = resolverBundles.get(bsn);
-		for (int i = 0; i < bundles.length; i++)
-			if (resolveBundle((ResolverBundle) bundles[i], cycle))
-				if (resolveImportReprovide0(imp, (ResolverBundle) bundles[i], (ResolverBundle) bundles[i], cycle, new ArrayList(5)))
-					return true;
-		return false;
-	}
-
-	private boolean resolveImportReprovide0(ResolverImport imp, ResolverBundle reexporter, ResolverBundle rb, ArrayList cycle, ArrayList visited) {
-		if (visited.contains(rb))
-			return false; // make sure we don't endless recurse cycles
-		visited.add(rb);
-		BundleConstraint[] requires = rb.getRequires();
-		for (int i = 0; i < requires.length; i++) {
-			if (!((BundleSpecification) requires[i].getVersionConstraint()).isExported())
-				continue; // Skip require if it doesn't re-export the packages
-			// Check exports to see if we've found the root
-			if (requires[i].getSelectedSupplier() == null)
-				continue;
-			ResolverExport[] exports = ((ResolverBundle) requires[i].getSelectedSupplier()).getExports(imp.getName());
-			for (int j = 0; j < exports.length; j++) {
-				Map directives = exports[j].getExportPackageDescription().getDirectives();
-				directives.remove(Constants.USES_DIRECTIVE);
-				ExportPackageDescription epd = state.getFactory().createExportPackageDescription(exports[j].getName(), exports[j].getVersion(), directives, exports[j].getExportPackageDescription().getAttributes(), false, reexporter.getBundle());
-				if (imp.getVersionConstraint().isSatisfiedBy(epd)) {
-					// Create reexport and add to bundle and resolverExports
-					if (DEBUG_IMPORTS)
-						ResolverImpl.log(" - Creating re-export for reprovide: " + reexporter + ":" + epd.getName()); //$NON-NLS-1$ //$NON-NLS-2$
-					ResolverExport re = new ResolverExport(reexporter, epd);
-					reexporter.addExport(re);
-					resolverExports.put(re.getName(), re);
-					// Resolve import
-					imp.addPossibleSupplier(re);
-					return true;
-				}
-			}
-			// Check requires of matching bundle (recurse down the chain)
-			if (resolveImportReprovide0(imp, reexporter, (ResolverBundle) requires[i].getSelectedSupplier(), cycle, visited))
-				return true;
-		}
 		return false;
 	}
 
@@ -1487,6 +1420,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		ExportPackageDescription[] selectedExportsArray = (ExportPackageDescription[]) selectedExports.toArray(new ExportPackageDescription[selectedExports.size()]);
 
+		// Gather substitute exports
+		ResolverExport[] substituted = rb.getSubstitutedExports();
+		ArrayList substitutedExports = new ArrayList(substituted.length);
+		for (int i = 0; i < substituted.length; i++) {
+			substitutedExports.add(substituted[i].getExportPackageDescription());
+		}
+		ExportPackageDescription[] substitutedExportsArray = (ExportPackageDescription[]) substitutedExports.toArray(new ExportPackageDescription[substitutedExports.size()]);
+
 		// Gather exports that have been wired to
 		ResolverImport[] imports = rb.getImportPackages();
 		ArrayList exportsWiredTo = new ArrayList(imports.length);
@@ -1516,14 +1457,14 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 						ExportPackageDescription[] hostExportsArray = new ExportPackageDescription[hostExports.length];
 						for (int j = 0; j < hostExports.length; j++)
 							hostExportsArray[j] = hostExports[j].getExportPackageDescription();
-						state.resolveBundle(hostBundles[i], true, null, hostExportsArray, hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports());
+						state.resolveBundle(hostBundles[i], true, null, hostExportsArray, hostBundles[i].getSubstitutedExports(), hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports());
 					}
 				}
 			}
 		}
 
 		// Resolve the bundle in the state
-		state.resolveBundle(rb.getBundle(), rb.isResolved(), hostBundles, selectedExportsArray, bundlesWiredToArray, exportsWiredToArray);
+		state.resolveBundle(rb.getBundle(), rb.isResolved(), hostBundles, selectedExportsArray, substitutedExportsArray, bundlesWiredToArray, exportsWiredToArray);
 	}
 
 	// Resolve dynamic import
@@ -1675,7 +1616,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		setBundleUnresolved(bundle, removed, false);
 		// Get bundles dependent on 'bundle'
 		BundleDescription[] dependents = bundle.getBundle().getDependents();
-		state.resolveBundle(bundle.getBundle(), false, null, null, null, null);
+		state.resolveBundle(bundle.getBundle(), false, null, null, null, null, null);
 		// Unresolve dependents of 'bundle'
 		for (int i = 0; i < dependents.length; i++)
 			unresolveBundle((ResolverBundle) bundleMapping.get(dependents[i]), false);

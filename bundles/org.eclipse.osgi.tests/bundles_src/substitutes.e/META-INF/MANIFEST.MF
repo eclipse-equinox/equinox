@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  substitutes.e
+Bundle-SymbolicName: substitutes.e
+Bundle-Version: 1.0.0
+Export-Package: substitutes.z
+Require-Bundle: substitutes.a; visibility:=reexport

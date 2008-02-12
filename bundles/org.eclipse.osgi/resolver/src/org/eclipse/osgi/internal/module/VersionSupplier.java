@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,8 @@ import org.osgi.framework.Version;
  * A companion to BaseDescription from the state used while resolving.
  */
 public abstract class VersionSupplier {
-	BaseDescription base;
-	boolean dropped = false;
+	protected BaseDescription base;
+	private VersionSupplier substitute;
 
 	VersionSupplier(BaseDescription base) {
 		this.base = base;
@@ -38,14 +38,14 @@ public abstract class VersionSupplier {
 	}
 
 	// returns true if this version supplier has been dropped and is no longer available as a wire
-	boolean isDropped() {
-		return dropped;
+	VersionSupplier getSubstitute() {
+		return substitute;
 	}
 
 	// sets the dropped status.  This should only be called by the VersionHashMap 
 	// when VersionSuppliers are removed
-	void setDropped(boolean dropped) {
-		this.dropped = dropped;
+	void setSubstitute(VersionSupplier substitute) {
+		this.substitute = substitute;
 	}
 
 	/*

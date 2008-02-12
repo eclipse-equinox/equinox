@@ -172,6 +172,13 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		return lazyData.selectedExports;
 	}
 
+	public ExportPackageDescription[] getSubstitutedExports() {
+		fullyLoad();
+		if (lazyData.substitutedExports == null)
+			return EMPTY_EXPORTS;
+		return lazyData.substitutedExports;
+	}
+
 	public BundleDescription[] getResolvedRequires() {
 		fullyLoad();
 		if (lazyData.resolvedRequires == null)
@@ -315,6 +322,11 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 				((ExportPackageDescriptionImpl) selectedExports[i]).setExporter(this);
 			}
 		}
+	}
+
+	protected void setSubstitutedExports(ExportPackageDescription[] substitutedExports) {
+		checkLazyData();
+		lazyData.substitutedExports = substitutedExports;
 	}
 
 	protected void setResolvedImports(ExportPackageDescription[] resolvedImports) {
@@ -570,7 +582,7 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		ExportPackageDescription[] selectedExports;
 		BundleDescription[] resolvedRequires;
 		ExportPackageDescription[] resolvedImports;
-
+		ExportPackageDescription[] substitutedExports;
 		String[] executionEnvironments;
 
 		HashMap dynamicStamps;

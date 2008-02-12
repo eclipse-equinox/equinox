@@ -53,6 +53,24 @@
 	<classpathentry kind="src" output="bundle_tests/test.fragment3" path="bundles_src/test.fragment3"/>
 	<classpathentry kind="src" output="bundle_tests/test.fragment4" path="bundles_src/test.fragment4"/>
 	<classpathentry kind="src" output="bundle_tests/test.fragment5" path="bundles_src/test.fragment5"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.a" path="bundles_src/substitutes.a"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.a.frag" path="bundles_src/substitutes.a.frag"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.b" path="bundles_src/substitutes.b"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.b.frag" path="bundles_src/substitutes.b.frag"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.c" path="bundles_src/substitutes.c"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.d" path="bundles_src/substitutes.d"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.e" path="bundles_src/substitutes.e"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.f" path="bundles_src/substitutes.f"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.g" path="bundles_src/substitutes.g"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.h" path="bundles_src/substitutes.h"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.i" path="bundles_src/substitutes.i"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.j" path="bundles_src/substitutes.j"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.k" path="bundles_src/substitutes.k"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.l" path="bundles_src/substitutes.l"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.m" path="bundles_src/substitutes.m"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.n" path="bundles_src/substitutes.n"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.p" path="bundles_src/substitutes.p"/>
+	<classpathentry kind="src" output="bundle_tests/substitutes.q" path="bundles_src/substitutes.q"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

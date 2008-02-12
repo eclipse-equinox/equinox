@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -282,6 +282,7 @@ public class StateHelperImpl implements StateHelper {
 		boolean strict = false;
 		if (state != null)
 			strict = state.inStrictMode();
+		BundleDescription host = (BundleDescription) (bundle.getHost() == null ? bundle : bundle.getHost().getSupplier());
 		ArrayList orderedPkgList = new ArrayList(); // list of all ExportPackageDescriptions that are visible (ArrayList is used to keep order)
 		Set pkgSet = new HashSet();
 		Set importList = new HashSet(); // list of package names which are directly imported
@@ -289,7 +290,7 @@ public class StateHelperImpl implements StateHelper {
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		for (int i = 0; i < imports.length; i++) {
 			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
-			if (pkgSupplier == null)
+			if (pkgSupplier == null || pkgSupplier.getExporter() == host) // do not return the bundle'sr own imports
 				continue;
 			if (!isSystemExport(pkgSupplier, options) && !pkgSet.contains(pkgSupplier)) {
 				orderedPkgList.add(pkgSupplier);
@@ -325,6 +326,16 @@ public class StateHelperImpl implements StateHelper {
 			return; // prevent duplicate entries and infinate loops incase of cycles
 		visited.add(requiredBundle);
 		// add all the exported packages from the required bundle; take x-friends into account.
+		ExportPackageDescription[] substitutedExports = requiredBundle.getSubstitutedExports();
+		for (int i = 0; i < substitutedExports.length; i++) {
+			ExportPackageDescription[] imports = requiredBundle.getResolvedImports();
+			for (int j = 0; j < imports.length; j++) {
+				if (substitutedExports[i].getName().equals(imports[j].getName()) && !pkgSet.contains(imports[j])) {
+					getPackages(imports[j].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
+					return; // should not continue to local exports or required bundles	
+				}
+			}
+		}
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		HashSet exportNames = new HashSet(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)

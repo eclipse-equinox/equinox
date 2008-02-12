@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,6 +246,15 @@ class StateWriter {
 				writeExportPackageDesc((ExportPackageDescriptionImpl) selectedExports[i], out);
 		}
 
+		ExportPackageDescription[] substitutedExports = bundle.getSubstitutedExports();
+		if (substitutedExports == null) {
+			out.writeInt(0);
+		} else {
+			out.writeInt(substitutedExports.length);
+			for (int i = 0; i < substitutedExports.length; i++)
+				writeExportPackageDesc((ExportPackageDescriptionImpl) substitutedExports[i], out);
+		}
+
 		ExportPackageDescription[] resolvedImports = bundle.getResolvedImports();
 		if (resolvedImports == null) {
 			out.writeInt(0);
@@ -323,7 +332,6 @@ class StateWriter {
 			return;
 		writeBaseDescription(exportPackageDesc, out);
 		writeBundleDescription(exportPackageDesc.getExporter(), out, false);
-		out.writeBoolean(exportPackageDesc.isRoot());
 		writeMap(out, exportPackageDesc.getAttributes());
 		writeMap(out, exportPackageDesc.getDirectives());
 	}

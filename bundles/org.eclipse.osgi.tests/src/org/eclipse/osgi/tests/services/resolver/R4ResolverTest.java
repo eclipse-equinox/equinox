@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import junit.framework.*;
 import org.eclipse.osgi.tests.resolver.*;
-
 
 public class R4ResolverTest extends TestCase {
 
 	public R4ResolverTest(String testName) {
 		super(testName);
 	}
-	
+
 	public static Test suite() {
 		TestSuite suite = new TestSuite(R4ResolverTest.class.getName());
 		suite.addTest(new TestSuite(TestAttributes_001.class));
@@ -39,25 +35,16 @@ public class R4ResolverTest extends TestCase {
 		suite.addTest(new TestSuite(TestDynamic_004.class));
 		suite.addTest(new TestSuite(TestDynamic_005.class));
 		suite.addTest(new TestSuite(TestDynamic_006.class));
-		suite.addTest(new TestSuite(TestDynamic_007.class));
 		suite.addTest(new TestSuite(TestGenerated_001.class));
 		suite.addTest(new TestSuite(TestGrouping_001.class));
 		suite.addTest(new TestSuite(TestGrouping_002.class));
 		suite.addTest(new TestSuite(TestGrouping_003.class));
-		suite.addTest(new TestSuite(TestGrouping_004.class));
-		suite.addTest(new TestSuite(TestGrouping_005.class));
 		suite.addTest(new TestSuite(TestGrouping_006.class));
-		suite.addTest(new TestSuite(TestGrouping_007.class));
 		suite.addTest(new TestSuite(TestGrouping_008.class));
-		suite.addTest(new TestSuite(TestGrouping_009.class));
 		suite.addTest(new TestSuite(TestOptional_001.class));
 		suite.addTest(new TestSuite(TestOptional_002.class));
 		suite.addTest(new TestSuite(TestPropagation_001.class));
-		suite.addTest(new TestSuite(TestPropagation_002.class));
 		suite.addTest(new TestSuite(TestPropagation_003.class));
-		suite.addTest(new TestSuite(TestPropagation_004.class));
-		suite.addTest(new TestSuite(TestPropagation_005.class));
-		suite.addTest(new TestSuite(TestReprovide_001.class));
 		suite.addTest(new TestSuite(TestRFC79_001.class));
 		suite.addTest(new TestSuite(TestRFC79_002.class));
 		suite.addTest(new TestSuite(TestRFC79_003.class));
@@ -65,13 +52,10 @@ public class R4ResolverTest extends TestCase {
 		suite.addTest(new TestSuite(TestRFC79_005.class));
 		suite.addTest(new TestSuite(TestRFC79_006.class));
 		suite.addTest(new TestSuite(TestRFC79_007.class));
-		suite.addTest(new TestSuite(TestRFC79_008.class));
 		suite.addTest(new TestSuite(TestVersion_001.class));
 		suite.addTest(new TestSuite(TestVersion_002.class));
 		suite.addTest(new TestSuite(TestVersion_003.class));
 		return suite;
 	}
-	
+
 }
-
-

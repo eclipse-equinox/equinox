@@ -68,6 +68,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	final private PolicyHandler policy;
 	/* List of package names that are exported by this BundleLoader */
 	final private Collection exportedPackages;
+	final private Collection substitutedPackages;
 	/* List of required bundle BundleLoaderProxy objects */
 	final BundleLoaderProxy[] requiredBundles;
 	/* List of indexes into the requiredBundles list of reexported bundles */
@@ -191,6 +192,16 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} else {
 			exportedPackages = null;
 		}
+
+		ExportPackageDescription substituted[] = description.getSubstitutedExports();
+		if (substituted.length > 0) {
+			substitutedPackages = substituted.length > 10 ? (Collection) new HashSet(substituted.length) : new ArrayList(substituted.length);
+			for (int i = 0; i < substituted.length; i++)
+				substitutedPackages.add(substituted[i].getName());
+		} else {
+			substitutedPackages = null;
+		}
+
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
 		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
 		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
@@ -217,11 +228,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private synchronized KeyedHashSet getImportedSources() {
 		if ((loaderFlags & FLAG_IMPORTSINIT) != 0)
 			return importedSources;
-		ExportPackageDescription[] packages = proxy.getBundleDescription().getResolvedImports();
+		BundleDescription bundleDesc = proxy.getBundleDescription();
+		ExportPackageDescription[] packages = bundleDesc.getResolvedImports();
 		if (packages != null && packages.length > 0) {
 			if (importedSources == null)
 				importedSources = new KeyedHashSet(packages.length, false);
 			for (int i = 0; i < packages.length; i++) {
+				if (packages[i].getExporter() == bundleDesc)
+					continue; // ignore imports resolved to this bundle
 				PackageSource source = createExportPackageSource(packages[i]);
 				if (source != null)
 					importedSources.add(source);
@@ -886,6 +900,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		PackageSource local = null;
 		if (isExportedPackage(packageName))
 			local = proxy.getPackageSource(packageName);
+		else if (isSubstitutedExport(packageName)) {
+			result.add(findImportedSource(packageName));
+			return; // should not continue to required bundles in this case
+		}
 		// Must search required bundles that are exported first.
 		if (requiredBundles != null) {
 			int size = reexportTable == null ? 0 : reexportTable.length;
@@ -904,15 +922,16 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		// now add the locally provided package.
-		if (local != null && local.isFriend(symbolicName)) {
-			if (local instanceof BundleLoaderProxy.ReexportPackageSource)
-				local = new SingleSourcePackage(packageName, proxy);
+		if (local != null && local.isFriend(symbolicName))
 			result.add(local);
-		}
 	}
 
 	final boolean isExportedPackage(String name) {
 		return exportedPackages == null ? false : exportedPackages.contains(name);
+	}
+
+	final boolean isSubstitutedExport(String name) {
+		return substitutedPackages == null ? false : substitutedPackages.contains(name);
 	}
 
 	private void addDynamicImportPackage(ImportPackageSpecification[] packages) {
@@ -1094,8 +1113,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return result;
 		// if the package is exported then we need to get the local source
 		PackageSource localSource = proxy.getPackageSource(pkgName);
-		if (localSource instanceof BundleLoaderProxy.ReexportPackageSource)
-			localSource = new SingleSourcePackage(pkgName, proxy);
 		if (result == null)
 			return localSource;
 		if (localSource == null)

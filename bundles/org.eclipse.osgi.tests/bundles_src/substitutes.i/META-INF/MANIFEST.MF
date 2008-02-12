@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  substitutes.i
+Bundle-SymbolicName: substitutes.i
+Bundle-Version: 1.0.0
+Export-Package: substitutes.x; substitutes.y; version=1.0; mandatory:=a; a=split
+Import-Package: substitutes.x; substitutes.y; version="[1.0, 2.0)"; a=split

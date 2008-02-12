@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ class StateReader {
 	private int numBundles;
 	private boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 28;
+	public static final byte STATE_CACHE_VERSION = 30;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -283,6 +283,14 @@ class StateReader {
 			result.setSelectedExports(selected);
 		}
 
+		int substitutedCount = in.readInt();
+		if (substitutedCount > 0) {
+			ExportPackageDescription[] selected = new ExportPackageDescription[substitutedCount];
+			for (int i = 0; i < selected.length; i++)
+				selected[i] = readExportPackageDesc(in);
+			result.setSubstitutedExports(selected);
+		}
+
 		int resolvedCount = in.readInt();
 		if (resolvedCount > 0) {
 			ExportPackageDescription[] resolved = new ExportPackageDescription[resolvedCount];
@@ -363,7 +371,6 @@ class StateReader {
 		exportPackageDesc.setTableIndex(tableIndex);
 		readBaseDescription(exportPackageDesc, in);
 		exportPackageDesc.setExporter(readBundleDescription(in));
-		exportPackageDesc.setRoot(in.readBoolean());
 		exportPackageDesc.setAttributes(readMap(in));
 		exportPackageDesc.setDirectives(readMap(in));
 		return exportPackageDesc;

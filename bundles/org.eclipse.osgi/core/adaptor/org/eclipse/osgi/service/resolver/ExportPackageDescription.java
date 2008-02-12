@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ public interface ExportPackageDescription extends BaseDescription {
 	 * A ExportPackageDescription is not a root package the exporting bundle
 	 * is re-exporting the package using the Reexport-Package header.
 	 * @return true if the export package is a root package; false otherwise
+	 * @deprecated all export package descriptions are roots.  The Reexport-Package header
+	 * never became API.
 	 */
 	public boolean isRoot();
 

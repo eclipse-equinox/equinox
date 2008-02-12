@@ -126,7 +126,7 @@ public abstract class StateImpl implements State {
 					try {
 						resolving = true;
 						resolverErrors.remove(existing);
-						resolveBundle(existing, false, null, null, null, null);
+						resolveBundle(existing, false, null, null, null, null, null);
 					} finally {
 						resolving = false;
 					}
@@ -166,7 +166,7 @@ public abstract class StateImpl implements State {
 					try {
 						resolving = true;
 						resolverErrors.remove(toRemove);
-						resolveBundle(toRemove, false, null, null, null, null);
+						resolveBundle(toRemove, false, null, null, null, null, null);
 					} finally {
 						resolving = false;
 					}
@@ -268,7 +268,11 @@ public abstract class StateImpl implements State {
 		((VersionConstraintImpl) constraint).setSupplier(supplier);
 	}
 
-	public synchronized void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
+	}
+
+	public synchronized void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		if (!resolving)
 			throw new IllegalStateException(); // TODO need error message here!
 		BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
@@ -291,7 +295,7 @@ public abstract class StateImpl implements State {
 		if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
 			unresolveConstraints(modifiable);
 		else
-			resolveConstraints(modifiable, hosts, selectedExports, resolvedRequires, resolvedImports);
+			resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, resolvedRequires, resolvedImports);
 	}
 
 	public synchronized void removeBundleComplete(BundleDescription bundle) {
@@ -301,19 +305,22 @@ public abstract class StateImpl implements State {
 		removalPendings.remove(bundle);
 	}
 
-	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		HostSpecificationImpl hostSpec = (HostSpecificationImpl) bundle.getHost();
 		if (hostSpec != null) {
 			if (hosts != null) {
 				hostSpec.setHosts(hosts);
-				for (int i = 0; i < hosts.length; i++)
+				for (int i = 0; i < hosts.length; i++) {
 					((BundleDescriptionImpl) hosts[i]).addDependency(bundle, true);
+					checkHostForSubstitutedExports((BundleDescriptionImpl) hosts[i], bundle);
+				}
 			}
 		}
 
 		bundle.setSelectedExports(selectedExports);
 		bundle.setResolvedRequires(resolvedRequires);
 		bundle.setResolvedImports(resolvedImports);
+		bundle.setSubstitutedExports(substitutedExports);
 
 		bundle.addDependencies(hosts, true);
 		bundle.addDependencies(resolvedRequires, true);
@@ -332,6 +339,30 @@ public abstract class StateImpl implements State {
 		}
 	}
 
+	private void checkHostForSubstitutedExports(BundleDescriptionImpl host, BundleDescriptionImpl fragment) {
+		// TODO need to handle this case where a fragment has its own export substituted
+		// there are issues here because the order in which fragments are resolved is not always the same ...
+	}
+
+	//	private void checkForSubstitutedExports(BundleDescriptionImpl bundle, ExportPackageDescription[] selectedExports) {
+	//		ExportPackageDescription[] existingSubstitutes = bundle.getSubstitutedExports();
+	//		ExportPackageDescription[] declaredExports = bundle.getExportPackages();
+	//		ArrayList substitutes = new ArrayList();
+	//		for (int i = 0; i < declaredExports.length; i++) {
+	//			boolean selected = false;
+	//			for (int j = 0; !selected && j < selectedExports.length; j++)
+	//				selected = declaredExports[i] == selectedExports[j];
+	//			if (!selected)
+	//				substitutes.add(declaredExports[i]);
+	//		}
+	//		if (substitutes.size() > 0) {
+	//			substitutes.ensureCapacity(substitutes.size() + existingSubstitutes.length);
+	//			for (int i = 0; i < existingSubstitutes.length; i++)
+	//				substitutes.add(0, existingSubstitutes[i]);
+	//			bundle.setSubstitutedExports((ExportPackageDescription[]) substitutes.toArray(new ExportPackageDescription[substitutes.size()]));
+	//		}
+	//	}
+
 	private void unresolveConstraints(BundleDescriptionImpl bundle) {
 		HostSpecificationImpl host = (HostSpecificationImpl) bundle.getHost();
 		if (host != null)
@@ -340,6 +371,7 @@ public abstract class StateImpl implements State {
 		bundle.setSelectedExports(null);
 		bundle.setResolvedImports(null);
 		bundle.setResolvedRequires(null);
+		bundle.setSubstitutedExports(null);
 
 		// remove suppliers for generics
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
@@ -433,7 +465,7 @@ public abstract class StateImpl implements State {
 		if (resolvedBundles.isEmpty())
 			return;
 		for (int i = 0; i < bundles.length; i++) {
-			resolveBundle(bundles[i], false, null, null, null, null);
+			resolveBundle(bundles[i], false, null, null, null, null, null);
 		}
 		resolvedBundles.clear();
 	}
@@ -655,7 +687,7 @@ public abstract class StateImpl implements State {
 				if (elements == null)
 					continue;
 				// we can pass false for strict mode here because we never want to mark the system exports as internal.
-				ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, null, 2, false);
+				ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, 2, false);
 				Integer profInx = new Integer(i);
 				for (int j = 0; j < systemExports.length; j++) {
 					((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);

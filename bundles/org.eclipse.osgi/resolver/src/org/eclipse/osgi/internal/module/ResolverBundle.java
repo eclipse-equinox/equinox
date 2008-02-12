@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,6 +131,10 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 		GenericConstraint[] allGenericRequires = getGenericRequires();
 		for (int i = 0; i < allGenericRequires.length; i++)
 			allGenericRequires[i].setMatchingCapability(null);
+
+		ResolverExport[] allExports = getExportPackages();
+		for (int i = 0; i < allExports.length; i++)
+			allExports[i].setSubstitute(null);
 	}
 
 	boolean isResolved() {
@@ -184,19 +188,27 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 	}
 
 	ResolverExport[] getSelectedExports() {
-		ResolverExport[] allExports = getExportPackages();
+		return getExports(true);
+	}
+
+	ResolverExport[] getSubstitutedExports() {
+		return getExports(false);
+	}
+
+	private ResolverExport[] getExports(boolean selected) {
+		ResolverExport[] results = getExportPackages();
 		int removedExports = 0;
-		for (int i = 0; i < allExports.length; i++)
-			if (allExports[i].isDropped())
+		for (int i = 0; i < results.length; i++)
+			if (selected ? results[i].getSubstitute() != null : results[i].getSubstitute() == null)
 				removedExports++;
 		if (removedExports == 0)
-			return allExports;
-		ResolverExport[] selectedExports = new ResolverExport[allExports.length - removedExports];
+			return results;
+		ResolverExport[] selectedExports = new ResolverExport[results.length - removedExports];
 		int index = 0;
-		for (int i = 0; i < allExports.length; i++) {
-			if (allExports[i].isDropped())
+		for (int i = 0; i < results.length; i++) {
+			if (selected ? results[i].getSubstitute() != null : results[i].getSubstitute() == null)
 				continue;
-			selectedExports[index] = allExports[i];
+			selectedExports[index] = results[i];
 			index++;
 		}
 		return selectedExports;
@@ -490,7 +502,11 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 				}
 			}
 		}
-		return removedExports == null ? new ResolverExport[0] : (ResolverExport[]) removedExports.toArray(new ResolverExport[removedExports.size()]);
+		ResolverExport[] results = removedExports == null ? new ResolverExport[0] : (ResolverExport[]) removedExports.toArray(new ResolverExport[removedExports.size()]);
+		for (int i = 0; i < results.length; i++)
+			// TODO this is a hack; need to figure out how to indicate that a fragment export is no longer attached
+			results[i].setSubstitute(results[i]);
+		return results;
 	}
 
 	private boolean hasUnresolvedConstraint(ResolverConstraint reason, ResolverBundle detachedFragment, ResolverBundle remainingFragment, ResolverImport[] oldImports, BundleConstraint[] oldRequires, ArrayList additionalImports, ArrayList additionalRequires) {

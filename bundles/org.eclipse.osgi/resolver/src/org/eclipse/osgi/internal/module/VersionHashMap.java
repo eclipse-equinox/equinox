@@ -30,11 +30,6 @@ public class VersionHashMap extends MappedList implements Comparator {
 			put(versionSuppliers[i].getName(), versionSuppliers[i]);
 	}
 
-	public void put(Object key, Object value) {
-		super.put(key, value);
-		((VersionSupplier) value).setDropped(false);
-	}
-
 	public boolean contains(VersionSupplier vs) {
 		return contains(vs, false) != null;
 	}
@@ -46,7 +41,6 @@ public class VersionHashMap extends MappedList implements Comparator {
 		for (int i = 0; i < existing.length; i++)
 			if (existing[i] == vs) {
 				if (remove) {
-					vs.setDropped(true);
 					if (existing.length == 1) {
 						internal.remove(vs.getName());
 						return vs;
@@ -69,13 +63,6 @@ public class VersionHashMap extends MappedList implements Comparator {
 	public void remove(VersionSupplier[] versionSuppliers) {
 		for (int i = 0; i < versionSuppliers.length; i++)
 			remove(versionSuppliers[i]);
-	}
-
-	public Object[] remove(Object key) {
-		Object[] results = super.remove(key);
-		for (int i = 0; i < results.length; i++)
-			((VersionSupplier) results[i]).setDropped(true);
-		return results;
 	}
 
 	// Once we have resolved bundles, we need to make sure that version suppliers

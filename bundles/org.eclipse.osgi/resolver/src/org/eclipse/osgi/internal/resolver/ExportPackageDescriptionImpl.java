@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
 
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
@@ -28,7 +29,6 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private String[] mandatory;
 	private Boolean internal = Boolean.FALSE;
 	private int equinox_ee = -1;
-	private boolean root;
 	private int tableIndex;
 
 	public Map getDirectives() {
@@ -111,7 +111,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public boolean isRoot() {
-		return root;
+		return true;
 	}
 
 	protected void setAttributes(Map attributes) {
@@ -120,10 +120,6 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 
 	protected void setExporter(BundleDescription exporter) {
 		this.exporter = exporter;
-	}
-
-	protected void setRoot(boolean root) {
-		this.root = root;
 	}
 
 	public String toString() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -61,9 +61,10 @@ public class GroupingChecker {
 		// check that the packages exported by the matching bundle are consistent
 		ResolverExport[] matchingExports = matchingBundle.getExportPackages();
 		for (int i = 0; i < matchingExports.length; i++) {
-			if (matchingExports[i].isDropped())
-				continue;
-			results = isConsistentInternal(requiringBundle, matchingExports[i], dynamicImport, results);
+			ResolverExport matchingExport = matchingExports[i];
+			if (matchingExports[i].getSubstitute() != null)
+				matchingExport = (ResolverExport) matchingExports[i].getSubstitute();
+			results = isConsistentInternal(requiringBundle, matchingExport, dynamicImport, results);
 		}
 		// check that the packages from reexported bundles are consistent
 		BundleConstraint[] supplierRequires = matchingBundle.getRequires();
@@ -266,24 +267,24 @@ public class GroupingChecker {
 		public ArrayList isConsistentClassSpace(ResolverBundle importingBundle, ArrayList visited, ArrayList results) {
 			if (roots == null)
 				return results;
+			if (visited == null)
+				visited = new ArrayList(1);
+			if (visited.contains(this))
+				return results;
+			visited.add(this);
 			int size = roots.length;
 			for (int i = 0; i < size; i++) {
 				ResolverExport root = roots[i];
 				String[] uses = root.getUsesDirective();
 				if (uses == null)
 					continue;
-				if (visited == null)
-					visited = new ArrayList(1);
-				if (visited.contains(this))
-					return results;
-				visited.add(this);
 				for (int j = 0; j < uses.length; j++) {
 					if (uses[j].equals(root.getName()))
 						continue;
 					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), uses[j], null);
 					PackageRoots importingUsedRoots = getPackageRoots(importingBundle, uses[j], null);
 					if (thisUsedRoots == importingUsedRoots)
-						return results;
+						continue;
 					if (thisUsedRoots != nullPackageRoots && importingUsedRoots != nullPackageRoots)
 						if (!(subSet(thisUsedRoots.roots, importingUsedRoots.roots) || subSet(importingUsedRoots.roots, thisUsedRoots.roots))) {
 							if (results == null)

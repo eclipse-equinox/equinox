@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,9 +137,9 @@ public class BundleInstaller {
 		return result;
 	}
 
-	synchronized public void refreshPackages(Bundle[] refresh) {
+	synchronized public Bundle[] refreshPackages(Bundle[] refresh) {
 		if (bundles == null)
-			return;
+			return null;
 		PackageAdmin pa = (PackageAdmin) packageAdmin.getService();
 		final boolean[] flag = new boolean[] {false};
 		FrameworkListener listener = new FrameworkListener() {
@@ -152,17 +152,27 @@ public class BundleInstaller {
 			}
 		};
 		context.addFrameworkListener(listener);
-		pa.refreshPackages(refresh);
-		synchronized (flag) {
-			while (!flag[0]) {
-				try {
-					flag.wait(5000);
-				} catch (InterruptedException e) {
-					// do nothing
+		final HashSet refreshed = new HashSet();
+		context.addBundleListener(new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				refreshed.add(event.getBundle());
+			}
+		});
+		try {
+			pa.refreshPackages(refresh);
+			synchronized (flag) {
+				while (!flag[0]) {
+					try {
+						flag.wait(5000);
+					} catch (InterruptedException e) {
+						// do nothing
+					}
 				}
 			}
+		} finally {
+			context.removeFrameworkListener(listener);
 		}
-		context.removeFrameworkListener(listener);
+		return (Bundle[]) refreshed.toArray(new Bundle[refreshed.size()]);
 	}
 
 	synchronized public boolean resolveBundles(Bundle[] resolve) {

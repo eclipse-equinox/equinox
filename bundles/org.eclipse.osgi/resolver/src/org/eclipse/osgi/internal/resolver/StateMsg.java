@@ -26,7 +26,6 @@ public class StateMsg extends NLS {
 	public static String HEADER_VERSION_ERROR;
 	public static String HEADER_EXPORT_ATTR_ERROR;
 	public static String HEADER_DIRECTIVE_DUPLICATES;
-	public static String HEADER_REEXPORT_USES;
 	public static String HEADER_EXTENSION_ERROR;
 
 	public static String RES_ERROR_DISABLEDBUNDLE;

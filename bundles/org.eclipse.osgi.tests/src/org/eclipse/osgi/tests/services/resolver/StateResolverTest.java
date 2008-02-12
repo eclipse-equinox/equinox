@@ -2497,59 +2497,6 @@ public class StateResolverTest extends AbstractStateTest {
 		assertEquals("1.4", a1, aFrag2.getHost().getSupplier());
 	}
 
-	public void testReexportPackage() throws BundleException {
-		State state = buildEmptyState();
-		Hashtable manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1");
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.EXPORT_PACKAGE, "a");
-		manifest.put(Constants.REQUIRE_BUNDLE, "C1; visibility:=reexport");
-		BundleDescription a1_100 = state.getFactory().createBundleDescription(state, manifest, "a1_100", 0);
-
-		manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1");
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.EXPORT_PACKAGE, "b");
-		manifest.put(Constants.IMPORT_PACKAGE, "a; bundle-symbolic-name=C1, c; d; bundle-symbolic-name=A1");
-		BundleDescription b1_100 = state.getFactory().createBundleDescription(state, manifest, "b1_100", 1);
-
-		manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1");
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.EXPORT_PACKAGE, "c");
-		manifest.put(Constants.REQUIRE_BUNDLE, "A1; visibility:=reexport, D1; visibility:=reexport");
-		BundleDescription c1_100 = state.getFactory().createBundleDescription(state, manifest, "c1_100", 2);
-
-		manifest = new Hashtable();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D1");
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.EXPORT_PACKAGE, "d");
-		manifest.put(Constants.REQUIRE_BUNDLE, "A1; visibility:=reexport");
-		BundleDescription d1_100 = state.getFactory().createBundleDescription(state, manifest, "d1_100", 3);
-
-		state.addBundle(a1_100);
-		state.addBundle(b1_100);
-		state.addBundle(c1_100);
-		state.addBundle(d1_100);
-		state.resolve();
-
-		assertTrue("0.1", a1_100.isResolved());
-		assertTrue("0.2", b1_100.isResolved());
-		assertTrue("0.3", c1_100.isResolved());
-		assertTrue("0.4", d1_100.isResolved());
-
-		// this assumes getResolvedImports will return the imports in the same order they are specified in the Import-Package header
-		ExportPackageDescription[] b1ResolvedImports = b1_100.getResolvedImports();
-		assertEquals("1.1", 3, b1ResolvedImports.length);
-		assertEquals("1.2", b1ResolvedImports[0].getExporter(), c1_100);
-		assertEquals("1.3", b1ResolvedImports[1].getExporter(), a1_100);
-		assertEquals("1.4", b1ResolvedImports[2].getExporter(), a1_100);
-	}
-
 	public void testPlatformProperties01() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
