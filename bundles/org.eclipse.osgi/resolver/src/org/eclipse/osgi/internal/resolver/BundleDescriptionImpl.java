@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Danail Nachev -  ProSyst - bug 218625
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
