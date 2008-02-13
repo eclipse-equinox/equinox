@@ -1,0 +1,16 @@
+# File is separated on few text and few binary parts. Each text part starts 
+# with #[TEXT] while each binary starts with #[BINARY]
+# Lines that starts with # (excluding the these that are with #[TEXT] or #[BINARY])
+# are comments. Lines are trimmed so line " key=value   " is equal to "key=value"
+
+# TEXT section contains properties that are to be loaded directly at load phase
+# The format of lines is :
+# <key>=<value>
+#[TEXT]
+#provisioning.spid=testgateway
+#provisioning.reference=http://localhost:80/prvsetup
+
+# BINARY section contains properties that are to be loaded indirectly
+# The format of lines is :
+# <key>=<jar entry where value is stored as byte array>
+#[BINARY]

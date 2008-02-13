@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1251">
+	<TITLE>ThreadPool</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.0  (Win32)">
+	<META NAME="AUTHOR" CONTENT="Maria Ivanova">
+	<META NAME="CREATED" CONTENT="20020718;16042117">
+	<META NAME="CHANGED" CONTENT="20020718;17380442">
+</HEAD>
+<BODY LANG="bg-BG">
+<P>This package contains the <FONT FACE="Courier New, Courier">ThreadPoolManager</FONT>
+interface, which is the face of the ThreadPoolManager Service. The
+task of the ThreadPoolManager is to provide created and started
+threads to its clients. The idea is to be saved time for the creation
+and starting of threads, when multiple, short-lived threads are used.
+</P>
+<P>At startup the ThreadPoolManager creates and starts a given number
+of threads put in waiting state. While working new threads can be
+created but the number of all threads created by the
+ThreadPoolManager can not exceed a fixed limit. 
+</P>
+<P>When a client passes a job for execution to the ThreadPoolManager,
+it immediately tries to run the job. If there is an idle thread in
+the pool - the job is run, otherwise the job is put in waiting state
+until a thread finishes its current job and is ready to accept
+another one. 
+</P>
+<P>If the Runnable objects, passed to the ThreadPoolManager do not
+face the requirements of short-living, there is a possibility to slow
+down the work of thread processing as many jobs can be put in waiting
+state. Another problem appears when processing bad-written Runnable
+objects (never exiting their run method), then the number of free
+threads decreases, the number of already running threads will reach
+the limit, and it may occur that no more threads can be processed. 
+</P>
+<P STYLE="margin-bottom: 0cm">Here is a simple example of a job
+(RunnableSample) that is passed to the ThreadPoolManager for
+execution. The job is simple and common: it waits for an event to
+occur to process an operation; if the event does not occur for a
+given time period (1 second in our example) another operation is
+processed. In the example below the event is the &quot;check&quot;
+flag to be turned on, and the operations are &quot;System.out.println&quot;.
+<BR>&nbsp; 
+</P>
+<TABLE COLS=1 WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=2>
+	<TR>
+		<TD>
+			<BLOCKQUOTE><FONT SIZE=2><FONT FACE="Courier New, Courier">public
+			class RunnableSample implements Runnable {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			private Object synch;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			private String name;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			private boolean check;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			//Constructs a RunnableSample.</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			public RunnableSample(String name) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			this.name = name;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			check = false;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			synch = new Object();</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp; //This
+			method is executed by the ThreadPoolManager.</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			public void run() {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			synchronized (synch) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			System.out.println(&quot;Job&nbsp; &quot;&nbsp; + name + &quot;
+			starts running!&quot;);</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			if (!check) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			try {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			synch.wait(1000);</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			} catch (InterruptedException e) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			if (check) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			System.out.println(&quot;OK: CHECKED&quot;);</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			} else {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			System.out.println(&quot;NOT OK: NOT CHECKED&quot;);</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			}</FONT></FONT> 
+			</BLOCKQUOTE>
+			<BLOCKQUOTE><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			//Turns the check flag on.&nbsp;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			public void checkIt() {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			synchronized (synch) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			check = true;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			synch.notify();</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			}</FONT></FONT> 
+			</BLOCKQUOTE>
+			<BLOCKQUOTE><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			//Wakes up this Runnable object, causing exiting its run method.</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp; public
+			void stopIt() {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			synchronized (synch) {</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			synch.notify();</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;&nbsp;&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			}</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">}</FONT></FONT>
+			<BR>&nbsp;</BLOCKQUOTE>
+		</TD>
+	</TR>
+</TABLE>
+<P STYLE="margin-bottom: 0cm">The sample code , which follows, gets
+reference to the ThreadPoolManager, and passes a RunnableSample job
+for execution. <BR>&nbsp; 
+</P>
+<TABLE COLS=1 WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=2>
+	<TR>
+		<TD>
+			<P><FONT SIZE=2><FONT FACE="Courier New, Courier">import
+			org.eclipse.equinox.util.threadpool.ThreadPoolManager;</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">import
+			org.osgi.framework.BundleContext;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">import
+			org.osgi.framework.ServiceReference;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			...</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			BundleContext bc;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			ServiceReference thManRef;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			ThreadPoolManager thMan;</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			...</FONT></FONT> 
+			</P>
+			<P><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp; thManRef
+			=
+			bc.getServiceReference(&quot;org.eclipse.equinox.util.threadpool.ThreadPoolManager&quot;);&nbsp;</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp; thMan =
+			(ThreadPoolManager) bc.getService(thManRef);</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			String&nbsp; jobName = &quot;RunnableSample&quot;;</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			//ThreadPoolManager will execute the job, as soon as a free thread
+			is available</FONT></FONT> <BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp;
+			thMan.execute(new RunnableSample(jobName), jobName);</FONT></FONT>
+			<BR><FONT SIZE=2><FONT FACE="Courier New, Courier">&nbsp; ...</FONT></FONT>
+			<BR>&nbsp;</P>
+		</TD>
+	</TR>
+</TABLE>
+<P>The ThreadPoolManager has two system properties, which define the
+limits of the thread pool: 
+</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>equinox.util.threadpool.minThreads</B>
+	: default value: 4; this property defines the minimum number of idle 
+	threads. The property cannot be 1 - if it is set to 1, automatically 
+	it is turned to 2.
+	</P>
+	<LI><P><B>equinox.util.threadpool.maxThreads</B> : default value: 48;
+	this property specifies the upper limit for the number of threads 
+	in the thread pool. The real limit is calculated using the formula: 
+    (((int)(max/min)) * min).</P>
+	<LI><P><B>equinox.util.threadpool.autoMaximum</B> : default value:
+	false; if this property is set to true the then if there are more
+	then 10 waitng jobs the maximum can be exceeded.</P>
+	<LI><P><B>equinox.util.threadpool.ignoreMaximum</B> : default value:
+	false; if this property is set to true, the Thread Pool Manager will 
+	not regard the maxThread property and will always create new threads 
+	when there are no available.</P>
+	<LI><P><B>equinox.util.threadpool.useNames</B> : default value: false; 
+	if this property is set to true, allows assigning names to threads, 
+	executing runnable jobs.</P> 
+	<LI><P><B>equinox.util.threadpool.percent</B> : default value: 30; this 
+	property specifies what default percent of the maximum number of 
+	threads a bundle can occupy from the thread pool.</P> 
+
+</UL>
+</BODY>
+</HTML>

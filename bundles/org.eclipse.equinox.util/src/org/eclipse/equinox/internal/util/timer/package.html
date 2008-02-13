@@ -1,0 +1,174 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="Author" content="Maria Ivanova">
+<meta name="GENERATOR" content="Microsoft FrontPage Express 2.0">
+<title>org.eclipse.equinox.util.timer</title>
+</head>
+
+<body>
+
+<p>This package adds the Timer Service by
+adding two additional interfaces. The idea is the Timer Service
+to provide universal timers which can be used by other bundles if
+they need them. When the Util Bundle is started, the Timer
+Service is registered and started, too. To use the Timer Service,
+you have to get it from the Bundle Context. </p>
+
+<p>To create a timer, you must invoke Timer's method <i>notifyAfter(listener,
+timePeriod, event)</i> and pass correct parameters to it. </p>
+
+<blockquote>
+    <p><i>listener</i> is object of a class implementing the<i>
+    TimerListener</i> interface whose <i>time(event)</i> method
+    will be invoked after the given <i>timePeriod</i> (in seconds)
+    with event specified in the <i>notifyAfter</i> method. The
+    Timer Service makes an event queue from all started timer
+    listeners and when some <i>timePeriod</i> of them passes, it
+    invokes its timer method with specified <i>event</i> and
+    removes it from queue. If the <i>notifyAfter</i> method is
+    invoked with listener and event that already exist in queue,
+    the previous listener is removed and the new one replaces it.</p>
+</blockquote>
+
+<blockquote>
+    <p><i>event</i> is an int parameter. When more than one timer
+    is started with the same listener, <i>event</i> shows which
+    of them is to be notified.</p>
+</blockquote>
+
+<p>With the <i>removeLisener(listener, event)</i> method it is
+possible to remove a listener with the specified event from the
+queue before its <i>timePeriod</i> has passed. If the listener
+with the specified event is not found, nothing happens. <br>
+&nbsp; </p>
+
+<blockquote>
+    <p>Here is an example which starts 3 timers with diferent
+    timerPeriod. The timer with lisener lsn1 and event 1 will be
+    started again with diferent timePeriod, the Timer Service
+    will remove the previous timer and only new one will stay in
+    the queue. The timer with lisener lsn2 and event 2 will be
+    removed from the queue befor its timePeriod has passed. Only
+    timer with lisener lsn1, timePeriod 5 sec and event 1 will be
+    notified by the Timer Service when its timePeriod has passed.</p>
+</blockquote>
+
+<table border="1" width="100%" cols="1">
+    <tr>
+        <td width="100%" nowrap><blockquote>
+            <p>&nbsp; <br>
+            <font size="2" face="Courier New">public class
+            TestTimer { <br>
+            &nbsp; private BundleContext bc; <br>
+            &nbsp; private ServiceReference timerReference; <br>
+            &nbsp; private Timer timer; </font></p>
+            <p><font size="2" face="Courier New">&nbsp;public
+            TestTimer(BundleContext bc) { <br>
+            &nbsp;&nbsp;&nbsp; try { <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.bc = bc; <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; timerReference = bc.getServiceReference(&quot;org.eclipse.equinox.util.timer.Timer&quot;);
+            <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (timerReference !=
+            null) { <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; timer = (Timer)bc.getService(timerReference);
+            <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            setTimerIntervals();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } <br>
+            &nbsp;&nbsp;&nbsp; } catch (Exception e) { <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println(&quot;An
+            error in start method.\n &quot; + e); <br>
+            &nbsp;&nbsp;&nbsp; } <br>
+            &nbsp; }&nbsp; <br>
+            &nbsp;&nbsp; <br>
+            &nbsp; private void setTimerIntervals() { <br>
+            &nbsp;&nbsp;&nbsp; int t;&nbsp; //timePeriod <br>
+            &nbsp;&nbsp;&nbsp; int e;&nbsp; //event <br>
+            &nbsp;&nbsp;&nbsp;&nbsp; <br>
+            &nbsp;&nbsp;&nbsp; //create lsn1 lisener implementing
+            TimerLisener interface <br>
+            &nbsp;&nbsp;&nbsp; TestTimerListener lsn1 = new
+            TestTimerListener(); <br>
+            &nbsp;&nbsp;&nbsp; t = 10; <br>
+            &nbsp;&nbsp;&nbsp; e = 1; <br>
+            &nbsp;&nbsp;&nbsp; //start timer interval <br>
+            &nbsp;&nbsp;&nbsp; timer.notifyAfter(lsn1, t, e); <br>
+            &nbsp;&nbsp;&nbsp; System.out.println(&quot;Timer
+            with lisener lsn1 was started - timePeriod &quot; + t
+            + &quot; sec, event &quot; + e); <br>
+            &nbsp;&nbsp;&nbsp;&nbsp; <br>
+            &nbsp;&nbsp;&nbsp; //create lsn2 lisener implementing
+            TimerLisener interface <br>
+            &nbsp;&nbsp;&nbsp; TestTimerListener lsn2 = new
+            TestTimerListener(); <br>
+            &nbsp;&nbsp;&nbsp; t = 12; <br>
+            &nbsp;&nbsp;&nbsp; e = 2; <br>
+            &nbsp;&nbsp;&nbsp; //start timer interval <br>
+            &nbsp;&nbsp;&nbsp; timer.notifyAfter(lsn2, t, e); <br>
+            &nbsp;&nbsp;&nbsp; System.out.println(&quot;Timer
+            with lisener lsn2 was started - timePeriod &quot; + t
+            + &quot; sec, event &quot; + e); </font></p>
+            <p><font size="2" face="Courier New">&nbsp;&nbsp;&nbsp;
+            t = 5; <br>
+            &nbsp;&nbsp;&nbsp; e = 1; <br>
+            &nbsp;&nbsp;&nbsp; //start timer interval <br>
+            &nbsp;&nbsp;&nbsp; timer.notifyAfter(lsn1, t, e); <br>
+            &nbsp;&nbsp;&nbsp; System.out.println(&quot;Timer
+            with lisener lsn1 was started - timePeriod &quot; + t
+            + &quot; sec, event &quot; + e); <br>
+            &nbsp;&nbsp;&nbsp; System.out.println(&quot;\n&quot;);
+            <br>
+            &nbsp;&nbsp;&nbsp;&nbsp; <br>
+            &nbsp;&nbsp;&nbsp; //remove lsn2 lisener with event 1
+            <br>
+            &nbsp;&nbsp;&nbsp; e = 2; <br>
+            &nbsp;&nbsp;&nbsp; timer.removeListener(lsn2, e);&nbsp;&nbsp;
+            <br>
+            &nbsp; }&nbsp; <br>
+            &nbsp;&nbsp; <br>
+            }&nbsp;&nbsp; <br>
+            &nbsp;</font></p>
+        </blockquote>
+        </td>
+    </tr>
+</table>
+
+<blockquote>
+    <p>The TestTimerListener class implements the TimerListener
+    interface and its method timer(event) will be invoked every
+    time a timerPeriod passes.</p>
+</blockquote>
+
+<table border="1" width="100%" cols="1">
+    <tr>
+        <td><blockquote>
+            <p><font size="2" face="Courier New">&nbsp; <br>
+            public class TestTimerListener implements
+            TimerListener { <br>
+            &nbsp;&nbsp; <br>
+            &nbsp; public TestTimerListener() { <br>
+            &nbsp; } <br>
+            &nbsp;&nbsp; <br>
+            &nbsp; public void timer(int event){ <br>
+            &nbsp;&nbsp;&nbsp; System.out.println(&quot;Timer
+            with event &quot; + event + &quot; has ended&quot;); <br>
+            &nbsp; }&nbsp;&nbsp; <br>
+            }</font></p>
+        </blockquote>
+        </td>
+    </tr>
+</table>
+
+<p><br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; <br>
+&nbsp; </p>
+</body>
+</html>

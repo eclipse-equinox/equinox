@@ -1,0 +1,36 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Maria Ivanova">
+   <meta name="GENERATOR" content="Mozilla/4.6 [en] (WinNT; I) [Netscape]">
+   <title>package</title>
+</head>
+<body>
+The Log Reference class, included in this package, is provided to
+isolate the bundle writers from the common and often used operations accompanying
+logging in the LogService. The Log class deals on behalf of the bundle,
+which instanciates it, while getting reference to and listening for events
+from the LogService.
+<p>A bundle, wishing to use the Log reference, must only pass its bundle
+context to the Log's constructor, from there on it can log INFO, ERROR,
+and DEBUG messages in the LogService, without caring for the availability
+even of the Log Bundle. 
+<p>If there are changes in the state of the LogService (e.g. it is REGISTERED,
+or UNREGISTERING), the Log class cares to get or unget reference to it.
+While the LogService is unavailable, no matter what is the reason for this,
+the log information is printed on the server's console.
+<p>When the Log object should be released, (e.g. in case the bundle owner
+will be stopped) the resources, hold by the Log object should also be released:
+thus including ungetting LogService reference and removal of the <i>ServiceListener</i>
+from the framework. <i>close()</i> method does all the necessary
+clean up of ungetting LogService, removal of <i>ServiceListener</i> and
+internal variable clean up.
+<p>When multiple LogServices are available in the service registry, the
+Log class gets reference to only one of them. If a bundle wishes to publish
+the log information to all of the available LogServices, it can take advantage
+of the org.eclipse.equinox.util.tracker.ServiceTracker utility.
+<p>The Log Reference class implements the LogInterface class.
+<br>&nbsp;
+</body>
+</html>
