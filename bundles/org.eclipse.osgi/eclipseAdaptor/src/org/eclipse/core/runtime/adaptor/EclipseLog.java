@@ -55,6 +55,8 @@ public class EclipseLog implements FrameworkLog {
 	/** The minimum size limit for log rotation */
 	public static final int LOG_SIZE_MIN = 10;
 
+	/** The system property used to specify the log level */
+	public static final String PROP_LOG_LEVEL = "eclipse.log.level"; //$NON-NLS-1$
 	/** The system property used to specify size a log file can grow before it is rotated */
 	public static final String PROP_LOG_SIZE_MAX = "eclipse.log.size.max"; //$NON-NLS-1$
 	/** The system property used to specify the maximim number of backup log files to use */
@@ -87,6 +89,8 @@ public class EclipseLog implements FrameworkLog {
 	int maxLogSize = DEFAULT_LOG_SIZE; // The value is in KB.
 	int maxLogFiles = DEFAULT_LOG_FILES;
 	int backupIdx = 0;
+
+	private int logLevel = FrameworkLogEntry.OK;
 
 	/**
 	 * Constructs an EclipseLog which uses the specified File to log messages to
@@ -290,6 +294,8 @@ public class EclipseLog implements FrameworkLog {
 	public synchronized void log(FrameworkLogEntry logEntry) {
 		if (logEntry == null)
 			return;
+		if (!isLoggable(logEntry))
+			return;
 		try {
 			checkLogFileSize();
 			openFile();
@@ -397,17 +403,17 @@ public class EclipseLog implements FrameworkLog {
 	 * @return a date string.
 	 */
 	protected String getDate(Date date) {
-			Calendar c = Calendar.getInstance();
-			c.setTime(date);
-			StringBuffer sb = new StringBuffer();
-			appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
-			appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
-			appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
-			appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
-			appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
-			return sb.toString();
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		StringBuffer sb = new StringBuffer();
+		appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
+		appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
+		appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
+		appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
+		appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
+		return sb.toString();
 	}
 
 	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {
@@ -661,5 +667,26 @@ public class EclipseLog implements FrameworkLog {
 				maxLogFiles = DEFAULT_LOG_FILES;
 			}
 		}
+
+		String newLogLevel = secureAction.getProperty(PROP_LOG_LEVEL);
+		if (newLogLevel != null) {
+			if (newLogLevel.equals("ERROR")) //$NON-NLS-1$
+				logLevel = FrameworkLogEntry.ERROR;
+			else if (newLogLevel.equals("WARNING")) //$NON-NLS-1$
+				logLevel = FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING;
+			else if (newLogLevel.equals("INFO")) //$NON-NLS-1$
+				logLevel = FrameworkLogEntry.INFO | FrameworkLogEntry.ERROR | FrameworkLogEntry.WARNING | FrameworkLogEntry.CANCEL;
+			else
+				logLevel = FrameworkLogEntry.OK; // OK (0) means log everything
+		}
+	}
+
+	/**
+	 * Determines if the log entry should be logged based on log level.
+	 */
+	private boolean isLoggable(FrameworkLogEntry entry) {
+		if (logLevel == 0)
+			return true;
+		return (entry.getSeverity() & logLevel) != 0;
 	}
 }
