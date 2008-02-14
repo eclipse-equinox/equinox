@@ -1369,31 +1369,35 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * is set much later than we would like!
 	 */
 	protected void installSecurityManager() {
-		String securityManager = System.getProperty("java.security.manager"); //$NON-NLS-1$
+		String securityManager = FrameworkProperties.getProperty("eclipse.security"); //$NON-NLS-1$
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm == null) {
-				if (securityManager.length() < 1) {
-					securityManager = "java.lang.SecurityManager"; //$NON-NLS-1$
-				}
-				try {
-					Class clazz = Class.forName(securityManager);
-					sm = (SecurityManager) clazz.newInstance();
-					if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
-						Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
+				if (securityManager.length() == 0)
+					sm = new SecurityManager(); // use the default one from java
+				else if (securityManager.equals("osgi")) //$NON-NLS-1$
+					sm = new FrameworkSecurityManager(); // use an OSGi enabled manager that understands postponed conditions
+				else {
+					// try to use a specific classloader by classname
+					try {
+						Class clazz = Class.forName(securityManager);
+						sm = (SecurityManager) clazz.newInstance();
+					} catch (ClassNotFoundException e) {
+						// do nothing
+					} catch (ClassCastException e) {
+						// do nothing
+					} catch (InstantiationException e) {
+						// do nothing
+					} catch (IllegalAccessException e) {
+						// do nothing
 					}
-					System.setSecurityManager(sm);
-					return;
-				} catch (ClassNotFoundException e) {
-					// do nothing
-				} catch (ClassCastException e) {
-					// do nothing
-				} catch (InstantiationException e) {
-					// do nothing
-				} catch (IllegalAccessException e) {
-					// do nothing
 				}
-				throw new NoClassDefFoundError(securityManager);
+				if (sm == null)
+					throw new NoClassDefFoundError(securityManager);
+				if (Debug.DEBUG && Debug.DEBUG_SECURITY)
+					Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
+				System.setSecurityManager(sm);
+				return;
 			}
 		}
 	}

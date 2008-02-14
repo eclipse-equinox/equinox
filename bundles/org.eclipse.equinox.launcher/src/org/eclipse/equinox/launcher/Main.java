@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -511,21 +511,8 @@ public class Main {
 	protected void setSecurityPolicy(URL[] bootPath) {
 		String eclipseSecurity = System.getProperty(PROP_ECLIPSESECURITY);
 		if (eclipseSecurity != null) {
-			SecurityManager sm = System.getSecurityManager();
-			boolean setSM = false;
-			if (sm == null) {
-				if (eclipseSecurity.length() < 1) {
-					eclipseSecurity = "java.lang.SecurityManager"; //$NON-NLS-1$
-				}
-				try {
-					Class clazz = Class.forName(eclipseSecurity);
-					sm = (SecurityManager) clazz.newInstance();
-					setSM = true;
-				} catch (Throwable t) {
-					System.getProperties().put("java.security.manager", eclipseSecurity); // let the framework try to load it later. //$NON-NLS-1$
-				}
-			}
-
+			// setup a policy that grants the launcher and path for the framework AllPermissions.
+			// Do not set the security manager, this will be done by the framework itself.
 			ProtectionDomain domain = Main.class.getProtectionDomain();
 			CodeSource source = null;
 			if (domain != null)
@@ -541,8 +528,6 @@ public class Main {
 			// replace the security policy
 			Policy eclipsePolicy = new EclipsePolicy(Policy.getPolicy(), rootURLs);
 			Policy.setPolicy(eclipsePolicy);
-			if (setSM)
-				System.setSecurityManager(sm);
 		}
 	}
 
