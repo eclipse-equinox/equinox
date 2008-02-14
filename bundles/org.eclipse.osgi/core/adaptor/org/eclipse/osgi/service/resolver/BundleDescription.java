@@ -238,8 +238,10 @@ public interface BundleDescription extends BaseDescription {
 	public NativeCodeSpecification getNativeCodeSpecification();
 
 	/**
-	 * Returns that satisfy imported packages for this bundle description
-	 * and substitute one of the exports for this bundle description
+	 * Returns the export packages that satisfy imported packages for this bundle description
+	 * and substitute one of the exports for this bundle description.  If the bundle is not resolved
+	 * or the bundle does not have substituted exports then an empty array is
+	 * returned.
 	 * @return all substituted exports for this bundle description
 	 */
 	public ExportPackageDescription[] getSubstitutedExports();
