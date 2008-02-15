@@ -107,6 +107,11 @@ public class FrameworkConsole implements Runnable {
 			public void close() throws IOException {
 				// We don't want to close System.out
 			}
+
+			public void write(byte[] var0, int var1, int var2) throws IOException {
+				this.out.write(var0, var1, var2);
+			}
+
 		};
 		out = createPrintWriter(os);
 		disconnect = false;
