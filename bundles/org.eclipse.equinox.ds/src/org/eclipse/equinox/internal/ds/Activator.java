@@ -24,7 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * 
  * It also acts as a "Bundle Manager" - a listener for bundle events. Whenever a
  * bundle is stopped or started it will invoke the resolver to respectively
- * enable or disable neccessary service components.
+ * enable or disable necessary service components.
  * 
  * Notice, the SynchronousBundleListener bundle listeners are called prior
  * bundle event is completed. This will make the stuff a little bit faster ;)
