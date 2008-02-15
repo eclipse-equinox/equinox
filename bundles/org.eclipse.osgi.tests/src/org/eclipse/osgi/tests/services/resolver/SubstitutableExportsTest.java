@@ -1217,6 +1217,68 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		return state;
 	}
 
+	private State getNonOverlapingSubstituteBasicState() throws BundleException {
+		// Basic substitutable export test with A, B, C all exporting and importing x,y packages
+		// D, E, F all requiring A, B, C respectively to access x, y packages
+		// all should get packages x and y from A
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0; nomatch=nomatch"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "A"); //$NON-NLS-1$
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "B"); //$NON-NLS-1$
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
+		state.addBundle(e);
+		state.addBundle(f);
+		return state;
+	}
+
 	public void testSubstitutableExports001() throws BundleException {
 		State state = getSubstituteBasicState();
 		state.resolve();
@@ -2668,4 +2730,52 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 			assertContains("nVisible not correct", nVisible, mnExpected[index]); //$NON-NLS-1$
 		}
 	}
+
+	public void testSubstitutableExports024() throws BundleException {
+		State state = getNonOverlapingSubstituteBasicState();
+		state.resolve();
+		BundleDescription a = state.getBundle(0);
+		BundleDescription b = state.getBundle(1);
+		BundleDescription c = state.getBundle(2);
+		BundleDescription d = state.getBundle(3);
+		BundleDescription e = state.getBundle(4);
+		BundleDescription f = state.getBundle(5);
+
+		assertTrue("1.0", a.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", b.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", c.isResolved()); //$NON-NLS-1$
+		assertTrue("1.3", d.isResolved()); //$NON-NLS-1$
+		assertTrue("1.4", e.isResolved()); //$NON-NLS-1$
+		assertTrue("1.5", f.isResolved()); //$NON-NLS-1$
+
+		ExportPackageDescription[] aVisible = state.getStateHelper().getVisiblePackages(a);
+		ExportPackageDescription[] bVisible = state.getStateHelper().getVisiblePackages(b);
+		ExportPackageDescription[] cVisible = state.getStateHelper().getVisiblePackages(c);
+		ExportPackageDescription[] dVisible = state.getStateHelper().getVisiblePackages(d);
+		ExportPackageDescription[] eVisible = state.getStateHelper().getVisiblePackages(e);
+		ExportPackageDescription[] fVisible = state.getStateHelper().getVisiblePackages(f);
+
+		assertNotNull("aVisible is null", aVisible); //$NON-NLS-1$
+		assertNotNull("bVisible is null", bVisible); //$NON-NLS-1$
+		assertNotNull("cVisible is null", cVisible); //$NON-NLS-1$
+		assertNotNull("dVisible is null", dVisible); //$NON-NLS-1$
+		assertNotNull("eVisible is null", eVisible); //$NON-NLS-1$
+		assertNotNull("fVisible is null", fVisible); //$NON-NLS-1$
+
+		assertEquals("aVisible wrong number", 0, aVisible.length); //$NON-NLS-1$
+		assertEquals("bVisible wrong number", 2, bVisible.length); //$NON-NLS-1$
+		assertEquals("cVisible wrong number", 2, cVisible.length); //$NON-NLS-1$
+		assertEquals("dVisible wrong number", 2, dVisible.length); //$NON-NLS-1$
+		assertEquals("eVisible wrong number", 2, eVisible.length); //$NON-NLS-1$
+		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
+
+		ExportPackageDescription[] aExports = a.getSelectedExports();
+		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+	}
+
 }

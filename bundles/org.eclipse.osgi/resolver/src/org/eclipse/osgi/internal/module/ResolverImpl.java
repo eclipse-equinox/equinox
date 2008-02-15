@@ -1254,8 +1254,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
 		boolean result = false;
+		ResolverExport[] substitutableExps = imp.getBundle().getExports(imp.getName());
 		Object[] exports = resolverExports.get(imp.getName());
-		exportsloop: for (int i = 0; i < exports.length; i++) {
+		for (int i = 0; i < exports.length; i++) {
 			ResolverExport export = (ResolverExport) exports[i];
 			if (DEBUG_IMPORTS)
 				ResolverImpl.log("CHECKING: " + export.getExporter().getBundle() + ", " + export.getName()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1269,22 +1270,19 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				export.getExporter().addRef(imp.getBundle());
 				// first add the possible supplier; this is done before resolving the supplier bundle to prevent endless cycle loops.
 				imp.addPossibleSupplier(export);
-				ResolverExport[] importerExps = null;
 				if (imp.getBundle() != export.getExporter()) {
-					// Save the exports of this package from the importer in case we need to add them back
-					importerExps = imp.getBundle().getExports(imp.getName());
-					for (int j = 0; j < importerExps.length; j++)
-						if (importerExps[j].getSubstitute() == null)
-							importerExps[j].setSubstitute(export); // Import wins, drop export
+					for (int j = 0; j < substitutableExps.length; j++)
+						if (substitutableExps[j].getSubstitute() == null)
+							substitutableExps[j].setSubstitute(export); // Import wins, drop export
 					// if in dev mode then allow a constraint to resolve to an unresolved bundle
 					if ((originalState != ResolverBundle.RESOLVED && !resolveBundle(export.getExporter(), cycle) && !developmentMode) || export.getSubstitute() != null) {
 						// remove the possible supplier
 						imp.removePossibleSupplier(export);
 						// add back the exports of this package from the importer
 						if (imp.getSelectedSupplier() == null)
-							for (int j = 0; j < importerExps.length; j++)
-								if (importerExps[j].getSubstitute() == export)
-									importerExps[j].setSubstitute(null);
+							for (int j = 0; j < substitutableExps.length; j++)
+								if (substitutableExps[j].getSubstitute() == export)
+									substitutableExps[j].setSubstitute(null);
 						continue; // Bundle hasn't resolved || export has not been selected and is unavailable
 					}
 				} else if (export.getSubstitute() != null)
@@ -1310,6 +1308,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			return true;
 		if (imp.isOptional())
 			return true; // If the import is optional then just return true
+		if (substitutableExps.length > 0 && substitutableExps[0].getSubstitute() == null)
+			return true; // If we still have an export that is not substituted return true
 		return false;
 	}
 
