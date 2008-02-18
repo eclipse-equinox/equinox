@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		ServiceReference ref = bc.getServiceReference(PackageAdmin.class.getName());
 		if (ref != null)
 			_packageAdmin = (PackageAdmin) bc.getService(ref);
-		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), this);
+		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
 		_frameworkLogTracker.open();
 		getDebugOptions(bc);
 		processCommandLineArgs(bc);
@@ -54,8 +54,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// we must have an extension registry started before we can start the container
 		registryTracker = new ServiceTracker(bc, IExtensionRegistry.class.getName(), this);
 		registryTracker.open();
-		_frameworkLogTracker = new ServiceTracker(bc, FrameworkLog.class.getName(), null);
-		_frameworkLogTracker.open();
 		// start the app commands for the console
 		try {
 			AppCommands.create(bc);
