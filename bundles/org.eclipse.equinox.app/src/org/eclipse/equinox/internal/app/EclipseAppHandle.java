@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,9 +207,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		// only set the exit code property if this is the default application
 		if (isDefault()) {
 			int exitCode = tempResult instanceof Integer ? ((Integer) tempResult).intValue() : 0;
-			// use the long way to set the property to compile against eeminimum
-			// TODO strange that this is done here instead of by EclipseStarter
-			System.getProperties().setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
+			// Use the EnvironmentInfo Service to set properties
+			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
 		}
 		if (Activator.DEBUG)
 			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), tempResult == null ? "null" : tempResult.toString()}))); //$NON-NLS-1$

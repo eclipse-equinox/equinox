@@ -91,15 +91,24 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		context.ungetService(debugRef);
 	}
 
-	private void processCommandLineArgs(BundleContext bc) {
+	private static EnvironmentInfo getEnvironmentInfo() {
+		BundleContext bc = Activator.getContext();
+		if (bc == null)
+			return null;
 		ServiceReference infoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
 		if (infoRef == null)
-			return;
+			return null;
 		EnvironmentInfo envInfo = (EnvironmentInfo) bc.getService(infoRef);
 		if (envInfo == null)
-			return;
+			return null;
 		bc.ungetService(infoRef);
-		CommandLineArgs.processCommandLine(envInfo);
+		return envInfo;
+	}
+
+	private void processCommandLineArgs(BundleContext bc) {
+		EnvironmentInfo envInfo = Activator.getEnvironmentInfo();
+		if (envInfo != null)
+			CommandLineArgs.processCommandLine(envInfo);
 	}
 
 	public Object addingService(ServiceReference reference) {
@@ -224,5 +233,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		FrameworkLog log = frameworkLogTracker == null ? null : (FrameworkLog) frameworkLogTracker.getService();
 		if (log != null)
 			log.log(entry);
+	}
+
+	static void setProperty(String key, String value) {
+		EnvironmentInfo envInfo = getEnvironmentInfo();
+		if (envInfo != null)
+			envInfo.setProperty(key, value);
+		else
+			System.getProperties().setProperty(key, value);
 	}
 }
