@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ public class VersionRange {
 	public static final VersionRange emptyRange = new VersionRange(null);
 
 	private Version minVersion;
-	private boolean includeMin; 
+	private boolean includeMin;
 	private Version maxVersion;
 	private boolean includeMax;
 
@@ -140,11 +140,9 @@ public class VersionRange {
 				if (maxVersion != null && vr.getMaximum() != null) {
 					if (maxVersion.equals(vr.getMaximum()) && includeMax == vr.includeMax)
 						return true;
-				}
-				else
+				} else
 					return maxVersion == vr.getMaximum();
-		}
-		else {
+		} else {
 			return minVersion == vr.getMinimum();
 		}
 		return false;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,12 +96,12 @@ public class OSGi {
 	 */
 	protected void displayBanner() {
 		System.out.println();
-		System.out.print(Msg.ECLIPSE_OSGI_NAME); 
+		System.out.print(Msg.ECLIPSE_OSGI_NAME);
 		System.out.print(" "); //$NON-NLS-1$
-		System.out.println(Msg.ECLIPSE_OSGI_VERSION); 
+		System.out.println(Msg.ECLIPSE_OSGI_VERSION);
 		System.out.println();
-		System.out.println(Msg.OSGI_VERSION); 
+		System.out.println(Msg.OSGI_VERSION);
 		System.out.println();
-		System.out.println(Msg.ECLIPSE_COPYRIGHT); 
+		System.out.println(Msg.ECLIPSE_COPYRIGHT);
 	}
 }

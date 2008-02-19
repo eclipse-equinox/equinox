@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 public class SecureAction {
 	// make sure we use the correct controlContext;
 	private AccessControlContext controlContext;
-	
+
 	// This ClassLoader is used in loadSystemClass if System.getClassLoader() returns null
 	static final ClassLoader bootClassLoader = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
 		public Object run() {
@@ -356,13 +356,13 @@ public class SecureAction {
 	public Class loadSystemClass(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null) {
 			ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-		    return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
+			return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 		}
 		try {
 			return (Class) AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
 					ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-				    return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
+					return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 				}
 			}, controlContext);
 		} catch (PrivilegedActionException e) {
@@ -370,8 +370,8 @@ public class SecureAction {
 				throw (ClassNotFoundException) e.getException();
 			throw (RuntimeException) e.getException();
 		}
-	}	
-			
+	}
+
 	/**
 	 * Opens a ServiceTracker. Same as calling tracker.open()
 	 * @param tracker the ServiceTracker to open.

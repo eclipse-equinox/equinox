@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.debug.Debug;
  */
 public abstract class BundleEntry {
 	protected static final int BUF_SIZE = 8 * 1024;
+
 	/**
 	 * Return an InputStream for the entry.
 	 *
@@ -85,7 +86,7 @@ public abstract class BundleEntry {
 	 * @return a byte array containing the content of this entry
 	 * @throws IOException
 	 */
-	public byte[] getBytes() throws IOException{
+	public byte[] getBytes() throws IOException {
 		InputStream in = getInputStream();
 		int length = (int) getSize();
 		byte[] classbytes;

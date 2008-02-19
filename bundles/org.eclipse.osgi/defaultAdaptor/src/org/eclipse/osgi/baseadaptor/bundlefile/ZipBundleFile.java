@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -299,7 +299,7 @@ public class ZipBundleFile extends BundleFile {
 					// either another thread closed the bundle file or we timed waiting for all the reference inputstreams to close
 					// If the referenceCount did not reach zero then this bundle file will remain open until the
 					// bundle file is closed explicitly (i.e. bundle is updated/uninstalled or framework is shutdown)
-					return; 
+					return;
 
 			}
 			closed = true;

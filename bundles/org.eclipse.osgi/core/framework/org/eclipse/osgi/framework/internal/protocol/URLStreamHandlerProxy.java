@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,7 +140,6 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
 	}
 
-
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 
 		//using non-deprecated URLStreamHandler.setURL method. 
@@ -178,7 +177,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	public void modifiedService(ServiceReference reference, Object service) {
 		int newRank = getRank(reference);
 		if (reference == urlStreamServiceReference) {
-			if (newRank < ranking) { 
+			if (newRank < ranking) {
 				// The URLHandler we are currently using has dropped it's ranking below a URLHandler registered 
 				// for the same protocol. We need to swap out URLHandlers.
 				// this should get us the highest ranked service, if available
@@ -187,7 +186,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
 			}
-		} else if (newRank > ranking) { 
+		} else if (newRank > ranking) {
 			// the service changed is another URLHandler that we are not currently using
 			// If it's ranking is higher, we must swap it in.
 			setNewHandler(reference, newRank);

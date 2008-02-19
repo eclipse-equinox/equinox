@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,7 +162,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		public boolean hasExtensionExtensionPoints() {
 			return hasExtensionExtensionPoints;
 		}
-		
+
 		public String getRoot() {
 			return isFragment() ? FRAGMENT : PLUGIN;
 		}
@@ -597,7 +597,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 		String plugin = attributes.getValue("", PLUGIN_REQUIRES_PLUGIN); //$NON-NLS-1$ 
 		if (plugin == null)
 			return;
-		if (plugin.equals(PluginConverterImpl.PI_BOOT)) 
+		if (plugin.equals(PluginConverterImpl.PI_BOOT))
 			return;
 		if (plugin.equals(PluginConverterImpl.PI_RUNTIME_COMPATIBILITY))
 			manifestInfo.compatibilityFound = true;
@@ -669,7 +669,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 
 	private void internalError(String elementName) {
 		FrameworkLogEntry error;
-		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName); 
+		String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT, elementName);
 		error = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, (manifestInfo.pluginId == null ? message : "Plug-in : " + manifestInfo.pluginId + ", " + message), 0, null, null); //$NON-NLS-1$ //$NON-NLS-2$
 		adaptor.getFrameworkLog().log(error);
 	}

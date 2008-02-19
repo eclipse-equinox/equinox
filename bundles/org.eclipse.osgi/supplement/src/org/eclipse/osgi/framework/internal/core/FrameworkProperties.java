@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2008 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.util.PropertyPermission;
  * The static methods on this class should be used instead of the System#getProperty, System#setProperty etc methods.
  */
 public class FrameworkProperties {
-	
+
 	private static Properties properties;
 
 	// A flag of some sort will have to be supported. 
@@ -39,36 +39,36 @@ public class FrameworkProperties {
 			properties.putAll(systemProperties);
 		}
 	}
-		
+
 	public static Properties getProperties() {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPropertiesAccess();
 		return properties;
 	}
-	
-    public static String getProperty(String key) {
-    	return getProperty(key, null);
-    }
+
+	public static String getProperty(String key) {
+		return getProperty(key, null);
+	}
 
 	public static String getProperty(String key, String defaultValue) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPropertyAccess(key);
-    	return properties.getProperty(key, defaultValue);
-    }
+		return properties.getProperty(key, defaultValue);
+	}
 
-    public static String setProperty(String key, String value) {
+	public static String setProperty(String key, String value) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPermission(new PropertyPermission(key, "write")); //$NON-NLS-1$
-    	return (String) properties.put(key, value);
-    }
+		return (String) properties.put(key, value);
+	}
 
-    public static String clearProperty(String key) {
+	public static String clearProperty(String key) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPermission(new PropertyPermission(key, "write")); //$NON-NLS-1$
-        return (String) properties.remove(key);
-    }    
+		return (String) properties.remove(key);
+	}
 }

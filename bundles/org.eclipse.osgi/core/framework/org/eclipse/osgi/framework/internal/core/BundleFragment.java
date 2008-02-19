@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -180,7 +180,7 @@ public class BundleFragment extends AbstractBundle {
 		}
 		// cannot load a class from a fragment because there is no classloader
 		// associated with fragments.
-		throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_FRAGMENT_CNFE, name)); 
+		throw new ClassNotFoundException(NLS.bind(Msg.BUNDLE_FRAGMENT_CNFE, name));
 	}
 
 	/**
@@ -221,7 +221,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param options
 	 */
 	protected void startWorker(int options) throws BundleException {
-		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this)); 
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this));
 	}
 
 	/**
@@ -230,7 +230,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param options
 	 */
 	protected void stopWorker(int options) throws BundleException {
-		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this)); 
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this));
 	}
 
 	/**
@@ -292,7 +292,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param host the BundleHost to add to the set of host bundles
 	 */
 	protected boolean addHost(BundleLoaderProxy host) {
-		if (host == null) 
+		if (host == null)
 			return false;
 		try {
 			((BundleHost) host.getBundleHost()).attachFragment(this);

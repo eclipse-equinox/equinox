@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	private boolean relaunch = false;
 	private boolean failOnNoDefault = false;
 	private FrameworkLog log;
+
 	public EclipseAppLauncher(BundleContext context, boolean relaunch, boolean failOnNoDefault, FrameworkLog log) {
 		this.context = context;
 		this.relaunch = relaunch;
@@ -47,7 +48,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		String appClass = ParameterizedRunnable.class.getName();
 		ServiceReference[] runRefs = null;
 		try {
-			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))");  //$NON-NLS-1$//$NON-NLS-2$
+			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
 			// ignore this.  It should never happen as we have tested the above format.
 		}
@@ -131,7 +132,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 			return; // no application is currently running.
 		ParameterizedRunnable currentRunnable = runnable;
 		if (currentRunnable instanceof ApplicationRunnable) {
-			((ApplicationRunnable)currentRunnable).stop();
+			((ApplicationRunnable) currentRunnable).stop();
 			runningLock.acquire(60000); // timeout after 1 minute.
 		}
 	}
@@ -143,7 +144,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 */
 	public Object reStart(Object argument) throws Exception {
 		ServiceReference ref[] = null;
-		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)");  //$NON-NLS-1$//$NON-NLS-2$
+		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)"); //$NON-NLS-1$//$NON-NLS-2$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);
 			Method launch = defaultApp.getClass().getMethod("launch", new Class[] {Map.class}); //$NON-NLS-1$

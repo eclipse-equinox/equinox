@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,8 +53,7 @@ public class TextProcessor {
 	/**
 	 * The default set of delimiters to use to segment a string.
 	 */
-	private static final String delimiterString = DOT + COLON + FILE_SEP_FSLASH
-			+ FILE_SEP_BSLASH;
+	private static final String delimiterString = DOT + COLON + FILE_SEP_FSLASH + FILE_SEP_BSLASH;
 
 	// left to right marker
 	private static final char LRM = '\u200e';
@@ -80,10 +79,10 @@ public class TextProcessor {
 
 		if ("iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang)) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			isBidi = true;
-		
+
 		String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
 		if (osName.startsWith("windows") || osName.startsWith("linux")) { //$NON-NLS-1$	//$NON-NLS-2$
-																			
+
 			// Only consider platforms that can support control characters
 			isSupportedPlatform = true;
 		}
@@ -162,7 +161,7 @@ public class TextProcessor {
 		if (str.charAt(0) == LRE && str.charAt(str.length() - 1) == PDF) {
 			return str;
 		}
-		
+
 		// String contains RTL characters
 		boolean isStringBidi = false;
 		// Last strong character is RTL
@@ -171,17 +170,17 @@ public class TextProcessor {
 		int delimIndex = INDEX_NOT_SET;
 
 		delimiter = delimiter == null ? getDefaultDelimiters() : delimiter;
-		
+
 		StringBuffer target = new StringBuffer();
 		target.append(LRE);
 		char ch;
 
 		for (int i = 0, n = str.length(); i < n; i++) {
 			ch = str.charAt(i);
-			if (delimiter.indexOf(ch) != -1) { 
+			if (delimiter.indexOf(ch) != -1) {
 				// character is a delimiter, note its index in the buffer
 				if (isLastRTL) {
-					delimIndex = target.length(); 
+					delimIndex = target.length();
 				}
 			} else if (Character.isDigit(ch)) {
 				if (delimIndex != INDEX_NOT_SET) {
@@ -201,9 +200,9 @@ public class TextProcessor {
 						delimIndex = INDEX_NOT_SET;
 					}
 					isLastRTL = true;
-				} else { 
+				} else {
 					// strong LTR character, no LRM will be required
-					delimIndex = INDEX_NOT_SET; 
+					delimIndex = INDEX_NOT_SET;
 					isLastRTL = false;
 				}
 			}
@@ -218,8 +217,7 @@ public class TextProcessor {
 		 * (2) The runtime locale is BiDi AND either the string does not start with 
 		 * an LTR character or it ends with LTR char or digit.
 		 */
-		if (isStringBidi || !Character.isLetter(str.charAt(0))
-				|| isNeutral(str.charAt(str.length() - 1))) {
+		if (isStringBidi || !Character.isLetter(str.charAt(0)) || isNeutral(str.charAt(str.length() - 1))) {
 			target.append(PDF);
 			return target.toString();
 		}
@@ -238,26 +236,29 @@ public class TextProcessor {
 	 * @see #process(String, String)
 	 * @since 3.3
 	 */
-	public static String deprocess(String str){
+	public static String deprocess(String str) {
 		// don't do all the work if not a valid case 
 		if (str == null || str.length() <= 1 || !isSupportedPlatform || !isBidi)
 			return str;
-		
+
 		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < str.length(); i++){
+		for (int i = 0; i < str.length(); i++) {
 			char c = str.charAt(i);
-			switch(c){
-				case LRE: continue;
-				case PDF: continue;
-				case LRM: continue;
-				default:
+			switch (c) {
+				case LRE :
+					continue;
+				case PDF :
+					continue;
+				case LRM :
+					continue;
+				default :
 					buf.append(c);
 			}
 		}
-		
+
 		return buf.toString();
 	}
-	
+
 	/**
 	 * Return the string containing all the default delimiter characters to be
 	 * used to segment a given string.

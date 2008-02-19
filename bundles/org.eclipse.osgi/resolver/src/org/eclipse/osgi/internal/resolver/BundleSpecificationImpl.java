@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 		BundleDescription candidate = (BundleDescription) supplier;
 		if (candidate.getHost() != null)
 			return false;
-		if (getName() != null && getName().equals(candidate.getSymbolicName()) &&
-				(getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
 			return true;
 		return false;
 	}

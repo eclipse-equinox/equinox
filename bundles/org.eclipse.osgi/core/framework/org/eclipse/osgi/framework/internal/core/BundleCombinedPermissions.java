@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,14 +21,15 @@ import java.util.*;
 final class BundleCombinedPermissions extends BundlePermissionCollection {
 	private static final long serialVersionUID = 4049357526208360496L;
 	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)  
-    private static final Enumeration EMPTY_ENUMERATION = new Enumeration() {
-        public boolean hasMoreElements() {
-            return false;
-        }
-        public Object nextElement() {
-            throw new NoSuchElementException();
-        }
-    };	
+	private static final Enumeration EMPTY_ENUMERATION = new Enumeration() {
+		public boolean hasMoreElements() {
+			return false;
+		}
+
+		public Object nextElement() {
+			throw new NoSuchElementException();
+		}
+	};
 	private BundlePermissionCollection assigned;
 	private BundlePermissionCollection implied;
 	private ConditionalPermissions conditional;

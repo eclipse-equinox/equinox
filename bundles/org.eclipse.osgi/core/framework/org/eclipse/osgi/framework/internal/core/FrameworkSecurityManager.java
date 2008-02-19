@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 	static class CheckContext {
 		// A non zero depth indicates that we are doing a recursive permission check.
 		ArrayList depthCondSets = new ArrayList(2);
-        ArrayList accs = new ArrayList(2);
+		ArrayList accs = new ArrayList(2);
 		ArrayList CondClassSet;
 
 		public int getDepth() {
@@ -91,21 +91,21 @@ public class FrameworkSecurityManager extends SecurityManager {
 	}
 
 	/**
-     * Gets the AccessControlContext currently being evaluated by
-     * the SecurityManager.
-     * 
+	 * Gets the AccessControlContext currently being evaluated by
+	 * the SecurityManager.
+	 * 
 	 * @return the AccessControlContext currently being evaluated by the SecurityManager, or
-     * null if no AccessControlContext is being evaluted. Note: this method will
-     * return null if the permission check is being done directly on the AccessControlContext
-     * rather than the SecurityManager.
+	 * null if no AccessControlContext is being evaluted. Note: this method will
+	 * return null if the permission check is being done directly on the AccessControlContext
+	 * rather than the SecurityManager.
 	 */
 	public AccessControlContext getContextToBeChecked() {
-        CheckContext cc = (CheckContext) localCheckContext.get();
-        if (cc != null && cc.accs != null && !cc.accs.isEmpty())
-            return (AccessControlContext) cc.accs.get(cc.accs.size()-1);
-        return null;
-    }
-    
+		CheckContext cc = (CheckContext) localCheckContext.get();
+		if (cc != null && cc.accs != null && !cc.accs.isEmpty())
+			return (AccessControlContext) cc.accs.get(cc.accs.size() - 1);
+		return null;
+	}
+
 	public void internalCheckPermission(Permission perm, Object context) {
 		AccessControlContext acc = (AccessControlContext) context;
 		CheckContext cc = (CheckContext) localCheckContext.get();
@@ -114,7 +114,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 			localCheckContext.set(cc);
 		}
 		cc.depthCondSets.add(null); // initialize postponed condition set to null
-        cc.accs.add(acc);
+		cc.accs.add(acc);
 		try {
 			acc.checkPermission(perm);
 			// We want to pop the first set of postponed conditions and process them
@@ -140,7 +140,7 @@ public class FrameworkSecurityManager extends SecurityManager {
 			}
 		} finally {
 			cc.depthCondSets.remove(cc.getDepth());
-            cc.accs.remove(cc.accs.size()-1);
+			cc.accs.remove(cc.accs.size() - 1);
 		}
 	}
 

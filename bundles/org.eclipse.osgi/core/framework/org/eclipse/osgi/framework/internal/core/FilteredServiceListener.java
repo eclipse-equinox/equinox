@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,19 +37,17 @@ public class FilteredServiceListener implements ServiceListener {
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
-		}
-		else {
+		} else {
 			FilterImpl filterImpl = new FilterImpl(filterstring);
 			String clazz = filterImpl.getRequiredObjectClass();
 			if (clazz == null) {
 				this.objectClass = null;
 				this.filter = filterImpl;
-			}
-			else {
+			} else {
 				this.objectClass = clazz.intern(); /*intern the name for future identity comparison */
 				String objectClassFilter = FilterImpl.getObjectClassFilterString(this.objectClass);
 				this.filter = (objectClassFilter.equals(filterstring)) ? null : filterImpl;
-			}	
+			}
 		}
 		this.listener = listener;
 		this.context = context;
@@ -66,12 +64,11 @@ public class FilteredServiceListener implements ServiceListener {
 		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
 
 		// first check if we can short circuit the filter match if the required objectClass does not match the event
-		objectClassCheck:
-		if (objectClass != null) {
+		objectClassCheck: if (objectClass != null) {
 			String[] classes = reference.getClasses();
 			int size = classes.length;
-			for (int i = 0; i < size; i++) {	
-				if (classes[i] == objectClass)  // objectClass strings have previously been interned for identity comparison 
+			for (int i = 0; i < size; i++) {
+				if (classes[i] == objectClass) // objectClass strings have previously been interned for identity comparison 
 					break objectClassCheck;
 			}
 			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
@@ -84,7 +81,7 @@ public class FilteredServiceListener implements ServiceListener {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		
+
 		if ((filter == null || filter.match(reference)) && (allservices || context.isAssignableTo(reference))) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$

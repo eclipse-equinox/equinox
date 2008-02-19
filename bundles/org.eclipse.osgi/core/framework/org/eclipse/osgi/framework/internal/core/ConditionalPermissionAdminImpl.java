@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,8 +51,7 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 				condPerms = new Vector(encodedCondPerms.length);
 				for (int i = 0; i < encodedCondPerms.length; i++)
 					condPerms.add(new ConditionalPermissionInfoImpl(encodedCondPerms[i]));
-			}
-			else
+			} else
 				condPerms = new Vector(0);
 		} catch (IOException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, e);
@@ -132,7 +131,7 @@ public class ConditionalPermissionAdminImpl implements ConditionalPermissionAdmi
 
 	private void saveCondPermInfos() {
 		try {
-			String [] encodedCondPerms = new String[condPerms.size()];
+			String[] encodedCondPerms = new String[condPerms.size()];
 			int i = 0;
 			for (Enumeration eCondPerms = condPerms.elements(); eCondPerms.hasMoreElements(); i++)
 				encodedCondPerms[i] = eCondPerms.nextElement().toString();

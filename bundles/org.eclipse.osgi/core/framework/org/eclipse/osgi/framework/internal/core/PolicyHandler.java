@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ public class PolicyHandler {
 	private final static String EXT_POLICY = "ext"; //$NON-NLS-1$
 	private final static String BOOT_POLICY = "boot"; //$NON-NLS-1$
 	private final static String PARENT_POLICY = "parent"; //$NON-NLS-1$
-	
+
 	//The loader to which this policy is attached.
 	BundleLoader policedLoader;
 	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
@@ -99,7 +99,7 @@ public class PolicyHandler {
 				policies[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
 				return (IBuddyPolicy) policies[policyOrder];
 			}
-			
+
 			//			//Buddy policy can be provided by service implementations
 			//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
 			//			ServiceReference[] matchingBuddies = null;
@@ -164,15 +164,15 @@ public class PolicyHandler {
 		Vector results = null;
 		for (int i = 0; i < policies.length; i++) {
 			Enumeration result = getPolicyImplementation(i).loadResources(name);
-            if (result != null) {
-            	if (results == null)
-            		results = new Vector(policies.length);
-                while (result.hasMoreElements()) {
-                    Object url = result.nextElement();
-                    if (!results.contains(url)) //only add if not already added 
-                        results.add(url);
-                }
-            }
+			if (result != null) {
+				if (results == null)
+					results = new Vector(policies.length);
+				while (result.hasMoreElements()) {
+					Object url = result.nextElement();
+					if (!results.contains(url)) //only add if not already added 
+						results.add(url);
+				}
+			}
 		}
 		stopLoading(name);
 		return results == null || results.isEmpty() ? null : results.elements();

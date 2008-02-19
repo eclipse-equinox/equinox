@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -130,7 +130,7 @@ public class Launcher {
 		try {
 			adaptor = doAdaptor();
 		} catch (Exception e) {
-			System.out.println(Msg.LAUNCHER_ADAPTOR_ERROR); 
+			System.out.println(Msg.LAUNCHER_ADAPTOR_ERROR);
 			e.printStackTrace();
 			return;
 		}
@@ -343,7 +343,7 @@ public class Launcher {
 			Thread t = new Thread(((Runnable) osgiconsole), OSGI_CONSOLE_COMPONENT_NAME);
 			t.start();
 		} catch (NumberFormatException nfe) {
-			System.err.println(NLS.bind(Msg.LAUNCHER_INVALID_PORT, consolePort)); 
+			System.err.println(NLS.bind(Msg.LAUNCHER_INVALID_PORT, consolePort));
 		} catch (Exception ex) {
 			informAboutMissingComponent(OSGI_CONSOLE_COMPONENT_NAME, OSGI_CONSOLE_COMPONENT);
 		}
@@ -358,8 +358,8 @@ public class Launcher {
 	 */
 	void informAboutMissingComponent(String component, String jar) {
 		System.out.println();
-		System.out.print(NLS.bind(Msg.LAUNCHER_COMPONENT_MISSING, component)); 
-		System.out.println(NLS.bind(Msg.LAUNCHER_COMPONENT_JAR, jar)); 
+		System.out.print(NLS.bind(Msg.LAUNCHER_COMPONENT_MISSING, component));
+		System.out.println(NLS.bind(Msg.LAUNCHER_COMPONENT_JAR, jar));
 		System.out.println();
 	}
 }

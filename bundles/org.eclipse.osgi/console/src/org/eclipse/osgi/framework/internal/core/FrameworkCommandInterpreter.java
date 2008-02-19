@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	public String nextArgument() {
 		if (tok == null || !tok.hasMoreElements())
 			return null;
-		
+
 		String arg = tok.nextToken();
 		if (arg.startsWith("\"")) { //$NON-NLS-1$
 			if (arg.endsWith("\"")) { //$NON-NLS-1$
@@ -211,7 +211,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 */
 	private void setMaximumLinesToScroll(int lines) {
 		if (lines < 0) {
-			throw new IllegalArgumentException(ConsoleMsg.CONSOLE_LINES_TO_SCROLL_NEGATIVE_ERROR); 
+			throw new IllegalArgumentException(ConsoleMsg.CONSOLE_LINES_TO_SCROLL_NEGATIVE_ERROR);
 		}
 
 		maxLineCount = lines;
@@ -366,7 +366,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 				System.err.println(NLS.bind(ConsoleMsg.CONSOLE_ERROR_READING_RESOURCE, resource));
 			}
 		} else {
-			println(NLS.bind(ConsoleMsg.CONSOLE_RESOURCE_NOT_IN_BUNDLE, resource, bundle.toString())); 
+			println(NLS.bind(ConsoleMsg.CONSOLE_RESOURCE_NOT_IN_BUNDLE, resource, bundle.toString()));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	// System property used to check timestamps of the bundles in the configuration
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	private static final String PROP_COMPATIBILITY_LAZYSTART = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
-	private static final boolean COMPATIBILITY_LAZYSTART  = Boolean.valueOf(FrameworkProperties.getProperty(PROP_COMPATIBILITY_LAZYSTART, "true")).booleanValue(); //$NON-NLS-1$
+	private static final boolean COMPATIBILITY_LAZYSTART = Boolean.valueOf(FrameworkProperties.getProperty(PROP_COMPATIBILITY_LAZYSTART, "true")).booleanValue(); //$NON-NLS-1$
 	private static final int STORAGE_VERION = 2;
 
 	public static final String KEY = EclipseStorageHook.class.getName();
@@ -113,7 +113,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		String[] packageList = pkgCount > 0 ? new String[pkgCount] : null;
 		for (int i = 0; i < pkgCount; i++)
 			packageList[i] = in.readUTF();
-		storageHook.lazyStartExcludes = packageList;		
+		storageHook.lazyStartExcludes = packageList;
 		if ((storageHook.flags & FLAG_HAS_LAZY_INCLUDE) != 0) {
 			pkgCount = in.readInt();
 			packageList = pkgCount > 0 ? new String[pkgCount] : null;
@@ -126,12 +126,12 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		storageHook.pluginClass = AdaptorUtil.readString(in, false);
 		storageHook.manifestTimeStamp = in.readLong();
 		storageHook.manifestType = in.readByte();
-		if (storageHook.isAutoStartable()) { 
+		if (storageHook.isAutoStartable()) {
 			if ((target.getStatus() & Constants.BUNDLE_LAZY_START) == 0)
 				target.setStatus(target.getStatus() | Constants.BUNDLE_LAZY_START);
 			// if the compatibility flag is set then we must make sure the persistent start bit is set and the activation policy bit;
 			// if the persistent start bit was already set then we should not set the activation policy bit because this is an "eager" started bundle.
-			if (COMPATIBILITY_LAZYSTART && (target.getStatus() & Constants.BUNDLE_STARTED ) == 0)
+			if (COMPATIBILITY_LAZYSTART && (target.getStatus() & Constants.BUNDLE_STARTED) == 0)
 				target.setStatus(target.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
 		}
 		return storageHook;

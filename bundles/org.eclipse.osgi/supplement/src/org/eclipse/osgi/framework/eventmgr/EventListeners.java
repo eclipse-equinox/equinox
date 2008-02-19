@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,21 +35,21 @@ public class EventListeners {
 	 * 	list != null IFF size != 0
 	 * 	list[size] == null
 	 *  for all i < size: list[i] != null
-     * Access to this field must be protected by a synchronized region.
+	 * Access to this field must be protected by a synchronized region.
 	 */
 	private ListElement[] list = null;
 
 	/**
 	 * The current number of elements.
 	 * Maintains invariant: 0 <= size <= list.length.
-     * Access to this field must be protected by a synchronized region.
+	 * Access to this field must be protected by a synchronized region.
 	 */
 	private int size = 0;
 
 	/**
 	 * If true and about to modify the list,
 	 * then the list must be copied first.
-     * Access to this field must be protected by a synchronized region.
+	 * Access to this field must be protected by a synchronized region.
 	 */
 	private boolean copyOnWrite = false;
 
@@ -85,15 +85,14 @@ public class EventListeners {
 	 * when the listener is to be called. This may be null
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public synchronized void addListener(Object listener, Object listenerObject) { 
+	public synchronized void addListener(Object listener, Object listenerObject) {
 		if (listener == null) {
 			throw new IllegalArgumentException();
 		}
 
 		if (size == 0) {
 			list = new ListElement[initialCapacity];
-		} 
-		else {
+		} else {
 			// copy array if necessary
 			if (copyOnWrite) {
 				copyList(size);
@@ -141,8 +140,7 @@ public class EventListeners {
 				if (copyOnWrite) {
 					copyList(i);
 					copyOnWrite = false;
-				}
-				else {
+				} else {
 					System.arraycopy(list, i + 1, list, i, size - i);
 					list[size] = null; /* invariant: end of list must be null */
 				}
@@ -181,7 +179,7 @@ public class EventListeners {
 		copyOnWrite = true;
 		return list;
 	}
-	
+
 	/**
 	 * Copy the array.
 	 * @param i Index of element to remove from array. Must be equal to size to 

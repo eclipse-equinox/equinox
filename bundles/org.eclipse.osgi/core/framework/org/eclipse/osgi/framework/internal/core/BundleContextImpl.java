@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -573,7 +573,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.println("Service object is null"); //$NON-NLS-1$
 			}
 
-			throw new IllegalArgumentException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION); 
+			throw new IllegalArgumentException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION);
 		}
 
 		int size = clazzes.length;
@@ -583,7 +583,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				Debug.println("Classes array is empty"); //$NON-NLS-1$
 			}
 
-			throw new IllegalArgumentException(Msg.SERVICE_EMPTY_CLASS_LIST_EXCEPTION); 
+			throw new IllegalArgumentException(Msg.SERVICE_EMPTY_CLASS_LIST_EXCEPTION);
 		}
 
 		/* copy the array so that changes to the original will not affect us. */
@@ -602,7 +602,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 				}
-				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService)); 
+				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
 			}
 		}
 
@@ -1310,7 +1310,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	protected void checkValid() {
 		if (!isValid()) {
-			throw new IllegalStateException(Msg.BUNDLE_CONTEXT_INVALID_EXCEPTION); 
+			throw new IllegalStateException(Msg.BUNDLE_CONTEXT_INVALID_EXCEPTION);
 		}
 	}
 

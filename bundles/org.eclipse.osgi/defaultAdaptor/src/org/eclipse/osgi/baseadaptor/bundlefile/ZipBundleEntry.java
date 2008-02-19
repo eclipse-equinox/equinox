@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,15 +111,18 @@ public class ZipBundleEntry extends BundleEntry {
 		return null;
 	}
 
-	private class ZipBundleEntryInputStream extends InputStream{
+	private class ZipBundleEntryInputStream extends InputStream {
 		private final InputStream stream;
 		private boolean closed = false;
+
 		public ZipBundleEntryInputStream(InputStream stream) {
 			this.stream = stream;
 		}
+
 		public int available() throws IOException {
 			return stream.available();
 		}
+
 		public void close() throws IOException {
 			try {
 				stream.close();
@@ -129,27 +132,34 @@ public class ZipBundleEntry extends BundleEntry {
 						return;
 					closed = true;
 				}
-				((ZipBundleFile)bundleFile).decrementReference();
+				((ZipBundleFile) bundleFile).decrementReference();
 			}
 		}
+
 		public void mark(int var0) {
 			stream.mark(var0);
 		}
+
 		public boolean markSupported() {
 			return stream.markSupported();
 		}
+
 		public int read() throws IOException {
 			return stream.read();
 		}
+
 		public int read(byte[] var0, int var1, int var2) throws IOException {
 			return stream.read(var0, var1, var2);
 		}
+
 		public int read(byte[] var0) throws IOException {
 			return stream.read(var0);
 		}
+
 		public void reset() throws IOException {
 			stream.reset();
 		}
+
 		public long skip(long var0) throws IOException {
 			return stream.skip(var0);
 		}

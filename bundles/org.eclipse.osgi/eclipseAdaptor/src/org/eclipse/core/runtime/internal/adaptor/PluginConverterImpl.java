@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -272,7 +272,7 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 			out.flush();
 		} catch (IOException e) {
-			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation); 
+			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST, this.pluginInfo.getUniqueId(), generationLocation);
 			throw new PluginConversionException(message, e);
 		} finally {
 			if (out != null)
@@ -283,7 +283,7 @@ public class PluginConverterImpl implements PluginConverter {
 				}
 		}
 		if (DEBUG)
-			System.out.println("Time to write out converted manifest to: " + generationLocation + ": "+ (System.currentTimeMillis() - start) + "ms.");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			System.out.println("Time to write out converted manifest to: " + generationLocation + ": " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	private void generateLocalizationEntry() {
@@ -348,7 +348,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (!pluginInfo.isSingleton())
 			return pluginInfo.getUniqueId();
 		StringBuffer result = new StringBuffer(pluginInfo.getUniqueId());
-		result.append(SEMICOLON); 
+		result.append(SEMICOLON);
 		result.append(Constants.SINGLETON_DIRECTIVE);
 		String assignment = TARGET31.compareTo(target) <= 0 ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
 		result.append(assignment).append("true"); //$NON-NLS-1$
@@ -408,7 +408,7 @@ public class PluginConverterImpl implements PluginConverter {
 	private void generateEclipseHeaders() {
 		if (pluginInfo.isFragment())
 			return;
-		
+
 		String pluginClass = pluginInfo.getPluginClass();
 		if (pluginInfo.hasExtensionExtensionPoints() || (pluginClass != null && !pluginClass.trim().equals(""))) //$NON-NLS-1$
 			generatedManifest.put(TARGET32.compareTo(target) <= 0 ? Constants.ECLIPSE_LAZYSTART : Constants.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
@@ -450,7 +450,7 @@ public class PluginConverterImpl implements PluginConverter {
 				continue;
 			String libEntryText = ((String) element.getKey()).trim();
 			File libraryLocation;
-			if (libEntryText.equals(DOT)) 
+			if (libEntryText.equals(DOT))
 				libraryLocation = pluginManifestLocation;
 			else {
 				// in development time, libEntries may contain absolute locations (linked folders)				
@@ -668,7 +668,7 @@ public class PluginConverterImpl implements PluginConverter {
 		StringBuffer sb = new StringBuffer(value.length() + ((values.length - 1) * LIST_SEPARATOR.length()));
 		for (int i = 0; i < values.length - 1; i++)
 			sb.append(values[i]).append(LIST_SEPARATOR);
-		sb.append(values[values.length -1]);
+		sb.append(values[values.length - 1]);
 		return sb.toString();
 	}
 

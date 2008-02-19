@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -209,7 +209,7 @@ public class FilePath {
 			return base.hasTrailingSlash() ? ("." + SEPARATOR) : "."; //$NON-NLS-1$ //$NON-NLS-2$
 		StringBuffer relative = new StringBuffer(); //	
 		for (int j = 0; j < baseCount - count; j++)
-			relative.append(PARENT_DIR + SEPARATOR); 
+			relative.append(PARENT_DIR + SEPARATOR);
 		for (int i = 0; i < base.segments.length - count; i++) {
 			relative.append(base.segments[count + i]);
 			relative.append(SEPARATOR);

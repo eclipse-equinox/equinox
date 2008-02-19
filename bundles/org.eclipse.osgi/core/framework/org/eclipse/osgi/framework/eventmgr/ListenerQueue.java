@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,7 +51,7 @@ public class ListenerQueue {
 	/**
 	 * Once the listener queue has been used to dispatch an event, 
 	 * you cannot add modify the queue.
-     * Access to this field must be protected by a synchronized region.
+	 * Access to this field must be protected by a synchronized region.
 	 */
 	private boolean readOnly;
 
@@ -113,7 +113,7 @@ public class ListenerQueue {
 		synchronized (eventThread) { /* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
 			int size = queue.size();
 			for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
-				ListElement list = (ListElement)queue.get(i);
+				ListElement list = (ListElement) queue.get(i);
 				eventThread.postEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
 			}
 		}
@@ -137,7 +137,7 @@ public class ListenerQueue {
 		// Attempts to do so result in deadly embraces.
 		int size = queue.size();
 		for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
-			ListElement list = (ListElement)queue.get(i);
+			ListElement list = (ListElement) queue.get(i);
 			EventManager.dispatchEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
 		}
 	}

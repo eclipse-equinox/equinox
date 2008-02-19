@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,11 +124,11 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 		info.setDuringStartup(booting);
 
 		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
-		if (activationStack==null) {
+		if (activationStack == null) {
 			activationStack = new Stack();
 			activationStacks.put(Thread.currentThread(), activationStack);
 		}
-			
+
 		// set the parentage of activation
 		if (activationStack.size() != 0) {
 			BundleStats activatedBy = (BundleStats) activationStack.peek();
@@ -203,7 +203,7 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 
 	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) {
 		if (StatsManager.MONITOR_CLASSES)
-			ClassloaderStats.endLoadingClass(getClassloaderId(manager), name, clazz != null);	
+			ClassloaderStats.endLoadingClass(getClassloaderId(manager), name, clazz != null);
 	}
 
 	public void preFindLocalResource(String name, ClasspathManager manager) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -295,7 +295,7 @@ public abstract class NLS {
 		final String[] variants = buildVariants(bundleName);
 		for (int i = 0; i < variants.length; i++) {
 			// loader==null if we're launched off the Java boot classpath
-			final InputStream input = loader==null ? ClassLoader.getSystemResourceAsStream(variants[i]) : loader.getResourceAsStream(variants[i]);
+			final InputStream input = loader == null ? ClassLoader.getSystemResourceAsStream(variants[i]) : loader.getResourceAsStream(variants[i]);
 			if (input == null)
 				continue;
 			try {
@@ -316,7 +316,7 @@ public abstract class NLS {
 		if (Debug.DEBUG_MESSAGE_BUNDLES)
 			System.out.println("Time to load message bundle: " + bundleName + " was " + (System.currentTimeMillis() - start) + "ms."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	/*
 	 * The method adds a log entry based on the error message and exception. 
 	 * The output is written to the System.err.
@@ -340,7 +340,7 @@ public abstract class NLS {
 				statusMsg = "Error: "; //$NON-NLS-1$
 				break;
 			case SEVERITY_WARNING :
-			// intentionally fall through:
+				// intentionally fall through:
 			default :
 				statusMsg = "Warning: "; //$NON-NLS-1$
 		}
@@ -385,7 +385,7 @@ public abstract class NLS {
 			if (fieldObject == null) {
 				final String msg = "NLS unused message: " + key + " in: " + bundleName;//$NON-NLS-1$ //$NON-NLS-2$
 				if (Debug.DEBUG_MESSAGE_BUNDLES)
-					System.out.println(msg); 
+					System.out.println(msg);
 				log(SEVERITY_WARNING, msg, null);
 				return null;
 			}

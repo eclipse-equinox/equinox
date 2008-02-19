@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import org.osgi.framework.*;
 import org.osgi.service.startlevel.StartLevel;
 
 public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
-	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true"));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	private StartLevelManager startLevelService;
 	private ServiceReference slRef;
@@ -68,7 +68,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		// that must be activated after the trigger class has been defined (see postFindLocalClass)
 		int size = stack.size();
 		if (size > 1) {
-			for (int i = size -1; i >= 1; i--)
+			for (int i = size - 1; i >= 1; i--)
 				if (manager == stack.get(i))
 					// the manager is already on the stack in which case we are already in the process of loading the trigger class
 					return;
@@ -117,7 +117,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 						if (status.getStatus() instanceof Thread) {
 							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Integer(5000)});
 							adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
-						}			
+						}
 						continue;
 					}
 				}
@@ -266,6 +266,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	private static class TerminatingClassNotFoundException extends ClassNotFoundException implements StatusException {
 		private static final long serialVersionUID = -6730732895632169173L;
 		private Object cause;
+
 		public TerminatingClassNotFoundException(String message, Throwable cause) {
 			super(message, cause);
 			this.cause = cause;
@@ -278,6 +279,6 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		public int getStatusCode() {
 			return StatusException.CODE_ERROR;
 		}
-		
+
 	}
 }
