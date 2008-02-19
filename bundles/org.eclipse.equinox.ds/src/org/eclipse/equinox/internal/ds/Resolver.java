@@ -444,6 +444,20 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
+	/**
+	 * Notifies the resolver that a component has been disposed. 
+	 * It should accordingly update its data structures if needed
+	 *
+	 **/
+	public void componentDisposed(ServiceComponentProp scp) {
+		synchronized (syncLock) {
+			int ind = satisfiedSCPs.indexOf(scp);
+			if (ind >= 0) {
+				satisfiedSCPs.removeElementAt(ind);
+			}
+		}
+	}
+
 	private Vector resolveEligible() {
 		try {
 			Vector enabledSCPs = (Vector) scpEnabled.clone();
@@ -453,8 +467,7 @@ public final class Resolver implements WorkPerformer {
 				for (int i = 0; refs != null && i < refs.size(); i++) {
 					// Loop though all the references (dependencies)for a given
 					// scp. If a dependency is not met, remove it's associated
-					// scp and
-					// re-run the algorithm
+					// scp and re-run the algorithm
 					Reference reference = (Reference) refs.elementAt(i);
 					if (reference != null) {
 						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
@@ -465,8 +478,8 @@ public final class Resolver implements WorkPerformer {
 							}
 							enabledSCPs.removeElementAt(k);
 							break;
-						} else if (scp.disposed) {
-							scp.disposed = false;
+						} else if (scp.getState() == ServiceComponentProp.DISPOSED) {
+							scp.setState(ServiceComponentProp.SATISFIED);
 						}
 					}
 				}
@@ -477,16 +490,14 @@ public final class Resolver implements WorkPerformer {
 					boolean hasPermission = true;
 					int i = 0;
 					for (; i < provides.length; i++) {
-						// make sure bundle has permission to register the
-						// service
+						// make sure bundle has permission to register the service
 						try {
 							if (!scp.bc.getBundle().hasPermission(new ServicePermission(provides[i], ServicePermission.REGISTER))) {
 								hasPermission = false;
 								break;
 							}
 						} catch (IllegalStateException ise) {
-							// the bundle of the service component is
-							// uninstalled
+							// the bundle of the service component is uninstalled
 							// System.out.println("IllegalStateException occured
 							// while processing component "+scp);
 							// ise.printStackTrace();
@@ -511,12 +522,10 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 
-			// if (Activator.DEBUG) {
-			// Activator.log.debug(0, 10021, enabledSCPs.toString(), null,
-			// false);
-			// ////Activator.log.debug("Resolver:resolveEligible(): resolved
-			// components = " + enabledSCPs, null);
-			// }
+			if (Activator.DEBUG) {
+				Activator.log.debug(0, 10021, enabledSCPs.toString(), null, false);
+				////Activator.log.debug("Resolver:resolveEligible(): resolved components = " + enabledSCPs, null);
+			}
 			return enabledSCPs;
 		} catch (Throwable e) {
 			e.printStackTrace();
