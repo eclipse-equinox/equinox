@@ -155,20 +155,23 @@ public class InstanceProcess {
 		if (list != null) {
 			for (int i = 0; i < list.size(); i++) {
 				scp = (ServiceComponentProp) list.elementAt(i);
-				if (scp.disposed)
-					continue;
 				getLock();
-				if (scp.disposed || !InstanceProcess.resolver.satisfiedSCPs.contains(scp)) {
-					//no need to build the component - it is disposed or about to be disposed
+				int componentState = scp.getState();
+				if (componentState <= ServiceComponentProp.DISPOSING || componentState > ServiceComponentProp.SATISFIED) {
+					//no need to build the component:
+					// 1) it is disposed or about to be disposed
+					// 2) it is already built or being built
 					freeLock();
 					continue;
 				}
 				long start = 0l;
+				boolean successfullyBuilt = true;
 				try {
 					if (Activator.PERF) {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start building component " + scp);
 					}
+					scp.setState(ServiceComponentProp.BUILDING);
 					sc = scp.serviceComponent;
 					if (sc.immediate) {
 						if (Activator.DEBUG) {
@@ -223,28 +226,30 @@ public class InstanceProcess {
 								// if MSF throw exception - can't be
 								// ComponentFactory add MSF
 								if (factoryPid != null) {
+									Vector toDisable = new Vector(1);
+									toDisable.addElement(sc);
+									InstanceProcess.resolver.disableComponents(toDisable);
+									successfullyBuilt = false;
 									throw new org.osgi.service.component.ComponentException("ManagedServiceFactory and ComponentFactory are incompatible");
 								}
 								registerComponentFactory(scp);
 								// when registering a ComponentFactory we must not
-								// reguister
-								// the component configuration as service
+								// register the component configuration as service
 								continue;
 							}
 						}
 
 						// check whether there is a service to register
 						if (sc.provides != null) {
-
 							// this will create either plain service component
-							// registration
-							// or a service factory registration
+							// registration or a service factory registration
 							registerService(scp, sc.serviceFactory, null);
 						}
 					}
 				} catch (Throwable t) {
 					Activator.log.error("Exception occured while building component " + scp, t);
 				} finally {
+					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
 					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
@@ -269,15 +274,15 @@ public class InstanceProcess {
 		if (scpList != null) {
 			for (int i = 0; i < scpList.size(); i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scpList.elementAt(i);
-				if (scp.disposed)
-					continue;
 				getLock();
-				if (scp.disposed) {
+				if (scp.getState() <= ServiceComponentProp.DISPOSING) {
+					//it is already disposed
 					freeLock();
 					continue;
 				}
 				long start = 0l;
 				try {
+					scp.setState(ServiceComponentProp.DISPOSING);
 					if (Activator.PERF) {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start disposing component " + scp);
@@ -286,6 +291,7 @@ public class InstanceProcess {
 				} catch (Throwable t) {
 					Activator.log.error("Exception while disposing instances of component " + scp, t);
 				} finally {
+					resolver.componentDisposed(scp);
 					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
@@ -488,7 +494,7 @@ public class InstanceProcess {
 		if (Activator.DEBUG) {
 			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null);
 		}
-		if (scp.disposed) {
+		if (scp.getState() <= ServiceComponentProp.DISPOSING) {
 			//must unregister the service because it was not able to unregister when the component was disposed
 			try {
 				reg.unregister();
