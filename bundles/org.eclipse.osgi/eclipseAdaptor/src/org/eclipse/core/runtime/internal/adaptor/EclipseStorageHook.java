@@ -13,7 +13,8 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
@@ -36,7 +37,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	private static final String PROP_COMPATIBILITY_LAZYSTART = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
 	private static final boolean COMPATIBILITY_LAZYSTART = Boolean.valueOf(FrameworkProperties.getProperty(PROP_COMPATIBILITY_LAZYSTART, "true")).booleanValue(); //$NON-NLS-1$
-	private static final int STORAGE_VERION = 2;
+	private static final int STORAGE_VERION = 3;
 
 	public static final String KEY = EclipseStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
@@ -59,6 +60,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	/**  Eclipse-LazyStart header */
 	private String[] lazyStartExcludes;
 	private String[] lazyStartIncludes;
+	private int bundleManfestVersion;
 	/** shortcut to know if a bundle has a buddy */
 	private String buddyList;
 	/** shortcut to know if a bundle is a registrant to a registered policy */
@@ -84,6 +86,12 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			if (lazyStart == null)
 				lazyStart = (String) manifest.get(Constants.ECLIPSE_AUTOSTART);
 			parseLazyStart(this, lazyStart);
+		}
+		try {
+			String versionString = (String) manifest.get(Constants.BUNDLE_MANIFESTVERSION);
+			bundleManfestVersion = versionString == null ? 0 : Integer.parseInt(versionString);
+		} catch (NumberFormatException nfe) {
+			bundleManfestVersion = 0;
 		}
 		pluginClass = (String) manifest.get(Constants.PLUGIN_CLASS);
 		buddyList = (String) manifest.get(Constants.BUDDY_LOADER);
@@ -126,6 +134,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		storageHook.pluginClass = AdaptorUtil.readString(in, false);
 		storageHook.manifestTimeStamp = in.readLong();
 		storageHook.manifestType = in.readByte();
+		storageHook.bundleManfestVersion = in.readInt();
 		if (storageHook.isAutoStartable()) {
 			if ((target.getStatus() & Constants.BUNDLE_LAZY_START) == 0)
 				target.setStatus(target.getStatus() | Constants.BUNDLE_LAZY_START);
@@ -165,6 +174,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		AdaptorUtil.writeStringOrNull(out, getPluginClass());
 		out.writeLong(getManifestTimeStamp());
 		out.writeByte(getManifestType());
+		out.writeInt(getBundleManifestVersion());
 	}
 
 	public int getKeyHashCode() {
@@ -213,6 +223,10 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 
 	public byte getManifestType() {
 		return manifestType;
+	}
+
+	public int getBundleManifestVersion() {
+		return bundleManfestVersion;
 	}
 
 	/**
