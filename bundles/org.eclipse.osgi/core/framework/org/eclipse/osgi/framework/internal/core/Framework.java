@@ -1369,7 +1369,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * is set much later than we would like!
 	 */
 	protected void installSecurityManager() {
-		String securityManager = FrameworkProperties.getProperty("eclipse.security"); //$NON-NLS-1$
+		String securityManager = FrameworkProperties.getProperty("eclipse.security", FrameworkProperties.getProperty("java.security.manager")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm == null) {
