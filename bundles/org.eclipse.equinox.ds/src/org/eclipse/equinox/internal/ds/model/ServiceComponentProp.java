@@ -37,6 +37,12 @@ import org.osgi.service.component.*;
  */
 
 public class ServiceComponentProp implements PrivilegedExceptionAction {
+	public static final int DISPOSED = 0;
+	public static final int DISPOSING = 1;
+	public static final int SATISFIED = 2;
+	public static final int BUILDING = 3;
+	public static final int BUILT = 4;
+
 	public ServiceRegistration registration;
 	public String name;
 	public ServiceComponent serviceComponent;
@@ -55,8 +61,8 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	// component factories as services.
 	protected boolean isComponentFactory = false;
 
-	//Used to mark the component as disposed
-	public boolean disposed = false;
+	//Holds the component's state
+	private int state = SATISFIED;
 
 	/**
 	 * List of names (Strings) of Component Configurations we should not
@@ -97,7 +103,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			Activator.log.debug(0, 10035, name, null, false);
 			// //Activator.log.debug("ServiceComponentProp.dispose(): ", null);
 		}
-		disposed = true;
+		setState(DISPOSED);
 		while (!instances.isEmpty()) {
 			ComponentInstanceImpl current = (ComponentInstanceImpl) instances.firstElement();
 			dispose(current);
@@ -251,7 +257,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	public ComponentInstanceImpl build(Bundle usingBundle, Object instance, boolean security) throws Exception {
-		if (disposed) {
+		if (getState() == DISPOSED) {
 			if (Activator.DEBUG) {
 				Activator.log.debug("Cannot build component, because it is already disposed: " + this, null);
 			}
@@ -550,6 +556,14 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 	public boolean isKindOfFactory() {
 		return kindOfFactory;
+	}
+
+	public synchronized int getState() {
+		return state;
+	}
+
+	public synchronized void setState(int state) {
+		this.state = state;
 	}
 
 }
