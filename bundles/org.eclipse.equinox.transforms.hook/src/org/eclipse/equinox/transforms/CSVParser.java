@@ -97,7 +97,7 @@ public class CSVParser {
 				}
 
 			} catch (NoSuchElementException e) {
-				TransformerHook.log(FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e);
+				TransformerHook.log(FrameworkLogEntry.ERROR, "Could not parse transform file record :" + currentLine, e); //$NON-NLS-1$
 			}
 		}
 		return (TransformTuple[]) list.toArray(new TransformTuple[list.size()]);
