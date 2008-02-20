@@ -206,13 +206,15 @@ public class FileStorage extends ComponentStorage {
 		ManifestElement[] elements = parseManifestHeader(bundle);
 		for (int i = 0; i < elements.length; i++) {
 			URL componentURL = bundle.getEntry(elements[i].getValue());
-			try {
-				URLConnection connection = componentURL.openConnection();
-				long lastModified = connection.getLastModified();
-				if (lastModified > result)
-					result = lastModified;
-			} catch (IOException e) {
-				return 0;
+			if (componentURL != null) {
+				try {
+					URLConnection connection = componentURL.openConnection();
+					long lastModified = connection.getLastModified();
+					if (lastModified > result)
+						result = lastModified;
+				} catch (IOException e) {
+					return 0;
+				}
 			}
 		}
 		return result;
