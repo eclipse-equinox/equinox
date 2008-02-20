@@ -25,17 +25,14 @@ public class Activator implements BundleActivator {
 	private ServiceTracker logTracker;
 
 	public void start(BundleContext context) throws Exception {
-		logTracker = new ServiceTracker(context, FrameworkLog.class.getName(),
-				null);
+		logTracker = new ServiceTracker(context, FrameworkLog.class.getName(), null);
 		logTracker.open();
 
 		Properties properties = new Properties();
-		properties.put("isStreamTransformer", "true");
+		properties.put("isStreamTransformer", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		Object transformer = new XSLTStreamTransformer(context
-				.getDataFile("entities"), logTracker);
-		registration = context.registerService(Object.class.getName(),
-				transformer, properties);
+		Object transformer = new XSLTStreamTransformer(context.getDataFile("entities"), logTracker); //$NON-NLS-1$
+		registration = context.registerService(Object.class.getName(), transformer, properties);
 
 	}
 

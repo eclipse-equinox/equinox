@@ -66,16 +66,16 @@ public class XSLTStreamTransformer {
 				if (resolver != null)
 					reader.setEntityResolver(resolver);
 				else
-					reader.setFeature("http://xml.org/sax/features/validation",
+					reader.setFeature("http://xml.org/sax/features/validation", //$NON-NLS-1$
 							false);
 
 				SAXSource saxSource = new SAXSource(reader, streamSource);
 				transformer.transform(saxSource, new StreamResult(result));
 			} catch (TransformerException e) {
-				log(FrameworkEvent.ERROR, "Could not perform transform.", e);
+				log(FrameworkEvent.ERROR, "Could not perform transform.", e); //$NON-NLS-1$
 				throw new IOException(e.getMessage());
 			} catch (SAXException e) {
-				log(FrameworkEvent.ERROR, "Problem parsing transform.", e);
+				log(FrameworkEvent.ERROR, "Problem parsing transform.", e); //$NON-NLS-1$
 				throw new IOException(e.getMessage());
 			}
 		}
@@ -128,11 +128,11 @@ public class XSLTStreamTransformer {
 						} catch (MalformedURLException e) {
 							// un-resolvable entity - return an empty entity to
 							// continue parsing
-							return new InputSource(new StringReader(""));
+							return new InputSource(new StringReader("")); //$NON-NLS-1$
 						} catch (IOException e) {
 							// un-resolvable entity - return an empty entity to
 							// continue parsing
-							return new InputSource(new StringReader(""));
+							return new InputSource(new StringReader("")); //$NON-NLS-1$
 
 						}
 						if (resolved != null)
@@ -161,7 +161,7 @@ public class XSLTStreamTransformer {
 				XSLTPipe pipe = new XSLTPipe(inputStream, transformer, resolver);
 				return pipe.getPipedInputStream();
 			} catch (TransformerConfigurationException e) {
-				log(FrameworkEvent.ERROR, "Could not perform transform.", e);
+				log(FrameworkEvent.ERROR, "Could not perform transform.", e); //$NON-NLS-1$
 			}
 		}
 
@@ -191,7 +191,7 @@ public class XSLTStreamTransformer {
 					else
 						reader
 								.setFeature(
-										"http://xml.org/sax/features/validation",
+										"http://xml.org/sax/features/validation", //$NON-NLS-1$
 										false);
 					SAXSource xsltSource = new SAXSource(reader, inputSource);
 
@@ -200,28 +200,28 @@ public class XSLTStreamTransformer {
 								.newTemplates(xsltSource));
 						templateMap.put(transformerURL, templatesRef);
 					} catch (Exception e) {
-						// cant create the template. May be an IO
+						// can't create the template. May be an IO
 						// exception from the source or perhaps a badly
 						// formed XSLT. We shouldn't fail in this case.
 						log(FrameworkEvent.WARNING,
-								"Could not create transform template: "
+								"Could not create transform template: " //$NON-NLS-1$
 										+ transformerURL.toString(), e);
 					}
 				} catch (TransformerFactoryConfigurationError e) {
 					// we can proceed without a factory
 					log(
 							FrameworkEvent.WARNING,
-							"Could not create transformer factory.  No transforms will be invoked.",
+							"Could not create transformer factory.  No transforms will be invoked.", //$NON-NLS-1$
 							e);
 				} catch (SAXException e) {
 					// we can proceed without a reader
 					log(
 							FrameworkEvent.WARNING,
-							"Could not create XML reader.  No transforms will be invoked.",
+							"Could not create XML reader.  No transforms will be invoked.", //$NON-NLS-1$
 							e);
 				}
 			} catch (IOException e) {
-				log(FrameworkEvent.WARNING, "General IO Exception creating templates.", e);
+				log(FrameworkEvent.WARNING, "General IO Exception creating templates.", e); //$NON-NLS-1$
 			}
 		}
 		return templates;
@@ -238,7 +238,7 @@ public class XSLTStreamTransformer {
 		}
 
 		FrameworkLogEntry entry = new FrameworkLogEntry(
-				"org.eclipse.equinox.transforms.xslt", severity, 0, msg, 0, t,
+				"org.eclipse.equinox.transforms.xslt", severity, 0, msg, 0, t, //$NON-NLS-1$
 				null);
 		log.log(entry);
 	}
