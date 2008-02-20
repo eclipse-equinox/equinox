@@ -25,8 +25,8 @@ public class TransformerList extends ServiceTracker {
 	private StreamTransformer[] transformers;
 
 	public TransformerList(BundleContext context) throws InvalidSyntaxException {
-		super(context, context.createFilter("(objectClass="
-				+ Object.class.getName() + ")"), null);
+		super(context, context.createFilter("(objectClass=" //$NON-NLS-1$
+				+ Object.class.getName() + ')'), null);
 		open();
 	}
 
@@ -43,17 +43,17 @@ public class TransformerList extends ServiceTracker {
 		if (services == null) {
 			transformers = new StreamTransformer[0];
 		} else {
-			ArrayList transformers = new ArrayList(services.length);
+			ArrayList transformerList = new ArrayList(services.length);
 			for (int i = 0; i < services.length; i++) {
 				Object object = services[i];
 				if (object instanceof StreamTransformer)
-					transformers.add(object);
+					transformerList.add(object);
 				else {
 
 					ProxyStreamTransformer transformer;
 					try {
 						transformer = new ProxyStreamTransformer(object);
-						transformers.add(transformer);
+						transformerList.add(transformer);
 					} catch (SecurityException e) {
 						TransformerHook.log(FrameworkLogEntry.ERROR,
 								"Problem creating transformer", e); //$NON-NLS-1$
@@ -63,8 +63,8 @@ public class TransformerList extends ServiceTracker {
 					}
 				}
 			}
-			this.transformers = (StreamTransformer[]) transformers
-					.toArray(new StreamTransformer[transformers.size()]);
+			this.transformers = (StreamTransformer[]) transformerList
+					.toArray(new StreamTransformer[transformerList.size()]);
 		}
 
 	}

@@ -24,7 +24,7 @@ public class ProxyStreamTransformer extends StreamTransformer {
 
 	public ProxyStreamTransformer(Object object) throws SecurityException, NoSuchMethodException {
 		this.object = object;
-		method = object.getClass().getMethod("getInputStream", new Class[] {InputStream.class, URL.class});
+		method = object.getClass().getMethod("getInputStream", new Class[] {InputStream.class, URL.class}); //$NON-NLS-1$
 		Class returnType = method.getReturnType();
 		if (!returnType.equals(InputStream.class))
 			throw new NoSuchMethodException();

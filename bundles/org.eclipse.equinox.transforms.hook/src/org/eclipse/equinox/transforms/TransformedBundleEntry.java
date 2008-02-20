@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
@@ -29,7 +28,6 @@ public class TransformedBundleEntry extends BundleEntry {
 	private InputStream stream;
 	private BundleEntry original;
 	private TransformedBundleFile bundleFile;
-	private BaseData data;
 
 	public TransformedBundleEntry(TransformedBundleFile bundleFile,
 			BundleEntry original, InputStream wrappedStream) {

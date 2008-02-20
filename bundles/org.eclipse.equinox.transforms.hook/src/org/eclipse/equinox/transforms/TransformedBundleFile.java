@@ -167,7 +167,7 @@ public class TransformedBundleFile extends BundleFile {
 					File original = originalFile;
 					if (original == null)
 						return null;
-					if (original.isDirectory()) { //$NON-NLS-1$
+					if (original.isDirectory()) {
 						if (!nested.mkdirs()) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 								Debug
@@ -220,7 +220,8 @@ public class TransformedBundleFile extends BundleFile {
 	 * a transform associated with it.
 	 * 
 	 * @param path
-	 * @return
+	 * @return whether the resource at the given path or any of its children has
+	 * a transform associated with it.
 	 */
 	private boolean hasTransforms(String path) {
 		if (transformers.getTransformers().length == 0)
@@ -245,7 +246,7 @@ public class TransformedBundleFile extends BundleFile {
 
 		while (entries.hasMoreElements()) {
 			String entryPath = (String) entries.nextElement();
-			if (entryPath.startsWith(dirName)) //$NON-NLS-1$
+			if (entryPath.startsWith(dirName)) 
 				getFile(entryPath, false);
 		}
 		return getExtractFile(dirName);

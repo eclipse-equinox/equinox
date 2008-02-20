@@ -62,12 +62,13 @@ public class CSVParser {
 		String currentLine = null;
 		List list = new ArrayList();
 		while ((currentLine = reader.readLine()) != null) {
-			if (currentLine.startsWith("#"))
+			if (currentLine.startsWith("#")) { //$NON-NLS-1$
 				continue;
+			}
 			currentLine = currentLine.trim();
 			if (currentLine.length() == 0)
 				continue;
-			StringTokenizer toker = new StringTokenizer(currentLine, ",");
+			StringTokenizer toker = new StringTokenizer(currentLine, ","); //$NON-NLS-1$
 			try {
 				String bundlePatternString = toker.nextToken().trim();
 				String pathPatternString = toker.nextToken().trim();

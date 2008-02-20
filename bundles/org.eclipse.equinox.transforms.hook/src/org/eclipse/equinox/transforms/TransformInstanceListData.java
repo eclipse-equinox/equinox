@@ -66,9 +66,9 @@ public class TransformInstanceListData extends ServiceTracker {
 	 */
 	public TransformInstanceListData(BundleContext context)
 			throws InvalidSyntaxException {
-		super(context, context.createFilter("(&(objectClass="
-				+ URL.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE
-				+ "=*))"), null);
+		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
+				+ URL.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
+				+ "=*))"), null); //$NON-NLS-1$
 		open();
 	}
 
