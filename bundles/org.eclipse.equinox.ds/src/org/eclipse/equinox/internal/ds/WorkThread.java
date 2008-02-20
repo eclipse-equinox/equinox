@@ -11,11 +11,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
-import org.osgi.service.cm.ConfigurationEvent;
-
 import org.eclipse.equinox.internal.util.event.Queue;
 import org.eclipse.equinox.internal.util.ref.TimerRef;
 import org.eclipse.equinox.internal.util.timer.TimerListener;
+import org.osgi.service.cm.ConfigurationEvent;
 
 /**
  * @author Pavlin Dobrev
@@ -79,7 +78,13 @@ public class WorkThread implements Runnable, TimerListener {
 						continue;
 					}
 				}
-				TimerRef.notifyAfter(this, BLOCK_TIMEOUT, 1);
+				if (TimerRef.timer != null) {
+					TimerRef.notifyAfter(this, BLOCK_TIMEOUT, 1);
+				} else {
+					if (Activator.DEBUG) {
+						Activator.log.debug("[SCR] WorkThread.run(): Timer service is not available! Skipping timeout check", null);
+					}
+				}
 				if (objectToProcess instanceof SCRManager.QueuedJob) {
 					((SCRManager.QueuedJob) objectToProcess).dispatch();
 				} else if (objectToProcess instanceof ConfigurationEvent) {
