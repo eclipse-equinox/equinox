@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.datalocation;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.adaptor.LocationManager;
+import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.tests.OSGiTestsActivator;
 
-public class BasicLocationTests extends TestCase {
+public class BasicLocationTests extends CoreTest {
 
 	String originalUser = null;
 	String originalInstance = null;
@@ -76,6 +81,71 @@ public class BasicLocationTests extends TestCase {
 		assertTrue(url.toExternalForm() + " should " + (trailing ? "" : "not") + " have a trailing slash", url.getFile().endsWith("/") == trailing);
 		if (windows)
 			assertTrue(url.toExternalForm() + " should " + (leading ? "" : "not") + " have a leading slash", url.getFile().startsWith("/") == leading);
+	}
+
+	public void testCreateLocation01() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), false);
+		} catch (Throwable t) {
+			fail("Failed to set location", t);
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.lock());
+		} catch (IOException e) {
+			fail("Failed to lock location", e);
+		}
+		testLocation.release();
+	}
+
+	public void testCreateLocation02() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation02");
+		Location testLocation = configLocation.createLocation(null, null, true);
+		try {
+			testLocation.set(testLocationFile.toURL(), false);
+		} catch (Throwable t) {
+			fail("Failed to set location", t);
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.lock());
+			testLocation.release();
+			fail("Should not be able to lock read-only location");
+		} catch (IOException e) {
+			// expected
+		}
+	}
+
+	public void testCreateLocation03() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation03");
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), true);
+		} catch (Throwable t) {
+			fail("Failed to set location", t);
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.isLocked());
+		} catch (IOException e) {
+			fail("Failed to lock location", e);
+		}
+		testLocation.release();
+	}
+
+	public void testCreateLocation04() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation04");
+		Location testLocation = configLocation.createLocation(null, null, true);
+		try {
+			testLocation.set(testLocationFile.toURL(), true);
+			testLocation.release();
+			fail("Should not be able to lock read-only location");
+		} catch (Throwable t) {
+			// expected
+		}
 	}
 
 	public void testSlashes() {
@@ -149,5 +219,4 @@ public class BasicLocationTests extends TestCase {
 		checkLocation(LocationManager.getConfigurationLocation(), true, true, "file");
 		checkLocation(LocationManager.getInstallLocation(), true, true, "file");
 	}
-
 }

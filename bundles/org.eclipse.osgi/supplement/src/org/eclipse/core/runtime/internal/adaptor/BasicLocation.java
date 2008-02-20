@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.datalocation.Location;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Internal class.
@@ -116,7 +117,15 @@ public class BasicLocation implements Location {
 		return isReadOnly;
 	}
 
-	public synchronized boolean setURL(URL value, boolean lock) throws IllegalStateException {
+	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
+		try {
+			return set(value, lock);
+		} catch (IOException e) {
+			return false;
+		}
+	}
+
+	public synchronized boolean set(URL value, boolean lock) throws IllegalStateException, IOException {
 		if (location != null)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_CANNOT_CHANGE_LOCATION);
 		File file = null;
@@ -131,12 +140,8 @@ public class BasicLocation implements Location {
 		}
 		lock = lock && !isReadOnly;
 		if (lock) {
-			try {
-				if (!lock(file))
-					return false;
-			} catch (IOException e) {
+			if (!lock(file, value))
 				return false;
-			}
 		}
 		lockFile = file;
 		location = LocationHelper.buildURL(value.toExternalForm(), true);
@@ -151,8 +156,8 @@ public class BasicLocation implements Location {
 
 	public synchronized boolean lock() throws IOException {
 		if (!isSet())
-			return false;
-		return lock(lockFile);
+			throw new IOException(EclipseAdaptorMsg.location_notSet);
+		return lock(lockFile, location);
 	}
 
 	public synchronized boolean isLocked() throws IOException {
@@ -164,14 +169,19 @@ public class BasicLocation implements Location {
 	/*
 	 * This must be called while holding the synchronization lock for (this)
 	 */
-	private boolean lock(File lock) throws IOException {
-		if (lock == null || isReadOnly)
-			return false;
+	private boolean lock(File lock, URL locationValue) throws IOException {
+		if (isReadOnly)
+			throw new IOException(NLS.bind(EclipseAdaptorMsg.location_folderReadOnly, lock));
+		if (lock == null) {
+			if (locationValue != null && !"file".equalsIgnoreCase(locationValue.getProtocol())) //$NON-NLS-1$
+				throw new IOException(NLS.bind(EclipseAdaptorMsg.location_notFileProtocol, locationValue));
+			throw new IllegalStateException(EclipseAdaptorMsg.location_noLockFile); // this is really unexpected
+		}
 
 		File parentFile = new File(lock.getParent());
 		if (!parentFile.exists())
 			if (!parentFile.mkdirs())
-				return false;
+				throw new IOException(NLS.bind(EclipseAdaptorMsg.location_folderReadOnly, parentFile));
 
 		setLocker(lock);
 		if (locker == null)

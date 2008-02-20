@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -117,8 +117,23 @@ public interface Location {
 	 * @param lock whether or not to lock this location 
 	 * @return whether or not the location was successfully set and, if requested, locked.
 	 * @throws IllegalStateException if the location's value is already set
+	 * @deprecated use {@link #set(URL, boolean)} instead.
 	 */
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException;
+
+	/**
+	 * Sets and optionally locks the location's value to the given {@link URL}.  If the location 
+	 * already has a value an exception is thrown.  If locking is requested and fails, <code>false</code>
+	 * is returned and the {@link URL} of this location is not set.
+	 * 
+	 * @param value the value of this location
+	 * @param lock whether or not to lock this location 
+	 * @return whether or not the location was successfully set and, if requested, locked.
+	 * @throws IllegalStateException if the location's value is already set
+	 * @throws IOException if there was an unexpected problem while acquiring the lock
+	 * @since 3.4
+	 */
+	public boolean set(URL value, boolean lock) throws IllegalStateException, IOException;
 
 	/**
 	 * Attempts to lock this location with a canonical locking mechanism and return
@@ -154,6 +169,7 @@ public interface Location {
 	 * @param defaultValue the default value of the location. A <code>null</code> value is allowed.
 	 * @param readonly true if the location is read-only.
 	 * @return a new location.
+	 * @since 3.4
 	 */
 	public Location createLocation(Location parent, URL defaultValue, boolean readonly);
 }

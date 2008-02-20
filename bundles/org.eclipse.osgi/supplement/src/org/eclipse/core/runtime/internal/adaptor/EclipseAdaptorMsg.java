@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,6 +84,10 @@ public class EclipseAdaptorMsg extends NLS {
 
 	public static String location_cannotLock;
 	public static String location_cannotLockNIO;
+	public static String location_folderReadOnly;
+	public static String location_notSet;
+	public static String location_notFileProtocol;	
+	public static String location_noLockFile;
 
 	public static String ECLIPSE_CONVERTER_FILENOTFOUND;
 	public static String ECLIPSE_CONVERTER_ERROR_CREATING_BUNDLE_MANIFEST;
