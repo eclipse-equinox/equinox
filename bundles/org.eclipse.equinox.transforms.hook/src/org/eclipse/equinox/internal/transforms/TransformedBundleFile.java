@@ -91,7 +91,7 @@ public class TransformedBundleFile extends BundleFile {
 	 * 
 	 * @param inputStream
 	 *            the stream to transform
-	 * @param transformerUrl
+	 * @param bundle
 	 *            the resource representing the transformer
 	 * @return the transformed stream
 	 */
@@ -224,8 +224,7 @@ public class TransformedBundleFile extends BundleFile {
 	 *         <code>null</code> is returned if the directory to extract does
 	 *         not exist or if content extraction is not supported.
 	 * 
-	 * This method is derived from
-	 * {@link ZipBundleFile#extractDirectory(String)}.
+	 * This method is derived from ZipBundleFile#extractDirectory(String).
 	 */
 	protected synchronized File extractDirectory(String dirName) {
 		Enumeration entries = delegate.getEntryPaths(dirName);
