@@ -9,20 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms;
+package org.eclipse.equinox.internal.transforms;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.eclipse.equinox.transforms.LazyInputStream.InputStreamProvider;
+import org.eclipse.equinox.internal.transforms.LazyInputStream.InputStreamProvider;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
-import org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile;
+import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
@@ -30,6 +25,10 @@ import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
+/**
+ * This class is capable of providing transformed versions of entries contained within a base bundle file.
+ * For requests that transform bundle contents into local resources (such as file URLs) the transformed state of the bundle is written to the configuration area.
+ */
 public class TransformedBundleFile extends BundleFile {
 
 	private BundleFile delegate;
@@ -37,9 +36,15 @@ public class TransformedBundleFile extends BundleFile {
 	private TransformerList transformers;
 	private TransformInstanceListData templates;
 
-	public TransformedBundleFile(TransformerList transformers,
-			TransformInstanceListData templates, BaseData data,
-			BundleFile delegate) {
+	/**
+	 * Create a wrapped bundle file.  
+	 * Requests into this file will be compared to the list of known transformers and transformer templates and if there's a match the transformed entity is returned instead of the original.
+	 * @param transformers the list of known transformers
+	 * @param templates the list of known templates
+	 * @param data the original data
+	 * @param delegate the original file
+	 */
+	public TransformedBundleFile(TransformerList transformers, TransformInstanceListData templates, BaseData data, BundleFile delegate) {
 		this.transformers = transformers;
 		this.templates = templates;
 		this.data = data;
@@ -74,8 +79,7 @@ public class TransformedBundleFile extends BundleFile {
 				return original.getInputStream();
 			}
 		});
-		InputStream wrappedStream = getInputStream(stream, data.getBundle(),
-				path);
+		InputStream wrappedStream = getInputStream(stream, data.getBundle(), path);
 		if (wrappedStream == null)
 			return original;
 		return new TransformedBundleEntry(this, original, wrappedStream);
@@ -91,31 +95,24 @@ public class TransformedBundleFile extends BundleFile {
 	 *            the resource representing the transformer
 	 * @return the transformed stream
 	 */
-	protected InputStream getInputStream(InputStream inputStream,
-			Bundle bundle, String path) {
+	protected InputStream getInputStream(InputStream inputStream, Bundle bundle, String path) {
 		String namespace = bundle.getSymbolicName();
 		StreamTransformer[] transformerArray = transformers.getTransformers();
 		for (int i = 0; i < transformerArray.length; i++) {
 			StreamTransformer transformer = transformerArray[i];
-			Object toTest = transformer instanceof ProxyStreamTransformer ? ((ProxyStreamTransformer) transformer)
-					.getTransformer()
-					: transformer;
+			Object toTest = transformer instanceof ProxyStreamTransformer ? ((ProxyStreamTransformer) transformer).getTransformer() : transformer;
 
-			TransformTuple[] transforms = templates.getTransformsFor(toTest
-					.getClass().getName());
+			TransformTuple[] transforms = templates.getTransformsFor(toTest.getClass().getName());
 			if (transforms == null)
 				return null;
 			for (int j = 0; j < transforms.length; j++) {
 				TransformTuple transformTuple = transforms[j];
-				if (match(transformTuple.bundlePattern, namespace)
-						&& match(transformTuple.pathPattern, path)) {
+				if (match(transformTuple.bundlePattern, namespace) && match(transformTuple.pathPattern, path)) {
 					try {
-						return transformer.getInputStream(inputStream,
-								transformTuple.transformerUrl);
+						return transformer.getInputStream(inputStream, transformTuple.transformerUrl);
 					} catch (IOException e) {
-						TransformerHook.log(FrameworkLogEntry.ERROR,
-								"Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
-										+ transformer.getClass().getName(), e);
+						TransformerHook.log(FrameworkLogEntry.ERROR, "Problem obtaining transformed stream from transformer : " //$NON-NLS-1$
+								+ transformer.getClass().getName(), e);
 					}
 				}
 			}
@@ -157,8 +154,7 @@ public class TransformedBundleFile extends BundleFile {
 				if (nested.exists()) {
 					/* the entry is already cached */
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-						Debug
-								.println("File already present: " + nested.getPath()); //$NON-NLS-1$
+						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 					if (nested.isDirectory())
 						// must ensure the complete directory is extracted (bug
 						// 182585)
@@ -170,13 +166,8 @@ public class TransformedBundleFile extends BundleFile {
 					if (original.isDirectory()) {
 						if (!nested.mkdirs()) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-								Debug
-										.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
-							throw new IOException(
-									NLS
-											.bind(
-													AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION,
-													nested.getAbsolutePath()));
+								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
+							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 						}
 						extractDirectory(path);
 					} else {
@@ -191,13 +182,8 @@ public class TransformedBundleFile extends BundleFile {
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-								Debug
-										.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
-							throw new IOException(
-									NLS
-											.bind(
-													AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION,
-													dir.getAbsolutePath()));
+								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
+							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
 						/* copy the entry to the cache */
 						AdaptorUtil.readFile(in, nested);
@@ -246,7 +232,7 @@ public class TransformedBundleFile extends BundleFile {
 
 		while (entries.hasMoreElements()) {
 			String entryPath = (String) entries.nextElement();
-			if (entryPath.startsWith(dirName)) 
+			if (entryPath.startsWith(dirName))
 				getFile(entryPath, false);
 		}
 		return getExtractFile(dirName);

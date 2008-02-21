@@ -9,18 +9,28 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms;
+package org.eclipse.equinox.internal.transforms;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * An input stream that is based off of another stream.  
+ * This other stream is provided as needed by an {@link InputStreamProvider} so that the underlying stream is not eagerly loaded.
+ */
 public class LazyInputStream extends InputStream {
 
 	private InputStreamProvider provider;
 
 	private InputStream original = null;
 
+	/**
+	 * Construct a new lazy stream based off the given provider.
+	 * @param provider the input stream provider.  Must not be <code>null</code>.
+	 */
 	public LazyInputStream(InputStreamProvider provider) {
+		if (provider == null)
+			throw new IllegalArgumentException();
 		this.provider = provider;
 	}
 
@@ -109,7 +119,16 @@ public class LazyInputStream extends InputStream {
 		}
 	}
 
+	/**
+	 * An interface to be implemented by clients that wish to utilize {@link LazyInputStream}s.  
+	 * The implementation of this interface should defer obtaining the desired input stream until absolutely necessary.
+	 */
 	public static interface InputStreamProvider {
+		/**
+		 * Return the input stream.
+		 * @return the input stream
+		 * @throws IOException thrown if there is an issue obtaining the stream
+		 */
 		InputStream getInputStream() throws IOException;
 	}
 }

@@ -9,16 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms.xslt;
+package org.eclipse.equinox.internal.transforms.xslt;
 
 import java.util.Properties;
-
+import org.eclipse.equinox.internal.transforms.xslt.provisional.XSLTStreamTransformer;
 import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+/**
+ * Registers the XSLT transform type.
+ */
 public class Activator implements BundleActivator {
 
 	private ServiceRegistration registration;
@@ -31,7 +32,7 @@ public class Activator implements BundleActivator {
 		Properties properties = new Properties();
 		properties.put("isStreamTransformer", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		Object transformer = new XSLTStreamTransformer(context.getDataFile("entities"), logTracker); //$NON-NLS-1$
+		Object transformer = new XSLTStreamTransformer(logTracker); //$NON-NLS-1$
 		registration = context.registerService(Object.class.getName(), transformer, properties);
 
 	}

@@ -9,19 +9,17 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms;
+package org.eclipse.equinox.internal.transforms;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
+/**
+ * This class is capable of providing a transformed version of an entry contained within a base bundle entity.
+ */
 public class TransformedBundleEntry extends BundleEntry {
 
 	long timestamp;
@@ -29,8 +27,13 @@ public class TransformedBundleEntry extends BundleEntry {
 	private BundleEntry original;
 	private TransformedBundleFile bundleFile;
 
-	public TransformedBundleEntry(TransformedBundleFile bundleFile,
-			BundleEntry original, InputStream wrappedStream) {
+	/**
+	 * Create a wrapped bundle entry.  Calls to obtain the content of this entry will be resolved via the provided input stream rather than the original. 
+	 * @param bundleFile the host bundle file
+	 * @param original the original entry
+	 * @param wrappedStream the override stream
+	 */
+	public TransformedBundleEntry(TransformedBundleFile bundleFile, BundleEntry original, InputStream wrappedStream) {
 		this.stream = wrappedStream;
 		this.bundleFile = bundleFile;
 		this.original = original;
@@ -48,7 +51,7 @@ public class TransformedBundleEntry extends BundleEntry {
 		return null;
 	}
 
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() {
 		return stream;
 	}
 
@@ -60,6 +63,10 @@ public class TransformedBundleEntry extends BundleEntry {
 		return original.getName();
 	}
 
+	/**
+	 * Obtaining the size means inspecting the transformed stream.  
+	 * If this stream does not support marks the stream is drained and a copy is retained for later use.
+	 */
 	public long getSize() {
 		ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream(1024);
 		byte[] buffer = new byte[1024];
@@ -78,9 +85,8 @@ public class TransformedBundleEntry extends BundleEntry {
 				stream = new ByteArrayInputStream(tempBuffer.toByteArray());
 			}
 		} catch (IOException e) {
-			TransformerHook.log(FrameworkLogEntry.ERROR,
-					"Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
-							+ getName(), e);
+			TransformerHook.log(FrameworkLogEntry.ERROR, "Problem calculating size of stream for file.  Stream may now be corrupted : " //$NON-NLS-1$
+					+ getName(), e);
 
 		}
 		return tempBuffer.size();

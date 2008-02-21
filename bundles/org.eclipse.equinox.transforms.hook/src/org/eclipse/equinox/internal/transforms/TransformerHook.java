@@ -9,38 +9,32 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms;
+package org.eclipse.equinox.internal.transforms;
 
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.Properties;
-
-import org.eclipse.osgi.baseadaptor.BaseAdaptor;
-import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.HookConfigurator;
-import org.eclipse.osgi.baseadaptor.HookRegistry;
+import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 
-public class TransformerHook implements BundleFileWrapperFactoryHook,
-		HookConfigurator, AdaptorHook {
+/**
+ * The framework extension that is capable of applying transforms to bundle content.
+ */
+public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfigurator, AdaptorHook {
 	private TransformerList transformers;
 	private TransformInstanceListData templates;
 	private static BaseAdaptor ADAPTOR;
 
-	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content,
-			BaseData data, boolean base) throws IOException {
+	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) throws IOException {
 		if (transformers == null || templates == null)
 			return null;
-		return new TransformedBundleFile(transformers, templates, data,
-				bundleFile);
+		return new TransformedBundleFile(transformers, templates, data, bundleFile);
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {
@@ -49,6 +43,7 @@ public class TransformerHook implements BundleFileWrapperFactoryHook,
 	}
 
 	public void addProperties(Properties properties) {
+		// no properties to add
 	}
 
 	public FrameworkLog createFrameworkLog() {
@@ -59,21 +54,19 @@ public class TransformerHook implements BundleFileWrapperFactoryHook,
 		try {
 			this.transformers = new TransformerList(context);
 		} catch (InvalidSyntaxException e) {
-			throw new BundleException(
-					"Problem registering service tracker: transformers", e);
+			throw new BundleException("Problem registering service tracker: transformers", e); //$NON-NLS-1$
 		}
 		try {
 			this.templates = new TransformInstanceListData(context);
 		} catch (InvalidSyntaxException e) {
 			transformers.close();
 			transformers = null;
-			throw new BundleException(
-					"Problem registering service tracker: templates", e);
+			throw new BundleException("Problem registering service tracker: templates", e); //$NON-NLS-1$
 		}
 
 	}
 
-	public void frameworkStop(BundleContext context) throws BundleException {
+	public void frameworkStop(BundleContext context) {
 		transformers.close();
 		templates.close();
 	}
@@ -83,17 +76,18 @@ public class TransformerHook implements BundleFileWrapperFactoryHook,
 	}
 
 	public void frameworkStopping(BundleContext context) {
+		//nothing to do here
 	}
 
 	public void handleRuntimeError(Throwable error) {
+		//no special handling by this framework extension
 	}
 
 	public void initialize(BaseAdaptor adaptor) {
 		TransformerHook.ADAPTOR = adaptor;
 	}
 
-	public URLConnection mapLocationToURLConnection(String location)
-			throws IOException {
+	public URLConnection mapLocationToURLConnection(String location) {
 		return null;
 	}
 
@@ -107,9 +101,7 @@ public class TransformerHook implements BundleFileWrapperFactoryHook,
 			t.printStackTrace();
 			return;
 		}
-		FrameworkLogEntry entry = new FrameworkLogEntry(
-				FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, severity, 0, msg, 0,
-				t, null);
+		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, severity, 0, msg, 0, t, null);
 		TransformerHook.ADAPTOR.getFrameworkLog().log(entry);
 	}
 }

@@ -10,5 +10,6 @@ Eclipse-LazyStart: true
 Bundle-Localization: bundle
 Require-Bundle: system.bundle,
  org.eclipse.equinox.transforms.util;bundle-version="1.0.0"
-Export-Package: org.eclipse.equinox.transforms.xslt
-Bundle-Activator: org.eclipse.equinox.transforms.xslt.Activator
+Export-Package: org.eclipse.equinox.internal.transforms.xslt;x-internal:=true,
+ org.eclipse.equinox.internal.transforms.xslt.provisional
+Bundle-Activator: org.eclipse.equinox.internal.transforms.xslt.Activator

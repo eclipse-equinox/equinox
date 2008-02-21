@@ -9,30 +9,20 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.transforms;
+package org.eclipse.equinox.internal.transforms;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import java.util.*;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Class that represents a dynamic list of TransformTuples that have been
- * registered against a particular transform type.
+ * Class that represents a dynamic list of TransformTuples that have been registered against a particular transform type.
  */
 public class TransformInstanceListData extends ServiceTracker {
 	/**
-	 * Stale state of the transform list. Set to true whenever one of the
-	 * ServiceTrackerCustomization methods are invoked.
+	 * Stale state of the transform list. Set to true whenever one of the ServiceTrackerCustomization methods are invoked.
 	 */
 	private volatile boolean stale = true;
 
@@ -47,25 +37,16 @@ public class TransformInstanceListData extends ServiceTracker {
 	private List rawTuples = new ArrayList();
 
 	/**
-	 * Map from bundle ID -> boolean representing whether or not a given bundle
-	 * currently has any transforms registered against it.
+	 * Map from bundle ID -> boolean representing whether or not a given bundle currently has any transforms registered against it.
 	 */
 	private Map bundleIdToTransformPresence = new HashMap();
 
 	/**
-	 * Create a new transform list bound to the given context. If new transforms
-	 * are registered against the given context the contents of this list will
-	 * change.
-	 * 
-	 * @param context
-	 *            the bundle context
-	 * 
-	 * @throws InvalidSyntaxException
-	 *             thrown if there's an issue listening for changes to the given
-	 *             transformer type
+	 * Create a new transform list bound to the given context. If new transforms are registered against the given context the contents of this list will change.
+	 * @param context the bundle context
+	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
 	 */
-	public TransformInstanceListData(BundleContext context)
-			throws InvalidSyntaxException {
+	public TransformInstanceListData(BundleContext context) throws InvalidSyntaxException {
 		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
 				+ URL.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
 				+ "=*))"), null); //$NON-NLS-1$
@@ -73,13 +54,10 @@ public class TransformInstanceListData extends ServiceTracker {
 	}
 
 	/**
-	 * Return the transforms currently held by this list. If a change has been
-	 * detected since the last request this list will be rebuilt.
-	 * 
+	 * Return the transforms currently held by this list. If a change has been detected since the last request this list will be rebuilt.
 	 * @return the transforms currently held by this list
 	 */
-	public synchronized TransformTuple[] getTransformsFor(
-			String transformerClass) {
+	public synchronized TransformTuple[] getTransformsFor(String transformerClass) {
 		if (stale)
 			rebuildTransformMap();
 
@@ -87,12 +65,8 @@ public class TransformInstanceListData extends ServiceTracker {
 	}
 
 	/**
-	 * Return whether or not there are any transforms who's bundle pattern
-	 * matches the ID of the provided bundle. Only transforms with a present
-	 * transform handler are considered during the invocation of this method.
-	 * 
-	 * @param bundle
-	 *            the bundle to test
+	 * Return whether or not there are any transforms who's bundle pattern matches the ID of the provided bundle. Only transforms with a present transform handler are considered during the invocation of this method.
+	 * @param bundle the bundle to test
 	 * @return the presence of associated transforms.
 	 */
 	public synchronized boolean hasTransformsFor(Bundle bundle) {
@@ -100,8 +74,7 @@ public class TransformInstanceListData extends ServiceTracker {
 			rebuildTransformMap();
 
 		String bundleName = bundle.getSymbolicName();
-		Boolean hasTransformsFor = (Boolean) bundleIdToTransformPresence
-				.get(bundleName);
+		Boolean hasTransformsFor = (Boolean) bundleIdToTransformPresence.get(bundleName);
 
 		if (hasTransformsFor == null) {
 			hasTransformsFor = Boolean.FALSE;
@@ -118,6 +91,9 @@ public class TransformInstanceListData extends ServiceTracker {
 		return hasTransformsFor.booleanValue();
 	}
 
+	/**
+	 * Consults the bundle context for services of the transformer type type and builds the internal cache.
+	 */
 	private void rebuildTransformMap() {
 		transformerToTuple.clear();
 		rawTuples.clear();
@@ -130,22 +106,17 @@ public class TransformInstanceListData extends ServiceTracker {
 
 		for (int i = 0; i < serviceReferences.length; i++) {
 			ServiceReference serviceReference = serviceReferences[i];
-			String type = serviceReference.getProperty(
-					TransformTuple.TRANSFORMER_TYPE).toString();
+			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
 
 			URL url = (URL) getService(serviceReference);
 			TransformTuple[] transforms;
 			try {
-				transforms = CSVParser.parse(context, url);
-				TransformTuple[] existing = (TransformTuple[]) transformerToTuple
-						.get(type);
+				transforms = CSVParser.parse(url);
+				TransformTuple[] existing = (TransformTuple[]) transformerToTuple.get(type);
 				if (existing != null) {
-					TransformTuple[] newTransforms = new TransformTuple[existing.length
-							+ transforms.length];
-					System.arraycopy(existing, 0, newTransforms, 0,
-							existing.length);
-					System.arraycopy(transforms, 0, newTransforms,
-							existing.length, transforms.length);
+					TransformTuple[] newTransforms = new TransformTuple[existing.length + transforms.length];
+					System.arraycopy(existing, 0, newTransforms, 0, existing.length);
+					System.arraycopy(transforms, 0, newTransforms, existing.length, transforms.length);
 					transformerToTuple.put(type, newTransforms);
 				} else
 					transformerToTuple.put(type, transforms);
@@ -160,11 +131,6 @@ public class TransformInstanceListData extends ServiceTracker {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTracker#addingService(org.osgi.framework.ServiceReference)
-	 */
 	public Object addingService(ServiceReference reference) {
 		try {
 			return super.addingService(reference);
@@ -173,26 +139,13 @@ public class TransformInstanceListData extends ServiceTracker {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTracker#modifiedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
 	public void modifiedService(ServiceReference reference, Object service) {
 		super.modifiedService(reference, service);
 		stale = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
 	public void removedService(ServiceReference reference, Object service) {
 		super.removedService(reference, service);
 		stale = true;
 	}
-
 }
