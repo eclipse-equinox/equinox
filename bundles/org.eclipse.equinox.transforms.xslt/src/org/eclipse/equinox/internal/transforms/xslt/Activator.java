@@ -32,7 +32,7 @@ public class Activator implements BundleActivator {
 		Properties properties = new Properties();
 		properties.put("isStreamTransformer", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		Object transformer = new XSLTStreamTransformer(logTracker); //$NON-NLS-1$
+		Object transformer = new XSLTStreamTransformer(logTracker);
 		registration = context.registerService(Object.class.getName(), transformer, properties);
 
 	}

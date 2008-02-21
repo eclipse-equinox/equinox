@@ -31,6 +31,9 @@ public class TransformerHook implements BundleFileWrapperFactoryHook, HookConfig
 	private TransformInstanceListData templates;
 	private static BaseAdaptor ADAPTOR;
 
+	/**
+	 * @throws IOException  
+	 */
 	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) throws IOException {
 		if (transformers == null || templates == null)
 			return null;
