@@ -10,9 +10,17 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.service.security;
 
+import java.io.*;
 import java.security.cert.CertificateException;
+import java.util.Properties;
+import org.eclipse.core.runtime.adaptor.LocationManager;
+import org.eclipse.osgi.baseadaptor.BaseData;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.DevClassPathHelper;
+import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
+import org.eclipse.osgi.internal.signedcontent.SignedStorageHook;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.service.security.*;
 import org.eclipse.osgi.signedcontent.SignedContent;
@@ -23,16 +31,12 @@ import org.osgi.framework.BundleContext;
 public class DefaultAuthorizationEngine extends AuthorizationEngine {
 
 	private final State systemState;
+	private final BundleContext bundleContext;
 
-	public DefaultAuthorizationEngine(BundleContext context, State systemState) {
-		super(context);
-		this.systemState = systemState;
-	}
-
-	private static final int ENFORCE_NONE = 0x0000;
-	private static final int ENFORCE_SIGNED = 0x0001;
-	private static final int ENFORCE_TRUSTED = 0x0002;
-	private static final int ENFORCE_VALIDITY = 0x0004;
+	public static final int ENFORCE_NONE = 0x0000;
+	public static final int ENFORCE_SIGNED = 0x0001;
+	public static final int ENFORCE_TRUSTED = 0x0002;
+	public static final int ENFORCE_VALIDITY = 0x0004;
 
 	private static final String STR_ENFORCE_NONE = "any"; //$NON-NLS-1$
 	private static final String STR_ENFORCE_SIGNED = "signed"; //$NON-NLS-1$
@@ -40,19 +44,46 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 	private static final String STR_ENFORCE_VALIDITY = "validity"; //$NON-NLS-1$
 
 	private static final String POLICY_NAME = "org.eclipse.equinox.security"; //$NON-NLS-1$
-	private static final String POLICY = "osgi.signedcontent.authorization.engine.policy"; //$NON-NLS-1$
+	private static final String POLICY_PROP = "osgi.signedcontent.authorization.engine.policy"; //$NON-NLS-1$
+	private static final String FILE_LOAD_POLICY = ".loadpolicy"; //$NON-NLS-1$
 	private static int enforceFlags = 0;
 
+	private static final File policyFile;
 	static {
-		String policy = FrameworkProperties.getProperty(POLICY);
-		if (policy == null || STR_ENFORCE_NONE.equals(policy))
-			enforceFlags = ENFORCE_NONE;
-		else if (STR_ENFORCE_TRUSTED.equals(policy))
-			enforceFlags = ENFORCE_TRUSTED | ENFORCE_SIGNED;
-		else if (STR_ENFORCE_SIGNED.equals(policy))
-			enforceFlags = ENFORCE_SIGNED;
-		else if (STR_ENFORCE_VALIDITY.equals(policy))
-			enforceFlags = ENFORCE_TRUSTED | ENFORCE_SIGNED | ENFORCE_VALIDITY;
+		File osgiFile = LocationManager.getOSGiConfigurationDir();
+		policyFile = new File(osgiFile.getPath() + File.separatorChar + FILE_LOAD_POLICY);
+
+		Properties properties = null;
+		// load the policy file, if not exist, create it and load it
+		if (policyFile.exists()) {
+			try {
+				properties = new Properties();
+				properties.load(new FileInputStream(policyFile));
+			} catch (IOException e) {
+				SignedBundleHook.log("Error loading policy file", FrameworkLogEntry.ERROR, e); //$NON-NLS-1$
+			}
+		}
+
+		if (properties != null && properties.getProperty(POLICY_PROP) != null) {
+			enforceFlags = Integer.parseInt(properties.getProperty(POLICY_PROP));
+		} else {
+			String policy = FrameworkProperties.getProperty(POLICY_PROP);
+			if (policy == null || STR_ENFORCE_NONE.equals(policy))
+				enforceFlags = ENFORCE_NONE;
+			else if (STR_ENFORCE_TRUSTED.equals(policy))
+				enforceFlags = ENFORCE_TRUSTED | ENFORCE_SIGNED;
+			else if (STR_ENFORCE_SIGNED.equals(policy))
+				enforceFlags = ENFORCE_SIGNED;
+			else if (STR_ENFORCE_VALIDITY.equals(policy))
+				enforceFlags = ENFORCE_TRUSTED | ENFORCE_SIGNED | ENFORCE_VALIDITY;
+		}
+
+	}
+
+	public DefaultAuthorizationEngine(BundleContext context, State systemState) {
+		super(context);
+		this.bundleContext = context;
+		this.systemState = systemState;
 	}
 
 	protected AuthorizationEvent doAuthorize(SignedContent content, Object context) {
@@ -104,4 +135,32 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 		}
 		return AuthorizationStatus.OK;
 	}
+
+	public void processInstalledBundles() {
+		Bundle[] bundles = bundleContext.getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			BaseData baseData = (BaseData) ((AbstractBundle) bundles[i]).getBundleData();
+			SignedStorageHook hook = (SignedStorageHook) baseData.getStorageHook(SignedStorageHook.KEY);
+			SignedContent signedContent = hook != null ? hook.getSignedContent() : null;
+			authorize(signedContent, bundles[i]);
+		}
+	}
+
+	public void setLoadPolicy(int policy) {
+		if ((policy | ENFORCE_SIGNED | ENFORCE_TRUSTED | ENFORCE_VALIDITY) != (ENFORCE_SIGNED | ENFORCE_TRUSTED | ENFORCE_VALIDITY))
+			throw new IllegalArgumentException("Invalid policy: " + policy); //$NON-NLS-1$
+		enforceFlags = policy;
+		Properties properties = new Properties();
+		properties.setProperty(POLICY_PROP, Integer.toString(policy));
+		try {
+			properties.store(new FileOutputStream(policyFile), null);
+		} catch (IOException e) {
+			SignedBundleHook.log("Error saving load policy file", FrameworkLogEntry.ERROR, e); //$NON-NLS-1$
+		}
+	}
+
+	public int getLoadPolicy() {
+		return enforceFlags;
+	}
+
 }
