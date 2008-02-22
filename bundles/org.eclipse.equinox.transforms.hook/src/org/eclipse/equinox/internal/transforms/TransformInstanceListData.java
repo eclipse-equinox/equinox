@@ -22,6 +22,10 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class TransformInstanceListData extends ServiceTracker {
 	/**
+	 * Used when there are no transform data types
+	 */
+	private static final String[] EMPTY_TYPES = new String[0];
+	/**
 	 * Stale state of the transform list. Set to true whenever one of the ServiceTrackerCustomization methods are invoked.
 	 */
 	private volatile boolean stale = true;
@@ -61,6 +65,8 @@ public class TransformInstanceListData extends ServiceTracker {
 		if (stale)
 			rebuildTransformMap();
 
+		if (transformerToTuple.size() == 0)
+			return EMPTY_TYPES;
 		return (String[]) transformerToTuple.keySet().toArray(new String[transformerToTuple.size()]);
 	}
 

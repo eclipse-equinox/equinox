@@ -44,11 +44,12 @@ public class TransformerList extends ServiceTracker {
 	}
 
 	/**
-	 * Return the transformers being monitored by this list.  
+	 * Return the transformer of the given type being monitored by this list.  
 	 * If the list is stale it will first be rebuilt.
-	 * @return the transformers.
+	 * @param type the type of transformer
+	 * @return the transformer or null if no transformer of the given type is available.
 	 */
-	public synchronized StreamTransformer getTransformers(String type) {
+	public synchronized StreamTransformer getTransformer(String type) {
 		if (stale) {
 			rebuildTransformersMap();
 		}

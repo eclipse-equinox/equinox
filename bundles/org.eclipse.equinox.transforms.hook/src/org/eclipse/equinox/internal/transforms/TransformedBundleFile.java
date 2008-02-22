@@ -102,7 +102,7 @@ public class TransformedBundleFile extends BundleFile {
 		if (transformTypes.length == 0)
 			return null;
 		for (int i = 0; i < transformTypes.length; i++) {
-			StreamTransformer transformer = transformers.getTransformers(transformTypes[i]);
+			StreamTransformer transformer = transformers.getTransformer(transformTypes[i]);
 			if (transformer == null)
 				continue;
 			TransformTuple[] transformTuples = templates.getTransformsFor(transformTypes[i]);
