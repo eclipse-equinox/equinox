@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2006 IBM Corporation and others.
+ * Copyright (c) 2001, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,16 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.useradmin;
+package org.eclipse.equinox.internal.useradmin;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import java.util.*;
+import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.PreferencesService;
@@ -174,7 +168,7 @@ public class UserAdmin implements org.osgi.service.useradmin.UserAdmin {
 			return (true);
 		}
 		synchronized (this) {
-			Role role = (org.eclipse.equinox.useradmin.Role) getRole(name);
+			Role role = (org.eclipse.equinox.internal.useradmin.Role) getRole(name);
 			if (role != null) {
 				try {
 					userAdminStore.removeRole(role);

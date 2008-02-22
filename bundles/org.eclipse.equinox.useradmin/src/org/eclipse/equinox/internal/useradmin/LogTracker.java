@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1998, 2007 IBM Corporation and others.
+ * Copyright (c) 1998, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,12 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.useradmin;
+package org.eclipse.equinox.internal.useradmin;
 
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -106,7 +105,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 						break;
 					}
 					case LOG_INFO : {
-						out.print(LogTrackerMsg.Info); 
+						out.print(LogTrackerMsg.Info);
 
 						break;
 					}
@@ -122,7 +121,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 					}
 					default : {
 						out.print("["); //$NON-NLS-1$
-						out.print(LogTrackerMsg.Unknown_Log_level);         
+						out.print(LogTrackerMsg.Unknown_Log_level);
 						out.print("]: "); //$NON-NLS-1$
 
 						break;
@@ -141,20 +140,20 @@ public class LogTracker extends ServiceTracker implements LogService {
 			}
 		}
 	}
-	
+
 	// from EclipseLog to avoid using DateFormat -- see bug 149892#c10
 	private String getDate(Date date) {
-			Calendar c = Calendar.getInstance();
-			c.setTime(date);
-			StringBuffer sb = new StringBuffer();
-			appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
-			appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
-			appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
-			appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
-			appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
-			return sb.toString();
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		StringBuffer sb = new StringBuffer();
+		appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
+		appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
+		appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
+		appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
+		appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
+		return sb.toString();
 	}
 
 	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {

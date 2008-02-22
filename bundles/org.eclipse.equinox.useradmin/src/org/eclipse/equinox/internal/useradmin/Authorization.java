@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2006 IBM Corporation and others.
+ * Copyright (c) 2001, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.useradmin;
+package org.eclipse.equinox.internal.useradmin;
 
 import java.util.Vector;
 
@@ -102,7 +102,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 	public boolean hasRole(String name_) {
 		useradmin.checkAlive();
 		synchronized (useradmin) {
-			Role checkRole = (org.eclipse.equinox.useradmin.Role) useradmin.getRole(name_);
+			Role checkRole = (org.eclipse.equinox.internal.useradmin.Role) useradmin.getRole(name_);
 			if (checkRole == null) {
 				return (false);
 			}
@@ -130,8 +130,7 @@ public class Authorization implements org.osgi.service.useradmin.Authorization {
 				if (role.isImpliedBy(user, new Vector())) {
 					String roleName = role.getName();
 					//exclude user.anyone from the list
-					if (!roleName.equals(Role.anyoneString))
-					{
+					if (!roleName.equals(Role.anyoneString)) {
 						result.addElement(roleName);
 					}
 				}

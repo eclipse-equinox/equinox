@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2001, 2006 IBM Corporation and others.
+ * Copyright (c) 2001, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.useradmin;
+package org.eclipse.equinox.internal.useradmin;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -125,10 +125,10 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	// When we are loading from storage this method is called directly.  We
 	// do not want to write to storage when we are loading form storage.
 	protected boolean addMember(org.osgi.service.useradmin.Role role, boolean store) {
-		((org.eclipse.equinox.useradmin.Role) role).addImpliedRole(this);
+		((org.eclipse.equinox.internal.useradmin.Role) role).addImpliedRole(this);
 		if (store) {
 			try {
-				useradmin.userAdminStore.addMember(this, (org.eclipse.equinox.useradmin.Role) role);
+				useradmin.userAdminStore.addMember(this, (org.eclipse.equinox.internal.useradmin.Role) role);
 			} catch (BackingStoreException ex) {
 				return (false);
 			}
@@ -164,10 +164,10 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 	}
 
 	protected boolean addRequiredMember(org.osgi.service.useradmin.Role role, boolean store) {
-		((org.eclipse.equinox.useradmin.Role) role).addImpliedRole(this);
+		((org.eclipse.equinox.internal.useradmin.Role) role).addImpliedRole(this);
 		if (store) {
 			try {
-				useradmin.userAdminStore.addRequiredMember(this, (org.eclipse.equinox.useradmin.Role) role);
+				useradmin.userAdminStore.addRequiredMember(this, (org.eclipse.equinox.internal.useradmin.Role) role);
 			} catch (BackingStoreException ex) {
 				return (false);
 			}
@@ -195,14 +195,14 @@ public class Group extends User implements org.osgi.service.useradmin.Group {
 		}
 		synchronized (useradmin) {
 			try {
-				useradmin.userAdminStore.removeMember(this, (org.eclipse.equinox.useradmin.Role) role);
+				useradmin.userAdminStore.removeMember(this, (org.eclipse.equinox.internal.useradmin.Role) role);
 			} catch (BackingStoreException ex) {
 				return (false);
 			}
 			//The role keeps track of which groups it is a member of so it can remove itself from
 			//the group if it is deleted.  In this case, this group is being removed from the role's
 			//list.
-			((org.eclipse.equinox.useradmin.Role) role).removeImpliedRole(this);
+			((org.eclipse.equinox.internal.useradmin.Role) role).removeImpliedRole(this);
 
 			// We don't know if the Role to be removed is a basic orrequired member, or both.  We
 			// simply try to remove it from both.
