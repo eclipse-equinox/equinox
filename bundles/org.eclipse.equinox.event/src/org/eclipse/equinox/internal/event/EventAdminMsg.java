@@ -9,12 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.event;
+package org.eclipse.equinox.internal.event;
 
 import org.eclipse.osgi.util.NLS;
 
 public class EventAdminMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.event.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.event.ExternalMessages"; //$NON-NLS-1$
 
 	public static String EVENT_ASYNC_THREAD_NAME;
 	public static String EVENT_NULL_EVENT;

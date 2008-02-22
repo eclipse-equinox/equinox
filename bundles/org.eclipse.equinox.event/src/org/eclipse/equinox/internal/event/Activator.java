@@ -9,9 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.event;
+package org.eclipse.equinox.internal.event;
 
-import org.eclipse.equinox.event.mapper.EventRedeliverer;
+import org.eclipse.equinox.internal.event.mapper.EventRedeliverer;
 import org.osgi.framework.*;
 
 public class Activator implements BundleActivator {

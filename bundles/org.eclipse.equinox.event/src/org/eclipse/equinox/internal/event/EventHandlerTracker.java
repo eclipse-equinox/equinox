@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.event;
+package org.eclipse.equinox.internal.event;
 
 import java.security.Permission;
 import java.util.*;

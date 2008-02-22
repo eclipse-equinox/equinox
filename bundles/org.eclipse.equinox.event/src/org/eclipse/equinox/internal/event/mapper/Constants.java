@@ -8,10 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.event.mapper;
+package org.eclipse.equinox.internal.event.mapper;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface Constants {
 	// constants for Event common properties; event specific properties are

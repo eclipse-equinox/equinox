@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.event.mapper;
+package org.eclipse.equinox.internal.event.mapper;
 
 import java.util.Hashtable;
 import org.osgi.framework.Bundle;
@@ -18,7 +18,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FrameworkEventAdapter extends EventAdapter {
 	// constants for Event topic substring
@@ -35,7 +35,7 @@ public class FrameworkEventAdapter extends EventAdapter {
 	}
 
 	/**
-	 * @see org.eclipse.equinox.event.mapper.EventAdapter#convert()
+	 * @see org.eclipse.equinox.internal.event.mapper.EventAdapter#convert()
 	 */
 	public Event convert() {
 		String typename = null;

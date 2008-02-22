@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.event.mapper;
+package org.eclipse.equinox.internal.event.mapper;
 
 import org.osgi.framework.*;
 import org.osgi.service.event.EventAdmin;
@@ -18,7 +18,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Main class for redeliver special events like FrameworkEvents via EventAdmin.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener, ServiceListener {
 	private ServiceTracker eventAdminTracker;
