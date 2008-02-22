@@ -22,7 +22,7 @@ public class TransformTuple {
 	/**
 	 * Constant used when registering transform tuples to identify the type of transformer they should be assigned to.
 	 */
-	public static final String TRANSFORMER_TYPE = "transformerType"; //$NON-NLS-1$
+	public static final String TRANSFORMER_TYPE = "equinox.transformerType"; //$NON-NLS-1$
 	public Pattern bundlePattern;
 	public Pattern pathPattern;
 	public URL transformerUrl;

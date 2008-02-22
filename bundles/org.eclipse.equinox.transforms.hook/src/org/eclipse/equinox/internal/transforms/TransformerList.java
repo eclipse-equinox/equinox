@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.internal.transforms;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -29,7 +29,7 @@ public class TransformerList extends ServiceTracker {
 	/**
 	 * Local cache of transformers.
 	 */
-	private StreamTransformer[] transformers;
+	private HashMap transformers = new HashMap();
 
 	/**
 	 * Create a new instance of this list.
@@ -37,8 +37,9 @@ public class TransformerList extends ServiceTracker {
 	 * @throws InvalidSyntaxException thrown if there's an issue listening for changes to the given transformer type
 	 */
 	public TransformerList(BundleContext context) throws InvalidSyntaxException {
-		super(context, context.createFilter("(objectClass=" //$NON-NLS-1$
-				+ Object.class.getName() + ')'), null);
+		super(context, context.createFilter("(&(objectClass=" //$NON-NLS-1$
+				+ Object.class.getName() + ")(" + TransformTuple.TRANSFORMER_TYPE //$NON-NLS-1$
+				+ "=*))"), null); //$NON-NLS-1$
 		open();
 	}
 
@@ -47,42 +48,50 @@ public class TransformerList extends ServiceTracker {
 	 * If the list is stale it will first be rebuilt.
 	 * @return the transformers.
 	 */
-	public synchronized StreamTransformer[] getTransformers() {
+	public synchronized StreamTransformer getTransformers(String type) {
 		if (stale) {
-			rebuildTransformerArray();
+			rebuildTransformersMap();
 		}
-		return transformers;
+		return (StreamTransformer) transformers.get(type);
+	}
+
+	public synchronized boolean hasTransformers() {
+		if (stale) {
+			rebuildTransformersMap();
+		}
+		return transformers.size() > 0;
 	}
 
 	/**
 	 * Consults the bundle context for services of the transformer type and builds the internal cache.
 	 */
-	private void rebuildTransformerArray() {
-		Object[] services = getServices();
+	private void rebuildTransformersMap() {
+		transformers.clear();
+		ServiceReference[] serviceReferences = getServiceReferences();
 		stale = false;
-		if (services == null) {
-			transformers = new StreamTransformer[0];
-		} else {
-			ArrayList transformerList = new ArrayList(services.length);
-			for (int i = 0; i < services.length; i++) {
-				Object object = services[i];
-				if (object instanceof StreamTransformer)
-					transformerList.add(object);
-				else {
-					ProxyStreamTransformer transformer;
-					try {
-						transformer = new ProxyStreamTransformer(object);
-						transformerList.add(transformer);
-					} catch (SecurityException e) {
-						TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
-					} catch (NoSuchMethodException e) {
-						TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
-					}
+		if (serviceReferences == null)
+			return;
+
+		for (int i = 0; i < serviceReferences.length; i++) {
+			ServiceReference serviceReference = serviceReferences[i];
+			String type = serviceReference.getProperty(TransformTuple.TRANSFORMER_TYPE).toString();
+			if (type == null || transformers.get(type) != null)
+				continue;
+			Object object = getService(serviceReference);
+			if (object instanceof StreamTransformer)
+				transformers.put(type, object);
+			else {
+				ProxyStreamTransformer transformer;
+				try {
+					transformer = new ProxyStreamTransformer(object);
+					transformers.put(type, transformer);
+				} catch (SecurityException e) {
+					TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
+				} catch (NoSuchMethodException e) {
+					TransformerHook.log(FrameworkLogEntry.ERROR, "Problem creating transformer", e); //$NON-NLS-1$
 				}
 			}
-			this.transformers = (StreamTransformer[]) transformerList.toArray(new StreamTransformer[transformerList.size()]);
 		}
-
 	}
 
 	public Object addingService(ServiceReference reference) {

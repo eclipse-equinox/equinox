@@ -54,14 +54,25 @@ public class TransformInstanceListData extends ServiceTracker {
 	}
 
 	/**
-	 * Return the transforms currently held by this list. If a change has been detected since the last request this list will be rebuilt.
-	 * @return the transforms currently held by this list
+	 * Return the transforms types currently held by this list. If a change has been detected since the last request this list will be rebuilt.
+	 * @return the transforms types currently held by this list
 	 */
-	public synchronized TransformTuple[] getTransformsFor(String transformerClass) {
+	public synchronized String[] getTransformTypes() {
 		if (stale)
 			rebuildTransformMap();
 
-		return (TransformTuple[]) transformerToTuple.get(transformerClass);
+		return (String[]) transformerToTuple.keySet().toArray(new String[transformerToTuple.size()]);
+	}
+
+	/**
+	 * Return the transforms of a particular type currently held by this list. If a change has been detected since the last request this list will be rebuilt.
+	 * @return the transforms currently held by this list
+	 */
+	public synchronized TransformTuple[] getTransformsFor(String type) {
+		if (stale)
+			rebuildTransformMap();
+
+		return (TransformTuple[]) transformerToTuple.get(type);
 	}
 
 	/**

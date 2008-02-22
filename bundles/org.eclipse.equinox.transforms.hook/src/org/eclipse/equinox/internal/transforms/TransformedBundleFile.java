@@ -97,16 +97,19 @@ public class TransformedBundleFile extends BundleFile {
 	 */
 	protected InputStream getInputStream(InputStream inputStream, Bundle bundle, String path) {
 		String namespace = bundle.getSymbolicName();
-		StreamTransformer[] transformerArray = transformers.getTransformers();
-		for (int i = 0; i < transformerArray.length; i++) {
-			StreamTransformer transformer = transformerArray[i];
-			Object toTest = transformer instanceof ProxyStreamTransformer ? ((ProxyStreamTransformer) transformer).getTransformer() : transformer;
 
-			TransformTuple[] transforms = templates.getTransformsFor(toTest.getClass().getName());
-			if (transforms == null)
-				return null;
-			for (int j = 0; j < transforms.length; j++) {
-				TransformTuple transformTuple = transforms[j];
+		String[] transformTypes = templates.getTransformTypes();
+		if (transformTypes.length == 0)
+			return null;
+		for (int i = 0; i < transformTypes.length; i++) {
+			StreamTransformer transformer = transformers.getTransformers(transformTypes[i]);
+			if (transformer == null)
+				continue;
+			TransformTuple[] transformTuples = templates.getTransformsFor(transformTypes[i]);
+			if (transformTuples == null)
+				continue;
+			for (int j = 0; j < transformTuples.length; j++) {
+				TransformTuple transformTuple = transformTuples[j];
 				if (match(transformTuple.bundlePattern, namespace) && match(transformTuple.pathPattern, path)) {
 					try {
 						return transformer.getInputStream(inputStream, transformTuple.transformerUrl);
@@ -116,8 +119,8 @@ public class TransformedBundleFile extends BundleFile {
 					}
 				}
 			}
-
 		}
+
 		return null;
 	}
 
@@ -210,7 +213,7 @@ public class TransformedBundleFile extends BundleFile {
 	 * a transform associated with it.
 	 */
 	private boolean hasTransforms(String path) {
-		if (transformers.getTransformers().length == 0)
+		if (!transformers.hasTransformers())
 			return false;
 		return templates.hasTransformsFor(data.getBundle());
 	}

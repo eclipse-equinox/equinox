@@ -12,7 +12,6 @@
 package org.eclipse.equinox.internal.transforms.xslt;
 
 import java.util.Properties;
-import org.eclipse.equinox.internal.transforms.xslt.provisional.XSLTStreamTransformer;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -30,7 +29,7 @@ public class Activator implements BundleActivator {
 		logTracker.open();
 
 		Properties properties = new Properties();
-		properties.put("isStreamTransformer", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		properties.put("equinox.transformerType", "xslt"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Object transformer = new XSLTStreamTransformer(logTracker);
 		registration = context.registerService(Object.class.getName(), transformer, properties);

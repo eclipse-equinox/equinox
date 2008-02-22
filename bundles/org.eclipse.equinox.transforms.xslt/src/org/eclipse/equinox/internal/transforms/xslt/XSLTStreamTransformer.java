@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.transforms.xslt.provisional;
+package org.eclipse.equinox.internal.transforms.xslt;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
@@ -19,7 +19,7 @@ import java.util.Map;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
-import org.eclipse.equinox.transforms.Pipe;
+import org.eclipse.equinox.internal.transforms.Pipe;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.FrameworkEvent;
