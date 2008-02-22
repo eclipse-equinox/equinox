@@ -19,6 +19,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * An authorization engine is used to grant authorization to {@link SignedContent}.
  * For example, an engine could determine if <code>SignedContent</code> is authorized
  * to enable code from a signed bundle.
+ * @since 3.4
  */
 public abstract class AuthorizationEngine {
 
