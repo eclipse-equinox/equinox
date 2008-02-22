@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,75 +32,94 @@ import org.osgi.framework.*;
  * bundle wants to keep its service registered, it should keep the
  * ServiceRegistration object referenced.
  */
-//TODO That's kind of big
 public class ServiceRegistrationImpl implements ServiceRegistration {
 	/** Reference to this registration. */
-	protected ServiceReferenceImpl reference;
+	/* @GuardedBy("registrationLock") */
+	private ServiceReferenceImpl reference;
 
 	/** Internal framework object. */
-	protected Framework framework;
+	final Framework framework;
 
 	/** context which registered this service. */
-	protected BundleContextImpl context;
+	final BundleContextImpl context;
 
 	/** bundle which registered this service. */
-	protected AbstractBundle bundle;
+	final AbstractBundle bundle;
 
 	/** list of contexts using the service.
-	 * Access to this should be protected by the registrationLock */
-	protected ArrayList contextsUsing;
+	/* @GuardedBy("registrationLock") */
+	private ArrayList contextsUsing;
 
 	/** service classes for this registration. */
-	protected String[] clazzes;
+	final String[] clazzes;
 
 	/** service object for this registration. */
-	protected Object service;
+	final Object service;
 
 	/** properties for this registration. */
-	protected Properties properties;
+	/* @GuardedBy("registrationLock") */
+	private Properties properties;
 
 	/** service id. */
-	protected long serviceid;
+	/* @GuardedBy("registrationLock") */
+	private long serviceid;
 
 	/** service ranking. */
-	protected int serviceranking;
+	/* @GuardedBy("registrationLock") */
+	private int serviceranking;
 
 	/* internal object to use for synchronization */
-	protected Object registrationLock = new Object();
+	private final Object registrationLock = new Object();
 
 	/** The registration state */
-	protected int state = REGISTERED;
-	public static final int REGISTERED = 0x00;
-	public static final int UNREGISTERING = 0x01;
-	public static final int UNREGISTERED = 0x02;
+	/* @GuardedBy("registrationLock") */
+	private int state = REGISTERED;
+	private static final int REGISTERED = 0x00;
+	private static final int UNREGISTERING = 0x01;
+	private static final int UNREGISTERED = 0x02;
 
 	/**
 	 * Construct a ServiceRegistration and register the service
 	 * in the framework's service registry.
 	 *
 	 */
-	protected ServiceRegistrationImpl(BundleContextImpl context, String[] clazzes, Object service, Dictionary properties) {
+	protected ServiceRegistrationImpl(BundleContextImpl context, String[] clazzes, Object service) {
 		this.context = context;
 		this.bundle = context.bundle;
 		this.framework = context.framework;
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service;
-		this.contextsUsing = null;
-		this.reference = new ServiceReferenceImpl(this);
+		synchronized (registrationLock) {
+			this.contextsUsing = null;
+			/* We leak this from the constructor here, but it is ok
+			 * because the ServiceReferenceImpl constructor only
+			 * stores the value in a final field without
+			 * otherwise using it.
+			 */
+			this.reference = new ServiceReferenceImpl(this);
+		}
+	}
 
+	/**
+	 * Call after constructing this object to complete the registration.
+	 */
+	void register(Dictionary props) {
+		final ServiceReference ref;
 		synchronized (framework.serviceRegistry) {
-			serviceid = framework.getNextServiceId(); /* must be set before calling createProperties. */
-			this.properties = createProperties(properties); /* must be valid after unregister is called. */
-
+			context.checkValid();
+			synchronized (registrationLock) {
+				ref = reference; /* used to publish event outside sync */
+				serviceid = framework.getNextServiceId(); /* must be set before calling createProperties. */
+				this.properties = createProperties(props); /* must be valid after unregister is called. */
+			}
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 				Debug.println("registerService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-
 			framework.serviceRegistry.publishService(context, this);
 		}
 
 		/* must not hold the registrations lock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.REGISTERED, reference);
+		framework.publishServiceEvent(ServiceEvent.REGISTERED, ref);
 	}
 
 	/**
@@ -134,35 +153,36 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * @see BundleContextImpl#ungetService
 	 */
 	public void unregister() {
-		synchronized (registrationLock) {
-			if (state != REGISTERED) /* in the process of unregisterING */
-			{
-				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
-			}
+		final ServiceReference ref;
+		synchronized (framework.serviceRegistry) {
+			synchronized (registrationLock) {
+				if (state != REGISTERED) /* in the process of unregisterING */
+				{
+					throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
+				}
 
-			/* remove this object from the service registry */
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
+				/* remove this object from the service registry */
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println("unregisterService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
 
-			synchronized (framework.serviceRegistry) {
 				framework.serviceRegistry.unpublishService(context, this);
-			}
 
-			state = UNREGISTERING; /* mark unregisterING */
+				state = UNREGISTERING; /* mark unregisterING */
+				ref = reference; /* used to publish event outside sync */
+			}
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.UNREGISTERING, reference);
-
-		/* we have published the ServiceEvent, now mark the service fully unregistered */
-		service = null;
-		state = UNREGISTERED;
+		framework.publishServiceEvent(ServiceEvent.UNREGISTERING, ref);
 
 		int size = 0;
 		BundleContextImpl[] users = null;
 
 		synchronized (registrationLock) {
+			/* we have published the ServiceEvent, now mark the service fully unregistered */
+			state = UNREGISTERED;
+
 			if (contextsUsing != null) {
 				size = contextsUsing.size();
 
@@ -180,14 +200,13 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			releaseService(users[i]);
 		}
 
-		contextsUsing = null;
+		synchronized (registrationLock) {
+			contextsUsing = null;
 
-		reference = null; /* mark registration dead */
-		context = null;
+			reference = null; /* mark registration dead */
+		}
 
-		/* These fields must be valid after unregister is called:
-		 *   properties
-		 */
+		/* The properties field must remain valid after unregister completes. */
 	}
 
 	/**
@@ -201,14 +220,16 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	public org.osgi.framework.ServiceReference getReference() {
 		/* use reference instead of unregistered so that ServiceFactorys, called
 		 * by releaseService after the registration is unregistered, can
-		 * get the ServiceReference. Note this technically may voilate the spec
+		 * get the ServiceReference. Note this technically may violate the spec
 		 * but makes more sense.
 		 */
-		if (reference == null) {
-			throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
-		}
+		synchronized (registrationLock) {
+			if (reference == null) {
+				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
+			}
 
-		return (reference);
+			return reference;
+		}
 	}
 
 	/**
@@ -234,17 +255,19 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * parameter contains case variants of the same key name.
 	 */
 	public void setProperties(Dictionary props) {
+		final ServiceReference ref;
 		synchronized (registrationLock) {
 			if (state != REGISTERED) /* in the process of unregistering */
 			{
 				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 			}
 
+			ref = reference; /* used to publish event outside sync */
 			this.properties = createProperties(props);
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.MODIFIED, reference);
+		framework.publishServiceEvent(ServiceEvent.MODIFIED, ref);
 	}
 
 	/**
@@ -254,7 +277,8 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * @param props The properties for this service.
 	 * @return A Properties object for this ServiceRegistration.
 	 */
-	protected Properties createProperties(Dictionary props) {
+	/* @GuardedBy("registrationLock") */
+	private Properties createProperties(Dictionary props) {
 		Properties properties = new Properties(props);
 
 		properties.set(Constants.OBJECTCLASS, clazzes, true);
@@ -264,7 +288,17 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 
 		serviceranking = (ranking instanceof Integer) ? ((Integer) ranking).intValue() : 0;
 
-		return (properties);
+		return properties;
+	}
+
+	/**
+	 * Return the properties object. This is for framework internal use only.
+	 * @return The service registration's properties.
+	 */
+	Properties getProperties() {
+		synchronized (registrationLock) {
+			return properties;
+		}
 	}
 
 	/**
@@ -281,7 +315,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 */
 	protected Object getProperty(String key) {
 		synchronized (registrationLock) {
-			return (properties.getProperty(key));
+			return properties.getProperty(key);
 		}
 	}
 
@@ -297,7 +331,27 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 */
 	protected String[] getPropertyKeys() {
 		synchronized (registrationLock) {
-			return (properties.getPropertyKeys());
+			return properties.getPropertyKeys();
+		}
+	}
+
+	/**
+	 * Return the service id for this service.
+	 * @return The service id for this service.
+	 */
+	long getId() {
+		synchronized (registrationLock) {
+			return serviceid;
+		}
+	}
+
+	/**
+	 * Return the service ranking for this service.
+	 * @return The service ranking for this service.
+	 */
+	int getRanking() {
+		synchronized (registrationLock) {
+			return serviceranking;
 		}
 	}
 
@@ -311,11 +365,13 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * @return The bundle which registered the service.
 	 */
 	protected AbstractBundle getBundle() {
-		if (reference == null) {
-			return (null);
-		}
+		synchronized (registrationLock) {
+			if (reference == null) {
+				return null;
+			}
 
-		return (bundle);
+			return bundle;
+		}
 	}
 
 	/**
@@ -326,37 +382,64 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 */
 	protected Object getService(BundleContextImpl user) {
 		synchronized (registrationLock) {
-			if (state == UNREGISTERED) /* service unregistered */
-			{
-				return (null);
+			if (state == UNREGISTERED) { /* service unregistered */
+				return null;
 			}
+		}
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("getService[" + user.bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("getService[" + user.bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-
-			Hashtable servicesInUse = user.servicesInUse;
-
-			ServiceUse use = (ServiceUse) servicesInUse.get(reference);
-
-			if (use == null) {
-				use = new ServiceUse(user, this);
-
-				Object service = use.getService();
-
-				if (service != null) {
-					servicesInUse.put(reference, use);
-
-					if (contextsUsing == null) {
-						contextsUsing = new ArrayList(10);
+		Map servicesInUse = user.getServicesInUseMap();
+		if (servicesInUse == null) { /* user is closed */
+			user.checkValid(); /* throw exception */
+		}
+		/* Use a while loop to support retry if a call to a ServiceFactory fails */
+		while (true) {
+			ServiceUse use;
+			boolean added = false;
+			/* Obtain the ServiceUse object for this service by bundle user */
+			synchronized (servicesInUse) {
+				user.checkValid();
+				use = (ServiceUse) servicesInUse.get(this);
+				if (use == null) {
+					/* if this is the first use of the service
+					 * optimistically record this service is being used. */
+					use = new ServiceUse(user, this);
+					added = true;
+					synchronized (registrationLock) {
+						servicesInUse.put(this, use);
+						if (contextsUsing == null) {
+							contextsUsing = new ArrayList(10);
+						}
+						contextsUsing.add(user);
 					}
-
-					contextsUsing.add(user);
 				}
+			}
 
-				return (service);
-			} else {
-				return (use.getService());
+			/* Obtain and return the service object */
+			synchronized (use) {
+				/* if another thread removed the ServiceUse, then
+				 * go back to the top and start again */
+				synchronized (servicesInUse) {
+					user.checkValid();
+					if (servicesInUse.get(this) != use) {
+						continue;
+					}
+				}
+				Object serviceObject = use.getService();
+				/* if the service factory failed to return an object and
+				 * we created the service use, then remove the 
+				 * optimistically added ServiceUse. */
+				if ((serviceObject == null) && added) {
+					synchronized (servicesInUse) {
+						synchronized (registrationLock) {
+							servicesInUse.remove(this);
+							contextsUsing.remove(user);
+						}
+					}
+				}
+				return serviceObject;
 			}
 		}
 	}
@@ -372,32 +455,39 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	protected boolean ungetService(BundleContextImpl user) {
 		synchronized (registrationLock) {
 			if (state == UNREGISTERED) {
-				return (false);
+				return false;
 			}
+		}
 
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				String bundle = (user.bundle == null) ? "" : user.bundle.toString(); //$NON-NLS-1$
-				Debug.println("ungetService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("ungetService[" + user.bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+		Map servicesInUse = user.getServicesInUseMap();
+		if (servicesInUse == null) {
+			return false;
+		}
+
+		ServiceUse use;
+		synchronized (servicesInUse) {
+			use = (ServiceUse) servicesInUse.get(this);
+			if (use == null) {
+				return false;
 			}
+		}
 
-			Hashtable servicesInUse = user.servicesInUse;
-
-			if (servicesInUse != null) {
-				ServiceUse use = (ServiceUse) servicesInUse.get(reference);
-
-				if (use != null) {
-					if (use.ungetService()) {
-						/* use count is now zero */
-						servicesInUse.remove(reference);
-
+		synchronized (use) {
+			if (use.ungetService()) {
+				/* use count is now zero */
+				synchronized (servicesInUse) {
+					synchronized (registrationLock) {
+						servicesInUse.remove(this);
 						contextsUsing.remove(user);
 					}
-					return (true);
 				}
 			}
-
-			return (false);
 		}
+		return true;
 	}
 
 	/**
@@ -407,29 +497,34 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 */
 	protected void releaseService(BundleContextImpl user) {
 		synchronized (registrationLock) {
-			if (reference == null) /* registration dead */
-			{
+			if (reference == null) { /* registration dead */
 				return;
 			}
+		}
 
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				String bundle = (user.bundle == null) ? "" : user.bundle.toString(); //$NON-NLS-1$
-				Debug.println("releaseService[" + bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("releaseService[" + user.bundle + "](" + this + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 
-			Hashtable servicesInUse = user.servicesInUse;
-
-			if (servicesInUse != null) {
-				ServiceUse use = (ServiceUse) servicesInUse.remove(reference);
-
-				if (use != null) {
-					use.releaseService();
-					// contextsUsing may have been nulled out by use.releaseService() if the registrant bundle
-					// is listening for events and unregisters the service
-					if (contextsUsing != null)
-						contextsUsing.remove(user);
+		Map servicesInUse = user.getServicesInUseMap();
+		if (servicesInUse == null) {
+			return;
+		}
+		ServiceUse use;
+		synchronized (servicesInUse) {
+			synchronized (registrationLock) {
+				use = (ServiceUse) servicesInUse.remove(this);
+				if (use == null) {
+					return;
 				}
+				// contextsUsing may have been nulled out by use.releaseService() if the registrant bundle
+				// is listening for events and unregisters the service
+				if (contextsUsing != null)
+					contextsUsing.remove(user);
 			}
+		}
+		synchronized (use) {
+			use.releaseService();
 		}
 	}
 
@@ -441,21 +536,21 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	protected AbstractBundle[] getUsingBundles() {
 		synchronized (registrationLock) {
 			if (state == UNREGISTERED) /* service unregistered */
-				return (null);
+				return null;
 
 			if (contextsUsing == null)
-				return (null);
+				return null;
 
 			int size = contextsUsing.size();
 			if (size == 0)
-				return (null);
+				return null;
 
 			/* Copy list of BundleContext into an array of Bundle. */
 			AbstractBundle[] bundles = new AbstractBundle[size];
 			for (int i = 0; i < size; i++)
 				bundles[i] = ((BundleContextImpl) contextsUsing.get(i)).bundle;
 
-			return (bundles);
+			return bundles;
 		}
 	}
 
@@ -479,9 +574,9 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		}
 
 		sb.append("}="); //$NON-NLS-1$
-		sb.append(properties);
+		sb.append(getProperties().toString());
 
-		return (sb.toString());
+		return sb.toString();
 	}
 
 	/**

@@ -34,20 +34,21 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
 	public static final boolean scopeEvents = Boolean.valueOf(FrameworkProperties.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
-	private boolean valid;
+	private volatile boolean valid;
 
 	/** Bundle object this context is associated with. */
 	// This slot is accessed directly by the Framework instead of using
 	// the getBundle() method because the Framework needs access to the bundle
 	// even when the context is invalid while the close method is being called.
-	protected BundleHost bundle;
+	final BundleHost bundle;
 
 	/** Internal framework object. */
-	protected Framework framework;
+	final Framework framework;
 
-	/** Services that bundle has used. Key is ServiceReference,
+	/** Services that bundle has used. Key is ServiceRegistrationImpl,
 	 Value is ServiceUse */
-	protected Hashtable servicesInUse;
+	/* @GuardedBy("contextLock") */
+	private HashMap/*<ServiceRegistrationImpl, ServiceUse>*/servicesInUse;
 
 	/** Listener list for bundle's BundleListeners */
 	protected EventListeners bundleEvent;
@@ -65,7 +66,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected BundleActivator activator;
 
 	/** private object for locking */
-	protected Object contextLock = new Object();
+	private final Object contextLock = new Object();
 
 	/**
 	 * Construct a BundleContext which wrappers the framework for a
@@ -81,7 +82,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		bundleEventSync = null;
 		serviceEvent = null;
 		frameworkEvent = null;
-		servicesInUse = null;
+		synchronized (contextLock) {
+			servicesInUse = null;
+		}
 		activator = null;
 	}
 
@@ -134,10 +137,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		/* service's used by the bundle, if any, are released. */
-		if (servicesInUse != null) {
-			int usedSize;
-			ServiceReference[] usedRefs = null;
-
+		int usedSize;
+		ServiceRegistrationImpl[] usedServices = null;
+		synchronized (contextLock) {
+			if (servicesInUse == null) {
+				return;
+			}
 			synchronized (servicesInUse) {
 				usedSize = servicesInUse.size();
 
@@ -146,23 +151,23 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						Debug.println("Releasing services"); //$NON-NLS-1$
 					}
 
-					usedRefs = new ServiceReference[usedSize];
+					usedServices = new ServiceRegistrationImpl[usedSize];
 
-					Enumeration refsEnum = servicesInUse.keys();
+					Iterator regsIter = servicesInUse.keySet().iterator();
 					for (int i = 0; i < usedSize; i++) {
-						usedRefs[i] = (ServiceReference) refsEnum.nextElement();
+						usedServices[i] = (ServiceRegistrationImpl) regsIter.next();
 					}
 				}
 			}
-
-			for (int i = 0; i < usedSize; i++) {
-				((ServiceReferenceImpl) usedRefs[i]).registration.releaseService(this);
-			}
-
-			servicesInUse = null;
 		}
 
-		bundle = null;
+		for (int i = 0; i < usedSize; i++) {
+			usedServices[i].releaseService(this);
+		}
+
+		synchronized (contextLock) {
+			servicesInUse = null;
+		}
 	}
 
 	/**
@@ -306,6 +311,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		ServiceListener filteredListener = new FilteredServiceListener(filter, listener, this);
 
 		synchronized (framework.serviceEvent) {
+			checkValid();
 			if (serviceEvent == null) {
 				serviceEvent = new EventListeners();
 				framework.serviceEvent.addListener(this, this);
@@ -379,7 +385,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public void addBundleListener(BundleListener listener) {
 		checkValid();
-
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -388,6 +393,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		if (listener instanceof SynchronousBundleListener) {
 			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
 			synchronized (framework.bundleEventSync) {
+				checkValid();
 				if (bundleEventSync == null) {
 					bundleEventSync = new EventListeners();
 					framework.bundleEventSync.addListener(this, this);
@@ -397,6 +403,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			}
 		} else {
 			synchronized (framework.bundleEvent) {
+				checkValid();
 				if (bundleEvent == null) {
 					bundleEvent = new EventListeners();
 					framework.bundleEvent.addListener(this, this);
@@ -467,6 +474,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 
 		synchronized (framework.frameworkEvent) {
+			checkValid();
 			if (frameworkEvent == null) {
 				frameworkEvent = new EventListeners();
 				framework.frameworkEvent.addListener(this, this);
@@ -654,7 +662,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return A {@link ServiceRegistrationImpl} object for use by the bundle.
 	 */
 	protected ServiceRegistrationImpl createServiceRegistration(String[] clazzes, Object service, Dictionary properties) {
-		return (new ServiceRegistrationImpl(this, clazzes, service, properties));
+		ServiceRegistrationImpl registration = new ServiceRegistrationImpl(this, clazzes, service);
+		registration.register(properties);
+		return registration;
 	}
 
 	/**
@@ -874,7 +884,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		synchronized (contextLock) {
 			if (servicesInUse == null)
 				// Cannot predict how many services a bundle will use, start with a small table.
-				servicesInUse = new Hashtable(10);
+				servicesInUse = new HashMap(10);
 		}
 
 		ServiceRegistrationImpl registration = ((ServiceReferenceImpl) reference).registration;
@@ -1126,47 +1136,61 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @see ServiceReferenceImpl
 	 */
 	protected ServiceReferenceImpl[] getServicesInUse() {
-		if (servicesInUse == null) {
-			return (null);
+		synchronized (contextLock) {
+			if (servicesInUse == null) {
+				return null;
+			}
+
+			synchronized (servicesInUse) {
+				int size = servicesInUse.size();
+
+				if (size == 0) {
+					return null;
+				}
+
+				ServiceReferenceImpl[] references = new ServiceReferenceImpl[size];
+				int refcount = 0;
+
+				Iterator regsIter = servicesInUse.keySet().iterator();
+
+				for (int i = 0; i < size; i++) {
+					ServiceRegistrationImpl service = (ServiceRegistrationImpl) regsIter.next();
+
+					try {
+						framework.checkGetServicePermission(service.clazzes);
+					} catch (SecurityException se) {
+						continue;
+					}
+
+					references[refcount] = (ServiceReferenceImpl) service.getReference();
+					refcount++;
+				}
+
+				if (refcount < size) {
+					if (refcount == 0) {
+						return null;
+					}
+
+					ServiceReferenceImpl[] refs = references;
+					references = new ServiceReferenceImpl[refcount];
+
+					System.arraycopy(refs, 0, references, 0, refcount);
+				}
+
+				return references;
+			}
 		}
+	}
 
-		synchronized (servicesInUse) {
-			int size = servicesInUse.size();
-
-			if (size == 0) {
-				return (null);
-			}
-
-			ServiceReferenceImpl[] references = new ServiceReferenceImpl[size];
-			int refcount = 0;
-
-			Enumeration refsEnum = servicesInUse.keys();
-
-			for (int i = 0; i < size; i++) {
-				ServiceReferenceImpl reference = (ServiceReferenceImpl) refsEnum.nextElement();
-
-				try {
-					framework.checkGetServicePermission(reference.registration.clazzes);
-				} catch (SecurityException se) {
-					continue;
-				}
-
-				references[refcount] = reference;
-				refcount++;
-			}
-
-			if (refcount < size) {
-				if (refcount == 0) {
-					return (null);
-				}
-
-				ServiceReferenceImpl[] refs = references;
-				references = new ServiceReferenceImpl[refcount];
-
-				System.arraycopy(refs, 0, references, 0, refcount);
-			}
-
-			return (references);
+	/** 
+	 * Return the map of ServiceRegistrationImpl to ServiceUse for services being
+	 * used by this context.
+	 * @return A map of ServiceRegistrationImpl to ServiceUse for services in use by 
+	 * this context.
+	 */
+	Map getServicesInUseMap() {
+		synchronized (contextLock) {
+			return servicesInUse;
 		}
 	}
 

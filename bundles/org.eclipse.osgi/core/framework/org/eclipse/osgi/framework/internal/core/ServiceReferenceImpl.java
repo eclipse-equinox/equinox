@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceReference;
 
 public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	/** Registered Service object. */
-	protected ServiceRegistrationImpl registration;
+	final ServiceRegistrationImpl registration;
 
 	/**
 	 * Construct a reference.
@@ -41,6 +41,10 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 */
 	protected ServiceReferenceImpl(ServiceRegistrationImpl registration) {
 		this.registration = registration;
+		/* We must not dereference registration in the constructor
+		 * since it is "leaked" to us in the ServiceRegistrationImpl
+		 * constructor.
+		 */
 	}
 
 	/**
@@ -110,21 +114,21 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	}
 
 	/**
-	 * Return the serviceid of the ServiceRegistration.
+	 * Return the service id of the ServiceRegistration.
 	 *
 	 * @return service.id of the service
 	 */
 	protected long getId() {
-		return (registration.serviceid);
+		return registration.getId();
 	}
 
 	/**
-	 * Return the serviceranking of the ServiceRegistration.
+	 * Return the service ranking of the ServiceRegistration.
 	 *
 	 * @return service.ranking of the service
 	 */
 	protected int getRanking() {
-		return (registration.serviceranking);
+		return registration.getRanking();
 	}
 
 	/**

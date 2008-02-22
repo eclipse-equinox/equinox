@@ -79,7 +79,7 @@ public class FilteredServiceListener implements ServiceListener {
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.properties + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		if ((filter == null || filter.match(reference)) && (allservices || context.isAssignableTo(reference))) {

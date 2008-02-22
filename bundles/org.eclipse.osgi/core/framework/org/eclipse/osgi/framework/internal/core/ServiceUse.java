@@ -26,22 +26,25 @@ import org.osgi.framework.*;
 public class ServiceUse {
 	/** ServiceFactory object if the service instance represents a factory,
 	 null otherwise */
-	protected ServiceFactory factory;
+	private final ServiceFactory factory;
+	/** BundleContext associated with this service use */
+	private final BundleContextImpl context;
+	/** ServiceDescription of the registered service */
+	private final ServiceRegistrationImpl registration;
+
 	/** Service object either registered or that returned by
 	 ServiceFactory.getService() */
-	protected Object service;
-	/** BundleContext associated with this service use */
-	protected BundleContextImpl context;
-	/** ServiceDescription of the registered service */
-	protected ServiceRegistrationImpl registration;
+	/* @GuardedBy("this") */
+	private Object cachedService;
 	/** bundle's use count for this service */
-	protected int useCount;
+	/* @GuardedBy("this") */
+	private int useCount;
 
 	/** Internal framework object. */
 
 	/**
 	 * Constructs a service use encapsulating the service object.
-	 * Objects of this class should be constrcuted while holding the
+	 * Objects of this class should be constructed while holding the
 	 * registrations lock.
 	 *
 	 * @param   context bundle getting the service
@@ -54,11 +57,11 @@ public class ServiceUse {
 
 		Object service = registration.service;
 		if (service instanceof ServiceFactory) {
-			factory = (ServiceFactory) service;
-			this.service = null;
+			this.factory = (ServiceFactory) service;
+			this.cachedService = null;
 		} else {
 			this.factory = null;
-			this.service = service;
+			this.cachedService = service;
 		}
 	}
 
@@ -97,54 +100,58 @@ public class ServiceUse {
 	 * @return A service object for the service associated with this
 	 * reference.
 	 */
+	/* @GuardedBy("this") */
 	protected Object getService() {
-		if ((useCount == 0) && (factory != null)) {
-			AbstractBundle factorybundle = registration.context.bundle;
-			Object service;
-
-			try {
-				service = AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						return factory.getService(context.bundle, registration);
-					}
-				});
-			} catch (Throwable t) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(t);
-				}
-				// allow the adaptor to handle this unexpected error
-				context.framework.adaptor.handleRuntimeError(t);
-				BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), t); //$NON-NLS-1$ 
-				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-				return (null);
-			}
-
-			if (service == null) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
-				}
-
-				BundleException be = new BundleException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()));
-				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-
-				return (null);
-			}
-
-			String[] clazzes = registration.clazzes;
-			String invalidService = BundleContextImpl.checkServiceClass(clazzes, service);
-			if (invalidService != null) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
-				}
-				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
-			}
-			this.service = service;
+		if ((useCount > 0) || (factory == null)) {
+			useCount++;
+			return cachedService;
 		}
 
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("getService[factory=" + registration.context.bundle + "](" + context.bundle + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+		final Object service;
+		try {
+			service = AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					return factory.getService(context.bundle, registration);
+				}
+			});
+		} catch (Throwable t) {
+			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+				Debug.println(factory + ".getService() exception: " + t.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(t);
+			}
+			// allow the adaptor to handle this unexpected error
+			context.framework.adaptor.handleRuntimeError(t);
+			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			return null;
+		}
+
+		if (service == null) {
+			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+				Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
+			}
+
+			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()));
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			return null;
+		}
+
+		String[] clazzes = registration.clazzes;
+		String invalidService = BundleContextImpl.checkServiceClass(clazzes, service);
+		if (invalidService != null) {
+			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
+			}
+			throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
+		}
+
+		this.cachedService = service;
 		useCount++;
 
-		return (this.service);
+		return service;
 	}
 
 	/**
@@ -175,41 +182,45 @@ public class ServiceUse {
 	 * @return <code>true</code> if the context bundle's use count for the service
 	 *         is zero otherwise <code>false</code>.
 	 */
+	/* @GuardedBy("this") */
 	protected boolean ungetService() {
 		if (useCount == 0) {
-			return (true);
+			return true;
 		}
 
 		useCount--;
-
-		if (useCount == 0) {
-			if (factory != null) {
-				try {
-					AccessController.doPrivileged(new PrivilegedAction() {
-						public Object run() {
-							factory.ungetService(context.bundle, registration, service);
-
-							return null;
-						}
-					});
-				} catch (Throwable t) {
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-						Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
-						Debug.printStackTrace(t);
-					}
-
-					AbstractBundle factorybundle = registration.context.bundle;
-					BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
-					context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
-				}
-
-				service = null;
-			}
-
-			return (true);
+		if (useCount > 0) {
+			return false;
 		}
 
-		return (false);
+		if (factory == null) {
+			return true;
+		}
+
+		final Object service = cachedService;
+		cachedService = null;
+
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("ungetService[factory=" + registration.context.bundle + "](" + context.bundle + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+		try {
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					factory.ungetService(context.bundle, registration, service);
+					return null;
+				}
+			});
+		} catch (Throwable t) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
+				Debug.printStackTrace(t);
+			}
+
+			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+		}
+
+		return true;
 	}
 
 	/**
@@ -221,30 +232,33 @@ public class ServiceUse {
 	 * is called to release the service object for the bundle.
 	 * </ol>
 	 */
+	/* @GuardedBy("this") */
 	protected void releaseService() {
-		if ((useCount > 0) && (factory != null)) {
-			try {
-				AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						factory.ungetService(context.bundle, registration, service);
+		if ((useCount == 0) || (factory == null)) {
+			return;
+		}
+		final Object service = cachedService;
+		cachedService = null;
+		useCount = 0;
 
-						return null;
-					}
-				});
-			} catch (Throwable t) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
-					Debug.printStackTrace(t);
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("releaseService[factory=" + registration.context.bundle + "](" + context.bundle + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+		try {
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					factory.ungetService(context.bundle, registration, service);
+					return null;
 				}
-
-				AbstractBundle factorybundle = registration.context.bundle;
-				BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
-				context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, factorybundle, be);
+			});
+		} catch (Throwable t) {
+			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+				Debug.println(factory + ".ungetService() exception"); //$NON-NLS-1$
+				Debug.printStackTrace(t);
 			}
 
-			service = null;
+			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
 		}
-
-		useCount = 0;
 	}
 }

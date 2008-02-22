@@ -159,7 +159,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * <code>false</code> otherwise.
 	 */
 	public boolean match(org.osgi.framework.ServiceReference reference) {
-		return match0(((ServiceReferenceImpl) reference).registration.properties);
+		return match0(((ServiceReferenceImpl) reference).registration.getProperties());
 	}
 
 	/**
@@ -386,7 +386,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
 	 */
 	protected boolean match(ServiceReferenceImpl reference) {
-		return match0(reference.registration.properties);
+		return match0(reference.registration.getProperties());
 	}
 
 	/**
