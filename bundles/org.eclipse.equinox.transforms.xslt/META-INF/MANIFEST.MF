@@ -10,8 +10,7 @@ Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: bundle
-Require-Bundle: system.bundle,
- org.eclipse.equinox.transforms.util;bundle-version="1.0.0"
-Export-Package: org.eclipse.equinox.internal.transforms.xslt;x-internal:=true,
- org.eclipse.equinox.internal.transforms.xslt.provisional
+Require-Bundle: system.bundle
+Export-Package: org.eclipse.equinox.internal.transforms;x-internal:=true,
+ org.eclipse.equinox.internal.transforms.xslt;x-internal:=true
 Bundle-Activator: org.eclipse.equinox.internal.transforms.xslt.Activator
