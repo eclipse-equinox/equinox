@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2008 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -701,7 +701,7 @@ public final class SecurityUtil implements PrivilegedRunner.PrivilegedDispatcher
 			case CLASS_FOR_NAME :
 				return Class.forName((String) arg1);
 			case SYSTEM_SET_PROPERTY :
-				return System.setProperty((String) arg1, (String) arg2);
+				return System.getProperties().put(arg1, arg2);
 			case FILE_GET_INPUT_STREAM :
 				return new FileInputStream((File) arg1);
 			case FILE_GET_OUTPUT_STREAM :
