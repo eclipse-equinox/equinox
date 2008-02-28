@@ -145,7 +145,7 @@ public class ServiceUse {
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
-			throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
+			throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION, factory.getClass().getName(), invalidService));
 		}
 
 		this.cachedService = service;
