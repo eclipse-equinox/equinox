@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -579,6 +579,9 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void saveStateData(boolean shutdown) {
+		if (shutdown && "true".equals(FrameworkProperties.getProperty("osgi.forcedRestart"))) //$NON-NLS-1$ //$NON-NLS-2$
+			// increment the state timestamp if a forced restart happened.
+			stateManager.getSystemState().setTimeStamp(stateManager.getSystemState().getTimeStamp() + 1);
 		if (stateManager == null || isReadOnly() || !stateManager.saveNeeded())
 			return;
 		try {

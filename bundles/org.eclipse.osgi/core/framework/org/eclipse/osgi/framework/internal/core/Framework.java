@@ -105,6 +105,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	boolean compatibiltyBootDelegation = false;
 	ClassLoaderDelegateHook[] delegateHooks;
+	private volatile boolean forcedRestart = false;
 	/**
 	 * The AliasMapper used to alias OS Names.
 	 */
@@ -1874,5 +1875,13 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 					// do nothing
 				}
 		}
+	}
+
+	void setForcedRestart(boolean forcedRestart) {
+		this.forcedRestart = forcedRestart;
+	}
+
+	boolean isForcedRestart() {
+		return forcedRestart;
 	}
 }

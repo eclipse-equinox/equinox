@@ -160,7 +160,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		Thread refresh = framework.secureAction.createThread(new Runnable() {
 			public void run() {
 				doResolveBundles(bundles, true);
-				if ("true".equals(FrameworkProperties.getProperty("osgi.forcedRestart"))) //$NON-NLS-1$ //$NON-NLS-2$
+				if (framework.isForcedRestart())
 					framework.shutdown();
 			}
 		}, "Refresh Packages"); //$NON-NLS-1$
@@ -185,6 +185,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
 			framework.publishBundleEvent(Framework.BATCHEVENT_BEGIN, framework.systemBundle);
+			State systemState = framework.adaptor.getState();
 			BundleDescription[] descriptions = null;
 			synchronized (framework.bundles) {
 				int numBundles = bundles == null ? 0 : bundles.length;
@@ -195,6 +196,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					descriptions = new BundleDescription[0];
 				else if (numBundles > 0) {
 					ArrayList results = new ArrayList(numBundles);
+					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
 						BundleDescription description = bundles[i].getBundleDescription();
 						if (description != null && description.getBundleId() != 0 && !results.contains(description))
@@ -202,18 +204,21 @@ public class PackageAdminImpl implements PackageAdmin {
 						// add in any bundles that have the same symbolic name see bug (169593)
 						AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
 						if (sameNames != null && sameNames.length > 1) {
+							if (addDeltas == null)
+								addDeltas = systemState.getChanges().getChanges(BundleDelta.ADDED, false);
 							for (int j = 0; j < sameNames.length; j++)
 								if (sameNames[j] != bundles[i]) {
 									BundleDescription sameName = sameNames[j].getBundleDescription();
-									if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName))
-										results.add(sameName);
+									if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName)) {
+										if (checkExtensionBundle(sameName, addDeltas))
+											results.add(sameName);
+									}
 								}
 						}
 					}
 					descriptions = (BundleDescription[]) (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
-			State systemState = framework.adaptor.getState();
 			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
 			processDelta(delta, refreshPackages, systemState);
 		} catch (Throwable t) {
@@ -234,6 +239,15 @@ public class PackageAdminImpl implements PackageAdmin {
 					framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
 			}
 		}
+	}
+
+	private boolean checkExtensionBundle(BundleDescription sameName, BundleDelta[] addDeltas) {
+		if (sameName.getHost() == null || !sameName.isResolved())
+			return true; // only do this extra check for resolved fragment bundles
+		// only add fragments of the system bundle when newly added bundles exist.
+		if (((BundleDescription) sameName.getHost().getSupplier()).getBundleId() != 0 || addDeltas.length > 0)
+			return true;
+		return false;
 	}
 
 	private void resumeBundles(AbstractBundle[] bundles, boolean refreshPackages, int[] previousStates) {
@@ -390,6 +404,7 @@ public class PackageAdminImpl implements PackageAdmin {
 				}
 				if (restart) {
 					FrameworkProperties.setProperty("osgi.forcedRestart", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+					framework.setForcedRestart(true);
 					// do not shutdown the framework while holding the PackageAdmin lock (bug 194149)
 					return null;
 				}

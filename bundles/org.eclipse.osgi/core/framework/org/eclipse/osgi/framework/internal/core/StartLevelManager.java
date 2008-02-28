@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.startlevel.StartLevel;
@@ -620,7 +620,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		}
 		/* Resume all bundles that were previously started and whose startlevel is <= the active startlevel */
 		int fwsl = getStartLevel();
-		for (int i = 0; i < launch.length; i++) {
+		for (int i = 0; i < launch.length && !framework.isForcedRestart(); i++) {
 			int bsl = launch[i].getStartLevel();
 			if (bsl < fwsl) {
 				// skip bundles who should have already been started
@@ -658,6 +658,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 			return;
 		}
 		// just decrementing the active startlevel - framework is not shutting down
+		// Do not check framework.isForcedRestart here because we want to stop the active bundles regardless.
 		for (int i = shutdown.length - 1; i >= 0; i--) {
 			int bsl = shutdown[i].getStartLevel();
 			if (bsl > decToSL + 1)
