@@ -1,0 +1,9 @@
+#Equinox secure storage version 1.0
+#Fri Feb 01 11:33:36 EST 2008
+equinox.security.preferences.version=1
+password==org.eclipse.equinox.security.noModule\tXNIUPgccoIw\=,0o1QFi/xKg1OR/HP4ZCWhA\=\=
+/abc/password1=org.eclipse.equinox.security.noModule\tDvRvjht7osQ\=,46ajUw62cSomethingIsWrong6rDR9gX+9WL3w\=\=
+/abc/password2=org.eclipse.equinox.security.noModule\tDvRvjht7osQ\=,46abUw62c6rDR9gX+9WL3w\=\=
+/cvs/eclipse.org/account1/password1=org.eclipse.equinox.security.oops\tOMBrKCofwqM\=,v8GEHFR5HvCe94arAo1RvA\=\=
+/cvs/eclipse.org/account1/password2=OMBrKCofwqM\=,v8GEHFR5HvCe94arAo1RvA\=\=
+/cvs/eclipse.org/password=org.eclipse.equinox.security.noModule\tG4/jZ1j21uI\=,C5c3ftrYWKEZo7Zuv7Ygxg\=\=
