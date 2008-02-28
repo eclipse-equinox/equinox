@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<fragment>
+   <extension
+         id="WindowsPasswordProvider"
+         name="%moduleName"
+         point="org.eclipse.equinox.security.secureStorage">
+      <provider
+            class="org.eclipse.equinox.internal.security.win32.WinCrypto"
+            priority="5">
+      </provider>
+   </extension>
+
+</fragment>

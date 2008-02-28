@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+         name="%security"
+         class="org.eclipse.equinox.internal.security.ui.preferences.SecurityCategoryPage"
+         id="org.eclipse.equinox.security.ui.category">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+         name="%policy"
+         class="org.eclipse.equinox.internal.security.ui.preferences.PolicyPage"
+         id="org.eclipse.equinox.security.ui.policy"
+         category="org.eclipse.equinox.security.ui.category">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+         name="%certificates"
+         class="org.eclipse.equinox.internal.security.ui.preferences.CertificatesPage"
+         id="org.eclipse.equinox.security.ui.certificates"
+         category="org.eclipse.equinox.security.ui.category">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages">
+      <page
+         name="%advanced"
+         class="org.eclipse.equinox.internal.security.ui.preferences.AdvancedPage"
+         id="org.eclipse.equinox.security.ui.advanced"
+         category="org.eclipse.equinox.security.ui.category">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="org.eclipse.ui.Basic"
+            class="org.eclipse.equinox.internal.security.ui.wizard.CertificateImportWizard"
+            icon="icons/full/obj16/signed_yes_tbl.gif"
+            id="org.eclipse.equinox.security.ui.importWizards.ImportWizard"
+            name="%certificateFile">
+         <description>
+            %certificateFileDescription
+         </description>
+         <selection class="org.eclipse.core.resources.IResource" /> 
+      </wizard>
+   </extension>
+   
+   <!-- The default UI password provider -->
+   <extension
+         id="DefaultPasswordProvider"
+         point="org.eclipse.equinox.security.secureStorage">
+      <provider
+            class="org.eclipse.equinox.internal.security.ui.storage.DefaultPasswordProvider"
+            priority="2">
+      </provider>
+   </extension>
+   
+</plugin>
