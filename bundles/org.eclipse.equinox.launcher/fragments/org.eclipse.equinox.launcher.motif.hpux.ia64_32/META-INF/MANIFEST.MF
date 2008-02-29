@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
-Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.hpux.ia64_32
+Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.hpux.ia64_32;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Bundle-Vendor: %providerName
