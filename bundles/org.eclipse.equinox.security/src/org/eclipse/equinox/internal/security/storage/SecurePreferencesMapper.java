@@ -20,7 +20,33 @@ import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferencesMapper {
 
-	private static Map preferences = new HashMap(); // URL.toString() -> SecurePreferencesRoot
+	static private ISecurePreferences defaultPreferences = null;
+
+	static private Map preferences = new HashMap(); // URL.toString() -> SecurePreferencesRoot
+
+	static public ISecurePreferences getDefault() {
+		if (defaultPreferences == null) {
+			try {
+				defaultPreferences = open(null, null);
+			} catch (IOException e) {
+				AuthPlugin.getDefault().logError(SecAuthMessages.keyringNotAvailable, e);
+			}
+		}
+		return defaultPreferences;
+	}
+
+	static public void clearDefault() {
+		if (defaultPreferences == null)
+			return;
+
+		try {
+			defaultPreferences.flush();
+		} catch (IOException e) {
+			// ignore in this context
+		}
+		close((((SecurePreferencesWrapper) defaultPreferences).getContainer().getRootData()));
+		defaultPreferences = null;
+	}
 
 	static public ISecurePreferences open(URL location, Map options) throws IOException {
 		// 1) process location

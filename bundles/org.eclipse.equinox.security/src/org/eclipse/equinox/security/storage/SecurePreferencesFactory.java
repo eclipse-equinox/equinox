@@ -13,8 +13,6 @@ package org.eclipse.equinox.security.storage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import org.eclipse.equinox.internal.security.auth.AuthPlugin;
-import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesMapper;
 import org.eclipse.equinox.security.storage.provider.IProviderHints;
 
@@ -26,8 +24,6 @@ import org.eclipse.equinox.security.storage.provider.IProviderHints;
  * </p>
  */
 final public class SecurePreferencesFactory {
-
-	static private ISecurePreferences defaultPreferences = null;
 
 	/**
 	 * Returns default secure preferences.
@@ -48,14 +44,7 @@ final public class SecurePreferencesFactory {
 	 * was unable to create secure preferences using default location
 	 */
 	static public ISecurePreferences getDefault() {
-		if (defaultPreferences == null) {
-			try {
-				defaultPreferences = open(null, null);
-			} catch (IOException e) {
-				AuthPlugin.getDefault().logError(SecAuthMessages.keyringNotAvailable, e);
-			}
-		}
-		return defaultPreferences;
+		return SecurePreferencesMapper.getDefault();
 	}
 
 	/**

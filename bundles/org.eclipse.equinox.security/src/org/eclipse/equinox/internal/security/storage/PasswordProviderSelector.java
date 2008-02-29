@@ -33,7 +33,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 
 	private Map modules = new HashMap(5); // cache of modules found
 
-	private class ExtStorageModule {
+	public class ExtStorageModule {
 		public String moduleID;
 		public IConfigurationElement element;
 		public int priority;
@@ -69,13 +69,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		// hides default constructor; use getInstance()
 	}
 
-	public PasswordProviderModuleExt findStorageModule(String expectedID) throws StorageException {
-		if (expectedID != null)
-			expectedID = expectedID.toLowerCase(); // ID is case-insensitive
-		synchronized (modules) {
-			if (modules.containsKey(expectedID))
-				return (PasswordProviderModuleExt) modules.get(expectedID);
-		}
+	public List findAvailableModules(String expectedID) {
 
 		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(EXTENSION_POINT);
@@ -117,6 +111,34 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 				return p2 - p1;
 			}
 		});
+
+		return allAvailableModules;
+	}
+
+	/**
+	 * Let's all instantiated modules to clear cached passwords. Passwords
+	 * are cached in open preferences and might be cached in the password
+	 * providers.
+	 */
+	public void logout() {
+		SecurePreferencesMapper.clearCaches();
+		synchronized (modules) {
+			for (Iterator i = modules.values().iterator(); i.hasNext();) {
+				PasswordProviderModuleExt module = (PasswordProviderModuleExt) i.next();
+				module.logout(null);
+			}
+		}
+	}
+
+	public PasswordProviderModuleExt findStorageModule(String expectedID) throws StorageException {
+		if (expectedID != null)
+			expectedID = expectedID.toLowerCase(); // ID is case-insensitive
+		synchronized (modules) {
+			if (modules.containsKey(expectedID))
+				return (PasswordProviderModuleExt) modules.get(expectedID);
+		}
+
+		List allAvailableModules = findAvailableModules(expectedID);
 
 		for (Iterator i = allAvailableModules.iterator(); i.hasNext();) {
 			ExtStorageModule module = (ExtStorageModule) i.next();

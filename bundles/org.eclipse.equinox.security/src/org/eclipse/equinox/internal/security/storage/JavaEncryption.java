@@ -20,11 +20,9 @@ import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
+import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.osgi.util.NLS;
-
-// TBD on the UI side provide handling to change "preferred" algorithm using preferences page.
-// Bonus: Default preferences: after the change offer to re-encrypt or delete old default secure prefs.
 
 /**
  * Note that algorithm detection skips aliases:

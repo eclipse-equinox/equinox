@@ -42,7 +42,8 @@ abstract public class PasswordProvider {
 	 * should not discard auto generated passwords that are not available from other  
 	 * sources.
 	 * </p>
-	 * @param container container of the secure preferences
+	 * @param container container of the secure preferences, might be <code>null</code>
+	 * if logout request is not related to a specific container
 	 */
 	abstract public void logout(IPreferencesContainer container);
 

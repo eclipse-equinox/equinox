@@ -40,6 +40,22 @@ public class SecUIMessages extends NLS {
 	public static String exceptionTitle;
 	public static String exceptionDecode;
 
+	// Storage properties page
+	public static String selectCipher;
+	public static String logoutButton;
+	public static String providersTable;
+	public static String priorityColumn;
+	public static String idColumn;
+	public static String descriptionColumn;
+	public static String defaultGroup;
+	public static String changePasswordButton;
+	public static String deleteButton;
+	public static String providersGroup;
+	public static String advancedGroup;
+	public static String confirmDeleteMsg;
+	public static String postDeleteTitle;
+	public static String postDeleteMsg;
+
 	static {
 		// load message values from bundle file
 		reloadMessages();

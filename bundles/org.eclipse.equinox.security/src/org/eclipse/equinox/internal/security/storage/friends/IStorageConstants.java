@@ -8,8 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.internal.security.storage;
+package org.eclipse.equinox.internal.security.storage.friends;
 
+/**
+ * Constants and default values used by the secure storage.
+ */
 public interface IStorageConstants {
 
 	/**
