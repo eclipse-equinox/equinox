@@ -26,7 +26,6 @@ import org.osgi.framework.*;
  */
 
 public class SystemBundle extends BundleHost {
-
 	ProtectionDomain systemDomain;
 
 	/**
@@ -215,9 +214,17 @@ public class SystemBundle extends BundleHost {
 		if (state == ACTIVE) {
 			Thread restart = framework.secureAction.createThread(new Runnable() {
 				public void run() {
+					String prevSLProp = FrameworkProperties.getProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
+					String sl = String.valueOf(framework.startLevelManager.getStartLevel());
+					FrameworkProperties.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, sl);
+					FrameworkProperties.setProperty(Constants.PROP_OSGI_RELAUNCH, ""); //$NON-NLS-1$
 					framework.shutdown();
-
 					framework.launch();
+					FrameworkProperties.clearProperty(Constants.PROP_OSGI_RELAUNCH);
+					if (prevSLProp == null)
+						FrameworkProperties.clearProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
+					else
+						FrameworkProperties.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, prevSLProp);
 				}
 			}, "System Bundle Update"); //$NON-NLS-1$
 

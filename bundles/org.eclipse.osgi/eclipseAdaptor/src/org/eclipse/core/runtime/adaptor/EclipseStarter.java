@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -390,6 +390,8 @@ public class EclipseStarter {
 			splashStreamRegistration.unregister();
 		if (defaultMonitorRegistration != null)
 			defaultMonitorRegistration.unregister();
+		if (appLauncher != null)
+			appLauncher.shutdown();
 		appLauncherRegistration = null;
 		appLauncher = null;
 		splashStreamRegistration = null;

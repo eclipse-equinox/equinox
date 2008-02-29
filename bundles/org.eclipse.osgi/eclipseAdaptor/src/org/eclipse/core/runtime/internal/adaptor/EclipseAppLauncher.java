@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -72,6 +73,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		if (failOnNoDefault && runnable == null)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_NO_APPLICATION);
 		Object result = null;
+		boolean doRelaunch;
 		do {
 			try {
 				result = runApplication(defaultContext);
@@ -81,7 +83,8 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 				if (log != null)
 					log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null));
 			}
-		} while (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0);
+			doRelaunch = (relaunch && (context.getBundle().getState() & Bundle.ACTIVE) != 0) || FrameworkProperties.getProperty(Constants.PROP_OSGI_RELAUNCH) != null;
+		} while (doRelaunch);
 		return result;
 	}
 

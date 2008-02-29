@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 
 package org.eclipse.core.runtime.internal.adaptor;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URLConnection;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,7 +30,6 @@ import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.pluginconversion.PluginConverter;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
-import org.eclipse.osgi.service.runnable.ApplicationLauncher;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 
@@ -142,14 +141,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	}
 
 	public void frameworkStopping(BundleContext context) {
-		// Shutdown the ApplicationLauncher service if it is available.
-		ServiceReference launcherRef = context.getServiceReference(ApplicationLauncher.class.getName());
-		if (launcherRef != null) {
-			ApplicationLauncher launcher = (ApplicationLauncher) context.getService(launcherRef);
-			// this will force a currently running application to stop.
-			launcher.shutdown();
-			context.ungetService(launcherRef);
-		}
+		// do nothing
 	}
 
 	public void addProperties(Properties properties) {

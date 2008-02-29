@@ -132,6 +132,7 @@ public class Constants implements org.osgi.framework.Constants {
 	public static final String STATE_SYSTEM_BUNDLE = "osgi.system.bundle"; //$NON-NLS-1$
 
 	public static final String OSGI_FRAMEWORKBEGINNINGSTARTLEVEL = "osgi.framework.beginningstartlevel"; //$NON-NLS-1$
+	public static final String PROP_OSGI_RELAUNCH = "osgi.framework.relaunch"; //$NON-NLS-1$
 
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1"; //$NON-NLS-1$
