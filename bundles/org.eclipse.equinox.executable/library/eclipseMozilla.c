@@ -29,7 +29,9 @@ int filter(const struct dirent *dir)
 	char* prefixes[] = {
 		"xulrunner-",
 		"mozilla-seamonkey-",
+		"seamonkey-",
 		"mozilla-",
+		"mozilla-firefox-",
 		"firefox-",
 		NULL
 	};
@@ -47,21 +49,30 @@ int filter(const struct dirent *dir)
 	char* prefix = prefixes [index];
 	while (prefix != NULL)
 	{
-		if (strncmp(dirname, prefix, strlen(prefix)) == 0)
+		int prefixLength = strlen(prefix);
+		if (strncmp(dirname, prefix, prefixLength) == 0)
 		{
 			/* If a xulrunner install is found then success is immediate since
 			 * xulrunner always provides an embeddable GRE.
 			 */
 			if (index == XULRUNNER_INDEX) return 1;	/* include in scandir result */
-			char* testpath = malloc (strlen(root) + strlen(dirname) + strlen(testlib) + 1);
-			strcpy(testpath, root);
-			strcat(testpath, dirname);
-			strcat(testpath, testlib);
-			int success = stat(testpath, &buf) == 0;
-			free(testpath);
-			if (success)
-			{
-				return 1;	/* include in scandir result */
+
+			/* Check if the first character following the prefix is a numeric digit.
+			 * This ensures that the suffix represents a version number like
+			 * "mozilla-1.7.3", and not a different product like "mozilla-thunderbird".
+			 */
+			int dirLength = strlen(dirname);
+			if (dirLength == prefixLength || ('0' <= dirname[prefixLength] && dirname[prefixLength] <= '9')) {
+				char* testpath = malloc (strlen(root) + dirLength + strlen(testlib) + 1);
+				strcpy(testpath, root);
+				strcat(testpath, dirname);
+				strcat(testpath, testlib);
+				int success = stat(testpath, &buf) == 0;
+				free(testpath);
+				if (success)
+				{
+					return 1;	/* include in scandir result */
+				}
 			}
 		}
 		prefix = prefixes [++index];
@@ -174,22 +185,30 @@ void fixEnvForMozilla() {
 				char* dirs[] = {
 #if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
 					"/usr/lib64/xulrunner/",
+					"/usr/lib64/mozilla-firefox/",
+					"/usr/lib64/firefox/",
+					"/usr/lib64/mozilla-seamonkey/",
 					"/usr/lib64/seamonkey/",
 					"/usr/lib64/mozilla/",
-					"/usr/lib64/firefox/",
 #endif
 					"/usr/lib/xulrunner/",
+					"/usr/lib/mozilla-firefox/",
+					"/usr/lib/firefox/",
+					"/usr/lib/mozilla-seamonkey/",
 					"/usr/lib/seamonkey/",
 					"/usr/lib/mozilla/",
-					"/usr/lib/firefox/",
 					"/usr/local/xulrunner/",
 					"/opt/xulrunner/",
+					"/usr/local/mozilla-firefox/",
+					"/usr/local/firefox/",
+					"/opt/mozilla-firefox/",
+					"/opt/firefox/",
+					"/usr/local/mozilla-seamonkey/",
 					"/usr/local/seamonkey/",
+					"/opt/mozilla-seamonkey/",
 					"/opt/seamonkey/",
 					"/usr/local/mozilla/",
 					"/opt/mozilla/",
-					"/usr/local/firefox/",
-					"/opt/firefox/",
 					NULL
 				};
 				char* testlib = "components/libwidget_gtk2.so";
