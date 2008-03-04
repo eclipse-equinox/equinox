@@ -20,6 +20,7 @@ import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.equinox.security.storage.*;
 import org.eclipse.jface.action.*;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -43,17 +44,20 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 	}
 
 	public void createPartControl(Composite parent) {
+		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
+		sashForm.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 
-		parent.setLayout(new GridLayout(2, false));
-
-		Tree nodeTree = new Tree(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		Tree nodeTree = new Tree(sashForm, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		GridData gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		gridData.verticalSpan = 2;
 		nodeTree.setLayoutData(gridData);
 
-		new Label(parent, SWT.NONE).setText(SecUIMessages.keysTable);
+		Composite rightPane = new Composite(sashForm, SWT.NONE);
+		rightPane.setLayout(new GridLayout());
 
-		Table tableOfValues = new Table(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		new Label(rightPane, SWT.NONE).setText(SecUIMessages.keysTable);
+
+		Table tableOfValues = new Table(rightPane, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		tableOfValues.setLinesVisible(true);
 		tableOfValues.setHeaderVisible(true);
 		tableOfValues.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));

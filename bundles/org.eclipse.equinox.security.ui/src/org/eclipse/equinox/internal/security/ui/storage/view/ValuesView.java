@@ -148,10 +148,13 @@ public class ValuesView {
 
 		TableColumn keysColumn = new TableColumn(table, SWT.LEFT);
 		keysColumn.setText(SecUIMessages.keysColumn);
-		keysColumn.setWidth(150);
 		TableColumn valuesColumn = new TableColumn(table, SWT.LEFT);
 		valuesColumn.setText(SecUIMessages.valuesColumn);
-		valuesColumn.setWidth(350);
+
+		TableLayout layout = new TableLayout();
+		layout.addColumnData(new ColumnWeightData(1));
+		layout.addColumnData(new ColumnWeightData(2));
+		table.setLayout(layout);
 
 		tableViewer = new TableViewer(table);
 
