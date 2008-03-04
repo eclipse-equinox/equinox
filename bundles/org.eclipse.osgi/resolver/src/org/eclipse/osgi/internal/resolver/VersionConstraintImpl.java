@@ -21,8 +21,12 @@ public abstract class VersionConstraintImpl implements VersionConstraint {
 	private BaseDescription supplier;
 
 	public String getName() {
-		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name))
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name)) {
+			StateImpl state = (StateImpl) getBundle().getContainingState();
+			if (state == null)
+				return Constants.getInternalSymbolicName();
 			return ((StateImpl) bundle.getContainingState()).getSystemBundle();
+		}
 		return name;
 	}
 

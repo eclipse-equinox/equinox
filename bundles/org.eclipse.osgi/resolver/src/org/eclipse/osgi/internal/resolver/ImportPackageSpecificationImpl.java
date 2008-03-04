@@ -47,8 +47,12 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	public String getBundleSymbolicName() {
-		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
+		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
+			StateImpl state = (StateImpl) getBundle().getContainingState();
+			if (state == null)
+				return Constants.getInternalSymbolicName();
 			return ((StateImpl) getBundle().getContainingState()).getSystemBundle();
+		}
 		return symbolicName;
 	}
 
@@ -72,7 +76,8 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		String[] friends = (String[]) pkgDes.getDirective(Constants.FRIENDS_DIRECTIVE);
 		Boolean internal = (Boolean) pkgDes.getDirective(Constants.INTERNAL_DIRECTIVE);
 		if (internal.booleanValue() || friends != null) {
-			boolean strict = ((StateImpl) getBundle().getContainingState()).inStrictMode();
+			StateImpl state = (StateImpl) getBundle().getContainingState();
+			boolean strict = state == null ? false : state.inStrictMode();
 			if (strict) {
 				if (internal.booleanValue())
 					return false;
