@@ -23,6 +23,8 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
  */
 public class InternalExchangeUtils {
 
+	static private List listeners = new ArrayList();
+
 	/**
 	 * Detects ciphers supplied by the current JVM that can be used with
 	 * the secure storage. Returns Map of pairs: supported cipher algorithm to 
@@ -83,6 +85,24 @@ public class InternalExchangeUtils {
 		// delete the actual file
 		if (StorageUtils.exists(location))
 			StorageUtils.delete(location);
+
+		// notify listeners
+		synchronized (listeners) {
+			for (Iterator i = listeners.iterator(); i.hasNext();) {
+				IDeleteListener listener = (IDeleteListener) i.next();
+				listener.onDeleted();
+			}
+		}
+	}
+
+	/**
+	 * Registers a new listener to be notified when default preferences are deleted.
+	 * @param listener class to be notified after default preferences are deleted
+	 */
+	static public void addDeleteListener(IDeleteListener listener) {
+		synchronized (listeners) {
+			listeners.add(listener);
+		}
 	}
 
 }

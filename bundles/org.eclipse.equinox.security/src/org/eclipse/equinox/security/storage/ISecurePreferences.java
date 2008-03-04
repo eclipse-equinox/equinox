@@ -277,4 +277,12 @@ public interface ISecurePreferences {
 	 * @throws StorageException if exception occurred during decryption
 	 */
 	public byte[] getByteArray(String key, byte[] def) throws StorageException;
+
+	/**
+	 * Specifies if value associated with the key is encrypted.
+	 * @param key key with which a value is associated
+	 * @return <code>true</code> if value is encrypted, <code>false</code> otherwise
+	 * @throws StorageException if stored data is invalid
+	 */
+	public boolean isEncrypted(String key) throws StorageException;
 }

@@ -158,4 +158,7 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 		node.putByteArray(key, value, encrypt, container);
 	}
 
+	public boolean isEncrypted(String key) throws StorageException {
+		return node.isEncrypted(key);
+	}
 }

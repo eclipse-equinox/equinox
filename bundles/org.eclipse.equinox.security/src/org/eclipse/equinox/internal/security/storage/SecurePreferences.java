@@ -512,4 +512,16 @@ public class SecurePreferences {
 		return getRoot().isModified();
 	}
 
+	public boolean isEncrypted(String key) throws StorageException {
+		checkRemoved();
+		if (!hasKey(key))
+			return false;
+		String encryptedValue = internalGet(key);
+		if (encryptedValue == null)
+			return false;
+
+		CryptoData data = new CryptoData(encryptedValue);
+		String moduleID = data.getModuleID();
+		return (moduleID != null);
+	}
 }

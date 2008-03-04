@@ -69,4 +69,16 @@
       </provider>
    </extension>
    
+   <!-- The view of the default secure storage -->
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%storageView"
+            icon="icons/storage.gif"
+            category="org.eclipse.ui"
+            class="org.eclipse.equinox.internal.security.ui.storage.view.SecurePreferencesView"
+            id="org.eclipse.equinox.security.views.storage">
+      </view>
+   </extension>
+   
 </plugin>

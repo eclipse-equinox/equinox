@@ -56,6 +56,71 @@ public class SecUIMessages extends NLS {
 	public static String postDeleteTitle;
 	public static String postDeleteMsg;
 
+	// secure storage view
+	public static String keysTable;
+	public static String keysColumn;
+	public static String valuesColumn;
+	public static String nodesContextMenu;
+	public static String rootNodeName;
+	public static String addNodeCommand;
+	public static String addNodeCommandTip;
+	public static String removeNodeCommand;
+	public static String removeNodeCommandTip;
+	public static String refreshNodesCommand;
+	public static String refreshNodesCommandTip;
+	public static String addValueCommand;
+	public static String addValueCommandTmp;
+	public static String removeValueCommand;
+	public static String removeValueCommandTmp;
+	public static String showValueCommand;
+	public static String showValueCommandTmp;
+	public static String encryptValueCommand;
+	public static String encryptValueCommandTmp;
+	public static String decryptValueCommand;
+	public static String decryptValueCommandTmp;
+	public static String failedDecrypt;
+	public static String failedEncrypt;
+	public static String saveCommand;
+	public static String saveCommandTip;
+	public static String exportCommand;
+	public static String exportCommandTip;
+
+	// new node dialog
+	public static String newNodeTitle;
+	public static String newNodeLabel;
+	public static String newNodeMsg;
+	public static String newNodeOK;
+	public static String newNodeCancel;
+	public static String newNodeInvalid;
+
+	// add value dialog
+	public static String addValueTitle;
+	public static String addValueKeyLabel;
+	public static String addValueValueLabel;
+	public static String addValueEncryptLabel;
+	public static String addValueOK;
+	public static String addValueCancel;
+	public static String addValueMsg;
+	public static String addValueInvalid;
+
+	// remove value dialog
+	public static String removeValueTitle;
+	public static String removeValueMsg;
+
+	// show value dialog
+	public static String showValueTitle;
+	public static String showValueMsg;
+
+	// export dialog
+	public static String exportDialogTitle;
+	public static String exportDialogMsg;
+	public static String exportDialogInvalidMsg;
+	public static String exportDialogFileLabel;
+	public static String exportDialogBrowse;
+	public static String exportDialogOK;
+	public static String exportDialogCancel;
+	public static String fileSelectTitle;
+
 	static {
 		// load message values from bundle file
 		reloadMessages();
