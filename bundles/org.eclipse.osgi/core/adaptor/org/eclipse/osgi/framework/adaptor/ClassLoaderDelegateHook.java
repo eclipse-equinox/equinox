@@ -21,7 +21,7 @@ import org.eclipse.osgi.baseadaptor.HookRegistry;
  * @see ClassLoaderDelegate
  * @see HookRegistry#getClassLoaderDelegateHooks()
  * @see HookRegistry#addClassLoaderDelegateHook(ClassLoaderDelegateHook)
- * @since 3.2
+ * @since 3.4
  */
 public interface ClassLoaderDelegateHook {
 	/**
