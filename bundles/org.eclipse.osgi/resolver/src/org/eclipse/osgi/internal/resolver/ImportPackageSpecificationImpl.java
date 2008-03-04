@@ -49,9 +49,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	public String getBundleSymbolicName() {
 		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
 			StateImpl state = (StateImpl) getBundle().getContainingState();
-			if (state == null)
-				return Constants.getInternalSymbolicName();
-			return ((StateImpl) getBundle().getContainingState()).getSystemBundle();
+			return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
 		}
 		return symbolicName;
 	}
