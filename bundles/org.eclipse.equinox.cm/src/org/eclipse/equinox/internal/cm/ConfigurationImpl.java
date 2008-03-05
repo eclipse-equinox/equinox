@@ -268,7 +268,7 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	public boolean equals(Object obj) {
-		return pid.equals(((Configuration) obj).getPid());
+		return (obj instanceof Configuration) && pid.equals(((Configuration) obj).getPid());
 	}
 
 	public int hashCode() {
