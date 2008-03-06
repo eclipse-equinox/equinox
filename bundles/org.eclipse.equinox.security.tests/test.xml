@@ -5,8 +5,8 @@
   <!-- sets the properties eclipse-home, and library-file -->
   <property name="eclipse-home" value="${basedir}/../../"/>
   <property name="library-file" value="${eclipse-home}/plugins/org.eclipse.test/library.xml"/>
-  <property name="runtime_location" value="${eclipse-home}/equinox_security_temp_folder"/>
   <property name="plugin-name" value="org.eclipse.equinox.security.tests"/>
+  <property name="security-folder" value="${eclipse-home}/equinox_security"/>
 
   <!-- This target holds all initialization code that needs to be done for -->
   <!-- all tests that are to be run. Initialization for individual tests -->
@@ -15,20 +15,21 @@
     <tstamp/>
   </target>
 
-  <!-- This target holds code to cleanup the testing environment after the tests -->
-  <!-- have been run. You can use this to delete temporary files that are created. -->
-  <target name="cleanup">
-    <delete dir="${runtime_location}" quiet="true"/>
-  </target>
-
   <!-- This target defines the tests that need to be run. -->
   <target name="suite" depends="init,cleanup">
-    <ant target="equinox-security-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="${runtime_location}"/>
-      <property name="plugin-name" value="org.eclipse.equinox.security.tests"/>
+	<delete dir="${security-folder}" quiet="true"/>
+    <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
+      <property name="data-dir" value="${security-folder}"/>
+      <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.equinox.security.tests.AllSecurityTests"/>
     </ant>
   </target>  
+
+  <!-- This target holds code to cleanup the testing environment after the tests -->
+  <!-- have been run. You can use this to delete temporary files that are created. -->
+  <target name="cleanup">
+    <delete dir="${security-folder}" quiet="true"/>
+  </target>
 
   <!-- This target runs the test suite. Any actions that need to happen after all -->
   <!-- the tests have been run should go here. -->
