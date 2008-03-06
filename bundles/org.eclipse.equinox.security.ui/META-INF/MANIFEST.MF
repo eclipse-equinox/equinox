@@ -5,7 +5,9 @@ Bundle-SymbolicName: org.eclipse.equinox.security.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Import-Package: org.eclipse.core.resources,
+Import-Package: javax.crypto.spec,
+ javax.security.auth.x500,
+ org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.osgi.service.resolver;version="1.2.0",
