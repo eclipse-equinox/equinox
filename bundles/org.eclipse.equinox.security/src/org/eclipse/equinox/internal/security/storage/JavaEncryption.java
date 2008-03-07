@@ -233,8 +233,10 @@ public class JavaEncryption {
 	}
 
 	private boolean roundtrip(String testCipher, String testKeyFactory) {
+		boolean storeInitState = initialized;
 		String storedCipherAlgorithm = cipherAlgorithm;
 		String storedKeyAlgorithm = keyFactoryAlgorithm;
+		initialized = true;
 		try {
 			cipherAlgorithm = testCipher;
 			keyFactoryAlgorithm = testKeyFactory;
@@ -249,7 +251,7 @@ public class JavaEncryption {
 		} finally { // reset back
 			cipherAlgorithm = storedCipherAlgorithm;
 			keyFactoryAlgorithm = storedKeyAlgorithm;
-
+			initialized = storeInitState;
 		}
 	}
 

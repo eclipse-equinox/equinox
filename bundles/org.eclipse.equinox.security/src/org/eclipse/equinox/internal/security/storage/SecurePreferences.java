@@ -147,8 +147,8 @@ public class SecurePreferences {
 	}
 
 	protected SecurePreferences navigateToNode(String pathName, boolean create) {
-		if (pathName == null)
-			return getRoot();
+		if (pathName == null || pathName.length() == 0)
+			return this;
 		int pos = pathName.indexOf(IPath.SEPARATOR);
 		if (pos == -1)
 			return getChild(pathName, create);
@@ -407,7 +407,7 @@ public class SecurePreferences {
 				return false;
 			lastSlash = isSlash;
 		}
-		return (chars[chars.length - 1] != IPath.SEPARATOR);
+		return (chars.length > 1) ? (chars[chars.length - 1] != IPath.SEPARATOR) : true;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
