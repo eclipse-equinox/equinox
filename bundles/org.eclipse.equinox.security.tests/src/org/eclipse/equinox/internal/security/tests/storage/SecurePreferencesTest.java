@@ -115,9 +115,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		String[] leafKeys = node3.keys();
 		assertNotNull(leafKeys);
 		assertEquals(leafKeys.length, 3);
-		boolean order1 = secondKey.equals(leafKeys[0]) && key.equals(leafKeys[1]);
-		boolean order2 = secondKey.equals(leafKeys[1]) && key.equals(leafKeys[0]);
-		assertTrue(order1 || order2);
+		findAll(new String[] {clearTextKey, key, secondKey}, leafKeys);
 	}
 
 	/**
@@ -483,6 +481,23 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		} finally {
 			// make sure we won't try to delete it
 			closePreferences(preferences);
+		}
+	}
+
+	// assumes all entries are unique and array1 has no null elements
+	private void findAll(String[] array1, String[] array2) {
+		assertNotNull(array1);
+		assertNotNull(array2);
+		assertEquals(array1.length, array2.length);
+		for (int i = 0; i < array1.length; i++) {
+			boolean found = false;
+			for (int j = 0; j < array2.length; j++) {
+				if (array1[i].equals(array2[j])) {
+					found = true;
+					break;
+				}
+			}
+			assertTrue(found);
 		}
 	}
 
