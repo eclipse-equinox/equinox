@@ -12,22 +12,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Hashtable;
 import java.util.Vector;
-
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
-import org.eclipse.equinox.internal.ds.model.ServiceComponent;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
-
 
 /**
  * @author Stoyan Boshev
@@ -64,9 +58,11 @@ public class ComponentReference implements Externalizable {
 
 	// --- begin: model
 
-	// ServiceReferences binded to this reference
-	public Vector serviceReferences = new Vector(2);
+	// Contains mapping of ServiceReference to ComponentInstance or Vector of ComponentInstances.
+	// The service reference is bound to the ComponentInstance or to each of the ComponentInstances in the Vector 
+	public Hashtable serviceReferences = new Hashtable(3);
 
+	// avoids recursive calling of unbind method for one and the same instance 
 	private Hashtable serviceReferencesToUnbind = new Hashtable(3);
 
 	static final Class[] SERVICE_REFERENCE = new Class[] {ServiceReference.class};
@@ -199,12 +195,30 @@ public class ComponentReference implements Externalizable {
 	final void bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
 		if (bind != null) {
 			// DON'T rebind the same object again
+			boolean isComponentFactory = component.factory != null;
 			synchronized (serviceReferences) {
-				if (serviceReferences.contains(serviceReference)) {
-					Activator.log.warning("ComponentReference.bind(): service reference already bound: " + serviceReference, null);
-					return;
+				if (isComponentFactory) {
+					Vector instances = (Vector) serviceReferences.get(serviceReference);
+					if (instances == null) {
+						instances = new Vector(2);
+						instances.addElement(instance);
+						serviceReferences.put(serviceReference, instances);
+					} else if (instances.contains(instance)) {
+						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null);
+						return;
+					} else {
+						instances.addElement(instance);
+					}
 				} else {
-					serviceReferences.addElement(serviceReference);
+					Object compInstance = serviceReferences.get(serviceReference);
+					if (compInstance == instance) {
+						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null);
+						return;
+					} else if (compInstance != null) {
+						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to another instance: " + compInstance, null);
+						return;
+					}
+					serviceReferences.put(serviceReference, instance);
 				}
 			}
 			// retrieve the method from cache
@@ -225,12 +239,23 @@ public class ComponentReference implements Externalizable {
 					methodParam = ((ComponentInstanceImpl) instance).bindedServices.get(serviceReference);
 					if (methodParam == null) {
 						methodParam = InstanceProcess.staticRef.getService(reference, serviceReference);
+						if (methodParam != null) {
+							((ComponentInstanceImpl) instance).bindedServices.put(serviceReference, methodParam);
+						}
 					}
 					if (methodParam == null) {
 						// cannot get serviceObject because of circularity
 
-						//remove the service reference marked as bind
-						serviceReferences.remove(serviceReference);
+						//remove the component instance marked as bind
+						if (isComponentFactory) {
+							Vector instances = (Vector) serviceReferences.get(serviceReference);
+							instances.removeElement(instance);
+							if (instances.isEmpty()) {
+								serviceReferences.remove(serviceReference);
+							}
+						} else {
+							serviceReferences.remove(serviceReference);
+						}
 						return;
 					}
 				}
@@ -248,8 +273,16 @@ public class ComponentReference implements Externalizable {
 					SCRUtil.release(params);
 				}
 			} else {
-				//remove the service reference marked as bind
-				serviceReferences.remove(serviceReference);
+				//remove the component instance marked as bind
+				if (isComponentFactory) {
+					Vector instances = (Vector) serviceReferences.get(serviceReference);
+					instances.removeElement(instance);
+					if (instances.isEmpty()) {
+						serviceReferences.remove(serviceReference);
+					}
+				} else {
+					serviceReferences.remove(serviceReference);
+				}
 
 				// could be also circularity break
 				Activator.log.warning("ComponentReference.bind(): bind method " + bind + " is not accessible!", null);
@@ -259,19 +292,52 @@ public class ComponentReference implements Externalizable {
 
 	public final void unbind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) {
 		// don't unbind an object that wasn't bound
-		int index;
+		boolean referenceExists = true;
+		boolean componentFactory = (component.factory != null);
 		synchronized (serviceReferences) {
-			index = serviceReferences.indexOf(serviceReference);
-			if (index >= 0) {
-				if (serviceReferencesToUnbind.containsKey(serviceReference)) {
-					//the service reference is already in process of unbinding
-					return;
+			if (componentFactory) {
+				Vector instances = (Vector) serviceReferences.get(serviceReference);
+				if (instances == null) {
+					referenceExists = false;
 				} else {
-					serviceReferencesToUnbind.put(serviceReference, "");
+					if (!instances.contains(instance)) {
+						Activator.log.warning("ComponentReference.unbind(): component instance not bound! It is: " + instance, null);
+						return;
+					}
+				}
+			} else {
+				Object compInstance = serviceReferences.get(serviceReference);
+				if (compInstance == null) {
+					referenceExists = false;
+				} else {
+					if (compInstance != instance) {
+						Activator.log.warning("ComponentReference.unbind(): component instance not bound! It is: " + instance, null);
+						return;
+					}
+				}
+			}
+			if (referenceExists) {
+				if (componentFactory) {
+					Vector instances = (Vector) serviceReferencesToUnbind.get(serviceReference);
+					if (instances != null && instances.contains(instance)) {
+						//the service reference is already in process of unbinding
+						return;
+					}
+					if (instances == null) {
+						instances = new Vector(2);
+						serviceReferencesToUnbind.put(serviceReference, instances);
+					}
+					instances.addElement(instance);
+				} else {
+					if (serviceReferencesToUnbind.get(serviceReference) == instance) {
+						//the service reference is already in process of unbinding
+						return;
+					}
+					serviceReferencesToUnbind.put(serviceReference, instance);
 				}
 			}
 		}
-		if (index == -1) {
+		if (!referenceExists) {
 			Activator.log.warning("ComponentReference.unbind(): invalid service reference " + serviceReference, null);
 			return;
 		}
@@ -315,8 +381,22 @@ public class ComponentReference implements Externalizable {
 			}
 		} finally {
 			synchronized (serviceReferences) {
-				serviceReferences.removeElementAt(index);
-				serviceReferencesToUnbind.remove(serviceReference);
+				if (componentFactory) {
+					Vector instances = (Vector) serviceReferences.get(serviceReference);
+					instances.removeElement(instance);
+					if (instances.isEmpty()) {
+						serviceReferences.remove(serviceReference);
+					}
+
+					instances = (Vector) serviceReferencesToUnbind.get(serviceReference);
+					instances.removeElement(instance);
+					if (instances.isEmpty()) {
+						serviceReferencesToUnbind.remove(serviceReference);
+					}
+				} else {
+					serviceReferences.remove(serviceReference);
+					serviceReferencesToUnbind.remove(serviceReference);
+				}
 			}
 		}
 		if (((ComponentInstanceImpl) instance).bindedServices.remove(serviceReference) != null) {

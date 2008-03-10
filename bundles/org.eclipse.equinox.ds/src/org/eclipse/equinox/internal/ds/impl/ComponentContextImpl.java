@@ -13,16 +13,10 @@ package org.eclipse.equinox.internal.ds.impl;
 
 import java.util.Dictionary;
 import java.util.Vector;
-
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-import org.osgi.service.component.ComponentInstance;
+import org.osgi.framework.*;
+import org.osgi.service.component.*;
 
 /**
  * ComponentContextImpl.java
@@ -92,7 +86,7 @@ public class ComponentContextImpl implements ComponentContext {
 				ServiceReference serviceReference = null;
 				synchronized (ref.serviceReferences) {
 					if (!ref.serviceReferences.isEmpty()) {
-						serviceReference = (ServiceReference) ref.serviceReferences.firstElement();
+						serviceReference = (ServiceReference) ref.serviceReferences.keys().nextElement();
 					}
 				}
 				try {
@@ -229,7 +223,7 @@ public class ComponentContextImpl implements ComponentContext {
 				ComponentReference ref = reference.reference;
 
 				if (ref.name.equals(name)) {
-					if (serviceReference == null || !ref.serviceReferences.contains(serviceReference)) {
+					if (serviceReference == null || !ref.serviceReferences.containsKey(serviceReference)) {
 						// the serviceReference is not bound to the specified
 						// reference
 						if (Activator.DEBUG) {

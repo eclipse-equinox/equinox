@@ -418,9 +418,9 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			// // null);
 		}
 
-		Vector serviceReferences = reference.reference.serviceReferences;
-		for (int i = serviceReferences.size() - 1; i >= 0; i--) {
-			reference.reference.unbind(reference, componentInstance, (ServiceReference) serviceReferences.elementAt(i));
+		Enumeration serviceReferences = reference.reference.serviceReferences.keys();
+		while (serviceReferences.hasMoreElements()) {
+			reference.reference.unbind(reference, componentInstance, (ServiceReference) serviceReferences.nextElement());
 		}
 	}
 
@@ -526,6 +526,9 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * @see ServiceComponentProp#delayActivateSCPNames
 	 */
 	public void setDelayActivateSCPName(String scpName) {
+		if (Activator.DEBUG) {
+			Activator.log.debug("Setting delay activate SCP: " + scpName, null);
+		}
 		if (delayActivateSCPNames == null) {
 			delayActivateSCPNames = new Vector(1);
 			delayActivateSCPNames.addElement(scpName);
