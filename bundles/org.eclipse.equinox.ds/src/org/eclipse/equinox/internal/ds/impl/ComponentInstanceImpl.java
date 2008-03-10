@@ -73,6 +73,7 @@ public class ComponentInstanceImpl implements ComponentInstance {
 		// free service references if some are left ungotten
 		freeServiceReferences();
 		componentContext = null;
+		instance = null;
 	}
 
 	// check whether some cached service references are not yet removed and
