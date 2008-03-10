@@ -524,4 +524,18 @@ public class SecurePreferences {
 		String moduleID = data.getModuleID();
 		return (moduleID != null);
 	}
+
+	public void clearPasswordVerification(SecurePreferencesContainer container) {
+		PasswordExt defaultPassword = getDefaultPassword(container);
+		if (defaultPassword != null)
+			return;
+
+		String moduleID = null;
+		if (container.hasOption(IProviderHints.REQUIRED_MODULE_ID)) {
+			Object idHint = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
+			if (idHint instanceof String)
+				moduleID = (String) idHint;
+		}
+		getRoot().clearPasswordVerification(moduleID, container);
+	}
 }

@@ -37,6 +37,8 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	private IEclipsePreferences eclipseNode = null;
 	private String defaultCipherAlgorithm;
 
+	protected Shell parentShell = null;
+
 	private Map availableCiphers = null;
 	private Combo cipherSelector = null;
 
@@ -51,6 +53,8 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	protected Control createContents(Composite parent) {
+		parentShell = parent.getShell();
+
 		Composite pageArea = new Composite(parent, SWT.NONE);
 		pageArea.setLayout(new RowLayout());
 
@@ -60,10 +64,22 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		defaultPrefsGroup.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		defaultPrefsGroup.setLayout(new GridLayout());
 
-		// TBD in future, add password change functionality
-		//		Button buttonChangePassword = new Button(defaultPrefsGroup, SWT.NONE);
-		//		buttonChangePassword.setText(SecUIMessages.changePasswordButton);
-		//		buttonChangePassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		Button buttonChangePassword = new Button(defaultPrefsGroup, SWT.NONE);
+		buttonChangePassword.setText(SecUIMessages.changePasswordButton);
+		buttonChangePassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		buttonChangePassword.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				Shell shell = (parentShell == null) ? new Shell() : parentShell;
+				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
+				ChangePasswordWizardDialog dialog = new ChangePasswordWizardDialog(shell, rootNode);
+				dialog.open();
+			}
+		});
 
 		Button buttonDetele = new Button(defaultPrefsGroup, SWT.NONE);
 		buttonDetele.setText(SecUIMessages.deleteButton);

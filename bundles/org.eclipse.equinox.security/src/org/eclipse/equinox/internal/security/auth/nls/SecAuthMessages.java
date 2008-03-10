@@ -80,6 +80,8 @@ public class SecAuthMessages extends NLS {
 	public static String noAlgorithms;
 	public static String noAlgorithm;
 	public static String usingAlgorithm;
+	public static String decryptingError;
+	public static String encryptingError;
 
 	static {
 		// load message values from bundle file

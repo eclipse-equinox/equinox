@@ -121,6 +121,18 @@ public class SecUIMessages extends NLS {
 	public static String exportDialogCancel;
 	public static String fileSelectTitle;
 
+	// re-code wizard
+	public static String changePasswordWizardTitle;
+	public static String wizardDecodeTitle;
+	public static String wizardDecode;
+	public static String wizardDecodeLabel;
+	public static String wizardEncodeTitle;
+	public static String wizardEncode;
+	public static String wizardEncodeLabel;
+	public static String wizardDecodeWarning;
+	public static String wizardDoneTitle;
+	public static String wizardDone;
+
 	static {
 		// load message values from bundle file
 		reloadMessages();

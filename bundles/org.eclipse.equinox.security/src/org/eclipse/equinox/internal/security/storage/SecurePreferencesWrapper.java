@@ -161,4 +161,10 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 	public boolean isEncrypted(String key) throws StorageException {
 		return node.isEncrypted(key);
 	}
+
+	/////////////////////////////////////////////////////////////////////////////////////
+	// really internal; used for password reset; don't use
+	public void clearPasswordVerification() {
+		node.clearPasswordVerification(container);
+	}
 }

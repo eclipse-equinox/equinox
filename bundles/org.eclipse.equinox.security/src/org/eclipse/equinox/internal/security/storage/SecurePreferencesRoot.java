@@ -226,4 +226,17 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			passwordCache.clear();
 		}
 	}
+
+	public void clearPasswordVerification(String moduleID, SecurePreferencesContainer container) {
+		PasswordProviderModuleExt moduleExt;
+		try {
+			moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
+		} catch (StorageException e) {
+			return; // no module -> nothing to do
+		}
+		String key = moduleExt.getID();
+		SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
+		if (node.hasKey(key))
+			node.remove(key);
+	}
 }
