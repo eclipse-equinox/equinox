@@ -765,7 +765,7 @@ public final class Resolver implements WorkPerformer {
 				if (references != null) {
 					for (int j = 0; j < references.size(); j++) {
 						Reference reference = (Reference) references.elementAt(j);
-						if (reference.policy == ComponentReference.POLICY_STATIC && reference.reference.serviceReferences.contains(serviceReference)) {
+						if (reference.policy == ComponentReference.POLICY_STATIC && reference.reference.serviceReferences.containsKey(serviceReference)) {
 
 							if (toUnbind == null) {
 								toUnbind = new Vector(2);
@@ -904,9 +904,11 @@ public final class Resolver implements WorkPerformer {
 						Reference reference = (Reference) enabledSCP.references.elementAt(j);
 
 						// see if it resolves to one of the other enabled SCPs
-						ServiceComponentProp providerSCP = reference.findProviderSCP(scpEnabled);
-						if (providerSCP != null) {
-							dependencyVector.addElement(new ReferenceSCPWrapper(reference, providerSCP));
+						ServiceComponentProp[] providerSCPs = reference.selectProviders(scpEnabled);
+						if (providerSCPs != null) {
+							for (int k = 0; k < providerSCPs.length; k++) {
+								dependencyVector.addElement(new ReferenceSCPWrapper(reference, providerSCPs[k]));
+							}
 						}
 					} // end for
 
@@ -975,7 +977,7 @@ public final class Resolver implements WorkPerformer {
 				if (currentStack.contains(refSCP)) {
 					// may throw circularity exception
 					processDependencyCycle(refSCP, currentStack);
-					return;
+					continue;
 				}
 				currentStack.addElement(refSCP);
 

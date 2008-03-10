@@ -24,10 +24,10 @@ import org.osgi.service.component.ComponentConstants;
  * one.
  * 
  * @author Valentin Valchev
+ * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
+ * @version 1.1
  */
-
 public final class Reference {
 
 	public ComponentReference reference;
@@ -181,13 +181,18 @@ public final class Reference {
 		}
 		// now check if the Service Reference is found in the list of saved
 		// ServiceReferences
-		if (!this.reference.serviceReferences.contains(reference)) {
+		if (!this.reference.serviceReferences.containsKey(reference)) {
 			return false;
 		}
 		return true;
 	}
 
-	public ServiceComponentProp findProviderSCP(Vector scps) {
+	/**
+	 * Selects the providers that provide service required by this reference
+	 * @param scps  the list of SCPs to be searched for providers
+	 * @return an array of SCPs that provide service required by this reference
+	 */
+	public ServiceComponentProp[] selectProviders(Vector scps) {
 		Filter filter;
 		try {
 			filter = FrameworkUtil.createFilter(target);
@@ -195,15 +200,18 @@ public final class Reference {
 			Activator.log.warning("Reference.findProviderSCP(): invalid target filter " + target, e);
 			return null;
 		}
+		Vector result = new Vector(2);
 		for (int i = 0; i < scps.size(); i++) {
 			ServiceComponentProp providerSCP = (ServiceComponentProp) scps.elementAt(i);
 			if (providerSCP.serviceComponent.serviceInterfaces != null && providerSCP.serviceComponent.serviceInterfaces.contains(interfaceName)) {
 				if (filter.match(providerSCP.getProperties())) {
-					return providerSCP;
+					result.addElement(providerSCP);
 				}
 			}
 		}
-		return null;
+		ServiceComponentProp[] res = new ServiceComponentProp[result.size()];
+		result.copyInto(res);
+		return res;
 	}
 
 	public void setScp(ServiceComponentProp scp) {
