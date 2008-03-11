@@ -16,8 +16,10 @@ import javax.crypto.spec.PBEKeySpec;
  * Password provider modules should extend this class. Secure storage will
  * ask modules for passwords used to encrypt entries stored in the secure preferences.
  * <p>
- * Password provider modules can be through of as trusted 3rd parties used
- * to provide passwords to open keyrings containing secure preferences.
+ * Password provider modules can be thought of as trusted 3rd parties used
+ * to provide passwords to open keyrings containing secure preferences. They can do
+ * it, for instance, by asking the user to enter password, or integrating with operating
+ * system login, or exchanging information with a device such as a smart card reader.
  * </p><p>
  * Use org.eclipse.equinox.security.secureStorage extension point to contribute 
  * password provider module to the secure storage system.
