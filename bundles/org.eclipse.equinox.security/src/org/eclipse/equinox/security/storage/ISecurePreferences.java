@@ -58,7 +58,7 @@ import java.io.IOException;
  * passwords. If you need to securely store large objects, consider encrypting such objects in 
  * a symmetric way using randomly generated password and use secure preferences to store the password. 
  * </p><p>
- * It secure preferences were modified, the framework will automatically save them on shutdown.
+ * If secure preferences were modified, the framework will automatically save them on shutdown.
  * </p><p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>

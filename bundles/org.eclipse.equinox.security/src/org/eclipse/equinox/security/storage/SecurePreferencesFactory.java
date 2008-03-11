@@ -17,7 +17,7 @@ import org.eclipse.equinox.internal.security.storage.SecurePreferencesMapper;
 import org.eclipse.equinox.security.storage.provider.IProviderHints;
 
 /**
- * Use this class to access to secure preferences. Secure preferences allow storage of
+ * Use this class to access secure preferences. Secure preferences allow storage of
  * data in an encrypted form.  
  * <p>
  * This class is not intended to be instantiated or extended by clients.
@@ -28,8 +28,8 @@ final public class SecurePreferencesFactory {
 	/**
 	 * Returns default secure preferences.
 	 * <p>
-	 * The framework will attempt to open secure preferences in a user-specific location 
-	 * so that information stored can be shared among all programs run by the user. 
+	 * The framework will attempt to open secure preferences in a user-specific location. 
+	 * As a result, the information stored can be shared among all programs run by the user. 
 	 * The location is determined as follows:
 	 * <ul>
 	 * <li> Java's "user.home" environment variable. On Windows system it usually 
