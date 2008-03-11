@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,6 +134,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		try {
 			KeyStore store = getKeyStore();
 			synchronized (store) {
+				String oldAlias = store.getCertificateAlias(cert);
+				if (null != oldAlias)
+					throw new CertificateException(SignedContentMessages.Default_Trust_Existing_Cert);
+				Certificate oldCert = store.getCertificate(alias);
+				if (null != oldCert)
+					throw new CertificateException(SignedContentMessages.Default_Trust_Existing_Alias);
 				store.setCertificateEntry(alias, cert);
 				saveStore(store, getOutputStream());
 			}
@@ -171,6 +177,9 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		try {
 			KeyStore store = getKeyStore();
 			synchronized (store) {
+				Certificate oldCert = store.getCertificate(alias);
+				if (oldCert == null)
+					throw new CertificateException(SignedContentMessages.Default_Trust_Cert_Not_Found);
 				store.deleteEntry(alias);
 				saveStore(store, getOutputStream());
 			}
