@@ -393,10 +393,6 @@ public interface IExtensionRegistry {
 	 * The listener continues to receive notifications until it is removed. 
 	 * </p><p>
 	 * This method has no effect if the listener is already registered. 
-	 * </p><p>
-	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
-	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
-	 * feedback from early adopters.
 	 * </p>
 	 * @param listener the listener
 	 * @since 3.4 
@@ -412,10 +408,6 @@ public interface IExtensionRegistry {
 	 * The listener continues to receive notifications until it is removed. 
 	 * </p><p>
 	 * This method has no effect if the listener is already registered. 
-	 * </p><p>
-	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
-	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
-	 * feedback from early adopters.
 	 * </p>
 	 * @param listener the listener
 	 * @param extensionPointId the unique identifier of extension point
@@ -428,10 +420,6 @@ public interface IExtensionRegistry {
 	 * Removes the given registry change listener from this registry.
 	 * <p>
 	 * This method has no effect if the listener is not registered. 
-	 * </p><p>
-	 * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
-	 * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
-	 * feedback from early adopters.
 	 * </p>
 	 * @param listener the listener
 	 * @see #addListener(IRegistryEventListener)

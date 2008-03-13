@@ -21,10 +21,6 @@ import java.util.EventListener;
  * This interface can be used without OSGi running.
  * </p><p>
  * Clients may implement this interface.
- * </p><p>
- * <b>Note:</b> This is a preliminary form of a new API that might change or be removed 
- * altogether prior to 3.4 release. It is being made available at this early stage to solicit 
- * feedback from early adopters.
  * </p>
  * @see IExtensionRegistry#addListener(IRegistryEventListener, String)
  * @since 3.4
