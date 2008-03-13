@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -356,7 +356,7 @@ public class ManifestElement {
 					} else
 						directive = true;
 				}
-				if (c == ';' || c == '\0') /* more */{
+				if (c == ';' || c == ',' || c == '\0') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
 					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
