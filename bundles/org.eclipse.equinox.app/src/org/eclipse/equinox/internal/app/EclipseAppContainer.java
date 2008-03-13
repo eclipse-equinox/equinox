@@ -75,6 +75,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	private String defaultAppId;
 	private DefaultApplicationListener defaultAppListener;
 	private ParameterizedRunnable defaultMainThreadAppHandle; // holds the default app handle to be run on the main thread
+	private volatile boolean missingApp = false;
+	private MainApplicationLauncher missingAppLauncher;
 
 	public EclipseAppContainer(BundleContext context, IExtensionRegistry extensionRegistry) {
 		this.context = context;
@@ -93,7 +95,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		if (startDefaultProp == null || "true".equalsIgnoreCase(startDefaultProp)) { //$NON-NLS-1$
 			// Start the default application
 			try {
-				startDefaultApp();
+				startDefaultApp(true);
 			} catch (ApplicationException e) {
 				Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, Messages.application_errorStartDefault, 0, e, null));
 			}
@@ -223,23 +225,30 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		}
 	}
 
-	private void startDefaultApp() throws ApplicationException {
+	void startDefaultApp(boolean delayError) throws ApplicationException {
 		// find the default application
 		String applicationId = getDefaultAppId();
 		EclipseAppDescriptor defaultDesc = null;
 		Map args = new HashMap(2);
 		args.put(EclipseAppDescriptor.APP_DEFAULT, Boolean.TRUE);
-		if (applicationId == null) {
+		if (applicationId == null && !delayError) {
 			// the application id is not set; use a descriptor that will throw an exception
 			args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(Messages.application_noIdFound));
 			defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 		} else {
 			defaultDesc = getAppDescriptor(applicationId);
-			if (defaultDesc == null) {
+			if (defaultDesc == null && !delayError) {
 				// the application id is not available in the registry; use a descriptor that will throw an exception
 				args.put(ErrorApplication.ERROR_EXCEPTION, new RuntimeException(NLS.bind(Messages.application_notFound, applicationId, getAvailableAppsMsg())));
 				defaultDesc = getAppDescriptor(EXT_ERROR_APP);
 			}
+		}
+		if (delayError && defaultDesc == null) {
+			// could not find the application; but we want to delay the error.
+			// another bundle may get installed that provides the application
+			// before we actually try to launch it.
+			missingApp = true;
+			return;
 		}
 		if (defaultDesc != null)
 			defaultDesc.launch(args);
@@ -299,6 +308,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 		if (((EclipseAppDescriptor) appHandle.getApplicationDescriptor()).getThreadType() == EclipseAppDescriptor.FLAG_TYPE_MAIN_THREAD) {
 			// use the ApplicationLauncher provided by the framework to ensure it is launched on the main thread
 			DefaultApplicationListener curDefaultApplicationListener = null;
+			MainApplicationLauncher curMissingAppLauncher = null;
 			ApplicationLauncher appLauncher = null;
 			synchronized (this) {
 				appLauncher = (ApplicationLauncher) launcherTracker.getService();
@@ -312,14 +322,18 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR);
 				}
 				curDefaultApplicationListener = defaultAppListener;
+				curMissingAppLauncher = missingAppLauncher;
 			}
 			if (curDefaultApplicationListener != null)
 				curDefaultApplicationListener.launch(appHandle);
+			else if (curMissingAppLauncher != null)
+				curMissingAppLauncher.launch(appHandle);
 			else
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 		} else {
 			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
 			DefaultApplicationListener curDefaultApplicationListener = null;
+			MainApplicationLauncher curMissingAppLauncher = null;
 			if (isDefault) {
 				ApplicationLauncher appLauncher = null;
 				synchronized (this) {
@@ -333,8 +347,12 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 						defaultMainThreadAppHandle = curDefaultApplicationListener;
 						return;
 					}
+					curMissingAppLauncher = missingAppLauncher;
 				}
-				appLauncher.launch(curDefaultApplicationListener, null);
+				if (curMissingAppLauncher != null)
+					curMissingAppLauncher.launch(curDefaultApplicationListener);
+				else
+					appLauncher.launch(curDefaultApplicationListener, null);
 			}
 		}
 	}
@@ -571,6 +589,11 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			appRunnable = defaultMainThreadAppHandle;
 			// null out so we do not attempt to start this handle again
 			defaultMainThreadAppHandle = null;
+			if (appRunnable == null && missingApp) {
+				missingAppLauncher = new MainApplicationLauncher(this);
+				appRunnable = missingAppLauncher;
+				missingApp = false;
+			}
 		}
 		if (appRunnable != null)
 			// found a main threaded app; start it now that the app launcher is available
