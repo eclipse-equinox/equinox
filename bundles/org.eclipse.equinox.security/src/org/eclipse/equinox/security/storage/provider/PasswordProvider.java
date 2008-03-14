@@ -28,26 +28,31 @@ import javax.crypto.spec.PBEKeySpec;
 abstract public class PasswordProvider {
 
 	/**
+	 * Bit mask for the password type field of the {@link #getPassword(IPreferencesContainer, int)}
+	 * method. If value at this bit set to <code>1</code>, it indicates that a new
+	 * password should be created; otherwise this is a request for the password previously 
+	 * used for this secure storage.
+	 */
+	final public static int CREATE_NEW_PASSWORD = 1 << 0;
+
+	/**
+	 * Bit mask for the password type field of the {@link #getPassword(IPreferencesContainer, int)}
+	 * method. If value at this bit set to <code>1</code>, it indicates that a new password
+	 * is requested as a part of the password change operation.
+	 */
+	final public static int PASSWORD_CHANGE = 1 << 1;
+
+	/**
 	 * This method should return the password used to encrypt entries in the secure 
 	 * preferences.
 	 * @param container container of the secure preferences
+	 * @param passwordType the collection of bits that describes password type requested. See
+	 * {@link #CREATE_NEW_PASSWORD} and {@link #PASSWORD_CHANGE}. When evaluating value of this
+	 * field use bit-wise filters as additional bits might be used in future versions
 	 * @return password used to encrypt entries in the secure preferences, <code>null</code>
 	 * if unable to obtain password
 	 */
-	abstract public PBEKeySpec login(IPreferencesContainer container);
-
-	/**
-	 * A logical equivalent of "logout" for the password providers. 
-	 * <p>
-	 * The module should clear its cached password if it is the password that can be
-	 * re-obtained from some third party (such as asking user to type it in). Modules
-	 * should not discard auto generated passwords that are not available from other  
-	 * sources.
-	 * </p>
-	 * @param container container of the secure preferences, might be <code>null</code>
-	 * if logout request is not related to a specific container
-	 */
-	abstract public void logout(IPreferencesContainer container);
+	abstract public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType);
 
 	/**
 	 * Constructor.
@@ -64,7 +69,7 @@ abstract public class PasswordProvider {
 	 * @return <code>true</code> if a different password might be provided; <code>false</code>
 	 * otherwise. If in doubt, return <code>false</code>
 	 */
-	public boolean changePassword(Exception e, IPreferencesContainer container) {
+	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		return false;
 	}
 

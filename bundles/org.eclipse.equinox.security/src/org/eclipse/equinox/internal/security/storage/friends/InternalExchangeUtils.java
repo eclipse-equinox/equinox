@@ -38,7 +38,7 @@ public class InternalExchangeUtils {
 	 * Clears cached passwords from the open storages and password providers.
 	 */
 	static public void passwordProvidersLogout() {
-		PasswordProviderSelector.getInstance().logout();
+		SecurePreferencesMapper.clearPasswordCache();
 	}
 
 	/**

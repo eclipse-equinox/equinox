@@ -162,9 +162,7 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 		return node.isEncrypted(key);
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////
-	// really internal; used for password reset; don't use
-	public void clearPasswordVerification() {
-		node.clearPasswordVerification(container);
+	public boolean passwordChanging() {
+		return node.passwordChanging(container);
 	}
 }

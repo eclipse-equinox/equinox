@@ -21,15 +21,11 @@ public class LowPriorityModule extends PasswordProvider {
 
 	public final static PBEKeySpec PASSWORD = new PBEKeySpec("LowPriorityPassword".toCharArray());
 
-	public PBEKeySpec login(IPreferencesContainer controller) {
+	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		return PASSWORD;
 	}
 
-	public boolean changePassword(Exception e, IPreferencesContainer container) {
+	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		return false;
-	}
-
-	public void logout(IPreferencesContainer container) {
-		// noting to do
 	}
 }

@@ -16,10 +16,12 @@ import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.PBEKeySpec;
+import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.equinox.security.storage.provider.IProviderHints;
+import org.eclipse.equinox.security.storage.provider.*;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Root secure preference node. In addition to usual things it stores location, modified
@@ -54,6 +56,16 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	 * Text used to verify password
 	 */
 	private final static String PASSWORD_VERIFICATION_SAMPLE = "-> brown fox jumped over lazy dog <-"; //$NON-NLS-1$
+
+	/**
+	 * Pseudo-module ID to use when encryption is done with the default password.
+	 */
+	protected final static String DEFAULT_PASSWORD_ID = "org.eclipse.equinox.security.noModule"; //$NON-NLS-1$
+
+	/**
+	 * Maximum unsuccessful decryption attempts per operation
+	 */
+	static protected final int MAX_ATTEMPTS = 20;
 
 	final private URL location;
 
@@ -164,7 +176,32 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		}
 	}
 
-	public PasswordExt getModulePassword(String moduleID, SecurePreferencesContainer container) throws StorageException {
+	/**
+	 * Provides password for a new entry using:
+	 * 1) default password, if any
+	 * 2a) if options specify usage of specific module, that module is polled to produce password
+	 * 2b) otherwise, password provider with highest priority is used to produce password
+	 */
+	public PasswordExt getPassword(String moduleID, IPreferencesContainer container, boolean encryption) throws StorageException {
+		if (encryption) { // provides password for a new entry
+			PasswordExt defaultPassword = getDefaultPassword(container);
+			if (defaultPassword != null)
+				return defaultPassword;
+			moduleID = getDefaultModuleID(container);
+		} else { // provides password for previously encrypted entry using its specified password provider module
+			if (moduleID == null)
+				throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.invalidEntryFormat);
+			if (DEFAULT_PASSWORD_ID.equals(moduleID)) { // was default password used?
+				PasswordExt defaultPassword = getDefaultPassword(container);
+				if (defaultPassword != null)
+					return defaultPassword;
+				throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.noDefaultPassword);
+			}
+		}
+		return getModulePassword(moduleID, container);
+	}
+
+	private PasswordExt getModulePassword(String moduleID, IPreferencesContainer container) throws StorageException {
 		if (DEFAULT_PASSWORD_ID.equals(moduleID)) // this should never happen but add this check just in case
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
 
@@ -177,13 +214,13 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			// is there password verification string already?
 			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
 			boolean newPassword = !node.hasKey(key);
-			container.setOption(IProviderHints.NEW_PASSWORD, new Boolean(newPassword));
+			int passwordType = newPassword ? PasswordProvider.CREATE_NEW_PASSWORD : 0;
 
 			boolean validPassword = false;
 			PasswordExt passwordExt = null;
 
 			for (int i = 0; i < MAX_ATTEMPTS; i++) {
-				PBEKeySpec password = moduleExt.login(container);
+				PBEKeySpec password = moduleExt.getPassword(container, passwordType);
 				if (password == null)
 					return null;
 				passwordExt = new PasswordExt(password, key);
@@ -206,11 +243,9 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				} catch (IllegalBlockSizeException e) {
 					if (!moduleExt.changePassword(e, container))
 						break;
-					moduleExt.logout(container);
 				} catch (BadPaddingException e) {
 					if (!moduleExt.changePassword(e, container))
 						break;
-					moduleExt.logout(container);
 				}
 			}
 			if (validPassword) {
@@ -221,22 +256,78 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		}
 	}
 
+	/**
+	 * Retrieves default password from options, if any
+	 */
+	private PasswordExt getDefaultPassword(IPreferencesContainer container) {
+		if (container.hasOption(IProviderHints.DEFAULT_PASSWORD)) {
+			Object passwordHint = container.getOption(IProviderHints.DEFAULT_PASSWORD);
+			if (passwordHint instanceof PBEKeySpec)
+				return new PasswordExt((PBEKeySpec) passwordHint, DEFAULT_PASSWORD_ID);
+		}
+		return null;
+	}
+
+	/**
+	 * Retrieves requested module ID from options, if any
+	 */
+	private String getDefaultModuleID(IPreferencesContainer container) {
+		if (container.hasOption(IProviderHints.REQUIRED_MODULE_ID)) {
+			Object idHint = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
+			if (idHint instanceof String)
+				return (String) idHint;
+		}
+		return null;
+	}
+
+	public boolean onChangePassword(IPreferencesContainer container) {
+		// validation: can't change externally supplied password
+		PasswordExt defaultPassword = getDefaultPassword(container);
+		if (defaultPassword != null)
+			return false;
+		String moduleID = getDefaultModuleID(container);
+
+		// validation: must have a password module
+		PasswordProviderModuleExt moduleExt;
+		try {
+			moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
+		} catch (StorageException e) {
+			return false; // no module -> nothing to do
+		}
+
+		// obtain new password first
+		int passwordType = PasswordProvider.CREATE_NEW_PASSWORD | PasswordProvider.PASSWORD_CHANGE;
+		PBEKeySpec password = moduleExt.getPassword(container, passwordType);
+		if (password == null)
+			return false;
+
+		synchronized (passwordCache) { // we are good to go, lock into single processing thread
+			// create verification node
+			String key = moduleExt.getID();
+			PasswordExt passwordExt = new PasswordExt(password, key);
+			CryptoData encryptedValue;
+			try {
+				encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
+			} catch (StorageException e) {
+				String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
+				AuthPlugin.getDefault().logError(msg, e);
+				return false;
+			}
+
+			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
+			node.internalPut(key, encryptedValue.toString());
+			markModified();
+
+			// store password in the memory cache
+			passwordCache.put(key, passwordExt);
+		}
+		return true;
+	}
+
 	public void clearPasswordCache() {
 		synchronized (passwordCache) {
 			passwordCache.clear();
 		}
 	}
 
-	public void clearPasswordVerification(String moduleID, SecurePreferencesContainer container) {
-		PasswordProviderModuleExt moduleExt;
-		try {
-			moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
-		} catch (StorageException e) {
-			return; // no module -> nothing to do
-		}
-		String key = moduleExt.getID();
-		SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
-		if (node.hasKey(key))
-			node.remove(key);
-	}
 }

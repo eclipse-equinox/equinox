@@ -41,11 +41,13 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	protected PBEKeySpec generatedPassword;
 
 	final protected boolean confirmPassword;
+	final protected boolean passwordChange;
 	final protected String location;
 
-	public StorageLoginDialog(boolean confirmPassword, String location) {
+	public StorageLoginDialog(boolean confirmPassword, boolean passwordChange, String location) {
 		super(null);
 		this.confirmPassword = confirmPassword;
+		this.passwordChange = passwordChange;
 		this.location = location;
 	}
 
@@ -74,7 +76,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		if (location == null)
-			shell.setText(SecUIMessages.dialogTitle);
+			shell.setText(passwordChange ? SecUIMessages.passwordChangeTitle : SecUIMessages.dialogTitle);
 		else
 			shell.setText(location);
 
@@ -84,7 +86,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 
-		setMessage(SecUIMessages.messageLogin);
+		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin);
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.labelPassword);
 		password = new Text(composite, SWT.LEFT | SWT.BORDER);
@@ -153,7 +155,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 				return false;
 			}
 		}
-		setMessage(SecUIMessages.messageLogin, IMessageProvider.NONE);
+		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin, IMessageProvider.NONE);
 		return true;
 	}
 

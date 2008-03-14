@@ -85,8 +85,7 @@ public class SecurePreferencesMapper {
 		}
 	}
 
-	// Not an API; links to the dynamic bundles
-	static public void clearCaches() {
+	static public void clearPasswordCache() {
 		synchronized (preferences) {
 			for (Iterator i = preferences.values().iterator(); i.hasNext();) {
 				SecurePreferencesRoot provider = (SecurePreferencesRoot) i.next();

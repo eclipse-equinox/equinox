@@ -47,7 +47,7 @@ public class WinCrypto extends PasswordProvider {
 	 */
 	private final static int PASSWORD_LENGTH = 250;
 
-	public PBEKeySpec login(IPreferencesContainer container) {
+	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
 		byte[] encryptedPassord = getEncryptedPassword(container);
 		if (encryptedPassord != null) {
 			byte[] decryptedPassword = windecrypt(encryptedPassord);
@@ -128,16 +128,12 @@ public class WinCrypto extends PasswordProvider {
 		return true;
 	}
 
-	public boolean changePassword(Exception e, IPreferencesContainer container) {
+	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		// It would be rather dangerous to allow this password to be changed
 		// as it would permanently trash all entries in the secure storage.
 		// Rather applications using get...() should handle exceptions and offer to overwrite 
 		// data on an entry-by-entry scale.
 		return false;
-	}
-
-	public void logout(IPreferencesContainer container) {
-		// nothing to do
 	}
 
 }

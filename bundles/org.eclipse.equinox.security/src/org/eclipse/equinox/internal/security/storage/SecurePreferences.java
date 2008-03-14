@@ -14,25 +14,12 @@ import java.io.IOException;
 import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.security.storage.StorageException;
-import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
-import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferences {
-
-	/**
-	 * Pseudo-module ID to use when encryption is done with the default password.
-	 */
-	protected final static String DEFAULT_PASSWORD_ID = "org.eclipse.equinox.security.noModule"; //$NON-NLS-1$
-
-	/**
-	 * Maximum unsuccessful decryption attempts per operation
-	 */
-	static protected final int MAX_ATTEMPTS = 20;
 
 	private static final String PATH_SEPARATOR = String.valueOf(IPath.SEPARATOR);
 
@@ -227,16 +214,11 @@ public class SecurePreferences {
 			return;
 		}
 
-		PasswordExt passwordExt = getPassword(container);
+		PasswordExt passwordExt = getRoot().getPassword(null, container, true);
+		if (passwordExt == null)
+			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
 
-		CryptoData encryptedValue;
-		try {
-			encryptedValue = getRoot().getCipher().encrypt(passwordExt, value.getBytes());
-		} catch (StorageException e) {
-			RuntimeException exception = new IllegalStateException();
-			exception.initCause(e);
-			throw exception;
-		}
+		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), value.getBytes());
 		internalPut(key, encryptedValue.toString());
 		markModified();
 	}
@@ -255,8 +237,12 @@ public class SecurePreferences {
 			return new String(data.getData());
 		}
 
+		PasswordExt passwordExt = getRoot().getPassword(moduleID, container, false);
+		if (passwordExt == null)
+			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+
 		try {
-			byte[] clearText = getRoot().getCipher().decrypt(getPassword(moduleID, container), data);
+			byte[] clearText = getRoot().getCipher().decrypt(passwordExt, data);
 			return new String(clearText);
 		} catch (IllegalBlockSizeException e) { // invalid password?
 			throw new StorageException(StorageException.DECRYPTION_ERROR, e);
@@ -264,59 +250,6 @@ public class SecurePreferences {
 			throw new StorageException(StorageException.DECRYPTION_ERROR, e);
 		}
 	}
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Password handling routines
-
-	/**
-	 * Provides password for a new entry using:
-	 * 1) default password, if any
-	 * 2a) if options specify usage of specific module, that module is polled to produce password
-	 * 2b) otherwise, password provider with highest priority is used to produce password
-	 */
-	private PasswordExt getPassword(SecurePreferencesContainer container) throws StorageException {
-		PasswordExt defaultPassword = getDefaultPassword(container);
-		if (defaultPassword != null)
-			return defaultPassword;
-
-		String moduleID = null;
-		if (container.hasOption(IProviderHints.REQUIRED_MODULE_ID)) {
-			Object idHint = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
-			if (idHint instanceof String)
-				moduleID = (String) idHint;
-		}
-		return getRoot().getModulePassword(moduleID, container);
-	}
-
-	/**
-	 * Provides password using specified password provider module
-	 */
-	private PasswordExt getPassword(String moduleID, SecurePreferencesContainer container) throws StorageException {
-		if (moduleID == null)
-			throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.invalidEntryFormat);
-		if (DEFAULT_PASSWORD_ID.equals(moduleID)) {
-			PasswordExt defaultPassword = getDefaultPassword(container);
-			if (defaultPassword != null)
-				return defaultPassword;
-			throw new StorageException(StorageException.NO_SECURE_MODULE, SecAuthMessages.noDefaultPassword);
-		}
-
-		return getRoot().getModulePassword(moduleID, container);
-	}
-
-	/**
-	 * Retrieves default password from options, if any
-	 */
-	private PasswordExt getDefaultPassword(IPreferencesContainer container) {
-		if (container.hasOption(IProviderHints.DEFAULT_PASSWORD)) {
-			Object passwordHint = container.getOption(IProviderHints.DEFAULT_PASSWORD);
-			if (passwordHint instanceof PBEKeySpec)
-				return new PasswordExt((PBEKeySpec) passwordHint, DEFAULT_PASSWORD_ID);
-		}
-		return null;
-	}
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	synchronized protected void internalPut(String key, String value) {
 		if (values == null)
@@ -525,17 +458,7 @@ public class SecurePreferences {
 		return (moduleID != null);
 	}
 
-	public void clearPasswordVerification(SecurePreferencesContainer container) {
-		PasswordExt defaultPassword = getDefaultPassword(container);
-		if (defaultPassword != null)
-			return;
-
-		String moduleID = null;
-		if (container.hasOption(IProviderHints.REQUIRED_MODULE_ID)) {
-			Object idHint = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
-			if (idHint instanceof String)
-				moduleID = (String) idHint;
-		}
-		getRoot().clearPasswordVerification(moduleID, container);
+	public boolean passwordChanging(SecurePreferencesContainer container) {
+		return getRoot().onChangePassword(container);
 	}
 }

@@ -31,16 +31,12 @@ public class PasswordProviderModuleExt {
 		return moduleID;
 	}
 
-	public PBEKeySpec login(IPreferencesContainer container) {
-		return providerModule.login(container);
-	}
-
-	public void logout(IPreferencesContainer container) {
-		providerModule.logout(container);
+	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
+		return providerModule.getPassword(container, passwordType);
 	}
 
 	public boolean changePassword(Exception e, IPreferencesContainer controller) {
-		return providerModule.changePassword(e, controller);
+		return providerModule.retryOnError(e, controller);
 	}
 
 }

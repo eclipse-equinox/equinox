@@ -32,7 +32,7 @@ public class ValuesView {
 	/**
 	 * Line to show for encrypted values
 	 */
-	private final static String ENCRYPTED_SUBSTITUTE = "••••••••••"; //$NON-NLS-1$
+	private final static String ENCRYPTED_SUBSTITUTE = "**********"; //$NON-NLS-1$
 
 	protected SecurePreferencesView parentView;
 	protected TableViewer tableViewer;

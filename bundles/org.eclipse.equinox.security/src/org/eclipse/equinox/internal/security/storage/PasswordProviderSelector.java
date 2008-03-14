@@ -115,21 +115,6 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		return allAvailableModules;
 	}
 
-	/**
-	 * Let's all instantiated modules to clear cached passwords. Passwords
-	 * are cached in open preferences and might be cached in the password
-	 * providers.
-	 */
-	public void logout() {
-		SecurePreferencesMapper.clearCaches();
-		synchronized (modules) {
-			for (Iterator i = modules.values().iterator(); i.hasNext();) {
-				PasswordProviderModuleExt module = (PasswordProviderModuleExt) i.next();
-				module.logout(null);
-			}
-		}
-	}
-
 	public PasswordProviderModuleExt findStorageModule(String expectedID) throws StorageException {
 		if (expectedID != null)
 			expectedID = expectedID.toLowerCase(); // ID is case-insensitive
@@ -203,7 +188,11 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	private void clearCaches() {
 		synchronized (modules) {
 			modules.clear();
-			SecurePreferencesMapper.clearCaches();
+			// If module was removed, clear its entry from the password cache.
+			// The code below clears all entries for simplicity, in future this
+			// can be made more limiting if a scenario exists where module
+			// removal/addition is a frequent event.
+			SecurePreferencesMapper.clearPasswordCache();
 		}
 	}
 }

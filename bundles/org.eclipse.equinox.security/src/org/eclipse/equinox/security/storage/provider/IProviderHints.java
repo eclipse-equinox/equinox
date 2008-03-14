@@ -48,10 +48,4 @@ public interface IProviderHints {
 	 * Storage will use this password. Expected value: {@link PBEKeySpec}.
 	 */
 	static final public String DEFAULT_PASSWORD = "org.eclipse.equinox.security.storage.defaultPassword"; //$NON-NLS-1$
-
-	/**
-	 * Specifies if a new password is being requested. Expected value: {@link Boolean}.
-	 */
-	static final public String NEW_PASSWORD = "org.eclipse.equinox.security.storage.newPassword"; //$NON-NLS-1$
-
 }

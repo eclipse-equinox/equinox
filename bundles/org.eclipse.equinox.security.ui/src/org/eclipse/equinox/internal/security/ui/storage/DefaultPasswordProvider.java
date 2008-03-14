@@ -24,35 +24,18 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class DefaultPasswordProvider extends PasswordProvider {
 
-	private PBEKeySpec password = null;
+	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
+		boolean newPassword = ((passwordType & CREATE_NEW_PASSWORD) != 0);
+		boolean passwordChange = ((passwordType & PASSWORD_CHANGE) != 0);
 
-	synchronized public PBEKeySpec login(IPreferencesContainer container) {
-		if (password != null)
-			return password;
 		String location = container.getLocation().getFile();
-		StorageLoginDialog loginDialog = new StorageLoginDialog(confirmPassword(container), location);
+		StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
 		if (loginDialog.open() == Window.OK)
-			password = loginDialog.getGeneratedPassword();
-		return password;
+			return loginDialog.getGeneratedPassword();
+		return null;
 	}
 
-	synchronized public void logout(IPreferencesContainer container) {
-		if (password == null)
-			return;
-		password.clearPassword();
-		password = null;
-	}
-
-	private boolean confirmPassword(IPreferencesContainer container) {
-		if (!container.hasOption(IProviderHints.NEW_PASSWORD))
-			return false;
-		Object confirmationHint = container.getOption(IProviderHints.NEW_PASSWORD);
-		if (confirmationHint != null && confirmationHint instanceof Boolean)
-			return ((Boolean) confirmationHint).booleanValue();
-		return false;
-	}
-
-	public boolean changePassword(Exception e, IPreferencesContainer container) {
+	public boolean retryOnError(Exception e, IPreferencesContainer container) {
 		boolean canPrompt = true;
 		if (container.hasOption(IProviderHints.PROMPT_USER)) {
 			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);

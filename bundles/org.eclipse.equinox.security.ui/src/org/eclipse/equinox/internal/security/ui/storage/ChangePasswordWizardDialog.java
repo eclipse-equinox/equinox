@@ -44,7 +44,7 @@ public class ChangePasswordWizardDialog extends WizardDialog {
 		if (currentPage instanceof ChangePasswordWizard.DecodePage) { // decrypt
 			if (!reEncrypter.decrypt()) {
 				MessageBox messageBox = new MessageBox(getShell(), SWT.YES | SWT.NO | SWT.ICON_WARNING);
-				messageBox.setText(SecUIMessages.wizardDecodeLabel);
+				messageBox.setText(SecUIMessages.changePasswordWizardTitle);
 				messageBox.setMessage(SecUIMessages.wizardDecodeWarning);
 				if (messageBox.open() == SWT.YES) {
 					setReturnCode(CANCEL);
@@ -53,6 +53,14 @@ public class ChangePasswordWizardDialog extends WizardDialog {
 				}
 			}
 		} else if (currentPage instanceof ChangePasswordWizard.EncodePage) { // encrypt
+			if (!reEncrypter.switchToNewPassword()) {
+				MessageBox messageBox = new MessageBox(getShell(), SWT.OK | SWT.ICON_ERROR);
+				messageBox.setText(SecUIMessages.changePasswordWizardTitle);
+				messageBox.setMessage(SecUIMessages.wizardSwitchError);
+				messageBox.open();
+				close();
+				return;
+			}
 			reEncrypter.encrypt();
 			recodeDone = true;
 		}

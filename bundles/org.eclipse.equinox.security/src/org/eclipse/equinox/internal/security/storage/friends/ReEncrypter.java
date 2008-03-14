@@ -86,15 +86,22 @@ public class ReEncrypter {
 	}
 
 	/**
-	 * The method will encrypt all data from the memory structure created by
-	 * decrypt using current passwords and providers. The original encrypted
-	 * data will be overwritten.
+	 * The method try to create new password. 
+	 * <p>
+	 * <strong>Note</strong> that after the successful completion of this method the secure storage has
+	 * new verification string and previously decoded values <b>must</b> be added via encrypt() method 
+	 * or they will become unavailable via conventional APIs.
+	 * </p>
+	 */
+	public boolean switchToNewPassword() {
+		return ((SecurePreferencesWrapper) root).passwordChanging();
+	}
+
+	/**
+	 * The method will encrypt all data from the memory structure created by decrypt using current 
+	 * passwords and providers. The original encrypted data will be overwritten.
 	 */
 	public boolean encrypt() {
-		InternalExchangeUtils.passwordProvidersLogout();
-		// TBD let providers know that this is a new password?
-		((SecurePreferencesWrapper) root).clearPasswordVerification();
-
 		boolean result = true;
 		for (Iterator i = elements.iterator(); i.hasNext();) {
 			TmpElement element = (TmpElement) i.next();

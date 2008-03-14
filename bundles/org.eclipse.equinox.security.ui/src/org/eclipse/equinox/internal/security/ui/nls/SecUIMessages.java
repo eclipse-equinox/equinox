@@ -27,11 +27,13 @@ public class SecUIMessages extends NLS {
 	public static String buttonLogin;
 	public static String buttonExit;
 	public static String messageLogin;
+	public static String messageLoginChange;
 	public static String messageEmptyPassword;
 	public static String messageNoMatch;
 	public static String labelPassword;
 	public static String labelConfirm;
 	public static String dialogTitle;
+	public static String passwordChangeTitle;
 	public static String showPassword;
 	public static String noDigestPassword;
 
@@ -130,6 +132,7 @@ public class SecUIMessages extends NLS {
 	public static String wizardEncode;
 	public static String wizardEncodeLabel;
 	public static String wizardDecodeWarning;
+	public static String wizardSwitchError;
 	public static String wizardDoneTitle;
 	public static String wizardDone;
 
