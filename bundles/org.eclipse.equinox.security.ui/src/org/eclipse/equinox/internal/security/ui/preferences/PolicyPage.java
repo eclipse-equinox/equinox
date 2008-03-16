@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.preferences;
 
+import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.osgi.internal.service.security.DefaultAuthorizationEngine;
+import org.eclipse.osgi.service.security.AuthorizationEngine;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -26,27 +29,32 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 	Button anysignedButton;
 	Button onlytrustedButton;
 	Button expiredButton;
+	TabFolder folder;
+	private int selectedPolicy;
+	private static final int BIT_TRUST_EXPIRED = DefaultAuthorizationEngine.ENFORCE_VALIDITY | DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED;
+	private static final int BIT_TRUST = DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED;
 
 	protected Control createContents(Composite parent) {
 
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new FormLayout());
 
-		Label titleLabel = new Label(page, SWT.NONE);
-		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_TITLE);
+		//		Label titleLabel = new Label(page, SWT.NONE);
+		//		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_TITLE);
 		FormData data = new FormData();
-		data.top = new FormAttachment(0, 0);
-		data.left = new FormAttachment(0, 0);
-		titleLabel.setLayoutData(data);
+		//				data.top = new FormAttachment(0, 0);
+		//		data.left = new FormAttachment(0, 0);
+		//		titleLabel.setLayoutData(data);
 
-		TabFolder folder = new TabFolder(page, SWT.NONE);
+		folder = new TabFolder(page, SWT.NONE);
 		folder.setLayout(new FormLayout());
 		data = new FormData();
-		data.top = new FormAttachment(titleLabel, 10);
+		data.top = new FormAttachment(0, 10);
 		data.left = new FormAttachment(0, 0);
 		data.right = new FormAttachment(100, 0);
 		data.bottom = new FormAttachment(100, 0);
 		folder.setLayoutData(data);
+		folder.setEnabled(false);
 
 		TabItem item = new TabItem(folder, SWT.NONE);
 		item.setText(SecurityUIMsg.POLPAGE_LABEL_SECTION);
@@ -67,6 +75,45 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		anysignedButton = new Button(loadArea, SWT.RADIO);
 		onlytrustedButton = new Button(loadArea, SWT.RADIO);
 		expiredButton = new Button(loadArea, SWT.CHECK);
+		expiredButton.setEnabled(false);
+		expiredButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent event) {
+				//do nothing
+			}
+
+			public void widgetSelected(SelectionEvent event) {
+				if (expiredButton.getSelection())
+					persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_VALIDITY | DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED);
+				else
+					persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED);
+			}
+
+		});
+
+		// check if osgi.signedcontent.support property is enable
+		if (System.getProperty("osgi.signedcontent.support") != null) {
+			//			enableLoadSecBtn.setSelection(true);
+			folder.setEnabled(true);
+
+			// select the default authorization engine
+			AuthorizationEngine authEngine = Activator.getAuthorizationEngine();
+			if (authEngine instanceof DefaultAuthorizationEngine) {
+				DefaultAuthorizationEngine defaultAuthEngine = (DefaultAuthorizationEngine) authEngine;
+				selectedPolicy = defaultAuthEngine.getLoadPolicy();
+
+				if ((selectedPolicy & BIT_TRUST_EXPIRED) == BIT_TRUST_EXPIRED) {
+					onlytrustedButton.setSelection(true);
+					expiredButton.setSelection(true);
+					expiredButton.setEnabled(true);
+				} else if ((selectedPolicy & BIT_TRUST) == BIT_TRUST) {
+					onlytrustedButton.setSelection(true);
+					expiredButton.setEnabled(true);
+				} else if ((selectedPolicy & DefaultAuthorizationEngine.ENFORCE_SIGNED) == DefaultAuthorizationEngine.ENFORCE_SIGNED)
+					anysignedButton.setSelection(true);
+				else if ((selectedPolicy & DefaultAuthorizationEngine.ENFORCE_NONE) == 0)
+					anyButton.setSelection(true);
+			}
+		}
 
 		anyButton.setText(SecurityUIMsg.POLPAGE_BUTTON_ALLOW_ANY);
 		anyButton.addSelectionListener(new SelectionListener() {
@@ -76,6 +123,8 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 
 			public void widgetSelected(SelectionEvent event) {
 				expiredButton.setEnabled(false);
+				expiredButton.setSelection(false);
+				persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_NONE);
 			}
 		});
 		data = new FormData();
@@ -90,7 +139,9 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 			}
 
 			public void widgetSelected(SelectionEvent event) {
-				expiredButton.setEnabled(true);
+				expiredButton.setSelection(false);
+				expiredButton.setEnabled(false);
+				persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_SIGNED);
 			}
 		});
 		data = new FormData();
@@ -106,6 +157,7 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 
 			public void widgetSelected(SelectionEvent event) {
 				expiredButton.setEnabled(true);
+				persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED);
 			}
 
 		});
@@ -186,10 +238,35 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		//data.bottom = new FormAttachment(100, -5);
 		expiredButton.setLayoutData(data);
 
-		onlytrustedButton.setSelection(true);
-		expiredButton.setEnabled(true);
+		//		onlytrustedButton.setSelection(true);
+		//		expiredButton.setEnabled(true);
 
 		return page;
+	}
+
+	protected void enableSecurityWidgets() {
+		folder.setEnabled(true);
+	}
+
+	protected void disableSecurityWidgets() {
+		folder.setEnabled(false);
+	}
+
+	public boolean performOk() {
+		// update the policy iff the page is dirty
+		AuthorizationEngine authEngine = Activator.getAuthorizationEngine();
+		if (authEngine instanceof DefaultAuthorizationEngine) {
+			DefaultAuthorizationEngine defaultAuthEngine = (DefaultAuthorizationEngine) authEngine;
+			defaultAuthEngine.setLoadPolicy(selectedPolicy);
+		} else {
+			// log the error
+		}
+
+		return super.performOk();
+	}
+
+	void persistPolicySetting(int policy) {
+		selectedPolicy = policy;
 	}
 
 	public void init(IWorkbench workbench) {
