@@ -81,4 +81,12 @@
       </view>
    </extension>
    
+   <!-- Dependency injection to couple UI and core modules -->
+   <extension
+         point="org.eclipse.equinox.security.internalUI">
+      <provider
+            class="org.eclipse.equinox.internal.security.ui.storage.UICallbackProvider">
+      </provider>
+   </extension>
+   
 </plugin>

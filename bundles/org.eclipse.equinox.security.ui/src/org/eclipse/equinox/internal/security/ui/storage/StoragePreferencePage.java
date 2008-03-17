@@ -81,6 +81,26 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 			}
 		});
 
+		Button buttonRecoverPassword = new Button(defaultPrefsGroup, SWT.NONE);
+		buttonRecoverPassword.setText(SecUIMessages.recoverPasswordButton);
+		buttonRecoverPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		buttonRecoverPassword.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				widgetSelected(e);
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
+				String[] questions = InternalExchangeUtils.getPasswordRecoveryQuestions(rootNode);
+				if (questions.length == 0)
+					return; // no password recovery questions were setup
+				Shell shell = (parentShell == null) ? new Shell() : parentShell;
+				PasswordRecoveryDialog dialog = new PasswordRecoveryDialog(questions, shell);
+				dialog.open();
+			}
+		});
+
 		Button buttonDetele = new Button(defaultPrefsGroup, SWT.NONE);
 		buttonDetele.setText(SecUIMessages.deleteButton);
 		buttonDetele.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));

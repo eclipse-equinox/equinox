@@ -51,6 +51,7 @@ public class SecUIMessages extends NLS {
 	public static String descriptionColumn;
 	public static String defaultGroup;
 	public static String changePasswordButton;
+	public static String recoverPasswordButton;
 	public static String deleteButton;
 	public static String providersGroup;
 	public static String advancedGroup;
@@ -135,6 +136,30 @@ public class SecUIMessages extends NLS {
 	public static String wizardSwitchError;
 	public static String wizardDoneTitle;
 	public static String wizardDone;
+
+	// challenge-response dialog
+	public static String pswdRecoveryOptionTitle;
+	public static String pswdRecoveryOptionMsg;
+	public static String passwordRecoveryTitle;
+	public static String passwordMsg;
+	public static String passwordRecoveryLabel;
+	public static String passwordErrMsg;
+	public static String passwordGroup;
+	public static String passwordQuestion;
+	public static String passwordAnswer;
+	public static String passwordButtonOK;
+	public static String passwordButtonCancel;
+
+	// password recovery dialog
+	public static String pswdRecoveryTitle;
+	public static String pswRecoveryMsg;
+	public static String pswRecoveryWarning;
+	public static String pswRecoveryQuestion;
+	public static String pswRecoveryAnswer;
+	public static String pswRecoveryButtonOK;
+	public static String pswRecoveryButtonCancel;
+	public static String pswRecoveredMsg;
+	public static String pswNotRecoveredMsg;
 
 	static {
 		// load message values from bundle file

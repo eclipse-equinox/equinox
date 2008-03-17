@@ -206,7 +206,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
 
 		PasswordProviderModuleExt moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
-		synchronized (passwordCache) {
+		synchronized (passwordCache) { // lock it for the whole process of password creation
 			String key = moduleExt.getID();
 			if (passwordCache.containsKey(key))
 				return (PasswordExt) passwordCache.get(key);
@@ -228,6 +228,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 					CryptoData encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
 					node.internalPut(key, encryptedValue.toString());
 					markModified();
+					PasswordManagement.setupRecovery(this, passwordExt, container);
 					validPassword = true;
 					break;
 				}
@@ -249,7 +250,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				}
 			}
 			if (validPassword) {
-				passwordCache.put(key, passwordExt);
+				cachePassword(key, passwordExt);
 				return passwordExt;
 			}
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
@@ -301,27 +302,32 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		if (password == null)
 			return false;
 
-		synchronized (passwordCache) { // we are good to go, lock into single processing thread
-			// create verification node
-			String key = moduleExt.getID();
-			PasswordExt passwordExt = new PasswordExt(password, key);
-			CryptoData encryptedValue;
-			try {
-				encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
-			} catch (StorageException e) {
-				String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
-				AuthPlugin.getDefault().logError(msg, e);
-				return false;
-			}
-
-			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
-			node.internalPut(key, encryptedValue.toString());
-			markModified();
-
-			// store password in the memory cache
-			passwordCache.put(key, passwordExt);
+		// create verification node
+		String key = moduleExt.getID();
+		PasswordExt passwordExt = new PasswordExt(password, key);
+		CryptoData encryptedValue;
+		try {
+			encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
+		} catch (StorageException e) {
+			String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
+			AuthPlugin.getDefault().logError(msg, e);
+			return false;
 		}
+
+		SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
+		node.internalPut(key, encryptedValue.toString());
+		markModified();
+
+		// store password in the memory cache
+		cachePassword(key, passwordExt);
+		PasswordManagement.setupRecovery(this, passwordExt, container);
 		return true;
+	}
+
+	public void cachePassword(String moduleID, PasswordExt passwordExt) {
+		synchronized (passwordCache) {
+			passwordCache.put(moduleID, passwordExt);
+		}
 	}
 
 	public void clearPasswordCache() {

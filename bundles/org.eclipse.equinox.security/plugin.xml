@@ -8,5 +8,6 @@
     <extension-point id="callbackHandlerMapping" name="%callbackMappingExtName" schema="schema/callbackHandlerMapping.exsd"/>
     
     <extension-point id="secureStorage" name="%secureStorageName" schema="schema/secureStorage.exsd"/>
+    <extension-point id="internalUI" name="%internalUIname" schema="schema/internalUI.exsd"/>
 
 </plugin>
