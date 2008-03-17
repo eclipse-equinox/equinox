@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.wizard;
 
+import java.util.ArrayList;
 import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.jface.wizard.WizardPage;
@@ -23,7 +24,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 
 	private Text aliasField;
 	private Combo trustEngineCombo;
-	private TrustEngine trustEngines[];
+	private ArrayList trustEngines = new ArrayList();
 
 	protected CertificateImportTrustEngineSelectPage(String pageName) {
 		super(pageName);
@@ -54,19 +55,20 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 		targetEngineLabel.setText(SecurityUIMsg.WIZARD_TARGET_TRUST_ENGINE);
 
 		trustEngineCombo = new Combo(certSelectComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-		trustEngines = Activator.getTrustEngines();
+		TrustEngine[] availableEngines = Activator.getTrustEngines();
 
 		// get a list of trust engine and fill the combo
-		for (int i = 0; i < trustEngines.length; i++) {
-			if (!trustEngines[i].isReadOnly())
-				trustEngineCombo.add(trustEngines[i].getName());
+		for (int i = 0; i < availableEngines.length; i++) {
+			if (!availableEngines[i].isReadOnly()) {
+				trustEngines.add(availableEngines[i]);
+				trustEngineCombo.add(availableEngines[i].getName());
+			}
 
 		}
 		if (trustEngineCombo.getItemCount() == 0)
 			setErrorMessage(SecurityUIMsg.WIZARD_ERROR_NO_WRITE_ENGINE);
 		else
-			trustEngineCombo.setVisibleItemCount(trustEngines.length);
+			trustEngineCombo.setVisibleItemCount(trustEngines.size());
 
 		addListeners();
 	}
@@ -91,7 +93,7 @@ public class CertificateImportTrustEngineSelectPage extends WizardPage implement
 				setErrorMessage(SecurityUIMsg.WIZARD_ERROR_ENGINE_REQUIRED);
 			} else {
 				setErrorMessage(null);
-				((CertificateImportWizard) getWizard()).selectTrustEngine = trustEngines[trustEngineCombo.getSelectionIndex()];
+				((CertificateImportWizard) getWizard()).selectTrustEngine = (TrustEngine) trustEngines.get(trustEngineCombo.getSelectionIndex());
 			}
 		}
 		getWizard().getContainer().updateButtons();
