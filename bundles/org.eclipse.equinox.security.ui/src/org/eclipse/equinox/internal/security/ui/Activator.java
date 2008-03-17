@@ -11,6 +11,7 @@
 package org.eclipse.equinox.internal.security.ui;
 
 import java.security.Security;
+import java.util.Arrays;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -129,9 +130,7 @@ public class Activator extends AbstractUIPlugin {
 		}
 		Object[] services = trustEngineTracker.getServices();
 		if (services != null) {
-			TrustEngine[] engines = new TrustEngine[services.length];
-			System.arraycopy(services, 0, engines, 0, services.length);
-			return engines;
+			return (TrustEngine[]) Arrays.asList(services).toArray(new TrustEngine[] {});
 		}
 		return new TrustEngine[0];
 	}
