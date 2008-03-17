@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.equinox.security.auth" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.eclipse.equinox.security" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.equinox.security.auth" id="secureStorage" name="Secure strorage modules"/>
+         <meta.schema plugin="org.eclipse.equinox.security" id="secureStorage" name="Secure strorage modules"/>
       </appinfo>
       <documentation>
          Describes implementation of the Equinox secure storage module.
