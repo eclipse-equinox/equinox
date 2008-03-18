@@ -82,7 +82,7 @@ public class SecureContext implements ISecureContext {
 		return getLoginContext().getSubject();
 	}
 
-	private LoginContext getLoginContext() throws LoginException {
+	public LoginContext getLoginContext() throws LoginException {
 		if (loginContext != null)
 			return loginContext;
 

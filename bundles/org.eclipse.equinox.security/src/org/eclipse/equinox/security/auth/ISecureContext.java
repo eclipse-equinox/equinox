@@ -63,4 +63,16 @@ public interface ISecureContext {
 	 * @see ILogoutListener
 	 */
 	public void unregisterListener(ISecurityListener listener);
+
+	/**
+	 * The method exposes underlying JAAS LoginContext.
+	 * <p>
+	 * Using the LoginContext directly will bypass some of the processing offered
+	 * by this interface and should be used only when other methods are not sufficient.
+	 * </p>
+	 * @return the underlying JAAS LoginContext
+	 * @throws LoginException if exception was encountered while creating LoginContext
+	 */
+	public LoginContext getLoginContext() throws LoginException;
+
 }
