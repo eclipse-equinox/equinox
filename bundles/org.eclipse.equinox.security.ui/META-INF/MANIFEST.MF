@@ -10,28 +10,23 @@ Import-Package: javax.crypto.spec,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
+ org.eclipse.jface.action,
  org.eclipse.osgi.internal.service.security,
  org.eclipse.osgi.service.resolver;version="1.2.0",
  org.eclipse.osgi.service.security;version="1.0.0",
  org.eclipse.osgi.util;version="1.1.0",
- org.eclipse.swt,
- org.eclipse.swt.events,
- org.eclipse.swt.graphics,
- org.eclipse.swt.layout,
- org.eclipse.swt.widgets,
- org.eclipse.ui.dialogs,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.3.3"
-Require-Bundle: org.eclipse.equinox.security,
- org.eclipse.ui,
- org.eclipse.equinox.preferences;bundle-version="3.2.200"
+Require-Bundle: org.eclipse.equinox.security;bundle-version="[1.0.0,2.0.0)",
+ org.eclipse.equinox.preferences;bundle-version="[3.2.200,4.0.0)",
+ org.eclipse.ui;bundle-version="[3.4.0,4.0.0)"
 Bundle-Activator: org.eclipse.equinox.internal.security.ui.Activator
 Export-Package: org.eclipse.equinox.internal.security.ui;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.nls;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.preferences;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.storage;x-internal:=true,
  org.eclipse.equinox.internal.security.ui.wizard;x-internal:=true,
- org.eclipse.equinox.security.ui.actions,
- org.eclipse.equinox.security.ui.services
+ org.eclipse.equinox.security.ui.actions;version="1.0.0",
+ org.eclipse.equinox.security.ui.services;version="1.0.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Bundle-ActivationPolicy: lazy

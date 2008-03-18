@@ -15,5 +15,5 @@ Require-Bundle: org.eclipse.core.tests.harness;bundle-version="3.4.0",
 Eclipse-LazyStart: true
 Export-Package: org.eclipse.equinox.internal.security.tests;x-internal:=true,
  org.eclipse.equinox.internal.security.tests.storage;x-internal:=true,
- org.eclipse.equinox.security.tests
+ org.eclipse.equinox.security.tests;version="1.0.0"
 Bundle-ActivationPolicy: lazy
