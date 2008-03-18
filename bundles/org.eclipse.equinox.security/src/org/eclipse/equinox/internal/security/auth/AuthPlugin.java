@@ -11,7 +11,9 @@
 package org.eclipse.equinox.internal.security.auth;
 
 import java.net.URL;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.internal.runtime.RuntimeLog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesMapper;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -84,23 +86,11 @@ public class AuthPlugin implements BundleActivator {
 	}
 
 	public void logError(String msg, Throwable e) {
-		if (bundleContext == null) {
-			System.err.println(msg);
-			if (e != null)
-				e.printStackTrace(System.err);
-		} else {
-			ILog log = Platform.getLog(bundleContext.getBundle());
-			log.log(new Status(IStatus.ERROR, PI_AUTH, msg, e));
-		}
+		RuntimeLog.log(new Status(IStatus.ERROR, PI_AUTH, msg, e));
 	}
 
 	public void logMessage(String msg) {
-		if (bundleContext == null) {
-			System.out.println(msg);
-		} else {
-			ILog log = Platform.getLog(bundleContext.getBundle());
-			log.log(new Status(IStatus.INFO, PI_AUTH, msg, null));
-		}
+		RuntimeLog.log(new Status(IStatus.INFO, PI_AUTH, msg, null));
 	}
 
 	public boolean getBooleanOption(String option, boolean defaultValue) {

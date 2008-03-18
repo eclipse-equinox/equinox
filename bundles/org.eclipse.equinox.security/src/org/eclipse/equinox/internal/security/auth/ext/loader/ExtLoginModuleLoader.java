@@ -30,7 +30,7 @@ public class ExtLoginModuleLoader {
 	final private static String ATTR_MODULE_CLASS = "class"; //$NON-NLS-1$
 
 	public static LoginModule load(Map options) {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(POINT_MODULE);
 		IExtension[] extensions = point.getExtensions();
 

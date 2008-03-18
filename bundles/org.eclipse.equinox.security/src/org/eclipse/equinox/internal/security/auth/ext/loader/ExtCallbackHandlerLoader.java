@@ -29,7 +29,7 @@ public class ExtCallbackHandlerLoader {
 	final private static String ATTR_MAPPING_CALLBACKID = "callbackHandlerId"; //$NON-NLS-1$
 
 	public CallbackHandler loadCallbackHandler(String configName) {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionRegistry registry = RegistryFactory.getRegistry();
 
 		// First, map config name -> callback handler ID
 		IExtensionPoint point = registry.getExtensionPoint(POINT_MAPPING);
