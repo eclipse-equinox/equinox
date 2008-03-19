@@ -1172,7 +1172,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void completeStateChange() {
 		synchronized (statechangeLock) {
-			if (stateChanging != null) {
+			if (stateChanging == Thread.currentThread()) {
 				stateChanging = null;
 				statechangeLock.notify();
 				/*
