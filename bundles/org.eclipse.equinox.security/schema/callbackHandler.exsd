@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.equinox.security.auth">
+<schema targetNamespace="org.eclipse.equinox.security" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appInfo>
-         <meta.schema plugin="org.eclipse.equinox.security.auth" id="callbackHandler" name="JAAS Callback Handler"/>
-      </appInfo>
+      <appinfo>
+         <meta.schema plugin="org.eclipse.equinox.security" id="callbackHandler" name="JAAS Callback Handler"/>
+      </appinfo>
       <documentation>
          The loginModule extension point provides a way for a bundle to register class implementing CallbackHandler with the Java Authentication and Authorization Service (JAAS). After specifying a Callback Handler using this extension point, the callbackHandlerMapping extension point can be used to set this callbackHander as the default to be used for a given JAAS login configuration.
       </documentation>
@@ -34,9 +34,9 @@
                <documentation>
                   
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute translatable="true"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
@@ -49,27 +49,27 @@
                <documentation>
                   Describes the class that implements the &lt;tt&gt;javax.security.auth.callback.CallbackHandler&lt;/tt&gt; interface.
                </documentation>
-               <appInfo>
+               <appinfo>
                   <meta.attribute kind="java" basedOn=":javax.security.auth.CallbackHandler"/>
-               </appInfo>
+               </appinfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="since"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          _CUTLASS_
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="examples"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          &lt;pre&gt; &lt;extension id=&quot;defaultHttpBasicCallbackHandler&quot;
         name=&quot;Default CallbackHandler for HTTP-BASIC Login Configuration&quot;
@@ -80,27 +80,28 @@
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="apiInfo"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          The JAAS API is part of the Java Runtime Environment version 1.4 and above.
       </documentation>
    </annotation>
 
+
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="implementation"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          No public Callback Handlers are provided by the platform.
       </documentation>
    </annotation>
 
    <annotation>
-      <appInfo>
+      <appinfo>
          <meta.section type="copyright"/>
-      </appInfo>
+      </appinfo>
       <documentation>
          Copyright (c) 2005, 2007 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
