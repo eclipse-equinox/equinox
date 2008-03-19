@@ -18,6 +18,7 @@ import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesMapper;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -35,6 +36,7 @@ public class AuthPlugin implements BundleActivator {
 	private BundleContext bundleContext;
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker configTracker = null;
+	private ServiceTracker environmentTracker = null;
 
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_LOGIN_FRAMEWORK = false;
@@ -76,6 +78,10 @@ public class AuthPlugin implements BundleActivator {
 		if (configTracker != null) {
 			configTracker.close();
 			configTracker = null;
+		}
+		if (environmentTracker != null) {
+			environmentTracker.close();
+			environmentTracker = null;
 		}
 		bundleContext = null;
 		singleton = null;
@@ -124,6 +130,16 @@ public class AuthPlugin implements BundleActivator {
 		if (location == null)
 			return null;
 		return location.getURL();
+	}
+
+	public EnvironmentInfo getEnvironmentInfoService() {
+		if (environmentTracker == null) {
+			if (bundleContext == null)
+				return null;
+			environmentTracker = new ServiceTracker(bundleContext, EnvironmentInfo.class.getName(), null);
+			environmentTracker.open();
+		}
+		return (EnvironmentInfo) environmentTracker.getService();
 	}
 
 }

@@ -17,10 +17,14 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.Configuration;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.equinox.internal.security.auth.ext.loader.ExtCallbackHandlerLoader;
+import org.osgi.framework.BundleContext;
 
 // TBD what happens for server-side implementations if configurations are shared across all processes on VM?
 
 public class SecurePlatformInternal {
+
+	private static final String VM_PROPERTY = "equinox.security.vm"; //$NON-NLS-1$
+	private static final String SERVER_VM = "server"; //$NON-NLS-1$
 
 	private static final String PROVIDER_URL_BASE = "login.config.url.";//$NON-NLS-1$
 	private static final int MAX_PROVIDER_URL_COUNT = 777; // arbitrary upper limit on the number of provider URLs
@@ -55,6 +59,19 @@ public class SecurePlatformInternal {
 	public void start() {
 		if (running)
 			return;
+
+		// Kludge for the bug 215828 "JAAS and server-side Eclipse": for the time being configuration 
+		// substitution is turned off if running on a server. It is likely possible to work around 
+		// configuration substitution using Java 5 methods, but not Java 1.4
+		BundleContext context = AuthPlugin.getDefault().getBundleContext();
+		String vmType = context.getProperty(VM_PROPERTY);
+		if (SERVER_VM.equals(vmType)) {
+			defaultConfiguration = null;
+			running = true;
+			return;
+		}
+		// end of kludge
+
 		try {
 			defaultConfiguration = Configuration.getConfiguration();
 		} catch (SecurityException e) {
@@ -69,8 +86,10 @@ public class SecurePlatformInternal {
 	public void stop() {
 		if (!running)
 			return;
-		Configuration.setConfiguration(defaultConfiguration);
-		defaultConfiguration = null;
+		if (defaultConfiguration != null) {
+			Configuration.setConfiguration(defaultConfiguration);
+			defaultConfiguration = null;
+		}
 		running = false;
 	}
 
