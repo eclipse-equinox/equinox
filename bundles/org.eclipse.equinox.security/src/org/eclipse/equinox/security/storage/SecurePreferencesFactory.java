@@ -31,14 +31,15 @@ final public class SecurePreferencesFactory {
 	 * The framework will attempt to open secure preferences in a user-specific location. 
 	 * As a result, the information stored can be shared among all programs run by the user. 
 	 * The location is determined as follows:
-	 * <ul>
-	 * <li> Java's "user.home" environment variable. On Windows system it usually 
+	 * <ol>
+	 * <li>&quot;-equinox.keyring&quot; command line arguments</li>
+	 * <li>Java's &quot;user.home&quot; environment variable. On Windows system it usually 
 	 * corresponds to the %USERPROFILE% environment variable or determined as the parent of
 	 * user's desktop folder. On Unix Java usually determines it from user's entry
 	 * in the password file (commonly this corresponds to $HOME environment variable);</li>
-	 * <li> if it fails, preferences will use configuration location of the current Eclipse 
+	 * <li>if it fails, preferences will use configuration location of the current Eclipse 
 	 * instance.</li>
-	 * </ul>
+	 * </ol>
 	 * </p>
 	 * @return default instance of secure preferences, <code>null</code> if application
 	 * was unable to create secure preferences using default location
@@ -52,11 +53,11 @@ final public class SecurePreferencesFactory {
 	 * is <code>null</code>, a default location is used.
 	 * <p>
 	 * Note that while this method accepts URLs to account for future expandability of this API,
-	 * at present the method only accepts "file" URLs that point to a directory. 
+	 * at present the method only accepts &quot;file&quot; URLs that point to a directory. 
 	 * An {@link IOException} might be thrown if unsupported URL is passed to this method.
 	 * </p><p>
 	 * Similarly to the rest of the Equinox, URLs passed as an argument must not be encoded, 
-	 * meaning that spaces should stay as spaces, not as "%x20".
+	 * meaning that spaces should stay as spaces, not as &quot;%x20&quot;.
 	 * </p>
 	 * @param location URL pointing to the location of secure storage. At present only file URLs
 	 * are supported. Pass <code>null</code> to use default location

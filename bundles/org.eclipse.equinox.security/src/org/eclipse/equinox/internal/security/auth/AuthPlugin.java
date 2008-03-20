@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesMapper;
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
@@ -37,6 +39,7 @@ public class AuthPlugin implements BundleActivator {
 	private ServiceTracker debugTracker = null;
 	private ServiceTracker configTracker = null;
 	private ServiceTracker environmentTracker = null;
+	private volatile ServiceTracker logTracker = null;
 
 	public static boolean DEBUG = false;
 	public static boolean DEBUG_LOGIN_FRAMEWORK = false;
@@ -82,6 +85,10 @@ public class AuthPlugin implements BundleActivator {
 		if (environmentTracker != null) {
 			environmentTracker.close();
 			environmentTracker = null;
+		}
+		if (logTracker != null) {
+			logTracker.close();
+			logTracker = null;
 		}
 		bundleContext = null;
 		singleton = null;
@@ -140,6 +147,33 @@ public class AuthPlugin implements BundleActivator {
 			environmentTracker.open();
 		}
 		return (EnvironmentInfo) environmentTracker.getService();
+	}
+
+	/**
+	 * At present the logging for bundles positioned below org.eclipse.core.runtime
+	 * in the bundle dependency stack is really sub-optimal.
+	 * 
+	 * In particular, logging with RuntimeLog on shutdown doesn't work as Platform
+	 * shuts down (removing listeners from RuntimeLog) before this bundle shuts down.
+	 * 
+	 * As such, until there is improved logging, the errors that occur on shutdown
+	 * should use this method. However, errors occuring during normal operations
+	 * should use RuntimeLog as otherwise the Error View is not getting updated.
+	 */
+	public void frameworkLogError(String msg, Throwable e) {
+		if ((logTracker == null) && (bundleContext != null)) {
+			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
+			logTracker.open();
+		}
+		FrameworkLog log = (logTracker == null) ? null : (FrameworkLog) logTracker.getService();
+		if (log != null)
+			log.log(new FrameworkLogEntry(PI_AUTH, FrameworkLogEntry.ERROR, 0, msg, 0, e, null));
+		else {
+			if (msg != null)
+				System.err.println(msg);
+			if (e != null)
+				e.printStackTrace(System.err);
+		}
 	}
 
 }

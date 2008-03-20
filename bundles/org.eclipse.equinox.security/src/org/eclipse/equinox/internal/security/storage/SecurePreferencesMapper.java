@@ -10,15 +10,29 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.provider.IProviderHints;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferencesMapper {
+
+	/**
+	 * Command line argument specifying default location
+	 */
+	final private static String KEYRING_ARGUMENT = "-equinox.keyring"; //$NON-NLS-1$
+
+	/**
+	 * Command line argument specifying default password
+	 */
+	final private static String PASSWORD_ARGUMENT = "-equinox.password"; //$NON-NLS-1$
 
 	static private ISecurePreferences defaultPreferences = null;
 
@@ -49,14 +63,36 @@ public class SecurePreferencesMapper {
 	}
 
 	static public ISecurePreferences open(URL location, Map options) throws IOException {
-		// 1) process location
+		// 1) find if there are any command line arguments that need to be added
+		EnvironmentInfo infoService = AuthPlugin.getDefault().getEnvironmentInfoService();
+		if (infoService != null) {
+			String[] args = infoService.getNonFrameworkArgs();
+			if (args != null && args.length != 0) {
+				for (int i = 0; i < args.length - 1; i++) {
+					if (args[i + 1].startsWith(("-"))) //$NON-NLS-1$
+						continue;
+					if (location == null && KEYRING_ARGUMENT.equalsIgnoreCase(args[i])) {
+						location = new File(args[i + 1]).toURL(); // don't use File.toURI().toURL()
+						continue;
+					}
+					if (PASSWORD_ARGUMENT.equalsIgnoreCase(args[i])) {
+						if (options == null)
+							options = new HashMap(1);
+						if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD))
+							options.put(IProviderHints.DEFAULT_PASSWORD, new PBEKeySpec(args[i + 1].toCharArray()));
+					}
+				}
+			}
+		}
+
+		// 2) process location
 		if (location == null)
 			location = StorageUtils.getDefaultLocation();
 		if (!StorageUtils.isFile(location))
 			// at this time we only accept file URLs; check URL type right away
 			throw new IOException(NLS.bind(SecAuthMessages.loginFileURL, location.toString()));
 
-		// 2) see if there is already SecurePreferencesRoot at that location; if not open a new one
+		// 3) see if there is already SecurePreferencesRoot at that location; if not open a new one
 		String key = location.toString();
 		SecurePreferencesRoot root;
 		if (preferences.containsKey(key))
@@ -66,7 +102,7 @@ public class SecurePreferencesMapper {
 			preferences.put(key, root);
 		}
 
-		// 3) create container with the options passed in
+		// 4) create container with the options passed in
 		SecurePreferencesContainer container = new SecurePreferencesContainer(root, options);
 		return container.getPreferences();
 	}
@@ -78,7 +114,9 @@ public class SecurePreferencesMapper {
 				try {
 					provider.flush();
 				} catch (IOException e) {
-					AuthPlugin.getDefault().logError(SecAuthMessages.errorOnSave, e);
+					// use FrameworkLog directly for shutdown messages - RuntimeLog
+					// is empty by this time
+					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.errorOnSave, e);
 				}
 			}
 			preferences.clear();
