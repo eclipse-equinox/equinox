@@ -24,7 +24,6 @@ public abstract class SecurityContributionItemFactory extends ContributionItemFa
 	/**
 	 * Workbench contribution item (id "securityStatus"): An icon for 
 	 * evaluating and inspecting the security status of the system.
-	 * @since 3.4
 	 */
 	public static final ContributionItemFactory SECURITY_STATUS = new ContributionItemFactory("securityStatus") {//$NON-NLS-1$
 		public IContributionItem create(IWorkbenchWindow window) {
