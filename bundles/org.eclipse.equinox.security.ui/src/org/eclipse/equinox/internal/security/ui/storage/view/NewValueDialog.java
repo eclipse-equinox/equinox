@@ -14,9 +14,11 @@ import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.PlatformUI;
@@ -24,6 +26,8 @@ import org.eclipse.ui.PlatformUI;
 public class NewValueDialog extends TitleAreaDialog {
 
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".NewValueDialog"; //$NON-NLS-1$
+
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/new_value_wiz.png"); //$NON-NLS-1$
 
 	private final String[] existingKeys;
 
@@ -35,6 +39,8 @@ public class NewValueDialog extends TitleAreaDialog {
 	protected String value;
 	protected boolean encrypt;
 
+	private Image dlgTitleImage = null;
+
 	public NewValueDialog(String[] existingKeys, Shell parentShell) {
 		super(parentShell);
 		this.existingKeys = existingKeys;
@@ -42,7 +48,7 @@ public class NewValueDialog extends TitleAreaDialog {
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(SecUIMessages.addValueTitle);
+		shell.setText(SecUIMessages.generalTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
@@ -52,11 +58,17 @@ public class NewValueDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.addValueCancel, false);
 	}
 
+	protected Control createContents(Composite parent) {
+		Control contents = super.createContents(parent);
+		setTitle(SecUIMessages.addValueTitle);
+		setMessage(SecUIMessages.addValueMsg);
+		dlgTitleImage = dlgImageDescriptor.createImage();
+		setTitleImage(dlgTitleImage);
+		return contents;
+	}
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
-
-		setMessage(SecUIMessages.addValueMsg);
-
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.addValueKeyLabel);
 		keyText = new Text(composite, SWT.LEFT | SWT.BORDER);
 		keyText.addModifyListener(new ModifyListener() {

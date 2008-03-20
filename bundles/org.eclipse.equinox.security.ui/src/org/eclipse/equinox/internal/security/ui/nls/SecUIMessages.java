@@ -60,6 +60,7 @@ public class SecUIMessages extends NLS {
 	public static String postDeleteMsg;
 
 	// secure storage view
+	public static String generalTitle;
 	public static String keysTable;
 	public static String keysColumn;
 	public static String valuesColumn;

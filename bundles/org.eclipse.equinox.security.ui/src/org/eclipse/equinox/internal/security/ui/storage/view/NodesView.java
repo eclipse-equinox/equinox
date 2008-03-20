@@ -15,6 +15,7 @@ import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Image;
@@ -169,6 +170,7 @@ public class NodesView {
 		};
 		refreshNodesAction.setText(SecUIMessages.refreshNodesCommand);
 		refreshNodesAction.setToolTipText(SecUIMessages.refreshNodesCommandTip);
+		refreshNodesAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_refresh.gif")); //$NON-NLS-1$
 
 		addNodeAction = new Action() {
 			public void run() {
@@ -197,6 +199,7 @@ public class NodesView {
 		};
 		addNodeAction.setText(SecUIMessages.addNodeCommand);
 		addNodeAction.setToolTipText(SecUIMessages.addNodeCommandTip);
+		addNodeAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_new.gif")); //$NON-NLS-1$
 
 		removeNodeAction = new Action() {
 			public void run() {
@@ -218,6 +221,7 @@ public class NodesView {
 		};
 		removeNodeAction.setText(SecUIMessages.removeNodeCommand);
 		removeNodeAction.setToolTipText(SecUIMessages.removeNodeCommandTip);
+		removeNodeAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/node_delete.gif")); //$NON-NLS-1$
 	}
 
 	public void setFocus() {

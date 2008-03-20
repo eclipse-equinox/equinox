@@ -17,8 +17,10 @@ import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.PlatformUI;
@@ -27,6 +29,8 @@ import org.osgi.service.prefs.BackingStoreException;
 public class ExportDialog extends TitleAreaDialog {
 
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".ExportDialog"; //$NON-NLS-1$
+
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(ExportDialog.class, "/icons/storage/export_secure_wiz.png"); //$NON-NLS-1$
 
 	protected final static String[] exportExtensions = new String[] {".txt"}; //$NON-NLS-1$
 
@@ -38,13 +42,15 @@ public class ExportDialog extends TitleAreaDialog {
 	protected Button okButton;
 	protected String file;
 
+	private Image dlgTitleImage = null;
+
 	public ExportDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		shell.setText(SecUIMessages.exportDialogTitle);
+		shell.setText(SecUIMessages.generalTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
@@ -54,9 +60,17 @@ public class ExportDialog extends TitleAreaDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, SecUIMessages.exportDialogCancel, false);
 	}
 
+	protected Control createContents(Composite parent) {
+		Control contents = super.createContents(parent);
+		setTitle(SecUIMessages.exportDialogTitle);
+		setMessage(SecUIMessages.exportDialogMsg, IMessageProvider.WARNING);
+		dlgTitleImage = dlgImageDescriptor.createImage();
+		setTitleImage(dlgTitleImage);
+		return contents;
+	}
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
-		setMessage(SecUIMessages.exportDialogMsg, IMessageProvider.WARNING);
 
 		Label fileLabel = new Label(composite, SWT.LEFT);
 		fileLabel.setText(SecUIMessages.exportDialogFileLabel);

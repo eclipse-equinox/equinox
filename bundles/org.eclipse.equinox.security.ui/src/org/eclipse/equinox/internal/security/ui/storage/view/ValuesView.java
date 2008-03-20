@@ -17,6 +17,7 @@ import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
@@ -230,6 +231,7 @@ public class ValuesView {
 		};
 		addValueAction.setText(SecUIMessages.addValueCommand);
 		addValueAction.setToolTipText(SecUIMessages.addValueCommandTmp);
+		addValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_new.gif")); //$NON-NLS-1$
 
 		removeValueAction = new Action() {
 			public void run() {
@@ -256,6 +258,7 @@ public class ValuesView {
 		};
 		removeValueAction.setText(SecUIMessages.removeValueCommand);
 		removeValueAction.setToolTipText(SecUIMessages.removeValueCommandTmp);
+		removeValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_delete.gif")); //$NON-NLS-1$
 
 		showValueAction = new Action() {
 			public void run() {
@@ -286,6 +289,7 @@ public class ValuesView {
 		};
 		showValueAction.setText(SecUIMessages.showValueCommand);
 		showValueAction.setToolTipText(SecUIMessages.showValueCommandTmp);
+		showValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_show.gif")); //$NON-NLS-1$
 
 		encryptValueAction = new Action() {
 			public void run() {
@@ -294,6 +298,7 @@ public class ValuesView {
 		};
 		encryptValueAction.setText(SecUIMessages.encryptValueCommand);
 		encryptValueAction.setToolTipText(SecUIMessages.encryptValueCommandTmp);
+		encryptValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/encrypt.gif")); //$NON-NLS-1$
 
 		decryptValueAction = new Action() {
 			public void run() {
@@ -302,6 +307,7 @@ public class ValuesView {
 		};
 		decryptValueAction.setText(SecUIMessages.decryptValueCommand);
 		decryptValueAction.setToolTipText(SecUIMessages.decryptValueCommandTmp);
+		decryptValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/decrypt.gif")); //$NON-NLS-1$
 	}
 
 	protected void reCodeValue(boolean encrypted) {

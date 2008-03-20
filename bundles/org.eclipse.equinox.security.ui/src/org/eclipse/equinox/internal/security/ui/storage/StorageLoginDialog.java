@@ -19,8 +19,10 @@ import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.EncodingUtils;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.PlatformUI;
@@ -30,7 +32,9 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	private static final String DIALOG_SETTINGS_SECTION = "StorageLoginDialog"; //$NON-NLS-1$
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".StorageLoginDialog"; //$NON-NLS-1$
 
-	private static final String DIGEST_ALGORITHM = "SHA"; //$NON-NLS-1$
+	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(StorageLoginDialog.class, "/icons/storage/login_wiz.png"); //$NON-NLS-1$
+
+	private static final String DIGEST_ALGORITHM = "MD5"; //$NON-NLS-1$
 
 	protected Text password;
 	protected Text confirm;
@@ -43,6 +47,8 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	final protected boolean confirmPassword;
 	final protected boolean passwordChange;
 	final protected String location;
+
+	private Image dlgTitleImage = null;
 
 	public StorageLoginDialog(boolean confirmPassword, boolean passwordChange, String location) {
 		super(null);
@@ -83,10 +89,16 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
+	protected Control createContents(Composite parent) {
+		Control contents = super.createContents(parent);
+		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin);
+		dlgTitleImage = dlgImageDescriptor.createImage();
+		setTitleImage(dlgTitleImage);
+		return contents;
+	}
+
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
-
-		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin);
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.labelPassword);
 		password = new Text(composite, SWT.LEFT | SWT.BORDER);

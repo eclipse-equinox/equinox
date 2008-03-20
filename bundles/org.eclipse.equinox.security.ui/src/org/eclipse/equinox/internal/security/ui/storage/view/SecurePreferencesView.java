@@ -19,6 +19,7 @@ import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.equinox.security.storage.*;
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -97,6 +98,7 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 		};
 		saveAction.setText(SecUIMessages.saveCommand);
 		saveAction.setToolTipText(SecUIMessages.saveCommandTip);
+		saveAction.setImageDescriptor(ImageDescriptor.createFromFile(SecurePreferencesView.class, "/icons/storage/save.gif")); //$NON-NLS-1$
 
 		exportAction = new Action() {
 			public void run() {
@@ -105,6 +107,7 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 		};
 		exportAction.setText(SecUIMessages.exportCommand);
 		exportAction.setToolTipText(SecUIMessages.exportCommandTip);
+		exportAction.setImageDescriptor(ImageDescriptor.createFromFile(SecurePreferencesView.class, "/icons/storage/export_secure.gif")); //$NON-NLS-1$
 	}
 
 	protected void export() {

@@ -74,7 +74,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%storageView"
-            icon="icons/storage.gif"
+            icon="icons/storage/secure_storage.gif"
             category="org.eclipse.ui"
             class="org.eclipse.equinox.internal.security.ui.storage.view.SecurePreferencesView"
             id="org.eclipse.equinox.security.views.storage">
