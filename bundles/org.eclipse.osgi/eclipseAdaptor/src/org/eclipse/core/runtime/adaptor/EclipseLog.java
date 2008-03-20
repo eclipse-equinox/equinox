@@ -489,7 +489,7 @@ public class EclipseLog implements FrameworkLog {
 
 	/**
 	 * Writes the ENTRY or SUBENTRY header for an entry.  A depth value of 0
-	 * idicates that the log entry is the root entry.  Any value greater than 0 indicates
+	 * indicates that the log entry is the root entry.  Any value greater than 0 indicates
 	 * a sub-entry.
 	 * @param depth the depth of th entry
 	 * @param entry the entry to write the header for
@@ -506,12 +506,10 @@ public class EclipseLog implements FrameworkLog {
 		}
 		writeSpace();
 		write(entry.getEntry());
-		if (entry.getSeverity() != 0 || entry.getBundleCode() != 0) {
-			writeSpace();
-			write(Integer.toString(entry.getSeverity()));
-			writeSpace();
-			write(Integer.toString(entry.getBundleCode()));
-		}
+		writeSpace();
+		write(Integer.toString(entry.getSeverity()));
+		writeSpace();
+		write(Integer.toString(entry.getBundleCode()));
 		writeSpace();
 		write(getDate(new Date()));
 		writeln();
