@@ -52,6 +52,7 @@ public class SecurityUIMsg extends NLS {
 	public static String STR_CERT_VIEWER_VALUE;
 
 	// messages for category page
+	public static String CATPAGE_LABEL_STORAGE;
 	public static String CATPAGE_LABEL_POLICY;
 	public static String CATPAGE_LABEL_CERTIFICATES;
 	public static String CATPAGE_LABEL_ADVANCED;
@@ -59,6 +60,7 @@ public class SecurityUIMsg extends NLS {
 	// messages for default policy page
 	public static String POLPAGE_LABEL_SECTION;
 	public static String POLPAGE_LABEL_TITLE;
+	public static String POLPAGE_LABEL_DESC;
 	public static String POLPAGE_BUTTON_ALLOW_ANY;
 	public static String POLPAGE_BUTTON_ALLOW_ANY_SIGNED;
 	public static String POLPAGE_BUTTON_ALLOW_ONLY_TRUSTED;

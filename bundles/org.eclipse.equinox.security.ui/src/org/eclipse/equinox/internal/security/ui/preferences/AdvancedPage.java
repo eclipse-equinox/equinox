@@ -77,6 +77,7 @@ public class AdvancedPage extends PreferencePage implements IWorkbenchPreference
 			}
 		});
 
+		/*
 		Link link = new Link(area, SWT.NONE);
 		link.setText(SecurityUIMsg.ADVPAGE_LABEL_LINK);
 		link.addListener(SWT.Selection, new Listener() {
@@ -84,11 +85,12 @@ public class AdvancedPage extends PreferencePage implements IWorkbenchPreference
 				//todo
 			}
 		});
-
+		 
 		data = new FormData();
 		data.top = new FormAttachment(0, 0);
 		data.right = new FormAttachment(100, 0);
 		link.setLayoutData(data);
+		*/
 
 		Label versionLabel = new Label(area, SWT.NONE);
 		versionLabel.setText(SecurityUIMsg.ADVPAGE_LABEL_VERSION);

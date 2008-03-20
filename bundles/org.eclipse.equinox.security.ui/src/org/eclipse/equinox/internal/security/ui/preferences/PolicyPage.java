@@ -29,15 +29,15 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 	Button anysignedButton;
 	Button onlytrustedButton;
 	Button expiredButton;
-	TabFolder folder;
+	//TabFolder folder;
 	private int selectedPolicy;
 	private static final int BIT_TRUST_EXPIRED = DefaultAuthorizationEngine.ENFORCE_VALIDITY | DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED;
 	private static final int BIT_TRUST = DefaultAuthorizationEngine.ENFORCE_TRUSTED | DefaultAuthorizationEngine.ENFORCE_SIGNED;
 
 	protected Control createContents(Composite parent) {
 
-		Composite page = new Composite(parent, SWT.NONE);
-		page.setLayout(new FormLayout());
+		//Composite page = new Composite(parent, SWT.NONE);
+		//page.setLayout(new FormLayout());
 
 		//		Label titleLabel = new Label(page, SWT.NONE);
 		//		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_TITLE);
@@ -46,23 +46,23 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		//		data.left = new FormAttachment(0, 0);
 		//		titleLabel.setLayoutData(data);
 
-		folder = new TabFolder(page, SWT.NONE);
-		folder.setLayout(new FormLayout());
-		data = new FormData();
-		data.top = new FormAttachment(0, 10);
-		data.left = new FormAttachment(0, 0);
-		data.right = new FormAttachment(100, 0);
-		data.bottom = new FormAttachment(100, 0);
-		folder.setLayoutData(data);
-		folder.setEnabled(false);
+		//folder = new TabFolder(page, SWT.NONE);
+		//folder.setLayout(new FormLayout());
+		//data = new FormData();
+		//data.top = new FormAttachment(0, 10);
+		//data.left = new FormAttachment(0, 0);
+		//data.right = new FormAttachment(100, 0);
+		//data.bottom = new FormAttachment(100, 0);
+		//folder.setLayoutData(data);
+		//folder.setEnabled(false);
 
-		TabItem item = new TabItem(folder, SWT.NONE);
-		item.setText(SecurityUIMsg.POLPAGE_LABEL_SECTION);
+		//TabItem item = new TabItem(folder, SWT.NONE);
+		//item.setText(SecurityUIMsg.POLPAGE_LABEL_SECTION);
 
-		Composite loadArea = new Composite(folder, SWT.NONE);
+		Composite loadArea = new Composite(parent, SWT.NONE);
 		loadArea.setLayout(new FormLayout());
 
-		item.setControl(loadArea);
+		//item.setControl(loadArea);
 
 		data = new FormData();
 		data.top = new FormAttachment(0, 0);
@@ -70,6 +70,13 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		data.right = new FormAttachment(100, 0);
 		data.bottom = new FormAttachment(100, 0);
 		loadArea.setLayoutData(data);
+
+		Label titleLabel = new Label(loadArea, SWT.NONE);
+		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_DESC);
+		data = new FormData();
+		data.top = new FormAttachment(0, 5);
+		data.left = new FormAttachment(0, 5);
+		titleLabel.setLayoutData(data);
 
 		anyButton = new Button(loadArea, SWT.RADIO);
 		anysignedButton = new Button(loadArea, SWT.RADIO);
@@ -93,7 +100,7 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		// check if osgi.signedcontent.support property is enable
 		if (System.getProperty("osgi.signedcontent.support") != null) {
 			//			enableLoadSecBtn.setSelection(true);
-			folder.setEnabled(true);
+			//folder.setEnabled(true);
 
 			// select the default authorization engine
 			AuthorizationEngine authEngine = Activator.getAuthorizationEngine();
@@ -128,7 +135,7 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 			}
 		});
 		data = new FormData();
-		data.top = new FormAttachment(0, 5);
+		data.top = new FormAttachment(titleLabel, 10);
 		data.left = new FormAttachment(0, 5);
 		anyButton.setLayoutData(data);
 
@@ -241,16 +248,16 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		//		onlytrustedButton.setSelection(true);
 		//		expiredButton.setEnabled(true);
 
-		return page;
+		return loadArea;
 	}
 
-	protected void enableSecurityWidgets() {
-		folder.setEnabled(true);
-	}
+	//protected void enableSecurityWidgets() {
+	//	folder.setEnabled(true);
+	//}
 
-	protected void disableSecurityWidgets() {
-		folder.setEnabled(false);
-	}
+	//protected void disableSecurityWidgets() {
+	//	folder.setEnabled(false);
+	//}
 
 	public boolean performOk() {
 		// update the policy iff the page is dirty

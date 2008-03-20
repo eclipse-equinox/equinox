@@ -18,6 +18,7 @@
       </page>
    </extension>
 
+<!--
    <extension point="org.eclipse.ui.preferencePages">
       <page
          name="%certificates"
@@ -26,6 +27,7 @@
          category="org.eclipse.equinox.security.ui.category">
       </page>
    </extension>
+-->
 
    <extension point="org.eclipse.ui.preferencePages">
       <page
@@ -44,6 +46,8 @@
          category="org.eclipse.equinox.security.ui.category">
       </page>
    </extension>
+   
+<!--   
    <extension
          point="org.eclipse.ui.importWizards">
       <wizard
@@ -58,7 +62,7 @@
          <selection class="org.eclipse.core.resources.IResource" /> 
       </wizard>
    </extension>
-   
+-->   
    <!-- The default UI password provider -->
    <extension
          id="DefaultPasswordProvider"

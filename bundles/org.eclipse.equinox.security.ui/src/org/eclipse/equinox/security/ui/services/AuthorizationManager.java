@@ -20,6 +20,10 @@ import org.eclipse.ui.IWorkbenchWindow;
  */
 public abstract class AuthorizationManager {
 
+	public AuthorizationManager() {
+		//no content
+	}
+
 	/**
 	 * Query whether the authorization system is enabled for the system.
 	 * 
