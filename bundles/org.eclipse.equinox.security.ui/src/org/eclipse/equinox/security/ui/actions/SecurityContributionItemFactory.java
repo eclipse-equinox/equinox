@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,6 @@ import org.eclipse.ui.actions.ContributionItemFactory;
  * Clients may declare subclasses that provide additional application-specific
  * contribution item factories.
  * </p>
- * 
- * @since 3.4
  */
 public abstract class SecurityContributionItemFactory {
 
@@ -33,7 +31,6 @@ public abstract class SecurityContributionItemFactory {
 
 	/**
 	* Creates a new contribution item factory with the given id.
-	* 
 	* @param contributionItemId the id of contribution items created by this factory
 	*/
 	protected SecurityContributionItemFactory(String contributionItemId) {
@@ -42,7 +39,6 @@ public abstract class SecurityContributionItemFactory {
 
 	/**
 	 * Returns the id of this contribution item factory.
-	 * 
 	 * @return the id of contribution items created by this factory
 	 */
 	public String getId() {
@@ -50,14 +46,13 @@ public abstract class SecurityContributionItemFactory {
 	}
 
 	/**
-	 * Workbench contribution item (id "securityStatus"): An icon for 
+	 * Workbench contribution item (id &quot;securityStatus&quot;): An icon for 
 	 * evaluating and inspecting the security status of the system.
 	 */
 	public static final ContributionItemFactory SECURITY_STATUS = new ContributionItemFactory("securityStatus") {//$NON-NLS-1$
 		public IContributionItem create(IWorkbenchWindow window) {
-			if (window == null) {
+			if (window == null)
 				throw new IllegalArgumentException();
-			}
 			return new SecurityStatusControl(window, getId());
 		}
 	};
