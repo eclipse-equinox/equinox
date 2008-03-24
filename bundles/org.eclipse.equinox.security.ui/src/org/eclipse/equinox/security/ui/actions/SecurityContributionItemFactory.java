@@ -15,10 +15,38 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ContributionItemFactory;
 
-public abstract class SecurityContributionItemFactory extends ContributionItemFactory {
+/**
+ * Access to security related contribution items for the workbench.
+ * <p>
+ * Clients may declare subclasses that provide additional application-specific
+ * contribution item factories.
+ * </p>
+ * 
+ * @since 3.4
+ */
+public abstract class SecurityContributionItemFactory {
 
+	/**
+	 * Id of contribution items created by this factory.
+	 */
+	private final String contributionItemId;
+
+	/**
+	* Creates a new contribution item factory with the given id.
+	* 
+	* @param contributionItemId the id of contribution items created by this factory
+	*/
 	protected SecurityContributionItemFactory(String contributionItemId) {
-		super(contributionItemId);
+		this.contributionItemId = contributionItemId;
+	}
+
+	/**
+	 * Returns the id of this contribution item factory.
+	 * 
+	 * @return the id of contribution items created by this factory
+	 */
+	public String getId() {
+		return contributionItemId;
 	}
 
 	/**
