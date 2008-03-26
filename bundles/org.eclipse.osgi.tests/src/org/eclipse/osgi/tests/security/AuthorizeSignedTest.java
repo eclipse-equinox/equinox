@@ -12,8 +12,8 @@ package org.eclipse.osgi.tests.security;
 
 import junit.framework.Test;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.osgi.internal.provisional.service.security.*;
 import org.eclipse.osgi.internal.service.security.DefaultAuthorizationEngine;
-import org.eclipse.osgi.service.security.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 

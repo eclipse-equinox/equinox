@@ -15,7 +15,7 @@ import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.service.security.AuthorizationEngine;
+import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;

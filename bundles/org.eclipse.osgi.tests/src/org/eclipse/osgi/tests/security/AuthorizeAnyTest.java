@@ -12,8 +12,8 @@ package org.eclipse.osgi.tests.security;
 
 import junit.framework.Test;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.service.security.AuthorizationEvent;
-import org.eclipse.osgi.service.security.AuthorizationListener;
+import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEvent;
+import org.eclipse.osgi.internal.provisional.service.security.AuthorizationListener;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 

@@ -12,7 +12,7 @@ package org.eclipse.osgi.internal.signedcontent;
 
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.service.security.AuthorizationEngine;
+import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.osgi.framework.*;
 

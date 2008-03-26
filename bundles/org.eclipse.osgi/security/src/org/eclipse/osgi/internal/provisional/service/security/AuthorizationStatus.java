@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.service.security;
+package org.eclipse.osgi.internal.provisional.service.security;
 
 /**
  * Constants for status codes in the Authorization engine.
