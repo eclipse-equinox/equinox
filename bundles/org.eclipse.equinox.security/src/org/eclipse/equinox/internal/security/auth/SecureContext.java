@@ -17,10 +17,10 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import org.eclipse.equinox.internal.security.auth.events.SecurityEventsManager;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
-import org.eclipse.equinox.security.auth.ISecureContext;
-import org.eclipse.equinox.security.auth.event.ISecurityListener;
+import org.eclipse.equinox.security.auth.ILoginContextListener;
+import org.eclipse.equinox.security.auth.ILoginContext;
 
-public class SecureContext implements ISecureContext {
+public class SecureContext implements ILoginContext {
 
 	private String configName;
 	private LoginContext loginContext;
@@ -99,11 +99,11 @@ public class SecureContext implements ISecureContext {
 		return loginContext;
 	}
 
-	public void registerListener(ISecurityListener listener) {
+	public void registerListener(ILoginContextListener listener) {
 		eventsManager.addListener(listener);
 	}
 
-	public void unregisterListener(ISecurityListener listener) {
+	public void unregisterListener(ILoginContextListener listener) {
 		eventsManager.removeListener(listener);
 	}
 

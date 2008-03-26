@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,16 +8,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.security.auth.event;
+package org.eclipse.equinox.security.auth;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
 /**
- * Implement this interface on security event listeners to 
- * receive notifications of login process.
+ * This is a common interface that tags a class that can be registered 
+ * as a listener for security events. 
+ * <p>
+ * This interface is not intended to be implemented or extended by clients.
+ * </p>
+ * @see IUserLoginListener
+ * @see IUserLogoutListener
  */
-public interface ILoginListener extends ISecurityListener {
+public interface ILoginContextListener {
 
 	/**
 	 * This method is called before login starts.
@@ -35,4 +40,21 @@ public interface ILoginListener extends ISecurityListener {
 	 * exception caused login to fail 
 	 */
 	void onLoginFinish(Subject subject, LoginException loginException);
+
+	/**
+	 * This method is called before logout starts.
+	 * @param subject the authenticated subject, might be <code>null</code>
+	 * if there is no subject associated the context at this time
+	 */
+	void onLogoutStart(Subject subject);
+
+	/**
+	 * This method is called after logout sequence finishes. If logout
+	 * exception is not null, the logout failed.
+	 * @param subject the authenticated subject, might be <code>null</code>
+	 * if there is no subject associated the context at this time
+	 * @param logoutException <code>null</code> if logout succeeded, otherwise contains
+	 * exception caused logout to fail 
+	 */
+	void onLogoutFinish(Subject subject, LoginException logoutException);
 }

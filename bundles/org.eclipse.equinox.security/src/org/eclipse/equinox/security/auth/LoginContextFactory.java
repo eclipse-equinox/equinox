@@ -15,13 +15,13 @@ import javax.security.auth.callback.CallbackHandler;
 import org.eclipse.equinox.internal.security.auth.SecureContext;
 
 /**
- * The SecurePlatform class is the entry point for the login support for the platform.
- * Use it to create security context.
+ * The LoginContextFactory class is the entry point for the login support for the platform.
+ * Use it to create login contexts.
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
  */
-final public class SecurePlatform {
+final public class LoginContextFactory {
 
 	/**
 	 * Creates application-specific security context. The security context then can be used
@@ -36,7 +36,7 @@ final public class SecurePlatform {
 	 * @param configFile points to the standard JASS configuration file 
 	 * @return new security context
 	 */
-	public static ISecureContext createContext(String configName, URL configFile) {
+	public static ILoginContext createContext(String configName, URL configFile) {
 		return new SecureContext(configName, configFile, null);
 	}
 
@@ -54,7 +54,7 @@ final public class SecurePlatform {
 	 * @param handler optional callback handler, might be <code>null</code>
 	 * @return new security context
 	 */
-	public static ISecureContext createContext(String configName, URL configFile, CallbackHandler handler) {
+	public static ILoginContext createContext(String configName, URL configFile, CallbackHandler handler) {
 		return new SecureContext(configName, configFile, handler);
 	}
 
@@ -65,7 +65,7 @@ final public class SecurePlatform {
 	 * @param configFile points to the standard JASS configuration file 
 	 * @return new security context
 	 */
-	public static ISecureContext createContext(String configName) {
+	public static ILoginContext createContext(String configName) {
 		return new SecureContext(configName);
 	}
 

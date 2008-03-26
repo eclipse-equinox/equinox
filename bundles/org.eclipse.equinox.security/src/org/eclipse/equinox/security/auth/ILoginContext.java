@@ -13,17 +13,16 @@ package org.eclipse.equinox.security.auth;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import org.eclipse.equinox.security.auth.event.*;
 
 /**
- * The ISecureContext is the central entry point for the authentication support.
+ * The ILoginContext is the central entry point for the authentication support.
  * Use it to perform login, logout, and retrieve information associated with the security
  * subject.
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
  */
-public interface ISecureContext {
+public interface ILoginContext {
 
 	/**
 	 * Call this method to perform a login. 
@@ -50,19 +49,19 @@ public interface ISecureContext {
 	/**
 	 * Adds listener to be notified on security-related events.
 	 * @param listener the listener to be registered
-	 * @see ILoginListener
-	 * @see ILogoutListener
+	 * @see IUserLoginListener
+	 * @see IUserLogoutListener
 	 */
-	public void registerListener(ISecurityListener listener);
+	public void registerListener(ILoginContextListener listener);
 
 	/**
 	 * Removes listener previously registered to receive notifications
 	 * on security-related events.
 	 * @param listener the listener to be unregistered
-	 * @see ILoginListener
-	 * @see ILogoutListener
+	 * @see IUserLoginListener
+	 * @see IUserLogoutListener
 	 */
-	public void unregisterListener(ISecurityListener listener);
+	public void unregisterListener(ILoginContextListener listener);
 
 	/**
 	 * The method exposes underlying JAAS LoginContext.

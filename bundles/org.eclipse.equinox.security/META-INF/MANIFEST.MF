@@ -15,7 +15,6 @@ Export-Package: org.eclipse.equinox.internal.security.auth;x-internal:=true,
  org.eclipse.equinox.internal.security.storage.friends;version="1.0.0";x-friends:="org.eclipse.equinox.security.ui",
  org.eclipse.equinox.security.auth;version="1.0.0",
  org.eclipse.equinox.security.auth.credentials;version="1.0.0",
- org.eclipse.equinox.security.auth.event;version="1.0.0",
  org.eclipse.equinox.security.auth.module;version="1.0.0",
  org.eclipse.equinox.security.storage;version="1.0.0",
  org.eclipse.equinox.security.storage.provider;version="1.0.0"
