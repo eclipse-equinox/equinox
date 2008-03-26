@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.security.ui.actions;
+package org.eclipse.equinox.internal.provisional.security.ui.actions;
 
 import org.eclipse.equinox.internal.security.ui.SecurityStatusControl;
 import org.eclipse.jface.action.IContributionItem;
