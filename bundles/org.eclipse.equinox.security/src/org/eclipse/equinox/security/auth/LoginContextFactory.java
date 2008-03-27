@@ -62,7 +62,6 @@ final public class LoginContextFactory {
 	 * Creates application-specific security context. The security context then can be used
 	 * to perform login, logout, and obtain Subject information.
 	 * @param configName the name of login configuration to use
-	 * @param configFile points to the standard JASS configuration file 
 	 * @return new security context
 	 */
 	public static ILoginContext createContext(String configName) {

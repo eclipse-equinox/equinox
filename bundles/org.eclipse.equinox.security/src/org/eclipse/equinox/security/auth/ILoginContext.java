@@ -49,8 +49,7 @@ public interface ILoginContext {
 	/**
 	 * Adds listener to be notified on security-related events.
 	 * @param listener the listener to be registered
-	 * @see IUserLoginListener
-	 * @see IUserLogoutListener
+	 * @see ILoginContextListener
 	 */
 	public void registerListener(ILoginContextListener listener);
 
@@ -58,8 +57,7 @@ public interface ILoginContext {
 	 * Removes listener previously registered to receive notifications
 	 * on security-related events.
 	 * @param listener the listener to be unregistered
-	 * @see IUserLoginListener
-	 * @see IUserLogoutListener
+	 * @see ILoginContextListener
 	 */
 	public void unregisterListener(ILoginContextListener listener);
 

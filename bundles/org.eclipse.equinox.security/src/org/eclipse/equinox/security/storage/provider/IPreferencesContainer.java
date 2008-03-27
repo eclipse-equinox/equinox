@@ -21,7 +21,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
  * <p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>  
- * @see IPasswordProvider
+ * @see PasswordProvider
  */
 public interface IPreferencesContainer {
 
