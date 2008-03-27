@@ -27,12 +27,12 @@ public class SecurePreferencesMapper {
 	/**
 	 * Command line argument specifying default location
 	 */
-	final private static String KEYRING_ARGUMENT = "-equinox.keyring"; //$NON-NLS-1$
+	final private static String KEYRING_ARGUMENT = "-eclipse.keyring"; //$NON-NLS-1$
 
 	/**
 	 * Command line argument specifying default password
 	 */
-	final private static String PASSWORD_ARGUMENT = "-equinox.password"; //$NON-NLS-1$
+	final private static String PASSWORD_ARGUMENT = "-eclipse.password"; //$NON-NLS-1$
 
 	static private ISecurePreferences defaultPreferences = null;
 
