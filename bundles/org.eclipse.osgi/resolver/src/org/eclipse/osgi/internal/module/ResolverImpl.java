@@ -975,6 +975,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				}
 			}
 		}
+		// clear the refs; we don't care about the refs after singlton selection
+		for (int i = 0; i < bundles.length; i++)
+			bundles[i].clearRefs();
 		// unresolve the rejected singletons
 		for (Iterator rejects = rejectedSingletons.iterator(); rejects.hasNext();)
 			unresolveBundle((ResolverBundle) bundleMapping.get(rejects.next()), false);

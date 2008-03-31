@@ -583,6 +583,8 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 	}
 
 	void addRef(ResolverBundle ref) {
+		if (((BundleDescription) getBaseDescription()).isResolved())
+			return; // don't care when the bundle is already resolved
 		if (refs != null && !refs.contains(ref))
 			refs.add(ref);
 	}
