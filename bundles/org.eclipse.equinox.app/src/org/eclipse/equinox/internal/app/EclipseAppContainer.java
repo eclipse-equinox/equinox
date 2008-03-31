@@ -433,12 +433,13 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 				try {
 					Object provider = element.createExecutableExtension("run"); //$NON-NLS-1$
 					Object[] products = (Object[]) EclipseAppContainer.callMethod(provider, "getProducts", null, null); //$NON-NLS-1$
-					for (int j = 0; j < products.length; j++) {
-						if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) { //$NON-NLS-1$
-							branding = new ProviderExtensionBranding(products[j]);
-							return branding;
+					if (products != null)
+						for (int j = 0; j < products.length; j++) {
+							if (productId.equalsIgnoreCase((String) EclipseAppContainer.callMethod(products[j], "getId", null, null))) { //$NON-NLS-1$
+								branding = new ProviderExtensionBranding(products[j]);
+								return branding;
+							}
 						}
-					}
 				} catch (CoreException e) {
 					if (logEntries == null)
 						logEntries = new ArrayList(3);
@@ -559,25 +560,25 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 	}
 
 	static Object callMethod(Object obj, String methodName, Class[] argTypes, Object[] args) {
-		Throwable error = null;
+		try {
+			return callMethodWithException(obj, methodName, argTypes, args);
+		} catch (Throwable t) {
+			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, t, null)); //$NON-NLS-1$
+		}
+		return null;
+	}
+
+	static Object callMethodWithException(Object obj, String methodName, Class[] argTypes, Object[] args) throws Exception {
 		try {
 			Method method = obj.getClass().getMethod(methodName, argTypes);
 			return method.invoke(obj, args);
-		} catch (SecurityException e) {
-			error = e;
-		} catch (NoSuchMethodException e) {
-			error = e;
-		} catch (IllegalArgumentException e) {
-			error = e;
-		} catch (IllegalAccessException e) {
-			error = e;
 		} catch (InvocationTargetException e) {
-			error = e.getTargetException();
+			if (e.getTargetException() instanceof Error)
+				throw (Error) e.getTargetException();
+			if (e.getTargetException() instanceof Exception)
+				throw (Exception) e.getTargetException();
+			throw e;
 		}
-		if (error != null) {
-			Activator.log(new FrameworkLogEntry(Activator.PI_APP, FrameworkLogEntry.ERROR, 0, "Error in invoking method.", 0, error, null)); //$NON-NLS-1$
-		}
-		return null;
 	}
 
 	public Object addingService(ServiceReference reference) {

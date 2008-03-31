@@ -192,7 +192,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			if (app instanceof IApplication)
 				tempResult = ((IApplication) app).start(this);
 			else
-				tempResult = EclipseAppContainer.callMethod(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
+				tempResult = EclipseAppContainer.callMethodWithException(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
 		} finally {
 			synchronized (this) {
 				result = tempResult;
