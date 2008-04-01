@@ -9,6 +9,7 @@
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
  *    Jeremy Volkman 		- bug.id = 182560
+ *    Simon Archer 		    - bug.id = 223454
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
@@ -20,6 +21,7 @@ import java.util.Vector;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
 
@@ -174,14 +176,14 @@ public class ComponentReference implements Externalizable {
 		}
 
 		if (method == null) {
-			Activator.log.error("[SCR] Method was not found: " + methodName, null);
+			logMethodNotFoundError(componentInstance, reference, methodName, interfaceClass, param_interfaceClass[0]);
 			return null;
 		}
 
 		// if method is not protected or public, log error message
 		int modifier = method.getModifiers();
 		if (!(Modifier.isProtected(modifier) || Modifier.isPublic(modifier))) {
-			Activator.log.error("[SCR] Method " + methodName + " is not protected or public.", null);
+			logMethodNotVisible(componentInstance, reference, methodName, interfaceClass, param_interfaceClass[0]);
 			return null;
 		}
 
@@ -190,6 +192,60 @@ public class ComponentReference implements Externalizable {
 		}
 
 		return method;
+	}
+
+	private void logMethodNotVisible(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class interfaceClass, Class param_interfaceClass) {
+		Bundle bundle = component.bc.getBundle();
+		String symbolicName = bundle.getSymbolicName();
+		String param_interfaceName = param_interfaceClass.getName();
+		String implementationClassName = componentInstance.getInstance().getClass().getName();
+		String referenceInterfaceName = interfaceClass.getName();
+		StringBuffer buffer = new StringBuffer(500);
+		buffer.append("[SCR] Method ");
+		buffer.append(methodName);
+		buffer.append('(');
+		buffer.append(param_interfaceName);
+		buffer.append(')');
+		buffer.append(" is not protected or public! Details:");
+		appendMethodDetails(buffer, symbolicName, reference, implementationClassName, referenceInterfaceName);
+		String message = buffer.toString();
+		Activator.log.error(message, null);
+	}
+
+	private void logMethodNotFoundError(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class interfaceClass, Class param_interfaceClass) {
+		Bundle bundle = component.bc.getBundle();
+		String symbolicName = bundle.getSymbolicName();
+		String param_interfaceName = param_interfaceClass.getName();
+		String implementationClassName = componentInstance.getInstance().getClass().getName();
+		String referenceInterfaceName = interfaceClass.getName();
+		StringBuffer buffer = new StringBuffer(500);
+		buffer.append("[SCR] Method was not found: ");
+		buffer.append(methodName);
+		buffer.append('(');
+		buffer.append(param_interfaceName);
+		buffer.append(')');
+		appendMethodDetails(buffer, symbolicName, reference, implementationClassName, referenceInterfaceName);
+		String message = buffer.toString();
+		Activator.log.error(message, null);
+	}
+
+	private void appendMethodDetails(StringBuffer buffer, String symbolicName, Reference reference, String implementationClassName, String referenceInterfaceName) {
+		String indent = "\n\t"; //$NON-NLS-1$
+		buffer.append(indent);
+		buffer.append("bundle="); //$NON-NLS-1$
+		buffer.append(symbolicName);
+		buffer.append(indent);
+		buffer.append("service component="); //$NON-NLS-1$
+		buffer.append(reference.reference.component.name);
+		buffer.append(indent);
+		buffer.append("implementation="); //$NON-NLS-1$
+		buffer.append(implementationClassName);
+		buffer.append(indent);
+		buffer.append("reference name="); //$NON-NLS-1$
+		buffer.append(reference.reference.name);
+		buffer.append(indent);
+		buffer.append("reference interface="); //$NON-NLS-1$
+		buffer.append(referenceInterfaceName);
 	}
 
 	final void bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
@@ -266,9 +322,6 @@ public class ComponentReference implements Externalizable {
 					bindMethod.invoke(instance.getInstance(), params);
 				} catch (Throwable t) {
 					Activator.log.error("[SCR] Error while trying to bind reference " + this, t);
-					// rethrow exception so resolver is eventually notified that
-					// this component is bad
-					// throw t;
 				} finally {
 					SCRUtil.release(params);
 				}
@@ -285,7 +338,7 @@ public class ComponentReference implements Externalizable {
 				}
 
 				// could be also circularity break
-				Activator.log.warning("ComponentReference.bind(): bind method " + bind + " is not accessible!", null);
+				Activator.log.warning("ComponentReference.bind(): bind method " + bind + " is not found or it is not accessible!", null);
 			}
 		}
 	}
@@ -372,8 +425,6 @@ public class ComponentReference implements Externalizable {
 						unbindMethod.invoke(instance.getInstance(), params);
 					} catch (Throwable t) {
 						Activator.log.error("Exception occured while unbining reference " + this, t);
-						// Activator.fwAccess.postFrameworkEvent(FrameworkEvent.ERROR,
-						// component.bundle, t);
 					} finally {
 						SCRUtil.release(params);
 					}
