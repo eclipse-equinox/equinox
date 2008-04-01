@@ -47,7 +47,7 @@ public class PrintStackUtil {
 			if (exception != null) {
 				StackTraceElement[] stack = exception.getStackTrace();
 				if (stack == null || stack.length == 0)
-					return;
+					continue;
 				// eliminate common trails
 				int stackMatch = stack.length;
 				int topPosition = (topStack == null) ? 0 : topStack.length;
