@@ -12,6 +12,7 @@ package org.eclipse.core.runtime;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import org.eclipse.core.internal.runtime.PrintStackUtil;
 
 /**
  * A checked exception representing a failure.
@@ -90,10 +91,7 @@ public class CoreException extends Exception {
 	public void printStackTrace(PrintStream output) {
 		synchronized (output) {
 			super.printStackTrace(output);
-			if (status.getException() != null) {
-				output.print(getClass().getName() + "[" + status.getCode() + "]: "); //$NON-NLS-1$ //$NON-NLS-2$
-				status.getException().printStackTrace(output);
-			}
+			PrintStackUtil.printChildren(status, output);
 		}
 	}
 
@@ -107,11 +105,7 @@ public class CoreException extends Exception {
 	public void printStackTrace(PrintWriter output) {
 		synchronized (output) {
 			super.printStackTrace(output);
-			if (status.getException() != null) {
-				output.print(getClass().getName() + "[" + status.getCode() + "]: "); //$NON-NLS-1$ //$NON-NLS-2$
-				status.getException().printStackTrace(output);
-			}
+			PrintStackUtil.printChildren(status, output);
 		}
 	}
-
 }
