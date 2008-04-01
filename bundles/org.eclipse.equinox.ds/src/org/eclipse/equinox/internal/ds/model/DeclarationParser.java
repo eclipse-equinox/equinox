@@ -333,7 +333,7 @@ public class DeclarationParser implements ExTagListener {
 				mtType = AttributeDefinition.INTEGER;
 			} else if ("Long".equals(type)) {
 				mtType = AttributeDefinition.LONG;
-			} else if ("Char".equals(type)) {
+			} else if ("Char".equals(type) || "Character".equals(type)) {
 				mtType = AttributeDefinition.CHARACTER;
 			} else if ("Double".equals(type)) {
 				mtType = AttributeDefinition.DOUBLE;
