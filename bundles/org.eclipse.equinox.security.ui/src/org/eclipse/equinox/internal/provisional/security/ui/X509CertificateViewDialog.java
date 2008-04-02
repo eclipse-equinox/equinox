@@ -10,10 +10,12 @@
  *     Jay Rosenthal - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.security.ui;
+package org.eclipse.equinox.internal.provisional.security.ui;
 
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
+import org.eclipse.equinox.internal.security.ui.Activator;
+import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.equinox.internal.security.ui.wizard.CertificateViewer;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;

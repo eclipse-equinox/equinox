@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.internal.provisional.security.ui.services.AuthorizationManager;
+import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;

@@ -10,7 +10,7 @@
  *     Jay Rosenthal - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.internal.security.ui;
+package org.eclipse.equinox.internal.provisional.security.ui;
 
 import java.util.ArrayList;
 import java.util.Iterator;

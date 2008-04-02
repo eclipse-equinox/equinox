@@ -13,6 +13,8 @@ package org.eclipse.equinox.internal.security.ui.preferences;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import org.eclipse.equinox.internal.provisional.security.ui.X500PrincipalHelper;
+import org.eclipse.equinox.internal.provisional.security.ui.X509CertificateViewDialog;
 import org.eclipse.equinox.internal.security.ui.*;
 import org.eclipse.equinox.internal.security.ui.wizard.CertificateImportWizard;
 import org.eclipse.jface.preference.PreferencePage;

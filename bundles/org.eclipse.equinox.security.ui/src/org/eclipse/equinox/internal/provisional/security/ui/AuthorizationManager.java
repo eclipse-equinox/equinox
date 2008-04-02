@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.equinox.internal.provisional.security.ui.services;
+package org.eclipse.equinox.internal.provisional.security.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.ui.IWorkbenchWindow;

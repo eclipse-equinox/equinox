@@ -12,7 +12,7 @@ package org.eclipse.equinox.internal.security.ui;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.internal.provisional.security.ui.services.AuthorizationManager;
+import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationStatus;
 import org.eclipse.ui.IWorkbenchWindow;
 

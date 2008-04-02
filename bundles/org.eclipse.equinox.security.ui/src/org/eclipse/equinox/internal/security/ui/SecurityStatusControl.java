@@ -12,7 +12,7 @@ package org.eclipse.equinox.internal.security.ui;
 
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.internal.provisional.security.ui.services.AuthorizationManager;
+import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
