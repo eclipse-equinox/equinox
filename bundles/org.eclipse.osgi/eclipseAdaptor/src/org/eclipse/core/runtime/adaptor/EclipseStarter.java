@@ -285,7 +285,6 @@ public class EclipseStarter {
 		context = osgi.getBundleContext();
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
-		osgi.launch();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
 		String consolePort = FrameworkProperties.getProperty(PROP_CONSOLE);
@@ -294,13 +293,27 @@ public class EclipseStarter {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		final Bundle[][] startBundles = new Bundle[1][];
+		BundleListener loadBundleListener = new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				if ((event.getType() & BundleEvent.STARTING) == 0 || event.getBundle().getBundleId() != 0)
+					return;
+				startBundles[0] = loadBasicBundles();
+			}
+		};
+		context.addBundleListener(loadBundleListener);
+		try {
+			osgi.launch();
+		} finally {
+			context.removeBundleListener(loadBundleListener);
+		}
 		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) //$NON-NLS-1$
 			return context; // cannot continue; refreshPackages shutdown the framework
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 		long stateStamp = adaptor.getState().getTimeStamp();
-		Bundle[] startBundles = loadBasicBundles();
-		if (startBundles == null)
+
+		if (startBundles[0] == null)
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
@@ -308,7 +321,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
-		ensureBundlesActive(startBundles);
+		ensureBundlesActive(startBundles[0]);
 		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
 			if (stateStamp != adaptor.getState().getTimeStamp())
@@ -543,7 +556,7 @@ public class EclipseStarter {
 		} catch (MalformedURLException e) {
 			// TODO this is legacy support for non-URL names.  It should be removed eventually.
 			// if name was not a URL then construct one.  
-			// Assume it should be a reference and htat it is relative.  This support need not 
+			// Assume it should be a reference and that it is relative.  This support need not 
 			// be robust as it is temporary..
 			File child = new File(name);
 			fileLocation = child.isAbsolute() ? child : new File(parent, name);
@@ -596,7 +609,7 @@ public class EclipseStarter {
 	 * all basic bundles that are marked to start. 
 	 * Returns null if the framework has been shutdown as a result of refreshPackages
 	 */
-	private static Bundle[] loadBasicBundles() throws IOException {
+	private static Bundle[] loadBasicBundles() {
 		long startTime = System.currentTimeMillis();
 		String osgiBundles = FrameworkProperties.getProperty(PROP_BUNDLES);
 		String osgiExtensions = FrameworkProperties.getProperty(PROP_EXTENSIONS);
@@ -635,7 +648,7 @@ public class EclipseStarter {
 		return startInitBundles;
 	}
 
-	private static InitialBundle[] getInitialBundles(String[] installEntries) throws MalformedURLException {
+	private static InitialBundle[] getInitialBundles(String[] installEntries) {
 		searchCandidates.clear();
 		ArrayList result = new ArrayList(installEntries.length);
 		int defaultStartLevel = Integer.parseInt(FrameworkProperties.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
@@ -668,16 +681,20 @@ public class EclipseStarter {
 				}
 				name = name.substring(0, index);
 			}
-			URL location = searchForBundle(name, syspath);
-			if (location == null) {
-				FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
-				log.log(entry);
-				// skip this entry
-				continue;
+			try {
+				URL location = searchForBundle(name, syspath);
+				if (location == null) {
+					FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_BUNDLE_NOT_FOUND, installEntries[i]), 0, null, null);
+					log.log(entry);
+					// skip this entry
+					continue;
+				}
+				location = makeRelative(LocationManager.getInstallLocation().getURL(), location);
+				String locationString = INITIAL_LOCATION + location.toExternalForm();
+				result.add(new InitialBundle(locationString, location, level, start));
+			} catch (IOException e) {
+				log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 			}
-			location = makeRelative(LocationManager.getInstallLocation().getURL(), location);
-			String locationString = INITIAL_LOCATION + location.toExternalForm();
-			result.add(new InitialBundle(locationString, location, level, start));
 		}
 		return (InitialBundle[]) result.toArray(new InitialBundle[result.size()]);
 	}

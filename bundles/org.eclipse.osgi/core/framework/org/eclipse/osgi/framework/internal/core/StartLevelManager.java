@@ -46,10 +46,10 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	// default value is 1 for compatibility mode
 
 	/** The currently active framework start level */
-	private static int activeSL = 0;
+	private int activeSL = 0;
 
 	/** An object used to lock the active startlevel while it is being referenced */
-	private static final Object lock = new Object();
+	private final Object lock = new Object();
 
 	volatile private boolean settingStartLevel = false;
 
@@ -244,8 +244,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 *  This method does not return until all bundles that should be started are started
 	 */
 	protected void launch(int startlevel) {
-
-		doSetStartLevel(startlevel, framework.systemBundle);
+		doSetStartLevel(startlevel);
 	}
 
 	/**
@@ -255,8 +254,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 *  This method does not return until all bundles are stopped and the framework is shut down.
 	 */
 	protected void shutdown() {
-
-		doSetStartLevel(0, framework.systemBundle);
+		doSetStartLevel(0);
 	}
 
 	/**
@@ -265,19 +263,44 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 * @param newSL start level value                  
 	 * @param callerBundle - the bundle initiating the change in start level
 	 */
-	private void doSetStartLevel(int newSL, AbstractBundle callerBundle) {
+	private void doSetStartLevel(int newSL) {
 		synchronized (lock) {
 			settingStartLevel = true;
 			try {
 				int tempSL = activeSL;
 
 				if (newSL > tempSL) {
+					boolean launching = tempSL == 0;
+					if (launching) {
+						/* Load all installed bundles */
+						loadInstalledBundles(getInstalledBundles(framework.bundles, false));
+						/* Start the system bundle */
+						try {
+							framework.systemBundle.state = Bundle.STARTING;
+							framework.systemBundle.context.start();
+							framework.publishBundleEvent(BundleEvent.STARTING, framework.systemBundle);
+							// TODO this technically should be done just before firing the STARTED event for the system bundle; 
+							// TODO State is set to ACTIVE here because some depend on the the system bundle being in the ACTIVE state when they are starting 
+							framework.systemBundle.state = Bundle.ACTIVE;
+						} catch (BundleException be) {
+							if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+								Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
+								Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
+							}
+							framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
+							throw new RuntimeException(be.getMessage());
+						}
+					}
 					for (int i = tempSL; i < newSL; i++) {
 						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 							Debug.println("sync - incrementing Startlevel from " + tempSL); //$NON-NLS-1$
 						}
 						tempSL++;
-						incFWSL(i + 1, callerBundle);
+						incFWSL(i + 1, getInstalledBundles(framework.bundles, false));
+					}
+					if (launching) {
+						framework.publishBundleEvent(BundleEvent.STARTED, framework.systemBundle);
+						framework.publishFrameworkEvent(FrameworkEvent.STARTED, framework.systemBundle, null);
 					}
 				} else {
 					AbstractBundle[] sortedBundles = getInstalledBundles(framework.bundles, true);
@@ -289,7 +312,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 						decFWSL(i - 1, sortedBundles);
 					}
 				}
-				framework.publishFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, callerBundle, null);
+				framework.publishFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, framework.systemBundle, null);
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 					Debug.println("StartLevelImpl: doSetStartLevel: STARTLEVEL_CHANGED event published"); //$NON-NLS-1$
 				}
@@ -463,7 +486,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 					setBundleSL((StartLevelEvent) eventObject);
 					break;
 				case StartLevelEvent.CHANGE_FW_SL :
-					doSetStartLevel(((StartLevelEvent) eventObject).getNewSL(), ((StartLevelEvent) eventObject).getBundle());
+					doSetStartLevel(((StartLevelEvent) eventObject).getNewSL());
 					break;
 			}
 		} catch (Throwable t) {
@@ -475,36 +498,14 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	/** 
 	 *  Increment the active startlevel by one
 	 */
-	protected void incFWSL(int incToSL, AbstractBundle callerBundle) {
+	protected void incFWSL(int incToSL, AbstractBundle[] launchBundles) {
 		if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 			Debug.println("SLL: incFWSL: saving activeSL of " + incToSL); //$NON-NLS-1$
 		}
-
+		// save the startlevel
 		saveActiveStartLevel(incToSL);
-
-		AbstractBundle[] launch;
-		BundleRepository bundles = framework.bundles;
-
-		launch = getInstalledBundles(bundles, false);
-
-		if (incToSL == 1) { // framework was not active
-
-			/* Load all installed bundles */
-			loadInstalledBundles(launch);
-			/* Resume all bundles */
-			resumeBundles(launch, true);
-
-			/* publish the framework started event */
-			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-				Debug.println("SLL: Framework started"); //$NON-NLS-1$
-			}
-
-			framework.publishFrameworkEvent(FrameworkEvent.STARTED, callerBundle, null);
-
-		} else {
-			// incrementing an already active framework
-			resumeBundles(launch, false);
-		}
+		// resume all bundles at the startlevel
+		resumeBundles(launchBundles);
 	}
 
 	/**
@@ -599,25 +600,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	/**
 	 *  Resume all bundles in the launch list
 	 * @param launch a list of Bundle Objects to launch
-	 * @param launchingFW tells whether or not to launch the framework (system bundle)
 	 */
-	private void resumeBundles(AbstractBundle[] launch, boolean launchingFW) {
-		if (launchingFW) {
-			/* Start the system bundle */
-			try {
-				framework.systemBundle.state = Bundle.STARTING;
-				framework.systemBundle.context.start();
-			} catch (BundleException be) {
-				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
-					Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
-				}
-
-				framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-				throw new RuntimeException(be.getMessage());
-			}
-
-		}
+	private void resumeBundles(AbstractBundle[] launch) {
 		/* Resume all bundles that were previously started and whose startlevel is <= the active startlevel */
 		int fwsl = getStartLevel();
 		for (int i = 0; i < launch.length && !framework.isForcedRestart(); i++) {
@@ -635,9 +619,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 				break;
 			}
 		}
-
-		framework.systemBundle.state = Bundle.ACTIVE;
-
 	}
 
 	/** 
@@ -712,6 +693,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		}
 
 		framework.systemBundle.state = Bundle.RESOLVED;
+		framework.publishBundleEvent(BundleEvent.STOPPED, framework.systemBundle);
 	}
 
 	/**
