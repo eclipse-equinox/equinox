@@ -179,8 +179,14 @@ public class ServiceComponent implements Externalizable {
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				ComponentReference r = (ComponentReference) references.elementAt(i);
-				if (r.name == null || r.interfaceName == null) {
+				if (r.name == null || r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) {
 					throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains illegal reference " + r);
+				}
+				for (int j = i + 1; j < references.size(); j++) {
+					ComponentReference ref2 = (ComponentReference) references.elementAt(j);
+					if (r.name.equals(ref2.name)) {
+						throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains references with duplicate names");
+					}
 				}
 			}
 		}
