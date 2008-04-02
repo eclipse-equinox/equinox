@@ -80,7 +80,7 @@ public abstract class ComponentStorage {
 							if (is == null) {
 								Activator.log.error("ComponentStorage.parseXMLDeclaration(): missing file " + url, null);
 							} else {
-								parser.parse(is, bundle, components);
+								parser.parse(is, bundle, components, url.toString());
 							}
 						} catch (IOException ie) {
 							Activator.log.error("[SCR] Error occured while opening component definition file " + url, ie);

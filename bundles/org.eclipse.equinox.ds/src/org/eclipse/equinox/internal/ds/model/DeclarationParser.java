@@ -71,6 +71,7 @@ public class DeclarationParser implements ExTagListener {
 	boolean immediateSet = false;
 	private Hashtable namespaces = null;
 	private boolean rootPassed = false;
+	private String currentURL = null;
 
 	/**
 	 * This method parses an XML file read from the given stream and converts
@@ -84,10 +85,11 @@ public class DeclarationParser implements ExTagListener {
 	 * @param bundle
 	 *            this is used to load the 'properties' tag
 	 */
-	public void parse(InputStream in, Bundle bundle, Vector components) throws Exception {
+	public void parse(InputStream in, Bundle bundle, Vector components, String processingURL) throws Exception {
 		this.components = components;
 		this.bundle = bundle;
 		this.bc = bundle.getBundleContext();
+		this.currentURL = processingURL;
 		rootPassed = false;
 		XMLParser.parseXML(in, this, -1);
 
@@ -95,6 +97,7 @@ public class DeclarationParser implements ExTagListener {
 		this.bundle = null;
 		this.bc = null;
 		this.currentComponent = null;
+		this.currentURL = null;
 		this.closeTag = null;
 		this.namespaces = null;
 	}
@@ -172,7 +175,7 @@ public class DeclarationParser implements ExTagListener {
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR - DeclarationParser.endTag()] Error occured while processing end tag in bundle " + bundle, e);
+			Activator.log.error("[SCR - DeclarationParser.endTag()] Error occured while processing end tag of url '" + currentURL + "' in bundle " + bundle, e);
 		}
 	}
 
@@ -268,13 +271,11 @@ public class DeclarationParser implements ExTagListener {
 	private void doImplementation(Tag tag) {
 		if (currentComponent.implementation != null) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'component' tag must have exactly one 'implementation' attribute at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 		String tmp = tag.getAttribute(ATTR_CLASS);
 		if (tmp == null) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'implementation' element must have 'class' attribute set at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 		currentComponent.implementation = tmp;
@@ -345,7 +346,6 @@ public class DeclarationParser implements ExTagListener {
 				mtType = AttributeDefinition.SHORT;
 			} else {
 				IllegalArgumentException e = new IllegalArgumentException("Illegal property type '" + type + "' on line " + tag.getLine());
-				Activator.log.error("[SCR] " + e.getMessage(), e);
 				throw e;
 			}
 
@@ -358,7 +358,6 @@ public class DeclarationParser implements ExTagListener {
 				value = tag.getContent();
 				if (value == null) {
 					IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have body content if 'value' attribute is not specified!");
-					Activator.log.error("[SCR] " + e.getMessage(), e);
 					throw e;
 				}
 				StringTokenizer tok = new StringTokenizer(value, "\n\r");
@@ -371,7 +370,6 @@ public class DeclarationParser implements ExTagListener {
 				}
 				if (el.size() == 0) {
 					IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have body content if 'value' attribute is not specified!");
-					Activator.log.error("[SCR] " + e.getMessage(), e);
 					throw e;
 				}
 				String[] values = new String[el.size()];
@@ -383,7 +381,7 @@ public class DeclarationParser implements ExTagListener {
 			}
 			currentComponent.properties.put(name, _value);
 		} catch (Throwable e) {
-			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property " + name, e);
+			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL, e);
 		}
 	}
 
