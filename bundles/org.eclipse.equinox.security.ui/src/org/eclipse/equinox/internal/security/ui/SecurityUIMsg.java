@@ -121,15 +121,16 @@ public class SecurityUIMsg extends NLS {
 	public static String CERTVAL_DEFAULTDIGESTALGO;
 	public static String CERTVAL_VERSION;
 	public static String CERTVAL_UNDEFINED;
-	public static String LABEL_KEYUSAGE_DIGITALSIGNATURE;
-	public static String LABEL_KEYUSAGE_NONREPUDIATION;
-	public static String LABEL_KEYUSAGE_KEYENCIPHERMENT;
-	public static String LABEL_KEYUSAGE_DATAENCIPHERMENT;
-	public static String LABEL_KEYUSAGE_KEYAGREEMENT;
-	public static String LABEL_KEYUSAGE_CERTSIGN;
-	public static String LABEL_KEYUSAGE_CRLSIGN;
-	public static String LABEL_KEYUSAGE_ENCIPHERONLY;
-	public static String LABEL_KEYUSAGE_DECIPHERONLY;
+	public static String LABEL_KEYUSAGE_DIGITALSIGNATURE = "digitalSignature"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_NONREPUDIATION = "nonRepudiation"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_KEYENCIPHERMENT = "keyEncipherment"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_DATAENCIPHERMENT = "dataEncipherment"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_KEYAGREEMENT = "keyAgreement"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_CERTSIGN = "keyCertSign"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_CRLSIGN = "cRLSign"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_ENCIPHERONLY = "encipherOnly"; //$NON-NLS-1$
+	public static String LABEL_KEYUSAGE_DECIPHERONLY = "decipherOnly"; //$NON-NLS-1$
+
 	public static String LABEL_NAMECONSTRAINTS_PERMITTED;
 	public static String LABEL_NAMECONSTRAINTS_EXCLUDED;
 	public static String LABEL_NAMECONSTRAINTS_ORGANIZATION;
