@@ -469,7 +469,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
  */
 _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder ) 
 {
-	int cwdSize = MAX_PATH_LENGTH * sizeof(_TCHAR);
+	int cwdLength = MAX_PATH_LENGTH;
 	int i;
 	_TCHAR * workingDir, * buffer, * result = NULL;
 	_TCHAR * paths[2];
@@ -481,10 +481,10 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     }
     
     /* get the current working directory */
-    workingDir = malloc(cwdSize);
-    while ( _tgetcwd( workingDir, cwdSize ) == NULL ){
-    	cwdSize *= 2;
-    	workingDir = realloc(workingDir, cwdSize);
+    workingDir = malloc(cwdLength * sizeof(_TCHAR));
+    while ( _tgetcwd( workingDir, cwdLength ) == NULL ){
+    	cwdLength *= 2;
+    	workingDir = realloc(workingDir, cwdLength * sizeof(_TCHAR));
     }
     
     paths[0] = reverseOrder ? programDir : workingDir;
