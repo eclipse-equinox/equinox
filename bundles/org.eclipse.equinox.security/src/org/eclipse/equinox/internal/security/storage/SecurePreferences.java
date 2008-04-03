@@ -21,6 +21,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferences {
 
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+
 	private static final String PATH_SEPARATOR = String.valueOf(IPath.SEPARATOR);
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -206,6 +208,9 @@ public class SecurePreferences {
 		if (key == null)
 			throw new NullPointerException();
 		checkRemoved();
+
+		if (value == null) // might be used to overwrite old value
+			value = EMPTY_STRING;
 
 		if (!encrypt) {
 			CryptoData clearValue = new CryptoData(null, null, value.getBytes());
