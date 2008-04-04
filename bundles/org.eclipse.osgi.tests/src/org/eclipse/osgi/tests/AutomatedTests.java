@@ -19,8 +19,7 @@ public class AutomatedTests extends TestCase {
 	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests";
 
 	/**
-	 * AllTests constructor comment.
-	 * @param name java.lang.String
+	 * AllTests constructor.
 	 */
 	public AutomatedTests() {
 		super(null);
