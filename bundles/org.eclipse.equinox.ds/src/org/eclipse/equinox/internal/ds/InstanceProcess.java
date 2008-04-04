@@ -247,7 +247,7 @@ public class InstanceProcess {
 						}
 					}
 				} catch (Throwable t) {
-					Activator.log.error("Exception occured while building component " + scp, t);
+					Activator.log.error("[SCR] Exception occured while building component configuration of component " + scp.serviceComponent, t);
 				} finally {
 					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
 					freeLock();
@@ -432,7 +432,6 @@ public class InstanceProcess {
 	 */
 	final void dynamicUnBind(Hashtable serviceTable) {
 		try {
-
 			if (serviceTable == null || serviceTable.isEmpty()) {
 				return;
 			}
@@ -453,14 +452,15 @@ public class InstanceProcess {
 							try {
 								scp.unbindDynamicReference(ref, compInstance, serviceReference);
 							} catch (Throwable t) {
-								t.printStackTrace();
+								Activator.log.error("[SCR] Error while dynamically unbinding reference '" + ref.reference + "' of component instance " + compInstance.getInstance(), t);
 							}
 						}
 					}
 				}
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			//should not happen
+			Activator.log.error("[SCR] Unexpected error!", e);
 		}
 	}
 
@@ -580,8 +580,8 @@ public class InstanceProcess {
 				Activator.log.error(e.getMessage(), e.getCause());
 				throw e;
 			} catch (Throwable t) {
-				Activator.log.error("[SCR] Error while building component " + scp.name, t);
-				throw new ComponentException("Error while building component " + scp.name, t);
+				Activator.log.error("[SCR] Error while building configuration of component " + scp.serviceComponent, t);
+				throw new ComponentException("Error while building configuration of component " + scp.serviceComponent, t);
 			} finally {
 				// keep track of how many times we have re-entered this method
 				counter.count--;

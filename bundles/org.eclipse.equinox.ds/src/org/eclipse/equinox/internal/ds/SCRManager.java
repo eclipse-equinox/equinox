@@ -140,7 +140,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
 		}
 	}
 
@@ -562,7 +562,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				// //Activator.log.debug("changeComponent method end", null);
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
 		}
 	}
 
@@ -597,7 +597,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				/* Call the WorkPerformer to process the work. */
 				performer.performWork(actionType, workToDo);
 			} catch (Throwable t) {
-				t.printStackTrace();
 				log.error("[SCR] Error dispatching work ", t);
 			}
 		}

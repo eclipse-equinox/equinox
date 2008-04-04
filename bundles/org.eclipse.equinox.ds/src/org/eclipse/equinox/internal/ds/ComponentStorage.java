@@ -61,7 +61,7 @@ public abstract class ComponentStorage {
 
 					Enumeration urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
 					if (urls == null || !urls.hasMoreElements()) {
-						Activator.log.error("Component definition XMLs not found in bundle " + bundle.getSymbolicName() + ". The component header value is " + definitionFile, null);
+						Activator.log.error("[SCR] Component definition XMLs not found in bundle " + bundle.getSymbolicName() + ". The component header value is " + definitionFile, null);
 						continue;
 					}
 
@@ -78,14 +78,14 @@ public abstract class ComponentStorage {
 						try {
 							is = url.openStream();
 							if (is == null) {
-								Activator.log.error("ComponentStorage.parseXMLDeclaration(): missing file " + url, null);
+								Activator.log.error("[SCR] ComponentStorage.parseXMLDeclaration(): missing file " + url, null);
 							} else {
 								parser.parse(is, bundle, components, url.toString());
 							}
 						} catch (IOException ie) {
 							Activator.log.error("[SCR] Error occured while opening component definition file " + url, ie);
 						} catch (Throwable t) {
-							Activator.log.error("Illegal definition file: " + url, t);
+							Activator.log.error("[SCR] Illegal definition file: " + url, t);
 						}
 					}
 				} // end while

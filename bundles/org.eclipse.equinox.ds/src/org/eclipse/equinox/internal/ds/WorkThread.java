@@ -93,7 +93,7 @@ public class WorkThread implements Runnable, TimerListener {
 			} catch (Throwable t) {
 				// just for any case. Must not happen in order to keep thread
 				// alive
-				t.printStackTrace();
+				Activator.log.error("[SCR - WorkThread] Unexpected exception ocurred!", t);
 			} finally {
 				TimerRef.removeListener(this, 1);
 			}

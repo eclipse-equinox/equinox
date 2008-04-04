@@ -433,22 +433,18 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * @throws Exception
 	 */
 	public void unbindDynamicReference(Reference ref, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
-		try {
-			if (Activator.DEBUG) {
-				Activator.log.debug("ServiceComponentProp.unbindDynamicReference(): component = " + name + ", reference = " + ref.reference.name, null);
-			}
-			// check if we need to rebind
-			switch (ref.reference.cardinality) {
-				case ComponentReference.CARDINALITY_0_1 :
-				case ComponentReference.CARDINALITY_1_1 :
-					if (ref.reference.bind != null) {
-						bindReference(ref, instance);
-					}
-			}
-			ref.reference.unbind(ref, instance, serviceReference);
-		} catch (Throwable e) {
-			e.printStackTrace();
+		if (Activator.DEBUG) {
+			Activator.log.debug("ServiceComponentProp.unbindDynamicReference(): component = " + name + ", reference = " + ref.reference.name, null);
 		}
+		// check if we need to rebind
+		switch (ref.reference.cardinality) {
+			case ComponentReference.CARDINALITY_0_1 :
+			case ComponentReference.CARDINALITY_1_1 :
+				if (ref.reference.bind != null) {
+					bindReference(ref, instance);
+				}
+		}
+		ref.reference.unbind(ref, instance, serviceReference);
 	}
 
 	// -- begin helper methods

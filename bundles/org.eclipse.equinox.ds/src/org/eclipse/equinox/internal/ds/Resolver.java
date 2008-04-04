@@ -251,7 +251,7 @@ public final class Resolver implements WorkPerformer {
 			scpEnabled.addElement(scp);
 
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception while creating configuration for component " + component, t);
 		}
 		return scp;
 	}
@@ -528,7 +528,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return enabledSCPs;
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
 			return null;
 		}
 	}
@@ -681,7 +681,7 @@ public final class Resolver implements WorkPerformer {
 					break;
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
 		}
 	}
 
@@ -714,7 +714,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return toBind;
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
 			return null;
 		}
 	}
@@ -747,7 +747,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return toBind;
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
 			return null;
 		}
 	}
@@ -783,7 +783,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			return toUnbind;
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
 			return null;
 		}
 	}
@@ -848,7 +848,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return unbindTable;
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
 			return null;
 		}
 	}
@@ -933,7 +933,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 		} catch (CircularityException e) {
-			Activator.log.error("[SCR] Circularity Exception found for component " + e.getCausingComponent(), e);
+			Activator.log.error("[SCR] Circularity Exception found for component: " + e.getCausingComponent().serviceComponent, e);
 			// disable offending SCP
 			scpEnabled.removeElement(e.getCausingComponent());
 			// try again

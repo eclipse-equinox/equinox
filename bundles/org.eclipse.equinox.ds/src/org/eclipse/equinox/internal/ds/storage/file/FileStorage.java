@@ -64,8 +64,9 @@ public class FileStorage extends ComponentStorage {
 	}
 
 	public Vector loadComponentDefinitions(long bundleID) {
+		Bundle bundle = null;
 		try {
-			Bundle bundle = bc.getBundle(bundleID);
+			bundle = bc.getBundle(bundleID);
 			Vector components = null;
 			if (!Activator.DBSTORE) {
 				return parseXMLDeclaration(bundle);
@@ -104,7 +105,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable e) {
-			e.printStackTrace();
+			Activator.log.error("[SCR] Unexpected exception while processing bundle with id " + bundleID + " : " + bundle, e);
 			return null;
 		}
 	}
