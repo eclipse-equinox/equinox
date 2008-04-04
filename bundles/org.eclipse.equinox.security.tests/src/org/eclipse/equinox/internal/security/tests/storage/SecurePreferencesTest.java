@@ -484,6 +484,56 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		}
 	}
 
+	/**
+	 * Tests edge cases for data (nulls, empty strings, and so on).
+	 */
+	public void testEdgeCases() throws StorageException, MalformedURLException, IOException {
+		byte[] expectedEmptyArray = new byte[0];
+		byte[] wrongArray = new byte[] {1, 2, 3};
+
+		{ // block1: fill, check, and save
+			ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
+			ISecurePreferences node = preferences.node("/testEdge");
+
+			node.put("emptyString1", "", true);
+			node.put("emptyString2", "", false);
+			node.put("nullString1", null, true);
+			node.put("nullString2", null, false);
+
+			node.putByteArray("emptyArray1", new byte[0], true);
+			node.putByteArray("emptyArray2", new byte[0], false);
+			node.putByteArray("nullArray1", null, true);
+			node.putByteArray("nullArray2", null, false);
+
+			assertEquals("", node.get("emptyString1", "wrong"));
+			assertEquals("", node.get("emptyString2", "wrong"));
+			assertNull(node.get("nullString1", "wrong"));
+			assertNull(node.get("nullString2", "wrong"));
+
+			compareArrays(expectedEmptyArray, node.getByteArray("emptyArray1", wrongArray));
+			compareArrays(expectedEmptyArray, node.getByteArray("emptyArray2", wrongArray));
+			assertNull(node.getByteArray("nullString1", wrongArray));
+			assertNull(node.getByteArray("nullString2", wrongArray));
+
+			preferences.flush();
+			closePreferences(preferences);
+		}
+		{ // block2: re-load and check
+			ISecurePreferences preferences = newPreferences(getStorageLocation(), getOptions());
+			ISecurePreferences node = preferences.node("/testEdge");
+
+			assertEquals("", node.get("emptyString1", "wrong"));
+			assertEquals("", node.get("emptyString2", "wrong"));
+			assertNull(node.get("nullString1", "wrong"));
+			assertNull(node.get("nullString2", "wrong"));
+
+			compareArrays(expectedEmptyArray, node.getByteArray("emptyArray1", wrongArray));
+			compareArrays(expectedEmptyArray, node.getByteArray("emptyArray2", wrongArray));
+			assertNull(node.getByteArray("nullString1", wrongArray));
+			assertNull(node.getByteArray("nullString2", wrongArray));
+		}
+	}
+
 	// assumes all entries are unique and array1 has no null elements
 	private void findAll(String[] array1, String[] array2) {
 		assertNotNull(array1);

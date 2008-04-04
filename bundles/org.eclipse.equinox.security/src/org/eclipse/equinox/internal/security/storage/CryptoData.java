@@ -63,9 +63,11 @@ public class CryptoData {
 		if (saltPos != -1) {
 			salt = Base64.decode(encrypted.substring(0, saltPos));
 			encryptedData = Base64.decode(encrypted.substring(saltPos + 1));
-		} else { // should not happen unless data is modified but handle it anyway
-			salt = new byte[] {0, 0, 0, 0, 0, 0, 0, 0};
-			encryptedData = Base64.decode(encrypted);
+		} else { // this is a "null" value
+			if (encrypted.length() != 0) // double check that this is not a broken entry
+				throw new StorageException(StorageException.DECRYPTION_ERROR, SecAuthMessages.invalidEntryFormat);
+			salt = null;
+			encryptedData = null;
 		}
 	}
 
@@ -74,9 +76,10 @@ public class CryptoData {
 		encryptedText.append(MODULE_ID_SEPARATOR);
 		if (salt != null)
 			encryptedText.append(Base64.encode(salt));
-		encryptedText.append(SALT_SEPARATOR);
-		if (encryptedData != null)
+		if (encryptedData != null) {
+			encryptedText.append(SALT_SEPARATOR);
 			encryptedText.append(Base64.encode(encryptedData));
+		}
 		return encryptedText.toString();
 	}
 

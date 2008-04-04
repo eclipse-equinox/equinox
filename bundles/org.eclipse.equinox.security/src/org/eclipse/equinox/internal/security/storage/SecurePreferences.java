@@ -21,8 +21,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferences {
 
-	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
-
 	private static final String PATH_SEPARATOR = String.valueOf(IPath.SEPARATOR);
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -209,11 +207,8 @@ public class SecurePreferences {
 			throw new NullPointerException();
 		checkRemoved();
 
-		if (value == null) // might be used to overwrite old value
-			value = EMPTY_STRING;
-
-		if (!encrypt) {
-			CryptoData clearValue = new CryptoData(null, null, value.getBytes());
+		if (!encrypt || value == null) {
+			CryptoData clearValue = new CryptoData(null, null, value == null ? null : value.getBytes());
 			internalPut(key, clearValue.toString());
 			markModified();
 			return;
@@ -223,6 +218,7 @@ public class SecurePreferences {
 		if (passwordExt == null)
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
 
+		// value must not be null at this point
 		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), value.getBytes());
 		internalPut(key, encryptedValue.toString());
 		markModified();
@@ -239,6 +235,8 @@ public class SecurePreferences {
 		CryptoData data = new CryptoData(encryptedValue);
 		String moduleID = data.getModuleID();
 		if (moduleID == null) { // clear-text value, not encrypted
+			if (data.getData() == null)
+				return null;
 			return new String(data.getData());
 		}
 
@@ -434,7 +432,7 @@ public class SecurePreferences {
 		if (!hasKey(key))
 			return defaultValue;
 		String value = get(key, null, container);
-		return (value == null) ? defaultValue : Base64.decode(value);
+		return Base64.decode(value);
 	}
 
 	public void putByteArray(String key, byte[] value, boolean encrypt, SecurePreferencesContainer container) throws StorageException {
