@@ -35,6 +35,8 @@ public class DeclarationParser implements ExTagListener {
 	private static final String XMLNS = "http://www.osgi.org/xmlns/scr/v1.0.0";
 	private static final String ATTR_XMLNS = "xmlns";
 
+	private static final String COMPONENT_TAG_NAME = "component";
+
 	private static final String ATTR_AUTOENABLE = "enabled";
 	private static final String ATTR_NAME = "name";
 	private static final String ATTR_FACTORY = "factory";
@@ -115,7 +117,7 @@ public class DeclarationParser implements ExTagListener {
 				doCorrectComponentTag(tag, tagName);
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR - DeclarationParser.startTag()] Error occured while processing start tag in bundle " + bundle, e);
+			Activator.log.error("[SCR] Error occured while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		} finally {
 			if (!rootPassed) {
 				rootPassed = true;
@@ -157,7 +159,6 @@ public class DeclarationParser implements ExTagListener {
 				closeTag = null;
 			} else {
 				IllegalArgumentException e = new IllegalArgumentException("Found illegal tag named '" + tagName + "' in component XML, at line " + tag.getLine());
-				Activator.log.error("[SCR] " + e.toString(), e);
 				throw e;
 			}
 		}
@@ -175,7 +176,7 @@ public class DeclarationParser implements ExTagListener {
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR - DeclarationParser.endTag()] Error occured while processing end tag of url '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log.error("[SCR] Error occured while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		}
 	}
 
@@ -204,14 +205,12 @@ public class DeclarationParser implements ExTagListener {
 		String name = tag.getAttribute(ATTR_NAME);
 		if (name == null) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'name' attribute, at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 
 		String iface = tag.getAttribute(ATTR_INTERFACE);
 		if (iface == null) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'interface' attribute, at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 
@@ -220,8 +219,7 @@ public class DeclarationParser implements ExTagListener {
 		if (cardinalityS != null) {
 			cardinality = getCardinality(cardinalityS);
 			if (cardinality < 0) {
-				IllegalArgumentException e = new IllegalArgumentException("The 'cardinality' attribute has invalid value '" + name + "' at line " + tag.getLine());
-				Activator.log.error("[SCR] " + e.getMessage(), e);
+				IllegalArgumentException e = new IllegalArgumentException("The 'cardinality' attribute has invalid value '" + cardinalityS + "' at line " + tag.getLine());
 				throw e;
 			}
 		} // if null - default cardinality is already initialized in
@@ -236,17 +234,15 @@ public class DeclarationParser implements ExTagListener {
 			} else if (policyS.equals("dynamic")) {
 				policy = ComponentReference.POLICY_DYNAMIC;
 			} else {
-				IllegalArgumentException e = new IllegalArgumentException("The 'policy' attribute has invalid value '" + name + "' at line" + tag.getLine());
-				Activator.log.error("[SCR] " + e.getMessage(), e);
+				IllegalArgumentException e = new IllegalArgumentException("The 'policy' attribute has invalid value '" + policyS + "' at line " + tag.getLine());
 				throw e;
 			}
 		} // if null - default policy is already initialized in constructor
 
 		String bind = tag.getAttribute(ATTR_BIND);
 		String unbind = tag.getAttribute(ATTR_UNBIND);
-		if ((bind != null && ((unbind == null) || bind.equals(unbind))) || (unbind != null && ((bind == null) || unbind.equals(bind)))) {
+		if ((bind != null && ((unbind == null) || bind.equals("") || bind.equals(unbind))) || (unbind != null && ((bind == null) || unbind.equals("") || unbind.equals(bind)))) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: you must specify both but different 'bind' and 'unbind' attributes!");
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 
@@ -320,7 +316,6 @@ public class DeclarationParser implements ExTagListener {
 			name = tag.getAttribute(ATTR_NAME);
 			if (name == null) {
 				IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have 'name' attribute set at line " + tag.getLine());
-				Activator.log.error("[SCR] " + e.getMessage(), e);
 				throw e;
 			}
 
@@ -389,7 +384,6 @@ public class DeclarationParser implements ExTagListener {
 		String fileEntry = tag.getAttribute(ATTR_ENTRY);
 		if (fileEntry == null) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'properties' tag must include 'entry' attribute, at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 
@@ -424,15 +418,11 @@ public class DeclarationParser implements ExTagListener {
 		}
 	}
 
-	private static String COMPONENT_TAG_NAME = "component";
-
 	private void doCorrectComponentTag(Tag tag, String tagName) {
 		closeTag = tagName.intern();
 		String tmp = tag.getAttribute(ATTR_NAME);
-		if (tmp == null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'component' tag MUST have 'name' tag set, at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
-			return;
+		if (tmp == null || tmp.equals("")) {
+			throw new IllegalArgumentException("The 'component' tag MUST have 'name' tag set, at line " + tag.getLine());
 		}
 		immediateSet = false;
 
