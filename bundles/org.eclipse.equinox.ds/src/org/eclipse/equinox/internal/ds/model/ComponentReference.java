@@ -21,7 +21,6 @@ import java.util.Vector;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
 
@@ -176,14 +175,14 @@ public class ComponentReference implements Externalizable {
 		}
 
 		if (method == null) {
-			logMethodNotFoundError(componentInstance, reference, methodName, interfaceClass, param_interfaceClass[0]);
+			logMethodNotFoundError(componentInstance, reference, methodName);
 			return null;
 		}
 
 		// if method is not protected or public, log error message
 		int modifier = method.getModifiers();
 		if (!(Modifier.isProtected(modifier) || Modifier.isPublic(modifier))) {
-			logMethodNotVisible(componentInstance, reference, methodName, interfaceClass, param_interfaceClass[0]);
+			logMethodNotVisible(componentInstance, reference, methodName, method.getParameterTypes()[0]);
 			return null;
 		}
 
@@ -194,58 +193,72 @@ public class ComponentReference implements Externalizable {
 		return method;
 	}
 
-	private void logMethodNotVisible(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class interfaceClass, Class param_interfaceClass) {
-		Bundle bundle = component.bc.getBundle();
-		String symbolicName = bundle.getSymbolicName();
+	private void logMethodNotVisible(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class param_interfaceClass) {
 		String param_interfaceName = param_interfaceClass.getName();
-		String implementationClassName = componentInstance.getInstance().getClass().getName();
-		String referenceInterfaceName = interfaceClass.getName();
-		StringBuffer buffer = new StringBuffer(500);
-		buffer.append("[SCR] Method ");
+		StringBuffer buffer = createBuffer();
+		buffer.append("[SCR] Method "); //$NON-NLS-1$
 		buffer.append(methodName);
 		buffer.append('(');
 		buffer.append(param_interfaceName);
 		buffer.append(')');
-		buffer.append(" is not protected or public! Details:");
-		appendMethodDetails(buffer, symbolicName, reference, implementationClassName, referenceInterfaceName);
+		buffer.append(" is not protected or public!"); //$NON-NLS-1$
+		appendDetails(buffer, reference);
 		String message = buffer.toString();
 		Activator.log.error(message, null);
 	}
 
-	private void logMethodNotFoundError(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class interfaceClass, Class param_interfaceClass) {
-		Bundle bundle = component.bc.getBundle();
-		String symbolicName = bundle.getSymbolicName();
-		String param_interfaceName = param_interfaceClass.getName();
-		String implementationClassName = componentInstance.getInstance().getClass().getName();
-		String referenceInterfaceName = interfaceClass.getName();
-		StringBuffer buffer = new StringBuffer(500);
-		buffer.append("[SCR] Method was not found: ");
+	private void logMethodNotFoundError(ComponentInstanceImpl componentInstance, Reference reference, String methodName) {
+		StringBuffer buffer = createBuffer();
+		buffer.append("[SCR] Method was not found: "); //$NON-NLS-1$
 		buffer.append(methodName);
 		buffer.append('(');
-		buffer.append(param_interfaceName);
+		buffer.append(reference.reference.interfaceName);
 		buffer.append(')');
-		appendMethodDetails(buffer, symbolicName, reference, implementationClassName, referenceInterfaceName);
+		appendDetails(buffer, reference);
 		String message = buffer.toString();
 		Activator.log.error(message, null);
 	}
 
-	private void appendMethodDetails(StringBuffer buffer, String symbolicName, Reference reference, String implementationClassName, String referenceInterfaceName) {
-		String indent = "\n\t"; //$NON-NLS-1$
-		buffer.append(indent);
-		buffer.append("bundle="); //$NON-NLS-1$
-		buffer.append(symbolicName);
-		buffer.append(indent);
-		buffer.append("service component="); //$NON-NLS-1$
-		buffer.append(reference.reference.component.name);
-		buffer.append(indent);
-		buffer.append("implementation="); //$NON-NLS-1$
-		buffer.append(implementationClassName);
-		buffer.append(indent);
-		buffer.append("reference name="); //$NON-NLS-1$
-		buffer.append(reference.reference.name);
-		buffer.append(indent);
-		buffer.append("reference interface="); //$NON-NLS-1$
-		buffer.append(referenceInterfaceName);
+	private void appendDetails(StringBuffer buffer, Reference reference) {
+		try {
+			String indent = "\n\t"; //$NON-NLS-1$
+			buffer.append(indent);
+			buffer.append("Details:"); //$NON-NLS-1$
+			buffer.append(indent);
+			buffer.append("Problematic reference = " + reference.reference); //$NON-NLS-1$
+			buffer.append(indent);
+			buffer.append("of service component = "); //$NON-NLS-1$
+			buffer.append(reference.reference.component.name);
+			buffer.append(indent);
+			buffer.append("component implementation class = "); //$NON-NLS-1$
+			buffer.append(reference.reference.component.implementation);
+			buffer.append(indent);
+			buffer.append("located in bundle with symbolic name = "); //$NON-NLS-1$
+			buffer.append(component.bc.getBundle().getSymbolicName());
+			buffer.append(indent);
+			buffer.append("bundle location = "); //$NON-NLS-1$
+			buffer.append(component.bc.getBundle().getLocation());
+		} catch (Throwable t) {
+			//prevent possible exceptions in case the component's bundle becomes uninstalled 
+		}
+	}
+
+	private void logWarning(String message, Throwable t, Reference reference) {
+		StringBuffer buffer = createBuffer();
+		buffer.append(message);
+		appendDetails(buffer, reference);
+		Activator.log.warning(buffer.toString(), t);
+	}
+
+	private void logError(String message, Throwable t, Reference reference) {
+		StringBuffer buffer = createBuffer();
+		buffer.append(message);
+		appendDetails(buffer, reference);
+		Activator.log.error(buffer.toString(), t);
+	}
+
+	private StringBuffer createBuffer() {
+		return new StringBuffer(400);
 	}
 
 	final void bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
@@ -260,7 +273,7 @@ public class ComponentReference implements Externalizable {
 						instances.addElement(instance);
 						serviceReferences.put(serviceReference, instances);
 					} else if (instances.contains(instance)) {
-						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null);
+						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
 						return;
 					} else {
 						instances.addElement(instance);
@@ -268,10 +281,10 @@ public class ComponentReference implements Externalizable {
 				} else {
 					Object compInstance = serviceReferences.get(serviceReference);
 					if (compInstance == instance) {
-						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null);
+						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
 						return;
 					} else if (compInstance != null) {
-						Activator.log.warning("ComponentReference.bind(): service reference " + serviceReference + " is already bound to another instance: " + compInstance, null);
+						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to another instance: " + compInstance, null, reference);
 						return;
 					}
 					serviceReferences.put(serviceReference, instance);
@@ -321,7 +334,7 @@ public class ComponentReference implements Externalizable {
 				try {
 					bindMethod.invoke(instance.getInstance(), params);
 				} catch (Throwable t) {
-					Activator.log.error("[SCR] Error while trying to bind reference " + this, t);
+					logError("[SCR] Error while trying to bind reference " + this, t, reference); //$NON-NLS-1$
 				} finally {
 					SCRUtil.release(params);
 				}
@@ -338,7 +351,7 @@ public class ComponentReference implements Externalizable {
 				}
 
 				// could be also circularity break
-				Activator.log.warning("ComponentReference.bind(): bind method " + bind + " is not found or it is not accessible!", null);
+				logWarning("[SCR] ComponentReference.bind(): bind method '" + bind + "' is not found or it is not accessible!", null, reference); //$NON-NLS-1$//$NON-NLS-2$
 			}
 		}
 	}
@@ -354,7 +367,7 @@ public class ComponentReference implements Externalizable {
 					referenceExists = false;
 				} else {
 					if (!instances.contains(instance)) {
-						Activator.log.warning("ComponentReference.unbind(): component instance not bound! It is: " + instance, null);
+						logWarning("[SCR] ComponentReference.unbind(): component instance not bound! It is: " + instance, null, reference);
 						return;
 					}
 				}
@@ -364,7 +377,7 @@ public class ComponentReference implements Externalizable {
 					referenceExists = false;
 				} else {
 					if (compInstance != instance) {
-						Activator.log.warning("ComponentReference.unbind(): component instance not bound! It is: " + instance, null);
+						logWarning("[SCR] ComponentReference.unbind(): component instance not bound! It is: " + instance, null, reference);
 						return;
 					}
 				}
@@ -391,7 +404,7 @@ public class ComponentReference implements Externalizable {
 			}
 		}
 		if (!referenceExists) {
-			Activator.log.warning("ComponentReference.unbind(): invalid service reference " + serviceReference, null);
+			logWarning("[SCR] ComponentReference.unbind(): invalid service reference " + serviceReference, null, reference);
 			return;
 		}
 		try {
@@ -424,7 +437,7 @@ public class ComponentReference implements Externalizable {
 					try {
 						unbindMethod.invoke(instance.getInstance(), params);
 					} catch (Throwable t) {
-						Activator.log.error("Exception occured while unbining reference " + this, t);
+						logError("[SCR] Exception occured while unbining reference " + this, t, reference);
 					} finally {
 						SCRUtil.release(params);
 					}
