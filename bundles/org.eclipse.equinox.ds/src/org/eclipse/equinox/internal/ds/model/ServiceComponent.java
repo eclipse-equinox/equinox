@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Simon Archer 		    - bug.id = 225624 
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
@@ -71,20 +72,21 @@ public class ServiceComponent implements Externalizable {
 	public ServiceComponent() {
 	}
 
-	private static final Method getMethod(Object instance, String name) {
+	private final Method getMethod(Object instance, String methodName) throws Exception {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10034, name, null, false);
+			Activator.log.debug(0, 10034, methodName, null, false);
 			// //Activator.log.debug("getMethod() " + name, null);
 		}
 		Method method = null;
 		Class clazz = instance != null ? instance.getClass() : null;
 
-		// search for the method in the parent classes!
 		while (method == null && clazz != null) {
 			try {
-				method = clazz.getDeclaredMethod(name, ACTIVATE_METHODS_PARAMETERS);
-			} catch (Throwable t) {
+				method = clazz.getDeclaredMethod(methodName, ACTIVATE_METHODS_PARAMETERS);
+			} catch (NoSuchMethodException e) {
+				// the method activate/deactivate may not exist in the component implementation class
 			}
+			// search for the method in the parent classes!
 			clazz = clazz.getSuperclass();
 		}
 		if (method != null) {
@@ -93,6 +95,7 @@ public class ServiceComponent implements Externalizable {
 				SCRUtil.setAccessible(method);
 			} else if (!Modifier.isPublic(modifiers)) {
 				// not protected neither public
+				Activator.log.warning("[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the implementation class of component: " + this, null);
 				method = null;
 			}
 		}
@@ -101,45 +104,49 @@ public class ServiceComponent implements Externalizable {
 	}
 
 	void activate(Object instance, ComponentContext context) throws ComponentException {
-		// retrieve the activate method from cache
-		if (!activateCached) {
-			activateCached = true;
-			activate = getMethod(instance, "activate");
-		}
-		// invoke the method if any
-		if (activate != null) {
-			Object[] params = SCRUtil.getObjectArray();
-			params[0] = context;
-			try {
-				activate.invoke(instance, params);
-			} catch (Throwable t) {
-				Activator.log.error("[SCR] Cannot activate instance " + instance + " of component " + name, t);
-				throw new ComponentException("[SCR] Exception while activating instance " + instance + " of component " + name, t);
-				// rethrow exception so resolver is eventually notified that
-				// the processed SCP is bad
-			} finally {
-				SCRUtil.release(params);
+		try {
+			// retrieve the activate method from cache
+			if (!activateCached) {
+				activateCached = true;
+				activate = getMethod(instance, "activate");
 			}
+			// invoke the method if any
+			if (activate != null) {
+				Object[] params = SCRUtil.getObjectArray();
+				params[0] = context;
+				try {
+					activate.invoke(instance, params);
+				} finally {
+					SCRUtil.release(params);
+				}
+			}
+		} catch (Throwable t) {
+			Activator.log.error("[SCR] Cannot activate instance " + instance + " of component " + this, null);
+			throw new ComponentException("[SCR] Exception while activating instance " + instance + " of component " + name, t);
+			// rethrow exception so resolver is eventually notified that
+			// the processed SCP is bad
 		}
 	}
 
 	void deactivate(Object instance, ComponentContext context) {
-		// retrieve the activate method from cache
-		if (!deactivateCached) {
-			deactivateCached = true;
-			deactivate = getMethod(instance, "deactivate");
-		}
-		// invoke the method
-		if (deactivate != null) {
-			Object[] params = SCRUtil.getObjectArray();
-			params[0] = context;
-			try {
-				deactivate.invoke(instance, params);
-			} catch (Throwable t) {
-				Activator.log.error("[SCR] Error while attempting to deactivate instance of component " + name, t);
-			} finally {
-				SCRUtil.release(params);
+		try {
+			// retrieve the activate method from cache
+			if (!deactivateCached) {
+				deactivateCached = true;
+				deactivate = getMethod(instance, "deactivate");
 			}
+			// invoke the method
+			if (deactivate != null) {
+				Object[] params = SCRUtil.getObjectArray();
+				params[0] = context;
+				try {
+					deactivate.invoke(instance, params);
+				} finally {
+					SCRUtil.release(params);
+				}
+			}
+		} catch (Throwable t) {
+			Activator.log.error("[SCR] Error while attempting to deactivate instance of component " + this, t);
 		}
 	}
 
@@ -197,7 +204,7 @@ public class ServiceComponent implements Externalizable {
 			serviceInterfaces.copyInto(provides);
 		}
 
-		// make sure that the component will get automaticaly enabled/disable!
+		// make sure that the component will get automatically enabled!
 		enabled = autoenable;
 	}
 
@@ -215,9 +222,7 @@ public class ServiceComponent implements Externalizable {
 		try {
 			return bundle.loadClass(implementation).newInstance();
 		} catch (Throwable t) {
-			// Activator.log.error("[SCR] Unable to create an instance of
-			// component "+name, t);
-			throw new ComponentException("Exception occured while creating new instance of component " + name, t);
+			throw new ComponentException("Exception occured while creating new instance of component " + this, t);
 		}
 	}
 
@@ -286,6 +291,7 @@ public class ServiceComponent implements Externalizable {
 			}
 			buffer.append("\n\t}");
 		}
+		buffer.append("\n\tlocated in bundle = ").append(bundle);
 		buffer.append("\n]");
 		return buffer.toString();
 	}
