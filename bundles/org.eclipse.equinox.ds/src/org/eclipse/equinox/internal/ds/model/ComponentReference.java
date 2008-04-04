@@ -96,7 +96,8 @@ public class ComponentReference implements Externalizable {
 				method = consumerClass.getDeclaredMethod(methodName, SERVICE_REFERENCE);
 			} catch (NoSuchMethodException e) {
 			} catch (NoClassDefFoundError err) {
-				// this may happen on skelmir VM
+				// this may happen on skelmir VM or in case of class loading problems
+				logWarning("[SCR] Exception occured while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
 
 			if (method != null)
@@ -152,7 +153,8 @@ public class ComponentReference implements Externalizable {
 				method = consumerClass.getDeclaredMethod(methodName, param_interfaceClass);
 			} catch (NoSuchMethodException e) {
 			} catch (NoClassDefFoundError err) {
-				// this may happen on skelmir VM
+				// this may happen on skelmir VM or in case of class loading problems
+				logWarning("[SCR] Exception occured while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
 			if (method != null)
 				break;
