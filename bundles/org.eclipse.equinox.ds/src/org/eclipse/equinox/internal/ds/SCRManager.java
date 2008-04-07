@@ -140,7 +140,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
+			Activator.log.error("[SCR] Unexpected exception occurred!", e);
 		}
 	}
 
@@ -486,17 +486,48 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				start = System.currentTimeMillis() - start;
 				log.info("[DS perf] The components for bundle " + bundle + " are parsed for " + start + " ms");
 			}
-			// store the components in the cache
 			if (bundleToServiceComponents == null) {
-				bundleToServiceComponents = new Hashtable(10);
+				bundleToServiceComponents = new Hashtable(11);
 			}
-			bundleToServiceComponents.put(bundle, components);
-			for (int i = 0; i < components.size(); i++) {
-				ServiceComponent comp = (ServiceComponent) components.elementAt(i);
+
+			//check whether component's names are unique
+			ServiceComponent comp;
+			ServiceComponent comp2;
+			L1: for (int i = 0; i < components.size(); i++) {
+				comp = (ServiceComponent) components.elementAt(i);
+				//check if unique in its bundle
+				for (int j = i + 1; j < components.size(); j++) {
+					comp2 = (ServiceComponent) components.elementAt(j);
+					if (comp.name.equals(comp2.name)) {
+						Activator.log.error("[SCR] Found components with duplicated names inside their bundle! This component will not be processed: " + comp, null);
+						//removing one of the components
+						components.remove(i);
+						i--;
+						continue L1;
+					}
+				}
+				//check if the component is globally unique
+				Enumeration keys = bundleToServiceComponents.keys();
+				while (keys.hasMoreElements()) {
+					Vector components2 = (Vector) bundleToServiceComponents.get(keys.nextElement());
+					for (int j = 0; j < components2.size(); j++) {
+						comp2 = (ServiceComponent) components2.elementAt(j);
+						if (comp.name.equals(comp2.name)) {
+							Activator.log.error("[SCR] Found components with duplicated names! Details: \nComponent1 (will be ignored): " + comp + "\nComponent2: " + comp2, null);
+							//removing the component
+							components.remove(i);
+							i--;
+							continue L1;
+						}
+					}
+				}
+
 				if (comp.autoenable) {
 					comp.enabled = true;
 				}
 			}
+			// store the components in the cache
+			bundleToServiceComponents.put(bundle, components);
 			// this will also resolve the component dependencies!
 			enqueueWork(this, ENABLE_COMPONENTS, components, false);
 		}
@@ -562,7 +593,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				// //Activator.log.debug("changeComponent method end", null);
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
+			Activator.log.error("[SCR] Unexpected exception occurred!", e);
 		}
 	}
 
