@@ -294,13 +294,15 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 								Activator.log.error("[SCR - SCRManager] ComponentFactory " + name + " cannot be managed using factory configuration!", null);
 								return;
 							}
-							if (Activator.DEBUG) {
-								Activator.log.debug(0, 10015, pid, null, false);
-								// //Activator.log.debug("
-								// Resolver.configurationEvent(): found
-								// component - " + pid, null);
+							if (sc.enabled) {
+								if (Activator.DEBUG) {
+									Activator.log.debug(0, 10015, pid, null, false);
+									// //Activator.log.debug("
+									// Resolver.configurationEvent(): found
+									// component - " + pid, null);
+								}
+								processConfigurationEvent(event, sc);
 							}
-							processConfigurationEvent(event, sc);
 							return;
 						}
 					}
