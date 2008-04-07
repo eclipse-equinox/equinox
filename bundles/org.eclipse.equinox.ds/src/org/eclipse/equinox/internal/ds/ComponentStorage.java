@@ -83,7 +83,7 @@ public abstract class ComponentStorage {
 								parser.parse(is, bundle, components, url.toString());
 							}
 						} catch (IOException ie) {
-							Activator.log.error("[SCR] Error occured while opening component definition file " + url, ie);
+							Activator.log.error("[SCR] Error occurred while opening component definition file " + url, ie);
 						} catch (Throwable t) {
 							Activator.log.error("[SCR] Illegal definition file: " + url, t);
 						}

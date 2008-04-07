@@ -247,7 +247,7 @@ public class InstanceProcess {
 						}
 					}
 				} catch (Throwable t) {
-					Activator.log.error("[SCR] Exception occured while building component configuration of component " + scp.serviceComponent, t);
+					Activator.log.error("[SCR] Exception occurred while building component configuration of component " + scp.serviceComponent, t);
 				} finally {
 					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
 					freeLock();

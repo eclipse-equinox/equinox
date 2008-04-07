@@ -528,7 +528,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return enabledSCPs;
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
+			Activator.log.error("[SCR] Unexpected exception occurred!", e);
 			return null;
 		}
 	}
@@ -681,7 +681,7 @@ public final class Resolver implements WorkPerformer {
 					break;
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", e);
+			Activator.log.error("[SCR] Unexpected exception occurred!", e);
 		}
 	}
 
@@ -714,7 +714,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return toBind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
+			Activator.log.error("[SCR] Unexpected exception occurred!", t);
 			return null;
 		}
 	}
@@ -747,7 +747,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return toBind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
+			Activator.log.error("[SCR] Unexpected exception occurred!", t);
 			return null;
 		}
 	}
@@ -783,7 +783,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			return toUnbind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
+			Activator.log.error("[SCR] Unexpected exception occurred!", t);
 			return null;
 		}
 	}
@@ -848,7 +848,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return unbindTable;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception ocurred!", t);
+			Activator.log.error("[SCR] Unexpected exception occurred!", t);
 			return null;
 		}
 	}

@@ -120,7 +120,7 @@ public class ComponentContextImpl implements ComponentContext {
 					if (t instanceof ComponentException) {
 						throw (ComponentException) t;
 					}
-					throw new ComponentException("Exception occured while locating service for interface " + name, t);
+					throw new ComponentException("Exception occurred while locating service for interface " + name, t); //$NON-NLS-1$
 				}
 				if (Activator.DEBUG) {
 					Activator.log.debug("ComponentContextImpl.locateService(): error, service not found - " + ref.interfaceName + "; the comp. context belongs to " + scp.name, null);
@@ -194,7 +194,7 @@ public class ComponentContextImpl implements ComponentContext {
 					if (t instanceof ComponentException) {
 						throw (ComponentException) t;
 					}
-					throw new ComponentException("Exception occured while locating services for interface " + name, t);
+					throw new ComponentException("Exception occurred while locating services for interface " + name, t);
 				}
 			}
 		}
@@ -251,7 +251,7 @@ public class ComponentContextImpl implements ComponentContext {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			throw new ComponentException("Exception occured while locating service for interface " + name, t);
+			throw new ComponentException("Exception occurred while locating service for interface " + name, t);
 		}
 		return null;
 	}

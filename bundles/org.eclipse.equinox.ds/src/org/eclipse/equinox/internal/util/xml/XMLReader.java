@@ -589,7 +589,7 @@ public class XMLReader {
 			}
 		} catch (RuntimeException re) {
 			if (fDebug) {
-				System.err.println("An outside exception occured while processing a tag on line " + aTag.getLine() + ", the tag name is: " + aTag.getName() + ", the level is: " + fCurrentLevel);
+				System.err.println("An outside exception occurred while processing a tag on line " + aTag.getLine() + ", the tag name is: " + aTag.getName() + ", the level is: " + fCurrentLevel);
 				re.printStackTrace(System.err);
 			}
 			throw re;

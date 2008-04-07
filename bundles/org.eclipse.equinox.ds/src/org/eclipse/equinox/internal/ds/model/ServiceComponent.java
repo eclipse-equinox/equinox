@@ -222,7 +222,7 @@ public class ServiceComponent implements Externalizable {
 		try {
 			return bundle.loadClass(implementation).newInstance();
 		} catch (Throwable t) {
-			throw new ComponentException("Exception occured while creating new instance of component " + this, t);
+			throw new ComponentException("Exception occurred while creating new instance of component " + this, t);
 		}
 	}
 

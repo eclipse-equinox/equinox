@@ -97,7 +97,7 @@ public class ComponentReference implements Externalizable {
 			} catch (NoSuchMethodException e) {
 			} catch (NoClassDefFoundError err) {
 				// this may happen on skelmir VM or in case of class loading problems
-				logWarning("[SCR] Exception occured while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
+				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
 
 			if (method != null)
@@ -154,7 +154,7 @@ public class ComponentReference implements Externalizable {
 			} catch (NoSuchMethodException e) {
 			} catch (NoClassDefFoundError err) {
 				// this may happen on skelmir VM or in case of class loading problems
-				logWarning("[SCR] Exception occured while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
+				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
 			if (method != null)
 				break;
@@ -439,7 +439,7 @@ public class ComponentReference implements Externalizable {
 					try {
 						unbindMethod.invoke(instance.getInstance(), params);
 					} catch (Throwable t) {
-						logError("[SCR] Exception occured while unbining reference " + this, t, reference);
+						logError("[SCR] Exception occurred while unbinding reference " + this, t, reference);
 					} finally {
 						SCRUtil.release(params);
 					}

@@ -117,7 +117,7 @@ public class DeclarationParser implements ExTagListener {
 				doCorrectComponentTag(tag, tagName);
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Error occured while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		} finally {
 			if (!rootPassed) {
 				rootPassed = true;
@@ -176,7 +176,7 @@ public class DeclarationParser implements ExTagListener {
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR] Error occured while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		}
 	}
 

@@ -93,7 +93,7 @@ public class WorkThread implements Runnable, TimerListener {
 			} catch (Throwable t) {
 				// just for any case. Must not happen in order to keep thread
 				// alive
-				Activator.log.error("[SCR - WorkThread] Unexpected exception ocurred!", t);
+				Activator.log.error("[SCR - WorkThread] Unexpected exception occurred!", t);
 			} finally {
 				TimerRef.removeListener(this, 1);
 			}
@@ -102,7 +102,7 @@ public class WorkThread implements Runnable, TimerListener {
 	}
 
 	public void timer(int event) {
-		Activator.log.warning("[SCR - WorkThread] Timeout ocurred! Thread was blocked on processing " + objectToProcess, null);
+		Activator.log.warning("[SCR - WorkThread] Timeout occurred! Thread was blocked on processing " + objectToProcess, null);
 		running = false;
 		objectToProcess = null;
 		mgr.queueBlocked();
