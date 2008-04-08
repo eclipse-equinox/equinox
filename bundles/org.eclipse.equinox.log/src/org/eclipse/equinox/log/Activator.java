@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2007 IBM Corporation and others.
+ * Copyright (c) 1999, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -145,8 +145,8 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	 *  @param level The severity of the message.  (Should be one of the four
 	 *               predefined severities.)
 	 *  @param message Human readable string describing the condition.
-	 *  @param context The BundleContext creating the log entry
-	 *  @param sd The ServiceDescription of the service that this message
+	 *  @param bundle The Bundle creating the log entry
+	 *  @param reference The ServiceReference of the service that this message
 	 *  is associated with.
 	 *  @param exception The exception that reflects the condition.
 	 */
