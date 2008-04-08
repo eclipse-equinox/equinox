@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage.friends;
 
+import org.eclipse.equinox.security.storage.StorageException;
+
 /**
  * Interface used for UI dependency injection. Unlike most places,
  * actions in the secure storage can be initiated independently from UI so
@@ -28,5 +30,12 @@ package org.eclipse.equinox.internal.security.storage.friends;
 public interface IUICallbacks {
 
 	public String[][] setupPasswordRecovery(int size);
+
+	/**
+	 * @param callback
+	 * @return false if task was canceled
+	 * @throws StorageException
+	 */
+	public boolean execute(final IStorageTask callback) throws StorageException;
 
 }

@@ -69,4 +69,9 @@ public class CallbacksProvider {
 		return null;
 	}
 
+	public IUICallbacks getCallback() {
+		if (callback == null)
+			init();
+		return callback;
+	}
 }

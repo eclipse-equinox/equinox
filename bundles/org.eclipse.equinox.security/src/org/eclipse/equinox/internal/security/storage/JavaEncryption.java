@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
-import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
+import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.osgi.util.NLS;
 
@@ -46,6 +46,8 @@ public class JavaEncryption {
 
 	private boolean initialized = false;
 
+	private HashMap availableCiphers;
+
 	public JavaEncryption() {
 		// placeholder
 	}
@@ -63,11 +65,25 @@ public class JavaEncryption {
 		this.keyFactoryAlgorithm = keyFactoryAlgorithm;
 	}
 
-	private void init() throws StorageException {
+	synchronized private void init() throws StorageException {
 		if (initialized)
 			return;
 		initialized = true;
 
+		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
+		if (callback == null)
+			internalInitialize();
+
+		IStorageTask task = new IStorageTask() {
+			public void execute() throws StorageException {
+				internalInitialize();
+			}
+		};
+		if (!callback.execute(task))
+			throw new StorageException(StorageException.INTERNAL_ERROR, SecAuthMessages.initCancelled);
+	}
+
+	protected void internalInitialize() throws StorageException {
 		if (cipherAlgorithm != null && keyFactoryAlgorithm != null) {
 			if (roundtrip(cipherAlgorithm, keyFactoryAlgorithm))
 				return;
@@ -86,7 +102,7 @@ public class JavaEncryption {
 			return;
 		String unavailableCipher = cipherAlgorithm;
 
-		HashMap availableCiphers = detect();
+		detect();
 		if (availableCiphers.size() == 0)
 			throw new StorageException(StorageException.INTERNAL_ERROR, SecAuthMessages.noAlgorithms);
 
@@ -98,8 +114,12 @@ public class JavaEncryption {
 		AuthPlugin.getDefault().logMessage(msg);
 	}
 
-	synchronized public CryptoData encrypt(PasswordExt passwordExt, byte[] clearText) throws StorageException {
+	public CryptoData encrypt(PasswordExt passwordExt, byte[] clearText) throws StorageException {
 		init();
+		return internalEncrypt(passwordExt, clearText);
+	}
+
+	private CryptoData internalEncrypt(PasswordExt passwordExt, byte[] clearText) throws StorageException {
 		try {
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(keyFactoryAlgorithm);
 			SecretKey key = keyFactory.generateSecret(passwordExt.getPassword());
@@ -138,8 +158,12 @@ public class JavaEncryption {
 		}
 	}
 
-	synchronized public byte[] decrypt(PasswordExt passwordExt, CryptoData encryptedData) throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
+	public byte[] decrypt(PasswordExt passwordExt, CryptoData encryptedData) throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
 		init();
+		return internalDecrypt(passwordExt, encryptedData);
+	}
+
+	private byte[] internalDecrypt(PasswordExt passwordExt, CryptoData encryptedData) throws StorageException, IllegalStateException, IllegalBlockSizeException, BadPaddingException {
 		try {
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(keyFactoryAlgorithm);
 			SecretKey key = keyFactory.generateSecret(passwordExt.getPassword());
@@ -184,9 +208,27 @@ public class JavaEncryption {
 	 *    <String>cipher -> <String>keyFactory
 	 */
 	public HashMap detect() {
+		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
+		if (callback == null)
+			return internalDetect();
+
+		IStorageTask task = new IStorageTask() {
+			public void execute() {
+				internalDetect();
+			}
+		};
+		try {
+			callback.execute(task);
+		} catch (StorageException e) { // should not happen in this path
+			AuthPlugin.getDefault().logError(e.getMessage(), e);
+		}
+		return availableCiphers;
+	}
+
+	public HashMap internalDetect() {
 		Set ciphers = findProviders(CIPHER);
 		Set keyFactories = findProviders(SECRET_KEY_FACTORY);
-		HashMap availableCiphers = new HashMap(ciphers.size());
+		availableCiphers = new HashMap(ciphers.size());
 
 		for (Iterator i = ciphers.iterator(); i.hasNext();) {
 			String cipher = (String) i.next();
@@ -240,8 +282,8 @@ public class JavaEncryption {
 		try {
 			cipherAlgorithm = testCipher;
 			keyFactoryAlgorithm = testKeyFactory;
-			CryptoData encrypted = encrypt(samplePassword, sampleText.getBytes());
-			byte[] roundtripBytes = decrypt(samplePassword, encrypted);
+			CryptoData encrypted = internalEncrypt(samplePassword, sampleText.getBytes());
+			byte[] roundtripBytes = internalDecrypt(samplePassword, encrypted);
 			String result = new String(roundtripBytes);
 			return sampleText.equals(result);
 		} catch (Exception e) {
