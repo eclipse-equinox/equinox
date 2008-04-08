@@ -98,44 +98,47 @@ public class Activator implements BundleActivator, EventDispatcher, BundleListen
 	 * execution.
 	 *
 	 */
-	public synchronized void stop(BundleContext bundleContext) throws Exception {
-		if (eventAdapter != null) {
-			eventAdapter.stop();
-			eventAdapter = null;
-		}
+	public void stop(BundleContext bundleContext) throws Exception {
 		if (logmanagedservice != null) {
 			logmanagedservice.unregister();
 			logmanagedservice = null;
 		}
 
-		/* remove my listeners before unregistering myself */
-		this.context.removeBundleListener(this);
-		this.context.removeServiceListener(this);
-		this.context.removeFrameworkListener(this);
-
 		if (logservice != null) {
 			logservice.unregister();
 			logservice = null;
 		}
+
 		if (logreaderservice != null) {
 			logreaderservice.unregister();
 			logreaderservice = null;
 		}
 
-		/* destroy my event manager */
-		if (logEvent != null) {
-			logEvent.removeAllListeners();
-			logEvent = null;
+		synchronized (this) {
+			if (eventAdapter != null) {
+				eventAdapter.stop();
+				eventAdapter = null;
+			}
+
+			/* remove my listeners before unregistering myself */
+			this.context.removeBundleListener(this);
+			this.context.removeServiceListener(this);
+			this.context.removeFrameworkListener(this);
+
+			/* destroy my event manager */
+			if (logEvent != null) {
+				logEvent.removeAllListeners();
+				logEvent = null;
+			}
+
+			if (eventManager != null) {
+				eventManager.close();
+				eventManager = null;
+			}
+
+			logEntries = null;
+			this.context = null;
 		}
-
-		if (eventManager != null) {
-			eventManager.close();
-			eventManager = null;
-		}
-
-		logEntries = null;
-
-		this.context = null;
 	}
 
 	/**
