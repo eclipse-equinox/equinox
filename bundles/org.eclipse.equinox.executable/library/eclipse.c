@@ -1378,9 +1378,12 @@ static int processEEProps(_TCHAR* eeFile)
 	
 	eeDir = _tcsdup(eeFile);
 	c1 = lastDirSeparator( eeDir );
-	if (c1 != NULL)
+	while (c1 != NULL)
     {
-    	*(c1+1) = _T_ECLIPSE('\0');
+    	*c1 = _T_ECLIPSE('\0');
+    	c1--; /* IS_DIR_SEPARATOR evalutes c twice, decrement out here */
+    	if (!IS_DIR_SEPARATOR(*c1))
+    		c1 = NULL;
     }
 	
     for (index = 0; index < argc; index++){
