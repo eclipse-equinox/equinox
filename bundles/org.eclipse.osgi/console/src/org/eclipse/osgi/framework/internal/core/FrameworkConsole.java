@@ -220,16 +220,7 @@ public class FrameworkConsole implements Runnable {
 		while (!shutdown) {
 			if (useSocketStream && !getSocketStream())
 				return;
-			try {
-				console();
-			} catch (IOException e) {
-				if (!shutdown)
-					e.printStackTrace(out);
-				if (!useSocketStream) {
-					// better just return; the standard console has failed us.  Don't want to get in an endless loop (bug 212313)
-					return;
-				}
-			}
+			console();
 		}
 	}
 
@@ -260,7 +251,7 @@ public class FrameworkConsole implements Runnable {
 	 * is reached. This method will then return.
 	 * @throws IOException
 	 */
-	protected void console() throws IOException {
+	protected void console() {
 		// wait to receive commands from console and handle them
 		BufferedReader br = in;
 		//cache the console prompt String
@@ -270,20 +261,28 @@ public class FrameworkConsole implements Runnable {
 			out.flush();
 
 			String cmdline = null;
-			if (blockOnready && !useSocketStream) {
-				// bug 40066: avoid waiting on input stream - apparently generates contention with other native calls 
-				try {
-					while (!br.ready())
-						Thread.sleep(300);
+			try {
+				if (blockOnready && !useSocketStream) {
+					// bug 40066: avoid waiting on input stream - apparently generates contention with other native calls 
+					try {
+						while (!br.ready())
+							Thread.sleep(300);
+						cmdline = br.readLine();
+					} catch (InterruptedException e) {
+						// do nothing; probably got disconnected
+					}
+				} else
 					cmdline = br.readLine();
-				} catch (InterruptedException e) {
-					// do nothing; probably got disconnected
-				}
-			} else
-				cmdline = br.readLine();
-
-			if (cmdline == null)
+			} catch (IOException ioe) {
+				if (!shutdown)
+					ioe.printStackTrace(out);
+			}
+			if (cmdline == null) {
+				if (!useSocketStream)
+					// better shutdown; the standard console has failed us.  Don't want to get in an endless loop (bug 212313) (bug 226053)
+					shutdown();
 				break;
+			}
 			if (!shutdown)
 				docommand(cmdline);
 		}
