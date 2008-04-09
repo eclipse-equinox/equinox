@@ -765,8 +765,7 @@ public final class Resolver implements WorkPerformer {
 				if (references != null) {
 					for (int j = 0; j < references.size(); j++) {
 						Reference reference = (Reference) references.elementAt(j);
-						if (reference.policy == ComponentReference.POLICY_STATIC && reference.reference.serviceReferences.containsKey(serviceReference)) {
-
+						if (reference.staticUnbindReference(serviceReference)) {
 							if (toUnbind == null) {
 								toUnbind = new Vector(2);
 							}
@@ -810,7 +809,6 @@ public final class Resolver implements WorkPerformer {
 			for (int i = 0; i < scps.size(); i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
 
-				BundleContext bc = scp.bc;
 				Vector references = scp.references;
 				// some components may not contain references and it is
 				// absolutely valid
@@ -819,7 +817,7 @@ public final class Resolver implements WorkPerformer {
 						Reference reference = (Reference) references.elementAt(j);
 						// Does the scp require this service, use the Reference
 						// object to check
-						if (reference.unBindReference(bc, serviceReference)) {
+						if (reference.dynamicUnbindReference(serviceReference)) {
 							if (Activator.DEBUG) {
 								Activator.log.debug(0, 10027, scp.toString(), null, false);
 								// //Activator.log.debug("Resolver.selectDynamicUnBind():

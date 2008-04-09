@@ -40,6 +40,10 @@ public final class Reference {
 	int cardinalityHigh;
 	int cardinalityLow;
 
+	//holds the matching service references in case the component has no bind method
+	//in case the cardinality is 1..1, the vector will hold only one matching ServiceReference
+	Vector boundServiceReferences = new Vector(1);
+
 	// -- end cache
 
 	/**
@@ -167,24 +171,63 @@ public final class Reference {
 		} catch (InvalidSyntaxException e) {
 			return false;
 		}
-		if (this.reference.serviceReferences.size() < cardinalityHigh) {
-			return true;
+		if (this.reference.bind != null) {
+			if (this.reference.serviceReferences.size() < cardinalityHigh) {
+				return true;
+			}
+		} else if (!dynamicBind) {
+			//custom case: static reference with no bind method - check its bound service references list
+			if (boundServiceReferences.size() < cardinalityHigh) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	// used in Resolver.selectDynamicUnBind();
-	final boolean unBindReference(BundleContext bundleContext, ServiceReference reference) {
+	final boolean dynamicUnbindReference(ServiceReference changedReference) {
 		// nothing dynamic to do if static
 		if (policy == ComponentReference.POLICY_STATIC) {
 			return false;
 		}
 		// now check if the Service Reference is found in the list of saved
 		// ServiceReferences
-		if (!this.reference.serviceReferences.containsKey(reference)) {
+		if (!this.reference.serviceReferences.containsKey(changedReference)) {
 			return false;
 		}
 		return true;
+	}
+
+	final boolean staticUnbindReference(ServiceReference changedReference) {
+		// does not apply if its policy is dynamic
+		if (policy == ComponentReference.POLICY_DYNAMIC) {
+			return false;
+		}
+		// now check if the Service Reference is found in the list of saved
+		// ServiceReferences; this list is saved in case the component has a bind method
+		if (this.reference.serviceReferences.containsKey(changedReference)) {
+			return true;
+		}
+		if (boundServiceReferences.size() > 0) {
+			return (cardinalityHigh == 1) ? boundServiceReferences.elementAt(0) == changedReference : boundServiceReferences.contains(changedReference);
+		}
+		return false;
+	}
+
+	public void setBoundServiceReferences(ServiceReference[] references) {
+		if (policy == ComponentReference.POLICY_DYNAMIC) {
+			//not relevant to dynamic references
+			return;
+		}
+
+		boundServiceReferences.removeAllElements();
+		if (cardinalityHigh == 1) {
+			boundServiceReferences.addElement(references[0]);
+		} else {
+			for (int i = 0; i < references.length; i++) {
+				boundServiceReferences.addElement(references[i]);
+			}
+		}
 	}
 
 	/**

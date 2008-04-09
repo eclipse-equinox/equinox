@@ -184,9 +184,8 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				Reference ref = (Reference) references.elementAt(i);
-				if (ref.reference.bind != null) {
-					bindReference(ref, componentInstance);
-				} else if (Activator.DEBUG) {
+				bindReference(ref, componentInstance);
+				if (ref.reference.bind == null && Activator.DEBUG) {
 					Activator.log.debug(0, 10040, ref.reference.name, null, false);
 					// //Activator.log.debug(
 					// // "ServiceComponentProp:bind(): the reference '" +
@@ -344,12 +343,6 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	public void bindReference(Reference reference, ComponentInstance componentInstance) throws Exception {
 
-		// bind the services ONLY if bind method is specified!
-		if (reference.reference.bind == null) {
-			return;
-		}
-
-		// ok, proceed!
 		if (Activator.DEBUG) {
 			Activator.log.debug(0, 10041, serviceComponent.name + " -> " + reference.reference, null, false);
 			// //Activator.log.debug(
@@ -360,8 +353,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 		ServiceReference[] serviceReferences = null;
 
-		// if there is a published service, then get the ServiceObject and call
-		// bind
+		// if there is a published service, then get the ServiceObject and call bind
 		try {
 			// get all registered services using this target filter
 			serviceReferences = bc.getServiceReferences(reference.reference.interfaceName, reference.reference.target);
@@ -375,18 +367,23 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		// bind only if there is at least ONE service
 		if (serviceReferences != null && serviceReferences.length > 0) {
 			// the component binds to the first available service only!
-			switch (reference.reference.cardinality) {
-				case ComponentReference.CARDINALITY_1_1 :
-				case ComponentReference.CARDINALITY_0_1 :
-					reference.reference.bind(reference, componentInstance, serviceReferences[0]);
-					break;
-				case ComponentReference.CARDINALITY_1_N :
-				case ComponentReference.CARDINALITY_0_N :
-					// bind to all services
-					for (int i = 0; i < serviceReferences.length; i++) {
-						reference.reference.bind(reference, componentInstance, serviceReferences[i]);
-					}
-					break;
+			if (reference.reference.bind != null) {
+				switch (reference.reference.cardinality) {
+					case ComponentReference.CARDINALITY_1_1 :
+					case ComponentReference.CARDINALITY_0_1 :
+						reference.reference.bind(reference, componentInstance, serviceReferences[0]);
+						break;
+					case ComponentReference.CARDINALITY_1_N :
+					case ComponentReference.CARDINALITY_0_N :
+						// bind to all services
+						for (int i = 0; i < serviceReferences.length; i++) {
+							reference.reference.bind(reference, componentInstance, serviceReferences[i]);
+						}
+						break;
+				}
+			} else if (reference.reference.policy == ComponentReference.POLICY_STATIC) {
+				//in case there is no bind method for static reference save the current matching service references
+				reference.setBoundServiceReferences(serviceReferences);
 			}
 		} else {
 			if (Activator.DEBUG) {
