@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,10 @@ import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
+import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
 import org.eclipse.osgi.service.security.TrustEngine;
@@ -141,6 +143,24 @@ public class BaseSecurityTest extends CoreTest {
 		return null;
 	}
 
+	protected File getEntryFile(String entryPath) throws IOException {
+		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
+		if (entryURL == null)
+			return null;
+		return new File(FileLocator.toFileURL(entryURL).toExternalForm().substring(5));
+	}
+
+	protected File copyEntryFile(String entryPath) throws IOException {
+		URL entryURL = OSGiTestsActivator.getContext().getBundle().getEntry(entryPath);
+		if (entryURL == null)
+			return null;
+		File tempFolder = OSGiTestsActivator.getContext().getDataFile("temp");
+		tempFolder.mkdirs();
+		File result = File.createTempFile("entry", ".jar", tempFolder);
+		readFile(entryURL.openStream(), result);
+		return result;
+	}
+
 	protected static String getTestJarPath(String jarName) {
 		return "test_files/security/bundles/" + jarName + ".jar";
 	}
@@ -171,6 +191,49 @@ public class BaseSecurityTest extends CoreTest {
 			suite.getSetup().setSystemProperty("osgi.framework.keystore", tempFile.toURL().toExternalForm()); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static void readFile(InputStream in, File file) throws IOException {
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(file);
+
+			byte buffer[] = new byte[1024];
+			int count;
+			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
+				fos.write(buffer, 0, count);
+			}
+
+			fos.close();
+			fos = null;
+
+			in.close();
+			in = null;
+		} catch (IOException e) {
+			// close open streams
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException ee) {
+					// nothing to do here
+				}
+			}
+
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException ee) {
+					// nothing to do here
+				}
+			}
+
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Unable to read file"); //$NON-NLS-1$
+				Debug.printStackTrace(e);
+			}
+
+			throw e;
 		}
 	}
 }

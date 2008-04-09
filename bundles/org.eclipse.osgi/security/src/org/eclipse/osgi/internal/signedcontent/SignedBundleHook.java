@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -242,7 +242,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			contentBundleFile = new ZipBundleFile(content, null);
 		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL);
 		result.setBundleFile(contentBundleFile);
-		return result.getSignedContent();
+		return new SignedContentFile(result.getSignedContent());
 	}
 
 	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, IllegalArgumentException {
