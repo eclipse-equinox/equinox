@@ -85,6 +85,7 @@ public class SecAuthMessages extends NLS {
 	public static String noDigest;
 	public static String failedCreateRecovery;
 	public static String initCancelled;
+	public static String unableToReadPswdFile;
 
 	static {
 		// load message values from bundle file

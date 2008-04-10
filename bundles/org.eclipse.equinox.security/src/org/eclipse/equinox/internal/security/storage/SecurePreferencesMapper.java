@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.storage;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import javax.crypto.spec.PBEKeySpec;
@@ -76,10 +75,8 @@ public class SecurePreferencesMapper {
 						continue;
 					}
 					if (PASSWORD_ARGUMENT.equalsIgnoreCase(args[i])) {
-						if (options == null)
-							options = new HashMap(1);
-						if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD))
-							options.put(IProviderHints.DEFAULT_PASSWORD, new PBEKeySpec(args[i + 1].toCharArray()));
+						options = processPassword(options, args[i + 1]);
+						continue;
 					}
 				}
 			}
@@ -145,6 +142,47 @@ public class SecurePreferencesMapper {
 				break;
 			}
 		}
+	}
+
+	static private Map processPassword(Map options, String arg) {
+		if (arg == null || arg.length() == 0)
+			return options;
+		File file = new File(arg);
+		if (!file.canRead()) {
+			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
+			AuthPlugin.getDefault().logError(msg, null);
+			return options;
+		}
+		BufferedReader is = null;
+		try {
+			is = new BufferedReader(new FileReader(file));
+			StringBuffer buffer = new StringBuffer();
+			for (;;) { // this eliminates new line characters but that's fine
+				String tmp = is.readLine();
+				if (tmp == null)
+					break;
+				buffer.append(tmp);
+			}
+			if (buffer.length() == 0)
+				return options;
+			if (options == null)
+				options = new HashMap(1);
+			if (!options.containsKey(IProviderHints.DEFAULT_PASSWORD))
+				options.put(IProviderHints.DEFAULT_PASSWORD, new PBEKeySpec(buffer.toString().toCharArray()));
+		} catch (IOException e) {
+			String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
+			AuthPlugin.getDefault().logError(msg, e);
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					String msg = NLS.bind(SecAuthMessages.unableToReadPswdFile, arg);
+					AuthPlugin.getDefault().logError(msg, e);
+				}
+			}
+		}
+		return options;
 	}
 
 }
