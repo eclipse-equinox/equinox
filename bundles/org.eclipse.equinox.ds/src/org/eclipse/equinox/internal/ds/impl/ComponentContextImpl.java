@@ -24,7 +24,7 @@ import org.osgi.service.component.*;
  * @author Valentin Valchev, Nina Ruseva
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
+ * @version 1.1
  */
 
 public class ComponentContextImpl implements ComponentContext {
@@ -85,21 +85,28 @@ public class ComponentContextImpl implements ComponentContext {
 			if (ref.name.equals(name)) {
 				ServiceReference serviceReference = null;
 				synchronized (ref.serviceReferences) {
-					if (!ref.serviceReferences.isEmpty()) {
+					if (ref.serviceReferences.size() == 1) {
+						//in case of there is only one bound service (or the reference is unary)
 						serviceReference = (ServiceReference) ref.serviceReferences.keys().nextElement();
 					}
 				}
 				try {
 					if (serviceReference == null) {
-						// try to find service in the FW
-						ServiceReference[] serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, ref.target);
-						if (serviceReferences != null && serviceReferences.length > 0) {
-							// the servicese references are sorted by
-							// service.reference and service.id
-							// so get the first one in the list
-							serviceReference = serviceReferences[0];
+						Vector boundServiceReferences = reference.getBoundServiceReferences();
+						if (reference.isUnary() && boundServiceReferences.size() > 0) {
+							//get the bound service reference for the unary reference
+							serviceReference = (ServiceReference) boundServiceReferences.elementAt(0);
 						}
-
+						if (serviceReference == null) {
+							// try to find service in the FW
+							ServiceReference[] serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, ref.target);
+							if (serviceReferences != null && serviceReferences.length > 0) {
+								// the services references are sorted by
+								// service.reference and service.id
+								// so get the first one in the list
+								serviceReference = serviceReferences[0];
+							}
+						}
 					}
 					if (serviceReference != null) {
 						Object cached = componentInstance.bindedServices.get(serviceReference);
