@@ -27,7 +27,7 @@ public class MRUBundleFileList implements EventDispatcher {
 	private static final int PROP_FILE_LIMIT_VALUE;
 	private static final ThreadLocal closingBundleFile = new ThreadLocal();
 	static {
-		int propValue = 100; // TODO change this to "0" before the final release (see bug 194943)
+		int propValue = 0; // disable by default
 		try {
 			String prop = BundleFile.secureAction.getProperty(PROP_FILE_LIMIT);
 			if (prop != null)
