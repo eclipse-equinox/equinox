@@ -86,7 +86,7 @@ public class Base64 {
 	static public String encode(byte[] bytes) {
 		if (bytes == null)
 			return null;
-		char[] longResult = new char[bytes.length * 2];
+		char[] longResult = new char[bytes.length * 2 + 2];
 		int pos = 0;
 		for (int i = 0; i < bytes.length; i += 3) {
 			int byte1 = 0xFF & bytes[i];

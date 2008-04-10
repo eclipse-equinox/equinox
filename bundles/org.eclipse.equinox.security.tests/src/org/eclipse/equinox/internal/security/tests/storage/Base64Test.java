@@ -36,6 +36,9 @@ public class Base64Test extends TestCase {
 	final private static String decoded5 = "1.234";
 	final private static String encoded5 = "M\05S4y\tM\n\rzQ=\r\n"; // tests invalid characters
 
+	final private static String decoded6 = "a";
+	final private static String encoded6 = "YQ=="; // tests array bounds
+
 	public Base64Test() {
 		super();
 	}
@@ -63,6 +66,10 @@ public class Base64Test extends TestCase {
 		byte[] bytesInvalidChars = EncodingUtils.decodeBase64(encoded5);
 		String decodedInvalidChars = new String(bytesInvalidChars);
 		assertEquals(decoded5, decodedInvalidChars);
+
+		String shortSample = EncodingUtils.encodeBase64(decoded6.getBytes());
+		assertEquals(encoded6, shortSample);
+		assertEquals(decoded6, new String(EncodingUtils.decodeBase64(shortSample)));
 	}
 
 	/**
