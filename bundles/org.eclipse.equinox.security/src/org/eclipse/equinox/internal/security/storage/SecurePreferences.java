@@ -21,6 +21,11 @@ import org.eclipse.osgi.util.NLS;
 
 public class SecurePreferences {
 
+	/**
+	 * Pseudo-module ID to use when encryption is done with the default password.
+	 */
+	protected final static String DEFAULT_PASSWORD_ID = "org.eclipse.equinox.security.noModule"; //$NON-NLS-1$
+
 	private static final String PATH_SEPARATOR = String.valueOf(IPath.SEPARATOR);
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -254,6 +259,26 @@ public class SecurePreferences {
 		}
 	}
 
+	/**
+	 * For internal use - retrieve moduleID used to encrypt this value
+	 */
+	public String getModule(String key) {
+		if (!hasKey(key))
+			return null;
+		String encryptedValue = internalGet(key);
+		if (encryptedValue == null)
+			return null;
+		try {
+			CryptoData data = new CryptoData(encryptedValue);
+			String moduleID = data.getModuleID();
+			if (DEFAULT_PASSWORD_ID.equals(moduleID))
+				return null;
+			return moduleID;
+		} catch (StorageException e) {
+			return null;
+		}
+	}
+
 	synchronized protected void internalPut(String key, String value) {
 		if (values == null)
 			values = new HashMap(5);
@@ -461,7 +486,7 @@ public class SecurePreferences {
 		return (moduleID != null);
 	}
 
-	public boolean passwordChanging(SecurePreferencesContainer container) {
-		return getRoot().onChangePassword(container);
+	public boolean passwordChanging(SecurePreferencesContainer container, String moduleID) {
+		return getRoot().onChangePassword(container, moduleID);
 	}
 }

@@ -57,15 +57,23 @@ public class PasswordManagement {
 		if (!canPrompt(container))
 			return;
 
-		String[][] userParts = CallbacksProvider.getDefault().formChallengeResponse();
-		if (userParts == null)
-			return;
-		// create password from mixing and boiling answers
-		String internalPassword = mashPassword(userParts[1]);
-
 		// encrypt user password with the mashed-up answers and store encrypted value
 		String moduleID = passwordExt.getModuleID();
 		SecurePreferences node = recoveryNode(root, moduleID);
+
+		String[][] userParts = CallbacksProvider.getDefault().formChallengeResponse();
+		if (userParts == null) {
+			node.remove(PASSWORD_RECOVERY_KEY);
+			for (int i = 0; i < 2; i++) {
+				String key = PASSWORD_RECOVERY_QUESTION + Integer.toString(i + 1);
+				node.remove(key);
+			}
+			root.markModified();
+			return;
+		}
+		// create password from mixing and boiling answers
+		String internalPassword = mashPassword(userParts[1]);
+
 		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()), RECOVERY_PSEUDO_ID);
 		try {
 			byte[] data = new String(passwordExt.getPassword().getPassword()).getBytes();

@@ -54,11 +54,11 @@ public class SecUIMessages extends NLS {
 	public static String changePasswordButton;
 	public static String recoverPasswordButton;
 	public static String deleteButton;
-	public static String providersGroup;
-	public static String advancedGroup;
 	public static String confirmDeleteMsg;
 	public static String postDeleteTitle;
 	public static String postDeleteMsg;
+	public static String tabPassword;
+	public static String tabAdvanced;
 
 	// secure storage view
 	public static String generalTitle;

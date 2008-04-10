@@ -30,14 +30,16 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".PasswordRecoveryDialog"; //$NON-NLS-1$
 
 	protected Text[] answers;
+	protected String moduleID;
 	protected String[] answersText = null;
 	protected Button okButton;
 
 	final protected String[] questionsText;
 
-	public PasswordRecoveryDialog(String[] questionsText, Shell parentShell) {
+	public PasswordRecoveryDialog(String[] questionsText, Shell parentShell, String moduleID) {
 		super(parentShell);
 		this.questionsText = questionsText;
+		this.moduleID = moduleID;
 		answers = new Text[questionsText.length];
 	}
 
@@ -109,7 +111,7 @@ public class PasswordRecoveryDialog extends TitleAreaDialog {
 			answersText[i] = answers[i].getText();
 		}
 
-		String password = InternalExchangeUtils.recoverPassword(answersText, SecurePreferencesFactory.getDefault());
+		String password = InternalExchangeUtils.recoverPassword(answersText, SecurePreferencesFactory.getDefault(), moduleID);
 		if (password == null) {
 			MessageBox prompt = new MessageBox(getShell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
 			prompt.setText(SecUIMessages.pswdRecoveryTitle);

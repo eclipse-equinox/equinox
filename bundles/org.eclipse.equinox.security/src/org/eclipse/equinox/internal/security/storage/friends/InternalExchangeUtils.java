@@ -15,7 +15,8 @@ import java.util.*;
 import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.storage.*;
 import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector.ExtStorageModule;
-import org.eclipse.equinox.security.storage.*;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 /**
  * Collection of utilities that gives friends additional access into
@@ -105,30 +106,16 @@ public class InternalExchangeUtils {
 		}
 	}
 
-	static public String[] getPasswordRecoveryQuestions(ISecurePreferences node) {
-		PasswordProviderModuleExt moduleExt;
-		try {
-			moduleExt = PasswordProviderSelector.getInstance().findStorageModule(null);
-		} catch (StorageException e) {
-			return null; // no module -> nothing to do
-		}
+	static public String[] getPasswordRecoveryQuestions(ISecurePreferences node, String moduleID) {
 		SecurePreferencesRoot rootNode = ((SecurePreferencesWrapper) node).getContainer().getRootData();
-		return PasswordManagement.getPasswordRecoveryQuestions(rootNode, moduleExt.getID());
+		return PasswordManagement.getPasswordRecoveryQuestions(rootNode, moduleID);
 	}
 
-	static public String recoverPassword(String[] answers, ISecurePreferences node) {
-		PasswordProviderModuleExt moduleExt;
-		try {
-			moduleExt = PasswordProviderSelector.getInstance().findStorageModule(null);
-		} catch (StorageException e) {
-			return null; // no module -> nothing to do
-		}
-		String moduleID = moduleExt.getID();
+	static public String recoverPassword(String[] answers, ISecurePreferences node, String moduleID) {
 		SecurePreferencesRoot rootNode = ((SecurePreferencesWrapper) node).getContainer().getRootData();
 		String password = PasswordManagement.recoverPassword(answers, rootNode, moduleID);
-		if (password != null) {
+		if (password != null)
 			rootNode.cachePassword(moduleID, new PasswordExt(new PBEKeySpec(password.toCharArray()), moduleID));
-		}
 		return password;
 	}
 

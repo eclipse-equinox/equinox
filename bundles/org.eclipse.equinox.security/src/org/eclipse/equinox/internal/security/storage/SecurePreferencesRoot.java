@@ -58,11 +58,6 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	private final static String PASSWORD_VERIFICATION_SAMPLE = "-> brown fox jumped over lazy dog <-"; //$NON-NLS-1$
 
 	/**
-	 * Pseudo-module ID to use when encryption is done with the default password.
-	 */
-	protected final static String DEFAULT_PASSWORD_ID = "org.eclipse.equinox.security.noModule"; //$NON-NLS-1$
-
-	/**
 	 * Maximum unsuccessful decryption attempts per operation
 	 */
 	static protected final int MAX_ATTEMPTS = 20;
@@ -281,13 +276,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		return null;
 	}
 
-	public boolean onChangePassword(IPreferencesContainer container) {
-		// validation: can't change externally supplied password
-		PasswordExt defaultPassword = getDefaultPassword(container);
-		if (defaultPassword != null)
-			return false;
-		String moduleID = getDefaultModuleID(container);
-
+	public boolean onChangePassword(IPreferencesContainer container, String moduleID) {
 		// validation: must have a password module
 		PasswordProviderModuleExt moduleExt;
 		try {

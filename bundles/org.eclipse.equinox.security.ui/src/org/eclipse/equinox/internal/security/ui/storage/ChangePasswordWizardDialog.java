@@ -26,9 +26,9 @@ public class ChangePasswordWizardDialog extends WizardDialog {
 	private boolean decryptedOK;
 	private boolean recodeDone;
 
-	public ChangePasswordWizardDialog(Shell parentShell, ISecurePreferences node) {
+	public ChangePasswordWizardDialog(Shell parentShell, ISecurePreferences node, String moduleID) {
 		super(parentShell, new ChangePasswordWizard());
-		reEncrypter = new ReEncrypter(node);
+		reEncrypter = new ReEncrypter(node, moduleID);
 	}
 
 	public boolean isDecryptedOK() {

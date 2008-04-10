@@ -43,11 +43,13 @@ public class ReEncrypter {
 	}
 
 	final private ISecurePreferences root;
+	final private String moduleID;
 	private boolean processedOK = true;
 
 	private ArrayList elements = new ArrayList(); // List<TmpElement> 
 
-	public ReEncrypter(ISecurePreferences prefs) {
+	public ReEncrypter(ISecurePreferences prefs, String moduleID) {
+		this.moduleID = moduleID;
 		root = prefs.node("/"); //$NON-NLS-1$
 	}
 
@@ -68,6 +70,14 @@ public class ReEncrypter {
 				try {
 					if (!node.isEncrypted(keys[i]))
 						continue;
+					if (!(node instanceof SecurePreferencesWrapper))
+						continue;
+					String encryptionModule = ((SecurePreferencesWrapper) node).getModule(keys[i]);
+					if (encryptionModule == null)
+						continue;
+					if (!encryptionModule.equals(moduleID))
+						continue;
+
 					map.put(keys[i], node.get(keys[i], null));
 				} catch (StorageException e) {
 					// this value will not be re-coded
@@ -94,7 +104,7 @@ public class ReEncrypter {
 	 * </p>
 	 */
 	public boolean switchToNewPassword() {
-		return ((SecurePreferencesWrapper) root).passwordChanging();
+		return ((SecurePreferencesWrapper) root).passwordChanging(moduleID);
 	}
 
 	/**

@@ -162,7 +162,11 @@ public class SecurePreferencesWrapper implements ISecurePreferences {
 		return node.isEncrypted(key);
 	}
 
-	public boolean passwordChanging() {
-		return node.passwordChanging(container);
+	public String getModule(String key) {
+		return node.getModule(key);
+	}
+
+	public boolean passwordChanging(String moduleID) {
+		return node.passwordChanging(container, moduleID);
 	}
 }
