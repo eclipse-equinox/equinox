@@ -136,8 +136,12 @@ public final class Reference {
 		return cardinalityLow == 1;
 	}
 
-	final boolean isRequired() {
+	public boolean isRequired() {
 		return cardinalityLow == 1;
+	}
+
+	public boolean isUnary() {
+		return cardinalityHigh == 1;
 	}
 
 	// used in Resolver.selectDynamicBind()
@@ -257,8 +261,8 @@ public final class Reference {
 		return res;
 	}
 
-	public void setScp(ServiceComponentProp scp) {
-		this.scp = scp;
+	public Vector getBoundServiceReferences() {
+		return boundServiceReferences;
 	}
 
 }
