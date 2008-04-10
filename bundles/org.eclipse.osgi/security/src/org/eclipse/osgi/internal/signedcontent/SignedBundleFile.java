@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,7 +107,7 @@ public class SignedBundleFile extends BundleFile implements SignedContentConstan
 			// double check that no signer thinks it should exist
 			SignedContentEntry signedEntry = signedContent.getSignedEntry(path);
 			if (signedEntry != null)
-				throw new SecurityException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, getBaseFile().toString(), path));
+				throw new SecurityException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, path, getBaseFile().toString()));
 			return null;
 		}
 		return new SignedBundleEntry(be);

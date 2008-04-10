@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -155,9 +155,15 @@ public class SignedContentImpl implements SignedContent {
 			BundleFile currentContent = content;
 			if (currentContent == null)
 				throw new InvalidContentException("The content was not set", null); //$NON-NLS-1$
-			BundleEntry entry = currentContent.getEntry(entryName);
+			BundleEntry entry = null;
+			SecurityException exception = null;
+			try {
+				entry = currentContent.getEntry(entryName);
+			} catch (SecurityException e) {
+				exception = e;
+			}
 			if (entry == null)
-				throw new InvalidContentException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, currentContent.getBaseFile().toString(), entryName), null);
+				throw new InvalidContentException(NLS.bind(SignedContentMessages.file_is_removed_from_jar, entryName, currentContent.getBaseFile().toString()), exception);
 			entry.getBytes();
 		}
 	}
