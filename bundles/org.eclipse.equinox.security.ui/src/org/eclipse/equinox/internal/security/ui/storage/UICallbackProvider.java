@@ -118,4 +118,17 @@ public class UICallbackProvider implements IUICallbacks {
 			throw task.getException();
 		return true;
 	}
+
+	public Boolean ask(String msg) {
+		if (!showUI())
+			return null;
+
+		Shell shell = getShell();
+		MessageBox prompt = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		prompt.setText(SecUIMessages.generalDialogTitle);
+		prompt.setMessage(msg);
+		int result = prompt.open();
+		return new Boolean(result == SWT.YES);
+	}
+
 }

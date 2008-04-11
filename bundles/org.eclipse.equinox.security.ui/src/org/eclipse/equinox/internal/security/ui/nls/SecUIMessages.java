@@ -23,6 +23,7 @@ public class SecUIMessages extends NLS {
 	public static String passwordRequired;
 	public static String noDigestAlgorithm;
 	public static String initializing;
+	public static String generalDialogTitle;
 
 	// login dialog
 	public static String buttonLogin;

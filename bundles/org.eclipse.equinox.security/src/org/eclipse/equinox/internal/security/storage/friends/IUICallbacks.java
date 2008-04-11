@@ -32,6 +32,13 @@ public interface IUICallbacks {
 	public String[][] setupPasswordRecovery(int size);
 
 	/**
+	 * Ask user a yes/no question
+	 * @param msg question to ask
+	 * @return True for Yes, False for No, null if can't ask
+	 */
+	public Boolean ask(String msg);
+
+	/**
 	 * @param callback
 	 * @return false if task was canceled
 	 * @throws StorageException

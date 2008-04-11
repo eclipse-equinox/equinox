@@ -19,6 +19,7 @@ import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
+import org.eclipse.equinox.internal.security.storage.friends.IUICallbacks;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.*;
 import org.eclipse.osgi.util.NLS;
@@ -64,6 +65,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	final private URL location;
 
+	private long timestamp = 0;
+
 	private boolean modified = false;
 
 	private JavaEncryption cipher = new JavaEncryption();
@@ -100,8 +103,10 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		InputStream is = null;
 		try {
 			is = StorageUtils.getInputStream(location);
-			if (is != null)
+			if (is != null) {
 				properties.load(is);
+				timestamp = getLastModified();
+			}
 		} finally {
 			if (is != null)
 				is.close();
@@ -140,11 +145,23 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		}
 	}
 
-	public void flush() throws IOException {
+	synchronized public void flush() throws IOException {
 		if (location == null)
 			return;
 		if (!modified)
 			return;
+
+		// check if the file has been modified since the last time it was touched
+		if (timestamp != 0 && (timestamp != getLastModified())) {
+			IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
+			if (callback != null) {
+				Boolean response = callback.ask(SecAuthMessages.fileModifiedMsg);
+				if (response == null)
+					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote, null);
+				else if (!response.booleanValue())
+					return; // by default go ahead with save
+			}
+		}
 
 		Properties properties = new Properties();
 		properties.put(VERSION_KEY, VERSION_VALUE);
@@ -169,6 +186,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			if (stream != null)
 				stream.close();
 		}
+		timestamp = getLastModified();
 	}
 
 	/**
@@ -323,6 +341,11 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		synchronized (passwordCache) {
 			passwordCache.clear();
 		}
+	}
+
+	private long getLastModified() {
+		File file = new File(location.getPath());
+		return file.lastModified();
 	}
 
 }
