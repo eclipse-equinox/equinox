@@ -18,7 +18,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -48,10 +47,6 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 		super.configureShell(shell);
 		shell.setText(SecUIMessages.passwordRecoveryTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
-	}
-
-	protected Point getInitialSize() {
-		return new Point(550, 480);
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
