@@ -52,13 +52,13 @@ public class ZipBundleEntry extends BundleEntry {
 			return ((ZipBundleFile) bundleFile).getZipFile().getInputStream(zipEntry);
 		ZipBundleFile zipBundleFile = (ZipBundleFile) bundleFile;
 		zipBundleFile.incrementReference();
+		InputStream result = null;
 		try {
-			return new ZipBundleEntryInputStream(zipBundleFile.getZipFile().getInputStream(zipEntry));
-		} catch (Throwable e) {
-			zipBundleFile.decrementReference();
-			if (e instanceof IOException)
-				throw (IOException) e;
-			throw (RuntimeException) e;
+			return result = new ZipBundleEntryInputStream(zipBundleFile.getZipFile().getInputStream(zipEntry));
+		} finally {
+			if (result == null)
+				// an exception occurred; decrement the reference
+				zipBundleFile.decrementReference();
 		}
 	}
 
