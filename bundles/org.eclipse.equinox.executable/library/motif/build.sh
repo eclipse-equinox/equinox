@@ -61,7 +61,7 @@ case $OS in
 		defaultOSArch="x86"
 		defaultWS="motif"
 		X11_HOME=/usr/X11R6
-		MOTIF_HOME=/eclipse/motif21
+		MOTIF_HOME=~/motif21
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		;;
 	"SunOS")
