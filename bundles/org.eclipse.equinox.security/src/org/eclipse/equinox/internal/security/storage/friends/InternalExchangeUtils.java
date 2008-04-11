@@ -59,6 +59,13 @@ public class InternalExchangeUtils {
 	}
 
 	/**
+	 * Clears cached information from password providers.
+	 */
+	static public void passwordProvidersReset() {
+		PasswordProviderSelector.getInstance().clearCaches();
+	}
+
+	/**
 	 * Returns location of default storage
 	 * @return location of the default storage, might be null
 	 */

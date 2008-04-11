@@ -47,6 +47,7 @@ public class SecUIMessages extends NLS {
 	public static String selectCipher;
 	public static String logoutButton;
 	public static String providersTable;
+	public static String enabledColumn;
 	public static String priorityColumn;
 	public static String idColumn;
 	public static String descriptionColumn;

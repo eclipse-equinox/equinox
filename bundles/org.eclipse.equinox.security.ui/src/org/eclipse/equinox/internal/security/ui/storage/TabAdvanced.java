@@ -32,7 +32,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class TabAdvanced {
 
-	public static final String PREFERENCES_PLUGIN = "org.eclipse.equinox.security"; //$NON-NLS-1$
+	private static final String PREFERENCES_PLUGIN = "org.eclipse.equinox.security"; //$NON-NLS-1$
 
 	private Map availableCiphers = null;
 	private Combo cipherSelector = null;
@@ -117,15 +117,6 @@ public class TabAdvanced {
 	}
 
 	public void performDefaults() {
-		eclipseNode.put(IStorageConstants.CIPHER_KEY, IStorageConstants.DEFAULT_CIPHER);
-		eclipseNode.put(IStorageConstants.KEY_FACTORY_KEY, IStorageConstants.DEFAULT_KEY_FACTORY);
-		defaultCipherAlgorithm = IStorageConstants.DEFAULT_CIPHER;
-		try {
-			eclipseNode.flush();
-		} catch (BackingStoreException e) {
-			// nothing can be done
-		}
-
 		for (int i = 0; i < cipherSelector.getItemCount(); i++) {
 			String item = cipherSelector.getItem(i);
 			if (item.equals(IStorageConstants.DEFAULT_CIPHER))

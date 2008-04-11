@@ -44,12 +44,16 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	protected void performDefaults() {
+		if (passwordTab != null)
+			passwordTab.performDefaults();
 		if (advancedTab != null)
 			advancedTab.performDefaults();
 		super.performDefaults();
 	}
 
 	public boolean performOk() {
+		if (passwordTab != null)
+			passwordTab.performOk();
 		if (advancedTab != null)
 			advancedTab.performOk();
 		return super.performOk();

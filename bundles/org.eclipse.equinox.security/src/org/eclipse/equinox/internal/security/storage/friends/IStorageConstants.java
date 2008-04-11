@@ -35,4 +35,8 @@ public interface IStorageConstants {
 	 */
 	public String DEFAULT_KEY_FACTORY = "PBEWithMD5AndDES"; //$NON-NLS-1$
 
+	/**
+	 * Preference contains list of disabled password provider modules
+	 */
+	public String DISABLED_PROVIDERS_KEY = "org.eclipse.equinox.security.preferences.disabledProviders"; //$NON-NLS-1$
 }

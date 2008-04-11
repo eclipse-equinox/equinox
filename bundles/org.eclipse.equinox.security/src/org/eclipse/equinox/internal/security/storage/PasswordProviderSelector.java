@@ -12,8 +12,11 @@ package org.eclipse.equinox.internal.security.storage;
 
 import java.util.*;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
+import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 import org.eclipse.osgi.util.NLS;
@@ -124,9 +127,14 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		}
 
 		List allAvailableModules = findAvailableModules(expectedID);
+		HashSet disabledModules = getDisabledModules();
 
 		for (Iterator i = allAvailableModules.iterator(); i.hasNext();) {
 			ExtStorageModule module = (ExtStorageModule) i.next();
+
+			if (expectedID == null && disabledModules != null && disabledModules.contains(module.moduleID))
+				continue;
+
 			Object clazz;
 			try {
 				clazz = module.element.createExecutableExtension(CLASS_NAME);
@@ -185,7 +193,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	/**
 	 * Clear whole cache as priorities might have changed after new modules were added.
 	 */
-	private void clearCaches() {
+	public void clearCaches() {
 		synchronized (modules) {
 			modules.clear();
 			// If module was removed, clear its entry from the password cache.
@@ -194,5 +202,18 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 			// removal/addition is a frequent event.
 			SecurePreferencesMapper.clearPasswordCache();
 		}
+	}
+
+	protected HashSet getDisabledModules() {
+		IEclipsePreferences node = new ConfigurationScope().getNode(AuthPlugin.PI_AUTH);
+		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);
+		if (tmp == null || tmp.length() == 0)
+			return null;
+		HashSet disabledModules = new HashSet();
+		String[] disabledProviders = tmp.split(","); //$NON-NLS-1$
+		for (int i = 0; i < disabledProviders.length; i++) {
+			disabledModules.add(disabledProviders[i]);
+		}
+		return disabledModules;
 	}
 }
