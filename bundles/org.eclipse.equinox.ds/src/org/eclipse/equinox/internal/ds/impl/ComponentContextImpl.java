@@ -109,19 +109,7 @@ public class ComponentContextImpl implements ComponentContext {
 						}
 					}
 					if (serviceReference != null) {
-						Object cached = componentInstance.bindedServices.get(serviceReference);
-						if (cached != null) {
-							// will skip the circularity checking in
-							// InstanceProcess.getService
-							return cached;
-						}
-						Object theService = InstanceProcess.staticRef.getService(reference, serviceReference);
-						// the service object could be null because of
-						// circularity
-						if (theService != null) {
-							componentInstance.bindedServices.put(serviceReference, theService);
-							return theService;
-						}
+						return getBoundService(reference, serviceReference);
 					}
 				} catch (Throwable t) {
 					if (t instanceof ComponentException) {
@@ -169,32 +157,40 @@ public class ComponentContextImpl implements ComponentContext {
 			if (ref.name.equals(name)) {
 				ServiceReference[] serviceReferences = null;
 				try {
+					if (reference.isUnary()) {
+						ServiceReference serviceReference = null;
+						synchronized (ref.serviceReferences) {
+							if (ref.serviceReferences.size() > 0) {
+								//in case the reference is unary
+								serviceReference = (ServiceReference) ref.serviceReferences.keys().nextElement();
+							}
+						}
+						if (serviceReference == null) {
+							Vector boundServiceReferences = reference.getBoundServiceReferences();
+							if (boundServiceReferences.size() > 0) {
+								//get the bound service reference for the unary reference
+								serviceReference = (ServiceReference) boundServiceReferences.elementAt(0);
+							}
+						}
+						if (serviceReference != null) {
+							Object result = getBoundService(reference, serviceReference);
+							if (result != null) {
+								return new Object[] {result};
+							}
+						}
+					}
 					serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, ref.target);
 					if (serviceReferences != null) {
 						Vector theServices = new Vector(5);
 						Object service;
 						for (int j = 0; j < serviceReferences.length; j++) {
-							// check whether the service is cached - this will
-							// skip
-							// the circularity checking in
-							// InstanceProcess.getService
-							service = componentInstance.bindedServices.get(serviceReferences[j]);
-							if (service == null) {
-								service = InstanceProcess.staticRef.getService(reference, serviceReferences[j]);
-							}
-							// the service object could be null because of
-							// circularity
+							service = getBoundService(reference, serviceReferences[j]);
 							if (service != null) {
 								theServices.addElement(service);
-								componentInstance.bindedServices.put(serviceReferences[j], service);
 							}
 						}
 						if (!theServices.isEmpty()) {
-							Object ret[] = new Object[theServices.size()];
-							for (int j = 0; j < ret.length; j++) {
-								ret[j] = theServices.elementAt(j);
-							}
-							return ret;
+							return theServices.toArray();
 						}
 					}
 				} catch (Throwable t) {
@@ -239,19 +235,7 @@ public class ComponentContextImpl implements ComponentContext {
 						}
 						return null;
 					}
-
-					Object cached = componentInstance.bindedServices.get(serviceReference);
-					if (cached != null) {
-						// will skip the circularity checking in
-						// InstanceProcess.getService
-						return cached;
-					}
-					Object theService = InstanceProcess.staticRef.getService(reference, serviceReference);
-					// the service object could be null because of circularity
-					if (theService != null) {
-						componentInstance.bindedServices.put(serviceReference, theService);
-						return theService;
-					}
+					return getBoundService(reference, serviceReference);
 				}
 			}
 		} catch (Throwable t) {
@@ -259,6 +243,21 @@ public class ComponentContextImpl implements ComponentContext {
 				throw (ComponentException) t;
 			}
 			throw new ComponentException("Exception occurred while locating service for interface " + name, t);
+		}
+		return null;
+	}
+
+	private Object getBoundService(Reference reference, ServiceReference theServiceReference) {
+		Object result = componentInstance.bindedServices.get(theServiceReference);
+		if (result != null) {
+			// will skip the circularity checking in InstanceProcess.getService
+			return result;
+		}
+		result = InstanceProcess.staticRef.getService(reference, theServiceReference);
+		// the service object could be null because of circularity
+		if (result != null) {
+			componentInstance.bindedServices.put(theServiceReference, result);
+			return result;
 		}
 		return null;
 	}
