@@ -51,8 +51,6 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	public BundleContext bc;
 	public Vector references;
 
-	private boolean kindOfFactory;
-
 	// This flag is used to check whether the component is a component factory.
 	// Since the component factory creates new ServiceComponentProp objects they
 	// have to
@@ -86,8 +84,6 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 		initProperties(configProperties);
 
-		// cache locally if it is some kind of a factory
-		kindOfFactory = serviceComponent.factory != null || serviceComponent.serviceFactory;
 		isComponentFactory = serviceComponent.factory != null;
 
 		// used for component context
@@ -273,7 +269,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		}
 		ComponentInstanceImpl componentInstance = null;
 		if (instance == null) {
-			if (!kindOfFactory) {
+			if (!serviceComponent.serviceFactory) {
 				// it is a plain service, this is because this method
 				// is also called from ServiceReg
 				if (instances.isEmpty()) {
@@ -499,7 +495,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	private void assertCreateSingleInstance() {
-		if (!kindOfFactory && !instances.isEmpty()) {
+		if (!serviceComponent.serviceFactory && !instances.isEmpty()) {
 			throw new ComponentException("Instance of '" + name + "'is already created!");
 		}
 	}
@@ -551,7 +547,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	public boolean isKindOfFactory() {
-		return kindOfFactory;
+		return serviceComponent.serviceFactory;
 	}
 
 	public synchronized int getState() {
