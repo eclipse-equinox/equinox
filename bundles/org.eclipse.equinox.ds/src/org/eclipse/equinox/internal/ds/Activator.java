@@ -121,7 +121,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 */
 	public void start(BundleContext bc) throws Exception {
 		Activator.bc = bc;
-		startup = getBoolean("equinox.measurements.full") || getBoolean("equinox.measurements.bundles");
+		startup = getBoolean("equinox.measurements.bundles");
 		if (startup) {
 			long tmp = System.currentTimeMillis();
 			time = new long[] {tmp, 0, tmp};

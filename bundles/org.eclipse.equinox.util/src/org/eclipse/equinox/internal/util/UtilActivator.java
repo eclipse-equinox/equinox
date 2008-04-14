@@ -69,7 +69,7 @@ public class UtilActivator implements BundleActivator {
 	 */
 	public void start(BundleContext bc) throws BundleException {
 		UtilActivator.bc = bc;
-		startup = getBoolean("equinox.measurements.full") || getBoolean("equinox.measurements.bundles");
+		startup = getBoolean("equinox.measurements.bundles");
 		if (startup) {
 			long tmp = System.currentTimeMillis();
 			time = new long[] {tmp, 0, tmp};
