@@ -80,6 +80,7 @@ public abstract class NLS {
 	 * @param message the message to be manipulated
 	 * @param binding the object to be inserted into the message
 	 * @return the manipulated String
+	 * @throws IllegalArgumentException if the text appearing within curly braces in the given message does not map to an integer 
 	 */
 	public static String bind(String message, Object binding) {
 		return internalBind(message, null, String.valueOf(binding), null);
@@ -92,6 +93,7 @@ public abstract class NLS {
 	 * @param binding1 An object to be inserted into the message
 	 * @param binding2 A second object to be inserted into the message
 	 * @return the manipulated String
+	 * @throws IllegalArgumentException if the text appearing within curly braces in the given message does not map to an integer
 	 */
 	public static String bind(String message, Object binding1, Object binding2) {
 		return internalBind(message, null, String.valueOf(binding1), String.valueOf(binding2));
@@ -103,6 +105,7 @@ public abstract class NLS {
 	 * @param message the message to be manipulated
 	 * @param bindings An array of objects to be inserted into the message
 	 * @return the manipulated String
+	 * @throws IllegalArgumentException if the text appearing within curly braces in the given message does not map to an integer
 	 */
 	public static String bind(String message, Object[] bindings) {
 		return internalBind(message, bindings, null, null);
