@@ -47,7 +47,7 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  Class implementing password provider interface.
+                  Class implementing password provider interface. The class must extend the &lt;tt&gt;org.eclipse.equinox.security.storage.provider.PasswordProvider&lt;/tt&gt; class.
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.equinox.security.storage.provider.PasswordProvider:"/>
@@ -66,19 +66,19 @@
 
    <annotation>
       <appinfo>
-         <meta.section type="since"/>
-      </appinfo>
-      <documentation>
-         [Enter the first release in which this extension point appears.]
-      </documentation>
-   </annotation>
-
-   <annotation>
-      <appinfo>
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-         [Enter extension point usage example here.]
+         &lt;pre&gt;
+   &lt;extension
+         id=&quot;custom&quot;
+         point=&quot;org.eclipse.equinox.security.secureStorage&quot;&gt;
+      &lt;provider
+            class=&quot;com.xyz.PasswordProvider&quot;
+            priority=&quot;7&quot;&gt;
+      &lt;/provider&gt;
+   &lt;/extension&gt;
+&lt;/pre&gt;
       </documentation>
    </annotation>
 
@@ -92,12 +92,15 @@
    </annotation>
 
 
+
    <annotation>
       <appinfo>
          <meta.section type="implementation"/>
       </appinfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.ui&lt;/code&gt; bundle supplies default password provider that prompts user to enter the password.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.win32.x86&lt;/code&gt; fragment provides Windows OS integration.&lt;/p&gt;
+
       </documentation>
    </annotation>
 

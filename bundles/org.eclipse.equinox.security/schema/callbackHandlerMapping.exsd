@@ -61,14 +61,6 @@
       </complexType>
    </element>
 
-   <annotation>
-      <appinfo>
-         <meta.section type="since"/>
-      </appinfo>
-      <documentation>
-         _CUTLASS_
-      </documentation>
-   </annotation>
 
    <annotation>
       <appinfo>
@@ -84,7 +76,6 @@
    &lt;/extension&gt;&lt;/pre&gt;
       </documentation>
    </annotation>
-
 
 
 

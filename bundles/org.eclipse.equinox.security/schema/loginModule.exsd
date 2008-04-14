@@ -78,14 +78,6 @@
       </complexType>
    </element>
 
-   <annotation>
-      <appinfo>
-         <meta.section type="since"/>
-      </appinfo>
-      <documentation>
-         _CUTLASS_
-      </documentation>
-   </annotation>
 
    <annotation>
       <appinfo>
