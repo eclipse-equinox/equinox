@@ -724,6 +724,10 @@ public final class Resolver implements WorkPerformer {
 			Vector toBind = null;
 			for (int i = 0, size = scps.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
+				if (scp.isComponentFactory()) {
+					// the component factory configuration does not have to be reactivated
+					continue;
+				}
 				// if it is not already eligible it will bind with the static
 				// scps
 				Vector references = scp.references;
