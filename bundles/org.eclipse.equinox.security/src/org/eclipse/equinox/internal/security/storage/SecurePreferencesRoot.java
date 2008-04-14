@@ -12,6 +12,7 @@ package org.eclipse.equinox.internal.security.storage;
 
 import java.io.*;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -238,7 +239,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 					return null;
 				passwordExt = new PasswordExt(password, key);
 				if (newPassword) {
-					CryptoData encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
+					String test = createTestString();
+					CryptoData encryptedValue = getCipher().encrypt(passwordExt, test.getBytes());
 					node.internalPut(key, encryptedValue.toString());
 					markModified();
 					PasswordManagement.setupRecovery(this, passwordExt, container);
@@ -250,7 +252,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				CryptoData data = new CryptoData(encryptedData);
 				try {
 					byte[] decryptedData = getCipher().decrypt(passwordExt, data);
-					if (PASSWORD_VERIFICATION_SAMPLE.equals(new String(decryptedData))) {
+					String test = new String(decryptedData);
+					if (verifyTestString(test)) {
 						validPassword = true;
 						break;
 					}
@@ -314,7 +317,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		PasswordExt passwordExt = new PasswordExt(password, key);
 		CryptoData encryptedValue;
 		try {
-			encryptedValue = getCipher().encrypt(passwordExt, PASSWORD_VERIFICATION_SAMPLE.getBytes());
+			String test = createTestString();
+			encryptedValue = getCipher().encrypt(passwordExt, test.getBytes());
 		} catch (StorageException e) {
 			String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
 			AuthPlugin.getDefault().logError(msg, e);
@@ -348,4 +352,74 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		return file.lastModified();
 	}
 
+	/**
+	 * Generates random string to be stored for password verification. String format:
+	 * <random1>\t<random2>\t<random2>\t<random1>
+	 */
+	private String createTestString() {
+		SecureRandom rand = new SecureRandom();
+		rand.setSeed(System.currentTimeMillis());
+
+		long num1 = rand.nextInt(10000);
+		long num2 = rand.nextInt(10000);
+
+		StringBuffer tmp = new StringBuffer();
+		tmp.append(num1);
+		tmp.append('\t');
+		tmp.append(num2);
+		tmp.append('\t');
+		tmp.append(num2);
+		tmp.append('\t');
+		tmp.append(num1);
+
+		return tmp.toString();
+	}
+
+	/**
+	 * Checks if the string is the hard-coded original password verification sample
+	 * or a string generated according to the rules in {@link #createTestString()}.  
+	 */
+	private boolean verifyTestString(String test) {
+		if (test == null || test.length() == 0)
+			return false;
+		// backward compatibility: check if it is the original hard-coded string 
+		if (PASSWORD_VERIFICATION_SAMPLE.equals(test))
+			return true;
+		String[] parts = test.split("\t"); //$NON-NLS-1$
+		if (parts == null || parts.length == 0)
+			return false;
+		if (parts.length != 4)
+			return false;
+		long num1 = -1;
+		long num2 = -1;
+		for (int i = 0; i < 4; i++) {
+			if (parts[i] == null || parts[i].length() == 0)
+				return false;
+			try {
+				switch (i) {
+					case 0 :
+						num1 = Long.decode(parts[i]).longValue();
+						break;
+					case 1 :
+						num2 = Long.decode(parts[i]).longValue();
+						break;
+					case 2 : {
+						long tmp = Long.decode(parts[i]).longValue();
+						if (tmp != num2)
+							return false;
+						break;
+					}
+					case 3 : {
+						long tmp = Long.decode(parts[i]).longValue();
+						if (tmp != num1)
+							return false;
+						break;
+					}
+				}
+			} catch (NumberFormatException e) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
