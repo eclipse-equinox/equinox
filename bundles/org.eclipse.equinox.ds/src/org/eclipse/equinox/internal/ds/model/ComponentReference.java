@@ -275,7 +275,9 @@ public class ComponentReference implements Externalizable {
 						instances.addElement(instance);
 						serviceReferences.put(serviceReference, instances);
 					} else if (instances.contains(instance)) {
-						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+						if (reference.isUnary()) {
+							logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+						}
 						return;
 					} else {
 						instances.addElement(instance);
@@ -283,7 +285,9 @@ public class ComponentReference implements Externalizable {
 				} else {
 					Object compInstance = serviceReferences.get(serviceReference);
 					if (compInstance == instance) {
-						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+						if (reference.isUnary()) {
+							logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+						}
 						return;
 					} else if (compInstance != null) {
 						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to another instance: " + compInstance, null, reference);
