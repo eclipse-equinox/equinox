@@ -76,6 +76,7 @@ public class EclipseStarter {
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
 	private static final String USER = "-user"; //$NON-NLS-1$
 	private static final String NOEXIT = "-noExit"; //$NON-NLS-1$
+	private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
 
 	// this is more of an Eclipse argument but this OSGi implementation stores its 
 	// metadata alongside Eclipse's.
@@ -898,6 +899,11 @@ public class EclipseStarter {
 				found = true;
 			}
 
+			// look for the launcher location
+			if (args[i - 1].equalsIgnoreCase(LAUNCHER)) {
+				FrameworkProperties.setProperty(LocationManager.PROP_LAUNCHER, arg);
+				found = true;
+			}
 			// look for the development mode and class path entries.  
 			if (args[i - 1].equalsIgnoreCase(DEV)) {
 				FrameworkProperties.setProperty(PROP_DEV, arg);

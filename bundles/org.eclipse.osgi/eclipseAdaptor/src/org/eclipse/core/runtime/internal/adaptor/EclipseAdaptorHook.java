@@ -44,51 +44,59 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 
 	private BaseAdaptor adaptor;
 	private boolean noXML = false;
+	private ArrayList registrations = new ArrayList(10);
 
 	public void frameworkStart(BundleContext context) throws BundleException {
+		registrations.clear();
 		registerEndorsedXMLParser(context);
-		Location location = LocationManager.getUserLocation();
 		Hashtable locationProperties = new Hashtable(1);
+		Location location = LocationManager.getUserLocation();
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, locationProperties);
+			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 		location = LocationManager.getInstanceLocation();
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_INSTANCE_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, locationProperties);
+			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 		location = LocationManager.getConfigurationLocation();
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_CONFIG_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, locationProperties);
+			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 		location = LocationManager.getInstallLocation();
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_INSTALL_AREA); //$NON-NLS-1$
-			context.registerService(Location.class.getName(), location, locationProperties);
+			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
+		}
+
+		location = LocationManager.getEclipseHomeLocation();
+		if (location != null) {
+			locationProperties.put("type", LocationManager.PROP_HOME_LOCATION_AREA); //$NON-NLS-1$
+			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 
 		Dictionary urlProperties = new Hashtable();
 		urlProperties.put("protocol", new String[] {"bundleentry", "bundleresource"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		context.registerService(URLConverter.class.getName(), new URLConverterImpl(), urlProperties);
+		registrations.add(context.registerService(URLConverter.class.getName(), new URLConverterImpl(), urlProperties));
 
-		AdaptorUtil.register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EclipseEnvironmentInfo.getDefault(), context);
-		AdaptorUtil.register(PlatformAdmin.class.getName(), adaptor.getPlatformAdmin(), context);
+		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.environment.EnvironmentInfo.class.getName(), EclipseEnvironmentInfo.getDefault(), context));
+		registrations.add(AdaptorUtil.register(PlatformAdmin.class.getName(), adaptor.getPlatformAdmin(), context));
 		PluginConverter converter = PluginConverterImpl.getDefault();
 		if (converter == null)
 			converter = new PluginConverterImpl(adaptor, context);
-		AdaptorUtil.register(PluginConverter.class.getName(), converter, context);
-		AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context);
-		AdaptorUtil.register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), context);
+		registrations.add(AdaptorUtil.register(PluginConverter.class.getName(), converter, context));
+		registrations.add(AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context));
+		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), context));
 	}
 
 	private void registerEndorsedXMLParser(BundleContext bc) {
 		try {
 			Class.forName(SAXFACTORYNAME);
-			bc.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable());
+			registrations.add(bc.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable()));
 			Class.forName(DOMFACTORYNAME);
-			bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable());
+			registrations.add(bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable()));
 		} catch (ClassNotFoundException e) {
 			noXML = true;
 			if (Debug.DEBUG && Debug.DEBUG_ENABLED) {
@@ -119,10 +127,13 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		// TODO should unregister the services here
 		printStats();
 		if (!noXML)
 			PluginParser.releaseXMLParsing();
+		// unregister services
+		for (Iterator iRegistrations = registrations.iterator(); iRegistrations.hasNext();)
+			((ServiceRegistration) iRegistrations.next()).unregister();
+		registrations.clear();
 	}
 
 	private void printStats() {

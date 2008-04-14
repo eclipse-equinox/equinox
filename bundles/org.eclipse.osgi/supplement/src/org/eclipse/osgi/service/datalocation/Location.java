@@ -57,6 +57,14 @@ public interface Location {
 	public static final String USER_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=osgi.user.area))"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
+	 * Constant which defines the filter string for acquiring the service which
+	 * specifies the eclipse home location.
+	 * 
+	 * @since 3.4
+	 */
+	public static final String ECLIPSE_HOME_FILTER = "(&(objectClass=" + Location.class.getName() + ")(type=eclipse.home.location))"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	/**
 	 * Returns <code>true</code> if this location allows a default value to be assigned
 	 * and <code>false</code> otherwise.
 	 * 

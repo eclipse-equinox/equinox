@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import org.eclipse.core.runtime.internal.adaptor.BasicLocation;
-import org.eclipse.core.runtime.internal.adaptor.LocationHelper;
+import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
@@ -33,6 +32,7 @@ public class LocationManager {
 	private static Location configurationLocation = null;
 	private static Location userLocation = null;
 	private static Location instanceLocation = null;
+	private static Location eclipseHomeLocation = null;
 
 	public static final String READ_ONLY_AREA_SUFFIX = ".readOnly"; //$NON-NLS-1$
 	public static final String PROP_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
@@ -46,6 +46,8 @@ public class LocationManager {
 	public static final String PROP_MANIFEST_CACHE = "osgi.manifest.cache"; //$NON-NLS-1$
 	public static final String PROP_USER_HOME = "user.home"; //$NON-NLS-1$
 	public static final String PROP_USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String PROP_HOME_LOCATION_AREA = "eclipse.home.location"; //$NON-NLS-1$
+	static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
 
 	// configuration area file/dir names
 	public static final String BUNDLES_DIR = "bundles"; //$NON-NLS-1$
@@ -130,6 +132,44 @@ public class LocationManager {
 			((BasicLocation) configurationLocation).setParent(parent);
 		}
 		initializeDerivedConfigurationLocations();
+
+		if (FrameworkProperties.getProperty(PROP_HOME_LOCATION_AREA) == null) {
+			String eclipseLauncher = FrameworkProperties.getProperty(PROP_LAUNCHER);
+			String eclipseHomeLocationPath = getEclipseHomeLocation(eclipseLauncher);
+			if (eclipseHomeLocationPath != null)
+				FrameworkProperties.setProperty(PROP_HOME_LOCATION_AREA, eclipseHomeLocationPath);
+		}
+		// if eclipse.home.location is not set then default to osgi.install.area
+		if (FrameworkProperties.getProperty(PROP_HOME_LOCATION_AREA) == null && FrameworkProperties.getProperty(PROP_INSTALL_AREA) != null)
+			FrameworkProperties.setProperty(PROP_HOME_LOCATION_AREA, FrameworkProperties.getProperty(PROP_INSTALL_AREA));
+		eclipseHomeLocation = buildLocation(PROP_HOME_LOCATION_AREA, null, "", true); //$NON-NLS-1$
+	}
+
+	private static String getEclipseHomeLocation(String launcher) {
+		if (launcher == null)
+			return null;
+		File launcherFile = new File(launcher);
+		if (launcherFile.getParent() == null)
+			return null;
+		File launcherDir = new File(launcherFile.getParent());
+		// check for mac os; the os check is copied from EclipseEnvironmentInfo.
+		String macosx = org.eclipse.osgi.service.environment.Constants.OS_MACOSX;
+		if (macosx.equals(EclipseEnvironmentInfo.getDefault().getOS()))
+			launcherDir = getMacOSEclipsoeHomeLocation(launcherDir);
+		return (launcherDir.exists() && launcherDir.isDirectory()) ? launcherDir.getAbsolutePath() : null;
+	}
+
+	private static File getMacOSEclipsoeHomeLocation(File launcherDir) {
+		// TODO for now we go up three directories from the launcher dir as long as the parent dir is named MacOS; is this always the case?
+		// TODO not sure if case is important
+		if (!launcherDir.getName().equalsIgnoreCase("macos")) //$NON-NLS-1$
+			return launcherDir; // don't do the up three stuff if not in macos directory
+		String launcherParent = launcherDir.getParent();
+		if (launcherParent != null)
+			launcherParent = new File(launcherParent).getParent();
+		if (launcherParent != null)
+			launcherParent = new File(launcherParent).getParent();
+		return launcherParent == null ? null : new File(launcherParent);
 	}
 
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault) {
@@ -305,6 +345,10 @@ public class LocationManager {
 	 */
 	public static Location getInstanceLocation() {
 		return instanceLocation;
+	}
+
+	public static Location getEclipseHomeLocation() {
+		return eclipseHomeLocation;
 	}
 
 	/**
