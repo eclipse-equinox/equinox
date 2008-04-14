@@ -102,7 +102,7 @@ public class ExportDialog extends TitleAreaDialog {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(new Shell());
+				FileDialog dialog = new FileDialog(getShell());
 				dialog.setText(SecUIMessages.fileSelectTitle);
 				dialog.setFilterExtensions(exportExtensions);
 				String tmp = fileText.getText();

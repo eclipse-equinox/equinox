@@ -46,8 +46,10 @@ public class NodesView {
 	class ViewContentProvider implements ITreeContentProvider {
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-			if (nodeTreeViewer != null)
+			if (nodeTreeViewer != null) {
+				nodeTreeViewer.setSelection(null);
 				nodeTreeViewer.refresh();
+			}
 		}
 
 		public void dispose() {

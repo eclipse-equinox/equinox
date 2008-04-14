@@ -16,7 +16,7 @@ import org.eclipse.equinox.security.storage.provider.*;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * This password provider prompts user for the password. This provider uses the same password for
@@ -29,10 +29,18 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		boolean passwordChange = ((passwordType & PASSWORD_CHANGE) != 0);
 
 		String location = container.getLocation().getFile();
-		StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
-		if (loginDialog.open() == Window.OK)
-			return loginDialog.getGeneratedPassword();
-		return null;
+		final StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
+
+		final PBEKeySpec[] result = new PBEKeySpec[1];
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				if (loginDialog.open() == Window.OK)
+					result[0] = loginDialog.getGeneratedPassword();
+				else
+					result[0] = null;
+			}
+		});
+		return result[0];
 	}
 
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
@@ -44,12 +52,19 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		}
 		if (!canPrompt)
 			return false;
+		if (!StorageUtils.showUI())
+			return false;
 
-		MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
-		dialog.setText(SecUIMessages.exceptionTitle);
-		dialog.setMessage(SecUIMessages.exceptionDecode);
-		int result = dialog.open();
-		return (result == SWT.YES);
+		final int[] result = new int[1];
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				MessageBox dialog = new MessageBox(StorageUtils.getShell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
+				dialog.setText(SecUIMessages.exceptionTitle);
+				dialog.setMessage(SecUIMessages.exceptionDecode);
+				result[0] = dialog.open();
+			}
+		});
+		return (result[0] == SWT.YES);
 	}
 
 }

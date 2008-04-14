@@ -39,8 +39,11 @@ public class TabAdvanced {
 
 	private IEclipsePreferences eclipseNode = null;
 	private String defaultCipherAlgorithm;
+	private Shell shell;
 
 	public TabAdvanced(TabFolder folder, int index, final Shell shell) {
+		this.shell = shell;
+
 		TabItem tab = new TabItem(folder, SWT.NONE, index);
 		tab.setText(SecUIMessages.tabAdvanced);
 		Composite page = new Composite(folder, SWT.NONE);
@@ -95,7 +98,7 @@ public class TabAdvanced {
 		URL location = InternalExchangeUtils.defaultStorageLocation();
 		if (location == null)
 			return;
-		MessageBox messageBox = new MessageBox(new Shell(), SWT.YES | SWT.NO);
+		MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO);
 		messageBox.setText(location.getFile().toString());
 		messageBox.setMessage(SecUIMessages.confirmDeleteMsg);
 		if (messageBox.open() != SWT.YES)
@@ -110,7 +113,7 @@ public class TabAdvanced {
 		InternalExchangeUtils.defaultStorageDelete();
 
 		// suggest restart in case somebody holds on to the deleted storage
-		MessageBox postDeletionBox = new MessageBox(new Shell(), SWT.OK);
+		MessageBox postDeletionBox = new MessageBox(shell, SWT.OK);
 		postDeletionBox.setText(SecUIMessages.postDeleteTitle);
 		postDeletionBox.setMessage(SecUIMessages.postDeleteMsg);
 		postDeletionBox.open();

@@ -29,14 +29,14 @@ import org.eclipse.equinox.security.storage.StorageException;
  */
 public interface IUICallbacks {
 
-	public String[][] setupPasswordRecovery(int size);
+	public String[][] setupPasswordRecovery(final int size);
 
 	/**
 	 * Ask user a yes/no question
 	 * @param msg question to ask
 	 * @return True for Yes, False for No, null if can't ask
 	 */
-	public Boolean ask(String msg);
+	public Boolean ask(final String msg);
 
 	/**
 	 * @param callback

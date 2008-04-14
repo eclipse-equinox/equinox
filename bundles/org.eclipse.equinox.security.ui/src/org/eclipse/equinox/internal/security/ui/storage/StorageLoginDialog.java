@@ -51,7 +51,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 	private Image dlgTitleImage = null;
 
 	public StorageLoginDialog(boolean confirmPassword, boolean passwordChange, String location) {
-		super(null);
+		super(StorageUtils.getShell());
 		this.confirmPassword = confirmPassword;
 		this.passwordChange = passwordChange;
 		this.location = location;

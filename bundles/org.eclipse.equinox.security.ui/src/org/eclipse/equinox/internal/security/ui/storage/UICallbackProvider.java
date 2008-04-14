@@ -20,15 +20,14 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
-import org.osgi.framework.BundleContext;
 
+/**
+ * Methods on this class could be called from non-UI thread so need
+ * to wrap into Display.syncExec().
+ */
 public class UICallbackProvider implements IUICallbacks {
-
-	static private final String junitApp = "org.eclipse.pde.junit.runtime"; //$NON-NLS-1$
 
 	private class InitWithProgress implements IRunnableWithProgress {
 
@@ -54,81 +53,83 @@ public class UICallbackProvider implements IUICallbacks {
 		}
 	}
 
-	public String[][] setupPasswordRecovery(int size) {
-		if (!showUI())
+	public String[][] setupPasswordRecovery(final int size) {
+		if (!StorageUtils.showUI())
 			return null;
 
-		Shell shell = getShell();
-		MessageBox prompt = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		prompt.setText(SecUIMessages.pswdRecoveryOptionTitle);
-		prompt.setMessage(SecUIMessages.pswdRecoveryOptionMsg);
-		int result = prompt.open();
-		if (result != SWT.YES)
+		final int[] result = new int[1];
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+				prompt.setText(SecUIMessages.pswdRecoveryOptionTitle);
+				prompt.setMessage(SecUIMessages.pswdRecoveryOptionMsg);
+				result[0] = prompt.open();
+			}
+		});
+		if (result[0] != SWT.YES)
 			return null;
 
-		ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, shell);
-		dialog.open();
-		return dialog.getResult();
-	}
-
-	/**
-	 * Determines if it is a good idea to show UI prompts
-	 */
-	private boolean showUI() {
-		if (!PlatformUI.isWorkbenchRunning())
-			return false;
-
-		// This is a bit of a strange code that tries to see if we are running in a JUnit
-		BundleContext context = Activator.getBundleContext();
-		if (context == null)
-			return false;
-		String app = context.getProperty("eclipse.application"); //$NON-NLS-1$
-		if (app != null && app.startsWith(junitApp))
-			return false;
-
-		return true;
-	}
-
-	/**
-	 * Finds a shell from an active window, if any; or creates a new one.
-	 */
-	private Shell getShell() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		return (window == null) ? new Shell() : window.getShell();
+		final Object[] responseResult = new Object[1];
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
+				dialog.open();
+				responseResult[0] = dialog.getResult();
+			}
+		});
+		return (String[][]) responseResult[0];
 	}
 
 	public boolean execute(final IStorageTask callback) throws StorageException {
-		if (!showUI()) {
+		if (!StorageUtils.showUI()) {
 			callback.execute();
 			return true;
 		}
 
-		IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-		InitWithProgress task = new InitWithProgress(callback);
-		try {
-			progressService.busyCursorWhile(task);
-		} catch (InvocationTargetException e) {
-			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
-			return false;
-		} catch (InterruptedException e) {
-			Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
-			return false;
-		}
-		if (task.getException() != null)
-			throw task.getException();
-		return true;
+		final boolean[] result = new boolean[1];
+		final StorageException[] exception = new StorageException[1];
+		exception[0] = null;
+
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+				InitWithProgress task = new InitWithProgress(callback);
+				try {
+					progressService.busyCursorWhile(task);
+				} catch (InvocationTargetException e) {
+					Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+					result[0] = false;
+					return;
+				} catch (InterruptedException e) {
+					Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+					result[0] = false;
+					return;
+				}
+				if (task.getException() != null)
+					exception[0] = task.getException();
+				result[0] = true;
+			}
+		});
+		if (exception[0] != null)
+			throw exception[0];
+		return result[0];
+
 	}
 
-	public Boolean ask(String msg) {
-		if (!showUI())
+	public Boolean ask(final String msg) {
+		if (!StorageUtils.showUI())
 			return null;
 
-		Shell shell = getShell();
-		MessageBox prompt = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		prompt.setText(SecUIMessages.generalDialogTitle);
-		prompt.setMessage(msg);
-		int result = prompt.open();
-		return new Boolean(result == SWT.YES);
+		final int[] result = new int[1];
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+				prompt.setText(SecUIMessages.generalDialogTitle);
+				prompt.setMessage(msg);
+				result[0] = prompt.open();
+			}
+		});
+		return new Boolean(result[0] == SWT.YES);
 	}
 
 }

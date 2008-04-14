@@ -35,6 +35,7 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 
 	protected Action saveAction;
 	protected Action exportAction;
+	private Shell shell;
 
 	public void setSelection(ISecurePreferences selectedNode) {
 		valuesView.setInput(selectedNode);
@@ -45,6 +46,8 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 	}
 
 	public void createPartControl(Composite parent) {
+		shell = parent.getShell();
+
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 
@@ -64,7 +67,7 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 		tableOfValues.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 
 		nodesView = new NodesView(nodeTree, this);
-		valuesView = new ValuesView(tableOfValues, this);
+		valuesView = new ValuesView(tableOfValues, this, shell);
 
 		makeActions();
 
@@ -114,7 +117,7 @@ public class SecurePreferencesView extends ViewPart implements IDeleteListener {
 		ISecurePreferences root = SecurePreferencesFactory.getDefault();
 		if (root == null)
 			return;
-		ExportDialog dialog = new ExportDialog(new Shell());
+		ExportDialog dialog = new ExportDialog(shell);
 		dialog.open();
 		String fileName = dialog.getFileName();
 		if (fileName == null)

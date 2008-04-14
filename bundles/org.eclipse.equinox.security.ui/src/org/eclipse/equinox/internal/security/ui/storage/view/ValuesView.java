@@ -46,6 +46,8 @@ public class ValuesView {
 	protected Action encryptValueAction;
 	protected Action decryptValueAction;
 
+	protected Shell shell;
+
 	class TableValuesElement {
 		private String key;
 		private String value;
@@ -144,8 +146,9 @@ public class ValuesView {
 		// using default implementation for now
 	}
 
-	public ValuesView(Table table, final SecurePreferencesView parentView) {
+	public ValuesView(Table table, final SecurePreferencesView parentView, Shell shell) {
 		this.parentView = parentView;
+		this.shell = shell;
 
 		TableColumn keysColumn = new TableColumn(table, SWT.LEFT);
 		keysColumn.setText(SecUIMessages.keysColumn);
@@ -246,7 +249,7 @@ public class ValuesView {
 				String key = node.getKey();
 
 				// "Are you sure?" dialog 
-				MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_WARNING | SWT.YES | SWT.NO);
+				MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO);
 				dialog.setText(SecUIMessages.removeValueTitle);
 				String msg = NLS.bind(SecUIMessages.removeValueMsg, key);
 				dialog.setMessage(msg);
@@ -273,14 +276,14 @@ public class ValuesView {
 				String key = node.getKey();
 				try {
 					String value = selectedNode.get(key, null);
-					MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_INFORMATION | SWT.OK);
+					MessageBox dialog = new MessageBox(shell, SWT.ICON_INFORMATION | SWT.OK);
 					dialog.setText(SecUIMessages.showValueTitle);
 					String msg = NLS.bind(SecUIMessages.showValueMsg, key, value);
 					dialog.setMessage(msg);
 					dialog.open();
 				} catch (StorageException e) {
 					Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
-					MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_WARNING | SWT.OK);
+					MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 					dialog.setMessage(SecUIMessages.failedDecrypt);
 					dialog.open();
 					return;
@@ -324,7 +327,7 @@ public class ValuesView {
 		try {
 			value = selectedNode.get(key, null);
 		} catch (StorageException e) {
-			MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_WARNING | SWT.OK);
+			MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 			dialog.setMessage(SecUIMessages.failedDecrypt);
 			dialog.open();
 			Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
@@ -334,7 +337,7 @@ public class ValuesView {
 		try {
 			selectedNode.put(key, value, encrypted);
 		} catch (StorageException e) {
-			MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_WARNING | SWT.OK);
+			MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 			dialog.setMessage(SecUIMessages.failedEncrypt);
 			dialog.open();
 			Activator.log(IStatus.ERROR, SecUIMessages.failedEncrypt, null, e);
