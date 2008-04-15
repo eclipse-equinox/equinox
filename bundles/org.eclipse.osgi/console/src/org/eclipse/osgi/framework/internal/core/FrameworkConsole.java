@@ -362,8 +362,8 @@ public class FrameworkConsole implements Runnable {
 	 * The array is sorted primarily by descending Service Ranking and
 	 * secondarily by ascending Service ID.
 	 *
-	 * @return Array of service objects or <tt>null</tt> if no service
-	 * are being tracked.
+	 * @return Array of service objects; if no service
+	 * are being tracked then an empty array is returned
 	 */
 	public Object[] getServices() {
 		ServiceReference[] serviceRefs = cptracker.getServiceReferences();
