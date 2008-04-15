@@ -102,27 +102,27 @@ public class LocationManager {
 	public static void initializeLocations() {
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
-		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true); //$NON-NLS-1$
+		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true, false); //$NON-NLS-1$
 
-		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		Location temp = buildLocation(PROP_USER_AREA_DEFAULT, null, "", false, false); //$NON-NLS-1$
 		URL defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
 			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_HOME), "user").getAbsolutePath(), true); //$NON-NLS-1$
-		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false); //$NON-NLS-1$
+		userLocation = buildLocation(PROP_USER_AREA, defaultLocation, "", false, false); //$NON-NLS-1$
 
-		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		temp = buildLocation(PROP_INSTANCE_AREA_DEFAULT, null, "", false, false); //$NON-NLS-1$
 		defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
 			defaultLocation = buildURL(new File(FrameworkProperties.getProperty(PROP_USER_DIR), "workspace").getAbsolutePath(), true); //$NON-NLS-1$
-		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false); //$NON-NLS-1$
+		instanceLocation = buildLocation(PROP_INSTANCE_AREA, defaultLocation, "", false, false); //$NON-NLS-1$
 
 		mungeConfigurationLocation();
 		// compute a default but it is very unlikely to be used since main will have computed everything
-		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false); //$NON-NLS-1$
+		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false, false); //$NON-NLS-1$
 		defaultLocation = temp == null ? null : temp.getURL();
 		if (defaultLocation == null)
 			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
-		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false); //$NON-NLS-1$
+		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false, false); //$NON-NLS-1$
 		// get the parent location based on the system property. This will have been set on the 
 		// way in either by the caller/user or by main.  There will be no parent location if we are not 
 		// cascaded.
@@ -142,7 +142,7 @@ public class LocationManager {
 		// if eclipse.home.location is not set then default to osgi.install.area
 		if (FrameworkProperties.getProperty(PROP_HOME_LOCATION_AREA) == null && FrameworkProperties.getProperty(PROP_INSTALL_AREA) != null)
 			FrameworkProperties.setProperty(PROP_HOME_LOCATION_AREA, FrameworkProperties.getProperty(PROP_INSTALL_AREA));
-		eclipseHomeLocation = buildLocation(PROP_HOME_LOCATION_AREA, null, "", true); //$NON-NLS-1$
+		eclipseHomeLocation = buildLocation(PROP_HOME_LOCATION_AREA, null, "", true, true); //$NON-NLS-1$
 	}
 
 	private static String getEclipseHomeLocation(String launcher) {
@@ -172,7 +172,7 @@ public class LocationManager {
 		return launcherParent == null ? null : new File(launcherParent);
 	}
 
-	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault) {
+	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly) {
 		String location = FrameworkProperties.clearProperty(property);
 		// the user/product may specify a non-default readOnly setting   
 		String userReadOnlySetting = FrameworkProperties.getProperty(property + READ_ONLY_AREA_SUFFIX);
@@ -180,7 +180,7 @@ public class LocationManager {
 		// if the instance location is not set, predict where the workspace will be and 
 		// put the instance area inside the workspace meta area.
 		if (location == null)
-			return new BasicLocation(property, defaultLocation, readOnly);
+			return new BasicLocation(property, defaultLocation, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(defaultLocation));
 		String trimmedLocation = location.trim();
 		if (trimmedLocation.equalsIgnoreCase(NONE))
 			return null;
@@ -196,7 +196,7 @@ public class LocationManager {
 		URL url = buildURL(location, true);
 		BasicLocation result = null;
 		if (url != null) {
-			result = new BasicLocation(property, null, readOnly);
+			result = new BasicLocation(property, null, userReadOnlySetting != null || !computeReadOnly ? readOnly : !canWrite(url));
 			result.setURL(url, false);
 		}
 		return result;
@@ -264,6 +264,17 @@ public class LocationManager {
 		}
 		// We can't write in the eclipse install dir so try for some place in the user's home dir
 		return computeDefaultUserAreaLocation(CONFIG_DIR);
+	}
+
+	private static boolean canWrite(URL location) {
+		if (location != null && "file".equals(location.getProtocol())) { //$NON-NLS-1$
+			File locationDir = new File(location.getFile());
+			if (!locationDir.exists())
+				locationDir.mkdirs();
+			if (locationDir.exists() && AdaptorUtil.canWrite(locationDir))
+				return true;
+		}
+		return false;
 	}
 
 	private static String computeDefaultUserAreaLocation(String pathAppendage) {
