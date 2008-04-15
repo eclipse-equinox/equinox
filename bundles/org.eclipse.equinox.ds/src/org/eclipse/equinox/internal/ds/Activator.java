@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.ds;
 
 import java.util.Dictionary;
 import org.eclipse.equinox.internal.util.ref.Log;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -41,6 +42,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	private ServiceTracker cmTracker;
 	private ServiceRegistration cmTrackerReg;
+
+	private ServiceTracker debugTracker = null;
 
 	private SCRManager scrManager = null;
 
@@ -127,12 +130,14 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			time = new long[] {tmp, 0, tmp};
 		}
 		// initialize the logging routines
+		debugTracker = new ServiceTracker(bc, DebugOptions.class.getName(), null);
+		debugTracker.open();
 		log = new Log(bc, false);
-		DEBUG = getBoolean("equinox.ds.debug");
-		PERF = getBoolean("equinox.ds.perf");
-		DBSTORE = getBoolean("equinox.ds.dbstore");
+		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug");
+		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf");
+		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", false) || getBoolean("equinox.ds.dbstore");
 		log.setDebug(DEBUG);
-		boolean print = getBoolean("equinox.ds.print");
+		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print");
 		log.setPrintOnConsole(print);
 		if (DEBUG) {
 			log.setMaps(TracerMap.getMap(), TracerMap.getStarts());
@@ -195,6 +200,11 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			cmTracker = null;
 		}
 
+		if (debugTracker != null) {
+			debugTracker.close();
+			debugTracker = null;
+		}
+
 		if (scrManager != null) {
 			scrManager.stopIt();
 		}
@@ -234,4 +244,18 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		}
 		return defaultValue;
 	}
+
+	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
+		if (debugTracker == null) {
+			return defaultValue;
+		}
+		DebugOptions options = (DebugOptions) debugTracker.getService();
+		if (options != null) {
+			String value = options.getOption(option);
+			if (value != null)
+				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
+		}
+		return defaultValue;
+	}
+
 }
