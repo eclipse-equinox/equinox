@@ -367,6 +367,8 @@ public class FrameworkConsole implements Runnable {
 	 */
 	public Object[] getServices() {
 		ServiceReference[] serviceRefs = cptracker.getServiceReferences();
+		if (serviceRefs == null)
+			return new Object[0];
 		Util.dsort(serviceRefs, 0, serviceRefs.length);
 
 		Object[] serviceObjects = new Object[serviceRefs.length];
