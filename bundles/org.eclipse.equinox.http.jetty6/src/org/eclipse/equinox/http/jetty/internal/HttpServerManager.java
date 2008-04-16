@@ -66,7 +66,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (httpsListener != null)
 			server.addListener(httpsListener);
 
-		ServletHandler servlets = new ServletHandler();
+		ServletHandler servlets = new Servlet25Handler();
 		servlets.setAutoInitializeServlets(true);
 
 		ServletHolder holder = servlets.addServlet("/*", InternalHttpServiceServlet.class.getName()); //$NON-NLS-1$
@@ -81,7 +81,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 		String otherInfo = (String) dictionary.get(JettyConstants.OTHER_INFO);
 		if (otherInfo != null)
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
-
 		HttpContext httpContext = createHttpContext(dictionary);
 		httpContext.addHandler(servlets);
 
@@ -178,16 +177,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 		Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null) {
 			if (needClientAuth instanceof String)
-				needClientAuth = Boolean.valueOf((String)needClientAuth);
-			
+				needClientAuth = Boolean.valueOf((String) needClientAuth);
+
 			listener.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
 		}
 
 		Object wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
 		if (wantClientAuth != null) {
 			if (wantClientAuth instanceof String)
-				wantClientAuth = Boolean.valueOf((String)wantClientAuth);
-			
+				wantClientAuth = Boolean.valueOf((String) wantClientAuth);
+
 			listener.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
 		}
 
@@ -281,7 +280,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 			return httpServiceServlet.getServletInfo();
 		}
 	}
-
 
 	// deleteDirectory is a convenience method to recursively delete a directory
 	private static boolean deleteDirectory(File directory) {
