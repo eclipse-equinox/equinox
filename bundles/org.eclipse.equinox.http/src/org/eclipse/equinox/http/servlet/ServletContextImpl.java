@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -440,6 +440,10 @@ public class ServletContextImpl implements ServletContext {
 	 * @see javax.servlet.ServletContext#getServletContextName()
 	 */
 	public String getServletContextName() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
+	}
+
+	public String getContextPath() {
 		throw new UnsupportedOperationException(HttpMsg.HTTP_ONLY_SUPPORTS_2_1);
 	}
 
