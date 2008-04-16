@@ -172,8 +172,14 @@ public class HttpRegistryManager {
 	}
 
 	public DefaultRegistryHttpContext createDefaultRegistryHttpContext() {
-		HttpContext defaultContext = httpService.createDefaultHttpContext();
-		return new DefaultRegistryHttpContext(defaultContext);
+		try {
+			HttpContext defaultContext = httpService.createDefaultHttpContext();
+			return new DefaultRegistryHttpContext(defaultContext);
+		} catch (Throwable t) {
+			// TODO: should log this
+			t.printStackTrace();
+		}
+		return null;
 	}
 
 	public Bundle getBundle(IContributor contributor) {
@@ -203,6 +209,9 @@ public class HttpRegistryManager {
 		} catch (NamespaceException e) {
 			// TODO: should log this
 			e.printStackTrace();
+		} catch (Throwable t) {
+			// TODO: should log this
+			t.printStackTrace();
 		}
 	}
 
@@ -219,17 +228,29 @@ public class HttpRegistryManager {
 		} catch (ServletException e) {
 			// TODO: should log this
 			e.printStackTrace();
+		} catch (Throwable t) {
+			// TODO: should log this
+			t.printStackTrace();
 		}
 	}
 
 	private void unregister(String alias) {
-		if (registered.remove(alias))
-			httpService.unregister(alias);
+		if (registered.remove(alias)) {
+			try {
+				httpService.unregister(alias);
+			} catch (Throwable t) {
+				// TODO: should log this
+				t.printStackTrace();
+			}
+		}
 	}
 
 	private HttpContext getHttpContext(String httpContextId, IContributor contributor) {
 		if (httpContextId == null) {
 			DefaultRegistryHttpContext defaultContext = createDefaultRegistryHttpContext();
+			if (defaultContext == null)
+				return null;
+
 			defaultContext.addResourceMapping(getBundle(contributor), null);
 			return defaultContext;
 		}
