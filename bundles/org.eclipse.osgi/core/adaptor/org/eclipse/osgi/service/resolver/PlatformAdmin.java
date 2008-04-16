@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ import org.osgi.framework.BundleException;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface PlatformAdmin {
 
@@ -97,12 +98,14 @@ public interface PlatformAdmin {
 	 * @param disabledInfo the disabled info to add.
 	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
 	 * the specified disabled info does not exist in the state managed by this platform admin.
+	 * @since 3.4
 	 */
 	public void addDisabledInfo(DisabledInfo disabledInfo);
 
 	/**
 	 * Removes the disabled info from the state managed by this platform admin.
 	 * @param disabledInfo the disabled info to remove
+	 * @since 3.4
 	 */
 	public void removeDisabledInfo(DisabledInfo disabledInfo);
 }

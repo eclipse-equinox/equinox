@@ -15,6 +15,7 @@ import org.osgi.framework.Version;
 /**
  * This class represents a version range.
  * @since 3.1
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class VersionRange {
 	private static final Version versionMax = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);

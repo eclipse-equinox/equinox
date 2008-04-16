@@ -64,6 +64,7 @@ import org.osgi.framework.BundleException;
  * </p>
  * 
  * @since 3.0
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class ManifestElement {
 

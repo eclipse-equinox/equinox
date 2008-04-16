@@ -15,6 +15,7 @@ import java.io.IOException;
 /**
  * Indicates that signed content is invalid according to one of the signers.
  * @since 3.4
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class InvalidContentException extends IOException {
 	private static final long serialVersionUID = -399150159330289387L;

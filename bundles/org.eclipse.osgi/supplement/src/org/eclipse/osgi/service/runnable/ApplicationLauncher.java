@@ -19,6 +19,7 @@ package org.eclipse.osgi.service.runnable;
  * </p>
  * 
  * @since 3.2
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ApplicationLauncher {
 	/**

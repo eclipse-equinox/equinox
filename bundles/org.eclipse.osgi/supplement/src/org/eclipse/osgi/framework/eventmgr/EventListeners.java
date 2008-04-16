@@ -15,6 +15,7 @@ package org.eclipse.osgi.framework.eventmgr;
  * This class manages a list of listeners.
  * Listeners may be added or removed as necessary.
  * @since 3.1
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class EventListeners {
 	/**

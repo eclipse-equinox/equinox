@@ -23,6 +23,7 @@ import org.osgi.framework.Version;
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
  * @since 3.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface State {
 	/**
@@ -206,6 +207,7 @@ public interface State {
 	 * @param resolvedRequires the BundleDescriptions that resolve the required bundles for this bundle, can be <code>null</code>
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 * @since 3.4
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
@@ -490,6 +492,7 @@ public interface State {
 	 * </p>
 	 * @param nativeCodeDescription the native code description.
 	 * @param hasInvalidNativePaths true if the native code paths are invalid; false otherwise.
+	 * @since 3.4
 	 */
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths);
 
@@ -499,6 +502,7 @@ public interface State {
 	 * each bundle is disabled.
 	 * @return the array of disabled bundles.  An empty array is returned if no bundles are disabled.
 	 * @see DisabledInfo
+	 * @since 3.4
 	 */
 	public BundleDescription[] getDisabledBundles();
 
@@ -509,12 +513,14 @@ public interface State {
 	 * @param disabledInfo the disabled info to add.
 	 * @throws IllegalArgumentException if the <code>BundleDescription</code> for
 	 * the specified disabled info does not exist in this state.
+	 * @since 3.4
 	 */
 	public void addDisabledInfo(DisabledInfo disabledInfo);
 
 	/**
 	 * Removes the disabled info from the state.
 	 * @param disabledInfo the disabled info to remove
+	 * @since 3.4
 	 */
 	public void removeDisabledInfo(DisabledInfo disabledInfo);
 
@@ -523,6 +529,7 @@ public interface State {
 	 * then an empty array is returned.
 	 * @param bundle the bundle to get the disabled info for.
 	 * @return the array of disabled info.
+	 * @since 3.4
 	 */
 	public DisabledInfo[] getDisabledInfos(BundleDescription bundle);
 
@@ -531,6 +538,7 @@ public interface State {
 	 * If no disabled info exists then <code>null</code> is returned.
 	 * @param bundle the bundle to get the disabled info for
 	 * @return the disabled info.
+	 * @since 3.4
 	 */
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
 }

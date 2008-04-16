@@ -20,9 +20,10 @@ package org.eclipse.osgi.service.environment;
  * </p>
  * 
  * @since 3.0
- * XXX Need to add a method that gets the real application args.
- * We might also want to explain how the command line is organized: fwk / non fwk. Non-fwk is rt args and app args.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
+// TODO  Need to add a method that gets the real application args.
+//We might also want to explain how the command line is organized: fwk / non fwk. Non-fwk is rt args and app args.
 public interface EnvironmentInfo {
 
 	/**
@@ -116,6 +117,7 @@ public interface EnvironmentInfo {
 	 * </p>
 	 * @param key the property key
 	 * @return the value of the property, or null
+	 * @since 3.4
 	 */
 	public String getProperty(String key);
 
@@ -131,6 +133,7 @@ public interface EnvironmentInfo {
 	 * @param key the property key
 	 * @param value the value of the property
 	 * @return the old value of the property, or null
+	 * @since 3.4
 	 */
 	public String setProperty(String key, String value);
 }

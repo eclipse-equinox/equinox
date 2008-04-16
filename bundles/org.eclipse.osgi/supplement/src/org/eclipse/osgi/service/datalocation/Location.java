@@ -21,6 +21,7 @@ import java.net.URL;
  * </p>
  * 
  * @since 3.0
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface Location {
 
@@ -168,6 +169,7 @@ public interface Location {
 	 * otherwise.
 	 * @return boolean value indicating whether or not this location is locked
 	 * @throws IOException if there was an unexpected problem reading the lock
+	 * @since 3.4
 	 */
 	public boolean isLocked() throws IOException;
 

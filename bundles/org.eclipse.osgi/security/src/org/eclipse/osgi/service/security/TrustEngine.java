@@ -18,6 +18,9 @@ import org.eclipse.osgi.internal.signedcontent.TrustEngineListener;
 /**
  * A <code>TrustEngine</code> is used to establish the authenticity of a 
  * {@link Certificate} chain.
+ * <p>
+ * Clients may implement this interface.
+ * </p>
  * @since 3.4
  */
 public abstract class TrustEngine {

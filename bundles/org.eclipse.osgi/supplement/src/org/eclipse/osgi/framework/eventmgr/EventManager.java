@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,7 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * <p> The highly dynamic nature of the OSGi framework had necessitated these features for 
  * proper and efficient event delivery.  
  * @since 3.1
+ * @noextend This class is not intended to be subclassed by clients.
  */
 
 public class EventManager {
@@ -143,6 +144,7 @@ public class EventManager {
 	 * this EventManager.  A <code>null</code> value is allowed.
 	 * @param threadGroup The thread group to use for the asynchronous event
 	 * thread associated with this EventManager. A <code>null</code> value is allowed.
+	 * @since 3.4
 	 */
 	public EventManager(String threadName, ThreadGroup threadGroup) {
 		thread = null;

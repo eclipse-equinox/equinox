@@ -11,10 +11,12 @@
 package org.eclipse.osgi.service.environment;
 
 /**
+ * Constants used with the {@link EnvironmentInfo} service.
  * @since 3.0
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface Constants {
 	//TODO These constants need to be aligned with the OSGi ones. See page 64-588 of the spec
@@ -64,6 +66,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "epoc32") indicating the platform is running on a
 	 * Epoc 32-bit Symbian operating system.
+	 * @since 3.4
 	 */
 	public static final String OS_EPOC32 = "epoc32";//$NON-NLS-1$
 
@@ -167,6 +170,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "s60") indicating the platform is running on a
 	 * machine using the S60 windowing system.
+	 * @since 3.4
 	 */
 	public static final String WS_S60 = "s60";//$NON-NLS-1$
 

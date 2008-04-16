@@ -26,6 +26,7 @@ import org.eclipse.osgi.service.datalocation.Location;
  * Clients may not extend this class.
  * </p>
  * @since 3.1
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class LocationManager {
 	private static Location installLocation = null;

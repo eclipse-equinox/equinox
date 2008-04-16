@@ -17,6 +17,7 @@ package org.eclipse.osgi.service.resolver;
  * {@link StateObjectFactory} should be used to construct instances.
  * </p>
  * @since 3.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface BundleDescription extends BaseDescription {
 
@@ -234,6 +235,7 @@ public interface BundleDescription extends BaseDescription {
 	 *  of <code>null</code> is returned if there is no native code
 	 *  specification.
 	 * @return the native code specification.
+	 * @since 3.4
 	 */
 	public NativeCodeSpecification getNativeCodeSpecification();
 
@@ -243,6 +245,7 @@ public interface BundleDescription extends BaseDescription {
 	 * or the bundle does not have substituted exports then an empty array is
 	 * returned.
 	 * @return all substituted exports for this bundle description
+	 * @since 3.4
 	 */
 	public ExportPackageDescription[] getSubstitutedExports();
 }

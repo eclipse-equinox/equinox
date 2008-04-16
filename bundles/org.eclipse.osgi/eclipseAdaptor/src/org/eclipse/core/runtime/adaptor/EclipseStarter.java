@@ -50,6 +50,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * </p>
  * <p>Note that the fields on this class are not API. </p>
  * @since 3.0
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class EclipseStarter {
 	private static FrameworkAdaptor adaptor;

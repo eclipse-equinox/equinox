@@ -22,6 +22,7 @@ import org.osgi.framework.*;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface StateObjectFactory {
 
@@ -154,6 +155,7 @@ public interface StateObjectFactory {
 	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
 	 * @param nativeCode the native code specification of the bundle (may be <code>null</code>)
 	 * @return the created bundle description
+	 * @since 3.4
 	 */
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
@@ -294,6 +296,7 @@ public interface StateObjectFactory {
 	 * @param nativeCodeDescriptions the native code descriptors
 	 * @param optional whether the specification is optional
 	 * @return the created native code specification
+	 * @since 3.4
 	 */
 	public NativeCodeSpecification createNativeCodeSpecification(NativeCodeDescription[] nativeCodeDescriptions, boolean optional);
 
@@ -307,6 +310,7 @@ public interface StateObjectFactory {
 	 * @param filter the selection filter (may be <code>null</code>)
 	 * @return the created native code description
 	 * @throws InvalidSyntaxException if the selection filter is invalid
+	 * @since 3.4
 	 */
 	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
 
