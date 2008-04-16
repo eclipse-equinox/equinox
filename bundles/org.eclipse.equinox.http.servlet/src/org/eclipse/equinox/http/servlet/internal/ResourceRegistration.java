@@ -51,9 +51,9 @@ public class ResourceRegistration extends Registration {
 				int aliasLength = alias.equals("/") ? 0 : alias.length(); //$NON-NLS-1$
 				String resourcePath = internalName + pathInfo.substring(aliasLength);
 				URL testURL = httpContext.getResource(resourcePath);
-				if (testURL == null || resourcePath.endsWith("/")) { //$NON-NLS-1$
+				if (testURL == null)
 					return false;
-				}
+
 				return writeResource(req, resp, resourcePath);
 			}
 			resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -76,8 +76,25 @@ public class ResourceRegistration extends Registration {
 					int contentLength = connection.getContentLength();
 
 					// check to ensure that we're dealing with a real resource and in particular not a directory
-					if (contentLength <= 0)
-						return Boolean.FALSE;
+					if (contentLength == 0) {
+						InputStream testStream = null;
+						try {
+							testStream = connection.getInputStream();
+						} catch (Exception e) {
+							// this will fail if the target is a directory or the OS will not allow access 
+							return Boolean.FALSE;
+						} finally {
+							if (testStream != null) {
+								try {
+									testStream.close();
+								} catch (IOException e) {
+									// ignore
+								}
+							}
+						}
+						// reset the connection if everything checks out
+						connection = url.openConnection();
+					}
 
 					String etag = null;
 					if (lastModified != -1 && contentLength != -1)
@@ -89,14 +106,14 @@ public class ResourceRegistration extends Registration {
 					if (ifNoneMatch != null && etag != null && ifNoneMatch.indexOf(etag) != -1) {
 						resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 						return Boolean.TRUE;
-					} else {
-						long ifModifiedSince = req.getDateHeader(IF_MODIFIED_SINCE);
-						// for purposes of comparison we add 999 to ifModifiedSince since the fidelity
-						// of the IMS header generally doesn't include milli-seconds
-						if (ifModifiedSince > -1 && lastModified > 0 && lastModified <= (ifModifiedSince + 999)) {
-							resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-							return Boolean.TRUE;
-						}
+					}
+
+					long ifModifiedSince = req.getDateHeader(IF_MODIFIED_SINCE);
+					// for purposes of comparison we add 999 to ifModifiedSince since the fidelity
+					// of the IMS header generally doesn't include milli-seconds
+					if (ifModifiedSince > -1 && lastModified > 0 && lastModified <= (ifModifiedSince + 999)) {
+						resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+						return Boolean.TRUE;
 					}
 
 					// return the full contents regularly
