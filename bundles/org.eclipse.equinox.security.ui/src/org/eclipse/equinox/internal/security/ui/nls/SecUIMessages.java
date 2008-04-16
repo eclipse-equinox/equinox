@@ -40,7 +40,6 @@ public class SecUIMessages extends NLS {
 	public static String noDigestPassword;
 
 	// exception handling
-	public static String exceptionOccured;
 	public static String exceptionTitle;
 	public static String exceptionDecode;
 
