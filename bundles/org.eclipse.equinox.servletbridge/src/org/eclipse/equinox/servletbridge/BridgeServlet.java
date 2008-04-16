@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005-2007 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2005-2008 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import javax.servlet.http.*;
 
 /**
  * The BridgeServlet provides a means to bridge the servlet and OSGi 
- * runtimes. This class has 3 main repsonsibilities:
+ * runtimes. This class has 3 main responsibilities:
  * 1) Control the lifecycle of the associated FrameworkLauncher in line with its own lifecycle
  * 2) Provide a servlet "hook" that allows all servlet requests to be delegated to the registered servlet
  * 3) Provide means to manually control the framework lifecycle
@@ -27,7 +27,7 @@ public class BridgeServlet extends HttpServlet {
 	static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri"; //$NON-NLS-1$
 	static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path"; //$NON-NLS-1$
 	static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info"; //$NON-NLS-1$
-	
+
 	private static final long serialVersionUID = 2825667412474494674L;
 	private static BridgeServlet instance;
 	private HttpServlet delegate;
@@ -41,7 +41,6 @@ public class BridgeServlet extends HttpServlet {
 	 */
 	public void init() throws ServletException {
 		super.init();
-		setInstance(this);
 
 		String enableFrameworkControlsParameter = getServletConfig().getInitParameter("enableFrameworkControls"); //$NON-NLS-1$
 		enableFrameworkControls = (enableFrameworkControlsParameter != null && enableFrameworkControlsParameter.equals("true")); //$NON-NLS-1$
@@ -58,9 +57,17 @@ public class BridgeServlet extends HttpServlet {
 			framework = new FrameworkLauncher();
 		}
 
-		framework.init(getServletConfig());
-		framework.deploy();
-		framework.start();
+		boolean frameworkStarted = false;
+		setInstance(this);
+		try {
+			framework.init(getServletConfig());
+			framework.deploy();
+			framework.start();
+			frameworkStarted = true;
+		} finally {
+			if (!frameworkStarted)
+				setInstance(null);
+		}
 	}
 
 	/**
@@ -79,14 +86,13 @@ public class BridgeServlet extends HttpServlet {
 	 *  
 	 */
 	protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		
+
 		if (req.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) == null) {
 			String pathInfo = req.getPathInfo();
 			// Check if this is being handled by an extension mapping
 			if (pathInfo == null && isExtensionMapping(req.getServletPath()))
 				req = new ExtensionMappingRequest(req);
-			
+
 			if (enableFrameworkControls) {
 				if (pathInfo != null && pathInfo.startsWith("/sp_")) { //$NON-NLS-1$
 					if (serviceFrameworkControls(req, resp)) {
@@ -103,7 +109,7 @@ public class BridgeServlet extends HttpServlet {
 					req = new IncludedExtensionMappingRequest(req);
 			}
 		}
-		
+
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		HttpServlet servletReference = acquireDelegateReference();
 		if (servletReference == null) {
@@ -127,7 +133,7 @@ public class BridgeServlet extends HttpServlet {
 		int lastSlash = servletPath.lastIndexOf('/');
 		if (lastSlash != -1)
 			lastSegment = servletPath.substring(lastSlash + 1);
-			
+
 		return lastSegment.indexOf('.') != -1;
 	}
 
@@ -257,7 +263,7 @@ public class BridgeServlet extends HttpServlet {
 			oldProxy.destroy();
 		}
 	}
-	
+
 	static class ExtensionMappingRequest extends HttpServletRequestWrapper {
 
 		public ExtensionMappingRequest(HttpServletRequest req) {
@@ -272,7 +278,7 @@ public class BridgeServlet extends HttpServlet {
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
+
 	static class IncludedExtensionMappingRequest extends HttpServletRequestWrapper {
 
 		public IncludedExtensionMappingRequest(HttpServletRequest req) {
