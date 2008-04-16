@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-SymbolicName: org.eclipse.equinox.http.jetty;singleton:=true
+Bundle-SymbolicName: org.eclipse.equinox.http.jetty
 Bundle-Version: 1.0.100.qualifier
 Bundle-Activator: org.eclipse.equinox.http.jetty.internal.Activator
 Import-Package: javax.servlet;version="[2.4.0,2.6.0)",
