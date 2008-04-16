@@ -24,7 +24,9 @@ public class HttpServiceImpl implements HttpService {
 
 	private ProxyServlet proxy; //The proxy that does the dispatching of the incoming requests
 
-	Set aliases = new HashSet(); //Aliases registered against this particular instance of the service
+	private Set aliases = new HashSet(); //Aliases registered against this particular instance of the service
+
+	private boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has called unregisterAliases.
 
 	public HttpServiceImpl(Bundle bundle, ProxyServlet proxy) {
 		this.bundle = bundle;
@@ -32,18 +34,25 @@ public class HttpServiceImpl implements HttpService {
 	}
 
 	//Clean up method
-	public synchronized void unregisterAliases() {
+	synchronized void unregisterAliases() {
 		for (Iterator it = aliases.iterator(); it.hasNext();) {
 			String alias = (String) it.next();
 			proxy.unregister(alias, false);
 		}
 		aliases.clear();
+		shutdown = true;
+	}
+
+	private void checkShutdown() {
+		if (shutdown)
+			throw new IllegalStateException("Service instance is already shutdown");
 	}
 
 	/**
 	 * @see HttpService#registerServlet(String, Servlet, Dictionary, HttpContext)
 	 */
 	public synchronized void registerServlet(String alias, Servlet servlet, Dictionary initparams, HttpContext context) throws ServletException, NamespaceException {
+		checkShutdown();
 		if (context == null) {
 			context = createDefaultHttpContext();
 		}
@@ -55,6 +64,7 @@ public class HttpServiceImpl implements HttpService {
 	 * @see HttpService#registerResources(String, String, HttpContext)
 	 */
 	public synchronized void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
+		checkShutdown();
 		if (context == null) {
 			context = createDefaultHttpContext();
 		}
@@ -66,6 +76,7 @@ public class HttpServiceImpl implements HttpService {
 	 * @see HttpService#unregister(String)
 	 */
 	public synchronized void unregister(String alias) {
+		checkShutdown();
 		if (aliases.remove(alias)) {
 			proxy.unregister(alias, true);
 		} else {
@@ -78,6 +89,7 @@ public class HttpServiceImpl implements HttpService {
 	 * @see HttpService#createDefaultHttpContext()
 	 */
 	public HttpContext createDefaultHttpContext() {
+		checkShutdown();
 		return new DefaultHttpContext(bundle);
 	}
 }
