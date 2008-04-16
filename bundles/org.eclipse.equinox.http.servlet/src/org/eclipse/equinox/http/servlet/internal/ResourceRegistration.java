@@ -50,28 +50,24 @@ public class ResourceRegistration extends Registration {
 				String pathInfo = HttpServletRequestAdaptor.getDispatchPathInfo(req);
 				int aliasLength = alias.equals("/") ? 0 : alias.length(); //$NON-NLS-1$
 				String resourcePath = internalName + pathInfo.substring(aliasLength);
-				URL testURL = httpContext.getResource(resourcePath);
-				if (testURL == null)
+				URL resourceURL = httpContext.getResource(resourcePath);
+				if (resourceURL == null)
 					return false;
 
-				return writeResource(req, resp, resourcePath);
+				return writeResource(req, resp, resourcePath, resourceURL);
 			}
 			resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		return true;
 	}
 
-	private boolean writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath) throws IOException {
+	private boolean writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath, final URL resourceURL) throws IOException {
 		Boolean result = Boolean.TRUE;
 		try {
 			result = (Boolean) AccessController.doPrivileged(new PrivilegedExceptionAction() {
 
 				public Object run() throws Exception {
-					URL url = httpContext.getResource(resourcePath);
-					if (url == null)
-						return Boolean.FALSE;
-
-					URLConnection connection = url.openConnection();
+					URLConnection connection = resourceURL.openConnection();
 					long lastModified = connection.getLastModified();
 					int contentLength = connection.getContentLength();
 
@@ -93,7 +89,7 @@ public class ResourceRegistration extends Registration {
 							}
 						}
 						// reset the connection if everything checks out
-						connection = url.openConnection();
+						connection = resourceURL.openConnection();
 					}
 
 					String etag = null;
