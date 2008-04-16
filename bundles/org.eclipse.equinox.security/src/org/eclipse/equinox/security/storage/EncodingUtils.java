@@ -18,6 +18,7 @@ import org.eclipse.equinox.internal.security.storage.SlashEncode;
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
+ * @noextend This class is not intended to be subclassed by clients.
  */
 final public class EncodingUtils {
 

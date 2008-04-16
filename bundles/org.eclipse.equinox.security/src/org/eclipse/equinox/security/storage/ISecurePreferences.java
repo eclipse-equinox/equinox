@@ -62,6 +62,8 @@ import java.io.IOException;
  * </p><p>
  * This interface is not intended to be implemented or extended by clients.
  * </p>
+ * @noextend This interface is not intended to be extended by clients.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ISecurePreferences {
 

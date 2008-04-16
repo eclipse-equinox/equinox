@@ -19,6 +19,7 @@ import javax.security.auth.Subject;
  * This interface should not be extended by clients.
  * </p>
  * @see Subject#getPublicCredentials()
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IPublicCredential extends Principal {
 

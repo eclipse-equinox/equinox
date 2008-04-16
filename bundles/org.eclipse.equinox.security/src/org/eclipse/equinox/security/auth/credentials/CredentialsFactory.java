@@ -23,6 +23,8 @@ import org.eclipse.equinox.internal.security.credentials.EquinoxPublicCredential
  * <p>  
  * This class is not intended to be instantiated or extended by clients.
  * </p> 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class CredentialsFactory {
 

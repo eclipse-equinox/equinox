@@ -18,6 +18,7 @@ package org.eclipse.equinox.security.storage;
  * <p>
  * This class is not intended to be instantiated or extended by clients.
  * </p>
+ * @noextend This class is not intended to be subclassed by clients.
  */
 final public class StorageException extends Exception {
 

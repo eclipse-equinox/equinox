@@ -20,6 +20,7 @@ import javax.security.auth.login.LoginException;
  * This interface is not intended to be implemented or extended by clients.
  * </p>
  * @see ILoginContextListener
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ILoginContextListener {
 
