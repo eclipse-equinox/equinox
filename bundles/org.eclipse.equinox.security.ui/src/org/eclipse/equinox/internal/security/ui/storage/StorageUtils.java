@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import org.eclipse.equinox.internal.security.ui.Activator;
+import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.BundleContext;
 
 public class StorageUtils {
-
-	static private final String JUNIT_APPS = "org.eclipse.pde.junit.runtime"; //$NON-NLS-1$
 
 	/**
 	 * Get the shell from an active window. If not found, returns null.
@@ -38,16 +35,7 @@ public class StorageUtils {
 	static public boolean showUI() {
 		if (!PlatformUI.isWorkbenchRunning())
 			return false;
-
-		// This is a bit of a strange code that tries to see if we are running in a JUnit
-		BundleContext context = Activator.getBundleContext();
-		if (context == null)
-			return false;
-		String app = context.getProperty("eclipse.application"); //$NON-NLS-1$
-		if (app != null && app.startsWith(JUNIT_APPS))
-			return false;
-
-		return true;
+		return !InternalExchangeUtils.isJUnitApp();
 	}
 
 }

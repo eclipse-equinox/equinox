@@ -25,6 +25,9 @@ import org.eclipse.ui.PlatformUI;
 public class DefaultPasswordProvider extends PasswordProvider {
 
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
+		if (!useUI(container))
+			return null;
+
 		boolean newPassword = ((passwordType & CREATE_NEW_PASSWORD) != 0);
 		boolean passwordChange = ((passwordType & PASSWORD_CHANGE) != 0);
 
@@ -44,15 +47,7 @@ public class DefaultPasswordProvider extends PasswordProvider {
 	}
 
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
-		boolean canPrompt = true;
-		if (container.hasOption(IProviderHints.PROMPT_USER)) {
-			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-			if (promptHint instanceof Boolean)
-				canPrompt = ((Boolean) promptHint).booleanValue();
-		}
-		if (!canPrompt)
-			return false;
-		if (!StorageUtils.showUI())
+		if (!useUI(container))
 			return false;
 
 		final int[] result = new int[1];
@@ -65,6 +60,17 @@ public class DefaultPasswordProvider extends PasswordProvider {
 			}
 		});
 		return (result[0] == SWT.YES);
+	}
+
+	private boolean useUI(IPreferencesContainer container) {
+		if (!StorageUtils.showUI())
+			return false;
+		if (container.hasOption(IProviderHints.PROMPT_USER)) {
+			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
+			if (promptHint instanceof Boolean)
+				return ((Boolean) promptHint).booleanValue();
+		}
+		return true;
 	}
 
 }

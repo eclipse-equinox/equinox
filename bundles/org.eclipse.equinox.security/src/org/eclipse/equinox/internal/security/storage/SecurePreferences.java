@@ -16,6 +16,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
+import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.osgi.util.NLS;
 
@@ -220,8 +221,25 @@ public class SecurePreferences {
 		}
 
 		PasswordExt passwordExt = getRoot().getPassword(null, container, true);
-		if (passwordExt == null)
+		if (passwordExt == null) {
+			// Special case: JUnits that don't care about encryption itself but use secure storage indirectly.
+			// -> For such JUnits store this value as a clear-text allowing tests to complete.
+			// -> For JUnits that do worry about passwords, see IProviderHints.DEFAULT_PASSWORD.
+			// -> For headless RCP applications, consider using "-eclipse.password <file>" runtime option.
+
+			// Note that this special processing for JUnits is not considered API and might be modified or 
+			// removed in future. See bug 227298.
+			if (InternalExchangeUtils.isJUnitApp()) {
+				CryptoData clearValue = new CryptoData(null, null, value == null ? null : value.getBytes());
+				internalPut(key, clearValue.toString());
+				markModified();
+				// print out a warning message for developer
+				String msg = "No password found: value of \"" + key + "\" is being stored as a non-encrypted value in the node \"" + absolutePath() + "\"."; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				System.out.println(msg);
+				return;
+			}
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+		}
 
 		// value must not be null at this point
 		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), value.getBytes());

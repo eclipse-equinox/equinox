@@ -13,16 +13,20 @@ package org.eclipse.equinox.internal.security.storage.friends;
 import java.net.URL;
 import java.util.*;
 import javax.crypto.spec.PBEKeySpec;
+import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.storage.*;
 import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector.ExtStorageModule;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.osgi.framework.BundleContext;
 
 /**
  * Collection of utilities that gives friends additional access into
  * internals of the secure storage.
  */
 public class InternalExchangeUtils {
+
+	static private final String JUNIT_APPS = "org.eclipse.pde.junit.runtime"; //$NON-NLS-1$
 
 	static private List listeners = new ArrayList();
 
@@ -124,6 +128,19 @@ public class InternalExchangeUtils {
 		if (password != null)
 			rootNode.cachePassword(moduleID, new PasswordExt(new PBEKeySpec(password.toCharArray()), moduleID));
 		return password;
+	}
+
+	/**
+	 * This is a bit of a strange code that tries to determine if we are running in a JUnit
+	 */
+	static public boolean isJUnitApp() {
+		BundleContext context = AuthPlugin.getDefault().getBundleContext();
+		if (context == null)
+			return false;
+		String app = context.getProperty("eclipse.application"); //$NON-NLS-1$
+		if (app == null)
+			return false;
+		return app.startsWith(JUNIT_APPS);
 	}
 
 }
