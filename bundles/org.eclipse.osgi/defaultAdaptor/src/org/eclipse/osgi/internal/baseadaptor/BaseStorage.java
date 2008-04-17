@@ -584,9 +584,11 @@ public class BaseStorage implements SynchronousBundleListener {
 			stateManager.getSystemState().setTimeStamp(stateManager.getSystemState().getTimeStamp() + 1);
 		if (stateManager == null || isReadOnly() || !stateManager.saveNeeded())
 			return;
+		File stateTmpFile = null;
+		File lazyTmpFile = null;
 		try {
-			File stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
-			File lazyTmpFile = File.createTempFile(LocationManager.LAZY_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			stateTmpFile = File.createTempFile(LocationManager.STATE_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
+			lazyTmpFile = File.createTempFile(LocationManager.LAZY_FILE, ".new", LocationManager.getOSGiConfigurationDir()); //$NON-NLS-1$
 			if (shutdown)
 				stateManager.shutdown(stateTmpFile, lazyTmpFile);
 			else
@@ -598,6 +600,11 @@ public class BaseStorage implements SynchronousBundleListener {
 			storageManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
 		} catch (IOException e) {
 			adaptor.getFrameworkLog().log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
+		} finally {
+			if (stateTmpFile != null && stateTmpFile.exists())
+				stateTmpFile.delete();
+			if (lazyTmpFile != null && lazyTmpFile.exists())
+				lazyTmpFile.delete();
 		}
 	}
 
