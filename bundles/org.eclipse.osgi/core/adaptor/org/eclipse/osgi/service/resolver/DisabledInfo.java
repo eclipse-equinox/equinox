@@ -23,6 +23,7 @@ package org.eclipse.osgi.service.resolver;
  * </p>
  *@see State
  *@noextend This class is not intended to be subclassed by clients.
+ * @since 3.4
  */
 public final class DisabledInfo {
 	private final String policyName;
