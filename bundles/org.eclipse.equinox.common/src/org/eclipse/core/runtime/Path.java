@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import java.io.File;
  * may be instantiated.
  * </p>
  * @see IPath
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class Path implements IPath, Cloneable {
 	/** masks for separator values */
@@ -48,13 +49,12 @@ public class Path implements IPath, Cloneable {
 	/** Mask for all bits that are involved in the hash code */
 	private static final int HASH_MASK = ~HAS_TRAILING;
 
-
 	/** Constant root path string (<code>"/"</code>). */
 	private static final String ROOT_STRING = "/"; //$NON-NLS-1$
 
 	/** Constant value containing the root path with no device. */
 	public static final Path ROOT = new Path(ROOT_STRING);
-	
+
 	/** Constant value indicating if the current platform is Windows */
 	private static final boolean WINDOWS = java.io.File.separatorChar == '\\';
 
@@ -88,7 +88,7 @@ public class Path implements IPath, Cloneable {
 	public static IPath fromOSString(String pathString) {
 		return new Path(pathString);
 	}
-	
+
 	/** 
 	 * Constructs a new path from the given path string.
 	 * The path string must have been produced by a previous
@@ -99,7 +99,7 @@ public class Path implements IPath, Cloneable {
 	 * @since 3.1
 	 */
 	public static IPath fromPortableString(String pathString) {
-		int firstMatch = pathString.indexOf(DEVICE_SEPARATOR) +1;
+		int firstMatch = pathString.indexOf(DEVICE_SEPARATOR) + 1;
 		//no extra work required if no device characters
 		if (firstMatch <= 0)
 			return new Path().initialize(null, pathString);
@@ -111,7 +111,7 @@ public class Path implements IPath, Cloneable {
 			pathString = pathString.substring(firstMatch, pathLength);
 		}
 		//optimize for no colon literals
-		if (pathString.indexOf(DEVICE_SEPARATOR) == -1) 
+		if (pathString.indexOf(DEVICE_SEPARATOR) == -1)
 			return new Path().initialize(devicePart, pathString);
 		//contract colon literals
 		char[] chars = pathString.toCharArray();
@@ -124,7 +124,7 @@ public class Path implements IPath, Cloneable {
 		}
 		return new Path().initialize(devicePart, new String(chars, 0, writeOffset));
 	}
-	
+
 	/* (Intentionally not included in javadoc)
 	 * Private constructor.
 	 */
@@ -490,6 +490,7 @@ public class Path implements IPath, Cloneable {
 		}
 		return newSegments;
 	}
+
 	/**
 	 * Returns the platform-neutral encoding of the given segment onto
 	 * the given string buffer. This escapes literal colon characters with double colons.
@@ -671,8 +672,8 @@ public class Path implements IPath, Cloneable {
 	 */
 	public boolean isValidPath(String path) {
 		Path test = new Path(path);
-		for (int i = 0, max = test.segmentCount(); i < max; i++) 
-			if (!isValidSegment(test.segment(i))) 
+		for (int i = 0, max = test.segmentCount(); i < max; i++)
+			if (!isValidSegment(test.segment(i)))
 				return false;
 		return true;
 	}
@@ -930,7 +931,7 @@ public class Path implements IPath, Cloneable {
 				encodeSegment(segments[i], result);
 			else
 				result.append(segments[i]);
-			if (i < len-1 || (separators & HAS_TRAILING) != 0)
+			if (i < len - 1 || (separators & HAS_TRAILING) != 0)
 				result.append(SEPARATOR);
 		}
 		return result.toString();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,11 @@
 package org.eclipse.core.runtime;
 
 import java.io.File;
-import org.eclipse.core.internal.registry.*;
+import org.eclipse.core.internal.registry.ExtensionRegistry;
+import org.eclipse.core.internal.registry.RegistryProviderFactory;
 import org.eclipse.core.internal.registry.osgi.RegistryStrategyOSGI;
-import org.eclipse.core.runtime.spi.*;
+import org.eclipse.core.runtime.spi.IRegistryProvider;
+import org.eclipse.core.runtime.spi.RegistryStrategy;
 
 /**
  * Use this class to create or obtain an extension registry.
@@ -27,6 +29,8 @@ import org.eclipse.core.runtime.spi.*;
  * This class is not intended to be subclassed or instantiated.
  * </p>
  * @since org.eclipse.equinox.registry 3.2
+ * @noinstantiate This class is not intended to be instantiated by clients.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RegistryFactory {
 

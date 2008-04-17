@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.osgi.service.application.ApplicationDescriptor;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @since 1.0
+ * @noextend This interface is not intended to be extended by clients.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IApplicationContext {
 	/**
@@ -88,7 +90,7 @@ public interface IApplicationContext {
 	 * @return the value associated with the given key or <code>null</code> if none
 	 */
 	public String getBrandingProperty(String key);
-	
+
 	/**
 	 * Returns the bundle which is responsible for the definition of the product associated with 
 	 * this application context.

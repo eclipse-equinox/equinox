@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IExtension;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @since 3.1
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IExtensionTracker {
 

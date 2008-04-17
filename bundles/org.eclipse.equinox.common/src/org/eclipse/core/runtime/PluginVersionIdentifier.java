@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,13 +54,14 @@ import org.osgi.framework.Version;
  * </p>
  * @see java.lang.String#compareTo(java.lang.String)
  * @deprecated clients should use {@link org.osgi.framework.Version} instead
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public final class PluginVersionIdentifier {
 
 	private Version version;
-	
+
 	private static final String SEPARATOR = "."; //$NON-NLS-1$
-	
+
 	/**
 	 * Creates a plug-in version identifier from its components.
 	 * 

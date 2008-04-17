@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,8 @@ package org.eclipse.core.runtime;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @see Path
+ * @noextend This interface is not intended to be extended by clients.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IPath extends Cloneable {
 
@@ -243,7 +245,7 @@ public interface IPath extends Cloneable {
 	 * When the platform location is a file system with no meaningful device
 	 * separator, the entire string is treated as the path proper.
 	 * The device id is not checked for validity; the path proper is correct 
-	* if each of the segments in its canonicalized form is valid.
+	 * if each of the segments in its canonicalized form is valid.
 	 *
 	 * @param path the path to check
 	 * @return <code>true</code> if the given string is a valid path,
