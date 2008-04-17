@@ -71,27 +71,6 @@ public class ResourceRegistration extends Registration {
 					long lastModified = connection.getLastModified();
 					int contentLength = connection.getContentLength();
 
-					// check to ensure that we're dealing with a real resource and in particular not a directory
-					if (contentLength == 0) {
-						InputStream testStream = null;
-						try {
-							testStream = connection.getInputStream();
-						} catch (Exception e) {
-							// this will fail if the target is a directory or the OS will not allow access 
-							return Boolean.FALSE;
-						} finally {
-							if (testStream != null) {
-								try {
-									testStream.close();
-								} catch (IOException e) {
-									// ignore
-								}
-							}
-						}
-						// reset the connection if everything checks out
-						connection = resourceURL.openConnection();
-					}
-
 					String etag = null;
 					if (lastModified != -1 && contentLength != -1)
 						etag = "W/\"" + contentLength + "-" + lastModified + "\""; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
@@ -129,17 +108,19 @@ public class ResourceRegistration extends Registration {
 					if (etag != null)
 						resp.setHeader(ETAG, etag);
 
-					try {
-						OutputStream os = resp.getOutputStream();
-						int writtenContentLength = writeResourceToOutputStream(connection, os);
-						if (contentLength == -1 || contentLength != writtenContentLength)
-							resp.setContentLength(writtenContentLength);
-					} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
-						Writer writer = resp.getWriter();
-						writeResourceToWriter(connection, writer);
-						// Since ContentLength is a measure of the number of bytes contained in the body
-						// of a message when we use a Writer we lose control of the exact byte count and
-						// defer the problem to the Servlet Engine's Writer implementation.
+					if (contentLength != 0) {
+						try {
+							OutputStream os = resp.getOutputStream();
+							int writtenContentLength = writeResourceToOutputStream(connection, os);
+							if (contentLength == -1 || contentLength != writtenContentLength)
+								resp.setContentLength(writtenContentLength);
+						} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
+							Writer writer = resp.getWriter();
+							writeResourceToWriter(connection, writer);
+							// Since ContentLength is a measure of the number of bytes contained in the body
+							// of a message when we use a Writer we lose control of the exact byte count and
+							// defer the problem to the Servlet Engine's Writer implementation.
+						}
 					}
 					return Boolean.TRUE;
 				}
