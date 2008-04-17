@@ -26,7 +26,8 @@ import org.osgi.framework.BundleContext;
  */
 public class InternalExchangeUtils {
 
-	static private final String JUNIT_APPS = "org.eclipse.pde.junit.runtime"; //$NON-NLS-1$
+	static private final String JUNIT_APPS1 = "org.eclipse.pde.junit.runtime."; //$NON-NLS-1$
+	static private final String JUNIT_APPS2 = "org.eclipse.test."; //$NON-NLS-1$
 
 	static private List listeners = new ArrayList();
 
@@ -140,7 +141,11 @@ public class InternalExchangeUtils {
 		String app = context.getProperty("eclipse.application"); //$NON-NLS-1$
 		if (app == null)
 			return false;
-		return app.startsWith(JUNIT_APPS);
+		if (app.startsWith(JUNIT_APPS1))
+			return true;
+		if (app.startsWith(JUNIT_APPS2))
+			return true;
+		return false;
 	}
 
 }

@@ -88,6 +88,7 @@ public class SecAuthMessages extends NLS {
 	public static String unableToReadPswdFile;
 	public static String fileModifiedMsg;
 	public static String fileModifiedNote;
+	public static String storedClearText;
 
 	static {
 		// load message values from bundle file

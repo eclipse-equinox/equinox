@@ -132,4 +132,8 @@ public class UICallbackProvider implements IUICallbacks {
 		return new Boolean(result[0] == SWT.YES);
 	}
 
+	public boolean runningUI() {
+		return StorageUtils.runningUI();
+	}
+
 }

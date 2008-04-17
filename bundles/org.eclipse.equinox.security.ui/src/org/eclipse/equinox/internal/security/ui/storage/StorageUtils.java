@@ -21,7 +21,7 @@ public class StorageUtils {
 	 * Get the shell from an active window. If not found, returns null.
 	 */
 	static public Shell getShell() {
-		if (PlatformUI.isWorkbenchRunning()) {
+		if (runningUI()) {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			if (window != null)
 				return window.getShell();
@@ -33,9 +33,11 @@ public class StorageUtils {
 	 * Determines if it is a good idea to show UI prompts
 	 */
 	static public boolean showUI() {
-		if (!PlatformUI.isWorkbenchRunning())
-			return false;
-		return !InternalExchangeUtils.isJUnitApp();
+		return runningUI() && !InternalExchangeUtils.isJUnitApp();
+	}
+
+	static public boolean runningUI() {
+		return PlatformUI.isWorkbenchRunning();
 	}
 
 }

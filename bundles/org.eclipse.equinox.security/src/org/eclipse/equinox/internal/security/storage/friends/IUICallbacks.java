@@ -45,4 +45,9 @@ public interface IUICallbacks {
 	 */
 	public boolean execute(final IStorageTask callback) throws StorageException;
 
+	/**
+	 * @return true if running with UI; false if headless
+	 */
+	public boolean runningUI();
+
 }

@@ -15,6 +15,7 @@ import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -222,20 +223,15 @@ public class SecurePreferences {
 
 		PasswordExt passwordExt = getRoot().getPassword(null, container, true);
 		if (passwordExt == null) {
-			// Special case: JUnits that don't care about encryption itself but use secure storage indirectly.
-			// -> For such JUnits store this value as a clear-text allowing tests to complete.
-			// -> For JUnits that do worry about passwords, see IProviderHints.DEFAULT_PASSWORD.
-			// -> For headless RCP applications, consider using "-eclipse.password <file>" runtime option.
-
-			// Note that this special processing for JUnits is not considered API and might be modified or 
-			// removed in future. See bug 227298.
-			if (InternalExchangeUtils.isJUnitApp()) {
+			boolean storeDecrypted = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
+			if (storeDecrypted) { // for JUnits and headless runs we store value as clear text and log a error
 				CryptoData clearValue = new CryptoData(null, null, value == null ? null : value.getBytes());
 				internalPut(key, clearValue.toString());
 				markModified();
-				// print out a warning message for developer
-				String msg = "No password found: value of \"" + key + "\" is being stored as a non-encrypted value in the node \"" + absolutePath() + "\"."; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				// Make this as visible as possible. Both print out the output and log a error
+				String msg = NLS.bind(SecAuthMessages.storedClearText, key, absolutePath());
 				System.out.println(msg);
+				AuthPlugin.getDefault().logError(msg, new StorageException(StorageException.NO_PASSWORD, msg));
 				return;
 			}
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);

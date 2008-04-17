@@ -74,4 +74,11 @@ public class CallbacksProvider {
 			init();
 		return callback;
 	}
+
+	public boolean runningUI() {
+		IUICallbacks callbackInstalled = getCallback();
+		if (callbackInstalled == null)
+			return false; // no UI bundle installed
+		return callbackInstalled.runningUI();
+	}
 }
