@@ -34,6 +34,7 @@ DLL = $(PROGRAM_LIBRARY)
 LIBS = -framework Carbon
 ARCHS = -arch i386 -arch ppc
 CFLAGS = -O -s \
+	-mmacosx-version-min=10.3 \
 	-Wall \
 	$(ARCHS) \
 	-DMACOSX \
