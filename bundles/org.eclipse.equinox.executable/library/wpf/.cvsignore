@@ -9,3 +9,4 @@ com_*.dll
 eclipsec.exe
 eclipsec.exe.manifest
 eclipse_*.dll.manifest
+eclipse.exe.manifest
