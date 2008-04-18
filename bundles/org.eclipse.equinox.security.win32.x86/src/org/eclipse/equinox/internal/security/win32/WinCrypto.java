@@ -48,9 +48,14 @@ public class WinCrypto extends PasswordProvider {
 	private final static int PASSWORD_LENGTH = 250;
 
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
-		byte[] encryptedPassord = getEncryptedPassword(container);
-		if (encryptedPassord != null) {
-			byte[] decryptedPassword = windecrypt(encryptedPassord);
+		byte[] encryptedPassword;
+		if ((passwordType & CREATE_NEW_PASSWORD) == 0)
+			encryptedPassword = getEncryptedPassword(container);
+		else
+			encryptedPassword = null;
+		
+		if (encryptedPassword != null) {
+			byte[] decryptedPassword = windecrypt(encryptedPassword);
 			if (decryptedPassword != null) {
 				String password = new String(decryptedPassword);
 				return new PBEKeySpec(password.toCharArray());
