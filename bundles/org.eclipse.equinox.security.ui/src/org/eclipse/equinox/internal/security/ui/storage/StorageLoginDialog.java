@@ -24,12 +24,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.PlatformUI;
 
 public class StorageLoginDialog extends TitleAreaDialog {
 
-	private static final String DIALOG_SETTINGS_SECTION = "StorageLoginDialog"; //$NON-NLS-1$
+	private static final String DIALOG_SETTINGS_SECTION_NEW = "StorageLoginDialogNew"; //$NON-NLS-1$
+	private static final String DIALOG_SETTINGS_SECTION_OLD = "StorageLoginDialogOld"; //$NON-NLS-1$
+
 	private static final String HELP_ID = Activator.PLUGIN_ID + ".StorageLoginDialog"; //$NON-NLS-1$
 
 	private static final ImageDescriptor dlgImageDescriptor = ImageDescriptor.createFromFile(StorageLoginDialog.class, "/icons/storage/login_wiz.png"); //$NON-NLS-1$
@@ -69,9 +72,10 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 	protected IDialogSettings getDialogBoundsSettings() {
 		IDialogSettings settings = Activator.getDefault().getDialogSettings();
-		IDialogSettings section = settings.getSection(DIALOG_SETTINGS_SECTION);
+		String settingsID = (confirmPassword) ? DIALOG_SETTINGS_SECTION_NEW : DIALOG_SETTINGS_SECTION_OLD;
+		IDialogSettings section = settings.getSection(settingsID);
 		if (section == null)
-			section = settings.addNewSection(DIALOG_SETTINGS_SECTION);
+			section = settings.addNewSection(settingsID);
 		return section;
 	}
 
@@ -81,24 +85,30 @@ public class StorageLoginDialog extends TitleAreaDialog {
 
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
-		if (location == null)
-			shell.setText(passwordChange ? SecUIMessages.passwordChangeTitle : SecUIMessages.dialogTitle);
-		else
-			shell.setText(location);
-
+		shell.setText(SecUIMessages.generalDialogTitle);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, HELP_ID);
 	}
 
 	protected Control createContents(Composite parent) {
 		Control contents = super.createContents(parent);
-		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin);
 		dlgTitleImage = dlgImageDescriptor.createImage();
 		setTitleImage(dlgTitleImage);
 		return contents;
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
+		Composite compositeTop = (Composite) super.createDialogArea(parent);
+
+		String titleMsg;
+		if (confirmPassword)
+			titleMsg = SecUIMessages.passwordChangeTitle;
+		else if (passwordChange)
+			titleMsg = SecUIMessages.messageLoginChange;
+		else
+			titleMsg = SecUIMessages.dialogTitle;
+		setTitle(titleMsg);
+
+		Composite composite = new Composite(compositeTop, SWT.NONE);
 
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.labelPassword);
 		password = new Text(composite, SWT.LEFT | SWT.BORDER);
@@ -119,7 +129,8 @@ public class StorageLoginDialog extends TitleAreaDialog {
 		} else
 			confirm = null;
 
-		showPassword = new Button(composite, SWT.CHECK);
+		new Label(composite, SWT.LEFT); // filler
+		showPassword = new Button(composite, SWT.CHECK | SWT.RIGHT);
 		showPassword.setText(SecUIMessages.showPassword);
 		showPassword.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -130,15 +141,28 @@ public class StorageLoginDialog extends TitleAreaDialog {
 				passwordVisibility();
 			}
 		});
+		showPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		// by default don't display password as clear text
 		showPassword.setSelection(false);
 		passwordVisibility();
 
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayoutFactory.swtDefaults().generateLayout(composite);
+		if (location != null) {
+			Group locationGroup = new Group(composite, SWT.NONE);
+			locationGroup.setText(SecUIMessages.locationGroup);
+			GridData groupData = new GridData(SWT.FILL, SWT.FILL, true, true);
+			groupData.horizontalSpan = 2;
+			locationGroup.setLayoutData(groupData);
+			locationGroup.setLayout(new GridLayout());
 
-		return composite;
+			Label locationLabel = new Label(locationGroup, SWT.WRAP);
+			locationLabel.setText(location);
+		}
+
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(composite);
+
+		return compositeTop;
 	}
 
 	protected void passwordVisibility() {
@@ -167,7 +191,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 				return false;
 			}
 		}
-		setMessage(passwordChange ? SecUIMessages.messageLoginChange : SecUIMessages.messageLogin, IMessageProvider.NONE);
+		setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
 		return true;
 	}
 

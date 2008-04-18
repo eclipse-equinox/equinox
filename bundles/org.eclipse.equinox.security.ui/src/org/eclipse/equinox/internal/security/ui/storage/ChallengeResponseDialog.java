@@ -60,25 +60,26 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
+		setTitle(SecUIMessages.passwordRecoveryTitleMsg);
+		Composite compositeTop = (Composite) super.createDialogArea(parent);
+
+		Composite composite = new Composite(compositeTop, SWT.NONE);
 
 		setMessage(SecUIMessages.passwordMsg, IMessageProvider.INFORMATION);
 
 		Label storyLabel = new Label(composite, SWT.LEFT);
 		storyLabel.setText(SecUIMessages.passwordRecoveryLabel);
-		GridData storyData = new GridData(GridData.FILL, GridData.BEGINNING, true, false);
-		storyData.horizontalIndent = 10;
-		storyLabel.setLayoutData(storyData);
+		storyLabel.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
 
 		for (int i = 0; i < size; i++) {
 			Group group = new Group(composite, SWT.NONE);
 			group.setText(NLS.bind(SecUIMessages.passwordGroup, Integer.toString(i + 1)));
-			group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
-			group.setLayout(new GridLayout());
+			group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
+			group.setLayout(new GridLayout(2, false));
 
 			new Label(group, SWT.LEFT).setText(SecUIMessages.passwordQuestion);
 			questions[i] = new Text(group, SWT.LEFT | SWT.BORDER);
-			questions[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
+			questions[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 			questions[i].addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent event) {
 					validateOK();
@@ -87,7 +88,7 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 
 			new Label(group, SWT.LEFT).setText(SecUIMessages.passwordAnswer);
 			answers[i] = new Text(group, SWT.LEFT | SWT.BORDER);
-			answers[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
+			answers[i].setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 			answers[i].addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent event) {
 					validateOK();

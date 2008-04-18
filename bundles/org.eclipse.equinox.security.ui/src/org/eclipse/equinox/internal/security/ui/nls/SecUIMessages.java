@@ -38,6 +38,7 @@ public class SecUIMessages extends NLS {
 	public static String passwordChangeTitle;
 	public static String showPassword;
 	public static String noDigestPassword;
+	public static String locationGroup;
 
 	// exception handling
 	public static String exceptionTitle;
@@ -144,6 +145,7 @@ public class SecUIMessages extends NLS {
 	public static String pswdRecoveryOptionTitle;
 	public static String pswdRecoveryOptionMsg;
 	public static String passwordRecoveryTitle;
+	public static String passwordRecoveryTitleMsg;
 	public static String passwordMsg;
 	public static String passwordRecoveryLabel;
 	public static String passwordErrMsg;
