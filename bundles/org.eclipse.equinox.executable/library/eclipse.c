@@ -523,10 +523,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	            if (exitData != 0) {
 	            	errorMsg = exitData;
 	            	exitData = NULL;
-	                if (_tcslen( errorMsg ) == 0) {
-	            	    free( errorMsg );
-	            	    errorMsg = NULL;
-	                } else {
+	                if (_tcslen( errorMsg ) > 0) {
 	                    _TCHAR *str;
 	                	if (_tcsncmp(errorMsg, _T_ECLIPSE("<title>"), _tcslen(_T_ECLIPSE("<title>"))) == 0) {
 							str = _tcsstr(errorMsg, _T_ECLIPSE("</title>"));
@@ -552,10 +549,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
 	                _stprintf( errorMsg, exitMsg, exitCode, msg );
 	            }
-	            if (!suppressErrors)
-	            	displayMessage( title, errorMsg );
-	            else 
-	            	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, errorMsg);
+	            
+	            if (_tcslen(errorMsg) > 0) {
+		            if (!suppressErrors)
+		            	displayMessage( title, errorMsg );
+		            else 
+		            	_ftprintf(stderr, _T_ECLIPSE("%s:\n%s\n"), title, errorMsg);
+	            }
 	            free( errorMsg );
 	            free( title );
 	            break;

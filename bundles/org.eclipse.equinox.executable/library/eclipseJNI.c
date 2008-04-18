@@ -157,7 +157,7 @@ void setExitData(JNIEnv *env, jstring id, jstring s){
 				} else {
 					exitData = malloc((length + 1) * sizeof(_TCHAR*));
 					_tcsncpy( exitData, data, length);
-					exitData[length] = 0;
+					exitData[length] = _T_ECLIPSE('\0');
 				}
 				JNI_ReleaseStringChars(env, s, data);
 			}
