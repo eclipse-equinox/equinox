@@ -70,7 +70,8 @@ public class ExportDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
+		Composite compositeTop = (Composite) super.createDialogArea(parent);
+		Composite composite = new Composite(compositeTop, SWT.NONE);
 
 		Label fileLabel = new Label(composite, SWT.LEFT);
 		fileLabel.setText(SecUIMessages.exportDialogFileLabel);

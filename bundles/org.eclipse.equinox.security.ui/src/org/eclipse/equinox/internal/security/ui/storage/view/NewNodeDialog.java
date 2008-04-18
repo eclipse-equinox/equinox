@@ -47,7 +47,8 @@ public class NewNodeDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
+		Composite compositeTop = (Composite) super.createDialogArea(parent);
+		Composite composite = new Composite(compositeTop, SWT.NONE);
 
 		setMessage(SecUIMessages.newNodeMsg);
 

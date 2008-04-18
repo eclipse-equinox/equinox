@@ -60,8 +60,8 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		setTitle(SecUIMessages.passwordRecoveryTitleMsg);
 		Composite compositeTop = (Composite) super.createDialogArea(parent);
+		setTitle(SecUIMessages.passwordRecoveryTitleMsg);
 
 		Composite composite = new Composite(compositeTop, SWT.NONE);
 

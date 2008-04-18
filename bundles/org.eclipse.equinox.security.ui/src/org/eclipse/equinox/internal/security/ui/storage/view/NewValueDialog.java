@@ -68,7 +68,9 @@ public class NewValueDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		Composite composite = (Composite) super.createDialogArea(parent);
+		Composite compositeTop = (Composite) super.createDialogArea(parent);
+		Composite composite = new Composite(compositeTop, SWT.NONE);
+
 		new Label(composite, SWT.LEFT).setText(SecUIMessages.addValueKeyLabel);
 		keyText = new Text(composite, SWT.LEFT | SWT.BORDER);
 		keyText.addModifyListener(new ModifyListener() {
