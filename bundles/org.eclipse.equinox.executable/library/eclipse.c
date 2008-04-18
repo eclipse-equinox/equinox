@@ -1390,8 +1390,9 @@ static int processEEProps(_TCHAR* eeFile)
     	/* replace ${ee.home} with eeDir, loop in case there is more than one per argument */
     	while( (c1 = _tcsstr(argv[index], EE_HOME_VAR)) != NULL)
     	{
-    		c2 = malloc( (_tcslen(argv[index]) + _tcslen(eeDir) + _tcslen(c1) + 1) * sizeof(_TCHAR));
-    		*c1 = 0;
+    		/* the space needed for c1 is included in _tcslen(argv[index]) */
+    		c2 = malloc( (_tcslen(argv[index]) + _tcslen(eeDir) + 1) * sizeof(_TCHAR));
+    		*c1 = _T_ECLIPSE('\0');
     		_stprintf(c2, _T_ECLIPSE("%s%s%s"), argv[index], eeDir, c1 + 10); /* ${ee.home} is 10 characters */
     		free(argv[index]);
     		argv[index] = c2;
@@ -1430,8 +1431,8 @@ static int processEEProps(_TCHAR* eeFile)
         		break;
         }
     }
-    /* set ee.home and ee.filename variables */
-    argv = realloc(argv, (nEEargs + 2) * sizeof(_TCHAR*));
+    /* set ee.home, ee.filename variables, and NULL */
+    argv = realloc(argv, (nEEargs + 3) * sizeof(_TCHAR*));
     
     c1 = malloc( (_tcslen(EE_HOME) + _tcslen(eeDir) + 1) * sizeof(_TCHAR));
     _stprintf(c1, _T_ECLIPSE("%s%s"), EE_HOME, eeDir);
