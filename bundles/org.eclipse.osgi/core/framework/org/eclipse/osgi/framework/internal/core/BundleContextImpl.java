@@ -357,7 +357,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public void removeServiceListener(ServiceListener listener) {
 		checkValid();
 
-		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
