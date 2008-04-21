@@ -31,6 +31,12 @@ import org.eclipse.swt.widgets.*;
 public class ValuesView {
 
 	/**
+	 * The default value of this variable (false, meaning "not in debug of secure storage"
+	 * removes showValueAction, encryptValueAction, and decryptValueAction.
+	 */
+	static private boolean inDevelopmentMode = false;
+
+	/**
 	 * Line to show for encrypted values
 	 */
 	private final static String ENCRYPTED_SUBSTITUTE = "**********"; //$NON-NLS-1$
@@ -42,9 +48,9 @@ public class ValuesView {
 
 	protected Action addValueAction;
 	protected Action removeValueAction;
-	protected Action showValueAction;
-	protected Action encryptValueAction;
-	protected Action decryptValueAction;
+	protected Action showValueAction = null;
+	protected Action encryptValueAction = null;
+	protected Action decryptValueAction = null;
 
 	protected Shell shell;
 
@@ -180,9 +186,12 @@ public class ValuesView {
 				boolean isInternal = selectedNode.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
 				addValueAction.setEnabled(!isInternal);
 				removeValueAction.setEnabled(!isInternal);
-				encryptValueAction.setEnabled(!isInternal);
-				decryptValueAction.setEnabled(!isInternal);
-				showValueAction.setEnabled(false);
+				if (encryptValueAction != null)
+					encryptValueAction.setEnabled(!isInternal);
+				if (decryptValueAction != null)
+					decryptValueAction.setEnabled(!isInternal);
+				if (showValueAction != null)
+					showValueAction.setEnabled(false);
 
 				// enablement of encrypted/decrypted
 				StructuredSelection selection = (StructuredSelection) tableViewer.getSelection();
@@ -191,9 +200,12 @@ public class ValuesView {
 					String key = ((TableValuesElement) selected).getKey();
 					try {
 						boolean encrypted = selectedNode.isEncrypted(key);
-						encryptValueAction.setEnabled(!isInternal && !encrypted);
-						decryptValueAction.setEnabled(!isInternal && encrypted);
-						showValueAction.setEnabled(encrypted);
+						if (encryptValueAction != null)
+							encryptValueAction.setEnabled(!isInternal && !encrypted);
+						if (decryptValueAction != null)
+							decryptValueAction.setEnabled(!isInternal && encrypted);
+						if (showValueAction != null)
+							showValueAction.setEnabled(encrypted);
 					} catch (StorageException e) {
 						Activator.log(IStatus.ERROR, SecUIMessages.failedDecrypt, null, e);
 					}
@@ -206,11 +218,16 @@ public class ValuesView {
 		// fill context menu
 		menuMgr.add(addValueAction);
 		menuMgr.add(removeValueAction);
-		menuMgr.add(new Separator());
-		menuMgr.add(showValueAction);
-		menuMgr.add(new Separator());
-		menuMgr.add(encryptValueAction);
-		menuMgr.add(decryptValueAction);
+		if (showValueAction != null) {
+			menuMgr.add(new Separator());
+			menuMgr.add(showValueAction);
+		}
+		if (encryptValueAction != null) {
+			menuMgr.add(new Separator());
+			menuMgr.add(encryptValueAction);
+		}
+		if (decryptValueAction != null)
+			menuMgr.add(decryptValueAction);
 	}
 
 	private void makeActions() {
@@ -264,6 +281,11 @@ public class ValuesView {
 		removeValueAction.setToolTipText(SecUIMessages.removeValueCommandTmp);
 		removeValueAction.setImageDescriptor(ImageDescriptor.createFromFile(NodesView.class, "/icons/storage/value_delete.gif")); //$NON-NLS-1$
 
+		if (inDevelopmentMode)
+			addDevelopmentMenuOptions();
+	}
+
+	private void addDevelopmentMenuOptions() {
 		showValueAction = new Action() {
 			public void run() {
 				if (selectedNode == null)
