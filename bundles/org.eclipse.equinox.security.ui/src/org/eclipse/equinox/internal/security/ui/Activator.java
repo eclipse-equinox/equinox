@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
+import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.util.NLS;
@@ -43,6 +44,7 @@ public class Activator extends AbstractUIPlugin {
 	private static ServiceTracker authzEngineTracker;
 	private static ServiceTracker authzManagerTracker;
 	private static ServiceTracker platformAdminTracker;
+	private static ServiceTracker debugTracker;
 
 	// The shared plug-in instance
 	private static Activator plugin;
@@ -50,6 +52,10 @@ public class Activator extends AbstractUIPlugin {
 	// The bundle context
 	private static BundleContext bundleContext;
 	private ServiceRegistration defaultAuthzManagerReg;
+
+	// debug tracing
+	private static final String OPTION_DEBUG = "org.eclipse.equinox.security.ui/debug"; //$NON-NLS-1$;
+	private static final String OPTION_DEBUG_STORAGE = OPTION_DEBUG + "/storage"; //$NON-NLS-1$;
 
 	public Activator() {
 		super();
@@ -108,6 +114,10 @@ public class Activator extends AbstractUIPlugin {
 		if (platformAdminTracker != null) {
 			platformAdminTracker.close();
 			platformAdminTracker = null;
+		}
+		if (debugTracker != null) {
+			debugTracker.close();
+			debugTracker = null;
 		}
 	}
 
@@ -202,6 +212,22 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static void log(int severity, String key, Object args[], Throwable throwable) {
 		plugin.getLog().log(new Status(severity, getSymbolicName(), IStatus.OK, NLS.bind(key, args), throwable));
+	}
+
+	public DebugOptions getDebugOptions() {
+		if (debugTracker == null) {
+			debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
+			debugTracker.open();
+		}
+		return (DebugOptions) debugTracker.getService();
+	}
+
+	public boolean debugStorageContents() {
+		DebugOptions debugOptions = getDebugOptions();
+		if (debugOptions == null)
+			return false;
+		return debugOptions.getBooleanOption(OPTION_DEBUG, false) && //
+				debugOptions.getBooleanOption(OPTION_DEBUG_STORAGE, false);
 	}
 
 }

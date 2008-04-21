@@ -35,7 +35,7 @@ public class ValuesView {
 	 */
 	private final static String ENCRYPTED_SUBSTITUTE = "**********"; //$NON-NLS-1$
 
-	protected SecurePreferencesView parentView;
+	protected ISecurePreferencesSelection parentView;
 	protected TableViewer tableViewer;
 
 	protected ISecurePreferences selectedNode = null;
@@ -146,7 +146,7 @@ public class ValuesView {
 		// using default implementation for now
 	}
 
-	public ValuesView(Table table, final SecurePreferencesView parentView, Shell shell) {
+	public ValuesView(Table table, final ISecurePreferencesSelection parentView, Shell shell) {
 		this.parentView = parentView;
 		this.shell = shell;
 
@@ -166,8 +166,10 @@ public class ValuesView {
 		tableViewer.setLabelProvider(new TableLabelProvider());
 		tableViewer.setSorter(new TableNameSorter());
 
-		makeActions();
-		hookContextMenu();
+		if (Activator.getDefault().debugStorageContents()) {
+			makeActions();
+			hookContextMenu();
+		}
 	}
 
 	private void hookContextMenu() {
@@ -200,7 +202,6 @@ public class ValuesView {
 		});
 		Menu menu = menuMgr.createContextMenu(tableViewer.getControl());
 		tableViewer.getControl().setMenu(menu);
-		parentView.getSite().registerContextMenu(menuMgr, tableViewer);
 
 		// fill context menu
 		menuMgr.add(addValueAction);

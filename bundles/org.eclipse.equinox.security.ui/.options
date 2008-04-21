@@ -1,0 +1,5 @@
+# Debugging options for the org.eclipse.equinox.security.ui plugin
+
+# Turn on general debugging for the org.eclipse.equinox.common plugin.
+org.eclipse.equinox.security.ui/debug=false
+org.eclipse.equinox.security.ui/debug/storage=false

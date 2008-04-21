@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage.view;
 
+import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.internal.security.ui.storage.IStorageConst;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -34,7 +35,7 @@ public class NodesView {
 	 */
 	final private static String defaultPrefs = "default"; //$NON-NLS-1$
 
-	protected SecurePreferencesView parentView;
+	protected ISecurePreferencesSelection parentView;
 	protected TreeViewer nodeTreeViewer;
 
 	protected ViewContentProvider contentProvider;
@@ -108,7 +109,7 @@ public class NodesView {
 		}
 	}
 
-	public NodesView(Tree nodeTree, final SecurePreferencesView parentView) {
+	public NodesView(Tree nodeTree, final ISecurePreferencesSelection parentView) {
 		this.parentView = parentView;
 
 		nodeTreeViewer = new TreeViewer(nodeTree);
@@ -129,8 +130,10 @@ public class NodesView {
 			}
 		});
 
-		makeActions();
-		hookContextMenu();
+		if (Activator.getDefault().debugStorageContents()) {
+			makeActions();
+			hookContextMenu();
+		}
 	}
 
 	private void hookContextMenu() {
@@ -155,7 +158,6 @@ public class NodesView {
 		});
 		Menu menu = menuMgr.createContextMenu(nodeTreeViewer.getControl());
 		nodeTreeViewer.getControl().setMenu(menu);
-		parentView.getSite().registerContextMenu(menuMgr, nodeTreeViewer);
 
 		// fill context menu
 		menuMgr.add(refreshNodesAction);

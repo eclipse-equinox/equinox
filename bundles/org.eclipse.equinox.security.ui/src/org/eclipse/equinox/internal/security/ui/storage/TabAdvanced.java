@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
@@ -18,15 +17,10 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
-import org.eclipse.equinox.security.storage.ISecurePreferences;
-import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -39,10 +33,8 @@ public class TabAdvanced {
 
 	private IEclipsePreferences eclipseNode = null;
 	private String defaultCipherAlgorithm;
-	private Shell shell;
 
 	public TabAdvanced(TabFolder folder, int index, final Shell shell) {
-		this.shell = shell;
 
 		TabItem tab = new TabItem(folder, SWT.NONE, index);
 		tab.setText(SecUIMessages.tabAdvanced);
@@ -71,52 +63,7 @@ public class TabAdvanced {
 			position++;
 		}
 
-		// Default preferences group
-		Group defaultPrefsGroup = new Group(page, SWT.NONE);
-		defaultPrefsGroup.setText(SecUIMessages.defaultGroup);
-		defaultPrefsGroup.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
-		defaultPrefsGroup.setLayout(new GridLayout());
-
-		Button buttonDetele = new Button(defaultPrefsGroup, SWT.NONE);
-		buttonDetele.setText(SecUIMessages.deleteButton);
-		buttonDetele.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
-		buttonDetele.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				deteleDefaultStorage();
-			}
-		});
-
 		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getMargins()).numColumns(1).generateLayout(page);
-	}
-
-	protected void deteleDefaultStorage() {
-		URL location = InternalExchangeUtils.defaultStorageLocation();
-		if (location == null)
-			return;
-		MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO);
-		messageBox.setText(location.getFile().toString());
-		messageBox.setMessage(SecUIMessages.confirmDeleteMsg);
-		if (messageBox.open() != SWT.YES)
-			return;
-
-		// clear the data structure itself in case somebody holds on to it
-		ISecurePreferences defaultStorage = SecurePreferencesFactory.getDefault();
-		defaultStorage.clear();
-		defaultStorage.removeNode();
-
-		// clear it from the list of open storages, delete the file 
-		InternalExchangeUtils.defaultStorageDelete();
-
-		// suggest restart in case somebody holds on to the deleted storage
-		MessageBox postDeletionBox = new MessageBox(shell, SWT.OK);
-		postDeletionBox.setText(SecUIMessages.postDeleteTitle);
-		postDeletionBox.setMessage(SecUIMessages.postDeleteMsg);
-		postDeletionBox.open();
 	}
 
 	public void performDefaults() {

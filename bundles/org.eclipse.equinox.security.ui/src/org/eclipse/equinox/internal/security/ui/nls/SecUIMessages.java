@@ -61,6 +61,10 @@ public class SecUIMessages extends NLS {
 	public static String postDeleteMsg;
 	public static String tabPassword;
 	public static String tabAdvanced;
+	public static String tabContents;
+	public static String saveButton;
+	public static String exportButton;
+	public static String locationButton;
 
 	// secure storage view
 	public static String generalTitle;
@@ -87,10 +91,6 @@ public class SecUIMessages extends NLS {
 	public static String decryptValueCommandTmp;
 	public static String failedDecrypt;
 	public static String failedEncrypt;
-	public static String saveCommand;
-	public static String saveCommandTip;
-	public static String exportCommand;
-	public static String exportCommandTip;
 
 	// new node dialog
 	public static String newNodeTitle;
