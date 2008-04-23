@@ -18,7 +18,8 @@ import org.eclipse.osgi.internal.service.security.DefaultAuthorizationEngine;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.*;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -36,53 +37,33 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 
 	protected Control createContents(Composite parent) {
 
-		//Composite page = new Composite(parent, SWT.NONE);
-		//page.setLayout(new FormLayout());
+		Composite composite = new Composite(parent, SWT.NONE);
+		GridLayout compositeLayout = new GridLayout();
+		compositeLayout.marginWidth = 0;
+		compositeLayout.marginHeight = 0;
+		composite.setLayout(compositeLayout);
+		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 
-		//		Label titleLabel = new Label(page, SWT.NONE);
-		//		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_TITLE);
-		FormData data = new FormData();
-		//				data.top = new FormAttachment(0, 0);
-		//		data.left = new FormAttachment(0, 0);
-		//		titleLabel.setLayoutData(data);
+		//Group gives nice box around the radio buttons
+		Group buttonGroup = new Group(composite, SWT.LEFT);
+		GridLayout buttonLayout = new GridLayout();
+		buttonGroup.setLayout(buttonLayout);
+		GridData compositeData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
+		buttonGroup.setLayoutData(compositeData);
+		buttonGroup.setText(SecurityUIMsg.POLPAGE_LABEL_DESC);
 
-		//folder = new TabFolder(page, SWT.NONE);
-		//folder.setLayout(new FormLayout());
-		//data = new FormData();
-		//data.top = new FormAttachment(0, 10);
-		//data.left = new FormAttachment(0, 0);
-		//data.right = new FormAttachment(100, 0);
-		//data.bottom = new FormAttachment(100, 0);
-		//folder.setLayoutData(data);
-		//folder.setEnabled(false);
+		anyButton = new Button(buttonGroup, SWT.RADIO);
+		anysignedButton = new Button(buttonGroup, SWT.RADIO);
+		onlytrustedButton = new Button(buttonGroup, SWT.RADIO);
+		onlytrustedButton.setSelection(true);
 
-		//TabItem item = new TabItem(folder, SWT.NONE);
-		//item.setText(SecurityUIMsg.POLPAGE_LABEL_SECTION);
+		expiredButton = new Button(buttonGroup, SWT.CHECK);
+		expiredButton.setEnabled(true); //since onlytrustedButton is default on
 
-		Composite loadArea = new Composite(parent, SWT.NONE);
-		loadArea.setLayout(new FormLayout());
+		GridData data = new GridData();
+		data.horizontalIndent = 20;
+		expiredButton.setLayoutData(data);
 
-		//item.setControl(loadArea);
-
-		data = new FormData();
-		data.top = new FormAttachment(0, 0);
-		data.left = new FormAttachment(0, 0);
-		data.right = new FormAttachment(100, 0);
-		data.bottom = new FormAttachment(100, 0);
-		loadArea.setLayoutData(data);
-
-		Label titleLabel = new Label(loadArea, SWT.NONE);
-		titleLabel.setText(SecurityUIMsg.POLPAGE_LABEL_DESC);
-		data = new FormData();
-		data.top = new FormAttachment(0, 5);
-		data.left = new FormAttachment(0, 5);
-		titleLabel.setLayoutData(data);
-
-		anyButton = new Button(loadArea, SWT.RADIO);
-		anysignedButton = new Button(loadArea, SWT.RADIO);
-		onlytrustedButton = new Button(loadArea, SWT.RADIO);
-		expiredButton = new Button(loadArea, SWT.CHECK);
-		expiredButton.setEnabled(false);
 		expiredButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent event) {
 				//do nothing
@@ -134,10 +115,6 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 				persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_NONE);
 			}
 		});
-		data = new FormData();
-		data.top = new FormAttachment(titleLabel, 10);
-		data.left = new FormAttachment(0, 5);
-		anyButton.setLayoutData(data);
 
 		anysignedButton.setText(SecurityUIMsg.POLPAGE_BUTTON_ALLOW_ANY_SIGNED);
 		anysignedButton.addSelectionListener(new SelectionListener() {
@@ -151,10 +128,6 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 				persistPolicySetting(DefaultAuthorizationEngine.ENFORCE_SIGNED);
 			}
 		});
-		data = new FormData();
-		data.top = new FormAttachment(anyButton, 2);
-		data.left = new FormAttachment(0, 5);
-		anysignedButton.setLayoutData(data);
 
 		onlytrustedButton.setText(SecurityUIMsg.POLPAGE_BUTTON_ALLOW_ONLY_TRUSTED);
 		onlytrustedButton.addSelectionListener(new SelectionListener() {
@@ -168,10 +141,7 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 			}
 
 		});
-		data = new FormData();
-		data.top = new FormAttachment(anysignedButton, 2);
-		data.left = new FormAttachment(0, 5);
-		onlytrustedButton.setLayoutData(data);
+
 		/*
 				whitelistButton.setText(STR_whiteList);
 				whitelistButton.addSelectionListener(new SelectionListener() {
@@ -239,16 +209,11 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 				promptButton.setLayoutData(data);
 		*/
 		expiredButton.setText(SecurityUIMsg.POLPAGE_BUTTON_ALLOW_EXPIRED);
-		data = new FormData();
-		data.top = new FormAttachment(onlytrustedButton, 5);
-		data.left = new FormAttachment(0, 5);
-		//data.bottom = new FormAttachment(100, -5);
-		expiredButton.setLayoutData(data);
 
 		//		onlytrustedButton.setSelection(true);
 		//		expiredButton.setEnabled(true);
 
-		return loadArea;
+		return composite;
 	}
 
 	//protected void enableSecurityWidgets() {

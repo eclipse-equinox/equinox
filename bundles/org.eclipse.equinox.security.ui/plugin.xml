@@ -5,7 +5,8 @@
       <page
          name="%security"
          class="org.eclipse.equinox.internal.security.ui.preferences.SecurityCategoryPage"
-         id="org.eclipse.equinox.security.ui.category">
+         id="org.eclipse.equinox.security.ui.category"
+         category="org.eclipse.ui.preferencePages.Workbench">
       </page>
    </extension>
 
