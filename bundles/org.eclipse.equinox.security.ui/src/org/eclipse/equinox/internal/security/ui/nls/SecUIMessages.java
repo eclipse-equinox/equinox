@@ -165,6 +165,7 @@ public class SecUIMessages extends NLS {
 	public static String pswRecoveryButtonCancel;
 	public static String pswRecoveredMsg;
 	public static String pswNotRecoveredMsg;
+	public static String pswJobName;
 
 	static {
 		// load message values from bundle file

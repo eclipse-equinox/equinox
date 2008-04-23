@@ -58,7 +58,7 @@ public class UICallbackProvider implements IUICallbacks {
 		if (!StorageUtils.showUI())
 			return;
 
-		UIJob reciverySetupJob = new UIJob("Password recovery setup") { //$NON-NLS-1$
+		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 				prompt.setText(SecUIMessages.pswdRecoveryOptionTitle);
