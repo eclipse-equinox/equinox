@@ -695,4 +695,106 @@ public class SignedBundleTest extends BaseSecurityTest {
 		unsignedFile.delete();
 		assertFalse("File should not exist", unsignedFile.exists());
 	}
+
+	public void testBug228427_01() throws Exception {
+		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata"));
+
+		assertNotNull("Could not find signed file!", signedFile);
+		//getTrustEngine().addTrustAnchor(anchor, alias);
+
+		// get the signed content for the bundle
+		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
+		assertNotNull("SignedContent is null", signedContent);
+		assertTrue("Content is not signed!!", signedContent.isSigned());
+		SignedContentEntry[] entries = signedContent.getSignedEntries();
+		assertNotNull("Entries is null", entries);
+		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		for (int i = 0; i < entries.length; i++) {
+			entries[i].verify();
+			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			assertNotNull("SignerInfo is null", entryInfos);
+			assertEquals("wrong number of entry signers", 1, entryInfos.length);
+		}
+		signedFile.delete();
+		assertFalse("File should not exist", signedFile.exists());
+	}
+
+	public void testBug228427_02() throws Exception {
+		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_added"));
+
+		assertNotNull("Could not find signed file!", signedFile);
+		//getTrustEngine().addTrustAnchor(anchor, alias);
+
+		// get the signed content for the bundle
+		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
+		assertNotNull("SignedContent is null", signedContent);
+		assertTrue("Content is not signed!!", signedContent.isSigned());
+		SignedContentEntry[] entries = signedContent.getSignedEntries();
+		assertNotNull("Entries is null", entries);
+		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		for (int i = 0; i < entries.length; i++) {
+			entries[i].verify();
+			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			assertNotNull("SignerInfo is null", entryInfos);
+			assertEquals("wrong number of entry signers", 1, entryInfos.length);
+		}
+		signedFile.delete();
+		assertFalse("File should not exist", signedFile.exists());
+	}
+
+	public void testBug228427_03() throws Exception {
+		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_corrupt"));
+
+		assertNotNull("Could not find signed file!", signedFile);
+		//getTrustEngine().addTrustAnchor(anchor, alias);
+
+		// get the signed content for the bundle
+		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
+		assertNotNull("SignedContent is null", signedContent);
+		assertTrue("Content is not signed!!", signedContent.isSigned());
+		SignedContentEntry[] entries = signedContent.getSignedEntries();
+		assertNotNull("Entries is null", entries);
+		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		for (int i = 0; i < entries.length; i++) {
+			try {
+				entries[i].verify();
+				assertFalse("Wrong entry is validated: " + entries[i].getName(), "META-INF/test/test1.file".equals(entries[i].getName()));
+			} catch (InvalidContentException e) {
+				assertEquals("Wrong entry is corrupted", "META-INF/test/test1.file", entries[i].getName());
+			}
+			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			assertNotNull("SignerInfo is null", entryInfos);
+			assertEquals("wrong number of entry signers", 1, entryInfos.length);
+		}
+		signedFile.delete();
+		assertFalse("File should not exist", signedFile.exists());
+	}
+
+	public void testBug228427_04() throws Exception {
+		File signedFile = copyEntryFile(getTestJarPath("signed_with_metadata_removed"));
+
+		assertNotNull("Could not find signed file!", signedFile);
+		//getTrustEngine().addTrustAnchor(anchor, alias);
+
+		// get the signed content for the bundle
+		SignedContent signedContent = getSignedContentFactory().getSignedContent(signedFile);
+		assertNotNull("SignedContent is null", signedContent);
+		assertTrue("Content is not signed!!", signedContent.isSigned());
+		SignedContentEntry[] entries = signedContent.getSignedEntries();
+		assertNotNull("Entries is null", entries);
+		assertEquals("Incorrect number of signed entries", 4, entries.length);
+		for (int i = 0; i < entries.length; i++) {
+			try {
+				entries[i].verify();
+				assertFalse("Wrong entry is validated: " + entries[i].getName(), "META-INF/test.file".equals(entries[i].getName()));
+			} catch (InvalidContentException e) {
+				assertEquals("Wrong entry is corrupted", "META-INF/test.file", entries[i].getName());
+			}
+			SignerInfo[] entryInfos = entries[i].getSignerInfos();
+			assertNotNull("SignerInfo is null", entryInfos);
+			assertEquals("wrong number of entry signers", 1, entryInfos.length);
+		}
+		signedFile.delete();
+		assertFalse("File should not exist", signedFile.exists());
+	}
 }

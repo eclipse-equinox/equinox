@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -18,6 +18,7 @@ public interface SignedContentConstants {
 	public static final String DOT_DSA = ".DSA"; //$NON-NLS-1$
 	public static final String DOT_RSA = ".RSA"; //$NON-NLS-1$
 	public static final String DOT_SF = ".SF"; //$NON-NLS-1$
+	public static final String SIG_DASH = "SIG-"; //$NON-NLS-1$
 	public static final String META_INF = "META-INF/"; //$NON-NLS-1$
 	public static final String META_INF_MANIFEST_MF = "META-INF/MANIFEST.MF"; //$NON-NLS-1$
 	public static final String[] EMPTY_STRING = new String[0];

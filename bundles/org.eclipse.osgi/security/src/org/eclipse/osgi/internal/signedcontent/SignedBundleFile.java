@@ -101,8 +101,17 @@ public class SignedBundleFile extends BundleFile implements SignedContentConstan
 		BundleEntry be = wrappedBundleFile.getEntry(path);
 		if ((supportFlags & SignedBundleHook.VERIFY_RUNTIME) == 0 || signedContent == null)
 			return be;
-		if (path.startsWith(META_INF))
-			return be;
+		if (path.startsWith(META_INF)) {
+			int lastSlash = path.lastIndexOf('/');
+			if (lastSlash == META_INF.length() - 1) {
+				if (path.equals(META_INF_MANIFEST_MF) || path.endsWith(DOT_DSA) || path.endsWith(DOT_RSA) || path.endsWith(DOT_SF) || path.indexOf(SIG_DASH) == META_INF.length())
+					return be;
+				SignedContentEntry signedEntry = signedContent.getSignedEntry(path);
+				if (signedEntry == null)
+					// TODO this is to allow 1.4 signed bundles to work, it would be better if we could detect 1.4 signed bundles and only do this for them.
+					return be;
+			}
+		}
 		if (be == null) {
 			// double check that no signer thinks it should exist
 			SignedContentEntry signedEntry = signedContent.getSignedEntry(path);
