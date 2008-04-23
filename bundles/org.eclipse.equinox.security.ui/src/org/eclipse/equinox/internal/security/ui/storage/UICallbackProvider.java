@@ -12,16 +12,17 @@ package org.eclipse.equinox.internal.security.ui.storage;
 
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.internal.security.storage.friends.IStorageTask;
-import org.eclipse.equinox.internal.security.storage.friends.IUICallbacks;
+import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
+import org.eclipse.ui.progress.UIJob;
 
 /**
  * Methods on this class could be called from non-UI thread so need
@@ -53,31 +54,27 @@ public class UICallbackProvider implements IUICallbacks {
 		}
 	}
 
-	public String[][] setupPasswordRecovery(final int size) {
+	public void setupPasswordRecovery(final int size, final String moduleID, final IPreferencesContainer container) {
 		if (!StorageUtils.showUI())
-			return null;
+			return;
 
-		final int[] result = new int[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
+		UIJob reciverySetupJob = new UIJob("Password recovery setup") { //$NON-NLS-1$
+			public IStatus runInUIThread(IProgressMonitor monitor) {
 				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 				prompt.setText(SecUIMessages.pswdRecoveryOptionTitle);
 				prompt.setMessage(SecUIMessages.pswdRecoveryOptionMsg);
-				result[0] = prompt.open();
-			}
-		});
-		if (result[0] != SWT.YES)
-			return null;
+				if (prompt.open() != SWT.YES)
+					return Status.OK_STATUS;
 
-		final Object[] responseResult = new Object[1];
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
 				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
 				dialog.open();
-				responseResult[0] = dialog.getResult();
+				String[][] result = dialog.getResult();
+				if (result != null)
+					InternalExchangeUtils.setupRecovery(result, moduleID, container);
+				return Status.OK_STATUS;
 			}
-		});
-		return (String[][]) responseResult[0];
+		};
+		reciverySetupJob.schedule();
 	}
 
 	public boolean execute(final IStorageTask callback) throws StorageException {

@@ -183,6 +183,11 @@ public class ValuesView {
 
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
+				if (selectedNode == null) {
+					addValueAction.setEnabled(false);
+					removeValueAction.setEnabled(false);
+					return;
+				}
 				boolean isInternal = selectedNode.absolutePath().startsWith(IStorageConst.PROVIDER_NODE);
 				addValueAction.setEnabled(!isInternal);
 				removeValueAction.setEnabled(!isInternal);

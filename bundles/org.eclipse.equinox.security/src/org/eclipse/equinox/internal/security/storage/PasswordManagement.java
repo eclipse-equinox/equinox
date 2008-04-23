@@ -22,7 +22,6 @@ import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.security.storage.EncodingUtils;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
-import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.eclipse.osgi.util.NLS;
 
 public class PasswordManagement {
@@ -52,17 +51,12 @@ public class PasswordManagement {
 	 */
 	private final static String PASSWORD_RECOVERY_QUESTION = "org.eclipse.equinox.security.internal.recovery.question"; //$NON-NLS-1$
 
-	static public void setupRecovery(SecurePreferencesRoot root, PasswordExt passwordExt, IPreferencesContainer container) {
-		// check if we are allowed to prompt
-		if (!canPrompt(container))
-			return;
-
+	static public void setupRecovery(String[][] challengeResponse, String moduleID, IPreferencesContainer container) {
 		// encrypt user password with the mashed-up answers and store encrypted value
-		String moduleID = passwordExt.getModuleID();
+		SecurePreferencesRoot root = ((SecurePreferencesContainer) container).getRootData();
 		SecurePreferences node = recoveryNode(root, moduleID);
 
-		String[][] userParts = CallbacksProvider.getDefault().formChallengeResponse();
-		if (userParts == null) {
+		if (challengeResponse == null) {
 			node.remove(PASSWORD_RECOVERY_KEY);
 			for (int i = 0; i < 2; i++) {
 				String key = PASSWORD_RECOVERY_QUESTION + Integer.toString(i + 1);
@@ -72,11 +66,18 @@ public class PasswordManagement {
 			return;
 		}
 		// create password from mixing and boiling answers
-		String internalPassword = mashPassword(userParts[1]);
+		String internalPassword = mashPassword(challengeResponse[1]);
 
 		PasswordExt internalPasswordExt = new PasswordExt(new PBEKeySpec(internalPassword.toCharArray()), RECOVERY_PSEUDO_ID);
+		PasswordExt password;
 		try {
-			byte[] data = new String(passwordExt.getPassword().getPassword()).getBytes();
+			password = root.getPassword(moduleID, container, false);
+		} catch (StorageException e) {
+			AuthPlugin.getDefault().logError(SecAuthMessages.failedCreateRecovery, e);
+			return;
+		}
+		try {
+			byte[] data = new String(password.getPassword().getPassword()).getBytes();
 			CryptoData encryptedValue = root.getCipher().encrypt(internalPasswordExt, data);
 			node.internalPut(PASSWORD_RECOVERY_KEY, encryptedValue.toString());
 			root.markModified();
@@ -86,10 +87,10 @@ public class PasswordManagement {
 		}
 
 		// save questions
-		for (int i = 0; i < userParts[0].length; i++) {
+		for (int i = 0; i < challengeResponse[0].length; i++) {
 			String key = PASSWORD_RECOVERY_QUESTION + Integer.toString(i + 1);
 			try {
-				node.put(key, userParts[0][i], false, (SecurePreferencesContainer) container);
+				node.put(key, challengeResponse[0][i], false, (SecurePreferencesContainer) container);
 			} catch (StorageException e) {
 				// not going to happen for non-encrypted values
 			}
@@ -140,16 +141,6 @@ public class PasswordManagement {
 
 	static private SecurePreferences recoveryNode(SecurePreferences root, String moduleID) {
 		return root.node(PASSWORD_RECOVERY_NODE).node(moduleID);
-	}
-
-	static private boolean canPrompt(IPreferencesContainer container) {
-		if (container.hasOption(IProviderHints.PROMPT_USER)) {
-			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-			if (promptHint instanceof Boolean) {
-				return ((Boolean) promptHint).booleanValue();
-			}
-		}
-		return true;
 	}
 
 	/**

@@ -11,6 +11,7 @@
 package org.eclipse.equinox.internal.security.storage.friends;
 
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 
 /**
  * Interface used for UI dependency injection. Unlike most places,
@@ -29,7 +30,7 @@ import org.eclipse.equinox.security.storage.StorageException;
  */
 public interface IUICallbacks {
 
-	public String[][] setupPasswordRecovery(final int size);
+	public void setupPasswordRecovery(final int size, String moduleID, IPreferencesContainer container);
 
 	/**
 	 * Ask user a yes/no question

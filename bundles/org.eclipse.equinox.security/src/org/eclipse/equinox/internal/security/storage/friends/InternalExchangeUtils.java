@@ -18,6 +18,7 @@ import org.eclipse.equinox.internal.security.storage.*;
 import org.eclipse.equinox.internal.security.storage.PasswordProviderSelector.ExtStorageModule;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -116,6 +117,10 @@ public class InternalExchangeUtils {
 		synchronized (listeners) {
 			listeners.add(listener);
 		}
+	}
+
+	static public void setupRecovery(String[][] userParts, String moduleID, IPreferencesContainer container) {
+		PasswordManagement.setupRecovery(userParts, moduleID, container);
 	}
 
 	static public String[] getPasswordRecoveryQuestions(ISecurePreferences node, String moduleID) {

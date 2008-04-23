@@ -100,7 +100,6 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 		return wrapper(root);
 	}
 
-	// Testing only
 	public SecurePreferencesRoot getRootData() {
 		return root;
 	}

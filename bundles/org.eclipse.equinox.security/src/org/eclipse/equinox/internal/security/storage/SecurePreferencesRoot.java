@@ -17,6 +17,8 @@ import java.util.*;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.PBEKeySpec;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
@@ -63,6 +65,8 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 	 * Maximum unsuccessful decryption attempts per operation
 	 */
 	static protected final int MAX_ATTEMPTS = 20;
+
+	static private ILock lock = Job.getJobManager().newLock();
 
 	final private URL location;
 
@@ -220,18 +224,23 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
 
 		PasswordProviderModuleExt moduleExt = PasswordProviderSelector.getInstance().findStorageModule(moduleID);
-		synchronized (passwordCache) { // lock it for the whole process of password creation
-			String key = moduleExt.getID();
-			if (passwordCache.containsKey(key))
-				return (PasswordExt) passwordCache.get(key);
+		String key = moduleExt.getID();
+		PasswordExt passwordExt = null;
+		boolean validPassword = false;
+		boolean setupPasswordRecovery = false;
+
+		try {
+			lock.acquire(); // make sure process of password creation is not re-entered by another thread
+			// Quick check first: it is cached?
+			synchronized (passwordCache) {
+				if (passwordCache.containsKey(key))
+					return (PasswordExt) passwordCache.get(key);
+			}
 
 			// is there password verification string already?
 			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
 			boolean newPassword = !node.hasKey(key);
 			int passwordType = newPassword ? PasswordProvider.CREATE_NEW_PASSWORD : 0;
-
-			boolean validPassword = false;
-			PasswordExt passwordExt = null;
 
 			for (int i = 0; i < MAX_ATTEMPTS; i++) {
 				PBEKeySpec password = moduleExt.getPassword(container, passwordType);
@@ -243,7 +252,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 					CryptoData encryptedValue = getCipher().encrypt(passwordExt, test.getBytes());
 					node.internalPut(key, encryptedValue.toString());
 					markModified();
-					PasswordManagement.setupRecovery(this, passwordExt, container);
+					setupPasswordRecovery = true;
 					validPassword = true;
 					break;
 				}
@@ -266,11 +275,19 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				}
 			}
 			if (validPassword) {
-				cachePassword(key, passwordExt);
-				return passwordExt;
+				synchronized (passwordCache) {
+					passwordCache.put(key, passwordExt);
+				}
 			}
-			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+		} finally {
+			lock.release();
 		}
+
+		if (!validPassword)
+			throw new StorageException(StorageException.NO_PASSWORD, SecAuthMessages.loginNoPassword);
+		if (setupPasswordRecovery)
+			CallbacksProvider.getDefault().setupChallengeResponse(key, container);
+		return passwordExt;
 	}
 
 	/**
@@ -331,7 +348,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 		// store password in the memory cache
 		cachePassword(key, passwordExt);
-		PasswordManagement.setupRecovery(this, passwordExt, container);
+		CallbacksProvider.getDefault().setupChallengeResponse(key, container);
 		return true;
 	}
 

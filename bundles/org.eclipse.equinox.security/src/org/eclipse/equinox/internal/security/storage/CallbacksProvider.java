@@ -12,6 +12,7 @@ package org.eclipse.equinox.internal.security.storage;
 
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.internal.security.storage.friends.IUICallbacks;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 
 public class CallbacksProvider {
 
@@ -61,12 +62,11 @@ public class CallbacksProvider {
 			callback = ((IUICallbacks) clazz);
 	}
 
-	public String[][] formChallengeResponse() {
+	public void setupChallengeResponse(String moduleID, IPreferencesContainer container) {
 		if (callback == null)
 			init();
 		if (callback != null)
-			return callback.setupPasswordRecovery(NUMBER_OF_QUESTIONS);
-		return null;
+			callback.setupPasswordRecovery(NUMBER_OF_QUESTIONS, moduleID, container);
 	}
 
 	public IUICallbacks getCallback() {
