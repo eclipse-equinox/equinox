@@ -65,11 +65,8 @@ public class TextProcessor {
 	// pop directional format
 	private static final char PDF = '\u202c';
 
-	// whether or not the locale BiDi
-	private static boolean isBidi = false;
-
-	// whether or not the current platform supports directional characters
-	private static boolean isSupportedPlatform = false;
+	// whether or not processing is needed
+	private static boolean IS_PROCESSING_NEEDED = false;
 
 	// constant used to indicate an LRM need not precede a delimiter 
 	private static final int INDEX_NOT_SET = 999999999;
@@ -78,14 +75,11 @@ public class TextProcessor {
 		Locale locale = Locale.getDefault();
 		String lang = locale.getLanguage();
 
-		if ("iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang)) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			isBidi = true;
-
-		String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
-		if (osName.startsWith("windows") || osName.startsWith("linux")) { //$NON-NLS-1$	//$NON-NLS-2$
-
-			// Only consider platforms that can support control characters
-			isSupportedPlatform = true;
+		if ("iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
+			if (osName.startsWith("windows") || osName.startsWith("linux")) { //$NON-NLS-1$	//$NON-NLS-2$
+				IS_PROCESSING_NEEDED = true;
+			}
 		}
 	}
 
@@ -102,6 +96,8 @@ public class TextProcessor {
 	 * @see #getDefaultDelimiters()
 	 */
 	public static String process(String text) {
+		if (!IS_PROCESSING_NEEDED || text == null || text.length() <= 1)
+			return text;
 		return process(text, getDefaultDelimiters());
 	}
 
@@ -155,7 +151,7 @@ public class TextProcessor {
 	 * @return the processed string
 	 */
 	public static String process(String str, String delimiter) {
-		if (str == null || str.length() <= 1 || !isSupportedPlatform || !isBidi)
+		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1)
 			return str;
 
 		// do not process a string that has already been processed.
@@ -238,8 +234,7 @@ public class TextProcessor {
 	 * @since 3.3
 	 */
 	public static String deprocess(String str) {
-		// don't do all the work if not a valid case 
-		if (str == null || str.length() <= 1 || !isSupportedPlatform || !isBidi)
+		if (!IS_PROCESSING_NEEDED || str == null || str.length() <= 1)
 			return str;
 
 		StringBuffer buf = new StringBuffer();
