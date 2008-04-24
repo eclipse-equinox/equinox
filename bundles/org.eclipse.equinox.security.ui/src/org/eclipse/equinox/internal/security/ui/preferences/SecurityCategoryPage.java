@@ -40,9 +40,6 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		PreferenceLinkArea policyLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.policy", SecurityUIMsg.CATPAGE_LABEL_POLICY, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
 		policyLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 
-		PreferenceLinkArea advancedLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.advanced", SecurityUIMsg.CATPAGE_LABEL_ADVANCED, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
-		advancedLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
-
 		PreferenceLinkArea storageLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.storage", SecurityUIMsg.CATPAGE_LABEL_STORAGE, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
 		storageLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 

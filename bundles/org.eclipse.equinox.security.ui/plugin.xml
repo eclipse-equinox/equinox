@@ -39,14 +39,6 @@
       </page>
    </extension>
 
-   <extension point="org.eclipse.ui.preferencePages">
-      <page
-         name="%advanced"
-         class="org.eclipse.equinox.internal.security.ui.preferences.AdvancedPage"
-         id="org.eclipse.equinox.security.ui.advanced"
-         category="org.eclipse.equinox.security.ui.category">
-      </page>
-   </extension>
    
 <!--   
    <extension
@@ -80,6 +72,16 @@
       <provider
             class="org.eclipse.equinox.internal.security.ui.storage.UICallbackProvider">
       </provider>
+   </extension>
+   <extension
+         id="security"
+         name="Security"
+         point="org.eclipse.ui.systemSummarySections">
+      <section
+            class="org.eclipse.equinox.internal.security.ui.SecurityConfigurationSection"
+            id="securityConfigurationSection"
+            sectionTitle="Security Configuration">
+      </section>
    </extension>
    
 </plugin>
