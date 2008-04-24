@@ -14,6 +14,9 @@ package org.eclipse.equinox.http.jetty;
  * <p>
  * Provides configuration constants for use with JettyConfigurator.
  * </p>
+ * @since 1.1
+ * @noextend This interface is not intended to be extended by clients.
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface JettyConstants {
 

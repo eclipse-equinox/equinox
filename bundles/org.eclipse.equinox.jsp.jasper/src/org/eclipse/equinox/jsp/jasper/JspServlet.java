@@ -21,7 +21,11 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.*;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,6 +57,7 @@ import org.osgi.framework.Bundle;
  *  Other than the setting and resetting of the thread context classloader and additional resource lookups in the bundle the JSPServlet
  *  is behaviourally consistent with the JSP 2.0 specification and regular Jasper operation.
  *  </p>
+ * @noextend This class is not intended to be subclassed by clients.
  */
 
 public class JspServlet extends HttpServlet {
@@ -159,7 +164,7 @@ public class JspServlet extends HttpServlet {
 			int lastSlash = resourceName.lastIndexOf('/');
 			if (lastSlash == -1)
 				return null;
-			
+
 			String path = resourceName.substring(0, lastSlash);
 			if (path.length() == 0)
 				path = "/"; //$NON-NLS-1$
@@ -283,7 +288,7 @@ public class JspServlet extends HttpServlet {
 		public void setAttribute(String arg0, Object arg1) {
 			delegate.setAttribute(arg0, arg1);
 		}
-		
+
 		// Added in Servlet 2.5
 		public String getContextPath() {
 			try {

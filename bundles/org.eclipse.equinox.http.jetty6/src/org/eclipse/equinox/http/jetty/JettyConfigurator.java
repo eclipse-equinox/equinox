@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others
+ * Copyright (c) 2007, 2008 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,9 @@ package org.eclipse.equinox.http.jetty;
 
 import java.security.Permission;
 import java.util.Dictionary;
+import org.eclipse.equinox.http.jetty.internal.Activator;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationPermission;
-import org.eclipse.equinox.http.jetty.internal.Activator;
 
 /**
  * <p>
@@ -23,6 +23,8 @@ import org.eclipse.equinox.http.jetty.internal.Activator;
  * </p>
  * 
  * @see org.eclipse.equinox.http.jetty.JettyConstants
+ * @noextend This class is not intended to be subclassed by clients.
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class JettyConfigurator {
 	private static final String PID_PREFIX = "org.eclipse.equinox.http.jetty.JettyConfigurator."; //$NON-NLS-1$

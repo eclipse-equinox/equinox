@@ -26,6 +26,8 @@ import org.osgi.framework.Bundle;
  * This parameter can be set using the ":" separator approach or by xml parameter.
  * </p>
  * e.g. class="org.eclipse.equinox.jsp.jasper.registry.JSPFactory:/A/PATH" or &lt;parameter name="path" value="/A/PATH"/&gt;
+ * @noextend This class is not intended to be subclassed by clients.
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class JSPFactory implements IExecutableExtensionFactory, IExecutableExtension {
 

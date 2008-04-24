@@ -18,7 +18,8 @@ import org.eclipse.equinox.http.servlet.internal.ProxyServlet;
  * will in-turn register and provide an OSGi Http Service implementation.
  * This class is not meant for extending or even using directly and is purely meant for registering
  * in a servlet container.
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class HttpServiceServlet extends ProxyServlet {
-	private static final long serialVersionUID = -3647550992964861187L; 
+	private static final long serialVersionUID = -3647550992964861187L;
 }
