@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<fragment>
+   <extension
+         id="OSXKeystoreIntegration"
+         name="%moduleName"
+         point="org.eclipse.equinox.security.secureStorage">
+      <provider
+            class="org.eclipse.equinox.internal.security.osx.OSXProvider"
+            priority="5">
+      </provider>
+   </extension>
+</fragment>
