@@ -74,7 +74,7 @@ public class WinCrypto extends PasswordProvider {
 				try {
 					if (!WinCryptoUI.canRecreatePassword())
 						return null;
-				} catch (ClassNotFoundException exception) {
+				} catch (NoClassDefFoundError exception) {
 					return null;
 				}
 				// follow down with new password generation

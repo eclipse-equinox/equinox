@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class WinCryptoUI {
 
-	public static boolean canRecreatePassword() throws ClassNotFoundException{
+	public static boolean canRecreatePassword() {
 		MessageBox dialog = new MessageBox(new Shell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
 		dialog.setText(WinCryptoMessages.newPasswordTitle);
 		dialog.setMessage(WinCryptoMessages.newPasswordMessage);
