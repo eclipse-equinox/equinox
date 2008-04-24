@@ -24,6 +24,8 @@ public class SecUIMessages extends NLS {
 	public static String noDigestAlgorithm;
 	public static String initializing;
 	public static String generalDialogTitle;
+	public static String secureStorageInitialization;
+	public static String initCancelled;
 
 	// login dialog
 	public static String buttonLogin;

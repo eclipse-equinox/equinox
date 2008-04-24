@@ -16,6 +16,8 @@ import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
@@ -39,6 +41,8 @@ public class JavaEncryption {
 	private final static String sampleText = "sample text for roundtrip testing"; //$NON-NLS-1$
 	private final static PasswordExt samplePassword = new PasswordExt(new PBEKeySpec("password1".toCharArray()), "abc"); //$NON-NLS-1$ //$NON-NLS-2$
 
+	static private ILock lock = Job.getJobManager().newLock();
+
 	static private final int SALT_ITERATIONS = 10;
 
 	private String keyFactoryAlgorithm = null;
@@ -60,27 +64,36 @@ public class JavaEncryption {
 		return cipherAlgorithm;
 	}
 
-	synchronized public void setAlgorithms(String cipherAlgorithm, String keyFactoryAlgorithm) {
-		this.cipherAlgorithm = cipherAlgorithm;
-		this.keyFactoryAlgorithm = keyFactoryAlgorithm;
+	public void setAlgorithms(String cipherAlgorithm, String keyFactoryAlgorithm) {
+		try {
+			lock.acquire(); // avoid conflict with init()
+			this.cipherAlgorithm = cipherAlgorithm;
+			this.keyFactoryAlgorithm = keyFactoryAlgorithm;
+		} finally {
+			lock.release();
+		}
 	}
 
-	synchronized private void init() throws StorageException {
+	private void init() throws StorageException {
 		if (initialized)
 			return;
 		initialized = true;
 
-		IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
-		if (callback == null)
-			internalInitialize();
-
-		IStorageTask task = new IStorageTask() {
-			public void execute() throws StorageException {
+		try {
+			lock.acquire(); // avoid multiple simultaneous initializations
+			IUICallbacks callback = CallbacksProvider.getDefault().getCallback();
+			if (callback == null)
 				internalInitialize();
+			else {
+				callback.execute(new IStorageTask() {
+					public void execute() throws StorageException {
+						internalInitialize();
+					}
+				});
 			}
-		};
-		if (!callback.execute(task))
-			throw new StorageException(StorageException.INTERNAL_ERROR, SecAuthMessages.initCancelled);
+		} finally {
+			lock.release();
+		}
 	}
 
 	protected void internalInitialize() throws StorageException {

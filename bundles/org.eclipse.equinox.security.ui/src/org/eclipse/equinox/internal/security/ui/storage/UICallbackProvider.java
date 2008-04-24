@@ -12,13 +12,14 @@ package org.eclipse.equinox.internal.security.ui.storage;
 
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.security.storage.friends.*;
-import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
@@ -74,43 +75,58 @@ public class UICallbackProvider implements IUICallbacks {
 				return Status.OK_STATUS;
 			}
 		};
+		reciverySetupJob.setUser(false);
 		reciverySetupJob.schedule();
 	}
 
-	public boolean execute(final IStorageTask callback) throws StorageException {
+	public void execute(final IStorageTask callback) throws StorageException {
 		if (!StorageUtils.showUI()) {
 			callback.execute();
-			return true;
+			return;
 		}
 
-		final boolean[] result = new boolean[1];
 		final StorageException[] exception = new StorageException[1];
-		exception[0] = null;
+		exception[0] = null; // keep exception and throw it on the original thread
 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
-				InitWithProgress task = new InitWithProgress(callback);
-				try {
-					progressService.busyCursorWhile(task);
-				} catch (InvocationTargetException e) {
-					Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
-					result[0] = false;
-					return;
-				} catch (InterruptedException e) {
-					Activator.getDefault().getLog().log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
-					result[0] = false;
-					return;
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed() && (display.getThread() == Thread.currentThread())) { // we are running in a UI thread
+
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() { // syncExec not really necessary but kept for safety
+						public void run() {
+							IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+							InitWithProgress task = new InitWithProgress(callback);
+							try {
+								progressService.busyCursorWhile(task);
+							} catch (InvocationTargetException e) {
+								exception[0] = new StorageException(StorageException.INTERNAL_ERROR, e);
+								return;
+							} catch (InterruptedException e) {
+								exception[0] = new StorageException(StorageException.INTERNAL_ERROR, SecUIMessages.initCancelled);
+								return;
+							}
+							exception[0] = task.getException();
+						}
+					});
+		} else { // we are running in non-UI thread, use Job to show small progress indicator on the status bar
+			Job job = new Job(SecUIMessages.secureStorageInitialization) {
+				protected IStatus run(IProgressMonitor monitor) {
+					try {
+						callback.execute();
+					} catch (StorageException e) {
+						exception[0] = e;
+					}
+					return Status.OK_STATUS;
 				}
-				if (task.getException() != null)
-					exception[0] = task.getException();
-				result[0] = true;
+			};
+			job.schedule();
+			try {
+				job.join();
+			} catch (InterruptedException e) {
+				exception[0] = new StorageException(StorageException.INTERNAL_ERROR, SecUIMessages.initCancelled);
 			}
-		});
+		}
 		if (exception[0] != null)
 			throw exception[0];
-		return result[0];
-
 	}
 
 	public Boolean ask(final String msg) {

@@ -40,11 +40,9 @@ public interface IUICallbacks {
 	public Boolean ask(final String msg);
 
 	/**
-	 * @param callback
-	 * @return false if task was canceled
-	 * @throws StorageException
+	 * Runs a long-running task.
 	 */
-	public boolean execute(final IStorageTask callback) throws StorageException;
+	public void execute(final IStorageTask callback) throws StorageException;
 
 	/**
 	 * @return true if running with UI; false if headless
