@@ -3,7 +3,7 @@
 <fragment>
    <extension
          id="WindowsPasswordProvider"
-         name="%moduleName"
+         name="%windowsModuleName"
          point="org.eclipse.equinox.security.secureStorage">
       <provider
             class="org.eclipse.equinox.internal.security.win32.WinCrypto"

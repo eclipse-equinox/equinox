@@ -59,6 +59,7 @@
    <!-- The default UI password provider -->
    <extension
          id="DefaultPasswordProvider"
+         name="%uiPasswordProviderName"
          point="org.eclipse.equinox.security.secureStorage">
       <provider
             class="org.eclipse.equinox.internal.security.ui.storage.DefaultPasswordProvider"

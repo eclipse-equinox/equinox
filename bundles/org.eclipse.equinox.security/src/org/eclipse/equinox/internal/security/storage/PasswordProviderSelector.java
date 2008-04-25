@@ -40,12 +40,14 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		public String moduleID;
 		public IConfigurationElement element;
 		public int priority;
+		public String name;
 
-		public ExtStorageModule(String id, IConfigurationElement element, int priority) {
+		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name) {
 			super();
 			this.element = element;
 			this.moduleID = id;
 			this.priority = priority;
+			this.name = name;
 		}
 	}
 
@@ -104,7 +106,8 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 				if (priority > 10)
 					priority = 10;
 			}
-			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority));
+			String name = extensions[i].getLabel();
+			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name));
 		}
 
 		Collections.sort(allAvailableModules, new Comparator() {

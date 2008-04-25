@@ -17,9 +17,11 @@ public class PasswordProviderDescription {
 
 	private int priority;
 	private String id;
+	private String name;
 
-	public PasswordProviderDescription(String id, int priority) {
+	public PasswordProviderDescription(String name, String id, int priority) {
 		this.id = id;
+		this.name = name;
 		this.priority = priority;
 	}
 
@@ -29,5 +31,11 @@ public class PasswordProviderDescription {
 
 	public String getId() {
 		return id;
+	}
+
+	public String getName() {
+		if (name == null || name.length() == 0)
+			return id;
+		return name;
 	}
 }

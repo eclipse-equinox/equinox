@@ -59,7 +59,7 @@ public class InternalExchangeUtils {
 		List result = new ArrayList(availableModules.size());
 		for (Iterator i = availableModules.iterator(); i.hasNext();) {
 			ExtStorageModule module = (ExtStorageModule) i.next();
-			result.add(new PasswordProviderDescription(module.moduleID, module.priority));
+			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority));
 		}
 		return result;
 	}

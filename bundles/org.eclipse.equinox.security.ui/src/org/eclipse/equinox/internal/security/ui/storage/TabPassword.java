@@ -154,7 +154,7 @@ public class TabPassword {
 		for (Iterator i = availableModules.iterator(); i.hasNext();) {
 			PasswordProviderDescription module = (PasswordProviderDescription) i.next();
 			TableItem item = new TableItem(providerTable, SWT.LEFT);
-			item.setText(new String[] {null, Integer.toString(module.getPriority()), module.getId()});
+			item.setText(new String[] {null, Integer.toString(module.getPriority()), module.getName()});
 			item.setData(module.getId());
 			if (disabledModules == null)
 				item.setChecked(true);
