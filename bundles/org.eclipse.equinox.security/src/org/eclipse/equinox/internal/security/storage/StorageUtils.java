@@ -35,7 +35,7 @@ public class StorageUtils {
 	/**
 	 * Default name of the storage file
 	 */
-	final private static String propertiesFileName = "secure_preferences.equinox"; //$NON-NLS-1$
+	final private static String propertiesFileName = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
 
 	/**
 	 * Default locations:
@@ -64,6 +64,11 @@ public class StorageUtils {
 	static public OutputStream getOutputStream(URL url) throws IOException {
 		if (isFile(url)) {
 			File file = new File(url.getPath());
+			if (!file.exists()) {
+				File parent = file.getParentFile();
+				if (parent != null && !parent.exists())
+					parent.mkdirs();
+			}
 			return new FileOutputStream(file);
 		}
 		// note that code below does not work for File URLs - "by design" Java 
