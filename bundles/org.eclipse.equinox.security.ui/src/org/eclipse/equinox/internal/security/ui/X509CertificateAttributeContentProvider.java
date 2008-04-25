@@ -32,6 +32,17 @@ import org.eclipse.osgi.util.NLS;
  *    
  */
 public class X509CertificateAttributeContentProvider implements IStructuredContentProvider {
+
+	private static String LABEL_KEYUSAGE_DIGITALSIGNATURE = "digitalSignature"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_NONREPUDIATION = "nonRepudiation"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_KEYENCIPHERMENT = "keyEncipherment"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_DATAENCIPHERMENT = "dataEncipherment"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_KEYAGREEMENT = "keyAgreement"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_CERTSIGN = "keyCertSign"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_CRLSIGN = "cRLSign"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_ENCIPHERONLY = "encipherOnly"; //$NON-NLS-1$
+	private static String LABEL_KEYUSAGE_DECIPHERONLY = "decipherOnly"; //$NON-NLS-1$
+
 	private ArrayList elements = new ArrayList();
 	private Viewer viewer = null;
 	private static String listDelim = ", "; //$NON-NLS-1$
@@ -39,7 +50,7 @@ public class X509CertificateAttributeContentProvider implements IStructuredConte
 	private static final DateFormat _df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.FULL);
 
 	// TODO - This is a bit ugly but gets the job done... Maybe this should be a class of it's own ??
-	private static String keyUsageStrings[] = {SecurityUIMsg.LABEL_KEYUSAGE_DIGITALSIGNATURE, SecurityUIMsg.LABEL_KEYUSAGE_NONREPUDIATION, SecurityUIMsg.LABEL_KEYUSAGE_KEYENCIPHERMENT, SecurityUIMsg.LABEL_KEYUSAGE_DATAENCIPHERMENT, SecurityUIMsg.LABEL_KEYUSAGE_KEYAGREEMENT, SecurityUIMsg.LABEL_KEYUSAGE_CERTSIGN, SecurityUIMsg.LABEL_KEYUSAGE_CRLSIGN, SecurityUIMsg.LABEL_KEYUSAGE_ENCIPHERONLY, SecurityUIMsg.LABEL_KEYUSAGE_DECIPHERONLY};
+	private static String keyUsageStrings[] = {LABEL_KEYUSAGE_DIGITALSIGNATURE, LABEL_KEYUSAGE_NONREPUDIATION, LABEL_KEYUSAGE_KEYENCIPHERMENT, LABEL_KEYUSAGE_DATAENCIPHERMENT, LABEL_KEYUSAGE_KEYAGREEMENT, LABEL_KEYUSAGE_CERTSIGN, LABEL_KEYUSAGE_CRLSIGN, LABEL_KEYUSAGE_ENCIPHERONLY, LABEL_KEYUSAGE_DECIPHERONLY};
 
 	public X509CertificateAttributeContentProvider() {
 		super();
