@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.Permission;
 import java.security.ProtectionDomain;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 
@@ -26,6 +28,53 @@ import org.osgi.framework.*;
  */
 
 public class SystemBundle extends BundleHost {
+	class SystemBundleHeaders extends Dictionary {
+		private final Dictionary headers;
+
+		public SystemBundleHeaders(Dictionary headers) {
+			this.headers = headers;
+		}
+
+		public Enumeration elements() {
+			return headers.elements();
+		}
+
+		public Object get(Object key) {
+			if (!org.osgi.framework.Constants.EXPORT_PACKAGE.equals(key))
+				return headers.get(key);
+			String systemPackages = FrameworkProperties.getProperty(org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES);
+			String resorts = (String) headers.get(org.osgi.framework.Constants.EXPORT_PACKAGE);
+			if (systemPackages != null) {
+				if (resorts != null)
+					resorts += ", " + systemPackages; //$NON-NLS-1$
+				else
+					resorts = systemPackages;
+			}
+			return resorts;
+		}
+
+		public boolean isEmpty() {
+			return headers.isEmpty();
+		}
+
+		public Enumeration keys() {
+			return headers.keys();
+		}
+
+		public Object put(Object key, Object value) {
+			return headers.put(key, value);
+		}
+
+		public Object remove(Object key) {
+			return headers.remove(key);
+		}
+
+		public int size() {
+			return headers.size();
+		}
+
+	}
+
 	ProtectionDomain systemDomain;
 
 	/**
@@ -289,4 +338,9 @@ public class SystemBundle extends BundleHost {
 	protected void unresolvePermissions(AbstractBundle[] refreshedBundles) {
 		// Do nothing
 	}
+
+	public Dictionary getHeaders(String localeString) {
+		return new SystemBundleHeaders(super.getHeaders(localeString));
+	}
+
 }
