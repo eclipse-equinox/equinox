@@ -515,11 +515,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					for (int j = 0; j < components2.size(); j++) {
 						comp2 = (ServiceComponent) components2.elementAt(j);
 						if (comp.name.equals(comp2.name)) {
-							Activator.log.error("[SCR] Found components with duplicated names! Details: \nComponent1 (will be ignored): " + comp + "\nComponent2: " + comp2, null);
-							//removing the component
-							components.remove(i);
-							i--;
-							continue L1;
+							Activator.log.warning("[SCR] Found components with duplicated names! Details: \nComponent1 : " + comp + "\nComponent2: " + comp2, null);
 						}
 					}
 				}
