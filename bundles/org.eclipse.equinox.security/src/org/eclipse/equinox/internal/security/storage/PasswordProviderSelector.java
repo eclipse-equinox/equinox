@@ -207,6 +207,12 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		}
 	}
 
+	public boolean isLoggedIn() {
+		synchronized (modules) {
+			return (modules.size() != 0);
+		}
+	}
+
 	protected HashSet getDisabledModules() {
 		IEclipsePreferences node = new ConfigurationScope().getNode(AuthPlugin.PI_AUTH);
 		String tmp = node.get(IStorageConstants.DISABLED_PROVIDERS_KEY, null);

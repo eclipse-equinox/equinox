@@ -21,8 +21,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -36,6 +35,7 @@ public class TabPassword {
 
 	protected Table providerTable;
 
+	protected Button buttonClearPassword;
 	protected Button buttonChangePassword;
 	protected Button buttonRecoverPassword;
 
@@ -78,17 +78,14 @@ public class TabPassword {
 		Composite rightPart = new Composite(page, SWT.NONE);
 		rightPart.setLayout(new GridLayout());
 
-		Button buttonClearPassword = new Button(rightPart, SWT.NONE);
+		buttonClearPassword = new Button(rightPart, SWT.NONE);
 		buttonClearPassword.setText(SecUIMessages.logoutButton);
 		buttonClearPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
-		buttonClearPassword.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-				widgetSelected(e);
-			}
+		buttonClearPassword.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				InternalExchangeUtils.passwordProvidersLogout();
+				InternalExchangeUtils.passwordProvidersReset();
+				enableLogout();
 			}
 		});
 
@@ -106,6 +103,7 @@ public class TabPassword {
 				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
 				ChangePasswordWizardDialog dialog = new ChangePasswordWizardDialog(shell, rootNode, moduleID);
 				dialog.open();
+				enableLogout();
 			}
 		});
 
@@ -126,6 +124,7 @@ public class TabPassword {
 					return; // no password recovery questions were setup
 				PasswordRecoveryDialog dialog = new PasswordRecoveryDialog(questions, shell, moduleID);
 				dialog.open();
+				enableLogout();
 			}
 		});
 
@@ -185,6 +184,7 @@ public class TabPassword {
 			boolean recoveryAvailable = rootNode.nodeExists(path);
 			buttonRecoverPassword.setEnabled(recoveryAvailable);
 		}
+		enableLogout();
 	}
 
 	protected HashSet getDisabledModules() {
@@ -242,6 +242,14 @@ public class TabPassword {
 
 		// logout so that previously selected default provider is not reused
 		InternalExchangeUtils.passwordProvidersReset();
+	}
+
+	public void onActivated() {
+		enableLogout();
+	}
+
+	protected void enableLogout() {
+		buttonClearPassword.setEnabled(InternalExchangeUtils.isLoggedIn());
 	}
 
 }

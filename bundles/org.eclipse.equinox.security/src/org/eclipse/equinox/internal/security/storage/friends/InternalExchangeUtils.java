@@ -42,13 +42,6 @@ public class InternalExchangeUtils {
 	}
 
 	/**
-	 * Clears cached passwords from the open storages and password providers.
-	 */
-	static public void passwordProvidersLogout() {
-		SecurePreferencesMapper.clearPasswordCache();
-	}
-
-	/**
 	 * Gathers list of available password providers. Note: this method does not try
 	 * to instantiate providers, hence, providers listed as available by this method
 	 * might fail on instantiation and not be available for the actual use.
@@ -69,6 +62,10 @@ public class InternalExchangeUtils {
 	 */
 	static public void passwordProvidersReset() {
 		PasswordProviderSelector.getInstance().clearCaches();
+	}
+
+	static public boolean isLoggedIn() {
+		return PasswordProviderSelector.getInstance().isLoggedIn();
 	}
 
 	/**

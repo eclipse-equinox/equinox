@@ -13,6 +13,8 @@ package org.eclipse.equinox.internal.security.ui.storage;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
@@ -37,12 +39,25 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		Composite pageArea = new Composite(parent, SWT.NONE);
 		pageArea.setLayout(new RowLayout());
 
-		TabFolder folder = new TabFolder(parent, SWT.TOP);
+		final TabFolder folder = new TabFolder(parent, SWT.TOP);
 		passwordTab = new TabPassword(folder, 0, getShell());
 		contentsTab = new TabContents(folder, 1, getShell(), convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH));
 		advancedTab = new TabAdvanced(folder, 2, getShell());
 		folder.setSelection(0);
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		folder.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing to do
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				int i = folder.getSelectionIndex();
+				if (i == 0 && passwordTab != null) // password page
+					passwordTab.onActivated();
+			}
+		});
 		return folder;
 	}
 
