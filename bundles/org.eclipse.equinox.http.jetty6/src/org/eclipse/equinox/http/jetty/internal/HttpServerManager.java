@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others
+ * Copyright (c) 2007, 2008 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,20 +13,22 @@ package org.eclipse.equinox.http.jetty.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.*;
 import javax.servlet.*;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
-import org.mortbay.http.*;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.SslSocketConnector;
+import org.mortbay.jetty.servlet.*;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
 
 public class HttpServerManager implements ManagedServiceFactory {
 
+	private static final String CONTEXT_TEMPDIR = "javax.servlet.context.tempdir"; //$NON-NLS-1$
 	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
 
@@ -38,7 +40,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public synchronized void deleted(String pid) {
-		HttpServer server = (HttpServer) servers.remove(pid);
+		Server server = (Server) servers.remove(pid);
 		if (server != null) {
 			try {
 				server.stop();
@@ -57,38 +59,32 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	public synchronized void updated(String pid, Dictionary dictionary) throws ConfigurationException {
 		deleted(pid);
-		HttpServer server = new HttpServer();
-		SocketListener httpListener = createHttpListener(dictionary);
-		if (httpListener != null)
-			server.addListener(httpListener);
+		Server server = new Server();
+		Connector httpConnector = createHttpConnector(dictionary);
+		if (httpConnector != null)
+			server.addConnector(httpConnector);
 
-		SocketListener httpsListener = createHttpsListener(dictionary);
-		if (httpsListener != null)
-			server.addListener(httpsListener);
+		Connector httpsConnector = createHttpsConnector(dictionary);
+		if (httpsConnector != null)
+			server.addConnector(httpsConnector);
 
-		ServletHandler servlets = new Servlet25Handler();
-		servlets.setAutoInitializeServlets(true);
-
-		ServletHolder holder = servlets.addServlet("/*", InternalHttpServiceServlet.class.getName()); //$NON-NLS-1$
+		ServletHolder holder = new ServletHolder(new InternalHttpServiceServlet());
 		holder.setInitOrder(0);
 		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
 		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, "Equinox Jetty-based Http Service"); //$NON-NLS-1$
-		if (httpListener != null)
-			holder.setInitParameter(JettyConstants.HTTP_PORT, new Integer(httpListener.getPort()).toString());
-		if (httpsListener != null)
-			holder.setInitParameter(JettyConstants.HTTPS_PORT, new Integer(httpsListener.getPort()).toString());
+		if (httpConnector != null)
+			holder.setInitParameter(JettyConstants.HTTP_PORT, new Integer(httpConnector.getLocalPort()).toString());
+		if (httpsConnector != null)
+			holder.setInitParameter(JettyConstants.HTTPS_PORT, new Integer(httpsConnector.getLocalPort()).toString());
 
 		String otherInfo = (String) dictionary.get(JettyConstants.OTHER_INFO);
 		if (otherInfo != null)
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
-		HttpContext httpContext = createHttpContext(dictionary);
-		httpContext.addHandler(servlets);
 
-		Integer sessionInactiveInterval = (Integer) dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
-		if (sessionInactiveInterval != null)
-			servlets.setSessionInactiveInterval(sessionInactiveInterval.intValue());
+		Context httpContext = createHttpContext(dictionary);
+		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
+		server.addHandler(httpContext);
 
-		server.addContext(httpContext);
 		try {
 			server.start();
 		} catch (Exception e) {
@@ -99,13 +95,13 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	public synchronized void shutdown() throws Exception {
 		for (Iterator it = servers.values().iterator(); it.hasNext();) {
-			HttpServer server = (HttpServer) it.next();
+			Server server = (Server) it.next();
 			server.stop();
 		}
 		servers.clear();
 	}
 
-	private SocketListener createHttpListener(Dictionary dictionary) {
+	private Connector createHttpConnector(Dictionary dictionary) {
 		Boolean httpEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_ENABLED);
 		if (httpEnabled != null && !httpEnabled.booleanValue())
 			return null;
@@ -114,32 +110,26 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (httpPort == null)
 			return null;
 
-		SocketListener listener = new SocketListener();
-		listener.setPort(httpPort.intValue());
+		Connector connector = new SelectChannelConnector();
+		connector.setPort(httpPort.intValue());
 
 		String httpHost = (String) dictionary.get(JettyConstants.HTTP_HOST);
 		if (httpHost != null) {
-			try {
-				listener.setHost(httpHost);
-			} catch (UnknownHostException e) {
-				// if the host name is invalid we do not want to create this listener
-				e.printStackTrace();
-				return null;
-			}
+			connector.setHost(httpHost);
 		}
 
-		if (listener.getPort() == 0) {
+		if (connector.getPort() == 0) {
 			try {
-				listener.open();
+				connector.open();
 			} catch (IOException e) {
 				// this would be unexpected since we're opening the next available port 
 				e.printStackTrace();
 			}
 		}
-		return listener;
+		return connector;
 	}
 
-	private SocketListener createHttpsListener(Dictionary dictionary) {
+	private Connector createHttpsConnector(Dictionary dictionary) {
 		Boolean httpsEnabled = (Boolean) dictionary.get(JettyConstants.HTTPS_ENABLED);
 		if (httpsEnabled == null || !httpsEnabled.booleanValue())
 			return null;
@@ -148,38 +138,32 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (httpsPort == null)
 			return null;
 
-		SslListener listener = new SslListener();
-		listener.setPort(httpsPort.intValue());
+		SslSocketConnector sslConnector = new SslSocketConnector();
+		sslConnector.setPort(httpsPort.intValue());
 
 		String httpsHost = (String) dictionary.get(JettyConstants.HTTPS_HOST);
 		if (httpsHost != null) {
-			try {
-				listener.setHost(httpsHost);
-			} catch (UnknownHostException e) {
-				// if the host name is invalid we do not want to use this listener
-				e.printStackTrace();
-				return null;
-			}
+			sslConnector.setHost(httpsHost);
 		}
 
 		String keyStore = (String) dictionary.get(JettyConstants.SSL_KEYSTORE);
 		if (keyStore != null)
-			listener.setKeystore(keyStore);
+			sslConnector.setKeystore(keyStore);
 
 		String password = (String) dictionary.get(JettyConstants.SSL_PASSWORD);
 		if (password != null)
-			listener.setPassword(password);
+			sslConnector.setPassword(password);
 
 		String keyPassword = (String) dictionary.get(JettyConstants.SSL_KEYPASSWORD);
 		if (keyPassword != null)
-			listener.setKeyPassword(keyPassword);
+			sslConnector.setKeyPassword(keyPassword);
 
 		Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null) {
 			if (needClientAuth instanceof String)
 				needClientAuth = Boolean.valueOf((String) needClientAuth);
 
-			listener.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
+			sslConnector.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
 		}
 
 		Object wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
@@ -187,34 +171,30 @@ public class HttpServerManager implements ManagedServiceFactory {
 			if (wantClientAuth instanceof String)
 				wantClientAuth = Boolean.valueOf((String) wantClientAuth);
 
-			listener.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
+			sslConnector.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
 		}
 
 		String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
 		if (protocol != null)
-			listener.setProtocol(protocol);
-
-		String algorithm = (String) dictionary.get(JettyConstants.SSL_ALGORITHM);
-		if (algorithm != null)
-			listener.setAlgorithm(algorithm);
+			sslConnector.setProtocol(protocol);
 
 		String keystoreType = (String) dictionary.get(JettyConstants.SSL_KEYSTORETYPE);
 		if (keystoreType != null)
-			listener.setKeystoreType(keystoreType);
+			sslConnector.setKeystoreType(keystoreType);
 
-		if (listener.getPort() == 0) {
+		if (sslConnector.getPort() == 0) {
 			try {
-				listener.open();
+				sslConnector.open();
 			} catch (IOException e) {
 				// this would be unexpected since we're opening the next available port 
 				e.printStackTrace();
 			}
 		}
-		return listener;
+		return sslConnector;
 	}
 
-	private HttpContext createHttpContext(Dictionary dictionary) {
-		HttpContext httpContext = new HttpContext();
+	private Context createHttpContext(Dictionary dictionary) {
+		Context httpContext = new Context();
 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
 
@@ -225,8 +205,14 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		File contextWorkDir = new File(workDir, DIR_PREFIX + dictionary.get(Constants.SERVICE_PID).hashCode());
 		contextWorkDir.mkdir();
-		httpContext.setTempDirectory(contextWorkDir);
+		httpContext.setAttribute(CONTEXT_TEMPDIR, contextWorkDir);
 
+		HashSessionManager sessionManager = new HashSessionManager();
+		Integer sessionInactiveInterval = (Integer) dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
+		if (sessionInactiveInterval != null)
+			sessionManager.setMaxInactiveInterval(sessionInactiveInterval.intValue());
+
+		httpContext.setSessionHandler(new SessionHandler(sessionManager));
 		return httpContext;
 	}
 
