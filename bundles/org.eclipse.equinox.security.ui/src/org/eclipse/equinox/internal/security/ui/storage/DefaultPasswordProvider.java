@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
+import java.net.URL;
 import javax.crypto.spec.PBEKeySpec;
+import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.provider.*;
 import org.eclipse.jface.window.Window;
@@ -32,6 +34,13 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		boolean passwordChange = ((passwordType & PASSWORD_CHANGE) != 0);
 
 		String location = container.getLocation().getFile();
+		URL defaultURL = InternalExchangeUtils.defaultStorageLocation();
+		if (defaultURL != null) { // remove default location from the dialog
+			String defaultFile = defaultURL.getFile();
+			if (defaultFile != null && defaultFile.equals(location))
+				location = null;
+		}
+
 		final StorageLoginDialog loginDialog = new StorageLoginDialog(newPassword, passwordChange, location);
 
 		final PBEKeySpec[] result = new PBEKeySpec[1];
