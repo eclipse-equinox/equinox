@@ -289,6 +289,8 @@ int launchJavaVM( char* args[] )
 	{
 		/* put the root of eclipse on the LD_LIBRARY_PATH */
 		char * ldPath = (char*)getenv(_T_ECLIPSE("LD_LIBRARY_PATH"));
+		if (ldPath == NULL)
+			ldPath = _T_ECLIPSE("");
 		char * root = getProgramDir();
 		if (root != NULL) {
 			char * newPath = malloc((strlen(root) + strlen(ldPath) + 2) * sizeof(char));

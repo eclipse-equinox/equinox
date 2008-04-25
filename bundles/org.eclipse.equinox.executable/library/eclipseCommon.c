@@ -223,6 +223,8 @@ _TCHAR* findSymlinkCommand( _TCHAR* command, int resolve )
             path = _tgetenv( _T_ECLIPSE("PATH") );
 #ifdef _WIN32
             /* on windows, prepend the current directory */
+            if (path == NULL)
+            	path = _T_ECLIPSE("");
             ch = malloc((_tcslen(path) + MAX_PATH_LENGTH + 2) * sizeof(_TCHAR));
             _tgetcwd( ch, MAX_PATH_LENGTH );
             length = _tcslen(ch);
