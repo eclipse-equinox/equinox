@@ -17,10 +17,9 @@ import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.progress.UIJob;
@@ -61,12 +60,9 @@ public class UICallbackProvider implements IUICallbacks {
 
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-				prompt.setText(SecUIMessages.pswdRecoveryOptionTitle);
-				prompt.setMessage(SecUIMessages.pswdRecoveryOptionMsg);
-				if (prompt.open() != SWT.YES)
+				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
+				if (!reply)
 					return Status.OK_STATUS;
-
 				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
 				dialog.open();
 				String[][] result = dialog.getResult();
@@ -133,16 +129,14 @@ public class UICallbackProvider implements IUICallbacks {
 		if (!StorageUtils.showUI())
 			return null;
 
-		final int[] result = new int[1];
+		final Boolean[] result = new Boolean[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
-				MessageBox prompt = new MessageBox(StorageUtils.getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-				prompt.setText(SecUIMessages.generalDialogTitle);
-				prompt.setMessage(msg);
-				result[0] = prompt.open();
+				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
+				result[0] = new Boolean(reply);
 			}
 		});
-		return new Boolean(result[0] == SWT.YES);
+		return result[0];
 	}
 
 	public boolean runningUI() {

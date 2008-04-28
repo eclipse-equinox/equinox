@@ -15,9 +15,8 @@ import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.provider.*;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -59,16 +58,14 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		if (!useUI(container))
 			return false;
 
-		final int[] result = new int[1];
+		final Boolean[] result = new Boolean[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
-				MessageBox dialog = new MessageBox(StorageUtils.getShell(), SWT.ICON_ERROR | SWT.YES | SWT.NO);
-				dialog.setText(SecUIMessages.exceptionTitle);
-				dialog.setMessage(SecUIMessages.exceptionDecode);
-				result[0] = dialog.open();
+				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.exceptionTitle, SecUIMessages.exceptionDecode);
+				result[0] = new Boolean(reply);
 			}
 		});
-		return (result[0] == SWT.YES);
+		return result[0].booleanValue();
 	}
 
 	private boolean useUI(IPreferencesContainer container) {
