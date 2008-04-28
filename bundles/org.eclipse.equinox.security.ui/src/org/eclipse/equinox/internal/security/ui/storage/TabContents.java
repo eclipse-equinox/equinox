@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.security.ui.storage;
 import java.io.*;
 import java.net.URL;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.equinox.internal.security.storage.friends.IDeleteListener;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.Activator;
@@ -109,7 +110,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		URL location = InternalExchangeUtils.defaultStorageLocation();
 		if (location != null) {
 			new Label(page, SWT.NONE).setText(SecUIMessages.locationButton);
-			new Text(page, SWT.READ_ONLY).setText(location.getFile().toString());
+			new Text(page, SWT.READ_ONLY).setText(new Path(location.getFile()).toOSString());
 		}
 
 		sashForm.setWeights(new int[] {30, 70});
@@ -184,7 +185,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		if (location == null)
 			return;
 		MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO);
-		messageBox.setText(location.getFile().toString());
+		messageBox.setText(SecUIMessages.generalDialogTitle);
 		messageBox.setMessage(SecUIMessages.confirmDeleteMsg);
 		if (messageBox.open() != SWT.YES)
 			return;

@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.EncodingUtils;
@@ -156,7 +157,7 @@ public class StorageLoginDialog extends TitleAreaDialog {
 			locationGroup.setLayout(new GridLayout());
 
 			Label locationLabel = new Label(locationGroup, SWT.WRAP);
-			locationLabel.setText(location);
+			locationLabel.setText(new Path(location).toOSString());
 		}
 
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
