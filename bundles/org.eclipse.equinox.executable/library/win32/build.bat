@@ -37,7 +37,7 @@ IF x.%1==x.x86_64 GOTO X86_64
 IF x.%1==x.ia64 GOTO IA64
 
 :X86
-IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM_1.5.0
+IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM-1.5.0
 set javaHome=%JAVA_HOME%
 if not "%MSVC_HOME%" == "" goto MAKE
 set MSVC_HOME=k:\dev\products\msvc60\vc98
