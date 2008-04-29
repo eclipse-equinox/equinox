@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.preferences;
 
+import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -37,8 +38,10 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		GridLayout layout = new GridLayout();
 		pageArea.setLayout(layout);
 
-		PreferenceLinkArea policyLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.policy", SecurityUIMsg.CATPAGE_LABEL_POLICY, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
-		policyLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
+		if (isDefaultPolicyEnabled()) {
+			PreferenceLinkArea policyLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.policy", SecurityUIMsg.CATPAGE_LABEL_POLICY, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
+			policyLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
+		}
 
 		PreferenceLinkArea storageLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.storage", SecurityUIMsg.CATPAGE_LABEL_STORAGE, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
 		storageLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
@@ -47,5 +50,12 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		//certsLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 
 		return pageArea;
+	}
+
+	private boolean isDefaultPolicyEnabled() {
+		//		IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
+		//		IActivityManager activityManager = workbenchActivitySupport.getActivityManager();
+		//		IActivity activity = activityManager.getActivity("org.eclipse.equinox.security.ui.defaultPolicyActivity"); //$NON-NLS-1$
+		return Activator.isDefaultPolicyEnabled();
 	}
 }
