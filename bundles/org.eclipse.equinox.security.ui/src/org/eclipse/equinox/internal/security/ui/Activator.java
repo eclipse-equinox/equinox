@@ -11,20 +11,18 @@
 package org.eclipse.equinox.internal.security.ui;
 
 import java.security.Security;
-import java.util.*;
-import org.eclipse.core.runtime.*;
+import java.util.Arrays;
+import java.util.Hashtable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.provisional.security.ui.AuthorizationManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
-import org.eclipse.osgi.internal.service.security.DefaultAuthorizationEngine;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.activities.IWorkbenchActivitySupport;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.ui.progress.UIJob;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -40,8 +38,6 @@ public class Activator extends AbstractUIPlugin {
 	private static final String PROP_AUTHZ_MANAGER = "osgi.signedcontent.authorization.manager"; //$NON-NLS-1$
 
 	private static final String PROP_DEFAULT_SERVICE = "org.eclipse.osgi"; //$NON-NLS-1$
-
-	private static final Object DEFAULT_POLICY_ACTIVITY_ID = "org.eclipse.equinox.security.ui.defaultPolicyActivity"; //$NON-NLS-1$
 
 	//service trackers
 	private static ServiceTracker trustEngineTracker;
@@ -88,36 +84,11 @@ public class Activator extends AbstractUIPlugin {
 		bundleContext = context;
 		plugin = this;
 
-		UIJob notifyJob = new UIJob("DefaultAuthorizationEngineJob") { //$NON-NLS-1$
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				isDefaultPolicyEnabled();
-				return Status.OK_STATUS;
-			}
-		};
-		notifyJob.setSystem(true);
-		notifyJob.schedule();
-
 		// Register the default authorization manager
 		Hashtable properties = new Hashtable(7);
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 		properties.put(PROP_AUTHZ_MANAGER, PROP_DEFAULT_SERVICE);
 		defaultAuthzManagerReg = bundleContext.registerService(AuthorizationManager.class.getName(), new DefaultAuthorizationManager(), properties);
-	}
-
-	public static boolean isDefaultPolicyEnabled() {
-		IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
-		Set activityIds = workbenchActivitySupport.getActivityManager().getEnabledActivityIds();
-		if (activityIds.contains(DEFAULT_POLICY_ACTIVITY_ID)) {
-			AuthorizationEngine authzEngine = getAuthorizationEngine();
-			if (authzEngine instanceof DefaultAuthorizationEngine) {
-				Set set = new HashSet(activityIds);
-				set.remove(DEFAULT_POLICY_ACTIVITY_ID);
-				workbenchActivitySupport.setEnabledActivityIds(set);
-				return false;
-			}
-			return true;
-		}
-		return false;
 	}
 
 	public void stop(BundleContext context) throws Exception {
