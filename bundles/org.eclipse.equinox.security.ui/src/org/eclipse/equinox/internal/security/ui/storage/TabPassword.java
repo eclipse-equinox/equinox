@@ -18,10 +18,12 @@ import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -41,11 +43,18 @@ public class TabPassword {
 
 	protected boolean providerModified = false;
 
-	public TabPassword(TabFolder folder, int index, final Shell shell) {
+	public TabPassword(TabFolder folder, int index, final Shell shell, int minButtonWidth) {
 		TabItem tab = new TabItem(folder, SWT.NONE, index);
 		tab.setText(SecUIMessages.tabPassword);
 		Composite page = new Composite(folder, SWT.NONE);
 		tab.setControl(page);
+
+		Composite topPart = new Composite(page, SWT.NONE);
+		GridData topData = new GridData(GridData.FILL, GridData.FILL, true, false);
+		topData.horizontalSpan = 2;
+		topPart.setLayoutData(topData);
+		topPart.setLayout(new GridLayout(2, false));
+		new Label(topPart, SWT.NONE).setText(SecUIMessages.providerDescription);
 
 		// Left side
 		Composite leftPart = new Composite(page, SWT.NONE);
@@ -106,6 +115,7 @@ public class TabPassword {
 				enableLogout();
 			}
 		});
+		setButtonSize(buttonChangePassword, minButtonWidth);
 
 		buttonRecoverPassword = new Button(rightPart, SWT.NONE);
 		buttonRecoverPassword.setText(SecUIMessages.recoverPasswordButton);
@@ -127,6 +137,7 @@ public class TabPassword {
 				enableLogout();
 			}
 		});
+		setButtonSize(buttonRecoverPassword, minButtonWidth);
 
 		enableButtons();
 
@@ -250,6 +261,14 @@ public class TabPassword {
 
 	protected void enableLogout() {
 		buttonClearPassword.setEnabled(InternalExchangeUtils.isLoggedIn());
+	}
+
+	protected void setButtonSize(Button button, int minButtonWidth) {
+		Dialog.applyDialogFont(button);
+		GridData data = new GridData();
+		Point minButtonSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+		data.widthHint = Math.max(minButtonWidth, minButtonSize.x);
+		button.setLayoutData(data);
 	}
 
 }

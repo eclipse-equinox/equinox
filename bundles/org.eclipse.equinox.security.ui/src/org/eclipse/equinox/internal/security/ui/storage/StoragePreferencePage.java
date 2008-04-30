@@ -39,9 +39,11 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 		Composite pageArea = new Composite(parent, SWT.NONE);
 		pageArea.setLayout(new RowLayout());
 
+		int minButtonWidth = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+
 		final TabFolder folder = new TabFolder(parent, SWT.TOP);
-		passwordTab = new TabPassword(folder, 0, getShell());
-		contentsTab = new TabContents(folder, 1, getShell(), convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH));
+		passwordTab = new TabPassword(folder, 0, getShell(), minButtonWidth);
+		contentsTab = new TabContents(folder, 1, getShell(), minButtonWidth);
 		advancedTab = new TabAdvanced(folder, 2, getShell());
 		folder.setSelection(0);
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

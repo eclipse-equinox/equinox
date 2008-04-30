@@ -67,6 +67,7 @@ public class SecUIMessages extends NLS {
 	public static String saveButton;
 	public static String exportButton;
 	public static String locationButton;
+	public static String providerDescription;
 
 	// secure storage view
 	public static String generalTitle;
