@@ -24,6 +24,7 @@ import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.*;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -161,7 +162,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 			if (callback != null) {
 				Boolean response = callback.ask(SecAuthMessages.fileModifiedMsg);
 				if (response == null)
-					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote, null);
+					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.fileModifiedNote, FrameworkLogEntry.WARNING, null);
 				else if (!response.booleanValue())
 					return; // by default go ahead with save
 			}

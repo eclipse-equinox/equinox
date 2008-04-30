@@ -160,14 +160,14 @@ public class AuthPlugin implements BundleActivator {
 	 * should use this method. However, errors occuring during normal operations
 	 * should use RuntimeLog as otherwise the Error View is not getting updated.
 	 */
-	public void frameworkLogError(String msg, Throwable e) {
+	public void frameworkLogError(String msg, int severity, Throwable e) {
 		if ((logTracker == null) && (bundleContext != null)) {
 			logTracker = new ServiceTracker(bundleContext, FrameworkLog.class.getName(), null);
 			logTracker.open();
 		}
 		FrameworkLog log = (logTracker == null) ? null : (FrameworkLog) logTracker.getService();
 		if (log != null)
-			log.log(new FrameworkLogEntry(PI_AUTH, FrameworkLogEntry.ERROR, 0, msg, 0, e, null));
+			log.log(new FrameworkLogEntry(PI_AUTH, severity, 0, msg, 0, e, null));
 		else {
 			if (msg != null)
 				System.err.println(msg);

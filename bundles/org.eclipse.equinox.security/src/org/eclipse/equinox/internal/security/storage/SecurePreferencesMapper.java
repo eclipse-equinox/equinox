@@ -18,6 +18,7 @@ import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.provider.IProviderHints;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 
@@ -113,7 +114,7 @@ public class SecurePreferencesMapper {
 				} catch (IOException e) {
 					// use FrameworkLog directly for shutdown messages - RuntimeLog
 					// is empty by this time
-					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.errorOnSave, e);
+					AuthPlugin.getDefault().frameworkLogError(SecAuthMessages.errorOnSave, FrameworkLogEntry.ERROR, e);
 				}
 			}
 			preferences.clear();
