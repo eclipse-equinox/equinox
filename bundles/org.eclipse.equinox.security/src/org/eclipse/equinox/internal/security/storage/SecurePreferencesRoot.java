@@ -21,8 +21,7 @@ import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
-import org.eclipse.equinox.internal.security.storage.friends.IStorageConstants;
-import org.eclipse.equinox.internal.security.storage.friends.IUICallbacks;
+import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.*;
 import org.eclipse.osgi.util.NLS;
@@ -236,6 +235,11 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				if (passwordCache.containsKey(key))
 					return (PasswordExt) passwordCache.get(key);
 			}
+
+			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to "false"
+			boolean supressPrompts = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
+			if (supressPrompts && container != null && !container.hasOption(IProviderHints.PROMPT_USER))
+				((SecurePreferencesContainer) container).setOption(IProviderHints.PROMPT_USER, new Boolean(false));
 
 			// is there password verification string already?
 			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
