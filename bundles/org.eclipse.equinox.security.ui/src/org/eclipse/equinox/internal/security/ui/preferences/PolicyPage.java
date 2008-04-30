@@ -55,7 +55,6 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		anyButton = new Button(buttonGroup, SWT.RADIO);
 		anysignedButton = new Button(buttonGroup, SWT.RADIO);
 		onlytrustedButton = new Button(buttonGroup, SWT.RADIO);
-		onlytrustedButton.setSelection(true);
 
 		expiredButton = new Button(buttonGroup, SWT.CHECK);
 		expiredButton.setEnabled(true); //since onlytrustedButton is default on
