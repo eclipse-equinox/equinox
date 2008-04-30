@@ -89,6 +89,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 			}
 		});
 
+		/* Removed for the time being. In future modify/show/export operations could be 
+		 * re-introduced with some special access token required to be entered by the user 
 		Button buttonExport = new Button(buttonBar, SWT.CENTER);
 		buttonExport.setText(SecUIMessages.exportButton);
 		setButtonSize(buttonExport, minButtonWidth);
@@ -97,6 +99,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 				export();
 			}
 		});
+		*/
 
 		Button buttonDelete = new Button(buttonBar, SWT.CENTER);
 		buttonDelete.setText(SecUIMessages.deleteButton);
