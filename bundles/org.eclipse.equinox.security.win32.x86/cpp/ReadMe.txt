@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,3 +29,16 @@ To compile this DLL:
 Note C++ projects settings:
 => Additional include directories - "$(JAVA_HOME)/include";"$(JAVA_HOME)/include/win32"
 => Additional linker dependency - Crypt32.lib
+
+ON THE SUBJECT OF RUNTIME LIBRARY
+
+The original DLL was build using Visual Studio 2005. That introduced dependency on 
+the msvcr80.dll that might be missing in some Windows installations. 
+
+The msvcr80.dll is available as a part of the "Microsoft Visual C++ 2005 SP1 Redistributable Package":
+http://www.microsoft.com/downloads/details.aspx?FamilyID=200B2FD9-AE1A-4A14-984D-389C36F85647&displaylang=en
+ 
+In order to replace dependency on msvcr80.dll with the dependency on msvcrt.dll the DLL currently
+included in this fragment was recompiled with Visual Studio 6.0 using wincrypt.h and crypt32.lib 
+from the Visual Studio 2005.
+
