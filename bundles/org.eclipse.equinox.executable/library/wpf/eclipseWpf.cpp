@@ -371,7 +371,7 @@ static _TCHAR* checkVMRegistryKey(HKEY jreKey, _TCHAR* subKeyName) {
 
 static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 {
-	int   index, length = 0;
+	int   index, length = 0, slash;
 	_TCHAR *commandLine, *ch, *space;
 
 	/*
@@ -384,8 +384,8 @@ static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 	{
 		/* String length plus space character */
 		length += _tcslen( args[ index ] ) + 1;
-		/* Quotes */
-		if (_tcschr( args[ index ], _T(' ') ) != NULL) length += 2;
+		/* Quotes + potential escaping '\' */
+		if (_tcschr( args[ index ], _T(' ') ) != NULL) length += 3;
 	}
 	
 	commandLine = ch = (_TCHAR *)malloc ( (length + 1) * sizeof(_TCHAR) );
@@ -400,7 +400,15 @@ static _TCHAR* buildCommandLine( _TCHAR* program, _TCHAR* args[] )
 		if (space != NULL) *ch++ = _T('\"');
 		_tcscpy( ch, args[index] );
 		ch += _tcslen( args[index] );
-		if (space != NULL) *ch++ = _T('\"');
+		if (space != NULL) {
+			if ( *(ch - 1) == _T('\\') ) {
+				/* escape a trailing unescaped '\' or it will escape our closing '"' and mess things up */
+				slash = 1;
+				while ( *(ch - 1 - slash) == _T('\\')) slash++;
+				if (slash % 2) *ch++ = _T('\\');
+			}
+			*ch++ = _T('\"');
+		}
 		*ch++ = _T(' ');
 	}
 	*ch = _T('\0');
