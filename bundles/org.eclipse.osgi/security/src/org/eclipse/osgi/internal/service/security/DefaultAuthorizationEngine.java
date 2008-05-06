@@ -25,10 +25,13 @@ import org.eclipse.osgi.internal.signedcontent.SignedStorageHook;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.*;
 
 public class DefaultAuthorizationEngine extends AuthorizationEngine {
+
+	private static final String VERSION_PROP = "Version"; //$NON-NLS-1$
+	private static final String VERSION_NUM = "1.0"; //$NON-NLS-1$
+	private static final Version VERSION_MAX = new Version(2, 0, 0);
 
 	private final State systemState;
 	private final BundleContext bundleContext;
@@ -64,8 +67,24 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 			}
 		}
 
-		if (properties != null && properties.getProperty(POLICY_PROP) != null) {
-			enforceFlags = Integer.parseInt(properties.getProperty(POLICY_PROP));
+		if (properties != null) {
+			Version version = new Version(0, 0, 0);
+			String versionProp = properties.getProperty(VERSION_PROP);
+			if (versionProp != null)
+				try {
+					version = new Version(versionProp);
+				} catch (IllegalArgumentException e) {
+					// do nothing;
+				}
+			if (versionProp == null || VERSION_MAX.compareTo(new Version(versionProp)) > 0) {
+				String policy = properties.getProperty(POLICY_PROP);
+				if (policy != null)
+					try {
+						enforceFlags = Integer.parseInt(policy);
+					} catch (NumberFormatException e) {
+						// do nothing;
+					}
+			}
 		} else {
 			String policy = FrameworkProperties.getProperty(POLICY_PROP);
 			if (policy == null || STR_ENFORCE_NONE.equals(policy))
@@ -152,6 +171,7 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 		enforceFlags = policy;
 		Properties properties = new Properties();
 		properties.setProperty(POLICY_PROP, Integer.toString(policy));
+		properties.setProperty(VERSION_PROP, VERSION_NUM); // need to act different when we have different versions
 		try {
 			properties.store(new FileOutputStream(policyFile), null);
 		} catch (IOException e) {
