@@ -60,7 +60,7 @@ public class UICallbackProvider implements IUICallbacks {
 
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				boolean reply = MessageDialog.openConfirm(StorageUtils.getShell(), SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
+				boolean reply = MessageDialog.openQuestion(StorageUtils.getShell(), SecUIMessages.pswdRecoveryOptionTitle, SecUIMessages.pswdRecoveryOptionMsg);
 				if (!reply)
 					return Status.OK_STATUS;
 				ChallengeResponseDialog dialog = new ChallengeResponseDialog(size, StorageUtils.getShell());
