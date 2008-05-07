@@ -583,6 +583,7 @@ public class BundleHost extends AbstractBundle {
 				newFragments[newFragments.length - 1] = fragment;
 			fragments = newFragments;
 		}
+		manifestLocalization = null;
 	}
 
 	protected BundleLoader getBundleLoader() {

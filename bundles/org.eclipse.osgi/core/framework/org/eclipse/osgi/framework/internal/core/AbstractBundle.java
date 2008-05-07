@@ -43,7 +43,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** ProtectionDomain for the bundle */
 	protected BundleProtectionDomain domain;
 
-	protected ManifestLocalization manifestLocalization = null;
+	volatile protected ManifestLocalization manifestLocalization = null;
 
 	/**
 	 * Bundle object constructor. This constructor should not perform any real
@@ -1008,8 +1008,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	public Dictionary getHeaders(String localeString) {
 		framework.checkAdminPermission(this, AdminPermission.METADATA);
+		ManifestLocalization localization;
 		try {
-			initializeManifestLocalization();
+			localization = getManifestLocalization();
 		} catch (BundleException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 			// return an empty dictinary.
@@ -1017,7 +1018,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 		if (localeString == null)
 			localeString = Locale.getDefault().toString();
-		return manifestLocalization.getHeaders(localeString);
+		return localization.getHeaders(localeString);
 	}
 
 	/**
@@ -1413,23 +1414,25 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * 
 	 */
 	public ResourceBundle getResourceBundle(String localeString) {
+		ManifestLocalization localization;
 		try {
-			initializeManifestLocalization();
+			localization = getManifestLocalization();
 		} catch (BundleException ex) {
 			return (null);
 		}
 		if (localeString == null) {
 			localeString = Locale.getDefault().toString();
 		}
-		return manifestLocalization.getResourceBundle(localeString);
+		return localization.getResourceBundle(localeString);
 	}
 
-	private void initializeManifestLocalization() throws BundleException {
-		if (manifestLocalization == null) {
-			Dictionary rawHeaders;
-			rawHeaders = bundledata.getManifest();
-			manifestLocalization = new ManifestLocalization(this, rawHeaders);
+	private synchronized ManifestLocalization getManifestLocalization() throws BundleException {
+		ManifestLocalization currentLocalization = manifestLocalization;
+		if (currentLocalization == null) {
+			Dictionary rawHeaders = bundledata.getManifest();
+			manifestLocalization = currentLocalization = new ManifestLocalization(this, rawHeaders);
 		}
+		return currentLocalization;
 	}
 
 	public boolean testStateChanging(Object thread) {
