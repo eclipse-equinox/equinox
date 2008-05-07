@@ -464,6 +464,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		if (!(contributor instanceof RegistryContributor))
 			throw new IllegalArgumentException(); // should never happen
 		String contributorId = ((RegistryContributor) contributor).getActualId();
+		return hasContributor(contributorId);
+	}
+
+	public boolean hasContributor(String contributorId) {
 		access.enterRead();
 		try {
 			return registryObjects.hasContribution(contributorId);

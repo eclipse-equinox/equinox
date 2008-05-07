@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	private ExtensionRegistry registry;
 	private RegistryStrategyOSGI strategy;
 	private Object token;
+	private HashMap dynamicAddStateStamps = new HashMap();
+	private long currentStateStamp[] = new long[] {0};
 
 	public EclipseBundleListener(ExtensionRegistry registry, Object key, RegistryStrategyOSGI strategy) {
 		this.registry = registry;
@@ -66,7 +68,15 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		Bundle bundle = event.getBundle();
 		switch (event.getType()) {
 			case BundleEvent.RESOLVED :
-				addBundle(bundle);
+				synchronized (currentStateStamp) {
+					long newStateStamp = registry.computeState();
+					if (currentStateStamp[0] != newStateStamp) {
+						// new state stamp; clear the dynamicaddStateStamps
+						currentStateStamp[0] = newStateStamp;
+						dynamicAddStateStamps.clear();
+					}
+				}
+				addBundle(bundle, true);
 				break;
 			case BundleEvent.UNRESOLVED :
 				removeBundle(bundle);
@@ -77,7 +87,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 	public void processBundles(Bundle[] bundles) {
 		for (int i = 0; i < bundles.length; i++) {
 			if (isBundleResolved(bundles[i]))
-				addBundle(bundles[i]);
+				addBundle(bundles[i], false);
 			else
 				removeBundle(bundles[i]);
 		}
@@ -137,7 +147,9 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		return null;
 	}
 
-	private void addBundle(Bundle bundle) {
+	private void addBundle(Bundle bundle, boolean checkNLSFragments) {
+		if (checkNLSFragments)
+			checkForNLSFragment(bundle);
 		// if the given bundle already exists in the registry then return.
 		// note that this does not work for update cases.
 		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
@@ -165,6 +177,64 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (strategy.checkContributionsTimestamp())
 			timestamp = strategy.getExtendedTimestamp(bundle, pluginManifest);
 		registry.addContribution(is, contributor, true, pluginManifest.getPath(), translationBundle, token, timestamp);
+	}
+
+	private void checkForNLSFragment(Bundle fragment) {
+		if (!OSGIUtils.getDefault().isFragment(fragment))
+			return; // only need to worry about fragments
+		Bundle[] hosts = OSGIUtils.getDefault().getHosts(fragment);
+		if (hosts == null)
+			return;
+		// check to see if the hosts should be refreshed because the fragment contains NLS properties files.
+		for (int i = 0; i < hosts.length; i++)
+			checkForNLSFiles(hosts[i], fragment);
+	}
+
+	private void checkForNLSFiles(Bundle host, Bundle fragment) {
+		String hostID = Long.toString(host.getBundleId());
+		Long hostStateStamp = (Long) dynamicAddStateStamps.get(hostID);
+		synchronized (currentStateStamp) {
+			if (hostStateStamp != null && currentStateStamp[0] == hostStateStamp.longValue())
+				return; // already processed this host
+			// mark this host as processed for the current state stamp.
+			dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+		}
+
+		if (registry.hasContributor(hostID)) {
+			// get the base localization path from the host
+			Dictionary hostHeaders = host.getHeaders(""); //$NON-NLS-1$
+			String localization = (String) hostHeaders.get(Constants.BUNDLE_LOCALIZATION);
+			if (localization == null)
+				// localization may be empty in which case we should check the default
+				localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+			// we do a simple check to make sure the default nls path exists in the host; 
+			// this is for performance reasons, but I'm not sure it is valid because a host could ship without the default nls properties file but this seems very unlikely
+			URL baseNLS = host.getEntry(localization + ".properties"); //$NON-NLS-1$
+			if (baseNLS == null)
+				return;
+			int lastSlash = localization.lastIndexOf('/');
+			if (lastSlash == localization.length() - 1)
+				return; // just to be safe
+			String baseDir = lastSlash < 0 ? "" : localization.substring(0, lastSlash); //$NON-NLS-1$
+			String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
+			Enumeration nlsFiles = fragment.findEntries(baseDir, filePattern, false);
+			if (nlsFiles == null)
+				return;
+			// force the host to be removed and added back
+			removeBundle(host);
+			addBundle(host, false);
+		}
+		// check other fragments of this host
+		Bundle[] fragments = OSGIUtils.getDefault().getFragments(host);
+		for (int i = 0; i < fragments.length; i++) {
+			if (fragment.equals(fragments[i]))
+				continue; // skip fragment that was just resolved; it will be added in our caller
+			String fragmentID = Long.toString(fragments[i].getBundleId());
+			if (registry.hasContributor(fragmentID)) {
+				removeBundle(fragments[i]);
+				addBundle(fragments[i], false);
+			}
+		}
 	}
 
 	private static boolean isSingleton(Bundle bundle) {
