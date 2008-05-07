@@ -109,7 +109,7 @@
 <useDefaultCommand>false</useDefaultCommand>
 </target>
 <target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
+<buildCommand>make JAVA_HOME=/usr/java/sun-150 DEFAULT_OS_ARCH=x86_64</buildCommand>
 <buildArguments>-f make_linux.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
