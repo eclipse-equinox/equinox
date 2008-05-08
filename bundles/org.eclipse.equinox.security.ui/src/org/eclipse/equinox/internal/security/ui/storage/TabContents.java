@@ -20,14 +20,11 @@ import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.internal.security.ui.storage.view.*;
 import org.eclipse.equinox.security.storage.*;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.layout.LayoutConstants;
+import org.eclipse.jface.layout.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -42,7 +39,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		valuesView.setInput(selectedNode);
 	}
 
-	public TabContents(TabFolder folder, int index, final Shell shell, int minButtonWidth) {
+	public TabContents(TabFolder folder, int index, final Shell shell) {
 		this.shell = shell;
 
 		TabItem tab = new TabItem(folder, SWT.NONE, index);
@@ -59,7 +56,10 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		nodeTree.setLayoutData(gridData);
 
 		Composite rightPane = new Composite(sashForm, SWT.NONE);
-		rightPane.setLayout(new GridLayout());
+		GridLayout rightPaneLayout = new GridLayout();
+		rightPaneLayout.marginHeight = 0;
+		rightPaneLayout.marginWidth = 2;
+		rightPane.setLayout(rightPaneLayout);
 
 		new Label(rightPane, SWT.NONE).setText(SecUIMessages.keysTable);
 
@@ -70,13 +70,13 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		Composite buttonBar = new Composite(rightPane, SWT.NONE);
 		GridLayout buttonBarLayout = new GridLayout();
-		buttonBarLayout.marginRight = 0;
+		buttonBarLayout.marginWidth = 0;
 		buttonBar.setLayout(buttonBarLayout);
-		buttonBar.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		buttonBar.setLayoutData(new GridData(GridData.END, GridData.BEGINNING, false, false));
 
-		Button buttonSave = new Button(buttonBar, SWT.CENTER);
+		Button buttonSave = new Button(buttonBar, SWT.PUSH);
 		buttonSave.setText(SecUIMessages.saveButton);
-		setButtonSize(buttonSave, minButtonWidth);
+		setButtonSize(buttonSave);
 		buttonSave.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
@@ -101,9 +101,9 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		});
 		*/
 
-		Button buttonDelete = new Button(buttonBar, SWT.CENTER);
+		Button buttonDelete = new Button(buttonBar, SWT.PUSH);
 		buttonDelete.setText(SecUIMessages.deleteButton);
-		setButtonSize(buttonDelete, minButtonWidth);
+		setButtonSize(buttonDelete);
 		buttonDelete.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				deteleDefaultStorage();
@@ -121,7 +121,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		nodesView = new NodesView(nodeTree, this);
 		valuesView = new ValuesView(tableOfValues, this, shell);
 
-		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getMargins()).numColumns(1).generateLayout(page);
+		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getSpacing()).generateLayout(page);
 		InternalExchangeUtils.addDeleteListener(this);
 	}
 
@@ -175,12 +175,8 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		}
 	}
 
-	protected void setButtonSize(Button button, int minButtonWidth) {
-		Dialog.applyDialogFont(button);
-		GridData data = new GridData();
-		Point minButtonSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		data.widthHint = Math.max(minButtonWidth, minButtonSize.x);
-		button.setLayoutData(data);
+	protected void setButtonSize(Button button) {
+		GridDataFactory.defaultsFor(button).align(SWT.FILL, SWT.BEGINNING).grab(false, false).applyTo(button);
 	}
 
 	protected void deteleDefaultStorage() {

@@ -18,12 +18,11 @@ import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.layout.LayoutConstants;
+import org.eclipse.jface.layout.*;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -43,25 +42,55 @@ public class TabPassword {
 
 	protected boolean providerModified = false;
 
-	public TabPassword(TabFolder folder, int index, final Shell shell, int minButtonWidth) {
+	public TabPassword(TabFolder folder, int index, final Shell shell) {
 		TabItem tab = new TabItem(folder, SWT.NONE, index);
 		tab.setText(SecUIMessages.tabPassword);
 		Composite page = new Composite(folder, SWT.NONE);
+		page.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false));
 		tab.setControl(page);
 
-		Composite topPart = new Composite(page, SWT.NONE);
-		GridData topData = new GridData(GridData.FILL, GridData.FILL, true, false);
-		topData.horizontalSpan = 2;
-		topPart.setLayoutData(topData);
-		topPart.setLayout(new GridLayout(2, false));
-		new Label(topPart, SWT.NONE).setText(SecUIMessages.providerDescription);
+		Group passwordGroup = new Group(page, SWT.NONE);
+		passwordGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		passwordGroup.setLayout(new GridLayout(2, false));
+		passwordGroup.setText(SecUIMessages.passwordCacheGroup);
 
-		// Left side
-		Composite leftPart = new Composite(page, SWT.NONE);
-		leftPart.setLayout(new GridLayout());
+		buttonClearPassword = new Button(passwordGroup, SWT.PUSH);
+		buttonClearPassword.setText(SecUIMessages.logoutButton);
+		buttonClearPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		buttonClearPassword.addSelectionListener(new SelectionAdapter() {
 
-		new Label(leftPart, SWT.NONE).setText(SecUIMessages.providersTable);
-		providerTable = new Table(leftPart, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.CHECK);
+			public void widgetSelected(SelectionEvent e) {
+				InternalExchangeUtils.passwordProvidersReset();
+				enableLogout();
+			}
+		});
+		setButtonSize(buttonClearPassword);
+
+		Label passwordNote = new Label(passwordGroup, SWT.WRAP);
+		GridData labelData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		labelData.widthHint = 340;
+		passwordNote.setLayoutData(labelData);
+		passwordNote.setText(SecUIMessages.passwordCacheNote);
+
+		Group providersGroup = new Group(page, SWT.NONE);
+		providersGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		providersGroup.setLayout(new GridLayout());
+		providersGroup.setText(SecUIMessages.providerGroup);
+
+		Label providersNote = new Label(providersGroup, SWT.WRAP);
+		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gridData.widthHint = 500;
+		providersNote.setLayoutData(gridData);
+		providersNote.setText(SecUIMessages.providerDescription);
+
+		Composite providersComp = new Composite(providersGroup, SWT.NONE);
+		providersComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout gridLayout = new GridLayout(2, false);
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+		providersComp.setLayout(gridLayout);
+
+		providerTable = new Table(providersComp, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION | SWT.CHECK);
 		GridData tableData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		providerTable.setLayoutData(tableData);
 		providerTable.setLinesVisible(true);
@@ -80,27 +109,11 @@ public class TabPassword {
 				enableButtons();
 			}
 		});
+		GridDataFactory.defaultsFor(providerTable).span(1, 2).applyTo(providerTable);
 
-		leftPart.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
-
-		// Right side
-		Composite rightPart = new Composite(page, SWT.NONE);
-		rightPart.setLayout(new GridLayout());
-
-		buttonClearPassword = new Button(rightPart, SWT.NONE);
-		buttonClearPassword.setText(SecUIMessages.logoutButton);
-		buttonClearPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
-		buttonClearPassword.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(SelectionEvent e) {
-				InternalExchangeUtils.passwordProvidersReset();
-				enableLogout();
-			}
-		});
-
-		buttonChangePassword = new Button(rightPart, SWT.NONE);
+		buttonChangePassword = new Button(providersComp, SWT.PUSH);
 		buttonChangePassword.setText(SecUIMessages.changePasswordButton);
-		buttonChangePassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		buttonChangePassword.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false));
 		buttonChangePassword.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -115,11 +128,11 @@ public class TabPassword {
 				enableLogout();
 			}
 		});
-		setButtonSize(buttonChangePassword, minButtonWidth);
+		setButtonSize(buttonChangePassword);
 
-		buttonRecoverPassword = new Button(rightPart, SWT.NONE);
+		buttonRecoverPassword = new Button(providersComp, SWT.PUSH);
 		buttonRecoverPassword.setText(SecUIMessages.recoverPasswordButton);
-		buttonRecoverPassword.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false));
+		buttonRecoverPassword.setLayoutData(new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false));
 		buttonRecoverPassword.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -137,40 +150,36 @@ public class TabPassword {
 				enableLogout();
 			}
 		});
-		setButtonSize(buttonRecoverPassword, minButtonWidth);
+		setButtonSize(buttonRecoverPassword);
 
 		enableButtons();
-
-		rightPart.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
-
-		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getMargins()).numColumns(2).generateLayout(page);
+		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getSpacing()).generateLayout(page);
 	}
 
 	private void fillProviderTable() {
-		TableColumn enabledColumn = new TableColumn(providerTable, SWT.CENTER);
-		enabledColumn.setText(SecUIMessages.enabledColumn);
-		enabledColumn.setWidth(60);
-
-		TableColumn priorityColumn = new TableColumn(providerTable, SWT.LEFT);
-		priorityColumn.setText(SecUIMessages.priorityColumn);
-		priorityColumn.setWidth(60);
-
-		TableColumn idColumn = new TableColumn(providerTable, SWT.LEFT);
+		TableColumn idColumn = new TableColumn(providerTable, SWT.LEAD);
 		idColumn.setText(SecUIMessages.idColumn);
-		idColumn.setWidth(300);
+
+		TableColumn priorityColumn = new TableColumn(providerTable, SWT.CENTER);
+		priorityColumn.setText(SecUIMessages.priorityColumn);
 
 		List availableModules = InternalExchangeUtils.passwordProvidersFind();
 		HashSet disabledModules = getDisabledModules();
 		for (Iterator i = availableModules.iterator(); i.hasNext();) {
 			PasswordProviderDescription module = (PasswordProviderDescription) i.next();
-			TableItem item = new TableItem(providerTable, SWT.LEFT);
-			item.setText(new String[] {null, Integer.toString(module.getPriority()), module.getName()});
+			TableItem item = new TableItem(providerTable, SWT.NONE);
+			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
 			item.setData(module.getId());
 			if (disabledModules == null)
 				item.setChecked(true);
 			else
 				item.setChecked(!disabledModules.contains(module.getId()));
 		}
+
+		TableLayout layout = new TableLayout();
+		layout.addColumnData(new ColumnWeightData(5));
+		layout.addColumnData(new ColumnWeightData(1));
+		providerTable.setLayout(layout);
 	}
 
 	protected String getSelectedModuleID() {
@@ -263,12 +272,8 @@ public class TabPassword {
 		buttonClearPassword.setEnabled(InternalExchangeUtils.isLoggedIn());
 	}
 
-	protected void setButtonSize(Button button, int minButtonWidth) {
-		Dialog.applyDialogFont(button);
-		GridData data = new GridData();
-		Point minButtonSize = button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-		data.widthHint = Math.max(minButtonWidth, minButtonSize.x);
-		button.setLayoutData(data);
+	protected void setButtonSize(Button button) {
+		GridDataFactory.defaultsFor(button).align(SWT.FILL, SWT.BEGINNING).grab(false, false).applyTo(button);
 	}
 
 }

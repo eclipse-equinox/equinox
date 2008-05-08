@@ -49,7 +49,6 @@ public class SecUIMessages extends NLS {
 	// Storage properties page
 	public static String selectCipher;
 	public static String logoutButton;
-	public static String providersTable;
 	public static String enabledColumn;
 	public static String priorityColumn;
 	public static String idColumn;
@@ -68,6 +67,9 @@ public class SecUIMessages extends NLS {
 	public static String exportButton;
 	public static String locationButton;
 	public static String providerDescription;
+	public static String passwordCacheGroup;
+	public static String providerGroup;
+	public static String passwordCacheNote;
 
 	// secure storage view
 	public static String generalTitle;

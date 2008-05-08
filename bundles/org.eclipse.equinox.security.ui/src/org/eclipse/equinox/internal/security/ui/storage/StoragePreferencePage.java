@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -36,17 +34,17 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 	}
 
 	protected Control createContents(Composite parent) {
-		Composite pageArea = new Composite(parent, SWT.NONE);
-		pageArea.setLayout(new RowLayout());
-
-		int minButtonWidth = convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
 
 		final TabFolder folder = new TabFolder(parent, SWT.TOP);
-		passwordTab = new TabPassword(folder, 0, getShell(), minButtonWidth);
-		contentsTab = new TabContents(folder, 1, getShell(), minButtonWidth);
+
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gd.horizontalSpan = 1;
+		folder.setLayoutData(gd);
+
+		passwordTab = new TabPassword(folder, 0, getShell());
+		contentsTab = new TabContents(folder, 1, getShell());
 		advancedTab = new TabAdvanced(folder, 2, getShell());
 		folder.setSelection(0);
-		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		folder.addSelectionListener(new SelectionListener() {
 
