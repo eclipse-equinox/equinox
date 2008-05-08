@@ -139,7 +139,7 @@ public class TransformInstanceListData extends ServiceTracker {
 					transformerToTuple.put(type, transforms);
 
 				for (int j = 0; j < transforms.length; j++) {
-					rawTuples.add(transforms[i]);
+					rawTuples.add(transforms[j]);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
