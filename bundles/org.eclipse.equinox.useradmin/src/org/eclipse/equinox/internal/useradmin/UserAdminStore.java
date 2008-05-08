@@ -281,11 +281,13 @@ public class UserAdminStore {
 		Preferences propsNode = node.node(propertiesNode);
 		String[] keys = propsNode.keys();
 		UserAdminHashtable properties = (UserAdminHashtable) role.getProperties();
-		String value;
+		Object value;
 
 		//load properties
 		for (int i = 0; i < keys.length; i++) {
-			value = propsNode.get(keys[i], null);
+			value = propsNode.getByteArray(keys[i], null);
+			if (value == null)
+				value = propsNode.get(keys[i], null);
 			properties.put(keys[i], value, false);
 		}
 
@@ -296,7 +298,9 @@ public class UserAdminStore {
 			keys = credNode.keys();
 			UserAdminHashtable credentials = (UserAdminHashtable) ((User) role).getCredentials();
 			for (int i = 0; i < keys.length; i++) {
-				credValue = credNode.get(keys[i], null);
+				credValue = credNode.getByteArray(keys[i], null);
+				if (credValue == null)
+					credValue = credNode.get(keys[i], null);
 				credentials.put(keys[i], credValue, false);
 			}
 		}

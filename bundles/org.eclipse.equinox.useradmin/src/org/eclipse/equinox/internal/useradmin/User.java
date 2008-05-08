@@ -99,12 +99,9 @@ public class User extends Role implements org.osgi.service.useradmin.User {
 				if (checkValue.equals(value)) {
 					return (true);
 				}
-			} else if (value instanceof byte[])//FIXME Is there a good way to do this compare???
-			{
-				if (!(checkValue instanceof byte[])) {
+			} else if (value instanceof byte[]) {
+				if (!(checkValue instanceof byte[]))
 					return (false);
-				}
-				//???do they need to be in order?
 				byte[] valueArray = (byte[]) value;
 				byte[] checkValueArray = (byte[]) checkValue;
 				int length = valueArray.length;
