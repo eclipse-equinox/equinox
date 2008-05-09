@@ -30,6 +30,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
 	private static String[] LIB_VARIANTS = buildLibraryVariants();
+	private Object pkgLock = new Object();
 
 	static {
 		try {
@@ -65,9 +66,12 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		if (lastIndex < 0)
 			return null;
 		String packageName = name.substring(0, lastIndex);
-		Object pkg = manager.getBaseClassLoader().publicGetPackage(packageName);
-		if (pkg != null)
-			return null;
+		Object pkg;
+		synchronized (pkgLock) {
+			pkg = manager.getBaseClassLoader().publicGetPackage(packageName);
+			if (pkg != null)
+				return null;
+		}
 
 		// get info about the package from the classpath entry's manifest.
 		String specTitle = null, specVersion = null, specVendor = null, implTitle = null, implVersion = null, implVendor = null;
@@ -107,7 +111,12 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		}
 		// The package is not defined yet define it before we define the class.
 		// TODO still need to seal packages.
-		manager.getBaseClassLoader().publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, null);
+		synchronized (pkgLock) {
+			pkg = manager.getBaseClassLoader().publicGetPackage(packageName);
+			if (pkg != null)
+				return null;
+			manager.getBaseClassLoader().publicDefinePackage(packageName, specTitle, specVersion, specVendor, implTitle, implVersion, implVendor, null);
+		}
 		// not doing any byte processing
 		return null;
 	}

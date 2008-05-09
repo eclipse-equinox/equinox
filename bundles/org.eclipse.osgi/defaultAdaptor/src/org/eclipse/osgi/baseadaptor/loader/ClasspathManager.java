@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
@@ -31,7 +32,7 @@ import org.osgi.framework.FrameworkEvent;
 /**
  * A helper class for <code>BaseClassLoader</code> implementations.  This class will keep track of 
  * <code>ClasspathEntry</code> objects for the host bundle and any attached fragment bundles.  This 
- * class takes care of seaching the <code>ClasspathEntry</code> objects for a base class loader
+ * class takes care of searching the <code>ClasspathEntry</code> objects for a base class loader
  * implementation.  Additional behavior may be added to a classpath manager by configuring 
  * <code>ClassLoadingHook</code> and <code>ClassLoadingStatsHook</code>.
  * @see BaseClassLoader
@@ -41,14 +42,18 @@ import org.osgi.framework.FrameworkEvent;
  */
 public class ClasspathManager {
 	private static final FragmentClasspath[] emptyFragments = new FragmentClasspath[0];
+	private final static String PROP_CLASSLOADER_LOCK = "osgi.classloader.lock"; //$NON-NLS-1$
+	private final static String VALUE_CLASSNAME_LOCK = "classname"; //$NON-NLS-1$
+	private final static boolean LOCK_CLASSNAME = VALUE_CLASSNAME_LOCK.equals(FrameworkProperties.getProperty(PROP_CLASSLOADER_LOCK));
 
 	private BaseData data;
 	private String[] classpath;
 	private ClasspathEntry[] entries;
 	private BaseClassLoader classloader;
 	private FragmentClasspath[] fragments = emptyFragments;
-	// a colloction of String[2], each element is {"libname", "libpath"}
+	// a collection of String[2], each element is {"libname", "libpath"}
 	private Collection loadedLibraries = null;
+	private HashMap classNameLocks = new HashMap(5);
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -412,7 +417,10 @@ public class ClasspathManager {
 		try {
 			for (int i = 0; i < hooks.length; i++)
 				hooks[i].preFindLocalClass(classname, this);
-			result = findLocalClassImpl(classname, hooks);
+			if (LOCK_CLASSNAME)
+				result = findLocalClass_LockClassName(classname, hooks);
+			else
+				result = findLocalClass_LockClassLoader(classname, hooks);
 			return result;
 		} finally {
 			for (int i = 0; i < hooks.length; i++)
@@ -420,31 +428,74 @@ public class ClasspathManager {
 		}
 	}
 
+	private Class findLocalClass_LockClassName(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
+		boolean initialLock = lockClassName(classname);
+		try {
+			return findLocalClassImpl(classname, hooks);
+		} finally {
+			if (initialLock)
+				unlockClassName(classname);
+		}
+	}
+
+	private Class findLocalClass_LockClassLoader(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
+		synchronized (classloader) {
+			return findLocalClassImpl(classname, hooks);
+		}
+	}
+
 	private Class findLocalClassImpl(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
 		// must call findLoadedClass here even if it was called earlier,
 		// the findLoadedClass and defineClass calls must be atomic
-		synchronized (classloader) {
-			Class result = classloader.publicFindLoaded(classname);
-			if (result != null)
-				return result;
-			for (int i = 0; i < entries.length; i++) {
-				if (entries[i] != null) {
-					result = findClassImpl(classname, entries[i], hooks);
-					if (result != null)
-						return result;
-				}
+		Class result = classloader.publicFindLoaded(classname);
+		if (result != null)
+			return result;
+		for (int i = 0; i < entries.length; i++) {
+			if (entries[i] != null) {
+				result = findClassImpl(classname, entries[i], hooks);
+				if (result != null)
+					return result;
 			}
-			// look in fragments.
-			for (int i = 0; i < fragments.length; i++) {
-				ClasspathEntry[] fragEntries = fragments[i].getEntries();
-				for (int j = 0; j < fragEntries.length; j++) {
-					result = findClassImpl(classname, fragEntries[j], hooks);
-					if (result != null)
-						return result;
-				}
+		}
+		// look in fragments.
+		for (int i = 0; i < fragments.length; i++) {
+			ClasspathEntry[] fragEntries = fragments[i].getEntries();
+			for (int j = 0; j < fragEntries.length; j++) {
+				result = findClassImpl(classname, fragEntries[j], hooks);
+				if (result != null)
+					return result;
 			}
 		}
 		throw new ClassNotFoundException(classname);
+	}
+
+	private boolean lockClassName(String classname) throws ClassNotFoundException {
+		synchronized (classNameLocks) {
+			Object lockingThread = classNameLocks.get(classname);
+			Thread current = Thread.currentThread();
+			if (lockingThread == current)
+				return false;
+			while (true) {
+				if (lockingThread == null) {
+					classNameLocks.put(classname, current);
+					return true;
+				}
+				try {
+					classNameLocks.wait();
+					lockingThread = classNameLocks.get(classname);
+				} catch (InterruptedException e) {
+					current.interrupt();
+					throw new ClassNotFoundException(classname);
+				}
+			}
+		}
+	}
+
+	private void unlockClassName(String classname) {
+		synchronized (classNameLocks) {
+			classNameLocks.remove(classname);
+			classNameLocks.notifyAll();
+		}
 	}
 
 	private Class findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
