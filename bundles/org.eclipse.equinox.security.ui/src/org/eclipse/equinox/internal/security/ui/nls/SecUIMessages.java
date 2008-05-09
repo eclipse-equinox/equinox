@@ -70,6 +70,7 @@ public class SecUIMessages extends NLS {
 	public static String passwordCacheGroup;
 	public static String providerGroup;
 	public static String passwordCacheNote;
+	public static String providerDetails;
 
 	// secure storage view
 	public static String generalTitle;
@@ -145,6 +146,7 @@ public class SecUIMessages extends NLS {
 	public static String wizardSwitchError;
 	public static String wizardDoneTitle;
 	public static String wizardDone;
+	public static String passwordChangeDone;
 
 	// challenge-response dialog
 	public static String pswdRecoveryOptionTitle;

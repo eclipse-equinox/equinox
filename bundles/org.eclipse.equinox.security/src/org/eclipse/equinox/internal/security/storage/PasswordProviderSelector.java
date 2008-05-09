@@ -32,7 +32,10 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	final private static String EXTENSION_POINT = "org.eclipse.equinox.security.secureStorage"; //$NON-NLS-1$
 	final private static String STORAGE_MODULE = "provider";//$NON-NLS-1$
 	final private static String MODULE_PRIORITY = "priority";//$NON-NLS-1$
+	final private static String MODULE_DESCRIPTION = "description";//$NON-NLS-1$
 	final private static String CLASS_NAME = "class";//$NON-NLS-1$
+	final private static String HINTS_NAME = "hint";//$NON-NLS-1$
+	final private static String HINT_VALUE = "value";//$NON-NLS-1$
 
 	private Map modules = new HashMap(5); // cache of modules found
 
@@ -41,13 +44,17 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 		public IConfigurationElement element;
 		public int priority;
 		public String name;
+		public String description;
+		public List hints;
 
-		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name) {
+		public ExtStorageModule(String id, IConfigurationElement element, int priority, String name, String description, List hints) {
 			super();
 			this.element = element;
 			this.moduleID = id;
 			this.priority = priority;
 			this.name = name;
+			this.description = description;
+			this.hints = hints;
 		}
 	}
 
@@ -107,7 +114,21 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 					priority = 10;
 			}
 			String name = extensions[i].getLabel();
-			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name));
+
+			String description = element.getAttribute(MODULE_DESCRIPTION);
+
+			List suppliedHints = null;
+			IConfigurationElement[] hints = element.getChildren(HINTS_NAME);
+			if (hints.length != 0) {
+				suppliedHints = new ArrayList(hints.length);
+				for (int j = 0; j < hints.length; j++) {
+					String hint = hints[j].getAttribute(HINT_VALUE);
+					if (hint != null)
+						suppliedHints.add(hint);
+				}
+			}
+
+			allAvailableModules.add(new ExtStorageModule(moduleID, element, priority, name, description, suppliedHints));
 		}
 
 		Collections.sort(allAvailableModules, new Comparator() {

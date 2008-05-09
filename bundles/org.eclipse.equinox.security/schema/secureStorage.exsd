@@ -44,6 +44,9 @@
 
    <element name="provider">
       <complexType>
+         <sequence>
+            <element ref="hint" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -60,6 +63,34 @@
                   The integer number 0 to 10 describing priority of this password provider, with 0 being the lowest priority. Newly created secure preferences will use the password provider with the highest priority. If multiple providers have the same priority, an arbitrary provider among them will be selected.
                </documentation>
             </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  Optional text describing to the user functionality of this password provider.
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="hint">
+      <complexType>
+         <attribute name="value" use="required">
+            <annotation>
+               <documentation>
+                  To help secure storage optimize workflows, providers that acquire master passwords without input from the user the should specify &lt;tt&gt;AutomaticPasswordGeneration&lt;/tt&gt; hint.
+               </documentation>
+            </annotation>
+            <simpleType>
+               <restriction base="string">
+                  <enumeration value="AutomaticPasswordGeneration">
+                  </enumeration>
+               </restriction>
+            </simpleType>
          </attribute>
       </complexType>
    </element>
@@ -100,7 +131,6 @@
       <documentation>
          &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.ui&lt;/code&gt; bundle supplies default password provider that prompts user to enter the password.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;org.eclipse.equinox.security.win32.x86&lt;/code&gt; fragment provides Windows OS integration.&lt;/p&gt;
-
       </documentation>
    </annotation>
 

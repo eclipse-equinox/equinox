@@ -18,9 +18,11 @@ import org.eclipse.equinox.internal.security.storage.friends.*;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.*;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
@@ -39,6 +41,8 @@ public class TabPassword {
 	protected Button buttonClearPassword;
 	protected Button buttonChangePassword;
 	protected Button buttonRecoverPassword;
+
+	protected Text detailsText;
 
 	protected boolean providerModified = false;
 
@@ -107,6 +111,7 @@ public class TabPassword {
 				if ((e.detail & SWT.CHECK) != 0)
 					providerModified = true;
 				enableButtons();
+				updateDescription();
 			}
 		});
 		GridDataFactory.defaultsFor(providerTable).span(1, 2).applyTo(providerTable);
@@ -121,10 +126,19 @@ public class TabPassword {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
+				PasswordProviderDescription selectedModule = getSelectedModule();
+				if (selectedModule == null)
+					return;
 				String moduleID = getSelectedModuleID();
 				ISecurePreferences rootNode = SecurePreferencesFactory.getDefault();
-				ChangePasswordWizardDialog dialog = new ChangePasswordWizardDialog(shell, rootNode, moduleID);
-				dialog.open();
+				if (selectedModule.hasHint(InternalExchangeUtils.HINT_PASSWORD_AUTOGEN)) {
+					// do replacement behind the scene without showing the wizard
+					changePassword(rootNode, moduleID, selectedModule.getName(), shell);
+				} else {
+					// show the wizard to provide separate "old" and "new" password entries
+					ChangePasswordWizardDialog dialog = new ChangePasswordWizardDialog(shell, rootNode, moduleID);
+					dialog.open();
+				}
 				enableLogout();
 			}
 		});
@@ -153,6 +167,19 @@ public class TabPassword {
 		setButtonSize(buttonRecoverPassword);
 
 		enableButtons();
+
+		Label descriptionLabel = new Label(providersComp, SWT.NONE);
+		descriptionLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
+		descriptionLabel.setText(SecUIMessages.providerDetails);
+
+		detailsText = new Text(providersComp, SWT.MULTI | SWT.LEAD | SWT.BORDER | SWT.READ_ONLY | SWT.WRAP);
+		detailsText.setBackground(detailsText.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		gridData = new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1);
+		gridData.widthHint = 300;
+		gridData.heightHint = 65;
+		detailsText.setLayoutData(gridData);
+		updateDescription();
+
 		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getSpacing()).generateLayout(page);
 	}
 
@@ -169,7 +196,7 @@ public class TabPassword {
 			PasswordProviderDescription module = (PasswordProviderDescription) i.next();
 			TableItem item = new TableItem(providerTable, SWT.NONE);
 			item.setText(new String[] {module.getName(), Integer.toString(module.getPriority())});
-			item.setData(module.getId());
+			item.setData(module);
 			if (disabledModules == null)
 				item.setChecked(true);
 			else
@@ -180,15 +207,25 @@ public class TabPassword {
 		layout.addColumnData(new ColumnWeightData(5));
 		layout.addColumnData(new ColumnWeightData(1));
 		providerTable.setLayout(layout);
+
+		if (providerTable.getItemCount() > 0)
+			providerTable.select(0);
 	}
 
-	protected String getSelectedModuleID() {
+	protected PasswordProviderDescription getSelectedModule() {
 		if (providerTable == null)
 			return null;
 		TableItem[] items = providerTable.getSelection();
 		if (items.length == 0)
 			return null;
-		return (String) items[0].getData();
+		return ((PasswordProviderDescription) items[0].getData());
+	}
+
+	protected String getSelectedModuleID() {
+		PasswordProviderDescription selectedModule = getSelectedModule();
+		if (selectedModule == null)
+			return null;
+		return selectedModule.getId();
 	}
 
 	protected void enableButtons() {
@@ -246,7 +283,7 @@ public class TabPassword {
 				tmp.append(',');
 			else
 				first = false;
-			tmp.append((String) items[i].getData());
+			tmp.append(((PasswordProviderDescription) items[i].getData()).getId());
 		}
 
 		IEclipsePreferences node = new ConfigurationScope().getNode(PREFERENCES_PLUGIN);
@@ -274,6 +311,37 @@ public class TabPassword {
 
 	protected void setButtonSize(Button button) {
 		GridDataFactory.defaultsFor(button).align(SWT.FILL, SWT.BEGINNING).grab(false, false).applyTo(button);
+	}
+
+	protected boolean changePassword(ISecurePreferences node, String moduleID, String name, Shell shell) {
+		ReEncrypter reEncrypter = new ReEncrypter(node, moduleID);
+		if (!reEncrypter.decrypt()) {
+			MessageBox messageBox = new MessageBox(shell, SWT.YES | SWT.NO | SWT.ICON_WARNING);
+			messageBox.setText(SecUIMessages.changePasswordWizardTitle);
+			messageBox.setMessage(SecUIMessages.wizardDecodeWarning);
+			if (messageBox.open() == SWT.YES)
+				return false;
+		}
+
+		if (!reEncrypter.switchToNewPassword()) {
+			MessageBox messageBox = new MessageBox(shell, SWT.OK | SWT.ICON_ERROR);
+			messageBox.setText(SecUIMessages.changePasswordWizardTitle);
+			messageBox.setMessage(SecUIMessages.wizardSwitchError);
+			messageBox.open();
+			return false;
+		}
+		reEncrypter.encrypt();
+
+		// all good
+		String msg = NLS.bind(SecUIMessages.passwordChangeDone, name);
+		MessageDialog.openInformation(StorageUtils.getShell(), SecUIMessages.generalDialogTitle, msg);
+		return true;
+	}
+
+	protected void updateDescription() {
+		PasswordProviderDescription selectedModule = getSelectedModule();
+		if (selectedModule != null && detailsText != null)
+			detailsText.setText(selectedModule.getDescription());
 	}
 
 }

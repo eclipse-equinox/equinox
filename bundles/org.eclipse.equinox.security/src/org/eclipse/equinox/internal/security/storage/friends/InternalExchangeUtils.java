@@ -27,6 +27,8 @@ import org.osgi.framework.BundleContext;
  */
 public class InternalExchangeUtils {
 
+	static public final String HINT_PASSWORD_AUTOGEN = "AutomaticPasswordGeneration"; //$NON-NLS-1$
+
 	static private final String JUNIT_APPS1 = "org.eclipse.pde.junit.runtime."; //$NON-NLS-1$
 	static private final String JUNIT_APPS2 = "org.eclipse.test."; //$NON-NLS-1$
 
@@ -52,7 +54,7 @@ public class InternalExchangeUtils {
 		List result = new ArrayList(availableModules.size());
 		for (Iterator i = availableModules.iterator(); i.hasNext();) {
 			ExtStorageModule module = (ExtStorageModule) i.next();
-			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority));
+			result.add(new PasswordProviderDescription(module.name, module.moduleID, module.priority, module.description, module.hints));
 		}
 		return result;
 	}

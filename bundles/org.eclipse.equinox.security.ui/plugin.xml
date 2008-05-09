@@ -63,6 +63,7 @@
          point="org.eclipse.equinox.security.secureStorage">
       <provider
             class="org.eclipse.equinox.internal.security.ui.storage.DefaultPasswordProvider"
+            description="%providerDescription"
             priority="2">
       </provider>
    </extension>
