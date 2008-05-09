@@ -124,4 +124,10 @@ public class SecurePreferencesContainer implements IPreferencesContainer {
 			return options.put(key, value);
 		}
 	}
+
+	public Object removeOption(Object key) {
+		synchronized (options) {
+			return options.remove(key);
+		}
+	}
 }

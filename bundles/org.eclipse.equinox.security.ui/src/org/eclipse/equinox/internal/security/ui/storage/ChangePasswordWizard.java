@@ -14,6 +14,7 @@ import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.*;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -33,7 +34,11 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			Composite container = new Composite(parent, SWT.NULL);
 			GridLayout layout = new GridLayout();
 			container.setLayout(layout);
-			new Label(container, SWT.NULL).setText(SecUIMessages.wizardDecodeLabel);
+			Label note = new Label(container, SWT.WRAP);
+			GridData labelData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+			labelData.widthHint = 340;
+			note.setLayoutData(labelData);
+			note.setText(SecUIMessages.wizardDecodeLabel);
 			setControl(container);
 		}
 
@@ -53,7 +58,11 @@ public class ChangePasswordWizard extends Wizard implements INewWizard {
 			Composite container = new Composite(parent, SWT.NULL);
 			GridLayout layout = new GridLayout();
 			container.setLayout(layout);
-			new Label(container, SWT.NULL).setText(SecUIMessages.wizardEncodeLabel);
+			Label note = new Label(container, SWT.WRAP);
+			GridData labelData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+			labelData.widthHint = 340;
+			note.setLayoutData(labelData);
+			note.setText(SecUIMessages.wizardEncodeLabel);
 			setControl(container);
 		}
 

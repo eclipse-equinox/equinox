@@ -13,9 +13,11 @@ package org.eclipse.equinox.internal.security.storage.friends;
 import java.util.*;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
+import org.eclipse.equinox.internal.security.storage.SecurePreferencesContainer;
 import org.eclipse.equinox.internal.security.storage.SecurePreferencesWrapper;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -113,6 +115,11 @@ public class ReEncrypter {
 	 */
 	public boolean encrypt() {
 		boolean result = true;
+
+		// we'll directly inject here a requirement to use the specified module to encrypt data
+		SecurePreferencesContainer container = ((SecurePreferencesWrapper) root).getContainer();
+		Object originalProperty = container.getOption(IProviderHints.REQUIRED_MODULE_ID);
+		container.setOption(IProviderHints.REQUIRED_MODULE_ID, moduleID);
 		for (Iterator i = elements.iterator(); i.hasNext();) {
 			TmpElement element = (TmpElement) i.next();
 			ISecurePreferences node = root.node(element.getPath());
@@ -129,6 +136,10 @@ public class ReEncrypter {
 				}
 			}
 		}
+		if (originalProperty != null)
+			container.setOption(IProviderHints.REQUIRED_MODULE_ID, originalProperty);
+		else
+			container.removeOption(IProviderHints.REQUIRED_MODULE_ID);
 		return result;
 	}
 
