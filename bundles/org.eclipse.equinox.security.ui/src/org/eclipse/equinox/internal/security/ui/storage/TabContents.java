@@ -28,6 +28,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
+import org.eclipse.ui.PlatformUI;
 
 public class TabContents implements ISecurePreferencesSelection, IDeleteListener {
 
@@ -198,10 +199,12 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		InternalExchangeUtils.defaultStorageDelete();
 
 		// suggest restart in case somebody holds on to the deleted storage
-		MessageBox postDeletionBox = new MessageBox(shell, SWT.OK);
-		postDeletionBox.setText(SecUIMessages.postDeleteTitle);
+		MessageBox postDeletionBox = new MessageBox(shell, SWT.YES | SWT.NO);
+		postDeletionBox.setText(SecUIMessages.generalDialogTitle);
 		postDeletionBox.setMessage(SecUIMessages.postDeleteMsg);
-		postDeletionBox.open();
+		int result = postDeletionBox.open();
+		if (result == SWT.YES)
+			PlatformUI.getWorkbench().restart();
 	}
 
 }

@@ -233,7 +233,9 @@ public class NodesView {
 	}
 
 	public void postDeleted() {
-		if (contentProvider != null)
-			contentProvider.inputChanged(null, null, defaultPrefs);
+		if (contentProvider == null)
+			return;
+		nodeTreeViewer.setSelection(StructuredSelection.EMPTY);
+		nodeTreeViewer.refresh();
 	}
 }
