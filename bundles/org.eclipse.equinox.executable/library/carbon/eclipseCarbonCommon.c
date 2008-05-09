@@ -72,11 +72,11 @@ void displayMessage(char *title, char *message)
 			if (c == '\n') c= ' ';
 			*to= c;
 		}
-		inError= CFStringCreateWithCString(kCFAllocatorDefault, buffer, kCFStringEncodingASCII);
+		inError= CFStringCreateWithCString(kCFAllocatorDefault, buffer, kCFStringEncodingUTF8);
 		free(buffer);
-		inDescription= CFStringCreateWithCString(kCFAllocatorDefault, pos+2, kCFStringEncodingASCII);
+		inDescription= CFStringCreateWithCString(kCFAllocatorDefault, pos+2, kCFStringEncodingUTF8);
 	} else {
-		inError= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingASCII);
+		inError= CFStringCreateWithCString(kCFAllocatorDefault, message, kCFStringEncodingUTF8);
 	}
 	
 	init();
@@ -141,7 +141,7 @@ char * resolveSymlinks( char * path ) {
 	if(path == NULL)
 		return path;
 		
-	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingASCII);
+	string = CFStringCreateWithCString(kCFAllocatorDefault, path, kCFStringEncodingUTF8);
 	url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, string, kCFURLPOSIXPathStyle, false);
 	CFRelease(string);
 	if(url == NULL)

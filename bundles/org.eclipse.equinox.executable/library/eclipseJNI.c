@@ -173,8 +173,19 @@ void setExitData(JNIEnv *env, jstring id, jstring s){
 static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
 	const _TCHAR * result = NULL;
 #ifdef UNICODE
-	result = (*env)->GetStringChars(env, str, 0);
+	/* GetStringChars is not null terminated, make a copy */
+	const _TCHAR * stringChars = (*env)->GetStringChars(env, str, 0);
+	int length = (*env)->GetStringLength(env, str);
+	_TCHAR * copy = malloc( (length + 1) * sizeof(_TCHAR));
+	_tcsncpy(copy, stringChars, length);
+	copy[length] = _T_ECLIPSE('\0');
+	(*env)->ReleaseStringChars(env, str, stringChars);
+	result = copy;
+#elif MACOSX
+	/* Use UTF on the Mac */
+	result = (*env)->GetStringUTFChars(env, str, 0);
 #else
+	/* Other platforms, use java's default encoding */ 
 	_TCHAR* buffer = NULL;
 	jclass stringClass = (*env)->FindClass(env, "java/lang/String");
 	if (stringClass != NULL) {
@@ -202,7 +213,9 @@ static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
 /* Release the string that was obtained using JNI_GetStringChars */
 static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data) {
 #ifdef UNICODE
-	(*env)->ReleaseStringChars(env, s, data);
+	free((_TCHAR*)data);
+#elif MACOSX
+	(*env)->ReleaseStringUTFChars(env, s, data);
 #else
 	free((_TCHAR*)data);
 #endif
@@ -211,11 +224,13 @@ static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data) {
 static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 {
 	jstring newString = NULL;
-	size_t length = _tcslen(str);
-	
 #ifdef UNICODE
+	size_t length = _tcslen(str);
 	newString = (*env)->NewString(env, str, length);
+#elif MACOSX
+	newString = (*env)->NewStringUTF(env, str);
 #else
+	size_t length = _tcslen(str);
 	jbyteArray bytes = (*env)->NewByteArray(env, length);
 	if(bytes != NULL) {
 		(*env)->SetByteArrayRegion(env, bytes, 0, length, str);

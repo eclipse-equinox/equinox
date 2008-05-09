@@ -123,7 +123,7 @@ int showSplash( const _TCHAR* featureImage )
 	
 	loadImageFns();
 	if (createWithURL && createAtIndex) {
-		CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingASCII);
+		CFStringRef imageString = CFStringCreateWithCString(kCFAllocatorDefault, featureImage, kCFStringEncodingUTF8);
 		if(imageString != NULL) {
 			CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, imageString, kCFURLPOSIXPathStyle, false);
 			if(url != NULL) {
