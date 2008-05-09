@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006-2007 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006-2008 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,9 +138,15 @@ class ConfigurationImpl implements Configuration {
 	}
 
 	public String getBundleLocation() {
+		return getBundleLocation(true);
+	}
+
+	protected String getBundleLocation(boolean checkPermission) {
 		try {
 			lock();
 			checkDeleted();
+			if (checkPermission)
+				configurationAdminFactory.checkConfigurationPermission();
 			if (bundleLocation != null)
 				return bundleLocation;
 			if (boundBundle != null)
@@ -205,8 +211,11 @@ class ConfigurationImpl implements Configuration {
 			if (deleted)
 				return null;
 			Dictionary copy = getProperties();
-			if (copy != null && bundleLocation != null)
-				copy.put(ConfigurationAdmin.SERVICE_BUNDLELOCATION, getBundleLocation());
+			if (copy == null)
+				return null;
+			String boundLocation = getBundleLocation(false);
+			if (boundLocation != null)
+				copy.put(ConfigurationAdmin.SERVICE_BUNDLELOCATION, boundLocation);
 			return copy;
 		} finally {
 			unlock();

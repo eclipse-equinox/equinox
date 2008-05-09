@@ -16,7 +16,6 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.equinox.internal.cm.reliablefile.*;
 import org.osgi.framework.*;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.log.LogService;
 
 /**
@@ -150,8 +149,8 @@ class ConfigurationStore {
 		configFile.delete();
 	}
 
-	public synchronized Configuration getConfiguration(String pid, String location) {
-		Configuration config = (Configuration) configurations.get(pid);
+	public synchronized ConfigurationImpl getConfiguration(String pid, String location) {
+		ConfigurationImpl config = (ConfigurationImpl) configurations.get(pid);
 		if (config == null) {
 			config = new ConfigurationImpl(configurationAdminFactory, this, null, pid, location);
 			configurations.put(pid, config);
@@ -159,7 +158,7 @@ class ConfigurationStore {
 		return config;
 	}
 
-	public synchronized Configuration createFactoryConfiguration(String factoryPid, String location) {
+	public synchronized ConfigurationImpl createFactoryConfiguration(String factoryPid, String location) {
 		String pid = factoryPid + "-" + new Date().getTime() + "-" + createdPidCount++; //$NON-NLS-1$ //$NON-NLS-2$
 		ConfigurationImpl config = new ConfigurationImpl(configurationAdminFactory, this, factoryPid, pid, location);
 		configurations.put(pid, config);
@@ -181,7 +180,7 @@ class ConfigurationStore {
 		return (ConfigurationImpl[]) resultList.toArray(new ConfigurationImpl[0]);
 	}
 
-	public synchronized Configuration[] listConfigurations(Filter filter) {
+	public synchronized ConfigurationImpl[] listConfigurations(Filter filter) {
 		List resultList = new ArrayList();
 		for (Iterator it = configurations.values().iterator(); it.hasNext();) {
 			ConfigurationImpl config = (ConfigurationImpl) it.next();
@@ -190,7 +189,7 @@ class ConfigurationStore {
 				resultList.add(config);
 		}
 		int size = resultList.size();
-		return size == 0 ? null : (Configuration[]) resultList.toArray(new Configuration[size]);
+		return size == 0 ? null : (ConfigurationImpl[]) resultList.toArray(new ConfigurationImpl[size]);
 	}
 
 	public synchronized void unbindConfigurations(Bundle bundle) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006-2007 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006-2008 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,9 +44,10 @@ class ConfigurationAdminImpl implements ConfigurationAdmin {
 
 	public Configuration getConfiguration(String pid) throws IOException {
 		checkPID(pid);
-		Configuration config = configurationStore.getConfiguration(pid, bundle.getLocation());
-		if (config.getBundleLocation() != null && !config.getBundleLocation().equals(bundle.getLocation()))
+		ConfigurationImpl config = configurationStore.getConfiguration(pid, bundle.getLocation());
+		if (config.getBundleLocation(false) != null && !config.getBundleLocation(false).equals(bundle.getLocation()))
 			this.configurationAdminFactory.checkConfigurationPermission();
+		config.bind(bundle);
 		return config;
 	}
 
