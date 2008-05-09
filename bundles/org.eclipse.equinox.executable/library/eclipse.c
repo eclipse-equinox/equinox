@@ -694,9 +694,9 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
     return execArg;
 }
 
-static void adjustVMArgs( _TCHAR *vm, _TCHAR **vmArgv[] ) {
+static void adjustVMArgs( _TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[] ) {
 	/* Sun VMs need some extra perm gen space */
-	if (isSunVM(vm) && permGen != NULL) {
+	if (permGen != NULL && isSunVM(javaVM, jniLib)) {
 		int specified = 0, i = -1;
 		
 		/* first check to see if it is already specified */
@@ -744,7 +744,7 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	/* If the user specified "-vmargs", add them instead of the default VM args. */
 	vmArg = (userVMarg != NULL) ? userVMarg : getArgVM( (launchMode == LAUNCH_JNI) ? jniLib : javaVM ); 
  	
-	adjustVMArgs((launchMode == LAUNCH_JNI) ? jniLib : javaVM, &vmArg);
+	adjustVMArgs(javaVM, jniLib, &vmArg);
 	
  	/* Calculate the number of VM arguments. */
  	while (vmArg[ nVMarg ] != NULL)

@@ -443,6 +443,7 @@ void processVMArgs(char **vmargs[] )
 	}
 }
 
-int isSunVM( _TCHAR * vm ) {
+int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	_TCHAR *vm = (jniLib != NULL) ? jniLib : javaVM;
 	return (strncmp(vm, JAVA_FRAMEWORK, strlen(JAVA_FRAMEWORK)) == 0);
 }

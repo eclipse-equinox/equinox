@@ -131,7 +131,7 @@ extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _
 extern void processVMArgs(_TCHAR **vmargs[] );
 
 /* is this a Sun VM, returns 0 if we don't know */
-extern int isSunVM( _TCHAR * vm );
+extern int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib );
 
 /* an array of paths that will need to be on the search path to load the vm shared library */
 extern _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary);

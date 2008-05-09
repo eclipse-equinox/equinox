@@ -173,7 +173,54 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* 
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }
 
-int isSunVM( _TCHAR * vm ) {
-	/* don't know how to decide on this platform */
-	return 0;
+int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
+	if (javaVM == NULL)
+		return 0;
+	
+	int descriptors[2];
+	int result = 0;
+	/* create pipe, [0] is read end, [1] is write end */
+	if (pipe(descriptors) != 0)
+		return 0; /* error */
+	
+	int pid = fork();
+	if (pid == 0 ) { 
+		/* child, connect stdout & stderr to write end of the pipe*/
+		dup2(descriptors[1], STDERR_FILENO);
+		dup2(descriptors[1], STDOUT_FILENO);
+		
+		/* close descriptors */
+		close(descriptors[0]);
+		close(descriptors[1]);
+		
+		/* exec java -version */
+		_TCHAR *args [] = { javaVM, _T_ECLIPSE("-version"), NULL };
+		execv(args[0], args);
+		/* if we make it here, there was a problem with exec, just exit */
+		exit(0);
+	} else if (pid > 0){
+		/* parent */
+		close(descriptors[1]);
+		FILE * stream = fdopen( descriptors[0], "r");
+		if (stream != NULL) {
+			_TCHAR buffer[256];
+			while ( fgets(buffer, 256, stream) != NULL) {
+				if (_tcsstr(buffer, _T_ECLIPSE("Java HotSpot(TM)")) || _tcsstr(buffer, _T_ECLIPSE("OpenJDK"))) {
+					result = 1;
+					break;
+				}
+				if (_tcsstr(buffer, _T_ECLIPSE("IBM")) != NULL) {
+					result = 0;
+					break;
+				}
+			}
+			fclose(stream);
+			close(descriptors[0]);
+		}
+	} else {
+		/* failed to fork */
+		close(descriptors[0]);
+		close(descriptors[1]);
+	}
+	return result;
 }
