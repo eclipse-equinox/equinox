@@ -65,7 +65,13 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 
 		Composite composite = new Composite(compositeTop, SWT.NONE);
 
-		setMessage(SecUIMessages.passwordMsg, IMessageProvider.INFORMATION);
+		setMessage(SecUIMessages.passwordMsg, IMessageProvider.NONE);
+
+		Label storyLabel = new Label(composite, SWT.WRAP);
+		GridData labelData = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		labelData.widthHint = 500;
+		storyLabel.setLayoutData(labelData);
+		storyLabel.setText(SecUIMessages.passwordRecoveryLabel);
 
 		for (int i = 0; i < size; i++) {
 			Group group = new Group(composite, SWT.NONE);
@@ -92,10 +98,6 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 			});
 		}
 
-		Label storyLabel = new Label(composite, SWT.LEFT);
-		storyLabel.setText(SecUIMessages.passwordRecoveryLabel);
-		storyLabel.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, true, false));
-
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayoutFactory.swtDefaults().generateLayout(composite);
 
@@ -121,7 +123,7 @@ public class ChallengeResponseDialog extends TitleAreaDialog {
 			}
 		}
 		if (valid)
-			setMessage(SecUIMessages.passwordMsg, IMessageProvider.INFORMATION);
+			setMessage(SecUIMessages.passwordMsg, IMessageProvider.NONE);
 		else
 			setMessage(SecUIMessages.passwordErrMsg, IMessageProvider.WARNING);
 		okButton.setEnabled(valid);
