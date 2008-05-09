@@ -76,7 +76,7 @@ public class DefaultAuthorizationEngine extends AuthorizationEngine {
 				} catch (IllegalArgumentException e) {
 					// do nothing;
 				}
-			if (versionProp == null || VERSION_MAX.compareTo(new Version(versionProp)) > 0) {
+			if (VERSION_MAX.compareTo(version) > 0) {
 				String policy = properties.getProperty(POLICY_PROP);
 				if (policy != null)
 					try {
