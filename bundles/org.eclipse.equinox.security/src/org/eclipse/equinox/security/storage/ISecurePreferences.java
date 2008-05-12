@@ -74,6 +74,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void put(String key, String value, boolean encrypt) throws StorageException;
 
@@ -84,72 +87,111 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public String get(String key, String def) throws StorageException;
 
 	/**
 	 * Removes value associated with the key.
 	 * @param key key with which a value is associated
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public void remove(String key);
 
 	/**
 	 * Removes all values from this node.
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public void clear();
 
 	/**
 	 * Returns keys that have associated values.
 	 * @return keys that have associated values
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public String[] keys();
 
 	/**
 	 * Returns names of children nodes
 	 * @return names of children nodes
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public String[] childrenNames();
 
 	/**
 	 * Returns parent of this node
 	 * @return parent of this node
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public ISecurePreferences parent();
 
 	/**
 	 * Returns node corresponding to the path specified. If such node does not
 	 * exist, a new node is created.
+	 * <p>
+	 * If the node path is invalid, an {@link IllegalArgumentException} will be thrown
+	 * by this method. The valid node path:
+	 * <ul>
+	 * <li>contains only ASCII characters between 32 and 126 (ASCII alphanumeric and printable
+	 * characters);</li>
+	 * <li>can not contain two or more consecutive forward slashes;</li>
+	 * <li>can not end with a trailing forward slash.</li>
+	 * </ul>
+	 * </p>
 	 * @see org.osgi.service.prefs.Preferences
 	 * @see org.osgi.service.prefs.Preferences#node(String)
 	 * @param pathName absolute or relative path to the node
 	 * @return node corresponding to the path
+	 * @throws IllegalArgumentException if the path name is invalid.
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public ISecurePreferences node(String pathName);
 
 	/**
 	 * Checks if the node corresponding to the specified path exists in this tree
 	 * of secure preferences.
+	 * <p>
+	 * If the node path is invalid, an {@link IllegalArgumentException} will be thrown
+	 * by this method. See {@link #node(String)} for the description of what is considered
+	 * to be a valid path.
+	 * </p>
 	 * @see org.osgi.service.prefs.Preferences
 	 * @see org.osgi.service.prefs.Preferences#node(String)
 	 * @param pathName absolute or relative path to the node
 	 * @return <code>true</code> if node corresponding to the path exists, <code>false</code> otherwise 
+	 * @throws IllegalArgumentException if the path name is invalid.
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public boolean nodeExists(String pathName);
 
 	/**
 	 * Removes this node from the tree of secure preferences.
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public void removeNode();
 
 	/**
 	 * Returns name of this node.
 	 * @return name of this node
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public String name();
 
 	/**
 	 * Returns absolute path to this node.
 	 * @return absolute path to this node
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public String absolutePath();
 
@@ -167,6 +209,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putInt(String key, int value, boolean encrypt) throws StorageException;
 
@@ -177,6 +222,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public int getInt(String key, int def) throws StorageException;
 
@@ -187,6 +234,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putLong(String key, long value, boolean encrypt) throws StorageException;
 
@@ -197,6 +247,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public long getLong(String key, long def) throws StorageException;
 
@@ -207,6 +259,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putBoolean(String key, boolean value, boolean encrypt) throws StorageException;
 
@@ -217,6 +272,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public boolean getBoolean(String key, boolean def) throws StorageException;
 
@@ -227,6 +284,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putFloat(String key, float value, boolean encrypt) throws StorageException;
 
@@ -237,6 +297,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public float getFloat(String key, float def) throws StorageException;
 
@@ -247,6 +309,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putDouble(String key, double value, boolean encrypt) throws StorageException;
 
@@ -257,6 +322,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public double getDouble(String key, double def) throws StorageException;
 
@@ -267,6 +334,9 @@ public interface ISecurePreferences {
 	 * @param encrypt <code>true</code> if value is to be encrypted, <code>false</code> value 
 	 * does not need to be encrypted 
 	 * @throws StorageException if exception occurred during encryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
+	 * @throws NullPointerException if <code>key</code> is <code>null</code>.
 	 */
 	public void putByteArray(String key, byte[] value, boolean encrypt) throws StorageException;
 
@@ -277,6 +347,8 @@ public interface ISecurePreferences {
 	 * @param def default value to return if the key is not associated with any value
 	 * @return value associated the key. If value was stored in an encrypted form, it will be decrypted
 	 * @throws StorageException if exception occurred during decryption
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public byte[] getByteArray(String key, byte[] def) throws StorageException;
 
@@ -285,6 +357,8 @@ public interface ISecurePreferences {
 	 * @param key key with which a value is associated
 	 * @return <code>true</code> if value is encrypted, <code>false</code> otherwise
 	 * @throws StorageException if stored data is invalid
+	 * @throws IllegalStateException if this node (or an ancestor) has been removed with 
+	 * the {@link #removeNode()} method.
 	 */
 	public boolean isEncrypted(String key) throws StorageException;
 }
