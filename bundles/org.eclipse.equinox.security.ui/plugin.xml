@@ -77,12 +77,11 @@
    </extension>
    <extension
          id="security"
-         name="Security"
          point="org.eclipse.ui.systemSummarySections">
       <section
             class="org.eclipse.equinox.internal.security.ui.SecurityConfigurationSection"
             id="securityConfigurationSection"
-            sectionTitle="Security Configuration">
+            sectionTitle="%systemSummaryTitle">
       </section>
    </extension>
    

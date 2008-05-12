@@ -24,7 +24,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 	public void write(PrintWriter writer) {
 
 		Provider[] providers = Security.getProviders();
-		writer.println("Installed providers (" + providers.length + "): ");//$NON-NLS-1$ //$NON-NLS-2$ 
+		writer.println("Providers (" + providers.length + "): ");//$NON-NLS-1$ //$NON-NLS-2$ 
 		writer.println();
 
 		for (int i = 0; i < providers.length; i++) {
@@ -36,7 +36,7 @@ public class SecurityConfigurationSection implements ISystemSummarySection {
 		writer.println(" Provider: " + provider.getName() + ", Version: " + provider.getVersion() + ", Class: " + provider.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		writer.println("  Description: " + provider.getInfo()); //$NON-NLS-1$
 		ProviderService[] services = getServices(provider);
-		writer.println("  Available services (" + services.length + "):"); //$NON-NLS-1$  //$NON-NLS-2$
+		writer.println("  Services (" + services.length + "):"); //$NON-NLS-1$  //$NON-NLS-2$
 		for (int i = 0; i < services.length; i++) {
 			appendService(writer, services[i], i);
 		}
