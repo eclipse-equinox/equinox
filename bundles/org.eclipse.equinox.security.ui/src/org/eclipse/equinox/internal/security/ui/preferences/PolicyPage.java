@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,6 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 		anyButton = new Button(buttonGroup, SWT.RADIO);
 		anysignedButton = new Button(buttonGroup, SWT.RADIO);
 		onlytrustedButton = new Button(buttonGroup, SWT.RADIO);
-		onlytrustedButton.setSelection(true);
 
 		expiredButton = new Button(buttonGroup, SWT.CHECK);
 		expiredButton.setEnabled(true); //since onlytrustedButton is default on
@@ -78,29 +77,26 @@ public class PolicyPage extends PreferencePage implements IWorkbenchPreferencePa
 
 		});
 
+		// select the default authorization engine
+		AuthorizationEngine authEngine = Activator.getAuthorizationEngine();
 		// check if osgi.signedcontent.support property is enable
-		if (System.getProperty("osgi.signedcontent.support") != null) {
-			//			enableLoadSecBtn.setSelection(true);
-			//folder.setEnabled(true);
+		if (System.getProperty("osgi.signedcontent.support") != null && authEngine instanceof DefaultAuthorizationEngine) {
+			DefaultAuthorizationEngine defaultAuthEngine = (DefaultAuthorizationEngine) authEngine;
+			selectedPolicy = defaultAuthEngine.getLoadPolicy();
 
-			// select the default authorization engine
-			AuthorizationEngine authEngine = Activator.getAuthorizationEngine();
-			if (authEngine instanceof DefaultAuthorizationEngine) {
-				DefaultAuthorizationEngine defaultAuthEngine = (DefaultAuthorizationEngine) authEngine;
-				selectedPolicy = defaultAuthEngine.getLoadPolicy();
-
-				if ((selectedPolicy & BIT_TRUST_EXPIRED) == BIT_TRUST_EXPIRED) {
-					onlytrustedButton.setSelection(true);
-					expiredButton.setSelection(true);
-					expiredButton.setEnabled(true);
-				} else if ((selectedPolicy & BIT_TRUST) == BIT_TRUST) {
-					onlytrustedButton.setSelection(true);
-					expiredButton.setEnabled(true);
-				} else if ((selectedPolicy & DefaultAuthorizationEngine.ENFORCE_SIGNED) == DefaultAuthorizationEngine.ENFORCE_SIGNED)
-					anysignedButton.setSelection(true);
-				else if ((selectedPolicy & DefaultAuthorizationEngine.ENFORCE_NONE) == 0)
-					anyButton.setSelection(true);
-			}
+			if ((selectedPolicy & BIT_TRUST_EXPIRED) == BIT_TRUST_EXPIRED) {
+				onlytrustedButton.setSelection(true);
+				expiredButton.setSelection(true);
+				expiredButton.setEnabled(true);
+			} else if ((selectedPolicy & BIT_TRUST) == BIT_TRUST) {
+				onlytrustedButton.setSelection(true);
+				expiredButton.setEnabled(true);
+			} else if ((selectedPolicy & DefaultAuthorizationEngine.ENFORCE_SIGNED) == DefaultAuthorizationEngine.ENFORCE_SIGNED)
+				anysignedButton.setSelection(true);
+			else
+				anyButton.setSelection(true);
+		} else {
+			anyButton.setSelection(true);
 		}
 
 		anyButton.setText(SecurityUIMsg.POLPAGE_BUTTON_ALLOW_ANY);
