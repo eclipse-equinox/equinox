@@ -10,14 +10,6 @@
       </page>
    </extension>
 
-   <extension point="org.eclipse.ui.preferencePages">
-      <page
-         name="%policy"
-         class="org.eclipse.equinox.internal.security.ui.preferences.PolicyPage"
-         id="org.eclipse.equinox.security.ui.policy"
-         category="org.eclipse.equinox.security.ui.category">
-      </page>
-   </extension>
 
 <!--
    <extension point="org.eclipse.ui.preferencePages">

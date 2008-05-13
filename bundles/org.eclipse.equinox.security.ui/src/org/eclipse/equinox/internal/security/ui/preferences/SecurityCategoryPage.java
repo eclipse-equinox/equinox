@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,9 +36,6 @@ public class SecurityCategoryPage extends PreferencePage implements IWorkbenchPr
 		Composite pageArea = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		pageArea.setLayout(layout);
-
-		PreferenceLinkArea policyLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.policy", SecurityUIMsg.CATPAGE_LABEL_POLICY, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
-		policyLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
 
 		PreferenceLinkArea storageLinkArea = new PreferenceLinkArea(pageArea, SWT.NONE, "org.eclipse.equinox.security.ui.storage", SecurityUIMsg.CATPAGE_LABEL_STORAGE, (IWorkbenchPreferenceContainer) getContainer(), null); //$NON-NLS-1$
 		storageLinkArea.getControl().setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL));
