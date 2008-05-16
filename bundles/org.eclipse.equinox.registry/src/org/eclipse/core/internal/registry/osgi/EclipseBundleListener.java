@@ -179,25 +179,30 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		registry.addContribution(is, contributor, true, pluginManifest.getPath(), translationBundle, token, timestamp);
 	}
 
-	private void checkForNLSFragment(Bundle fragment) {
-		if (!OSGIUtils.getDefault().isFragment(fragment))
-			return; // only need to worry about fragments
-		Bundle[] hosts = OSGIUtils.getDefault().getHosts(fragment);
+	private void checkForNLSFragment(Bundle bundle) {
+		if (!OSGIUtils.getDefault().isFragment(bundle)) {
+			// only need to worry about fragments
+			synchronized (currentStateStamp) {
+				// mark this host as processed for the current state stamp.
+				dynamicAddStateStamps.put(Long.toString(bundle.getBundleId()), new Long(currentStateStamp[0]));
+			}
+			return;
+		}
+		Bundle[] hosts = OSGIUtils.getDefault().getHosts(bundle);
 		if (hosts == null)
 			return;
 		// check to see if the hosts should be refreshed because the fragment contains NLS properties files.
 		for (int i = 0; i < hosts.length; i++)
-			checkForNLSFiles(hosts[i], fragment);
+			checkForNLSFiles(hosts[i], bundle);
 	}
 
 	private void checkForNLSFiles(Bundle host, Bundle fragment) {
 		String hostID = Long.toString(host.getBundleId());
-		Long hostStateStamp = (Long) dynamicAddStateStamps.get(hostID);
+
 		synchronized (currentStateStamp) {
+			Long hostStateStamp = (Long) dynamicAddStateStamps.get(hostID);
 			if (hostStateStamp != null && currentStateStamp[0] == hostStateStamp.longValue())
 				return; // already processed this host
-			// mark this host as processed for the current state stamp.
-			dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
 		}
 
 		if (registry.hasContributor(hostID)) {
@@ -219,7 +224,11 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
 			Enumeration nlsFiles = fragment.findEntries(baseDir, filePattern, false);
 			if (nlsFiles == null)
-				return;
+				return; // return without marking as processed
+			synchronized (currentStateStamp) {
+				// mark this host as processed for the current state stamp.
+				dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+			}
 			// force the host to be removed and added back
 			removeBundle(host);
 			addBundle(host, false);
