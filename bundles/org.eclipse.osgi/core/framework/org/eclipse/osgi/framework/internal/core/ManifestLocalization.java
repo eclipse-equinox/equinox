@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,15 +78,11 @@ public class ManifestLocalization {
 
 	private String[] buildNLVariants(String nl) {
 		ArrayList result = new ArrayList();
-		int lastSeparator;
-		while ((lastSeparator = nl.lastIndexOf('_')) != -1) {
+		while (nl.length() > 0) {
 			result.add(nl);
-			if (lastSeparator != -1) {
-				nl = nl.substring(0, lastSeparator);
-			}
+			int i = nl.lastIndexOf('_');
+			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
-		result.add(nl);
-		// always add the default locale string
 		result.add(""); //$NON-NLS-1$
 		return (String[]) result.toArray(new String[result.size()]);
 	}
