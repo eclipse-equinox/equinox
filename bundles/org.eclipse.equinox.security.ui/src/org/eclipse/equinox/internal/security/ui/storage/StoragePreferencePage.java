@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -58,6 +59,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 					passwordTab.onActivated();
 			}
 		});
+		Dialog.applyDialogFont(folder);
 		return folder;
 	}
 
