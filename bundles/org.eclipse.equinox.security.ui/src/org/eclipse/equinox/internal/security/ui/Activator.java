@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui;
 
-import java.security.Security;
 import java.util.Arrays;
 import java.util.Hashtable;
 import org.eclipse.core.runtime.IStatus;
@@ -123,7 +122,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static TrustEngine[] getTrustEngines() {
 		if (trustEngineTracker == null) {
-			String trustAuthorityProp = Security.getProperty(PROP_TRUST_ENGINE);
+			String trustAuthorityProp = Activator.getBundleContext().getProperty(PROP_TRUST_ENGINE);
 			Filter filter = null;
 			if (trustAuthorityProp != null)
 				try {
@@ -147,7 +146,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static AuthorizationEngine getAuthorizationEngine() {
 		if (authzEngineTracker == null) {
-			String implProp = Security.getProperty(PROP_AUTHZ_ENGINE);
+			String implProp = Activator.getBundleContext().getProperty(PROP_AUTHZ_ENGINE);
 			Filter filter = null;
 			if (implProp != null)
 				try {
@@ -167,7 +166,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static AuthorizationManager getAuthorizationManager() {
 		if (authzManagerTracker == null) {
-			String implProp = Security.getProperty(PROP_AUTHZ_MANAGER);
+			String implProp = Activator.getBundleContext().getProperty(PROP_AUTHZ_MANAGER);
 			Filter filter = null;
 			if (implProp != null)
 				try {
