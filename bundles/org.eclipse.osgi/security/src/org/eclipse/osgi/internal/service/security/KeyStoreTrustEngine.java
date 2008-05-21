@@ -112,11 +112,14 @@ public class KeyStoreTrustEngine extends TrustEngine {
 							rootCert = certChain[i]; // this is a self-signed certificate
 						} else {
 							// try to find a parent, we have an incomplete chain
-							for (Enumeration e = store.aliases(); e.hasMoreElements();) {
-								Certificate nextCert = store.getCertificate((String) e.nextElement());
-								if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
-									cert.verify(nextCert.getPublicKey());
-									rootCert = nextCert;
+							synchronized (store) {
+								for (Enumeration e = store.aliases(); e.hasMoreElements();) {
+									Certificate nextCert = store.getCertificate((String) e.nextElement());
+									if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+										cert.verify(nextCert.getPublicKey());
+										rootCert = nextCert;
+										break;
+									}
 								}
 							}
 						}
