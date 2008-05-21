@@ -100,19 +100,40 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			throw new IllegalArgumentException("Certificate chain is required"); //$NON-NLS-1$
 
 		try {
+			Certificate rootCert = null;
+
 			KeyStore store = getKeyStore();
 			for (int i = 0; i < certChain.length; i++) {
-				if (i == certChain.length - 1) {
-					certChain[i].verify(certChain[i].getPublicKey());
-				} else {
-					X509Certificate nextX509Cert = (X509Certificate) certChain[i + 1];
-					certChain[i].verify(nextX509Cert.getPublicKey());
+				if (certChain[i] instanceof X509Certificate) {
+					if (i == certChain.length - 1) { //this is the last certificate in the chain
+						X509Certificate cert = (X509Certificate) certChain[i];
+						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
+							certChain[i].verify(certChain[i].getPublicKey());
+							rootCert = certChain[i]; // this is a self-signed certificate
+						} else {
+							// try to find a parent, we have an incomplete chain
+							for (Enumeration e = store.aliases(); e.hasMoreElements();) {
+								Certificate nextCert = store.getCertificate((String) e.nextElement());
+								if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+									cert.verify(nextCert.getPublicKey());
+									rootCert = nextCert;
+								}
+							}
+						}
+					} else {
+						X509Certificate nextX509Cert = (X509Certificate) certChain[i + 1];
+						certChain[i].verify(nextX509Cert.getPublicKey());
+					}
 				}
 
 				synchronized (store) {
-					String alias = store.getCertificateAlias(certChain[i]);
-					if (alias != null) {
+					String alias = rootCert == null ? null : store.getCertificateAlias(rootCert);
+					if (alias != null)
 						return store.getCertificate(alias);
+					else if (rootCert != certChain[i]) {
+						alias = store.getCertificateAlias(certChain[i]);
+						if (alias != null)
+							return store.getCertificate(alias);
 					}
 				}
 			}
