@@ -298,10 +298,13 @@ public class EclipseStarter {
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		final Bundle[][] startBundles = new Bundle[1][];
+		final long[] stateStamp = {0l};
 		BundleListener loadBundleListener = new SynchronousBundleListener() {
 			public void bundleChanged(BundleEvent event) {
 				if ((event.getType() & BundleEvent.STARTING) == 0 || event.getBundle().getBundleId() != 0)
 					return;
+				// save the cached timestamp before loading basic bundles; this is needed so we can do a proper timestamp check when logging resolver errors
+				stateStamp[0] = adaptor.getState().getTimeStamp();
 				startBundles[0] = loadBasicBundles();
 			}
 		};
@@ -311,11 +314,11 @@ public class EclipseStarter {
 		} finally {
 			context.removeBundleListener(loadBundleListener);
 		}
+
 		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) //$NON-NLS-1$
 			return context; // cannot continue; refreshPackages shutdown the framework
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
-		long stateStamp = adaptor.getState().getTimeStamp();
 
 		if (startBundles[0] == null)
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
@@ -328,7 +331,7 @@ public class EclipseStarter {
 		ensureBundlesActive(startBundles[0]);
 		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
-			if (stateStamp != adaptor.getState().getTimeStamp())
+			if (stateStamp[0] != adaptor.getState().getTimeStamp())
 				logUnresolvedBundles(context.getBundles());
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
