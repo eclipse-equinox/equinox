@@ -17,10 +17,11 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.*;
 
 public class StoragePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+
+	private static final String HELP_ID = "org.eclipse.equinox.security.ui.sec_storage_preferences_context"; //$NON-NLS-1$
 
 	protected TabPassword passwordTab;
 	protected TabContents contentsTab;
@@ -60,6 +61,7 @@ public class StoragePreferencePage extends PreferencePage implements IWorkbenchP
 			}
 		});
 		Dialog.applyDialogFont(folder);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), HELP_ID);
 		return folder;
 	}
 

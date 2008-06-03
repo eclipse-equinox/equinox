@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.storage;
 
-import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -25,7 +24,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class ChallengeResponseDialog extends TitleAreaDialog {
 
-	private static final String HELP_ID = Activator.PLUGIN_ID + ".ChallengeResponseDialog"; //$NON-NLS-1$
+	private static final String HELP_ID = "org.eclipse.equinox.security.ui.challenge_response_dialog"; //$NON-NLS-1$
 
 	protected Text[] questions;
 	protected Text[] answers;

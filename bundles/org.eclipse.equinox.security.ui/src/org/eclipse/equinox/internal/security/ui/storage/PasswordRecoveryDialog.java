@@ -11,7 +11,6 @@
 package org.eclipse.equinox.internal.security.ui.storage;
 
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
-import org.eclipse.equinox.internal.security.ui.Activator;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.jface.dialogs.*;
@@ -27,7 +26,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class PasswordRecoveryDialog extends TitleAreaDialog {
 
-	private static final String HELP_ID = Activator.PLUGIN_ID + ".PasswordRecoveryDialog"; //$NON-NLS-1$
+	private static final String HELP_ID = "org.eclipse.equinox.security.ui.password_recovery_dialog"; //$NON-NLS-1$
 
 	protected Text[] answers;
 	protected String moduleID;
