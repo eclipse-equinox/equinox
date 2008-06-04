@@ -34,7 +34,6 @@ import org.osgi.framework.Bundle;
 public interface SignedContentFactory {
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified content of a repository.
-	 * A value of <code>null</code> is returned if the specified content is not signed.
 	 * @param content the content of the repository
 	 * @return signed content for the specified repository
 	 * @throws IOException if an IO exception occurs while reading the repository
@@ -48,7 +47,6 @@ public interface SignedContentFactory {
 
 	/**
 	 * Returns a <code>SignedContent</code> object for the specified bundle.
-	 * A value of <code>null</code> is returned if the specified content is not signed.
 	 * @param bundle the bundle to get a signed content for. 
 	 * @return signed content for the specified bundle.
 	 * @throws IOException if an IO exception occurs while reading the bundle content
