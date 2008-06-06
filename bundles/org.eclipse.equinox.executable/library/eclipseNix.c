@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -18,6 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -205,6 +206,7 @@ int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	} else if (pid > 0){
 		/* parent */
 		FILE * stream = NULL;
+		int status = 0;
 		close(descriptors[1]);
 		stream = fdopen( descriptors[0], "r");
 		if (stream != NULL) {
@@ -222,6 +224,7 @@ int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 			fclose(stream);
 			close(descriptors[0]);
 		}
+		waitpid(pid, &status, 0);
 	} else {
 		/* failed to fork */
 		close(descriptors[0]);
