@@ -70,11 +70,11 @@ public class ConfigurationPreferences extends EclipsePreferences {
 		return location;
 	}
 
-	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
+	protected synchronized boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
-	protected void loaded() {
+	protected synchronized void loaded() {
 		loadedNodes.add(name());
 	}
 

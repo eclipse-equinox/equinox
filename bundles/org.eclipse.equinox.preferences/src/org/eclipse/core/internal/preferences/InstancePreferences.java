@@ -71,11 +71,11 @@ public class InstancePreferences extends EclipsePreferences {
 		// accessed before the instance location is set.
 	}
 
-	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
+	protected synchronized boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
-	protected void loaded() {
+	protected synchronized void loaded() {
 		loadedNodes.add(name());
 	}
 

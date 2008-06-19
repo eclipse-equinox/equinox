@@ -18,7 +18,7 @@ import java.util.*;
 import org.eclipse.core.internal.preferences.exchange.IProductPreferencesService;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.preferences.*;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -221,7 +221,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return new DefaultPreferences(nodeParent, nodeName, context);
 	}
 
-	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
+	protected synchronized boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
@@ -287,7 +287,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return result;
 	}
 
-	protected void loaded() {
+	protected synchronized void loaded() {
 		loadedNodes.add(name());
 	}
 
