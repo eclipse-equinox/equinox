@@ -48,6 +48,8 @@
 	<classpathentry kind="src" output="bundle_tests/exporter.importer2" path="bundles_src/exporter.importer2"/>
 	<classpathentry kind="src" output="bundle_tests/exporter.importer3" path="bundles_src/exporter.importer3"/>
 	<classpathentry kind="src" output="bundle_tests/exporter.importer4" path="bundles_src/exporter.importer4"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug235958.x" path="bundles_src/test.bug235958.x"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug235958.y" path="bundles_src/test.bug235958.y"/>
 	<classpathentry kind="src" output="bundle_tests/test.fragment1" path="bundles_src/test.fragment1"/>
 	<classpathentry kind="src" output="bundle_tests/test.fragment2" path="bundles_src/test.fragment2"/>
 	<classpathentry kind="src" output="bundle_tests/test.fragment3" path="bundles_src/test.fragment3"/>

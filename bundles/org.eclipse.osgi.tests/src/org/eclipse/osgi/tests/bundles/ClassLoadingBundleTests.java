@@ -738,29 +738,29 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertNotNull("No exporter.importer.test found", origExportedPackages); //$NON-NLS-1$
 		assertEquals("Wrong number of exports", 1, origExportedPackages.length); //$NON-NLS-1$
 		Bundle exporter = origExportedPackages[0].getExportingBundle();
-		assertEquals("Wrong exporter", importerExporter1, exporter);
+		assertEquals("Wrong exporter", importerExporter1, exporter); //$NON-NLS-1$
 		// TODO need to get clarification from OSGi on what is returned by getImportingBundles when there is no importers
 		Bundle[] origImporters = origExportedPackages[0].getImportingBundles();
-		assertTrue("Should have no importers", origImporters == null || origImporters.length == 0);
+		assertTrue("Should have no importers", origImporters == null || origImporters.length == 0); //$NON-NLS-1$
 
 		// install another importer/exporter.  This bundle should wire to the original exporter
 		Bundle importerExporter2 = installer.installBundle("exporter.importer2"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {importerExporter2});
 
 		origImporters = origExportedPackages[0].getImportingBundles();
-		assertNotNull("No importers found", origImporters);
-		assertEquals("Wrong number of importers", 1, origImporters.length);
-		assertEquals("Wrong importer", importerExporter2, origImporters[0]);
+		assertNotNull("No importers found", origImporters); //$NON-NLS-1$
+		assertEquals("Wrong number of importers", 1, origImporters.length); //$NON-NLS-1$
+		assertEquals("Wrong importer", importerExporter2, origImporters[0]); //$NON-NLS-1$
 
 		ExportedPackage[] newExportedPackages = pa.getExportedPackages("exporter.importer.test"); //$NON-NLS-1$
 		assertNotNull("No exporter.importer.test found", newExportedPackages); //$NON-NLS-1$
 		assertEquals("Wrong number of exports", 1, newExportedPackages.length); //$NON-NLS-1$
 		exporter = newExportedPackages[0].getExportingBundle();
-		assertEquals("Wrong exporter", importerExporter1, exporter);
+		assertEquals("Wrong exporter", importerExporter1, exporter); //$NON-NLS-1$
 		Bundle[] newImporters = newExportedPackages[0].getImportingBundles();
-		assertNotNull("No importers found", newImporters);
-		assertEquals("Wrong number of importers", 1, newImporters.length);
-		assertEquals("Wrong importer", importerExporter2, newImporters[0]);
+		assertNotNull("No importers found", newImporters); //$NON-NLS-1$
+		assertEquals("Wrong number of importers", 1, newImporters.length); //$NON-NLS-1$
+		assertEquals("Wrong importer", importerExporter2, newImporters[0]); //$NON-NLS-1$
 	}
 
 	public void testImporterExporter02() throws BundleException {
@@ -796,6 +796,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("frag3 is not resolved", (frag3.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
 		assertTrue("frag4 is not resolved", (frag4.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
 		assertTrue("frag5 is not resolved", (frag5.getState() & Bundle.RESOLVED) != 0); //$NON-NLS-1$
+	}
+
+	public void testBug235958() throws BundleException {
+		Bundle testX = installer.installBundle("test.bug235958.x"); //$NON-NLS-1$
+		Bundle testY = installer.installBundle("test.bug235958.y"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {testX, testY});
+		try {
+			testX.start();
+		} catch (Exception e) {
+			fail("Unexpected Exception", e); //$NON-NLS-1$
+		}
 	}
 
 	// TODO temporarily disable til we can debug the build test machine on Win XP

@@ -225,7 +225,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		policy = buddyList != null ? new PolicyHandler(this, buddyList) : null;
 	}
 
-	private synchronized KeyedHashSet getImportedSources() {
+	private synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
 		if ((loaderFlags & FLAG_IMPORTSINIT) != 0)
 			return importedSources;
 		BundleDescription bundleDesc = proxy.getBundleDescription();
@@ -236,7 +236,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			for (int i = 0; i < packages.length; i++) {
 				if (packages[i].getExporter() == bundleDesc)
 					continue; // ignore imports resolved to this bundle
-				PackageSource source = createExportPackageSource(packages[i]);
+				PackageSource source = createExportPackageSource(packages[i], visited);
 				if (source != null)
 					importedSources.add(source);
 			}
@@ -245,12 +245,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return importedSources;
 	}
 
-	final PackageSource createExportPackageSource(ExportPackageDescription export) {
+	final PackageSource createExportPackageSource(ExportPackageDescription export, KeyedHashSet visited) {
 		BundleLoaderProxy exportProxy = getLoaderProxy(export.getExporter());
 		if (exportProxy == null)
 			// TODO log error!!
 			return null;
-		PackageSource requiredSource = exportProxy.getBundleLoader().findRequiredSource(export.getName());
+		PackageSource requiredSource = exportProxy.getBundleLoader().findRequiredSource(export.getName(), visited);
 		PackageSource exportSource = exportProxy.createPackageSource(export, false);
 		if (requiredSource == null)
 			return exportSource;
@@ -426,7 +426,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result != null)
 			return result;
 		// 3) search the imported packages
-		PackageSource source = findImportedSource(pkgName);
+		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null) {
 			// 3) found import source terminate search at the source
 			result = source.loadClass(name);
@@ -435,7 +435,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			throw new ClassNotFoundException(name);
 		}
 		// 4) search the required bundles
-		source = findRequiredSource(pkgName);
+		source = findRequiredSource(pkgName, null);
 		if (source != null)
 			// 4) attempt to load from source but continue on failure
 			result = source.loadClass(name);
@@ -589,12 +589,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (result != null)
 			return result;
 		// 3) search the imported packages
-		PackageSource source = findImportedSource(pkgName);
+		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null)
 			// 3) found import source terminate search at the source
 			return source.getResource(name);
 		// 4) search the required bundles
-		source = findRequiredSource(pkgName);
+		source = findRequiredSource(pkgName, null);
 		if (source != null)
 			// 4) attempt to load from source but continue on failure
 			result = source.getResource(name);
@@ -666,12 +666,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return result;
 		// start at step 3 because of the comment above about ClassLoader#getResources
 		// 3) search the imported packages
-		PackageSource source = findImportedSource(pkgName);
+		PackageSource source = findImportedSource(pkgName, null);
 		if (source != null)
 			// 3) found import source terminate search at the source
 			return source.getResources(name);
 		// 4) search the required bundles
-		source = findRequiredSource(pkgName);
+		source = findRequiredSource(pkgName, null);
 		if (source != null)
 			// 4) attempt to load from source but continue on failure
 			result = source.getResources(name);
@@ -901,7 +901,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (isExportedPackage(packageName))
 			local = proxy.getPackageSource(packageName);
 		else if (isSubstitutedExport(packageName)) {
-			result.add(findImportedSource(packageName));
+			result.add(findImportedSource(packageName, visited));
 			return; // should not continue to required bundles in this case
 		}
 		// Must search required bundles that are exported first.
@@ -1033,15 +1033,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private PackageSource findSource(String pkgName) {
 		if (pkgName == null)
 			return null;
-		PackageSource result = findImportedSource(pkgName);
+		PackageSource result = findImportedSource(pkgName, null);
 		if (result != null)
 			return result;
 		// Note that dynamic imports are not checked to avoid aggressive wiring (bug 105779)  
-		return findRequiredSource(pkgName);
+		return findRequiredSource(pkgName, null);
 	}
 
-	private PackageSource findImportedSource(String pkgName) {
-		KeyedHashSet imports = getImportedSources();
+	private PackageSource findImportedSource(String pkgName, KeyedHashSet visited) {
+		KeyedHashSet imports = getImportedSources(visited);
 		if (imports == null)
 			return null;
 		synchronized (imports) {
@@ -1053,7 +1053,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (isDynamicallyImported(pkgName)) {
 			ExportPackageDescription exportPackage = bundle.framework.adaptor.getState().linkDynamicImport(proxy.getBundleDescription(), pkgName);
 			if (exportPackage != null) {
-				PackageSource source = createExportPackageSource(exportPackage);
+				PackageSource source = createExportPackageSource(exportPackage, null);
 				synchronized (this) {
 					if (importedSources == null)
 						importedSources = new KeyedHashSet(false);
@@ -1067,7 +1067,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return null;
 	}
 
-	private PackageSource findRequiredSource(String pkgName) {
+	private PackageSource findRequiredSource(String pkgName, KeyedHashSet visited) {
 		if (requiredBundles == null)
 			return null;
 		synchronized (requiredSources) {
@@ -1075,7 +1075,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 			if (result != null)
 				return result.isNullSource() ? null : result;
 		}
-		KeyedHashSet visited = new KeyedHashSet(false);
+		if (visited == null)
+			visited = new KeyedHashSet(false);
 		visited.add(bundle); // always add ourselves so we do not recurse back to ourselves
 		ArrayList result = new ArrayList(3);
 		for (int i = 0; i < requiredBundles.length; i++) {
