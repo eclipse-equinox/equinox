@@ -132,7 +132,7 @@ public class BasicLocation implements Location {
 		if (value.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
 			try {
 				String basePath = new File(value.getFile()).getCanonicalPath();
-				value = new URL("file:" + basePath); //$NON-NLS-1$
+				value = LocationHelper.buildURL("file:" + basePath, true); //$NON-NLS-1$
 			} catch (IOException e) {
 				// do nothing just use the original value
 			}
@@ -144,7 +144,7 @@ public class BasicLocation implements Location {
 				return false;
 		}
 		lockFile = file;
-		location = LocationHelper.buildURL(value.toExternalForm(), true);
+		location = value;
 		if (property != null)
 			FrameworkProperties.setProperty(property, location.toExternalForm());
 		return lock;

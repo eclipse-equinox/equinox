@@ -1015,12 +1015,9 @@ public class EclipseStarter {
 	private static String getSysPathFromURL(String urlSpec) {
 		if (urlSpec == null)
 			return null;
-		URL url = null;
-		try {
-			url = new URL(urlSpec);
-		} catch (MalformedURLException e) {
+		URL url = LocationHelper.buildURL(urlSpec, false);
+		if (url == null)
 			return null;
-		}
 		File fwkFile = new File(url.getFile());
 		fwkFile = new File(fwkFile.getAbsolutePath());
 		fwkFile = new File(fwkFile.getParent());

@@ -215,13 +215,8 @@ public class LocationManager {
 
 	private static URL computeInstallConfigurationLocation() {
 		String property = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
-		if (property != null) {
-			try {
-				return new URL(property);
-			} catch (MalformedURLException e) {
-				// do nothing here since it is basically impossible to get a bogus url
-			}
-		}
+		if (property != null)
+			return LocationHelper.buildURL(property, true);
 		return null;
 	}
 
@@ -230,7 +225,9 @@ public class LocationManager {
 		if (property == null)
 			return null;
 		try {
-			URL sharedConfigurationURL = new URL(property);
+			URL sharedConfigurationURL = LocationHelper.buildURL(property, true);
+			if (sharedConfigurationURL == null)
+				return null;
 			if (sharedConfigurationURL.getPath().startsWith("/")) //$NON-NLS-1$
 				// absolute
 				return sharedConfigurationURL;
