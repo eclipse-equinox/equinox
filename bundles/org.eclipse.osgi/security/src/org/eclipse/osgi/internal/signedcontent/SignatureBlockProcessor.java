@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -101,7 +101,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		// Process the Step 2 in the Jar File Verification algorithm
 		// Get the manifest out of the signature file and make sure
 		// it matches MANIFEST.MF
-		verifyManifestAndSingatureFile(manifestBytes, sfBytes);
+		verifyManifestAndSignatureFile(manifestBytes, sfBytes);
 
 		// create a SignerInfo with the processed information
 		SignerInfoImpl signerInfo = new SignerInfoImpl(processor.getCertificates(), null, digAlg);
@@ -122,8 +122,9 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 	/**
 	 * Verify the digest listed in each entry in the .SF file with corresponding section in the manifest
+	 * @throws SignatureException 
 	 */
-	private void verifyManifestAndSingatureFile(byte[] manifestBytes, byte[] sfBytes) {
+	private void verifyManifestAndSignatureFile(byte[] manifestBytes, byte[] sfBytes) throws SignatureException {
 
 		String sf = new String(sfBytes);
 		sf = stripContinuations(sf);
@@ -150,9 +151,9 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 				// check if the the computed digest value of manifest file equals to the digest value in the .sf file
 				if (!digestValue.equals(manifestDigest)) {
-					Exception e = new SecurityException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {signedBundle.getBaseFile().toString()}));
-					SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.ERROR, e);
-					throw (SecurityException) e;
+					SignatureException se = new SignatureException(NLS.bind(SignedContentMessages.Security_File_Is_Tampered, new String[] {signedBundle.getBaseFile().toString()}));
+					SignedBundleHook.log(se.getMessage(), FrameworkLogEntry.ERROR, se);
+					throw se;
 				}
 			}
 		}

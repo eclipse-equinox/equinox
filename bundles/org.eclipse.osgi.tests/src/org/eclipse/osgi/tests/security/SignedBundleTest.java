@@ -11,6 +11,7 @@
 package org.eclipse.osgi.tests.security;
 
 import java.io.File;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import junit.framework.Test;
@@ -796,5 +797,20 @@ public class SignedBundleTest extends BaseSecurityTest {
 		}
 		signedFile.delete();
 		assertFalse("File should not exist", signedFile.exists());
+	}
+
+	public void testBug236329_01() throws Exception {
+		File signedFile = copyEntryFile(getTestJarPath("signed_with_sf_corrupted"));
+
+		assertNotNull("Could not find signed file!", signedFile);
+		//getTrustEngine().addTrustAnchor(anchor, alias);
+
+		// get the signed content for the bundle
+		try {
+			getSignedContentFactory().getSignedContent(signedFile);
+			fail("Should have gotten a SignatureException for file: " + signedFile);
+		} catch (SignatureException e) {
+			// expected
+		}
 	}
 }

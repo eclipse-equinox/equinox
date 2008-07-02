@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2008 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -122,7 +122,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		}
 
 		if (certs == null || certs.size() < 1)
-			throw new SecurityException("There are no certificates in the .RSA/.DSA file!"); //$NON-NLS-1$
+			throw new SignatureException("There are no certificates in the .RSA/.DSA file!"); //$NON-NLS-1$
 
 		// Okay, here are our certificates.
 		bp.stepOver();
