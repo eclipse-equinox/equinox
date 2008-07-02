@@ -315,13 +315,17 @@ public class EclipseStarter {
 			context.removeBundleListener(loadBundleListener);
 		}
 
-		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) //$NON-NLS-1$
+		if (startBundles[0] == null) {
+			waitForShutdown();
+			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
+		}
+		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) { //$NON-NLS-1$
+			waitForShutdown();
 			return context; // cannot continue; refreshPackages shutdown the framework
+		}
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		if (startBundles[0] == null)
-			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		// set the framework start level to the ultimate value.  This will actually start things
 		// running if they are persistently active.
 		setStartLevel(getStartLevel());
@@ -728,21 +732,25 @@ public class EclipseStarter {
 		packageAdmin.refreshPackages(bundles);
 		context.ungetService(packageAdminRef);
 		updateSplash(semaphore, listener);
-		if (isForcedRestart()) {
-			// wait for the system bundle to stop
-			Bundle systemBundle = context.getBundle(0);
-			int i = 0;
-			while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
-				i += 200;
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
+		if (isForcedRestart())
 			return true;
-		}
 		return false;
+	}
+
+	private static void waitForShutdown() {
+		if (!isForcedRestart())
+			return;
+		// wait for the system bundle to stop
+		Bundle systemBundle = context.getBundle(0);
+		int i = 0;
+		while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
+			i += 200;
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				break;
+			}
+		}
 	}
 
 	/**
