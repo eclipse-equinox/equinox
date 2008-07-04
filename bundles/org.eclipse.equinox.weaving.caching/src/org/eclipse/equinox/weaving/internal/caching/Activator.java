@@ -1,0 +1,108 @@
+/*******************************************************************************
+ * Copyright (c) 2008 Heiko Seeberger and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html.
+ * 
+ * Contributors:
+ *     Heiko Seeberger - initial implementation
+ *******************************************************************************/
+
+package org.eclipse.equinox.weaving.internal.caching;
+
+import org.eclipse.equinox.service.weaving.ICachingService;
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+
+import com.ibm.oti.shared.Shared;
+
+/**
+ * {@link BundleActivator} for "org.aspectj.osgi.service.caching".
+ * 
+ * @author Heiko Seeberger
+ */
+public class Activator implements BundleActivator {
+
+	public static boolean verbose = Boolean.getBoolean("org.aspectj.osgi.verbose");
+
+	private SingletonCachingService singletonCachingService;
+    private ServiceRegistration singletonCachingServiceRegistration;
+
+    /**
+     * Registers a new {@link SingletonCachingService} instance as OSGi service
+     * under the interface {@link ICachingService}.
+     * 
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext bundleContext) {
+        setDebugEnabled(bundleContext);
+        
+        if (shouldRegister()) {
+			if (verbose) System.err.println("[org.aspectj.osgi.service.caching] info starting standard caching service ...");
+        	registerSingletonCachingService(bundleContext);
+        }
+        else {
+        	if (verbose) System.err.println("[org.aspectj.osgi.service.caching] warning cannot start standard caching service on J9 VM");
+        }
+    }
+
+	private boolean shouldRegister() {
+		boolean enabled = true;
+		try {
+			Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9
+			boolean sharing = Shared.isSharingEnabled(); // if not using shared classes we want a different adaptor
+
+			if (sharing) {
+				enabled = false;
+			}
+		} catch (ClassNotFoundException ex) {
+		}
+
+		return enabled;
+	}
+
+    /**
+     * Shuts down the {@link SingletonCachingService}.
+     * 
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) {
+        singletonCachingService.stop();
+        singletonCachingServiceRegistration.unregister();
+        if (Log.isDebugEnabled()) {
+            Log.debug("Shut down and unregistered SingletonCachingService.");
+        }
+    }
+
+    private void registerSingletonCachingService(
+        final BundleContext bundleContext) {
+        singletonCachingService = new SingletonCachingService(bundleContext);
+        singletonCachingServiceRegistration =
+            bundleContext.registerService(ICachingService.class.getName(),
+                singletonCachingService, null);
+        if (Log.isDebugEnabled()) {
+            Log.debug("Created and registered SingletonCachingService.");
+        }
+    }
+
+    private void setDebugEnabled(final BundleContext bundleContext) {
+        final ServiceReference debugOptionsReference =
+            bundleContext.getServiceReference(DebugOptions.class.getName());
+        if (debugOptionsReference != null) {
+            final DebugOptions debugOptions =
+                (DebugOptions) bundleContext.getService(debugOptionsReference);
+            if (debugOptions != null) {
+                Log.debugEnabled =
+                    debugOptions.getBooleanOption(
+                        "org.aspectj.osgi.service.caching/debug", true); //$NON-NLS-1$
+            }
+        }
+        if (debugOptionsReference != null) {
+            bundleContext.ungetService(debugOptionsReference);
+        }
+    }
+}

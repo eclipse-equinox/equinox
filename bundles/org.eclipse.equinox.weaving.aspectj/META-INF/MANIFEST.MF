@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: WeavingService Plug-in (Incubation)
+Bundle-SymbolicName: org.eclipse.equinox.weaving.aspectj
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin
+Require-Bundle: org.aspectj.weaver,
+ system.bundle
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.equinox.service.weaving, org.eclipse.osgi.service.resolver
+Bundle-RequiredExecutionEnvironment: J2SE-1.3
