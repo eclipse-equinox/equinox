@@ -88,6 +88,8 @@ public class SupplementerRegistry {
 		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.aspectj");
 		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.caching");
 		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.caching.j9");
+		this.dontWeaveTheseBundles.add("org.aspectj.runtime");
+		this.dontWeaveTheseBundles.add("org.aspectj.weaver");
 	}
 	
 	public void setBundleContext(BundleContext context) {
