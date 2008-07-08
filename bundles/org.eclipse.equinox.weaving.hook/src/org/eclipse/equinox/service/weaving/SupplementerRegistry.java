@@ -16,10 +16,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.equinox.weaving.hooks.AbstractAspectJHook;
 import org.eclipse.equinox.weaving.hooks.Supplementer;
@@ -70,11 +72,22 @@ public class SupplementerRegistry {
 	public static final String	SUPPLEMENT_BUNDLE = "Eclipse-SupplementBundle"; //$NON-NLS-1$
 
 	private final Map supplementers; // keys of type String (symbolic name of supplementer bundle), values of type Supplementer
+	private final Set dontWeaveTheseBundles; // elements of type String (symbolic name of bundle)
 	private BundleContext context;
 	private PackageAdmin packageAdmin;
 
 	public SupplementerRegistry() {
 		this.supplementers = new HashMap();
+		this.dontWeaveTheseBundles = new HashSet();
+
+		this.dontWeaveTheseBundles.add("org.eclipse.osgi");
+		this.dontWeaveTheseBundles.add("org.eclipse.update.configurator");
+		this.dontWeaveTheseBundles.add("org.eclipse.core.runtime");
+		this.dontWeaveTheseBundles.add("org.eclipse.equinox.common");
+		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.hook");
+		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.aspectj");
+		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.caching");
+		this.dontWeaveTheseBundles.add("org.eclipse.equinox.weaving.caching.j9");
 	}
 	
 	public void setBundleContext(BundleContext context) {
@@ -135,7 +148,7 @@ public class SupplementerRegistry {
 	public List getSupplementers (String symbolicName, ManifestElement[] imports, ManifestElement[] exports) {
 		List result = Collections.EMPTY_LIST;
 
-		if (supplementers.size() > 0) {
+		if (supplementers.size() > 0 && !this.dontWeaveTheseBundles.contains(symbolicName)) {
 			result = new LinkedList();
 			for (Iterator i = supplementers.values().iterator(); i.hasNext();) {
 				Supplementer supplementer = (Supplementer) i.next();
@@ -226,23 +239,15 @@ public class SupplementerRegistry {
 				}
 				
 			} catch (BundleException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private void updateInstalledBundle(Bundle bundle) {
-		
 		String symbolicName = bundle.getSymbolicName();
+		if (this.dontWeaveTheseBundles.contains(symbolicName)) return;
 		
-		if (symbolicName.equals("org.eclipse.osgi")) return;
-		if (symbolicName.equals("org.aspectj.osgi")) return;
-		if (symbolicName.startsWith("org.eclipse.update")) return;
-		if (symbolicName.startsWith("org.eclipse.core.runtime")) return;
-		if (symbolicName.startsWith("org.aspectj.osgi.service")) return;
-		if (symbolicName.startsWith("org.eclipse.equinox")) return;
-
 		if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info triggering update for re-supplementing " + symbolicName);
 
 		try {
