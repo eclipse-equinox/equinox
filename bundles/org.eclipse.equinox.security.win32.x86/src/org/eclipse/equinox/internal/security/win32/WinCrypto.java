@@ -62,22 +62,7 @@ public class WinCrypto extends PasswordProvider {
 			} else {
 				StorageException e = new StorageException(StorageException.ENCRYPTION_ERROR, WinCryptoMessages.decryptPasswordFailed);
 				AuthPlugin.getDefault().logError(WinCryptoMessages.decryptPasswordFailed, e);
-
-				if (container.hasOption(IProviderHints.PROMPT_USER)) {
-					Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-					if (promptHint instanceof Boolean) {
-						boolean canPrompt = ((Boolean) promptHint).booleanValue();
-						if (!canPrompt)
-							return null;
-					}
-				}
-				try {
-					if (!WinCryptoUI.canRecreatePassword())
-						return null;
-				} catch (NoClassDefFoundError exception) {
-					return null;
-				}
-				// follow down with new password generation
+				return null;
 			}
 		}
 

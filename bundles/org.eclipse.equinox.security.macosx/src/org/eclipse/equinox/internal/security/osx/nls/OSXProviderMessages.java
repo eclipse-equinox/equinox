@@ -16,8 +16,6 @@ public class OSXProviderMessages extends NLS {
 
 	private static final String BUNDLE_NAME = "org.eclipse.equinox.internal.security.osx.nls.messages"; //$NON-NLS-1$
 
-	public static String newPasswordTitle;
-	public static String newPasswordMessage;
 	public static String getPasswordError;
 	public static String setPasswordError;
 	

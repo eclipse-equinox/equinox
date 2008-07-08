@@ -15,7 +15,8 @@ import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.osx.nls.OSXProviderMessages;
 import org.eclipse.equinox.internal.security.storage.Base64;
-import org.eclipse.equinox.security.storage.provider.*;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
+import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 
 public class OSXProvider extends PasswordProvider {
 
@@ -44,24 +45,8 @@ public class OSXProvider extends PasswordProvider {
 				return new PBEKeySpec(getPassword(serviceName, accountName).toCharArray());
 			} catch (SecurityException e) {
 				AuthPlugin.getDefault().logError(OSXProviderMessages.getPasswordError, e);
-			}
-
-			if (container.hasOption(IProviderHints.PROMPT_USER)) {
-				Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-				if (promptHint instanceof Boolean) {
-					boolean canPrompt = ((Boolean) promptHint).booleanValue();
-					if (!canPrompt)
-						return null;
-				}
-			}
-
-			try {
-				if (!OSXProviderUI.canRecreatePassword())
-					return null;
-			} catch (NoClassDefFoundError exception) {
 				return null;
 			}
-
 		}
 
 		try {

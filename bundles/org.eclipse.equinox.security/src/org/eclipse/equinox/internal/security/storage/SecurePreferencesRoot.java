@@ -228,6 +228,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		PasswordExt passwordExt = null;
 		boolean validPassword = false;
 		boolean setupPasswordRecovery = false;
+		boolean addedNoPrompt = false;
 
 		try {
 			lock.acquire(); // make sure process of password creation is not re-entered by another thread
@@ -239,8 +240,10 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 			// if this is (a headless run or JUnit) and prompt hint is not set up, set it to "false"
 			boolean supressPrompts = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
-			if (supressPrompts && container != null && !container.hasOption(IProviderHints.PROMPT_USER))
+			if (supressPrompts && container != null && !container.hasOption(IProviderHints.PROMPT_USER)) {
 				((SecurePreferencesContainer) container).setOption(IProviderHints.PROMPT_USER, new Boolean(false));
+				addedNoPrompt = true;
+			}
 
 			// is there password verification string already?
 			SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
@@ -285,6 +288,10 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				}
 			}
 		} finally {
+			if (addedNoPrompt) {
+				((SecurePreferencesContainer) container).removeOption(IProviderHints.PROMPT_USER);
+				addedNoPrompt = false;
+			}
 			lock.release();
 		}
 

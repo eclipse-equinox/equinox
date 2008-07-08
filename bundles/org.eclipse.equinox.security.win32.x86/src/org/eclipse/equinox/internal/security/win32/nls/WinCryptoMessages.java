@@ -19,8 +19,6 @@ public class WinCryptoMessages extends NLS {
 	// Windows module
 	public static String encryptPasswordFailed;
 	public static String decryptPasswordFailed;
-	public static String newPasswordTitle;
-	public static String newPasswordMessage; 
 	public static String newPasswordGenerated;
 
 	static {
