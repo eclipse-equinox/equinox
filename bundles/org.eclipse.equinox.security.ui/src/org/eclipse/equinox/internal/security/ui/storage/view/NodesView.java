@@ -188,6 +188,7 @@ public class NodesView {
 						return;
 					String name = nodeDialog.getNodeName();
 					ISecurePreferences child = node.node(name);
+					parentView.modified();
 
 					// expand and select new node
 					ISecurePreferences parentNode = child.parent();
@@ -216,6 +217,7 @@ public class NodesView {
 					if (parentNode == null)
 						return; // can't remove root node
 					node.removeNode();
+					parentView.modified();
 
 					// refresh parent node and select it
 					nodeTreeViewer.refresh(parentNode, false);

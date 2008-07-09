@@ -17,8 +17,7 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.equinox.internal.security.storage.SecurePreferencesRoot;
-import org.eclipse.equinox.internal.security.storage.SecurePreferencesWrapper;
+import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.tests.SecurityTestsActivator;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -84,8 +83,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	 * preference data.
 	 */
 	private boolean isModified(ISecurePreferences node) {
-		SecurePreferencesRoot rootData = ((SecurePreferencesWrapper) node).getContainer().getRootData();
-		return rootData.isModified();
+		return InternalExchangeUtils.isModified(node);
 	}
 
 	private void check(ISecurePreferences preferences) throws StorageException {

@@ -135,6 +135,11 @@ public class InternalExchangeUtils {
 		return password;
 	}
 
+	static public boolean isModified(ISecurePreferences node) {
+		SecurePreferencesRoot rootData = ((SecurePreferencesWrapper) node).getContainer().getRootData();
+		return rootData.isModified();
+	}
+
 	/**
 	 * This is a bit of a strange code that tries to determine if we are running in a JUnit
 	 */

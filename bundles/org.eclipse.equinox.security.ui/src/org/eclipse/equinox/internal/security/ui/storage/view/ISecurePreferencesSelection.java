@@ -13,6 +13,16 @@ package org.eclipse.equinox.internal.security.ui.storage.view;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 
 public interface ISecurePreferencesSelection {
+	/**
+	 * Called by child elements to inform container that current selection has been
+	 * modified
+	 * @param selectedNode newly selected element
+	 */
 	public void setSelection(ISecurePreferences selectedNode);
 
+	/**
+	 * Called by child elements to inform container that information has been
+	 * modified.
+	 */
+	public void modified();
 }

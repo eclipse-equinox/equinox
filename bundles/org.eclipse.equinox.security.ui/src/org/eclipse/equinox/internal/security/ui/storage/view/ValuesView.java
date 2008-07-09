@@ -249,6 +249,7 @@ public class ValuesView {
 				boolean encrypt = newValueDialog.encrypt();
 				try {
 					selectedNode.put(key, value, encrypt);
+					parentView.modified();
 				} catch (StorageException e) {
 					Activator.log(IStatus.ERROR, SecUIMessages.failedEncrypt, null, e);
 				}
@@ -279,6 +280,7 @@ public class ValuesView {
 				if (dialog.open() != SWT.YES)
 					return;
 				selectedNode.remove(key);
+				parentView.modified();
 				tableViewer.refresh();
 			}
 		};
@@ -364,6 +366,7 @@ public class ValuesView {
 		}
 		try {
 			selectedNode.put(key, value, encrypted);
+			parentView.modified();
 		} catch (StorageException e) {
 			MessageBox dialog = new MessageBox(shell, SWT.ICON_WARNING | SWT.OK);
 			dialog.setMessage(SecUIMessages.failedEncrypt);

@@ -35,6 +35,7 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 	private Shell shell;
 	protected NodesView nodesView = null;
 	protected ValuesView valuesView = null;
+	protected Button buttonSave = null;
 
 	public void setSelection(ISecurePreferences selectedNode) {
 		valuesView.setInput(selectedNode);
@@ -75,18 +76,21 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		buttonBar.setLayout(buttonBarLayout);
 		buttonBar.setLayoutData(new GridData(GridData.END, GridData.BEGINNING, false, false));
 
-		Button buttonSave = new Button(buttonBar, SWT.PUSH);
+		buttonSave = new Button(buttonBar, SWT.PUSH);
 		buttonSave.setText(SecUIMessages.saveButton);
 		setButtonSize(buttonSave);
 		buttonSave.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
 				ISecurePreferences root = SecurePreferencesFactory.getDefault();
+				if (root == null)
+					return;
 				try {
 					root.flush();
 				} catch (IOException exception) {
 					Activator.log(IStatus.ERROR, exception.getMessage(), null, exception);
 				}
+				validateSave(); // save could fail so re-check
 			}
 		});
 
@@ -124,6 +128,19 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getSpacing()).generateLayout(page);
 		InternalExchangeUtils.addDeleteListener(this);
+		validateSave();
+	}
+
+	public void modified() {
+		validateSave();
+	}
+
+	public void validateSave() {
+		ISecurePreferences root = SecurePreferencesFactory.getDefault();
+		if (root == null)
+			return;
+		boolean modified = (root == null) ? false : InternalExchangeUtils.isModified(root);
+		buttonSave.setEnabled(modified);
 	}
 
 	public void onDeleted() {
