@@ -29,7 +29,7 @@ public abstract class BaseCachingService implements ICachingService {
      *      java.net.URL, java.lang.String)
      */
     public byte[] findStoredClass(final String namespace,
-        final URL sourceFileURL, final String name) {
+            final URL sourceFileURL, final String name) {
         throw new UnsupportedOperationException("Illegal call semantics!");
     }
 
@@ -38,7 +38,7 @@ public abstract class BaseCachingService implements ICachingService {
      *      org.osgi.framework.Bundle, java.lang.String)
      */
     public ICachingService getInstance(final ClassLoader classLoader,
-        final Bundle bundle, final String key) {
+            final Bundle bundle, final String key) {
         throw new UnsupportedOperationException("Illegal call semantics!");
     }
 
@@ -47,7 +47,7 @@ public abstract class BaseCachingService implements ICachingService {
      *      java.net.URL, java.lang.Class, byte[])
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
-        final Class clazz, final byte[] classbytes) {
+            final Class clazz, final byte[] classbytes) {
         throw new UnsupportedOperationException("Illegal call semantics!");
     }
 }

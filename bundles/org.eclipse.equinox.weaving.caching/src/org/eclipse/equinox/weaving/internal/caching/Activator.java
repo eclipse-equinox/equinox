@@ -11,14 +11,14 @@
 
 package org.eclipse.equinox.weaving.internal.caching;
 
+import com.ibm.oti.shared.Shared;
+
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import com.ibm.oti.shared.Shared;
 
 /**
  * {@link BundleActivator} for "org.aspectj.osgi.service.caching".
@@ -27,9 +27,11 @@ import com.ibm.oti.shared.Shared;
  */
 public class Activator implements BundleActivator {
 
-	public static boolean verbose = Boolean.getBoolean("org.aspectj.osgi.verbose");
+    public static boolean verbose = Boolean
+            .getBoolean("org.aspectj.osgi.verbose");
 
-	private SingletonCachingService singletonCachingService;
+    private SingletonCachingService singletonCachingService;
+
     private ServiceRegistration singletonCachingServiceRegistration;
 
     /**
@@ -40,30 +42,18 @@ public class Activator implements BundleActivator {
      */
     public void start(final BundleContext bundleContext) {
         setDebugEnabled(bundleContext);
-        
+
         if (shouldRegister()) {
-			if (verbose) System.err.println("[org.aspectj.osgi.service.caching] info starting standard caching service ...");
-        	registerSingletonCachingService(bundleContext);
-        }
-        else {
-        	if (verbose) System.err.println("[org.aspectj.osgi.service.caching] warning cannot start standard caching service on J9 VM");
+            if (verbose)
+                System.err
+                        .println("[org.aspectj.osgi.service.caching] info starting standard caching service ...");
+            registerSingletonCachingService(bundleContext);
+        } else {
+            if (verbose)
+                System.err
+                        .println("[org.aspectj.osgi.service.caching] warning cannot start standard caching service on J9 VM");
         }
     }
-
-	private boolean shouldRegister() {
-		boolean enabled = true;
-		try {
-			Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9
-			boolean sharing = Shared.isSharingEnabled(); // if not using shared classes we want a different adaptor
-
-			if (sharing) {
-				enabled = false;
-			}
-		} catch (ClassNotFoundException ex) {
-		}
-
-		return enabled;
-	}
 
     /**
      * Shuts down the {@link SingletonCachingService}.
@@ -79,30 +69,43 @@ public class Activator implements BundleActivator {
     }
 
     private void registerSingletonCachingService(
-        final BundleContext bundleContext) {
+            final BundleContext bundleContext) {
         singletonCachingService = new SingletonCachingService(bundleContext);
-        singletonCachingServiceRegistration =
-            bundleContext.registerService(ICachingService.class.getName(),
-                singletonCachingService, null);
+        singletonCachingServiceRegistration = bundleContext.registerService(
+                ICachingService.class.getName(), singletonCachingService, null);
         if (Log.isDebugEnabled()) {
             Log.debug("Created and registered SingletonCachingService.");
         }
     }
 
     private void setDebugEnabled(final BundleContext bundleContext) {
-        final ServiceReference debugOptionsReference =
-            bundleContext.getServiceReference(DebugOptions.class.getName());
+        final ServiceReference debugOptionsReference = bundleContext
+                .getServiceReference(DebugOptions.class.getName());
         if (debugOptionsReference != null) {
-            final DebugOptions debugOptions =
-                (DebugOptions) bundleContext.getService(debugOptionsReference);
+            final DebugOptions debugOptions = (DebugOptions) bundleContext
+                    .getService(debugOptionsReference);
             if (debugOptions != null) {
-                Log.debugEnabled =
-                    debugOptions.getBooleanOption(
+                Log.debugEnabled = debugOptions.getBooleanOption(
                         "org.aspectj.osgi.service.caching/debug", true); //$NON-NLS-1$
             }
         }
         if (debugOptionsReference != null) {
             bundleContext.ungetService(debugOptionsReference);
         }
+    }
+
+    private boolean shouldRegister() {
+        boolean enabled = true;
+        try {
+            Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9
+            final boolean sharing = Shared.isSharingEnabled(); // if not using shared classes we want a different adaptor
+
+            if (sharing) {
+                enabled = false;
+            }
+        } catch (final ClassNotFoundException ex) {
+        }
+
+        return enabled;
     }
 }

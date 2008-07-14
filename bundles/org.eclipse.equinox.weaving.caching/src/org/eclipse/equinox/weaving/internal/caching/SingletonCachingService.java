@@ -29,8 +29,7 @@ import org.osgi.framework.SynchronousBundleListener;
  */
 public class SingletonCachingService extends BaseCachingService {
 
-    private final Map<String, BundleCachingService> bundleCachingServices =
-        new HashMap<String, BundleCachingService>();
+    private final Map<String, BundleCachingService> bundleCachingServices = new HashMap<String, BundleCachingService>();
 
     private final BundleContext bundleContext;
 
@@ -43,17 +42,18 @@ public class SingletonCachingService extends BaseCachingService {
     public SingletonCachingService(final BundleContext bundleContext) {
         if (bundleContext == null) {
             throw new IllegalArgumentException(
-                "Argument \"bundleContext\" must not be null!");
+                    "Argument \"bundleContext\" must not be null!");
         }
         this.bundleContext = bundleContext;
 
         this.bundleContext.addBundleListener(new SynchronousBundleListener() {
-    		public void bundleChanged(BundleEvent event) {
-    			if (event.getType() == BundleEvent.UNINSTALLED) {
-    				stopBundleCachingService(event);
-    			}
-    		}
-		});
+
+            public void bundleChanged(final BundleEvent event) {
+                if (event.getType() == BundleEvent.UNINSTALLED) {
+                    stopBundleCachingService(event);
+                }
+            }
+        });
     }
 
     /**
@@ -65,29 +65,29 @@ public class SingletonCachingService extends BaseCachingService {
      */
     @Override
     public synchronized ICachingService getInstance(
-        final ClassLoader classLoader, final Bundle bundle, String key) {
+            final ClassLoader classLoader, final Bundle bundle, String key) {
 
         if (bundle == null) {
             throw new IllegalArgumentException(
-                "Argument \"bundle\" must not be null!");
+                    "Argument \"bundle\" must not be null!");
         }
 
-        BundleCachingService bundleCachingService =
-            bundleCachingServices.get(bundle.getSymbolicName());
-        
+        BundleCachingService bundleCachingService = bundleCachingServices
+                .get(bundle.getSymbolicName());
+
         key = key == null || key.length() == 0 ? "defaultCache" : key;
 
         if (bundleCachingService == null) {
 
-            bundleCachingService =
-                new BundleCachingService(bundleContext, bundle, key);
+            bundleCachingService = new BundleCachingService(bundleContext,
+                    bundle, key);
             bundleCachingServices.put(bundle.getSymbolicName(),
-                bundleCachingService);
+                    bundleCachingService);
 
             if (Log.isDebugEnabled()) {
                 Log.debug(MessageFormat.format(
-                    "Created BundleCachingService for [{0}].", bundle
-                        .getSymbolicName()));
+                        "Created BundleCachingService for [{0}].", bundle
+                                .getSymbolicName()));
             }
         }
 
@@ -99,22 +99,23 @@ public class SingletonCachingService extends BaseCachingService {
      */
     public synchronized void stop() {
         for (final BundleCachingService bundleCachingService : bundleCachingServices
-            .values()) {
+                .values()) {
             bundleCachingService.stop();
         }
         bundleCachingServices.clear();
     }
-    
-	/**
+
+    /**
      * Stops individual bundle caching service if the bundle is uninstalled
      */
-    protected void stopBundleCachingService(BundleEvent event) {
-		String symbolicName = event.getBundle().getSymbolicName();
-		BundleCachingService bundleCachingService = bundleCachingServices.get(symbolicName);
-		if (bundleCachingService != null) {
-			bundleCachingService.stop();
-			bundleCachingServices.remove(symbolicName);
-		}
-	}
+    protected void stopBundleCachingService(final BundleEvent event) {
+        final String symbolicName = event.getBundle().getSymbolicName();
+        final BundleCachingService bundleCachingService = bundleCachingServices
+                .get(symbolicName);
+        if (bundleCachingService != null) {
+            bundleCachingService.stop();
+            bundleCachingServices.remove(symbolicName);
+        }
+    }
 
 }
