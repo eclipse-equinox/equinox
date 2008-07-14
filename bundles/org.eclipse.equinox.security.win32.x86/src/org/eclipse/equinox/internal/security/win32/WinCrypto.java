@@ -22,7 +22,6 @@ import org.eclipse.equinox.internal.security.win32.nls.WinCryptoMessages;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
-import org.eclipse.equinox.security.storage.provider.IProviderHints;
 import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 
 /**
