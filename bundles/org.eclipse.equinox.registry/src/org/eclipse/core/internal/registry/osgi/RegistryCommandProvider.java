@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Benjamin Muskalla - fix for the console help text (bug 240607) 
  *******************************************************************************/
 
 package org.eclipse.core.internal.registry.osgi;
@@ -19,7 +20,7 @@ public class RegistryCommandProvider implements CommandProvider {
 
 	private final static String helpText = "---Extension Registry Commands---\n" + //$NON-NLS-1$
 			"\tns [-v] [name] - display extension points in the namespace; add -v to display extensions\n" + //$NON-NLS-1$
-			"\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements"; //$NON-NLS-1$
+			"\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements\n"; //$NON-NLS-1$
 
 	private static final String indent = "   "; //$NON-NLS-1$
 
