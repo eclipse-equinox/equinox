@@ -42,6 +42,9 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 	final private static String clearTextKey = "data";
 	final private static String clearTextValue = "-> this should not be encrypted <-";
 
+	final private static String unicodeKey = "unicodeKey";
+	final private static String unicodeValue = "va\u0432lue\u0433";
+
 	public SecurePreferencesTest() {
 		super();
 	}
@@ -71,6 +74,7 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		node3.put(key, value, true);
 		node3.put(secondKey, secondValue, true);
 		node3.put(clearTextKey, clearTextValue, false);
+		node3.put(unicodeKey, unicodeValue, true);
 
 		node2.remove(secondKey);
 
@@ -109,11 +113,12 @@ abstract public class SecurePreferencesTest extends StorageAbstractTest {
 		assertEquals(secondValue, node3.get(secondKey, defaultValue));
 		assertEquals(defaultValue, node3.get(unassignedKey, defaultValue));
 		assertEquals(clearTextValue, node3.get(clearTextKey, defaultValue));
+		assertEquals(unicodeValue, node3.get(unicodeKey, defaultValue));
 
 		String[] leafKeys = node3.keys();
 		assertNotNull(leafKeys);
-		assertEquals(leafKeys.length, 3);
-		findAll(new String[] {clearTextKey, key, secondKey}, leafKeys);
+		assertEquals(leafKeys.length, 4);
+		findAll(new String[] {clearTextKey, key, secondKey, unicodeKey}, leafKeys);
 	}
 
 	/**

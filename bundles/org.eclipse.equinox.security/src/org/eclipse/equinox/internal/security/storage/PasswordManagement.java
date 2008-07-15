@@ -77,7 +77,7 @@ public class PasswordManagement {
 			return;
 		}
 		try {
-			byte[] data = new String(password.getPassword().getPassword()).getBytes();
+			byte[] data = StorageUtils.getBytes(new String(password.getPassword().getPassword()));
 			CryptoData encryptedValue = root.getCipher().encrypt(internalPasswordExt, data);
 			node.internalPut(PASSWORD_RECOVERY_KEY, encryptedValue.toString());
 			root.markModified();
@@ -127,7 +127,7 @@ public class PasswordManagement {
 		try {
 			CryptoData encryptedData = new CryptoData(node.internalGet(PASSWORD_RECOVERY_KEY));
 			byte[] data = root.getCipher().decrypt(internalPasswordExt, encryptedData);
-			return new String(data);
+			return StorageUtils.getString(data);
 		} catch (IllegalStateException e) {
 			return null;
 		} catch (IllegalBlockSizeException e) {
@@ -173,7 +173,7 @@ public class PasswordManagement {
 		try {
 			// normally use digest of what was entered
 			MessageDigest digest = MessageDigest.getInstance(DIGEST_ALGORITHM);
-			byte[] digested = digest.digest(mix.toString().getBytes());
+			byte[] digested = digest.digest(StorageUtils.getBytes(mix.toString()));
 			internalPassword = EncodingUtils.encodeBase64(digested);
 		} catch (NoSuchAlgorithmException e) {
 			// just use the text as is; it is nicer to use digest but in this case no big deal

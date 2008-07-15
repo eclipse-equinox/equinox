@@ -295,9 +295,9 @@ public class JavaEncryption {
 		try {
 			cipherAlgorithm = testCipher;
 			keyFactoryAlgorithm = testKeyFactory;
-			CryptoData encrypted = internalEncrypt(samplePassword, sampleText.getBytes());
+			CryptoData encrypted = internalEncrypt(samplePassword, StorageUtils.getBytes(sampleText));
 			byte[] roundtripBytes = internalDecrypt(samplePassword, encrypted);
-			String result = new String(roundtripBytes);
+			String result = StorageUtils.getString(roundtripBytes);
 			return sampleText.equals(result);
 		} catch (Exception e) {
 			// internal implementation throws both checked and unchecked

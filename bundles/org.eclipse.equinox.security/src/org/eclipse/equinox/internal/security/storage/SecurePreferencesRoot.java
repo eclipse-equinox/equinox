@@ -257,7 +257,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				passwordExt = new PasswordExt(password, key);
 				if (newPassword) {
 					String test = createTestString();
-					CryptoData encryptedValue = getCipher().encrypt(passwordExt, test.getBytes());
+					CryptoData encryptedValue = getCipher().encrypt(passwordExt, StorageUtils.getBytes(test));
 					node.internalPut(key, encryptedValue.toString());
 					markModified();
 					setupPasswordRecovery = true;
@@ -269,7 +269,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				CryptoData data = new CryptoData(encryptedData);
 				try {
 					byte[] decryptedData = getCipher().decrypt(passwordExt, data);
-					String test = new String(decryptedData);
+					String test = StorageUtils.getString(decryptedData);
 					if (verifyTestString(test)) {
 						validPassword = true;
 						break;
@@ -347,7 +347,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		CryptoData encryptedValue;
 		try {
 			String test = createTestString();
-			encryptedValue = getCipher().encrypt(passwordExt, test.getBytes());
+			encryptedValue = getCipher().encrypt(passwordExt, StorageUtils.getBytes(test));
 		} catch (StorageException e) {
 			String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
 			AuthPlugin.getDefault().logError(msg, e);

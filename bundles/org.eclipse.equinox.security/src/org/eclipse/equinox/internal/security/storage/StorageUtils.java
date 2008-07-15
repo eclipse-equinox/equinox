@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import org.eclipse.equinox.internal.security.auth.AuthPlugin;
 import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * PLEASE READ BEFORE CHANGING THIS FILE
@@ -33,9 +34,16 @@ import org.eclipse.equinox.internal.security.auth.nls.SecAuthMessages;
 public class StorageUtils {
 
 	/**
+	 * Characters encoding used by the secure storage.
+	 */
+	final public static String CHAR_ENCODING = "UTF-8"; //$NON-NLS-1$
+
+	/**
 	 * Default name of the storage file
 	 */
 	final private static String propertiesFileName = ".eclipse/org.eclipse.equinox.security/secure_storage"; //$NON-NLS-1$
+
+	static private boolean firstCharsetException = true;
 
 	/**
 	 * Default locations:
@@ -107,6 +115,48 @@ public class StorageUtils {
 
 	static public boolean isFile(URL url) {
 		return ("file".equals(url.getProtocol())); //$NON-NLS-1$
+	}
+
+	/**
+	 * The {@link String#getBytes()} truncates non-ASCII chars. As a result 
+	 * new String(string.getBytes()) is not the same as the original string. Moreover,
+	 * the default Java encoding can be changed via system variables or startup conditions.
+	 */
+	static public byte[] getBytes(String string) {
+		if (string == null)
+			return null;
+		try {
+			return string.getBytes(CHAR_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			if (firstCharsetException) { // log error once per session
+				String msg = NLS.bind(SecAuthMessages.unsupoprtedCharEncoding, StorageUtils.CHAR_ENCODING);
+				AuthPlugin.getDefault().logMessage(msg);
+				firstCharsetException = false;
+			}
+			return string.getBytes();
+		}
+	}
+
+	/**
+	 * The new String(byte[]) method uses default system encoding which
+	 * might not properly process non-ASCII characters. 
+	 * 
+	 * Pairing {@link #getBytes(String)} and {@link #getString(byte[])} methods allows round trip 
+	 * of non-ASCII characters. 
+	 */
+	static public String getString(byte[] bytes) {
+		if (bytes == null)
+			return null;
+		try {
+			return new String(bytes, CHAR_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			if (firstCharsetException) { // log error once per session
+				String msg = NLS.bind(SecAuthMessages.unsupoprtedCharEncoding, StorageUtils.CHAR_ENCODING);
+				AuthPlugin.getDefault().logMessage(msg);
+				firstCharsetException = false;
+			}
+			return new String(bytes);
+		}
 	}
 
 }

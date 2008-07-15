@@ -193,7 +193,7 @@ public class SecurePreferences {
 			for (Iterator i = values.keySet().iterator(); i.hasNext();) {
 				String key = (String) i.next();
 				PersistedPath extenalTag = new PersistedPath(thisNodePath, key);
-				properties.put(extenalTag.toString(), values.get(key));
+				properties.setProperty(extenalTag.toString(), (String) values.get(key));
 			}
 		}
 
@@ -215,8 +215,8 @@ public class SecurePreferences {
 		checkRemoved();
 
 		if (!encrypt || value == null) {
-			CryptoData clearValue = new CryptoData(null, null, value == null ? null : value.getBytes());
-			internalPut(key, clearValue.toString());
+			CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value));
+			internalPut(key, clearValue.toString()); // uses Base64 to encode byte sequences
 			markModified();
 			return;
 		}
@@ -225,7 +225,7 @@ public class SecurePreferences {
 		if (passwordExt == null) {
 			boolean storeDecrypted = !CallbacksProvider.getDefault().runningUI() || InternalExchangeUtils.isJUnitApp();
 			if (storeDecrypted) { // for JUnits and headless runs we store value as clear text and log a error
-				CryptoData clearValue = new CryptoData(null, null, value == null ? null : value.getBytes());
+				CryptoData clearValue = new CryptoData(null, null, StorageUtils.getBytes(value));
 				internalPut(key, clearValue.toString());
 				markModified();
 				// Make this as visible as possible. Both print out the output and log a error
@@ -238,7 +238,7 @@ public class SecurePreferences {
 		}
 
 		// value must not be null at this point
-		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), value.getBytes());
+		CryptoData encryptedValue = getRoot().getCipher().encrypt(getRoot().getPassword(null, container, true), StorageUtils.getBytes(value));
 		internalPut(key, encryptedValue.toString());
 		markModified();
 	}
@@ -256,7 +256,7 @@ public class SecurePreferences {
 		if (moduleID == null) { // clear-text value, not encrypted
 			if (data.getData() == null)
 				return null;
-			return new String(data.getData());
+			return StorageUtils.getString(data.getData());
 		}
 
 		PasswordExt passwordExt = getRoot().getPassword(moduleID, container, false);
@@ -265,7 +265,7 @@ public class SecurePreferences {
 
 		try {
 			byte[] clearText = getRoot().getCipher().decrypt(passwordExt, data);
-			return new String(clearText);
+			return StorageUtils.getString(clearText);
 		} catch (IllegalBlockSizeException e) { // invalid password?
 			throw new StorageException(StorageException.DECRYPTION_ERROR, e);
 		} catch (BadPaddingException e) { // invalid password?
