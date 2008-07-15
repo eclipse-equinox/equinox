@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,18 +28,20 @@ public class MappedList {
 			existing[0] = value;
 			internal.put(key, existing);
 		} else {
-			// append the new value to the end.
+			// insert the new value
+			int index = insertionIndex(existing, value);
 			Object[] newValues = new Object[existing.length + 1];
-			System.arraycopy(existing, 0, newValues, 0, existing.length);
-			newValues[existing.length] = value;
-			sort(newValues); // sort the new values array
-			internal.put(key, newValues); // overwrite the old values in tha map
+			System.arraycopy(existing, 0, newValues, 0, index);
+			newValues[index] = value;
+			System.arraycopy(existing, index, newValues, index + 1, existing.length - index);
+			internal.put(key, newValues); // overwrite the old values in the map
 		}
 	}
 
-	protected void sort(Object[] values) {
-		// a MappedList is not sorted by default
-		// extending classes may override this method to sort lists
+	protected int insertionIndex(Object[] existing, Object value) {
+		// a MappedList is by default not sorted so just insert at the end
+		// extending classes may override this method to provide an index that retains sorted order
+		return existing.length;
 	}
 
 	// removes all values with the specified key

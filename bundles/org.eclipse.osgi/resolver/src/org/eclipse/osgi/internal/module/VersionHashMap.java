@@ -20,9 +20,16 @@ public class VersionHashMap extends MappedList implements Comparator {
 		this.resolver = resolver;
 	}
 
-	// sorts using the Comparator#compare method to sort
-	protected void sort(Object[] values) {
-		Arrays.sort(values, this);
+	// assumes existing array is sorted
+	// finds the index where to insert the new value
+	protected int insertionIndex(Object[] existing, Object value) {
+		int index = existing.length;
+		if (compare(existing[existing.length - 1], value) > 0) {
+			index = Arrays.binarySearch(existing, value, this);
+			if (index < 0)
+				index = -index - 1;
+		}
+		return index;
 	}
 
 	public void put(VersionSupplier[] versionSuppliers) {
@@ -72,7 +79,7 @@ public class VersionHashMap extends MappedList implements Comparator {
 			Object[] existing = (Object[]) it.next();
 			if (existing.length <= 1)
 				continue;
-			sort(existing);
+			Arrays.sort(existing, this);
 		}
 	}
 
