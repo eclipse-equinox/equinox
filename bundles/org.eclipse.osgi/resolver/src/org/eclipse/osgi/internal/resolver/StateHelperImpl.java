@@ -233,7 +233,38 @@ public class StateHelperImpl implements StateHelper {
 		for (int i = 0; i < toSort.length; i++)
 			if (toSort[i].isResolved())
 				buildReferences(toSort[i], references);
-		return ComputeNodeOrder.computeNodeOrder(toSort, (Object[][]) references.toArray(new Object[references.size()][]));
+		Object[][] cycles = ComputeNodeOrder.computeNodeOrder(toSort, (Object[][]) references.toArray(new Object[references.size()][]));
+		if (cycles.length == 0)
+			return cycles;
+		// fix up host/fragment orders (bug 184127)
+		for (int i = 0; i < cycles.length; i++) {
+			for (int j = 0; j < cycles[i].length; j++) {
+				BundleDescription fragment = (BundleDescription) cycles[i][j];
+				if (fragment.getHost() == null)
+					continue;
+				BundleDescription host = (BundleDescription) fragment.getHost().getSupplier();
+				if (host == null)
+					continue;
+				fixFragmentOrder(host, fragment, toSort);
+			}
+		}
+		return cycles;
+	}
+
+	private void fixFragmentOrder(BundleDescription host, BundleDescription fragment, BundleDescription[] toSort) {
+		int hostIndex = -1;
+		int fragIndex = -1;
+		for (int i = 0; i < toSort.length && (hostIndex == -1 || fragIndex == -1); i++) {
+			if (toSort[i] == host)
+				hostIndex = i;
+			else if (toSort[i] == fragment)
+				fragIndex = i;
+		}
+		if (fragIndex > -1 && fragIndex < hostIndex) {
+			for (int i = fragIndex; i < hostIndex; i++)
+				toSort[i] = toSort[i + 1];
+			toSort[hostIndex] = fragment;
+		}
 	}
 
 	private void buildReferences(BundleDescription description, List references) {
