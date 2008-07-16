@@ -106,6 +106,12 @@ public class EventManager {
 	 */
 	private EventThread thread;
 
+	/** 
+	 * Once closed, an attempt to create a new EventThread will result in an 
+	 * IllegalStateException. 
+	 */
+	private boolean closed;
+
 	/**
 	 * Thread name used for asynchronous event delivery
 	 */
@@ -148,6 +154,7 @@ public class EventManager {
 	 */
 	public EventManager(String threadName, ThreadGroup threadGroup) {
 		thread = null;
+		closed = false;
 		this.threadName = threadName;
 		this.threadGroup = threadGroup;
 	}
@@ -161,10 +168,14 @@ public class EventManager {
 	 * thread terminates.
 	 */
 	public synchronized void close() {
+		if (closed) {
+			return;
+		}
 		if (thread != null) {
 			thread.close();
 			thread = null;
 		}
+		closed = true;
 	}
 
 	/**
@@ -175,6 +186,9 @@ public class EventManager {
 	 * this EventManager.
 	 */
 	synchronized EventThread getEventThread() {
+		if (closed) {
+			throw new IllegalStateException();
+		}
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
 			thread = new EventThread(threadGroup, threadName);
@@ -376,6 +390,7 @@ public class EventManager {
 				try {
 					wait();
 				} catch (InterruptedException e) {
+					// If interrupted, we will loop back up and check running
 				}
 			}
 
