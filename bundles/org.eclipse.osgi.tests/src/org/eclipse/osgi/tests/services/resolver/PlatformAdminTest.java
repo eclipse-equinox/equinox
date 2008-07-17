@@ -11,6 +11,7 @@
 package org.eclipse.osgi.tests.services.resolver;
 
 import java.io.*;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -20,6 +21,9 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class PlatformAdminTest extends AbstractStateTest {
+	private static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
+	private static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
+
 	public static Test suite() {
 		return new TestSuite(PlatformAdminTest.class);
 	}
@@ -151,6 +155,218 @@ public class PlatformAdminTest extends AbstractStateTest {
 		}
 		assertNotNull("exports is null", exports);
 		assertEquals("Wrong number of exports", 2, exports.length);
+	}
+
+	public void testBug241128_01() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		int id = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "a; bundle-version=\"[1.0.0, 2.0.0)\"");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		state.addBundle(a1);
+		state.addBundle(b);
+		state.resolve(true);
+
+		assertTrue("Bundle a1 is not resolved", a1.isResolved());
+		assertTrue("Bundle b is not resolved", b.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		state.updateBundle(a2);
+
+		state.resolve(true);
+		assertTrue("Bundle a2 is not resolved", a2.isResolved());
+		assertFalse("Bundle b is resolved", b.isResolved());
+
+		VersionConstraint[] unsatisified = state.getStateHelper().getUnsatisfiedLeaves(state.getBundles());
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", b.getRequiredBundles()[0], unsatisified[0]);
+	}
+
+	public void testBug241128_02() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		int id = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.FRAGMENT_HOST, "a; bundle-version=\"[1.0.0, 2.0.0)\"");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		state.addBundle(a1);
+		state.addBundle(b);
+		state.resolve(true);
+
+		assertTrue("Bundle a1 is not resolved", a1.isResolved());
+		assertTrue("Bundle b is not resolved", b.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		state.updateBundle(a2);
+
+		state.resolve(true);
+		assertTrue("Bundle a2 is not resolved", a2.isResolved());
+		assertFalse("Bundle b is resolved", b.isResolved());
+
+		VersionConstraint[] unsatisified = state.getStateHelper().getUnsatisfiedLeaves(state.getBundles());
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", b.getHost(), unsatisified[0]);
+	}
+
+	public void testBug241128_03() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		int id = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version=1.0");
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "a; version=\"[1.0.0, 2.0.0)\"");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		state.addBundle(a1);
+		state.addBundle(b);
+		state.resolve(true);
+
+		assertTrue("Bundle a1 is not resolved", a1.isResolved());
+		assertTrue("Bundle b is not resolved", b.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version=2.0");
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		state.updateBundle(a2);
+
+		state.resolve(true);
+		assertTrue("Bundle a2 is not resolved", a2.isResolved());
+		assertFalse("Bundle b is resolved", b.isResolved());
+
+		VersionConstraint[] unsatisified = state.getStateHelper().getUnsatisfiedLeaves(state.getBundles());
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", b.getImportPackages()[0], unsatisified[0]);
+	}
+
+	public void testBug241128_04() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("osgi.os", "win32");
+		props[0].put("osgi.arch", "x86");
+		state.setPlatformProperties(props);
+
+		Hashtable manifest = new Hashtable();
+		int id = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=x86;osname=win32");
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), id++);
+
+		state.addBundle(a1);
+		state.resolve(true);
+
+		assertTrue("Bundle a1 is not resolved", a1.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		manifest.put(Constants.BUNDLE_NATIVECODE, "Bundle-NativeCode: nativefile1.txt;processor=linux;osname=gtk");
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + manifest.get(Constants.BUNDLE_VERSION), a1.getBundleId());
+		state.updateBundle(a2);
+
+		state.resolve(true);
+		assertFalse("Bundle a2 is resolved", a2.isResolved());
+
+		VersionConstraint[] unsatisified = state.getStateHelper().getUnsatisfiedConstraints(a2);
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", a2.getNativeCodeSpecification(), unsatisified[0]);
+
+		unsatisified = state.getStateHelper().getUnsatisfiedLeaves(state.getBundles());
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", a2.getNativeCodeSpecification(), unsatisified[0]);
+	}
+
+	public void testGenericsBasics() throws BundleException {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(GENERIC_CAPABILITY, "foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\"");
+		BundleDescription genCap1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		manifest.put(GENERIC_REQUIRE, "foo; selection-filter=\"(version>=1.3.0)\"");
+		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(genCap1);
+		state.addBundle(genReq);
+
+		state.resolve();
+
+		assertTrue("Bundle genCap1 is not resolved", genCap1.isResolved());
+		assertTrue("Bundle genReq is not resolved", genReq.isResolved());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
+		manifest.put(GENERIC_CAPABILITY, "foo; version=\"1.0\"; attr1=\"value1\"; attr2=\"value2\"");
+		BundleDescription genCap2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), genCap1.getBundleId());
+
+		state.updateBundle(genCap2);
+
+		state.resolve(true);
+		assertTrue("Bundle genCap2 is not resolved", genCap2.isResolved());
+		assertFalse("Bundle genReq is resolved", genReq.isResolved());
+
+		VersionConstraint[] unsatisified = state.getStateHelper().getUnsatisfiedLeaves(state.getBundles());
+		assertEquals("Wrong number of unsatisified leaves", 1, unsatisified.length);
+		assertEquals("Wrong unsatisfied constraint", genReq.getGenericRequires()[0], unsatisified[0]);
 	}
 }
 //TODO tests to enable

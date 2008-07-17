@@ -178,6 +178,9 @@ public class StateHelperImpl implements StateHelper {
 		for (int i = 0; i < generics.length; i++)
 			if (!generics[i].isResolved() && !isResolvable(generics[i]))
 				unsatisfied.add(generics[i]);
+		NativeCodeSpecification nativeCode = bundle.getNativeCodeSpecification();
+		if (nativeCode != null && !nativeCode.isResolved())
+			unsatisfied.add(nativeCode);
 		return (VersionConstraint[]) unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
 	}
 

@@ -373,11 +373,21 @@ public abstract class StateImpl implements State {
 		bundle.setResolvedRequires(null);
 		bundle.setSubstitutedExports(null);
 
-		// remove suppliers for generics
+		// remove the constraint suppliers
+		NativeCodeSpecificationImpl nativeCode = (NativeCodeSpecificationImpl) bundle.getNativeCodeSpecification();
+		if (nativeCode != null)
+			nativeCode.setSupplier(null);
+		ImportPackageSpecification[] imports = bundle.getImportPackages();
+		for (int i = 0; i < imports.length; i++)
+			((ImportPackageSpecificationImpl) imports[i]).setSupplier(null);
+		BundleSpecification[] requires = bundle.getRequiredBundles();
+		for (int i = 0; i < requires.length; i++)
+			((BundleSpecificationImpl) requires[i]).setSupplier(null);
 		GenericSpecification[] genericRequires = bundle.getGenericRequires();
 		if (genericRequires.length > 0)
 			for (int i = 0; i < genericRequires.length; i++)
 				((GenericSpecificationImpl) genericRequires[i]).setSupplers(null);
+
 		bundle.removeDependencies();
 	}
 
