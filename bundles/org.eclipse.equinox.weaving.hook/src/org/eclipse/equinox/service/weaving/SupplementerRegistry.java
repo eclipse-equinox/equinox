@@ -220,6 +220,10 @@ public class SupplementerRegistry {
 					continue;
 				}
 				
+				if (dontWeaveTheseBundles.contains(bundle.getSymbolicName())) {
+				    continue;
+				}
+				
 				Dictionary manifest = bundle.getHeaders();
 				ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, (String) manifest.get(Constants.IMPORT_PACKAGE));
 				ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
@@ -247,10 +251,7 @@ public class SupplementerRegistry {
 	}
 
 	private void updateInstalledBundle(Bundle bundle) {
-		String symbolicName = bundle.getSymbolicName();
-		if (this.dontWeaveTheseBundles.contains(symbolicName)) return;
-		
-		if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info triggering update for re-supplementing " + symbolicName);
+		if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info triggering update for re-supplementing " + bundle.getSymbolicName());
 
 		try {
 			int initialstate = (bundle.getState() | (Bundle.ACTIVE | Bundle.STARTING));

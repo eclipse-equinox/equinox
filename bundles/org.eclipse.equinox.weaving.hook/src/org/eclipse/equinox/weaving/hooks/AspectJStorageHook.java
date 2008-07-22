@@ -110,21 +110,11 @@ public class AspectJStorageHook implements StorageHook {
 			List supplementers = supplementerRegistry.getSupplementers(bundleData.getSymbolicName(), imports, exports);
 			if (!supplementers.isEmpty()) {
 				if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.initialize() " + getSymbolicName() + " supplementers=" + supplementers);
-				if (!getSymbolicName().equals("org.eclipse.osgi") 
-//						&& !getSymbolicName().startsWith("org.eclipse.core")
-//						&& !getSymbolicName().startsWith("org.eclipse.equinox")
-						&& !getSymbolicName().startsWith("org.eclipse.team.ui")
-						&& !getSymbolicName().startsWith("org.eclipse.update")
-					) {
-					if (addRequiredBundles(supplementers)) {
-						if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info supplementing " + getSymbolicName() + " with " + supplementers);
-					}
-					else {
-						if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info not supplementing " + getSymbolicName());
-					}
+				if (addRequiredBundles(supplementers)) {
+					if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info supplementing " + getSymbolicName() + " with " + supplementers);
 				}
 				else {
-					if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info cannot supplement " + getSymbolicName());
+					if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info not supplementing " + getSymbolicName());
 				}
 			}
 		}
