@@ -39,131 +39,222 @@ import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-public abstract class AbstractAspectJHook implements HookConfigurator, AdaptorHook, BundleFileWrapperFactoryHook , ClassLoadingHook, ClassLoadingStatsHook {
+/**
+ * Default implementation of all the necessary adaptor hooks. Used to keep the
+ * real hook implementation focused on only the necessary methods.
+ * 
+ * @author Matthew Webster
+ * @author Martin Lippert
+ */
+public abstract class AbstractAspectJHook implements HookConfigurator,
+        AdaptorHook, BundleFileWrapperFactoryHook, ClassLoadingHook,
+        ClassLoadingStatsHook {
 
-	public static boolean verbose = Boolean.getBoolean("org.aspectj.osgi.verbose");
-	
-	private SupplementerRegistry supplementerRegistry;
-	
-	public void addHooks (HookRegistry hooks) {
-		if (verbose) System.err.println("[org.aspectj.osgi] info adding AspectJ hooks ...");
+    /**
+     * flag to indicate whether to print out detailed information or not
+     */
+    public static boolean verbose = Boolean
+            .getBoolean("org.aspectj.osgi.verbose"); //$NON-NLS-1$
 
-		supplementerRegistry = new SupplementerRegistry();
+    private SupplementerRegistry supplementerRegistry;
 
-		hooks.addAdaptorHook(this);
-		hooks.addClassLoadingHook(this);
-		hooks.addBundleFileWrapperFactoryHook(this);
-		hooks.addClassLoadingStatsHook(this);
-		hooks.addStorageHook(new AspectJStorageHook(supplementerRegistry));
-	}
-	
-	public SupplementerRegistry getSupplementerRegistry() {
-		return this.supplementerRegistry;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.HookConfigurator#addHooks(org.eclipse.osgi.baseadaptor.HookRegistry)
+     */
+    public void addHooks(HookRegistry hooks) {
+        if (verbose)
+            System.err
+                    .println("[org.aspectj.osgi] info adding AspectJ hooks ..."); //$NON-NLS-1$
 
-	public BundleFile wrapBundleFile(BundleFile bundleFile, Object content, BaseData data, boolean base) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        supplementerRegistry = new SupplementerRegistry();
 
-	public boolean addClassPathEntry(ArrayList cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+        hooks.addAdaptorHook(this);
+        hooks.addClassLoadingHook(this);
+        hooks.addBundleFileWrapperFactoryHook(this);
+        hooks.addClassLoadingStatsHook(this);
+        hooks.addStorageHook(new AspectJStorageHook(supplementerRegistry));
+    }
 
-	public BaseClassLoader createClassLoader(ClassLoader parent, ClassLoaderDelegate delegate, BundleProtectionDomain domain, BaseData data, String[] bundleclasspath) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Their is only one registry for dealing with supplementers available via
+     * this accessor method.
+     * 
+     * @return The supplementer registry, guaranteed to be not null
+     */
+    public SupplementerRegistry getSupplementerRegistry() {
+        return this.supplementerRegistry;
+    }
 
-	public String findLibrary(BaseData data, String libName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.baseadaptor.bundlefile.BundleFile,
+     *      java.lang.Object, org.eclipse.osgi.baseadaptor.BaseData, boolean)
+     */
+    public BundleFile wrapBundleFile(BundleFile bundleFile, Object content,
+            BaseData data, boolean base) throws IOException {
+        return null;
+    }
 
-	public ClassLoader getBundleClassLoaderParent() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#addClassPathEntry(java.util.ArrayList,
+     *      java.lang.String,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager,
+     *      org.eclipse.osgi.baseadaptor.BaseData,
+     *      java.security.ProtectionDomain)
+     */
+    public boolean addClassPathEntry(ArrayList cpEntries, String cp,
+            ClasspathManager hostmanager, BaseData sourcedata,
+            ProtectionDomain sourcedomain) {
+        return false;
+    }
 
-	public void initializedClassLoader(BaseClassLoader baseClassLoader, BaseData data) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#createClassLoader(java.lang.ClassLoader,
+     *      org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate,
+     *      org.eclipse.osgi.framework.adaptor.BundleProtectionDomain,
+     *      org.eclipse.osgi.baseadaptor.BaseData, java.lang.String[])
+     */
+    public BaseClassLoader createClassLoader(ClassLoader parent,
+            ClassLoaderDelegate delegate, BundleProtectionDomain domain,
+            BaseData data, String[] bundleclasspath) {
+        return null;
+    }
 
-	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#findLibrary(org.eclipse.osgi.baseadaptor.BaseData,
+     *      java.lang.String)
+     */
+    public String findLibrary(BaseData data, String libName) {
+        return null;
+    }
 
-	public void addProperties(Properties properties) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#getBundleClassLoaderParent()
+     */
+    public ClassLoader getBundleClassLoaderParent() {
+        return null;
+    }
 
-	public FrameworkLog createFrameworkLog() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
+     *      org.eclipse.osgi.baseadaptor.BaseData)
+     */
+    public void initializedClassLoader(BaseClassLoader baseClassLoader,
+            BaseData data) {
+    }
 
-	public void frameworkStart(BundleContext context) throws BundleException {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#processClass(java.lang.String,
+     *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
+     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public byte[] processClass(String name, byte[] classbytes,
+            ClasspathEntry classpathEntry, BundleEntry entry,
+            ClasspathManager manager) {
+        return null;
+    }
 
-	public void frameworkStop(BundleContext context) throws BundleException {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#addProperties(java.util.Properties)
+     */
+    public void addProperties(Properties properties) {
+    }
 
-	public void frameworkStopping(BundleContext context) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#createFrameworkLog()
+     */
+    public FrameworkLog createFrameworkLog() {
+        return null;
+    }
 
-	public void handleRuntimeError(Throwable error) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStart(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStart(BundleContext context) throws BundleException {
+    }
 
-	public void initialize(BaseAdaptor adaptor) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStop(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStop(BundleContext context) throws BundleException {
+    }
 
-	public URLConnection mapLocationToURLConnection(String location) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStopping(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStopping(BundleContext context) {
+    }
 
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#handleRuntimeError(java.lang.Throwable)
+     */
+    public void handleRuntimeError(Throwable error) {
+    }
 
-	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#initialize(org.eclipse.osgi.baseadaptor.BaseAdaptor)
+     */
+    public void initialize(BaseAdaptor adaptor) {
+    }
 
-	public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#mapLocationToURLConnection(java.lang.String)
+     */
+    public URLConnection mapLocationToURLConnection(String location)
+            throws IOException {
+        return null;
+    }
 
-	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#matchDNChain(java.lang.String,
+     *      java.lang.String[])
+     */
+    public boolean matchDNChain(String pattern, String[] dnChain) {
+        return false;
+    }
 
-	public void preFindLocalResource(String name, ClasspathManager manager) {
-		// TODO Auto-generated method stub
-		
-	}
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#postFindLocalClass(java.lang.String,
+     *      java.lang.Class,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public void postFindLocalClass(String name, Class clazz,
+            ClasspathManager manager) {
+    }
 
-	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#postFindLocalResource(java.lang.String,
+     *      java.net.URL, org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public void postFindLocalResource(String name, URL resource,
+            ClasspathManager manager) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#preFindLocalClass(java.lang.String,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public void preFindLocalClass(String name, ClasspathManager manager)
+            throws ClassNotFoundException {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#preFindLocalResource(java.lang.String,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public void preFindLocalResource(String name, ClasspathManager manager) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#recordClassDefine(java.lang.String,
+     *      java.lang.Class, byte[],
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
+     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public void recordClassDefine(String name, Class clazz, byte[] classbytes,
+            ClasspathEntry classpathEntry, BundleEntry entry,
+            ClasspathManager manager) {
+    }
+
 }
