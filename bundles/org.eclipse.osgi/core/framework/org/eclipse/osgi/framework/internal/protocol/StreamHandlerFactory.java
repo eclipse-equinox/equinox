@@ -38,6 +38,16 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
 	private static final List ignoredClasses = Arrays.asList(new Class[] {MultiplexingURLStreamHandler.class, StreamHandlerFactory.class, URL.class});
+	private static final boolean useNetProxy;
+	static {
+		Class clazz = null;
+		try {
+			clazz = Class.forName("java.net.Proxy"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected on JRE < 1.5
+		}
+		useNetProxy = clazz != null;
+	}
 	private Hashtable proxies;
 	private URLStreamHandlerFactory parentFactory;
 
@@ -134,7 +144,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 				String[] protocols = (String[]) prop;
 				for (int j = 0; j < protocols.length; j++)
 					if (protocols[j].equals(protocol)) {
-						handler = new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
+						handler = useNetProxy ? new URLStreamHandlerFactoryProxyFor15(protocol, serviceReferences[i], context) : new URLStreamHandlerProxy(protocol, serviceReferences[i], context);
 						proxies.put(protocol, handler);
 						return (handler);
 					}
