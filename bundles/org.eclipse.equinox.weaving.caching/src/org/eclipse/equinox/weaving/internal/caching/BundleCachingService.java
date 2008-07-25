@@ -53,12 +53,17 @@ public class BundleCachingService extends BaseCachingService {
 
     private final BundleContext bundleContext;
 
-    private File cache;
-
     private final Map<String, byte[]> cachedClasses = new HashMap<String, byte[]>(
             MAX_CACHED_CLASSES + 10);
 
+    private final Map<URL, File> cacheDirectories = new HashMap<URL, File>();
+
+    private final Map<String, URL> cachedSourceFileURLs = new HashMap<String, URL>(
+            MAX_CACHED_CLASSES + 10);
+
     private final String cacheKey;
+
+    private File cachePartition;
 
     /**
      * @param bundleContext
@@ -75,15 +80,15 @@ public class BundleCachingService extends BaseCachingService {
 
         if (bundleContext == null) {
             throw new IllegalArgumentException(
-                    "Argument \"bundleContext\" must not be null!");
+                    "Argument \"bundleContext\" must not be null!"); //$NON-NLS-1$
         }
         if (bundle == null) {
             throw new IllegalArgumentException(
-                    "Argument \"bundle\" must not be null!");
+                    "Argument \"bundle\" must not be null!"); //$NON-NLS-1$
         }
         if (key == null) {
             throw new IllegalArgumentException(
-                    "Argument \"key\" must not be null!");
+                    "Argument \"key\" must not be null!"); //$NON-NLS-1$
         }
 
         this.bundleContext = bundleContext;
@@ -103,21 +108,22 @@ public class BundleCachingService extends BaseCachingService {
 
         if (name == null) {
             throw new IllegalArgumentException(
-                    "Argument \"name\" must not be null!");
+                    "Argument \"name\" must not be null!"); //$NON-NLS-1$
         }
 
         byte[] storedClass = null;
-        if (cache != null) {
-            final File cachedBytecodeFile = new File(cache, name);
+        if (cachePartition != null) {
+            final File cacheDirectory = getCacheDirectory(sourceFileURL);
+            final File cachedBytecodeFile = new File(cacheDirectory, name);
             if (cachedBytecodeFile.exists()) {
                 storedClass = read(name, cachedBytecodeFile);
             }
         }
 
         if (Log.isDebugEnabled()) {
-            Log.debug(MessageFormat.format("for [{0}]: {1} {2}", bundle
-                    .getSymbolicName(), ((storedClass != null) ? "Found"
-                    : "Found NOT"), name));
+            Log.debug(MessageFormat.format("for [{0}]: {1} {2}", bundle //$NON-NLS-1$
+                    .getSymbolicName(), ((storedClass != null) ? "Found" //$NON-NLS-1$
+                    : "Found NOT"), name)); //$NON-NLS-1$
         }
         return storedClass;
     }
@@ -126,9 +132,10 @@ public class BundleCachingService extends BaseCachingService {
      * Writes the remaining cache to disk.
      */
     public void stop() {
-        if (cache != null) {
+        if (cachePartition != null) {
             for (final String name : cachedClasses.keySet()) {
-                write(name);
+                final URL sourceFileURL = cachedSourceFileURLs.get(name);
+                write(name, sourceFileURL);
             }
         }
     }
@@ -143,27 +150,48 @@ public class BundleCachingService extends BaseCachingService {
 
         if (clazz == null) {
             throw new IllegalArgumentException(
-                    "Argument \"clazz\" must not be null!");
+                    "Argument \"clazz\" must not be null!"); //$NON-NLS-1$
         }
         if (classbytes == null) {
             throw new IllegalArgumentException(
-                    "Argument \"classbytes\" must not be null!");
+                    "Argument \"classbytes\" must not be null!"); //$NON-NLS-1$
         }
 
-        if (cache == null) {
+        if (cachePartition == null) {
             return false;
         }
 
         cachedClasses.put(clazz.getName(), classbytes);
+        cachedSourceFileURLs.put(clazz.getName(), sourceFileURL);
         if (cachedClasses.size() > MAX_CACHED_CLASSES) {
 
             final Iterator<String> names = cachedClasses.keySet().iterator();
             while (names.hasNext()) {
-                write(names.next());
+                final String name = names.next();
+                final URL url = cachedSourceFileURLs.get(name);
+                write(name, url);
                 names.remove();
+                cachedSourceFileURLs.remove(name);
             }
         }
         return true;
+    }
+
+    private File getCacheDirectory(final URL sourceFileUrl) {
+        File cacheDir = this.cacheDirectories.get(sourceFileUrl);
+
+        if (cacheDir == null) {
+            final String cacheDirFromUrl = hashNamespace(sourceFileUrl
+                    .toString());
+            cacheDir = new File(cachePartition, cacheDirFromUrl);
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+
+            this.cacheDirectories.put(sourceFileUrl, cacheDir);
+        }
+
+        return cacheDir;
     }
 
     /**
@@ -175,7 +203,7 @@ public class BundleCachingService extends BaseCachingService {
     private String hashNamespace(final String namespace) {
         MessageDigest md = null;
         try {
-            md = MessageDigest.getInstance("MD5");
+            md = MessageDigest.getInstance("MD5"); //$NON-NLS-1$
         } catch (final NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -190,7 +218,7 @@ public class BundleCachingService extends BaseCachingService {
             }
             String s = Integer.toHexString(num);
             while (s.length() < 2) {
-                s = "0" + s;
+                s = "0" + s; //$NON-NLS-1$
             }
             result.append(s);
         }
@@ -199,18 +227,17 @@ public class BundleCachingService extends BaseCachingService {
 
     private void initCache() {
         boolean isInitialized = false;
-        final File dataFile = bundleContext.getDataFile("");
+        final File dataFile = bundleContext.getDataFile(""); //$NON-NLS-1$
         if (dataFile != null) {
-            cache = new File(new File(dataFile, cacheKey), bundle
-                    .getSymbolicName());
-            if (!cache.exists()) {
-                isInitialized = cache.mkdirs();
+            cachePartition = new File(dataFile, cacheKey);
+            if (!cachePartition.exists()) {
+                isInitialized = cachePartition.mkdirs();
             } else {
                 isInitialized = true;
             }
         }
         if (!isInitialized) {
-            Log.error("Cannot initialize cache!", null);
+            Log.error("Cannot initialize cache!", null); //$NON-NLS-1$
         }
     }
 
@@ -231,7 +258,7 @@ public class BundleCachingService extends BaseCachingService {
                     readcount = in.read(classbytes, bytesread, length
                             - bytesread);
                     if (readcount <= 0) /* if we didn't read anything */
-                        break; /* leave the loop */
+                    break; /* leave the loop */
                 }
             } else /* BundleEntry does not know its own length! */{
                 length = BUFFER_SIZE;
@@ -241,7 +268,7 @@ public class BundleCachingService extends BaseCachingService {
                         readcount = in.read(classbytes, bytesread, length
                                 - bytesread);
                         if (readcount <= 0) /* if we didn't read anything */
-                            break readloop; /* leave the loop */
+                        break readloop; /* leave the loop */
                     }
                     final byte[] oldbytes = classbytes;
                     length += BUFFER_SIZE;
@@ -257,7 +284,7 @@ public class BundleCachingService extends BaseCachingService {
             return classbytes;
         } catch (final IOException e) {
             Log.error(MessageFormat.format(
-                    "for [{0}]: Cannot read [1] from cache!", bundle
+                    "for [{0}]: Cannot read [1] from cache!", bundle //$NON-NLS-1$
                             .getSymbolicName(), name), e);
             return null;
         } finally {
@@ -266,28 +293,29 @@ public class BundleCachingService extends BaseCachingService {
                     in.close();
                 } catch (final IOException e) {
                     Log.error(MessageFormat.format(
-                            "for [{0}]: Cannot close cache file for [1]!",
+                            "for [{0}]: Cannot close cache file for [1]!", //$NON-NLS-1$
                             bundle.getSymbolicName(), name), e);
                 }
             }
         }
     }
 
-    private void write(final String name) {
+    private void write(final String name, final URL sourceFileURL) {
         // TODO Think about synchronization !!!
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(new File(cache, name));
+            final File cacheDirectory = getCacheDirectory(sourceFileURL);
+            out = new FileOutputStream(new File(cacheDirectory, name));
             out.write(cachedClasses.get(name));
             out.close();
             if (Log.isDebugEnabled()) {
                 Log.debug(MessageFormat.format(
-                        "for [{0}]: Written {1} to cache.", bundle
+                        "for [{0}]: Written {1} to cache.", bundle //$NON-NLS-1$
                                 .getSymbolicName(), name));
             }
         } catch (final IOException e) {
             Log.error(MessageFormat.format(
-                    "for [{0}]: Cannot write [1] to cache!", bundle
+                    "for [{0}]: Cannot write [1] to cache!", bundle //$NON-NLS-1$
                             .getSymbolicName(), name), e);
         } finally {
             if (out != null) {
@@ -295,7 +323,7 @@ public class BundleCachingService extends BaseCachingService {
                     out.close();
                 } catch (final IOException e) {
                     Log.error(MessageFormat.format(
-                            "for [{0}]: Cannot close cache file for [1]!",
+                            "for [{0}]: Cannot close cache file for [1]!", //$NON-NLS-1$
                             bundle.getSymbolicName(), name), e);
                 }
             }

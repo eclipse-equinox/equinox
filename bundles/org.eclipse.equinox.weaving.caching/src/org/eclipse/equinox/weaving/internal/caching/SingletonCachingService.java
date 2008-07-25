@@ -19,6 +19,7 @@ import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
 
 /**
@@ -57,6 +58,23 @@ public class SingletonCachingService extends BaseCachingService {
     }
 
     /**
+     * Generates the unique id for the cache of the given bundle (usually the
+     * symbolic name and the bundle version)
+     * 
+     * @param bundle
+     *            The bundle for which a unique cache id should be calculated
+     * @return The unique id of the cache for the given bundle
+     */
+    public String getCacheId(final Bundle bundle) {
+        String bundleVersion = (String) bundle.getHeaders().get(
+                Constants.BUNDLE_VERSION);
+        if (bundleVersion == null || bundleVersion.length() == 0) {
+            bundleVersion = "0.0.0"; //$NON-NLS-1$
+        }
+        return bundle.getSymbolicName() + "_" + bundleVersion; //$NON-NLS-1$
+    }
+
+    /**
      * Looks for a stored {@link BaseCachingService} for the given bundle. If
      * this exits it is returned, else created and stored.
      * 
@@ -72,8 +90,10 @@ public class SingletonCachingService extends BaseCachingService {
                     "Argument \"bundle\" must not be null!");
         }
 
+        final String cacheId = getCacheId(bundle);
+
         BundleCachingService bundleCachingService = bundleCachingServices
-                .get(bundle.getSymbolicName());
+                .get(cacheId);
 
         key = key == null || key.length() == 0 ? "defaultCache" : key;
 
@@ -81,13 +101,11 @@ public class SingletonCachingService extends BaseCachingService {
 
             bundleCachingService = new BundleCachingService(bundleContext,
                     bundle, key);
-            bundleCachingServices.put(bundle.getSymbolicName(),
-                    bundleCachingService);
+            bundleCachingServices.put(cacheId, bundleCachingService);
 
             if (Log.isDebugEnabled()) {
                 Log.debug(MessageFormat.format(
-                        "Created BundleCachingService for [{0}].", bundle
-                                .getSymbolicName()));
+                        "Created BundleCachingService for [{0}].", cacheId));
             }
         }
 
@@ -109,12 +127,12 @@ public class SingletonCachingService extends BaseCachingService {
      * Stops individual bundle caching service if the bundle is uninstalled
      */
     protected void stopBundleCachingService(final BundleEvent event) {
-        final String symbolicName = event.getBundle().getSymbolicName();
+        final String cacheId = getCacheId(event.getBundle());
         final BundleCachingService bundleCachingService = bundleCachingServices
-                .get(symbolicName);
+                .get(cacheId);
         if (bundleCachingService != null) {
             bundleCachingService.stop();
-            bundleCachingServices.remove(symbolicName);
+            bundleCachingServices.remove(cacheId);
         }
     }
 
