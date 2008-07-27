@@ -13,6 +13,7 @@ package org.eclipse.equinox.weaving.internal.caching;
 
 import java.net.URL;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 
@@ -28,7 +29,7 @@ public abstract class BaseCachingService implements ICachingService {
      * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
      *      java.net.URL, java.lang.String)
      */
-    public byte[] findStoredClass(final String namespace,
+    public CacheEntry findStoredClass(final String namespace,
             final URL sourceFileURL, final String name) {
         throw new UnsupportedOperationException("Illegal call semantics!");
     }
@@ -40,6 +41,12 @@ public abstract class BaseCachingService implements ICachingService {
     public ICachingService getInstance(final ClassLoader classLoader,
             final Bundle bundle, final String key) {
         throw new UnsupportedOperationException("Illegal call semantics!");
+    }
+
+    /**
+     * Lifecycle method Stops the caching service
+     */
+    public void stop() {
     }
 
     /**

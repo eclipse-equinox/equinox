@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.IWeavingService;
 import org.eclipse.equinox.weaving.hooks.AspectJBundleFile;
@@ -127,17 +128,17 @@ public class AspectJAdaptor implements IAspectJAdaptor {
 		if (Debug.DEBUG_GENERAL) Debug.println("- AspectJAdaptor.setBaseClassLoader() bundle=" + symbolicName + ", baseLoader=" + baseLoader);
 	}
 	
-	public byte[] findClass (String name, URL sourceFileURL) {
+	public CacheEntry findClass (String name, URL sourceFileURL) {
 		if (Debug.DEBUG_CACHE) Debug.println("> AspectJAdaptor.findClass() bundle=" + symbolicName + ", url=" + sourceFileURL + ", name=" + name);
-		byte[] bytes = null;
+		CacheEntry cacheEntry = null;
 
 		initialize();
 		if (cachingService != null) {
-			bytes = cachingService.findStoredClass("",sourceFileURL,name);
+			cacheEntry = cachingService.findStoredClass("",sourceFileURL,name);
 		}
 
-		if (Debug.DEBUG_CACHE) Debug.println("< AspectJAdaptor.findClass() bytes=" + bytes);
-		return bytes;
+		if (Debug.DEBUG_CACHE) Debug.println("< AspectJAdaptor.findClass() cacheEntry=" + cacheEntry);
+		return cacheEntry;
 	}
 	
 	public byte[] weaveClass (String name, byte[] bytes) {

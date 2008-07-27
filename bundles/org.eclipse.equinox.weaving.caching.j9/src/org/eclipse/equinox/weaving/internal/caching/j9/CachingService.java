@@ -16,6 +16,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 
@@ -51,10 +52,16 @@ public class CachingService implements ICachingService {
 		return new CachingService(classLoader,bundle, key);
 	}
 
-	public byte[] findStoredClass(String namespace, URL sourceFileURL, String name) {
+	public CacheEntry findStoredClass(String namespace, URL sourceFileURL, String name) {
 		byte[] bytes = urlhelper.findSharedClass(partition, sourceFileURL, name);
 		if (CachingServicePlugin.DEBUG && bytes != null) System.out.println("- CachingService.findStoredClass() bundle=" + bundle.getSymbolicName() + ", name=" + name + ", url=" + sourceFileURL + ", bytes=" + bytes);
-		return bytes;
+		
+		if (bytes != null) {
+		    return new CacheEntry(true, bytes);
+		}
+		else {
+		    return new CacheEntry(false, null);
+		}
 	}
 
 	public boolean storeClass(String namespace, URL sourceFileURL, Class clazz, byte[] classbytes) {

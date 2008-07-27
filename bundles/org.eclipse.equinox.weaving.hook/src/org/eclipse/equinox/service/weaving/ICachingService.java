@@ -20,7 +20,7 @@ public interface ICachingService {
 	
 	public ICachingService getInstance(ClassLoader classLoader, Bundle bundle, String key);
 	
-	public byte[] findStoredClass(String namespace, URL sourceFileURL, String name);
+	public CacheEntry findStoredClass(String namespace, URL sourceFileURL, String name);
 	
 	public boolean storeClass(String namespace, URL sourceFileURL, Class clazz, byte[] classbytes);
 	

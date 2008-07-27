@@ -13,13 +13,14 @@ package org.eclipse.equinox.weaving.adaptors;
 
 import java.net.URL;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 
 public interface IAspectJAdaptor {
 
 	public void setBaseClassLoader (BaseClassLoader baseClassLoader);
 	
-	public byte[] findClass (String name, URL sourceFileURL);
+	public CacheEntry findClass (String name, URL sourceFileURL);
 	
 	public byte[] weaveClass (String name, byte[] bytes);
 	

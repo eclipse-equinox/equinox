@@ -30,7 +30,7 @@ import org.osgi.framework.SynchronousBundleListener;
  */
 public class SingletonCachingService extends BaseCachingService {
 
-    private final Map<String, BundleCachingService> bundleCachingServices = new HashMap<String, BundleCachingService>();
+    private final Map<String, BaseCachingService> bundleCachingServices = new HashMap<String, BaseCachingService>();
 
     private final BundleContext bundleContext;
 
@@ -83,7 +83,7 @@ public class SingletonCachingService extends BaseCachingService {
      */
     @Override
     public synchronized ICachingService getInstance(
-            final ClassLoader classLoader, final Bundle bundle, String key) {
+            final ClassLoader classLoader, final Bundle bundle, final String key) {
 
         if (bundle == null) {
             throw new IllegalArgumentException(
@@ -92,15 +92,17 @@ public class SingletonCachingService extends BaseCachingService {
 
         final String cacheId = getCacheId(bundle);
 
-        BundleCachingService bundleCachingService = bundleCachingServices
+        BaseCachingService bundleCachingService = bundleCachingServices
                 .get(cacheId);
-
-        key = key == null || key.length() == 0 ? "defaultCache" : key;
 
         if (bundleCachingService == null) {
 
-            bundleCachingService = new BundleCachingService(bundleContext,
-                    bundle, key);
+            if (key != null && key.length() > 0) {
+                bundleCachingService = new BundleCachingService(bundleContext,
+                        bundle, key);
+            } else {
+                bundleCachingService = new UnchangedCachingService();
+            }
             bundleCachingServices.put(cacheId, bundleCachingService);
 
             if (Log.isDebugEnabled()) {
@@ -115,8 +117,9 @@ public class SingletonCachingService extends BaseCachingService {
     /**
      * Stops all individual bundle services.
      */
+    @Override
     public synchronized void stop() {
-        for (final BundleCachingService bundleCachingService : bundleCachingServices
+        for (final BaseCachingService bundleCachingService : bundleCachingServices
                 .values()) {
             bundleCachingService.stop();
         }
@@ -128,7 +131,7 @@ public class SingletonCachingService extends BaseCachingService {
      */
     protected void stopBundleCachingService(final BundleEvent event) {
         final String cacheId = getCacheId(event.getBundle());
-        final BundleCachingService bundleCachingService = bundleCachingServices
+        final BaseCachingService bundleCachingService = bundleCachingServices
                 .get(cacheId);
         if (bundleCachingService != null) {
             bundleCachingService.stop();

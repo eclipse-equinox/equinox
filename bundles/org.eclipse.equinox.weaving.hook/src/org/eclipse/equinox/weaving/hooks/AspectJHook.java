@@ -92,7 +92,7 @@ public class AspectJHook extends AbstractAspectJHook {
 		byte[] newClassytes = null;
 		if (entry instanceof AspectJBundleEntry) {
 			AspectJBundleEntry ajBundleEntry = (AspectJBundleEntry)entry;
-			if (!ajBundleEntry.isCached()) {
+			if (!ajBundleEntry.dontWeave()) {
 				IAspectJAdaptor adaptor = ajBundleEntry.getAdaptor();
 				newClassytes = adaptor.weaveClass(name,classbytes);
 			}

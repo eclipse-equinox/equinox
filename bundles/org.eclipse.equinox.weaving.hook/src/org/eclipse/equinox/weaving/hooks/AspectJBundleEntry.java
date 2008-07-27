@@ -27,15 +27,17 @@ public class AspectJBundleEntry extends BundleEntry {
 	private byte[] bytes;
 	private URL bundleFileURL;
 	private BundleEntry delegate;
+    private boolean dontWeave;
 	
-	public AspectJBundleEntry (IAspectJAdaptor aspectjAdaptor, BundleEntry delegate, URL url) {
+	public AspectJBundleEntry (IAspectJAdaptor aspectjAdaptor, BundleEntry delegate, URL url, boolean dontWeave) {
 		this.adaptor = aspectjAdaptor;
 		this.bundleFileURL = url;
 		this.delegate = delegate;
+		this.dontWeave = dontWeave;
 	}
 	
 	public AspectJBundleEntry (IAspectJAdaptor aspectjAdaptor, BundleEntry delegate, String name, byte[] bytes, URL url) {
-		this(aspectjAdaptor, delegate, url);
+		this(aspectjAdaptor, delegate, url, true);
 		this.name = name;
 		this.bytes = bytes;
 	}
@@ -87,8 +89,8 @@ public class AspectJBundleEntry extends BundleEntry {
 		else return 0;
 	}
 	
-	public boolean isCached() {
-		return bytes != null;
+	public boolean dontWeave() {
+	    return dontWeave;
 	}
 
 }

@@ -15,6 +15,7 @@ package org.eclipse.equinox.weaving.hooks;
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.weaving.adaptors.Debug;
 import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
@@ -35,22 +36,27 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
 
 	public BundleEntry getEntry(String path) {
 		if (Debug.DEBUG_BUNDLE) Debug.println("> AspectJBundleFile.getEntry() path=" + path + ", url=" + url);
-		BundleEntry entry;
+		BundleEntry entry = delegate.getEntry(path);
+
 		if (path.endsWith(".class")) {
 			int offset = path.lastIndexOf('.');
 			String name = path.substring(0,offset).replace('/','.');
-			byte[] bytes = adaptor.findClass(name,url);
-			if (bytes == null) {
-				entry = delegate.getEntry(path);
+//			byte[] bytes = adaptor.findClass(name,url);
+			CacheEntry cacheEntry = adaptor.findClass(name,url);
+			if (cacheEntry == null) {
 				if (entry != null) {
-					entry = new AspectJBundleEntry(adaptor,entry, url);
+					entry = new AspectJBundleEntry(adaptor, entry, url, false);
 					if (Debug.DEBUG_BUNDLE) Debug.println("- AspectJBundleFile.getEntry() path=" + path + ", entry=" + entry);
 				}
 			}
-			else entry = new AspectJBundleEntry(adaptor,delegate.getEntry(path), path,bytes, url);
-		}
-		else {
-			entry = delegate.getEntry(path);
+			else {
+			    if (cacheEntry.getCachedBytes() != null) {
+                    entry = new AspectJBundleEntry(adaptor, entry, path, cacheEntry.getCachedBytes(), url);
+			    }
+			    else if (entry != null) {
+			        entry = new AspectJBundleEntry(adaptor, entry, url, cacheEntry.dontWeave());
+			    }
+			}
 		}
 
 		if (Debug.DEBUG_BUNDLE) Debug.println("< AspectJBundleFile.getEntry() entry=" + entry);

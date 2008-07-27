@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -103,7 +104,7 @@ public class BundleCachingService extends BaseCachingService {
      *      java.net.URL, java.lang.String)
      */
     @Override
-    public byte[] findStoredClass(final String namespace,
+    public CacheEntry findStoredClass(final String namespace,
             final URL sourceFileURL, final String name) {
 
         if (name == null) {
@@ -112,11 +113,14 @@ public class BundleCachingService extends BaseCachingService {
         }
 
         byte[] storedClass = null;
+        boolean isCached = false;
+
         if (cachePartition != null) {
             final File cacheDirectory = getCacheDirectory(sourceFileURL);
             final File cachedBytecodeFile = new File(cacheDirectory, name);
             if (cachedBytecodeFile.exists()) {
                 storedClass = read(name, cachedBytecodeFile);
+                isCached = true;
             }
         }
 
@@ -125,7 +129,7 @@ public class BundleCachingService extends BaseCachingService {
                     .getSymbolicName(), ((storedClass != null) ? "Found" //$NON-NLS-1$
                     : "Found NOT"), name)); //$NON-NLS-1$
         }
-        return storedClass;
+        return new CacheEntry(isCached, storedClass);
     }
 
     /**
