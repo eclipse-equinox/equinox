@@ -28,6 +28,7 @@ import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 
 /**
  * <p>
@@ -54,10 +55,12 @@ public class BundleCachingService extends BaseCachingService {
 
     private final BundleContext bundleContext;
 
+    private String bundleVersion;
+
     private final Map<String, byte[]> cachedClasses = new HashMap<String, byte[]>(
             MAX_CACHED_CLASSES + 10);
 
-    private final Map<URL, File> cacheDirectories = new HashMap<URL, File>();
+    private final Map<String, File> cacheDirectories = new HashMap<String, File>();
 
     private final Map<String, URL> cachedSourceFileURLs = new HashMap<String, URL>(
             MAX_CACHED_CLASSES + 10);
@@ -95,6 +98,14 @@ public class BundleCachingService extends BaseCachingService {
         this.bundleContext = bundleContext;
         this.bundle = bundle;
         this.cacheKey = hashNamespace(key);
+
+        final Object version = bundle.getHeaders()
+                .get(Constants.BUNDLE_VERSION);
+        if (version != null) {
+            this.bundleVersion = (String) version;
+        } else {
+            this.bundleVersion = "0.0.0"; //$NON-NLS-1$
+        }
 
         initCache();
     }
@@ -135,6 +146,7 @@ public class BundleCachingService extends BaseCachingService {
     /**
      * Writes the remaining cache to disk.
      */
+    @Override
     public void stop() {
         if (cachePartition != null) {
             for (final String name : cachedClasses.keySet()) {
@@ -182,17 +194,19 @@ public class BundleCachingService extends BaseCachingService {
     }
 
     private File getCacheDirectory(final URL sourceFileUrl) {
-        File cacheDir = this.cacheDirectories.get(sourceFileUrl);
+        final String directoryName = sourceFileUrl.toString()
+                + this.bundleVersion;
+
+        File cacheDir = this.cacheDirectories.get(directoryName);
 
         if (cacheDir == null) {
-            final String cacheDirFromUrl = hashNamespace(sourceFileUrl
-                    .toString());
+            final String cacheDirFromUrl = hashNamespace(directoryName);
             cacheDir = new File(cachePartition, cacheDirFromUrl);
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
             }
 
-            this.cacheDirectories.put(sourceFileUrl, cacheDir);
+            this.cacheDirectories.put(directoryName, cacheDir);
         }
 
         return cacheDir;
