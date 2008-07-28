@@ -423,10 +423,10 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 			if (filter(data.cFileName)) {
 				if (candidate == NULL) {
 					candidate = _tcsdup(data.cFileName);
-				} else if( compareVersions(candidate + prefixLength + 1, fileName + prefixLength + 1) < 0) {
+				} else if( compareVersions(candidate + prefixLength + 1, data.cFileName + prefixLength + 1) < 0) {
 					/* compare, take the highest version */
 					free(candidate);
-					candidate = _tcsdup(fileName);
+					candidate = _tcsdup(data.cFileName);
 				}
 			}
 		}
