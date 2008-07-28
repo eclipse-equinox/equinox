@@ -50,7 +50,11 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
 		return resolverState.getBundle(Integer.parseInt(url.getHost())).getSymbolicName();
 	}
 	
-	public String toString(){
+    public String getBundleVersionFromURL(URL url) {
+        return resolverState.getBundle(Integer.parseInt(url.getHost())).getVersion().toString();
+    }
+
+    public String toString(){
 		return getClass().getName() + "[" + bundleDescription.getSymbolicName() + "]";
 	}
 
