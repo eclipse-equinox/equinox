@@ -250,7 +250,7 @@ void adjustSearchPath( _TCHAR* vmLib ){
 	if (length > 0) {
 		path = (_TCHAR*)malloc(length * sizeof(_TCHAR));
 		GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, length);
-		needAdjust = containsPaths(path, paths);
+		needAdjust = !containsPaths(path, paths);
 		freePath = 1;
 	} else {
 		path = _T_ECLIPSE("");
