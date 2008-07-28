@@ -162,7 +162,7 @@ static void adjustLibraryPath( char * vmLibrary ) {
 void restartLauncher( char* program, char* args[] ) 
 {
 	/* just restart in-place */
-	execv( program != NULL ? program : args[0], args);
+	execvp( program != NULL ? program : args[0], args);
 }
 
 void processVMArgs(_TCHAR **vmargs[] ) {
