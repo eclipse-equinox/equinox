@@ -174,7 +174,7 @@ int launchJavaVM( char* args[] )
 	/* If the JVM is still running, wait for it to terminate. */
 	if (jvmProcess != 0)
 	{
-		wait(&exitCode);
+		waitpid(jvmProcess, &exitCode, 0);
       	if (WIFEXITED(exitCode))
 			jvmExitCode = WEXITSTATUS(exitCode);
     }
