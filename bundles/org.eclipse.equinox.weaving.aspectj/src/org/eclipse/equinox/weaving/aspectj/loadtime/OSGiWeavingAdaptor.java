@@ -23,16 +23,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.aspectj.bridge.Constants;
 import org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor;
 import org.aspectj.weaver.loadtime.definition.DocumentParser;
 import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 import org.osgi.framework.Bundle;
 
 public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
-
-    private final static String AOP_XML = Constants.AOP_USER_XML + ";"
-            + Constants.AOP_AJC_XML + ";" + Constants.AOP_OSGI_XML;
 
     private static final String AOP_CONTEXT_LOCATION_HEADER = "Eclipse-AspectContext";
 
@@ -56,6 +52,10 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
     }
 
     // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
+    /**
+     * @see org.aspectj.weaver.tools.WeavingAdaptor#weaveClass(java.lang.String,
+     *      byte[], boolean)
+     */
     public byte[] weaveClass(String name, byte[] bytes, boolean mustWeave)
             throws IOException {
 
@@ -123,7 +123,7 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
 
     private void parseDefinitionsFromVisibility(List definitions, Set seenBefore) {
         String resourcePath = System.getProperty(
-                "org.aspectj.weaver.loadtime.configuration", AOP_XML);
+                "org.aspectj.weaver.loadtime.configuration", "");
         StringTokenizer st = new StringTokenizer(resourcePath, ";");
 
         while (st.hasMoreTokens()) {
