@@ -17,6 +17,8 @@ package org.eclipse.equinox.weaving.aspectj.loadtime;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -162,6 +164,16 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
     private void parseDefinitionsFromRequiredBundles(List definitions,
             Set seenBefore) {
         Bundle[] bundles = weavingContext.getBundles();
+
+        Arrays.sort(bundles, new Comparator() {
+
+            public int compare(Object arg0, Object arg1) {
+                long bundleId1 = ((Bundle) arg0).getBundleId();
+                long bundleId2 = ((Bundle) arg1).getBundleId();
+                return (int) (bundleId1 - bundleId2);
+            }
+        });
+
         for (int i = 0; i < bundles.length; i++) {
             parseDefinitionFromRequiredBundle(bundles[i], definitions,
                     seenBefore);
