@@ -29,7 +29,7 @@ programOutput="eclipse"
 defaultOS="macosx"
 defaultOSArch="" # for universal binary the arch is not specified
 defaultWS="carbon"
-makefile="make_macosx.mak"
+makefile="make_carbon.mak"
 if [ "$OS" = "" ];  then
     OS=`uname -s`
 fi
@@ -64,6 +64,10 @@ PPC_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/ppc/Eclipse.app/Contents/MacOS"
 X86_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86/Eclipse.app/Contents/MacOS"
 
 export PPC_OUTPUT_DIR X86_OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS
+
+if [ "$DEFAULT_WS" == "cocoa" ]; then
+	makefile = "make_cocoa.mak"
+fi
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then

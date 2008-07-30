@@ -388,8 +388,8 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 }
 
 static char * getMainClass(JNIEnv *env, _TCHAR * jarFile) {
-	jclass jarFileClass, manifestClass, attributesClass = NULL;
-	jmethodID jarFileConstructor, getManifestMethod, getMainAttributesMethod, closeJarMethod, getValueMethod = NULL;
+	jclass jarFileClass = NULL, manifestClass = NULL, attributesClass = NULL;
+	jmethodID jarFileConstructor = NULL, getManifestMethod = NULL, getMainAttributesMethod = NULL, closeJarMethod = NULL, getValueMethod = NULL;
 	jobject jarFileObject, manifest, attributes;
 	jstring mainClassString = NULL;
 	jstring jarFileString, headerString;

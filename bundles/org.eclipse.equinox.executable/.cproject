@@ -64,21 +64,35 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
+<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
-<target name="all" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="carbon" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_macosx.mak</buildArguments>
+<buildArguments>-f make_carbon.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_macosx.mak</buildArguments>
+<buildArguments>-f make_carbon.mak</buildArguments>
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="cocoa" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-f make_cocoa.mak DEFAULT_WS=cocoa</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="all-mingw" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -86,6 +100,7 @@
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -93,6 +108,7 @@
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -100,6 +116,7 @@
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -107,6 +124,7 @@
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make JAVA_HOME=/usr/java/sun-150 DEFAULT_OS_ARCH=x86_64</buildCommand>
@@ -114,6 +132,7 @@
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -121,10 +140,10 @@
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
 </target>
 </buildTargets>
 </storageModule>
-<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 </cconfiguration>
 </storageModule>
 </cproject>

@@ -18,12 +18,16 @@
 
 #include <unistd.h>
 #include <CoreServices/CoreServices.h>
+#ifdef COCOA
+#include <Cocoa/Cocoa.h>
+#else
 #include <Carbon/Carbon.h>
-#include <mach-o/dyld.h>
-#include <pthread.h>
 #include "NgCommon.h"
 #include "NgImageData.h"
 #include "NgWinBMPFileFormat.h"
+#endif
+#include <mach-o/dyld.h>
+#include <pthread.h>
 
 #define startupJarName "startup.jar"
 #define LAUNCHER "-launcher"
@@ -41,11 +45,6 @@ char*  shippedVMDir  = "jre/bin/";
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
 
-static WindowRef window;
-static ControlRef pane = NULL;
-static CGImageRef image = NULL;
-static CGImageRef loadBMPImage(const char *image);
-
 /* thread stuff */
 typedef struct {
 	_TCHAR * libPath;
@@ -60,14 +59,72 @@ static void * startThread(void * init);
 static void runEventLoop(CFRunLoopRef ref);
 static void dummyCallback(void * info) {}
 
+int main() {
+	return -1;
+}
+
+#ifdef COCOA
+static NSWindow* window = nil;
+
+/* Show the Splash Window
+ *
+ * Create the splash window, load the bitmap and display the splash window.
+ */
+int showSplash( const _TCHAR* featureImage )
+{
+	if (window != NULL)
+		return 0; /*already showing */
+	if (featureImage == NULL)
+		return ENOENT;
+	
+	int result = ENOENT;
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	[NSApplication sharedApplication];
+	NSImage* image = [[NSImage alloc] initByReferencingFile: [NSString stringWithUTF8String: featureImage]];
+	if (image != NULL) {
+		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
+		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
+		[image autorelease];
+		window = [[NSWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
+		if (window != nil) {
+			[window center];
+			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
+			[window makeKeyAndOrderFront: nil];
+			dispatchMessages();
+			result = 0;		
+		}
+	}
+	[pool release];
+	return result;
+}
+
+void takeDownSplash() {
+	if (window != 0) {
+		[window close];
+		window = nil;
+	}
+}	
+
+void dispatchMessages() {
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	NSEvent* event;
+	NSApplication* application = [NSApplication sharedApplication];
+	while ((event = [application nextEventMatchingMask: 0 untilDate: nil inMode: NSDefaultRunLoopMode dequeue: TRUE]) != nil) {
+		[application sendEvent: event];
+	}
+	[pool release];	
+}
+
+#else
+static WindowRef window;
+static ControlRef pane = NULL;
+static CGImageRef image = NULL;
+static CGImageRef loadBMPImage(const char *image);
+
 typedef CGImageSourceRef (*CGImageSourceCreateWithURL_FUNC) (CFURLRef, CFDictionaryRef);
 typedef CGImageRef (*CGImageSourceCreateImageAtIndex_FUNC)(CGImageSourceRef, size_t, CFDictionaryRef);
 static CGImageSourceCreateWithURL_FUNC createWithURL = NULL;
 static CGImageSourceCreateImageAtIndex_FUNC createAtIndex = NULL;
-
-int main() {
-	return -1;
-}
 
 static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
 	int result = CallNextEventHandler(eventHandlerCallRef, eventRef);
@@ -176,10 +233,6 @@ int showSplash( const _TCHAR* featureImage )
 	return 0;
 }
 
-jlong getSplashHandle() {
-	return (jlong)window;
-}
-
 void takeDownSplash() {
 	if( window != 0) {
 		DisposeWindow(window);
@@ -200,7 +253,12 @@ void dispatchMessages() {
 		SendEventToEventTarget(event, target);
 		ReleaseEvent(event);
 	}
-}	
+}
+#endif	
+
+jlong getSplashHandle() {
+	return (jlong)window;
+}
 
 /* Get the window system specific VM arguments */
 char** getArgVM( char* vm ) 
@@ -330,6 +388,7 @@ void runEventLoop(CFRunLoopRef ref) {
 	CFRelease(sourceRef);
 }
 
+#ifndef COCOA
 void disposeData(void *info, void *data, size_t size) 
 {
 	DisposePtr(data);
@@ -391,6 +450,7 @@ static CGImageRef loadBMPImage (const char *bmpPathname) {
 
 	return ref;
 }
+#endif
 
 #define DOCK_ICON_PREFIX "-Xdock:icon="
 #define DOCK_NAME_PREFIX "-Xdock:name="
