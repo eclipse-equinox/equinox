@@ -52,6 +52,8 @@ public class SingletonCachingService extends BaseCachingService {
             public void bundleChanged(final BundleEvent event) {
                 if (event.getType() == BundleEvent.UNINSTALLED) {
                     stopBundleCachingService(event);
+                } else if (event.getType() == BundleEvent.UPDATED) {
+                    stopBundleCachingService(event);
                 }
             }
         });
