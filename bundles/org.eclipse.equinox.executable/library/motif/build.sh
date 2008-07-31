@@ -39,6 +39,7 @@ defaultWS="motif"
 defaultJava=DEFAULT_JAVA_JNI
 makefile=""
 javaHome=""
+outputRoot="../../bin"
 if [ "$OS" = "" ];  then
     OS=`uname -s`
 fi
@@ -67,6 +68,8 @@ case $OS in
 	"SunOS")
 #		PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
+		javaHome="/usr/jdk/jdk1.5.0_01"
+		outputRoot="../../contributed"
 		export PATH
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
@@ -137,7 +140,7 @@ JAVA_HOME=$javaHome
 DEFAULT_JAVA=$defaultJava
 
 LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
-OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+OUTPUT_DIR="$outputRoot/$defaultWS/$defaultOS/$defaultOSArch"
 
 export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME DEFAULT_JAVA LIBRARY_DIR
 
