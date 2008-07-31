@@ -26,7 +26,7 @@ include ../make_version.mak
 PROGRAM_OUTPUT=eclipse
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
 
-CC = cc_r
+CC = gcc
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o eclipseMotifInit.o
@@ -74,7 +74,7 @@ eclipseJNI.o: ../eclipseJNI.c ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.h
 eclipseConfig.o: ../eclipseConfig.c ../eclipseConfig.h ../eclipseOS.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-eclipseShm.o: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
+eclipseShm.o: ../eclipseShm.c ../eclipseShm.h ../eclipseUnicode.h 
 	$(CC) $(CFLAGS) -c $< -o $@
 
 eclipseNix.o: ../eclipseNix.c
