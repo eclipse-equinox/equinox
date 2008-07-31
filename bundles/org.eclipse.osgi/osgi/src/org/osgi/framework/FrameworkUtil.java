@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/FrameworkUtil.java,v 1.7 2006/10/18 15:32:18 twatson Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
  * 
@@ -29,7 +29,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8 $
  */
 public class FrameworkUtil {
 	/*

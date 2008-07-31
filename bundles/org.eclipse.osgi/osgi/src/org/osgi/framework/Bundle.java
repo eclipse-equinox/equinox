@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Bundle.java,v 1.54 2007/02/21 16:49:05 hargrave Exp $
+ * $Date: 2007-10-10 08:28:24 -0400 (Wed, 10 Oct 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -65,7 +65,7 @@ import java.util.Enumeration;
  * Framework that created them.
  * 
  * @ThreadSafe
- * @version $Revision: 1.54 $
+ * @version $Revision: 5011 $
  */
 public interface Bundle {
 	/**
@@ -389,18 +389,19 @@ public interface Bundle {
 	 * Framework is restarted and this bundle's autostart setting is
 	 * <em>Stopped</em>, this bundle must not be automatically started.
 	 * 
-	 * <li>If this bundle's state is not <code>ACTIVE</code> then this method
-	 * returns immediately.
+	 * <li>If this bundle's state is not <code>STARTING</code> or
+	 * <code>ACTIVE</code> then this method returns immediately.
 	 * 
 	 * <li>This bundle's state is set to <code>STOPPING</code>.
 	 * 
 	 * <li>A bundle event of type {@link BundleEvent#STOPPING} is fired.
 	 * 
-	 * <li>The {@link BundleActivator#stop} method of this bundle's
-	 * <code>BundleActivator</code>, if one is specified, is called. If that
-	 * method throws an exception, this method must continue to stop this
-	 * bundle. A <code>BundleException</code> must be thrown after completion
-	 * of the remaining steps.
+	 * <li>If this bundle's state was <code>ACTIVE</code> prior to setting
+	 * the state to <code>STOPPING</code>, the {@link BundleActivator#stop}
+	 * method of this bundle's <code>BundleActivator</code>, if one is
+	 * specified, is called. If that method throws an exception, this method
+	 * must continue to stop this bundle and a <code>BundleException</code>
+	 * must be thrown after completion of the remaining steps.
 	 * 
 	 * <li>Any services registered by this bundle must be unregistered.
 	 * <li>Any services used by this bundle must be released.
@@ -503,13 +504,6 @@ public interface Bundle {
 	 * unable to install the new version of this bundle, the original version of
 	 * this bundle must be restored and a <code>BundleException</code> must be
 	 * thrown after completion of the remaining steps.
-	 * 
-	 * <li>If this bundle has declared an Bundle-RequiredExecutionEnvironment
-	 * header, then the listed execution environments must be verified against
-	 * the installed execution environments. If they do not all match, the
-	 * original version of this bundle must be restored and a
-	 * <code>BundleException</code> must be thrown after completion of the
-	 * remaining steps.
 	 * 
 	 * <li>This bundle's state is set to <code>INSTALLED</code>.
 	 * 
@@ -650,7 +644,9 @@ public interface Bundle {
 	 * case-insensitive manner.
 	 * 
 	 * If a Manifest header value starts with &quot;%&quot;, it must be
-	 * localized according to the default locale.
+	 * localized according to the default locale. If no localization is found
+	 * for a header value, the header value without the leading &quot;%&quot; is
+	 * returned.
 	 * 
 	 * <p>
 	 * For example, the following Manifest headers and values are included if
@@ -808,7 +804,7 @@ public interface Bundle {
 	public boolean hasPermission(Object permission);
 
 	/**
-	 * Find the specified resource from this bundle.
+	 * Find the specified resource from this bundle's class loader.
 	 * 
 	 * This bundle's class loader is called to search for the specified
 	 * resource. If this bundle's state is <code>INSTALLED</code>, this
@@ -817,6 +813,10 @@ public interface Bundle {
 	 * bundle must be searched for the specified resource. Imported packages
 	 * cannot be searched when this bundle has not been resolved. If this bundle
 	 * is a fragment bundle then <code>null</code> is returned.
+	 * <p>
+	 * Note: Jar and zip files are not required to include directory entries.
+	 * URLs to directory entries will not be returned if the bundle contents do
+	 * not contain directory entries.
 	 * 
 	 * @param name The name of the resource. See
 	 *        <code>java.lang.ClassLoader.getResource</code> for a description
@@ -851,13 +851,13 @@ public interface Bundle {
 	 * default locale. Localizations are searched for in the following order:
 	 * 
 	 * <pre>
-	 *   bn + "_" + Ls + "_" + Cs + "_" + Vs
-     *   bn + "_" + Ls + "_" + Cs
-     *   bn + "_" + Ls
-     *   bn + "_" + Ld + "_" + Cd + "_" + Vd
-     *   bn + "_" + Ld + "_" + Cd
-     *   bn + "_" + Ld
-	 *     bn
+	 *   bn + &quot;_&quot; + Ls + &quot;_&quot; + Cs + &quot;_&quot; + Vs
+	 *   bn + &quot;_&quot; + Ls + &quot;_&quot; + Cs
+	 *   bn + &quot;_&quot; + Ls
+	 *   bn + &quot;_&quot; + Ld + &quot;_&quot; + Cd + &quot;_&quot; + Vd
+	 *   bn + &quot;_&quot; + Ld + &quot;_&quot; + Cd
+	 *   bn + &quot;_&quot; + Ld
+	 *   bn
 	 * </pre>
 	 * 
 	 * Where <code>bn</code> is this bundle's localization basename,
@@ -870,7 +870,9 @@ public interface Bundle {
 	 * values must be localized using the default locale. If the empty string
 	 * (&quot;&quot;) is specified as the locale string, the header values must
 	 * not be localized and the raw (unlocalized) header values, including any
-	 * leading &quot;%&quot;, must be returned.
+	 * leading &quot;%&quot;, must be returned. If no localization is found for
+	 * a header value, the header value without the leading &quot;%&quot; is
+	 * returned.
 	 * 
 	 * <p>
 	 * This method must continue to return Manifest header information while
@@ -914,7 +916,7 @@ public interface Bundle {
 	public String getSymbolicName();
 
 	/**
-	 * Loads the specified class using this bundle's classloader.
+	 * Loads the specified class using this bundle's class loader.
 	 * 
 	 * <p>
 	 * If this bundle is a fragment bundle then this method must throw a
@@ -948,7 +950,7 @@ public interface Bundle {
 	public Class loadClass(String name) throws ClassNotFoundException;
 
 	/**
-	 * Find the specified resources from this bundle.
+	 * Find the specified resources from this bundle's class loader.
 	 * 
 	 * This bundle's class loader is called to search for the specified
 	 * resources. If this bundle's state is <code>INSTALLED</code>, this
@@ -957,6 +959,10 @@ public interface Bundle {
 	 * bundle must be searched for the specified resources. Imported packages
 	 * cannot be searched when a bundle has not been resolved. If this bundle is
 	 * a fragment bundle then <code>null</code> is returned.
+	 * <p>
+	 * Note: Jar and zip files are not required to include directory entries.
+	 * URLs to directory entries will not be returned if the bundle contents do
+	 * not contain directory entries.
 	 * 
 	 * @param name The name of the resource. See
 	 *        <code>java.lang.ClassLoader.getResources</code> for a
@@ -977,7 +983,7 @@ public interface Bundle {
 	/**
 	 * Returns an Enumeration of all the paths (<code>String</code> objects)
 	 * to entries within this bundle whose longest sub-path matches the
-	 * specified path. This bundle's classloader is not used to search for
+	 * specified path. This bundle's class loader is not used to search for
 	 * entries. Only the contents of this bundle are searched.
 	 * <p>
 	 * The specified path is always relative to the root of this bundle and may
@@ -987,6 +993,10 @@ public interface Bundle {
 	 * Returned paths indicating subdirectory paths end with a &quot;/&quot;.
 	 * The returned paths are all relative to the root of this bundle and must
 	 * not begin with &quot;/&quot;.
+	 * <p>
+	 * Note: Jar and zip files are not required to include directory entries.
+	 * Paths to directory entries will not be returned if the bundle contents do
+	 * not contain directory entries.
 	 * 
 	 * @param path The path name for which to return entry paths.
 	 * @return An Enumeration of the entry paths (<code>String</code>
@@ -1002,12 +1012,16 @@ public interface Bundle {
 
 	/**
 	 * Returns a URL to the entry at the specified path in this bundle. This
-	 * bundle's classloader is not used to search for the entry. Only the
+	 * bundle's class loader is not used to search for the entry. Only the
 	 * contents of this bundle are searched for the entry.
 	 * <p>
 	 * The specified path is always relative to the root of this bundle and may
 	 * begin with &quot;/&quot;. A path value of &quot;/&quot; indicates the
 	 * root of this bundle.
+	 * <p>
+	 * Note: Jar and zip files are not required to include directory entries.
+	 * URLs to directory entries will not be returned if the bundle contents do
+	 * not contain directory entries.
 	 * 
 	 * @param path The path name of the entry.
 	 * @return A URL to the entry, or <code>null</code> if no entry could be
@@ -1036,7 +1050,7 @@ public interface Bundle {
 
 	/**
 	 * Returns entries in this bundle and its attached fragments. This bundle's
-	 * classloader is not used to search for entries. Only the contents of this
+	 * class loader is not used to search for entries. Only the contents of this
 	 * bundle and its attached fragments are searched for the specified entries.
 	 * 
 	 * If this bundle's state is <code>INSTALLED</code>, this method must
@@ -1064,22 +1078,28 @@ public interface Bundle {
 	 * Enumeration e = b.findEntries(&quot;OSGI-INF&quot;, &quot;*.xml&quot;, true);
 	 * 
 	 * // Find a specific localization file
-	 * Enumeration e = b.findEntries(&quot;OSGI-INF/l10n&quot;, 
-	 *                               &quot;bundle_nl_DU.properties&quot;, 
-	 *                               false);
+	 * Enumeration e = b
+	 * 		.findEntries(&quot;OSGI-INF/l10n&quot;, &quot;bundle_nl_DU.properties&quot;, false);
 	 * if (e.hasMoreElements())
 	 * 	return (URL) e.nextElement();
 	 * </pre>
+	 * 
+	 * <p>
+	 * Note: Jar and zip files are not required to include directory entries.
+	 * URLs to directory entries will not be returned if the bundle contents do
+	 * not contain directory entries.
 	 * 
 	 * @param path The path name in which to look. The path is always relative
 	 *        to the root of this bundle and may begin with &quot;/&quot;. A
 	 *        path value of &quot;/&quot; indicates the root of this bundle.
 	 * @param filePattern The file name pattern for selecting entries in the
 	 *        specified path. The pattern is only matched against the last
-	 *        element of the entry path and it supports substring matching, as
-	 *        specified in the Filter specification, using the wildcard
-	 *        character (&quot;*&quot;). If null is specified, this is
-	 *        equivalent to &quot;*&quot; and matches all files.
+	 *        element of the entry path. If the entry is a directory then the
+	 *        trailing &quot;/&quot; is not used for pattern matching. Substring
+	 *        matching is supported, as specified in the Filter specification,
+	 *        using the wildcard character (&quot;*&quot;). If null is
+	 *        specified, this is equivalent to &quot;*&quot; and matches all
+	 *        files.
 	 * @param recurse If <code>true</code>, recurse into subdirectories.
 	 *        Otherwise only return entries from the specified path.
 	 * @return An enumeration of URL objects for each matching entry, or

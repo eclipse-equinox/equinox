@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.url/src/org/osgi/service/url/URLConstants.java,v 1.10 2006/12/01 06:38:45 hargrave Exp $
+ * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
  * 
- * Copyright (c) OSGi Alliance (2002, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,23 @@ package org.osgi.service.url;
  * services.
  * 
  * <p>
- * The values associated with these keys are of type <code>java.lang.String[]</code>
- * or <code>java.lang.String</code>,
- * unless otherwise indicated.
+ * The values associated with these keys are of type
+ * <code>java.lang.String[]</code> or <code>java.lang.String</code>, unless
+ * otherwise indicated.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 5042 $
  */
 public interface URLConstants {
 	/**
 	 * Service property naming the protocols serviced by a
-	 * URLStreamHandlerService. The property's value is 
-	 * a protocol name or an array of protocol names.
+	 * URLStreamHandlerService. The property's value is a protocol name or an
+	 * array of protocol names.
 	 */
 	public static final String	URL_HANDLER_PROTOCOL	= "url.handler.protocol";
 	/**
 	 * Service property naming the MIME types serviced by a
-	 * java.net.ContentHandler. The property's value is a
-	 * MIME type or an array of MIME types.
+	 * java.net.ContentHandler. The property's value is a MIME type or an array
+	 * of MIME types.
 	 */
 	public static final String	URL_CONTENT_MIMETYPE	= "url.content.mimetype";
 }

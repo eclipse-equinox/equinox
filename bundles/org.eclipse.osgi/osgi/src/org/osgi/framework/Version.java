@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Version.java,v 1.17 2007/02/20 00:07:22 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
@@ -39,7 +39,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Revision: 1.17 $
+ * @version $Revision: 4930 $
  */
 
 public class Version implements Comparable {

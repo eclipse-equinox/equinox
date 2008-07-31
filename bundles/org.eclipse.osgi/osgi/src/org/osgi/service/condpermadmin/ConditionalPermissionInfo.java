@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java,v 1.11 2006/06/16 16:31:37 hargrave Exp $
+ * $Date: 2008-07-18 09:23:22 -0400 (Fri, 18 Jul 2008) $
  *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,46 +18,24 @@
 
 package org.osgi.service.condpermadmin;
 
-import org.osgi.service.permissionadmin.PermissionInfo;
-
 /**
  * A binding of a set of Conditions to a set of Permissions. Instances of this
  * interface are obtained from the Conditional Permission Admin service.
  * 
- * @version $Revision: 1.11 $
+ * @ThreadSafe
+ * @version $Revision: 5188 $
  */
-public interface ConditionalPermissionInfo {
-	/**
-	 * Returns the Condition Infos for the Conditions that must be satisfied to
-	 * enable the Permissions.
-	 * 
-	 * @return The Condition Infos for the Conditions in this Conditional
-	 *         Permission Info.
-	 */
-	public ConditionInfo[] getConditionInfos();
-
-	/**
-	 * Returns the Permission Infos for the Permission in this Conditional
-	 * Permission Info.
-	 * 
-	 * @return The Permission Infos for the Permission in this Conditional
-	 *         Permission Info.
-	 */
-	public PermissionInfo[] getPermissionInfos();
-
+public interface ConditionalPermissionInfo extends ConditionalPermissionInfoBase {
 	/**
 	 * Removes this Conditional Permission Info from the Conditional Permission
-	 * Admin.
+	 * Table.
+	 * <p>
+	 * Since this method changes the underlying permission table any
+	 * {@link ConditionalPermissionsUpdate}s that were created prior to calling
+	 * this method can no longer be committed.
 	 * 
 	 * @throws SecurityException If the caller does not have
 	 *         <code>AllPermission</code>.
 	 */
 	public void delete();
-
-	/**
-	 * Returns the name of this Conditional Permission Info.
-	 * 
-	 * @return The name of this Conditional Permission Info.
-	 */
-	public String getName();
 }

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/FrameworkEvent.java,v 1.15 2007/02/20 00:14:12 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
@@ -34,7 +34,7 @@ import java.util.EventObject;
  * 
  * @Immutable
  * @see FrameworkListener
- * @version $Revision: 1.15 $
+ * @version $Revision: 4930 $
  */
 
 public class FrameworkEvent extends EventObject {
@@ -61,6 +61,7 @@ public class FrameworkEvent extends EventObject {
 	 * This event is fired when the Framework has started after all installed
 	 * bundles that are marked to be started have been started and the Framework
 	 * has reached the intitial start level.
+	 * The source of this event is the System Bundle.
 	 * 
 	 * <p>
 	 * The value of <code>STARTED</code> is 0x00000001.
@@ -86,6 +87,7 @@ public class FrameworkEvent extends EventObject {
 	 * <p>
 	 * This event is fired when the Framework has completed the refresh packages
 	 * operation initiated by a call to the PackageAdmin.refreshPackages method.
+	 * The source of this event is the System Bundle.
 	 * 
 	 * <p>
 	 * The value of <code>PACKAGES_REFRESHED</code> is 0x00000004.
@@ -101,6 +103,7 @@ public class FrameworkEvent extends EventObject {
 	 * <p>
 	 * This event is fired when the Framework has completed changing the active
 	 * start level initiated by a call to the StartLevel.setStartLevel method.
+	 * The source of this event is the System Bundle.
 	 * 
 	 * <p>
 	 * The value of <code>STARTLEVEL_CHANGED</code> is 0x00000008.

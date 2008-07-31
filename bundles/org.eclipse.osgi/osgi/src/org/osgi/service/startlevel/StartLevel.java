@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.startlevel/src/org/osgi/service/startlevel/StartLevel.java,v 1.19 2007/02/09 03:20:24 hargrave Exp $
+ * $Date: 2007-10-11 11:26:56 -0400 (Thu, 11 Oct 2007) $
  * 
  * Copyright (c) OSGi Alliance (2002, 2007). All Rights Reserved.
  * 
@@ -68,7 +68,8 @@ import org.osgi.framework.Bundle;
  * The StartLevel service can be used by management bundles to alter the active
  * start level of the framework.
  * 
- * @version $Revision: 1.19 $
+ * @ThreadSafe
+ * @version $Revision: 5021 $
  */
 public interface StartLevel {
 	/**
@@ -218,7 +219,7 @@ public interface StartLevel {
 	 * been called to assign a different initial bundle start level value.
 	 * 
 	 * <p>
-	 * Thie method does not change the start level values of installed bundles.
+	 * This method does not change the start level values of installed bundles.
 	 * 
 	 * @param startlevel The initial start level for newly installed bundles.
 	 * @throws IllegalArgumentException If the specified start level is less

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvsroot/eclipse/org.eclipse.osgi/osgi/src/org/osgi/framework/AdminPermission.java,v 1.23 2007/02/26 16:37:21 twatson Exp $
+ * $Date: 2007-10-11 10:45:28 -0400 (Thu, 11 Oct 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -74,25 +74,28 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 
 public final class AdminPermission extends BasicPermission {
-	static final long	serialVersionUID	= 207051004521261705L;
+	static final long			serialVersionUID	= 307051004521261705L;
 
 	/**
 	 * The action string <code>class</code> (Value is "class").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			CLASS				= "class";
 	/**
 	 * The action string <code>execute</code> (Value is "execute").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			EXECUTE				= "execute";
 	/**
 	 * The action string <code>extensionLifecycle</code> (Value is
 	 * "extensionLifecycle").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			EXTENSIONLIFECYCLE	= "extensionLifecycle";
@@ -103,32 +106,38 @@ public final class AdminPermission extends BasicPermission {
 	public final static String			LIFECYCLE			= "lifecycle";
 	/**
 	 * The action string <code>listener</code> (Value is "listener").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			LISTENER			= "listener";
 	/**
 	 * The action string <code>metadata</code> (Value is "metadata").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			METADATA			= "metadata";
 	/**
 	 * The action string <code>resolve</code> (Value is "resolve").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			RESOLVE				= "resolve";
 	/**
 	 * The action string <code>resource</code> (Value is "resource").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			RESOURCE			= "resource";
 	/**
 	 * The action string <code>startlevel</code> (Value is "startlevel").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			STARTLEVEL			= "startlevel";
 
 	/**
 	 * The action string <code>context</code> (Value is "context").
+	 * 
 	 * @since 1.4
 	 */
 	public final static String			CONTEXT				= "context";
@@ -236,8 +245,8 @@ public final class AdminPermission extends BasicPermission {
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>,
 	 *        <code>resolve</code>, <code>resource</code>, 
-	 *        <code>startlevel</code> or <code>context</code>. A value of "*" or <code>null</code>
-	 *        indicates all actions
+	 *        <code>startlevel</code> or <code>context</code>. A value of
+	 *        "*" or <code>null</code> indicates all actions
 	 */
 	public AdminPermission(String filter, String actions) {
     	//arguments will be null if called from a PermissionInfo defined with
@@ -324,7 +333,8 @@ public final class AdminPermission extends BasicPermission {
 	 * following order: <code>class</code>, <code>execute</code>,
 	 * <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 * <code>listener</code>, <code>metadata</code>, <code>resolve</code>,
-	 * <code>resource</code>, <code>startlevel</code>, <code>context</code>.
+	 * <code>resource</code>, <code>startlevel</code>,
+	 * <code>context</code>.
 	 * 
 	 * @return Canonical string representation of the
 	 *         <code>AdminPermission</code> actions.

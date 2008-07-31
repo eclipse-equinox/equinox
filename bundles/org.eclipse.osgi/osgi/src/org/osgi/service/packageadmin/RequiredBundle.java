@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/RequiredBundle.java,v 1.11 2006/06/16 16:31:49 hargrave Exp $
+ * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
  * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ import org.osgi.framework.Version;
  * and <code>getRequiringBundles()</code> return <code>null</code>.
  * 
  * @since 1.2
- * @version $Revision: 1.11 $
+ * @ThreadSafe
+ * @version $Revision: 5042 $
  */
 public interface RequiredBundle {
 	/**
@@ -72,7 +73,8 @@ public interface RequiredBundle {
 	 * 
 	 * @return An array of bundles currently requiring this required bundle, or
 	 *         <code>null</code> if this <code>RequiredBundle</code> object
-	 *         has become stale.
+	 *         has become stale. The array will be empty if no bundles require
+	 *         this required package.
 	 */
 	public Bundle[] getRequiringBundles();
 
@@ -89,7 +91,7 @@ public interface RequiredBundle {
 	 * Returns <code>true</code> if the bundle associated with this
 	 * <code>RequiredBundle</code> object has been updated or uninstalled.
 	 * 
-	 * @return <code>true</code> if the reqiured bundle has been updated or
+	 * @return <code>true</code> if the required bundle has been updated or
 	 *         uninstalled, or if the <code>RequiredBundle</code> object has
 	 *         become stale; <code>false</code> otherwise.
 	 */

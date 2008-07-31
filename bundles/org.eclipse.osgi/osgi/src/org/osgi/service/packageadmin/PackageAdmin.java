@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.packageadmin/src/org/osgi/service/packageadmin/PackageAdmin.java,v 1.19 2006/06/16 16:31:49 hargrave Exp $
+ * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
  * 
- * Copyright (c) OSGi Alliance (2001, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import org.osgi.framework.Bundle;
  * If present, there will only be a single instance of this service registered
  * with the Framework.
  * 
- * @version $Revision: 1.19 $
+ * @ThreadSafe
+ * @version $Revision: 5042 $
  * @see org.osgi.service.packageadmin.ExportedPackage
  * @see org.osgi.service.packageadmin.RequiredBundle
  */

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Filter.java,v 1.16 2007/02/21 16:49:05 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -42,7 +42,7 @@ import java.util.Dictionary;
  * @see "Core Specification, section 5.5, for a description of the filter string
  *      syntax."
  * @ThreadSafe
- * @version $Revision: 1.16 $
+ * @version $Revision: 4930 $
  */
 public interface Filter {
 	/**

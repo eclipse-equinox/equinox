@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleException.java,v 1.15 2006/07/11 13:15:54 hargrave Exp $
+ * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
  * 
- * Copyright (c) OSGi Alliance (2000, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,59 +23,158 @@ package org.osgi.framework;
  * occurred.
  * 
  * <p>
- * <code>BundleException</code> object is created by the Framework to denote
+ * A <code>BundleException</code> object is created by the Framework to denote
  * an exception condition in the lifecycle of a bundle.
  * <code>BundleException</code>s should not be created by bundle developers.
+ * A type code is used to identify the exception type for future extendability.
  * 
  * <p>
- * This exception is updated to conform to the general purpose exception
- * chaining mechanism.
+ * OSGi Alliance reserves the right to extend the set of types.
  * 
- * @version $Revision: 1.15 $
+ * <p>
+ * This exception conforms to the general purpose exception chaining mechanism.
+ * 
+ * @version $Revision: 5042 $
  */
 
 public class BundleException extends Exception {
-	static final long	serialVersionUID	= 3571095144220455665L;
+	static final long		serialVersionUID		= 3571095144220455665L;
 	/**
 	 * Nested exception.
 	 */
 	private final Throwable	cause;
 
 	/**
-	 * Creates a <code>BundleException</code> that wraps another exception.
+	 * Type of bundle exception.
+	 * 
+	 * @since 1.5
+	 */
+	private final int		type;
+
+	/**
+	 * No exception type is unspecified.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	UNSPECIFIED				= 0;
+	/**
+	 * The operation was unsupported.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	UNSUPPORTED_OPERATION	= 1;
+	/**
+	 * The operation was invalid.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	INVALID_OPERATION		= 2;
+	/**
+	 * The bundle manifest was in error.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	MANIFEST_ERROR			= 3;
+	/**
+	 * The bundle was not resolved.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	RESOLVE_ERROR			= 4;
+	/**
+	 * The bundle activator was in error.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	ACTIVATOR_ERROR			= 5;
+	/**
+	 * The operation failed due to insufficient permissions.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	SECURITY_ERROR			= 6;
+	/**
+	 * The operation failed to complete the requested lifecycle state change.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	STATECHANGE_ERROR		= 7;
+
+	/**
+	 * The bundle could not be resolved due to an error with the
+	 * Bundle-NativeCode header.
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	NATIVECODE_ERROR		= 8;
+
+	/**
+	 * The install or update operation failed because another 
+	 * already installed bundle has the same symbolic name and version.
+	 * @since 1.5
+	 */
+	public static final int	DUPLICATE_BUNDLE_ERROR	= 9;
+
+	/**
+	 * Creates a <code>BundleException</code> with the specified message and
+	 * exception cause.
 	 * 
 	 * @param msg The associated message.
 	 * @param cause The cause of this exception.
 	 */
 	public BundleException(String msg, Throwable cause) {
-		super(msg);
-		this.cause = cause;
+		this(msg, UNSPECIFIED, cause);
 	}
 
 	/**
-	 * Creates a <code>BundleException</code> object with the specified
-	 * message.
+	 * Creates a <code>BundleException</code> with the specified message.
 	 * 
 	 * @param msg The message.
 	 */
 	public BundleException(String msg) {
-		super(msg);
-		this.cause = null;
+		this(msg, UNSPECIFIED, null);
 	}
 
 	/**
-	 * Returns any nested exceptions included in this exception.
+	 * Creates a <code>BundleException</code> with the specified message, type
+	 * and exception cause.
+	 * 
+	 * @param msg The associated message.
+	 * @param type The type for this exception.
+	 * @param cause The cause of this exception.
+	 * @since 1.5
+	 */
+	public BundleException(String msg, int type, Throwable cause) {
+		super(msg);
+		this.type = type;
+		this.cause = cause;
+	}
+
+	/**
+	 * Creates a <code>BundleException</code> with the specified message and
+	 * type.
+	 * 
+	 * @param msg The message.
+	 * @param type The type for this exception.
+	 * @since 1.5
+	 */
+	public BundleException(String msg, int type) {
+		this(msg, type, null);
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause
+	 * was specified when this exception was created.
 	 * 
 	 * <p>
 	 * This method predates the general purpose exception chaining mechanism.
 	 * The {@link #getCause()} method is now the preferred means of obtaining
 	 * this information.
 	 * 
-	 * @return The nested exception; <code>null</code> if there is no nested
-	 *         exception.
+	 * @return The result of calling {@link #getCause()}.
 	 */
 	public Throwable getNestedException() {
-		return cause;
+		return getCause();
 	}
 
 	/**
@@ -102,5 +201,16 @@ public class BundleException extends Exception {
 	 */
 	public Throwable initCause(Throwable cause) {
 		throw new IllegalStateException();
+	}
+
+	/**
+	 * Returns the type for this exception or <code>UNSPECIFIED</code> if the
+	 * type was unspecified or unknown.
+	 * 
+	 * @return The type of this exception.
+	 * @since 1.5
+	 */
+	public int getType() {
+		return type;
 	}
 }

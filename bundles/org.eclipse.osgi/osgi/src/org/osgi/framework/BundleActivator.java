@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/BundleActivator.java,v 1.14 2007/02/21 16:49:05 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -47,7 +47,7 @@ package org.osgi.framework;
  * object can be created by <code>Class.newInstance()</code>.
  * 
  * @NotThreadSafe
- * @version $Revision: 1.14 $
+ * @version $Revision: 4930 $
  */
 
 public interface BundleActivator {

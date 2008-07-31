@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.util.tracker/src/org/osgi/util/tracker/ServiceTrackerCustomizer.java,v 1.13 2007/02/19 19:04:33 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -33,7 +33,7 @@ import org.osgi.framework.ServiceReference;
  * <p>
  * The methods in this interface may be called as the result of a
  * <code>ServiceEvent</code> being received by a <code>ServiceTracker</code>
- * object. Since <code>ServiceEvent</code> s are synchronously delivered by
+ * object. Since <code>ServiceEvent</code>s are synchronously delivered by
  * the Framework, it is highly recommended that implementations of these methods
  * do not register (<code>BundleContext.registerService</code>), modify (
  * <code>ServiceRegistration.setProperties</code>) or unregister (
@@ -47,7 +47,7 @@ import org.osgi.framework.ServiceReference;
  * thread-safe.
  * 
  * @ThreadSafe
- * @version $Revision: 1.13 $
+ * @version $Revision: 4930 $
  */
 public interface ServiceTrackerCustomizer {
 	/**

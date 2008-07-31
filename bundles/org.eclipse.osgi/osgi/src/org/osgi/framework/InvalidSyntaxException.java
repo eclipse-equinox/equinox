@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/InvalidSyntaxException.java,v 1.16 2007/02/20 00:15:00 hargrave Exp $
+ * $Date: 2007-08-16 14:05:07 -0400 (Thu, 16 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -28,10 +28,9 @@ package org.osgi.framework;
  * {@link Filter} for a description of the filter string syntax.
  * 
  * <p>
- * This exception is updated to conform to the general purpose exception
- * chaining mechanism.
+ * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Revision: 1.16 $
+ * @version $Revision: 4952 $
  */
 
 public class InvalidSyntaxException extends Exception {

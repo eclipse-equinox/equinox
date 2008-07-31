@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/ServiceListener.java,v 1.15 2007/02/20 00:16:30 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -53,7 +53,7 @@ import java.util.EventListener;
  * @see ServiceEvent
  * @see ServicePermission
  * @ThreadSafe
- * @version $Revision: 1.15 $
+ * @version $Revision: 4930 $
  */
 
 public interface ServiceListener extends EventListener {

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/ConditionInfo.java,v 1.13 2006/06/16 16:31:37 hargrave Exp $
+ * $Date: 2008-07-17 23:00:06 -0400 (Thu, 17 Jul 2008) $
  *
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ import java.util.ArrayList;
  * <code>ConditionInfo</code> object as arguments.
  * </ul>
  * 
- * @version $Revision: 1.13 $
+ * @Immutable
+ * @version $Revision: 5183 $
  */
 public class ConditionInfo {
-	private String		type;
-	private String[]	args;
+	private final String	type;
+	private final String[]	args;
 
 	/**
 	 * Constructs a <code>ConditionInfo</code> from the specified type and
@@ -65,7 +66,7 @@ public class ConditionInfo {
 	 */
 	public ConditionInfo(String type, String[] args) {
 		this.type = type;
-		this.args = args != null ? args : new String[0];
+		this.args = (args != null) ? (String[]) args.clone() : new String[0];
 		if (type == null) {
 			throw new NullPointerException("type is null");
 		}
@@ -177,7 +178,7 @@ public class ConditionInfo {
 	 * 
 	 * where <i>argN</i> are strings that are encoded for proper parsing.
 	 * Specifically, the <code>"</code>, <code>\</code>, carriage return,
-	 * and linefeed characters are escaped using <code>\"</code>,
+	 * and line feed characters are escaped using <code>\"</code>,
 	 * <code>\\</code>, <code>\r</code>, and <code>\n</code>,
 	 * respectively.
 	 * 
@@ -234,7 +235,7 @@ public class ConditionInfo {
 	 *         arguments.
 	 */
 	public final String[] getArgs() {
-		return args;
+		return (String[]) args.clone();
 	}
 
 	/**

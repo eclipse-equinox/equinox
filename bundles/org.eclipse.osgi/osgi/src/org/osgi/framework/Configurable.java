@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.framework/src/org/osgi/framework/Configurable.java,v 1.12 2007/02/20 00:07:22 hargrave Exp $
+ * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -28,7 +28,7 @@ package org.osgi.framework;
  * <code>instanceof Configurable</code>.
  * 
  * @deprecated As of 1.2. Please use Configuration Admin service.
- * @version $Revision: 1.12 $
+ * @version $Revision: 4930 $
  */
 public interface Configurable {
 	/**

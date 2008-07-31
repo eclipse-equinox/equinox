@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.condpermadmin/src/org/osgi/service/condpermadmin/BundleSignerCondition.java,v 1.10 2006/06/16 16:31:37 hargrave Exp $
+ * $Date: 2008/07/31 21:21:40 $
  * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.osgi.framework.Bundle;
 
 /**
- * Condition to test if the signer of a bundle matches a pattern. Since the bundle's signer can
- * only change when the bundle is updated, this condition is immutable.
+ * Condition to test if the signer of a bundle matches or does not match a
+ * pattern. Since the bundle's signer can only change when the bundle is
+ * updated, this condition is immutable.
  * <p>
  * The condition expressed using a single String that specifies a Distinguished
  * Name (DN) chain to match bundle signers against. DN's are encoded using IETF
@@ -44,30 +45,40 @@ import org.osgi.framework.Bundle;
  * must be the first RDN and will match any number of RDNs (including zero
  * RDNs).
  * 
- * @version $Revision: 1.10 $
+ * @ThreadSafe
+ * @version $Revision: 1.2 $
  */
 public class BundleSignerCondition {
 	private static final String CONDITION_TYPE = "org.osgi.service.condpermadmin.BundleSignerCondition";
+
 	/**
 	 * Constructs a Condition that tries to match the passed Bundle's location
 	 * to the location pattern.
 	 * 
 	 * @param bundle The Bundle being evaluated.
-	 * @param info The ConditionInfo to construct the condition for. The args of
-	 *        the ConditionInfo specify a single String specifying the chain of
-	 *        distinguished names pattern to match against the signer of the
-	 *        Bundle.
-	 * @return A Condition which checks the signers of the specified bundle.        
+	 * @param info The ConditionInfo from which to construct the condition. The
+	 *        ConditionInfo must specify one or two arguments. The first
+	 *        argument of the ConditionInfo specifies the chain of distinguished
+	 *        names pattern to match against the signer of the bundle. The
+	 *        Condition is satisfied if the signer of the bundle matches the
+	 *        pattern. The second argument of the ConditionInfo is optional. If
+	 *        a second argument is present and equal to "!", then the
+	 *        satisfaction of the Condition is negated. That is, the Condition
+	 *        is satisfied if the signer of the bundle does NOT match the
+	 *        pattern. If the second argument is present but does not equal "!",
+	 *        then the second argument is ignored.
+	 * @return A Condition which checks the signers of the specified bundle.
 	 */
 	static public Condition getCondition(Bundle bundle, ConditionInfo info) {
 		if (!CONDITION_TYPE.equals(info.getType()))
 			throw new IllegalArgumentException("ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
 		String[] args = info.getArgs();
-		if (args.length != 1)
+		if (args.length != 1 && args.length != 2)
 			throw new IllegalArgumentException("Illegal number of args: " + args.length);
 		// implementation specific code used here
 		AbstractBundle ab = (AbstractBundle) bundle;
-		return ab.getBundleData().matchDNChain(args[0]) ? Condition.TRUE : Condition.FALSE;
+		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
+		return negate ^ ab.getBundleData().matchDNChain(args[0]) ? Condition.TRUE : Condition.FALSE;
 	}
 
 	private BundleSignerCondition() {
