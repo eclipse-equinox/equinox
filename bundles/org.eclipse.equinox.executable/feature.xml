@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.3.100.qualifier">
+      version="3.3.200.qualifier">
 
    <description>
       %description
@@ -53,6 +53,15 @@
          id="org.eclipse.equinox.launcher.carbon.macosx"
          os="macosx"
          ws="carbon"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+         
+   <plugin
+         id="org.eclipse.equinox.launcher.cocoa.macosx"
+         os="macosx"
+         ws="cocoa"
          download-size="0"
          install-size="0"
          version="0.0.0"

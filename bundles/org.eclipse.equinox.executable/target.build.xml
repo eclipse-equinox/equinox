@@ -93,6 +93,24 @@
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}.app/Contents/Resources/Splash.app/Contents/MacOS/${launcherName}"/>
 	</target>
+	<target name="rootFilesmacosx_cocoa_ppc">
+		<mkdir dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}"/>
+		<copy todir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/cocoa/macosx/ppc" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}.app/Contents/Resources/Splash.app/Contents/MacOS/${launcherName}"/>
+	</target>
+	<target name="rootFilesmacosx_cocoa_x86">
+		<mkdir dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}"/>
+		<copy todir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/cocoa/macosx/x86" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}.app/Contents/Resources/Splash.app/Contents/MacOS/${launcherName}"/>
+	</target>
 	<target name="rootFileslinux_gtk_x86">
 		<mkdir dir="${feature.base}/linux.gtk.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.x86/${collectingFolder}" failonerror="true" overwrite="true">
@@ -203,6 +221,8 @@
 		<antcall target="rootFileswin32_win32_ia64"/>
 		<antcall target="rootFilesmacosx_carbon_ppc"/>
 		<antcall target="rootFilesmacosx_carbon_x86"/>
+		<antcall target="rootFilesmacosx_cocoa_ppc"/>
+		<antcall target="rootFilesmacosx_cocoa_x86"/>
 		<antcall target="rootFileslinux_gtk_x86"/>
 		<antcall target="rootFileslinux_gtk_ppc"/>
 		<antcall target="rootFileslinux_gtk_ppc64"/>
