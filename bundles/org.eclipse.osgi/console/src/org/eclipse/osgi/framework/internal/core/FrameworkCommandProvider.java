@@ -20,15 +20,14 @@ import java.util.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.launcher.Launcher;
+import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
-import org.osgi.service.permissionadmin.PermissionAdmin;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -86,8 +85,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	private org.osgi.framework.BundleContext context;
 	/** The start level implementation */
 	private StartLevelManager slImpl;
-	private ConditionalPermissionAdmin condPermAdmin;
-	private PermissionAdmin permAdmin;
+	private SecurityAdmin securityAdmin;
 	private PlatformAdmin platAdmin;
 
 	/** Strings used to format other strings */
@@ -108,8 +106,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		this.osgi = osgi;
 		context = osgi.getBundleContext();
 		slImpl = osgi.framework.startLevelManager;
-		condPermAdmin = osgi.framework.condPermAdmin;
-		permAdmin = osgi.framework.permissionAdmin;
+		securityAdmin = osgi.framework.securityAdmin;
 	}
 
 	/**
@@ -1130,17 +1127,17 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		} else {
 			intp.println(ConsoleMsg.CONSOLE_NO_INSTALLED_BUNDLES_ERROR);
 		}
-		if (permAdmin != null) {
+		if (securityAdmin != null) {
 			// clear the permissions from permission admin
-			permAdmin.setDefaultPermissions(null);
-			String[] permLocations = permAdmin.getLocations();
+			securityAdmin.setDefaultPermissions(null);
+			String[] permLocations = securityAdmin.getLocations();
 			if (permLocations != null)
 				for (int i = 0; i < permLocations.length; i++)
-					permAdmin.setPermissions(permLocations[i], null);
+					securityAdmin.setPermissions(permLocations[i], null);
 		}
 		// clear the permissions from conditional permission admin
-		if (condPermAdmin != null)
-			for (Enumeration infos = condPermAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
+		if (securityAdmin != null)
+			for (Enumeration infos = securityAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
 				((ConditionalPermissionInfo) infos.nextElement()).delete();
 	}
 

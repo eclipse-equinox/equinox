@@ -26,8 +26,7 @@ public class SystemBundleActivator implements BundleActivator {
 	protected SystemBundle bundle;
 	protected Framework framework;
 	protected ServiceRegistration packageAdmin;
-	protected ServiceRegistration permissionAdmin;
-	protected ServiceRegistration condPermAdmin;
+	protected ServiceRegistration securityAdmin;
 	protected ServiceRegistration startLevel;
 	protected ServiceRegistration debugOptions;
 
@@ -40,16 +39,14 @@ public class SystemBundleActivator implements BundleActivator {
 		framework = bundle.framework;
 
 		if (framework.packageAdmin != null)
-			packageAdmin = register(Constants.OSGI_PACKAGEADMIN_NAME, framework.packageAdmin);
-		if (framework.permissionAdmin != null)
-			permissionAdmin = register(Constants.OSGI_PERMISSIONADMIN_NAME, framework.permissionAdmin);
+			packageAdmin = register(new String[] {Constants.OSGI_PACKAGEADMIN_NAME}, framework.packageAdmin);
+		if (framework.secureAction != null)
+			securityAdmin = register(new String[] {Constants.OSGI_PERMISSIONADMIN_NAME, ConditionalPermissionAdmin.class.getName()}, framework.securityAdmin);
 		if (framework.startLevelManager != null)
-			startLevel = register(Constants.OSGI_STARTLEVEL_NAME, framework.startLevelManager);
-		if (framework.condPermAdmin != null)
-			condPermAdmin = register(ConditionalPermissionAdmin.class.getName(), framework.condPermAdmin);
+			startLevel = register(new String[] {Constants.OSGI_STARTLEVEL_NAME}, framework.startLevelManager);
 		FrameworkDebugOptions dbgOptions = null;
 		if ((dbgOptions = FrameworkDebugOptions.getDefault()) != null)
-			debugOptions = register(org.eclipse.osgi.service.debug.DebugOptions.class.getName(), dbgOptions);
+			debugOptions = register(new String[] {org.eclipse.osgi.service.debug.DebugOptions.class.getName()}, dbgOptions);
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
 		framework.adaptor.frameworkStart(context);
@@ -67,10 +64,8 @@ public class SystemBundleActivator implements BundleActivator {
 
 		if (packageAdmin != null)
 			packageAdmin.unregister();
-		if (permissionAdmin != null)
-			permissionAdmin.unregister();
-		if (condPermAdmin != null)
-			condPermAdmin.unregister();
+		if (securityAdmin != null)
+			securityAdmin.unregister();
 		if (startLevel != null)
 			startLevel.unregister();
 		if (debugOptions != null)
@@ -85,13 +80,13 @@ public class SystemBundleActivator implements BundleActivator {
 	 * Register a service object.
 	 *
 	 */
-	protected ServiceRegistration register(String name, Object service) {
+	protected ServiceRegistration register(String[] names, Object service) {
 		Hashtable properties = new Hashtable(7);
 		Dictionary headers = bundle.getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
-		return context.registerService(name, service, properties);
+		return context.registerService(names, service, properties);
 	}
 
 }

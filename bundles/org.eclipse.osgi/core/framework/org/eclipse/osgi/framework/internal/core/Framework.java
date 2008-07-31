@@ -25,6 +25,8 @@ import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
+import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -60,12 +62,9 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	protected BundleRepository bundles;
 	/** Package Admin object. This object manages the exported packages. */
 	protected PackageAdminImpl packageAdmin;
-	/** Package Admin object. This object manages the exported packages. */
-	protected PermissionAdminImpl permissionAdmin;
-	/**
-	 * Startlevel object. This object manages the framework and bundle
-	 * startlevels
-	 */
+	/** PermissionAdmin and ConditionalPermissionAdmin impl. This object manages the bundle permissions. */
+	protected SecurityAdmin securityAdmin;
+	/** Startlevel object. This object manages the framework and bundle startlevels */
 	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
 	protected ServiceRegistry serviceRegistry; //TODO This is duplicated from the adaptor, do we really gain ?
@@ -110,7 +109,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
-	protected ConditionalPermissionAdminImpl condPermAdmin;
 	SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	// cache of AdminPermissions keyed by Bundle ID
 	private HashMap adminPermissions = new HashMap();
@@ -191,20 +189,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		initializeProperties(adaptor.getProperties());
 		/* initialize admin objects */
 		packageAdmin = new PackageAdminImpl(this);
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			try {
-				permissionAdmin = new PermissionAdminImpl(this, adaptor.getPermissionStorage());
-			} catch (IOException e) /* fatal error */{
-				e.printStackTrace();
-				throw new RuntimeException(e.getMessage());
-			}
-			try {
-				condPermAdmin = new ConditionalPermissionAdminImpl(this, adaptor.getPermissionStorage());
-			} catch (IOException e) /* fatal error */{
-				e.printStackTrace();
-				throw new RuntimeException(e.getMessage());
-			}
+		try {
+			// always create security admin even with security off
+			securityAdmin = new SecurityAdmin(null, this, adaptor.getPermissionStorage());
+		} catch (IOException e) /* fatal error */{
+			e.printStackTrace();
+			throw new RuntimeException(e.getMessage());
 		}
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done init props & new PermissionAdminImpl"); //$NON-NLS-1$//$NON-NLS-2$
@@ -605,8 +595,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			eventManager.close();
 			eventManager = null;
 		}
-		permissionAdmin = null;
-		condPermAdmin = null;
+		secureAction = null;
 		packageAdmin = null;
 		adaptor = null;
 		uninstallURLStreamHandlerFactory();
@@ -1377,7 +1366,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				if (securityManager.length() == 0)
 					sm = new SecurityManager(); // use the default one from java
 				else if (securityManager.equals("osgi")) //$NON-NLS-1$
-					sm = new FrameworkSecurityManager(); // use an OSGi enabled manager that understands postponed conditions
+					sm = new EquinoxSecurityManager(); // use an OSGi enabled manager that understands postponed conditions
 				else {
 					// try to use a specific classloader by classname
 					try {

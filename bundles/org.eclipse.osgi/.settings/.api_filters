@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component id="org.eclipse.osgi" version="2">
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfoBase.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfoBase">
+<filter id="1108344834">
+<message_arguments>
+<message_argument value="1.1"/>
+<message_argument value="3.4"/>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfoBase"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.1"/>
+<message_argument value="3.4"/>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+<message_argument value="createConditionalPermissionsUpdate()"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionsUpdate.java" type="org.osgi.service.condpermadmin.ConditionalPermissionsUpdate">
+<filter id="1108344834">
+<message_arguments>
+<message_argument value="1.1"/>
+<message_argument value="3.4"/>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionsUpdate"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/BundleException.java" type="org.osgi.framework.BundleException">
+<filter id="1141899266">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.4"/>
+<message_argument value="org.osgi.framework.BundleException"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/ServiceEvent.java" type="org.osgi.framework.ServiceEvent">
+<filter id="1141899266">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.4"/>
+<message_argument value="org.osgi.framework.ServiceEvent"/>
+</message_arguments>
+</filter>
+</resource>
+</component>

@@ -1,7 +1,5 @@
-#Fri Oct 20 13:22:13 EDT 2006
+#Thu Jul 31 16:31:14 CDT 2008
 eclipse.preferences.version=1
-encoding//core/framework/org/eclipse/osgi/framework/internal/core/default.permissions=UTF-8
-encoding//core/framework/org/eclipse/osgi/framework/internal/core/implied.permissions=UTF-8
 encoding//core/framework/org/eclipse/osgi/framework/internal/core/osname.aliases=UTF-8
 encoding//core/framework/org/eclipse/osgi/framework/internal/core/processor.aliases=UTF-8
 encoding/<project>=ISO-8859-1

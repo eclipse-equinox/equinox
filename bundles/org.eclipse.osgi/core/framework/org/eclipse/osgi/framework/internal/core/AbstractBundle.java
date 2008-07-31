@@ -19,6 +19,8 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.KeyedElement;
+import org.eclipse.osgi.internal.permadmin.EquinoxProtectionDomain;
+import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.util.NLS;
@@ -41,7 +43,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
-	protected BundleProtectionDomain domain;
+	protected EquinoxProtectionDomain domain;
 
 	volatile protected ManifestLocalization manifestLocalization = null;
 
@@ -1092,7 +1094,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (domain != null) {
 			if (permission instanceof Permission) {
 				SecurityManager sm = System.getSecurityManager();
-				if (sm instanceof FrameworkSecurityManager) {
+				if (sm instanceof EquinoxSecurityManager) {
 					/*
 					 * If the FrameworkSecurityManager is active, we need to do checks the "right" way.
 					 * We can exploit our knowledge that the security context of FrameworkSecurityManager
@@ -1243,11 +1245,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected void unresolvePermissions() {
 		if (domain != null) {
-			BundlePermissionCollection collection = (BundlePermissionCollection) domain.getPermissions();
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 				Debug.println("Unresolving permissions in bundle " + this); //$NON-NLS-1$
-			}
-			collection.unresolvePermissions();
+			domain.clearPermissionCache();
 		}
 	}
 

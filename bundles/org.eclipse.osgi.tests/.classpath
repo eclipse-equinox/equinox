@@ -42,6 +42,7 @@
 	<classpathentry kind="src" output="bundle_tests/xfriends.test3" path="bundles_src/xfriends.test3"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.a" path="bundles_src/ext.framework.a"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.a.importer" path="bundles_src/ext.framework.a.importer"/>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.b" path="bundles_src/ext.framework.b"/>
 	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a" path="bundles_src/ext.extclasspath.a"/>
 	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a.importer" path="bundles_src/ext.extclasspath.a.importer"/>
 	<classpathentry kind="src" output="bundle_tests/exporter.importer1" path="bundles_src/exporter.importer1"/>
