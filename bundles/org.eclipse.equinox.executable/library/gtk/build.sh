@@ -57,6 +57,7 @@ case $OS in
 			"x86_64")
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
+				javaHome="/usr/java64/1.5"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86)
@@ -96,6 +97,7 @@ case $OS in
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
+		javaHome="/usr/jdk/jdk1.5.0_01"
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
@@ -152,7 +154,10 @@ DEFAULT_WS="$defaultWS"
 JAVA_HOME=$javaHome
 DEFAULT_JAVA=$defaultJava
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_HOME DEFAULT_JAVA
+LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
+OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS JAVA_HOME DEFAULT_JAVA LIBRARY_DIR
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then

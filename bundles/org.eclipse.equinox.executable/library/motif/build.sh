@@ -136,7 +136,10 @@ DEFAULT_WS="$defaultWS"
 JAVA_HOME=$javaHome
 DEFAULT_JAVA=$defaultJava
 
-export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME DEFAULT_JAVA
+LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
+OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+
+export OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS X11_HOME MOTIF_HOME JAVA_HOME DEFAULT_JAVA LIBRARY_DIR
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then

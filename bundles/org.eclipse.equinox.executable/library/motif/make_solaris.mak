@@ -96,7 +96,8 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 install: all
-	cp $(EXEC) $(DLL) $(OUTPUT_DIR)
+	cp $(EXEC) $(OUTPUT_DIR)
+	cp  $(DLL) $(LIBRARY_DIR)
 	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 
 clean:
