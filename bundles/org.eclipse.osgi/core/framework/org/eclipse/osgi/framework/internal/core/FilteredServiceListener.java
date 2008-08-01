@@ -19,12 +19,15 @@ public class FilteredServiceListener implements ServiceListener {
 	private final FilterImpl filter;
 	/** Real listener. */
 	private final ServiceListener listener;
-	// The bundle context
+	/** The bundle context */
 	private final BundleContextImpl context;
-	// is this an AllServiceListener
+	/** is this an AllServiceListener */
 	private final boolean allservices;
-	// an objectClass required by the filter
+	/** an objectClass required by the filter */
 	private final String objectClass;
+	/** Indicates if the last event was delivered because of a filter match */
+	/* @GuardedBy this */
+	private boolean matched;
 
 	/**
 	 * Constructor.
@@ -49,6 +52,7 @@ public class FilteredServiceListener implements ServiceListener {
 				this.filter = (objectClassFilter.equals(filterstring)) ? null : filterImpl;
 			}
 		}
+		this.matched = false;
 		this.listener = listener;
 		this.context = context;
 		this.allservices = (listener instanceof AllServiceListener);
@@ -82,7 +86,28 @@ public class FilteredServiceListener implements ServiceListener {
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
-		if ((filter == null || filter.match(reference)) && (allservices || context.isAssignableTo(reference))) {
+		checkfilter: {
+			if (filter == null) {
+				break checkfilter; // no filter, so deliver event
+			}
+			final boolean match = filter.match(reference);
+			synchronized (this) {
+				if (match) {
+					matched = true; // remember that the filter matched
+					break checkfilter; // filter matched, so deliver event
+				}
+				if (matched) { // if the filter does not match now, but it previously matched
+					matched = false; // remember that the filter no longer matches
+					if (event.getType() == ServiceEvent.MODIFIED) {
+						event = new ServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, reference);
+						break checkfilter; // deliver a MODIFIED_ENDMATCH event
+					}
+				}
+			}
+			return; // there is a filter and it does not match, so do NOT deliver the event
+		}
+
+		if (allservices || context.isAssignableTo(reference)) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
