@@ -344,7 +344,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return results;
 	}
 
-	public void clearPermissionCache() {
+	public void clearCaches() {
 		PermissionInfoCollection[] permAdminCollections;
 		SecurityRow[] condAdminRows;
 		synchronized (lock) {
@@ -354,7 +354,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		for (int i = 0; i < permAdminCollections.length; i++)
 			permAdminCollections[i].clearPermissionCache();
 		for (int i = 0; i < condAdminRows.length; i++)
-			condAdminRows[i].getPermissionInfoCollection().clearPermissionCache();
+			condAdminRows[i].clearCaches();
 	}
 
 	EquinoxSecurityManager getSupportedSecurityManager() {

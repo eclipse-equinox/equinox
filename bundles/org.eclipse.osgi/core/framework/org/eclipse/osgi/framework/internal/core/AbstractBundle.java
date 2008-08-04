@@ -1240,17 +1240,6 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return domain;
 	}
 
-	/**
-	 * The bundle must unresolve the permissions.
-	 */
-	protected void unresolvePermissions() {
-		if (domain != null) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-				Debug.println("Unresolving permissions in bundle " + this); //$NON-NLS-1$
-			domain.clearPermissionCache();
-		}
-	}
-
 	protected Bundle[] getFragments() {
 		checkValid();
 		return null;

@@ -248,6 +248,14 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return permissionInfoCollection;
 	}
 
+	void clearCaches() {
+		permissionInfoCollection.clearPermissionCache();
+		if (bundleConditions != null)
+			synchronized (bundleConditions) {
+				bundleConditions.clear();
+			}
+	}
+
 	static class Decision {
 		final int decision;
 		final Condition[] postponed;

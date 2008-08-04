@@ -493,9 +493,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		if (!framework.isActive())
 			return refresh;
 		if (refreshPackages) {
-			AbstractBundle[] allBundles = framework.getAllBundles();
-			for (int i = 0; i < allBundles.length; i++)
-				allBundles[i].unresolvePermissions();
+			// must clear permission class and condition cache
+			framework.securityAdmin.clearCaches();
 			// increment the system state timestamp if we are refreshing packages.
 			// this is needed incase we suspended a bundle from processing the delta (bug 167483)
 			if (bundleDeltas.length > 0)
