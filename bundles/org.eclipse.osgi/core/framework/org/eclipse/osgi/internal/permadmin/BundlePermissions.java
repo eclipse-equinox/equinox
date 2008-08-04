@@ -17,6 +17,8 @@ import java.util.NoSuchElementException;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 
 public final class BundlePermissions extends PermissionCollection {
+	private static final long serialVersionUID = -5443618108312606612L;
+
 	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)  
 	static final Enumeration EMPTY_ENUMERATION = new Enumeration() {
 		public boolean hasMoreElements() {

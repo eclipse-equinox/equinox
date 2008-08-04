@@ -19,6 +19,7 @@ import java.util.HashMap;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class PermissionInfoCollection extends PermissionCollection {
+	private static final long serialVersionUID = 3140511562980923957L;
 	/* Used to find permission constructors in addPermissions */
 	static private final Class twoStringClassArray[] = new Class[] {String.class, String.class};
 	static private final Class oneStringClassArray[] = new Class[] {String.class};
