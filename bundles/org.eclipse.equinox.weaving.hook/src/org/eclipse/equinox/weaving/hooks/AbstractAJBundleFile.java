@@ -23,60 +23,63 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
 public abstract class AbstractAJBundleFile extends BundleFile {
 
-	protected IAspectJAdaptor adaptor;
-	protected BundleFile delegate;
-	
-	public AbstractAJBundleFile (IAspectJAdaptor aspectjAdaptor, BundleFile bundleFile) {
-		super(bundleFile.getBaseFile());
-		this.adaptor = aspectjAdaptor;
-		this.delegate = bundleFile;
-	}
-	
-	public File getBaseFile() {
-		File baseFile = delegate.getBaseFile();
-		return baseFile;
-	}
+    protected IAspectJAdaptor adaptor;
 
-	/**
-	 * @deprecated
-	 */
-	public URL getResourceURL(String path, long hostBundleID, int index) {
-		return delegate.getResourceURL(path, hostBundleID, index);
-	}
+    protected BundleFile delegate;
 
-	/**
-	 * @deprecated
-	 */
-	public URL getResourceURL(String path, long hostBundleID) {
-		return delegate.getResourceURL(path, hostBundleID);
-	}
+    public AbstractAJBundleFile(final IAspectJAdaptor aspectjAdaptor,
+            final BundleFile bundleFile) {
+        super(bundleFile.getBaseFile());
+        this.adaptor = aspectjAdaptor;
+        this.delegate = bundleFile;
+    }
 
-	public void close() throws IOException {
-		delegate.close();
-	}
+    public void close() throws IOException {
+        delegate.close();
+    }
 
-	public boolean containsDir(String dir) {
-		return delegate.containsDir(dir);
-	}
+    public boolean containsDir(final String dir) {
+        return delegate.containsDir(dir);
+    }
 
-	public BundleEntry getEntry(String path) {
-		return delegate.getEntry(path);
-	}
+    public IAspectJAdaptor getAdaptor() {
+        return adaptor;
+    }
 
-	public Enumeration getEntryPaths(String path) {
-		return delegate.getEntryPaths(path);
-	}
+    public File getBaseFile() {
+        final File baseFile = delegate.getBaseFile();
+        return baseFile;
+    }
 
-	public File getFile(String path, boolean nativeCode) {
-		return delegate.getFile(path, nativeCode);
-	}
+    public BundleEntry getEntry(final String path) {
+        return delegate.getEntry(path);
+    }
 
-	public void open() throws IOException {
-		delegate.open();
-	}
+    public Enumeration getEntryPaths(final String path) {
+        return delegate.getEntryPaths(path);
+    }
 
-	public IAspectJAdaptor getAdaptor() {
-		return adaptor;
-	}
+    public File getFile(final String path, final boolean nativeCode) {
+        return delegate.getFile(path, nativeCode);
+    }
+
+    /**
+     * @deprecated
+     */
+    public URL getResourceURL(final String path, final long hostBundleID) {
+        return delegate.getResourceURL(path, hostBundleID);
+    }
+
+    /**
+     * @deprecated
+     */
+    public URL getResourceURL(final String path, final long hostBundleID,
+            final int index) {
+        return delegate.getResourceURL(path, hostBundleID, index);
+    }
+
+    public void open() throws IOException {
+        delegate.open();
+    }
 
 }

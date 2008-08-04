@@ -1,6 +1,6 @@
 org.aspectj.osgi/debug=false
 org.aspectj.osgi/debug/bundle=false
-org.aspectj.osgi/debug/weave=false
+org.aspectj.osgi/debug/weave=true
 org.aspectj.osgi/debug/cache=false
 org.aspectj.osgi/debug/supplements=false
-org.aspectj.osgi/debug/bundleName=
+org.aspectj.osgi/debug/bundleName=false

@@ -18,24 +18,23 @@ import org.osgi.framework.SynchronousBundleListener;
 
 public class SupplementBundleListener implements SynchronousBundleListener {
 
-	private final SupplementerRegistry supplementerRegistry;
+    private final SupplementerRegistry supplementerRegistry;
 
-	public SupplementBundleListener(SupplementerRegistry supplementerRegistry) {
-		this.supplementerRegistry = supplementerRegistry;
-	}
+    public SupplementBundleListener(
+            final SupplementerRegistry supplementerRegistry) {
+        this.supplementerRegistry = supplementerRegistry;
+    }
 
-	public void bundleChanged(BundleEvent event) {
-		Bundle bundle = event.getBundle();
-		if (event.getType() == BundleEvent.INSTALLED) {
-			supplementerRegistry.addSupplementer(bundle);
-		}
-		else if (event.getType() == BundleEvent.UNINSTALLED) {
-			supplementerRegistry.removeSupplementer(bundle);
-		}
-		else if (event.getType() == BundleEvent.UPDATED) {
-			supplementerRegistry.removeSupplementer(bundle);
-			supplementerRegistry.addSupplementer(bundle);
-		}
-	}
+    public void bundleChanged(final BundleEvent event) {
+        final Bundle bundle = event.getBundle();
+        if (event.getType() == BundleEvent.INSTALLED) {
+            supplementerRegistry.addSupplementer(bundle);
+        } else if (event.getType() == BundleEvent.UNINSTALLED) {
+            supplementerRegistry.removeSupplementer(bundle);
+        } else if (event.getType() == BundleEvent.UPDATED) {
+            supplementerRegistry.removeSupplementer(bundle);
+            supplementerRegistry.addSupplementer(bundle);
+        }
+    }
 
 }

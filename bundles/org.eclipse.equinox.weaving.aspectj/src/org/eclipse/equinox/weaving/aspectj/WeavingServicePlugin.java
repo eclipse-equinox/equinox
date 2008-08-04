@@ -25,64 +25,68 @@ import org.osgi.framework.ServiceReference;
  */
 public class WeavingServicePlugin implements BundleActivator {
 
-	public static boolean verbose = Boolean.getBoolean("org.aspectj.osgi.verbose");
+    public static boolean DEBUG;
 
-	//The shared instance.
-	private static WeavingServicePlugin plugin;
-	
-	/**
-	 * The constructor.
-	 */
-	public WeavingServicePlugin() {
-		plugin = this;
-//		IWeavingContext iwc = new WeavingContext(null,null);//force bundle to be resolved
-	}
+    public static boolean verbose = Boolean
+            .getBoolean("org.aspectj.osgi.verbose");
 
-	/**
-	 * This method is called upon plug-in activation
-	 */
-	public void start(BundleContext context) throws Exception {
-		loadOptions(context);
-		if (verbose) System.err.println("[org.aspectj.osgi.service.weaving] info Starting AspectJ weaving service ...");
-		String serviceName     = IWeavingService.class.getName();
-//		ServiceFactory factory = new WeavingServiceFactory();
-		IWeavingService weavingService = new WeavingService();
-		Properties props       = new Properties();
-//		context.registerService(serviceName, factory, props);
-		context.registerService(serviceName, weavingService, props);
-//		System.out.println("WeavingServicePlugin.start() - registered WeavingService");
-	}
+    //The shared instance.
+    private static WeavingServicePlugin plugin;
 
-	/**
-	 * This method is called when the plug-in is stopped
-	 */
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-	}
+    /**
+     * The constructor.
+     */
+    public WeavingServicePlugin() {
+        plugin = this;
+        //		IWeavingContext iwc = new WeavingContext(null,null);//force bundle to be resolved
+    }
 
-	/**
-	 * Returns the shared instance.
-	 */
-	public static WeavingServicePlugin getDefault() {
-		return plugin;
-	}
+    /**
+     * Returns the shared instance.
+     */
+    public static WeavingServicePlugin getDefault() {
+        return plugin;
+    }
 
-	private void loadOptions (BundleContext context) {
-		// all this is only to get the application args		
-		DebugOptions service = null;
-		ServiceReference reference = context.getServiceReference(DebugOptions.class.getName());
-		if (reference != null)
-			service = (DebugOptions) context.getService(reference);
-		if (service == null)
-			return;
-		try {
-			DEBUG = service.getBooleanOption("org.aspectj.osgi.service.weaving/debug", false);
-		} finally {
-			// we have what we want - release the service
-			context.ungetService(reference);
-		}
-	}
-	
-	public static boolean DEBUG;
+    /**
+     * This method is called upon plug-in activation
+     */
+    public void start(final BundleContext context) throws Exception {
+        loadOptions(context);
+        if (verbose)
+            System.err
+                    .println("[org.aspectj.osgi.service.weaving] info Starting AspectJ weaving service ...");
+        final String serviceName = IWeavingService.class.getName();
+        //		ServiceFactory factory = new WeavingServiceFactory();
+        final IWeavingService weavingService = new WeavingService();
+        final Properties props = new Properties();
+        //		context.registerService(serviceName, factory, props);
+        context.registerService(serviceName, weavingService, props);
+        //		System.out.println("WeavingServicePlugin.start() - registered WeavingService");
+    }
+
+    /**
+     * This method is called when the plug-in is stopped
+     */
+    public void stop(final BundleContext context) throws Exception {
+        plugin = null;
+    }
+
+    private void loadOptions(final BundleContext context) {
+        // all this is only to get the application args		
+        DebugOptions service = null;
+        final ServiceReference reference = context
+                .getServiceReference(DebugOptions.class.getName());
+        if (reference != null)
+            service = (DebugOptions) context.getService(reference);
+        if (service == null) return;
+        try {
+            DEBUG = service.getBooleanOption(
+                    "org.aspectj.osgi.service.weaving/debug", false);
+        } finally {
+            // we have what we want - release the service
+            context.ungetService(reference);
+        }
+    }
 
 }

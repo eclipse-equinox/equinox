@@ -27,8 +27,7 @@ public class Log {
     /**
      * Logging debug information.
      * 
-     * @param message
-     *            The tracing message, optional.
+     * @param message The tracing message, optional.
      */
     public static void debug(final String message) {
         if (debugEnabled) {
@@ -41,10 +40,8 @@ public class Log {
     /**
      * Logging an error.
      * 
-     * @param message
-     *            The error message, optional.
-     * @param t
-     *            The Throwable for this error, optional.
+     * @param message The error message, optional.
+     * @param t The Throwable for this error, optional.
      */
     public static void error(final String message, final Throwable t) {
         if (message != null) {

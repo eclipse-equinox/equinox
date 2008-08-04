@@ -20,17 +20,17 @@ import org.osgi.framework.Bundle;
 
 public interface IWeavingService {
 
-	public IWeavingService getInstance(ClassLoader loader, Bundle bundle,
-			State resolverState, BundleDescription bundleDesciption,
-			SupplementerRegistry supplementerRegistry);
+    public void flushGeneratedClasses(ClassLoader loader);
 
-	public byte[] preProcess(String name, byte[] classbytes, ClassLoader loader)
-			throws IOException;
+    public boolean generatedClassesExistFor(ClassLoader loader, String className);
 
-	public String getKey();
+    public IWeavingService getInstance(ClassLoader loader, Bundle bundle,
+            State resolverState, BundleDescription bundleDesciption,
+            SupplementerRegistry supplementerRegistry);
 
-	public boolean generatedClassesExistFor(ClassLoader loader, String className);
+    public String getKey();
 
-	public void flushGeneratedClasses(ClassLoader loader);
+    public byte[] preProcess(String name, byte[] classbytes, ClassLoader loader)
+            throws IOException;
 
 }

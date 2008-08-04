@@ -70,14 +70,11 @@ public class BundleCachingService extends BaseCachingService {
     private File cachePartition;
 
     /**
-     * @param bundleContext
-     *            Must not be null!
-     * @param bundle
-     *            Must not be null!
-     * @param key
-     *            Must not be null!
-     * @throws IllegalArgumentException
-     *             if given bundleContext or bundle is null.
+     * @param bundleContext Must not be null!
+     * @param bundle Must not be null!
+     * @param key Must not be null!
+     * @throws IllegalArgumentException if given bundleContext or bundle is
+     *             null.
      */
     public BundleCachingService(final BundleContext bundleContext,
             final Bundle bundle, final String key) {

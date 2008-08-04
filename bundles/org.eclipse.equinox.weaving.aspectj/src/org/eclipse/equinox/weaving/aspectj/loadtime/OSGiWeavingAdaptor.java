@@ -36,43 +36,35 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
 
     private static final String DEFAULT_AOP_CONTEXT_LOCATION = "META-INF/aop.xml";
 
+    private final ClassLoader classLoader;
+
     private boolean initialized;
 
     private boolean initializing;
 
-    private ClassLoader classLoader;
+    private final StringBuffer namespaceAddon;
 
-    private OSGiWeavingContext weavingContext;
+    private final OSGiWeavingContext weavingContext;
 
-    private StringBuffer namespaceAddon;
-
-    public OSGiWeavingAdaptor(ClassLoader loader, OSGiWeavingContext context) {
+    public OSGiWeavingAdaptor(final ClassLoader loader,
+            final OSGiWeavingContext context) {
         super();
         this.classLoader = loader;
         this.weavingContext = context;
         this.namespaceAddon = new StringBuffer();
     }
 
-    // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
     /**
-     * @see org.aspectj.weaver.tools.WeavingAdaptor#weaveClass(java.lang.String,
-     *      byte[], boolean)
+     * @see org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor#getNamespace()
      */
-    public byte[] weaveClass(String name, byte[] bytes, boolean mustWeave)
-            throws IOException {
-
-        /* Avoid recursion during adaptor initialization */
-        if (!initializing) {
-            if (!initialized) {
-                initializing = true;
-                initialize(classLoader, weavingContext);
-                initialized = true;
-                initializing = false;
-            }
-            // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
-            bytes = super.weaveClass(name, bytes, mustWeave);
+    public String getNamespace() {
+        final String namespace = super.getNamespace();
+        if (namespace != null && namespace.length() > 0
+                && namespaceAddon.length() > 0) {
+            return namespace + " - " + namespaceAddon.toString(); //$NON-NLS-1$
+        } else {
+            return namespace;
         }
-        return bytes;
     }
 
     public void initialize() {
@@ -105,8 +97,8 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
      * @param loader
      */
     public List parseDefinitionsForBundle() {
-        List definitions = new ArrayList();
-        Set seenBefore = new HashSet();
+        final List definitions = new ArrayList();
+        final Set seenBefore = new HashSet();
 
         try {
             parseDefinitionsFromVisibility(definitions, seenBefore);
@@ -115,7 +107,7 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                 info("no configuration found. Disabling weaver for bundler "
                         + weavingContext.getClassLoaderName());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             definitions.clear();
             warn("parse definitions failed", e);
         }
@@ -123,17 +115,102 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         return definitions;
     }
 
-    private void parseDefinitionsFromVisibility(List definitions, Set seenBefore) {
-        String resourcePath = System.getProperty(
+    // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
+    /**
+     * @see org.aspectj.weaver.tools.WeavingAdaptor#weaveClass(java.lang.String,
+     *      byte[], boolean)
+     */
+    public byte[] weaveClass(final String name, byte[] bytes,
+            final boolean mustWeave) throws IOException {
+
+        /* Avoid recursion during adaptor initialization */
+        if (!initializing) {
+            if (!initialized) {
+                initializing = true;
+                initialize(classLoader, weavingContext);
+                initialized = true;
+                initializing = false;
+            }
+            // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
+            bytes = super.weaveClass(name, bytes, mustWeave);
+        }
+        return bytes;
+    }
+
+    private void addToNamespaceAddon(final URL xml) {
+        final String bundleName = weavingContext.getBundleIdFromURL(xml);
+        final String bundleVersion = weavingContext
+                .getBundleVersionFromURL(xml);
+
+        namespaceAddon.append(bundleName);
+        namespaceAddon.append(":");
+        namespaceAddon.append(bundleVersion);
+        namespaceAddon.append(";");
+    }
+
+    private String getDefinitionLocation(final Bundle bundle) {
+        String aopContextHeader = (String) bundle.getHeaders().get(
+                AOP_CONTEXT_LOCATION_HEADER);
+        if (aopContextHeader != null) {
+            aopContextHeader = aopContextHeader.trim();
+            return aopContextHeader;
+        }
+
+        return DEFAULT_AOP_CONTEXT_LOCATION;
+    }
+
+    private void parseDefinitionFromRequiredBundle(final Bundle bundle,
+            final List definitions, final Set seenBefore) {
+        try {
+            final URL aopXmlDef = bundle
+                    .getEntry(getDefinitionLocation(bundle));
+            if (aopXmlDef != null) {
+                if (!seenBefore.contains(aopXmlDef)) {
+                    definitions.add(DocumentParser.parse(aopXmlDef));
+                    seenBefore.add(aopXmlDef);
+
+                    addToNamespaceAddon(aopXmlDef);
+                } else {
+                    warn("ignoring duplicate definition: " + aopXmlDef);
+                }
+            }
+        } catch (final Exception e) {
+            warn("parse definitions failed", e);
+        }
+    }
+
+    private void parseDefinitionsFromRequiredBundles(final List definitions,
+            final Set seenBefore) {
+        final Bundle[] bundles = weavingContext.getBundles();
+
+        Arrays.sort(bundles, new Comparator() {
+
+            public int compare(final Object arg0, final Object arg1) {
+                final long bundleId1 = ((Bundle) arg0).getBundleId();
+                final long bundleId2 = ((Bundle) arg1).getBundleId();
+                return (int) (bundleId1 - bundleId2);
+            }
+        });
+
+        for (int i = 0; i < bundles.length; i++) {
+            parseDefinitionFromRequiredBundle(bundles[i], definitions,
+                    seenBefore);
+        }
+    }
+
+    private void parseDefinitionsFromVisibility(final List definitions,
+            final Set seenBefore) {
+        final String resourcePath = System.getProperty(
                 "org.aspectj.weaver.loadtime.configuration", "");
-        StringTokenizer st = new StringTokenizer(resourcePath, ";");
+        final StringTokenizer st = new StringTokenizer(resourcePath, ";");
 
         while (st.hasMoreTokens()) {
             try {
-                Enumeration xmls = weavingContext.getResources(st.nextToken());
+                final Enumeration xmls = weavingContext.getResources(st
+                        .nextToken());
 
                 while (xmls.hasMoreElements()) {
-                    URL xml = (URL) xmls.nextElement();
+                    final URL xml = (URL) xmls.nextElement();
                     if (!seenBefore.contains(xml)) {
                         info("using configuration "
                                 + weavingContext.getFile(xml));
@@ -145,81 +222,9 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                         warn("ignoring duplicate definition: " + xml);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 warn("parse definitions failed", e);
             }
-        }
-    }
-
-    private void addToNamespaceAddon(URL xml) {
-        String bundleName = weavingContext.getBundleIdFromURL(xml);
-        String bundleVersion = weavingContext.getBundleVersionFromURL(xml);
-
-        namespaceAddon.append(bundleName);
-        namespaceAddon.append(":");
-        namespaceAddon.append(bundleVersion);
-        namespaceAddon.append(";");
-    }
-
-    private void parseDefinitionsFromRequiredBundles(List definitions,
-            Set seenBefore) {
-        Bundle[] bundles = weavingContext.getBundles();
-
-        Arrays.sort(bundles, new Comparator() {
-
-            public int compare(Object arg0, Object arg1) {
-                long bundleId1 = ((Bundle) arg0).getBundleId();
-                long bundleId2 = ((Bundle) arg1).getBundleId();
-                return (int) (bundleId1 - bundleId2);
-            }
-        });
-
-        for (int i = 0; i < bundles.length; i++) {
-            parseDefinitionFromRequiredBundle(bundles[i], definitions,
-                    seenBefore);
-        }
-    }
-
-    private void parseDefinitionFromRequiredBundle(Bundle bundle,
-            List definitions, Set seenBefore) {
-        try {
-            URL aopXmlDef = bundle.getEntry(getDefinitionLocation(bundle));
-            if (aopXmlDef != null) {
-                if (!seenBefore.contains(aopXmlDef)) {
-                    definitions.add(DocumentParser.parse(aopXmlDef));
-                    seenBefore.add(aopXmlDef);
-
-                    addToNamespaceAddon(aopXmlDef);
-                } else {
-                    warn("ignoring duplicate definition: " + aopXmlDef);
-                }
-            }
-        } catch (Exception e) {
-            warn("parse definitions failed", e);
-        }
-    }
-
-    private String getDefinitionLocation(Bundle bundle) {
-        String aopContextHeader = (String) bundle.getHeaders().get(
-                AOP_CONTEXT_LOCATION_HEADER);
-        if (aopContextHeader != null) {
-            aopContextHeader = aopContextHeader.trim();
-            return aopContextHeader;
-        }
-
-        return DEFAULT_AOP_CONTEXT_LOCATION;
-    }
-
-    /**
-     * @see org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor#getNamespace()
-     */
-    public String getNamespace() {
-        String namespace = super.getNamespace();
-        if (namespace != null && namespace.length() > 0
-                && namespaceAddon.length() > 0) {
-            return namespace + " - " + namespaceAddon.toString(); //$NON-NLS-1$
-        } else {
-            return namespace;
         }
     }
 

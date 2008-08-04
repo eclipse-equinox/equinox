@@ -9,6 +9,7 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes     
  *******************************************************************************/
+
 package org.eclipse.equinox.weaving.adaptors;
 
 import java.net.URL;
@@ -18,12 +19,13 @@ import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 
 public interface IAspectJAdaptor {
 
-	public void setBaseClassLoader (BaseClassLoader baseClassLoader);
-	
-	public CacheEntry findClass (String name, URL sourceFileURL);
-	
-	public byte[] weaveClass (String name, byte[] bytes);
-	
-	public boolean storeClass (String name, URL sourceFileURL, Class clazz, byte[] classbytes);
+    public CacheEntry findClass(String name, URL sourceFileURL);
+
+    public void setBaseClassLoader(BaseClassLoader baseClassLoader);
+
+    public boolean storeClass(String name, URL sourceFileURL, Class clazz,
+            byte[] classbytes);
+
+    public byte[] weaveClass(String name, byte[] bytes);
 
 }

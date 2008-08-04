@@ -19,7 +19,8 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
 public class BaseAjBundleFile extends AspectJBundleFile {
 
-	public BaseAjBundleFile (IAspectJAdaptor aspectjAdaptor, BundleFile bundleFile) throws IOException {
-		super(aspectjAdaptor,bundleFile);
-	}
+    public BaseAjBundleFile(final IAspectJAdaptor aspectjAdaptor,
+            final BundleFile bundleFile) throws IOException {
+        super(aspectjAdaptor, bundleFile);
+    }
 }

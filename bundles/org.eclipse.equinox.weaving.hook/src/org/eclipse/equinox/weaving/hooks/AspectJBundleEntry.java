@@ -22,75 +22,93 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 
 public class AspectJBundleEntry extends BundleEntry {
 
-	private IAspectJAdaptor adaptor;
-	private String name;
-	private byte[] bytes;
-	private URL bundleFileURL;
-	private BundleEntry delegate;
-    private boolean dontWeave;
-	
-	public AspectJBundleEntry (IAspectJAdaptor aspectjAdaptor, BundleEntry delegate, URL url, boolean dontWeave) {
-		this.adaptor = aspectjAdaptor;
-		this.bundleFileURL = url;
-		this.delegate = delegate;
-		this.dontWeave = dontWeave;
-	}
-	
-	public AspectJBundleEntry (IAspectJAdaptor aspectjAdaptor, BundleEntry delegate, String name, byte[] bytes, URL url) {
-		this(aspectjAdaptor, delegate, url, true);
-		this.name = name;
-		this.bytes = bytes;
-	}
-	
-	public URL getBundleFileURL () {
-		return bundleFileURL; 
-	}
-	
-	public IAspectJAdaptor getAdaptor() {
-		return adaptor;
-	}
-	
-	public URL getFileURL() {
-		if (bytes == null) return delegate.getFileURL();
-		else return null;
-	}
+    private final IAspectJAdaptor adaptor;
 
-	public InputStream getInputStream() throws IOException {
-		// this always returns the original stream of the delegate to
-		// allow getResourceAsStream to be used even in the context of
-		// caching with J9 class sharing
-		//
-		// class loading uses getBytes instead (where the caching is considered)
-		return delegate.getInputStream();
-	}
-	
-	public byte[] getBytes() throws IOException {
-		if (bytes == null) return delegate.getBytes();
-		return bytes;
-	}
+    private final URL bundleFileURL;
 
-	public URL getLocalURL() {
-		if (bytes == null) return delegate.getLocalURL();
-		else return null;
-	}
+    private byte[] bytes;
 
-	public String getName() {
-		if (bytes == null) return delegate.getName();
-		else return name;
-	}
+    private final BundleEntry delegate;
 
-	public long getSize() {
-		if (delegate != null) return delegate.getSize();
-		else return bytes.length;
-	}
+    private final boolean dontWeave;
 
-	public long getTime() {
-		if (delegate != null) return delegate.getTime();
-		else return 0;
-	}
-	
-	public boolean dontWeave() {
-	    return dontWeave;
-	}
+    private String name;
+
+    public AspectJBundleEntry(final IAspectJAdaptor aspectjAdaptor,
+            final BundleEntry delegate, final String name, final byte[] bytes,
+            final URL url) {
+        this(aspectjAdaptor, delegate, url, true);
+        this.name = name;
+        this.bytes = bytes;
+    }
+
+    public AspectJBundleEntry(final IAspectJAdaptor aspectjAdaptor,
+            final BundleEntry delegate, final URL url, final boolean dontWeave) {
+        this.adaptor = aspectjAdaptor;
+        this.bundleFileURL = url;
+        this.delegate = delegate;
+        this.dontWeave = dontWeave;
+    }
+
+    public boolean dontWeave() {
+        return dontWeave;
+    }
+
+    public IAspectJAdaptor getAdaptor() {
+        return adaptor;
+    }
+
+    public URL getBundleFileURL() {
+        return bundleFileURL;
+    }
+
+    public byte[] getBytes() throws IOException {
+        if (bytes == null) return delegate.getBytes();
+        return bytes;
+    }
+
+    public URL getFileURL() {
+        if (bytes == null)
+            return delegate.getFileURL();
+        else
+            return null;
+    }
+
+    public InputStream getInputStream() throws IOException {
+        // this always returns the original stream of the delegate to
+        // allow getResourceAsStream to be used even in the context of
+        // caching with J9 class sharing
+        //
+        // class loading uses getBytes instead (where the caching is considered)
+        return delegate.getInputStream();
+    }
+
+    public URL getLocalURL() {
+        if (bytes == null)
+            return delegate.getLocalURL();
+        else
+            return null;
+    }
+
+    public String getName() {
+        if (bytes == null)
+            return delegate.getName();
+        else
+            return name;
+    }
+
+    public long getSize() {
+        if (delegate != null)
+            return delegate.getSize();
+        else
+            return bytes.length;
+    }
+
+    public long getTime() {
+        if (delegate != null)
+            return delegate.getTime();
+        else
+            return 0;
+    }
 
 }

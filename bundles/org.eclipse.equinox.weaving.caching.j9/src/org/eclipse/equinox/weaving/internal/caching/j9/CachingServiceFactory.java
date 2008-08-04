@@ -18,13 +18,14 @@ import org.osgi.framework.ServiceRegistration;
 
 public class CachingServiceFactory implements ServiceFactory {
 
-	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		return new CachingService();
-	}
+    public Object getService(final Bundle bundle,
+            final ServiceRegistration registration) {
+        return new CachingService();
+    }
 
-	public void ungetService(Bundle bundle, ServiceRegistration registration,
-			Object service) {
+    public void ungetService(final Bundle bundle,
+            final ServiceRegistration registration, final Object service) {
 
-	}
+    }
 
 }

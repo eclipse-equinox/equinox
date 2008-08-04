@@ -17,11 +17,14 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 public interface ICachingService {
-	
-	public ICachingService getInstance(ClassLoader classLoader, Bundle bundle, String key);
-	
-	public CacheEntry findStoredClass(String namespace, URL sourceFileURL, String name);
-	
-	public boolean storeClass(String namespace, URL sourceFileURL, Class clazz, byte[] classbytes);
-	
+
+    public CacheEntry findStoredClass(String namespace, URL sourceFileURL,
+            String name);
+
+    public ICachingService getInstance(ClassLoader classLoader, Bundle bundle,
+            String key);
+
+    public boolean storeClass(String namespace, URL sourceFileURL, Class clazz,
+            byte[] classbytes);
+
 }

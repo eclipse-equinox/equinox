@@ -32,179 +32,222 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class AspectJStorageHook implements StorageHook {
-	
-	public static final String KEY = AspectJStorageHook.class.getName();
-	public static final int HASHCODE = KEY.hashCode();
-	
-	private BaseData bundleData;
-	private final SupplementerRegistry supplementerRegistry;
 
-	
-	public AspectJStorageHook(SupplementerRegistry supplementerRegistry) {
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.AspectJStorageHook()");
-		this.supplementerRegistry = supplementerRegistry;
-	}
-	
-	public AspectJStorageHook(BaseData bd, SupplementerRegistry supplementerRegistry) {
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.AspectJStorageHook() baseDate=" + bd);
-		this.bundleData = bd;
-		this.supplementerRegistry = supplementerRegistry;
-	}
-	
-	private String getSymbolicName () {
-		return (bundleData == null)? "root" : bundleData.getSymbolicName();
-	}
-	
-	public void copy(StorageHook storageHook) {
-		// TODO Auto-generated method stub
-	}
+    public static final int HASHCODE;
 
-	public StorageHook create(BaseData bundledata) throws BundleException {
-//		System.err.println("? AbstractAspectJHook.create()");
-		// TODO Auto-generated method stub
-//		StorageHook result;
-		final StorageHook hook = new AspectJStorageHook(bundledata, supplementerRegistry);
-////		if (bundledata.getSymbolicName().equals("demo.hello")) {
-//			InvocationHandler ih = new InvocationHandler() {
-//				public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) throws Throwable {
-//					System.err.println("? " + method.getName());
-//					return method.invoke(hook,args);
-//				}
-//			};
-//			result = (StorageHook)Proxy.newProxyInstance(getClass().getClassLoader(),new Class[] { StorageHook.class }, ih);
-////		}
-////		else {
-////			result = hook;
-////		}
-//		return result;
-		return hook;
-	}
+    public static final String KEY;
 
-	public boolean forgetStartLevelChange(int startlevel) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    private static Field readOnly;
 
-	public boolean forgetStatusChange(int status) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    static {
+        KEY = AspectJStorageHook.class.getName();
+        HASHCODE = KEY.hashCode();
+        try {
+            readOnly = Headers.class.getDeclaredField("readOnly");
+            readOnly.setAccessible(true);
+        } catch (final Exception ex) {
+            if (Debug.DEBUG_SUPPLEMENTS) ex.printStackTrace();
+        }
+    }
 
-	public Dictionary getManifest(boolean firstLoad) throws BundleException {
-//		System.err.println("? AspectJStorageHook.getManifest() " + this + " firstLoad=" + firstLoad);
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private BaseData bundleData;
 
-	public int getStorageVersion() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    private final SupplementerRegistry supplementerRegistry;
 
-	public void initialize(Dictionary manifest) throws BundleException {
-//		System.err.println("? AspectJStorageHook.initialize() " + this + " manifest=" + manifest);
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("> AspectJStorageHook.initialize() " + getSymbolicName());
-		try {
-			ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, (String) manifest.get(Constants.IMPORT_PACKAGE));
-			ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
-			List supplementers = supplementerRegistry.getSupplementers(bundleData.getSymbolicName(), imports, exports);
-			if (!supplementers.isEmpty()) {
-				if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.initialize() " + getSymbolicName() + " supplementers=" + supplementers);
-				if (addRequiredBundles(supplementers)) {
-					if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info supplementing " + getSymbolicName() + " with " + supplementers);
-				}
-				else {
-					if (AbstractAspectJHook.verbose) System.err.println("[org.aspectj.osgi] info not supplementing " + getSymbolicName());
-				}
-			}
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("< AspectJStorageHook.initialize() ");
-	}
+    public AspectJStorageHook(final BaseData bd,
+            final SupplementerRegistry supplementerRegistry) {
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("- AspectJStorageHook.AspectJStorageHook() baseDate="
+                    + bd);
+        this.bundleData = bd;
+        this.supplementerRegistry = supplementerRegistry;
+    }
 
-	private boolean addRequiredBundles (List bundles) throws BundleException {
-		Dictionary manifest = bundleData.getManifest();
-		manifest = ((CachedManifest)manifest).getManifest();
-		
-		if (manifest != null) {
-			String value = (String)manifest.get(Constants.REQUIRE_BUNDLE);
-			for (Iterator i = bundles.iterator(); i.hasNext();) {
-				String name = (String)i.next();
-				if (value == null) value = name;
-				else value += "," + name;
-			}
-			
-			if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.addRequiredBundles() " + bundleData.getSymbolicName() + " ,manifest=" + manifest.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(manifest)) + ", value=" + value);
-			setHeader((Headers)manifest,Constants.REQUIRE_BUNDLE,value,true);
-		}
-		
-		return true;
-	}
-	
-	private Object setHeader(Headers manifest, Object key, Object value, boolean replace) throws BundleException {
-		try {
-			/* In Eclipse 3.3 we must use reflection to allow the manifest to be modified */
-			if (readOnly != null) {
-				readOnly.set(manifest,new Boolean(false));
-			}
-			
-			return manifest.set(Constants.REQUIRE_BUNDLE,value,true);
-		}
-		catch (IllegalAccessException ex) {
-			throw new BundleException(key + "=" + value,ex);
-		}
-	}
-	
-	private static Field readOnly; 
-	
-	static {
-		try {
-			readOnly = Headers.class.getDeclaredField("readOnly");
-			readOnly.setAccessible(true);
-		}
-		catch (Exception ex) {
-			if (Debug.DEBUG_SUPPLEMENTS) ex.printStackTrace();
-		}
-	}
+    public AspectJStorageHook(final SupplementerRegistry supplementerRegistry) {
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("- AspectJStorageHook.AspectJStorageHook()");
+        this.supplementerRegistry = supplementerRegistry;
+    }
 
-	public StorageHook load(BaseData bundledata, DataInputStream is) throws IOException {
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.load() " + getSymbolicName() + " bundleData=" + bundledata);
-		return new AspectJStorageHook(bundledata, supplementerRegistry);
-	}
+    public boolean compare(final KeyedElement other) {
+        // TODO Auto-generated method stub
+        return other.getKey() == KEY;
+    }
 
-	public boolean matchDNChain(String pattern) {
-		// TODO Auto-generated method stub
-//		System.err.println("? AspectJStorageHook.matchDNChain() " + getSymbolicName() + " pattern=" + pattern);
-		return false;
-	}
+    public void copy(final StorageHook storageHook) {
+        // TODO Auto-generated method stub
+    }
 
-	public void save(DataOutputStream os) throws IOException {
-		// TODO Auto-generated method stub
-		if (Debug.DEBUG_SUPPLEMENTS) Debug.println("- AspectJStorageHook.save() " + getSymbolicName());
-	}
+    public StorageHook create(final BaseData bundledata) throws BundleException {
+        //		System.err.println("? AbstractAspectJHook.create()");
+        // TODO Auto-generated method stub
+        //		StorageHook result;
+        final StorageHook hook = new AspectJStorageHook(bundledata,
+                supplementerRegistry);
+        ////		if (bundledata.getSymbolicName().equals("demo.hello")) {
+        //			InvocationHandler ih = new InvocationHandler() {
+        //				public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) throws Throwable {
+        //					System.err.println("? " + method.getName());
+        //					return method.invoke(hook,args);
+        //				}
+        //			};
+        //			result = (StorageHook)Proxy.newProxyInstance(getClass().getClassLoader(),new Class[] { StorageHook.class }, ih);
+        ////		}
+        ////		else {
+        ////			result = hook;
+        ////		}
+        //		return result;
+        return hook;
+    }
 
-	public void validate() throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-//		System.err.println("? AspectJStorageHook.validate()");
-	}
+    public boolean forgetStartLevelChange(final int startlevel) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	public boolean compare(KeyedElement other) {
-		// TODO Auto-generated method stub
-		return other.getKey() == KEY;
-	}
+    public boolean forgetStatusChange(final int status) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	public Object getKey() {
-		return KEY;
-	}
+    public Object getKey() {
+        return KEY;
+    }
 
-	public int getKeyHashCode() {
-		return HASHCODE;
-	}
-	
-	public String toString () {
-		return "AspectJStorageHook[" + getSymbolicName() + "]"; 
-	}
+    public int getKeyHashCode() {
+        return HASHCODE;
+    }
+
+    public Dictionary getManifest(final boolean firstLoad)
+            throws BundleException {
+        //		System.err.println("? AspectJStorageHook.getManifest() " + this + " firstLoad=" + firstLoad);
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public int getStorageVersion() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public void initialize(final Dictionary manifest) throws BundleException {
+        //		System.err.println("? AspectJStorageHook.initialize() " + this + " manifest=" + manifest);
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("> AspectJStorageHook.initialize() "
+                    + getSymbolicName());
+        try {
+            final ManifestElement[] imports = ManifestElement.parseHeader(
+                    Constants.IMPORT_PACKAGE, (String) manifest
+                            .get(Constants.IMPORT_PACKAGE));
+            final ManifestElement[] exports = ManifestElement.parseHeader(
+                    Constants.EXPORT_PACKAGE, (String) manifest
+                            .get(Constants.EXPORT_PACKAGE));
+            final List supplementers = supplementerRegistry.getSupplementers(
+                    bundleData.getSymbolicName(), imports, exports);
+            if (!supplementers.isEmpty()) {
+                if (Debug.DEBUG_SUPPLEMENTS)
+                    Debug.println("- AspectJStorageHook.initialize() "
+                            + getSymbolicName() + " supplementers="
+                            + supplementers);
+                if (addRequiredBundles(supplementers)) {
+                    if (AbstractAspectJHook.verbose)
+                        System.err
+                                .println("[org.aspectj.osgi] info supplementing "
+                                        + getSymbolicName()
+                                        + " with "
+                                        + supplementers);
+                } else {
+                    if (AbstractAspectJHook.verbose)
+                        System.err
+                                .println("[org.aspectj.osgi] info not supplementing "
+                                        + getSymbolicName());
+                }
+            }
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("< AspectJStorageHook.initialize() ");
+    }
+
+    public StorageHook load(final BaseData bundledata, final DataInputStream is)
+            throws IOException {
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("- AspectJStorageHook.load() " + getSymbolicName()
+                    + " bundleData=" + bundledata);
+        return new AspectJStorageHook(bundledata, supplementerRegistry);
+    }
+
+    public boolean matchDNChain(final String pattern) {
+        // TODO Auto-generated method stub
+        //		System.err.println("? AspectJStorageHook.matchDNChain() " + getSymbolicName() + " pattern=" + pattern);
+        return false;
+    }
+
+    public void save(final DataOutputStream os) throws IOException {
+        // TODO Auto-generated method stub
+        if (Debug.DEBUG_SUPPLEMENTS)
+            Debug.println("- AspectJStorageHook.save() " + getSymbolicName());
+    }
+
+    public String toString() {
+        return "AspectJStorageHook[" + getSymbolicName() + "]";
+    }
+
+    public void validate() throws IllegalArgumentException {
+        // TODO Auto-generated method stub
+        //		System.err.println("? AspectJStorageHook.validate()");
+    }
+
+    private boolean addRequiredBundles(final List bundles)
+            throws BundleException {
+        Dictionary manifest = bundleData.getManifest();
+        manifest = ((CachedManifest) manifest).getManifest();
+
+        if (manifest != null) {
+            String value = (String) manifest.get(Constants.REQUIRE_BUNDLE);
+            for (final Iterator i = bundles.iterator(); i.hasNext();) {
+                final String name = (String) i.next();
+                if (value == null)
+                    value = name;
+                else
+                    value += "," + name;
+            }
+
+            if (Debug.DEBUG_SUPPLEMENTS)
+                Debug.println("- AspectJStorageHook.addRequiredBundles() "
+                        + bundleData.getSymbolicName()
+                        + " ,manifest="
+                        + manifest.getClass().getName()
+                        + "@"
+                        + Integer
+                                .toHexString(System.identityHashCode(manifest))
+                        + ", value=" + value);
+            setHeader((Headers) manifest, Constants.REQUIRE_BUNDLE, value, true);
+        }
+
+        return true;
+    }
+
+    private String getSymbolicName() {
+        return (bundleData == null) ? "root" : bundleData.getSymbolicName();
+    }
+
+    private Object setHeader(final Headers manifest, final Object key,
+            final Object value, final boolean replace) throws BundleException {
+        try {
+            /*
+             * In Eclipse 3.3 we must use reflection to allow the manifest to be
+             * modified
+             */
+            if (readOnly != null) {
+                readOnly.set(manifest, new Boolean(false));
+            }
+
+            return manifest.set(Constants.REQUIRE_BUNDLE, value, true);
+        } catch (final IllegalAccessException ex) {
+            throw new BundleException(key + "=" + value, ex);
+        }
+    }
 
 }

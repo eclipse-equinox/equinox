@@ -35,10 +35,8 @@ public class SingletonCachingService extends BaseCachingService {
     private final BundleContext bundleContext;
 
     /**
-     * @param bundleContext
-     *            Must not be null!
-     * @throws IllegalArgumentException
-     *             if given bundleContext is null.
+     * @param bundleContext Must not be null!
+     * @throws IllegalArgumentException if given bundleContext is null.
      */
     public SingletonCachingService(final BundleContext bundleContext) {
         if (bundleContext == null) {
@@ -63,8 +61,7 @@ public class SingletonCachingService extends BaseCachingService {
      * Generates the unique id for the cache of the given bundle (usually the
      * symbolic name and the bundle version)
      * 
-     * @param bundle
-     *            The bundle for which a unique cache id should be calculated
+     * @param bundle The bundle for which a unique cache id should be calculated
      * @return The unique id of the cache for the given bundle
      */
     public String getCacheId(final Bundle bundle) {

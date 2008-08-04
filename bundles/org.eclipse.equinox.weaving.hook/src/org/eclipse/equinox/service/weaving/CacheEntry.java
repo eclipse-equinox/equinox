@@ -13,11 +13,11 @@ package org.eclipse.equinox.service.weaving;
 
 public class CacheEntry {
 
-    private byte[] cachedBytes;
+    private final byte[] cachedBytes;
 
-    private boolean dontWeave;
+    private final boolean dontWeave;
 
-    public CacheEntry(boolean dontWeave, byte[] cachedBytes) {
+    public CacheEntry(final boolean dontWeave, final byte[] cachedBytes) {
         this.dontWeave = dontWeave;
         this.cachedBytes = cachedBytes;
     }
