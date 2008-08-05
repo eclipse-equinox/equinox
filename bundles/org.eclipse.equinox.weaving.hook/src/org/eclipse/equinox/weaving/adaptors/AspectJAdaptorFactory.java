@@ -24,10 +24,13 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class AspectJAdaptorFactory {
 
@@ -39,12 +42,19 @@ public class AspectJAdaptorFactory {
 
     private SupplementerRegistry supplementerRegistry;
 
+    private ServiceListener weavingServiceListener;
+
     private ServiceTracker weavingServiceTracker;
 
     public AspectJAdaptorFactory() {
     }
 
-    public void dispose() {
+    public void dispose(final BundleContext context) {
+
+        context.removeServiceListener(weavingServiceListener);
+        if (Debug.DEBUG_WEAVE)
+            Debug.println("> Removed service listener for weaving service.");
+
         weavingServiceTracker.close();
         if (Debug.DEBUG_WEAVE)
             Debug.println("> Closed service tracker for weaving service.");
@@ -78,48 +88,36 @@ public class AspectJAdaptorFactory {
 
         // Service tracker for weaving service
         weavingServiceTracker = new ServiceTracker(context,
-                IWeavingService.class.getName(),
-                new ServiceTrackerCustomizer() {
-
-                    public Object addingService(final ServiceReference reference) {
-                        updateSupplementedBundles(context, supplementerRegistry);
-                        return context.getService(reference);
-                    }
-
-                    public void modifiedService(
-                            final ServiceReference reference,
-                            final Object service) {
-                        // Nothing to be done!
-                    }
-
-                    public void removedService(
-                            final ServiceReference reference,
-                            final Object service) {
-                        updateSupplementedBundles(context, supplementerRegistry);
-                        context.ungetService(reference);
-                    }
-
-                    private void updateSupplementedBundles(
-                            final BundleContext context,
-                            final SupplementerRegistry supplementerRegistry) {
-                        final Iterator supplementedBundlesIterator = supplementerRegistry
-                                .getSupplementedBundles().iterator();
-                        while (supplementedBundlesIterator.hasNext()) {
-                            final Bundle supplementedBundle = (Bundle) supplementedBundlesIterator
-                                    .next();
-                            supplementerRegistry
-                                    .updateInstalledBundle(supplementedBundle);
-                            if (Debug.DEBUG_WEAVE)
-                                Debug.println("> Updated supplemented bundle "
-                                        + supplementedBundle.getSymbolicName());
-                            System.err.println("> Updated supplemented bundle "
-                                    + supplementedBundle.getSymbolicName());
-                        }
-                    }
-                });
+                IWeavingService.class.getName(), null);
         weavingServiceTracker.open();
         if (Debug.DEBUG_WEAVE)
             Debug.println("> Opened service tracker for weaving service.");
+
+        // Service listener for weaving service
+        weavingServiceListener = new ServiceListener() {
+
+            public void serviceChanged(final ServiceEvent event) {
+                if (event.getType() != ServiceEvent.MODIFIED) {
+                    final Iterator supplementedBundlesIterator = supplementerRegistry
+                            .getSupplementedBundles().iterator();
+                    while (supplementedBundlesIterator.hasNext()) {
+                        final Bundle supplementedBundle = (Bundle) supplementedBundlesIterator
+                                .next();
+                        supplementerRegistry
+                                .updateInstalledBundle(supplementedBundle);
+                        if (Debug.DEBUG_WEAVE)
+                            Debug.println("> Updated supplemented bundle "
+                                    + supplementedBundle.getSymbolicName());
+                    }
+                }
+            }
+        };
+        try {
+            context.addServiceListener(weavingServiceListener, "("
+                    + Constants.OBJECTCLASS + "="
+                    + IWeavingService.class.getName() + ")");
+        } catch (final InvalidSyntaxException e) { // This is correct!
+        }
 
         // Service tracker for caching service
         cachingServiceTracker = new ServiceTracker(context,

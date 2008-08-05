@@ -50,7 +50,7 @@ public class AspectJHook extends AbstractAspectJHook {
 
     public void frameworkStop(final BundleContext context)
             throws BundleException {
-        adaptorFactory.dispose();
+        adaptorFactory.dispose(context);
     }
 
     public void initializedClassLoader(final BaseClassLoader baseClassLoader,
