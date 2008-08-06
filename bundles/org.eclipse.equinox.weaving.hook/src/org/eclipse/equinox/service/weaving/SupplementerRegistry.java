@@ -252,17 +252,7 @@ public class SupplementerRegistry {
                             + bundle.getSymbolicName());
 
         try {
-            final int initialstate = (bundle.getState() & (Bundle.ACTIVE | Bundle.STARTING));
-            // TODO Why stop? Shouldn't start again?
-            boolean wasStopped = false;
-            if (initialstate != 0
-                    && packageAdmin != null
-                    && packageAdmin.getBundleType(bundle) != PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
-                wasStopped = true;
-                bundle.stop(Bundle.STOP_TRANSIENT);
-            }
             bundle.update();
-            if (wasStopped) bundle.start(Bundle.START_TRANSIENT);
         } catch (final BundleException e) {
             e.printStackTrace();
         }
