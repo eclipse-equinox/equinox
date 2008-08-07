@@ -189,6 +189,10 @@ public class SystemBundle extends BundleHost {
 		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 	}
 
+	public void start(int options) {
+		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
+	}
+
 	/**
 	 * Start the SystemBundle.
 	 * This method launches the framework.
@@ -224,6 +228,10 @@ public class SystemBundle extends BundleHost {
 
 			shutdown.start();
 		}
+	}
+
+	public void stop(int options) {
+		stop();
 	}
 
 	/**
