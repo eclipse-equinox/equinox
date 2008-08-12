@@ -11,7 +11,8 @@
 
 package org.eclipse.equinox.weaving.internal.caching;
 
-import com.ibm.oti.shared.Shared;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -97,13 +98,24 @@ public class Activator implements BundleActivator {
     private boolean shouldRegister() {
         boolean enabled = true;
         try {
-            Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9
-            final boolean sharing = Shared.isSharingEnabled(); // if not using shared classes we want a different adaptor
-
-            if (sharing) {
-                enabled = false;
+            Class.forName("com.ibm.oti.vm.VM"); // if this fails we are not on J9 //$NON-NLS-1$
+            final Class<?> sharedClass = Class
+                    .forName("com.ibm.oti.shared.Shared"); //$NON-NLS-1$
+            final Method isSharingEnabledMethod = sharedClass.getMethod(
+                    "isSharingEnabled", (Class[]) null); //$NON-NLS-1$
+            if (isSharingEnabledMethod != null) {
+                final Boolean sharing = (Boolean) isSharingEnabledMethod
+                        .invoke(null, (Object[]) null);
+                if (sharing != null && sharing.booleanValue()) {
+                    enabled = false;
+                }
             }
         } catch (final ClassNotFoundException ex) {
+        } catch (final SecurityException e) {
+        } catch (final NoSuchMethodException e) {
+        } catch (final IllegalArgumentException e) {
+        } catch (final IllegalAccessException e) {
+        } catch (final InvocationTargetException e) {
         }
 
         return enabled;
