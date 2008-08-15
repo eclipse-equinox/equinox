@@ -414,15 +414,15 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 
-		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId());
-		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId());
-		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId());
-		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId());
+		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId()); //$NON-NLS-1$
+		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
 
-		assertNotNull("tc1sat", tc1sat);
-		assertNotNull("tc2sat", tc2sat);
-		assertNotNull("tc1unsat", tc1unsat);
-		assertNotNull("tc2unsat", tc2unsat);
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+		assertNotNull("tc2sat", tc2sat); //$NON-NLS-1$
+		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
+		assertNotNull("tc2unsat", tc2unsat); //$NON-NLS-1$
 
 		tc1sat.setSatisfied(false);
 		tc2sat.setSatisfied(false);
@@ -447,6 +447,152 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.remove(0);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testPostponedConditions02() {
+		installConditionBundle();
+		TestCondition.clearConditions();
+		EquinoxSecurityManager sm = new EquinoxSecurityManager();
+		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
+		Bundle test1 = installTestBundle();
+		Bundle test2 = installTest2Bundle();
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
+
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId()); //$NON-NLS-1$
+		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
+
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+		assertNull("tc2sat", tc2sat); //$NON-NLS-1$
+		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
+		assertNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+
+		tc1sat.setSatisfied(false);
+		tc1unsat.setSatisfied(true);
+		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testPostponedConditions03() {
+		installConditionBundle();
+		TestCondition.clearConditions();
+		EquinoxSecurityManager sm = new EquinoxSecurityManager();
+		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
+		Bundle test1 = installTestBundle();
+		Bundle test2 = installTest2Bundle();
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
+
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId()); //$NON-NLS-1$
+		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
+
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+		assertNotNull("tc2sat", tc2sat); //$NON-NLS-1$
+		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
+		assertNotNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+
+		tc1sat.setSatisfied(false);
+		tc2sat.setSatisfied(false);
+		tc1unsat.setSatisfied(true);
+		tc2unsat.setSatisfied(true);
+		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testPostponedConditions04() {
+		installConditionBundle();
+		TestCondition.clearConditions();
+		EquinoxSecurityManager sm = new EquinoxSecurityManager();
+		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
+		Bundle test1 = installTestBundle();
+		Bundle test2 = installTest2Bundle();
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
+
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId()); //$NON-NLS-1$
+		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
+
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+		assertNull("tc2sat", tc2sat); //$NON-NLS-1$
+		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
+		assertNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+
+		tc1sat.setSatisfied(false);
+		tc1unsat.setSatisfied(true);
+		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testPostponedConditions05() {
+		installConditionBundle();
+		TestCondition.clearConditions();
+		EquinoxSecurityManager sm = new EquinoxSecurityManager();
+		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
+		Bundle test1 = installTestBundle();
+		Bundle test2 = installTest2Bundle();
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
+
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
+
+		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
+
+		TestCondition tc1sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2sat = TestCondition.getTestCondition("POST_MUT_SAT_" + test2.getBundleId()); //$NON-NLS-1$
+		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
+		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
+
+		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
+		assertNotNull("tc2sat", tc2sat); //$NON-NLS-1$
+		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
+		assertNotNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+
+		tc1sat.setSatisfied(false);
+		tc2sat.setSatisfied(false);
+		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void testSMPermission(EquinoxSecurityManager sm, ProtectionDomain[] pds, Permission permission, boolean expectedToPass) {

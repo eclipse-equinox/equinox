@@ -38,7 +38,7 @@ public class SecurityTable {
 			return ABSTAIN;
 		boolean postponed = false;
 		Decision[] results = new Decision[rows.length];
-		int immediateDecision = 0;
+		int immediateDecision = -1;
 		// evaluate each row
 		for (int i = 0; i < rows.length; i++) {
 			try {
@@ -59,21 +59,37 @@ public class SecurityTable {
 				return results[i].decision; // return GRANTED or DENIED
 			// got an immediate answer; but it is after a postponed condition.
 			// no need to process the rest of the rows
-			immediateDecision = results[i].decision;
+			immediateDecision = i;
 			break;
 		}
 		if (postponed) {
 			// iterate over all postponed conditions; 
 			// if they all provide the same decision as the immediate decision then return the immediate decision
-			boolean allSameDecision = true;
-			for (int i = 0; i < results.length && allSameDecision; i++) {
+			boolean allSameDecision = immediateDecision > 0;
+			for (int i = immediateDecision - 1; i >= 0 && allSameDecision; i--) {
 				if (results[i] == null)
-					break;
-				if ((results[i].decision & POSTPONED) != 0 && (results[i].decision & immediateDecision) == 0)
-					allSameDecision = false;
+					continue;
+				if ((results[i].decision & POSTPONED) != 0) {
+					if ((results[i].decision & results[immediateDecision].decision) == 0)
+						allSameDecision = false;
+					else
+						results[i] = SecurityRow.DECISION_ABSTAIN; // we can clear postpones with the same decision as the immediate
+				}
 			}
 			if (allSameDecision)
-				return immediateDecision;
+				return results[immediateDecision].decision;
+			// if there is no immediate Decision then check to make sure there is at lease one Grant postponed decision
+			if (immediateDecision < 0) {
+				boolean allDeny = true;
+				for (int i = results.length - 1; i >= 0 && allDeny; i--) {
+					if (results[i] == null)
+						continue;
+					if ((results[i].decision & GRANTED) != 0)
+						allDeny = false;
+				}
+				if (allDeny)
+					return DENIED;
+			}
 			// we now are forced to postpone; we need to also remember the postponed decisions and 
 			// the immediate decision if there is one.
 			EquinoxSecurityManager equinoxManager = securityAdmin.getSupportedSecurityManager();
