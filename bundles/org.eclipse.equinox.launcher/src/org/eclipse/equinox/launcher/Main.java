@@ -2062,16 +2062,7 @@ public class Main {
 	 * path represents a JAR file.
 	 */
 	private boolean isJAR(String path) {
-		if (path.endsWith(File.separator))
-			return false;
-		int index = path.lastIndexOf('.');
-		if (index == -1)
-			return false;
-		index++;
-		// handle the case where we have a '.' at the end
-		if (index >= path.length())
-			return false;
-		return "JAR".equalsIgnoreCase(path.substring(index)); //$NON-NLS-1$
+		return new File(path).isFile();
 	}
 
 	/*
