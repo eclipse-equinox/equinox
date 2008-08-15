@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,13 @@
 package org.eclipse.equinox.launcher;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.*;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipFile;
 
 /**
  * The launcher to start eclipse using webstart. To use this launcher, the client 
@@ -170,7 +173,14 @@ public class WebStartMain extends Main {
 			try {
 				connection = url.openConnection();
 				if (connection instanceof JarURLConnection) {
-					return "file:" + ((JarURLConnection) connection).getJarFile().getName(); //$NON-NLS-1$
+					JarFile jarFile = ((JarURLConnection) connection).getJarFile();
+					String name = jarFile.getName();
+					// Some VMs may not return a jar name as a security precaution
+					if (name == null || name.length() == 0)
+						name = getJarNameByReflection(jarFile);
+
+					if (name != null && name.length() > 0)
+						return "file:" + name; //$NON-NLS-1$
 				}
 			} finally {
 				if (connection != null)
@@ -180,6 +190,42 @@ public class WebStartMain extends Main {
 			//Ignore and return the external form
 		}
 		return url.toExternalForm();
+	}
+
+	/*
+	 *  Get a value of the ZipFile.name field using reflection.
+	 *  For this to succeed, we need the "suppressAccessChecks" permission.
+	 */
+	private String getJarNameByReflection(JarFile jarFile) {
+		if (jarFile == null)
+			return null;
+
+		Field nameField = null;
+		try {
+			nameField = ZipFile.class.getDeclaredField("name"); //$NON-NLS-1$
+		} catch (NoSuchFieldException e1) {
+			try {
+				nameField = ZipFile.class.getDeclaredField("fileName"); //$NON-NLS-1$
+			} catch (NoSuchFieldException e) {
+				//ignore
+			}
+		}
+
+		if (nameField == null || Modifier.isStatic(nameField.getModifiers()) || nameField.getType() != String.class)
+			return null;
+
+		try {
+			nameField.setAccessible(true);
+			return (String) nameField.get(jarFile);
+		} catch (SecurityException e) {
+			// Don't have permissions, ignore
+		} catch (IllegalArgumentException e) {
+			// Shouldn't happen
+		} catch (IllegalAccessException e) {
+			// Shouldn't happen
+		}
+
+		return null;
 	}
 
 	/*
