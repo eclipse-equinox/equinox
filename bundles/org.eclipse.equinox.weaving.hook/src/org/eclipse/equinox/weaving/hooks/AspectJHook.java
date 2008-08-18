@@ -16,6 +16,7 @@ package org.eclipse.equinox.weaving.hooks;
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.equinox.service.weaving.SupplementerRegistry;
 import org.eclipse.equinox.weaving.adaptors.AspectJAdaptor;
 import org.eclipse.equinox.weaving.adaptors.AspectJAdaptorFactory;
 import org.eclipse.equinox.weaving.adaptors.Debug;
@@ -26,6 +27,7 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -184,17 +186,25 @@ public class AspectJHook extends AbstractAspectJHook {
             Debug.println("> AspectJHook.initialize() context=" + context);
 
         this.bundleContext = context;
-        adaptorFactory.initialize(context, getSupplementerRegistry());
+
+        final SupplementerRegistry supplementerRegistry = getSupplementerRegistry();
+        adaptorFactory.initialize(context, supplementerRegistry);
 
         final ServiceReference serviceReference = context
                 .getServiceReference(PackageAdmin.class.getName());
         final PackageAdmin packageAdmin = (PackageAdmin) context
                 .getService(serviceReference);
 
-        getSupplementerRegistry().setBundleContext(context);
-        getSupplementerRegistry().setPackageAdmin(packageAdmin);
+        supplementerRegistry.setBundleContext(context);
+        supplementerRegistry.setPackageAdmin(packageAdmin);
         context.addBundleListener(new SupplementBundleListener(
-                getSupplementerRegistry()));
+                supplementerRegistry));
+
+        // re-build supplementer registry state for installed bundles
+        final Bundle[] installedBundles = context.getBundles();
+        for (int i = 0; i < installedBundles.length; i++) {
+            supplementerRegistry.addSupplementer(installedBundles[i]);
+        }
 
         if (Debug.DEBUG_GENERAL)
             Debug.println("< AspectJHook.initialize() adaptorFactory="
