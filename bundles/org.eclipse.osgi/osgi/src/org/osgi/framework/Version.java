@@ -1,5 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
+ * $Date: 2008-07-25 12:51:53 -0400 (Fri, 25 Jul 2008) $
  * 
  * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
@@ -39,7 +39,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Revision: 4930 $
+ * @version $Revision: 5193 $
  */
 
 public class Version implements Comparable {
@@ -72,14 +72,14 @@ public class Version implements Comparable {
 	}
 
 	/**
-	 * Creates a version identifier from the specifed components.
+	 * Creates a version identifier from the specified components.
 	 * 
 	 * @param major Major component of the version identifier.
 	 * @param minor Minor component of the version identifier.
 	 * @param micro Micro component of the version identifier.
 	 * @param qualifier Qualifier component of the version identifier. If
-	 *        <code>null</code> is specified, then the qualifier will be set
-	 *        to the empty string.
+	 *        <code>null</code> is specified, then the qualifier will be set to
+	 *        the empty string.
 	 * @throws IllegalArgumentException If the numerical components are negative
 	 *         or the qualifier string is invalid.
 	 */

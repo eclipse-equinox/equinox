@@ -1,5 +1,5 @@
 /*
- * $Date: 2008-07-03 17:21:28 -0400 (Thu, 03 Jul 2008) $
+ * $Date: 2008-08-01 20:54:43 -0400 (Fri, 01 Aug 2008) $
  * 
  * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
@@ -56,7 +56,7 @@ import org.osgi.framework.Version;
  * thread-safe.
  * 
  * @ThreadSafe
- * @version $Revision: 5121 $
+ * @version $Revision: 5237 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
@@ -177,7 +177,7 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		this.trackReference = null;
 		this.trackClass = clazz;
 		this.customizer = (customizer == null) ? this : customizer;
-		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.listenerFilter = "(" + Constants.OBJECTCLASS + "=" + clazz + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
 			this.filter = context.createFilter(listenerFilter);
 		}
@@ -214,12 +214,15 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 		this.context = context;
 		this.trackReference = null;
 		this.trackClass = null;
-		final Version frameworkVersion = new Version((String) AccessController
+		final Version frameworkVersion = (Version) AccessController
 				.doPrivileged(new PrivilegedAction() {
 					public Object run() {
-						return context.getProperty(Constants.FRAMEWORK_VERSION);
+						String version = context
+								.getProperty(Constants.FRAMEWORK_VERSION);
+						return (version == null) ? Version.emptyVersion
+								: new Version(version);
 					}
-				}));
+				});
 		final boolean endMatchSupported = (frameworkVersion
 				.compareTo(endMatchVersion) >= 0);
 		this.listenerFilter = endMatchSupported ? filter.toString() : null;

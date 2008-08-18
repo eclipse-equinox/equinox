@@ -1,5 +1,5 @@
 /*
- * $Date: 2007-10-11 10:45:28 -0400 (Thu, 11 Oct 2007) $
+ * $Date: 2008/07/31 22:25:18 $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -74,7 +74,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -101,6 +101,7 @@ public final class AdminPermission extends BasicPermission {
 	public final static String			EXTENSIONLIFECYCLE	= "extensionLifecycle";
 	/**
 	 * The action string <code>lifecycle</code> (Value is "lifecycle").
+	 * 
 	 * @since 1.3
 	 */
 	public final static String			LIFECYCLE			= "lifecycle";

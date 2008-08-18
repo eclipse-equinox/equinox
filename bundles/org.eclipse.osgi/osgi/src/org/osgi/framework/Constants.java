@@ -1,5 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
+ * $Date: 2008-08-04 12:32:08 -0400 (Mon, 04 Aug 2008) $
  *
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  *
@@ -27,7 +27,7 @@ package org.osgi.framework;
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 4930 $
+ * @version $Revision: 5248 $
  */
 
 public interface Constants {
@@ -551,6 +551,25 @@ public interface Constants {
 	 */
 	public static final String	SERVICE_RANKING							= "service.ranking";
 
+	/**
+	 * Service property (named &quot;service.type&quot;) to provide information
+	 * about the type of the service. For example, if this service is proxied,
+	 * the property value might contain a string such as &quot;proxied&quot;.
+	 * 
+	 * <p>
+	 * The OSGi Alliance reserves all property value strings that start with
+	 * &quot;osgi.&quot;.
+	 * 
+	 * <p>
+	 * This property may be supplied in the properties <code>Dictionary</code>
+	 * object passed to the <code>BundleContext.registerService</code> method.
+	 * The value of this property must be of type <code>String</code>,
+	 * <code>String[]</code>, or <code>Collection</code> of <code>String</code>.
+	 * 
+	 * @since 1.5
+	 */
+	public static final String	SERVICE_TYPE							= "service.type";
+	
 	/**
 	 * Service property (named &quot;service.vendor&quot;) identifying a
 	 * service's vendor.

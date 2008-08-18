@@ -1,5 +1,5 @@
 /*
- * $Date: 2008-07-03 17:21:28 -0400 (Thu, 03 Jul 2008) $
+ * $Date: 2008-07-31 16:15:58 -0400 (Thu, 31 Jul 2008) $
  * 
  * Copyright (c) OSGi Alliance (2007, 2008). All Rights Reserved.
  * 
@@ -33,7 +33,7 @@ import java.util.Map;
  * implementation of the Tracker class.
  * 
  * @ThreadSafe
- * @version $Revision: 5121 $
+ * @version $Revision: 5216 $
  * @since 1.4
  */
 abstract class AbstractTracked {
@@ -396,7 +396,7 @@ abstract class AbstractTracked {
 
 	/**
 	 * Call the Tracker modified method. If this method is overridden, the
-	 * overridding method MUST call this method to increment the tracking count.
+	 * overriding method MUST call this method to increment the tracking count.
 	 * 
 	 * @GuardedBy this
 	 */

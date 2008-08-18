@@ -1,5 +1,5 @@
 /*
- * $Date: 2008-07-10 17:24:58 -0400 (Thu, 10 Jul 2008) $
+ * $Date: 2008-07-31 15:04:40 -0400 (Thu, 31 Jul 2008) $
  * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceEvent;
  * are not called for service operations on other service hooks.
  * 
  * @ThreadSafe
- * @version $Revision: 5176 $
+ * @version $Revision: 5215 $
  */
 
 public interface PublishHook {
@@ -42,10 +42,13 @@ public interface PublishHook {
 	 * 
 	 * @param event The service event to be delivered.
 	 * @param bundles A <code>Collection</code> of Bundles which have listeners
-	 *        to which the event may be delivered. The method implementation can
+	 *        to which the event may be delivered. The method implementation may
 	 *        remove bundles from the collection to prevent the event from being
-	 *        delivered to those bundles. Attempting to add to the collection
-	 *        will result in an <code>UnsupportedOperationException</code>.
+	 *        delivered to those bundles. The collection supports all the
+	 *        optional <code>Collection</code> operations except
+	 *        <code>add</code> and <code>addAll</code>. Attempting to add to the
+	 *        collection will result in an
+	 *        <code>UnsupportedOperationException</code>.
 	 */
 	void event(ServiceEvent event, Collection bundles);
 }

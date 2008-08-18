@@ -1,5 +1,5 @@
 /*
- * $Date: 2008-07-10 17:24:58 -0400 (Thu, 10 Jul 2008) $
+ * $Date: 2008-07-31 15:04:40 -0400 (Thu, 31 Jul 2008) $
  * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
  * operations on other service hooks.
  * 
  * @ThreadSafe
- * @version $Revision: 5176 $
+ * @version $Revision: 5215 $
  */
 
 public interface FindHook {
@@ -50,10 +50,12 @@ public interface FindHook {
 	 *        of a call to
 	 *        {@link BundleContext#getAllServiceReferences(String, String)}
 	 * @param references A <code>Collection</code> of Service References to be
-	 *        returned to the finding bundle. The method implementation can
+	 *        returned to the finding bundle. The method implementation may
 	 *        remove references from the collection to prevent the references
-	 *        from being returned to the finding bundle. Attempting to add to
-	 *        the collection will result in an
+	 *        from being returned to the finding bundle. The collection supports
+	 *        all the optional <code>Collection</code> operations except
+	 *        <code>add</code> and <code>addAll</code>. Attempting to add to the
+	 *        collection will result in an
 	 *        <code>UnsupportedOperationException</code>.
 	 */
 	void find(BundleContext context, String name, String filter,
