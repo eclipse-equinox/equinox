@@ -33,6 +33,8 @@ public class WeavingServicePlugin implements BundleActivator {
     //The shared instance.
     private static WeavingServicePlugin plugin;
 
+    private BundleContext context;
+
     /**
      * The constructor.
      */
@@ -49,9 +51,19 @@ public class WeavingServicePlugin implements BundleActivator {
     }
 
     /**
+     * @return The bundle context of the weaving service bundle or null, of
+     *         bundle is not started
+     */
+    public BundleContext getContext() {
+        return this.context;
+    }
+
+    /**
      * This method is called upon plug-in activation
      */
     public void start(final BundleContext context) throws Exception {
+        this.context = context;
+
         loadOptions(context);
         if (verbose)
             System.err
@@ -69,6 +81,7 @@ public class WeavingServicePlugin implements BundleActivator {
      * This method is called when the plug-in is stopped
      */
     public void stop(final BundleContext context) throws Exception {
+        this.context = null;
         plugin = null;
     }
 
