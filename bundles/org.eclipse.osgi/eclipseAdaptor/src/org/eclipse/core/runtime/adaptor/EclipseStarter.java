@@ -58,7 +58,7 @@ public class EclipseStarter {
 	private static boolean initialize = false;
 	public static boolean debug = false;
 	private static boolean running = false;
-	private static OSGi osgi = null;
+	private static Framework framework = null;
 	private static ServiceRegistration defaultMonitorRegistration = null;
 	private static ServiceRegistration appLauncherRegistration = null;
 	private static ServiceRegistration splashStreamRegistration = null;
@@ -270,7 +270,7 @@ public class EclipseStarter {
 			Profile.logEnter("EclipseStarter.startup()", null); //$NON-NLS-1$
 		if (running)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
-		initializeProperties();
+		FrameworkProperties.initializeProperties();
 		processCommandLine(args);
 		LocationManager.initializeLocations();
 		loadConfigurationInfo();
@@ -283,46 +283,30 @@ public class EclipseStarter {
 		log = adaptor.getFrameworkLog();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "adapter created"); //$NON-NLS-1$ //$NON-NLS-2$
-		osgi = new OSGi(adaptor);
+		framework = new Framework(adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "OSGi created"); //$NON-NLS-1$ //$NON-NLS-2$
-		context = osgi.getBundleContext();
+		context = framework.getBundle(0).getBundleContext();
 		registerFrameworkShutdownHandlers();
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
 		String consolePort = FrameworkProperties.getProperty(PROP_CONSOLE);
 		if (consolePort != null) {
-			startConsole(osgi, new String[0], consolePort);
+			startConsole(framework, new String[0], consolePort);
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		final Bundle[][] startBundles = new Bundle[1][];
-		final long[] stateStamp = {0l};
-		BundleListener loadBundleListener = new SynchronousBundleListener() {
-			public void bundleChanged(BundleEvent event) {
-				if ((event.getType() & BundleEvent.STARTING) == 0 || event.getBundle().getBundleId() != 0)
-					return;
-				// save the cached timestamp before loading basic bundles; this is needed so we can do a proper timestamp check when logging resolver errors
-				stateStamp[0] = adaptor.getState().getTimeStamp();
-				startBundles[0] = loadBasicBundles();
-			}
-		};
-		context.addBundleListener(loadBundleListener);
-		try {
-			osgi.launch();
-		} finally {
-			context.removeBundleListener(loadBundleListener);
-		}
+		framework.launch();
+		// save the cached timestamp before loading basic bundles; this is needed so we can do a proper timestamp check when logging resolver errors
+		long stateStamp = adaptor.getState().getTimeStamp();
+		Bundle[] startBundles = loadBasicBundles();
 
-		if (startBundles[0] == null) {
+		if (startBundles == null || ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false)))) { //$NON-NLS-1$
 			waitForShutdown();
 			return context; // cannot continue; loadBasicBundles caused refreshPackages to shutdown the framework
 		}
-		if ("true".equals(FrameworkProperties.getProperty(PROP_REFRESH_BUNDLES)) && refreshPackages(getCurrentBundles(false))) { //$NON-NLS-1$
-			waitForShutdown();
-			return context; // cannot continue; refreshPackages shutdown the framework
-		}
+
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "loading basic bundles"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -332,10 +316,10 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
-		ensureBundlesActive(startBundles[0]);
+		ensureBundlesActive(startBundles);
 		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
-			if (stateStamp[0] != adaptor.getState().getTimeStamp())
+			if (stateStamp != adaptor.getState().getTimeStamp())
 				logUnresolvedBundles(context.getBundles());
 		running = true;
 		if (Profile.PROFILE && Profile.STARTUP)
@@ -406,7 +390,7 @@ public class EclipseStarter {
 	 * @throws Exception if anything goes wrong
 	 */
 	public static void shutdown() throws Exception {
-		if (!running || osgi == null)
+		if (!running || framework == null)
 			return;
 		if (appLauncherRegistration != null)
 			appLauncherRegistration.unregister();
@@ -421,8 +405,8 @@ public class EclipseStarter {
 		splashStreamRegistration = null;
 		defaultMonitorRegistration = null;
 		stopConsole();
-		osgi.close();
-		osgi = null;
+		framework.close();
+		framework = null;
 		context = null;
 		running = false;
 	}
@@ -743,7 +727,7 @@ public class EclipseStarter {
 		// wait for the system bundle to stop
 		Bundle systemBundle = context.getBundle(0);
 		int i = 0;
-		while (i < 5000 && (systemBundle.getState() & (Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
+		while (i < 5000 && (systemBundle.getState() & (Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
 			i += 200;
 			try {
 				Thread.sleep(200);
@@ -761,17 +745,17 @@ public class EclipseStarter {
 	 * for the console to execute
 	 * @param consolePort the port on which to run the console.  Empty string implies the default port.
 	 */
-	private static void startConsole(OSGi equinox, String[] consoleArgs, String consolePort) {
+	private static void startConsole(Framework equinox, String[] consoleArgs, String consolePort) {
 		try {
 			String consoleClassName = FrameworkProperties.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
 			Class consoleClass = Class.forName(consoleClassName);
 			Class[] parameterTypes;
 			Object[] parameters;
 			if (consolePort.length() == 0) {
-				parameterTypes = new Class[] {OSGi.class, String[].class};
+				parameterTypes = new Class[] {Framework.class, String[].class};
 				parameters = new Object[] {equinox, consoleArgs};
 			} else {
-				parameterTypes = new Class[] {OSGi.class, int.class, String[].class};
+				parameterTypes = new Class[] {Framework.class, int.class, String[].class};
 				parameters = new Object[] {equinox, new Integer(consolePort), consoleArgs};
 			}
 			Constructor constructor = consoleClass.getConstructor(parameterTypes);
@@ -1429,26 +1413,6 @@ public class EclipseStarter {
 		return ((String) left[3]).compareTo((String) right[3]); // compare qualifier
 	}
 
-	private static void initializeProperties() {
-		// initialize some framework properties that must always be set
-		if (FrameworkProperties.getProperty(PROP_FRAMEWORK) == null || FrameworkProperties.getProperty(PROP_INSTALL_AREA) == null) {
-			CodeSource cs = EclipseStarter.class.getProtectionDomain().getCodeSource();
-			if (cs == null)
-				throw new IllegalArgumentException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_PROPS_NOT_SET, PROP_FRAMEWORK + ", " + PROP_INSTALL_AREA)); //$NON-NLS-1$
-			URL url = cs.getLocation();
-			// allow props to be preset
-			if (FrameworkProperties.getProperty(PROP_FRAMEWORK) == null)
-				FrameworkProperties.setProperty(PROP_FRAMEWORK, url.toExternalForm());
-			if (FrameworkProperties.getProperty(PROP_INSTALL_AREA) == null) {
-				String filePart = url.getFile();
-				FrameworkProperties.setProperty(PROP_INSTALL_AREA, filePart.substring(0, filePart.lastIndexOf('/')));
-			}
-		}
-		// always decode these properties
-		FrameworkProperties.setProperty(PROP_FRAMEWORK, decode(FrameworkProperties.getProperty(PROP_FRAMEWORK)));
-		FrameworkProperties.setProperty(PROP_INSTALL_AREA, decode(FrameworkProperties.getProperty(PROP_INSTALL_AREA)));
-	}
-
 	private static void finalizeProperties() {
 		// if check config is unknown and we are in dev mode, 
 		if (FrameworkProperties.getProperty(PROP_DEV) != null && FrameworkProperties.getProperty(PROP_CHECK_CONFIG) == null)
@@ -1466,102 +1430,6 @@ public class EclipseStarter {
 			this.location = location;
 			this.level = level;
 			this.start = start;
-		}
-	}
-
-	private static String decode(String urlString) {
-		//try to use Java 1.4 method if available
-		try {
-			Class clazz = URLDecoder.class;
-			Method method = clazz.getDeclaredMethod("decode", new Class[] {String.class, String.class}); //$NON-NLS-1$
-			//first encode '+' characters, because URLDecoder incorrectly converts 
-			//them to spaces on certain class library implementations.
-			if (urlString.indexOf('+') >= 0) {
-				int len = urlString.length();
-				StringBuffer buf = new StringBuffer(len);
-				for (int i = 0; i < len; i++) {
-					char c = urlString.charAt(i);
-					if (c == '+')
-						buf.append("%2B"); //$NON-NLS-1$
-					else
-						buf.append(c);
-				}
-				urlString = buf.toString();
-			}
-			Object result = method.invoke(null, new Object[] {urlString, "UTF-8"}); //$NON-NLS-1$
-			if (result != null)
-				return (String) result;
-		} catch (Exception e) {
-			//JDK 1.4 method not found -- fall through and decode by hand
-		}
-		//decode URL by hand
-		boolean replaced = false;
-		byte[] encodedBytes = urlString.getBytes();
-		int encodedLength = encodedBytes.length;
-		byte[] decodedBytes = new byte[encodedLength];
-		int decodedLength = 0;
-		for (int i = 0; i < encodedLength; i++) {
-			byte b = encodedBytes[i];
-			if (b == '%') {
-				byte enc1 = encodedBytes[++i];
-				byte enc2 = encodedBytes[++i];
-				b = (byte) ((hexToByte(enc1) << 4) + hexToByte(enc2));
-				replaced = true;
-			}
-			decodedBytes[decodedLength++] = b;
-		}
-		if (!replaced)
-			return urlString;
-		try {
-			return new String(decodedBytes, 0, decodedLength, "UTF-8"); //$NON-NLS-1$
-		} catch (UnsupportedEncodingException e) {
-			//use default encoding
-			return new String(decodedBytes, 0, decodedLength);
-		}
-	}
-
-	private static int hexToByte(byte b) {
-		switch (b) {
-			case '0' :
-				return 0;
-			case '1' :
-				return 1;
-			case '2' :
-				return 2;
-			case '3' :
-				return 3;
-			case '4' :
-				return 4;
-			case '5' :
-				return 5;
-			case '6' :
-				return 6;
-			case '7' :
-				return 7;
-			case '8' :
-				return 8;
-			case '9' :
-				return 9;
-			case 'A' :
-			case 'a' :
-				return 10;
-			case 'B' :
-			case 'b' :
-				return 11;
-			case 'C' :
-			case 'c' :
-				return 12;
-			case 'D' :
-			case 'd' :
-				return 13;
-			case 'E' :
-			case 'e' :
-				return 14;
-			case 'F' :
-			case 'f' :
-				return 15;
-			default :
-				throw new IllegalArgumentException("Switch error decoding URL"); //$NON-NLS-1$
 		}
 	}
 

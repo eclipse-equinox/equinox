@@ -43,8 +43,10 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	private static final String CONTEXTCLASSLOADER_PARENT_BOOT = "boot"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_FWK = "fwk"; //$NON-NLS-1$
 
-	private static final String PROP_FRAMEWORK_THREAD = "osgi.framework.activeThreadType"; //$NON-NLS-1$
-	private static final String THREAD_NORMAL = "normal"; //$NON-NLS-1$
+	public static final String PROP_FRAMEWORK_THREAD = "osgi.framework.activeThreadType"; //$NON-NLS-1$
+	public static final String THREAD_NORMAL = "normal"; //$NON-NLS-1$
+	public static final String PROP_EQUINOX_SECURITY = "eclipse.security"; //$NON-NLS-1$
+	public static final String SECURITY_OSGI = "osgi"; //$NON-NLS-1$
 
 	private static String J2SE = "J2SE-"; //$NON-NLS-1$
 	private static String JAVASE = "JavaSE-"; //$NON-NLS-1$
@@ -1359,13 +1361,13 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * is set much later than we would like!
 	 */
 	protected void installSecurityManager() {
-		String securityManager = FrameworkProperties.getProperty("eclipse.security", FrameworkProperties.getProperty("java.security.manager")); //$NON-NLS-1$ //$NON-NLS-2$
+		String securityManager = FrameworkProperties.getProperty(PROP_EQUINOX_SECURITY, FrameworkProperties.getProperty("java.security.manager")); //$NON-NLS-1$
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm == null) {
 				if (securityManager.length() == 0)
 					sm = new SecurityManager(); // use the default one from java
-				else if (securityManager.equals("osgi")) //$NON-NLS-1$
+				else if (securityManager.equals(SECURITY_OSGI))
 					sm = new EquinoxSecurityManager(); // use an OSGi enabled manager that understands postponed conditions
 				else {
 					// try to use a specific classloader by classname
@@ -1609,6 +1611,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private void initializeContextFinder() {
+		//if (true)
+		//	return;
 		Thread current = Thread.currentThread();
 		Throwable error = null;
 		try {
@@ -1872,5 +1876,13 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	boolean isForcedRestart() {
 		return forcedRestart;
+	}
+
+	public void waitForStop(long timeout) throws InterruptedException {
+		synchronized (this) {
+			if (active) {
+				this.wait(timeout);
+			}
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import java.security.ProtectionDomain;
 import java.util.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.launcher.Launcher;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.resolver.*;
@@ -80,7 +79,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
 public class FrameworkCommandProvider implements CommandProvider, SynchronousBundleListener {
 
 	/** An instance of the OSGi framework */
-	private OSGi osgi;
+	private Framework framework;
 	/** The system bundle context */
 	private org.osgi.framework.BundleContext context;
 	/** The start level implementation */
@@ -100,13 +99,13 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *
 	 *  initialize must be called after creating this object.
 	 *
-	 *  @param osgi The current instance of OSGi
+	 *  @param framework The current instance of the framework
 	 */
-	public FrameworkCommandProvider(OSGi osgi) {
-		this.osgi = osgi;
-		context = osgi.getBundleContext();
-		slImpl = osgi.framework.startLevelManager;
-		securityAdmin = osgi.framework.securityAdmin;
+	public FrameworkCommandProvider(Framework framework) {
+		this.framework = framework;
+		context = framework.systemBundle.getContext();
+		slImpl = framework.startLevelManager;
+		securityAdmin = framework.securityAdmin;
 	}
 
 	/**
@@ -217,7 +216,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _launch(CommandInterpreter intp) throws Exception {
-		osgi.launch();
+		framework.launch();
 	}
 
 	/**
@@ -226,7 +225,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _shutdown(CommandInterpreter intp) throws Exception {
-		osgi.shutdown();
+		framework.shutdown();
 	}
 
 	/**
@@ -312,12 +311,21 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			if (nextArg != null) {
 				String start = nextArg.toLowerCase();
 
-				if (Launcher.matchCommand("start", start, 1)) { //$NON-NLS-1$
+				if (matchCommand("start", start, 1)) { //$NON-NLS-1$
 					bundle.start();
 				}
 			}
 		}
 
+	}
+
+	private static boolean matchCommand(String command, String input, int minLength) {
+		if (minLength <= 0)
+			minLength = command.length();
+		int length = input.length();
+		if (minLength > length)
+			length = minLength;
+		return (command.regionMatches(0, input, 0, length));
 	}
 
 	/**
@@ -455,7 +463,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _status(CommandInterpreter intp) throws Exception {
-		if (osgi.isActive()) {
+		if (framework.isActive()) {
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_LAUNCHED_MESSAGE);
 		} else {
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_SHUTDOWN_MESSAGE);
@@ -664,7 +672,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			intp.print(", "); //$NON-NLS-1$
 			intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
 			if (id != 0) {
-				File dataRoot = osgi.framework.getDataFile(bundle, ""); //$NON-NLS-1$
+				File dataRoot = framework.getDataFile(bundle, ""); //$NON-NLS-1$
 
 				String root = (dataRoot == null) ? null : dataRoot.getAbsolutePath();
 
@@ -730,7 +738,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 				intp.print(", "); //$NON-NLS-1$
 				intp.print(NLS.bind(ConsoleMsg.CONSOLE_STATUS_MESSAGE, getStateName(bundle)));
 				if (id != 0) {
-					File dataRoot = osgi.framework.getDataFile(bundle, ""); //$NON-NLS-1$
+					File dataRoot = framework.getDataFile(bundle, ""); //$NON-NLS-1$
 
 					String root = (dataRoot == null) ? null : dataRoot.getAbsolutePath();
 
@@ -1102,7 +1110,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _init(CommandInterpreter intp) throws Exception {
-		if (osgi.isActive()) {
+		if (framework.isActive()) {
 			intp.print(newline);
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_LAUNCHED_PLEASE_SHUTDOWN_MESSAGE);
 			return;
@@ -1148,7 +1156,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 */
 	public void _close(CommandInterpreter intp) throws Exception {
 		intp.println();
-		osgi.close();
+		framework.close();
 		System.exit(0);
 	}
 
@@ -1344,7 +1352,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 * @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _ss(CommandInterpreter intp) throws Exception {
-		if (osgi.isActive()) {
+		if (framework.isActive()) {
 			intp.println();
 			intp.println(ConsoleMsg.CONSOLE_FRAMEWORK_IS_LAUNCHED_MESSAGE);
 		} else {

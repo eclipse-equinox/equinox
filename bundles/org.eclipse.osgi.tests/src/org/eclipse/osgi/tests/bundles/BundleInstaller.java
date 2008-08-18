@@ -49,6 +49,14 @@ public class BundleInstaller {
 	synchronized public Bundle installBundle(String name, boolean track) throws BundleException {
 		if (bundles == null && track)
 			return null;
+		String location = getBundleLocation(name);
+		Bundle bundle = context.installBundle(location);
+		if (track)
+			bundles.put(name, bundle);
+		return bundle;
+	}
+
+	public String getBundleLocation(String name) throws BundleException {
 		String bundleFileName = rootLocation + "/" + name;
 		URL bundleURL = context.getBundle().getEntry(bundleFileName);
 		if (bundleURL == null)
@@ -63,10 +71,7 @@ public class BundleInstaller {
 		String location = bundleURL.toExternalForm();
 		if ("file".equals(bundleURL.getProtocol()))
 			location = "reference:" + location;
-		Bundle bundle = context.installBundle(location);
-		if (track)
-			bundles.put(name, bundle);
-		return bundle;
+		return location;
 	}
 
 	synchronized public Bundle updateBundle(String fromName, String toName) throws BundleException {

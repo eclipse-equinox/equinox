@@ -137,15 +137,12 @@ public class SystemBundle extends BundleHost {
 
 	/**
 	 * Close the the Bundle's file.
-	 * This method closes the BundleContext for the SystemBundle
-	 * and sets the SystemBundle's state to UNINSTALLED.
+	 * This method closes the BundleContext for the SystemBundle.
 	 *
 	 */
 	protected void close() {
 		context.close();
 		context = null;
-
-		state = UNINSTALLED;
 	}
 
 	/**
@@ -202,8 +199,33 @@ public class SystemBundle extends BundleHost {
 		/* initialize the startlevel service */
 		framework.startLevelManager.initialize();
 
-		framework.startLevelManager.launch(framework.startLevelManager.getFrameworkStartLevel());
+		/* Load all installed bundles */
+		loadInstalledBundles(framework.startLevelManager.getInstalledBundles(framework.bundles, false));
+		/* Start the system bundle */
+		try {
+			framework.systemBundle.state = Bundle.STARTING;
+			framework.systemBundle.context.start();
+			framework.publishBundleEvent(BundleEvent.STARTING, framework.systemBundle);
+		} catch (BundleException be) {
+			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+				Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
+				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
+			}
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
+			throw new RuntimeException(be.getMessage());
+		}
 
+	}
+
+	private void loadInstalledBundles(AbstractBundle[] installedBundles) {
+
+		for (int i = 0; i < installedBundles.length; i++) {
+			AbstractBundle bundle = installedBundles[i];
+			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+				Debug.println("SLL: Trying to load bundle " + bundle); //$NON-NLS-1$
+			}
+			bundle.load();
+		}
 	}
 
 	/**
@@ -214,11 +236,11 @@ public class SystemBundle extends BundleHost {
 	public void stop() {
 		framework.checkAdminPermission(this, AdminPermission.EXECUTE);
 
-		if (state == ACTIVE) {
+		if ((state & (ACTIVE | STARTING)) != 0) {
 			Thread shutdown = framework.secureAction.createThread(new Runnable() {
 				public void run() {
 					try {
-						framework.shutdown();
+						framework.close();
 					} catch (Throwable t) {
 						// allow the adaptor to handle this unexpected error
 						framework.adaptor.handleRuntimeError(t);
@@ -271,17 +293,17 @@ public class SystemBundle extends BundleHost {
 		if (state == ACTIVE) {
 			Thread restart = framework.secureAction.createThread(new Runnable() {
 				public void run() {
-					String prevSLProp = FrameworkProperties.getProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
-					String sl = String.valueOf(framework.startLevelManager.getStartLevel());
-					FrameworkProperties.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, sl);
+					int sl = framework.startLevelManager.getStartLevel();
 					FrameworkProperties.setProperty(Constants.PROP_OSGI_RELAUNCH, ""); //$NON-NLS-1$
 					framework.shutdown();
+					try {
+						framework.waitForStop(1000);
+					} catch (InterruptedException e) {
+						// ignore
+					}
 					framework.launch();
+					framework.startLevelManager.doSetStartLevel(sl);
 					FrameworkProperties.clearProperty(Constants.PROP_OSGI_RELAUNCH);
-					if (prevSLProp == null)
-						FrameworkProperties.clearProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
-					else
-						FrameworkProperties.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, prevSLProp);
 				}
 			}, "System Bundle Update"); //$NON-NLS-1$
 

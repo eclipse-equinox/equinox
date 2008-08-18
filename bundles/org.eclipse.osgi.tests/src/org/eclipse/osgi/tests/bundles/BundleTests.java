@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 public class BundleTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(BundleTests.class.getName());
+		suite.addTest(SystemBundleTests.suite());
 		suite.addTest(ServiceRegistryBundleTests.suite());
 		suite.addTest(SubstituteExportsBundleTests.suite());
 		suite.addTest(PackageAdminBundleTests.suite());

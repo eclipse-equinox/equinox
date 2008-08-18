@@ -238,16 +238,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	}
 
 	/**
-	 *  Internal method to allow the framework to be launched synchronously by calling the
-	 *  StartLevelListener worker calls directly
-	 *
-	 *  This method does not return until all bundles that should be started are started
-	 */
-	protected void launch(int startlevel) {
-		doSetStartLevel(startlevel);
-	}
-
-	/**
 	 *  Internal method to shut down the framework synchronously by setting the startlevel to zero
 	 *  and calling the StartLevelListener worker calls directly
 	 *
@@ -263,33 +253,17 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 * @param newSL start level value                  
 	 * @param callerBundle - the bundle initiating the change in start level
 	 */
-	private void doSetStartLevel(int newSL) {
+	void doSetStartLevel(int newSL) {
 		synchronized (lock) {
 			settingStartLevel = true;
 			try {
 				int tempSL = activeSL;
-
 				if (newSL > tempSL) {
 					boolean launching = tempSL == 0;
 					if (launching) {
-						/* Load all installed bundles */
-						loadInstalledBundles(getInstalledBundles(framework.bundles, false));
-						/* Start the system bundle */
-						try {
-							framework.systemBundle.state = Bundle.STARTING;
-							framework.systemBundle.context.start();
-							framework.publishBundleEvent(BundleEvent.STARTING, framework.systemBundle);
-							// TODO this technically should be done just before firing the STARTED event for the system bundle; 
-							// TODO State is set to ACTIVE here because some depend on the the system bundle being in the ACTIVE state when they are starting 
-							framework.systemBundle.state = Bundle.ACTIVE;
-						} catch (BundleException be) {
-							if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-								Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
-								Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
-							}
-							framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-							throw new RuntimeException(be.getMessage());
-						}
+						// TODO this technically should be done just before firing the STARTED event for the system bundle; 
+						// TODO State is set to ACTIVE here because some depend on the the system bundle being in the ACTIVE state when they are starting 
+						framework.systemBundle.state = Bundle.ACTIVE;
 					}
 					for (int i = tempSL; i < newSL; i++) {
 						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
@@ -310,6 +284,11 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 						}
 						tempSL--;
 						decFWSL(i - 1, sortedBundles);
+					}
+					if (newSL == 0) {
+						// stop and unload all bundles
+						suspendAllBundles(framework.bundles);
+						unloadAllBundles(framework.bundles);
 					}
 				}
 				framework.publishFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, framework.systemBundle, null);
@@ -514,7 +493,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 * @param bundles - the bundles installed in the framework
 	 * @return A sorted array of bundles 
 	 */
-	private AbstractBundle[] getInstalledBundles(BundleRepository bundles, boolean sortByDependency) {
+	AbstractBundle[] getInstalledBundles(BundleRepository bundles, boolean sortByDependency) {
 
 		/* make copy of bundles vector in case it is modified during launch */
 		AbstractBundle[] installedBundles;
@@ -583,21 +562,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	}
 
 	/**
-	 * Load all bundles in the list
-	 * @param installedBundles a list of bundles to load
-	 */
-	private void loadInstalledBundles(AbstractBundle[] installedBundles) {
-
-		for (int i = 0; i < installedBundles.length; i++) {
-			AbstractBundle bundle = installedBundles[i];
-			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-				Debug.println("SLL: Trying to load bundle " + bundle); //$NON-NLS-1$
-			}
-			bundle.load();
-		}
-	}
-
-	/**
 	 *  Resume all bundles in the launch list
 	 * @param launch a list of Bundle Objects to launch
 	 */
@@ -632,12 +596,9 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 
 		saveActiveStartLevel(decToSL);
 
-		if (decToSL == 0) { // stopping the framework
-			// stop and unload all bundles
-			suspendAllBundles(framework.bundles);
-			unloadAllBundles(framework.bundles);
+		if (decToSL == 0) // stopping the framework
 			return;
-		}
+
 		// just decrementing the active startlevel - framework is not shutting down
 		// Do not check framework.isForcedRestart here because we want to stop the active bundles regardless.
 		for (int i = shutdown.length - 1; i >= 0; i--) {

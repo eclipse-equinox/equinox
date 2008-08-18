@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component id="org.eclipse.osgi" version="2">
+<resource path="osgi/src/org/osgi/framework/launch/SystemBundle.java" type="org.osgi.framework.launch.SystemBundle">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.launch.SystemBundle"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/hooks/service/FindHook.java" type="org.osgi.framework.hooks.service.FindHook">
 <filter id="1110441988">
 <message_arguments>
@@ -50,7 +57,20 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
+</message_arguments>
+</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
@@ -61,20 +81,7 @@
 <filter id="403804204">
 <message_arguments>
 <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
 <message_argument value="createConditionalPermissionsUpdate()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
 </message_arguments>
 </filter>
 </resource>

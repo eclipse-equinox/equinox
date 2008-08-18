@@ -32,8 +32,6 @@ public class FrameworkConsole implements Runnable {
 	protected PrintWriter out;
 	/** The current bundle context */
 	protected final org.osgi.framework.BundleContext context;
-	/** The current osgi instance */
-	protected final OSGi osgi;
 	/** The command line arguments passed at launch time*/
 	protected final String[] args;
 	/** The OSGi Command Provider */
@@ -59,37 +57,36 @@ public class FrameworkConsole implements Runnable {
 	 Constructor for FrameworkConsole.
 	 It creates a service tracker to track CommandProvider registrations.
 	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	 @param osgi - an instance of an osgi framework
+	 @param framework - an instance of an osgi framework
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
-	public FrameworkConsole(OSGi osgi, String[] args) {
-		this(osgi, args, 0, false);
+	public FrameworkConsole(Framework framework, String[] args) {
+		this(framework, args, 0, false);
 	}
 
 	/**
 	 Constructor for FrameworkConsole.
 	 It creates a service tracker to track CommandProvider registrations.
 	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	 @param osgi - an instance of an osgi framework
+	 @param framework - an instance of an osgi framework
 	 @param args - any arguments passed on the command line when Launcher is started.
 	 */
-	public FrameworkConsole(OSGi osgi, int port, String[] args) {
-		this(osgi, args, port, true);
+	public FrameworkConsole(Framework framework, int port, String[] args) {
+		this(framework, args, port, true);
 	}
 
-	private FrameworkConsole(OSGi osgi, String[] args, int port, boolean useSocketStream) {
+	private FrameworkConsole(Framework framework, String[] args, int port, boolean useSocketStream) {
 		this.args = args;
-		this.osgi = osgi;
 		this.useSocketStream = useSocketStream;
 		this.port = port;
-		this.context = osgi.getBundleContext();
+		this.context = framework.systemBundle.getContext();
 
 		// set up a service tracker to track CommandProvider registrations
 		this.cptracker = new ServiceTracker(context, CommandProvider.class.getName(), null);
 		this.cptracker.open();
 
 		// register the OSGi command provider
-		this.osgicp = new FrameworkCommandProvider(osgi).intialize();
+		this.osgicp = new FrameworkCommandProvider(framework).intialize();
 	}
 
 	/**
