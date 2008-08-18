@@ -30,6 +30,10 @@ import org.aspectj.weaver.loadtime.definition.DocumentParser;
 import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 import org.osgi.framework.Bundle;
 
+/**
+ * The weaving adaptor for AspectJs load-time weaving API that deals with the
+ * OSGi specifics for load-time weaving
+ */
 public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
 
     private static final String AOP_CONTEXT_LOCATION_HEADER = "Eclipse-AspectContext";
