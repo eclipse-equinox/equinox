@@ -61,7 +61,7 @@ public class Equinox implements SystemBundle {
 	}
 
 	public void init(Properties configuration) {
-		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING)) != 0)
+		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
 			throw new IllegalStateException("Framework is active!!");
 		synchronized (this) {
 			if (impl != null && impl.getState() != Bundle.INSTALLED) {
