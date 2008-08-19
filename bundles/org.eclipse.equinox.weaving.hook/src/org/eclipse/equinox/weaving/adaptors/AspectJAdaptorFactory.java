@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.IWeavingService;
@@ -114,12 +115,14 @@ public class AspectJAdaptorFactory {
 
             public void serviceChanged(final ServiceEvent event) {
                 if (event.getType() == ServiceEvent.REGISTERED) {
-                    final Iterator bundles = weavingServices.keySet()
+                    final Iterator bundleEntries = weavingServices.entrySet()
                             .iterator();
                     synchronized (weavingServices) {
-                        while (bundles.hasNext()) {
-                            final Bundle bundle = (Bundle) bundles.next();
-                            if (weavingServices.get(bundle) == null) {
+                        while (bundleEntries.hasNext()) {
+                            final Entry entry = (Entry) bundleEntries.next();
+                            final Bundle bundle = (Bundle) entry.getKey();
+                            if (entry.getValue() == null) {
+                                bundleEntries.remove();
                                 supplementerRegistry
                                         .updateInstalledBundle(bundle);
                                 if (Debug.DEBUG_WEAVE)
@@ -130,12 +133,14 @@ public class AspectJAdaptorFactory {
                     }
                 }
                 if (event.getType() == ServiceEvent.UNREGISTERING) {
-                    final Iterator bundles = weavingServices.keySet()
+                    final Iterator bundleEntries = weavingServices.entrySet()
                             .iterator();
                     synchronized (weavingServices) {
-                        while (bundles.hasNext()) {
-                            final Bundle bundle = (Bundle) bundles.next();
-                            if (weavingServices.get(bundle) != null) {
+                        while (bundleEntries.hasNext()) {
+                            final Entry entry = (Entry) bundleEntries.next();
+                            final Bundle bundle = (Bundle) entry.getKey();
+                            if (entry.getValue() != null) {
+                                bundleEntries.remove();
                                 supplementerRegistry
                                         .updateInstalledBundle(bundle);
                                 if (Debug.DEBUG_WEAVE)
@@ -209,7 +214,9 @@ public class AspectJAdaptorFactory {
                         (ClassLoader) loader, bundle, state, bundleDescription,
                         supplementerRegistry);
             }
-            weavingServices.put(bundle, weavingService);
+            synchronized (weavingServices) {
+                weavingServices.put(bundle, weavingService);
+            }
         }
         if (Debug.DEBUG_WEAVE)
             Debug
