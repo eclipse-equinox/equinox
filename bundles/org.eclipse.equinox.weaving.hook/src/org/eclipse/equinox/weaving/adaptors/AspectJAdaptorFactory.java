@@ -13,7 +13,12 @@
 
 package org.eclipse.equinox.weaving.adaptors;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.IWeavingService;
@@ -34,6 +39,11 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class AspectJAdaptorFactory {
 
+    private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
+            .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
+                    "org.eclipse.equinox.caching",
+                    "org.eclipse.equinox.caching.j9" });
+
     private BundleContext bundleContext;
 
     private ServiceTracker cachingServiceTracker;
@@ -43,6 +53,12 @@ public class AspectJAdaptorFactory {
     private SupplementerRegistry supplementerRegistry;
 
     private ServiceListener weavingServiceListener;
+
+    /**
+     * Bundle -> Local weaving service
+     */
+    private final Map weavingServices = Collections
+            .synchronizedMap(new HashMap());
 
     private ServiceTracker weavingServiceTracker;
 
@@ -97,17 +113,36 @@ public class AspectJAdaptorFactory {
         weavingServiceListener = new ServiceListener() {
 
             public void serviceChanged(final ServiceEvent event) {
-                if (event.getType() != ServiceEvent.MODIFIED) {
-                    final Iterator supplementedBundlesIterator = supplementerRegistry
-                            .getSupplementedBundles().iterator();
-                    while (supplementedBundlesIterator.hasNext()) {
-                        final Bundle supplementedBundle = (Bundle) supplementedBundlesIterator
-                                .next();
-                        supplementerRegistry
-                                .updateInstalledBundle(supplementedBundle);
-                        if (Debug.DEBUG_WEAVE)
-                            Debug.println("> Updated supplemented bundle "
-                                    + supplementedBundle.getSymbolicName());
+                if (event.getType() == ServiceEvent.REGISTERED) {
+                    final Iterator bundles = weavingServices.keySet()
+                            .iterator();
+                    synchronized (weavingServices) {
+                        while (bundles.hasNext()) {
+                            final Bundle bundle = (Bundle) bundles.next();
+                            if (weavingServices.get(bundle) == null) {
+                                supplementerRegistry
+                                        .updateInstalledBundle(bundle);
+                                if (Debug.DEBUG_WEAVE)
+                                    Debug.println("> Updated bundle "
+                                            + bundle.getSymbolicName());
+                            }
+                        }
+                    }
+                }
+                if (event.getType() == ServiceEvent.UNREGISTERING) {
+                    final Iterator bundles = weavingServices.keySet()
+                            .iterator();
+                    synchronized (weavingServices) {
+                        while (bundles.hasNext()) {
+                            final Bundle bundle = (Bundle) bundles.next();
+                            if (weavingServices.get(bundle) != null) {
+                                supplementerRegistry
+                                        .updateInstalledBundle(bundle);
+                                if (Debug.DEBUG_WEAVE)
+                                    Debug.println("> Updated bundle "
+                                            + bundle.getSymbolicName());
+                            }
+                        }
                     }
                 }
             }
@@ -159,19 +194,22 @@ public class AspectJAdaptorFactory {
                     .println("> AspectJAdaptorFactory.getWeavingService() baseClassLoader="
                             + loader);
 
+        final BaseData baseData = loader.getClasspathManager().getBaseData();
+        final State state = baseData.getAdaptor().getState();
+        final Bundle bundle = baseData.getBundle();
+        final BundleDescription bundleDescription = state.getBundle(bundle
+                .getBundleId());
+
         IWeavingService weavingService = null;
-        final IWeavingService singletonWeavingService = (IWeavingService) weavingServiceTracker
-                .getService();
-        if (singletonWeavingService != null) {
-            final BaseData baseData = loader.getClasspathManager()
-                    .getBaseData();
-            final State state = baseData.getAdaptor().getState();
-            final Bundle bundle = baseData.getBundle();
-            final BundleDescription bundleDescription = state.getBundle(bundle
-                    .getBundleId());
-            weavingService = singletonWeavingService.getInstance(
-                    (ClassLoader) loader, bundle, state, bundleDescription,
-                    supplementerRegistry);
+        if (!IGNORE_WEAVING_SERVICE_BUNDLES.contains(bundle.getSymbolicName())) {
+            final IWeavingService singletonWeavingService = (IWeavingService) weavingServiceTracker
+                    .getService();
+            if (singletonWeavingService != null) {
+                weavingService = singletonWeavingService.getInstance(
+                        (ClassLoader) loader, bundle, state, bundleDescription,
+                        supplementerRegistry);
+            }
+            weavingServices.put(bundle, weavingService);
         }
         if (Debug.DEBUG_WEAVE)
             Debug
