@@ -20,6 +20,8 @@ import org.osgi.framework.*;
 import org.osgi.framework.launch.SystemBundle;
 
 /**
+ * The System Bundle implementation for the Equinox Framework.
+ * 
  * @since 3.5
  */
 public class Equinox implements SystemBundle {
