@@ -26,11 +26,11 @@ import org.osgi.framework.*;
 public class ServiceUse {
 	/** ServiceFactory object if the service instance represents a factory,
 	 null otherwise */
-	private final ServiceFactory factory;
+	final ServiceFactory factory;
 	/** BundleContext associated with this service use */
-	private final BundleContextImpl context;
+	final BundleContextImpl context;
 	/** ServiceDescription of the registered service */
-	private final ServiceRegistrationImpl registration;
+	final ServiceRegistrationImpl registration;
 
 	/** Service object either registered or that returned by
 	 ServiceFactory.getService() */
@@ -124,8 +124,8 @@ public class ServiceUse {
 			}
 			// allow the adaptor to handle this unexpected error
 			context.framework.adaptor.handleRuntimeError(t);
-			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), t); //$NON-NLS-1$ 
-			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, se);
 			return null;
 		}
 
@@ -134,8 +134,8 @@ public class ServiceUse {
 				Debug.println(factory + ".getService() returned null."); //$NON-NLS-1$
 			}
 
-			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()));
-			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()), ServiceException.FACTORY_ERROR);
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, se);
 			return null;
 		}
 
@@ -145,7 +145,9 @@ public class ServiceUse {
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 				Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
 			}
-			throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION, factory.getClass().getName(), invalidService));
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_NOT_INSTANCEOF_CLASS_EXCEPTION, factory.getClass().getName(), invalidService), ServiceException.FACTORY_ERROR);
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, se);
+			return null;
 		}
 
 		this.cachedService = service;
@@ -216,8 +218,8 @@ public class ServiceUse {
 				Debug.printStackTrace(t);
 			}
 
-			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
-			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, se);
 		}
 
 		return true;
@@ -257,8 +259,8 @@ public class ServiceUse {
 				Debug.printStackTrace(t);
 			}
 
-			BundleException be = new BundleException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), t); //$NON-NLS-1$ 
-			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, be);
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "ungetService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
+			context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.context.bundle, se);
 		}
 	}
 }
