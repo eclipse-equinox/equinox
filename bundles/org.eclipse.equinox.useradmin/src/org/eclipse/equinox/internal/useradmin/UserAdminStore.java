@@ -27,6 +27,7 @@ public class UserAdminStore {
 	static protected final String propertiesNode = "properties"; //$NON-NLS-1$
 	static protected final String credentialsNode = "credentials"; //$NON-NLS-1$
 	static protected final String membersNode = "members"; //$NON-NLS-1$
+	static private final String typesNode = "types"; //$NON-NLS-1$
 	static protected final String basicString = "basic"; //$NON-NLS-1$
 	static protected final String requiredString = "required"; //$NON-NLS-1$
 	static protected final String typeString = "type"; //$NON-NLS-1$
@@ -99,6 +100,8 @@ public class UserAdminStore {
 				public Object run() throws BackingStoreException {
 					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
 					propertyNode.clear();
+					if (propertyNode.nodeExists(typesNode))
+						propertyNode.node(typesNode).removeNode();
 					propertyNode.flush();
 					return (null);
 				}
@@ -114,11 +117,14 @@ public class UserAdminStore {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws BackingStoreException {
 					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
+					Preferences propertyTypesNode = propertyNode.node(typesNode);
 					if (value instanceof String) {
 						propertyNode.put(key, (String) value);
+						propertyTypesNode.putBoolean(key, true);
 					} else //must be a byte array, then
 					{
 						propertyNode.putByteArray(key, (byte[]) value);
+						propertyTypesNode.putBoolean(key, true);
 					}
 					propertyNode.flush();
 					return (null);
@@ -136,6 +142,8 @@ public class UserAdminStore {
 				public Object run() throws BackingStoreException {
 					Preferences propertyNode = rootNode.node(role.getName() + "/" + propertiesNode); //$NON-NLS-1$
 					propertyNode.remove(key);
+					if (propertyNode.nodeExists(typesNode))
+						propertyNode.node(typesNode).remove(key);
 					propertyNode.flush();
 					return (null);
 				}
@@ -152,6 +160,8 @@ public class UserAdminStore {
 				public Object run() throws BackingStoreException {
 					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
 					credentialNode.clear();
+					if (credentialNode.nodeExists(typesNode))
+						credentialNode.node(typesNode).removeNode();
 					credentialNode.flush();
 					return (null);
 				}
@@ -168,11 +178,14 @@ public class UserAdminStore {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws BackingStoreException {
 					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
+					Preferences credentialTypesNode = credentialNode.node(typesNode);
 					if (value instanceof String) {
 						credentialNode.put(key, (String) value);
+						credentialTypesNode.putBoolean(key, true);
 					} else //assume it is a byte array
 					{
 						credentialNode.putByteArray(key, (byte[]) value);
+						credentialTypesNode.putBoolean(key, false);
 					}
 					credentialNode.flush();
 					return (null);
@@ -191,6 +204,8 @@ public class UserAdminStore {
 				public Object run() throws BackingStoreException {
 					Preferences credentialNode = rootNode.node(role.getName() + "/" + credentialsNode); //$NON-NLS-1$
 					credentialNode.remove(key);
+					if (credentialNode.nodeExists(typesNode))
+						credentialNode.node(typesNode).remove(key);
 					credentialNode.flush();
 					return (null);
 				}
@@ -284,10 +299,12 @@ public class UserAdminStore {
 		Object value;
 
 		//load properties
+		Preferences propsTypesNode = propsNode.node(typesNode);
 		for (int i = 0; i < keys.length; i++) {
-			value = propsNode.getByteArray(keys[i], null);
-			if (value == null)
+			if (propsTypesNode.getBoolean(keys[i], true))
 				value = propsNode.get(keys[i], null);
+			else
+				value = propsNode.getByteArray(keys[i], null);
 			properties.put(keys[i], value, false);
 		}
 
@@ -295,12 +312,14 @@ public class UserAdminStore {
 		if (type == org.osgi.service.useradmin.Role.USER || type == org.osgi.service.useradmin.Role.GROUP) {
 			Object credValue;
 			Preferences credNode = node.node(credentialsNode);
+			Preferences credTypesNode = credNode.node(UserAdminStore.typesNode);
 			keys = credNode.keys();
 			UserAdminHashtable credentials = (UserAdminHashtable) ((User) role).getCredentials();
 			for (int i = 0; i < keys.length; i++) {
-				credValue = credNode.getByteArray(keys[i], null);
-				if (credValue == null)
+				if (credTypesNode.getBoolean(keys[i], true))
 					credValue = credNode.get(keys[i], null);
+				else
+					credValue = credNode.getByteArray(keys[i], null);
 				credentials.put(keys[i], credValue, false);
 			}
 		}
