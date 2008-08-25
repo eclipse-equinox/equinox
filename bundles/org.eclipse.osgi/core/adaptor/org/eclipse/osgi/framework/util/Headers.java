@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
 
 package org.eclipse.osgi.framework.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.util.ManifestElement;
@@ -244,7 +245,7 @@ public class Headers extends Dictionary implements Map {
 		try {
 			ManifestElement.parseBundleManifest(in, headers);
 		} catch (IOException e) {
-			throw new BundleException(Msg.MANIFEST_IOEXCEPTION, e);
+			throw new BundleException(Msg.MANIFEST_IOEXCEPTION, BundleException.MANIFEST_ERROR, e);
 		}
 		headers.setReadOnly();
 		return headers;

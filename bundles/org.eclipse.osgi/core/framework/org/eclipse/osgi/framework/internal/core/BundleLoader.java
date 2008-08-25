@@ -347,7 +347,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (classpath == null) {
 			// no classpath
 			classpath = new String[0];
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH));
+			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH, BundleException.MANIFEST_ERROR));
 		}
 		BundleClassLoader bcl = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 		parent = getParentPrivileged(bcl);

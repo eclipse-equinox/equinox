@@ -238,7 +238,7 @@ public class EquinoxSystemBundle implements SystemBundle {
 	}
 
 	public void uninstall() throws BundleException {
-		throw new BundleException(Msg.BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION);
+		throw new BundleException(Msg.BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION, BundleException.INVALID_OPERATION);
 	}
 
 	public void update() throws BundleException {

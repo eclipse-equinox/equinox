@@ -30,4 +30,6 @@ Bundle-NativeCode:
  libs/test3/nativecode.txt;
   osversion="0.0.1";
   language="en";
-  selection-filter="(nativecodetest=3)"
+  selection-filter="(nativecodetest=3)",
+ libs/test4/nativecode.txt;
+  selection-filter="(nativecodetest=4)"

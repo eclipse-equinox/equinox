@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: bundle14
+Bundle-SymbolicName: bundle14
+Import-package: a; attr=value1, a; attr=value2

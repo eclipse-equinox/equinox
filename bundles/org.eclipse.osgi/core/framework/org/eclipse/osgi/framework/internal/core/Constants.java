@@ -137,7 +137,6 @@ public class Constants implements org.osgi.framework.Constants {
 	/** Properties defaults */
 	public static final String DEFAULT_STARTLEVEL = "1"; //$NON-NLS-1$
 
-	public static String ECLIPSE_EE_INSTALL_VERIFY = "eclipse.ee.install.verify"; //$NON-NLS-1$
 	public static String OSGI_COMPATIBILITY_BOOTDELEGATION = "osgi.compatibility.bootdelegation"; //$NON-NLS-1$
 
 	/** Eclipse-SystemBundle header */

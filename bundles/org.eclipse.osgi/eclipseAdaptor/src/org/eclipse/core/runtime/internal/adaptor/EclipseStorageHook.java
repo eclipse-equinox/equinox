@@ -408,7 +408,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			generatedManifest = converter.convertManifest(bundledata.getBundleFile().getBaseFile(), true, null, true, null);
 		} catch (PluginConversionException pce) {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CONVERTER_ERROR_CONVERTING, bundledata.getBundleFile().getBaseFile());
-			throw new BundleException(message, pce);
+			throw new BundleException(message, BundleException.MANIFEST_ERROR, pce);
 		}
 
 		//Now we know the symbolicId and the version of the bundle, we check to see if don't have a manifest for it already

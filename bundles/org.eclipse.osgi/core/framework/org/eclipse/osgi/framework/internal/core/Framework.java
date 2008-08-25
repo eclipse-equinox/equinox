@@ -699,7 +699,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		private final Bundle duplicate;
 
 		public DuplicateBundleException(String msg, Bundle duplicate) {
-			super(msg);
+			super(msg, BundleException.DUPLICATE_BUNDLE_ERROR);
 			this.duplicate = duplicate;
 		}
 
@@ -882,7 +882,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				 * recursed to install the same bundle!
 				 */
 				if (current.equals(reservation)) {
-					throw new BundleException(Msg.BUNDLE_INSTALL_RECURSION_EXCEPTION);
+					throw new BundleException(Msg.BUNDLE_INSTALL_RECURSION_EXCEPTION, BundleException.STATECHANGE_ERROR);
 				}
 				try {
 					/* wait for the reservation to be released */
@@ -939,7 +939,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 					final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0;
 					// must check for AllPermission before allow a bundle extension to be installed
 					if (extension && !bundle.hasPermission(new AllPermission()))
-						throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
+						throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, BundleException.SECURITY_ERROR, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
 					try {
 						AccessController.doPrivileged(new PrivilegedExceptionAction() {
 							public Object run() throws Exception {

@@ -18,6 +18,7 @@ public class BundleTests {
 		TestSuite suite = new TestSuite(BundleTests.class.getName());
 		suite.addTest(SystemBundleTests.suite());
 		suite.addTest(ServiceRegistryBundleTests.suite());
+		suite.addTest(BundleExceptionTests.suite());
 		suite.addTest(SubstituteExportsBundleTests.suite());
 		suite.addTest(PackageAdminBundleTests.suite());
 		suite.addTest(PlatformAdminBundleTests.suite());

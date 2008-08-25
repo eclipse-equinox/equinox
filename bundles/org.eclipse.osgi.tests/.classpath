@@ -74,6 +74,10 @@
 	<classpathentry kind="src" output="bundle_tests/substitutes.n" path="bundles_src/substitutes.n"/>
 	<classpathentry kind="src" output="bundle_tests/substitutes.p" path="bundles_src/substitutes.p"/>
 	<classpathentry kind="src" output="bundle_tests/substitutes.q" path="bundles_src/substitutes.q"/>
+	<classpathentry kind="src" output="bundle_tests/activator.error1" path="bundles_src/activator.error1"/>
+	<classpathentry kind="src" output="bundle_tests/activator.error2" path="bundles_src/activator.error2"/>
+	<classpathentry kind="src" output="bundle_tests/activator.error3" path="bundles_src/activator.error3"/>
+	<classpathentry kind="src" output="bundle_tests/activator.error4" path="bundles_src/activator.error4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

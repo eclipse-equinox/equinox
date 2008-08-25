@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -356,7 +356,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			osgiA.start(Bundle.START_TRANSIENT);
 			assertFalse("Bundle is started!!", osgiA.getState() == Bundle.ACTIVE); //$NON-NLS-1$
 		} catch (BundleException e) {
-			// expected
+			assertEquals("Expected invalid operation", BundleException.INVALID_OPERATION, e.getType()); //$NON-NLS-1$
 		}
 		expectedEvents = new Object[0];
 		actualEvents = simpleResults.getResults(0);

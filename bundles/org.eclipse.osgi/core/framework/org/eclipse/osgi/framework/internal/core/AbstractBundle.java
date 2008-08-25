@@ -145,7 +145,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.printStackTrace(t);
 				}
-				throw new BundleException(NLS.bind(Msg.BUNDLE_INVALID_ACTIVATOR_EXCEPTION, activatorClassName, bundledata.getSymbolicName()), t);
+				throw new BundleException(NLS.bind(Msg.BUNDLE_INVALID_ACTIVATOR_EXCEPTION, activatorClassName, bundledata.getSymbolicName()), BundleException.ACTIVATOR_ERROR, t);
 			}
 		}
 		return (null);
@@ -733,7 +733,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				final boolean extension = (bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0;
 				// must check for AllPermission before allow a bundle extension to be updated
 				if (extension && !hasPermission(new AllPermission()))
-					throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
+					throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, BundleException.SECURITY_ERROR, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction() {
 						public Object run() throws Exception {
@@ -1143,7 +1143,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 					return;
 				}
 				if (doubleFault || (stateChanging == Thread.currentThread())) {
-					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getBundleData().getLocation(), stateChanging.getName()), new BundleStatusException(null, StatusException.CODE_WARNING, stateChanging));
+					throw new BundleException(NLS.bind(Msg.BUNDLE_STATE_CHANGE_EXCEPTION, getBundleData().getLocation(), stateChanging.getName()), BundleException.STATECHANGE_ERROR, new BundleStatusException(null, StatusException.CODE_WARNING, stateChanging));
 				}
 				try {
 					long start = 0;
@@ -1361,27 +1361,30 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	abstract protected BundleContextImpl getContext();
 
-	public String getResolutionFailureMessage() {
+	public BundleException getResolutionFailureException() {
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null)
-			return Msg.BUNDLE_UNRESOLVED_EXCEPTION;
+			return new BundleException(Msg.BUNDLE_UNRESOLVED_EXCEPTION, BundleException.RESOLVE_ERROR);
 		// just a sanity check - this would be an inconsistency between the framework and the state
 		if (bundleDescription.isResolved())
-			throw new IllegalStateException(Msg.BUNDLE_UNRESOLVED_STATE_CONFLICT);
-		return NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, getResolverError(bundleDescription));
+			return new BundleException(Msg.BUNDLE_UNRESOLVED_STATE_CONFLICT, BundleException.RESOLVE_ERROR);
+		return getResolverError(bundleDescription);
 	}
 
-	private String getResolverError(BundleDescription bundleDesc) {
+	private BundleException getResolverError(BundleDescription bundleDesc) {
 		ResolverError[] errors = framework.adaptor.getState().getResolverErrors(bundleDesc);
 		if (errors == null || errors.length == 0)
-			return Msg.BUNDLE_UNRESOLVED_EXCEPTION;
+			return new BundleException(Msg.BUNDLE_UNRESOLVED_EXCEPTION, BundleException.RESOLVE_ERROR);
 		StringBuffer message = new StringBuffer();
+		int errorType = BundleException.RESOLVE_ERROR;
 		for (int i = 0; i < errors.length; i++) {
+			if ((errors[i].getType() & ResolverError.INVALID_NATIVECODE_PATHS) != 0)
+				errorType = BundleException.NATIVECODE_ERROR;
 			message.append(errors[i].toString());
 			if (i < errors.length - 1)
 				message.append(", "); //$NON-NLS-1$
 		}
-		return message.toString();
+		return new BundleException(NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, message.toString()), errorType);
 	}
 
 	public int getKeyHashCode() {

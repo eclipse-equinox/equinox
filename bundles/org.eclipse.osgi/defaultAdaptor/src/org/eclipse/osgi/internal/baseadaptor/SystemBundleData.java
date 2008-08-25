@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,8 @@ package org.eclipse.osgi.internal.baseadaptor;
 import java.io.*;
 import java.net.URL;
 import java.util.Enumeration;
-import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
@@ -82,7 +83,7 @@ public class SystemBundleData extends BaseData {
 				Debug.println("Unable to find system bundle manifest " + Constants.OSGI_BUNDLE_MANIFEST); //$NON-NLS-1$
 
 		if (in == null)
-			throw new BundleException(AdaptorMsg.SYSTEMBUNDLE_MISSING_MANIFEST);
+			throw new BundleException(AdaptorMsg.SYSTEMBUNDLE_MISSING_MANIFEST, BundleException.MANIFEST_ERROR);
 		return Headers.parseManifest(in);
 	}
 

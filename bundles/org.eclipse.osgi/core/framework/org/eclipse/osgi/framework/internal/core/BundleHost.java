@@ -300,7 +300,7 @@ public class BundleHost extends AbstractBundle {
 
 		if (state == INSTALLED) {
 			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
-				throw new BundleException(getResolutionFailureMessage());
+				throw getResolutionFailureException();
 		}
 
 		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
@@ -308,7 +308,7 @@ public class BundleHost extends AbstractBundle {
 				// throw exception if this is a transient start
 				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
 				// Use a StatusException to indicate to the lazy starter that this should result in a warning
-				throw new BundleException(msg, new BundleStatusException(msg, StatusException.CODE_WARNING, this));
+				throw new BundleException(msg, BundleException.INVALID_OPERATION, new BundleStatusException(msg, StatusException.CODE_WARNING, this));
 			}
 			return;
 		}
@@ -379,7 +379,7 @@ public class BundleHost extends AbstractBundle {
 		if (state == UNINSTALLED) {
 			context.close();
 			context = null;
-			throw new BundleException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
+			throw new BundleException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()), BundleException.STATECHANGE_ERROR);
 		}
 	}
 
@@ -570,7 +570,7 @@ public class BundleHost extends AbstractBundle {
 					// then we cannot attach a fragment into the middle
 					// of the fragment chain.
 					if (loader != null) {
-						throw new BundleException(NLS.bind(Msg.BUNDLE_LOADER_ATTACHMENT_ERROR, fragments[i].getSymbolicName(), getSymbolicName()));
+						throw new BundleException(NLS.bind(Msg.BUNDLE_LOADER_ATTACHMENT_ERROR, fragments[i].getSymbolicName(), getSymbolicName()), BundleException.INVALID_OPERATION);
 					}
 					newFragments[i] = fragment;
 					inserted = true;

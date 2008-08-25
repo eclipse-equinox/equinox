@@ -331,7 +331,7 @@ public class ManifestElement {
 		parseloop: while (true) {
 			String next = tokenizer.getString(";,"); //$NON-NLS-1$
 			if (next == null)
-				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 			ArrayList headerValues = new ArrayList();
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
@@ -344,14 +344,14 @@ public class ManifestElement {
 			while (c == ';') {
 				next = tokenizer.getString(";,=:"); //$NON-NLS-1$
 				if (next == null)
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 				c = tokenizer.getChar();
 				while (c == ':') { // may not really be a :=
 					c = tokenizer.getChar();
 					if (c != '=') {
 						String restOfNext = tokenizer.getToken(";,=:"); //$NON-NLS-1$
 						if (restOfNext == null)
-							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 						next += ":" + c + restOfNext; //$NON-NLS-1$
 						c = tokenizer.getChar();
 					} else
@@ -376,7 +376,7 @@ public class ManifestElement {
 					if (c != '=') {
 						String restOfNext = tokenizer.getToken("=:"); //$NON-NLS-1$
 						if (restOfNext == null)
-							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+							throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 						next += ":" + c + restOfNext; //$NON-NLS-1$
 						c = tokenizer.getChar();
 					} else
@@ -384,7 +384,7 @@ public class ManifestElement {
 				}
 				String val = tokenizer.getString(";,"); //$NON-NLS-1$
 				if (val == null)
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 
 				if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
 					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
@@ -395,13 +395,13 @@ public class ManifestElement {
 						manifestElement.addAttribute(next, val);
 					directive = false;
 				} catch (Exception e) {
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 				}
 				c = tokenizer.getChar();
 				if (c == ';') /* more */{
 					next = tokenizer.getToken("=:"); //$NON-NLS-1$
 					if (next == null)
-						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 					c = tokenizer.getChar();
 				}
 			}
@@ -412,7 +412,7 @@ public class ManifestElement {
 				continue parseloop;
 			if (c == '\0') /* end of value */
 				break parseloop;
-			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value));
+			throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 		}
 		int size = headerElements.size();
 		if (size == 0)
@@ -506,7 +506,7 @@ public class ManifestElement {
 				{
 					if (firstLine) /* if no previous line */
 					{
-						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_SPACE, line));
+						throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_SPACE, line), BundleException.MANIFEST_ERROR);
 					}
 					value.append(line.substring(1));
 					continue;
@@ -520,7 +520,7 @@ public class ManifestElement {
 				int colon = line.indexOf(':');
 				if (colon == -1) /* no colon */
 				{
-					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_LINE_NOCOLON, line));
+					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_LINE_NOCOLON, line), BundleException.MANIFEST_ERROR);
 				}
 				header = line.substring(0, colon).trim();
 				value.append(line.substring(colon + 1));

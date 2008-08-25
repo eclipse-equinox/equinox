@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name:  activator.error1
+Bundle-SymbolicName: activator.error1
+Bundle-Version: 1.0.0
+Bundle-Activator: activator.error1.Activator
+Import-Package: org.osgi.framework

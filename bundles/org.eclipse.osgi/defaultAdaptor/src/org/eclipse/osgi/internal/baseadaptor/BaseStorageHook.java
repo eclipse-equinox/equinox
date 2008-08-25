@@ -225,13 +225,13 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 				String path = substituteVars(nativePaths[i].substring(EXTERNAL_LIB_PREFIX.length()));
 				File nativeFile = new File(path);
 				if (!nativeFile.exists())
-					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()));
+					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()), BundleException.NATIVECODE_ERROR);
 				continue; // continue to next path
 			}
 			// ensure the file exists in the bundle; it will get extracted later on demand
 			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(nativePaths[i]);
 			if (nativeEntry == null)
-				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativePaths[i]));
+				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativePaths[i]), BundleException.NATIVECODE_ERROR);
 		}
 	}
 

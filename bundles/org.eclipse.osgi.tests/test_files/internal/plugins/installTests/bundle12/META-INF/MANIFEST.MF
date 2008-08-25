@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: bundle12
+Bundle-SymbolicName: bundle12
+Export-package: a; test:=value2; test:=value1 

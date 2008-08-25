@@ -220,7 +220,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param options
 	 */
 	protected void startWorker(int options) throws BundleException {
-		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this));
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_START, this), BundleException.INVALID_OPERATION);
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @param options
 	 */
 	protected void stopWorker(int options) throws BundleException {
-		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this));
+		throw new BundleException(NLS.bind(Msg.BUNDLE_FRAGMENT_STOP, this), BundleException.INVALID_OPERATION);
 	}
 
 	/**

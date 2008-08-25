@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: bundle15
+Bundle-SymbolicName: bundle15
+Import-package: willnotresolve

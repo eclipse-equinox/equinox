@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.io.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 public class NativeCodeBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -106,6 +107,19 @@ public class NativeCodeBundleTests extends AbstractBundleTests {
 
 		assertTrue("1.0", results.length == 1);
 		assertNull("1.1", results[0]);
+	}
+
+	public void testNativeCode08() throws Exception {
+		System.setProperty("nativecodetest", "4");
+		setPlatformProperties();
+		Bundle nativetestC = installer.installBundle("nativetest.c");
+		try {
+			nativetestC.start();
+			fail("Should not be able to start bundle with missing native code path");
+		} catch (BundleException e) {
+			// expected
+			assertEquals("Wrong exception type", BundleException.NATIVECODE_ERROR, e.getType());
+		}
 	}
 
 	private String getContent(String file) throws IOException {

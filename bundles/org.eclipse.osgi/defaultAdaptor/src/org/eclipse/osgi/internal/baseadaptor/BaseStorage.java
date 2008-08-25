@@ -298,7 +298,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (result == null)
 			result = AdaptorUtil.loadManifestFrom(bundleData);
 		if (result == null)
-			throw new BundleException(NLS.bind(AdaptorMsg.MANIFEST_NOT_FOUND_EXCEPTION, Constants.OSGI_BUNDLE_MANIFEST, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.MANIFEST_NOT_FOUND_EXCEPTION, Constants.OSGI_BUNDLE_MANIFEST, bundleData.getLocation()), BundleException.MANIFEST_ERROR);
 		return result;
 	}
 
@@ -942,11 +942,11 @@ public class BaseStorage implements SynchronousBundleListener {
 	private void validateExtension(BundleData bundleData) throws BundleException {
 		Dictionary extensionManifest = bundleData.getManifest();
 		if (extensionManifest.get(Constants.IMPORT_PACKAGE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_IMPORT_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_IMPORT_ERROR, bundleData.getLocation()), BundleException.MANIFEST_ERROR);
 		if (extensionManifest.get(Constants.REQUIRE_BUNDLE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_REQUIRE_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_REQUIRE_ERROR, bundleData.getLocation()), BundleException.MANIFEST_ERROR);
 		if (extensionManifest.get(Constants.BUNDLE_NATIVECODE) != null)
-			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_NATIVECODE_ERROR, bundleData.getLocation()));
+			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_NATIVECODE_ERROR, bundleData.getLocation()), BundleException.MANIFEST_ERROR);
 	}
 
 	/**
@@ -957,13 +957,13 @@ public class BaseStorage implements SynchronousBundleListener {
 	 */
 	protected void processFrameworkExtension(BaseData bundleData, byte type) throws BundleException {
 		if (addFwkURLMethod == null)
-			throw new BundleException("Framework extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+			throw new BundleException("Framework extensions are not supported.", BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException()); //$NON-NLS-1$
 		addExtensionContent(bundleData, type, getFwkClassLoader(), addFwkURLMethod);
 	}
 
 	protected void processExtExtension(BaseData bundleData, byte type) throws BundleException {
 		if (addExtURLMethod == null)
-			throw new BundleException("Extension classpath extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+			throw new BundleException("Extension classpath extensions are not supported.", BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException()); //$NON-NLS-1$
 		addExtensionContent(bundleData, type, getExtClassLoader(), addExtURLMethod);
 	}
 
@@ -1030,7 +1030,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	 * @throws BundleException on errors or if boot extensions are not supported
 	 */
 	protected void processBootExtension(BundleData bundleData, byte type) throws BundleException {
-		throw new BundleException("Boot classpath extensions are not supported.", new UnsupportedOperationException()); //$NON-NLS-1$
+		throw new BundleException("Boot classpath extensions are not supported.", BundleException.UNSUPPORTED_OPERATION, new UnsupportedOperationException()); //$NON-NLS-1$
 	}
 
 	private void initBundleStoreRoot() {
@@ -1120,21 +1120,8 @@ public class BaseStorage implements SynchronousBundleListener {
 				break;
 		}
 
-		if (newDescription != null) {
-			boolean verified = false;
-			try {
-				verifyEEandNativeCode(newDescription, bundleData, systemState);
-				validateNativeCodePaths(newDescription, (BaseData) bundleData);
-				verified = true;
-			} finally {
-				if (!verified) {
-					if (oldDescription != null)
-						systemState.updateBundle(oldDescription);
-					else
-						systemState.removeBundle(newDescription);
-				}
-			}
-		}
+		if (newDescription != null)
+			validateNativeCodePaths(newDescription, (BaseData) bundleData);
 	}
 
 	private void validateNativeCodePaths(BundleDescription newDescription, BaseData data) {
@@ -1150,49 +1137,6 @@ public class BaseStorage implements SynchronousBundleListener {
 				} catch (BundleException e) {
 					stateManager.getSystemState().setNativePathsInvalid(nativeCodeDescs[i], true);
 				}
-		}
-	}
-
-	private void verifyEEandNativeCode(BundleDescription newDescription, BundleData bundleData, State systemState) throws BundleException {
-		if (!Boolean.valueOf(FrameworkProperties.getProperty(Constants.ECLIPSE_EE_INSTALL_VERIFY, Boolean.TRUE.toString())).booleanValue() || newDescription == null)
-			return;
-		// do backwards compatibility for fail on install
-		// check EE
-		String[] ees = newDescription.getExecutionEnvironments();
-		if (ees.length > 0) {
-			String systemEE = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
-			if (systemEE != null && !systemEE.equals("")) { //$NON-NLS-1$
-				ManifestElement[] systemEEs = ManifestElement.parseHeader(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, systemEE);
-				boolean matchedEE = false;
-				for (int i = 0; i < systemEEs.length && !matchedEE; i++)
-					for (int j = 0; j < ees.length & !matchedEE; j++)
-						if (systemEEs[i].getValue().equals(ees[j]))
-							matchedEE = true;
-				if (!matchedEE) {
-					StringBuffer bundleEE = new StringBuffer(25);
-					for (int i = 0; i < ees.length; i++) {
-						if (i > 0)
-							bundleEE.append(","); //$NON-NLS-1$
-						bundleEE.append(ees[i]);
-					}
-					throw new BundleException("Cannot match Execution Environment: " + bundleEE.toString()); //$NON-NLS-1$
-				}
-			}
-		}
-		// check native code
-		NativeCodeSpecification nativeCode = newDescription.getNativeCodeSpecification();
-		if (nativeCode != null) {
-			systemState.setPlatformProperties(new Dictionary[] {FrameworkProperties.getProperties()});
-			NativeCodeDescription[] nativeCodeSuppliers = nativeCode.getPossibleSuppliers();
-			NativeCodeDescription highestRanked = null;
-			for (int i = 0; i < nativeCodeSuppliers.length; i++)
-				if (nativeCode.isSatisfiedBy(nativeCodeSuppliers[i]) && (highestRanked == null || highestRanked.compareTo(nativeCodeSuppliers[i]) < 0))
-					highestRanked = nativeCodeSuppliers[i];
-			if (highestRanked == null) {
-				if (!nativeCode.isOptional())
-					throw new BundleException("Unsatisfied Bundle-NativeCode: " + nativeCode.toString()); //$NON-NLS-1$
-			} else
-				bundleData.installNativeCode(highestRanked.getNativePaths());
 		}
 	}
 
