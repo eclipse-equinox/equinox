@@ -83,4 +83,16 @@
          </run>
       </application>
    </extension>
+   <extension
+         id="exitValueApp"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="1"
+            thread="any"
+            visible="true">
+         <run
+               class="org.eclipse.osgi.tests.appadmin.ExitValueApp">
+         </run>
+      </application>
+   </extension>
 </plugin>
