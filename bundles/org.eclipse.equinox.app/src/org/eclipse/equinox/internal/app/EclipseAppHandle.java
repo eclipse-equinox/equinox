@@ -343,18 +343,27 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	}
 
 	public synchronized Object waitForResult(int timeout) {
+		try {
+			return getExitValue(timeout);
+		} catch (ApplicationException e) {
+			// return null
+		} catch (InterruptedException e) {
+			// return null
+		}
+		return null;
+	}
+
+	public synchronized Object getExitValue(long timeout) throws ApplicationException, InterruptedException {
 		if (handleRegistration == null && application == null)
 			return result;
 		long startTime = System.currentTimeMillis();
 		long delay = timeout;
 		while (!setResult && delay > 0) {
-			try {
-				wait(delay); // only wait for the specified amount of time
-			} catch (InterruptedException e) {
-				// Do nothing; return quickly
-			}
+			wait(delay); // only wait for the specified amount of time
 			delay -= (System.currentTimeMillis() - startTime);
 		}
+		if (result == null)
+			throw new ApplicationException(ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE);
 		return result;
 	}
 }

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationException.java,v 1.10 2006/07/10 11:49:12 hargrave Exp $
+ * $Date: 2008-08-05 13:10:45 -0400 (Tue, 05 Aug 2008) $
  * 
- * Copyright (c) OSGi Alliance (2005, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,10 @@ package org.osgi.service.application;
  *       container during launch.</li>
  * <li> {@link #APPLICATION_SCHEDULING_FAILED} - The scheduling of an application
  *       failed.
+ * <li> {@link #APPLICATION_DUPLICATE_SCHEDULE_ID} -  The application scheduling failed 
+ *       because the specified identifier is already in use.
+ * <li> {@link #APPLICATION_EXITVALUE_NOT_AVAILABLE} - The exit value is not available 
+ *       for an application instance because the instance has not terminated.
  * </ul>
  * 
  */
@@ -74,11 +78,19 @@ public class ApplicationException extends Exception {
     public static final int APPLICATION_DUPLICATE_SCHEDULE_ID = 0x05;
 
 	/**
+	 * The exit value is not available for an application instance because the
+	 * instance has not terminated.
+	 * 
+	 * @since 1.1
+	 */
+    public static final int APPLICATION_EXITVALUE_NOT_AVAILABLE = 0x06;
+
+	/**
 	 * Creates an <code>ApplicationException</code> with the specified error code.
 	 * @param errorCode The code of the error 
 	 */
 	public ApplicationException(int errorCode) {
-		this(errorCode,(Throwable) null);
+		this(errorCode, (Throwable) null);
 	}
 	
 	/**
@@ -99,7 +111,7 @@ public class ApplicationException extends Exception {
 	 * @param message The associated message
 	 */
 	public ApplicationException(int errorCode, String message) {
-		this(errorCode, message,null);
+		this(errorCode, message, null);
 	}
 
 	/**
@@ -127,7 +139,7 @@ public class ApplicationException extends Exception {
 	}
 
 	/**
-	 * Returns the error code associcated with this exception.
+	 * Returns the error code associated with this exception.
 	 * @return The error code of this exception.
 	 */
 	public int getErrorCode() {

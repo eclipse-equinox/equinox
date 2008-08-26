@@ -1,7 +1,7 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationAdminPermission.java,v 1.34 2006/07/12 21:22:11 hargrave Exp $
+ * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
  * 
- * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,9 @@ public class ApplicationAdminPermission extends Permission {
   	private String pattern;
   	private ApplicationDescriptor appDesc;
   	
+  	/**
+  	 * @param pattern
+  	 */
   	public SignerWrapper(String pattern) {
   		this.pattern = pattern;    			
   	}

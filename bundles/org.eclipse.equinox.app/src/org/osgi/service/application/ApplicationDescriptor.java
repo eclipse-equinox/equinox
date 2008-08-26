@@ -1,5 +1,5 @@
 /*
- * $Header: /cvshome/build/org.osgi.service.application/src/org/osgi/service/application/ApplicationDescriptor.java,v 1.61 2006/07/10 12:02:31 hargrave Exp $
+ * $Date: 2007-11-12 04:35:34 -0500 (Mon, 12 Nov 2007) $
  * 
  * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
@@ -248,8 +248,9 @@ public abstract class ApplicationDescriptor {
 	 * The following steps are made:
 	 * <UL>
 	 * <LI>Check for the appropriate permission.
-	 * <LI>Check the locking state of the application. If locked then return
-	 * null otherwise continue.
+	 * <LI>Check the locking state of the application. If locked then throw
+	 *     an {@link ApplicationException} with the reason code 
+	 *     {@link ApplicationException#APPLICATION_LOCKED}.
 	 * <LI>Calls the <code>launchSpecific()</code> method to create and start an application
 	 * instance.
 	 * <LI>Returns the <code>ApplicationHandle</code> returned by the 
@@ -275,7 +276,7 @@ public abstract class ApplicationDescriptor {
 	 *       <code>org.osgi.</code>.</li>
 	 * </ul>
 	 * <P>
-	 * The method is synchonous, it return only when the application instance was
+	 * The method is synchronous, it return only when the application instance was
 	 * successfully started or the attempt to start it failed.
 	 * <P>
 	 * This method never returns <code>null</code>. If launching an application fails,
