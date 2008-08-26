@@ -180,7 +180,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		return true;
 	}
 
-	synchronized void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
+	// This method is protected to enable a work around to bug 245251
+	synchronized protected void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
 		try {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
