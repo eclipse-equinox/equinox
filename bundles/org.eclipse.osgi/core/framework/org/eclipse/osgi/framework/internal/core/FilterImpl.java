@@ -15,13 +15,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Iterator;
-
+import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -159,7 +156,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * <code>false</code> otherwise.
 	 */
 	public boolean match(org.osgi.framework.ServiceReference reference) {
-		return match0(((ServiceReferenceImpl) reference).registration.getProperties());
+		return match0(((ServiceReferenceImpl) reference).getRegistration().getProperties());
 	}
 
 	/**
@@ -373,20 +370,6 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		this.operation = operation;
 		this.attr = attr;
 		this.value = value;
-	}
-
-	/**
-	 * Filter using a service's properties.
-	 * The Filter is executed using the referenced service's
-	 * properties.
-	 *
-	 * @param reference A reference to the service whose
-	 * properties are used in the match.
-	 * @return If the service's properties match the filter,
-	 * return <code>true</code>. Otherwise, return <code>false</code>.
-	 */
-	protected boolean match(ServiceReferenceImpl reference) {
-		return match0(reference.registration.getProperties());
 	}
 
 	/**

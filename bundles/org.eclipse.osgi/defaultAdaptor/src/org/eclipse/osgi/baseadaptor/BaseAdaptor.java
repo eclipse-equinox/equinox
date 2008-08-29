@@ -20,8 +20,8 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.*;
@@ -78,7 +78,6 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	}
 
 	private EventPublisher eventPublisher;
-	private ServiceRegistry serviceRegistry;
 	private boolean stopping;
 	private HookRegistry hookRegistry;
 	private FrameworkLog log;
@@ -109,8 +108,6 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 */
 	public void initialize(EventPublisher publisher) {
 		this.eventPublisher = publisher;
-		serviceRegistry = new ServiceRegistryImpl();
-		((ServiceRegistryImpl) serviceRegistry).initialize();
 		// set the adaptor for the adaptor hooks
 		AdaptorHook[] adaptorHooks = getHookRegistry().getAdaptorHooks();
 		for (int i = 0; i < adaptorHooks.length; i++)
@@ -236,13 +233,6 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 */
 	public PermissionStorage getPermissionStorage() throws IOException {
 		return storage.getPermissionStorage();
-	}
-
-	/**
-	 * @see FrameworkAdaptor#getServiceRegistry()
-	 */
-	public ServiceRegistry getServiceRegistry() {
-		return serviceRegistry;
 	}
 
 	/**

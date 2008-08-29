@@ -1044,7 +1044,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 							intp.print(getMessage.invoke(logentry, null));
 							intp.print(" "); //$NON-NLS-1$
 
-							ServiceReferenceImpl svcref = (ServiceReferenceImpl) getServiceReference.invoke(logentry, null);
+							ServiceReference svcref = (ServiceReference) getServiceReference.invoke(logentry, null);
 							if (svcref != null) {
 								intp.print("{"); //$NON-NLS-1$
 								intp.print(Constants.SERVICE_ID);

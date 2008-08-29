@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.internal.profile.Profile;
+import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -31,8 +32,6 @@ import org.osgi.framework.*;
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
-	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
-	public static final boolean scopeEvents = Boolean.valueOf(FrameworkProperties.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
 	/** true if the bundle context is still valid */
 	private volatile boolean valid;
 
@@ -45,7 +44,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	/** Internal framework object. */
 	final Framework framework;
 
-	/** Services that bundle has used. Key is ServiceRegistrationImpl,
+	/** Services that bundle is using. Key is ServiceRegistrationImpl,
 	 Value is ServiceUse */
 	/* @GuardedBy("contextLock") */
 	private HashMap/*<ServiceRegistrationImpl, ServiceUse>*/servicesInUse;
@@ -120,50 +119,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			}
 		}
 
+		final ServiceRegistry registry = framework.getServiceRegistry();
 		/* service's registered by the bundle, if any, are unregistered. */
-		ServiceReference[] publishedReferences = null;
-		synchronized (framework.serviceRegistry) {
-			publishedReferences = framework.serviceRegistry.lookupServiceReferences(this);
-		}
-
-		if (publishedReferences != null) {
-			for (int i = 0; i < publishedReferences.length; i++) {
-				try {
-					((ServiceReferenceImpl) publishedReferences[i]).registration.unregister();
-				} catch (IllegalStateException e) {
-					/* already unregistered */
-				}
-			}
-		}
+		registry.unregisterServices(this);
 
 		/* service's used by the bundle, if any, are released. */
-		int usedSize;
-		ServiceRegistrationImpl[] usedServices = null;
-		synchronized (contextLock) {
-			if (servicesInUse == null) {
-				return;
-			}
-			synchronized (servicesInUse) {
-				usedSize = servicesInUse.size();
-
-				if (usedSize > 0) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("Releasing services"); //$NON-NLS-1$
-					}
-
-					usedServices = new ServiceRegistrationImpl[usedSize];
-
-					Iterator regsIter = servicesInUse.keySet().iterator();
-					for (int i = 0; i < usedSize; i++) {
-						usedServices[i] = (ServiceRegistrationImpl) regsIter.next();
-					}
-				}
-			}
-		}
-
-		for (int i = 0; i < usedSize; i++) {
-			usedServices[i].releaseService(this);
-		}
+		registry.releaseServicesInUse(this);
 
 		synchronized (contextLock) {
 			servicesInUse = null;
@@ -192,10 +153,14 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @return The context bundle's Bundle object.
 	 */
-	public org.osgi.framework.Bundle getBundle() {
+	public Bundle getBundle() {
 		checkValid();
 
-		return (bundle);
+		return getBundleImpl();
+	}
+
+	public AbstractBundle getBundleImpl() {
+		return bundle;
 	}
 
 	/**
@@ -209,7 +174,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @param location The location identifier of the bundle to install.
 	 * @return The Bundle object of the installed bundle.
 	 */
-	public org.osgi.framework.Bundle installBundle(String location) throws BundleException {
+	public Bundle installBundle(String location) throws BundleException {
 		checkValid();
 		//note AdminPermission is checked after bundle is loaded
 		return framework.installBundle(location);
@@ -228,7 +193,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @param in The InputStream from which the bundle will be read.
 	 * @return The Bundle of the installed bundle.
 	 */
-	public org.osgi.framework.Bundle installBundle(String location, InputStream in) throws BundleException {
+	public Bundle installBundle(String location, InputStream in) throws BundleException {
 		checkValid();
 		//note AdminPermission is checked after bundle is loaded
 		return framework.installBundle(location, in);
@@ -241,7 +206,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return A Bundle object, or <code>null</code>
 	 * if the identifier doesn't match any installed bundle.
 	 */
-	public org.osgi.framework.Bundle getBundle(long id) {
+	public Bundle getBundle(long id) {
 		return (framework.getBundle(id));
 	}
 
@@ -265,7 +230,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @return An array of {@link AbstractBundle} objects, one
 	 * object per installed bundle.
 	 */
-	public org.osgi.framework.Bundle[] getBundles() {
+	public Bundle[] getBundles() {
 		return framework.getAllBundles();
 	}
 
@@ -308,7 +273,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
-		ServiceListener filteredListener = new FilteredServiceListener(filter, listener, this);
+		ServiceListener filteredListener = new FilteredServiceListener(this, listener, filter);
 
 		synchronized (framework.serviceEvent) {
 			checkValid();
@@ -516,8 +481,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * Register a service with multiple names.
 	 * This method registers the given service object with the given properties
 	 * under the given class names.
-	 * A {@link ServiceRegistrationImpl} object is returned.
-	 * The {@link ServiceRegistrationImpl} object is for the private use of the bundle
+	 * A {@link ServiceRegistration} object is returned.
+	 * The {@link ServiceRegistration} object is for the private use of the bundle
 	 * registering the service and should not be shared with other bundles.
 	 * The registering bundle is defined to be the context bundle.
 	 * See {@link #getBundle()} for a definition of context bundle.
@@ -540,7 +505,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * and may now be used by other bundles.
 	 * <li>A {@link ServiceEvent} of type {@link ServiceEvent#REGISTERED}
 	 * is synchronously sent.
-	 * <li>A {@link ServiceRegistrationImpl} object for this registration
+	 * <li>A {@link ServiceRegistration} object for this registration
 	 * is returned.
 	 * </ol>
 	 *
@@ -552,10 +517,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *        The keys in the properties object must all be Strings.
 	 *        Changes should not be made to this object after calling this method.
 	 *        To update the service's properties call the
-	 *        {@link ServiceRegistrationImpl#setProperties ServiceRegistration.setProperties}
+	 *        {@link ServiceRegistration#setProperties ServiceRegistration.setProperties}
 	 *        method.
 	 *        This parameter may be <code>null</code> if the service has no properties.
-	 * @return A {@link ServiceRegistrationImpl} object for use by the bundle
+	 * @return A {@link ServiceRegistration} object for use by the bundle
 	 *        registering the service to update the
 	 *        service's properties or to unregister the service.
 	 * @exception java.lang.IllegalArgumentException If one of the following is true:
@@ -570,101 +535,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * and the Java runtime environment supports permissions.
 	 * @exception java.lang.IllegalStateException
 	 * If the bundle context has stopped.
-	 * @see ServiceRegistrationImpl
+	 * @see ServiceRegistration
 	 * @see ServiceFactory
 	 */
-	public org.osgi.framework.ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
+	public ServiceRegistration registerService(String[] clazzes, Object service, Dictionary properties) {
 		checkValid();
 
-		if (service == null) {
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("Service object is null"); //$NON-NLS-1$
-			}
-
-			throw new IllegalArgumentException(Msg.SERVICE_ARGUMENT_NULL_EXCEPTION);
-		}
-
-		int size = clazzes.length;
-
-		if (size == 0) {
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("Classes array is empty"); //$NON-NLS-1$
-			}
-
-			throw new IllegalArgumentException(Msg.SERVICE_EMPTY_CLASS_LIST_EXCEPTION);
-		}
-
-		/* copy the array so that changes to the original will not affect us. */
-		String[] copy = new String[clazzes.length];
-		// doing this the hard way so we can intern the strings
-		for (int i = clazzes.length - 1; i >= 0; i--)
-			copy[i] = clazzes[i].intern();
-		clazzes = copy;
-
-		/* check for ServicePermissions. */
-		framework.checkRegisterServicePermission(clazzes);
-
-		if (!(service instanceof ServiceFactory)) {
-			String invalidService = checkServiceClass(clazzes, service);
-			if (invalidService != null) {
-				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println("Service object is not an instanceof " + invalidService); //$NON-NLS-1$
-				}
-				throw new IllegalArgumentException(NLS.bind(Msg.SERVICE_NOT_INSTANCEOF_CLASS_EXCEPTION, invalidService));
-			}
-		}
-
-		return (createServiceRegistration(clazzes, service, properties));
-	}
-
-	//Return the name of the class that is not satisfied by the service object 
-	static String checkServiceClass(final String[] clazzes, final Object serviceObject) {
-		ClassLoader cl = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return serviceObject.getClass().getClassLoader();
-			}
-		});
-		for (int i = 0; i < clazzes.length; i++) {
-			try {
-				Class serviceClazz = cl == null ? Class.forName(clazzes[i]) : cl.loadClass(clazzes[i]);
-				if (!serviceClazz.isInstance(serviceObject))
-					return clazzes[i];
-			} catch (ClassNotFoundException e) {
-				//This check is rarely done
-				if (extensiveCheckServiceClass(clazzes[i], serviceObject.getClass()))
-					return clazzes[i];
-			}
-		}
-		return null;
-	}
-
-	private static boolean extensiveCheckServiceClass(String clazz, Class serviceClazz) {
-		if (clazz.equals(serviceClazz.getName()))
-			return false;
-		Class[] interfaces = serviceClazz.getInterfaces();
-		for (int i = 0; i < interfaces.length; i++)
-			if (!extensiveCheckServiceClass(clazz, interfaces[i]))
-				return false;
-		Class superClazz = serviceClazz.getSuperclass();
-		if (superClazz != null)
-			if (!extensiveCheckServiceClass(clazz, superClazz))
-				return false;
-		return true;
-	}
-
-	/**
-	 * Create a new ServiceRegistration object. This method is used so that it may be overridden
-	 * by a secure implementation.
-	 *
-	 * @param clazzes The class names under which the service can be located.
-	 * @param service The service object or a {@link ServiceFactory} object.
-	 * @param properties The properties for this service.
-	 * @return A {@link ServiceRegistrationImpl} object for use by the bundle.
-	 */
-	protected ServiceRegistrationImpl createServiceRegistration(String[] clazzes, Object service, Dictionary properties) {
-		ServiceRegistrationImpl registration = new ServiceRegistrationImpl(this, clazzes, service);
-		registration.register(properties);
-		return registration;
+		return framework.getServiceRegistry().registerService(this, clazzes, service, properties);
 	}
 
 	/**
@@ -679,10 +556,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * @see #registerService(java.lang.String[], java.lang.Object, java.util.Dictionary)
 	 */
-	public org.osgi.framework.ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
+	public ServiceRegistration registerService(String clazz, Object service, Dictionary properties) {
 		String[] clazzes = new String[] {clazz};
 
-		return (registerService(clazzes, service, properties));
+		return registerService(clazzes, service, properties);
 	}
 
 	/**
@@ -695,11 +572,11 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 *
 	 * <p><tt>filter</tt> is used to select the registered service whose
 	 * properties objects contain keys and values which satisfy the filter.
-	 * See {@link FilterImpl}for a description of the filter string syntax.
+	 * See {@link Filter}for a description of the filter string syntax.
 	 *
 	 * <p>If <tt>filter</tt> is <tt>null</tt>, all registered services
 	 * are considered to match the filter.
-	 * <p>If <tt>filter</tt> cannot be parsed, an {@link InvalidSyntaxException}will
+	 * <p>If <tt>filter</tt> cannot be parsed, an {@link InvalidSyntaxException} will
 	 * be thrown with a human readable message where the filter became unparsable.
 	 *
 	 * <p>The following steps are required to select a service:
@@ -728,25 +605,19 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @exception InvalidSyntaxException If <tt>filter</tt> contains
 	 * an invalid filter string which cannot be parsed.
 	 */
-	public org.osgi.framework.ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
+	public ServiceReference[] getServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
 		checkValid();
-		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("getServiceReferences(" + clazz + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		return (framework.getServiceReferences(clazz, filter, this, false));
+		return framework.getServiceRegistry().getServiceReferences(this, clazz, filter, false);
 	}
 
 	public ServiceReference[] getAllServiceReferences(String clazz, String filter) throws InvalidSyntaxException {
 		checkValid();
-		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("getAllServiceReferences(" + clazz + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		return (framework.getServiceReferences(clazz, filter, this, true));
+		return framework.getServiceRegistry().getServiceReferences(this, clazz, filter, true);
 	}
 
 	/**
 	 * Get a service reference.
-	 * Retrieves a {@link ServiceReferenceImpl} for a service
+	 * Retrieves a {@link ServiceReference} for a service
 	 * which implements the named class.
 	 *
 	 * <p>This reference is valid at the time
@@ -756,76 +627,18 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * <p>This method is provided as a convenience for when the caller is
 	 * interested in any service which implements a named class. This method is
 	 * the same as calling {@link #getServiceReferences getServiceReferences}
-	 * with a <code>null</code> filter string but only a single {@link ServiceReferenceImpl}
+	 * with a <code>null</code> filter string but only a single {@link ServiceReference}
 	 * is returned.
 	 *
 	 * @param clazz The class name which the service must implement.
-	 * @return A {@link ServiceReferenceImpl} object, or <code>null</code>
+	 * @return A {@link ServiceReference} object, or <code>null</code>
 	 * if no services are registered which implement the named class.
 	 * @see #getServiceReferences
 	 */
-	public org.osgi.framework.ServiceReference getServiceReference(String clazz) {
+	public ServiceReference getServiceReference(String clazz) {
 		checkValid();
 
-		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("getServiceReference(" + clazz + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
-		try {
-			ServiceReference[] references = framework.getServiceReferences(clazz, null, this, false);
-
-			if (references != null) {
-				int index = 0;
-
-				int length = references.length;
-
-				if (length > 1) /* if more than one service, select highest ranking */{
-					int rankings[] = new int[length];
-					int count = 0;
-					int maxRanking = Integer.MIN_VALUE;
-
-					for (int i = 0; i < length; i++) {
-						int ranking = ((ServiceReferenceImpl) references[i]).getRanking();
-
-						rankings[i] = ranking;
-
-						if (ranking > maxRanking) {
-							index = i;
-							maxRanking = ranking;
-							count = 1;
-						} else {
-							if (ranking == maxRanking) {
-								count++;
-							}
-						}
-					}
-
-					if (count > 1) /* if still more than one service, select lowest id */{
-						long minId = Long.MAX_VALUE;
-
-						for (int i = 0; i < length; i++) {
-							if (rankings[i] == maxRanking) {
-								long id = ((ServiceReferenceImpl) references[i]).getId();
-
-								if (id < minId) {
-									index = i;
-									minId = id;
-								}
-							}
-						}
-					}
-				}
-
-				return (references[index]);
-			}
-		} catch (InvalidSyntaxException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(e);
-			}
-		}
-
-		return (null);
+		return framework.getServiceRegistry().getServiceReference(this, clazz);
 	}
 
 	/**
@@ -878,7 +691,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @see #ungetService
 	 * @see ServiceFactory
 	 */
-	public Object getService(org.osgi.framework.ServiceReference reference) {
+	public Object getService(ServiceReference reference) {
 		checkValid();
 
 		synchronized (contextLock) {
@@ -887,11 +700,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				servicesInUse = new HashMap(10);
 		}
 
-		ServiceRegistrationImpl registration = ((ServiceReferenceImpl) reference).registration;
-
-		framework.checkGetServicePermission(registration.clazzes);
-
-		return registration.getService(BundleContextImpl.this);
+		return framework.getServiceRegistry().getService(this, (ServiceReferenceImpl) reference);
 	}
 
 	/**
@@ -929,12 +738,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @see #getService
 	 * @see ServiceFactory
 	 */
-	public boolean ungetService(org.osgi.framework.ServiceReference reference) {
+	public boolean ungetService(ServiceReference reference) {
 		checkValid();
 
-		ServiceRegistrationImpl registration = ((ServiceReferenceImpl) reference).registration;
-
-		return registration.ungetService(BundleContextImpl.this);
+		return framework.getServiceRegistry().ungetService(this, (ServiceReferenceImpl) reference);
 	}
 
 	/**
@@ -971,7 +778,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * Call bundle's BundleActivator.start()
 	 * This method is called by Bundle.startWorker to start the bundle.
 	 *
-	 * @exception org.osgi.framework.BundleException if
+	 * @exception BundleException if
 	 *            the bundle has a class that implements the BundleActivator interface,
 	 *            but Framework couldn't instantiate it, or the BundleActivator.start()
 	 *            method failed
@@ -1037,7 +844,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * Call bundle's BundleActivator.stop()
 	 * This method is called by Bundle.stopWorker to stop the bundle.
 	 *
-	 * @exception org.osgi.framework.BundleException if
+	 * @exception BundleException if
 	 *            the bundle has a class that implements the BundleActivator interface,
 	 *            and the BundleActivator.stop() method failed
 	 */
@@ -1069,126 +876,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		}
 	}
 
-	/**
-	 * Provides a list of {@link ServiceReference}s for the services
-	 * registered by this bundle
-	 * or <code>null</code> if the bundle has no registered
-	 * services.
-	 *
-	 * <p>The list is valid at the time
-	 * of the call to this method, but the framework is a very dynamic
-	 * environment and services can be modified or unregistered at anytime.
-	 *
-	 * @return An array of {@link ServiceReference} or <code>null</code>.
-	 * @exception java.lang.IllegalStateException If the
-	 * bundle has been uninstalled.
-	 * @see ServiceRegistrationImpl
-	 * @see ServiceReferenceImpl
-	 */
-	protected ServiceReference[] getRegisteredServices() {
-		ServiceReference[] services = null;
-
-		synchronized (framework.serviceRegistry) {
-			services = framework.serviceRegistry.lookupServiceReferences(this);
-			if (services == null) {
-				return null;
-			}
-			int removed = 0;
-			for (int i = services.length - 1; i >= 0; i--) {
-				ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
-				String[] classes = ref.getClasses();
-				try { /* test for permission to the classes */
-					framework.checkGetServicePermission(classes);
-				} catch (SecurityException se) {
-					services[i] = null;
-					removed++;
-				}
-			}
-			if (removed > 0) {
-				ServiceReference[] temp = services;
-				services = new ServiceReference[temp.length - removed];
-				for (int i = temp.length - 1; i >= 0; i--) {
-					if (temp[i] == null)
-						removed--;
-					else
-						services[i - removed] = temp[i];
-				}
-			}
-		}
-		return (services);
-
-	}
-
-	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the
-	 * services this bundle is using,
-	 * or <code>null</code> if the bundle is not using any services.
-	 * A bundle is considered to be using a service if the bundle's
-	 * use count for the service is greater than zero.
-	 *
-	 * <p>The list is valid at the time
-	 * of the call to this method, but the framework is a very dynamic
-	 * environment and services can be modified or unregistered at anytime.
-	 *
-	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
-	 * @exception java.lang.IllegalStateException If the
-	 * bundle has been uninstalled.
-	 * @see ServiceReferenceImpl
-	 */
-	protected ServiceReferenceImpl[] getServicesInUse() {
-		synchronized (contextLock) {
-			if (servicesInUse == null) {
-				return null;
-			}
-
-			synchronized (servicesInUse) {
-				int size = servicesInUse.size();
-
-				if (size == 0) {
-					return null;
-				}
-
-				ServiceReferenceImpl[] references = new ServiceReferenceImpl[size];
-				int refcount = 0;
-
-				Iterator regsIter = servicesInUse.keySet().iterator();
-
-				for (int i = 0; i < size; i++) {
-					ServiceRegistrationImpl service = (ServiceRegistrationImpl) regsIter.next();
-
-					try {
-						framework.checkGetServicePermission(service.clazzes);
-					} catch (SecurityException se) {
-						continue;
-					}
-
-					references[refcount] = (ServiceReferenceImpl) service.getReference();
-					refcount++;
-				}
-
-				if (refcount < size) {
-					if (refcount == 0) {
-						return null;
-					}
-
-					ServiceReferenceImpl[] refs = references;
-					references = new ServiceReferenceImpl[refcount];
-
-					System.arraycopy(refs, 0, references, 0, refcount);
-				}
-
-				return references;
-			}
-		}
-	}
-
 	/** 
 	 * Return the map of ServiceRegistrationImpl to ServiceUse for services being
 	 * used by this context.
 	 * @return A map of ServiceRegistrationImpl to ServiceUse for services in use by 
 	 * this context.
 	 */
-	Map getServicesInUseMap() {
+	public Map getServicesInUseMap() {
 		synchronized (contextLock) {
 			return servicesInUse;
 		}
@@ -1284,31 +978,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	}
 
 	/**
-	 * Check for permission to listen to a service.
-	 */
-	protected boolean hasListenServicePermission(ServiceEvent event) {
-		ProtectionDomain domain = bundle.getProtectionDomain();
-
-		if (domain != null) {
-			ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
-
-			String[] names = reference.getClasses();
-
-			int len = names.length;
-
-			for (int i = 0; i < len; i++) {
-				if (domain.implies(new ServicePermission(names[i], ServicePermission.GET))) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		return (true);
-	}
-
-	/**
 	 * Construct a Filter object. This filter object may be used
 	 * to match a ServiceReference or a Dictionary.
 	 * See Filter
@@ -1319,10 +988,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @exception InvalidSyntaxException If the filter parameter contains
 	 * an invalid filter string which cannot be parsed.
 	 */
-	public org.osgi.framework.Filter createFilter(String filter) throws InvalidSyntaxException {
+	public Filter createFilter(String filter) throws InvalidSyntaxException {
 		checkValid();
 
-		return (new FilterImpl(filter));
+		return new FilterImpl(filter);
 	}
 
 	/**
@@ -1332,7 +1001,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * @exception java.lang.IllegalStateException
 	 * If the context bundle has stopped.
 	 */
-	protected void checkValid() {
+	public void checkValid() {
 		if (!isValid()) {
 			throw new IllegalStateException(Msg.BUNDLE_CONTEXT_INVALID_EXCEPTION);
 		}
@@ -1347,13 +1016,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		return valid;
 	}
 
-	boolean isAssignableTo(ServiceReferenceImpl reference) {
-		if (!scopeEvents)
-			return true;
-		String[] clazzes = reference.getClasses();
-		for (int i = 0; i < clazzes.length; i++)
-			if (!reference.isAssignableTo(bundle, clazzes[i]))
-				return false;
-		return true;
+	public Framework getFramework() {
+		return framework;
 	}
 }

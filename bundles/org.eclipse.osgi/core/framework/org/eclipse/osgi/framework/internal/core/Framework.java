@@ -28,6 +28,7 @@ import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -58,7 +59,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * the adaptor will be merged into these properties.
 	 */
 	protected Properties properties;
-	/** Has the service space been started */
+	/** Has the framework been started */
 	protected boolean active;
 	/** The bundles installed in the framework */
 	protected BundleRepository bundles;
@@ -69,9 +70,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	/** Startlevel object. This object manages the framework and bundle startlevels */
 	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
-	protected ServiceRegistry serviceRegistry; //TODO This is duplicated from the adaptor, do we really gain ?
-	/** next free service id. */
-	protected long serviceid;
+	private ServiceRegistry serviceRegistry;
 
 	/*
 	 * The following EventListeners objects keep track of event listeners
@@ -210,8 +209,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* create the service registry */
-		serviceid = 1;
-		serviceRegistry = adaptor.getServiceRegistry();
+		serviceRegistry = new ServiceRegistry();
 		// Initialize the installLock; there is no way of knowing 
 		// what the initial size should be, at most it will be the number
 		// of threads trying to install a bundle (probably a very low number).
@@ -248,6 +246,14 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("Framework.initialize()"); //$NON-NLS-1$
+	}
+
+	public FrameworkAdaptor getAdaptor() {
+		return adaptor;
+	}
+
+	public ServiceRegistry getServiceRegistry() {
+		return serviceRegistry;
 	}
 
 	private void setNLSFrameworkLog() {
@@ -1152,121 +1158,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	/**
-	 * Returns a list of <tt>ServiceReference</tt> objects. This method
-	 * returns a list of <tt>ServiceReference</tt> objects for services which
-	 * implement and were registered under the specified class and match the
-	 * specified filter criteria.
-	 * 
-	 * <p>
-	 * The list is valid at the time of the call to this method, however as the
-	 * Framework is a very dynamic environment, services can be modified or
-	 * unregistered at anytime.
-	 * 
-	 * <p>
-	 * <tt>filter</tt> is used to select the registered service whose
-	 * properties objects contain keys and values which satisfy the filter. See
-	 * {@link FilterImpl}for a description of the filter string syntax.
-	 * 
-	 * <p>
-	 * If <tt>filter</tt> is <tt>null</tt>, all registered services are
-	 * considered to match the filter.
-	 * <p>
-	 * If <tt>filter</tt> cannot be parsed, an {@link InvalidSyntaxException}
-	 * will be thrown with a human readable message where the filter became
-	 * unparsable.
-	 * 
-	 * <p>
-	 * The following steps are required to select a service:
-	 * <ol>
-	 * <li>If the Java Runtime Environment supports permissions, the caller is
-	 * checked for the <tt>ServicePermission</tt> to get the service with the
-	 * specified class. If the caller does not have the correct permission,
-	 * <tt>null</tt> is returned.
-	 * <li>If the filter string is not <tt>null</tt>, the filter string is
-	 * parsed and the set of registered services which satisfy the filter is
-	 * produced. If the filter string is <tt>null</tt>, then all registered
-	 * services are considered to satisfy the filter.
-	 * <li>If <code>clazz</code> is not <tt>null</tt>, the set is further
-	 * reduced to those services which are an <tt>instanceof</tt> and were
-	 * registered under the specified class. The complete list of classes of
-	 * which a service is an instance and which were specified when the service
-	 * was registered is available from the service's
-	 * {@link Constants#OBJECTCLASS}property.
-	 * <li>An array of <tt>ServiceReference</tt> to the selected services is
-	 * returned.
-	 * </ol>
-	 * 
-	 * @param clazz
-	 *            The class name with which the service was registered, or <tt>null</tt>
-	 *            for all services.
-	 * @param filterstring
-	 *            The filter criteria.
-	 * @return An array of <tt>ServiceReference</tt> objects, or <tt>null</tt>
-	 *         if no services are registered which satisfy the search.
-	 * @exception InvalidSyntaxException
-	 *                If <tt>filter</tt> contains an invalid filter string
-	 *                which cannot be parsed.
-	 */
-	protected ServiceReference[] getServiceReferences(String clazz, String filterstring, BundleContextImpl context, boolean allservices) throws InvalidSyntaxException {
-		FilterImpl filter = (filterstring == null) ? null : new FilterImpl(filterstring);
-		ServiceReference[] services = null;
-		if (clazz != null) {
-			try /* test for permission to get clazz */{
-				checkGetServicePermission(clazz);
-			} catch (SecurityException se) {
-				return (null);
-			}
-		}
-		synchronized (serviceRegistry) {
-			services = serviceRegistry.lookupServiceReferences(clazz, filter);
-			if (services == null) {
-				return null;
-			}
-			int removed = 0;
-			for (int i = services.length - 1; i >= 0; i--) {
-				ServiceReferenceImpl ref = (ServiceReferenceImpl) services[i];
-				String[] classes = ref.getClasses();
-				if (allservices || context.isAssignableTo((ServiceReferenceImpl) services[i])) {
-					if (clazz == null)
-						try { /* test for permission to the classes */
-							checkGetServicePermission(classes);
-						} catch (SecurityException se) {
-							services[i] = null;
-							removed++;
-						}
-				} else {
-					services[i] = null;
-					removed++;
-				}
-			}
-			if (removed > 0) {
-				ServiceReference[] temp = services;
-				services = new ServiceReference[temp.length - removed];
-				for (int i = temp.length - 1; i >= 0; i--) {
-					if (temp[i] == null)
-						removed--;
-					else
-						services[i - removed] = temp[i];
-				}
-			}
-
-		}
-		return services == null || services.length == 0 ? null : services;
-	}
-
-	/**
-	 * Method to return the next available service id. This method should be
-	 * called while holding the registrations lock.
-	 * 
-	 * @return next service id.
-	 */
-	protected long getNextServiceId() {
-		long id = serviceid;
-		serviceid++;
-		return (id);
-	}
-
-	/**
 	 * Creates a <code>File</code> object for a file in the persistent
 	 * storage area provided for the bundle by the framework. If the adaptor
 	 * does not have file system support, this method will return <code>null</code>.
@@ -1306,53 +1197,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				bundlePermissions.put(action, result);
 			}
 			return result;
-		}
-	}
-
-	/**
-	 * Check for permission to register a service.
-	 * 
-	 * The caller must have permission for ALL names.
-	 */
-	protected void checkRegisterServicePermission(String[] names) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			int len = names.length;
-			for (int i = 0; i < len; i++) {
-				sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
-			}
-		}
-	}
-
-	/**
-	 * Check for permission to get a service.
-	 * 
-	 * The caller must have permission for at least ONE name.
-	 */
-	protected void checkGetServicePermission(String[] names) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			SecurityException se = null;
-			int len = names.length;
-			for (int i = 0; i < len; i++) {
-				try {
-					sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
-					return;
-				} catch (SecurityException e) {
-					se = e;
-				}
-			}
-			throw se;
-		}
-	}
-
-	/**
-	 * Check for permission to get a service.
-	 */
-	protected void checkGetServicePermission(String name) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
 		}
 	}
 
@@ -1885,4 +1729,78 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			}
 		}
 	}
+
+	/**
+	 * Used by ServiceReferenceImpl for isAssignableTo
+	 * @param registrant Bundle registering service
+	 * @param client Bundle desiring to use service
+	 * @param className class name to use
+	 * @param serviceClass class of original service object
+	 * @return true if assignable given package wiring
+	 */
+	public boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className, Class serviceClass) {
+		// always return false for fragments
+		AbstractBundle consumer = (AbstractBundle) client;
+		if (consumer.isFragment())
+			return false;
+		// 1) if the registrant == consumer always return true
+		AbstractBundle producer = (AbstractBundle) registrant;
+		if (consumer == producer)
+			return true;
+		// 2) get the package name from the specified className
+		String pkgName = BundleLoader.getPackageName(className);
+		if (pkgName.startsWith("java.")) //$NON-NLS-1$
+			return true;
+		BundleLoader producerBL = producer.getBundleLoader();
+		if (producerBL == null)
+			return false;
+		BundleLoader consumerBL = consumer.getBundleLoader();
+		if (consumerBL == null)
+			return false;
+		// 3) for the specified bundle, find the wiring for the package.  If no wiring is found return true
+		PackageSource consumerSource = consumerBL.getPackageSource(pkgName);
+		if (consumerSource == null)
+			return true;
+		// work around the issue when the package is in the EE and we delegate to boot for that package
+		if (producerBL.isBootDelegationPackage(pkgName)) {
+			SystemBundleLoader systemLoader = (SystemBundleLoader) systemBundle.getBundleLoader();
+			if (systemLoader.isEEPackage(pkgName))
+				return true; // in this case we have a common source from the EE
+		}
+		// 4) For the registrant bundle, find the wiring for the package.
+		PackageSource producerSource = producerBL.getPackageSource(pkgName);
+		if (producerSource == null) {
+			// 5) If no wiring is found for the registrant bundle then find the wiring for the classloader of the service object.  If no wiring is found return false.
+			producerSource = getPackageSource(serviceClass, pkgName);
+			if (producerSource == null)
+				return false;
+		}
+		// 6) If the two wirings found are equal then return true; otherwise return false.
+		return producerSource.hasCommonSource(consumerSource);
+	}
+
+	private PackageSource getPackageSource(Class serviceClass, String pkgName) {
+		if (serviceClass == null)
+			return null;
+		AbstractBundle serviceBundle = (AbstractBundle) packageAdmin.getBundle(serviceClass);
+		if (serviceBundle == null)
+			return null;
+		BundleLoader producerBL = serviceBundle.getBundleLoader();
+		if (producerBL == null)
+			return null;
+		PackageSource producerSource = producerBL.getPackageSource(pkgName);
+		if (producerSource != null)
+			return producerSource;
+		// try the interfaces
+		Class[] interfaces = serviceClass.getInterfaces();
+		// note that getInterfaces never returns null
+		for (int i = 0; i < interfaces.length; i++) {
+			producerSource = getPackageSource(interfaces[i], pkgName);
+			if (producerSource != null)
+				return producerSource;
+		}
+		// try super class
+		return getPackageSource(serviceClass.getSuperclass(), pkgName);
+	}
+
 }

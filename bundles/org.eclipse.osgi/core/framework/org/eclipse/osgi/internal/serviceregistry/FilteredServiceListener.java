@@ -9,9 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.serviceregistry;
 
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.osgi.framework.*;
 
 public class FilteredServiceListener implements ServiceListener {
@@ -36,7 +38,7 @@ public class FilteredServiceListener implements ServiceListener {
 	 * @param listener real listener.
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
-	protected FilteredServiceListener(String filterstring, ServiceListener listener, BundleContextImpl context) throws InvalidSyntaxException {
+	public FilteredServiceListener(BundleContextImpl context, ServiceListener listener, String filterstring) throws InvalidSyntaxException {
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
@@ -59,10 +61,9 @@ public class FilteredServiceListener implements ServiceListener {
 	}
 
 	/**
-	 * Receive notification that a service has had a
-	 * change occur in it's lifecycle.
-	 *
-	 * @param event The ServiceEvent.
+	 * Receives notification that a service has had a lifecycle change.
+	 * 
+	 * @param event The <code>ServiceEvent</code> object.
 	 */
 	public void serviceChanged(ServiceEvent event) {
 		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
@@ -78,12 +79,12 @@ public class FilteredServiceListener implements ServiceListener {
 			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
 		}
 
-		if (!context.hasListenServicePermission(event))
+		if (!ServiceRegistry.hasListenServicePermission(event, context))
 			return;
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.registration.getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		checkfilter: {
@@ -107,7 +108,7 @@ public class FilteredServiceListener implements ServiceListener {
 			return; // there is a filter and it does not match, so do NOT deliver the event
 		}
 
-		if (allservices || context.isAssignableTo(reference)) {
+		if (allservices || ServiceRegistry.isAssignableTo(context, reference)) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -125,5 +126,4 @@ public class FilteredServiceListener implements ServiceListener {
 	public String toString() {
 		return filter == null ? listener.toString() : filter.toString();
 	}
-
 }

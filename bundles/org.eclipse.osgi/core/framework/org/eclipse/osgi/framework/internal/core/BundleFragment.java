@@ -245,7 +245,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @return An array of {@link ServiceReference} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceRegistrationImpl
+	 * @see ServiceRegistration
 	 * @see ServiceReference
 	 */
 	public ServiceReference[] getRegisteredServices() {

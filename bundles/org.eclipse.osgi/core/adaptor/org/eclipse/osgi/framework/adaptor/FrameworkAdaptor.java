@@ -175,13 +175,6 @@ public interface FrameworkAdaptor {
 	public PermissionStorage getPermissionStorage() throws IOException;
 
 	/**
-	 * Returns the <code>ServiceRegistry</code> object which will be used
-	 * to manage ServiceReference bindings.
-	 * @return The ServiceRegistry object for the adaptor.
-	 */
-	public ServiceRegistry getServiceRegistry();
-
-	/**
 	 * The framework will call this method after the 
 	 * System BundleActivator.start(BundleContext) has been called.  The context is 
 	 * the System Bundle's BundleContext.  This method allows FrameworkAdaptors to 

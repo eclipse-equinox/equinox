@@ -1236,7 +1236,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * 
 	 * @return bundle's ProtectionDomain.
 	 */
-	protected BundleProtectionDomain getProtectionDomain() {
+	public BundleProtectionDomain getProtectionDomain() {
 		return domain;
 	}
 

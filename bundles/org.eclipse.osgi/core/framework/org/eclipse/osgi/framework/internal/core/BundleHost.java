@@ -478,7 +478,7 @@ public class BundleHost extends AbstractBundle {
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the services
+	 * Provides a list of {@link ServiceReference}s for the services
 	 * registered by this bundle
 	 * or <code>null</code> if the bundle has no registered
 	 * services.
@@ -487,24 +487,24 @@ public class BundleHost extends AbstractBundle {
 	 * of the call to this method, but the framework is a very dynamic
 	 * environment and services can be modified or unregistered at anytime.
 	 *
-	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
+	 * @return An array of {@link ServiceReference} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceRegistrationImpl
-	 * @see ServiceReferenceImpl
+	 * @see ServiceRegistration
+	 * @see ServiceReference
 	 */
-	public org.osgi.framework.ServiceReference[] getRegisteredServices() {
+	public ServiceReference[] getRegisteredServices() {
 		checkValid();
 
 		if (context == null) {
-			return (null);
+			return null;
 		}
 
-		return (context.getRegisteredServices());
+		return context.getFramework().getServiceRegistry().getRegisteredServices(context);
 	}
 
 	/**
-	 * Provides a list of {@link ServiceReferenceImpl}s for the
+	 * Provides a list of {@link ServiceReference}s for the
 	 * services this bundle is using,
 	 * or <code>null</code> if the bundle is not using any services.
 	 * A bundle is considered to be using a service if the bundle's
@@ -514,19 +514,19 @@ public class BundleHost extends AbstractBundle {
 	 * of the call to this method, but the framework is a very dynamic
 	 * environment and services can be modified or unregistered at anytime.
 	 *
-	 * @return An array of {@link ServiceReferenceImpl} or <code>null</code>.
+	 * @return An array of {@link ServiceReference} or <code>null</code>.
 	 * @exception java.lang.IllegalStateException If the
 	 * bundle has been uninstalled.
-	 * @see ServiceReferenceImpl
+	 * @see ServiceReference
 	 */
-	public org.osgi.framework.ServiceReference[] getServicesInUse() {
+	public ServiceReference[] getServicesInUse() {
 		checkValid();
 
 		if (context == null) {
-			return (null);
+			return null;
 		}
 
-		return (context.getServicesInUse());
+		return context.getFramework().getServiceRegistry().getServicesInUse(context);
 	}
 
 	protected Bundle[] getFragments() {
