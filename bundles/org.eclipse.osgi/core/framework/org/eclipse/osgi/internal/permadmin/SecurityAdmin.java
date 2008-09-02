@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.permadmin;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.internal.signedcontent.DNChainMatching;
 import org.osgi.framework.AdminPermission;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -31,7 +33,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private static final String ADMIN_IMPLIED_ACTIONS = AdminPermission.RESOURCE + ',' + AdminPermission.METADATA + ',' + AdminPermission.CLASS;
-
+	private static final PermissionInfo[] EMPTY_PERM_INFO = new PermissionInfo[0];
 	/* @GuardedBy(lock) */
 	private final PermissionAdminTable permAdminTable = new PermissionAdminTable();
 	/* @GuardedBy(lock) */
@@ -53,7 +55,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		this.supportedSecurityManager = supportedSecurityManager;
 		this.framework = framework;
 		this.permissionStorage = new SecurePermissionStorage(permissionStorage);
-		this.impliedPermissionInfos = SecurityAdminUtils.getPermissionInfos(getClass().getResource(Constants.OSGI_BASE_IMPLIED_PERMISSIONS), framework);
+		this.impliedPermissionInfos = SecurityAdmin.getPermissionInfos(getClass().getResource(Constants.OSGI_BASE_IMPLIED_PERMISSIONS), framework);
 		String[] encodedDefaultInfos = permissionStorage.getPermissionData(null);
 		PermissionInfo[] defaultInfos = getPermissionInfos(encodedDefaultInfos);
 		if (defaultInfos != null)
@@ -215,8 +217,39 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	public AccessControlContext getAccessControlContext(String[] signers) {
-		// TODO Auto-generated method stub
-		return null;
+		Enumeration infos = getConditionalPermissionInfos();
+		ArrayList permissionInfos = new ArrayList();
+		if (infos != null) {
+			while (infos.hasMoreElements()) {
+				SecurityRow condPermInfo = (SecurityRow) infos.nextElement();
+				if (!ConditionalPermissionInfoBase.ALLOW.equals(condPermInfo.getGrantDecision()))
+					break; // TODO need to clarify the spec WRT DENY rows
+				ConditionInfo[] condInfo = condPermInfo.getConditionInfos();
+				boolean match = true;
+				for (int i = 0; match && i < condInfo.length; i++) {
+					if (BundleSignerCondition.class.getName().equals(condInfo[i].getType())) {
+						String[] args = condInfo[i].getArgs();
+						String condSigners = args.length > 0 ? args[0] : null;
+						if (condSigners != null) {
+							boolean negate = (args.length == 2) ? "!".equals(args[1]) : false; //$NON-NLS-1$
+							for (int j = 0; j < signers.length && match; j++)
+								match = (negate ^ DNChainMatching.match(signers[i], condSigners));
+						} else {
+							match = false;
+						}
+					} else {
+						match = false;
+					}
+				}
+				if (match) {
+					PermissionInfo[] addPermInfos = condPermInfo.getPermissionInfos();
+					for (int i = 0; i < addPermInfos.length; i++)
+						permissionInfos.add(addPermInfos[i]);
+				}
+			}
+		}
+		PermissionInfoCollection collection = new PermissionInfoCollection((PermissionInfo[]) permissionInfos.toArray(new PermissionInfo[permissionInfos.size()]));
+		return new AccessControlContext(collection == null ? new ProtectionDomain[0] : new ProtectionDomain[] {new ProtectionDomain(null, collection)});
 	}
 
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
@@ -309,7 +342,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	public EquinoxProtectionDomain createProtectionDomain(AbstractBundle bundle) {
 		PermissionInfoCollection impliedPermissions = getImpliedPermission(bundle);
-		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdminUtils.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm"), framework), bundle); //$NON-NLS-1$
+		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm"), framework), bundle); //$NON-NLS-1$
 		PermissionInfoCollection restrictedPermissions = restrictedInfos == null ? null : new PermissionInfoCollection(restrictedInfos);
 		BundlePermissions bundlePermissions = new BundlePermissions(bundle, this, impliedPermissions, restrictedPermissions);
 		return new EquinoxProtectionDomain(bundlePermissions);
@@ -368,5 +401,52 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		} catch (ClassCastException e) {
 			return null;
 		}
+	}
+
+	private static PermissionInfo[] getPermissionInfos(URL resource, Framework framework) {
+		if (resource == null)
+			return null;
+		PermissionInfo[] info = EMPTY_PERM_INFO;
+		DataInputStream in = null;
+		try {
+			in = new DataInputStream(resource.openStream());
+			ArrayList permissions = new ArrayList();
+			BufferedReader reader;
+			try {
+				reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
+			} catch (UnsupportedEncodingException e) {
+				reader = new BufferedReader(new InputStreamReader(in));
+			}
+
+			while (true) {
+				String line = reader.readLine();
+				if (line == null) /* EOF */
+					break;
+				line = line.trim();
+				if ((line.length() == 0) || line.startsWith("#") || line.startsWith("//")) /* comments *///$NON-NLS-1$ //$NON-NLS-2$
+					continue;
+
+				try {
+					permissions.add(new PermissionInfo(line));
+				} catch (IllegalArgumentException iae) {
+					/* incorrectly encoded permission */
+					if (framework != null)
+						framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.getBundle(0), iae);
+				}
+			}
+			int size = permissions.size();
+			if (size > 0)
+				info = (PermissionInfo[]) permissions.toArray(new PermissionInfo[size]);
+		} catch (IOException e) {
+			// do nothing
+		} finally {
+			try {
+				if (in != null)
+					in.close();
+			} catch (IOException ee) {
+				// do nothing
+			}
+		}
+		return info;
 	}
 }

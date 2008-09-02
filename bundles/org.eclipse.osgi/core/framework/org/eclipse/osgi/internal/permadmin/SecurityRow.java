@@ -180,8 +180,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			Condition condition = conditions[i];
 			if (condition == null)
 				continue; // this condition must have been satisfied && !mutable in a previous check
-			// TODO need to clarify on the spec if nonMutable postponed conditions can be evaluated immediately
-			if (!isPostponed(condition) || !condition.isMutable()) {
+			if (!isPostponed(condition)) {
 				if (condition.isSatisfied()) {
 					if (!condition.isMutable())
 						conditions[i] = null; // ignore this condition for future checks

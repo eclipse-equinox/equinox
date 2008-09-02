@@ -43,6 +43,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	private static final ConditionInfo POST_MUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_SAT", "true", "true", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	private static final ConditionInfo POST_MUT_UNSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_UNSAT", "true", "true", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
+	private static final ConditionInfo SIGNER_CONDITION1 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test1,c=US"}); //$NON-NLS-1$//$NON-NLS-2$
+	private static final ConditionInfo SIGNER_CONDITION2 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test2,c=US"}); //$NON-NLS-1$//$NON-NLS-2$
+	private static final ConditionInfo NOT_SIGNER_CONDITION1 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test1,c=US", "!"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+
 	//private static final ConditionInfo POST_MUT_NOTSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_NOTSAT", "true", "true", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	//private static final ConditionInfo POST_NOTMUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_NOTMUT_SAT", "true", "false", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	//private static final ConditionInfo POST_NOTMUT_NOTSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_NOTMUT_NOTSAT", "true", "false", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -593,6 +597,123 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		tc1sat.setSatisfied(false);
 		tc2sat.setSatisfied(false);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testAccessControlContext01() {
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testAccessControlContext02() {
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.DENY));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testAccessControlContext03() {
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+
+		update = securityAdmin.createConditionalPermissionsUpdate();
+		rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testAccessControlContext04() {
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {NOT_SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
 	}
 
 	private void testSMPermission(EquinoxSecurityManager sm, ProtectionDomain[] pds, Permission permission, boolean expectedToPass) {
