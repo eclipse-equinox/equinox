@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,12 +8,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
-
+import java.util.Enumeration;
+import java.util.Iterator;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
@@ -45,7 +46,7 @@ public class RegisteredPolicy extends DependentPolicy {
 				}
 				boolean contributes = false;
 				for (int j = 0; j < allContributions.length && contributes == false; j++) {
-					if (allContributions[j].equals(buddyRequester.bundle.getSymbolicName()))
+					if (allContributions[j].equals(buddyRequester.getBundle().getSymbolicName()))
 						contributes = true;
 				}
 				if (!contributes)
@@ -72,7 +73,7 @@ public class RegisteredPolicy extends DependentPolicy {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
 				if (proxy == null)
 					continue;
-				result = proxy.getBundleLoader().findClass(name, true);
+				result = proxy.getBundleLoader().findClass(name);
 			} catch (ClassNotFoundException e) {
 				//Nothing to do, just keep looking
 				continue;
@@ -91,7 +92,7 @@ public class RegisteredPolicy extends DependentPolicy {
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
 			if (proxy == null)
 				continue;
-			result = proxy.getBundleLoader().findResource(name, true);
+			result = proxy.getBundleLoader().findResource(name);
 		}
 		return result;
 	}

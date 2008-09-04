@@ -809,76 +809,57 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
-	// TODO temporarily disable til we can debug the build test machine on Win XP
-	//	public void testBuddyClassLoadingRegistered1() throws Exception{
-	//		Bundle registeredA = installer.installBundle("buddy.registered.a");
-	//		installer.resolveBundles(new Bundle[] {registeredA});
-	//		Enumeration testFiles = registeredA.getResources("resources/test.txt");
-	//		assertNotNull("testFiles", testFiles);
-	//		ArrayList testURLs = new ArrayList();
-	//		while(testFiles.hasMoreElements())
-	//			testURLs.add(testFiles.nextElement());
-	//		assertEquals("test.txt number", 1, testURLs.size());
-	//		assertEquals("buddy.registered.a", "buddy.registered.a", readURL((URL) testURLs.get(0)));
-	//
-	//		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1");
-	//		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2");
-	//		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
-	//		testFiles = registeredA.getResources("resources/test.txt");
-	//		assertNotNull("testFiles", testFiles);
-	//		testURLs = new ArrayList();
-	//		while(testFiles.hasMoreElements())
-	//			testURLs.add(testFiles.nextElement());
-	//
-	//		// TODO some debug code to figure out why this is failing on the test machine
-	//		if (registeredATest1.getState() != Bundle.RESOLVED) {
-	//			System.out.println("Bundle is not resolved!! " + registeredATest1.getSymbolicName());
-	//			State state = Platform.getPlatformAdmin().getState(false);
-	//			BundleDescription aDesc = state.getBundle(registeredATest1.getBundleId());
-	//			ResolverError[] errors = state.getResolverErrors(aDesc);
-	//			for (int i = 0; i < errors.length; i++)
-	//				System.out.println(errors[i]);
-	//		}
-	//		if (registeredATest2.getState() != Bundle.RESOLVED) {
-	//			System.out.println("Bundle is not resolved!! " + registeredATest2.getSymbolicName());
-	//			State state = Platform.getPlatformAdmin().getState(false);
-	//			BundleDescription bDesc = state.getBundle(registeredATest2.getBundleId());
-	//			ResolverError[] errors = state.getResolverErrors(bDesc);
-	//			for (int i = 0; i < errors.length; i++)
-	//				System.out.println(errors[i]);
-	//		}
-	//
-	//		// The real test
-	//		assertEquals("test.txt number", 3, testURLs.size());
-	//		assertEquals("buddy.registered.a", "buddy.registered.a", readURL((URL) testURLs.get(0)));
-	//		assertEquals("buddy.registered.a.test1", "buddy.registered.a.test1", readURL((URL) testURLs.get(1)));
-	//		assertEquals("buddy.registered.a.test2", "buddy.registered.a.test2", readURL((URL) testURLs.get(2)));
-	//	}
-	//
-	//	public void testBuddyClassLoadingDependent1() throws Exception{
-	//		Bundle dependentA = installer.installBundle("buddy.dependent.a");
-	//		installer.resolveBundles(new Bundle[] {dependentA});
-	//		Enumeration testFiles = dependentA.getResources("resources/test.txt");
-	//		assertNotNull("testFiles", testFiles);
-	//		ArrayList testURLs = new ArrayList();
-	//		while(testFiles.hasMoreElements())
-	//			testURLs.add(testFiles.nextElement());
-	//		assertEquals("test.txt number", 1, testURLs.size());
-	//		assertEquals("buddy.dependent.a", "buddy.dependent.a", readURL((URL) testURLs.get(0)));
-	//
-	//		Bundle dependentATest1 = installer.installBundle("buddy.dependent.a.test1");
-	//		Bundle dependentATest2 = installer.installBundle("buddy.dependent.a.test2");
-	//		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
-	//		testFiles = dependentA.getResources("resources/test.txt");
-	//		assertNotNull("testFiles", testFiles);
-	//		testURLs = new ArrayList();
-	//		while(testFiles.hasMoreElements())
-	//			testURLs.add(testFiles.nextElement());
-	//		assertEquals("test.txt number", 3, testURLs.size());
-	//		assertEquals("buddy.dependent.a", "buddy.dependent.a", readURL((URL) testURLs.get(0)));
-	//		assertEquals("buddy.dependent.a.test1", "buddy.dependent.a.test1", readURL((URL) testURLs.get(1)));
-	//		assertEquals("buddy.dependent.a.test2", "buddy.dependent.a.test2", readURL((URL) testURLs.get(2)));
-	//	}
+	public void testBuddyClassLoadingRegistered1() throws Exception {
+		Bundle registeredA = installer.installBundle("buddy.registered.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredA});
+		Enumeration testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
+		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
+		ArrayList texts = new ArrayList();
+		while (testFiles.hasMoreElements())
+			texts.add(readURL((URL) testFiles.nextElement()));
+		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
+		assertTrue("buddy.registered.a", texts.contains("buddy.registered.a")); //$NON-NLS-1$ //$NON-NLS-2$
+
+		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1"); //$NON-NLS-1$
+		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
+		testFiles = registeredA.getResources("resources/test.txt"); //$NON-NLS-1$
+		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
+		texts = new ArrayList();
+		while (testFiles.hasMoreElements())
+			texts.add(readURL((URL) testFiles.nextElement()));
+
+		// The real test
+		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
+		assertTrue("buddy.registered.a", texts.contains("buddy.registered.a")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("buddy.registered.a.test1", texts.contains("buddy.registered.a.test1")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("buddy.registered.a.test2", texts.contains("buddy.registered.a.test2")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testBuddyClassLoadingDependent1() throws Exception {
+		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentA});
+		Enumeration testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
+		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
+		ArrayList texts = new ArrayList();
+		while (testFiles.hasMoreElements())
+			texts.add(readURL((URL) testFiles.nextElement()));
+		assertEquals("test.txt number", 1, texts.size()); //$NON-NLS-1$
+		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$ //$NON-NLS-2$
+
+		Bundle dependentATest1 = installer.installBundle("buddy.dependent.a.test1"); //$NON-NLS-1$
+		Bundle dependentATest2 = installer.installBundle("buddy.dependent.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
+		testFiles = dependentA.getResources("resources/test.txt"); //$NON-NLS-1$
+		assertNotNull("testFiles", testFiles); //$NON-NLS-1$
+		texts = new ArrayList();
+		while (testFiles.hasMoreElements())
+			texts.add(readURL((URL) testFiles.nextElement()));
+		assertEquals("test.txt number", 3, texts.size()); //$NON-NLS-1$
+		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$//$NON-NLS-2$
+		assertTrue("buddy.dependent.a.test1", texts.contains("buddy.dependent.a.test1")); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("buddy.dependent.a.test2", texts.contains("buddy.dependent.a.test2")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 
 	private String readURL(URL url) throws IOException {
 		StringBuffer sb = new StringBuffer();

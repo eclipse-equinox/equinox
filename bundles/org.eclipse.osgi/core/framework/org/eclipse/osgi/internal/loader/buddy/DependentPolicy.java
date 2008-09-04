@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,11 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader.buddy;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.BundleLoader;
+import org.eclipse.osgi.framework.internal.core.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 
 /**
@@ -49,7 +51,7 @@ public class DependentPolicy implements IBuddyPolicy {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 				if (proxy == null)
 					continue;
-				result = proxy.getBundleLoader().findClass(name, true);
+				result = proxy.getBundleLoader().findClass(name);
 			} catch (ClassNotFoundException e) {
 				if (result == null)
 					addDependent(i, searchedBundle);
@@ -76,7 +78,7 @@ public class DependentPolicy implements IBuddyPolicy {
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 			if (proxy == null)
 				continue;
-			result = proxy.getBundleLoader().findResource(name, true);
+			result = proxy.getBundleLoader().findResource(name);
 			if (result == null) {
 				addDependent(i, searchedBundle);
 			}

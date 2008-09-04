@@ -43,7 +43,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		this.pkgSources = new KeyedHashSet(false);
 	}
 
-	synchronized BundleLoader getBundleLoader() {
+	public synchronized BundleLoader getBundleLoader() {
 		if (loader != null)
 			return loader;
 		if (bundle.isResolved()) {

@@ -1322,7 +1322,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return bundledata.getVersion();
 	}
 
-	protected BundleDescription getBundleDescription() {
+	public BundleDescription getBundleDescription() {
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
 

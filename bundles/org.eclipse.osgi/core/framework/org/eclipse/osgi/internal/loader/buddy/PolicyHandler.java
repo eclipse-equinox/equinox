@@ -8,13 +8,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.BundleLoader;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.osgi.framework.*;
+import org.osgi.service.packageadmin.PackageAdmin;
 
-public class PolicyHandler {
+public class PolicyHandler implements SynchronousBundleListener {
 	//Key for the framework buddies
 	private final static String DEPENDENT_POLICY = "dependent"; //$NON-NLS-1$
 	private final static String GLOBAL_POLICY = "global"; //$NON-NLS-1$
@@ -25,33 +28,20 @@ public class PolicyHandler {
 	private final static String PARENT_POLICY = "parent"; //$NON-NLS-1$
 
 	//The loader to which this policy is attached.
-	BundleLoader policedLoader;
+	private final BundleLoader policedLoader;
 	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
+	// @GuardedBy this
 	Object[] policies = null;
 
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
-	private ThreadLocal beingLoaded;
+	private final ThreadLocal beingLoaded;
+	private final PackageAdmin packageAdmin;
 
-	private BundleListener listener = new BundleListener() {
-		public void bundleChanged(BundleEvent event) {
-			if (event.getType() == BundleEvent.STARTED || event.getType() == BundleEvent.STOPPED)
-				return;
-			try {
-				String list = (String) policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
-				synchronized (this) {
-					policies = getArrayFromList(list);
-				}
-			} catch (BundleException e) {
-				//Ignore
-			}
-		}
-	};
-
-	public PolicyHandler(BundleLoader loader, String buddyList) {
+	public PolicyHandler(BundleLoader loader, String buddyList, PackageAdmin packageAdmin) {
 		policedLoader = loader;
 		policies = getArrayFromList(buddyList);
 		beingLoaded = new ThreadLocal();
-		policedLoader.bundle.framework.systemBundle.context.addBundleListener(listener);
+		this.packageAdmin = packageAdmin;
 	}
 
 	static Object[] getArrayFromList(String stringList) {
@@ -92,7 +82,7 @@ public class PolicyHandler {
 				return (IBuddyPolicy) policies[policyOrder];
 			}
 			if (GLOBAL_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new GlobalPolicy(policedLoader.bundle.framework.packageAdmin);
+				policies[policyOrder] = new GlobalPolicy(packageAdmin);
 				return (IBuddyPolicy) policies[policyOrder];
 			}
 			if (PARENT_POLICY.equals(buddyName)) {
@@ -195,7 +185,24 @@ public class PolicyHandler {
 		((Set) beingLoaded.get()).remove(name);
 	}
 
-	public void close() {
-		policedLoader.bundle.framework.systemBundle.context.removeBundleListener(listener);
+	public void open(BundleContext context) {
+		context.addBundleListener(this);
+	}
+
+	public void close(BundleContext context) {
+		context.removeBundleListener(this);
+	}
+
+	public void bundleChanged(BundleEvent event) {
+		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) != 0)
+			return;
+		try {
+			String list = (String) policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
+			synchronized (this) {
+				policies = getArrayFromList(list);
+			}
+		} catch (BundleException e) {
+			//Ignore
+		}
 	}
 }

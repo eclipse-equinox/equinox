@@ -158,11 +158,12 @@ public class BundleInstaller {
 		};
 		context.addFrameworkListener(listener);
 		final HashSet refreshed = new HashSet();
-		context.addBundleListener(new SynchronousBundleListener() {
+		BundleListener refreshBundleListener = new SynchronousBundleListener() {
 			public void bundleChanged(BundleEvent event) {
 				refreshed.add(event.getBundle());
 			}
-		});
+		};
+		context.addBundleListener(refreshBundleListener);
 		try {
 			pa.refreshPackages(refresh);
 			synchronized (flag) {
@@ -176,6 +177,7 @@ public class BundleInstaller {
 			}
 		} finally {
 			context.removeFrameworkListener(listener);
+			context.removeBundleListener(refreshBundleListener);
 		}
 		return (Bundle[]) refreshed.toArray(new Bundle[refreshed.size()]);
 	}

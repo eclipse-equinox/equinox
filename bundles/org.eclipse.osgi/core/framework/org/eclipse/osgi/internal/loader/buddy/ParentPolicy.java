@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,15 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader.buddy;
 
 import java.net.URL;
 import java.util.Enumeration;
 
-public interface IBuddyPolicy {
-	public Class loadClass(String name);
+public class ParentPolicy implements IBuddyPolicy {
 
-	public URL loadResource(String name);
+	public Class loadClass(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-	public Enumeration loadResources(String name);
+	public URL loadResource(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Enumeration loadResources(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

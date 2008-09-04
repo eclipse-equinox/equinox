@@ -20,6 +20,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.BundleException;
@@ -222,7 +223,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} catch (BundleException e) {
 			// do nothing; buddyList == null
 		}
-		policy = buddyList != null ? new PolicyHandler(this, buddyList) : null;
+		policy = buddyList != null ? new PolicyHandler(this, buddyList, bundle.framework.packageAdmin) : null;
+		if (policy != null)
+			policy.open(bundle.framework.systemBundle.context);
 	}
 
 	private synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
@@ -273,7 +276,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * get the loader proxy for a bundle description
 	 */
-	final BundleLoaderProxy getLoaderProxy(BundleDescription source) {
+	public final BundleLoaderProxy getLoaderProxy(BundleDescription source) {
 		BundleLoaderProxy sourceProxy = (BundleLoaderProxy) source.getUserObject();
 		if (sourceProxy == null) {
 			// may need to force the proxy to be created
@@ -296,7 +299,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (classloader != null)
 			classloader.close();
 		if (policy != null)
-			policy.close();
+			policy.close(bundle.framework.systemBundle.context);
 		loaderFlags |= FLAG_CLOSED; /* This indicates the BundleLoader is destroyed */
 	}
 
@@ -326,7 +329,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return createClassLoader().getResource(name);
 	}
 
-	final synchronized ClassLoader getParentClassLoader() {
+	public final synchronized ClassLoader getParentClassLoader() {
 		if (parent != null)
 			return parent;
 		createClassLoader();
@@ -722,7 +725,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return compoundEnumerations(result, findResources(name));
 	}
 
-	static Enumeration compoundEnumerations(Enumeration list1, Enumeration list2) {
+	public static Enumeration compoundEnumerations(Enumeration list1, Enumeration list2) {
 		if (list2 == null || !list2.hasMoreElements())
 			return list1;
 		if (list1 == null || !list1.hasMoreElements())
@@ -810,7 +813,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * Return the bundle we are associated with.
 	 */
-	final AbstractBundle getBundle() {
+	public final AbstractBundle getBundle() {
 		return bundle;
 	}
 
