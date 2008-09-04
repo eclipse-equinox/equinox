@@ -836,6 +836,62 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("buddy.registered.a.test2", texts.contains("buddy.registered.a.test2")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	public void testBuddyClassLoadingRegistered2() throws Exception {
+		Bundle registeredA = installer.installBundle("buddy.registered.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredA});
+		URL testFile = registeredA.getResource("resources/test1.txt"); //$NON-NLS-1$
+		assertNull("test1.txt", testFile); //$NON-NLS-1$
+
+		testFile = registeredA.getResource("resources/test2.txt"); //$NON-NLS-1$
+		assertNull("test2.txt", testFile); //$NON-NLS-1$
+
+		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1"); //$NON-NLS-1$
+		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
+
+		testFile = registeredA.getResource("resources/test1.txt"); //$NON-NLS-1$
+		assertNotNull("test1.txt", testFile); //$NON-NLS-1$
+		assertEquals("buddy.registered.a.test1", "buddy.registered.a.test1", readURL(testFile)); //$NON-NLS-1$ //$NON-NLS-2$
+
+		testFile = registeredA.getResource("resources/test2.txt"); //$NON-NLS-1$
+		assertNotNull("test2.txt", testFile); //$NON-NLS-1$
+		assertEquals("buddy.registered.a.test2", "buddy.registered.a.test2", readURL(testFile)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testBuddyClassLoadingRegistered3() throws Exception {
+		Bundle registeredA = installer.installBundle("buddy.registered.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredA});
+		try {
+			registeredA.loadClass("buddy.registered.a.test1.ATest"); //$NON-NLS-1$
+			fail("expected ClassNotFoundException"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		try {
+			registeredA.loadClass("buddy.registered.a.test2.ATest"); //$NON-NLS-1$
+			fail("expected ClassNotFoundException"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+		Bundle registeredATest1 = installer.installBundle("buddy.registered.a.test1"); //$NON-NLS-1$
+		Bundle registeredATest2 = installer.installBundle("buddy.registered.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {registeredATest1, registeredATest2});
+
+		try {
+			Class testClass = registeredA.loadClass("buddy.registered.a.test1.ATest"); //$NON-NLS-1$
+			assertNotNull("testClass", testClass); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected ClassNotFoundException", e); //$NON-NLS-1$
+		}
+
+		try {
+			Class testClass = registeredA.loadClass("buddy.registered.a.test2.ATest"); //$NON-NLS-1$
+			assertNotNull("testClass", testClass); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected ClassNotFoundException", e); //$NON-NLS-1$
+		}
+	}
+
 	public void testBuddyClassLoadingDependent1() throws Exception {
 		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {dependentA});
@@ -859,6 +915,64 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertTrue("buddy.dependent.a", texts.contains("buddy.dependent.a")); //$NON-NLS-1$//$NON-NLS-2$
 		assertTrue("buddy.dependent.a.test1", texts.contains("buddy.dependent.a.test1")); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("buddy.dependent.a.test2", texts.contains("buddy.dependent.a.test2")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testBuddyClassLoadingDependent2() throws Exception {
+		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentA});
+		URL testFile = dependentA.getResource("resources/test1.txt"); //$NON-NLS-1$
+		assertNull("test1.txt", testFile); //$NON-NLS-1$
+
+		testFile = dependentA.getResource("resources/test2.txt"); //$NON-NLS-1$
+		assertNull("test2.txt", testFile); //$NON-NLS-1$
+
+		Bundle dependentATest1 = installer.installBundle("buddy.dependent.a.test1"); //$NON-NLS-1$
+		Bundle dependentATest2 = installer.installBundle("buddy.dependent.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
+
+		testFile = dependentA.getResource("resources/test1.txt"); //$NON-NLS-1$
+		assertNotNull("test1.txt", testFile); //$NON-NLS-1$
+		assertEquals("buddy.dependent.a.test1", "buddy.dependent.a.test1", readURL(testFile)); //$NON-NLS-1$ //$NON-NLS-2$
+
+		testFile = dependentA.getResource("resources/test2.txt"); //$NON-NLS-1$
+		assertNotNull("test2.txt", testFile); //$NON-NLS-1$
+		assertEquals("buddy.dependent.a.test2", "buddy.dependent.a.test2", readURL(testFile)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testBuddyClassLoadingDependent3() throws Exception {
+		Bundle dependentA = installer.installBundle("buddy.dependent.a"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentA});
+
+		try {
+			dependentA.loadClass("buddy.dependent.a.test1.ATest"); //$NON-NLS-1$
+			fail("expected ClassNotFoundException"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+
+		try {
+			dependentA.loadClass("buddy.dependent.a.test2.ATest"); //$NON-NLS-1$
+			fail("expected ClassNotFoundException"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+
+		Bundle dependentATest1 = installer.installBundle("buddy.dependent.a.test1"); //$NON-NLS-1$
+		Bundle dependentATest2 = installer.installBundle("buddy.dependent.a.test2"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {dependentATest1, dependentATest2});
+
+		try {
+			Class testClass = dependentA.loadClass("buddy.dependent.a.test1.ATest"); //$NON-NLS-1$
+			assertNotNull("testClass", testClass); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected ClassNotFoundException", e); //$NON-NLS-1$
+		}
+		try {
+			Class testClass = dependentA.loadClass("buddy.dependent.a.test2.ATest"); //$NON-NLS-1$
+			assertNotNull("testClass", testClass); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected ClassNotFoundException", e); //$NON-NLS-1$
+		}
 	}
 
 	private String readURL(URL url) throws IOException {

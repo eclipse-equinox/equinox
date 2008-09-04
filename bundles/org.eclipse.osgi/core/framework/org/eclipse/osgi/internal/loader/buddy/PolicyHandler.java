@@ -30,8 +30,8 @@ public class PolicyHandler implements SynchronousBundleListener {
 	//The loader to which this policy is attached.
 	private final BundleLoader policedLoader;
 	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
-	// @GuardedBy this
-	Object[] policies = null;
+	// @GuardedBy (this)
+	private Object[] policies = null;
 
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
 	private final ThreadLocal beingLoaded;
@@ -58,6 +58,8 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	private synchronized IBuddyPolicy getPolicyImplementation(int policyOrder) {
+		if (policyOrder >= policies.length)
+			return null;
 		if (policies[policyOrder] instanceof String) {
 			String buddyName = (String) policies[policyOrder];
 
@@ -124,8 +126,11 @@ public class PolicyHandler implements SynchronousBundleListener {
 			return null;
 
 		Class result = null;
-		for (int i = 0; i < policies.length && result == null; i++) {
-			result = getPolicyImplementation(i).loadClass(name);
+		int policyCount = getPolicyCount();
+		for (int i = 0; i < policyCount && result == null; i++) {
+			IBuddyPolicy policy = getPolicyImplementation(i);
+			if (policy != null)
+				result = policy.loadClass(name);
 		}
 		stopLoading(name);
 		return result;
@@ -135,11 +140,12 @@ public class PolicyHandler implements SynchronousBundleListener {
 		if (startLoading(name) == false)
 			return null;
 
-		if (policies == null)
-			return null;
+		int policyCount = getPolicyCount();
 		URL result = null;
-		for (int i = 0; i < policies.length && result == null; i++) {
-			result = getPolicyImplementation(i).loadResource(name);
+		for (int i = 0; i < policyCount && result == null; i++) {
+			IBuddyPolicy policy = getPolicyImplementation(i);
+			if (policy != null)
+				result = policy.loadResource(name);
 		}
 		stopLoading(name);
 		return result;
@@ -149,14 +155,16 @@ public class PolicyHandler implements SynchronousBundleListener {
 		if (startLoading(name) == false)
 			return null;
 
-		if (policies == null)
-			return null;
+		int policyCount = getPolicyCount();;
 		Vector results = null;
-		for (int i = 0; i < policies.length; i++) {
-			Enumeration result = getPolicyImplementation(i).loadResources(name);
+		for (int i = 0; i < policyCount; i++) {
+			IBuddyPolicy policy = getPolicyImplementation(i);
+			if (policy == null)
+				continue;
+			Enumeration result = policy.loadResources(name);
 			if (result != null) {
 				if (results == null)
-					results = new Vector(policies.length);
+					results = new Vector(policyCount);
 				while (result.hasMoreElements()) {
 					Object url = result.nextElement();
 					if (!results.contains(url)) //only add if not already added 
@@ -185,6 +193,10 @@ public class PolicyHandler implements SynchronousBundleListener {
 		((Set) beingLoaded.get()).remove(name);
 	}
 
+	private synchronized int getPolicyCount() {
+		return policies == null ? 0 : policies.length;
+	}
+
 	public void open(BundleContext context) {
 		context.addBundleListener(this);
 	}
@@ -194,8 +206,9 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	public void bundleChanged(BundleEvent event) {
-		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) != 0)
+		if ((event.getType() & (BundleEvent.RESOLVED | BundleEvent.UNRESOLVED)) == 0)
 			return;
+		// reinitialize the policies
 		try {
 			String list = (String) policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
 			synchronized (this) {
