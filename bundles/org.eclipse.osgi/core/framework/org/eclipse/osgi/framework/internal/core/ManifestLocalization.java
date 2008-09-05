@@ -142,7 +142,7 @@ public class ManifestLocalization {
 		if (bundle.isResolved()) {
 			if (bundle.isFragment() && bundle.getHosts() != null) {
 				//if the bundle is a fragment, look in the host first
-				searchBundle = bundle.getHosts()[0].getBundleHost();
+				searchBundle = bundle.getHosts()[0];
 				if (searchBundle.getState() == Bundle.UNINSTALLED)
 					searchBundle = bundle;
 			}

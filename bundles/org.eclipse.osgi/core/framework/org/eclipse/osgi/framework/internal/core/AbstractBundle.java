@@ -19,6 +19,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.KeyedElement;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.permadmin.EquinoxProtectionDomain;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -175,6 +176,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return (state);
 	}
 
+	public Framework getFramework() {
+		return framework;
+	}
+
 	/**
 	 * Return true if the bundle is starting or active.
 	 *  
@@ -187,7 +192,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * Return true if the bundle is resolved.
 	 *  
 	 */
-	protected boolean isResolved() {
+	public boolean isResolved() {
 		return (state & (INSTALLED | UNINSTALLED)) == 0;
 	}
 
@@ -1249,7 +1254,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return false;
 	}
 
-	protected BundleLoaderProxy[] getHosts() {
+	BundleHost[] getHosts() {
 		checkValid();
 		return null;
 	}

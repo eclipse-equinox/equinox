@@ -25,6 +25,7 @@ import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
@@ -99,11 +100,11 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	protected Hashtable installLock;
 	/** System Bundle object */
 	protected SystemBundle systemBundle;
-	String[] bootDelegation;
-	String[] bootDelegationStems;
-	boolean bootDelegateAll = false;
-	boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	boolean compatibiltyBootDelegation = false;
+	private String[] bootDelegation;
+	private String[] bootDelegationStems;
+	private boolean bootDelegateAll = false;
+	public final boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 	ClassLoaderDelegateHook[] delegateHooks;
 	private volatile boolean forcedRestart = false;
 	/**
@@ -252,6 +253,10 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		return adaptor;
 	}
 
+	public ClassLoaderDelegateHook[] getDelegateHooks() {
+		return delegateHooks;
+	}
+
 	public ServiceRegistry getServiceRegistry() {
 		return serviceRegistry;
 	}
@@ -381,8 +386,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private void setBootDelegation() {
-		// set the compatibility boot delegation flag
-		compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
 		// set the boot delegation according to the osgi boot delegation property
 		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
 		if (bootDelegationProp == null)
@@ -1003,6 +1006,16 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		synchronized (bundles) {
 			return bundles.getBundle(id);
 		}
+	}
+
+	public BundleContextImpl getSystemBundleContext() {
+		if (systemBundle == null)
+			return null;
+		return systemBundle.context;
+	}
+
+	public PackageAdminImpl getPackageAdmin() {
+		return packageAdmin;
 	}
 
 	/**
@@ -1762,7 +1775,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (consumerSource == null)
 			return true;
 		// work around the issue when the package is in the EE and we delegate to boot for that package
-		if (producerBL.isBootDelegationPackage(pkgName)) {
+		if (isBootDelegationPackage(pkgName)) {
 			SystemBundleLoader systemLoader = (SystemBundleLoader) systemBundle.getBundleLoader();
 			if (systemLoader.isEEPackage(pkgName))
 				return true; // in this case we have a common source from the EE
@@ -1803,4 +1816,17 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		return getPackageSource(serviceClass.getSuperclass(), pkgName);
 	}
 
+	public boolean isBootDelegationPackage(String name) {
+		if (bootDelegateAll)
+			return true;
+		if (bootDelegation != null)
+			for (int i = 0; i < bootDelegation.length; i++)
+				if (name.equals(bootDelegation[i]))
+					return true;
+		if (bootDelegationStems != null)
+			for (int i = 0; i < bootDelegationStems.length; i++)
+				if (name.startsWith(bootDelegationStems[i]))
+					return true;
+		return false;
+	}
 }

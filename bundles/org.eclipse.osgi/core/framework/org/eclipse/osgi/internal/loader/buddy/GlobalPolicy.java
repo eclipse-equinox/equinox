@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader.buddy;
 
-import org.eclipse.osgi.framework.internal.core.BundleLoader;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 

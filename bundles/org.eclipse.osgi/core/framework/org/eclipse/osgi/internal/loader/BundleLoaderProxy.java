@@ -8,9 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader;
 
 import java.util.ArrayList;
+import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
@@ -53,18 +55,18 @@ public class BundleLoaderProxy implements RequiredBundle {
 				else
 					loader = new BundleLoader(bundle, this);
 			} catch (BundleException e) {
-				bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+				bundle.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 				return null;
 			}
 		}
 		return loader;
 	}
 
-	BundleLoader getBasicBundleLoader() {
+	public BundleLoader getBasicBundleLoader() {
 		return loader;
 	}
 
-	AbstractBundle getBundleHost() {
+	public AbstractBundle getBundleHost() {
 		return bundle;
 	}
 
@@ -72,7 +74,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		stale = true;
 	}
 
-	boolean isStale() {
+	public boolean isStale() {
 		return stale;
 	}
 
@@ -166,12 +168,12 @@ public class BundleLoaderProxy implements RequiredBundle {
 		return pkgSource;
 	}
 
-	boolean inUse() {
+	public boolean inUse() {
 		return description.getDependents().length > 0;
 	}
 
 	boolean forceSourceCreation(ExportPackageDescription export) {
-		boolean strict = Constants.STRICT_MODE.equals(bundle.framework.adaptor.getState().getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+		boolean strict = Constants.STRICT_MODE.equals(FrameworkProperties.getProperty(Constants.OSGI_RESOLVER_MODE));
 		return (export.getDirective(Constants.INCLUDE_DIRECTIVE) != null) || (export.getDirective(Constants.EXCLUDE_DIRECTIVE) != null) || (strict && export.getDirective(Constants.FRIENDS_DIRECTIVE) != null);
 	}
 
@@ -181,7 +183,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 	// that the source for special case package sources (filtered or re-exported should be stored 
 	// in the cache.  if this flag is set then a normal SinglePackageSource will not be created
 	// (i.e. it will be created lazily)
-	PackageSource createPackageSource(ExportPackageDescription export, boolean storeSource) {
+	public PackageSource createPackageSource(ExportPackageDescription export, boolean storeSource) {
 		PackageSource pkgSource = null;
 
 		// check to see if it is a filtered export
@@ -189,7 +191,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		String excludes = (String) export.getDirective(Constants.EXCLUDE_DIRECTIVE);
 		String[] friends = (String[]) export.getDirective(Constants.FRIENDS_DIRECTIVE);
 		if (friends != null) {
-			boolean strict = Constants.STRICT_MODE.equals(bundle.framework.adaptor.getState().getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
+			boolean strict = Constants.STRICT_MODE.equals(FrameworkProperties.getProperty(Constants.OSGI_RESOLVER_MODE));
 			if (!strict)
 				friends = null; // do not pay attention to friends if not in strict mode
 		}

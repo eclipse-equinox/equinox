@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,13 +9,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashSet;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.internal.core.BundleFragment;
+import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -80,7 +82,7 @@ public class SystemBundleLoader extends BundleLoader {
 			extPackages.add(extExports[j].getName());
 	}
 
-	synchronized void attachFragment(BundleFragment fragment) throws BundleException {
+	synchronized public void attachFragment(BundleFragment fragment) throws BundleException {
 		super.attachFragment(fragment);
 		synchronized (extPackages) {
 			addExtPackages(fragment);

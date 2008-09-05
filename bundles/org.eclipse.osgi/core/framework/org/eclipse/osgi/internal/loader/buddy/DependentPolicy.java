@@ -14,8 +14,8 @@ package org.eclipse.osgi.internal.loader.buddy;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.BundleLoader;
-import org.eclipse.osgi.framework.internal.core.BundleLoaderProxy;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 
 /**

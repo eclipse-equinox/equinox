@@ -1383,12 +1383,12 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 					label = label + "_" + b.getVersion(); //$NON-NLS-1$
 				intp.println(b.getBundleId() + "\t" + getStateName(b) + label); //$NON-NLS-1$ 
 				if (b.isFragment()) {
-					BundleLoaderProxy[] hosts = b.getHosts();
+					Bundle[] hosts = b.getHosts();
 					if (hosts != null)
 						for (int j = 0; j < hosts.length; j++)
-							intp.println("\t            Master=" + hosts[j].getBundleHost().getBundleId()); //$NON-NLS-1$
+							intp.println("\t            Master=" + hosts[j].getBundleId()); //$NON-NLS-1$
 				} else {
-					org.osgi.framework.Bundle fragments[] = b.getFragments();
+					Bundle[] fragments = b.getFragments();
 					if (fragments != null) {
 						intp.print("\t            Fragments="); //$NON-NLS-1$
 						for (int f = 0; f < fragments.length; f++) {

@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader.buddy;
 
+import org.eclipse.osgi.internal.loader.BundleLoader;
+
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.framework.internal.core.BundleLoader;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;

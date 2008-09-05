@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader;
 
 import java.net.URL;
 import java.util.Enumeration;

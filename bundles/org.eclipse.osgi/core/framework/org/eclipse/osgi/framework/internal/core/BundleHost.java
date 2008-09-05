@@ -17,6 +17,8 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -89,7 +91,7 @@ public class BundleHost extends AbstractBundle {
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
 				else
-					closeBundleLoader(proxy);
+					BundleLoader.closeBundleLoader(proxy);
 				state = INSTALLED;
 				proxy = null;
 				fragments = null;
@@ -123,7 +125,7 @@ public class BundleHost extends AbstractBundle {
 			}
 		}
 		if (state == RESOLVED) {
-			closeBundleLoader(proxy);
+			BundleLoader.closeBundleLoader(proxy);
 			proxy = null;
 			fragments = null;
 			state = INSTALLED;
@@ -157,7 +159,7 @@ public class BundleHost extends AbstractBundle {
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
 				else
-					closeBundleLoader(proxy);
+					BundleLoader.closeBundleLoader(proxy);
 
 				state = INSTALLED;
 				proxy = null;
@@ -529,7 +531,7 @@ public class BundleHost extends AbstractBundle {
 		return context.getFramework().getServiceRegistry().getServicesInUse(context);
 	}
 
-	protected Bundle[] getFragments() {
+	public Bundle[] getFragments() {
 		synchronized (framework.bundles) {
 			if (fragments == null)
 				return null;
@@ -589,7 +591,7 @@ public class BundleHost extends AbstractBundle {
 		return curProxy == null ? null : curProxy.getBundleLoader();
 	}
 
-	protected synchronized BundleLoaderProxy getLoaderProxy() {
+	public synchronized BundleLoaderProxy getLoaderProxy() {
 		if (proxy != null)
 			return proxy;
 		BundleDescription bundleDescription = getBundleDescription();
@@ -598,19 +600,5 @@ public class BundleHost extends AbstractBundle {
 		proxy = new BundleLoaderProxy(this, bundleDescription);
 		bundleDescription.setUserObject(proxy);
 		return proxy;
-	}
-
-	static void closeBundleLoader(BundleLoaderProxy proxy) {
-		if (proxy == null)
-			return;
-		// First close the BundleLoader
-		BundleLoader loader = proxy.getBasicBundleLoader();
-		if (loader != null)
-			loader.close();
-		proxy.setStale();
-		// if proxy is not null then make sure to unset user object
-		// associated with the proxy in the state
-		BundleDescription description = proxy.getBundleDescription();
-		description.setUserObject(null);
 	}
 }

@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.osgi.framework.internal.core;
+package org.eclipse.osgi.internal.loader;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
 import org.eclipse.osgi.service.resolver.*;
@@ -31,7 +32,7 @@ import org.osgi.framework.FrameworkEvent;
  * It represents the loaded state of the bundle.  BundleLoader objects
  * are created lazily; care should be taken not to force the creation
  * of a BundleLoader unless it is necessary.
- * @see org.eclipse.osgi.framework.internal.core.BundleLoaderProxy
+ * @see org.eclipse.osgi.internal.loader.BundleLoaderProxy
  */
 public class BundleLoader implements ClassLoaderDelegate {
 	public final static String DEFAULT_PACKAGE = "."; //$NON-NLS-1$
@@ -223,9 +224,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} catch (BundleException e) {
 			// do nothing; buddyList == null
 		}
-		policy = buddyList != null ? new PolicyHandler(this, buddyList, bundle.framework.packageAdmin) : null;
+		policy = buddyList != null ? new PolicyHandler(this, buddyList, bundle.getFramework().getPackageAdmin()) : null;
 		if (policy != null)
-			policy.open(bundle.framework.systemBundle.context);
+			policy.open(bundle.getFramework().getSystemBundleContext());
 	}
 
 	private synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
@@ -281,7 +282,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (sourceProxy == null) {
 			// may need to force the proxy to be created
 			long exportingID = source.getBundleId();
-			BundleHost exportingBundle = (BundleHost) bundle.framework.getBundle(exportingID);
+			BundleHost exportingBundle = (BundleHost) bundle.getFramework().getBundle(exportingID);
 			if (exportingBundle == null)
 				return null;
 			sourceProxy = exportingBundle.getLoaderProxy();
@@ -299,7 +300,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (classloader != null)
 			classloader.close();
 		if (policy != null)
-			policy.close(bundle.framework.systemBundle.context);
+			policy.close(bundle.getFramework().getSystemBundleContext());
 		loaderFlags |= FLAG_CLOSED; /* This indicates the BundleLoader is destroyed */
 	}
 
@@ -312,7 +313,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	final Class loadClass(String name) throws ClassNotFoundException {
+	final public Class loadClass(String name) throws ClassNotFoundException {
 		return createClassLoader().loadClass(name);
 	}
 
@@ -336,7 +337,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return parent;
 	}
 
-	final synchronized BundleClassLoader createClassLoader() {
+	final public synchronized BundleClassLoader createClassLoader() {
 		if (classloader != null)
 			return classloader;
 		String[] classpath;
@@ -345,12 +346,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 		} catch (BundleException e) {
 			// no classpath
 			classpath = new String[0];
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
+			bundle.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
 		}
 		if (classpath == null) {
 			// no classpath
 			classpath = new String[0];
-			bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH, BundleException.MANIFEST_ERROR));
+			bundle.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, new BundleException(Msg.BUNDLE_NO_CLASSPATH_MATCH, BundleException.MANIFEST_ERROR));
 		}
 		BundleClassLoader bcl = createBCLPrevileged(bundle.getProtectionDomain(), classpath);
 		parent = getParentPrivileged(bcl);
@@ -410,7 +411,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;
 		// follow the OSGi delegation model
-		if (checkParent && parentCL != null && isBootDelegationPackage(pkgName))
+		if (checkParent && parentCL != null && bundle.getFramework().isBootDelegationPackage(pkgName))
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			try {
 				return parentCL.loadClass(name);
@@ -474,7 +475,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return result;
 		// hack to support backwards compatibiility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parentCL != null && !bootDelegation && ((checkParent && bundle.framework.compatibiltyBootDelegation) || isRequestFromVM()))
+		if (parentCL != null && !bootDelegation && ((checkParent && bundle.getFramework().compatibiltyBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if a CNFE is thrown here.
 			try {
 				return parentCL.loadClass(name);
@@ -485,35 +486,35 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private Object searchHooks(String name, int type) throws ClassNotFoundException, FileNotFoundException {
-		ClassLoaderDelegateHook[] delegateHooks = bundle.framework.delegateHooks;
+		ClassLoaderDelegateHook[] delegateHooks = bundle.getFramework().getDelegateHooks();
 		if (delegateHooks == null)
 			return null;
 		Object result = null;
 		for (int i = 0; i < delegateHooks.length && result == null; i++) {
 			switch (type) {
 				case PRE_CLASS :
-					result = delegateHooks[i].preFindClass(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].preFindClass(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_CLASS :
-					result = delegateHooks[i].postFindClass(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].postFindClass(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_RESOURCE :
-					result = delegateHooks[i].preFindResource(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].preFindResource(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_RESOURCE :
-					result = delegateHooks[i].postFindResource(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].postFindResource(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_RESOURCES :
-					result = delegateHooks[i].preFindResources(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].preFindResources(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_RESOURCES :
-					result = delegateHooks[i].postFindResources(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].postFindResources(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_LIBRARY :
-					result = delegateHooks[i].preFindLibrary(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].preFindLibrary(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_LIBRARY :
-					result = delegateHooks[i].postFindLibrary(name, createClassLoader(), bundle.bundledata);
+					result = delegateHooks[i].postFindLibrary(name, createClassLoader(), bundle.getBundleData());
 					break;
 			}
 		}
@@ -521,7 +522,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private boolean isRequestFromVM() {
-		if (bundle.framework.bootDelegateAll || !bundle.framework.contextBootDelegation)
+		if (bundle.getFramework().isBootDelegationPackage("*") || !bundle.getFramework().contextBootDelegation) //$NON-NLS-1$
 			return false;
 		// works around VM bugs that require all classloaders to have access to parent packages
 		Class[] context = CLASS_CONTEXT.getClassContext();
@@ -572,7 +573,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				// 1) if startsWith "java." delegate to parent and terminate search
 				// we never delegate java resource requests past the parent
 				return parentCL.getResource(name);
-			else if (isBootDelegationPackage(pkgName)) {
+			else if (bundle.getFramework().isBootDelegationPackage(pkgName)) {
 				// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 				URL result = parentCL.getResource(name);
 				if (result != null)
@@ -629,24 +630,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return result;
 		// hack to support backwards compatibiility for bootdelegation
 		// or last resort; do class context trick to work around VM bugs
-		if (parentCL != null && !bootDelegation && ((checkParent && bundle.framework.compatibiltyBootDelegation) || isRequestFromVM()))
+		if (parentCL != null && !bootDelegation && ((checkParent && bundle.getFramework().compatibiltyBootDelegation) || isRequestFromVM()))
 			// we don't need to continue if the resource is not found here
 			return parentCL.getResource(name);
 		return result;
-	}
-
-	boolean isBootDelegationPackage(String name) {
-		if (bundle.framework.bootDelegateAll)
-			return true;
-		if (bundle.framework.bootDelegation != null)
-			for (int i = 0; i < bundle.framework.bootDelegation.length; i++)
-				if (name.equals(bundle.framework.bootDelegation[i]))
-					return true;
-		if (bundle.framework.bootDelegationStems != null)
-			for (int i = 0; i < bundle.framework.bootDelegationStems.length; i++)
-				if (name.startsWith(bundle.framework.bootDelegationStems[i]))
-					return true;
-		return false;
 	}
 
 	/**
@@ -707,14 +694,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * This method is used by Bundle.getResources to do proper parent delegation.
 	 */
-	Enumeration getResources(String name) throws IOException {
+	public Enumeration getResources(String name) throws IOException {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
 		Enumeration result = null;
-		if (pkgName.startsWith(JAVA_PACKAGE) || isBootDelegationPackage(pkgName)) {
+		if (pkgName.startsWith(JAVA_PACKAGE) || bundle.getFramework().isBootDelegationPackage(pkgName)) {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
 			ClassLoader parentCL = getParentClassLoader();
@@ -838,9 +825,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 			for (int i = 0; i < fragments.length; i++) {
 				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
-					bcl.attachFragment(fragment.getBundleData(), fragment.domain, fragment.getBundleData().getClassPath());
+					bcl.attachFragment(fragment.getBundleData(), fragment.getProtectionDomain(), fragment.getBundleData().getClassPath());
 				} catch (BundleException be) {
-					bundle.framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
+					bundle.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 				}
 			}
 
@@ -1021,12 +1008,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
-	synchronized void attachFragment(BundleFragment fragment) throws BundleException {
+	synchronized public void attachFragment(BundleFragment fragment) throws BundleException {
 		if (classloader == null)
 			return;
 		String[] classpath = fragment.getBundleData().getClassPath();
 		if (classpath != null)
-			classloader.attachFragment(fragment.getBundleData(), fragment.domain, classpath);
+			classloader.attachFragment(fragment.getBundleData(), fragment.getProtectionDomain(), classpath);
 	}
 
 	/*
@@ -1054,7 +1041,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	private PackageSource findDynamicSource(String pkgName) {
 		if (isDynamicallyImported(pkgName)) {
-			ExportPackageDescription exportPackage = bundle.framework.adaptor.getState().linkDynamicImport(proxy.getBundleDescription(), pkgName);
+			ExportPackageDescription exportPackage = bundle.getFramework().getAdaptor().getState().linkDynamicImport(proxy.getBundleDescription(), pkgName);
 			if (exportPackage != null) {
 				PackageSource source = createExportPackageSource(exportPackage, null);
 				synchronized (this) {
@@ -1111,7 +1098,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * if the bundle exports the package.  This is used to compare the PackageSource of a 
 	 * package from two different bundles.
 	 */
-	final PackageSource getPackageSource(String pkgName) {
+	public final PackageSource getPackageSource(String pkgName) {
 		PackageSource result = findSource(pkgName);
 		if (!isExportedPackage(pkgName))
 			return result;
@@ -1229,4 +1216,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	}
 
+	static public void closeBundleLoader(BundleLoaderProxy proxy) {
+		if (proxy == null)
+			return;
+		// First close the BundleLoader
+		BundleLoader loader = proxy.getBasicBundleLoader();
+		if (loader != null)
+			loader.close();
+		proxy.setStale();
+		// if proxy is not null then make sure to unset user object
+		// associated with the proxy in the state
+		BundleDescription description = proxy.getBundleDescription();
+		description.setUserObject(null);
+	}
 }

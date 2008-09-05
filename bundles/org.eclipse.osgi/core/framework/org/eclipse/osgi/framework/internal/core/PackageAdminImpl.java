@@ -18,6 +18,8 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
@@ -309,7 +311,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
 			if (proxy != null) {
-				BundleHost.closeBundleLoader(proxy);
+				BundleLoader.closeBundleLoader(proxy);
 				try {
 					proxy.getBundleHost().getBundleData().close();
 				} catch (IOException e) {
@@ -333,7 +335,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			BundleDescription[] hosts = bundleDescription.getHost().getHosts();
 			for (int i = 0; i < hosts.length; i++) {
 				BundleHost host = (BundleHost) framework.getBundle(hosts[i].getBundleId());
-				resolve = ((BundleFragment) bundle).addHost(host.getLoaderProxy());
+				resolve = ((BundleFragment) bundle).addHost(host);
 			}
 		}
 		if (resolve)
@@ -558,19 +560,20 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public Bundle[] getHosts(Bundle bundle) {
-		BundleLoaderProxy[] hosts = ((AbstractBundle) bundle).getHosts();
+		BundleHost[] hosts = ((AbstractBundle) bundle).getHosts();
 		if (hosts == null)
 			return null;
+		// copy the array to protect modification
 		Bundle[] result = new Bundle[hosts.length];
 		for (int i = 0; i < hosts.length; i++)
-			result[i] = hosts[i].getBundleHost();
+			result[i] = hosts[i];
 		return result;
 	}
 
 	Bundle getBundlePriv(Class clazz) {
 		ClassLoader cl = clazz.getClassLoader();
 		if (cl instanceof BundleClassLoader)
-			return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).bundle;
+			return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).getBundle();
 		if (cl == getClass().getClassLoader())
 			return framework.systemBundle;
 		return null;

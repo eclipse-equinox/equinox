@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
+import org.eclipse.osgi.internal.loader.*;
+
 import java.util.ArrayList;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;

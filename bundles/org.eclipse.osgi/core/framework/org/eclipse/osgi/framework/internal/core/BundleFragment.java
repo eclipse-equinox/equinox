@@ -16,13 +16,14 @@ import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BundleFragment extends AbstractBundle {
 
 	/** The resolved host that this fragment is attached to */
-	protected BundleLoaderProxy[] hosts;
+	protected BundleHost[] hosts;
 
 	/**
 	 * @param bundledata
@@ -278,7 +279,7 @@ public class BundleFragment extends AbstractBundle {
 		return null;
 	}
 
-	protected BundleLoaderProxy[] getHosts() {
+	synchronized BundleHost[] getHosts() {
 		return hosts;
 	}
 
@@ -290,27 +291,29 @@ public class BundleFragment extends AbstractBundle {
 	 * Adds a host bundle for this fragment.
 	 * @param host the BundleHost to add to the set of host bundles
 	 */
-	protected boolean addHost(BundleLoaderProxy host) {
+	boolean addHost(BundleHost host) {
 		if (host == null)
 			return false;
 		try {
-			((BundleHost) host.getBundleHost()).attachFragment(this);
+			host.attachFragment(this);
 		} catch (BundleException be) {
-			framework.publishFrameworkEvent(FrameworkEvent.ERROR, host.getBundleHost(), be);
+			framework.publishFrameworkEvent(FrameworkEvent.ERROR, host, be);
 			return false;
 		}
-		if (hosts == null) {
-			hosts = new BundleLoaderProxy[] {host};
-			return true;
+		synchronized (this) {
+			if (hosts == null) {
+				hosts = new BundleHost[] {host};
+				return true;
+			}
+			for (int i = 0; i < hosts.length; i++) {
+				if (host == hosts[i])
+					return true; // already a host
+			}
+			BundleHost[] newHosts = new BundleHost[hosts.length + 1];
+			System.arraycopy(hosts, 0, newHosts, 0, hosts.length);
+			newHosts[newHosts.length - 1] = host;
+			hosts = newHosts;
 		}
-		for (int i = 0; i < hosts.length; i++) {
-			if (host.getBundleHost() == hosts[i].getBundleHost())
-				return true; // already a host
-		}
-		BundleLoaderProxy[] newHosts = new BundleLoaderProxy[hosts.length + 1];
-		System.arraycopy(hosts, 0, newHosts, 0, hosts.length);
-		newHosts[newHosts.length - 1] = host;
-		hosts = newHosts;
 		return true;
 	}
 
