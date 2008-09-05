@@ -7,4 +7,4 @@ Bundle-Localization: plugin
 Import-Package: 
  org.eclipse.osgi.tests.bundles,
  org.osgi.framework;version="1.3.0"
-Require-Bundle: buddy.dependent.a
+Require-Bundle: buddy.dependent.a.test1
