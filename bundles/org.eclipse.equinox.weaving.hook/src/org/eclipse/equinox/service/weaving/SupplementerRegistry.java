@@ -14,7 +14,6 @@
 package org.eclipse.equinox.service.weaving;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -100,23 +99,17 @@ public class SupplementerRegistry {
                 .add("org.eclipse.equinox.simpleconfigurator");
     }
 
-    public void addSupplementedBundle(final Bundle supplementedBundle,
-            final List supplementers) {
-        for (final Iterator iterator = supplementers.iterator(); iterator
-                .hasNext();) {
-            final String supplementersName = (String) iterator.next();
-            if (this.supplementers.containsKey(supplementersName)) {
-                final Supplementer supplementer = (Supplementer) this.supplementers
-                        .get(supplementersName);
-                supplementer.addSupplementedBundle(supplementedBundle);
-            }
-        }
+    public void addBundle(final Bundle bundle) {
+        // First analyze which supplementers already exists for this bundle
+        addSupplementedBundle(bundle);
+
+        // Second analyze if this bundle itself is a supplementer
+        addSupplementer(bundle, true);
     }
 
-    public void addSupplementer(final Bundle bundle) {
-        final Dictionary manifest = bundle.getHeaders();
+    public void addSupplementedBundle(final Bundle bundle) {
         try {
-            // First analyze which supplementers already exists for this bundle
+            final Dictionary manifest = bundle.getHeaders();
             final ManifestElement[] imports = ManifestElement.parseHeader(
                     Constants.IMPORT_PACKAGE, (String) manifest
                             .get(Constants.IMPORT_PACKAGE));
@@ -128,8 +121,13 @@ public class SupplementerRegistry {
             if (supplementers.size() > 0) {
                 this.addSupplementedBundle(bundle, supplementers);
             }
+        } catch (final BundleException e) {
+        }
+    }
 
-            // Second analyze if this bundle itself is a supplementer
+    public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
+        try {
+            final Dictionary manifest = bundle.getHeaders();
             final ManifestElement[] supplementBundle = ManifestElement
                     .parseHeader(SUPPLEMENT_BUNDLE, (String) manifest
                             .get(SUPPLEMENT_BUNDLE));
@@ -148,23 +146,16 @@ public class SupplementerRegistry {
 
                 this.supplementers.put(bundle.getSymbolicName(),
                         newSupplementer);
-                resupplementInstalledBundles(newSupplementer);
+                if (updateBundles) {
+                    resupplementInstalledBundles(newSupplementer);
+                }
             }
         } catch (final BundleException e) {
         }
     }
 
-    public Set getSupplementedBundles() {
-        final Set supplementedBundles = new HashSet();
-        final Iterator supplementersIterator = supplementers.values()
-                .iterator();
-        while (supplementersIterator.hasNext()) {
-            final Supplementer supplementer = (Supplementer) supplementersIterator
-                    .next();
-            supplementedBundles.addAll(Arrays.asList(supplementer
-                    .getSupplementedBundles()));
-        }
-        return supplementedBundles;
+    public PackageAdmin getPackageAdmin() {
+        return packageAdmin;
     }
 
     public Bundle[] getSupplementers(final Bundle bundle) {
@@ -204,15 +195,7 @@ public class SupplementerRegistry {
         return result;
     }
 
-    public void removeSupplementedBundle(final Bundle bundle) {
-        for (final Iterator iterator = this.supplementers.values().iterator(); iterator
-                .hasNext();) {
-            final Supplementer supplementer = (Supplementer) iterator.next();
-            supplementer.removeSupplementedBundle(bundle);
-        }
-    }
-
-    public void removeSupplementer(final Bundle bundle) {
+    public void removeBundle(final Bundle bundle) {
         // if this bundle is itself supplemented by others, remove the bundle from those lists
         removeSupplementedBundle(bundle);
 
@@ -252,9 +235,28 @@ public class SupplementerRegistry {
                             + bundle.getSymbolicName());
 
         try {
+            final int initialstate = (bundle.getState() & (Bundle.ACTIVE | Bundle.STARTING));
+            if (initialstate != 0
+                    && packageAdmin != null
+                    && packageAdmin.getBundleType(bundle) != PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
+                bundle.stop(Bundle.STOP_TRANSIENT);
+            }
             bundle.update();
         } catch (final BundleException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addSupplementedBundle(final Bundle supplementedBundle,
+            final List supplementers) {
+        for (final Iterator iterator = supplementers.iterator(); iterator
+                .hasNext();) {
+            final String supplementersName = (String) iterator.next();
+            if (this.supplementers.containsKey(supplementersName)) {
+                final Supplementer supplementer = (Supplementer) this.supplementers
+                        .get(supplementersName);
+                supplementer.addSupplementedBundle(supplementedBundle);
+            }
         }
     }
 
@@ -272,6 +274,14 @@ public class SupplementerRegistry {
             }
         }
         return false;
+    }
+
+    private void removeSupplementedBundle(final Bundle bundle) {
+        for (final Iterator iterator = this.supplementers.values().iterator(); iterator
+                .hasNext();) {
+            final Supplementer supplementer = (Supplementer) iterator.next();
+            supplementer.removeSupplementedBundle(bundle);
+        }
     }
 
     private void resupplementInstalledBundles(final Supplementer supplementer) {
@@ -300,23 +310,8 @@ public class SupplementerRegistry {
 
                 if (isSupplementerMatching(bundle.getSymbolicName(), imports,
                         exports, supplementer)) {
-                    boolean alreadyRequired = false;
-                    final ManifestElement[] requires = ManifestElement
-                            .parseHeader(Constants.REQUIRE_BUNDLE,
-                                    (String) manifest
-                                            .get(Constants.REQUIRE_BUNDLE));
-                    if (requires != null) {
-                        for (int j = 0; j < requires.length; j++) {
-                            if (requires[j].getValue().equals(
-                                    supplementer.getSymbolicName())) {
-                                alreadyRequired = true;
-                            }
-                        }
-                    }
 
-                    if (!alreadyRequired) {
-                        updateInstalledBundle(bundle);
-                    }
+                    updateInstalledBundle(bundle);
                 }
 
             } catch (final BundleException e) {

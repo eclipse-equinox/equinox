@@ -36,6 +36,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class AspectJAdaptorFactory {
@@ -43,13 +44,17 @@ public class AspectJAdaptorFactory {
     private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
                     "org.eclipse.equinox.caching",
-                    "org.eclipse.equinox.caching.j9" });
+                    "org.eclipse.equinox.caching.j9",
+                    "org.eclipse.update.configurator",
+                    "org.eclipse.equinox.simpleconfigurator" });
 
     private BundleContext bundleContext;
 
     private ServiceTracker cachingServiceTracker;
 
     private PackageAdmin packageAdminService;
+
+    private StartLevel startLevelService;
 
     private SupplementerRegistry supplementerRegistry;
 
@@ -103,6 +108,9 @@ public class AspectJAdaptorFactory {
         this.bundleContext = context;
         this.supplementerRegistry = supplementerRegistry;
 
+        initializePackageAdminService(context);
+        initializeStartLevelService(context);
+
         // Service tracker for weaving service
         weavingServiceTracker = new ServiceTracker(context,
                 IWeavingService.class.getName(), null);
@@ -123,6 +131,9 @@ public class AspectJAdaptorFactory {
                             final Bundle bundle = (Bundle) entry.getKey();
                             if (entry.getValue() == null) {
                                 bundleEntries.remove();
+                                System.err
+                                        .println("bundle update because of weaving service start: "
+                                                + bundle.getSymbolicName());
                                 supplementerRegistry
                                         .updateInstalledBundle(bundle);
                                 if (Debug.DEBUG_WEAVE)
@@ -132,7 +143,10 @@ public class AspectJAdaptorFactory {
                         }
                     }
                 }
-                if (event.getType() == ServiceEvent.UNREGISTERING) {
+                if (event.getType() == ServiceEvent.UNREGISTERING
+                        && startLevelService != null
+                        && startLevelService.getStartLevel() > 0) {
+
                     final Iterator bundleEntries = weavingServices.entrySet()
                             .iterator();
                     synchronized (weavingServices) {
@@ -141,6 +155,9 @@ public class AspectJAdaptorFactory {
                             final Bundle bundle = (Bundle) entry.getKey();
                             if (entry.getValue() != null) {
                                 bundleEntries.remove();
+                                System.err
+                                        .println("bundle update because of weaving service stop: "
+                                                + bundle.getSymbolicName());
                                 supplementerRegistry
                                         .updateInstalledBundle(bundle);
                                 if (Debug.DEBUG_WEAVE)
@@ -165,8 +182,6 @@ public class AspectJAdaptorFactory {
         cachingServiceTracker.open();
         if (Debug.DEBUG_CACHE)
             Debug.println("> Opened service tracker for caching service.");
-
-        initializePackageAdminService(context);
     }
 
     protected ICachingService getCachingService(final BaseClassLoader loader,
@@ -241,5 +256,23 @@ public class AspectJAdaptorFactory {
             Debug
                     .println("< AspectJAdaptorFactory.initializePackageAdminService() "
                             + packageAdminService);
+    }
+
+    private void initializeStartLevelService(final BundleContext context) {
+        if (Debug.DEBUG_GENERAL)
+            Debug
+                    .println("> AspectJAdaptorFactory.initializeStartLevelService() context="
+                            + context);
+
+        final ServiceReference ref = context
+                .getServiceReference(StartLevel.class.getName());
+        if (ref != null) {
+            startLevelService = (StartLevel) context.getService(ref);
+        }
+
+        if (Debug.DEBUG_GENERAL)
+            Debug
+                    .println("< AspectJAdaptorFactory.initializeStartLevelService() "
+                            + startLevelService);
     }
 }

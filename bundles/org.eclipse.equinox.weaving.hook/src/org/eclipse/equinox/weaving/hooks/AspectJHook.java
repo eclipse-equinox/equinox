@@ -200,15 +200,17 @@ public class AspectJHook extends AbstractAspectJHook {
         context.addBundleListener(new SupplementBundleListener(
                 supplementerRegistry));
 
-        // re-build supplementer registry state for installed bundles
+        // final re-build supplementer final registry state for final installed bundles
         final Bundle[] installedBundles = context.getBundles();
         for (int i = 0; i < installedBundles.length; i++) {
-            supplementerRegistry.addSupplementer(installedBundles[i]);
+            supplementerRegistry.addSupplementer(installedBundles[i], false);
+        }
+        for (int i = 0; i < installedBundles.length; i++) {
+            supplementerRegistry.addSupplementedBundle(installedBundles[i]);
         }
 
         if (Debug.DEBUG_GENERAL)
             Debug.println("< AspectJHook.initialize() adaptorFactory="
                     + adaptorFactory);
     }
-
 }
