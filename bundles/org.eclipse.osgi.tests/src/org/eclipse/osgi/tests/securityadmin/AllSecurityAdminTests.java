@@ -17,6 +17,7 @@ public class AllSecurityAdminTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllSecurityAdminTests.class.getName());
 		suite.addTest(SecurityAdminUnitTests.suite());
+		suite.addTest(SecurityManagerTests.suite());
 		return suite;
 	}
 }

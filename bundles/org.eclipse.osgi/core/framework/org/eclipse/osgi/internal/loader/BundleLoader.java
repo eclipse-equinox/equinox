@@ -205,10 +205,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		//This is the fastest way to access to the description for fragments since the hostdescription.getFragments() is slow
-		org.osgi.framework.Bundle[] fragmentObjects = bundle.getFragments();
+		BundleFragment[] fragmentObjects = bundle.getFragments();
 		BundleDescription[] fragments = new BundleDescription[fragmentObjects == null ? 0 : fragmentObjects.length];
 		for (int i = 0; i < fragments.length; i++)
-			fragments[i] = ((AbstractBundle) fragmentObjects[i]).getBundleDescription();
+			fragments[i] = fragmentObjects[i].getBundleDescription();
 		// init the dynamic imports tables
 		if (description.hasDynamicImports())
 			addDynamicImportPackage(description.getImportPackages());
@@ -780,10 +780,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			return result;
 
 		// look in fragments imports ...
-		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
+		BundleFragment[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++) {
-				result = ((AbstractBundle) fragments[i]).getBundleData().findLibrary(name);
+				result = fragments[i].getBundleData().findLibrary(name);
 				if (result != null)
 					return result;
 			}
@@ -820,12 +820,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	BundleClassLoader createBCL(final BundleProtectionDomain pd, final String[] cp) {
 		BundleClassLoader bcl = bundle.getBundleData().createClassLoader(BundleLoader.this, pd, cp);
 		// attach existing fragments to classloader
-		org.osgi.framework.Bundle[] fragments = bundle.getFragments();
+		BundleFragment[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++) {
-				AbstractBundle fragment = (AbstractBundle) fragments[i];
 				try {
-					bcl.attachFragment(fragment.getBundleData(), fragment.getProtectionDomain(), fragment.getBundleData().getClassPath());
+					bcl.attachFragment(fragments[i].getBundleData(), fragments[i].getProtectionDomain(), fragments[i].getBundleData().getClassPath());
 				} catch (BundleException be) {
 					bundle.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, bundle, be);
 				}

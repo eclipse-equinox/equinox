@@ -19,7 +19,6 @@ import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.internal.core.BundleFragment;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 /**
@@ -51,10 +50,10 @@ public class SystemBundleLoader extends BundleLoader {
 		}
 		this.classLoader = getClass().getClassLoader();
 		extPackages = new HashSet(0); // not common; start with 0
-		Bundle[] fragments = bundle.getFragments();
+		BundleFragment[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++)
-				addExtPackages((BundleFragment) fragments[i]);
+				addExtPackages(fragments[i]);
 		ClassLoader extCL = ClassLoader.getSystemClassLoader();
 		if (extCL == null)
 			extClassLoader = null;

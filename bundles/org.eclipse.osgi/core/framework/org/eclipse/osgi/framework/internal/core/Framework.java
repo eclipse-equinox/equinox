@@ -551,7 +551,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private URL findInSystemBundle(String entry) {
-		URL result = systemBundle.getEntry(entry);
+		URL result = systemBundle.getEntry0(entry);
 		if (result == null) {
 			// Check the ClassLoader in case we're launched off the Java boot classpath
 			ClassLoader loader = getClass().getClassLoader();
@@ -611,6 +611,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		adaptor = null;
 		uninstallURLStreamHandlerFactory();
 		uninstallContentHandlerFactory();
+		if (System.getSecurityManager() instanceof EquinoxSecurityManager)
+			System.setSecurityManager(null);
 	}
 
 	/**

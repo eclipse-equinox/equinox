@@ -148,27 +148,22 @@ public class ManifestLocalization {
 			}
 			return findInResolved(resource, searchBundle);
 		}
-		return findInBundle(resource, searchBundle);
+		return searchBundle.getEntry0(resource);
 	}
 
 	private URL findInResolved(String filePath, AbstractBundle bundleHost) {
-
-		URL result = findInBundle(filePath, bundleHost);
+		URL result = bundleHost.getEntry0(filePath);
 		if (result != null)
 			return result;
 		return findInFragments(filePath, bundleHost);
 	}
 
-	private URL findInBundle(String filePath, AbstractBundle searchBundle) {
-		return searchBundle.getEntry(filePath);
-	}
-
 	private URL findInFragments(String filePath, AbstractBundle searchBundle) {
-		org.osgi.framework.Bundle[] fragments = searchBundle.getFragments();
+		BundleFragment[] fragments = searchBundle.getFragments();
 		URL fileURL = null;
 		for (int i = 0; fragments != null && i < fragments.length && fileURL == null; i++) {
 			if (fragments[i].getState() != Bundle.UNINSTALLED)
-				fileURL = fragments[i].getEntry(filePath);
+				fileURL = fragments[i].getEntry0(filePath);
 		}
 		return fileURL;
 	}

@@ -78,6 +78,8 @@
 	<classpathentry kind="src" output="bundle_tests/activator.error2" path="bundles_src/activator.error2"/>
 	<classpathentry kind="src" output="bundle_tests/activator.error3" path="bundles_src/activator.error3"/>
 	<classpathentry kind="src" output="bundle_tests/activator.error4" path="bundles_src/activator.error4"/>
+	<classpathentry kind="src" output="bundle_tests/security.a" path="bundles_src/security.a"/>
+	<classpathentry kind="src" output="bundle_tests/security.a.frag.a" path="bundles_src/security.a.frag.a"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

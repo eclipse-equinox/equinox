@@ -1245,7 +1245,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		return domain;
 	}
 
-	protected Bundle[] getFragments() {
+	protected BundleFragment[] getFragments() {
 		checkValid();
 		return null;
 	}
@@ -1299,6 +1299,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} catch (SecurityException e) {
 			return null;
 		}
+		return getEntry0(fileName);
+	}
+
+	URL getEntry0(String fileName) {
 		checkValid();
 		if (System.getSecurityManager() == null)
 			return bundledata.getEntry(fileName);
@@ -1467,7 +1471,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		// find the local entries of this bundle
 		findLocalEntryPaths(path, patternFilter, patternProps, recurse, pathList);
 		// if this bundle is a host to fragments then search the fragments
-		final Bundle[] fragments = getFragments();
+		final BundleFragment[] fragments = getFragments();
 		final int numFragments = fragments == null ? -1 : fragments.length;
 		for (int i = 0; i < numFragments; i++)
 			((AbstractBundle) fragments[i]).findLocalEntryPaths(path, patternFilter, patternProps, recurse, pathList);
@@ -1506,12 +1510,12 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				String curPath = pathArray[curIndex];
 				if (curFragment == -1) {
 					// need to search ourselves first
-					nextElement = getEntry(curPath);
+					nextElement = getEntry0(curPath);
 					curFragment++;
 				}
 				// if the element is not in the host look in the fragments until we have searched them all
 				while (nextElement == null && curFragment < numFragments)
-					nextElement = fragments[curFragment++].getEntry(curPath);
+					nextElement = fragments[curFragment++].getEntry0(curPath);
 				// if we have no fragments or we have searched all fragments then advance to the next path 
 				if (numFragments == -1 || curFragment >= numFragments) {
 					curIndex++;

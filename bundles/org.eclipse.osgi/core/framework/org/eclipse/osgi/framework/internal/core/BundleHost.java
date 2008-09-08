@@ -531,11 +531,11 @@ public class BundleHost extends AbstractBundle {
 		return context.getFramework().getServiceRegistry().getServicesInUse(context);
 	}
 
-	public Bundle[] getFragments() {
+	public BundleFragment[] getFragments() {
 		synchronized (framework.bundles) {
 			if (fragments == null)
 				return null;
-			Bundle[] result = new Bundle[fragments.length];
+			BundleFragment[] result = new BundleFragment[fragments.length];
 			System.arraycopy(fragments, 0, result, 0, result.length);
 			return result;
 		}

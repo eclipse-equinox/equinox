@@ -15,7 +15,7 @@ import java.net.URLClassLoader;
 
 class EquinoxFWClassLoader extends URLClassLoader {
 
-	private static final String[] DELEGATE_PARENT = {"org.osgi.", "org.eclipse.osgi.launch.", "org.eclipse.osgi.service."}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private static final String[] DELEGATE_PARENT = {"java.", "org.osgi.", "org.eclipse.osgi.launch.", "org.eclipse.osgi.service."}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	private static final String[] SKIP_PARENT = {"org.osgi.framework.AdminPermission", "org.osgi.framework.FrameworkUtil", "org.osgi.service.condpermadmin.BundleSignerCondition"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private final ClassLoader parent;
