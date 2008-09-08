@@ -23,7 +23,6 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
@@ -156,9 +155,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	}
 
 	public void addProperties(Properties properties) {
-		// default to enable compatibility boot delegation
-		if (properties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
-			properties.put(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true"); //$NON-NLS-1$
+		// do nothing
 	}
 
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {

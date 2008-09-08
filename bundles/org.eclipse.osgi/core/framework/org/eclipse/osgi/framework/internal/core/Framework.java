@@ -104,7 +104,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	private String[] bootDelegationStems;
 	private boolean bootDelegateAll = false;
 	public final boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION)); //$NON-NLS-1$
+	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 	ClassLoaderDelegateHook[] delegateHooks;
 	private volatile boolean forcedRestart = false;
 	/**
