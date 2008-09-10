@@ -678,8 +678,8 @@ public abstract class StateImpl implements State {
 
 	private void resetSystemExports() {
 		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-		if (systemBundles.length > 0) {
-			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
+		for (int idx = 0; idx < systemBundles.length; idx++) {
+			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[idx];
 			ExportPackageDescription[] exports = systemBundle.getExportPackages();
 			ArrayList newExports = new ArrayList(exports.length);
 			for (int i = 0; i < exports.length; i++)
