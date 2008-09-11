@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,7 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
@@ -223,7 +222,13 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 				// this is done just incase someone sets the security manager later
 				permissions = ALLPERMISSIONS;
 			Certificate[] certs = null;
-			SignedContent signedContent = (bundlefile instanceof SignedContent) ? (SignedContent) bundlefile : null;
+			SignedContent signedContent = null;
+			if (bundlefile instanceof BundleFileWrapperChain) {
+				BundleFileWrapperChain wrapper = (BundleFileWrapperChain) bundlefile;
+				while (wrapper != null && (!(wrapper.getWrapped() instanceof SignedContent)))
+					wrapper = wrapper.getNext();
+				signedContent = wrapper == null ? null : (SignedContent) wrapper.getWrapped();
+			}
 			if (CLASS_CERTIFICATE && signedContent != null && signedContent.isSigned()) {
 				SignerInfo[] signers = signedContent.getSignerInfos();
 				if (signers.length > 0)

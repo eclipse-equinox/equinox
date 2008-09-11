@@ -684,10 +684,11 @@ public class BaseStorage implements SynchronousBundleListener {
 
 		// try creating a wrapper bundlefile out of it.
 		BundleFileWrapperFactoryHook[] wrapperFactories = adaptor.getHookRegistry().getBundleFileWrapperFactoryHooks();
+		BundleFileWrapperChain wrapped = wrapperFactories.length == 0 ? null : new BundleFileWrapperChain(result, null);
 		for (int i = 0; i < wrapperFactories.length; i++) {
 			BundleFile wrapperBundle = wrapperFactories[i].wrapBundleFile(result, content, data, base);
-			if (wrapperBundle != null)
-				result = wrapperBundle;
+			if (wrapperBundle != null && wrapperBundle != result)
+				result = wrapped = new BundleFileWrapperChain(wrapperBundle, wrapped);
 		}
 		return result;
 	}
