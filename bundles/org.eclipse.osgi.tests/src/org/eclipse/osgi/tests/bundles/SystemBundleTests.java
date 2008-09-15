@@ -493,4 +493,42 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
+
+	public void testSystemBundle09() {
+		// test FrameworkUtil.createFilter
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle09"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox();
+		equinox.init(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		Bundle testFilterA = null;
+		try {
+			testFilterA = equinox.getBundleContext().installBundle(installer.getBundleLocation("test.filter.a")); //$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected exception installing", e); //$NON-NLS-1$
+		}
+		try {
+			testFilterA.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception starting test bundle", e);
+		}
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
 }
