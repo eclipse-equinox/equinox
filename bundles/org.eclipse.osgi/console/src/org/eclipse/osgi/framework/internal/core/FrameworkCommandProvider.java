@@ -546,7 +546,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 					intp.print(ConsoleMsg.CONSOLE_REGISTERED_BY_BUNDLE_MESSAGE);
 					intp.print(" "); //$NON-NLS-1$
 					intp.println(service.getBundle());
-					AbstractBundle[] users = (AbstractBundle[]) service.getUsingBundles();
+					Bundle[] users = service.getUsingBundles();
 					if (users != null) {
 						intp.print("  "); //$NON-NLS-1$
 						intp.println(ConsoleMsg.CONSOLE_BUNDLES_USING_SERVICE_MESSAGE);
