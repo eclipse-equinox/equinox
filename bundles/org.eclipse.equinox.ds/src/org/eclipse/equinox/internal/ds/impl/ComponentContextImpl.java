@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Joerg-Christian Boehme - bug.id = 246757
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.impl;
 
@@ -99,7 +100,7 @@ public class ComponentContextImpl implements ComponentContext {
 						}
 						if (serviceReference == null) {
 							// try to find service in the FW
-							ServiceReference[] serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, ref.target);
+							ServiceReference[] serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, reference.getTarget());
 							if (serviceReferences != null && serviceReferences.length > 0) {
 								// the services references are sorted by
 								// service.reference and service.id
@@ -179,7 +180,7 @@ public class ComponentContextImpl implements ComponentContext {
 							}
 						}
 					}
-					serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, ref.target);
+					serviceReferences = scp.bc.getServiceReferences(ref.interfaceName, reference.getTarget());
 					if (serviceReferences != null) {
 						Vector theServices = new Vector(5);
 						Object service;

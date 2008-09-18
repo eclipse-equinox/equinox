@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Joerg-Christian Boehme - bug.id = 246757
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
@@ -352,7 +353,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		// if there is a published service, then get the ServiceObject and call bind
 		try {
 			// get all registered services using this target filter
-			serviceReferences = bc.getServiceReferences(reference.reference.interfaceName, reference.reference.target);
+			serviceReferences = bc.getServiceReferences(reference.reference.interfaceName, reference.getTarget());
 		} catch (Exception e) {
 			Activator.log.error("[SCR] Cannot get references for " + reference.reference.interfaceName, e);
 			throw e;

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Joerg-Christian Boehme - bug.id = 246757
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -103,6 +104,10 @@ public final class Reference {
 				cardinalityHigh = 999999999;
 		}
 
+	}
+
+	public String getTarget() {
+		return target;
 	}
 
 	// used in Resolver.resolveEligible()
