@@ -600,6 +600,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testAccessControlContext01() {
+		// test single row with signer condition
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
 		List rows = update.getConditionalPermissionInfoBases();
@@ -621,6 +622,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testAccessControlContext02() {
+		// test with DENY row
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
 		List rows = update.getConditionalPermissionInfoBases();
@@ -644,6 +646,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testAccessControlContext03() {
+		// test multiple signer conditions
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
 		List rows = update.getConditionalPermissionInfoBases();
@@ -683,6 +686,95 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testAccessControlContext04() {
+		// test multiple signer conditions
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1, SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US", "cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$ //$NON-NLS-2$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testAccessControlContext05() {
+		// test with empty rows
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+			acc.checkPermission(new AllPermission());
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+		// set the default permissions
+		securityAdmin.setDefaultPermissions(READWRITE_INFOS);
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+		try {
+			acc.checkPermission(new AllPermission());
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+	}
+
+	public void testAccessControlContext06() {
+		// test with empty condition rows
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
+		List rows = update.getConditionalPermissionInfoBases();
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+	}
+
+	public void testAccessControlContext07() {
+		// test ! signer condition
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
 		List rows = update.getConditionalPermissionInfoBases();

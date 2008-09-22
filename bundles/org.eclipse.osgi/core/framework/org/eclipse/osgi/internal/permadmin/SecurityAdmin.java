@@ -218,38 +218,44 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	public AccessControlContext getAccessControlContext(String[] signers) {
 		Enumeration infos = getConditionalPermissionInfos();
-		ArrayList permissionInfos = new ArrayList();
-		if (infos != null) {
+		ArrayList securityRows = new ArrayList();
+		if (infos != null && infos.hasMoreElements()) {
+			// enumerate through all the rows
 			while (infos.hasMoreElements()) {
 				SecurityRow condPermInfo = (SecurityRow) infos.nextElement();
-				if (!ConditionalPermissionInfoBase.ALLOW.equals(condPermInfo.getGrantDecision()))
-					break; // TODO need to clarify the spec WRT DENY rows
 				ConditionInfo[] condInfo = condPermInfo.getConditionInfos();
 				boolean match = true;
+				// check that each condition is a signer condition
 				for (int i = 0; match && i < condInfo.length; i++) {
 					if (BundleSignerCondition.class.getName().equals(condInfo[i].getType())) {
 						String[] args = condInfo[i].getArgs();
 						String condSigners = args.length > 0 ? args[0] : null;
 						if (condSigners != null) {
+							match = false;
 							boolean negate = (args.length == 2) ? "!".equals(args[1]) : false; //$NON-NLS-1$
-							for (int j = 0; j < signers.length && match; j++)
+							for (int j = 0; j < signers.length && !match; j++)
 								match = (negate ^ DNChainMatching.match(signers[i], condSigners));
 						} else {
 							match = false;
 						}
 					} else {
+						// contains a non signer condition; cannot match
 						match = false;
 					}
 				}
-				if (match) {
-					PermissionInfo[] addPermInfos = condPermInfo.getPermissionInfos();
-					for (int i = 0; i < addPermInfos.length; i++)
-						permissionInfos.add(addPermInfos[i]);
-				}
+				if (match)
+					// found match add the row; keeping the row order
+					securityRows.add(condPermInfo);
 			}
+		} else {
+			PermissionCollection defaultPermissions;
+			synchronized (lock) {
+				defaultPermissions = permAdminDefaults == null ? DEFAULT_DEFAULT : permAdminDefaults;
+			}
+			return new AccessControlContext(new ProtectionDomain[] {new ProtectionDomain(null, defaultPermissions)});
 		}
-		PermissionInfoCollection collection = new PermissionInfoCollection((PermissionInfo[]) permissionInfos.toArray(new PermissionInfo[permissionInfos.size()]));
-		return new AccessControlContext(collection == null ? new ProtectionDomain[0] : new ProtectionDomain[] {new ProtectionDomain(null, collection)});
+		SecurityTable table = new SecurityTable(this, (SecurityRow[]) securityRows.toArray(new SecurityRow[securityRows.size()]));
+		return new AccessControlContext(new ProtectionDomain[] {new ProtectionDomain(null, table)});
 	}
 
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {

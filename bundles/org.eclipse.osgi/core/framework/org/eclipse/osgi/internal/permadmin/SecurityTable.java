@@ -11,9 +11,12 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import java.security.Permission;
+import java.security.PermissionCollection;
+import java.util.Enumeration;
 import org.eclipse.osgi.internal.permadmin.SecurityRow.Decision;
 
-public class SecurityTable {
+public class SecurityTable extends PermissionCollection {
+	private static final long serialVersionUID = -1800193310096318060L;
 	static final int GRANTED = 0x0001;
 	static final int DENIED = 0x0002;
 	static final int ABSTAIN = 0x0004;
@@ -123,5 +126,17 @@ public class SecurityTable {
 		for (int i = 0; i < rows.length; i++)
 			encoded[i] = rows[i].toString();
 		return encoded;
+	}
+
+	public void add(Permission permission) {
+		throw new SecurityException();
+	}
+
+	public Enumeration elements() {
+		return BundlePermissions.EMPTY_ENUMERATION;
+	}
+
+	public boolean implies(Permission permission) {
+		return (evaluate(null, permission) & SecurityTable.GRANTED) != 0;
 	}
 }

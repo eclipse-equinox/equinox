@@ -158,7 +158,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	Decision evaluate(BundlePermissions bundlePermissions, Permission permission) {
-		if (bundleConditions == null)
+		if (bundleConditions == null || bundlePermissions == null)
 			return evaluatePermission(permission);
 		Condition[] conditions;
 		synchronized (bundleConditions) {
