@@ -149,6 +149,16 @@ public class VersionRange {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (maxVersion != null ? maxVersion.hashCode() : VersionRange.versionMax.hashCode());
+		result = prime * result + (minVersion != null ? minVersion.hashCode() : Version.emptyVersion.hashCode());
+		result = prime * result + (includeMax ? 1231 : 1237);
+		result = prime * result + (includeMin ? 1231 : 1237);
+		return result;
+	}
+
 	public String toString() {
 		if (minVersion == null)
 			return Version.emptyVersion.toString();
