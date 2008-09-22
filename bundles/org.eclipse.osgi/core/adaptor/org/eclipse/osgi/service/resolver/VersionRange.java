@@ -24,10 +24,10 @@ public class VersionRange {
 	 */
 	public static final VersionRange emptyRange = new VersionRange(null);
 
-	private Version minVersion;
-	private boolean includeMin;
-	private Version maxVersion;
-	private boolean includeMax;
+	private final Version minVersion;
+	private final boolean includeMin;
+	private final Version maxVersion;
+	private final boolean includeMax;
 
 	/**
 	 * Constructs a VersionRange with the specified minVersion and maxVersion.
