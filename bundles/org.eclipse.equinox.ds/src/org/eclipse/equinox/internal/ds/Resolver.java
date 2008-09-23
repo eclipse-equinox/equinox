@@ -42,8 +42,8 @@ public final class Resolver implements WorkPerformer {
 	 */
 	public static final int DYNAMICBIND = 2;
 
-	/* [SC+P] enabled */
-	private Vector scpEnabled;
+	/* Holds the enabled SCPs*/
+	protected Vector scpEnabled;
 
 	/**
 	 * List of ComponentDescriptionProps, which are currently "satisfied"

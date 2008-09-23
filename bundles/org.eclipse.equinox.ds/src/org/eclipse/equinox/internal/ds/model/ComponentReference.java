@@ -47,7 +47,7 @@ public class ComponentReference implements Externalizable {
 	public String target;
 	public String bind;
 	public String unbind;
-	ServiceComponent component;
+	public ServiceComponent component;
 	// --- end: XML def
 
 	// --- begin: cache

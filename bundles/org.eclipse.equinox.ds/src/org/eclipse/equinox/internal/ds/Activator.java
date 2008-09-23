@@ -12,7 +12,9 @@
 package org.eclipse.equinox.internal.ds;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
+import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -46,6 +48,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	private ServiceTracker debugTracker = null;
 
 	private SCRManager scrManager = null;
+
+	private ServiceRegistration scrCommandProviderReg;
+	private SCRCommandProvider scrCommandProvider;
 
 	private boolean inited = false;
 
@@ -109,6 +114,12 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		scrManager.startIt();
 		if (Activator.startup)
 			Activator.timeLog(113); /* 113 = "startIt() method took " */
+
+		if (scrCommandProvider == null) {
+			scrCommandProvider = new SCRCommandProvider(scrManager);
+			Hashtable reg_props = new Hashtable(3, 1);
+			scrCommandProviderReg = bc.registerService(CommandProvider.class.getName(), scrCommandProvider, reg_props);
+		}
 
 		if (startup && lazyIniting) {
 			/* 115 = "[END - lazy SCR init] Activator.initSCR() method executed for "*/
@@ -187,6 +198,11 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		if (cmTrackerReg != null) {
 			cmTrackerReg.unregister();
 		}
+
+		if (scrCommandProviderReg != null)
+			scrCommandProviderReg.unregister();
+		scrCommandProvider = null;
+
 		if (scrManager != null) {
 			bc.removeBundleListener(scrManager);
 		} else {

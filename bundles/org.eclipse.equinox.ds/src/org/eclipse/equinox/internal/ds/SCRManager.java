@@ -38,7 +38,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class SCRManager implements ServiceListener, SynchronousBundleListener, ConfigurationListener, WorkPerformer, PrivilegedAction {
 
-	private Hashtable bundleToServiceComponents;
+	protected Hashtable bundleToServiceComponents;
 	public BundleContext bc;
 	protected Queue queue;
 	public static Log log;
