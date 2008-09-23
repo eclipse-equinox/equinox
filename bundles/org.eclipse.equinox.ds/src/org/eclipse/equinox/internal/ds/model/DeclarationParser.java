@@ -86,6 +86,9 @@ public class DeclarationParser implements ExTagListener {
 	 *            the input stream to the XML declaration file
 	 * @param bundle
 	 *            this is used to load the 'properties' tag
+	 * @param components sets the components Vector where the parsed components should be placed
+	 * @param processingURL the URL of the XML which is being processed. Will be used for debugging purposes
+	 * @throws Exception if any unhandled exception occurs during the parsing
 	 */
 	public void parse(InputStream in, Bundle bundle, Vector components, String processingURL) throws Exception {
 		this.components = components;
@@ -115,6 +118,11 @@ public class DeclarationParser implements ExTagListener {
 			String tagName = tag.getName();
 			if (isCorrectComponentTag(tagName)) {
 				doCorrectComponentTag(tag, tagName);
+			}
+		} catch (IllegalArgumentException iae) {
+			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! The error is: " + iae.getMessage(), null);
+			if (Activator.DEBUG) {
+				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
 		} catch (Throwable e) {
 			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
@@ -173,6 +181,13 @@ public class DeclarationParser implements ExTagListener {
 		try {
 			doEndTag(tag);
 			processNamespacesLeave(tag);
+		} catch (IllegalArgumentException iae) {
+			currentComponent = null;
+			closeTag = null;
+			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! The error is: " + iae.getMessage(), null);
+			if (Activator.DEBUG) {
+				Activator.log.debug("[SCR] Tracing the last exception", iae);
+			}
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
@@ -285,7 +300,6 @@ public class DeclarationParser implements ExTagListener {
 		int size = tag.size();
 		if (size == 0) {
 			IllegalArgumentException e = new IllegalArgumentException("The 'service' tag must have one 'provide' tag set at line " + tag.getLine());
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 		for (int i = 0; i < size; i++) {
@@ -295,7 +309,6 @@ public class DeclarationParser implements ExTagListener {
 				String iFace = p.getAttribute(ATTR_INTERFACE);
 				if (iFace == null) {
 					IllegalArgumentException e = new IllegalArgumentException("The 'provide' tag must have 'interface' attribute set at line " + tag.getLine());
-					Activator.log.error("[SCR] " + e.getMessage(), e);
 					throw e;
 				}
 				if (currentComponent.serviceInterfaces == null) {
@@ -304,7 +317,6 @@ public class DeclarationParser implements ExTagListener {
 				currentComponent.serviceInterfaces.addElement(iFace);
 			} else {
 				IllegalArgumentException e = new IllegalArgumentException("Found illegal element '" + pName + "' for tag 'service' at line " + tag.getLine());
-				Activator.log.error("[SCR] " + e.getMessage(), e);
 				throw e;
 			}
 		}
@@ -375,7 +387,13 @@ public class DeclarationParser implements ExTagListener {
 				currentComponent.properties = new Properties();
 			}
 			currentComponent.properties.put(name, _value);
+		} catch (IllegalArgumentException iae) {
+			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! The error is: " + iae.getMessage(), null);
+			if (Activator.DEBUG) {
+				Activator.log.debug("[SCR] Tracing the last exception", iae);
+			}
 		} catch (Throwable e) {
+			//logging unrecognized exception
 			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL, e);
 		}
 	}
@@ -414,7 +432,6 @@ public class DeclarationParser implements ExTagListener {
 
 		if (invalid) {
 			IllegalArgumentException e = new IllegalArgumentException("The specified 'entry' for the 'properties' tag at line " + tag.getLine() + " doesn't contain valid reference to a property file: " + fileEntry);
-			Activator.log.error("[SCR] " + e.getMessage(), e);
 			throw e;
 		}
 	}
