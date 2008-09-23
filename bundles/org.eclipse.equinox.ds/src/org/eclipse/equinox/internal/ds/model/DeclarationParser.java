@@ -389,9 +389,10 @@ public class DeclarationParser implements ExTagListener {
 
 		InputStream is = null;
 		try {
-			URL resource = bundle.getResource(fileEntry);
+			URL resource = bundle.getEntry(fileEntry);
 			is = resource != null ? resource.openStream() : null;
 		} catch (IOException ignore) {
+			//ignore
 		}
 
 		boolean invalid = true;
