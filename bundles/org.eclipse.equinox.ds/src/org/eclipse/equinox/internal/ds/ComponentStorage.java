@@ -78,9 +78,13 @@ public abstract class ComponentStorage {
 						try {
 							is = url.openStream();
 							if (is == null) {
-								Activator.log.error("[SCR] ComponentStorage.parseXMLDeclaration(): missing file " + url, null);
+								Activator.log.error("[SCR] Could not open stream to component definition file " + url, null);
 							} else {
+								int compSize = components.size();
 								parser.parse(is, bundle, components, url.toString());
+								if (compSize == components.size()) {
+									Activator.log.warning("[SCR] No components were found while processing component definition file " + url, null);
+								}
 							}
 						} catch (IOException ie) {
 							Activator.log.error("[SCR] Error occurred while opening component definition file " + url, ie);
