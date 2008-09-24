@@ -426,7 +426,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	private void disposeBundles() {
-		log.info("disposeBundles()");
 		// dispose ALL bundles
 		if (bundleToServiceComponents != null) {
 			for (Enumeration e = bundleToServiceComponents.keys(); e.hasMoreElements();) {

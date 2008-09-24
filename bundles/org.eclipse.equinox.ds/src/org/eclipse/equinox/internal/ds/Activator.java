@@ -190,7 +190,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bc) throws Exception {
-		log.info("Shutting down service component runtime!");
 		if (scrManager != null) {
 			bc.removeServiceListener(scrManager);
 		}

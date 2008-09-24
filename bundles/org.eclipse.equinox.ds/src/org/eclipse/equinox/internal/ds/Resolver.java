@@ -86,20 +86,6 @@ public final class Resolver implements WorkPerformer {
 		instanceProcess = new InstanceProcess(this);
 	}
 
-	/**
-	 * Clean up the SCR is shutting down
-	 */
-	void dispose() {
-		Activator.log.info("Resolver.dispose()");
-		if (instanceProcess != null) {
-			instanceProcess.dispose();
-			instanceProcess = null;
-		}
-
-		scpEnabled.removeAllElements();
-		satisfiedSCPs.removeAllElements();
-	}
-
 	// -- begin *enable* component routines
 	/**
 	 * enableComponents - called by the dispatchWorker
@@ -161,7 +147,9 @@ public final class Resolver implements WorkPerformer {
 								Activator.log.error("[SCR - Resolver] Cannot specify both ComponentFactory and ManagedServiceFactory\n" + "The name of the ComponentFactory component is " + current.name, null);
 								continue; // skip current component
 							}
-							Activator.log.info("Resolver.enableComponents(): " + current.name + " as *managed service factory*");
+							if (Activator.DEBUG) {
+								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *managed service factory*", null);
+							}
 							try {
 								configs = ConfigurationManager.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")");
 							} catch (Exception e) {
@@ -175,8 +163,9 @@ public final class Resolver implements WorkPerformer {
 								}
 							}
 						} else {
-							Activator.log.info("Resolver.enableComponents(): " + current.name + " as *service*");
-							// if Service, not ManagedServiceFactory
+							if (Activator.DEBUG) {
+								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *service*", null);
+							} // if Service, not ManagedServiceFactory
 							map(current, config);
 						}
 					} // end has configuration
@@ -217,9 +206,8 @@ public final class Resolver implements WorkPerformer {
 	/**
 	 * Create the SCP and add to the maps
 	 * 
-	 * @param component
-	 * @param config
-	 *            CM configuration
+	 * @param component the component for which SCP will be created 
+	 * @param configProperties CM configuration properties
 	 */
 	public ServiceComponentProp map(ServiceComponent component, Dictionary configProperties) {
 		ServiceComponentProp scp = null;
