@@ -20,7 +20,6 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
-import org.osgi.framework.launch.SystemBundle;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
@@ -93,10 +92,14 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	public void testEnableSecurityManager01() {
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager01"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		configuration.put(Framework.PROP_EQUINOX_SECURITY, Framework.SECURITY_OSGI);
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
@@ -125,10 +128,15 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager02"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		configuration.put(Framework.PROP_EQUINOX_SECURITY, Framework.SECURITY_OSGI);
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
@@ -172,10 +180,14 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testLocalization01"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		configuration.put(Framework.PROP_EQUINOX_SECURITY, Framework.SECURITY_OSGI);
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
 		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$

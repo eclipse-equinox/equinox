@@ -12,6 +12,8 @@ package org.eclipse.osgi.launch;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -29,20 +31,27 @@ public class Equinox implements SystemBundle {
 	/**@GuardedBy this*/
 	private SystemBundle impl;
 	private final boolean useSeparateCL;
+	private final Map configuration;
 
-	public Equinox() {
+	public Equinox(Map configuration) {
 		useSeparateCL = FrameworkProperties.inUse();
+		this.configuration = configuration;
 	}
 
 	private SystemBundle createImpl() {
 		try {
 			Class implClazz = getImplClass();
-			return (SystemBundle) implClazz.newInstance();
+			Constructor constructor = implClazz.getConstructor(new Class[] {Map.class});
+			return (SystemBundle) constructor.newInstance(new Object[] {configuration});
 		} catch (ClassNotFoundException e) {
 			throw new NoClassDefFoundError(implName);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e.getMessage());
+		} catch (NoSuchMethodException e) {
+			throw new NoSuchMethodError(e.getMessage());
 		} catch (InstantiationException e) {
+			throw new RuntimeException(e.getMessage());
+		} catch (InvocationTargetException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
@@ -62,9 +71,9 @@ public class Equinox implements SystemBundle {
 		return impl;
 	}
 
-	public void init(Properties configuration) {
+	public void init() throws BundleException {
 		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
-			throw new IllegalStateException("Framework is active!!");
+			return; // no op
 		synchronized (this) {
 			if (impl != null && impl.getState() != Bundle.INSTALLED) {
 				try {
@@ -78,7 +87,7 @@ public class Equinox implements SystemBundle {
 				impl = null;
 			}
 		}
-		getImpl().init(configuration);
+		getImpl().init();
 	}
 
 	public void waitForStop(long timeout) throws InterruptedException {

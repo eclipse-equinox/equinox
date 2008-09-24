@@ -19,7 +19,6 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
-import org.osgi.framework.launch.SystemBundle;
 
 public class SystemBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -30,10 +29,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// simple test to create an embedded framework
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle01"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
 		try {
+			equinox.init();
 			equinox.start();
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
@@ -71,10 +70,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle02"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+
 		try {
+			equinox.init();
 			equinox.start();
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
@@ -115,9 +115,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/stop/ test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle03"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		BundleContext systemContext = equinox.getBundleContext();
@@ -143,9 +147,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle04"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		BundleContext systemContext = equinox.getBundleContext();
@@ -188,9 +196,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/install/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle05_1"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		BundleContext systemContext = equinox.getBundleContext();
@@ -234,9 +246,13 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/install/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle05_2"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
 		BundleContext systemContext = equinox.getBundleContext();
@@ -310,17 +326,25 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create multiple instances test
 		File config1 = OSGiTestsActivator.getContext().getDataFile("testSystemBundle06_1"); //$NON-NLS-1$
 		Properties configuration1 = new Properties();
-		configuration1.put(SystemBundle.STORAGE, config1.getAbsolutePath());
-		Equinox equinox1 = new Equinox();
-		equinox1.init(configuration1);
+		configuration1.put(Constants.FRAMEWORK_STORAGE, config1.getAbsolutePath());
+		Equinox equinox1 = new Equinox(configuration1);
+		try {
+			equinox1.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox1.getState()); //$NON-NLS-1$
 
 		File config2 = OSGiTestsActivator.getContext().getDataFile("testSystemBundle06_2"); //$NON-NLS-1$
 		Properties configuration2 = new Properties();
-		configuration2.put(SystemBundle.STORAGE, config2.getAbsolutePath());
-		Equinox equinox2 = new Equinox();
-		equinox2.init(configuration2);
+		configuration2.put(Constants.FRAMEWORK_STORAGE, config2.getAbsolutePath());
+		Equinox equinox2 = new Equinox(configuration2);
+		try {
+			equinox2.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
 		// should be in the STARTING state
 		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox2.getState()); //$NON-NLS-1$
 
@@ -359,7 +383,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
 
-		// put the framework 1 back to the RESOLVED state
+		// put the framework 2 back to the RESOLVED state
 		try {
 			equinox2.stop();
 		} catch (BundleException e) {
@@ -377,18 +401,17 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// test init twice
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle07_01"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
-
-		config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle07_02"); //$NON-NLS-1$
-		configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
 		try {
-			equinox.init(configuration);
-			fail("Failed to throw illegal state exception on double init"); //$NON-NLS-1$
-		} catch (IllegalStateException e) {
-			// expected
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.init();
+		} catch (Exception e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
 		}
 
 		try {
@@ -401,10 +424,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertNotNull("SystemBundle context is null", systemContext); //$NON-NLS-1$
 
 		try {
-			equinox.init(configuration);
-			fail("Failed to throw illegal state exception on double init"); //$NON-NLS-1$
-		} catch (IllegalStateException e) {
-			// expected
+			equinox.init();
+		} catch (Exception e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
 		}
 
 		ServiceReference[] refs = null;
@@ -436,10 +458,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle08_1"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
 		try {
+			equinox.init();
 			equinox.start();
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
@@ -459,10 +481,10 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle08_2"); //$NON-NLS-1$
 		configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		equinox.init(configuration);
-
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		equinox = new Equinox(configuration);
 		try {
+			equinox.init();
 			equinox.start();
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
@@ -498,9 +520,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		// test FrameworkUtil.createFilter
 		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle09"); //$NON-NLS-1$
 		Properties configuration = new Properties();
-		configuration.put(SystemBundle.STORAGE, config.getAbsolutePath());
-		Equinox equinox = new Equinox();
-		equinox.init(configuration);
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.start();
 		} catch (BundleException e) {
@@ -517,7 +538,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 		try {
 			testFilterA.start();
 		} catch (BundleException e) {
-			fail("Unexpected exception starting test bundle", e);
+			fail("Unexpected exception starting test bundle", e); //$NON-NLS-1$
 		}
 		try {
 			equinox.stop();

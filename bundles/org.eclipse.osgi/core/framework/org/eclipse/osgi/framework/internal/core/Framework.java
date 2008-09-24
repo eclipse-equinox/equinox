@@ -573,6 +573,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 *  
 	 */
 	public synchronized void close() {
+		if (adaptor == null)
+			return;
 		if (active) {
 			shutdown();
 		}

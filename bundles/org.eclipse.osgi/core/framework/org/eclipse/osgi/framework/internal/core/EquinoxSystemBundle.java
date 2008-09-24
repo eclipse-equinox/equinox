@@ -26,12 +26,17 @@ public class EquinoxSystemBundle implements SystemBundle {
 	private static String FULLPATH = " [fullpath]"; //$NON-NLS-1$
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
+	private final Map configuration;
 
-	public void init(Properties configuration) {
-		internalInit(configuration);
+	public EquinoxSystemBundle(Map configuration) {
+		this.configuration = configuration;
 	}
 
-	private Framework internalInit(Properties configuration) {
+	public void init() {
+		internalInit();
+	}
+
+	private Framework internalInit() {
 		Framework current = framework;
 		if (current != null) {
 			// this is not really necessary because the Equinox class will 
@@ -57,40 +62,40 @@ public class EquinoxSystemBundle implements SystemBundle {
 		return current;
 	}
 
-	private void setEquinoxProperties(Properties configuration) {
+	private void setEquinoxProperties(Map configuration) {
 		// always need to use an active thread
 		FrameworkProperties.setProperty(Framework.PROP_FRAMEWORK_THREAD, Framework.THREAD_NORMAL);
 
 		// first check props we are required to provide reasonable defaults for
-		String windowSystem = configuration == null ? null : configuration.getProperty(SystemBundle.WINDOWSYSTEM);
+		Object windowSystem = configuration == null ? null : configuration.get(Constants.FRAMEWORK_WINDOWSYSTEM);
 		if (windowSystem == null) {
 			windowSystem = FrameworkProperties.getProperty(EclipseStarter.PROP_WS);
 			if (windowSystem != null)
-				FrameworkProperties.setProperty(SystemBundle.WINDOWSYSTEM, windowSystem);
+				FrameworkProperties.setProperty(Constants.FRAMEWORK_WINDOWSYSTEM, (String) windowSystem);
 		}
 		// rest of props can be ignored if the configuration is null
 		if (configuration == null)
 			return;
 		// check each osgi defined property and set the appropriate equinox one
-		String security = configuration.getProperty(SystemBundle.SECURITY);
+		Object security = configuration.get(Constants.FRAMEWORK_SECURITY);
 		if (security != null) {
-			if (Boolean.valueOf(security).booleanValue())
+			if (Framework.SECURITY_OSGI.equals(security))
 				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, Framework.SECURITY_OSGI);
-			else
-				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, security);
+			else if (security instanceof String)
+				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, (String) security);
 		}
-		String storage = configuration.getProperty(SystemBundle.STORAGE);
-		if (storage != null) {
-			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, storage);
-			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA_DEFAULT, storage);
+		Object storage = configuration.get(Constants.FRAMEWORK_STORAGE);
+		if (storage != null && storage instanceof String) {
+			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, (String) storage);
+			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA_DEFAULT, (String) storage);
 		}
-		String execPermission = configuration.getProperty(SystemBundle.EXECPERMISSION);
-		if (execPermission != null) {
+		Object execPermissionObj = configuration.get(Constants.FRAMEWORK_EXECPERMISSION);
+		if (execPermissionObj != null && execPermissionObj instanceof String) {
+			String execPermission = (String) execPermissionObj;
 			if (!execPermission.endsWith(FULLPATH))
 				execPermission = execPermission + FULLPATH;
 			FrameworkProperties.setProperty("osgi.filepermissions.command", execPermission); //$NON-NLS-1$
 		}
-
 	}
 
 	public void waitForStop(long timeout) throws InterruptedException {
@@ -222,7 +227,7 @@ public class EquinoxSystemBundle implements SystemBundle {
 		if (getState() == Bundle.ACTIVE)
 			return;
 		if (getState() != Bundle.STARTING)
-			current = internalInit(null);
+			current = internalInit();
 		current.startLevelManager.doSetStartLevel(1);
 	}
 

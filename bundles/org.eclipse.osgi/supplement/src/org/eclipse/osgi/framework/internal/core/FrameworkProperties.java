@@ -85,7 +85,7 @@ public class FrameworkProperties {
 		return properties;
 	}
 
-	public static synchronized void setProperties(Properties input) {
+	public static synchronized void setProperties(Map input) {
 		if (input == null) {
 			// just use internal props;  note that this will reuse a previous set of properties if they were set
 			internalGetProperties("false"); //$NON-NLS-1$
@@ -93,9 +93,9 @@ public class FrameworkProperties {
 		}
 		properties = null;
 		Properties toSet = internalGetProperties("false"); //$NON-NLS-1$
-		for (Enumeration keys = input.keys(); keys.hasMoreElements();) {
-			String key = (String) keys.nextElement();
-			Object value = input.getProperty(key);
+		for (Iterator keys = input.keySet().iterator(); keys.hasNext();) {
+			String key = (String) keys.next();
+			Object value = input.get(key);
 			if (value != null) {
 				toSet.setProperty(key, (String) value);
 				continue;

@@ -57,18 +57,17 @@
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
-</message_arguments>
-</filter>
-</resource>
 <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
 <message_argument value="3.5"/>
+<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
 <message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
 </message_arguments>
 </filter>
@@ -79,12 +78,6 @@
 <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
 </message_arguments>
 </filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
-</message_arguments>
-</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
@@ -99,7 +92,67 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_ROOT_CERTIFICATES"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_ROOT_CERTIFICATES"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_EXECPERMISSION"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_SECURITY"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_STORAGE"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
+</message_arguments>
+</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.5"/>
@@ -107,10 +160,48 @@
 <message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_EXECPERMISSION"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_STORAGE"/>
+</message_arguments>
+</filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="SERVICE_TYPE"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_SECURITY"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
 </message_arguments>
 </filter>
 </resource>

@@ -1,5 +1,5 @@
 /*
- * $Date: 2008-07-31 14:34:04 -0400 (Thu, 31 Jul 2008) $
+ * $Date: 2008-09-10 20:26:25 -0400 (Wed, 10 Sep 2008) $
  * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
@@ -17,88 +17,85 @@
  */
 package org.osgi.framework.launch;
 
-import java.util.Properties;
-
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 
 /**
- * This interface should be implemented by framework implementations when their
- * main object is created. It allows a configurator to set the properties and
- * launch the framework.
+ * The System Bundle for a Framework instance.
  * 
- * TODO The javadoc in this class need a good scrub before release.
+ * The <i>main</i> class of a framework implementation must implement this
+ * interface. The instantiator of the framework implementation class then has a
+ * System Bundle object and can then use the methods of this interface to manage
+ * and control the created framework instance.
+ * 
+ * <p>
+ * The <i>main</i> class of a framework implementation must provide a public
+ * constructor that takes a single argument of type <code>Map</code>. This
+ * configuration argument provides this System Bundle with framework properties
+ * to configure the framework instance. The framework instance must also examine
+ * the system properties for framework properties which are not set in the
+ * configuration argument. If framework properties are not provided by the
+ * configuration argument or the system properties, this System Bundle must use
+ * some reasonable default configuration appropriate for the current VM. For
+ * example, the system packages for the current execution environment should be
+ * properly exported. The configuration argument may be <code>null</code>.
+ * 
+ * <p>
+ * A newly constructed System Bundle must be in the {@link Bundle#INSTALLED
+ * INSTALLED} state.
  * 
  * @ThreadSafe
- * @version $Revision: 5214 $
+ * @version $Revision: 5591 $
  */
 public interface SystemBundle extends Bundle {
 	/**
-	 * The name of a Security Manager class with public empty constructor. A
-	 * valid value is also true, this means that the framework should
-	 * instantiate its own security manager. If not set, security could be
-	 * defined by a parent framework or there is no security. This can be
-	 * detected by looking if there is a security manager set
-	 */
-	String SECURITY = "org.osgi.framework.security";
-
-	/**
-	 * A valid file path in the file system to a directory that exists. The
-	 * framework is free to use this directory as it sees fit. This area can not
-	 * be shared with anything else. If this property is not set, the framework
-	 * should use a file area from the parent bundle. If it is not embedded, it
-	 * must use a reasonable platform default.
-	 */
-	String STORAGE = "org.osgi.framework.storage";
-
-	/**
-	 * A list of paths (separated by path separator) that point to additional
-	 * directories to search for platform specific libraries
-	 */
-	String LIBRARIES = "org.osgi.framework.libraries";
-	/**
-	 * The command to give a file executable permission. This is necessary in
-	 * some environments for running shared libraries.
-	 */
-	String EXECPERMISSION = "org.osgi.framework.command.execpermission";
-
-	/**
-	 * Points to a directory with certificates. ###??? Keystore? Certificate
-	 * format?
-	 */
-	String ROOT_CERTIFICATES = "org.osgi.framework.root.certificates";
-
-	/**
-	 * Set by the configurator but the framework should provide a reasonable
-	 * default.
-	 */
-	String WINDOWSYSTEM = "org.osgi.framework.windowsystem";
-
-	/**
-	 * Configure this framework with the given properties. These properties can
-	 * contain framework specific properties or of the general kind defined in
-	 * the specification or in this interface.
+	 * Initialize this System Bundle. After calling this method, this System
+	 * Bundle must be in the {@link Bundle#STARTING STARTING} state and must
+	 * have a valid Bundle Context.
 	 * 
-	 * @param configuration
-	 *            The properties. This properties can be backed by another
-	 *            properties, it can there not be assumed that it contains all
-	 *            keys. Use it only through the getProperty methods. This
-	 *            parameter may be null.
+	 * <p>
+	 * During intialization, this System Bundle must also register
+	 * {@link org.osgi.service.concurrent.ThreadFactory ThreadFactory} and
+	 * {@link org.osgi.service.concurrent.AsyncExecutor AsyncExecutor} services.
+	 * Implementations of these services may be passed to this System Bundle in
+	 * the configuration argument using the service names as keys. If
+	 * implementations of these services are not passed in the configuration
+	 * argument, then this System Bundle must create and use a default
+	 * implementation of each service.
 	 * 
+	 * <p>
+	 * This System Bundle will not actually be started until <code>start</code>
+	 * is called. If this System Bundle is not initialized called prior to
+	 * calling <code>start</code>, then the <code>start</code> method must
+	 * initialize this System Bundle prior to starting.
+	 * 
+	 * <p>
+	 * This method does nothing if called when this System Bundle is in the
+	 * {@link Bundle#STARTING STARTING}, {@link Bundle#ACTIVE ACTIVE} or
+	 * {@link Bundle#STOPPING STOPPING} states.
+	 * 
+	 * @throws BundleException If this System Bundle could not be initialized.
 	 */
-	void init(Properties configuration);
+	void init() throws BundleException;
 
 	/**
-	 * Wait until the framework is completely finished.
+	 * Wait until this System Bundle has completely stopped. The
+	 * <code>stop</code> and <code>update</code> methods on a System Bundle
+	 * performs an asynchronous stop of the System Bundle. This method can be
+	 * used to wait until the asynchronous stop of this System Bundle has
+	 * completed. This method will only wait if called when this System Bundle
+	 * is in the {@link Bundle#STARTING STARTING}, {@link Bundle#ACTIVE ACTIVE},
+	 * or {@link Bundle#STOPPING STOPPING} states. Otherwise it will return
+	 * immediately.
 	 * 
-	 * This method will return if the framework is stopped and has cleaned up
-	 * all the framework resources.
-	 * 
-	 * @param timeout
-	 *            Maximum number of milliseconds to wait until the framework is
-	 *            finished. Specifying a zero will wait indefinitely.
-	 * @throws InterruptedException When the wait was interrupted
-	 * 
+	 * @param timeout Maximum number of milliseconds to wait until this System
+	 *        Bundle has completely stopped. A value of zero will wait
+	 *        indefinitely.
+	 * @throws InterruptedException If another thread interrupted the current
+	 *         thread before or while the current thread was waiting for this
+	 *         System Bundle to completely stop. The <i>interrupted status</i>
+	 *         of the current thread is cleared when this exception is thrown.
+	 * @throws IllegalArgumentException If the value of timeout is negative.
 	 */
-
 	void waitForStop(long timeout) throws InterruptedException;
 }
