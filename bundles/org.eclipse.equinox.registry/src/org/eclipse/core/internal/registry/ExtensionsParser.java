@@ -178,7 +178,7 @@ public class ExtensionsParser extends DefaultHandler {
 				configurationElementValue = configurationElementValue + value;
 			}
 			if (configurationElementValue != null)
-				currentConfigElement.setValue(translate(configurationElementValue));
+				currentConfigElement.setValue(configurationElementValue);
 		}
 	}
 
@@ -253,7 +253,7 @@ public class ExtensionsParser extends DefaultHandler {
 
 				String value = currentConfigElement.getValueAsIs();
 				if (value != null) {
-					currentConfigElement.setValue(value.trim());
+					currentConfigElement.setValue(translate(value).trim());
 				}
 
 				RegistryObject parent = (RegistryObject) objectStack.peek();
