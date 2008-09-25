@@ -14,6 +14,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -75,8 +76,10 @@ class StateBuilder {
 		try {
 			result.setVersion((version != null) ? Version.parseVersion(version) : Version.emptyVersion);
 		} catch (IllegalArgumentException ex) {
-			if (manifestVersion >= 2)
-				throw new BundleException(ex.getMessage(), BundleException.MANIFEST_ERROR, ex);
+			if (manifestVersion >= 2) {
+				String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, Constants.BUNDLE_VERSION, version);
+				throw new BundleException(message + " : " + ex.getMessage(), BundleException.MANIFEST_ERROR, ex); //$NON-NLS-1$
+			}
 			// prior to R4 the Bundle-Version header was not interpreted by the Framework;
 			// must not fail for old R3 style bundles
 		}
@@ -180,15 +183,15 @@ class StateBuilder {
 			String header = (String) manifest.get(DEFINED_OSGI_VALIDATE_HEADERS[i]);
 			if (header != null) {
 				ManifestElement[] elements = ManifestElement.parseHeader(DEFINED_OSGI_VALIDATE_HEADERS[i], header);
-				checkForDuplicateDirectivesAttributes(elements);
+				checkForDuplicateDirectivesAttributes(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.IMPORT_PACKAGE)
-					checkImportExportSyntax(elements, false, false, jreBundle);
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, false, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.DYNAMICIMPORT_PACKAGE)
-					checkImportExportSyntax(elements, false, true, jreBundle);
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, false, true, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.EXPORT_PACKAGE)
-					checkImportExportSyntax(elements, true, false, jreBundle);
+					checkImportExportSyntax(DEFINED_OSGI_VALIDATE_HEADERS[i], elements, true, false, jreBundle);
 				if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.FRAGMENT_HOST)
-					checkExtensionBundle(elements);
+					checkExtensionBundle(DEFINED_OSGI_VALIDATE_HEADERS[i], elements);
 			} else if (DEFINED_OSGI_VALIDATE_HEADERS[i] == Constants.BUNDLE_SYMBOLICNAME) {
 				throw new BundleException(NLS.bind(StateMsg.HEADER_REQUIRED, Constants.BUNDLE_SYMBOLICNAME), BundleException.MANIFEST_ERROR);
 			}
@@ -420,7 +423,8 @@ class StateBuilder {
 				try {
 					spec.setMatchingFilter(genericRequires[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
 				} catch (InvalidSyntaxException e) {
-					throw new BundleException(Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e);
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, GENERIC_REQUIRE, genericRequires[i].toString());
+					throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 				}
 				String optional = genericRequires[i].getAttribute(OPTIONAL_ATTR);
 				String multiple = genericRequires[i].getAttribute(MULTIPLE_ATTR);
@@ -500,7 +504,8 @@ class StateBuilder {
 		try {
 			result.setFilter(manifestElement.getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
 		} catch (InvalidSyntaxException e) {
-			throw new BundleException(Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e);
+			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, Constants.BUNDLE_NATIVECODE, manifestElement.toString());
+			throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -520,7 +525,7 @@ class StateBuilder {
 		return new VersionRange(versionRange);
 	}
 
-	private static void checkImportExportSyntax(ManifestElement[] elements, boolean export, boolean dynamic, boolean jreBundle) throws BundleException {
+	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic, boolean jreBundle) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;
@@ -529,11 +534,15 @@ class StateBuilder {
 			// check for duplicate imports
 			String[] packageNames = elements[i].getValueComponents();
 			for (int j = 0; j < packageNames.length; j++) {
-				if (!export && !dynamic && packages.contains(packageNames[j]))
-					throw new BundleException(NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageNames[j]), BundleException.MANIFEST_ERROR);
+				if (!export && !dynamic && packages.contains(packageNames[j])) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_DUPLICATES, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
 				// check for java.*
-				if (!jreBundle && packageNames[j].startsWith("java.")) //$NON-NLS-1$
-					throw new BundleException(NLS.bind(StateMsg.HEADER_PACKAGE_JAVA, packageNames[j]), BundleException.MANIFEST_ERROR);
+				if (!jreBundle && packageNames[j].startsWith("java.")) { //$NON-NLS-1$
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_PACKAGE_JAVA, packageNames[j]), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
 				packages.add(packageNames[j]);
 			}
 			// check for version/specification version mismatch
@@ -546,15 +555,19 @@ class StateBuilder {
 			// check for bundle-symbolic-name and bundle-verion attibures
 			// (failure)
 			if (export) {
-				if (elements[i].getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null)
-					throw new BundleException(NLS.bind(StateMsg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR);
-				if (elements[i].getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null)
-					throw new BundleException(NLS.bind(StateMsg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR);
+				if (elements[i].getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE) != null) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
+				if (elements[i].getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE) != null) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+					throw new BundleException(NLS.bind(message + " : " + StateMsg.HEADER_EXPORT_ATTR_ERROR, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.EXPORT_PACKAGE), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+				}
 			}
 		}
 	}
 
-	private static void checkForDuplicateDirectivesAttributes(ManifestElement[] elements) throws BundleException {
+	private static void checkForDuplicateDirectivesAttributes(String headerKey, ManifestElement[] elements) throws BundleException {
 		// check for duplicate directives
 		for (int i = 0; i < elements.length; i++) {
 			Enumeration directiveKeys = elements[i].getDirectiveKeys();
@@ -562,8 +575,10 @@ class StateBuilder {
 				while (directiveKeys.hasMoreElements()) {
 					String key = (String) directiveKeys.nextElement();
 					String[] directives = elements[i].getDirectives(key);
-					if (directives.length > 1)
-						throw new BundleException(NLS.bind(StateMsg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR);
+					if (directives.length > 1) {
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						throw new BundleException(NLS.bind(message + " : " + StateMsg.HEADER_DIRECTIVE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					}
 				}
 			}
 			Enumeration attrKeys = elements[i].getKeys();
@@ -571,19 +586,23 @@ class StateBuilder {
 				while (attrKeys.hasMoreElements()) {
 					String key = (String) attrKeys.nextElement();
 					String[] attrs = elements[i].getAttributes(key);
-					if (attrs.length > 1)
-						throw new BundleException(NLS.bind(StateMsg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR);
+					if (attrs.length > 1) {
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[i].toString());
+						throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_ATTRIBUTE_DUPLICATES, key), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+					}
 				}
 			}
 		}
 	}
 
-	private static void checkExtensionBundle(ManifestElement[] elements) throws BundleException {
+	private static void checkExtensionBundle(String headerKey, ManifestElement[] elements) throws BundleException {
 		if (elements.length == 0 || elements[0].getDirective(Constants.EXTENSION_DIRECTIVE) == null)
 			return;
 		String hostName = elements[0].getValue();
 		// XXX: The extension bundle check is done against system.bundle and org.eclipse.osgi
-		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(Constants.getInternalSymbolicName()))
-			throw new BundleException(NLS.bind(StateMsg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR);
+		if (!hostName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME) && !hostName.equals(Constants.getInternalSymbolicName())) {
+			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
+			throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
+		}
 	}
 }

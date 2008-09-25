@@ -535,4 +535,36 @@ public class ManifestElement {
 		}
 		return headers;
 	}
+
+	public String toString() {
+		Enumeration attrKeys = getKeys();
+		Enumeration directiveKeys = getDirectiveKeys();
+		if (attrKeys == null && directiveKeys == null)
+			return value;
+		StringBuffer result = new StringBuffer(value);
+		if (attrKeys != null) {
+			while (attrKeys.hasMoreElements()) {
+				String key = (String) attrKeys.nextElement();
+				addValues(false, key, getAttributes(key), result);
+			}
+		}
+		if (directiveKeys != null) {
+			while (directiveKeys.hasMoreElements()) {
+				String key = (String) directiveKeys.nextElement();
+				addValues(true, key, getDirectives(key), result);
+			}
+		}
+		return result.toString();
+	}
+
+	private void addValues(boolean directive, String key, String[] values, StringBuffer result) {
+		if (values == null)
+			return;
+		for (int i = 0; i < values.length; i++) {
+			result.append(';').append(key);
+			if (directive)
+				result.append(':');
+			result.append("=\"").append(values[i]).append('\"'); //$NON-NLS-1$			
+		}
+	}
 }
