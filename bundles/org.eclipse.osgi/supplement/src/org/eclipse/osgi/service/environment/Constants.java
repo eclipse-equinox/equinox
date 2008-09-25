@@ -168,6 +168,12 @@ public interface Constants {
 	public static final String WS_CARBON = "carbon";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "cocoa") indicating the platform is running on a
+	 * machine using the Cocoa windowing system.
+	 */
+	public static final String WS_COCOA = "cocoa";//$NON-NLS-1$
+
+	/**
 	 * Constant string (value "s60") indicating the platform is running on a
 	 * machine using the S60 windowing system.
 	 * @since 3.4
