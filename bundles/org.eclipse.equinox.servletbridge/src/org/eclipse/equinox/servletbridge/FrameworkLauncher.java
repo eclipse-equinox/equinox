@@ -8,6 +8,7 @@
  * Contributors:
  *     Cognos Incorporated - initial API and implementation
  *     IBM Corporation - bug fixes and enhancements
+ *     Code 9 - bug fixes and enhancements
  *******************************************************************************/
 package org.eclipse.equinox.servletbridge;
 
@@ -30,9 +31,9 @@ import javax.servlet.ServletContext;
  * 5) undeploy
  * 6) destroy
  * an instance of the OSGi framework. 
- * These 6 methods are provided to help manage the lifecycle and are called from outside this
+ * These 6 methods are provided to help manage the life-cycle and are called from outside this
  * class by the BridgeServlet. To create an extended FrameworkLauncher over-ride these methods to allow
- * custom behaviour.  
+ * custom behavior.  
  */
 public class FrameworkLauncher {
 
@@ -47,7 +48,8 @@ public class FrameworkLauncher {
 	protected static final String OSGI_CONFIGURATION_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	protected static final String OSGI_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
 	protected static final String OSGI_FORCED_RESTART = "osgi.forcedRestart"; //$NON-NLS-1$
-	protected static final String RESOURCE_BASE = "/WEB-INF/eclipse/"; //$NON-NLS-1$
+	protected static final String RESOURCE_BASE = "/WEB-INF/"; //$NON-NLS-1$
+	protected static final String ECLIPSE = "eclipse/"; //$NON-NLS-1$
 	protected static final String LAUNCH_INI = "launch.ini"; //$NON-NLS-1$
 
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
@@ -60,6 +62,7 @@ public class FrameworkLauncher {
 
 	private static final String CONFIG_COMMANDLINE = "commandline"; //$NON-NLS-1$
 	private static final String CONFIG_EXTENDED_FRAMEWORK_EXPORTS = "extendedFrameworkExports"; //$NON-NLS-1$
+	private static final String CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE = "overrideAndReplaceExtensionBundle"; //$NON-NLS-1$
 
 	static final PermissionCollection allPermissions = new PermissionCollection() {
 		private static final long serialVersionUID = 482874725021998286L;
@@ -102,6 +105,7 @@ public class FrameworkLauncher {
 
 	protected ServletConfig config;
 	protected ServletContext context;
+	protected String resourceBase;
 	private File platformDirectory;
 	private ClassLoader frameworkContextClassLoader;
 	private URLClassLoader frameworkClassLoader;
@@ -109,20 +113,41 @@ public class FrameworkLauncher {
 	void init(ServletConfig servletConfig) {
 		config = servletConfig;
 		context = servletConfig.getServletContext();
+		initResourceBase();
 		init();
 	}
 
 	/**
+	 * try to find the resource base for this webapp by looking for the launcher initialization file.
+	 */
+	protected void initResourceBase() {
+		try {
+			if (context.getResource(RESOURCE_BASE + LAUNCH_INI) != null) {
+				resourceBase = RESOURCE_BASE;
+				return;
+			}
+			if (context.getResource(RESOURCE_BASE + ECLIPSE + LAUNCH_INI) != null) {
+				resourceBase = RESOURCE_BASE + ECLIPSE;
+				return;
+			}
+		} catch (MalformedURLException e) {
+			// ignore
+		}
+		// If things don't work out, use the default resource base
+		resourceBase = RESOURCE_BASE;
+	}
+
+	/**
 	 * init is the first method called on the FrameworkLauncher and can be used for any initial setup.
-	 * The default behaviour is to do nothing.
+	 * The default behavior is to do nothing.
 	 */
 	public void init() {
 		// do nothing for now
 	}
 
 	/**
-	 * destory is the last method called on the FrameworkLauncher and can be used for any final cleanup.
-	 * The default behaviour is to do nothing.
+	 * destroy is the last method called on the FrameworkLauncher and can be used for any final cleanup.
+	 * The default behavior is to do nothing.
 	 */
 	public void destroy() {
 		// do nothing for now
@@ -130,8 +155,8 @@ public class FrameworkLauncher {
 
 	/**
 	 * deploy is used to move the OSGi framework libraries into a location suitable for execution.
-	 * The default behaviour is to copy the contents of the webapps WEB-INF/eclipse directory
-	 * to the webapps temp directory.
+	 * The default behavior is to copy the contents of the webapp's WEB-INF/eclipse directory
+	 * to the webapp's temp directory.
 	 */
 	public synchronized void deploy() {
 		if (platformDirectory != null) {
@@ -145,12 +170,13 @@ public class FrameworkLauncher {
 			platformDirectory.mkdirs();
 		}
 
-		copyResource(RESOURCE_BASE + "configuration/", new File(platformDirectory, "configuration")); //$NON-NLS-1$ //$NON-NLS-2$
-		copyResource(RESOURCE_BASE + "features/", new File(platformDirectory, "features")); //$NON-NLS-1$ //$NON-NLS-2$
+		copyResource(resourceBase + "configuration/", new File(platformDirectory, "configuration")); //$NON-NLS-1$ //$NON-NLS-2$
+		copyResource(resourceBase + "features/", new File(platformDirectory, "features")); //$NON-NLS-1$ //$NON-NLS-2$
 		File plugins = new File(platformDirectory, "plugins"); //$NON-NLS-1$
-		copyResource(RESOURCE_BASE + "plugins/", plugins); //$NON-NLS-1$
+		copyResource(resourceBase + "plugins/", plugins); //$NON-NLS-1$
+		copyResource(resourceBase + "p2/", new File(platformDirectory, "p2")); //$NON-NLS-1$ //$NON-NLS-2$
 		deployExtensionBundle(plugins);
-		copyResource(RESOURCE_BASE + ".eclipseproduct", new File(platformDirectory, ".eclipseproduct")); //$NON-NLS-1$ //$NON-NLS-2$
+		copyResource(resourceBase + ".eclipseproduct", new File(platformDirectory, ".eclipseproduct")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -161,7 +187,10 @@ public class FrameworkLauncher {
 	private void deployExtensionBundle(File plugins) {
 		File extensionBundle = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0.jar"); //$NON-NLS-1$
 		File extensionBundleDir = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0"); //$NON-NLS-1$
-		if (extensionBundle.exists() || (extensionBundleDir.exists() && extensionBundleDir.isDirectory()))
+		if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE)).booleanValue()) {
+			extensionBundle.delete();
+			deleteDirectory(extensionBundleDir);
+		} else if (extensionBundle.exists() || extensionBundleDir.isDirectory())
 			return;
 
 		Manifest mf = new Manifest();
@@ -218,13 +247,14 @@ public class FrameworkLauncher {
 		deleteDirectory(new File(platformDirectory, "features")); //$NON-NLS-1$
 		deleteDirectory(new File(platformDirectory, "plugins")); //$NON-NLS-1$
 		deleteDirectory(new File(platformDirectory, "workspace")); //$NON-NLS-1$
+		deleteDirectory(new File(platformDirectory, "p2")); //$NON-NLS-1$
 
 		new File(platformDirectory, ".eclipseproduct").delete(); //$NON-NLS-1$
 		platformDirectory = null;
 	}
 
 	/** start is used to "start" a previously deployed OSGi framework
-	 * The default behaviour will read launcher.ini to create a set of initial properties and
+	 * The default behavior will read launcher.ini to create a set of initial properties and
 	 * use the "commandline" configuration parameter to create the equivalent command line arguments
 	 * available when starting Eclipse. 
 	 */
@@ -317,7 +347,7 @@ public class FrameworkLauncher {
 	 */
 	protected Map buildInitialPropertyMap() {
 		Map initialPropertyMap = new HashMap();
-		Properties launchProperties = loadProperties(RESOURCE_BASE + LAUNCH_INI);
+		Properties launchProperties = loadProperties(resourceBase + LAUNCH_INI);
 		for (Iterator it = launchProperties.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
@@ -404,28 +434,28 @@ public class FrameworkLauncher {
 				String arg = tokenizer.nextToken();
 				if (arg.startsWith("\"")) { //$NON-NLS-1$
 					if (arg.endsWith("\"")) { //$NON-NLS-1$ 
-		 				if (arg.length() >= 2) {
-		 					// strip the beginning and ending quotes 
-		 					arg = arg.substring(1, arg.length() - 1);
-		 				}
-		 			} else {
+						if (arg.length() >= 2) {
+							// strip the beginning and ending quotes 
+							arg = arg.substring(1, arg.length() - 1);
+						}
+					} else {
 						String remainingArg = tokenizer.nextToken("\""); //$NON-NLS-1$
 						arg = arg.substring(1) + remainingArg;
 						// skip to next whitespace separated token
 						tokenizer.nextToken(WS_DELIM);
-		 			}
+					}
 				} else if (arg.startsWith("'")) { //$NON-NLS-1$
-		 			if (arg.endsWith("'")) { //$NON-NLS-1$ 
-		 				if (arg.length() >= 2) {
-		 					// strip the beginning and ending quotes 
-		 					arg = arg.substring(1, arg.length() - 1);
-		 				}
-		 			} else {
+					if (arg.endsWith("'")) { //$NON-NLS-1$ 
+						if (arg.length() >= 2) {
+							// strip the beginning and ending quotes 
+							arg = arg.substring(1, arg.length() - 1);
+						}
+					} else {
 						String remainingArg = tokenizer.nextToken("'"); //$NON-NLS-1$
 						arg = arg.substring(1) + remainingArg;
 						// skip to next whitespace separated token
 						tokenizer.nextToken(WS_DELIM);
-		 			}
+					}
 				}
 				args.add(arg);
 			}
@@ -477,7 +507,7 @@ public class FrameworkLauncher {
 
 	/**
 	 * copyResource is a convenience method to recursively copy resources from the ServletContext to
-	 * an installation target. The default behaviour will create a directory if the resourcepath ends
+	 * an installation target. The default behavior will create a directory if the resourcepath ends
 	 * in '/' and a file otherwise.
 	 * @param resourcePath - The resource root path
 	 * @param target - The root location where resources are to be copied
@@ -526,10 +556,10 @@ public class FrameworkLauncher {
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
 	 * @param directory - the directory to delete.
-	 * @return was the delete succesful
+	 * @return was the delete successful
 	 */
 	protected static boolean deleteDirectory(File directory) {
-		if (directory.exists() && directory.isDirectory()) {
+		if (directory.isDirectory()) {
 			File[] files = directory.listFiles();
 			for (int i = 0; i < files.length; i++) {
 				if (files[i].isDirectory()) {
@@ -545,7 +575,7 @@ public class FrameworkLauncher {
 	/**
 	 * Used when to set the ContextClassLoader when the BridgeServlet delegates to a Servlet
 	 * inside the framework
-	 * @return a Classloader with the OSGi framework's context classloader.
+	 * @return a Classloader with the OSGi framework's context class loader.
 	 */
 	public synchronized ClassLoader getFrameworkContextClassLoader() {
 		return frameworkContextClassLoader;

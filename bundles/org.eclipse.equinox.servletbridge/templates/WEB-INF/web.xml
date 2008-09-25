@@ -33,6 +33,22 @@
 			<param-value>org.eclipse.equinox.servletbridge.FrameworkLauncher</param-value>
 		</init-param>	
 		-->		
+		<!-- 
+		  When the framework is deployed, an extension bundle must be present to allow the Servlet API to 
+		  be exported by the container.  Typically, this extension bundle is created at deploy time by the
+		  FrameworkLauncher.  If, however, an extension bundle (with id 'org.eclipse.equinox.servletbridge.extensionbundle') is
+		  already present in the 'plugins' area, then preference is given to the existing bundle.
+		  If this param is set to 'true', then the existing extension bundle with be *overridden* and
+		  the one created by the FrameworkLauncher will replace any existing one.  The default is 'false' 
+		  (giving preference to the existing extension bundle if present).
+		  
+		  default: false
+		  
+		<init-param>
+			<param-name>overrideAndReplaceExtensionBundle</param-name>
+			<param-value>true</param-value>
+		</init-param>	
+		-->		
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
