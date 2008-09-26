@@ -55,6 +55,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public final int DISABLE_COMPONENTS = 2;
 
 	private ComponentStorage storage;
+	boolean doSynchronousComponentResolving = true;
 
 	/**
 	 * Constructs the SCRManager.
@@ -62,6 +63,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public SCRManager(BundleContext bc, Log log) {
 		this.bc = bc;
 		SCRManager.log = log;
+		String doSynchronousComponentResolvingValue = System.getProperty("equinox.ds.synchronous_build");
+		if (doSynchronousComponentResolvingValue != null) {
+			//def value is true
+			doSynchronousComponentResolving = !doSynchronousComponentResolvingValue.equalsIgnoreCase("false");
+		}
 
 		security = Log.security();
 
@@ -175,6 +181,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	 *            Action for this item
 	 * @param o
 	 *            Object for this item
+	 * @param security specifies whether to use security privileged call
 	 */
 	public void enqueueWork(WorkPerformer d, int a, Object o, boolean security) {
 		addEvent(new QueuedJob(d, a, o), security);
@@ -524,9 +531,33 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 			// store the components in the cache
-			bundleToServiceComponents.put(bundle, components);
+			bundleToServiceComponents.put(bundle, components.clone());
 			// this will also resolve the component dependencies!
 			enqueueWork(this, ENABLE_COMPONENTS, components, false);
+			synchronized (components) {
+				long startTime = System.currentTimeMillis();
+				try {
+					do {
+						components.wait(1000);
+					} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
+					if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
+						Activator.log.warning("[SCR] Enabling of components of bundle " + getBundleName(bundle) + " did not complete in " + WorkThread.BLOCK_TIMEOUT + "ms", null);
+					}
+				} catch (InterruptedException e) {
+					//do nothing
+				}
+			}
+		}
+	}
+
+	private String getBundleName(Bundle b) {
+		String res = null;
+		if (b.getSymbolicName() != null) {
+			return b.getSymbolicName();
+		} else if ((res = (String) b.getHeaders().get(Constants.BUNDLE_NAME)) != null) {
+			return res;
+		} else {
+			return b.getLocation();
 		}
 	}
 
@@ -657,6 +688,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public void performWork(int workAction, Object workObject) {
 		if (workAction == ENABLE_COMPONENTS) {
 			resolver.enableComponents((Vector) workObject);
+			//notify that the component enabling has finished
+			synchronized (workObject) {
+				((Vector) workObject).clear();
+				workObject.notify();
+			}
 		} else if (workAction == DISABLE_COMPONENTS) {
 			resolver.disableComponents((Vector) workObject);
 		}
