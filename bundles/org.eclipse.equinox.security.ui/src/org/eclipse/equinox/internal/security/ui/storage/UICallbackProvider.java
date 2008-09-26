@@ -55,7 +55,7 @@ public class UICallbackProvider implements IUICallbacks {
 	}
 
 	public void setupPasswordRecovery(final int size, final String moduleID, final IPreferencesContainer container) {
-		if (!StorageUtils.showUI())
+		if (!StorageUtils.showUI(container))
 			return;
 
 		UIJob reciverySetupJob = new UIJob(SecUIMessages.pswJobName) {
@@ -76,7 +76,7 @@ public class UICallbackProvider implements IUICallbacks {
 	}
 
 	public void execute(final IStorageTask callback) throws StorageException {
-		if (!StorageUtils.showUI()) {
+		if (!StorageUtils.showUI(null)) {
 			callback.execute();
 			return;
 		}
@@ -126,7 +126,7 @@ public class UICallbackProvider implements IUICallbacks {
 	}
 
 	public Boolean ask(final String msg) {
-		if (!StorageUtils.showUI())
+		if (!StorageUtils.showUI(null)) // container-independent operation
 			return null;
 
 		final Boolean[] result = new Boolean[1];

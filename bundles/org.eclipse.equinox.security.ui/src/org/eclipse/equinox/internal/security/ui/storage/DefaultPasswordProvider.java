@@ -14,7 +14,8 @@ import java.net.URL;
 import javax.crypto.spec.PBEKeySpec;
 import org.eclipse.equinox.internal.security.storage.friends.InternalExchangeUtils;
 import org.eclipse.equinox.internal.security.ui.nls.SecUIMessages;
-import org.eclipse.equinox.security.storage.provider.*;
+import org.eclipse.equinox.security.storage.provider.IPreferencesContainer;
+import org.eclipse.equinox.security.storage.provider.PasswordProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.PlatformUI;
@@ -26,7 +27,7 @@ import org.eclipse.ui.PlatformUI;
 public class DefaultPasswordProvider extends PasswordProvider {
 
 	public PBEKeySpec getPassword(IPreferencesContainer container, int passwordType) {
-		if (!useUI(container))
+		if (!StorageUtils.showUI(container))
 			return null;
 
 		boolean newPassword = ((passwordType & CREATE_NEW_PASSWORD) != 0);
@@ -55,7 +56,7 @@ public class DefaultPasswordProvider extends PasswordProvider {
 	}
 
 	public boolean retryOnError(Exception e, IPreferencesContainer container) {
-		if (!useUI(container))
+		if (!StorageUtils.showUI(container))
 			return false;
 
 		final Boolean[] result = new Boolean[1];
@@ -67,16 +68,4 @@ public class DefaultPasswordProvider extends PasswordProvider {
 		});
 		return result[0].booleanValue();
 	}
-
-	private boolean useUI(IPreferencesContainer container) {
-		if (!StorageUtils.showUI())
-			return false;
-		if (container.hasOption(IProviderHints.PROMPT_USER)) {
-			Object promptHint = container.getOption(IProviderHints.PROMPT_USER);
-			if (promptHint instanceof Boolean)
-				return ((Boolean) promptHint).booleanValue();
-		}
-		return true;
-	}
-
 }
