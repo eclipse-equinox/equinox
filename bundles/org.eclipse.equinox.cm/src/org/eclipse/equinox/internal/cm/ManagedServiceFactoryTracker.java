@@ -26,8 +26,11 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
+
+	// managedServiceFactoryReferences guards both managedServiceFactories and managedServiceFactoryReferences
 	private final Map managedServiceFactories = new HashMap();
 	private final Map managedServiceFactoryReferences = new HashMap();
+
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedServiceFactory Update Queue"); //$NON-NLS-1$
 
 	public ManagedServiceFactoryTracker(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, BundleContext context) {
@@ -126,36 +129,46 @@ class ManagedServiceFactoryTracker extends ServiceTracker {
 		}
 	}
 
-	private synchronized boolean trackManagedServiceFactory(String factoryPid, ServiceReference reference, ManagedServiceFactory service) {
-		if (managedServiceFactoryReferences.containsKey(factoryPid)) {
-			configurationAdminFactory.log(LogService.LOG_WARNING, ManagedServiceFactory.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + factoryPid); //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
+	private boolean trackManagedServiceFactory(String factoryPid, ServiceReference reference, ManagedServiceFactory service) {
+		synchronized (managedServiceFactoryReferences) {
+			if (managedServiceFactoryReferences.containsKey(factoryPid)) {
+				configurationAdminFactory.log(LogService.LOG_WARNING, ManagedServiceFactory.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + factoryPid); //$NON-NLS-1$ //$NON-NLS-2$
+				return false;
+			}
+			managedServiceFactoryReferences.put(factoryPid, reference);
+			managedServiceFactories.put(factoryPid, service);
+			return true;
 		}
-		managedServiceFactoryReferences.put(factoryPid, reference);
-		managedServiceFactories.put(factoryPid, service);
-		return true;
 	}
 
-	private synchronized void untrackManagedServiceFactory(String factoryPid, ServiceReference reference) {
-		managedServiceFactoryReferences.remove(factoryPid);
-		managedServiceFactories.remove(factoryPid);
+	private void untrackManagedServiceFactory(String factoryPid, ServiceReference reference) {
+		synchronized (managedServiceFactoryReferences) {
+			managedServiceFactoryReferences.remove(factoryPid);
+			managedServiceFactories.remove(factoryPid);
+		}
 	}
 
-	private synchronized ManagedServiceFactory getManagedServiceFactory(String factoryPid) {
-		return (ManagedServiceFactory) managedServiceFactories.get(factoryPid);
+	private ManagedServiceFactory getManagedServiceFactory(String factoryPid) {
+		synchronized (managedServiceFactoryReferences) {
+			return (ManagedServiceFactory) managedServiceFactories.get(factoryPid);
+		}
 	}
 
-	private synchronized ServiceReference getManagedServiceFactoryReference(String factoryPid) {
-		return (ServiceReference) managedServiceFactoryReferences.get(factoryPid);
+	private ServiceReference getManagedServiceFactoryReference(String factoryPid) {
+		synchronized (managedServiceFactoryReferences) {
+			return (ServiceReference) managedServiceFactoryReferences.get(factoryPid);
+		}
 	}
 
 	private String getPidForManagedServiceFactory(Object service) {
-		for (Iterator it = managedServiceFactories.entrySet().iterator(); it.hasNext();) {
-			Entry entry = (Entry) it.next();
-			if (entry.getValue() == service)
-				return (String) entry.getKey();
+		synchronized (managedServiceFactoryReferences) {
+			for (Iterator it = managedServiceFactories.entrySet().iterator(); it.hasNext();) {
+				Entry entry = (Entry) it.next();
+				if (entry.getValue() == service)
+					return (String) entry.getKey();
+			}
+			return null;
 		}
-		return null;
 	}
 
 	private void asynchDeleted(final ManagedServiceFactory service, final String pid) {

@@ -25,8 +25,11 @@ class ManagedServiceTracker extends ServiceTracker {
 
 	final ConfigurationAdminFactory configurationAdminFactory;
 	private final ConfigurationStore configurationStore;
+
+	// managedServiceReferences guards both managedServices and managedServiceReferences
 	private final Map managedServices = new HashMap();
 	private final Map managedServiceReferences = new HashMap();
+
 	private final SerializedTaskQueue queue = new SerializedTaskQueue("ManagedService Update Queue"); //$NON-NLS-1$
 
 	public ManagedServiceTracker(ConfigurationAdminFactory configurationAdminFactory, ConfigurationStore configurationStore, BundleContext context) {
@@ -128,37 +131,47 @@ class ManagedServiceTracker extends ServiceTracker {
 		}
 	}
 
-	private synchronized boolean trackManagedService(String pid, ServiceReference reference, ManagedService service) {
-		if (managedServiceReferences.containsKey(pid)) {
-			String message = ManagedService.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + pid; //$NON-NLS-1$ //$NON-NLS-2$
-			configurationAdminFactory.log(LogService.LOG_WARNING, message);
-			return false;
+	private boolean trackManagedService(String pid, ServiceReference reference, ManagedService service) {
+		synchronized (managedServiceReferences) {
+			if (managedServiceReferences.containsKey(pid)) {
+				String message = ManagedService.class.getName() + " already registered for " + Constants.SERVICE_PID + "=" + pid; //$NON-NLS-1$ //$NON-NLS-2$
+				configurationAdminFactory.log(LogService.LOG_WARNING, message);
+				return false;
+			}
+			managedServiceReferences.put(pid, reference);
+			managedServices.put(pid, service);
+			return true;
 		}
-		managedServiceReferences.put(pid, reference);
-		managedServices.put(pid, service);
-		return true;
 	}
 
-	private synchronized void untrackManagedService(String pid, ServiceReference reference) {
-		managedServiceReferences.remove(pid);
-		managedServices.remove(pid);
-	}
-
-	private synchronized ManagedService getManagedService(String pid) {
-		return (ManagedService) managedServices.get(pid);
-	}
-
-	private synchronized ServiceReference getManagedServiceReference(String pid) {
-		return (ServiceReference) managedServiceReferences.get(pid);
-	}
-
-	private synchronized String getPidForManagedService(Object service) {
-		for (Iterator it = managedServices.entrySet().iterator(); it.hasNext();) {
-			Entry entry = (Entry) it.next();
-			if (entry.getValue() == service)
-				return (String) entry.getKey();
+	private void untrackManagedService(String pid, ServiceReference reference) {
+		synchronized (managedServiceReferences) {
+			managedServiceReferences.remove(pid);
+			managedServices.remove(pid);
 		}
-		return null;
+	}
+
+	private ManagedService getManagedService(String pid) {
+		synchronized (managedServiceReferences) {
+			return (ManagedService) managedServices.get(pid);
+		}
+	}
+
+	private ServiceReference getManagedServiceReference(String pid) {
+		synchronized (managedServiceReferences) {
+			return (ServiceReference) managedServiceReferences.get(pid);
+		}
+	}
+
+	private String getPidForManagedService(Object service) {
+		synchronized (managedServiceReferences) {
+			for (Iterator it = managedServices.entrySet().iterator(); it.hasNext();) {
+				Entry entry = (Entry) it.next();
+				if (entry.getValue() == service)
+					return (String) entry.getKey();
+			}
+			return null;
+		}
 	}
 
 	private void asynchUpdated(final ManagedService service, final Dictionary properties) {
