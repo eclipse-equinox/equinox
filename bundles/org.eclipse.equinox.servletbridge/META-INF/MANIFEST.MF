@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-Vendor: %bundleProvider
-Bundle-SymbolicName: org.eclipse.equinox.servletbridge
+Bundle-SymbolicName: org.eclipse.equinox.servletbridge;singleton:=true
 Bundle-Version: 1.0.100.qualifier
 Bundle-Localization: plugin
 Import-Package: javax.servlet;version="2.3.0",
