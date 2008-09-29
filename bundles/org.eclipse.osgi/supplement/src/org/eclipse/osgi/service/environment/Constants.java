@@ -170,6 +170,7 @@ public interface Constants {
 	/**
 	 * Constant string (value "cocoa") indicating the platform is running on a
 	 * machine using the Cocoa windowing system.
+	 * @since 3.5
 	 */
 	public static final String WS_COCOA = "cocoa";//$NON-NLS-1$
 
