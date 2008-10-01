@@ -195,7 +195,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default mark method.
 	 * @see FilterInputStream#mark(int)
 	 */
-	public void mark(int readlimit) {
+	public synchronized void mark(int readlimit) {
 		//ignore
 	}
 
@@ -203,7 +203,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 * Override default reset method.
 	 * @see FilterInputStream#reset()
 	 */
-	public void reset() throws IOException {
+	public synchronized void reset() throws IOException {
 		throw new IOException("reset not supported."); //$NON-NLS-1$
 	}
 }

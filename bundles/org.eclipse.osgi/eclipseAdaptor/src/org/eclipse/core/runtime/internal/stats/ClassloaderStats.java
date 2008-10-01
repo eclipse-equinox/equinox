@@ -65,7 +65,7 @@ public class ClassloaderStats {
 			Properties filters = new Properties() {
 				private static final long serialVersionUID = 3546359543853365296L;
 
-				public Object put(Object key, Object value) {
+				public synchronized Object put(Object key, Object value) {
 					addFilters((String) key, (String) value);
 					return null;
 				}
