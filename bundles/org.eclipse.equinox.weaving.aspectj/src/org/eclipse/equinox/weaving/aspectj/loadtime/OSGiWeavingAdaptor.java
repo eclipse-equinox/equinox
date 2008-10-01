@@ -40,6 +40,8 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
 
     private static final String DEFAULT_AOP_CONTEXT_LOCATION = "META-INF/aop.xml";
 
+    private final List aspectDefinitions;
+
     private final ClassLoader classLoader;
 
     private boolean initialized;
@@ -56,19 +58,29 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         this.classLoader = loader;
         this.weavingContext = context;
         this.namespaceAddon = new StringBuffer();
+        this.aspectDefinitions = parseDefinitionsForBundle();
+    }
+
+    /**
+     * returns the found aspect definitions
+     */
+    public List getAspectDefinitions() {
+        return this.aspectDefinitions;
     }
 
     /**
      * @see org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor#getNamespace()
      */
     public String getNamespace() {
-        final String namespace = super.getNamespace();
-        if (namespace != null && namespace.length() > 0
-                && namespaceAddon.length() > 0) {
-            return namespace + " - " + namespaceAddon.toString(); //$NON-NLS-1$
-        } else {
-            return namespace;
-        }
+        //        final String namespace = super.getNamespace();
+        return namespaceAddon.toString();
+
+        //        if (namespace != null && namespace.length() > 0
+        //                && namespaceAddon.length() > 0) {
+        //            return namespace + " - " + namespaceAddon.toString(); 
+        //        } else {
+        //            return namespace;
+        //        }
     }
 
     public void initialize() {
@@ -78,45 +90,21 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                 super.initialize(classLoader, weavingContext);
                 initialized = true;
                 initializing = false;
+
+                if (WeavingServicePlugin.verbose) {
+                    if (isEnabled())
+                        System.err
+                                .println("[org.aspectj.osgi.service.weaving] info weaving bundle '"
+                                        + weavingContext.getClassLoaderName()
+                                        + "'");
+                    else
+                        System.err
+                                .println("[org.aspectj.osgi.service.weaving] info not weaving bundle '"
+                                        + weavingContext.getClassLoaderName()
+                                        + "'");
+                }
             }
         }
-
-        if (WeavingServicePlugin.verbose) {
-            if (isEnabled())
-                System.err
-                        .println("[org.aspectj.osgi.service.weaving] info weaving bundle '"
-                                + weavingContext.getClassLoaderName() + "'");
-            else
-                System.err
-                        .println("[org.aspectj.osgi.service.weaving] info not weaving bundle '"
-                                + weavingContext.getClassLoaderName() + "'");
-        }
-    }
-
-    /**
-     * Load and cache the aop.xml/properties according to the classloader
-     * visibility rules
-     * 
-     * @param weaver
-     * @param loader
-     */
-    public List parseDefinitionsForBundle() {
-        final List definitions = new ArrayList();
-        final Set seenBefore = new HashSet();
-
-        try {
-            parseDefinitionsFromVisibility(definitions, seenBefore);
-            parseDefinitionsFromRequiredBundles(definitions, seenBefore);
-            if (definitions.isEmpty()) {
-                info("no configuration found. Disabling weaver for bundler "
-                        + weavingContext.getClassLoaderName());
-            }
-        } catch (final Exception e) {
-            definitions.clear();
-            warn("parse definitions failed", e);
-        }
-
-        return definitions;
     }
 
     // Bug 215177: Adapt to updated (AJ 1.5.4) super class signature:
@@ -181,6 +169,32 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         } catch (final Exception e) {
             warn("parse definitions failed", e);
         }
+    }
+
+    /**
+     * Load and cache the aop.xml/properties according to the classloader
+     * visibility rules
+     * 
+     * @param weaver
+     * @param loader
+     */
+    private List parseDefinitionsForBundle() {
+        final List definitions = new ArrayList();
+        final Set seenBefore = new HashSet();
+
+        try {
+            parseDefinitionsFromVisibility(definitions, seenBefore);
+            parseDefinitionsFromRequiredBundles(definitions, seenBefore);
+            if (definitions.isEmpty()) {
+                info("no configuration found. Disabling weaver for bundler "
+                        + weavingContext.getClassLoaderName());
+            }
+        } catch (final Exception e) {
+            definitions.clear();
+            warn("parse definitions failed", e);
+        }
+
+        return definitions;
     }
 
     private void parseDefinitionsFromRequiredBundles(final List definitions,

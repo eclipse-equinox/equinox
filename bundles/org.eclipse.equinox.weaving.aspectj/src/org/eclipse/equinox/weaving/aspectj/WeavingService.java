@@ -75,7 +75,7 @@ public class WeavingService implements IWeavingService {
             System.out.println("> WeavingService.getKey() bundle="
                     + bundle.getSymbolicName());
         String key;
-        ensureAdaptorInit();
+        ensureAdaptorCreated();
         key = adaptor1.getNamespace();
         if (WeavingServicePlugin.DEBUG)
             System.out.println("< WeavingService.getKey() key='" + key + "'");
@@ -105,11 +105,17 @@ public class WeavingService implements IWeavingService {
     /**
      * Initialise Aj
      */
-    private void ensureAdaptorInit() {
-        if (adaptor1 == null) {
-            adaptor1 = new OSGiWeavingAdaptor(loader, weavingContext);
-            adaptor1.initialize();
+    private void ensureAdaptorCreated() {
+        synchronized (this) {
+            if (adaptor1 == null) {
+                adaptor1 = new OSGiWeavingAdaptor(loader, weavingContext);
+            }
         }
+    }
+
+    private void ensureAdaptorInit() {
+        ensureAdaptorCreated();
+        adaptor1.initialize();
     }
 
 }

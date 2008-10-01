@@ -124,7 +124,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
     public List getDefinitions(final ClassLoader loader,
             final WeavingAdaptor adaptor) {
         final List definitions = ((OSGiWeavingAdaptor) adaptor)
-                .parseDefinitionsForBundle();
+                .getAspectDefinitions();
         return definitions;
     }
 
