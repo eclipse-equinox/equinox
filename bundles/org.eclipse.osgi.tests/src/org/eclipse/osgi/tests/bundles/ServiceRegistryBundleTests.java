@@ -615,14 +615,18 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 					try {
 						references.add(reg1.getReference());
 						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 					try {
 						references.addAll(Arrays.asList(new ServiceReference[] {reg1.getReference()}));
 						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
 					hookError[0] = a;
@@ -657,14 +661,18 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 					try {
 						references.add(reg2.getReference());
 						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 					try {
 						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
 						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
 					hookError[1] = a;
@@ -699,14 +707,18 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 					try {
 						references.add(reg2.getReference());
 						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 					try {
 						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
 						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
 					hookError[2] = a;
@@ -746,14 +758,18 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 					try {
 						references.add(reg2.getReference());
 						fail("add to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 					try {
 						references.addAll(Arrays.asList(new ServiceReference[] {reg2.getReference()}));
 						fail("addAll to collection succeeded"); //$NON-NLS-1$
-					} catch (Exception e) {
+					} catch (UnsupportedOperationException e) {
 						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
 					}
 				} catch (AssertionFailedError a) {
 					hookError[3] = a;
