@@ -56,7 +56,7 @@ public class ServiceUse {
 	 */
 	ServiceUse(BundleContextImpl context, ServiceRegistrationImpl registration) {
 		this.useCount = 0;
-		Object service = registration.getService();
+		Object service = registration.getServiceObject();
 		if (service instanceof ServiceFactory) {
 			this.factory = (ServiceFactory) service;
 			this.cachedService = null;

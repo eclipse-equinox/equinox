@@ -188,7 +188,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 * {@link Constants#SERVICE_ID service id} and greater if it has a lower
 	 * service id.
 	 * 
-	 * @param reference The <code>ServiceReference</code> to be compared.
+	 * @param object The <code>ServiceReference</code> to be compared.
 	 * @return Returns a negative integer, zero, or a positive integer if this
 	 *         <code>ServiceReference</code> is less than, equal to, or
 	 *         greater than the specified <code>ServiceReference</code>.
@@ -196,9 +196,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 */
 	public int compareTo(Object object) {
 		ServiceReferenceImpl other = (ServiceReferenceImpl) object;
-		if (this.getRanking() != other.getRanking())
-			return this.getRanking() > other.getRanking() ? -1 : 1;
-		return this.getId() == other.getId() ? 0 : this.getId() > other.getId() ? 1 : -1;
+		return registration.compareTo(other.registration);
 	}
 
 	/**
@@ -219,11 +217,11 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
-			return (true);
+			return true;
 		}
 
 		if (!(obj instanceof ServiceReferenceImpl)) {
-			return (false);
+			return false;
 		}
 
 		ServiceReferenceImpl other = (ServiceReferenceImpl) obj;
@@ -256,23 +254,5 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 */
 	String[] getClasses() {
 		return registration.getClasses();
-	}
-
-	/**
-	 * Return the service id of the ServiceRegistration.
-	 *
-	 * @return service.id of the service
-	 */
-	long getId() {
-		return registration.getId();
-	}
-
-	/**
-	 * Return the service ranking of the ServiceRegistration.
-	 *
-	 * @return service.ranking of the service
-	 */
-	int getRanking() {
-		return registration.getRanking();
 	}
 }

@@ -18,6 +18,7 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.hooks.service.FindHook;
 
 /**
  * The Service Registry. This class is the main control point for service 
@@ -29,26 +30,39 @@ public class ServiceRegistry {
 	public static final String PROP_SCOPE_SERVICE_EVENTS = "osgi.scopeServiceEvents"; //$NON-NLS-1$
 	public static final boolean scopeEvents = Boolean.valueOf(FrameworkProperties.getProperty(PROP_SCOPE_SERVICE_EVENTS, "true")).booleanValue(); //$NON-NLS-1$
 
-	/** Published services by class name. Key is a String class name; Value is a ArrayList of ServiceRegistrations */
+	/** Published services by class name. 
+	 * Map&lt;String,List&lt;ServiceRegistrationImpl&gt;&gt;
+	 * The List&lt;ServiceRegistrationImpl&gt;s are sorted.
+	 */
 	/* @GuardedBy("this") */
-	private final HashMap/*<String,ArrayList<ServiceRegistrationImpl>>*/publishedServicesByClass;
-	/** All published services. Value is ServiceRegistrations */
+	private final Map/*<String,List<ServiceRegistrationImpl>>*/publishedServicesByClass;
+	/** All published services. 
+	 * List&lt;ServiceRegistrationImpl&gt;.
+	 * The List&lt;ServiceRegistrationImpl&gt; is sorted.
+	 */
 	/* @GuardedBy("this") */
-	private final ArrayList/*<ServiceRegistrationImpl>*/allPublishedServices;
-	/** Published services by BundleContext.  Key is a BundleContext; Value is a ArrayList of ServiceRegistrations*/
+	private final List/*<ServiceRegistrationImpl>*/allPublishedServices;
+	/** Published services by BundleContextImpl.  
+	 * Map&lt;BundleContextImpl,List&lt;ServiceRegistrationImpl&gt;&gt;.
+	 * The List&lt;ServiceRegistrationImpl&gt;s are NOT sorted.
+	 */
 	/* @GuardedBy("this") */
-	private final HashMap/*<BundleContextImpl,ArrayList<ServiceRegistrationImpl>*/publishedServicesByContext;
+	private final Map/*<BundleContextImpl,List<ServiceRegistrationImpl>>*/publishedServicesByContext;
 	/** next free service id. */
 	/* @GuardedBy("this") */
 	private long serviceid;
 	/** initial capacity of the data structure */
 	private static final int initialCapacity = 50;
 
+	/** framework which created this service registry */
+	private final Framework framework;
+
 	/**
 	 * Initializes the internal data structures of this ServiceRegistry.
 	 *
 	 */
-	public ServiceRegistry() {
+	public ServiceRegistry(Framework framework) {
+		this.framework = framework;
 		serviceid = 1;
 		publishedServicesByClass = new HashMap(initialCapacity);
 		publishedServicesByContext = new HashMap(initialCapacity);
@@ -58,8 +72,8 @@ public class ServiceRegistry {
 	/**
 	 * Registers the specified service object with the specified properties
 	 * under the specified class names into the Framework. A
-	 * <code>ServiceRegistration</code> object is returned. The
-	 * <code>ServiceRegistration</code> object is for the private use of the
+	 * <code>ServiceRegistrationImpl</code> object is returned. The
+	 * <code>ServiceRegistrationImpl</code> object is for the private use of the
 	 * bundle registering the service and should not be shared with other
 	 * bundles. The registering bundle is defined to be the context bundle.
 	 * Other bundles can locate the service by using either the
@@ -106,7 +120,7 @@ public class ServiceRegistry {
 	 *        The set of properties may be <code>null</code> if the service
 	 *        has no properties.
 	 * 
-	 * @return A <code>ServiceRegistration</code> object for use by the bundle
+	 * @return A <code>ServiceRegistrationImpl</code> object for use by the bundle
 	 *         registering the service to update the service's properties or to
 	 *         unregister the service.
 	 * 
@@ -174,12 +188,11 @@ public class ServiceRegistry {
 		ServiceRegistrationImpl registration = new ServiceRegistrationImpl(this, context, clazzes, service);
 		registration.register(properties);
 		return registration;
-
 	}
 
 	/**
-	 * Returns an array of <code>ServiceReference</code> objects. The returned
-	 * array of <code>ServiceReference</code> objects contains services that
+	 * Returns an array of <code>ServiceReferenceImpl</code> objects. The returned
+	 * array of <code>ServiceReferenceImpl</code> objects contains services that
 	 * were registered under the specified class, match the specified filter
 	 * criteria, and the packages for the class names under which the services
 	 * were registered match the context bundle's packages as defined in
@@ -203,19 +216,19 @@ public class ServiceRegistry {
 	 * 
 	 * <p>
 	 * The following steps are required to select a set of
-	 * <code>ServiceReference</code> objects:
+	 * <code>ServiceReferenceImpl</code> objects:
 	 * <ol>
 	 * <li>If the filter string is not <code>null</code>, the filter string
-	 * is parsed and the set <code>ServiceReference</code> objects of
+	 * is parsed and the set <code>ServiceReferenceImpl</code> objects of
 	 * registered services that satisfy the filter is produced. If the filter
 	 * string is <code>null</code>, then all registered services are
 	 * considered to satisfy the filter.
 	 * <li>If the Java Runtime Environment supports permissions, the set of
-	 * <code>ServiceReference</code> objects produced by the previous step is
+	 * <code>ServiceReferenceImpl</code> objects produced by the previous step is
 	 * reduced by checking that the caller has the
 	 * <code>ServicePermission</code> to get at least one of the class names
 	 * under which the service was registered. If the caller does not have the
-	 * correct permission for a particular <code>ServiceReference</code>
+	 * correct permission for a particular <code>ServiceReferenceImpl</code>
 	 * object, then it is removed from the set.
 	 * <li>If <code>clazz</code> is not <code>null</code>, the set is
 	 * further reduced to those services that are an <code>instanceof</code>
@@ -227,12 +240,12 @@ public class ServiceRegistry {
 	 * <code>ServiceReference</code> object and calling
 	 * {@link ServiceReference#isAssignableTo(Bundle, String)} with the context
 	 * bundle and each class name under which the <code>ServiceReference</code>
-	 * object was registered. For any given <code>ServiceReference</code>
+	 * object was registered. For any given <code>ServiceReferenceImpl</code>
 	 * object, if any call to
 	 * {@link ServiceReference#isAssignableTo(Bundle, String)} returns
 	 * <code>false</code>, then it is removed from the set of
-	 * <code>ServiceReference</code> objects.
-	 * <li>An array of the remaining <code>ServiceReference</code> objects is
+	 * <code>ServiceReferenceImpl</code> objects.
+	 * <li>An array of the remaining <code>ServiceReferenceImpl</code> objects is
 	 * returned.
 	 * </ol>
 	 * 
@@ -241,7 +254,7 @@ public class ServiceRegistry {
 	 *        <code>null</code> for all services.
 	 * @param filterstring The filter criteria.
 	 * @param allservices True if the bundle called getAllServiceReferences.
-	 * @return An array of <code>ServiceReference</code> objects or
+	 * @return An array of <code>ServiceReferenceImpl</code> objects or
 	 *         <code>null</code> if no services are registered which satisfy
 	 *         the search.
 	 * @throws InvalidSyntaxException If <code>filter</code> contains an
@@ -261,9 +274,9 @@ public class ServiceRegistry {
 			}
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
-		List references = null;
+		List references;
 		synchronized (this) {
-			references = lookupServiceReferences(clazz, filter);
+			references = changeRegistrationsToReferences(lookupServiceRegistrations(clazz, filter));
 			Iterator iter = references.iterator();
 			while (iter.hasNext()) {
 				ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
@@ -280,6 +293,8 @@ public class ServiceRegistry {
 				}
 			}
 		}
+
+		processFindHooks(context, clazz, filterstring, allservices, references);
 
 		int size = references.size();
 		if (size == 0) {
@@ -328,48 +343,9 @@ public class ServiceRegistry {
 			ServiceReferenceImpl[] references = getServiceReferences(context, clazz, null, false);
 
 			if (references != null) {
-				int index = 0;
-
-				int length = references.length;
-
-				if (length > 1) /* if more than one service, select highest ranking */{
-					int rankings[] = new int[length];
-					int count = 0;
-					int maxRanking = Integer.MIN_VALUE;
-
-					for (int i = 0; i < length; i++) {
-						int ranking = references[i].getRanking();
-
-						rankings[i] = ranking;
-
-						if (ranking > maxRanking) {
-							index = i;
-							maxRanking = ranking;
-							count = 1;
-						} else {
-							if (ranking == maxRanking) {
-								count++;
-							}
-						}
-					}
-
-					if (count > 1) /* if still more than one service, select lowest id */{
-						long minId = Long.MAX_VALUE;
-
-						for (int i = 0; i < length; i++) {
-							if (rankings[i] == maxRanking) {
-								long id = references[i].getId();
-
-								if (id < minId) {
-									index = i;
-									minId = id;
-								}
-							}
-						}
-					}
-				}
-
-				return references[index];
+				// Since we maintain the registrations in a sorted List, the first element is always the
+				// correct one to return.
+				return references[0];
 			}
 		} catch (InvalidSyntaxException e) {
 			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
@@ -517,7 +493,7 @@ public class ServiceRegistry {
 	 * @see ServicePermission
 	 */
 	public synchronized ServiceReferenceImpl[] getRegisteredServices(BundleContextImpl context) {
-		List references = lookupServiceReferences(context);
+		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context));
 		ListIterator iter = references.listIterator();
 		while (iter.hasNext()) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
@@ -678,33 +654,39 @@ public class ServiceRegistry {
 	 */
 	/* @GuardedBy("this") */
 	void addServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl registration) {
-		// Add the ServiceRegistration to the list of Services published by BundleContext.
-		ArrayList contextServices = (ArrayList) publishedServicesByContext.get(context);
+		// Add the ServiceRegistrationImpl to the list of Services published by BundleContextImpl.
+		List contextServices = (List) publishedServicesByContext.get(context);
 		if (contextServices == null) {
 			contextServices = new ArrayList(10);
 			publishedServicesByContext.put(context, contextServices);
 		}
+		// The list is NOT sorted, so we just add
 		contextServices.add(registration);
 
-		// Add the ServiceRegistration to the list of Services published by Class Name.
+		// Add the ServiceRegistrationImpl to the list of Services published by Class Name.
 		String[] clazzes = registration.getClasses();
 		int size = clazzes.length;
+		int insertIndex;
 
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i];
 
-			ArrayList services = (ArrayList) publishedServicesByClass.get(clazz);
+			List services = (List) publishedServicesByClass.get(clazz);
 
 			if (services == null) {
 				services = new ArrayList(10);
 				publishedServicesByClass.put(clazz, services);
 			}
 
-			services.add(registration);
+			// The list is sorted, so we must find the proper location to insert
+			insertIndex = -Collections.binarySearch(services, registration) - 1;
+			services.add(insertIndex, registration);
 		}
 
-		// Add the ServiceRegistration to the list of all published Services.
-		allPublishedServices.add(registration);
+		// Add the ServiceRegistrationImpl to the list of all published Services.
+		// The list is sorted, so we must find the proper location to insert
+		insertIndex = -Collections.binarySearch(allPublishedServices, registration) - 1;
+		allPublishedServices.add(insertIndex, registration);
 	}
 
 	/**
@@ -715,55 +697,58 @@ public class ServiceRegistry {
 	 */
 	/* @GuardedBy("this") */
 	void removeServiceRegistration(BundleContextImpl context, ServiceRegistrationImpl serviceReg) {
-		// Remove the ServiceRegistration from the list of Services published by BundleContext.
-		ArrayList contextServices = (ArrayList) publishedServicesByContext.get(context);
+		// Remove the ServiceRegistrationImpl from the list of Services published by BundleContextImpl.
+		List contextServices = (List) publishedServicesByContext.get(context);
 		if (contextServices != null) {
 			contextServices.remove(serviceReg);
 		}
 
-		// Remove the ServiceRegistration from the list of Services published by Class Name.
+		// Remove the ServiceRegistrationImpl from the list of Services published by Class Name.
 		String[] clazzes = serviceReg.getClasses();
 		int size = clazzes.length;
 
 		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i];
-			ArrayList services = (ArrayList) publishedServicesByClass.get(clazz);
+			List services = (List) publishedServicesByClass.get(clazz);
 			services.remove(serviceReg);
 		}
 
-		// Remove the ServiceRegistration from the list of all published Services.
+		// Remove the ServiceRegistrationImpl from the list of all published Services.
 		allPublishedServices.remove(serviceReg);
 	}
 
 	/**
-	 * Lookup Service References in the data structure by class name and filter.
+	 * Lookup Service Registrations in the data structure by class name and filter.
 	 * 
 	 * @param clazz The class name with which the service was registered or
 	 *        <code>null</code> for all services.
 	 * @param filter The filter criteria.
+	 * @return List<ServiceRegistrationImpl>
 	 */
 	/* @GuardedBy("this") */
-	private List lookupServiceReferences(String clazz, Filter filter) {
-		ArrayList result;
+	private List lookupServiceRegistrations(String clazz, Filter filter) {
+		List result;
 		if (clazz == null) { /* all services */
 			result = allPublishedServices;
 		} else {
 			/* services registered under the class name */
-			result = (ArrayList) publishedServicesByClass.get(clazz);
-			if (result == null) {
-				return Collections.EMPTY_LIST;
-			}
+			result = (List) publishedServicesByClass.get(clazz);
+		}
+
+		if ((result == null) || (result.size() == 0)) {
+			return Collections.EMPTY_LIST;
 		}
 
 		result = new ArrayList(result); /* make a new list since we don't want to change the real list */
 
+		if (filter == null) {
+			return result;
+		}
+
 		ListIterator iter = result.listIterator();
 		while (iter.hasNext()) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			ServiceReferenceImpl reference = registration.getReferenceImpl();
-			if ((filter == null) || filter.match(reference)) {
-				iter.set(reference); /* replace the registration with its reference */
-			} else {
+			if (!filter.match(registration.getReferenceImpl())) {
 				iter.remove();
 			}
 		}
@@ -774,33 +759,30 @@ public class ServiceRegistry {
 	 * Lookup Service Registrations in the data structure by BundleContext.
 	 * 
 	 * @param context The BundleContext for which to return Service Registrations.
+	 * @return List<ServiceRegistrationImpl>
 	 */
 	/* @GuardedBy("this") */
 	private List lookupServiceRegistrations(BundleContextImpl context) {
-		ArrayList result = (ArrayList) publishedServicesByContext.get(context);
+		List result = (List) publishedServicesByContext.get(context);
 
-		if (result == null) {
+		if ((result == null) || (result.size() == 0)) {
 			return Collections.EMPTY_LIST;
 		}
 
-		result = new ArrayList(result); /* make a new list since we don't want to change the real list */
-		return result;
+		return new ArrayList(result); /* make a new list since we don't want to change the real list */
 	}
 
 	/**
-	 * Lookup Service References in the data structure by BundleContext.
+	 * Modify a List<ServiceRegistrationImpl> to a List<ServiceReferenceImpl>.
 	 * 
-	 * @param context The BundleContext for which to return Service References.
+	 * @param result The input List<ServiceRegistrationImpl>.
+	 * @return List<ServiceReferenceImpl>
 	 */
-	/* @GuardedBy("this") */
-	private List lookupServiceReferences(BundleContextImpl context) {
-		List result = lookupServiceRegistrations(context);
-
+	private static List changeRegistrationsToReferences(List result) {
 		ListIterator iter = result.listIterator();
 		while (iter.hasNext()) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			ServiceReferenceImpl reference = registration.getReferenceImpl();
-			iter.set(reference); /* replace the registration with its reference */
+			iter.set(registration.getReferenceImpl()); /* replace the registration with its reference */
 		}
 		return result;
 	}
@@ -922,5 +904,62 @@ public class ServiceRegistry {
 			if (!reference.isAssignableTo(bundle, clazzes[i]))
 				return false;
 		return true;
+	}
+
+	private static final String findHookName = FindHook.class.getName();
+
+	/**
+	 * Call the registered FindHook services to allow them to inspect and possibly shrink the result.
+	 * The FindHook must be called in order: descending by service.ranking, then ascending by service.id.
+	 * This is the natural order for ServiceReference.
+	 * 
+	 * @param context The context of the bundle getting the service references.
+	 * @param clazz The class name used to search for the service references.
+	 * @param filterstring The filter used to search for the service references.
+	 * @param allservices True if getAllServiceReferences called.
+	 * @param result The result to return to the caller which may have been shrunk by the FindHooks.
+	 */
+	private void processFindHooks(BundleContextImpl context, String clazz, String filterstring, boolean allservices, Collection result) {
+		BundleContextImpl systemBundleContext = framework.getSystemBundleContext();
+		if (systemBundleContext == null) { // if no system bundle context, we are done!
+			return;
+		}
+
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("processFindHook(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		}
+
+		Collection references = new ShrinkableCollection(result); // prevent hooks from adding to result
+		List hooks;
+		synchronized (this) {
+			hooks = lookupServiceRegistrations(findHookName, null);
+		}
+		// Since the list is already sorted, we don't need to sort the list to call the hooks
+		// in the proper order.
+
+		Iterator iter = hooks.iterator();
+		while (iter.hasNext()) {
+			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
+			Object findHook = registration.getService(systemBundleContext);
+			if (findHook == null) { // if the hook is null
+				continue;
+			}
+			try {
+				if (findHook instanceof FindHook) { // if the hook is usable
+					((FindHook) findHook).find(context, clazz, filterstring, allservices, references);
+				}
+			} catch (Throwable t) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println(findHook + ".find() exception: " + t.getMessage()); //$NON-NLS-1$
+					Debug.printStackTrace(t);
+				}
+				// allow the adaptor to handle this unexpected error
+				framework.getAdaptor().handleRuntimeError(t);
+				ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, findHook.getClass().getName(), "find"), t); //$NON-NLS-1$ 
+				framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			} finally {
+				registration.ungetService(systemBundleContext);
+			}
+		}
 	}
 }

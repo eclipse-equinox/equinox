@@ -210,7 +210,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* create the service registry */
-		serviceRegistry = new ServiceRegistry();
+		serviceRegistry = new ServiceRegistry(this);
 		// Initialize the installLock; there is no way of knowing 
 		// what the initial size should be, at most it will be the number
 		// of threads trying to install a bundle (probably a very low number).

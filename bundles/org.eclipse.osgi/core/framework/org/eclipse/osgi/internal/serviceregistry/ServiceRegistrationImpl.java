@@ -34,7 +34,7 @@ import org.osgi.framework.Constants;
  * 
  * @ThreadSafe
  */
-public class ServiceRegistrationImpl implements ServiceRegistration {
+public class ServiceRegistrationImpl implements ServiceRegistration, Comparable {
 	/** Internal framework object. */
 	private final Framework framework;
 
@@ -56,17 +56,18 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	/* @GuardedBy("registrationLock") */
 	private ServiceReferenceImpl reference;
 
-	/** list of contexts using the service. */
+	/** List of contexts using the service. 
+	 * List&lt;BundleContextImpl&gt;.
+	 * */
 	/* @GuardedBy("registrationLock") */
-	private ArrayList contextsUsing;
+	private List contextsUsing;
 
 	/** properties for this registration. */
 	/* @GuardedBy("registrationLock") */
 	private ServiceProperties properties;
 
 	/** service id. */
-	/* @GuardedBy("registrationLock") */
-	private long serviceid;
+	private final long serviceid;
 
 	/** service ranking. */
 	/* @GuardedBy("registrationLock") */
@@ -94,7 +95,9 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		this.framework = context.getFramework();
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service;
+
 		synchronized (registrationLock) {
+			this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
 			this.contextsUsing = null;
 			/* We leak this from the constructor here, but it is ok
 			 * because the ServiceReferenceImpl constructor only
@@ -114,7 +117,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 			context.checkValid();
 			synchronized (registrationLock) {
 				ref = reference; /* used to publish event outside sync */
-				serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
 				this.properties = createProperties(props); /* must be valid after unregister is called. */
 			}
 			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
@@ -347,9 +349,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 	 * @return The service id for this service.
 	 */
 	long getId() {
-		synchronized (registrationLock) {
-			return serviceid;
-		}
+		return serviceid;
 	}
 
 	/**
@@ -366,7 +366,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		return clazzes;
 	}
 
-	Object getService() {
+	Object getServiceObject() {
 		return service;
 	}
 
@@ -595,5 +595,37 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
 		sb.append(getProperties().toString());
 
 		return sb.toString();
+	}
+
+	/**
+	 * Compares this <code>ServiceRegistrationImpl</code> with the specified
+	 * <code>ServiceRegistrationImpl</code> for order.
+	 * 
+	 * <p>
+	 * If this <code>ServiceRegistrationImpl</code> and the specified
+	 * <code>ServiceRegistrationImpl</code> have the same
+	 * {@link Constants#SERVICE_ID service id} they are equal. This
+	 * <code>ServiceRegistrationImpl</code> is less than the specified
+	 * <code>ServiceRegistrationImpl</code> if it has a lower
+	 * {@link Constants#SERVICE_RANKING service ranking} and greater if it has a
+	 * higher service ranking. Otherwise, if this <code>ServiceRegistrationImpl</code>
+	 * and the specified <code>ServiceRegistrationImpl</code> have the same
+	 * {@link Constants#SERVICE_RANKING service ranking}, this
+	 * <code>ServiceRegistrationImpl</code> is less than the specified
+	 * <code>ServiceRegistrationImpl</code> if it has a higher
+	 * {@link Constants#SERVICE_ID service id} and greater if it has a lower
+	 * service id.
+	 * 
+	 * @param object The <code>ServiceRegistrationImpl</code> to be compared.
+	 * @return Returns a negative integer, zero, or a positive integer if this
+	 *         <code>ServiceRegistrationImpl</code> is less than, equal to, or
+	 *         greater than the specified <code>ServiceRegistrationImpl</code>.
+	 */
+	public int compareTo(Object object) {
+		ServiceRegistrationImpl other = (ServiceRegistrationImpl) object;
+
+		if (this.getRanking() != other.getRanking())
+			return this.getRanking() > other.getRanking() ? -1 : 1;
+		return this.getId() == other.getId() ? 0 : this.getId() > other.getId() ? 1 : -1;
 	}
 }
