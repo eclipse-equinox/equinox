@@ -95,9 +95,9 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		this.framework = context.getFramework();
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service;
+		this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
 
 		synchronized (registrationLock) {
-			this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
 			this.contextsUsing = null;
 			/* We leak this from the constructor here, but it is ok
 			 * because the ServiceReferenceImpl constructor only

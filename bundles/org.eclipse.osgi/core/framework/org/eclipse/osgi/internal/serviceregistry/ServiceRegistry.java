@@ -51,9 +51,10 @@ public class ServiceRegistry {
 	/** next free service id. */
 	/* @GuardedBy("this") */
 	private long serviceid;
-	/** initial capacity of the data structure */
+	/** initial capacity of the main data structure */
 	private static final int initialCapacity = 50;
-
+	/** initial capacity of the nested data structure */
+	private static final int initialSubCapacity = 10;
 	/** framework which created this service registry */
 	private final Framework framework;
 
@@ -274,23 +275,20 @@ public class ServiceRegistry {
 			}
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
-		List references;
-		synchronized (this) {
-			references = changeRegistrationsToReferences(lookupServiceRegistrations(clazz, filter));
-			Iterator iter = references.iterator();
-			while (iter.hasNext()) {
-				ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
-				if (allservices || isAssignableTo(context, reference)) {
-					if (clazz == null) {
-						try { /* test for permission to the classes */
-							checkGetServicePermission(reference.getClasses());
-						} catch (SecurityException se) {
-							iter.remove();
-						}
+		List references = changeRegistrationsToReferences(lookupServiceRegistrations(clazz, filter));
+		Iterator iter = references.iterator();
+		while (iter.hasNext()) {
+			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
+			if (allservices || isAssignableTo(context, reference)) {
+				if (clazz == null) {
+					try { /* test for permission to the classes */
+						checkGetServicePermission(reference.getClasses());
+					} catch (SecurityException se) {
+						iter.remove();
 					}
-				} else {
-					iter.remove();
 				}
+			} else {
+				iter.remove();
 			}
 		}
 
@@ -332,7 +330,6 @@ public class ServiceRegistry {
 	 *         if no services are registered which implement the named class.
 	 * @throws java.lang.IllegalStateException If this BundleContext is no
 	 *         longer valid.
-	 * @see #getServiceReferences(String, String)
 	 */
 	public ServiceReferenceImpl getServiceReference(BundleContextImpl context, String clazz) {
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
@@ -492,9 +489,9 @@ public class ServiceRegistry {
 	 * @see ServiceReference
 	 * @see ServicePermission
 	 */
-	public synchronized ServiceReferenceImpl[] getRegisteredServices(BundleContextImpl context) {
+	public ServiceReferenceImpl[] getRegisteredServices(BundleContextImpl context) {
 		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context));
-		ListIterator iter = references.listIterator();
+		Iterator iter = references.iterator();
 		while (iter.hasNext()) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			try { /* test for permission to the classes */
@@ -541,44 +538,29 @@ public class ServiceRegistry {
 		if (servicesInUse == null) {
 			return null;
 		}
-		synchronized (servicesInUse) {
-			int size = servicesInUse.size();
 
-			if (size == 0) {
+		List references;
+		synchronized (servicesInUse) {
+			if (servicesInUse.size() == 0) {
 				return null;
 			}
-
-			ServiceReferenceImpl[] references = new ServiceReferenceImpl[size];
-			int refcount = 0;
-
-			Iterator regsIter = servicesInUse.keySet().iterator();
-
-			for (int i = 0; i < size; i++) {
-				ServiceRegistrationImpl registration = (ServiceRegistrationImpl) regsIter.next();
-
-				try {
-					checkGetServicePermission(registration.getClasses());
-				} catch (SecurityException se) {
-					continue;
-				}
-
-				references[refcount] = registration.getReferenceImpl();
-				refcount++;
-			}
-
-			if (refcount < size) {
-				if (refcount == 0) {
-					return null;
-				}
-
-				ServiceReferenceImpl[] refs = references;
-				references = new ServiceReferenceImpl[refcount];
-
-				System.arraycopy(refs, 0, references, 0, refcount);
-			}
-
-			return references;
+			references = changeRegistrationsToReferences(new ArrayList(servicesInUse.keySet()));
 		}
+		Iterator iter = references.iterator();
+		while (iter.hasNext()) {
+			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
+			try { /* test for permission to the classes */
+				checkGetServicePermission(reference.getClasses());
+			} catch (SecurityException se) {
+				iter.remove();
+			}
+		}
+
+		int size = references.size();
+		if (size == 0) {
+			return null;
+		}
+		return (ServiceReferenceImpl[]) references.toArray(new ServiceReferenceImpl[size]);
 	}
 
 	/**
@@ -588,11 +570,8 @@ public class ServiceRegistry {
 	 * @param context The BundleContext of the closing bundle.
 	 */
 	public void unregisterServices(BundleContextImpl context) {
-		List registrations;
-		synchronized (this) {
-			registrations = lookupServiceRegistrations(context);
-		}
-		ListIterator iter = registrations.listIterator();
+		List registrations = lookupServiceRegistrations(context);
+		Iterator iter = registrations.iterator();
 		while (iter.hasNext()) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			try {
@@ -614,23 +593,20 @@ public class ServiceRegistry {
 		if (servicesInUse == null) {
 			return;
 		}
-		int usedSize;
-		ServiceRegistrationImpl[] usedServices;
+		List registrations;
 		synchronized (servicesInUse) {
-			usedSize = servicesInUse.size();
-			if (usedSize == 0) {
+			if (servicesInUse.size() == 0) {
 				return;
 			}
-
-			if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-				Debug.println("Releasing services"); //$NON-NLS-1$
-			}
-
-			usedServices = (ServiceRegistrationImpl[]) servicesInUse.keySet().toArray(new ServiceRegistrationImpl[usedSize]);
+			registrations = new ArrayList(servicesInUse.keySet());
 		}
-
-		for (int i = 0; i < usedSize; i++) {
-			usedServices[i].releaseService(context);
+		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+			Debug.println("Releasing services"); //$NON-NLS-1$
+		}
+		Iterator iter = registrations.iterator();
+		while (iter.hasNext()) {
+			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
+			registration.releaseService(context);
 		}
 	}
 
@@ -639,8 +615,7 @@ public class ServiceRegistry {
 	 * 
 	 * @return next service id.
 	 */
-	/* @GuardedBy("this") */
-	long getNextServiceId() {
+	synchronized long getNextServiceId() {
 		long id = serviceid;
 		serviceid++;
 		return id;
@@ -657,7 +632,7 @@ public class ServiceRegistry {
 		// Add the ServiceRegistrationImpl to the list of Services published by BundleContextImpl.
 		List contextServices = (List) publishedServicesByContext.get(context);
 		if (contextServices == null) {
-			contextServices = new ArrayList(10);
+			contextServices = new ArrayList(initialSubCapacity);
 			publishedServicesByContext.put(context, contextServices);
 		}
 		// The list is NOT sorted, so we just add
@@ -674,7 +649,7 @@ public class ServiceRegistry {
 			List services = (List) publishedServicesByClass.get(clazz);
 
 			if (services == null) {
-				services = new ArrayList(10);
+				services = new ArrayList(initialSubCapacity);
 				publishedServicesByClass.put(clazz, services);
 			}
 
@@ -725,27 +700,28 @@ public class ServiceRegistry {
 	 * @param filter The filter criteria.
 	 * @return List<ServiceRegistrationImpl>
 	 */
-	/* @GuardedBy("this") */
 	private List lookupServiceRegistrations(String clazz, Filter filter) {
 		List result;
-		if (clazz == null) { /* all services */
-			result = allPublishedServices;
-		} else {
-			/* services registered under the class name */
-			result = (List) publishedServicesByClass.get(clazz);
-		}
+		synchronized (this) {
+			if (clazz == null) { /* all services */
+				result = allPublishedServices;
+			} else {
+				/* services registered under the class name */
+				result = (List) publishedServicesByClass.get(clazz);
+			}
 
-		if ((result == null) || (result.size() == 0)) {
-			return Collections.EMPTY_LIST;
-		}
+			if ((result == null) || (result.size() == 0)) {
+				return Collections.EMPTY_LIST;
+			}
 
-		result = new ArrayList(result); /* make a new list since we don't want to change the real list */
+			result = new ArrayList(result); /* make a new list since we don't want to change the real list */
+		}
 
 		if (filter == null) {
 			return result;
 		}
 
-		ListIterator iter = result.listIterator();
+		Iterator iter = result.iterator();
 		while (iter.hasNext()) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			if (!filter.match(registration.getReferenceImpl())) {
@@ -761,8 +737,7 @@ public class ServiceRegistry {
 	 * @param context The BundleContext for which to return Service Registrations.
 	 * @return List<ServiceRegistrationImpl>
 	 */
-	/* @GuardedBy("this") */
-	private List lookupServiceRegistrations(BundleContextImpl context) {
+	private synchronized List lookupServiceRegistrations(BundleContextImpl context) {
 		List result = (List) publishedServicesByContext.get(context);
 
 		if ((result == null) || (result.size() == 0)) {
@@ -773,10 +748,10 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Modify a List<ServiceRegistrationImpl> to a List<ServiceReferenceImpl>.
+	 * Modify a List<ServiceRegistrationImpl> in place to a List<ServiceReferenceImpl>.
 	 * 
 	 * @param result The input List<ServiceRegistrationImpl>.
-	 * @return List<ServiceReferenceImpl>
+	 * @return result which has been changed to List<ServiceReferenceImpl>
 	 */
 	private static List changeRegistrationsToReferences(List result) {
 		ListIterator iter = result.listIterator();
@@ -930,10 +905,7 @@ public class ServiceRegistry {
 		}
 
 		Collection references = new ShrinkableCollection(result); // prevent hooks from adding to result
-		List hooks;
-		synchronized (this) {
-			hooks = lookupServiceRegistrations(findHookName, null);
-		}
+		List hooks = lookupServiceRegistrations(findHookName, null);
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
