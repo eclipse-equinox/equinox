@@ -43,10 +43,11 @@ public class AspectJAdaptorFactory {
 
     private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
-                    "org.eclipse.equinox.caching",
-                    "org.eclipse.equinox.caching.j9",
+                    "org.eclipse.equinox.weaving.caching",
+                    "org.eclipse.equinox.weaving.caching.j9",
                     "org.eclipse.update.configurator",
-                    "org.eclipse.equinox.simpleconfigurator" });
+                    "org.eclipse.equinox.simpleconfigurator",
+                    "org.eclipse.equinox.common" });
 
     private BundleContext bundleContext;
 
