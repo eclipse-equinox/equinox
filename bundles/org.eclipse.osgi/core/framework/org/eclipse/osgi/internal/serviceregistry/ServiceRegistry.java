@@ -769,11 +769,12 @@ public class ServiceRegistry {
 	 */
 	private static void checkRegisterServicePermission(String[] names) {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			int len = names.length;
-			for (int i = 0; i < len; i++) {
-				sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
-			}
+		if (sm == null) {
+			return;
+		}
+		int len = names.length;
+		for (int i = 0; i < len; i++) {
+			sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
 		}
 	}
 
@@ -782,9 +783,10 @@ public class ServiceRegistry {
 	 */
 	private static void checkGetServicePermission(String name) {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
+		if (sm == null) {
+			return;
 		}
+		sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
 	}
 
 	/**
@@ -794,19 +796,20 @@ public class ServiceRegistry {
 	 */
 	private static void checkGetServicePermission(String[] names) {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
-			SecurityException se = null;
-			int len = names.length;
-			for (int i = 0; i < len; i++) {
-				try {
-					sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
-					return;
-				} catch (SecurityException e) {
-					se = e;
-				}
-			}
-			throw se;
+		if (sm == null) {
+			return;
 		}
+		SecurityException se = null;
+		int len = names.length;
+		for (int i = 0; i < len; i++) {
+			try {
+				sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
+				return;
+			} catch (SecurityException e) {
+				se = e;
+			}
+		}
+		throw se;
 	}
 
 	/**
