@@ -67,7 +67,7 @@ public class WeavingServicePlugin implements BundleActivator {
         loadOptions(context);
         if (verbose)
             System.err
-                    .println("[org.aspectj.osgi.service.weaving] info Starting AspectJ weaving service ...");
+                    .println("[org.eclipse.equinox.weaving.aspectj] info Starting AspectJ weaving service ...");
         final String serviceName = IWeavingService.class.getName();
         //		ServiceFactory factory = new WeavingServiceFactory();
         final IWeavingService weavingService = new WeavingService();

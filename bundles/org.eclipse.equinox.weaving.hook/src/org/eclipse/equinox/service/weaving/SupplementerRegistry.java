@@ -215,7 +215,7 @@ public class SupplementerRegistry {
             supplementers.remove(bundle.getSymbolicName());
             if (AbstractAspectJHook.verbose)
                 System.err
-                        .println("[org.aspectj.osgi] info removing supplementer "
+                        .println("[org.eclipse.equinox.weaving.hook] info removing supplementer "
                                 + bundle.getSymbolicName());
 
             final Bundle[] supplementedBundles = supplementer
@@ -240,7 +240,7 @@ public class SupplementerRegistry {
     public void updateInstalledBundle(final Bundle bundle) {
         if (AbstractAspectJHook.verbose)
             System.err
-                    .println("[org.aspectj.osgi] info triggering update for re-supplementing "
+                    .println("[org.eclipse.equinox.weaving.hook] info triggering update for re-supplementing "
                             + bundle.getSymbolicName());
 
         try {

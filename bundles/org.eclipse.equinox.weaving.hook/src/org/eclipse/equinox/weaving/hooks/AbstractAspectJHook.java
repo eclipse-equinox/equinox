@@ -77,7 +77,7 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
     public void addHooks(final HookRegistry hooks) {
         if (verbose)
             System.err
-                    .println("[org.aspectj.osgi] info adding AspectJ hooks ..."); //$NON-NLS-1$
+                    .println("[org.eclipse.equinox.weaving.hook] info adding AspectJ hooks ..."); //$NON-NLS-1$
 
         supplementerRegistry = new SupplementerRegistry();
 

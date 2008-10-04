@@ -51,7 +51,7 @@ public class CachingServicePlugin implements BundleActivator {
         if (shouldRegister()) {
             if (verbose)
                 System.err
-                        .println("[org.aspectj.osgi.service.caching.j9] info starting J9 caching service ...");
+                        .println("[org.eclipse.equinox.weaving.caching.j9] info starting J9 caching service ...");
             final String name = ICachingService.class.getName();
             //			CachingServiceFactory factory = new CachingServiceFactory();
             final CachingService singleCachingService = new CachingService();
@@ -60,7 +60,7 @@ public class CachingServicePlugin implements BundleActivator {
         } else {
             if (verbose)
                 System.err
-                        .println("[org.aspectj.osgi.service.caching.j9] warning cannot start J9 caching service");
+                        .println("[org.eclipse.equinox.weaving.caching.j9] warning cannot start J9 caching service");
         }
 
         if (CachingServicePlugin.DEBUG)

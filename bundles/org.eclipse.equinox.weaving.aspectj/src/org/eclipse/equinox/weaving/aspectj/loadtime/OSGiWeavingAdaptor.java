@@ -94,12 +94,12 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                 if (WeavingServicePlugin.verbose) {
                     if (isEnabled())
                         System.err
-                                .println("[org.aspectj.osgi.service.weaving] info weaving bundle '"
+                                .println("[org.eclipse.equinox.weaving.aspectj] info weaving bundle '"
                                         + weavingContext.getClassLoaderName()
                                         + "'");
                     else
                         System.err
-                                .println("[org.aspectj.osgi.service.weaving] info not weaving bundle '"
+                                .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
                                         + weavingContext.getClassLoaderName()
                                         + "'");
                 }

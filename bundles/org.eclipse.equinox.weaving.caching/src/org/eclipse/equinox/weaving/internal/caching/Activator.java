@@ -47,12 +47,12 @@ public class Activator implements BundleActivator {
         if (shouldRegister()) {
             if (verbose)
                 System.err
-                        .println("[org.aspectj.osgi.service.caching] info starting standard caching service ...");
+                        .println("[org.eclipse.equinox.weaving.caching] info starting standard caching service ...");
             registerSingletonCachingService(bundleContext);
         } else {
             if (verbose)
                 System.err
-                        .println("[org.aspectj.osgi.service.caching] warning cannot start standard caching service on J9 VM");
+                        .println("[org.eclipse.equinox.weaving.caching] warning cannot start standard caching service on J9 VM");
         }
     }
 
