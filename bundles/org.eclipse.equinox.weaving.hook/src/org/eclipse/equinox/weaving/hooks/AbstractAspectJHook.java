@@ -59,9 +59,22 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
     private SupplementerRegistry supplementerRegistry;
 
     /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#addClassPathEntry(java.util.ArrayList,
+     *      java.lang.String,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager,
+     *      org.eclipse.osgi.baseadaptor.BaseData,
+     *      java.security.ProtectionDomain)
+     */
+    public boolean addClassPathEntry(final ArrayList cpEntries,
+            final String cp, final ClasspathManager hostmanager,
+            final BaseData sourcedata, final ProtectionDomain sourcedomain) {
+        return false;
+    }
+
+    /**
      * @see org.eclipse.osgi.baseadaptor.HookConfigurator#addHooks(org.eclipse.osgi.baseadaptor.HookRegistry)
      */
-    public void addHooks(HookRegistry hooks) {
+    public void addHooks(final HookRegistry hooks) {
         if (verbose)
             System.err
                     .println("[org.aspectj.osgi] info adding AspectJ hooks ..."); //$NON-NLS-1$
@@ -73,6 +86,69 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
         hooks.addBundleFileWrapperFactoryHook(this);
         hooks.addClassLoadingStatsHook(this);
         hooks.addStorageHook(new AspectJStorageHook(supplementerRegistry));
+        hooks.addClassLoaderDelegateHook(new WeavingLoaderDelegateHook(
+                supplementerRegistry));
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#addProperties(java.util.Properties)
+     */
+    public void addProperties(final Properties properties) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#createClassLoader(java.lang.ClassLoader,
+     *      org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate,
+     *      org.eclipse.osgi.framework.adaptor.BundleProtectionDomain,
+     *      org.eclipse.osgi.baseadaptor.BaseData, java.lang.String[])
+     */
+    public BaseClassLoader createClassLoader(final ClassLoader parent,
+            final ClassLoaderDelegate delegate,
+            final BundleProtectionDomain domain, final BaseData data,
+            final String[] bundleclasspath) {
+        return null;
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#createFrameworkLog()
+     */
+    public FrameworkLog createFrameworkLog() {
+        return null;
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#findLibrary(org.eclipse.osgi.baseadaptor.BaseData,
+     *      java.lang.String)
+     */
+    public String findLibrary(final BaseData data, final String libName) {
+        return null;
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStart(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStart(final BundleContext context)
+            throws BundleException {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStop(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStop(final BundleContext context)
+            throws BundleException {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStopping(org.osgi.framework.BundleContext)
+     */
+    public void frameworkStopping(final BundleContext context) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#getBundleClassLoaderParent()
+     */
+    public ClassLoader getBundleClassLoaderParent() {
+        return null;
     }
 
     /**
@@ -86,121 +162,29 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.baseadaptor.bundlefile.BundleFile,
-     *      java.lang.Object, org.eclipse.osgi.baseadaptor.BaseData, boolean)
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#handleRuntimeError(java.lang.Throwable)
      */
-    public BundleFile wrapBundleFile(BundleFile bundleFile, Object content,
-            BaseData data, boolean base) throws IOException {
-        return null;
+    public void handleRuntimeError(final Throwable error) {
     }
 
     /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#addClassPathEntry(java.util.ArrayList,
-     *      java.lang.String,
-     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager,
-     *      org.eclipse.osgi.baseadaptor.BaseData,
-     *      java.security.ProtectionDomain)
+     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#initialize(org.eclipse.osgi.baseadaptor.BaseAdaptor)
      */
-    public boolean addClassPathEntry(ArrayList cpEntries, String cp,
-            ClasspathManager hostmanager, BaseData sourcedata,
-            ProtectionDomain sourcedomain) {
-        return false;
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#createClassLoader(java.lang.ClassLoader,
-     *      org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate,
-     *      org.eclipse.osgi.framework.adaptor.BundleProtectionDomain,
-     *      org.eclipse.osgi.baseadaptor.BaseData, java.lang.String[])
-     */
-    public BaseClassLoader createClassLoader(ClassLoader parent,
-            ClassLoaderDelegate delegate, BundleProtectionDomain domain,
-            BaseData data, String[] bundleclasspath) {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#findLibrary(org.eclipse.osgi.baseadaptor.BaseData,
-     *      java.lang.String)
-     */
-    public String findLibrary(BaseData data, String libName) {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#getBundleClassLoaderParent()
-     */
-    public ClassLoader getBundleClassLoaderParent() {
-        return null;
+    public void initialize(final BaseAdaptor adaptor) {
     }
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
      *      org.eclipse.osgi.baseadaptor.BaseData)
      */
-    public void initializedClassLoader(BaseClassLoader baseClassLoader,
-            BaseData data) {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#processClass(java.lang.String,
-     *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
-     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
-     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
-     */
-    public byte[] processClass(String name, byte[] classbytes,
-            ClasspathEntry classpathEntry, BundleEntry entry,
-            ClasspathManager manager) {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#addProperties(java.util.Properties)
-     */
-    public void addProperties(Properties properties) {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#createFrameworkLog()
-     */
-    public FrameworkLog createFrameworkLog() {
-        return null;
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStart(org.osgi.framework.BundleContext)
-     */
-    public void frameworkStart(BundleContext context) throws BundleException {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStop(org.osgi.framework.BundleContext)
-     */
-    public void frameworkStop(BundleContext context) throws BundleException {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#frameworkStopping(org.osgi.framework.BundleContext)
-     */
-    public void frameworkStopping(BundleContext context) {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#handleRuntimeError(java.lang.Throwable)
-     */
-    public void handleRuntimeError(Throwable error) {
-    }
-
-    /**
-     * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#initialize(org.eclipse.osgi.baseadaptor.BaseAdaptor)
-     */
-    public void initialize(BaseAdaptor adaptor) {
+    public void initializedClassLoader(final BaseClassLoader baseClassLoader,
+            final BaseData data) {
     }
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#mapLocationToURLConnection(java.lang.String)
      */
-    public URLConnection mapLocationToURLConnection(String location)
+    public URLConnection mapLocationToURLConnection(final String location)
             throws IOException {
         return null;
     }
@@ -209,7 +193,7 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
      * @see org.eclipse.osgi.baseadaptor.hooks.AdaptorHook#matchDNChain(java.lang.String,
      *      java.lang.String[])
      */
-    public boolean matchDNChain(String pattern, String[] dnChain) {
+    public boolean matchDNChain(final String pattern, final String[] dnChain) {
         return false;
     }
 
@@ -218,31 +202,44 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
      *      java.lang.Class,
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
-    public void postFindLocalClass(String name, Class clazz,
-            ClasspathManager manager) {
+    public void postFindLocalClass(final String name, final Class clazz,
+            final ClasspathManager manager) {
     }
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#postFindLocalResource(java.lang.String,
      *      java.net.URL, org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
-    public void postFindLocalResource(String name, URL resource,
-            ClasspathManager manager) {
+    public void postFindLocalResource(final String name, final URL resource,
+            final ClasspathManager manager) {
     }
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#preFindLocalClass(java.lang.String,
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
-    public void preFindLocalClass(String name, ClasspathManager manager)
-            throws ClassNotFoundException {
+    public void preFindLocalClass(final String name,
+            final ClasspathManager manager) throws ClassNotFoundException {
     }
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook#preFindLocalResource(java.lang.String,
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
-    public void preFindLocalResource(String name, ClasspathManager manager) {
+    public void preFindLocalResource(final String name,
+            final ClasspathManager manager) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#processClass(java.lang.String,
+     *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
+     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
+    public byte[] processClass(final String name, final byte[] classbytes,
+            final ClasspathEntry classpathEntry, final BundleEntry entry,
+            final ClasspathManager manager) {
+        return null;
     }
 
     /**
@@ -252,9 +249,19 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
      *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
      */
-    public void recordClassDefine(String name, Class clazz, byte[] classbytes,
-            ClasspathEntry classpathEntry, BundleEntry entry,
-            ClasspathManager manager) {
+    public void recordClassDefine(final String name, final Class clazz,
+            final byte[] classbytes, final ClasspathEntry classpathEntry,
+            final BundleEntry entry, final ClasspathManager manager) {
+    }
+
+    /**
+     * @see org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook#wrapBundleFile(org.eclipse.osgi.baseadaptor.bundlefile.BundleFile,
+     *      java.lang.Object, org.eclipse.osgi.baseadaptor.BaseData, boolean)
+     */
+    public BundleFile wrapBundleFile(final BundleFile bundleFile,
+            final Object content, final BaseData data, final boolean base)
+            throws IOException {
+        return null;
     }
 
 }

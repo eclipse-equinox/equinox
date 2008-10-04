@@ -175,6 +175,15 @@ public class SupplementerRegistry {
         return (Bundle[]) result.toArray(new Bundle[result.size()]);
     }
 
+    public Bundle[] getSupplementers(final long bundleID) {
+        final Bundle bundle = this.context.getBundle(bundleID);
+        if (bundle != null) {
+            return getSupplementers(bundle);
+        } else {
+            return null;
+        }
+    }
+
     public List getSupplementers(final String symbolicName,
             final ManifestElement[] imports, final ManifestElement[] exports) {
         List result = Collections.EMPTY_LIST;

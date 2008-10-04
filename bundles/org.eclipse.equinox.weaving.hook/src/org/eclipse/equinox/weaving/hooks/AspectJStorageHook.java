@@ -149,19 +149,19 @@ public class AspectJStorageHook implements StorageHook {
                     Debug.println("- AspectJStorageHook.initialize() "
                             + getSymbolicName() + " supplementers="
                             + supplementers);
-                if (addRequiredBundles(supplementers)) {
-                    if (AbstractAspectJHook.verbose)
-                        System.err
-                                .println("[org.aspectj.osgi] info supplementing "
-                                        + getSymbolicName()
-                                        + " with "
-                                        + supplementers);
-                } else {
-                    if (AbstractAspectJHook.verbose)
-                        System.err
-                                .println("[org.aspectj.osgi] info not supplementing "
-                                        + getSymbolicName());
-                }
+                //                if (addRequiredBundles(supplementers)) {
+                //                    if (AbstractAspectJHook.verbose)
+                //                        System.err
+                //                                .println("[org.aspectj.osgi] info supplementing "
+                //                                        + getSymbolicName()
+                //                                        + " with "
+                //                                        + supplementers);
+                //                } else {
+                //                    if (AbstractAspectJHook.verbose)
+                //                        System.err
+                //                                .println("[org.aspectj.osgi] info not supplementing "
+                //                                        + getSymbolicName());
+                //                }
             }
         } catch (final Exception ex) {
             ex.printStackTrace();
