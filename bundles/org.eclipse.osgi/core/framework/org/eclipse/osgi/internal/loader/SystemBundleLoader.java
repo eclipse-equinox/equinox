@@ -181,7 +181,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * Do nothing on a close.
 	 */
-	protected synchronized void close() {
+	protected void close() {
 		// Do nothing.
 	}
 

@@ -53,7 +53,7 @@ public class InvalidContentException extends IOException {
 	 *         <code>IllegalStateException</code> since the cause of this
 	 *         exception can only be set when constructed.
 	 */
-	public synchronized Throwable initCause(Throwable t) {
+	public Throwable initCause(Throwable t) {
 		throw new IllegalStateException();
 	}
 }
