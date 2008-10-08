@@ -552,4 +552,68 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
+
+	public void testSystemBundle10() {
+		// create/start/update/stop test
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle10"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		final Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		final Exception[] failureException = new BundleException[1];
+		final boolean succeed[] = new boolean[] {true};
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					// TODO this is a hack; this will be improved with OSGi API updates to return info from waitForStop()
+					long time = System.currentTimeMillis();
+					equinox.waitForStop(10000);
+					time = System.currentTimeMillis() - time;
+					if (time < 10000)
+						succeed[0] = true;
+				} catch (InterruptedException e) {
+					failureException[0] = e;
+				}
+			}
+		}, "test waitForStop thread"); //$NON-NLS-1$
+		t.start();
+		try {
+			equinox.update();
+		} catch (BundleException e) {
+			fail("Failed to update the framework", e); //$NON-NLS-1$
+		}
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			fail("unexpected interuption", e); //$NON-NLS-1$
+		}
+		if (failureException[0] != null)
+			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
+		assertTrue("Wait for stop failed", succeed[0]); //$NON-NLS-1$
+		// TODO delay hack to allow the framework to get started again
+		for (int i = 0; i < 5 && Bundle.ACTIVE != equinox.getState(); i++)
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// nothing
+			}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
 }
