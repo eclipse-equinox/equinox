@@ -27,7 +27,7 @@ import org.osgi.framework.launch.SystemBundle;
  * @since 3.5
  */
 public class Equinox implements SystemBundle {
-	private static final String implName = "org.eclipse.osgi.framework.internal.core.EquinoxSystemBundle";
+	private static final String implName = "org.eclipse.osgi.framework.internal.core.EquinoxLauncher";
 	/**@GuardedBy this*/
 	private SystemBundle impl;
 	private final boolean useSeparateCL;
@@ -72,21 +72,6 @@ public class Equinox implements SystemBundle {
 	}
 
 	public void init() throws BundleException {
-		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
-			return; // no op
-		synchronized (this) {
-			if (impl != null && impl.getState() != Bundle.INSTALLED) {
-				try {
-					impl.stop();
-					impl.waitForStop(30000); // timeout after 30 seconds
-				} catch (BundleException e) {
-					// ignore
-				} catch (InterruptedException e) {
-					// continue
-				}
-				impl = null;
-			}
-		}
 		getImpl().init();
 	}
 

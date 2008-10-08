@@ -21,14 +21,14 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.SystemBundle;
 
-public class EquinoxSystemBundle implements SystemBundle {
+public class EquinoxLauncher implements SystemBundle {
 
 	private static String FULLPATH = " [fullpath]"; //$NON-NLS-1$
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
 	private final Map configuration;
 
-	public EquinoxSystemBundle(Map configuration) {
+	public EquinoxLauncher(Map configuration) {
 		this.configuration = configuration;
 	}
 
@@ -36,10 +36,12 @@ public class EquinoxSystemBundle implements SystemBundle {
 		internalInit();
 	}
 
-	private Framework internalInit() {
+	private synchronized Framework internalInit() {
+		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
+			return framework; // no op
+
 		Framework current = framework;
 		if (current != null) {
-			// this is not really necessary because the Equinox class will 
 			current.close();
 			framework = null;
 			systemBundle = null;
@@ -223,11 +225,10 @@ public class EquinoxSystemBundle implements SystemBundle {
 	 * @throws BundleException  
 	 */
 	public void start() throws BundleException {
-		Framework current = framework;
 		if (getState() == Bundle.ACTIVE)
 			return;
-		if (getState() != Bundle.STARTING)
-			current = internalInit();
+		Framework current = internalInit();
+		// TODO should consult the org.osgi.framework.startlevel property
 		current.startLevelManager.doSetStartLevel(1);
 	}
 

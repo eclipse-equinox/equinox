@@ -99,7 +99,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	/* Reservation object for install synchronization */
 	protected Hashtable installLock;
 	/** System Bundle object */
-	protected SystemBundle systemBundle;
+	protected InternalSystemBundle systemBundle;
 	private String[] bootDelegation;
 	private String[] bootDelegationStems;
 	private boolean bootDelegateAll = false;
@@ -273,7 +273,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	private void createSystemBundle() {
 		try {
-			systemBundle = new SystemBundle(this);
+			systemBundle = new InternalSystemBundle(this);
 			systemBundle.getBundleData().setBundle(systemBundle);
 		} catch (BundleException e) { // fatal error
 			e.printStackTrace();

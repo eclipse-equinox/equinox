@@ -23,7 +23,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 
 public class SystemBundleActivator implements BundleActivator {
 	protected BundleContext context;
-	protected SystemBundle bundle;
+	protected InternalSystemBundle bundle;
 	protected Framework framework;
 	protected ServiceRegistration packageAdmin;
 	protected ServiceRegistration securityAdmin;
@@ -35,7 +35,7 @@ public class SystemBundleActivator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
-		bundle = (SystemBundle) context.getBundle();
+		bundle = (InternalSystemBundle) context.getBundle();
 		framework = bundle.framework;
 
 		if (framework.packageAdmin != null)

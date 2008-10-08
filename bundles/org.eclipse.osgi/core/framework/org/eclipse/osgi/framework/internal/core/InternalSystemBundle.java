@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
+import org.osgi.framework.launch.SystemBundle;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -27,7 +28,7 @@ import org.osgi.framework.*;
  * can access the services provided by other bundles.
  */
 
-public class SystemBundle extends BundleHost {
+public class InternalSystemBundle extends BundleHost implements SystemBundle {
 	class SystemBundleHeaders extends Dictionary {
 		private final Dictionary headers;
 
@@ -85,7 +86,7 @@ public class SystemBundle extends BundleHost {
 	 *
 	 * @param framework Framework this bundle is running in
 	 */
-	protected SystemBundle(Framework framework) throws BundleException {
+	protected InternalSystemBundle(Framework framework) throws BundleException {
 		super(framework.adaptor.createSystemBundleData(), framework); // startlevel=0 means framework stopped
 		Constants.setInternalSymbolicName(bundledata.getSymbolicName());
 		state = Bundle.RESOLVED;
@@ -371,6 +372,14 @@ public class SystemBundle extends BundleHost {
 
 	public Dictionary getHeaders(String localeString) {
 		return new SystemBundleHeaders(super.getHeaders(localeString));
+	}
+
+	public void init() {
+		// no op for internal representation
+	}
+
+	public void waitForStop(long timeout) throws InterruptedException {
+		framework.waitForStop(timeout);
 	}
 
 }

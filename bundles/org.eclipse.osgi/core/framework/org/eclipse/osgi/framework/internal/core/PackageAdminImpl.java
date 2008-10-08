@@ -592,7 +592,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	protected void cleanup() { //This is only called when the framework is shutting down
 	}
 
-	protected void setResolvedBundles(SystemBundle systemBundle) {
+	protected void setResolvedBundles(InternalSystemBundle systemBundle) {
 		checkSystemBundle(systemBundle);
 		// Now set the actual state of the bundles from the persisted state.
 		State state = framework.adaptor.getState();
@@ -605,7 +605,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		}
 	}
 
-	private void checkSystemBundle(SystemBundle systemBundle) {
+	private void checkSystemBundle(InternalSystemBundle systemBundle) {
 		try {
 			// first check that the system bundle has not changed since last saved state.
 			State state = framework.adaptor.getState();
