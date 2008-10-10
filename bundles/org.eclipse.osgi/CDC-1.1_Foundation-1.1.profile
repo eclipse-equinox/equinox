@@ -22,7 +22,6 @@ org.osgi.framework.executionenvironment = \
  CDC-1.0/Foundation-1.0,\
  CDC-1.1/Foundation-1.1
 osgi.java.profile.name = CDC-1.1/Foundation-1.1
-java.class.version=48
 org.eclipse.jdt.core.compiler.compliance=1.4
 org.eclipse.jdt.core.compiler.source=1.3
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.2

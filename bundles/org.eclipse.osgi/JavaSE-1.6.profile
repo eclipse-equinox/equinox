@@ -183,7 +183,6 @@ org.osgi.framework.executionenvironment = \
  J2SE-1.5,\
  JavaSE-1.6
 osgi.java.profile.name = JavaSE-1.6
-java.class.version=50
 org.eclipse.jdt.core.compiler.compliance=1.6
 org.eclipse.jdt.core.compiler.source=1.6
 org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
