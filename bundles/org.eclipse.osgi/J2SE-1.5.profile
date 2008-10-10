@@ -148,3 +148,10 @@ org.osgi.framework.executionenvironment = \
  J2SE-1.4,\
  J2SE-1.5
 osgi.java.profile.name = J2SE-1.5
+java.class.version=49
+org.eclipse.jdt.core.compiler.compliance=1.5
+org.eclipse.jdt.core.compiler.source=1.5
+org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=error

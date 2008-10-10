@@ -121,3 +121,9 @@ org.osgi.framework.executionenvironment = \
  J2SE-1.3,\
  J2SE-1.4
 osgi.java.profile.name = J2SE-1.4
+java.class.version=48
+org.eclipse.jdt.core.compiler.compliance=1.4
+org.eclipse.jdt.core.compiler.source=1.3
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.2
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=warning
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=warning

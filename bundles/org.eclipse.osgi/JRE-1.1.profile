@@ -15,3 +15,9 @@ org.osgi.framework.bootdelegation = \
 org.osgi.framework.executionenvironment = \
  JRE-1.1
 osgi.java.profile.name = JRE-1.1
+java.class.version=45.3
+org.eclipse.jdt.core.compiler.compliance=1.1
+org.eclipse.jdt.core.compiler.source=1.1
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.1
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=ignore
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=ignore
