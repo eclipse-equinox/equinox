@@ -26,7 +26,7 @@ public interface IWeavingService {
 
     public IWeavingService getInstance(ClassLoader loader, Bundle bundle,
             State resolverState, BundleDescription bundleDesciption,
-            SupplementerRegistry supplementerRegistry);
+            ISupplementerRegistry supplementerRegistry);
 
     public String getKey();
 

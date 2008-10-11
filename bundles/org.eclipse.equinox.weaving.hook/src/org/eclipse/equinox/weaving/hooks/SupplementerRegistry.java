@@ -11,7 +11,7 @@
  *   Heiko Seeberger           Enhancements for service dynamics     
  *******************************************************************************/
 
-package org.eclipse.equinox.service.weaving;
+package org.eclipse.equinox.weaving.hooks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.equinox.weaving.hooks.AbstractAspectJHook;
-import org.eclipse.equinox.weaving.hooks.Supplementer;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -33,7 +32,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-public class SupplementerRegistry {
+public class SupplementerRegistry implements ISupplementerRegistry {
 
     //knibb
     /**
@@ -99,6 +98,9 @@ public class SupplementerRegistry {
                 .add("org.eclipse.equinox.simpleconfigurator");
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addBundle(org.osgi.framework.Bundle)
+     */
     public void addBundle(final Bundle bundle) {
         // First analyze which supplementers already exists for this bundle
         addSupplementedBundle(bundle);
@@ -107,6 +109,9 @@ public class SupplementerRegistry {
         addSupplementer(bundle, true);
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementedBundle(org.osgi.framework.Bundle)
+     */
     public void addSupplementedBundle(final Bundle bundle) {
         try {
             final Dictionary manifest = bundle.getHeaders();
@@ -125,6 +130,9 @@ public class SupplementerRegistry {
         }
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#addSupplementer(org.osgi.framework.Bundle, boolean)
+     */
     public void addSupplementer(final Bundle bundle, final boolean updateBundles) {
         try {
             final Dictionary manifest = bundle.getHeaders();
@@ -154,10 +162,16 @@ public class SupplementerRegistry {
         }
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getPackageAdmin()
+     */
     public PackageAdmin getPackageAdmin() {
         return packageAdmin;
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(org.osgi.framework.Bundle)
+     */
     public Bundle[] getSupplementers(final Bundle bundle) {
         List result = Collections.EMPTY_LIST;
 
@@ -175,6 +189,9 @@ public class SupplementerRegistry {
         return (Bundle[]) result.toArray(new Bundle[result.size()]);
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(long)
+     */
     public Bundle[] getSupplementers(final long bundleID) {
         final Bundle bundle = this.context.getBundle(bundleID);
         if (bundle != null) {
@@ -184,6 +201,9 @@ public class SupplementerRegistry {
         }
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#getSupplementers(java.lang.String, org.eclipse.osgi.util.ManifestElement[], org.eclipse.osgi.util.ManifestElement[])
+     */
     public List getSupplementers(final String symbolicName,
             final ManifestElement[] imports, final ManifestElement[] exports) {
         List result = Collections.EMPTY_LIST;
@@ -204,6 +224,9 @@ public class SupplementerRegistry {
         return result;
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#removeBundle(org.osgi.framework.Bundle)
+     */
     public void removeBundle(final Bundle bundle) {
         // if this bundle is itself supplemented by others, remove the bundle from those lists
         removeSupplementedBundle(bundle);
@@ -229,14 +252,23 @@ public class SupplementerRegistry {
         }
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setBundleContext(org.osgi.framework.BundleContext)
+     */
     public void setBundleContext(final BundleContext context) {
         this.context = context;
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#setPackageAdmin(org.osgi.service.packageadmin.PackageAdmin)
+     */
     public void setPackageAdmin(final PackageAdmin packageAdmin) {
         this.packageAdmin = packageAdmin;
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ISupplementerRegistry#updateInstalledBundle(org.osgi.framework.Bundle)
+     */
     public void updateInstalledBundle(final Bundle bundle) {
         if (AbstractAspectJHook.verbose)
             System.err

@@ -16,7 +16,7 @@ package org.eclipse.equinox.weaving.hooks;
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.weaving.adaptors.AspectJAdaptor;
 import org.eclipse.equinox.weaving.adaptors.AspectJAdaptorFactory;
 import org.eclipse.equinox.weaving.adaptors.Debug;
@@ -187,7 +187,7 @@ public class AspectJHook extends AbstractAspectJHook {
 
         this.bundleContext = context;
 
-        final SupplementerRegistry supplementerRegistry = getSupplementerRegistry();
+        final ISupplementerRegistry supplementerRegistry = getSupplementerRegistry();
         adaptorFactory.initialize(context, supplementerRegistry);
 
         final ServiceReference serviceReference = context

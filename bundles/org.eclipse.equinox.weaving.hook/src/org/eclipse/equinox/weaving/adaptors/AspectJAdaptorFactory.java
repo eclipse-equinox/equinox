@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -57,7 +57,7 @@ public class AspectJAdaptorFactory {
 
     private StartLevel startLevelService;
 
-    private SupplementerRegistry supplementerRegistry;
+    private ISupplementerRegistry supplementerRegistry;
 
     private ServiceListener weavingServiceListener;
 
@@ -102,7 +102,7 @@ public class AspectJAdaptorFactory {
     }
 
     public void initialize(final BundleContext context,
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         if (Debug.DEBUG_GENERAL)
             Debug.println("> AspectJAdaptorFactory.initialize() context="
                     + context);

@@ -23,7 +23,7 @@ import java.util.Vector;
 
 import org.aspectj.weaver.loadtime.DefaultWeavingContext;
 import org.aspectj.weaver.tools.WeavingAdaptor;
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
@@ -43,11 +43,11 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
 
     private final State resolverState;
 
-    private final SupplementerRegistry supplementerRegistry;
+    private final ISupplementerRegistry supplementerRegistry;
 
     public OSGiWeavingContext(final ClassLoader loader, final Bundle bundle,
             final State state, final BundleDescription bundleDescription,
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         super(loader);
         this.bundle = bundle;
         this.bundleDescription = bundleDescription;

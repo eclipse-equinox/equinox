@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.internal.adaptor.CachedManifest;
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.weaving.adaptors.Debug;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
@@ -52,10 +52,10 @@ public class AspectJStorageHook implements StorageHook {
 
     private BaseData bundleData;
 
-    private final SupplementerRegistry supplementerRegistry;
+    private final ISupplementerRegistry supplementerRegistry;
 
     public AspectJStorageHook(final BaseData bd,
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         if (Debug.DEBUG_SUPPLEMENTS)
             Debug.println("- AspectJStorageHook.AspectJStorageHook() baseDate="
                     + bd);
@@ -63,7 +63,7 @@ public class AspectJStorageHook implements StorageHook {
         this.supplementerRegistry = supplementerRegistry;
     }
 
-    public AspectJStorageHook(final SupplementerRegistry supplementerRegistry) {
+    public AspectJStorageHook(final ISupplementerRegistry supplementerRegistry) {
         if (Debug.DEBUG_SUPPLEMENTS)
             Debug.println("- AspectJStorageHook.AspectJStorageHook()");
         this.supplementerRegistry = supplementerRegistry;

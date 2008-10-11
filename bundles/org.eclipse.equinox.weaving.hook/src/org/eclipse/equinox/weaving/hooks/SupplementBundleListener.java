@@ -11,17 +11,17 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
 
 public class SupplementBundleListener implements SynchronousBundleListener {
 
-    private final SupplementerRegistry supplementerRegistry;
+    private final ISupplementerRegistry supplementerRegistry;
 
     public SupplementBundleListener(
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         this.supplementerRegistry = supplementerRegistry;
     }
 

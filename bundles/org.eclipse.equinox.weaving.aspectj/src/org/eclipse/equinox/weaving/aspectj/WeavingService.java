@@ -15,8 +15,8 @@ package org.eclipse.equinox.weaving.aspectj;
 
 import java.io.IOException;
 
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingAdaptor;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingContext;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -40,7 +40,7 @@ public class WeavingService implements IWeavingService {
 
     public WeavingService(final ClassLoader loader, final Bundle bundle,
             final State state, final BundleDescription bundleDescription,
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         this.loader = loader;
         this.bundle = bundleDescription;
         this.weavingContext = new OSGiWeavingContext(loader, bundle, state,
@@ -65,7 +65,7 @@ public class WeavingService implements IWeavingService {
     public IWeavingService getInstance(final ClassLoader loader,
             final Bundle bundle, final State resolverState,
             final BundleDescription bundleDesciption,
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         return new WeavingService(loader, bundle, resolverState,
                 bundleDesciption, supplementerRegistry);
     }

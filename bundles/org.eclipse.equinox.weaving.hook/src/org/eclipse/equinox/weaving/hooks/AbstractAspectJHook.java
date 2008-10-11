@@ -19,7 +19,7 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.HookConfigurator;
@@ -56,7 +56,7 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
     public static boolean verbose = Boolean
             .getBoolean("org.aspectj.osgi.verbose"); //$NON-NLS-1$
 
-    private SupplementerRegistry supplementerRegistry;
+    private ISupplementerRegistry supplementerRegistry;
 
     /**
      * @see org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook#addClassPathEntry(java.util.ArrayList,
@@ -157,7 +157,7 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
      * 
      * @return The supplementer registry, guaranteed to be not null
      */
-    public SupplementerRegistry getSupplementerRegistry() {
+    public ISupplementerRegistry getSupplementerRegistry() {
         return this.supplementerRegistry;
     }
 

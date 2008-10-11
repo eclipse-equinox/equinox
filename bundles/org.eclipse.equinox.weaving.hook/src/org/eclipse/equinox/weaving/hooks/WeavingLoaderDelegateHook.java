@@ -15,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.eclipse.equinox.service.weaving.SupplementerRegistry;
+import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook;
@@ -34,7 +34,7 @@ import org.osgi.framework.Bundle;
  */
 public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
 
-    private final SupplementerRegistry supplementerRegistry;
+    private final ISupplementerRegistry supplementerRegistry;
 
     /**
      * Create the hook instance for broaden the visibility according to the
@@ -45,7 +45,7 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
      *            by which other bundles (needs to not be null)
      */
     public WeavingLoaderDelegateHook(
-            final SupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry) {
         this.supplementerRegistry = supplementerRegistry;
     }
 
