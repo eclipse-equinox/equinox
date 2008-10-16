@@ -19,7 +19,6 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
-
 import org.osgi.framework.ServiceEvent;
 
 /**
@@ -41,7 +40,7 @@ public interface PublishHook {
 	 * can filter the bundles which receive the event.
 	 * 
 	 * @param event The service event to be delivered.
-	 * @param bundles A <code>Collection</code> of Bundles which have listeners
+	 * @param bundles A <code>Collection</code> of BundleContextss which have listeners
 	 *        to which the event may be delivered. The method implementation may
 	 *        remove bundles from the collection to prevent the event from being
 	 *        delivered to those bundles. The collection supports all the
@@ -50,5 +49,5 @@ public interface PublishHook {
 	 *        collection will result in an
 	 *        <code>UnsupportedOperationException</code>.
 	 */
-	void event(ServiceEvent event, Collection bundles);
+	void event(ServiceEvent event, Collection contexts);
 }
