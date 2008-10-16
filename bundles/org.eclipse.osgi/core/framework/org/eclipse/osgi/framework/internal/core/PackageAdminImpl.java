@@ -163,7 +163,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			public void run() {
 				doResolveBundles(bundles, true);
 				if (framework.isForcedRestart())
-					framework.shutdown();
+					framework.shutdown(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
 			}
 		}, "Refresh Packages"); //$NON-NLS-1$
 

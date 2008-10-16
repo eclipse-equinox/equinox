@@ -23,9 +23,10 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.Constants;
 
 public class BaseClassLoadingHook implements ClassLoadingHook {
-	private static final String[] LIB_EXTENSIONS = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions"), ","); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String[] LIB_EXTENSIONS = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions", FrameworkProperties.getProperty(Constants.FRAMEWORK_LIBRARY_EXTENSIONS)), ","); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String[] EMPTY_STRINGS = new String[0];
 
 	/*

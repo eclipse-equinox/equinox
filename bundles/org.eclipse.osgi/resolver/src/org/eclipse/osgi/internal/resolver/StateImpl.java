@@ -28,7 +28,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
-	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
@@ -665,6 +665,7 @@ public abstract class StateImpl implements State {
 				result |= changedProps(this.platformProperties[i], newPlatformProperties[i], keys);
 				if (resetSystemExports) {
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES));
+					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA));
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME), newPlatformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME));
 				}
 			}
@@ -693,19 +694,22 @@ public abstract class StateImpl implements State {
 	private void addSystemExports(ArrayList exports) {
 		for (int i = 0; i < platformProperties.length; i++)
 			try {
-				ManifestElement[] elements = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES));
-				if (elements == null)
-					continue;
-				// we can pass false for strict mode here because we never want to mark the system exports as internal.
-				ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, 2, false);
-				Integer profInx = new Integer(i);
-				for (int j = 0; j < systemExports.length; j++) {
-					((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
-					exports.add(systemExports[j]);
-				}
+				addSystemExports(exports, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES)), i);
+				addSystemExports(exports, ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA)), i);
 			} catch (BundleException e) {
 				// TODO consider throwing this... 
 			}
+	}
+
+	private void addSystemExports(ArrayList exports, ManifestElement[] elements, int index) throws BundleException {
+		if (elements == null)
+			return;
+		ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, 2, false);
+		Integer profInx = new Integer(index);
+		for (int j = 0; j < systemExports.length; j++) {
+			((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
+			exports.add(systemExports[j]);
+		}
 	}
 
 	public Dictionary[] getPlatformProperties() {

@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-09-10 20:26:25 -0400 (Wed, 10 Sep 2008) $
- *
  * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +25,7 @@ package org.osgi.framework;
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 5591 $
+ * @version $Revision: 5684 $
  */
 
 public interface Constants {
@@ -407,8 +405,11 @@ public interface Constants {
 
 	/**
 	 * Framework environment property (named
-	 * &quot;org.osgi.framework.system.packages&quot;) identifying package which
+	 * &quot;org.osgi.framework.system.packages&quot;) identifying packages which
 	 * the system bundle must export.
+	 * <p>
+	 * If this property is not specified then the framework must calculate a 
+	 * reasonable default value for the current execution environment. 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
@@ -417,6 +418,21 @@ public interface Constants {
 	 */
 	public static final String	FRAMEWORK_SYSTEMPACKAGES				= "org.osgi.framework.system.packages";
 
+	/**
+	 * Framework environment property (named
+	 * &quot;org.osgi.framework.system.packages.extra&quot;) identifying extra 
+	 * packages which the system bundle must export from the current 
+	 * execution environment.
+	 * <p>
+	 * This property is useful for configuring extra system packages in 
+	 * addition to the system packages calculated by the framework.
+	 * <p>
+	 * The value of this property may be retrieved by calling the
+	 * <code>BundleContext.getProperty</code> method.
+	 * @see #FRAMEWORK_SYSTEMPACKAGES org.osgi.framework.system.packages
+	 * @since 1.5
+	 */
+	public static final String	FRAMEWORK_SYSTEMPACKAGES_EXTRA			= "org.osgi.framework.system.packages.extra";
 	/**
 	 * Framework environment property (named
 	 * &quot;org.osgi.supports.framework.extension&quot;) identifying whether
@@ -980,7 +996,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header directive (named &quot;visibility&quot;) identifying the
-	 * visibility of a reqiured bundle in the Require-Bundle manifest header.
+	 * visibility of a required bundle in the Require-Bundle manifest header.
 	 * 
 	 * <p>
 	 * The directive value is encoded in the Require-Bundle manifest header
@@ -1126,7 +1142,7 @@ public interface Constants {
 	public final static String	ACTIVATION_LAZY							= "lazy";
 
 	/**
-	 * Specifies the the type of security manager the framework must use. If not
+	 * Specifies the type of security manager the framework must use. If not
 	 * specified then the framework will not set the VM security manager. The
 	 * following types are defined:
 	 * <ul>
@@ -1139,15 +1155,49 @@ public interface Constants {
 	public final static String	FRAMEWORK_SECURITY						= "org.osgi.framework.security";
 
 	/**
-	 * A valid file path in the file system to a directory that exists. The
-	 * framework is free to use this directory as it sees fit. This area can not
-	 * be shared with anything else. If this property is not set, the framework
-	 * should use a persistent storage area in the current directory with a
-	 * framework implementation specific name.
+	 * A valid file path in the file system to a directory. If the specified
+	 * directory does not exist then the framework will create the directory.
+	 * If the specified path exists but is not a directory or if the 
+	 * framework fails to create the storage directory then framework
+	 * initialization must fail.
+	 * The framework is free to use this directory as it sees fit. This area can not
+	 * be shared with anything else.
+	 * <p>
+	 * If this property is not set, the framework should use a reasonable
+	 * platform default for the persistent storage area.
 	 * 
 	 * @since 1.5
 	 */
 	public final static String	FRAMEWORK_STORAGE						= "org.osgi.framework.storage";
+
+	/**
+	 * Specifies if and when the storage area for the framework should be
+	 * cleaned.  Default value is {@link #FRAMEWORK_STORAGE_CLEAN_NONE none}
+	 * @see #FRAMEWORK_STORAGE_CLEAN_NONE none
+	 * @see #FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT onFirstInit
+	 * @since 1.5
+	 */
+	public final static String	FRAMEWORK_STORAGE_CLEAN					= "org.osgi.framework.storage.clean";
+
+	/**
+	 * A framework configuration property value for 
+	 * {@link #FRAMEWORK_STORAGE_CLEAN org.osgi.framework.storage.clean} (named &quot;onFirstInit&quot;) identifying 
+	 * that the framework storage area will be cleaned before the system bundle
+	 * is initialized for the first time.  Subsequent inits, starts or updates of the 
+	 * system bundle will not result in cleaning the framework storage area.
+	 * 
+	 * @since 1.5
+	 */
+	public final static String  FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT			= "onFirstInit";
+
+	/**
+	 * A framework configuration property value for 
+	 * {@link #FRAMEWORK_STORAGE_CLEAN org.osgi.framework.storage.clean} (named &quot;none&quot;) identifying 
+	 * that the framework storage area should not be cleaned.
+	 * 
+	 * @since 1.5
+	 */
+	public final static String  FRAMEWORK_STORAGE_CLEAN_NONE			= "none";
 
 	/**
 	 * A comma separated list of additional library file extensions that must be
@@ -1171,10 +1221,10 @@ public interface Constants {
 	 * the following value:
 	 * 
 	 * <pre>
-	 * org.osgi.framework.command.execpermission = &quot;chmod +rx [fullpath]&quot;
+	 * org.osgi.framework.command.execpermission = &quot;chmod +rx ${abspath}&quot;
 	 * </pre>
 	 * 
-	 * The [fullpath] is used to substitute the actual file path by the
+	 * The ${abspath} is used to substitute the actual file path by the
 	 * framework.
 	 * 
 	 * @since 1.5
@@ -1182,14 +1232,22 @@ public interface Constants {
 	public final static String	FRAMEWORK_EXECPERMISSION				= "org.osgi.framework.command.execpermission";
 
 	/**
-	 * Points to a directory with certificates. ###??? Keystore? Certificate
-	 * format?
-	 * 
-	 * TODO Need to complete this description
+	 * This property is used to configure trust repositories for the
+	 * framework. The value is a <code>java.io.File#pathSeparator</code> separated list of
+	 * valid file paths in the file system to files that contain key stores of
+	 * type JKS. The framework will use the key stores as trust repositories to
+	 * authenticate certificates of trusted signers. The key stores are only used
+	 * as read-only trust repositories to access public keys. No passwords are
+	 * required to access the key stores' public keys.
+	 * <p>
+	 * Note that framework implementations are allowed to use other trust
+	 * repositories in addition to the trust repositories specified by this 
+	 * property. How these other trust repositories are configured and populated 
+	 * is implementation specific.
 	 * 
 	 * @since 1.5
 	 */
-	public final static String	FRAMEWORK_ROOT_CERTIFICATES				= "org.osgi.framework.root.certificates";
+	public final static String	FRAMEWORK_TRUST_REPOSITORIES			= "org.osgi.framework.trust.repositories";
 
 	/**
 	 * Specifies the current windowing system. The framework should provide a

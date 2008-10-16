@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
- * 
- * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +23,8 @@ import java.util.EventObject;
  * 
  * <p>
  * <code>FrameworkEvent</code> objects are delivered to
- * <code>FrameworkListener</code>s when a general event occurs within the
- * OSGi environment. A type code is used to identify the event type for future
+ * <code>FrameworkListener</code>s when a general event occurs within the OSGi
+ * environment. A type code is used to identify the event type for future
  * extendability.
  * 
  * <p>
@@ -34,11 +32,11 @@ import java.util.EventObject;
  * 
  * @Immutable
  * @see FrameworkListener
- * @version $Revision: 4930 $
+ * @version $Revision: 5680 $
  */
 
 public class FrameworkEvent extends EventObject {
-	static final long		serialVersionUID	= 207051004521261705L;
+	static final long		serialVersionUID				= 207051004521261705L;
 	/**
 	 * Bundle related to the event.
 	 */
@@ -60,15 +58,15 @@ public class FrameworkEvent extends EventObject {
 	 * <p>
 	 * This event is fired when the Framework has started after all installed
 	 * bundles that are marked to be started have been started and the Framework
-	 * has reached the intitial start level.
-	 * The source of this event is the System Bundle.
+	 * has reached the initial start level. The source of this event is the
+	 * System Bundle.
 	 * 
 	 * <p>
 	 * The value of <code>STARTED</code> is 0x00000001.
 	 * 
 	 * @see "<code>StartLevel</code>"
 	 */
-	public final static int	STARTED				= 0x00000001;
+	public final static int	STARTED							= 0x00000001;
 
 	/**
 	 * An error has occurred.
@@ -79,7 +77,7 @@ public class FrameworkEvent extends EventObject {
 	 * <p>
 	 * The value of <code>ERROR</code> is 0x00000002.
 	 */
-	public final static int	ERROR				= 0x00000002;
+	public final static int	ERROR							= 0x00000002;
 
 	/**
 	 * A PackageAdmin.refreshPackage operation has completed.
@@ -95,7 +93,7 @@ public class FrameworkEvent extends EventObject {
 	 * @since 1.2
 	 * @see "<code>PackageAdmin.refreshPackages</code>"
 	 */
-	public final static int	PACKAGES_REFRESHED	= 0x00000004;
+	public final static int	PACKAGES_REFRESHED				= 0x00000004;
 
 	/**
 	 * A StartLevel.setStartLevel operation has completed.
@@ -111,7 +109,7 @@ public class FrameworkEvent extends EventObject {
 	 * @since 1.2
 	 * @see "<code>StartLevel</code>"
 	 */
-	public final static int	STARTLEVEL_CHANGED	= 0x00000008;
+	public final static int	STARTLEVEL_CHANGED				= 0x00000008;
 
 	/**
 	 * A warning has occurred.
@@ -124,7 +122,7 @@ public class FrameworkEvent extends EventObject {
 	 * 
 	 * @since 1.3
 	 */
-	public final static int	WARNING				= 0x00000010;
+	public final static int	WARNING							= 0x00000010;
 
 	/**
 	 * An informational event has occurred.
@@ -137,7 +135,52 @@ public class FrameworkEvent extends EventObject {
 	 * 
 	 * @since 1.3
 	 */
-	public final static int	INFO				= 0x00000020;
+	public final static int	INFO							= 0x00000020;
+
+	/**
+	 * The Framework has stopped.
+	 * 
+	 * <p>
+	 * This event is fired when the Framework has been stopped because of a stop
+	 * operation on the system bundle. The source of this event is the System
+	 * Bundle.
+	 * 
+	 * <p>
+	 * The value of <code>STOPPED</code> is 0x00000040.
+	 * 
+	 * @since 1.5
+	 */
+	public final static int	STOPPED							= 0x00000040;
+
+	/**
+	 * The Framework has stopped during update.
+	 * 
+	 * <p>
+	 * This event is fired when the Framework has been stopped because of an
+	 * update operation on the system bundle. The Framework will be restarted
+	 * after this event is fired. The source of this event is the System Bundle.
+	 * 
+	 * <p>
+	 * The value of <code>STOPPED_UPDATE</code> is 0x00000080.
+	 * 
+	 * @since 1.5
+	 */
+	public final static int	STOPPED_UPDATE					= 0x00000080;
+
+	/**
+	 * The Framework has stopped and the boot class path has changed.
+	 * 
+	 * <p>
+	 * This event is fired when the Framework has been stopped because of a stop
+	 * operation on the system bundle and a bootclasspath extension bundle has
+	 * been installed or updated. The source of this event is the System Bundle.
+	 * 
+	 * <p>
+	 * The value of <code>STOPPED_BOOTCLASSPATH_MODIFIED</code> is 0x00000100.
+	 * 
+	 * @since 1.5
+	 */
+	public final static int	STOPPED_BOOTCLASSPATH_MODIFIED	= 0x00000100;
 
 	/**
 	 * Creates a Framework event.

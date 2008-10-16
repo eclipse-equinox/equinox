@@ -62,6 +62,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	protected Properties properties;
 	/** Has the framework been started */
 	protected boolean active;
+	/** Event indicating the reason for shutdown*/
+	private FrameworkEvent[] shutdownEvent;
 	/** The bundles installed in the framework */
 	protected BundleRepository bundles;
 	/** Package Admin object. This object manages the exported packages. */
@@ -384,7 +386,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	private void setBootDelegation() {
 		// set the boot delegation according to the osgi boot delegation property
-		String bootDelegationProp = properties.getProperty(Constants.OSGI_BOOTDELEGATION);
+		String bootDelegationProp = properties.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
 		if (bootDelegationProp == null)
 			return;
 		if (bootDelegationProp.trim().length() == 0)
@@ -411,23 +413,23 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	private void loadVMProfile() {
 		Properties profileProps = findVMProfile();
-		String systemExports = properties.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
+		String systemExports = properties.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
 		// set the system exports property using the vm profile; only if the property is not already set
 		if (systemExports == null) {
-			systemExports = profileProps.getProperty(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES);
+			systemExports = profileProps.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
 			if (systemExports != null)
-				properties.put(Constants.OSGI_FRAMEWORK_SYSTEM_PACKAGES, systemExports);
+				properties.put(Constants.FRAMEWORK_SYSTEMPACKAGES, systemExports);
 		}
 		// set the org.osgi.framework.bootdelegation property according to the java profile
 		String type = properties.getProperty(Constants.OSGI_JAVA_PROFILE_BOOTDELEGATION); // a null value means ignore
-		String profileBootDelegation = profileProps.getProperty(Constants.OSGI_BOOTDELEGATION);
+		String profileBootDelegation = profileProps.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
 		if (Constants.OSGI_BOOTDELEGATION_OVERRIDE.equals(type)) {
 			if (profileBootDelegation == null)
-				properties.remove(Constants.OSGI_BOOTDELEGATION); // override with a null value
+				properties.remove(Constants.FRAMEWORK_BOOTDELEGATION); // override with a null value
 			else
-				properties.put(Constants.OSGI_BOOTDELEGATION, profileBootDelegation); // override with the profile value
+				properties.put(Constants.FRAMEWORK_BOOTDELEGATION, profileBootDelegation); // override with the profile value
 		} else if (Constants.OSGI_BOOTDELEGATION_NONE.equals(type))
-			properties.remove(Constants.OSGI_BOOTDELEGATION); // remove the bootdelegation property in case it was set
+			properties.remove(Constants.FRAMEWORK_BOOTDELEGATION); // remove the bootdelegation property in case it was set
 		// set the org.osgi.framework.executionenvironment property according to the java profile
 		if (properties.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT) == null) {
 			// get the ee from the java profile; if no ee is defined then try the java profile name
@@ -572,9 +574,9 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	public synchronized void close() {
 		if (adaptor == null)
 			return;
-		if (active) {
-			shutdown();
-		}
+		if (active)
+			shutdown(FrameworkEvent.STOPPED);
+
 		synchronized (bundles) {
 			List allBundles = bundles.getBundles();
 			int size = allBundles.size();
@@ -629,6 +631,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 		/* mark framework as started */
 		active = true;
+		shutdownEvent = new FrameworkEvent[1];
 		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD))) {
 			Thread fwkThread = new Thread(this, "Framework Active Thread"); //$NON-NLS-1$
 			fwkThread.setDaemon(false);
@@ -651,11 +654,11 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * stopping using FrameworkEvents. 2. Event handling is disabled.
 	 *  
 	 */
-	public synchronized void shutdown() {
+	public synchronized void shutdown(int eventType) {
 		/* Return if framework already stopped */
-		if (!active) {
+		if (!active)
 			return;
-		}
+		this.shutdownEvent[0] = new FrameworkEvent(eventType, systemBundle, null);
 		/*
 		 * set the state of the System Bundle to STOPPING.
 		 * this must be done first according to section 4.19.2 from the OSGi R3 spec.  
@@ -1695,11 +1698,24 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		return forcedRestart;
 	}
 
-	public void waitForStop(long timeout) throws InterruptedException {
+	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
+		boolean waitForEver = timeout == 0;
+		long start = System.currentTimeMillis();
+		long timeLeft = timeout;
 		synchronized (this) {
-			if (active) {
-				this.wait(timeout);
+			FrameworkEvent[] event = shutdownEvent;
+			while (event != null && event[0] == null) {
+				this.wait(timeLeft);
+				if (!waitForEver) {
+					timeLeft = start + timeout - System.currentTimeMillis();
+					// break if we are passed the timeout
+					if (timeLeft <= 0)
+						break;
+				}
 			}
+			if (event == null || event[0] == null)
+				return new FrameworkEvent(FrameworkEvent.INFO, systemBundle, null);
+			return event[0];
 		}
 	}
 

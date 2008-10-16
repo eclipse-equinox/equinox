@@ -75,8 +75,8 @@ public class Equinox implements SystemBundle {
 		getImpl().init();
 	}
 
-	public void waitForStop(long timeout) throws InterruptedException {
-		getImpl().waitForStop(timeout);
+	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
+		return getImpl().waitForStop(timeout);
 	}
 
 	public Enumeration findEntries(String path, String filePattern, boolean recurse) {

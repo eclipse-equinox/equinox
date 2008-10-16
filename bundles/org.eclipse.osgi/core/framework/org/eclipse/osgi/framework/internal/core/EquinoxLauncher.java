@@ -23,7 +23,6 @@ import org.osgi.framework.launch.SystemBundle;
 
 public class EquinoxLauncher implements SystemBundle {
 
-	private static String FULLPATH = " [fullpath]"; //$NON-NLS-1$
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
 	private final Map configuration;
@@ -91,20 +90,16 @@ public class EquinoxLauncher implements SystemBundle {
 			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, (String) storage);
 			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA_DEFAULT, (String) storage);
 		}
-		Object execPermissionObj = configuration.get(Constants.FRAMEWORK_EXECPERMISSION);
-		if (execPermissionObj != null && execPermissionObj instanceof String) {
-			String execPermission = (String) execPermissionObj;
-			if (!execPermission.endsWith(FULLPATH))
-				execPermission = execPermission + FULLPATH;
-			FrameworkProperties.setProperty("osgi.filepermissions.command", execPermission); //$NON-NLS-1$
-		}
+		Object clean = configuration.get(Constants.FRAMEWORK_STORAGE_CLEAN);
+		if (Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(clean))
+			FrameworkProperties.setProperty(EclipseStarter.PROP_CLEAN, Boolean.TRUE.toString());
 	}
 
-	public void waitForStop(long timeout) throws InterruptedException {
+	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
 		Framework current = framework;
 		if (current == null)
-			return;
-		current.waitForStop(timeout);
+			return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
+		return current.waitForStop(timeout);
 	}
 
 	public Enumeration findEntries(String path, String filePattern, boolean recurse) {
@@ -228,8 +223,13 @@ public class EquinoxLauncher implements SystemBundle {
 		if (getState() == Bundle.ACTIVE)
 			return;
 		Framework current = internalInit();
-		// TODO should consult the org.osgi.framework.startlevel property
-		current.startLevelManager.doSetStartLevel(1);
+		int level = 1;
+		try {
+			level = Integer.parseInt((String) configuration.get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+		} catch (Throwable t) {
+			// do nothing
+		}
+		current.startLevelManager.doSetStartLevel(level);
 	}
 
 	public void stop(int options) throws BundleException {

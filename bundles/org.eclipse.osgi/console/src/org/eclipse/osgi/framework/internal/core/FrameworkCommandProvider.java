@@ -225,7 +225,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _shutdown(CommandInterpreter intp) throws Exception {
-		framework.shutdown();
+		framework.shutdown(FrameworkEvent.STOPPED);
 	}
 
 	/**

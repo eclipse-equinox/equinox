@@ -117,6 +117,11 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			} catch (MalformedURLException e) {
 				SignedBundleHook.log("Invalid setting for " + OSGI_KEYSTORE, FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 			}
+		} else {
+			osgiTrustPath = context.getProperty(Constants.FRAMEWORK_TRUST_REPOSITORIES);
+			if (osgiTrustPath != null) {
+				osgiTrustEngineReg = context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(osgiTrustPath, CACERTS_TYPE, null, OSGI_KEYSTORE), null);
+			}
 		}
 		if ((supportSignedBundles & VERIFY_TRUST) != 0)
 			// initialize the trust engine listener only if trust is being established with a trust engine

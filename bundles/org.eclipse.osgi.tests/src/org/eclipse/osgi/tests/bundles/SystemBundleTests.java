@@ -19,6 +19,9 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.service.packageadmin.ExportedPackage;
+import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.startlevel.StartLevel;
 
 public class SystemBundleTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -566,16 +569,11 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		final Exception[] failureException = new BundleException[1];
-		final boolean succeed[] = new boolean[] {true};
+		final FrameworkEvent[] success = new FrameworkEvent[] {null};
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				try {
-					// TODO this is a hack; this will be improved with OSGi API updates to return info from waitForStop()
-					long time = System.currentTimeMillis();
-					equinox.waitForStop(10000);
-					time = System.currentTimeMillis() - time;
-					if (time < 10000)
-						succeed[0] = true;
+					success[0] = equinox.waitForStop(10000);
 				} catch (InterruptedException e) {
 					failureException[0] = e;
 				}
@@ -594,7 +592,8 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 		if (failureException[0] != null)
 			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
-		assertTrue("Wait for stop failed", succeed[0]); //$NON-NLS-1$
+		assertNotNull("Wait for stop event is null", success[0]); //$NON-NLS-1$
+		assertEquals("Wait for stop event type is wrong", FrameworkEvent.STOPPED_UPDATE, success[0].getType()); //$NON-NLS-1$
 		// TODO delay hack to allow the framework to get started again
 		for (int i = 0; i < 5 && Bundle.ACTIVE != equinox.getState(); i++)
 			try {
@@ -616,4 +615,218 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	public void testSystemBundle11() {
+		// test extra packages property
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle11"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, "test.pkg1, test.pkg2"); //$NON-NLS-1$
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("SystemBundle context is null", systemContext); //$NON-NLS-1$
+
+		PackageAdmin pa = (PackageAdmin) equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(PackageAdmin.class.getName()));
+		ExportedPackage[] pkg1 = pa.getExportedPackages("test.pkg1"); //$NON-NLS-1$
+		assertNotNull(pkg1);
+		assertEquals("Wrong number of exports", 1, pkg1.length); //$NON-NLS-1$
+		assertEquals("Wrong package name", "test.pkg1", pkg1[0].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		ExportedPackage[] pkg2 = pa.getExportedPackages("test.pkg2"); //$NON-NLS-1$
+		assertNotNull(pkg2);
+		assertEquals("Wrong number of exports", 1, pkg2.length); //$NON-NLS-1$
+		assertEquals("Wrong package name", "test.pkg2", pkg2[0].getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
+	public void testSystemBundle12() {
+		// Test stop FrameworkEvent
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle12"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+
+		try {
+			equinox.init();
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		// test timeout waiting for framework stop
+		FrameworkEvent stopEvent = null;
+		try {
+			stopEvent = equinox.waitForStop(1000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
+		assertEquals("Wrong stopEvent", FrameworkEvent.INFO, stopEvent.getType()); //$NON-NLS-1$
+
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			stopEvent = equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
+		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
+	}
+
+	public void testSystemBundle13() {
+		// create/install/start/stop clean test
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle13"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing a bundle before starting
+		Bundle substitutesA = null;
+		try {
+			substitutesA = systemContext.installBundle(installer.getBundleLocation("substitutes.a")); //$NON-NLS-1$
+		} catch (BundleException e1) {
+			fail("failed to install a bundle", e1); //$NON-NLS-1$
+		}
+		// start framework first
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		assertEquals("Wrong state for installed bundle", Bundle.INSTALLED, substitutesA.getState()); //$NON-NLS-1$
+		try {
+			substitutesA.start();
+		} catch (BundleException e1) {
+			fail("Failed to start a bundle", e1); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for active bundle", Bundle.ACTIVE, substitutesA.getState()); //$NON-NLS-1$
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+
+		// initialize the framework again to the same configuration
+		configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		substitutesA = equinox.getBundleContext().getBundle(1);
+
+		// make sure the bundle is there
+		assertNotNull("missing installed bundle", substitutesA); //$NON-NLS-1$
+		assertEquals("Unexpected symbolic name", "substitutes.a", substitutesA.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+
+		// initialize the framework again to the same configuration but use clean option
+		configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
+		equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		substitutesA = equinox.getBundleContext().getBundle(1);
+
+		// make sure the bundle is there
+		assertNull("Unexpected bundle is installed", substitutesA); //$NON-NLS-1$
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
+	public void testSystemBundle14() {
+		// Test startlevel property
+		File config = OSGiTestsActivator.getContext().getDataFile("testSystemBundle14"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_BEGINNING_STARTLEVEL, "10"); //$NON-NLS-1$
+		Equinox equinox = new Equinox(configuration);
+
+		try {
+			equinox.init();
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+
+		StartLevel st = (StartLevel) equinox.getBundleContext().getService(equinox.getBundleContext().getServiceReference(StartLevel.class.getName()));
+		assertNotNull("StartLevel service is null", st); //$NON-NLS-1$
+		assertEquals("Unexpected start level", 10, st.getStartLevel()); //$NON-NLS-1$
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+
+		FrameworkEvent stopEvent = null;
+		try {
+			stopEvent = equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
+		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
+	}
 }

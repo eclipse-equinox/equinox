@@ -181,18 +181,20 @@ abstract public class BundleFile {
 	}
 
 	/**
-	 * Attempts to set the permissions of the file in a system dependant way.
+	 * Attempts to set the permissions of the file in a system dependent way.
 	 * @param file the file to set the permissions on
 	 */
 	public static void setPermissions(File file) {
 		String commandProp = FrameworkProperties.getProperty(PROP_SETPERMS_CMD);
+		if (commandProp == null)
+			commandProp = FrameworkProperties.getProperty(Constants.FRAMEWORK_EXECPERMISSION);
 		if (commandProp == null)
 			return;
 		String[] temp = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
 		ArrayList command = new ArrayList(temp.length + 1);
 		boolean foundFullPath = false;
 		for (int i = 0; i < temp.length; i++) {
-			if ("[fullpath]".equals(temp[i])) { //$NON-NLS-1$
+			if ("[fullpath]".equals(temp[i]) || "${abspath}".equals(temp[i])) { //$NON-NLS-1$ //$NON-NLS-2$
 				command.add(file.getAbsolutePath());
 				foundFullPath = true;
 			} else

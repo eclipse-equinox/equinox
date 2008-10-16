@@ -44,14 +44,14 @@ public class InternalSystemBundle extends BundleHost implements SystemBundle {
 			if (!org.osgi.framework.Constants.EXPORT_PACKAGE.equals(key))
 				return headers.get(key);
 			String systemPackages = FrameworkProperties.getProperty(org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES);
-			String resorts = (String) headers.get(org.osgi.framework.Constants.EXPORT_PACKAGE);
+			String results = (String) headers.get(org.osgi.framework.Constants.EXPORT_PACKAGE);
 			if (systemPackages != null) {
-				if (resorts != null)
-					resorts += ", " + systemPackages; //$NON-NLS-1$
+				if (results != null)
+					results += ", " + systemPackages; //$NON-NLS-1$
 				else
-					resorts = systemPackages;
+					results = systemPackages;
 			}
-			return resorts;
+			return results;
 		}
 
 		public boolean isEmpty() {
@@ -296,12 +296,7 @@ public class InternalSystemBundle extends BundleHost implements SystemBundle {
 				public void run() {
 					int sl = framework.startLevelManager.getStartLevel();
 					FrameworkProperties.setProperty(Constants.PROP_OSGI_RELAUNCH, ""); //$NON-NLS-1$
-					framework.shutdown();
-					try {
-						framework.waitForStop(1000);
-					} catch (InterruptedException e) {
-						// ignore
-					}
+					framework.shutdown(FrameworkEvent.STOPPED_UPDATE);
 					framework.launch();
 					framework.startLevelManager.doSetStartLevel(sl);
 					FrameworkProperties.clearProperty(Constants.PROP_OSGI_RELAUNCH);
@@ -378,8 +373,8 @@ public class InternalSystemBundle extends BundleHost implements SystemBundle {
 		// no op for internal representation
 	}
 
-	public void waitForStop(long timeout) throws InterruptedException {
-		framework.waitForStop(timeout);
+	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
+		return framework.waitForStop(timeout);
 	}
 
 }

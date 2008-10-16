@@ -38,9 +38,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	protected static EventManager eventManager;
 	protected static EventListeners startLevelListeners;
 
-	/** The framework beginning startlevel.  Default is 1 */
-	protected int frameworkBeginningStartLevel = 1;
-
 	/** The initial bundle start level for newly installed bundles */
 	protected int initialBundleStartLevel = 1;
 	// default value is 1 for compatibility mode
@@ -60,24 +57,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 
 	protected void initialize() {
 		initialBundleStartLevel = framework.adaptor.getInitialBundleStartLevel();
-
-		// Set Framework Beginning Start Level Property
-		String value = framework.getProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL);
-		if (value == null) {
-			value = Constants.DEFAULT_STARTLEVEL;
-		} else {
-			try {
-				if (Integer.parseInt(value) <= 0) {
-					System.err.println(NLS.bind(Msg.PROPERTIES_INVALID_FW_STARTLEVEL, Constants.DEFAULT_STARTLEVEL));
-					value = Constants.DEFAULT_STARTLEVEL;
-				}
-			} catch (NumberFormatException nfe) {
-				System.err.println(NLS.bind(Msg.PROPERTIES_INVALID_FW_STARTLEVEL, Constants.DEFAULT_STARTLEVEL));
-				value = Constants.DEFAULT_STARTLEVEL;
-			}
-		}
-		framework.setProperty(Constants.OSGI_FRAMEWORKBEGINNINGSTARTLEVEL, value);
-		frameworkBeginningStartLevel = Integer.parseInt(value);
 
 		// create an event manager and a start level listener
 		eventManager = new EventManager("Start Level Event Dispatcher"); //$NON-NLS-1$
@@ -101,15 +80,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 */
 	public int getInitialBundleStartLevel() {
 		return initialBundleStartLevel;
-	}
-
-	/**
-	 * Return the initial start level used when the framework is started.
-	 *
-	 * @return The framework start level.
-	 */
-	public int getFrameworkStartLevel() {
-		return frameworkBeginningStartLevel;
 	}
 
 	/**
