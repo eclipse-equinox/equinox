@@ -5,7 +5,6 @@
 <booleanAttribute key="automaticAdd" value="true"/>
 <booleanAttribute key="automaticValidate" value="false"/>
 <stringAttribute key="bootstrap" value=""/>
-<stringAttribute key="checked" value="[NONE]"/>
 <booleanAttribute key="clearConfig" value="true"/>
 <booleanAttribute key="clearws" value="true"/>
 <booleanAttribute key="clearwslog" value="false"/>
@@ -13,9 +12,7 @@
 <booleanAttribute key="default" value="true"/>
 <booleanAttribute key="includeFragments" value="false"/>
 <booleanAttribute key="includeOptional" value="true"/>
-<stringAttribute key="location" value="c:\temp\test-workspaces"/>
-<stringAttribute key="location1" value="c:\temp\test-workspaces"/>
-<stringAttribute key="location2" value="d:\work\workspaces\runtime-test-workspace"/>
+<stringAttribute key="location" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/All OSGi Tests/test-workspaces"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/org.eclipse.osgi.tests/src/org/eclipse/osgi/tests/AutomatedTests.java"/>
 </listAttribute>
@@ -23,58 +20,17 @@
 <listEntry value="1"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
-<mapAttribute key="org.eclipse.debug.core.environmentVariables">
-<mapEntry key="CommonProgramFiles" value="C:\Program Files\Common Files"/>
-<mapEntry key="PATHEXT" value=".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.pyo;.pyc;.py;.pyw"/>
-<mapEntry key="ComSpec" value="C:\WINDOWS\system32\cmd.exe"/>
-<mapEntry key="tvlogsessioncount" value="5000"/>
-<mapEntry key="SystemDrive" value="C:"/>
-<mapEntry key="TMP" value="C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp"/>
-<mapEntry key="ProgramFiles" value="C:\Program Files"/>
-<mapEntry key="windir" value="C:\WINDOWS"/>
-<mapEntry key="IBMSHARE" value="C:\IBMSHARE"/>
-<mapEntry key="HOMEDRIVE" value="C:"/>
-<mapEntry key="APPDATA" value="C:\Documents and Settings\Administrator\Application Data"/>
-<mapEntry key="PYTHONCASEOK" value="1"/>
-<mapEntry key="COMPUTERNAME" value="IBM-B8AD03D533C"/>
-<mapEntry key="PROMPT" value="$P$G"/>
-<mapEntry key="OS" value="Windows_NT"/>
-<mapEntry key="ALLUSERSPROFILE" value="C:\Documents and Settings\All Users"/>
-<mapEntry key="USERPROFILE" value="C:\Documents and Settings\Administrator"/>
-<mapEntry key="PD_SOCKET" value="6874"/>
-<mapEntry key="PDHOST" value=" "/>
-<mapEntry key="IBM_JAVA_COMMAND_LINE" value="C:\java\ibm-jdk-50-20060511\bin\javaw.exe -Xms40m -Xmx256m -jar C:\dev\latest\eclipse\startup.jar -os win32 -ws win32 -arch x86 -launcher C:\dev\latest\eclipse\eclipse.exe -name Eclipse -showsplash 600 -exitdata 588_68 -vm C:\java\ibm-jdk-50-20060511\bin\javaw.exe -vmargs -Xms40m -Xmx256m -jar C:\dev\latest\eclipse\startup.jar"/>
-<mapEntry key="FP_NO_HOST_CHECK" value="NO"/>
-<mapEntry key="TCL_LIBRARY" value="C:\IBMTOOLS\Python22\tcl\tcl8.4"/>
-<mapEntry key="PROCESSOR_LEVEL" value="6"/>
-<mapEntry key="USERNAME" value="administrator"/>
-<mapEntry key="tvdebugflags" value="0x260"/>
-<mapEntry key="PROCESSOR_IDENTIFIER" value="x86 Family 6 Model 13 Stepping 6, GenuineIntel"/>
-<mapEntry key="RRU" value="C:\Program Files\IBM\IBM Rapid Restore Ultra\"/>
-<mapEntry key="TEMP" value="C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp"/>
-<mapEntry key="TK_LIBRARY" value="C:\IBMTOOLS\Python22\tcl\tk8.4"/>
-<mapEntry key="NUMBER_OF_PROCESSORS" value="1"/>
-<mapEntry key="SystemRoot" value="C:\WINDOWS"/>
-<mapEntry key="USERDOMAIN" value="IBM-B8AD03D533C"/>
-<mapEntry key="PROCESSOR_REVISION" value="0d06"/>
-<mapEntry key="LOGONSERVER" value="\\IBM-B8AD03D533C"/>
-<mapEntry key="PDBASE" value="C:\Program Files\IBM\Infoprint Select"/>
-<mapEntry key="PCOMM_Root" value="C:\Program Files\IBM\Personal Communications\"/>
-<mapEntry key="Path" value="C:\java\ibm-jdk-50-20060511\bin;C:\Program Files\IBM\Infoprint Select;C:\PROGRAM FILES\THINKPAD\UTILITIES;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Notes;C:\Program Files\XLView;C:\lotus\compnent;C:\Utilities;C:\Program Files\IBM\Personal Communications\;C:\Program Files\IBM\Trace Facility\;C:\IBMTOOLS\Python22;C:\WINDOWS\Downloaded Program Files;C:\Program Files\Rational\common;C:\cygwin\usr\bin;C:\cygwin\bin"/>
-<mapEntry key="HOMEPATH" value="\Documents and Settings\Administrator"/>
-<mapEntry key="SESSIONNAME" value="Console"/>
-<mapEntry key="PYTHONPATH" value="C:\IBMTOOLS\utils\support;C:\IBMTOOLS\utils\logger"/>
-<mapEntry key="PROCESSOR_ARCHITECTURE" value="x86"/>
-</mapAttribute>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
+<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.osgi.tests.AutomatedTests"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.eclipse.osgi.tests"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="pde.version" value="3.3"/>
 <stringAttribute key="product" value="org.eclipse.platform.ide"/>
+<booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="templateConfig" value=""/>
 <booleanAttribute key="tracing" value="false"/>
 <booleanAttribute key="useDefaultConfig" value="true"/>
