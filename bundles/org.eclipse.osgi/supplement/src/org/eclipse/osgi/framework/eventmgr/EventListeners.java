@@ -83,7 +83,7 @@ public class EventListeners {
 	 * Copy constructor.
 	 *
 	 * @param source The list to copy.
-	 * @since 3.5.
+	 * @since 3.5
 	 */
 	public EventListeners(EventListeners source) {
 		synchronized (source) {
