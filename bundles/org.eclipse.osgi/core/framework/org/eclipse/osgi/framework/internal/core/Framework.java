@@ -86,9 +86,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	/** List of BundleContexts for bundle's SynchronousBundleListeners. */
 	protected EventListeners bundleEventSync;
 	protected static final int BUNDLEEVENTSYNC = 2;
-	/** List of BundleContexts for bundle's ServiceListeners. */
-	protected EventListeners serviceEvent;
-	protected static final int SERVICEEVENT = 3;
+	/* SERVICEEVENT(3) is now handled by ServiceRegistry */
 	/** List of BundleContexts for bundle's FrameworkListeners. */
 	protected EventListeners frameworkEvent;
 	protected static final int FRAMEWORKEVENT = 4;
@@ -205,7 +203,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
 		bundleEvent = new EventListeners();
 		bundleEventSync = new EventListeners();
-		serviceEvent = new EventListeners();
 		frameworkEvent = new EventListeners();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -595,10 +592,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (bundleEventSync != null) {
 			bundleEventSync.removeAllListeners();
 			bundleEventSync = null;
-		}
-		if (serviceEvent != null) {
-			serviceEvent.removeAllListeners();
-			serviceEvent = null;
 		}
 		if (frameworkEvent != null) {
 			frameworkEvent.removeAllListeners();
@@ -1375,44 +1368,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 	}
 
-	/**
-	 * Deliver a ServiceEvent.
-	 * 
-	 * @param type
-	 *            ServiceEvent type.
-	 * @param reference
-	 *            Affected service reference.
-	 */
-	public void publishServiceEvent(int type, org.osgi.framework.ServiceReference reference) {
-		if (serviceEvent != null) {
-			final ServiceEvent event = new ServiceEvent(type, reference);
-			if (System.getSecurityManager() == null) {
-				publishServiceEventPrivileged(event);
-			} else {
-				AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						publishServiceEventPrivileged(event);
-						return null;
-					}
-				});
-			}
-		}
-	}
-
-	public void publishServiceEventPrivileged(ServiceEvent event) {
-		/* queue to hold set of listeners */
-		ListenerQueue listeners = new ListenerQueue(eventManager);
-		/* queue to hold set of BundleContexts w/ listeners */
-		ListenerQueue contexts = new ListenerQueue(eventManager);
-		/* synchronize while building the listener list */
-		synchronized (serviceEvent) {
-			/* add set of BundleContexts w/ listeners to queue */
-			contexts.queueListeners(serviceEvent, this);
-			/* synchronously dispatch to populate listeners queue */
-			contexts.dispatchEventSynchronous(SERVICEEVENT, listeners);
-		}
-		/* dispatch event to set of listeners */
-		listeners.dispatchEventSynchronous(SERVICEEVENT, event);
+	public ListenerQueue newListenerQueue() {
+		return new ListenerQueue(eventManager);
 	}
 
 	/**
@@ -1441,13 +1398,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 						queue.queueListeners(context.bundleEventSync, context);
 						break;
 					}
-					case SERVICEEVENT : {
-						queue.queueListeners(context.serviceEvent, context);
-						break;
-					}
 					case FRAMEWORKEVENT : {
 						queue.queueListeners(context.frameworkEvent, context);
 						break;
+					}
+					default : {
+						throw new InternalError();
 					}
 				}
 			}

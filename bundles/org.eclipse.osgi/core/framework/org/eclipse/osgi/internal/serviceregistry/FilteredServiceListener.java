@@ -16,7 +16,7 @@ import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.osgi.framework.*;
 
-public class FilteredServiceListener implements ServiceListener {
+class FilteredServiceListener implements ServiceListener {
 	/** Filter for listener. */
 	private final FilterImpl filter;
 	/** Real listener. */
@@ -38,7 +38,7 @@ public class FilteredServiceListener implements ServiceListener {
 	 * @param listener real listener.
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
-	public FilteredServiceListener(BundleContextImpl context, ServiceListener listener, String filterstring) throws InvalidSyntaxException {
+	FilteredServiceListener(BundleContextImpl context, ServiceListener listener, String filterstring) throws InvalidSyntaxException {
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;

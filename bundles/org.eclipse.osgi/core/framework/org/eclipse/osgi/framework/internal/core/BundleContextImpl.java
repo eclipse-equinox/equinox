@@ -20,7 +20,8 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.internal.profile.Profile;
-import org.eclipse.osgi.internal.serviceregistry.*;
+import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
+import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -55,9 +56,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	/** Listener list for bundle's SynchronousBundleListeners */
 	protected EventListeners bundleEventSync;
 
-	/** Listener list for bundle's ServiceListeners */
-	protected EventListeners serviceEvent;
-
 	/** Listener list for bundle's FrameworkListeners */
 	protected EventListeners frameworkEvent;
 
@@ -79,7 +77,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		framework = bundle.framework;
 		bundleEvent = null;
 		bundleEventSync = null;
-		serviceEvent = null;
 		frameworkEvent = null;
 		synchronized (contextLock) {
 			servicesInUse = null;
@@ -94,12 +91,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected void close() {
 		valid = false; /* invalidate context */
 
-		synchronized (framework.serviceEvent) {
-			if (serviceEvent != null) {
-				framework.serviceEvent.removeListener(this);
-				serviceEvent = null;
-			}
-		}
+		final ServiceRegistry registry = framework.getServiceRegistry();
+
+		registry.removeAllServiceListeners(this);
 		synchronized (framework.frameworkEvent) {
 			if (frameworkEvent != null) {
 				framework.frameworkEvent.removeListener(this);
@@ -119,7 +113,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			}
 		}
 
-		final ServiceRegistry registry = framework.getServiceRegistry();
 		/* service's registered by the bundle, if any, are unregistered. */
 		registry.unregisterServices(this);
 
@@ -268,22 +261,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
 		checkValid();
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
-			Debug.println("addServiceListener[" + bundle + "](" + listenerName + ", \"" + filter + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-		}
-
-		ServiceListener filteredListener = new FilteredServiceListener(this, listener, filter);
-
-		synchronized (framework.serviceEvent) {
-			checkValid();
-			if (serviceEvent == null) {
-				serviceEvent = new EventListeners();
-				framework.serviceEvent.addListener(this, this);
-			}
-
-			serviceEvent.addListener(listener, filteredListener);
-		}
+		framework.getServiceRegistry().addServiceListener(this, listener, filter);
 	}
 
 	/**
@@ -322,16 +300,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public void removeServiceListener(ServiceListener listener) {
 		checkValid();
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
-			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
-			Debug.println("removeServiceListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-
-		synchronized (framework.serviceEvent) {
-			if (serviceEvent != null) {
-				serviceEvent.removeListener(listener);
-			}
-		}
+		framework.getServiceRegistry().removeServiceListener(this, listener);
 	}
 
 	/**
@@ -931,7 +900,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						break;
 					}
 
-					case Framework.SERVICEEVENT : {
+					case ServiceRegistry.SERVICEEVENT : {
 						ServiceEvent event = (ServiceEvent) object;
 
 						ServiceListener listener = (ServiceListener) l;
@@ -954,6 +923,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 						listener.frameworkEvent((FrameworkEvent) object);
 						break;
+					}
+					default : {
+						throw new InternalError();
 					}
 				}
 			}

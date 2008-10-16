@@ -15,6 +15,7 @@ import junit.framework.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.FindHook;
+import org.osgi.framework.hooks.service.PublishHook;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -849,6 +850,202 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 				reg2.unregister();
 			if (reg3 != null)
 				reg3.unregister();
+		}
+	}
+
+	public void testPublishHook01() {
+		final String testMethodName = "testPublishHook01"; //$NON-NLS-1$
+		// test the FindHook is called and can remove a reference from the results
+		Runnable runIt = new Runnable() {
+			public void run() {
+				// nothing
+			}
+		};
+		final BundleContext testContext = OSGiTestsActivator.getContext();
+
+		final int[] hookCalled = new int[] {0, 0};
+		final AssertionFailedError[] hookError = new AssertionFailedError[] {null};
+		final List events = new ArrayList();
+
+		final ServiceListener sl = new ServiceListener() {
+			public void serviceChanged(ServiceEvent event) {
+				synchronized (events) {
+					events.add(event);
+				}
+			}
+		};
+
+		final String filterString = "(&(name=" + testMethodName + ")(objectClass=java.lang.Runnable))"; //$NON-NLS-1$ //$NON-NLS-2$
+		Filter tmpFilter = null;
+		try {
+			tmpFilter = testContext.createFilter(filterString);
+			testContext.addServiceListener(sl, filterString);
+		} catch (InvalidSyntaxException e) {
+			fail("Unexpected syntax error", e); //$NON-NLS-1$
+		}
+
+		final Filter filter = tmpFilter;
+		PublishHook hook1 = new PublishHook() {
+			public void event(ServiceEvent event, Collection contexts) {
+				try {
+					if (!filter.match(event.getServiceReference())) {
+						return;
+					}
+					synchronized (hookCalled) {
+						hookCalled[++hookCalled[0]] = 1;
+					}
+					assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
+
+					try {
+						contexts.add(testContext.getBundle(0).getBundleContext());
+						fail("add to collection succeeded"); //$NON-NLS-1$
+					} catch (UnsupportedOperationException e) {
+						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
+					}
+					try {
+						contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
+						fail("addAll to collection succeeded"); //$NON-NLS-1$
+					} catch (UnsupportedOperationException e) {
+						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
+					}
+				} catch (AssertionFailedError a) {
+					hookError[0] = a;
+					return;
+				}
+			}
+		};
+		PublishHook hook2 = new PublishHook() {
+			public void event(ServiceEvent event, Collection contexts) {
+				try {
+					if (!filter.match(event.getServiceReference())) {
+						return;
+					}
+					synchronized (hookCalled) {
+						hookCalled[++hookCalled[0]] = 1;
+					}
+					assertTrue("does not contain test context", contexts.contains(testContext)); //$NON-NLS-1$
+					contexts.remove(testContext);
+					try {
+						contexts.add(testContext.getBundle(0).getBundleContext());
+						fail("add to collection succeeded"); //$NON-NLS-1$
+					} catch (UnsupportedOperationException e) {
+						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
+					}
+					try {
+						contexts.addAll(Arrays.asList(new BundleContext[] {testContext.getBundle(0).getBundleContext()}));
+						fail("addAll to collection succeeded"); //$NON-NLS-1$
+					} catch (UnsupportedOperationException e) {
+						// should get an exception
+					} catch (Exception e) {
+						fail("incorrect exception", e); //$NON-NLS-1$
+					}
+				} catch (AssertionFailedError a) {
+					hookError[0] = a;
+					return;
+				}
+			}
+		};
+
+		Hashtable props = new Hashtable();
+		props.put("name", testMethodName); //$NON-NLS-1$
+		// register find hook 1
+		props.put(Constants.SERVICE_DESCRIPTION, "publish hook 1"); //$NON-NLS-1$
+		ServiceRegistration regHook = testContext.registerService(PublishHook.class.getName(), hook1, props);
+
+		ServiceRegistration reg1 = null;
+		try {
+			props.put(Constants.SERVICE_DESCRIPTION, "service 1"); //$NON-NLS-1$
+			synchronized (events) {
+				events.clear();
+			}
+			reg1 = testContext.registerService(Runnable.class.getName(), runIt, props);
+			assertEquals("all hooks not called", 1, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("hook 1 not called first", 1, hookCalled[1]); //$NON-NLS-1$
+			for (int i = 0; i < hookError.length; i++) {
+				if (hookError[i] != null) {
+					throw hookError[i];
+				}
+			}
+			synchronized (events) {
+				assertEquals("listener not called once", 1, events.size()); //$NON-NLS-1$
+				Iterator iter = events.iterator();
+				while (iter.hasNext()) {
+					ServiceEvent event = (ServiceEvent) iter.next();
+					assertEquals("type not registered", ServiceEvent.REGISTERED, event.getType()); //$NON-NLS-1$
+					assertEquals("wrong service", reg1.getReference(), event.getServiceReference()); //$NON-NLS-1$
+				}
+			}
+
+			regHook.unregister();
+			regHook = null;
+
+			synchronized (events) {
+				events.clear();
+			}
+			hookCalled[0] = 0;
+			props.put(Constants.SERVICE_DESCRIPTION, "service 2"); //$NON-NLS-1$
+			reg1.setProperties(props);
+			synchronized (events) {
+				assertEquals("listener not called once", 1, events.size()); //$NON-NLS-1$
+				Iterator iter = events.iterator();
+				while (iter.hasNext()) {
+					ServiceEvent event = (ServiceEvent) iter.next();
+					assertEquals("type not registered", ServiceEvent.MODIFIED, event.getType()); //$NON-NLS-1$
+					assertEquals("wrong service", reg1.getReference(), event.getServiceReference()); //$NON-NLS-1$
+				}
+			}
+			assertEquals("hooks called", 0, hookCalled[0]); //$NON-NLS-1$
+
+			props.put(Constants.SERVICE_DESCRIPTION, "publish hook 2"); //$NON-NLS-1$
+			regHook = testContext.registerService(PublishHook.class.getName(), hook2, props);
+
+			synchronized (events) {
+				events.clear();
+			}
+			hookCalled[0] = 0;
+			reg1.unregister();
+			reg1 = null;
+			synchronized (events) {
+				assertEquals("listener called", 0, events.size()); //$NON-NLS-1$
+			}
+			assertEquals("all hooks not called", 1, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("hook 1 not called first", 1, hookCalled[1]); //$NON-NLS-1$
+			for (int i = 0; i < hookError.length; i++) {
+				if (hookError[i] != null) {
+					throw hookError[i];
+				}
+			}
+
+		} finally {
+			// unregister hook and services
+			if (regHook != null)
+				regHook.unregister();
+			if (reg1 != null)
+				reg1.unregister();
+			if (sl != null)
+				testContext.removeServiceListener(sl);
+		}
+	}
+
+	public void testDuplicateObjectClass() {
+		ServiceRegistration reg = null;
+		try {
+			reg = OSGiTestsActivator.getContext().registerService(new String[] {Runnable.class.getName(), Object.class.getName(), Object.class.getName()}, new Runnable() {
+				public void run() {
+					// nothing
+				}
+			}, null);
+		} catch (Throwable t) {
+			fail("Failed to register service with duplicate objectClass names", t); //$NON-NLS-1$
+		} finally {
+			if (reg != null)
+				reg.unregister();
 		}
 	}
 

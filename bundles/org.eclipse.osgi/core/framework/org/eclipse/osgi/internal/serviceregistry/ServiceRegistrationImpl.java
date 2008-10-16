@@ -112,7 +112,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 * Call after constructing this object to complete the registration.
 	 */
 	void register(Dictionary props) {
-		final ServiceReference ref;
+		final ServiceReferenceImpl ref;
 		synchronized (registry) {
 			context.checkValid();
 			synchronized (registrationLock) {
@@ -126,7 +126,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		/* must not hold the registrations lock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.REGISTERED, ref);
+		registry.publishServiceEvent(ServiceEvent.REGISTERED, ref);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 * parameter contains case variants of the same key name.
 	 */
 	public void setProperties(Dictionary props) {
-		final ServiceReference ref;
+		final ServiceReferenceImpl ref;
 		synchronized (registrationLock) {
 			if (state != REGISTERED) { /* in the process of unregistering */
 				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
@@ -163,7 +163,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.MODIFIED, ref);
+		registry.publishServiceEvent(ServiceEvent.MODIFIED, ref);
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 * @see BundleContextImpl#ungetService
 	 */
 	public void unregister() {
-		final ServiceReference ref;
+		final ServiceReferenceImpl ref;
 		synchronized (registry) {
 			synchronized (registrationLock) {
 				if (state != REGISTERED) { /* in the process of unregisterING */
@@ -217,7 +217,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		framework.publishServiceEvent(ServiceEvent.UNREGISTERING, ref);
+		registry.publishServiceEvent(ServiceEvent.UNREGISTERING, ref);
 
 		int size = 0;
 		BundleContextImpl[] users = null;

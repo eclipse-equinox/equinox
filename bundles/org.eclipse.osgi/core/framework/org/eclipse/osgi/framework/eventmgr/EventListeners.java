@@ -38,21 +38,21 @@ public class EventListeners {
 	 *  for all i < size: list[i] != null
 	 * Access to this field must be protected by a synchronized region.
 	 */
-	private ListElement[] list = null;
+	private ListElement[] list;
 
 	/**
 	 * The current number of elements.
 	 * Maintains invariant: 0 <= size <= list.length.
 	 * Access to this field must be protected by a synchronized region.
 	 */
-	private int size = 0;
+	private int size;
 
 	/**
 	 * If true and about to modify the list,
 	 * then the list must be copied first.
 	 * Access to this field must be protected by a synchronized region.
 	 */
-	private boolean copyOnWrite = false;
+	private boolean copyOnWrite;
 
 	/**
 	 * Creates a listener list with an initial capacity of 10.
@@ -74,6 +74,26 @@ public class EventListeners {
 		if (capacity < 1)
 			throw new IllegalArgumentException();
 		this.initialCapacity = capacity;
+		this.size = 0;
+		this.list = null;
+		this.copyOnWrite = false;
+	}
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param source The list to copy.
+	 * @since 3.5.
+	 */
+	public EventListeners(EventListeners source) {
+		synchronized (source) {
+			this.initialCapacity = source.initialCapacity;
+			this.size = source.size;
+			this.list = source.list;
+			/* mark both copy on write since they share the same list */
+			this.copyOnWrite = true;
+			source.copyOnWrite = true;
+		}
 	}
 
 	/**
@@ -157,6 +177,15 @@ public class EventListeners {
 		/* invariant: list must be null iff size is zero */
 		list = null;
 		size = 0;
+	}
+
+	/**
+	 * Is the list empty?
+	 * @return <code>true</code> if the list is empty.
+	 * @since 3.5
+	 */
+	public synchronized boolean isEmpty() {
+		return size == 0;
 	}
 
 	/**
