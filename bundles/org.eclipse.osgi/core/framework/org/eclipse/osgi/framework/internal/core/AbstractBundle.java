@@ -1197,7 +1197,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 * @return String
 	 */
 	public String toString() {
-		return (bundledata.getLocation() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		String name = bundledata.getSymbolicName();
+		if (name == null)
+			name = "unknown"; //$NON-NLS-1$
+		return (name + '_' + bundledata.getVersion() + " [" + getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
