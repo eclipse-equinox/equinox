@@ -242,9 +242,10 @@ public class EventListeners implements Map {
 	}
 
 	/**
+	 * Add all the listener,companion pairings from the specified map.
+	 * Typically this map is another EventListeners object.
 	 * 
-	 * 
-	 * @param var0
+	 * @param source The input listener list to add to this listener list
 	 * @since 3.5
 	 */
 	public synchronized void putAll(Map source) {
@@ -355,9 +356,6 @@ public class EventListeners implements Map {
 	/**
 	 * Return the list of (listener, listenerObject) pairs.
 	 * Package private method.
-	 * The array may be longer than the number of pairs in the array.
-	 * The end of the pairs is signalled by a null element or
-	 * end of array. 
 	 * This array must not be modified by anyone and should not be 
 	 * exposed outside of this package.
 	 * To reduce memory allocations, the internal array is shared
