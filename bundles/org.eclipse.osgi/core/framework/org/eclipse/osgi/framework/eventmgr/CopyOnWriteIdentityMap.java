@@ -368,7 +368,7 @@ public class CopyOnWriteIdentityMap implements Map {
 			return value;
 		}
 
-		public Object setValue(Object o) {
+		public Object setValue(Object value) {
 			throw new UnsupportedOperationException(); // entries cannot be modified.
 		}
 	}

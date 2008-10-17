@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,11 +29,11 @@ public interface EventDispatcher {
 	 * listener. The EventManager will ignore any Throwable thrown by this method
 	 * in order to continue delivery of the event to the next listener.
 	 *
-	 * @param eventListener This listener must be cast to the appropriate listener
+	 * @param eventListener This is the key in the Map.Entry for the listener.
+	 * The implementation of this method must cast it to the appropriate listener
 	 * class for the event to be delivered and the appropriate listener method
 	 * must then be called.
-	 * @param listenerObject This is the optional companion object that was 
-	 * specified when the listener was added to the EventListeners object.
+	 * @param listenerObject This is the value in the Map.Entry for the listener.
 	 * @param eventAction This value was passed to the ListenerQueue object via one of its
 	 * dispatchEvent* method calls. It can provide information (such
 	 * as which listener method to call) so that the EventDispatcher

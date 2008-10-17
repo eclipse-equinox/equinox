@@ -15,25 +15,22 @@ import java.util.*;
 import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
 
 /**
- * The ListenerQueue is used to snapshot the set of listeners at the time the event
+ * The ListenerQueue is used to snapshot the list of listeners at the time the event
  * is fired. The snapshot list is then used to dispatch
  * events to those listeners. A ListenerQueue object is associated with a
  * specific EventManager object. ListenerQueue objects constructed with the same
- * EventManager object will get in-order delivery of events
+ * EventManager object will get in-order delivery of events when
  * using asynchronous delivery. No delivery order is guaranteed for synchronous
  * delivery to avoid any potential deadly embraces.
  *
- * <p>ListenerQueue objects are created as necessary to build a set of listeners
- * that should receive a specific event or events. Once the set is created, the event
- * can then be synchronously or asynchronously delivered to the set of
+ * <p>ListenerQueue objects are created as necessary to build a list of listeners
+ * that should receive a specific event or events. Once the list is created, the event
+ * can then be synchronously or asynchronously delivered to the list of
  * listeners. After the event has been dispatched for delivery, the
  * ListenerQueue object should be discarded as it is likely the list of listeners is stale.
  * A new ListenerQueue object should be created when it is time to deliver 
- * another event.  The memory cost of a ListenerQueue object is
- * low since the ListenerQueue object shares the array of listeners with the CopyOnWriteIdentityMap 
- * object which are queued.
- * CopyOnWriteIdentityMap uses copy-on-write semantics for managing the array and will copy the array
- * before changing. This guarantees the snapshot list is never modified once created.
+ * another event. The Sets used to build the list of listeners must not change after being 
+ * added to the list.
  * @since 3.1
  */
 public class ListenerQueue {
@@ -87,15 +84,16 @@ public class ListenerQueue {
 	}
 
 	/**
-	 * Add a listener list to the snapshot list. This method can be called multiple times, prior to
-	 * calling one of the dispatchEvent methods, to build the set of listeners for the
-	 * delivery of a specific event. The current list of listeners in the specified EventListeners
-	 * object is added to the snapshot list.
+	 * Add a set of listeners to the snapshot list. This method can be called multiple times, prior to
+	 * calling one of the dispatchEvent methods, to build the list of listeners for the
+	 * delivery of a specific event. The specified listeners
+	 * are added to the snapshot list.
 	 *
 	 * @param listeners A Set of Map.Entries to add to the queue. This is typically the entrySet
-	 * from a CopyOnWriteIdentityMap object.
+	 * from a CopyOnWriteIdentityMap object. This set must not change after being added to this
+	 * snapshot list.
 	 * @param dispatcher An EventDispatcher object to use when dispatching an event
-	 * to the listeners on the specified EventListeners.
+	 * to the specified listeners.
 	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
 	 * @since 3.5
 	 */
