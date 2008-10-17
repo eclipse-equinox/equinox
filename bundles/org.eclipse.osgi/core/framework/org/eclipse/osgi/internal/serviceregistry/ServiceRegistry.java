@@ -19,8 +19,7 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;
-import org.osgi.framework.hooks.service.FindHook;
-import org.osgi.framework.hooks.service.PublishHook;
+import org.osgi.framework.hooks.service.*;
 
 /**
  * The Service Registry. This class is the main control point for service 
@@ -35,6 +34,7 @@ public class ServiceRegistry {
 
 	private static final String findHookName = FindHook.class.getName();
 	private static final String publishHookName = PublishHook.class.getName();
+	private static final String listenerHookName = ListenerHook.class.getName();
 
 	/** Published services by class name. 
 	 * Map&lt;String,List&lt;ServiceRegistrationImpl&gt;&gt;
@@ -205,7 +205,9 @@ public class ServiceRegistry {
 
 		ServiceRegistrationImpl registration = new ServiceRegistrationImpl(this, context, clazzes, service);
 		registration.register(properties);
-		// TODO notify if this is a new ListenerHook registration
+		if (copy.contains(listenerHookName)) {
+			// TODO notify if this is a new ListenerHook registration
+		}
 		return registration;
 	}
 
@@ -660,7 +662,7 @@ public class ServiceRegistry {
 				listeners = new EventListeners();
 				serviceEventListeners.put(context, listeners);
 			}
-			listeners.addListener(listener, filteredListener);
+			listeners.put(listener, filteredListener);
 		}
 		//TODO notify ListenerHooks of new ServiceListener
 	}
@@ -680,9 +682,10 @@ public class ServiceRegistry {
 		synchronized (serviceEventListeners) {
 			EventListeners listeners = (EventListeners) serviceEventListeners.get(context);
 			if (listeners != null) {
-				listeners.removeListener(listener);
+				listeners.remove(listener);
 			}
 		}
+
 		//TODO notify ListenerHooks of removed ServiceListener
 	}
 
@@ -695,7 +698,7 @@ public class ServiceRegistry {
 		synchronized (serviceEventListeners) {
 			serviceEventListeners.remove(context);
 		}
-		//TODO notify ListenerHooks of all the removed ServiceListeners for the specified bundle
+			//TODO notify ListenerHooks of all the removed ServiceListeners for the specified bundle
 	}
 
 	/**

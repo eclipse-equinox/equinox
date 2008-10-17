@@ -96,19 +96,19 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		registry.removeAllServiceListeners(this);
 		synchronized (framework.frameworkEvent) {
 			if (frameworkEvent != null) {
-				framework.frameworkEvent.removeListener(this);
+				framework.frameworkEvent.remove(this);
 				frameworkEvent = null;
 			}
 		}
 		synchronized (framework.bundleEvent) {
 			if (bundleEvent != null) {
-				framework.bundleEvent.removeListener(this);
+				framework.bundleEvent.remove(this);
 				bundleEvent = null;
 			}
 		}
 		synchronized (framework.bundleEventSync) {
 			if (bundleEventSync != null) {
-				framework.bundleEventSync.removeListener(this);
+				framework.bundleEventSync.remove(this);
 				bundleEventSync = null;
 			}
 		}
@@ -330,20 +330,20 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				checkValid();
 				if (bundleEventSync == null) {
 					bundleEventSync = new EventListeners();
-					framework.bundleEventSync.addListener(this, this);
+					framework.bundleEventSync.put(this, this);
 				}
 
-				bundleEventSync.addListener(listener, listener);
+				bundleEventSync.put(listener, listener);
 			}
 		} else {
 			synchronized (framework.bundleEvent) {
 				checkValid();
 				if (bundleEvent == null) {
 					bundleEvent = new EventListeners();
-					framework.bundleEvent.addListener(this, this);
+					framework.bundleEvent.put(this, this);
 				}
 
-				bundleEvent.addListener(listener, listener);
+				bundleEvent.put(listener, listener);
 			}
 		}
 	}
@@ -374,13 +374,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			synchronized (framework.bundleEventSync) {
 				if (bundleEventSync != null) {
-					bundleEventSync.removeListener(listener);
+					bundleEventSync.remove(listener);
 				}
 			}
 		} else {
 			synchronized (framework.bundleEvent) {
 				if (bundleEvent != null) {
-					bundleEvent.removeListener(listener);
+					bundleEvent.remove(listener);
 				}
 			}
 		}
@@ -411,10 +411,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			checkValid();
 			if (frameworkEvent == null) {
 				frameworkEvent = new EventListeners();
-				framework.frameworkEvent.addListener(this, this);
+				framework.frameworkEvent.put(this, this);
 			}
 
-			frameworkEvent.addListener(listener, listener);
+			frameworkEvent.put(listener, listener);
 		}
 	}
 
@@ -441,7 +441,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 		synchronized (framework.frameworkEvent) {
 			if (frameworkEvent != null) {
-				frameworkEvent.removeListener(listener);
+				frameworkEvent.remove(listener);
 			}
 		}
 	}

@@ -11,8 +11,7 @@
 
 package org.eclipse.osgi.framework.internal.core;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.*;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -20,8 +19,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 
 /**
  * RFC 1960-based Filter. Filter objects can be created by calling
@@ -155,7 +153,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return <code>true</code> if the service's properties match this filter;
 	 * <code>false</code> otherwise.
 	 */
-	public boolean match(org.osgi.framework.ServiceReference reference) {
+	public boolean match(ServiceReference reference) {
 		return match0(((ServiceReferenceImpl) reference).getRegistration().getProperties());
 	}
 
@@ -178,7 +176,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/**
 	 * Filter with case sensitivity using a <tt>Dictionary</tt> object. The
 	 * Filter is executed using the <tt>Dictionary</tt> object's keys and
-	 * values. The keys are case sensitivley matched with the filter.
+	 * values. The keys are case sensitively matched with the filter.
 	 * 
 	 * @param dictionary The <tt>Dictionary</tt> object whose keys are used in
 	 *        the match.
@@ -200,47 +198,48 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return filter string.
 	 */
 	public String toString() {
-		if (this.filter == null) {
-			StringBuffer filter = new StringBuffer();
-			filter.append('(');
+		String result = this.filterString;
+		if (result == null) {
+			StringBuffer sb = new StringBuffer();
+			sb.append('(');
 
 			switch (operation) {
 				case AND : {
-					filter.append('&');
+					sb.append('&');
 
 					FilterImpl[] filters = (FilterImpl[]) value;
 					int size = filters.length;
 
 					for (int i = 0; i < size; i++) {
-						filter.append(filters[i].toString());
+						sb.append(filters[i].toString());
 					}
 
 					break;
 				}
 
 				case OR : {
-					filter.append('|');
+					sb.append('|');
 
 					FilterImpl[] filters = (FilterImpl[]) value;
 					int size = filters.length;
 
 					for (int i = 0; i < size; i++) {
-						filter.append(filters[i].toString());
+						sb.append(filters[i].toString());
 					}
 
 					break;
 				}
 
 				case NOT : {
-					filter.append('!');
-					filter.append(value.toString());
+					sb.append('!');
+					sb.append(value.toString());
 
 					break;
 				}
 
 				case SUBSTRING : {
-					filter.append(attr);
-					filter.append('=');
+					sb.append(attr);
+					sb.append('=');
 
 					String[] substrings = (String[]) value;
 
@@ -250,61 +249,60 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 						String substr = substrings[i];
 
 						if (substr == null) /* * */{
-							filter.append('*');
+							sb.append('*');
 						} else /* xxx */{
-							filter.append(encodeValue(substr));
+							sb.append(encodeValue(substr));
 						}
 					}
 
 					break;
 				}
 				case EQUAL : {
-					filter.append(attr);
-					filter.append('=');
-					filter.append(encodeValue(value.toString()));
+					sb.append(attr);
+					sb.append('=');
+					sb.append(encodeValue(value.toString()));
 
 					break;
 				}
 				case GREATER : {
-					filter.append(attr);
-					filter.append(">="); //$NON-NLS-1$
-					filter.append(encodeValue(value.toString()));
+					sb.append(attr);
+					sb.append(">="); //$NON-NLS-1$
+					sb.append(encodeValue(value.toString()));
 
 					break;
 				}
 				case LESS : {
-					filter.append(attr);
-					filter.append("<="); //$NON-NLS-1$
-					filter.append(encodeValue(value.toString()));
+					sb.append(attr);
+					sb.append("<="); //$NON-NLS-1$
+					sb.append(encodeValue(value.toString()));
 
 					break;
 				}
 				case APPROX : {
-					filter.append(attr);
-					filter.append("~="); //$NON-NLS-1$
-					filter.append(encodeValue(approxString(value.toString())));
+					sb.append(attr);
+					sb.append("~="); //$NON-NLS-1$
+					sb.append(encodeValue(approxString(value.toString())));
 
 					break;
 				}
 
 				case PRESENT : {
-					filter.append(attr);
-					filter.append("=*"); //$NON-NLS-1$
+					sb.append(attr);
+					sb.append("=*"); //$NON-NLS-1$
 
 					break;
 				}
 			}
 
-			filter.append(')');
+			sb.append(')');
 
+			result = sb.toString();
 			if (topLevel) /* only hold onto String object at toplevel */{
-				this.filter = filter.toString();
-			} else {
-				return filter.toString();
+				this.filterString = result;
 			}
 		}
 
-		return this.filter;
+		return result;
 	}
 
 	/**
@@ -357,10 +355,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	protected Object value;
 
 	/* normalized filter string for topLevel Filter object */
-	protected String filter;
+	private transient volatile String filterString;
 
 	/* true if root Filter object */
-	protected boolean topLevel;
+	private final boolean topLevel;
 
 	protected FilterImpl() {
 		topLevel = false;
@@ -1642,14 +1640,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	static class SetAccessibleAction implements PrivilegedAction {
-		private Constructor constructor;
+		private final AccessibleObject accessible;
 
-		public SetAccessibleAction(Constructor constructor) {
-			this.constructor = constructor;
+		public SetAccessibleAction(AccessibleObject accessible) {
+			this.accessible = accessible;
 		}
 
 		public Object run() {
-			constructor.setAccessible(true);
+			accessible.setAccessible(true);
 			return null;
 		}
 	}

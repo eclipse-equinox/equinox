@@ -11,72 +11,48 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
+import java.util.*;
+
 /**
- * This class manages a list of listeners.
+ * This class manages a list of listeners. The class implements the Map interface mapping
+ * listener objects onto their companion objects.
+ * 
+ * The object is copy-on-write to allow for safe, unsynchronized traversal.
+ * 
  * Listeners may be added or removed as necessary.
+ * 
+ * This class uses identity for comparison, not equals.
+ * 
  * @since 3.1
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class EventListeners {
+public class EventListeners implements Map {
 	/**
-	 * The empty array singleton instance, returned by getListeners()
-	 * when size == 0.
+	 * The empty array singleton instance.
 	 */
 	private static final ListElement[] emptyArray = new ListElement[0];
 
 	/**
-	 * The initial capacity of the list. Always >= 1.
+	 * The list of elements.
 	 */
-	private final int initialCapacity;
+	private volatile ListElement[] list;
 
 	/**
-	 * The list of elements.  Initially <code>null</code> but initialized
-	 * to an array of size initialCapacity the first time an element is added.
-	 * Maintains invariants: 
-	 * 	list != null IFF size != 0
-	 * 	list[size] == null
-	 *  for all i < size: list[i] != null
-	 * Access to this field must be protected by a synchronized region.
-	 */
-	private ListElement[] list;
-
-	/**
-	 * The current number of elements.
-	 * Maintains invariant: 0 <= size <= list.length.
-	 * Access to this field must be protected by a synchronized region.
-	 */
-	private int size;
-
-	/**
-	 * If true and about to modify the list,
-	 * then the list must be copied first.
-	 * Access to this field must be protected by a synchronized region.
-	 */
-	private boolean copyOnWrite;
-
-	/**
-	 * Creates a listener list with an initial capacity of 10.
+	 * Creates an empty listener list.
 	 *
 	 */
 	public EventListeners() {
-		this(10);
+		list = emptyArray;
 	}
 
 	/**
-	 * Creates a listener list with the given initial capacity.
+	 * Creates an empty listener list.
 	 *
-	 * @param capacity The number of listeners which this list can initially 
-	 *    accept without growing its internal representation; must be at
-	 *    least 1
-	 * @throws IllegalArgumentException If capacity is less than 1.
+	 * @param capacity This argument is ignored.
+	 * @deprecated As of 3.5
 	 */
 	public EventListeners(int capacity) {
-		if (capacity < 1)
-			throw new IllegalArgumentException();
-		this.initialCapacity = capacity;
-		this.size = 0;
-		this.list = null;
-		this.copyOnWrite = false;
+		this();
 	}
 
 	/**
@@ -86,19 +62,265 @@ public class EventListeners {
 	 * @since 3.5
 	 */
 	public EventListeners(EventListeners source) {
-		synchronized (source) {
-			this.initialCapacity = source.initialCapacity;
-			this.size = source.size;
-			this.list = source.list;
-			/* mark both copy on write since they share the same list */
-			this.copyOnWrite = true;
-			source.copyOnWrite = true;
+		this.list = source.list();
+	}
+
+	private ListElement[] list() {
+		return list;
+	}
+
+	/**
+	 * Add a listener and its companion object to the list.
+	 * If a listener object is already in the list, then it is replaced.
+	 * Listeners are compared using identity.
+	 *
+	 * @param listener This is the listener object to be added to the list.
+	 * @param companion This is an optional listener companion object.
+	 * This object will be passed to the EventDispatcher along with the listener
+	 * when the listener is to be called. This may be null.
+	 * @return <code>null</code> if this listener was newly added to the list.
+	 * Otherwise the previous value of the companion object.
+	 * @throws IllegalArgumentException If listener is null.
+	 * @since 3.5
+	 */
+	public synchronized Object put(Object listener, Object companion) {
+		if (listener == null) {
+			throw new IllegalArgumentException();
 		}
+
+		int size = list.length;
+		for (int i = 0; i < size; i++) {
+			if (list[i].primary == listener) {
+				Object c = list[i].companion;
+				if (c == companion) {
+					return c;
+				}
+				ListElement[] newList = new ListElement[size];
+				System.arraycopy(list, 0, newList, 0, size);
+				newList[i] = new ListElement(listener, companion);
+				list = newList;
+				return c;
+			}
+		}
+
+		ListElement[] newList = new ListElement[size + 1];
+		if (size > 0) {
+			System.arraycopy(list, 0, newList, 0, size);
+		}
+		newList[size] = new ListElement(listener, companion);
+		list = newList;
+		return null;
+	}
+
+	/**
+	 * Remove a listener from the list and indicate if the listener was removed.
+	 * Listeners are compared using identity.
+	 *
+	 * @param listener This is the listener object to be removed from the list.
+	 * @return <code>null</code> if the listener was not in the list. 
+	 * Otherwise, the companion with which the listener was registered.
+	 * @throws IllegalArgumentException If listener is null.
+	 * @since 3.5
+	 */
+	public synchronized Object remove(Object listener) {
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
+
+		int size = list.length;
+		for (int i = 0; i < size; i++) {
+			if (list[i].primary == listener) {
+				Object c = list[i].companion;
+				if (size == 1) {
+					list = emptyArray;
+					return c;
+				}
+				ListElement[] newList = new ListElement[size - 1];
+				if (i > 0) {
+					System.arraycopy(list, 0, newList, 0, i);
+				}
+				int next = size - 1 - i;
+				if (next > 0) {
+					System.arraycopy(list, i + 1, newList, i, next);
+				}
+				list = newList;
+				return c;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Remove all listeners from the list.
+	 * 
+	 * @since 3.5
+	 */
+	public synchronized void clear() {
+		list = emptyArray;
+	}
+
+	/**
+	 * Is the list empty?
+	 * 
+	 * @return <code>true</code> if the list is empty.
+	 * @since 3.5
+	 */
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+
+	/**
+	 * Return the size of the list.
+	 * 
+	 * @return The size of the list.
+	 * @since 3.5
+	 */
+	public int size() {
+		return list().length;
+	}
+
+	/**
+	 * Return the companion object for the listener.
+	 * Listeners are compared using identity.
+	 * 
+	 * @param listener The listener object.
+	 * @return The companion object for the listener.
+	 * @since 3.5
+	 */
+	public Object get(Object listener) {
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
+
+		ListElement[] l = list();
+		for (int i = 0; i < l.length; i++) {
+			if (l[i].primary == listener) {
+				return l[i].companion;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Check if the list contains the listener.
+	 * Listeners are compared using identity.
+	 * 
+	 * @param listener The listener object.
+	 * @return <code>true</code> if the listener is in the list.
+	 * @since 3.5
+	 */
+	public boolean containsKey(Object listener) {
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
+
+		ListElement[] l = list();
+		for (int i = 0; i < l.length; i++) {
+			if (l[i].primary == listener) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check if the list contains the companion.
+	 * Companions are compared using identity.
+	 * 
+	 * @param companion The companion object for the listener.
+	 * @return <code>true</code> if the companion is in the list.
+	 * @since 3.5
+	 */
+	public boolean containsValue(Object companion) {
+		ListElement[] l = list();
+		for (int i = 0; i < l.length; i++) {
+			if (l[i].companion == companion) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param var0
+	 * @since 3.5
+	 */
+	public synchronized void putAll(Map source) {
+		int sourceSize = source.size();
+		if (sourceSize == 0) {
+			return;
+		}
+		ListElement[] toCopy;
+		if (source instanceof EventListeners) {
+			toCopy = ((EventListeners) source).list();
+		} else {
+			toCopy = new ListElement[sourceSize];
+			Iterator iter = source.entrySet().iterator();
+			for (int i = 0; i < sourceSize; i++) {
+				Map.Entry entry = (Map.Entry) iter.next();
+				toCopy[i] = new ListElement(entry.getKey(), entry.getValue());
+			}
+		}
+
+		int size = list.length;
+		ListElement[] newList = new ListElement[size + sourceSize];
+		System.arraycopy(list, 0, newList, 0, size);
+		copy: for (int n = 0; n < sourceSize; n++) {
+			ListElement copy = toCopy[n];
+			for (int i = 0; i < size; i++) {
+				if (newList[i].primary == copy.primary) {
+					newList[i] = copy;
+					continue copy;
+				}
+			}
+			newList[size] = copy;
+			size++;
+		}
+		if (size == newList.length) {
+			list = newList;
+			return;
+		}
+		ListElement[] l = new ListElement[size];
+		System.arraycopy(newList, 0, l, 0, size);
+		list = l;
+	}
+
+	/**
+	 * Returns a set containing a Map.Entry for each listener in this list.
+	 * 
+	 * @return A Set of Map.Entry for each listener in this list
+	 * @since 3.5
+	 */
+	public Set entrySet() {
+		return new InnerSet(list(), InnerSet.ENTRY);
+	}
+
+	/**
+	 * Returns a set containing the listeners in this list.
+	 * 
+	 * @return A Set of the listeners in this list
+	 * @since 3.5
+	 */
+	public Set keySet() {
+		return new InnerSet(list(), InnerSet.KEY);
+	}
+
+	/**
+	 * Returns a collection containing the companions in this list.
+	 * 
+	 * @return A Collection of the companions in this list
+	 * @since 3.5
+	 */
+	public Collection values() {
+		return new InnerSet(list(), InnerSet.VALUE);
 	}
 
 	/**
 	 * Add a listener to the list.
 	 * If a listener object is already in the list, then it is replaced.
+	 * This method calls the put method.
 	 *
 	 * @param listener This is the listener object to be added to the list.
 	 * @param listenerObject This is an optional listener-specific object.
@@ -106,86 +328,28 @@ public class EventListeners {
 	 * when the listener is to be called. This may be null
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public synchronized void addListener(Object listener, Object listenerObject) {
-		if (listener == null) {
-			throw new IllegalArgumentException();
-		}
-
-		if (size == 0) {
-			list = new ListElement[initialCapacity];
-		} else {
-			// copy array if necessary
-			if (copyOnWrite) {
-				copyList(size);
-				copyOnWrite = false;
-			}
-
-			// check for duplicates using identity
-			for (int i = 0; i < size; i++) {
-				if (list[i].primary == listener) {
-					list[i] = new ListElement(listener, listenerObject); /* use the most recent companion */
-					return;
-				}
-			}
-
-			// grow array if necessary
-			// This wont recopy list if copy on write occured above since that
-			// would have grown the list.
-			if (size == list.length) {
-				copyList(size);
-			}
-		}
-
-		list[size] = new ListElement(listener, listenerObject);
-		size++;
+	public void addListener(Object listener, Object listenerObject) {
+		put(listener, listenerObject);
 	}
 
 	/**
 	 * Remove a listener from the list.
+	 * This method calls the remove method.
 	 *
 	 * @param listener This is the listener object to be removed from the list.
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public synchronized void removeListener(Object listener) {
-		if (listener == null) {
-			throw new IllegalArgumentException();
-		}
-
-		for (int i = 0; i < size; i++) {
-			if (list[i].primary == listener) {
-				size--;
-				if (size == 0) {
-					list = null; /* invariant: list must be null iff size is zero */
-					return;
-				}
-				if (copyOnWrite) {
-					copyList(i);
-					copyOnWrite = false;
-				} else {
-					System.arraycopy(list, i + 1, list, i, size - i);
-					list[size] = null; /* invariant: end of list must be null */
-				}
-				return;
-			}
-		}
+	public void removeListener(Object listener) {
+		remove(listener);
 	}
 
 	/**
 	 * Remove all listeners from the list.
+	 * 
+	 * This method calls the clear method.
 	 */
-	public synchronized void removeAllListeners() {
-		/* invariant: list must be null iff size is zero */
-		list = null;
-		size = 0;
-	}
-
-	/**
-	 * Is the list empty?
-	 * @return <code>true</code> if the list is empty.
-	 * @since 3.5
-	 */
-	public synchronized boolean isEmpty() {
-		return size == 0;
+	public void removeAllListeners() {
+		clear();
 	}
 
 	/**
@@ -202,34 +366,8 @@ public class EventListeners {
 	 * 
 	 * @return A shared array that must not be modified by anyone. 
 	 */
-	synchronized ListElement[] getListeners() {
-		if (size == 0) {
-			return emptyArray;
-		}
-		copyOnWrite = true;
-		return list;
-	}
-
-	/**
-	 * Copy the array.
-	 * @param i Index of element to remove from array. Must be equal to size to 
-	 * copy entire array.
-	 * @throws IndexOutOfBoundsException If i < 0 or i > size.
-	 */
-	private void copyList(int i) {
-		if (i > size) {
-			throw new IndexOutOfBoundsException();
-		}
-		int capacity = (size * 3) / 2 + 1;
-		if (capacity < initialCapacity) {
-			capacity = initialCapacity;
-		}
-		ListElement[] newList = new ListElement[capacity];
-		System.arraycopy(list, 0, newList, 0, i);
-		if (i < size) {
-			System.arraycopy(list, i + 1, newList, i, size - i);
-		}
-		list = newList;
+	ListElement[] getListeners() {
+		return list();
 	}
 
 	/**
@@ -238,7 +376,7 @@ public class EventListeners {
 	 * ListElements are stored in EventListeners.
 	 * ListElements are immutable.
 	 */
-	static class ListElement {
+	static class ListElement implements Map.Entry {
 		/**
 		 * Primary object.
 		 */
@@ -257,6 +395,64 @@ public class EventListeners {
 		ListElement(final Object primary, final Object companion) {
 			this.primary = primary;
 			this.companion = companion;
+		}
+
+		public Object getKey() {
+			return primary;
+		}
+
+		public Object getValue() {
+			return companion;
+		}
+
+		public Object setValue(Object o) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class InnerSet extends AbstractSet {
+		final ListElement[] list;
+		final int returnType;
+		final static int ENTRY = 1;
+		final static int KEY = 2;
+		final static int VALUE = 3;
+
+		InnerSet(ListElement[] list, int returnType) {
+			this.list = list;
+			this.returnType = returnType;
+		}
+
+		public Iterator iterator() {
+			return new Iterator() {
+				private int cursor = 0;
+
+				public boolean hasNext() {
+					return cursor < list.length;
+				}
+
+				public Object next() {
+					if (cursor == list.length) {
+						throw new NoSuchElementException();
+					}
+					switch (returnType) {
+						case ENTRY :
+							return list[cursor++];
+						case KEY :
+							return list[cursor++].primary;
+						case VALUE :
+							return list[cursor++].companion;
+					}
+					throw new InternalError();
+				}
+
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+			};
+		}
+
+		public int size() {
+			return list.length;
 		}
 	}
 }

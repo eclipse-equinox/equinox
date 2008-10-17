@@ -79,7 +79,7 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * event is being delivered to the snapshot list. The memory cost of the snapshot list is
  * low since the ListenerQueue object shares the array of listeners with the EventListeners object.
  * EventListeners uses copy-on-write semantics for managing the array and will copy the array
- * before changing it IF the array has been shared with a ListenerQueue. This minimizes 
+ * before changing it. This minimizes 
  * object creation while guaranteeing the snapshot list is never modified once created.
  * 
  * The OSGi framework also uses a 2 level dispatch technique (EventDispatcher).
@@ -217,9 +217,6 @@ public class EventManager {
 		int size = listeners.length;
 		for (int i = 0; i < size; i++) { /* iterate over the list of listeners */
 			ListElement listener = listeners[i];
-			if (listener == null) { /* a null element terminates the list */
-				break;
-			}
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
 				dispatcher.dispatchEvent(listener.primary, listener.companion, eventAction, eventObject);

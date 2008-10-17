@@ -62,7 +62,7 @@ public class MRUBundleFileList implements EventDispatcher {
 			this.useStampList = new long[fileLimit];
 			this.bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
 			this.bundleFileCloser = new EventListeners();
-			this.bundleFileCloser.addListener(this, this);
+			this.bundleFileCloser.put(this, this);
 		} else {
 			this.bundleFileList = null;
 			this.useStampList = null;

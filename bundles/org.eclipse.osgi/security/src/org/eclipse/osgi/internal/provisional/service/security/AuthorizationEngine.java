@@ -52,7 +52,7 @@ public abstract class AuthorizationEngine {
 			return;
 		EventListeners listeners = new EventListeners();
 		for (int i = 0; i < services.length; i++)
-			listeners.addListener(services[i], null);
+			listeners.put(services[i], null);
 		ListenerQueue queue = new ListenerQueue(manager);
 		queue.queueListeners(listeners, dispatcher);
 		queue.dispatchEventSynchronous(0, event);

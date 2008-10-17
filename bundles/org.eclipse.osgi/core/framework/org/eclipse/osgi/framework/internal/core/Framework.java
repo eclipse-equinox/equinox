@@ -588,15 +588,15 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 		serviceRegistry = null;
 		if (bundleEvent != null) {
-			bundleEvent.removeAllListeners();
+			bundleEvent.clear();
 			bundleEvent = null;
 		}
 		if (bundleEventSync != null) {
-			bundleEventSync.removeAllListeners();
+			bundleEventSync.clear();
 			bundleEventSync = null;
 		}
 		if (frameworkEvent != null) {
-			frameworkEvent.removeAllListeners();
+			frameworkEvent.clear();
 			frameworkEvent = null;
 		}
 		if (eventManager != null) {

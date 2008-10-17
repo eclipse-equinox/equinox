@@ -61,13 +61,13 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		// create an event manager and a start level listener
 		eventManager = new EventManager("Start Level Event Dispatcher"); //$NON-NLS-1$
 		startLevelListeners = new EventListeners();
-		startLevelListeners.addListener(this, this);
+		startLevelListeners.put(this, this);
 	}
 
 	protected void cleanup() {
 		eventManager.close();
 		eventManager = null;
-		startLevelListeners.removeAllListeners();
+		startLevelListeners.clear();
 		startLevelListeners = null;
 	}
 
