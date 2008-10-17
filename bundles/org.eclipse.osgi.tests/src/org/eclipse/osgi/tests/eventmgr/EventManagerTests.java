@@ -128,6 +128,16 @@ public class EventManagerTests extends TestCase {
 		assertFalse("invalid value", el2.containsValue(c1)); //$NON-NLS-1$
 
 		el2.clear();
+		Map source = new HashMap();
+		source.put(l1, c1);
+		source.put(l4, c4);
+		el2.putAll(source);
+		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
+		assertEquals("wrong size", 2, el2.size()); //$NON-NLS-1$
+		assertEquals("wrong companion", c1, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+
+		el2.clear();
 		Set k1 = el1.keySet();
 		Set k2 = el2.keySet();
 		Collection v1 = el1.values();
