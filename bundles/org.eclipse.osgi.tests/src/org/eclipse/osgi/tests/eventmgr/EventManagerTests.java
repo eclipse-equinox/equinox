@@ -128,8 +128,14 @@ public class EventManagerTests extends TestCase {
 		assertFalse("invalid value", el2.containsValue(c1)); //$NON-NLS-1$
 
 		el2.clear();
-
 		Set k1 = el1.keySet();
+		Set k2 = el2.keySet();
+		Collection v1 = el1.values();
+		Collection v2 = el2.values();
+		Set e2 = el2.entrySet();
+		Set e1 = el1.entrySet();
+		el1.clear();
+
 		assertFalse("empty", k1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, k1.size()); //$NON-NLS-1$
 		assertTrue("missed key", k1.contains(l1)); //$NON-NLS-1$
@@ -179,7 +185,6 @@ public class EventManagerTests extends TestCase {
 			//expected
 		}
 
-		Set k2 = el2.keySet();
 		assertTrue("not empty", k2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 0, k2.size()); //$NON-NLS-1$
 
@@ -232,7 +237,6 @@ public class EventManagerTests extends TestCase {
 		assertTrue("array unequal", Arrays.equals(new Object[] {l1, l3, l2, l4}, k1.toArray())); //$NON-NLS-1$
 		assertTrue("array unequal", Arrays.equals(new Object[] {l1, l3, l2, l4}, k1.toArray(new Object[4]))); //$NON-NLS-1$
 
-		Collection v1 = el1.values();
 		assertFalse("empty", v1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, v1.size()); //$NON-NLS-1$
 		assertTrue("missed key", v1.contains(c1)); //$NON-NLS-1$
@@ -282,7 +286,6 @@ public class EventManagerTests extends TestCase {
 			//expected
 		}
 
-		Collection v2 = el2.values();
 		assertTrue("not empty", v2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 0, v2.size()); //$NON-NLS-1$
 
@@ -335,7 +338,6 @@ public class EventManagerTests extends TestCase {
 		assertTrue("array unequal", Arrays.equals(new Object[] {c1, c3, c2, c4}, v1.toArray())); //$NON-NLS-1$
 		assertTrue("array unequal", Arrays.equals(new Object[] {c1, c3, c2, c4}, v1.toArray(new Object[4]))); //$NON-NLS-1$
 
-		Set e1 = el1.entrySet();
 		assertFalse("empty", e1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, e1.size()); //$NON-NLS-1$
 
@@ -412,7 +414,6 @@ public class EventManagerTests extends TestCase {
 			//expected
 		}
 
-		Set e2 = el2.entrySet();
 		assertTrue("not empty", e2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 0, e2.size()); //$NON-NLS-1$
 
