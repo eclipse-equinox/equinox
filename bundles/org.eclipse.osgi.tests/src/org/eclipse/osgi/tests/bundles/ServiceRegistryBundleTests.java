@@ -954,7 +954,7 @@ public class ServiceRegistryBundleTests extends AbstractBundleTests {
 
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		// register find hook 1
+		// register publish hook 1
 		props.put(Constants.SERVICE_DESCRIPTION, "publish hook 1"); //$NON-NLS-1$
 		ServiceRegistration regHook = testContext.registerService(PublishHook.class.getName(), hook1, props);
 
