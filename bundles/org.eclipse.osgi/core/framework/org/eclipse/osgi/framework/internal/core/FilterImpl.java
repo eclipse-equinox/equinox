@@ -375,7 +375,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return If the Dictionary's keys match the filter,
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
 	 */
-	protected boolean match0(Dictionary properties) {
+	private boolean match0(Dictionary properties) {
 		switch (op) {
 			case AND : {
 				FilterImpl[] filters = (FilterImpl[]) value;
@@ -440,7 +440,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @param value unencoded value string.
 	 * @return encoded value string.
 	 */
-	protected static String encodeValue(String value) {
+	private static String encodeValue(String value) {
 		boolean encoded = false;
 		int inlen = value.length();
 		int outlen = inlen << 1; /* inlen * 2 */
@@ -472,7 +472,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return encoded ? new String(output, 0, cursor) : value;
 	}
 
-	protected boolean compare(int operation, Object value1, Object value2) {
+	private boolean compare(int operation, Object value1, Object value2) {
 		if (value1 == null) {
 			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 				Debug.println("compare(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -539,7 +539,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return compare_Unknown(operation, value1, value2); // RFC 59
 	}
 
-	protected boolean compare_Collection(int operation, Collection collection, Object value2) {
+	private boolean compare_Collection(int operation, Collection collection, Object value2) {
 		Iterator iterator = collection.iterator();
 
 		while (iterator.hasNext()) {
@@ -551,7 +551,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_ObjectArray(int operation, Object[] array, Object value2) {
+	private boolean compare_ObjectArray(int operation, Object[] array, Object value2) {
 		int size = array.length;
 
 		for (int i = 0; i < size; i++) {
@@ -563,7 +563,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_PrimitiveArray(int operation, Class type, Object primarray, Object value2) {
+	private boolean compare_PrimitiveArray(int operation, Class type, Object primarray, Object value2) {
 		if (Integer.TYPE.isAssignableFrom(type)) {
 			int[] array = (int[]) primarray;
 
@@ -679,7 +679,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_String(int operation, String string, Object value2) {
+	private boolean compare_String(int operation, String string, Object value2) {
 		switch (operation) {
 			case SUBSTRING : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -771,7 +771,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Integer(int operation, int intval, Object value2) {
+	private boolean compare_Integer(int operation, int intval, Object value2) {
 		int intval2 = Integer.parseInt(((String) value2).trim());
 
 		switch (operation) {
@@ -810,7 +810,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Long(int operation, long longval, Object value2) {
+	private boolean compare_Long(int operation, long longval, Object value2) {
 		long longval2 = Long.parseLong(((String) value2).trim());
 
 		switch (operation) {
@@ -849,7 +849,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Byte(int operation, byte byteval, Object value2) {
+	private boolean compare_Byte(int operation, byte byteval, Object value2) {
 		byte byteval2 = Byte.parseByte(((String) value2).trim());
 
 		switch (operation) {
@@ -888,7 +888,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Short(int operation, short shortval, Object value2) {
+	private boolean compare_Short(int operation, short shortval, Object value2) {
 		short shortval2 = Short.parseShort(((String) value2).trim());
 
 		switch (operation) {
@@ -927,7 +927,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Character(int operation, char charval, Object value2) {
+	private boolean compare_Character(int operation, char charval, Object value2) {
 		char charval2 = (((String) value2).trim()).charAt(0);
 
 		switch (operation) {
@@ -966,7 +966,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Boolean(int operation, boolean boolval, Object value2) {
+	private boolean compare_Boolean(int operation, boolean boolval, Object value2) {
 		boolean boolval2 = new Boolean(((String) value2).trim()).booleanValue();
 
 		switch (operation) {
@@ -1005,7 +1005,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Float(int operation, float floatval, Object value2) {
+	private boolean compare_Float(int operation, float floatval, Object value2) {
 		float floatval2 = Float.parseFloat(((String) value2).trim());
 
 		switch (operation) {
@@ -1044,7 +1044,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Double(int operation, double doubleval, Object value2) {
+	private boolean compare_Double(int operation, double doubleval, Object value2) {
 		double doubleval2 = Double.parseDouble(((String) value2).trim());
 
 		switch (operation) {
@@ -1083,9 +1083,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected static final Class[] constructorType = new Class[] {String.class};
+	private static final Class[] constructorType = new Class[] {String.class};
 
-	protected boolean compare_Comparable(int operation, Comparable value1, Object value2) {
+	private boolean compare_Comparable(int operation, Comparable value1, Object value2) {
 		Constructor constructor;
 
 		try {
@@ -1141,7 +1141,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	protected boolean compare_Unknown(int operation, Object value1, Object value2) { //RFC 59
+	private boolean compare_Unknown(int operation, Object value1, Object value2) { //RFC 59
 		Constructor constructor;
 		try {
 			constructor = value1.getClass().getConstructor(constructorType);
@@ -1209,7 +1209,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @param input Input string.
 	 * @return String ready for APPROX comparison.
 	 */
-	protected static String approxString(String input) {
+	private static String approxString(String input) {
 		boolean changed = false;
 		char[] output = input.toCharArray();
 
