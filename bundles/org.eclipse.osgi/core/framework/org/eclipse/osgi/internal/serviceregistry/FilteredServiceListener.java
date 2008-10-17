@@ -43,7 +43,7 @@ class FilteredServiceListener implements ServiceListener {
 			this.filter = null;
 			this.objectClass = null;
 		} else {
-			FilterImpl filterImpl = new FilterImpl(filterstring);
+			FilterImpl filterImpl = FilterImpl.newInstance(filterstring);
 			String clazz = filterImpl.getRequiredObjectClass();
 			if (clazz == null) {
 				this.objectClass = null;

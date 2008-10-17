@@ -134,13 +134,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * will be thrown with a human readable message where the
 	 * filter became unparsable.
 	 *
-	 * @param filter the filter string.
+	 * @param filterString the filter string.
 	 * @exception InvalidSyntaxException If the filter parameter contains
 	 * an invalid filter string that cannot be parsed.
 	 */
-	public FilterImpl(String filter) throws InvalidSyntaxException {
-		topLevel = true;
-		new Parser(filter).parse(this);
+	public static FilterImpl newInstance(String filterString) throws InvalidSyntaxException {
+		return new Parser(filterString).parse();
 	}
 
 	/**
@@ -203,7 +202,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			StringBuffer sb = new StringBuffer();
 			sb.append('(');
 
-			switch (operation) {
+			switch (op) {
 				case AND : {
 					sb.append('&');
 
@@ -296,7 +295,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			sb.append(')');
 
-			result = sb.toString();
+			result = sb.toString().intern();
 			if (topLevel) /* only hold onto String object at toplevel */{
 				this.filterString = result;
 			}
@@ -338,21 +337,21 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/* Protected fields and methods for the Filter implementation */
 
 	/** filter operation */
-	protected int operation;
-	protected static final int EQUAL = 1;
-	protected static final int APPROX = 2;
-	protected static final int GREATER = 3;
-	protected static final int LESS = 4;
-	protected static final int PRESENT = 5;
-	protected static final int SUBSTRING = 6;
-	protected static final int AND = 7;
-	protected static final int OR = 8;
-	protected static final int NOT = 9;
+	private final int op;
+	private static final int EQUAL = 1;
+	private static final int APPROX = 2;
+	private static final int GREATER = 3;
+	private static final int LESS = 4;
+	private static final int PRESENT = 5;
+	private static final int SUBSTRING = 6;
+	private static final int AND = 7;
+	private static final int OR = 8;
+	private static final int NOT = 9;
 
 	/** filter attribute or null if operation AND, OR or NOT */
-	protected String attr;
+	private final String attr;
 	/** filter operands */
-	protected Object value;
+	private final Object value;
 
 	/* normalized filter string for topLevel Filter object */
 	private transient volatile String filterString;
@@ -360,12 +359,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/* true if root Filter object */
 	private final boolean topLevel;
 
-	protected FilterImpl() {
-		topLevel = false;
-	}
-
-	protected void setFilter(int operation, String attr, Object value) {
-		this.operation = operation;
+	FilterImpl(boolean topLevel, int operation, String attr, Object value) {
+		this.topLevel = topLevel;
+		this.op = operation;
 		this.attr = attr;
 		this.value = value;
 	}
@@ -380,7 +376,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
 	 */
 	protected boolean match0(Dictionary properties) {
-		switch (operation) {
+		switch (op) {
 			case AND : {
 				FilterImpl[] filters = (FilterImpl[]) value;
 				int size = filters.length;
@@ -420,7 +416,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case APPROX : {
 				Object prop = (properties == null) ? null : properties.get(attr);
 
-				return compare(operation, prop, value);
+				return compare(op, prop, value);
 			}
 
 			case PRESENT : {
@@ -496,9 +492,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			if (type.isPrimitive()) {
 				return compare_PrimitiveArray(operation, type, value1, value2);
-			} else {
-				return compare_ObjectArray(operation, (Object[]) value1, value2);
 			}
+			return compare_ObjectArray(operation, (Object[]) value1, value2);
 		}
 
 		if (value1 instanceof Collection) {
@@ -732,12 +727,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					} else /* last substr */{
 						if (substr == null) /* * */{
 							return true;
-						} else /* xxx */{
-							if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-								Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							}
-							return string.endsWith(substr);
 						}
+						/* xxx */
+						if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+							Debug.println("regionMatches(" + pos + "," + substr + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+						return string.endsWith(substr);
 					}
 				}
 
@@ -1248,7 +1243,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		// (objectClass=org.acme.*) NOT OK
 		// (|(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) NOT OK
 		// (&(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) OK but only the first objectClass is returned
-		switch (operation) {
+		switch (op) {
 			case EQUAL :
 				if (attr.equalsIgnoreCase(org.osgi.framework.Constants.OBJECTCLASS) && (value instanceof String))
 					return (String) value;
@@ -1256,7 +1251,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			case AND :
 				FilterImpl[] clauses = (FilterImpl[]) value;
 				for (int i = 0; i < clauses.length; i++)
-					if (clauses[i].operation == EQUAL) {
+					if (clauses[i].op == EQUAL) {
 						String result = clauses[i].getRequiredObjectClass();
 						if (result != null)
 							return result;
@@ -1306,178 +1301,162 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * the complete filter string and builds a tree of Filter
 	 * objects rooted at the parent.
 	 */
-	static class Parser {
-		protected String filterstring;
-		protected char[] filter;
-		protected int pos;
+	private static class Parser {
+		private final String filterstring;
+		private final char[] filterChars;
+		private int pos;
 
-		protected Parser(String filterstring) {
+		Parser(String filterstring) {
 			this.filterstring = filterstring;
-			filter = filterstring.toCharArray();
+			filterChars = filterstring.toCharArray();
 			pos = 0;
 		}
 
-		protected void parse(FilterImpl parent) throws InvalidSyntaxException {
+		FilterImpl parse() throws InvalidSyntaxException {
+			FilterImpl filter;
 			try {
-				parse_filter(parent);
+				filter = parse_filter(true);
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new InvalidSyntaxException(Msg.FILTER_TERMINATED_ABRUBTLY, filterstring);
 			}
 
-			if (pos != filter.length) {
+			if (pos != filterChars.length) {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_TRAILING_CHARACTERS, String.valueOf(pos)), filterstring);
 			}
+			return filter;
 		}
 
-		protected void parse_filter(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_filter(boolean topLevel) throws InvalidSyntaxException {
+			FilterImpl filter;
 			skipWhiteSpace();
 
-			if (filter[pos] != '(') {
+			if (filterChars[pos] != '(') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring);
 			}
 
 			pos++;
 
-			parse_filtercomp(parent);
+			filter = parse_filtercomp(topLevel);
 
 			skipWhiteSpace();
 
-			if (filter[pos] != ')') {
+			if (filterChars[pos] != ')') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_RIGHTPAREN, String.valueOf(pos)), filterstring);
 			}
 
 			pos++;
 
 			skipWhiteSpace();
+
+			return filter;
 		}
 
-		protected void parse_filtercomp(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_filtercomp(boolean topLevel) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
-			char c = filter[pos];
+			char c = filterChars[pos];
 
 			switch (c) {
 				case '&' : {
 					pos++;
-					parse_and(parent);
-					break;
+					return parse_and(topLevel);
 				}
 				case '|' : {
 					pos++;
-					parse_or(parent);
-					break;
+					return parse_or(topLevel);
 				}
 				case '!' : {
 					pos++;
-					parse_not(parent);
-					break;
-				}
-				default : {
-					parse_item(parent);
-					break;
+					return parse_not(topLevel);
 				}
 			}
+			return parse_item(topLevel);
 		}
 
-		protected void parse_and(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_and(boolean topLevel) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
-			if (filter[pos] != '(') {
+			if (filterChars[pos] != '(') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring);
 			}
 
 			ArrayList operands = new ArrayList(10);
 
-			while (filter[pos] == '(') {
-				FilterImpl child = new FilterImpl();
-				parse_filter(child);
+			while (filterChars[pos] == '(') {
+				FilterImpl child = parse_filter(false);
 				operands.add(child);
 			}
 
 			int size = operands.size();
 
-			FilterImpl[] children = new FilterImpl[size];
-
-			operands.toArray(children);
-
-			parent.setFilter(FilterImpl.AND, null, children);
+			return new FilterImpl(topLevel, FilterImpl.AND, null, operands.toArray(new FilterImpl[size]));
 		}
 
-		protected void parse_or(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_or(boolean topLevel) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
-			if (filter[pos] != '(') {
+			if (filterChars[pos] != '(') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring);
 			}
 
 			ArrayList operands = new ArrayList(10);
 
-			while (filter[pos] == '(') {
-				FilterImpl child = new FilterImpl();
-				parse_filter(child);
+			while (filterChars[pos] == '(') {
+				FilterImpl child = parse_filter(false);
 				operands.add(child);
 			}
 
 			int size = operands.size();
 
-			FilterImpl[] children = new FilterImpl[size];
-
-			operands.toArray(children);
-
-			parent.setFilter(FilterImpl.OR, null, children);
+			return new FilterImpl(topLevel, FilterImpl.OR, null, operands.toArray(new FilterImpl[size]));
 		}
 
-		protected void parse_not(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_not(boolean topLevel) throws InvalidSyntaxException {
 			skipWhiteSpace();
 
-			if (filter[pos] != '(') {
+			if (filterChars[pos] != '(') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, String.valueOf(pos)), filterstring);
 			}
 
-			FilterImpl child = new FilterImpl();
-			parse_filter(child);
+			FilterImpl child = parse_filter(false);
 
-			parent.setFilter(FilterImpl.NOT, null, child);
+			return new FilterImpl(topLevel, FilterImpl.NOT, null, child);
 		}
 
-		protected void parse_item(FilterImpl parent) throws InvalidSyntaxException {
+		private FilterImpl parse_item(boolean topLevel) throws InvalidSyntaxException {
 			String attr = parse_attr();
 
 			skipWhiteSpace();
 
-			switch (filter[pos]) {
+			switch (filterChars[pos]) {
 				case '~' : {
-					if (filter[pos + 1] == '=') {
+					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						parent.setFilter(FilterImpl.APPROX, attr, parse_value());
-						return;
+						return new FilterImpl(topLevel, FilterImpl.APPROX, attr, parse_value());
 					}
 					break;
 				}
 				case '>' : {
-					if (filter[pos + 1] == '=') {
+					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						parent.setFilter(FilterImpl.GREATER, attr, parse_value());
-						return;
+						return new FilterImpl(topLevel, FilterImpl.GREATER, attr, parse_value());
 					}
 					break;
 				}
 				case '<' : {
-					if (filter[pos + 1] == '=') {
+					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						parent.setFilter(FilterImpl.LESS, attr, parse_value());
-						return;
+						return new FilterImpl(topLevel, FilterImpl.LESS, attr, parse_value());
 					}
 					break;
 				}
 				case '=' : {
-					if (filter[pos + 1] == '*') {
+					if (filterChars[pos + 1] == '*') {
 						int oldpos = pos;
 						pos += 2;
 						skipWhiteSpace();
-						if (filter[pos] == ')') {
-							parent.setFilter(FilterImpl.PRESENT, attr, null);
-							return; /* present */
+						if (filterChars[pos] == ')') {
+							return new FilterImpl(topLevel, FilterImpl.PRESENT, attr, null);
 						}
 						pos = oldpos;
 					}
@@ -1486,25 +1465,22 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					Object string = parse_substring();
 
 					if (string instanceof String) {
-						parent.setFilter(FilterImpl.EQUAL, attr, string);
-					} else {
-						parent.setFilter(FilterImpl.SUBSTRING, attr, string);
+						return new FilterImpl(topLevel, FilterImpl.EQUAL, attr, string);
 					}
-
-					return;
+					return new FilterImpl(topLevel, FilterImpl.SUBSTRING, attr, string);
 				}
 			}
 
 			throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_INVALID_OPERATOR, String.valueOf(pos)), filterstring);
 		}
 
-		protected String parse_attr() throws InvalidSyntaxException {
+		private String parse_attr() throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			int begin = pos;
 			int end = pos;
 
-			char c = filter[pos];
+			char c = filterChars[pos];
 
 			while ("~<>=()".indexOf(c) == -1) { //$NON-NLS-1$
 				pos++;
@@ -1513,7 +1489,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					end = pos;
 				}
 
-				c = filter[pos];
+				c = filterChars[pos];
 			}
 
 			int length = end - begin;
@@ -1522,14 +1498,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_ATTR, String.valueOf(pos)), filterstring);
 			}
 
-			return new String(filter, begin, length);
+			return new String(filterChars, begin, length);
 		}
 
-		protected String parse_value() throws InvalidSyntaxException {
-			StringBuffer sb = new StringBuffer(filter.length - pos);
+		private String parse_value() throws InvalidSyntaxException {
+			StringBuffer sb = new StringBuffer(filterChars.length - pos);
 
 			parseloop: while (true) {
-				char c = filter[pos];
+				char c = filterChars[pos];
 
 				switch (c) {
 					case ')' : {
@@ -1542,7 +1518,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 					case '\\' : {
 						pos++;
-						c = filter[pos];
+						c = filterChars[pos];
 						/* fall through into default */
 					}
 
@@ -1561,13 +1537,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return sb.toString();
 		}
 
-		protected Object parse_substring() throws InvalidSyntaxException {
-			StringBuffer sb = new StringBuffer(filter.length - pos);
+		private Object parse_substring() throws InvalidSyntaxException {
+			StringBuffer sb = new StringBuffer(filterChars.length - pos);
 
 			ArrayList operands = new ArrayList(10);
 
 			parseloop: while (true) {
-				char c = filter[pos];
+				char c = filterChars[pos];
 
 				switch (c) {
 					case ')' : {
@@ -1597,7 +1573,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 					case '\\' : {
 						pos++;
-						c = filter[pos];
+						c = filterChars[pos];
 						/* fall through into default */
 					}
 
@@ -1630,19 +1606,19 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return strings;
 		}
 
-		protected void skipWhiteSpace() {
-			int length = filter.length;
+		private void skipWhiteSpace() {
+			int length = filterChars.length;
 
-			while ((pos < length) && Character.isWhitespace(filter[pos])) {
+			while ((pos < length) && Character.isWhitespace(filterChars[pos])) {
 				pos++;
 			}
 		}
 	}
 
-	static class SetAccessibleAction implements PrivilegedAction {
+	private static class SetAccessibleAction implements PrivilegedAction {
 		private final AccessibleObject accessible;
 
-		public SetAccessibleAction(AccessibleObject accessible) {
+		SetAccessibleAction(AccessibleObject accessible) {
 			this.accessible = accessible;
 		}
 

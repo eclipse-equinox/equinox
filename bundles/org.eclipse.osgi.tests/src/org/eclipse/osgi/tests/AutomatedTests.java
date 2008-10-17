@@ -13,6 +13,7 @@ package org.eclipse.osgi.tests;
 import junit.framework.*;
 import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
+import org.eclipse.osgi.tests.filter.FilterTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
 
@@ -48,6 +49,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(org.eclipse.osgi.tests.util.AllTests.suite());
 		suite.addTest(BundleTests.suite());
 		suite.addTest(EventManagerTests.suite());
+		suite.addTest(FilterTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
 		return suite;
 	}

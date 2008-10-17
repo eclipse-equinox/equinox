@@ -963,7 +963,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public Filter createFilter(String filter) throws InvalidSyntaxException {
 		checkValid();
 
-		return new FilterImpl(filter);
+		return FilterImpl.newInstance(filter);
 	}
 
 	/**

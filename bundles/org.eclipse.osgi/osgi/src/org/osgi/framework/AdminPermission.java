@@ -1,5 +1,5 @@
 /*
- * $Date: 2008/08/18 20:17:35 $
+ * $Date: 2008/09/19 03:23:54 $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -74,7 +74,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -842,7 +842,7 @@ public final class AdminPermission extends BasicPermission {
 					filter = filterBuf.toString();
 				} //end if (pos != -1)
 
-				filterImpl = new FilterImpl(filter);
+				filterImpl = FilterImpl.newInstance(filter);
 			} catch (InvalidSyntaxException e) {
 				//we will return null
 			}

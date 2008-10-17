@@ -1,5 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
+ * $Date: 2008/07/31 22:25:18 $
  * 
  * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
  * 
@@ -29,7 +29,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class FrameworkUtil {
 	/*
@@ -42,7 +42,7 @@ public class FrameworkUtil {
 	 * FrameworkUtil objects may not be constructed. 
 	 */
 	private FrameworkUtil() {}
-	
+
 	/**
 	 * Creates a <code>Filter</code> object. This <code>Filter</code> object
 	 * may be used to match a <code>ServiceReference</code> object or a
@@ -60,8 +60,7 @@ public class FrameworkUtil {
 	 * 
 	 * @see Filter
 	 */
-	public static Filter createFilter(String filter)
-			throws InvalidSyntaxException {
-		return new FilterImpl(filter);
+	public static Filter createFilter(String filter) throws InvalidSyntaxException {
+		return FilterImpl.newInstance(filter);
 	}
 }

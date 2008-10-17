@@ -1465,7 +1465,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		if (filePattern != null)
 			try {
 				// create a file pattern filter with 'filename' as the key
-				patternFilter = new FilterImpl("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				patternFilter = FilterImpl.newInstance("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a single hashtable to be shared during the recursive search
 				patternProps = new Hashtable(2);
 			} catch (InvalidSyntaxException e) {
