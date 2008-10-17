@@ -11,8 +11,7 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
-import java.util.ArrayList;
-import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
+import java.util.*;
 import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
 
 /**
@@ -24,18 +23,17 @@ import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
  * using asynchronous delivery. No delivery order is guaranteed for synchronous
  * delivery to avoid any potential deadly embraces.
  *
- * <p>ListenerQueue objects are created as necesssary to build a set of listeners
+ * <p>ListenerQueue objects are created as necessary to build a set of listeners
  * that should receive a specific event or events. Once the set is created, the event
  * can then be synchronously or asynchronously delivered to the set of
  * listeners. After the event has been dispatched for delivery, the
  * ListenerQueue object should be discarded as it is likely the list of listeners is stale.
  * A new ListenerQueue object should be created when it is time to deliver 
  * another event.  The memory cost of a ListenerQueue object is
- * low since the ListenerQueue object shares the array of listeners with the EventListeners 
+ * low since the ListenerQueue object shares the array of listeners with the CopyOnWriteIdentityMap 
  * object which are queued.
- * EventListeners uses copy-on-write semantics for managing the array and will copy the array
- * before changing it once the array has been shared with a ListenerQueue. This minimizes 
- * object creation while guaranteeing the snapshot list is never modified once created.
+ * CopyOnWriteIdentityMap uses copy-on-write semantics for managing the array and will copy the array
+ * before changing. This guarantees the snapshot list is never modified once created.
  * @since 3.1
  */
 public class ListenerQueue {
@@ -46,7 +44,7 @@ public class ListenerQueue {
 	/**
 	 * A list of listener lists.
 	 */
-	private final ArrayList queue;
+	private final Map /*<Set<Map.Entry<Object,Object>>,EventDispatcher>*/queue;
 
 	/**
 	 * Once the listener queue has been used to dispatch an event, 
@@ -56,7 +54,7 @@ public class ListenerQueue {
 	private boolean readOnly;
 
 	/**
-	 * ListenerQueue constructor. This method creates an empty snapshop list.
+	 * ListenerQueue constructor. This method creates an empty snapshot list.
 	 *
 	 * @param manager The EventManager this queue is associated with.
 	 * @throws IllegalArgumentException If manager is null.
@@ -67,7 +65,7 @@ public class ListenerQueue {
 		}
 
 		this.manager = manager;
-		queue = new ArrayList();
+		queue = new CopyOnWriteIdentityMap();
 		readOnly = false;
 	}
 
@@ -82,18 +80,32 @@ public class ListenerQueue {
 	 * @param dispatcher An EventDispatcher object to use when dispatching an event
 	 * to the listeners on the specified EventListeners.
 	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
+	 * @deprecated As of 3.5. Replaced by {@link #queueListeners(Set, EventDispatcher)}.
 	 */
-	public synchronized void queueListeners(EventListeners listeners, EventDispatcher dispatcher) {
+	public void queueListeners(EventListeners listeners, EventDispatcher dispatcher) {
+		queueListeners(listeners.getCopyOnWriteIdentityMap().entrySet(), dispatcher);
+	}
+
+	/**
+	 * Add a listener list to the snapshot list. This method can be called multiple times, prior to
+	 * calling one of the dispatchEvent methods, to build the set of listeners for the
+	 * delivery of a specific event. The current list of listeners in the specified EventListeners
+	 * object is added to the snapshot list.
+	 *
+	 * @param listeners A Set of Map.Entries to add to the queue. This is typically the entrySet
+	 * from a CopyOnWriteIdentityMap object.
+	 * @param dispatcher An EventDispatcher object to use when dispatching an event
+	 * to the listeners on the specified EventListeners.
+	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
+	 * @since 3.5
+	 */
+	public synchronized void queueListeners(Set/*<Map.Entry<Object,Object>>*/listeners, EventDispatcher dispatcher) {
 		if (readOnly) {
 			throw new IllegalStateException();
 		}
 
-		if (listeners != null) {
-			ListElement[] list = listeners.getListeners();
-
-			if (list.length > 0) {
-				queue.add(new EventListeners.ListElement(list, dispatcher));
-			}
+		if (listeners.size() != 0) {
+			queue.put(listeners, dispatcher); // enqueue the list and its dispatcher
 		}
 	}
 
@@ -111,10 +123,10 @@ public class ListenerQueue {
 		}
 		EventThread eventThread = manager.getEventThread();
 		synchronized (eventThread) { /* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
-			int size = queue.size();
-			for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
-				ListElement list = (ListElement) queue.get(i);
-				eventThread.postEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
+			Iterator iter = queue.entrySet().iterator();
+			while (iter.hasNext()) { /* iterate over the list of listener lists */
+				Map.Entry entry = (Map.Entry) iter.next();
+				eventThread.postEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
 			}
 		}
 	}
@@ -135,10 +147,10 @@ public class ListenerQueue {
 		}
 		// We can't guarantee any delivery order for synchronous events.
 		// Attempts to do so result in deadly embraces.
-		int size = queue.size();
-		for (int i = 0; i < size; i++) { /* iterate over the list of listener lists */
-			ListElement list = (ListElement) queue.get(i);
-			EventManager.dispatchEvent((ListElement[]) list.primary, (EventDispatcher) list.companion, eventAction, eventObject);
+		Iterator iter = queue.entrySet().iterator();
+		while (iter.hasNext()) { /* iterate over the list of listener lists */
+			Map.Entry entry = (Map.Entry) iter.next();
+			EventManager.dispatchEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
 		}
 	}
 }

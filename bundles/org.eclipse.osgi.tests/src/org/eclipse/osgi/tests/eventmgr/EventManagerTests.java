@@ -12,14 +12,14 @@ package org.eclipse.osgi.tests.eventmgr;
 
 import java.util.*;
 import junit.framework.*;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
+import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
 
 public class EventManagerTests extends TestCase {
 	public static Test suite() {
 		return new TestSuite(EventManagerTests.class);
 	}
 
-	public void testEventListeners() {
+	public void testCopyOnWriteIdentityMap() {
 		Object l1 = new Object();
 		Object l2 = new Object();
 		Object l3 = new Object();
@@ -29,7 +29,7 @@ public class EventManagerTests extends TestCase {
 		Object c3 = new Object();
 		Object c4 = new Object();
 
-		EventListeners el1 = new EventListeners();
+		CopyOnWriteIdentityMap el1 = new CopyOnWriteIdentityMap();
 
 		assertTrue("not empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 0, el1.size()); //$NON-NLS-1$
@@ -50,78 +50,78 @@ public class EventManagerTests extends TestCase {
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el1.size()); //$NON-NLS-1$
 
-		assertEquals("wrong companion", c1, el1.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el1.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el1.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el1.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el1.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el1.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el1.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el1.get(l4)); //$NON-NLS-1$
 
-		EventListeners el2 = new EventListeners(el1);
+		CopyOnWriteIdentityMap el2 = new CopyOnWriteIdentityMap(el1);
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el2.size()); //$NON-NLS-1$
 
-		assertEquals("wrong companion", c1, el2.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el2.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el2.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el2.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el2.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el2.get(l4)); //$NON-NLS-1$
 
-		assertEquals("wrong companion", c2, el1.remove(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el1.remove(l2)); //$NON-NLS-1$
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 3, el1.size()); //$NON-NLS-1$
 		assertEquals("not null", null, el1.remove(l2)); //$NON-NLS-1$
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 3, el1.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el1.remove(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el1.remove(l4)); //$NON-NLS-1$
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 2, el1.size()); //$NON-NLS-1$
 		assertEquals("not null", null, el1.remove(l4)); //$NON-NLS-1$
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 2, el1.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el1.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el1.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el1.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el1.get(l3)); //$NON-NLS-1$
 
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el2.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el2.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el2.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el2.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el2.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el2.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el2.get(l4)); //$NON-NLS-1$
 
-		assertEquals("wrong companion", c1, el2.remove(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el2.remove(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.remove(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el2.remove(l3)); //$NON-NLS-1$
 
 		el1.putAll(el2);
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el1.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el1.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el1.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el1.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el1.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el1.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el1.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el1.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el1.get(l4)); //$NON-NLS-1$
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 2, el2.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el2.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el2.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el2.get(l4)); //$NON-NLS-1$
 
 		el2.putAll(el1);
 		assertFalse("empty", el1.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el1.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el1.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el1.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el1.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el1.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el1.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el1.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el1.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el1.get(l4)); //$NON-NLS-1$
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 4, el2.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el2.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c2, el2.get(l2)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el2.get(l3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c2, el2.get(l2)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el2.get(l3)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el2.get(l4)); //$NON-NLS-1$
 
 		el2.clear();
 		assertTrue("not empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 0, el2.size()); //$NON-NLS-1$
 
 		assertNull("non null", el2.put(l1, c1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el2.put(l1, c3)); //$NON-NLS-1$
-		assertEquals("wrong companion", c3, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.put(l1, c3)); //$NON-NLS-1$
+		assertEquals("wrong value", c3, el2.get(l1)); //$NON-NLS-1$
 		assertTrue("missed key", el2.containsKey(l1)); //$NON-NLS-1$
 		assertTrue("missed value", el2.containsValue(c3)); //$NON-NLS-1$
 		assertFalse("invalid key", el2.containsKey(l2)); //$NON-NLS-1$
@@ -134,8 +134,8 @@ public class EventManagerTests extends TestCase {
 		el2.putAll(source);
 		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
 		assertEquals("wrong size", 2, el2.size()); //$NON-NLS-1$
-		assertEquals("wrong companion", c1, el2.get(l1)); //$NON-NLS-1$
-		assertEquals("wrong companion", c4, el2.get(l4)); //$NON-NLS-1$
+		assertEquals("wrong value", c1, el2.get(l1)); //$NON-NLS-1$
+		assertEquals("wrong value", c4, el2.get(l4)); //$NON-NLS-1$
 
 		el2.clear();
 		Set k1 = el1.keySet();
@@ -475,6 +475,15 @@ public class EventManagerTests extends TestCase {
 
 		assertTrue("array unequal", Arrays.equals(new Map.Entry[] {me1, me3, me2, me4}, e1.toArray())); //$NON-NLS-1$
 		assertTrue("array unequal", Arrays.equals(new Map.Entry[] {me1, me3, me2, me4}, e1.toArray(new Map.Entry[4]))); //$NON-NLS-1$
+
+		el2.clear();
+		el2.putAll(new Object[] {l1, l3});
+		assertFalse("empty", el2.isEmpty()); //$NON-NLS-1$
+		assertEquals("wrong size", 2, el2.size()); //$NON-NLS-1$
+		assertTrue("missed key", el2.containsKey(l1)); //$NON-NLS-1$
+		assertTrue("missed key", el2.containsKey(l3)); //$NON-NLS-1$
+		assertNull("value not null", el2.get(l1)); //$NON-NLS-1$
+		assertNull("value not null", el2.get(l3)); //$NON-NLS-1$
 
 	}
 }

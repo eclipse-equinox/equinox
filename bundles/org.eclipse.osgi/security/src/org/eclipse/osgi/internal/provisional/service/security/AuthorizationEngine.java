@@ -50,11 +50,10 @@ public abstract class AuthorizationEngine {
 		Object[] services = listenerTracker.getServices();
 		if (services == null)
 			return;
-		EventListeners listeners = new EventListeners();
-		for (int i = 0; i < services.length; i++)
-			listeners.put(services[i], null);
+		CopyOnWriteIdentityMap listeners = new CopyOnWriteIdentityMap();
+		listeners.putAll(services);
 		ListenerQueue queue = new ListenerQueue(manager);
-		queue.queueListeners(listeners, dispatcher);
+		queue.queueListeners(listeners.entrySet(), dispatcher);
 		queue.dispatchEventSynchronous(0, event);
 	}
 

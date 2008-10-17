@@ -12,6 +12,7 @@
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
 import java.io.IOException;
+import java.util.Map;
 import org.eclipse.osgi.framework.eventmgr.*;
 
 /**
@@ -44,7 +45,7 @@ public class MRUBundleFileList implements EventDispatcher {
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
 	final private EventManager bundleFileCloserManager;
-	final private EventListeners bundleFileCloser;
+	final private Map bundleFileCloser;
 	// the current number of open bundle files
 	private int numOpen = 0;
 	// the current use stamp
@@ -61,7 +62,7 @@ public class MRUBundleFileList implements EventDispatcher {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
 			this.bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
-			this.bundleFileCloser = new EventListeners();
+			this.bundleFileCloser = new CopyOnWriteIdentityMap();
 			this.bundleFileCloser.put(this, this);
 		} else {
 			this.bundleFileList = null;
@@ -186,7 +187,7 @@ public class MRUBundleFileList implements EventDispatcher {
 		/* queue to hold set of listeners */
 		ListenerQueue queue = new ListenerQueue(bundleFileCloserManager);
 		/* add bundle file closer to the queue */
-		queue.queueListeners(bundleFileCloser, this);
+		queue.queueListeners(bundleFileCloser.entrySet(), this);
 		/* dispatch event to set of listeners */
 		queue.dispatchEventAsynchronous(0, toRemove);
 	}

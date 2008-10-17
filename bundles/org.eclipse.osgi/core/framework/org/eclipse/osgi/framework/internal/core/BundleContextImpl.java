@@ -17,8 +17,8 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.event.BatchBundleListener;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
-import org.eclipse.osgi.framework.eventmgr.EventListeners;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.ServiceReferenceImpl;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
@@ -51,13 +51,13 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	private HashMap/*<ServiceRegistrationImpl, ServiceUse>*/servicesInUse;
 
 	/** Listener list for bundle's BundleListeners */
-	protected EventListeners bundleEvent;
+	protected Map bundleEvent;
 
 	/** Listener list for bundle's SynchronousBundleListeners */
-	protected EventListeners bundleEventSync;
+	protected Map bundleEventSync;
 
 	/** Listener list for bundle's FrameworkListeners */
-	protected EventListeners frameworkEvent;
+	protected Map frameworkEvent;
 
 	/** The current instantiation of the activator. */
 	protected BundleActivator activator;
@@ -329,7 +329,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			synchronized (framework.bundleEventSync) {
 				checkValid();
 				if (bundleEventSync == null) {
-					bundleEventSync = new EventListeners();
+					bundleEventSync = new CopyOnWriteIdentityMap();
 					framework.bundleEventSync.put(this, this);
 				}
 
@@ -339,7 +339,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			synchronized (framework.bundleEvent) {
 				checkValid();
 				if (bundleEvent == null) {
-					bundleEvent = new EventListeners();
+					bundleEvent = new CopyOnWriteIdentityMap();
 					framework.bundleEvent.put(this, this);
 				}
 
@@ -410,7 +410,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		synchronized (framework.frameworkEvent) {
 			checkValid();
 			if (frameworkEvent == null) {
-				frameworkEvent = new EventListeners();
+				frameworkEvent = new CopyOnWriteIdentityMap();
 				framework.frameworkEvent.put(this, this);
 			}
 

@@ -36,7 +36,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 
 	protected static Framework framework;
 	protected static EventManager eventManager;
-	protected static EventListeners startLevelListeners;
+	protected static Map startLevelListeners;
 
 	/** The initial bundle start level for newly installed bundles */
 	protected int initialBundleStartLevel = 1;
@@ -60,7 +60,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 
 		// create an event manager and a start level listener
 		eventManager = new EventManager("Start Level Event Dispatcher"); //$NON-NLS-1$
-		startLevelListeners = new EventListeners();
+		startLevelListeners = new CopyOnWriteIdentityMap();
 		startLevelListeners.put(this, this);
 	}
 
@@ -402,7 +402,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		ListenerQueue queue = new ListenerQueue(eventManager);
 
 		/* add set of StartLevelListeners to queue */
-		queue.queueListeners(startLevelListeners, this);
+		queue.queueListeners(startLevelListeners.entrySet(), this);
 
 		/* dispatch event to set of listeners */
 		queue.dispatchEventAsynchronous(sle.getType(), sle);

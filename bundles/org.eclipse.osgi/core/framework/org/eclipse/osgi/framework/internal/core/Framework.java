@@ -83,14 +83,14 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * installed in the Framework.
 	 */
 	/** List of BundleContexts for bundle's BundleListeners. */
-	protected EventListeners bundleEvent;
+	protected Map bundleEvent;
 	protected static final int BUNDLEEVENT = 1;
 	/** List of BundleContexts for bundle's SynchronousBundleListeners. */
-	protected EventListeners bundleEventSync;
+	protected Map bundleEventSync;
 	protected static final int BUNDLEEVENTSYNC = 2;
 	/* SERVICEEVENT(3) is now handled by ServiceRegistry */
 	/** List of BundleContexts for bundle's FrameworkListeners. */
-	protected EventListeners frameworkEvent;
+	protected Map frameworkEvent;
 	protected static final int FRAMEWORKEVENT = 4;
 	protected static final int BATCHEVENT_BEGIN = Integer.MIN_VALUE + 1;
 	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
@@ -203,9 +203,9 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
 		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
-		bundleEvent = new EventListeners();
-		bundleEventSync = new EventListeners();
-		frameworkEvent = new EventListeners();
+		bundleEvent = new CopyOnWriteIdentityMap();
+		bundleEventSync = new CopyOnWriteIdentityMap();
+		frameworkEvent = new CopyOnWriteIdentityMap();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* create the service registry */
@@ -1293,7 +1293,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		/* synchronize while building the listener list */
 		synchronized (frameworkEvent) {
 			/* add set of BundleContexts w/ listeners to queue */
-			contexts.queueListeners(frameworkEvent, this);
+			contexts.queueListeners(frameworkEvent.entrySet(), this);
 			/* synchronously dispatch to populate listeners queue */
 			contexts.dispatchEventSynchronous(FRAMEWORKEVENT, listeners);
 		}
@@ -1341,7 +1341,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			/* synchronize while building the listener list */
 			synchronized (bundleEventSync) {
 				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEventSync, this);
+				contexts.queueListeners(bundleEventSync.entrySet(), this);
 				/* synchronously dispatch to populate listeners queue */
 				contexts.dispatchEventSynchronous(BUNDLEEVENTSYNC, listenersSync);
 			}
@@ -1356,7 +1356,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			/* synchronize while building the listener list */
 			synchronized (bundleEvent) {
 				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEvent, this);
+				contexts.queueListeners(bundleEvent.entrySet(), this);
 				/* synchronously dispatch to populate listeners queue */
 				contexts.dispatchEventSynchronous(BUNDLEEVENT, listenersAsync);
 			}
@@ -1394,15 +1394,15 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				ListenerQueue queue = (ListenerQueue) object;
 				switch (action) {
 					case BUNDLEEVENT : {
-						queue.queueListeners(context.bundleEvent, context);
+						queue.queueListeners(context.bundleEvent.entrySet(), context);
 						break;
 					}
 					case BUNDLEEVENTSYNC : {
-						queue.queueListeners(context.bundleEventSync, context);
+						queue.queueListeners(context.bundleEventSync.entrySet(), context);
 						break;
 					}
 					case FRAMEWORKEVENT : {
-						queue.queueListeners(context.frameworkEvent, context);
+						queue.queueListeners(context.frameworkEvent.entrySet(), context);
 						break;
 					}
 					default : {

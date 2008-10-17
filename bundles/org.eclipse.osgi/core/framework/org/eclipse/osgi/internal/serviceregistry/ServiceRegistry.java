@@ -61,7 +61,7 @@ public class ServiceRegistry {
 	 * Map&lt;BundleContextImpl,EventListeners&gt;.
 	 */
 	/* @GuardedBy("serviceEventListeners") */
-	private final Map/*<BundleContextImpl,EventListeners>*/serviceEventListeners;
+	private final Map/*<BundleContextImpl,CopyOnWriteIdentityMap>*/serviceEventListeners;
 
 	/** initial capacity of the main data structure */
 	private static final int initialCapacity = 50;
@@ -657,9 +657,9 @@ public class ServiceRegistry {
 		ServiceListener filteredListener = new FilteredServiceListener(context, listener, filter);
 
 		synchronized (serviceEventListeners) {
-			EventListeners listeners = (EventListeners) serviceEventListeners.get(context);
+			Map listeners = (Map) serviceEventListeners.get(context);
 			if (listeners == null) {
-				listeners = new EventListeners();
+				listeners = new CopyOnWriteIdentityMap();
 				serviceEventListeners.put(context, listeners);
 			}
 			listeners.put(listener, filteredListener);
@@ -680,7 +680,7 @@ public class ServiceRegistry {
 		}
 
 		synchronized (serviceEventListeners) {
-			EventListeners listeners = (EventListeners) serviceEventListeners.get(context);
+			Map listeners = (Map) serviceEventListeners.get(context);
 			if (listeners != null) {
 				listeners.remove(listener);
 			}
@@ -698,7 +698,7 @@ public class ServiceRegistry {
 		synchronized (serviceEventListeners) {
 			serviceEventListeners.remove(context);
 		}
-			//TODO notify ListenerHooks of all the removed ServiceListeners for the specified bundle
+		//TODO notify ListenerHooks of all the removed ServiceListeners for the specified bundle
 	}
 
 	/**
@@ -723,16 +723,16 @@ public class ServiceRegistry {
 
 	void publishServiceEventPrivileged(final ServiceEvent event) {
 		/* Build the listener snapshot */
-		Map /*<BundleContextImpl,EventListeners>*/listenerSnapshot;
+		Map /*<BundleContextImpl,Set<Map.Entry<Object,Object>>>*/listenerSnapshot;
 		synchronized (serviceEventListeners) {
 			listenerSnapshot = new HashMap(serviceEventListeners.size());
 			Iterator iter = serviceEventListeners.entrySet().iterator();
 			while (iter.hasNext()) {
 				Map.Entry entry = (Map.Entry) iter.next();
 				BundleContextImpl context = (BundleContextImpl) entry.getKey();
-				EventListeners listeners = (EventListeners) entry.getValue();
+				Map listeners = (Map) entry.getValue();
 				if (!listeners.isEmpty()) {
-					listenerSnapshot.put(context, new EventListeners(listeners));
+					listenerSnapshot.put(context, listeners.entrySet());
 				}
 			}
 		}
@@ -754,7 +754,7 @@ public class ServiceRegistry {
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			EventDispatcher dispatcher = (BundleContextImpl) entry.getKey();
-			EventListeners listeners = (EventListeners) entry.getValue();
+			Set listeners = (Set) entry.getValue();
 			queue.queueListeners(listeners, dispatcher);
 		}
 		queue.dispatchEventSynchronous(SERVICEEVENT, event);

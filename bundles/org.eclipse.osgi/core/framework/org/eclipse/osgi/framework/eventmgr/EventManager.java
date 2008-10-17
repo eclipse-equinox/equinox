@@ -11,14 +11,14 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
-import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
+import java.util.*;
 
 /**
  * This class is the central class for the Event Manager. Each
  * program that wishes to use the Event Manager should construct
  * an EventManager object and use that object to construct
- * ListenerQueue for dispatching events. EventListeners objects
- * should be used to manage listener lists.
+ * ListenerQueue for dispatching events. CopyOnWriteIdentityMap objects
+ * must be used to manage listener lists.
  *
  * <p>This example uses the fictitious SomeEvent class and shows how to use this package 
  * to deliver a SomeEvent to a set of SomeEventListeners.  
@@ -26,37 +26,37 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  *
  * 	// Create an EventManager with a name for an asynchronous event dispatch thread
  * 	EventManager eventManager = new EventManager("SomeEvent Async Event Dispatcher Thread");
- * 	// Create an EventListeners to hold the list of SomeEventListeners
- *		EventListeners eventListeners = new EventListeners();
+ * 	// Create a CopyOnWriteIdentityMap to hold the list of SomeEventListeners
+ *	Map eventListeners = new CopyOnWriteIdentityMap();
  *
- *		// Add a SomeEventListener to the listener list
- *	    eventListeners.addListener(someEventListener, null);
+ *	// Add a SomeEventListener to the listener list
+ *	eventListeners.put(someEventListener, null);
  *
- *		// Asynchronously deliver a SomeEvent to registered SomeEventListeners
- *		// Create the listener queue for this event delivery
- *		ListenerQueue listenerQueue = new ListenerQueue(eventManager);
- *		// Add the listeners to the queue and associate them with the event dispatcher
- *		listenerQueue.queueListeners(eventListeners, new EventDispatcher() {
- *	        public void dispatchEvent(Object eventListener, Object listenerObject, 
+ *	// Asynchronously deliver a SomeEvent to registered SomeEventListeners
+ *	// Create the listener queue for this event delivery
+ *	ListenerQueue listenerQueue = new ListenerQueue(eventManager);
+ *	// Add the listeners to the queue and associate them with the event dispatcher
+ *	listenerQueue.queueListeners(eventListeners.entrySet(), new EventDispatcher() {
+ *		public void dispatchEvent(Object eventListener, Object listenerObject, 
  *                                    int eventAction, Object eventObject) {
- * 				try {
- *					(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
- * 				} catch (Throwable t) {
- * 					// properly log/handle any Throwable thrown by the listener
- * 				}
- *			}
- *		});
- *		// Deliver the event to the listeners. 
- *		listenerQueue.dispatchEventAsynchronous(0, new SomeEvent());
+ * 			try {
+ *				(SomeEventListener)eventListener.someEventOccured((SomeEvent)eventObject);
+ * 			} catch (Throwable t) {
+ * 				// properly log/handle any Throwable thrown by the listener
+ * 			}
+ *		}
+ *	});
+ *	// Deliver the event to the listeners. 
+ *	listenerQueue.dispatchEventAsynchronous(0, new SomeEvent());
  *		
- *		// Remove the listener from the listener list
- *	    eventListeners.removeListener(someEventListener);
+ *	// Remove the listener from the listener list
+ *	eventListeners.remove(someEventListener);
  *
- *		// Close EventManager to clean when done to terminate async event dispatch thread.
- *		// Note that closing the event manager while asynchronously delivering events 
- *		// may cause some events to not be delivered before the async event dispatch 
- *		// thread terminates
- *		eventManager.close();
+ *	// Close EventManager to clean when done to terminate async event dispatch thread.
+ *	// Note that closing the event manager while asynchronously delivering events 
+ *	// may cause some events to not be delivered before the async event dispatch 
+ *	// thread terminates
+ *	eventManager.close();
  * </pre>
  * 
  * <p>At first glance, this package may seem more complicated than necessary
@@ -66,9 +66,9 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * The ListenerQueue class is used to build a snap shot of the listeners prior to beginning
  * event dispatch. 
  * 
- * The OSGi framework uses a 2 level listener list (EventListeners) for each listener type (4 types). 
- * Level one is managed by the framework and contains the list of BundleContexts which have 
- * registered a listener. Level 2 is managed by each BundleContext for the listeners in that 
+ * The OSGi framework uses a 2 level listener list for each listener type (4 types). 
+ * Level one is managed per framework instance and contains the list of BundleContexts which have 
+ * registered a listener. Level 2 is managed per BundleContext for the listeners in that 
  * context. This allows all the listeners of a bundle to be easily and atomically removed from 
  * the level one list. To use a "flat" list for all bundles would require the list to know which 
  * bundle registered a listener object so that the list could be traversed when stopping a bundle 
@@ -77,10 +77,8 @@ import org.eclipse.osgi.framework.eventmgr.EventListeners.ListElement;
  * When an event is fired, a snapshot list (ListenerQueue) must be made of the current listeners before delivery 
  * is attempted. The snapshot list is necessary to allow the listener list to be modified while the 
  * event is being delivered to the snapshot list. The memory cost of the snapshot list is
- * low since the ListenerQueue object shares the array of listeners with the EventListeners object.
- * EventListeners uses copy-on-write semantics for managing the array and will copy the array
- * before changing it. This minimizes 
- * object creation while guaranteeing the snapshot list is never modified once created.
+ * low since the ListenerQueue object uses the copy-on-write semantics 
+ * of the CopyOnWriteIdentityMap. This guarantees the snapshot list is never modified once created.
  * 
  * The OSGi framework also uses a 2 level dispatch technique (EventDispatcher).
  * Level one dispatch is used by the framework to add the level 2 listener list of each 
@@ -204,8 +202,7 @@ public class EventManager {
 	 * on the next item on the list.
 	 * This method is package private.
 	 *
-	 * @param listeners A null terminated array of ListElements with each element containing the primary and 
-	 * companion object for a listener. This array must not be modified.
+	 * @param listeners A Set of entries from a CopyOnWriteIdentityMap map.
 	 * @param dispatcher Call back object which is called to complete the delivery of
 	 * the event.
 	 * @param eventAction This value was passed by the event source and
@@ -213,17 +210,17 @@ public class EventManager {
 	 * @param eventObject This object was created by the event source and
 	 * is passed to this method. This is passed on to the call back object.
 	 */
-	static void dispatchEvent(ListElement[] listeners, EventDispatcher dispatcher, int eventAction, Object eventObject) {
-		int size = listeners.length;
-		for (int i = 0; i < size; i++) { /* iterate over the list of listeners */
-			ListElement listener = listeners[i];
+	static void dispatchEvent(Set/*<Map.Entry<Object,Object>>*/listeners, EventDispatcher dispatcher, int eventAction, Object eventObject) {
+		Iterator iter = listeners.iterator();
+		while (iter.hasNext()) { /* iterate over the list of listeners */
+			Map.Entry listener = (Map.Entry) iter.next();
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
-				dispatcher.dispatchEvent(listener.primary, listener.companion, eventAction, eventObject);
+				dispatcher.dispatchEvent(listener.getKey(), listener.getValue(), eventAction, eventObject);
 			} catch (Throwable t) {
 				/* Consume and ignore any exceptions thrown by the listener */
 				if (DEBUG) {
-					System.out.println("Exception in " + listener.primary); //$NON-NLS-1$
+					System.out.println("Exception in " + listener.getKey()); //$NON-NLS-1$
 					t.printStackTrace();
 				}
 			}
@@ -244,7 +241,7 @@ public class EventManager {
 		 */
 		private static class Queued {
 			/** listener list for this event */
-			final ListElement[] listeners;
+			final Set/*<Map.Entry<Object,Object>>*/listeners;
 			/** dispatcher of this event */
 			final EventDispatcher dispatcher;
 			/** action for this event */
@@ -262,7 +259,7 @@ public class EventManager {
 			 * @param a Action for this event
 			 * @param o Object for this event
 			 */
-			Queued(ListElement[] l, EventDispatcher d, int a, Object o) {
+			Queued(Set/*<Map.Entry<Object,Object>>*/l, EventDispatcher d, int a, Object o) {
 				listeners = l;
 				dispatcher = d;
 				action = a;
@@ -354,7 +351,7 @@ public class EventManager {
 		 * @param a Action for this event
 		 * @param o Object for this event
 		 */
-		synchronized void postEvent(ListElement[] l, EventDispatcher d, int a, Object o) {
+		synchronized void postEvent(Set/*<Map.Entry<Object,Object>>*/l, EventDispatcher d, int a, Object o) {
 			if (!isAlive()) { /* If the thread is not alive, throw an exception */
 				throw new IllegalStateException();
 			}
