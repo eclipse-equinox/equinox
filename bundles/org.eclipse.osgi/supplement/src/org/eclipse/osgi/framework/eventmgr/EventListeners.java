@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
+import java.util.Set;
+
 /**
  * This class manages a list of listeners. 
  * 
@@ -78,10 +80,10 @@ public class EventListeners {
 	}
 
 	/**
-	 * Get the internal CopyOnWriteIdentityMap.
-	 * @return The internal CopyOnWriteIdentityMap.
+	 * Get the entry Set from the internal CopyOnWriteIdentityMap.
+	 * @return The entry Set.
 	 */
-	CopyOnWriteIdentityMap getCopyOnWriteIdentityMap() {
-		return list;
+	Set entrySet() {
+		return list.entrySet();
 	}
 }

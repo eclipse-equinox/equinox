@@ -83,7 +83,7 @@ public class ListenerQueue {
 	 * @deprecated As of 3.5. Replaced by {@link #queueListeners(Set, EventDispatcher)}.
 	 */
 	public void queueListeners(EventListeners listeners, EventDispatcher dispatcher) {
-		queueListeners(listeners.getCopyOnWriteIdentityMap().entrySet(), dispatcher);
+		queueListeners(listeners.entrySet(), dispatcher);
 	}
 
 	/**
