@@ -16,6 +16,7 @@ import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
 import org.eclipse.osgi.tests.filter.FilterTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
+import org.eclipse.osgi.tests.permissions.PermissionTests;
 
 public class AutomatedTests extends TestCase {
 	public final static String PI_OSGI_TESTS = "org.eclipse.osgi.tests"; //$NON-NLS-1$
@@ -50,6 +51,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(BundleTests.suite());
 		suite.addTest(EventManagerTests.suite());
 		suite.addTest(FilterTests.suite());
+		suite.addTest(PermissionTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
 		return suite;
 	}
