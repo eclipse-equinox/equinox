@@ -261,6 +261,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public void addServiceListener(ServiceListener listener, String filter) throws InvalidSyntaxException {
 		checkValid();
 
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
 		framework.getServiceRegistry().addServiceListener(this, listener, filter);
 	}
 
@@ -300,6 +303,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	public void removeServiceListener(ServiceListener listener) {
 		checkValid();
 
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
 		framework.getServiceRegistry().removeServiceListener(this, listener);
 	}
 
@@ -319,6 +325,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public void addBundleListener(BundleListener listener) {
 		checkValid();
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
+
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -363,6 +373,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public void removeBundleListener(BundleListener listener) {
 		checkValid();
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
@@ -401,6 +414,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public void addFrameworkListener(FrameworkListener listener) {
 		checkValid();
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
@@ -433,6 +449,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public void removeFrameworkListener(FrameworkListener listener) {
 		checkValid();
+		if (listener == null) {
+			throw new IllegalArgumentException();
+		}
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$

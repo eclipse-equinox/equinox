@@ -295,7 +295,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			sb.append(')');
 
-			result = sb.toString().intern();
+			result = sb.toString();
 			if (topLevel) /* only hold onto String object at toplevel */{
 				this.filterString = result;
 			}

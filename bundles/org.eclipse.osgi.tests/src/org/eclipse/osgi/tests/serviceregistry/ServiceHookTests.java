@@ -15,8 +15,7 @@ import junit.framework.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.service.FindHook;
-import org.osgi.framework.hooks.service.PublishHook;
+import org.osgi.framework.hooks.service.*;
 
 public class ServiceHookTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -490,6 +489,126 @@ public class ServiceHookTests extends AbstractBundleTests {
 				reg1.unregister();
 			if (sl != null)
 				testContext.removeServiceListener(sl);
+		}
+	}
+
+	public void testListenerHook01() {
+		final String testMethodName = "testListenerHook01"; //$NON-NLS-1$
+		// test the FindHook is called and can remove a reference from the results
+		Runnable runIt = new Runnable() {
+			public void run() {
+				// nothing
+			}
+		};
+		final BundleContext testContext = OSGiTestsActivator.getContext();
+		final Collection result = new ArrayList();
+		final int[] hookCalled = new int[] {0, 0};
+
+		ListenerHook hook1 = new ListenerHook() {
+			public void added(Collection listeners) {
+				synchronized (hookCalled) {
+					hookCalled[0]++;
+				}
+				result.addAll(listeners);
+			}
+
+			public void removed(Collection listeners) {
+				synchronized (hookCalled) {
+					hookCalled[1]++;
+				}
+				result.removeAll(listeners);
+			}
+		};
+
+		Hashtable props = new Hashtable();
+		props.put("name", testMethodName); //$NON-NLS-1$
+		// register listener hook 1
+		props.put(Constants.SERVICE_DESCRIPTION, "listener hook 1"); //$NON-NLS-1$
+		ServiceRegistration regHook = testContext.registerService(ListenerHook.class.getName(), hook1, props);
+
+		try {
+			assertFalse("no service listeners found", result.isEmpty()); //$NON-NLS-1$
+			assertEquals("added not called", 1, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("removed called", 0, hookCalled[1]); //$NON-NLS-1$
+
+			int size = result.size();
+			ServiceListener testSL = new ServiceListener() {
+				public void serviceChanged(ServiceEvent event) {
+					// do nothing
+				}
+			};
+			String filterString1 = "(foo=bar)"; //$NON-NLS-1$
+			testContext.addServiceListener(testSL, filterString1);
+			assertEquals("added not called", 2, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("removed called", 0, hookCalled[1]); //$NON-NLS-1$
+			assertEquals("listener not added", size + 1, result.size()); //$NON-NLS-1$
+			Iterator iter = result.iterator();
+			boolean found = false;
+			while (iter.hasNext()) {
+				ListenerHook.ListenerInfo info = (ListenerHook.ListenerInfo) iter.next();
+				BundleContext c = info.getBundleContext();
+				String f = info.getFilter();
+				if ((c == testContext) && (filterString1.equals(f))) {
+					if (found) {
+						fail("found more than once"); //$NON-NLS-1$
+					}
+					found = true;
+				}
+			}
+			if (!found) {
+				fail("listener not found"); //$NON-NLS-1$
+			}
+
+			String filterString2 = "(bar=foo)"; //$NON-NLS-1$
+			testContext.addServiceListener(testSL, filterString2);
+			assertEquals("added not called", 3, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("removed not called", 1, hookCalled[1]); //$NON-NLS-1$
+			assertEquals("listener not removed and added", size + 1, result.size()); //$NON-NLS-1$
+			iter = result.iterator();
+			found = false;
+			while (iter.hasNext()) {
+				ListenerHook.ListenerInfo info = (ListenerHook.ListenerInfo) iter.next();
+				BundleContext c = info.getBundleContext();
+				String f = info.getFilter();
+				if ((c == testContext) && (filterString2.equals(f))) {
+					if (found) {
+						fail("found more than once"); //$NON-NLS-1$
+					}
+					found = true;
+				}
+				if ((c == testContext) && (filterString1.equals(f))) {
+					fail("first listener not removed"); //$NON-NLS-1$
+				}
+			}
+			if (!found) {
+				fail("listener not found"); //$NON-NLS-1$
+			}
+
+			testContext.removeServiceListener(testSL);
+			assertEquals("added called", 3, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("removed not called", 2, hookCalled[1]); //$NON-NLS-1$
+			assertEquals("listener not removed", size, result.size()); //$NON-NLS-1$
+			iter = result.iterator();
+			while (iter.hasNext()) {
+				ListenerHook.ListenerInfo info = (ListenerHook.ListenerInfo) iter.next();
+				BundleContext c = info.getBundleContext();
+				String f = info.getFilter();
+				if ((c == testContext) && (filterString2.equals(f))) {
+					fail("second listener not removed"); //$NON-NLS-1$
+				}
+			}
+
+			testContext.removeServiceListener(testSL);
+			assertEquals("added called", 3, hookCalled[0]); //$NON-NLS-1$
+			assertEquals("removed called", 2, hookCalled[1]); //$NON-NLS-1$
+			assertEquals("listener removed", size, result.size()); //$NON-NLS-1$
+
+		} catch (InvalidSyntaxException e) {
+			fail(e.getMessage());
+		} finally {
+			if (regHook != null) {
+				regHook.unregister();
+			}
 		}
 	}
 }

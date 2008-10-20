@@ -15,8 +15,12 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.BundleContextImpl;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.service.ListenerHook;
 
-class FilteredServiceListener implements ServiceListener {
+/**
+ * Service Listener delegate.
+ */
+class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerInfo {
 	/** Filter for listener. */
 	private final FilterImpl filter;
 	/** Real listener. */
@@ -34,8 +38,9 @@ class FilteredServiceListener implements ServiceListener {
 	/**
 	 * Constructor.
 	 *
-	 * @param filterstring filter for this listener.
-	 * @param listener real listener.
+	 * @param context The bundle context of the bundle which added the specified service listener.
+	 * @param filterstring The filter string specified when this service listener was added.
+	 * @param listener The service listener object.
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
 	FilteredServiceListener(BundleContextImpl context, ServiceListener listener, String filterstring) throws InvalidSyntaxException {
@@ -125,5 +130,26 @@ class FilteredServiceListener implements ServiceListener {
 	 */
 	public String toString() {
 		return filter == null ? listener.toString() : filter.toString();
+	}
+
+	/** 
+	 * Return the bundle context for the ListenerHook.
+	 * @return The context of the bundle which added the service listener.
+	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getBundleContext()
+	 */
+	public BundleContext getBundleContext() {
+		return context;
+	}
+
+	/** 
+	 * Return the filter string for the ListenerHook.
+	 * @return The filter string with which the service listener was added.
+	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getFilter()
+	 */
+	public String getFilter() {
+		if (filter == null) {
+			return null;
+		}
+		return filter.toString();
 	}
 }
