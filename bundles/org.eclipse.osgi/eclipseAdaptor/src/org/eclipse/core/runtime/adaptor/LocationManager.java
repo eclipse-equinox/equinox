@@ -121,7 +121,8 @@ public class LocationManager {
 		// compute a default but it is very unlikely to be used since main will have computed everything
 		temp = buildLocation(PROP_CONFIG_AREA_DEFAULT, null, "", false, false); //$NON-NLS-1$
 		defaultLocation = temp == null ? null : temp.getURL();
-		if (defaultLocation == null)
+		if (defaultLocation == null && FrameworkProperties.getProperty(PROP_CONFIG_AREA) == null)
+			// only compute the default if the configuration area property is not set
 			defaultLocation = buildURL(computeDefaultConfigurationLocation(), true);
 		configurationLocation = buildLocation(PROP_CONFIG_AREA, defaultLocation, "", false, false); //$NON-NLS-1$
 		// get the parent location based on the system property. This will have been set on the 

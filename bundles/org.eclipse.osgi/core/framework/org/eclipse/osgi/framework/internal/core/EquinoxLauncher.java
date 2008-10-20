@@ -86,10 +86,8 @@ public class EquinoxLauncher implements SystemBundle {
 				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, (String) security);
 		}
 		Object storage = configuration.get(Constants.FRAMEWORK_STORAGE);
-		if (storage != null && storage instanceof String) {
+		if (storage != null && storage instanceof String)
 			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, (String) storage);
-			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA_DEFAULT, (String) storage);
-		}
 		Object clean = configuration.get(Constants.FRAMEWORK_STORAGE_CLEAN);
 		if (Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(clean))
 			FrameworkProperties.setProperty(EclipseStarter.PROP_CLEAN, Boolean.TRUE.toString());
