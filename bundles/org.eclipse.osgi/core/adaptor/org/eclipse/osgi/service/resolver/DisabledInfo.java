@@ -80,4 +80,13 @@ public final class DisabledInfo {
 		}
 		return false;
 	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (bundle == null ? 0 : bundle.hashCode());
+		result = prime * result + (policyName == null ? 0 : policyName.hashCode());
+		result = prime * result + (message == null ? 0 : message.hashCode());
+		return result;
+	}
 }

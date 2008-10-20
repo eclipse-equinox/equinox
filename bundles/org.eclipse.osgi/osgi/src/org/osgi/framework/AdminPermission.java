@@ -1,5 +1,5 @@
 /*
- * $Date: 2008/09/19 03:23:54 $
+ * $Date: 2008/10/17 23:11:16 $
  * 
  * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
  * 
@@ -74,7 +74,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -764,6 +764,15 @@ public final class AdminPermission extends BasicPermission {
 			AbstractBundle matchBundle = (AbstractBundle) (bundle != null ? bundle : other.bundle);
 			String matchPattern = bundle != null ? other.pattern : pattern;
 			return matchBundle.getBundleData().matchDNChain(matchPattern);
+		}
+
+		public int hashCode() {
+			// It is not possible to make unique hash codes for this object
+			// because of the way equals is implemented to behave differently when
+			// the fields are null.  This is an inner class that is only used
+			// for filter evaluations.  No need to make its hashcode unique
+			// for map usage.
+			return 31;
 		}
 	}
 

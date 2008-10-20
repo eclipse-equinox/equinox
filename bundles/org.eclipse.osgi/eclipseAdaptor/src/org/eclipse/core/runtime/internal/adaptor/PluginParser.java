@@ -584,6 +584,10 @@ public class PluginParser extends DefaultHandler implements IModel {
 				return false;
 			return name.equals(((Prerequisite) prereq).name);
 		}
+
+		public int hashCode() {
+			return name.hashCode();
+		}
 	}
 
 	public void parsePluginRequiresImport(Attributes attributes) {

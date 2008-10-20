@@ -173,6 +173,24 @@ public class DisabledInfoTest extends AbstractStateTest {
 		assertEquals("disabledBundles length", 0, disabledBundles.length);
 	}
 
+	public void testBug251427() throws BundleException {
+		State state = buildTestState();
+		BundleDescription b1 = state.getBundleByLocation(B1_LOCATION);
+		BundleDescription b2 = state.getBundleByLocation(B2_LOCATION);
+		BundleDescription b3 = state.getBundleByLocation(B3_LOCATION);
+
+		DisabledInfo info11 = new DisabledInfo(POLICY, "message 1", b1);
+		DisabledInfo info12 = new DisabledInfo(POLICY, "message 1", b1);
+		DisabledInfo info21 = new DisabledInfo(POLICY, "message 1", b2);
+		DisabledInfo info22 = new DisabledInfo(POLICY, "message 1", b2);
+
+		assertEquals("infos not equal", info11, info12);
+		assertEquals("infos hashCode not equal", info11.hashCode(), info12.hashCode());
+		assertEquals("infos not equal", info21, info22);
+		assertEquals("infos hashCode not equal", info21.hashCode(), info22.hashCode());
+
+	}
+
 	private State buildTestState() throws BundleException {
 		State state = buildEmptyState();
 		final String B1_MANIFEST = "Bundle-ManifestVersion: 1\n" + "Bundle-SymbolicName: b1\n" + "Bundle-Version: 1.0\n" + "Import-Package: b2";

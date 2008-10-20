@@ -50,4 +50,12 @@ public class SingleSourcePackage extends PackageSource {
 		// we do an == test on id because the id is interned in the constructor of PackageSource
 		return supplier == singleSource.supplier && id == singleSource.getId();
 	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id.hashCode();
+		result = prime * result + supplier.hashCode();
+		return result;
+	}
 }
