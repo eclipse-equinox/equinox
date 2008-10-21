@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.tests.mics;
+package org.eclipse.osgi.tests.misc;
 
 import junit.framework.*;
 import org.eclipse.core.runtime.Platform;
