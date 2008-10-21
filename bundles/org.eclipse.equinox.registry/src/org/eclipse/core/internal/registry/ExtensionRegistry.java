@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		 */
 		public boolean equals(Object another) {
 			return another instanceof ListenerInfo && ((ListenerInfo) another).listener == this.listener;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.lang.Object#hashCode()
+		 */
+		public int hashCode() {
+			return listener == null ? 0 : listener.hashCode();
 		}
 	}
 
