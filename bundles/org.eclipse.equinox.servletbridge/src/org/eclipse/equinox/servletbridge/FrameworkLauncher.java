@@ -15,7 +15,8 @@ package org.eclipse.equinox.servletbridge;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.*;
 import java.util.*;
 import java.util.jar.*;
@@ -108,7 +109,7 @@ public class FrameworkLauncher {
 	protected String resourceBase;
 	private File platformDirectory;
 	private ClassLoader frameworkContextClassLoader;
-	private URLClassLoader frameworkClassLoader;
+	private CloseableURLClassLoader frameworkClassLoader;
 
 	void init(ServletConfig servletConfig) {
 		config = servletConfig;
@@ -495,10 +496,12 @@ public class FrameworkLauncher {
 			} catch (ClassNotFoundException e) {
 				// ignore, ACL is not being used
 			}
+
 		} catch (Exception e) {
 			context.log("Error while stopping Framework", e); //$NON-NLS-1$
 			return;
 		} finally {
+			frameworkClassLoader.close();
 			frameworkClassLoader = null;
 			frameworkContextClassLoader = null;
 			Thread.currentThread().setContextClassLoader(original);
@@ -741,18 +744,10 @@ public class FrameworkLauncher {
 	 * used in its initialization for matching classes before delegating to it's parent.
 	 * Sometimes also referred to as a ParentLastClassLoader
 	 */
-	protected class ChildFirstURLClassLoader extends URLClassLoader {
-
-		public ChildFirstURLClassLoader(URL[] urls) {
-			super(urls);
-		}
+	protected class ChildFirstURLClassLoader extends CloseableURLClassLoader {
 
 		public ChildFirstURLClassLoader(URL[] urls, ClassLoader parent) {
-			super(urls, parent);
-		}
-
-		public ChildFirstURLClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
-			super(urls, parent, factory);
+			super(urls, parent, false);
 		}
 
 		public URL getResource(String name) {
