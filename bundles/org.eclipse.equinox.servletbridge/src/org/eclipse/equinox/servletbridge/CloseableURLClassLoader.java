@@ -42,10 +42,6 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			this.jarFile = jarFile;
 		}
 
-		/**
-		 * @throws IOException
-		 * Documented to avoid warning 
-		 */
 		public void connect() throws IOException {
 			internalGetEntry();
 		}
