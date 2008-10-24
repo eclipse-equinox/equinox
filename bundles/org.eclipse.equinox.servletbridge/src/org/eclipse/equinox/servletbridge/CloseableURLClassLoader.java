@@ -22,15 +22,19 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	static final String BANG_SLASH = "!/"; //$NON-NLS-1$
 	static final String JAR = "jar"; //$NON-NLS-1$
 
+	// @GuardedBy("loaders")
 	final ArrayList loaders = new ArrayList(); // package private to avoid synthetic access.
+	// @GuardedBy("loaders")
 	private final ArrayList loaderURLs = new ArrayList(); // note: protected by loaders
+	// @GuardedBy("loaders")
 	boolean closed = false; // note: protected by loaders, package private to avoid synthetic access.
 
 	private final AccessControlContext context;
-	private boolean verifyJars;
+	private final boolean verifyJars;
 
 	public static class CloseableJarURLConnection extends JarURLConnection {
 		private final JarFile jarFile;
+		// @GuardedBy("this")
 		private JarEntry entry;
 
 		public CloseableJarURLConnection(URL url, JarFile jarFile) throws MalformedURLException {
@@ -42,15 +46,21 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		 * @throws IOException
 		 * Documented to avoid warning 
 		 */
-		public synchronized void connect() throws IOException {
+		public void connect() throws IOException {
+			internalGetEntry();
+		}
+
+		private synchronized JarEntry internalGetEntry() throws IOException {
 			if (entry != null)
-				return;
+				return entry;
 			entry = jarFile.getJarEntry(getEntryName());
+			if (entry == null)
+				throw new FileNotFoundException(getEntryName());
+			return entry;
 		}
 
 		public InputStream getInputStream() throws IOException {
-			connect();
-			return jarFile.getInputStream(entry);
+			return jarFile.getInputStream(internalGetEntry());
 		}
 
 		/**
@@ -62,8 +72,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 
 		public JarEntry getJarEntry() throws IOException {
-			connect();
-			return entry;
+			return internalGetEntry();
 		}
 	}
 
@@ -88,23 +97,16 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		private final Manifest manifest;
 		private final CloseableJarURLStreamHandler jarURLStreamHandler;
 		private final String jarFileURLPrefixString;
-		private final Collection entries = new HashSet();
 
 		public CloseableJarFileLoader(File file, boolean verify) throws IOException {
 			this.jarFile = new JarFile(file, verify);
 			this.manifest = jarFile.getManifest();
 			this.jarURLStreamHandler = new CloseableJarURLStreamHandler(jarFile);
 			this.jarFileURLPrefixString = file.toURL().toString() + BANG_SLASH;
-			Enumeration e = jarFile.entries();
-			while (e.hasMoreElements()) {
-				JarEntry entry = (JarEntry) e.nextElement();
-				if (!entry.isDirectory())
-					entries.add(entry.getName());
-			}
 		}
 
 		public URL getURL(String name) {
-			if (entries.contains(name))
+			if (jarFile.getEntry(name) != null)
 				try {
 					return new URL(JAR, null, -1, jarFileURLPrefixString + name, jarURLStreamHandler);
 				} catch (MalformedURLException e) {
@@ -146,6 +148,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
+	// @GuardedBy("loaders")
 	private void safeAddLoader(URL url) {
 		String path = url.getPath();
 		File file = new File(path);
