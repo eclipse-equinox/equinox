@@ -109,17 +109,39 @@ public class ResourceRegistration extends Registration {
 						resp.setHeader(ETAG, etag);
 
 					if (contentLength != 0) {
+						// open the input stream
+						InputStream is = null;
 						try {
-							OutputStream os = resp.getOutputStream();
-							int writtenContentLength = writeResourceToOutputStream(connection, os);
-							if (contentLength == -1 || contentLength != writtenContentLength)
-								resp.setContentLength(writtenContentLength);
-						} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
-							Writer writer = resp.getWriter();
-							writeResourceToWriter(connection, writer);
-							// Since ContentLength is a measure of the number of bytes contained in the body
-							// of a message when we use a Writer we lose control of the exact byte count and
-							// defer the problem to the Servlet Engine's Writer implementation.
+							is = connection.getInputStream();
+							// write the resource
+							try {
+								OutputStream os = resp.getOutputStream();
+								int writtenContentLength = writeResourceToOutputStream(is, os);
+								if (contentLength == -1 || contentLength != writtenContentLength)
+									resp.setContentLength(writtenContentLength);
+							} catch (IllegalStateException e) { // can occur if the response output is already open as a Writer
+								Writer writer = resp.getWriter();
+								writeResourceToWriter(is, writer);
+								// Since ContentLength is a measure of the number of bytes contained in the body
+								// of a message when we use a Writer we lose control of the exact byte count and
+								// defer the problem to the Servlet Engine's Writer implementation.
+							}
+						} catch (FileNotFoundException e) {
+							// FileNotFoundException may indicate the following scenarios
+							// - url is a directory
+							// - url is not accessible
+							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
+						} catch (SecurityException e) {
+							// SecurityException may indicate the following scenarios
+							// - url is not accessible
+							sendError(resp, HttpServletResponse.SC_FORBIDDEN);
+						} finally {
+							if (is != null)
+								try {
+									is.close();
+								} catch (IOException e) {
+									// ignore
+								}
 						}
 					}
 					return Boolean.TRUE;
@@ -131,44 +153,42 @@ public class ResourceRegistration extends Registration {
 		return result.booleanValue();
 	}
 
-	int writeResourceToOutputStream(URLConnection connection, OutputStream os) throws IOException {
-		InputStream is = connection.getInputStream();
+	void sendError(final HttpServletResponse resp, int sc) throws IOException {
+
 		try {
-			byte[] buffer = new byte[8192];
-			int bytesRead = is.read(buffer);
-			int writtenContentLength = 0;
-			while (bytesRead != -1) {
-				os.write(buffer, 0, bytesRead);
-				writtenContentLength += bytesRead;
-				bytesRead = is.read(buffer);
-			}
-			return writtenContentLength;
-		} finally {
-			if (is != null)
-				is.close();
+			// we need to reset headers for 302 and 403
+			resp.reset();
+			resp.sendError(sc);
+		} catch (IllegalStateException e) {
+			// this could happen if the response has already been committed
 		}
 	}
 
-	void writeResourceToWriter(URLConnection connection, Writer writer) throws IOException {
-		InputStream is = connection.getInputStream();
+	int writeResourceToOutputStream(InputStream is, OutputStream os) throws IOException {
+		byte[] buffer = new byte[8192];
+		int bytesRead = is.read(buffer);
+		int writtenContentLength = 0;
+		while (bytesRead != -1) {
+			os.write(buffer, 0, bytesRead);
+			writtenContentLength += bytesRead;
+			bytesRead = is.read(buffer);
+		}
+		return writtenContentLength;
+	}
+
+	void writeResourceToWriter(InputStream is, Writer writer) throws IOException {
+		Reader reader = new InputStreamReader(is);
 		try {
-			Reader reader = new InputStreamReader(connection.getInputStream());
-			try {
-				char[] buffer = new char[8192];
-				int charsRead = reader.read(buffer);
-				while (charsRead != -1) {
-					writer.write(buffer, 0, charsRead);
-					charsRead = reader.read(buffer);
-				}
-			} finally {
-				if (reader != null) {
-					reader.close(); // will also close input stream
-					is = null;
-				}
+			char[] buffer = new char[8192];
+			int charsRead = reader.read(buffer);
+			while (charsRead != -1) {
+				writer.write(buffer, 0, charsRead);
+				charsRead = reader.read(buffer);
 			}
 		} finally {
-			if (is != null)
-				is.close();
+			if (reader != null) {
+				reader.close(); // will also close input stream
+			}
 		}
 	}
 }
