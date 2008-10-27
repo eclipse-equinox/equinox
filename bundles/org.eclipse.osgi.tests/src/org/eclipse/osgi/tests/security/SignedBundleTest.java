@@ -813,4 +813,23 @@ public class SignedBundleTest extends BaseSecurityTest {
 			// expected
 		}
 	}
+
+	public void testBug252098() {
+
+		Bundle testBundle = null;
+		try {
+			testBundle = installBundle(getTestJarPath("test.bug252098"));
+			assertNotNull("Test bundle not installed!", testBundle);
+			testBundle.start();
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		} finally {
+			try {
+				if (testBundle != null)
+					testBundle.uninstall();
+			} catch (BundleException e) {
+				fail("Failed to uninstall bundle", e);
+			}
+		}
+	}
 }
