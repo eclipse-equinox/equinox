@@ -14,13 +14,12 @@ package org.eclipse.equinox.weaving.hooks;
 
 import java.io.IOException;
 
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
 public class BaseAjBundleFile extends AspectJBundleFile {
 
-    public BaseAjBundleFile(final IAspectJAdaptor aspectjAdaptor,
+    public BaseAjBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) throws IOException {
-        super(aspectjAdaptor, bundleFile);
+        super(adaptorProvider, bundleFile);
     }
 }

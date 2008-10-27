@@ -13,11 +13,13 @@
 
 package org.eclipse.equinox.weaving.adaptors;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -124,6 +126,8 @@ public class AspectJAdaptorFactory {
 
             public void serviceChanged(final ServiceEvent event) {
                 if (event.getType() == ServiceEvent.REGISTERED) {
+                    final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
+
                     final Iterator bundleEntries = weavingServices.entrySet()
                             .iterator();
                     synchronized (weavingServices) {
@@ -135,18 +139,23 @@ public class AspectJAdaptorFactory {
                                 System.err
                                         .println("bundle update because of weaving service start: "
                                                 + bundle.getSymbolicName());
-                                supplementerRegistry
-                                        .updateInstalledBundle(bundle);
+                                bundlesToRefresh.add(bundle);
                                 if (Debug.DEBUG_WEAVE)
                                     Debug.println("> Updated bundle "
                                             + bundle.getSymbolicName());
                             }
                         }
                     }
+
+                    if (bundlesToRefresh.size() > 0) {
+                        supplementerRegistry.refreshBundles(bundlesToRefresh
+                                .toArray(new Bundle[bundlesToRefresh.size()]));
+                    }
                 }
                 if (event.getType() == ServiceEvent.UNREGISTERING
                         && startLevelService != null
                         && startLevelService.getStartLevel() > 0) {
+                    final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>();
 
                     final Iterator bundleEntries = weavingServices.entrySet()
                             .iterator();
@@ -159,13 +168,16 @@ public class AspectJAdaptorFactory {
                                 System.err
                                         .println("bundle update because of weaving service stop: "
                                                 + bundle.getSymbolicName());
-                                supplementerRegistry
-                                        .updateInstalledBundle(bundle);
+                                bundlesToRefresh.add(bundle);
                                 if (Debug.DEBUG_WEAVE)
                                     Debug.println("> Updated bundle "
                                             + bundle.getSymbolicName());
                             }
                         }
+                    }
+                    if (bundlesToRefresh.size() > 0) {
+                        supplementerRegistry.refreshBundles(bundlesToRefresh
+                                .toArray(new Bundle[bundlesToRefresh.size()]));
                     }
                 }
             }

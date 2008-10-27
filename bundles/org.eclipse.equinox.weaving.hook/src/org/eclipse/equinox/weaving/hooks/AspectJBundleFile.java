@@ -25,12 +25,13 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
 
     private final URL url;
 
-    public AspectJBundleFile(final IAspectJAdaptor aa,
+    public AspectJBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) throws IOException {
-        super(aa, bundleFile);
+        super(adaptorProvider, bundleFile);
         this.url = delegate.getBaseFile().toURL();
     }
 
+    @Override
     public BundleEntry getEntry(final String path) {
         if (Debug.DEBUG_BUNDLE)
             Debug.println("> AspectJBundleFile.getEntry() path=" + path
@@ -41,6 +42,7 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
             final int offset = path.lastIndexOf('.');
             final String name = path.substring(0, offset).replace('/', '.');
             //			byte[] bytes = adaptor.findClass(name,url);
+            final IAspectJAdaptor adaptor = getAdaptor();
             final CacheEntry cacheEntry = adaptor.findClass(name, url);
             if (cacheEntry == null) {
                 if (entry != null) {

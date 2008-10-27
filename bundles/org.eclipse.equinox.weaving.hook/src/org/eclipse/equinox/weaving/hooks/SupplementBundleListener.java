@@ -27,17 +27,17 @@ public class SupplementBundleListener implements SynchronousBundleListener {
 
     public void bundleChanged(final BundleEvent event) {
         final Bundle bundle = event.getBundle();
-        if (event.getType() == BundleEvent.INSTALLED) {
+        if (event.getType() == BundleEvent.RESOLVED) {
             supplementerRegistry.addBundle(bundle);
-        } else if (event.getType() == BundleEvent.UNINSTALLED) {
+        } else if (event.getType() == BundleEvent.UNRESOLVED) {
             supplementerRegistry.removeBundle(bundle);
-        } else if (event.getType() == BundleEvent.UPDATED) {
-            System.err.println("bundle update: "
-                    + event.getBundle().getBundleId());
-
-            supplementerRegistry.removeBundle(bundle);
-            supplementerRegistry.addBundle(bundle);
-            //            supplementerRegistry.getPackageAdmin().refreshPackages(null);
+            //        } else if (event.getType() == BundleEvent.UPDATED) {
+            //            System.err.println("bundle update: "
+            //                    + event.getBundle().getBundleId());
+            //
+            //            supplementerRegistry.removeBundle(bundle);
+            //            supplementerRegistry.addBundle(bundle);
+            //            //            supplementerRegistry.getPackageAdmin().refreshPackages(null);
         }
     }
 

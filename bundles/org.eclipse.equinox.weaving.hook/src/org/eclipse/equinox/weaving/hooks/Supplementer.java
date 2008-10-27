@@ -22,7 +22,7 @@ public class Supplementer {
 
     private final ManifestElement[] supplementBundle;
 
-    private final List supplementedBundles; // elements of type Bundle
+    private final List<Bundle> supplementedBundles; // elements of type Bundle
 
     private final Bundle supplementer;
 
@@ -38,7 +38,7 @@ public class Supplementer {
         this.supplementBundle = supplementBundle;
         this.supplementImporter = supplementImporter;
         this.supplementExporter = supplementExporter;
-        this.supplementedBundles = new ArrayList();
+        this.supplementedBundles = new ArrayList<Bundle>();
     }
 
     public void addSupplementedBundle(final Bundle supplementedBundle) {
@@ -46,7 +46,7 @@ public class Supplementer {
     }
 
     public Bundle[] getSupplementedBundles() {
-        return (Bundle[]) supplementedBundles
+        return supplementedBundles
                 .toArray(new Bundle[supplementedBundles.size()]);
     }
 

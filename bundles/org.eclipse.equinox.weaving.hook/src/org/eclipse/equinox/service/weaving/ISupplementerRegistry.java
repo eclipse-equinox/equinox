@@ -31,6 +31,11 @@ public interface ISupplementerRegistry {
 
     public void setPackageAdmin(final PackageAdmin packageAdmin);
 
-    public void updateInstalledBundle(final Bundle bundle);
+    /**
+     * Refreshes the given bundles
+     * 
+     * @param bundles The bundles to refresh
+     */
+    public void refreshBundles(final Bundle[] bundles);
 
 }

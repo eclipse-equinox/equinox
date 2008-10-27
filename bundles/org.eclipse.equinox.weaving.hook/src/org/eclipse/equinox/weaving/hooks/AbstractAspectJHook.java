@@ -48,7 +48,7 @@ import org.osgi.framework.BundleException;
  */
 public abstract class AbstractAspectJHook implements HookConfigurator,
         AdaptorHook, BundleFileWrapperFactoryHook, ClassLoadingHook,
-        ClassLoadingStatsHook {
+        ClassLoadingStatsHook, IAdaptorProvider {
 
     /**
      * flag to indicate whether to print out detailed information or not
@@ -79,13 +79,12 @@ public abstract class AbstractAspectJHook implements HookConfigurator,
             System.err
                     .println("[org.eclipse.equinox.weaving.hook] info adding AspectJ hooks ..."); //$NON-NLS-1$
 
-        supplementerRegistry = new SupplementerRegistry();
+        supplementerRegistry = new SupplementerRegistry(this);
 
         hooks.addAdaptorHook(this);
         hooks.addClassLoadingHook(this);
         hooks.addBundleFileWrapperFactoryHook(this);
         hooks.addClassLoadingStatsHook(this);
-        hooks.addStorageHook(new AspectJStorageHook(supplementerRegistry));
         hooks.addClassLoaderDelegateHook(new WeavingLoaderDelegateHook(
                 supplementerRegistry));
     }

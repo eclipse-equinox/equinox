@@ -23,42 +23,48 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
 public abstract class AbstractAJBundleFile extends BundleFile {
 
-    protected IAspectJAdaptor adaptor;
-
     protected BundleFile delegate;
 
-    public AbstractAJBundleFile(final IAspectJAdaptor aspectjAdaptor,
+    private final BundleAdaptorProvider adaptorProvider;
+
+    public AbstractAJBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) {
         super(bundleFile.getBaseFile());
-        this.adaptor = aspectjAdaptor;
+        this.adaptorProvider = adaptorProvider;
         this.delegate = bundleFile;
     }
 
+    @Override
     public void close() throws IOException {
         delegate.close();
     }
 
+    @Override
     public boolean containsDir(final String dir) {
         return delegate.containsDir(dir);
     }
 
     public IAspectJAdaptor getAdaptor() {
-        return adaptor;
+        return this.adaptorProvider.getAdaptor();
     }
 
+    @Override
     public File getBaseFile() {
         final File baseFile = delegate.getBaseFile();
         return baseFile;
     }
 
+    @Override
     public BundleEntry getEntry(final String path) {
         return delegate.getEntry(path);
     }
 
+    @Override
     public Enumeration getEntryPaths(final String path) {
         return delegate.getEntryPaths(path);
     }
 
+    @Override
     public File getFile(final String path, final boolean nativeCode) {
         return delegate.getFile(path, nativeCode);
     }
@@ -66,6 +72,8 @@ public abstract class AbstractAJBundleFile extends BundleFile {
     /**
      * @deprecated
      */
+    @Deprecated
+    @Override
     public URL getResourceURL(final String path, final long hostBundleID) {
         return delegate.getResourceURL(path, hostBundleID);
     }
@@ -73,11 +81,14 @@ public abstract class AbstractAJBundleFile extends BundleFile {
     /**
      * @deprecated
      */
+    @Deprecated
+    @Override
     public URL getResourceURL(final String path, final long hostBundleID,
             final int index) {
         return delegate.getResourceURL(path, hostBundleID, index);
     }
 
+    @Override
     public void open() throws IOException {
         delegate.open();
     }

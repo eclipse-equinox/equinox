@@ -14,6 +14,8 @@ package org.eclipse.equinox.weaving.hooks;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
@@ -33,6 +35,30 @@ import org.osgi.framework.Bundle;
  * supplementer registry information.
  */
 public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
+
+    private final ThreadLocal<Set<String>> postFindClassCalls = new ThreadLocal<Set<String>>() {
+
+        @Override
+        protected Set<String> initialValue() {
+            return new HashSet<String>();
+        }
+    };
+
+    private final ThreadLocal<Set<String>> postFindResourceCalls = new ThreadLocal<Set<String>>() {
+
+        @Override
+        protected Set<String> initialValue() {
+            return new HashSet<String>();
+        }
+    };
+
+    private final ThreadLocal<Set<String>> postFindResourcesCalls = new ThreadLocal<Set<String>>() {
+
+        @Override
+        protected Set<String> initialValue() {
+            return new HashSet<String>();
+        }
+    };
 
     private final ISupplementerRegistry supplementerRegistry;
 
@@ -58,18 +84,29 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
             final BundleClassLoader classLoader, final BundleData data)
             throws ClassNotFoundException {
         final long bundleID = data.getBundleID();
-        final Bundle[] supplementers = supplementerRegistry
-                .getSupplementers(bundleID);
-        if (supplementers != null) {
-            for (int i = 0; i < supplementers.length; i++) {
-                try {
-                    final Class clazz = supplementers[i].loadClass(name);
-                    if (clazz != null) {
-                        return clazz;
+
+        final String callKey = bundleID + name;
+        if (postFindClassCalls.get().contains(callKey)) {
+            return null;
+        }
+
+        postFindClassCalls.get().add(callKey);
+        try {
+            final Bundle[] supplementers = supplementerRegistry
+                    .getSupplementers(bundleID);
+            if (supplementers != null) {
+                for (int i = 0; i < supplementers.length; i++) {
+                    try {
+                        final Class clazz = supplementers[i].loadClass(name);
+                        if (clazz != null) {
+                            return clazz;
+                        }
+                    } catch (final ClassNotFoundException e) {
                     }
-                } catch (final ClassNotFoundException e) {
                 }
             }
+        } finally {
+            postFindClassCalls.get().remove(callKey);
         }
 
         return null;
@@ -94,18 +131,30 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
             final BundleClassLoader classLoader, final BundleData data)
             throws FileNotFoundException {
         final long bundleID = data.getBundleID();
-        final Bundle[] supplementers = supplementerRegistry
-                .getSupplementers(bundleID);
-        if (supplementers != null) {
-            for (int i = 0; i < supplementers.length; i++) {
-                try {
-                    final URL resource = supplementers[i].getResource(name);
-                    if (resource != null) {
-                        return resource;
+
+        final String callKey = bundleID + name;
+        if (postFindResourceCalls.get().contains(callKey)) {
+            return null;
+        }
+
+        postFindResourceCalls.get().add(callKey);
+        try {
+            final Bundle[] supplementers = supplementerRegistry
+                    .getSupplementers(bundleID);
+            if (supplementers != null) {
+                for (int i = 0; i < supplementers.length; i++) {
+                    try {
+                        final URL resource = supplementers[i].getResource(name);
+                        if (resource != null) {
+                            return resource;
+                        }
+                    } catch (final Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (final Exception e) {
                 }
             }
+        } finally {
+            postFindResourceCalls.get().remove(callKey);
         }
 
         return null;
@@ -120,20 +169,32 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
             final BundleClassLoader classLoader, final BundleData data)
             throws FileNotFoundException {
         final long bundleID = data.getBundleID();
-        final Bundle[] supplementers = supplementerRegistry
-                .getSupplementers(bundleID);
-        if (supplementers != null) {
-            for (int i = 0; i < supplementers.length; i++) {
-                try {
-                    final Enumeration resource = supplementers[i]
-                            .getResources(name);
-                    if (resource != null) {
-                        // TODO: if more than one enumeration is found, we should return all items
-                        return resource;
+
+        final String callKey = bundleID + name;
+        if (postFindResourcesCalls.get().contains(callKey)) {
+            return null;
+        }
+
+        postFindResourcesCalls.get().add(callKey);
+        try {
+            final Bundle[] supplementers = supplementerRegistry
+                    .getSupplementers(bundleID);
+            if (supplementers != null) {
+                for (int i = 0; i < supplementers.length; i++) {
+                    try {
+                        final Enumeration resource = supplementers[i]
+                                .getResources(name);
+                        if (resource != null) {
+                            // TODO: if more than one enumeration is found, we should return all items
+                            return resource;
+                        }
+                    } catch (final Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (final Exception e) {
                 }
             }
+        } finally {
+            postFindResourcesCalls.get().remove(callKey);
         }
 
         return null;

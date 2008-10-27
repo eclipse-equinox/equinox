@@ -15,6 +15,8 @@ package org.eclipse.equinox.weaving.hooks;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.weaving.adaptors.AspectJAdaptor;
@@ -37,24 +39,46 @@ public class AspectJHook extends AbstractAspectJHook {
 
     private final AspectJAdaptorFactory adaptorFactory;
 
+    private final Map<Long, IAspectJAdaptor> adaptors;
+
     private BundleContext bundleContext;
 
     public AspectJHook() {
         if (Debug.DEBUG_GENERAL) Debug.println("- AspectJHook.<init>()");
-        adaptorFactory = new AspectJAdaptorFactory();
+        this.adaptorFactory = new AspectJAdaptorFactory();
+        this.adaptors = new HashMap<Long, IAspectJAdaptor>();
     }
 
+    @Override
     public void frameworkStart(final BundleContext context)
             throws BundleException {
         //		Debug.println("? AspectJHook.frameworkStart() context=" + context + ", fdo=" + FrameworkDebugOptions.getDefault());
         initialize(context);
     }
 
+    @Override
     public void frameworkStop(final BundleContext context)
             throws BundleException {
         adaptorFactory.dispose(context);
     }
 
+    public IAspectJAdaptor getAdaptor(final long bundleID) {
+        return this.adaptors.get(bundleID);
+    }
+
+    public IAspectJAdaptor getHostBundleAdaptor(final long bundleID) {
+        final Bundle bundle = this.bundleContext.getBundle(bundleID);
+        if (bundle != null) {
+            final Bundle host = adaptorFactory.getHost(bundle);
+            if (host != null) {
+                final long hostBundleID = host.getBundleId();
+                return this.adaptors.get(hostBundleID);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public void initializedClassLoader(final BaseClassLoader baseClassLoader,
             final BaseData data) {
         if (Debug.DEBUG_GENERAL)
@@ -63,19 +87,17 @@ public class AspectJHook extends AbstractAspectJHook {
                             + data.getSymbolicName() + ", loader="
                             + baseClassLoader + ", data=" + data
                             + ", bundleFile=" + data.getBundleFile());
-        IAspectJAdaptor adaptor = null;
-        final BundleFile bundleFile = data.getBundleFile();
-        if (bundleFile instanceof BaseAjBundleFile) {
-            final BaseAjBundleFile baseBundleFile = (BaseAjBundleFile) bundleFile;
-            adaptor = baseBundleFile.getAdaptor();
-            adaptor.setBaseClassLoader(baseClassLoader);
-        }
+
+        final IAspectJAdaptor adaptor = createAspectJAdaptor(data);
+        adaptor.setBaseClassLoader(baseClassLoader);
+        this.adaptors.put(data.getBundleID(), adaptor);
 
         if (Debug.DEBUG_GENERAL)
             Debug.println("< AspectJHook.initializedClassLoader() adaptor="
                     + adaptor);
     }
 
+    @Override
     public byte[] processClass(final String name, final byte[] classbytes,
             final ClasspathEntry classpathEntry, final BundleEntry entry,
             final ClasspathManager manager) {
@@ -90,6 +112,7 @@ public class AspectJHook extends AbstractAspectJHook {
         return newClassytes;
     }
 
+    @Override
     public void recordClassDefine(final String name, final Class clazz,
             final byte[] classbytes, final ClasspathEntry classpathEntry,
             final BundleEntry entry, final ClasspathManager manager) {
@@ -103,6 +126,7 @@ public class AspectJHook extends AbstractAspectJHook {
         }
     }
 
+    @Override
     public BundleFile wrapBundleFile(final BundleFile bundleFile,
             final Object content, final BaseData data, final boolean base)
             throws IOException {
@@ -123,23 +147,11 @@ public class AspectJHook extends AbstractAspectJHook {
                             + bundleFile.getBaseFile());
 
         if (base) {
-            final IAspectJAdaptor adaptor = createAspectJAdaptor(data);
-            if (adaptor != null) {
-                wrapped = new BaseAjBundleFile(adaptor, bundleFile);
-            }
+            wrapped = new BaseAjBundleFile(
+                    new BundleAdaptorProvider(data, this), bundleFile);
         } else {
-            IAspectJAdaptor adaptor = null;
-            if (bundleContext != null) {
-                adaptor = getAspectJAdaptor(data);
-                if (Debug.DEBUG_BUNDLE)
-                    Debug
-                            .println("- AspectJBundleFileWrapperFactoryHook.wrapBundleFile() adaptor="
-                                    + adaptor);
-                //				if (adaptor == null) throw new RuntimeException(data.getSymbolicName());
-            }
-            if (adaptor != null) {
-                wrapped = new AspectJBundleFile(adaptor, bundleFile);
-            }
+            wrapped = new AspectJBundleFile(new BundleAdaptorProvider(data,
+                    this), bundleFile);
         }
         if (Debug.DEBUG_BUNDLE)
             Debug
@@ -170,15 +182,7 @@ public class AspectJHook extends AbstractAspectJHook {
     }
 
     private IAspectJAdaptor getAspectJAdaptor(final BaseData data) {
-        IAspectJAdaptor adaptor = null;
-
-        final BundleFile bundleFile = data.getBundleFile();
-        if (bundleFile instanceof BaseAjBundleFile) {
-            final BaseAjBundleFile baseBundleFile = (BaseAjBundleFile) bundleFile;
-            adaptor = baseBundleFile.getAdaptor();
-        }
-
-        return adaptor;
+        return getAdaptor(data.getBundleID());
     }
 
     private void initialize(final BundleContext context) {
@@ -213,4 +217,5 @@ public class AspectJHook extends AbstractAspectJHook {
             Debug.println("< AspectJHook.initialize() adaptorFactory="
                     + adaptorFactory);
     }
+
 }
