@@ -21,6 +21,8 @@ public interface IAspectJAdaptor {
 
     public CacheEntry findClass(String name, URL sourceFileURL);
 
+    public void initialize();
+
     public void setBaseClassLoader(BaseClassLoader baseClassLoader);
 
     public boolean storeClass(String name, URL sourceFileURL, Class clazz,

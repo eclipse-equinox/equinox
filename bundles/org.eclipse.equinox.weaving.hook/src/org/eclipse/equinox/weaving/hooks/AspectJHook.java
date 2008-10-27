@@ -90,6 +90,7 @@ public class AspectJHook extends AbstractAspectJHook {
 
         final IAspectJAdaptor adaptor = createAspectJAdaptor(data);
         adaptor.setBaseClassLoader(baseClassLoader);
+        adaptor.initialize();
         this.adaptors.put(data.getBundleID(), adaptor);
 
         if (Debug.DEBUG_GENERAL)

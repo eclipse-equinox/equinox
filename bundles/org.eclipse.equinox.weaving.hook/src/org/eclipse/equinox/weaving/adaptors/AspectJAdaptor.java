@@ -54,6 +54,7 @@ public class AspectJAdaptor implements IAspectJAdaptor {
             set.remove(obj);
         }
 
+        @Override
         protected Object initialValue() {
             return new HashSet();
         }
@@ -108,76 +109,7 @@ public class AspectJAdaptor implements IAspectJAdaptor {
         return cacheEntry;
     }
 
-    public void setBaseClassLoader(final BaseClassLoader baseClassLoader) {
-        this.baseLoader = baseClassLoader;
-
-        if (Debug.DEBUG_GENERAL)
-            Debug.println("- AspectJAdaptor.setBaseClassLoader() bundle="
-                    + symbolicName + ", baseLoader=" + baseLoader);
-    }
-
-    public boolean storeClass(final String name, final URL sourceFileURL,
-            final Class clazz, final byte[] classbytes) {
-        if (Debug.DEBUG_CACHE)
-            Debug.println("> AspectJAdaptor.storeClass() bundle="
-                    + symbolicName + ", url=" + sourceFileURL + ", name="
-                    + name + ", clazz=" + clazz);
-        boolean stored = false;
-
-        initialize();
-        if (cachingService != null) {
-            //have we generated a closure? 
-            //If so we cannot store in shared cache (as closure will be lost for future runs)
-            if (weavingService != null
-                    && weavingService.generatedClassesExistFor(
-                            (ClassLoader) baseLoader, name)) {
-                weavingService.flushGeneratedClasses((ClassLoader) baseLoader);
-                if (Debug.DEBUG_CACHE)
-                    Debug
-                            .println("- AspectJAdaptor.storeClass() generatedClassesExistFor=true");
-                //				return clazz;
-            } else {
-                stored = cachingService.storeClass("", sourceFileURL, clazz,
-                        classbytes);
-                if (!stored) {
-                    if (Debug.DEBUG_CACHE)
-                        Debug.println("E AspectJHook.storeClass() bundle="
-                                + symbolicName + ", name=" + name);
-                }
-            }
-        }
-        if (Debug.DEBUG_CACHE)
-            Debug.println("< AspectJAdaptor.storeClass() stored=" + stored);
-        return stored;
-    }
-
-    public String toString() {
-        return "AspectJAdaptor[" + symbolicName + "]";
-    }
-
-    public byte[] weaveClass(final String name, final byte[] bytes) {
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("> AspectJAdaptor.weaveClass() bundle="
-                    + symbolicName + ", name=" + name + ", bytes="
-                    + bytes.length);
-        byte[] newBytes = null;
-
-        initialize();
-        if (/* shouldWeave(bytes) && */weavingService != null) {
-            try {
-                newBytes = weavingService.preProcess(name, bytes,
-                        (ClassLoader) baseLoader);
-            } catch (final IOException ex) {
-                throw new ClassFormatError(ex.toString());
-            }
-        }
-
-        if (Debug.DEBUG_WEAVE)
-            Debug.println("< AspectJAdaptor.weaveClass() newBytes=" + newBytes);
-        return newBytes;
-    }
-
-    private void initialize() {
+    public void initialize() {
         synchronized (this) {
             if (initialized) return;
 
@@ -240,6 +172,76 @@ public class AspectJAdaptor implements IAspectJAdaptor {
                         + (weavingService != null) + ", cachingService="
                         + (cachingService != null));
         }
+    }
+
+    public void setBaseClassLoader(final BaseClassLoader baseClassLoader) {
+        this.baseLoader = baseClassLoader;
+
+        if (Debug.DEBUG_GENERAL)
+            Debug.println("- AspectJAdaptor.setBaseClassLoader() bundle="
+                    + symbolicName + ", baseLoader=" + baseLoader);
+    }
+
+    public boolean storeClass(final String name, final URL sourceFileURL,
+            final Class clazz, final byte[] classbytes) {
+        if (Debug.DEBUG_CACHE)
+            Debug.println("> AspectJAdaptor.storeClass() bundle="
+                    + symbolicName + ", url=" + sourceFileURL + ", name="
+                    + name + ", clazz=" + clazz);
+        boolean stored = false;
+
+        initialize();
+        if (cachingService != null) {
+            //have we generated a closure? 
+            //If so we cannot store in shared cache (as closure will be lost for future runs)
+            if (weavingService != null
+                    && weavingService.generatedClassesExistFor(
+                            (ClassLoader) baseLoader, name)) {
+                weavingService.flushGeneratedClasses((ClassLoader) baseLoader);
+                if (Debug.DEBUG_CACHE)
+                    Debug
+                            .println("- AspectJAdaptor.storeClass() generatedClassesExistFor=true");
+                //				return clazz;
+            } else {
+                stored = cachingService.storeClass("", sourceFileURL, clazz,
+                        classbytes);
+                if (!stored) {
+                    if (Debug.DEBUG_CACHE)
+                        Debug.println("E AspectJHook.storeClass() bundle="
+                                + symbolicName + ", name=" + name);
+                }
+            }
+        }
+        if (Debug.DEBUG_CACHE)
+            Debug.println("< AspectJAdaptor.storeClass() stored=" + stored);
+        return stored;
+    }
+
+    @Override
+    public String toString() {
+        return "AspectJAdaptor[" + symbolicName + "]";
+    }
+
+    public byte[] weaveClass(final String name, final byte[] bytes) {
+        if (Debug.DEBUG_WEAVE)
+            Debug.println("> AspectJAdaptor.weaveClass() bundle="
+                    + symbolicName + ", name=" + name + ", bytes="
+                    + bytes.length);
+        byte[] newBytes = null;
+
+        initialize();
+        if (/* shouldWeave(bytes) && */weavingService != null) {
+            try {
+                newBytes = weavingService.preProcess(name, bytes,
+                        (ClassLoader) baseLoader);
+            } catch (final IOException ex) {
+                throw new ClassFormatError(ex.toString());
+            }
+        }
+
+        if (Debug.DEBUG_WEAVE)
+            Debug.println("< AspectJAdaptor.weaveClass() newBytes=" + newBytes);
+        return newBytes;
     }
 
 }
