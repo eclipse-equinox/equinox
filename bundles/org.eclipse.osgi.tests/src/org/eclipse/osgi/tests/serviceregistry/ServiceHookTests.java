@@ -495,11 +495,6 @@ public class ServiceHookTests extends AbstractBundleTests {
 	public void testListenerHook01() {
 		final String testMethodName = "testListenerHook01"; //$NON-NLS-1$
 		// test the FindHook is called and can remove a reference from the results
-		Runnable runIt = new Runnable() {
-			public void run() {
-				// nothing
-			}
-		};
 		final BundleContext testContext = OSGiTestsActivator.getContext();
 		final Collection result = new ArrayList();
 		final int[] hookCalled = new int[] {0, 0};
