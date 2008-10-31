@@ -47,7 +47,7 @@ import org.osgi.framework.*;
  * @ThreadSafe
  * @version $Revision: 5834 $
  */
-public interface Framework extends Bundle {
+public interface Framework extends SystemBundle {
 
 	/**
 	 * Initialize this Framework. After calling this method, this Framework
