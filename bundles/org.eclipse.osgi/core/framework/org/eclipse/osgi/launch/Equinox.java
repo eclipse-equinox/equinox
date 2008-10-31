@@ -16,33 +16,47 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.osgi.framework.*;
-import org.osgi.framework.launch.SystemBundle;
+import org.osgi.framework.launch.Framework;
 
 /**
  * The System Bundle implementation for the Equinox Framework.
  * 
  * @since 3.5
  */
-public class Equinox implements SystemBundle {
+public class Equinox implements Framework {
 	private static final String implName = "org.eclipse.osgi.framework.internal.core.EquinoxLauncher";
 	/**@GuardedBy this*/
-	private SystemBundle impl;
+	private Framework impl;
 	private final boolean useSeparateCL;
 	private final Map configuration;
 
 	public Equinox(Map configuration) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new AllPermission());
 		useSeparateCL = FrameworkProperties.inUse();
 		this.configuration = configuration;
 	}
 
-	private SystemBundle createImpl() {
+	private Framework createImpl() {
+		if (System.getSecurityManager() == null)
+			return createImpl0();
+		return (Framework) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return createImpl0();
+			}
+		});
+	}
+
+	Framework createImpl0() {
 		try {
 			Class implClazz = getImplClass();
 			Constructor constructor = implClazz.getConstructor(new Class[] {Map.class});
-			return (SystemBundle) constructor.newInstance(new Object[] {configuration});
+			return (Framework) constructor.newInstance(new Object[] {configuration});
 		} catch (ClassNotFoundException e) {
 			throw new NoClassDefFoundError(implName);
 		} catch (IllegalAccessException e) {
@@ -65,7 +79,7 @@ public class Equinox implements SystemBundle {
 		return fwCL.loadClass(implName);
 	}
 
-	private synchronized SystemBundle getImpl() {
+	private synchronized Framework getImpl() {
 		if (impl == null)
 			impl = createImpl();
 		return impl;

@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.*;
@@ -27,6 +30,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
  * Framework.
  */
 public class BundleLoaderProxy implements RequiredBundle {
+	static SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	// The BundleLoader that this BundleLoaderProxy is managing
 	private BundleLoader loader;
 	// The Bundle that this BundleLoaderProxy is for
@@ -45,7 +49,17 @@ public class BundleLoaderProxy implements RequiredBundle {
 		this.pkgSources = new KeyedHashSet(false);
 	}
 
-	public synchronized BundleLoader getBundleLoader() {
+	public BundleLoader getBundleLoader() {
+		if (System.getSecurityManager() == null)
+			return getBundleLoader0();
+		return (BundleLoader) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return getBundleLoader0();
+			}
+		});
+	}
+
+	synchronized BundleLoader getBundleLoader0() {
 		if (loader != null)
 			return loader;
 		if (bundle.isResolved()) {
@@ -173,7 +187,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 	}
 
 	boolean forceSourceCreation(ExportPackageDescription export) {
-		boolean strict = Constants.STRICT_MODE.equals(FrameworkProperties.getProperty(Constants.OSGI_RESOLVER_MODE));
+		boolean strict = Constants.STRICT_MODE.equals(secureAction.getProperty(Constants.OSGI_RESOLVER_MODE));
 		return (export.getDirective(Constants.INCLUDE_DIRECTIVE) != null) || (export.getDirective(Constants.EXCLUDE_DIRECTIVE) != null) || (strict && export.getDirective(Constants.FRIENDS_DIRECTIVE) != null);
 	}
 
@@ -191,7 +205,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 		String excludes = (String) export.getDirective(Constants.EXCLUDE_DIRECTIVE);
 		String[] friends = (String[]) export.getDirective(Constants.FRIENDS_DIRECTIVE);
 		if (friends != null) {
-			boolean strict = Constants.STRICT_MODE.equals(FrameworkProperties.getProperty(Constants.OSGI_RESOLVER_MODE));
+			boolean strict = Constants.STRICT_MODE.equals(secureAction.getProperty(Constants.OSGI_RESOLVER_MODE));
 			if (!strict)
 				friends = null; // do not pay attention to friends if not in strict mode
 		}

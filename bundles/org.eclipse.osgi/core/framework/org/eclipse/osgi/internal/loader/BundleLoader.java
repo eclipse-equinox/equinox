@@ -58,7 +58,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private static final int PRE_LIBRARY = 7;
 	private static final int POST_LIBRARY = 8;
 
-	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(FrameworkProperties.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
+	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(BundleLoaderProxy.secureAction.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
 	private static final List waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList(0) : null;
 	private static Object lockThread;
 	private static int lockCount = 0;

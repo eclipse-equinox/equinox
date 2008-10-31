@@ -20,7 +20,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
-import org.osgi.framework.launch.SystemBundle;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -28,7 +27,7 @@ import org.osgi.framework.launch.SystemBundle;
  * can access the services provided by other bundles.
  */
 
-public class InternalSystemBundle extends BundleHost implements SystemBundle {
+public class InternalSystemBundle extends BundleHost implements org.osgi.framework.launch.Framework {
 	class SystemBundleHeaders extends Dictionary {
 		private final Dictionary headers;
 

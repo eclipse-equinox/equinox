@@ -13,15 +13,15 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.*;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.osgi.framework.*;
-import org.osgi.framework.launch.SystemBundle;
 
-public class EquinoxLauncher implements SystemBundle {
+public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
@@ -32,10 +32,19 @@ public class EquinoxLauncher implements SystemBundle {
 	}
 
 	public void init() {
-		internalInit();
+		checkAdminPermission(AdminPermission.EXECUTE);
+		if (System.getSecurityManager() == null)
+			internalInit();
+		else
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					internalInit();
+					return null;
+				}
+			});
 	}
 
-	private synchronized Framework internalInit() {
+	synchronized Framework internalInit() {
 		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
 			return framework; // no op
 
@@ -96,7 +105,7 @@ public class EquinoxLauncher implements SystemBundle {
 	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
 		Framework current = framework;
 		if (current == null)
-			return new FrameworkEvent(FrameworkEvent.STOPPED, systemBundle, null);
+			return new FrameworkEvent(FrameworkEvent.STOPPED, this, null);
 		return current.waitForStop(timeout);
 	}
 
@@ -218,6 +227,29 @@ public class EquinoxLauncher implements SystemBundle {
 	 * @throws BundleException  
 	 */
 	public void start() throws BundleException {
+		checkAdminPermission(AdminPermission.EXECUTE);
+		if (System.getSecurityManager() == null)
+			internalStart();
+		else
+			try {
+				AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					public Object run() throws BundleException {
+						internalStart();
+						return null;
+					}
+				});
+			} catch (PrivilegedActionException e) {
+				throw (BundleException) e.getException();
+			}
+	}
+
+	private void checkAdminPermission(String actions) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new AdminPermission(this, actions));
+	}
+
+	void internalStart() throws BundleException {
 		if (getState() == Bundle.ACTIVE)
 			return;
 		Framework current = internalInit();
