@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2003, 2005 IBM Corporation and others.
+# Copyright (c) 2003, 2008 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -176,6 +176,7 @@ org.osgi.framework.bootdelegation = \
 org.osgi.framework.executionenvironment = \
  OSGi/Minimum-1.0,\
  OSGi/Minimum-1.1,\
+ OSGi/Minimum-1.2,\
  JRE-1.1,\
  J2SE-1.2,\
  J2SE-1.3,\

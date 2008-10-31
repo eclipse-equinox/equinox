@@ -12,8 +12,8 @@
 -Dee.src=
 -Dee.ext.dirs=
 
--Dee.language.level=1.3
--Dee.class.library.level=OSGi/Minimum-1.1
--Dee.id=OSGi/Minimum-1.0[jclrm,jit]
--Dee.name=OSGi Minimum-1.1
--Dee.description=OSGi/Minimum v1.1
+-Dee.language.level=1.4
+-Dee.class.library.level=OSGi/Minimum-1.2
+-Dee.id=OSGi/Minimum-1.2[jclrm,jit]
+-Dee.name=OSGi Minimum-1.2
+-Dee.description=OSGi/Minimum v1.2
