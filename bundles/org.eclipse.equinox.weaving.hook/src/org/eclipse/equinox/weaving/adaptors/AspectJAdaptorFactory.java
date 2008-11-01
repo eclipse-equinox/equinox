@@ -43,6 +43,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class AspectJAdaptorFactory {
 
+    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics";
+
     private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
                     "org.eclipse.equinox.weaving.caching",
@@ -182,11 +184,15 @@ public class AspectJAdaptorFactory {
                 }
             }
         };
-        try {
-            context.addServiceListener(weavingServiceListener, "("
-                    + Constants.OBJECTCLASS + "="
-                    + IWeavingService.class.getName() + ")");
-        } catch (final InvalidSyntaxException e) { // This is correct!
+
+        if (System.getProperty(WEAVING_SERVICE_DYNAMICS_PROPERTY, "false")
+                .equals("true")) {
+            try {
+                context.addServiceListener(weavingServiceListener, "("
+                        + Constants.OBJECTCLASS + "="
+                        + IWeavingService.class.getName() + ")");
+            } catch (final InvalidSyntaxException e) { // This is correct!
+            }
         }
 
         // Service tracker for caching service
