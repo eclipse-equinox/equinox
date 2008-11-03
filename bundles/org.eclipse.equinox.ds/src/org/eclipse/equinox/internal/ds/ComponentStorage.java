@@ -90,6 +90,10 @@ public abstract class ComponentStorage {
 							Activator.log.error("[SCR] Error occurred while opening component definition file " + url, ie);
 						} catch (Throwable t) {
 							Activator.log.error("[SCR] Illegal definition file: " + url, t);
+						} finally {
+							if (is != null) {
+								is.close();
+							}
 						}
 					}
 				} // end while
