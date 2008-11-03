@@ -37,6 +37,10 @@ public class InvalidSyntaxException extends Exception {
 	 * The invalid filter string.
 	 */
 	private final String	filter;
+	/**
+	 * Nested exception.
+	 */
+	private final Throwable	cause;
 
 	/**
 	 * Creates an exception of type <code>InvalidSyntaxException</code>.
@@ -52,6 +56,7 @@ public class InvalidSyntaxException extends Exception {
 	public InvalidSyntaxException(String msg, String filter) {
 		super(msg);
 		this.filter = filter;
+		this.cause = null;
 	}
 
 	/**
@@ -68,8 +73,9 @@ public class InvalidSyntaxException extends Exception {
 	 * @since 1.3
 	 */
 	public InvalidSyntaxException(String msg, String filter, Throwable cause) {
-		super(msg, cause);
+		super(msg);
 		this.filter = filter;
+		this.cause = cause;
 	}
 
 	/**
@@ -82,5 +88,31 @@ public class InvalidSyntaxException extends Exception {
 	 */
 	public String getFilter() {
 		return filter;
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause
+	 * was specified when this exception was created.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause
+	 *         was specified.
+	 * @since 1.3
+	 */
+	public Throwable getCause() {
+		return cause;
+	}
+
+	/**
+	 * The cause of this exception can only be set when constructed.
+	 * 
+	 * @param cause Cause of the exception.
+	 * @return This object.
+	 * @throws java.lang.IllegalStateException This method will always throw an
+	 *         <code>IllegalStateException</code> since the cause of this
+	 *         exception can only be set when constructed.
+	 * @since 1.3
+	 */
+	public Throwable initCause(Throwable cause) {
+		throw new IllegalStateException();
 	}
 }
