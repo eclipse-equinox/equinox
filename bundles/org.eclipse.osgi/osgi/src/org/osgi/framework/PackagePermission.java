@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,29 +34,30 @@ import java.util.HashMap;
  * For example:
  * 
  * <pre>
- * <code>
  * org.osgi.service.http
- * </code>
  * </pre>
  * 
  * <p>
- * <code>PackagePermission</code> has two actions: <code>EXPORT</code> and
- * <code>IMPORT</code>. The <code>EXPORT</code> action implies the
- * <code>IMPORT</code> action.
+ * <code>PackagePermission</code> has two actions: <code>export</code> and
+ * <code>import</code>. The <code>export</code> action implies the
+ * <code>import</code> action.
  * 
  * @ThreadSafe
- * @version $Revision: 5042 $
+ * @version $Revision: 5654 $
  */
 
 public final class PackagePermission extends BasicPermission {
 	static final long			serialVersionUID	= -5107705877071099135L;
+	
 	/**
-	 * The action string <code>export</code>.
+	 * The action string <code>export</code>. The <code>export</code> action
+	 * implies the <code>import</code> action.
 	 */
 	public final static String	EXPORT				= "export";
 
 	/**
-	 * The action string <code>import</code>.
+	 * The action string <code>import</code>. The <code>import</code> action is
+	 * implied by the <code>export</code> action.
 	 */
 	public final static String	IMPORT				= "import";
 
@@ -96,15 +95,14 @@ public final class PackagePermission extends BasicPermission {
 	 * Package Permissions are granted over all possible versions of a package.
 	 * 
 	 * A bundle that needs to export a package must have the appropriate
-	 * <code>PackagePermission</code> for that package; similarly, a bundle
-	 * that needs to import a package must have the appropriate
+	 * <code>PackagePermission</code> for that package; similarly, a bundle that
+	 * needs to import a package must have the appropriate
 	 * <code>PackagePermssion</code> for that package.
 	 * <p>
 	 * Permission is granted for both classes and resources.
 	 * 
 	 * @param name Package name.
-	 * @param actions <code>EXPORT</code>,<code>IMPORT</code> (canonical
-	 *        order).
+	 * @param actions <code>export</code>,<code>import</code> (canonical order).
 	 */
 
 	public PackagePermission(String name, String actions) {

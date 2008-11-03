@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-31 15:04:40 -0400 (Thu, 31 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +17,7 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
+
 import org.osgi.framework.ServiceEvent;
 
 /**
@@ -26,28 +25,29 @@ import org.osgi.framework.ServiceEvent;
  * 
  * <p>
  * Bundles registering this service will be called during framework service
- * publish (register, modify, and unregister service) operations. Service hooks
- * are not called for service operations on other service hooks.
+ * publish (register, modify, and unregister service) operations.
  * 
  * @ThreadSafe
- * @version $Revision: 5215 $
+ * @version $Revision: 5793 $
  */
 
 public interface PublishHook {
 	/**
 	 * Event hook method. This method is called prior to service event delivery
-	 * when a publishing bundle registers, modifies or unregisters a service and
-	 * can filter the bundles which receive the event.
+	 * when a publishing bundle registers, modifies or unregisters a service.
+	 * This method can filter the bundles which receive the event.
 	 * 
 	 * @param event The service event to be delivered.
-	 * @param bundles A <code>Collection</code> of BundleContextss which have listeners
-	 *        to which the event may be delivered. The method implementation may
-	 *        remove bundles from the collection to prevent the event from being
-	 *        delivered to those bundles. The collection supports all the
-	 *        optional <code>Collection</code> operations except
-	 *        <code>add</code> and <code>addAll</code>. Attempting to add to the
-	 *        collection will result in an
-	 *        <code>UnsupportedOperationException</code>.
+	 * @param contexts A <code>Collection</code> of Bundle Contexts for bundles
+	 *        which have listeners to which the specified event will be
+	 *        delivered. The method implementation may remove bundle contexts
+	 *        from the collection to prevent the event from being delivered to
+	 *        the associated bundles. The collection supports all the optional
+	 *        <code>Collection</code> operations except <code>add</code> and
+	 *        <code>addAll</code>. Attempting to add to the collection will
+	 *        result in an <code>UnsupportedOperationException</code>. The
+	 *        collection is not synchronized.
 	 */
-	void event(ServiceEvent event, Collection contexts);
+	void event(ServiceEvent event,
+			Collection/* <? extends BundleContext> */contexts);
 }

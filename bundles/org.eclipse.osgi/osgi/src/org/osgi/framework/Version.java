@@ -1,7 +1,5 @@
 /*
- * $Date: 2008-07-25 12:51:53 -0400 (Fri, 25 Jul 2008) $
- * 
- * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +37,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Revision: 5193 $
+ * @version $Revision: 5673 $
  */
 
 public class Version implements Comparable {

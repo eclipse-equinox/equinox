@@ -1,7 +1,5 @@
 /*
- * $Date: 2008-03-11 16:05:57 -0400 (Tue, 11 Mar 2008) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +32,7 @@ import java.util.Dictionary;
  * 
  * @see BundleContext#registerService(String[],Object,Dictionary)
  * @ThreadSafe
- * @version $Revision: 5077 $
+ * @version $Revision: 5673 $
  */
 
 public interface ServiceRegistration {

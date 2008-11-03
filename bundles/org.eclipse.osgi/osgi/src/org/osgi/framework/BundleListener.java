@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +34,7 @@ import java.util.EventListener;
  * 
  * @see BundleEvent
  * @NotThreadSafe
- * @version $Revision: 4930 $
+ * @version $Revision: 5673 $
  */
 
 public interface BundleListener extends EventListener {

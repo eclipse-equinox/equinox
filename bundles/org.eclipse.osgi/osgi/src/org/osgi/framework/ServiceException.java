@@ -1,7 +1,5 @@
 /*
- * $Date: 2008-01-10 15:05:00 -0500 (Thu, 10 Jan 2008) $
- * 
- * Copyright (c) OSGi Alliance (2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2007, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +31,12 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Revision: 5048 $
+ * @version $Revision: 5837 $
  * @since 1.5
  */
 
 public class ServiceException extends RuntimeException {
 	static final long		serialVersionUID	= 3038963223712959631L;
-	/**
-	 * Nested exception.
-	 */
-	private final Throwable	cause;
 
 	/**
 	 * Type of service exception.
@@ -88,7 +82,7 @@ public class ServiceException extends RuntimeException {
 	 * @param msg The message.
 	 */
 	public ServiceException(String msg) {
-		this(msg, UNSPECIFIED, null);
+		this(msg, UNSPECIFIED);
 	}
 
 	/**
@@ -100,9 +94,8 @@ public class ServiceException extends RuntimeException {
 	 * @param cause The cause of this exception.
 	 */
 	public ServiceException(String msg, int type, Throwable cause) {
-		super(msg);
+		super(msg, cause);
 		this.type = type;
-		this.cause = cause;
 	}
 
 	/**
@@ -113,31 +106,8 @@ public class ServiceException extends RuntimeException {
 	 * @param type The type for this exception.
 	 */
 	public ServiceException(String msg, int type) {
-		this(msg, type, null);
-	}
-
-	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause
-	 * was specified when this exception was created.
-	 * 
-	 * @return The cause of this exception or <code>null</code> if no cause
-	 *         was specified.
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
-
-	/**
-	 * The cause of this exception can only be set when constructed.
-	 * 
-	 * @param cause Cause of the exception.
-	 * @return This object.
-	 * @throws java.lang.IllegalStateException This method will always throw an
-	 *         <code>IllegalStateException</code> since the cause of this
-	 *         exception can only be set when constructed.
-	 */
-	public Throwable initCause(Throwable cause) {
-		throw new IllegalStateException();
+		super(msg);
+		this.type = type;
 	}
 
 	/**

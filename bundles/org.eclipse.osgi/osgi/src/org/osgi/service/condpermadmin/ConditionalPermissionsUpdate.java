@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-18 09:23:22 -0400 (Fri, 18 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +24,7 @@ import java.util.List;
  * Table has been modified since this update was created, then the call to
  * commit will fail and this object should be discarded.
  * 
- * @version $Revision: 5188 $
+ * @version $Revision: 5654 $
  * @since 1.1
  */
 public interface ConditionalPermissionsUpdate {

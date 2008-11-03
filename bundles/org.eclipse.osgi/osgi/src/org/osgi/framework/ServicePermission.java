@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-08 09:04:25 -0400 (Tue, 08 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,10 +27,10 @@ import java.util.HashMap;
 /**
  * A bundle's authority to register or get a service.
  * <ul>
- * <li>The <code>ServicePermission.REGISTER</code> action allows a bundle to
- * register a service on the specified names.
- * <li>The <code>ServicePermission.GET</code> action allows a bundle to
- * detect a service and get it.
+ * <li>The <code>register</code> action allows a bundle to register a service on
+ * the specified names.
+ * <li>The <code>get</code> action allows a bundle to detect a service and get
+ * it.
  * </ul>
  * Permission to get a service is required in order to detect events regarding
  * the service. Untrusted bundles should not be able to detect the presence of
@@ -40,7 +38,7 @@ import java.util.HashMap;
  * <code>ServicePermission</code> to get the specific service.
  * 
  * @ThreadSafe
- * @version $Revision: 5168 $
+ * @version $Revision: 5654 $
  */
 
 final public class ServicePermission extends BasicPermission {

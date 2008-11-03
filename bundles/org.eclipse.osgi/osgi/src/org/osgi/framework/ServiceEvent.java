@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-06-16 15:29:46 -0400 (Mon, 16 Jun 2008) $
- * 
  * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +32,7 @@ import java.util.EventObject;
  * @Immutable
  * @see ServiceListener
  * @see AllServiceListener
- * @version $Revision: 5117 $
+ * @version $Revision: 5654 $
  */
 
 public class ServiceEvent extends EventObject {

@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-10-10 08:28:24 -0400 (Wed, 10 Oct 2007) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +63,7 @@ import java.util.Enumeration;
  * Framework that created them.
  * 
  * @ThreadSafe
- * @version $Revision: 5011 $
+ * @version $Revision: 5673 $
  */
 public interface Bundle {
 	/**

@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-10-11 11:26:56 -0400 (Thu, 11 Oct 2007) $
- * 
- * Copyright (c) OSGi Alliance (2002, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2002, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +67,7 @@ import org.osgi.framework.Bundle;
  * start level of the framework.
  * 
  * @ThreadSafe
- * @version $Revision: 5021 $
+ * @version $Revision: 5673 $
  */
 public interface StartLevel {
 	/**
@@ -153,7 +151,9 @@ public interface StartLevel {
 	 * @param bundle The target bundle.
 	 * @return The start level value of the specified Bundle.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 */
 	public int getBundleStartLevel(Bundle bundle);
 
@@ -184,11 +184,13 @@ public interface StartLevel {
 	 * @param bundle The target bundle.
 	 * @param startlevel The new start level for the specified Bundle.
 	 * @throws IllegalArgumentException If the specified bundle has been
-	 *         uninstalled or if the specified start level is less than or equal
-	 *         to zero, or the specified bundle is the system bundle.
+	 *         uninstalled, or if the specified start level is less than or
+	 *         equal to zero, or if the specified bundle is the system bundle,
+	 *         or if the specified bundle was not created by the same framework
+	 *         instance that registered this <code>PackageAdmin</code> service.
 	 * @throws SecurityException If the caller does not have
-	 *         <code>AdminPermission[bundle,EXECUTE]</code> and the Java
-	 *         runtime environment supports permissions.
+	 *         <code>AdminPermission[bundle,EXECUTE]</code> and the Java runtime
+	 *         environment supports permissions.
 	 */
 	public void setBundleStartLevel(Bundle bundle, int startlevel);
 
@@ -242,7 +244,9 @@ public interface StartLevel {
 	 *         indicates the bundle is to be started. <code>false</code>
 	 *         otherwise.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 * @see Bundle#START_TRANSIENT
 	 */
 	public boolean isBundlePersistentlyStarted(Bundle bundle);
@@ -255,11 +259,13 @@ public interface StartLevel {
 	 * activation policy is to be used when the bundle is started.
 	 * 
 	 * @param bundle The bundle whose autostart setting is to be examined.
-	 * @return <code>true</code> if the bundle's autostart setting indicates
-	 *         the activation policy declared in the manifest must be used.
+	 * @return <code>true</code> if the bundle's autostart setting indicates the
+	 *         activation policy declared in the manifest must be used.
 	 *         <code>false</code> if the bundle must be eagerly activated.
 	 * @throws java.lang.IllegalArgumentException If the specified bundle has
-	 *         been uninstalled.
+	 *         been uninstalled or if the specified bundle was not created by
+	 *         the same framework instance that registered this
+	 *         <code>StartLevel</code> service.
 	 * @since 1.1
 	 * @see Bundle#START_ACTIVATION_POLICY
 	 */

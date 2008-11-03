@@ -1,7 +1,5 @@
 /*
- * $Date: 2008/07/31 22:25:18 $
- * 
- * Copyright (c) OSGi Alliance (2005, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +27,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 1.9 $
+ * @version $Revision: 5673 $
  */
 public class FrameworkUtil {
 	/*

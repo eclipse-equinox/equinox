@@ -1,7 +1,5 @@
 /*
- * $Date: 2008/10/17 23:11:16 $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,38 +54,41 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  *  startlevel           StartLevel.setStartLevel
  *                       StartLevel.setInitialBundleStartLevel 
  *  context              Bundle.getBundleContext                     
- *                       
  * </pre>
  * 
  * <p>
- * The special action &quot;*&quot; will represent all actions.
+ * The special action &quot;*&quot; will represent all actions. The
+ * <code>resolve</code> action is implied by the <code>class</code>,
+ * <code>execute</code> and <code>resource</code> actions.
  * <p>
  * The name of this permission is a filter expression. The filter gives access
  * to the following parameters:
  * <ul>
- * <li>signer - A Distinguished Name chain used to sign a bundle. Wildcards in
- * a DN are not matched according to the filter string rules, but according to
- * the rules defined for a DN chain.</li>
+ * <li>signer - A Distinguished Name chain used to sign a bundle. Wildcards in a
+ * DN are not matched according to the filter string rules, but according to the
+ * rules defined for a DN chain.</li>
  * <li>location - The location of a bundle.</li>
  * <li>id - The bundle ID of the designated bundle.</li>
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 1.28 $
+ * @version $Revision: 5654 $
  */
 
 public final class AdminPermission extends BasicPermission {
 	static final long serialVersionUID = 307051004521261705L;
 
 	/**
-	 * The action string <code>class</code> (Value is "class").
+	 * The action string <code>class</code> (Value is "class"). The
+	 * <code>class</code> action implies the <code>resolve</code> action.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String CLASS = "class";
 	/**
-	 * The action string <code>execute</code> (Value is "execute").
+	 * The action string <code>execute</code> (Value is "execute"). The
+	 * <code>execute</code> action implies the <code>resolve</code> action.
 	 * 
 	 * @since 1.3
 	 */
@@ -118,13 +119,16 @@ public final class AdminPermission extends BasicPermission {
 	 */
 	public final static String METADATA = "metadata";
 	/**
-	 * The action string <code>resolve</code> (Value is "resolve").
+	 * The action string <code>resolve</code> (Value is "resolve"). The
+	 * <code>resolve</code> action is implied by the <code>class</code>,
+	 * <code>execute</code> and <code>resource</code> actions.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String RESOLVE = "resolve";
 	/**
-	 * The action string <code>resource</code> (Value is "resource").
+	 * The action string <code>resource</code> (Value is "resource"). The
+	 * <code>resource</code> action implies the <code>resolve</code> action.
 	 * 
 	 * @since 1.3
 	 */

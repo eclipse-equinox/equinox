@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-17 23:00:06 -0400 (Thu, 17 Jul 2008) $
- *
  * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +44,7 @@ import java.util.ArrayList;
  * </ul>
  * 
  * @Immutable
- * @version $Revision: 5183 $
+ * @version $Revision: 5654 $
  */
 public class ConditionInfo {
 	private final String	type;

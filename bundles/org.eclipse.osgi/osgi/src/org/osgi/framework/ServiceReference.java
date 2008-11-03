@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-08-09 21:17:58 -0400 (Thu, 09 Aug 2007) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +44,7 @@ package org.osgi.framework;
  * @see BundleContext#getServiceReferences
  * @see BundleContext#getService
  * @ThreadSafe
- * @version $Revision: 4930 $
+ * @version $Revision: 5673 $
  */
 
 public interface ServiceReference extends Comparable {
@@ -146,7 +144,9 @@ public interface ServiceReference extends Comparable {
 	 *         referenced by this <code>ServiceReference</code> and the
 	 *         specified bundle use the same source for the package of the
 	 *         specified class name. Otherwise <code>false</code> is returned.
-	 * 
+	 * @throws IllegalArgumentException If the specified <code>Bundle</code> was
+	 *         not created by the same framework instance as this
+	 *         <code>ServiceReference</code>.
 	 * @since 1.3
 	 */
 	public boolean isAssignableTo(Bundle bundle, String className);
@@ -157,10 +157,9 @@ public interface ServiceReference extends Comparable {
 	 * 
 	 * <p>
 	 * If this <code>ServiceReference</code> and the specified
-	 * <code>ServiceReference</code> have the same
-	 * {@link Constants#SERVICE_ID service id} they are equal. This
-	 * <code>ServiceReference</code> is less than the specified
-	 * <code>ServiceReference</code> if it has a lower
+	 * <code>ServiceReference</code> have the same {@link Constants#SERVICE_ID
+	 * service id} they are equal. This <code>ServiceReference</code> is less
+	 * than the specified <code>ServiceReference</code> if it has a lower
 	 * {@link Constants#SERVICE_RANKING service ranking} and greater if it has a
 	 * higher service ranking. Otherwise, if this <code>ServiceReference</code>
 	 * and the specified <code>ServiceReference</code> have the same
@@ -172,8 +171,11 @@ public interface ServiceReference extends Comparable {
 	 * 
 	 * @param reference The <code>ServiceReference</code> to be compared.
 	 * @return Returns a negative integer, zero, or a positive integer if this
-	 *         <code>ServiceReference</code> is less than, equal to, or
-	 *         greater than the specified <code>ServiceReference</code>.
+	 *         <code>ServiceReference</code> is less than, equal to, or greater
+	 *         than the specified <code>ServiceReference</code>.
+	 * @throws IllegalArgumentException If the specified
+	 *         <code>ServiceReference</code> was not created by the framework
+	 *         instance as this <code>ServiceReference</code>.
 	 * @since 1.4
 	 */
 	public int compareTo(Object reference);

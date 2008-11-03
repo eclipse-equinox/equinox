@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-10 17:24:58 -0400 (Thu, 10 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,48 +17,56 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
+
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceListener;
 
 /**
  * OSGi Framework Service Listener Hook Service.
  * 
  * <p>
  * Bundles registering this service will be called during service listener
- * addition and removal. Service hooks are not called for service operations on
- * other service hooks.
+ * addition and removal.
  * 
  * @ThreadSafe
- * @version $Revision: 5176 $
+ * @version $Revision: 5793 $
  */
 
 public interface ListenerHook {
 	/**
-	 * Add listener hook method. This method is called during service listener
-	 * addition. This method will be called once for each service listener added
-	 * after this hook had been registered.
+	 * Added listeners hook method. This method is called to provide the hook
+	 * implementation with information on the current service listeners. This
+	 * method will be called immediately after registration of this hook to
+	 * provide the current collection of service listeners which had been added
+	 * prior to the hook being registered. This method will also be called as
+	 * service listeners are added while this hook is registered.
 	 * 
-	 * @param listener A listener which is now listening to service events.
+	 * @param listeners A collection of {@link ListenerInfo}s for service
+	 *        listeners which are now listening to service events. Attempting to
+	 *        add to or remove from the collection will result in an
+	 *        <code>UnsupportedOperationException</code>. The collection is not
+	 *        synchronized.
 	 */
-	void added(Collection listeners);
+	void added(Collection/* <? extends ListenerInfo> */listeners);
 
 	/**
-	 * Remove listener hook method. This method is called during service
-	 * listener removal. This method will be called once for each service
-	 * listener removed after this hook had been registered.
+	 * Removed listeners hook method. This method is called to provide the hook
+	 * implementation with information on removed service listeners. This method
+	 * will be called as service listeners are removed while this hook is
+	 * registered.
 	 * 
-	 * @param listener A listener which is no longer listening to service
-	 * 	events.
+	 * @param listeners A collection of {@link ListenerInfo}s for service
+	 *        listeners which are no longer listening to service events.
+	 *        Attempting to add to or remove from the collection will result in
+	 *        an <code>UnsupportedOperationException</code>. The collection is
+	 *        not synchronized.
 	 */
-	void removed(Collection listeners);
+	void removed(Collection/* <? extends ListenerInfo> */listeners);
 
 	/**
-	 * A Service Listener wrapper. This immutable class encapsulates a {@link
-	 * ServiceListener} and the bundle which added it and the filter with which
-	 * it was added. Objects of this type are created by the framework and
-	 * passed to the {@link ListenerHook}.
+	 * Information about a Service Listener. This interface describes the bundle
+	 * which added the Service Listener and the filter with which it was added.
 	 * 
-	 * @Immutable
+	 * @ThreadSafe
 	 */
 	public interface ListenerInfo {
 		/**
@@ -71,10 +77,11 @@ public interface ListenerHook {
 		public BundleContext getBundleContext();
 
 		/**
-		 * Return the filter with which the listener was added.
+		 * Return the filter string with which the listener was added.
 		 * 
-		 * @return The filter with which the listener was added. This may be
-		 * 	<code>null</code> if the listener was added without a filter.
+		 * @return The filter string with which the listener was added. This may
+		 *         be <code>null</code> if the listener was added without a
+		 *         filter.
 		 */
 		public String getFilter();
 	}

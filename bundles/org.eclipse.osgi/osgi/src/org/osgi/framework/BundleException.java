@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
- * 
- * Copyright (c) OSGi Alliance (2000, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +32,11 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Revision: 5042 $
+ * @version $Revision: 5837 $
  */
 
 public class BundleException extends Exception {
 	static final long		serialVersionUID		= 3571095144220455665L;
-	/**
-	 * Nested exception.
-	 */
-	private final Throwable	cause;
-
 	/**
 	 * Type of bundle exception.
 	 * 
@@ -114,6 +107,14 @@ public class BundleException extends Exception {
 	 * @since 1.5
 	 */
 	public static final int	DUPLICATE_BUNDLE_ERROR	= 9;
+	
+    /**
+	 * The start transient operation failed because the start level of the
+	 * bundle is greater than the current framework start level
+	 * 
+	 * @since 1.5
+	 */
+	public static final int	START_TRANSIENT_ERROR	= 10;
 
 	/**
 	 * Creates a <code>BundleException</code> with the specified message and
@@ -132,7 +133,7 @@ public class BundleException extends Exception {
 	 * @param msg The message.
 	 */
 	public BundleException(String msg) {
-		this(msg, UNSPECIFIED, null);
+		this(msg, UNSPECIFIED);
 	}
 
 	/**
@@ -145,9 +146,8 @@ public class BundleException extends Exception {
 	 * @since 1.5
 	 */
 	public BundleException(String msg, int type, Throwable cause) {
-		super(msg);
+		super(msg, cause);
 		this.type = type;
-		this.cause = cause;
 	}
 
 	/**
@@ -159,48 +159,23 @@ public class BundleException extends Exception {
 	 * @since 1.5
 	 */
 	public BundleException(String msg, int type) {
-		this(msg, type, null);
+		super(msg);
+		this.type = type;
 	}
 
 	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause
-	 * was specified when this exception was created.
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * specified when this exception was created.
 	 * 
 	 * <p>
 	 * This method predates the general purpose exception chaining mechanism.
-	 * The {@link #getCause()} method is now the preferred means of obtaining
-	 * this information.
+	 * The <code>getCause()</code> method is now the preferred means of
+	 * obtaining this information.
 	 * 
-	 * @return The result of calling {@link #getCause()}.
+	 * @return The result of calling <code>getCause()</code>.
 	 */
 	public Throwable getNestedException() {
 		return getCause();
-	}
-
-	/**
-	 * Returns the cause of this exception or <code>null</code> if no cause
-	 * was specified when this exception was created.
-	 * 
-	 * @return The cause of this exception or <code>null</code> if no cause
-	 *         was specified.
-	 * @since 1.3
-	 */
-	public Throwable getCause() {
-		return cause;
-	}
-
-	/**
-	 * The cause of this exception can only be set when constructed.
-	 * 
-	 * @param cause Cause of the exception.
-	 * @return This object.
-	 * @throws java.lang.IllegalStateException This method will always throw an
-	 *         <code>IllegalStateException</code> since the cause of this
-	 *         exception can only be set when constructed.
-	 * @since 1.3
-	 */
-	public Throwable initCause(Throwable cause) {
-		throw new IllegalStateException();
 	}
 
 	/**

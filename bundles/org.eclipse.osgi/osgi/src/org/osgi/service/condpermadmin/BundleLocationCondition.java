@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-17 23:02:47 -0400 (Thu, 17 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +34,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * Pattern matching is done according to the filter string matching rules.
  * 
  * @ThreadSafe
- * @version $Revision: 5185 $
+ * @version $Revision: 5654 $
  */
 public class BundleLocationCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleLocationCondition";

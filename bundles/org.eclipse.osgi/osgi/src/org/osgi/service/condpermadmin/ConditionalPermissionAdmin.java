@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-18 09:23:22 -0400 (Fri, 18 Jul 2008) $
- * 
  * Copyright (c) OSGi Alliance (2005, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +28,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * the Conditional Permission Table.
  * 
  * @ThreadSafe
- * @version $Revision: 5188 $
+ * @version $Revision: 5654 $
  */
 public interface ConditionalPermissionAdmin {
 	/**

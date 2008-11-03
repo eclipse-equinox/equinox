@@ -1,7 +1,5 @@
 /*
- * $Date: 2007-12-19 15:42:59 -0500 (Wed, 19 Dec 2007) $
- * 
- * Copyright (c) OSGi Alliance (2001, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +42,7 @@ import org.osgi.framework.Version;
  * return <code>null</code>.
  * 
  * @ThreadSafe
- * @version $Revision: 5042 $
+ * @version $Revision: 5673 $
  */
 public interface ExportedPackage {
 	/**

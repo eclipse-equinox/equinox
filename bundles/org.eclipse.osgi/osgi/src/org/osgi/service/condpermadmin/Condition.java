@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-07-17 23:01:04 -0400 (Thu, 17 Jul 2008) $
- *
  * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +24,7 @@ import java.util.Dictionary;
  * Info can only be used if the associated Conditions are satisfied.
  * 
  * @ThreadSafe
- * @version $Revision: 5184 $
+ * @version $Revision: 5654 $
  */
 public interface Condition {
 	/**
