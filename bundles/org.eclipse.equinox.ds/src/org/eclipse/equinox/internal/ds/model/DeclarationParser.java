@@ -256,8 +256,18 @@ public class DeclarationParser implements ExTagListener {
 
 		String bind = tag.getAttribute(ATTR_BIND);
 		String unbind = tag.getAttribute(ATTR_UNBIND);
-		if ((bind != null && ((unbind == null) || bind.equals("") || bind.equals(unbind))) || (unbind != null && ((bind == null) || unbind.equals("") || unbind.equals(bind)))) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: you must specify both but different 'bind' and 'unbind' attributes!");
+		if (bind != null) {
+			if (bind.equals("")) {
+				IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'bind' attribute is empty!");
+				throw e;
+			}
+			if (bind.equals(unbind)) {
+				IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'bind' and 'unbind' values are equal!");
+				throw e;
+			}
+		}
+		if (unbind != null && unbind.equals("")) {
+			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'unbind' attribute is empty!");
 			throw e;
 		}
 
