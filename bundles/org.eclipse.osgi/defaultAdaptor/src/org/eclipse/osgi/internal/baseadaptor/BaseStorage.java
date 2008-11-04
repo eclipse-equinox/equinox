@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - Spring Source (bug 247520)  
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.baseadaptor;
@@ -106,7 +107,9 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	private long timeStamp = 0;
 	private int initialBundleStartLevel = 1;
-	private long nextId = 1;
+
+	private final Object nextIdMonitor = new Object();
+	private volatile long nextId = 1;
 	/**
 	 * directory containing installed bundles 
 	 */
@@ -1232,7 +1235,9 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	public long getNextBundleId() {
-		return nextId++;
+		synchronized (this.nextIdMonitor) {
+			return nextId++;
+		}
 	}
 
 	public void bundleChanged(BundleEvent event) {
