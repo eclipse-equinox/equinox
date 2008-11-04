@@ -73,7 +73,7 @@ import org.eclipse.osgi.framework.internal.core.FilterImpl;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Revision: 5654 $
+ * @version $Revision: 1.30 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -157,17 +157,7 @@ public final class AdminPermission extends BasicPermission {
 	private final static int ACTION_STARTLEVEL = 0x00000100;
 	private final static int ACTION_EXTENSIONLIFECYCLE = 0x00000200;
 	private final static int ACTION_CONTEXT = 0x00000400;
-    private final static int ACTION_ALL = 
-		ACTION_CLASS 				|
-		ACTION_EXECUTE 				|
-		ACTION_LIFECYCLE 			|
-		ACTION_LISTENER 			|
-    	ACTION_METADATA 			|
-		ACTION_RESOLVE 				|
-		ACTION_RESOURCE 			|
-		ACTION_STARTLEVEL			|
-		ACTION_EXTENSIONLIFECYCLE |
-		ACTION_CONTEXT;
+	private final static int ACTION_ALL = ACTION_CLASS | ACTION_EXECUTE | ACTION_LIFECYCLE | ACTION_LISTENER | ACTION_METADATA | ACTION_RESOLVE | ACTION_RESOURCE | ACTION_STARTLEVEL | ACTION_EXTENSIONLIFECYCLE | ACTION_CONTEXT;
 	private final static int ACTION_NONE = 0;
 
 	/**
@@ -199,14 +189,14 @@ public final class AdminPermission extends BasicPermission {
 	 * The bundle governed by this AdminPermission - only used if 
 	 * wildcard is false and filter == null
 	 */
-	private transient Bundle bundle;
+	transient Bundle bundle;
 
 	/**
 	 * If this AdminPermission was constructed with a bundle, this dictionary holds
 	 * the properties of that bundle, used to match a filter in implies.
 	 * This is not initialized until necessary, and then cached in this object.
 	 */
-	private transient Dictionary bundleProperties;
+	transient Dictionary bundleProperties;
 
 	/**
 	 * If this AdminPermission was constructed with a filter, this dictionary holds
@@ -256,8 +246,7 @@ public final class AdminPermission extends BasicPermission {
 	public AdminPermission(String filter, String actions) {
 		//arguments will be null if called from a PermissionInfo defined with
 		//no args
-    	this(
-    			(filter == null ? "*" : filter), //$NON-NLS-1$
+		this((filter == null ? "*" : filter), //$NON-NLS-1$
 				getMask((actions == null ? "*" : actions)) //$NON-NLS-1$
 		);
 	}
@@ -314,10 +303,7 @@ public final class AdminPermission extends BasicPermission {
 
 		AdminPermission a = (AdminPermission) obj;
 
-        return (action_mask == a.action_mask) &&
-        		(wildcard == a.wildcard) &&
-        		(bundle == null ? a.bundle == null : (a.bundle == null ? false : bundle.getBundleId() == a.bundle.getBundleId())) &&
-				(filter == null ? a.filter == null : filter.equals(a.filter));
+		return (action_mask == a.action_mask) && (wildcard == a.wildcard) && (bundle == null ? a.bundle == null : (a.bundle == null ? false : bundle.getBundleId() == a.bundle.getBundleId())) && (filter == null ? a.filter == null : filter.equals(a.filter));
 	}
 
 	/**
@@ -522,164 +508,61 @@ public final class AdminPermission extends BasicPermission {
 			char c;
 
 			// skip whitespace
-    		while ((i!=-1) && ((c = a[i]) == ' ' ||
-    				c == '\r' ||
-					c == '\n' ||
-					c == '\f' ||
-					c == '\t'))
+			while ((i != -1) && ((c = a[i]) == ' ' || c == '\r' || c == '\n' || c == '\f' || c == '\t'))
 				i--;
 
 			// check for the known strings
 			int matchlen;
 
-    		if (i >= 4 && 
-					(a[i-4] == 'c' || a[i-4] == 'C') &&
-					(a[i-3] == 'l' || a[i-3] == 'L') &&
-					(a[i-2] == 'a' || a[i-2] == 'A') &&
-					(a[i-1] == 's' || a[i-1] == 'S') &&
-					  (a[i] == 's' ||   a[i] == 'S'))
-			{
+			if (i >= 4 && (a[i - 4] == 'c' || a[i - 4] == 'C') && (a[i - 3] == 'l' || a[i - 3] == 'L') && (a[i - 2] == 'a' || a[i - 2] == 'A') && (a[i - 1] == 's' || a[i - 1] == 'S') && (a[i] == 's' || a[i] == 'S')) {
 				matchlen = 5;
 				mask |= ACTION_CLASS | ACTION_RESOLVE;
 
-    		} else if (i >= 6 && 
-					(a[i-6] == 'e' || a[i-6] == 'E') &&
-					(a[i-5] == 'x' || a[i-5] == 'X') &&
-					(a[i-4] == 'e' || a[i-4] == 'E') &&
-					(a[i-3] == 'c' || a[i-3] == 'C') &&
-					(a[i-2] == 'u' || a[i-2] == 'U') &&
-					(a[i-1] == 't' || a[i-1] == 'T') &&
-					  (a[i] == 'e' ||   a[i] == 'E'))
-			{
+			} else if (i >= 6 && (a[i - 6] == 'e' || a[i - 6] == 'E') && (a[i - 5] == 'x' || a[i - 5] == 'X') && (a[i - 4] == 'e' || a[i - 4] == 'E') && (a[i - 3] == 'c' || a[i - 3] == 'C') && (a[i - 2] == 'u' || a[i - 2] == 'U') && (a[i - 1] == 't' || a[i - 1] == 'T') && (a[i] == 'e' || a[i] == 'E')) {
 				matchlen = 7;
 				mask |= ACTION_EXECUTE | ACTION_RESOLVE;
 
-			} else if (i >= 17 && 
-					(a[i-17] == 'e' || a[i-17] == 'E') &&
-					(a[i-16] == 'x' || a[i-16] == 'X') &&
-					(a[i-15] == 't' || a[i-15] == 'T') &&
-					(a[i-14] == 'e' || a[i-14] == 'E') &&
-					(a[i-13] == 'n' || a[i-13] == 'N') &&
-					(a[i-12] == 's' || a[i-12] == 'S') &&
-					(a[i-11] == 'i' || a[i-11] == 'I') &&
-					(a[i-10] == 'o' || a[i-10] == 'O') &&
-					(a[i-9] == 'n' || a[i-9] == 'N') &&
-					(a[i-8] == 'l' || a[i-8] == 'L') &&
-					(a[i-7] == 'i' || a[i-7] == 'I') &&
-					(a[i-6] == 'f' || a[i-6] == 'F') &&
-					(a[i-5] == 'e' || a[i-5] == 'E') &&
-					(a[i-4] == 'c' || a[i-4] == 'C') &&
-					(a[i-3] == 'y' || a[i-3] == 'Y') &&
-					(a[i-2] == 'c' || a[i-2] == 'C') &&
-					(a[i-1] == 'l' || a[i-1] == 'L') &&
-					  (a[i] == 'e' ||   a[i] == 'E'))
-    		{
+			} else if (i >= 17 && (a[i - 17] == 'e' || a[i - 17] == 'E') && (a[i - 16] == 'x' || a[i - 16] == 'X') && (a[i - 15] == 't' || a[i - 15] == 'T') && (a[i - 14] == 'e' || a[i - 14] == 'E') && (a[i - 13] == 'n' || a[i - 13] == 'N') && (a[i - 12] == 's' || a[i - 12] == 'S') && (a[i - 11] == 'i' || a[i - 11] == 'I') && (a[i - 10] == 'o' || a[i - 10] == 'O') && (a[i - 9] == 'n' || a[i - 9] == 'N') && (a[i - 8] == 'l' || a[i - 8] == 'L') && (a[i - 7] == 'i' || a[i - 7] == 'I') && (a[i - 6] == 'f' || a[i - 6] == 'F') && (a[i - 5] == 'e' || a[i - 5] == 'E') && (a[i - 4] == 'c' || a[i - 4] == 'C') && (a[i - 3] == 'y' || a[i - 3] == 'Y') && (a[i - 2] == 'c' || a[i - 2] == 'C') && (a[i - 1] == 'l' || a[i - 1] == 'L') && (a[i] == 'e' || a[i] == 'E')) {
 				matchlen = 18;
 				mask |= ACTION_EXTENSIONLIFECYCLE;
 
-    		} else if (i >= 8 && 
-					(a[i-8] == 'l' || a[i-8] == 'L') &&
-					(a[i-7] == 'i' || a[i-7] == 'I') &&
-					(a[i-6] == 'f' || a[i-6] == 'F') &&
-					(a[i-5] == 'e' || a[i-5] == 'E') &&
-					(a[i-4] == 'c' || a[i-4] == 'C') &&
-					(a[i-3] == 'y' || a[i-3] == 'Y') &&
-					(a[i-2] == 'c' || a[i-2] == 'C') &&
-					(a[i-1] == 'l' || a[i-1] == 'L') &&
-					  (a[i] == 'e' ||   a[i] == 'E'))
-			{
+			} else if (i >= 8 && (a[i - 8] == 'l' || a[i - 8] == 'L') && (a[i - 7] == 'i' || a[i - 7] == 'I') && (a[i - 6] == 'f' || a[i - 6] == 'F') && (a[i - 5] == 'e' || a[i - 5] == 'E') && (a[i - 4] == 'c' || a[i - 4] == 'C') && (a[i - 3] == 'y' || a[i - 3] == 'Y') && (a[i - 2] == 'c' || a[i - 2] == 'C') && (a[i - 1] == 'l' || a[i - 1] == 'L') && (a[i] == 'e' || a[i] == 'E')) {
 				matchlen = 9;
 				mask |= ACTION_LIFECYCLE;
 
-			} else if (i >= 7 && 
-					(a[i-7] == 'l' || a[i-7] == 'L') &&
-					(a[i-6] == 'i' || a[i-6] == 'I') &&
-					(a[i-5] == 's' || a[i-5] == 'S') &&
-					(a[i-4] == 't' || a[i-4] == 'T') &&
-					(a[i-3] == 'e' || a[i-3] == 'E') &&
-					(a[i-2] == 'n' || a[i-2] == 'N') &&
-					(a[i-1] == 'e' || a[i-1] == 'E') &&
-					  (a[i] == 'r' ||   a[i] == 'R'))
-			{
+			} else if (i >= 7 && (a[i - 7] == 'l' || a[i - 7] == 'L') && (a[i - 6] == 'i' || a[i - 6] == 'I') && (a[i - 5] == 's' || a[i - 5] == 'S') && (a[i - 4] == 't' || a[i - 4] == 'T') && (a[i - 3] == 'e' || a[i - 3] == 'E') && (a[i - 2] == 'n' || a[i - 2] == 'N') && (a[i - 1] == 'e' || a[i - 1] == 'E') && (a[i] == 'r' || a[i] == 'R')) {
 				matchlen = 8;
 				mask |= ACTION_LISTENER;
 
-			} else if (i >= 7 && 
-    				(a[i-7] == 'm' || a[i-7] == 'M') &&
-    	            (a[i-6] == 'e' || a[i-6] == 'E') &&
-    	            (a[i-5] == 't' || a[i-5] == 'T') &&
-    	            (a[i-4] == 'a' || a[i-4] == 'A') &&
-    	            (a[i-3] == 'd' || a[i-3] == 'D') &&
-    	            (a[i-2] == 'a' || a[i-2] == 'A') &&
-					(a[i-1] == 't' || a[i-1] == 'T') &&
-					  (a[i] == 'a' ||   a[i] == 'A'))
-    		{
+			} else if (i >= 7 && (a[i - 7] == 'm' || a[i - 7] == 'M') && (a[i - 6] == 'e' || a[i - 6] == 'E') && (a[i - 5] == 't' || a[i - 5] == 'T') && (a[i - 4] == 'a' || a[i - 4] == 'A') && (a[i - 3] == 'd' || a[i - 3] == 'D') && (a[i - 2] == 'a' || a[i - 2] == 'A') && (a[i - 1] == 't' || a[i - 1] == 'T') && (a[i] == 'a' || a[i] == 'A')) {
 				matchlen = 8;
 				mask |= ACTION_METADATA;
 
-    		} else if (i >= 6 && 
-					(a[i-6] == 'r' || a[i-6] == 'R') &&
-					(a[i-5] == 'e' || a[i-5] == 'E') &&
-					(a[i-4] == 's' || a[i-4] == 'S') &&
-					(a[i-3] == 'o' || a[i-3] == 'O') &&
-					(a[i-2] == 'l' || a[i-2] == 'L') &&
-					(a[i-1] == 'v' || a[i-1] == 'V') &&
-					  (a[i] == 'e' ||   a[i] == 'E'))
-    		{
+			} else if (i >= 6 && (a[i - 6] == 'r' || a[i - 6] == 'R') && (a[i - 5] == 'e' || a[i - 5] == 'E') && (a[i - 4] == 's' || a[i - 4] == 'S') && (a[i - 3] == 'o' || a[i - 3] == 'O') && (a[i - 2] == 'l' || a[i - 2] == 'L') && (a[i - 1] == 'v' || a[i - 1] == 'V') && (a[i] == 'e' || a[i] == 'E')) {
 				matchlen = 7;
 				mask |= ACTION_RESOLVE;
 
-    		} else if (i >= 7 && 
-    					(a[i-7] == 'r' || a[i-7] == 'R') &&
-						(a[i-6] == 'e' || a[i-6] == 'E') &&
-						(a[i-5] == 's' || a[i-5] == 'S') &&
-						(a[i-4] == 'o' || a[i-4] == 'O') &&
-						(a[i-3] == 'u' || a[i-3] == 'U') &&
-						(a[i-2] == 'r' || a[i-2] == 'R') &&
-						(a[i-1] == 'c' || a[i-1] == 'C') &&
-						  (a[i] == 'e' ||   a[i] == 'E'))
-			{
+			} else if (i >= 7 && (a[i - 7] == 'r' || a[i - 7] == 'R') && (a[i - 6] == 'e' || a[i - 6] == 'E') && (a[i - 5] == 's' || a[i - 5] == 'S') && (a[i - 4] == 'o' || a[i - 4] == 'O') && (a[i - 3] == 'u' || a[i - 3] == 'U') && (a[i - 2] == 'r' || a[i - 2] == 'R') && (a[i - 1] == 'c' || a[i - 1] == 'C') && (a[i] == 'e' || a[i] == 'E')) {
 				matchlen = 8;
 				mask |= ACTION_RESOURCE | ACTION_RESOLVE;
 
-    		} else if (i >= 9 && 
-					(a[i-9] == 's' || a[i-9] == 'S') &&
-					(a[i-8] == 't' || a[i-8] == 'T') &&
-					(a[i-7] == 'a' || a[i-7] == 'A') &&
-					(a[i-6] == 'r' || a[i-6] == 'R') &&
-					(a[i-5] == 't' || a[i-5] == 'T') &&
-					(a[i-4] == 'l' || a[i-4] == 'L') &&
-					(a[i-3] == 'e' || a[i-3] == 'E') &&
-					(a[i-2] == 'v' || a[i-2] == 'V') &&
-					(a[i-1] == 'e' || a[i-1] == 'E') &&
-					  (a[i] == 'l' ||   a[i] == 'L'))
-    		{
+			} else if (i >= 9 && (a[i - 9] == 's' || a[i - 9] == 'S') && (a[i - 8] == 't' || a[i - 8] == 'T') && (a[i - 7] == 'a' || a[i - 7] == 'A') && (a[i - 6] == 'r' || a[i - 6] == 'R') && (a[i - 5] == 't' || a[i - 5] == 'T') && (a[i - 4] == 'l' || a[i - 4] == 'L') && (a[i - 3] == 'e' || a[i - 3] == 'E') && (a[i - 2] == 'v' || a[i - 2] == 'V') && (a[i - 1] == 'e' || a[i - 1] == 'E') && (a[i] == 'l' || a[i] == 'L')) {
 				matchlen = 10;
 				mask |= ACTION_STARTLEVEL;
 
-    		} else if (i >= 6 && 
-					(a[i-6] == 'c' || a[i-6] == 'C') &&
-					(a[i-5] == 'o' || a[i-5] == 'O') &&
-					(a[i-4] == 'n' || a[i-4] == 'N') &&
-					(a[i-3] == 't' || a[i-3] == 'T') &&
-					(a[i-2] == 'e' || a[i-2] == 'E') &&
-					(a[i-1] == 'x' || a[i-1] == 'X') &&
-					  (a[i] == 't' ||   a[i] == 'T'))
-    		{
+			} else if (i >= 6 && (a[i - 6] == 'c' || a[i - 6] == 'C') && (a[i - 5] == 'o' || a[i - 5] == 'O') && (a[i - 4] == 'n' || a[i - 4] == 'N') && (a[i - 3] == 't' || a[i - 3] == 'T') && (a[i - 2] == 'e' || a[i - 2] == 'E') && (a[i - 1] == 'x' || a[i - 1] == 'X') && (a[i] == 't' || a[i] == 'T')) {
 				matchlen = 7;
 				mask |= ACTION_CONTEXT;
 
 			} else if (i >= 0 &&
 
-					(a[i] == '*'))
-    		{
+			(a[i] == '*')) {
 				matchlen = 1;
 				mask |= ACTION_ALL;
 
 			} else {
 				// parse error
-				throw new IllegalArgumentException(
-						"invalid permission: " + actions); //$NON-NLS-1$
+				throw new IllegalArgumentException("invalid permission: " + actions); //$NON-NLS-1$
 			}
 
 			// make sure we didn't just match the tail of a word
@@ -690,12 +573,14 @@ public final class AdminPermission extends BasicPermission {
 					case ',' :
 						seencomma = true;
 						/*FALLTHROUGH*/
-        		case ' ': case '\r': case '\n':
-        		case '\f': case '\t':
+					case ' ' :
+					case '\r' :
+					case '\n' :
+					case '\f' :
+					case '\t' :
 						break;
 					default :
-        			throw new IllegalArgumentException(
-        					"invalid permission: " + actions); //$NON-NLS-1$
+						throw new IllegalArgumentException("invalid permission: " + actions); //$NON-NLS-1$
 				}
 				i--;
 			}
@@ -898,8 +783,7 @@ public final class AdminPermission extends BasicPermission {
 /**
  * Stores a collection of <code>AdminPermission</code>s.
  */
-final class AdminPermissionCollection extends PermissionCollection
-{
+final class AdminPermissionCollection extends PermissionCollection {
 	private static final long serialVersionUID = 3906372644575328048L;
 	/**
 	 * Collection of permissions.
@@ -913,8 +797,7 @@ final class AdminPermissionCollection extends PermissionCollection
 	 *
 	 */
 
-    public AdminPermissionCollection()
-    {
+	public AdminPermissionCollection() {
 		permissions = new Hashtable();
 	}
 
@@ -930,8 +813,7 @@ final class AdminPermissionCollection extends PermissionCollection
 	 * @exception SecurityException If this <code>AdminPermissionCollection</code>
 	 * object has been marked read-only.
 	 */
-    public void add(Permission permission)
-    {
+	public void add(Permission permission) {
 		if (!(permission instanceof AdminPermission))
 			throw new IllegalArgumentException("invalid permission: " + //$NON-NLS-1$
 					permission);
@@ -945,8 +827,7 @@ final class AdminPermissionCollection extends PermissionCollection
 			int newMask = ap.getMask();
 
 			if (oldMask != newMask) {
-    			permissions.put(existing.getName(),
-    					new AdminPermission(existing.getName(), oldMask | newMask));
+				permissions.put(existing.getName(), new AdminPermission(existing.getName(), oldMask | newMask));
 			}
 		} else {
 			permissions.put(ap.getName(), ap);
@@ -963,8 +844,7 @@ final class AdminPermissionCollection extends PermissionCollection
 	 * @return <code>true</code> if <code>permission</code> is implied by an 
 	 * <code>AdminPermission</code> in this collection, <code>false</code> otherwise.
 	 */
-    public boolean implies(Permission permission)
-    {
+	public boolean implies(Permission permission) {
 		if (!(permission instanceof AdminPermission))
 			return (false);
 
@@ -986,8 +866,7 @@ final class AdminPermissionCollection extends PermissionCollection
 	 * @return Enumeration of all <code>AdminPermission</code> objects.
 	 */
 
-    public Enumeration elements()
-    {
+	public Enumeration elements() {
 		return (Collections.enumeration(permissions.values()));
 	}
 }
