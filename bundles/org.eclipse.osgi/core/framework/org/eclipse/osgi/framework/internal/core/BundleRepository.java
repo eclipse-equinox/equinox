@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - Spring Source (bug 247521) 
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.internal.core;
@@ -21,10 +22,11 @@ import org.osgi.framework.Version;
  * bundle dependancies.
  *
  * <p> 
- * This class is not synchronized.  Any access to the bundle
- * repository must be synchronized by the caller.
+ * This class is internally synchronized and supports client locking. Clients
+ * wishing to perform threadsafe composite operations on instances of this
+ * class can synchronize on the instance itself when doing these operations.
  */
-public class BundleRepository {
+public final class BundleRepository {
 	/** bundles by install order */
 	private ArrayList bundlesByInstallOrder;
 
@@ -35,16 +37,18 @@ public class BundleRepository {
 	private HashMap bundlesBySymbolicName;
 
 	public BundleRepository(int initialCapacity) {
-		bundlesByInstallOrder = new ArrayList(initialCapacity);
-		bundlesById = new KeyedHashSet(initialCapacity, true);
-		bundlesBySymbolicName = new HashMap(initialCapacity);
+		synchronized (this) {
+			bundlesByInstallOrder = new ArrayList(initialCapacity);
+			bundlesById = new KeyedHashSet(initialCapacity, true);
+			bundlesBySymbolicName = new HashMap(initialCapacity);
+		}
 	}
 
 	/**
 	 * Gets a list of bundles ordered by install order.
 	 * @return List of bundles by install order.
 	 */
-	public List getBundles() {
+	public synchronized List getBundles() {
 		return bundlesByInstallOrder;
 	}
 
@@ -53,18 +57,18 @@ public class BundleRepository {
 	 * @param bundleId
 	 * @return a bundle with the specified id or null if one does not exist
 	 */
-	public AbstractBundle getBundle(long bundleId) {
+	public synchronized AbstractBundle getBundle(long bundleId) {
 		Long key = new Long(bundleId);
 		return (AbstractBundle) bundlesById.getByKey(key);
 	}
 
-	public AbstractBundle[] getBundles(String symbolicName) {
+	public synchronized AbstractBundle[] getBundles(String symbolicName) {
 		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
 			symbolicName = Constants.getInternalSymbolicName();
 		return (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 	}
 
-	public AbstractBundle getBundle(String symbolicName, Version version) {
+	public synchronized AbstractBundle getBundle(String symbolicName, Version version) {
 		AbstractBundle[] bundles = getBundles(symbolicName);
 		if (bundles != null) {
 			if (bundles.length > 0) {
@@ -78,7 +82,7 @@ public class BundleRepository {
 		return null;
 	}
 
-	public void add(AbstractBundle bundle) {
+	public synchronized void add(AbstractBundle bundle) {
 		bundlesByInstallOrder.add(bundle);
 		bundlesById.add(bundle);
 		String symbolicName = bundle.getSymbolicName();
@@ -116,7 +120,7 @@ public class BundleRepository {
 		}
 	}
 
-	public boolean remove(AbstractBundle bundle) {
+	public synchronized boolean remove(AbstractBundle bundle) {
 		// remove by bundle ID
 		boolean found = bundlesById.remove(bundle);
 		if (!found)
@@ -163,7 +167,7 @@ public class BundleRepository {
 		return true;
 	}
 
-	public void removeAllBundles() {
+	public synchronized void removeAllBundles() {
 		bundlesByInstallOrder.clear();
 		bundlesById = new KeyedHashSet();
 		bundlesBySymbolicName.clear();
