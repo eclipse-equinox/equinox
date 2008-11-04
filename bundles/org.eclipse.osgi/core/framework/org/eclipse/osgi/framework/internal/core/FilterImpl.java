@@ -1262,16 +1262,6 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	/**
-	 * Returns a objectClass filter string for the specified objectClass.
-	 * @return A filter string for the specified objectClass or null if the specified objectClass is null.
-	 */
-	public static String getObjectClassFilterString(String objectClass) {
-		if (objectClass == null)
-			return null;
-		return "(" + org.osgi.framework.Constants.OBJECTCLASS + "=" + objectClass + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-	}
-
-	/**
 	 * Returns all the attributes contained within this filter
 	 * @return all the attributes contained within this filter
 	 */

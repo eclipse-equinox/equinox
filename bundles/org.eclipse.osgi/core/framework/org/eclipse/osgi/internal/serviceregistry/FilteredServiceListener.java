@@ -43,7 +43,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * @param listener The service listener object.
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
-	FilteredServiceListener(BundleContextImpl context, ServiceListener listener, String filterstring) throws InvalidSyntaxException {
+	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring) throws InvalidSyntaxException {
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
@@ -55,8 +55,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 				this.filter = filterImpl;
 			} else {
 				this.objectClass = clazz.intern(); /*intern the name for future identity comparison */
-				String objectClassFilter = FilterImpl.getObjectClassFilterString(this.objectClass);
-				this.filter = (objectClassFilter.equals(filterstring)) ? null : filterImpl;
+				this.filter = filterstring.equals(getObjectClassFilterString(this.objectClass)) ? null : filterImpl;
 			}
 		}
 		this.matched = false;
@@ -89,7 +88,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
-			Debug.println("filterServiceEvent(" + listenerName + ", \"" + filter + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
 		checkfilter: {
@@ -98,7 +97,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			}
 			final boolean match = filter.match(reference);
 			synchronized (this) {
-				if (match) {
+				if (match) { // if the filter matches now
 					matched = true; // remember that the filter matched
 					break checkfilter; // filter matched, so deliver event
 				}
@@ -124,12 +123,16 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	}
 
 	/**
-	 * Get the filter string used by this Filtered listener.
+	 * The string representation of this Filtered listener.
 	 *
-	 * @return The filter string used by this listener.
+	 * @return The string representation of this listener.
 	 */
 	public String toString() {
-		return filter == null ? listener.toString() : filter.toString();
+		String filterString = getFilter();
+		if (filterString == null) {
+			filterString = ""; //$NON-NLS-1$
+		}
+		return listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)) + filterString; //$NON-NLS-1$
 	}
 
 	/** 
@@ -143,13 +146,26 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 	/** 
 	 * Return the filter string for the ListenerHook.
-	 * @return The filter string with which the service listener was added.
+	 * @return The filter string with which the listener was added. This may
+	 * be <code>null</code> if the listener was added without a filter.
 	 * @see org.osgi.framework.hooks.service.ListenerHook.ListenerInfo#getFilter()
 	 */
 	public String getFilter() {
-		if (filter == null) {
+		if (filter != null) {
+			return filter.toString();
+		}
+		return getObjectClassFilterString(objectClass);
+	}
+
+	/**
+	 * Returns an objectClass filter string for the specified class name.
+	 * @return A filter string for the specified class name or <code>null</code> if the 
+	 * specified class name is <code>null</code>.
+	 */
+	private static String getObjectClassFilterString(String className) {
+		if (className == null) {
 			return null;
 		}
-		return filter.toString();
+		return "(" + Constants.OBJECTCLASS + "=" + className + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 }
