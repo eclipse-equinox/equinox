@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
 package org.eclipse.osgi.internal.serviceregistry;
 
 import java.lang.reflect.Array;
@@ -19,18 +30,19 @@ class ServiceProperties extends Headers {
 	private ServiceProperties(int size, Dictionary props) {
 		super(size);
 
-		if (props != null) {
-			synchronized (props) {
-				Enumeration keysEnum = props.keys();
+		if (props == null) {
+			return;
+		}
+		synchronized (props) {
+			Enumeration keysEnum = props.keys();
 
-				while (keysEnum.hasMoreElements()) {
-					Object key = keysEnum.nextElement();
+			while (keysEnum.hasMoreElements()) {
+				Object key = keysEnum.nextElement();
 
-					if (key instanceof String) {
-						String header = (String) key;
+				if (key instanceof String) {
+					String header = (String) key;
 
-						setProperty(header, props.get(header));
-					}
+					setProperty(header, props.get(header));
 				}
 			}
 		}
@@ -96,11 +108,11 @@ class ServiceProperties extends Headers {
 	 * @param value object to be cloned.
 	 * @return cloned object or original object if we didn't clone it.
 	 */
-	static Object cloneValue(Object value) {
+	private static Object cloneValue(Object value) {
 		if (value == null)
 			return null;
 		if (value instanceof String) /* shortcut String */
-			return (value);
+			return value;
 		if (value instanceof Number) /* shortcut Number */
 			return value;
 		if (value instanceof Character) /* shortcut Character */
@@ -119,7 +131,7 @@ class ServiceProperties extends Headers {
 		}
 		// must use reflection because Object clone method is protected!!
 		try {
-			return (clazz.getMethod("clone", null).invoke(value, null)); //$NON-NLS-1$
+			return clazz.getMethod("clone", null).invoke(value, null); //$NON-NLS-1$
 		} catch (Exception e) {
 			/* clone is not a public method on value's class */
 		} catch (Error e) {
