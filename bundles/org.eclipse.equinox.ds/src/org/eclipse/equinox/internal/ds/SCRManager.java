@@ -110,6 +110,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				// try to process the active ones.
 				if (current.getState() == Bundle.ACTIVE) {
 					startedBundle(current);
+				} else if (current.getState() == Bundle.STARTING) {
+					String lazy = (String) current.getHeaders("").get(Constants.BUNDLE_ACTIVATIONPOLICY);
+					if (lazy != null && lazy.indexOf(Constants.ACTIVATION_LAZY) >= 0) {
+						startedBundle(current);
+					}
 				}
 			}
 		}
@@ -230,6 +235,8 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		if (type == BundleEvent.STOPPING) {
 			stoppingBundle(event.getBundle());
 		} else if (type == BundleEvent.STARTED) {
+			startedBundle(event.getBundle());
+		} else if (type == BundleEvent.LAZY_ACTIVATION) {
 			startedBundle(event.getBundle());
 		} else if (type == BundleEvent.UNINSTALLED && Activator.DBSTORE) {
 			try {
