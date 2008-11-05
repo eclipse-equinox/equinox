@@ -191,6 +191,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 */
 	public void stop(BundleContext bc) throws Exception {
 		if (scrManager != null) {
+			scrManager.stopIt();
 			bc.removeServiceListener(scrManager);
 		}
 		// dispose the CM Listener
@@ -220,9 +221,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			debugTracker = null;
 		}
 
-		if (scrManager != null) {
-			scrManager.stopIt();
-		}
 		log.close();
 		log = null;
 		bc = null;
