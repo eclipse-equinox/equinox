@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Rob Harrop - Spring Source (bug 247520)  
+ *     Rob Harrop - SpringSource Inc. (bug 247520)  
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.baseadaptor;

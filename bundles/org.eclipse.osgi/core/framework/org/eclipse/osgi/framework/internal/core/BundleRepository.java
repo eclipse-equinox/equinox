@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Rob Harrop - Spring Source (bug 247521) 
+ *     Rob Harrop - SpringSource Inc. (bug 247521) 
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.internal.core;
