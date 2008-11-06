@@ -7,12 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 253942)
  *******************************************************************************/
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
 import java.io.*;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.baseadaptor.BaseData;
@@ -27,8 +29,8 @@ import org.osgi.framework.FrameworkEvent;
  * @since 3.2
  */
 public class ZipBundleFile extends BundleFile {
-	protected static MRUBundleFileList mruList = new MRUBundleFileList();
 
+	private final MRUBundleFileList mruList;
 	/**
 	 * The bundle data
 	 */
@@ -36,11 +38,11 @@ public class ZipBundleFile extends BundleFile {
 	/**
 	 * The zip file
 	 */
-	protected ZipFile zipFile;
+	protected volatile ZipFile zipFile;
 	/**
 	 * The closed flag
 	 */
-	protected boolean closed = true;
+	protected volatile boolean closed = true;
 
 	private int referenceCount = 0;
 
@@ -51,11 +53,16 @@ public class ZipBundleFile extends BundleFile {
 	 * @throws IOException
 	 */
 	public ZipBundleFile(File basefile, BaseData bundledata) throws IOException {
+		this(basefile, bundledata, null);
+	}
+
+	public ZipBundleFile(File basefile, BaseData bundledata, MRUBundleFileList mruList) throws IOException {
 		super(basefile);
 		if (!BundleFile.secureAction.exists(basefile))
 			throw new IOException(NLS.bind(AdaptorMsg.ADAPTER_FILEEXIST_EXCEPTION, basefile));
 		this.bundledata = bundledata;
 		this.closed = true;
+		this.mruList = mruList;
 	}
 
 	/**
@@ -90,11 +97,11 @@ public class ZipBundleFile extends BundleFile {
 	 */
 	protected synchronized ZipFile getZipFile() throws IOException {
 		if (closed) {
-			mruList.add(this);
+			mruListAdd();
 			zipFile = basicOpen();
 			closed = false;
 		} else
-			mruList.use(this);
+			mruListUse();
 		return zipFile;
 	}
 
@@ -287,7 +294,7 @@ public class ZipBundleFile extends BundleFile {
 
 	public synchronized void close() throws IOException {
 		if (!closed) {
-			if (referenceCount > 0 && mruList.isClosing(this)) {
+			if (referenceCount > 0 && isMruListClosing()) {
 				// there are some opened streams to this BundleFile still;
 				// wait for them all to close because this is being closed by the MRUBundleFileList
 				try {
@@ -304,19 +311,38 @@ public class ZipBundleFile extends BundleFile {
 			}
 			closed = true;
 			zipFile.close();
-			mruList.remove(this);
+			mruListRemove();
 		}
 	}
 
-	public void open() throws IOException {
-		//do nothing
+	private boolean isMruListClosing() {
+		return this.mruList != null && this.mruList.isClosing(this);
 	}
 
-	/**
-	 * Shutsdown the bundle file closer thread for zip bundle files
-	 */
-	public static void shutdown() {
-		mruList.shutdown();
+	boolean isMruEnabled() {
+		return this.mruList != null && this.mruList.isEnabled();
+	}
+
+	private void mruListRemove() {
+		if (this.mruList != null) {
+			this.mruList.remove(this);
+		}
+	}
+
+	private void mruListUse() {
+		if (this.mruList != null) {
+			mruList.use(this);
+		}
+	}
+
+	private void mruListAdd() {
+		if (this.mruList != null) {
+			mruList.add(this);
+		}
+	}
+
+	public void open() {
+		//do nothing
 	}
 
 	synchronized void incrementReference() {

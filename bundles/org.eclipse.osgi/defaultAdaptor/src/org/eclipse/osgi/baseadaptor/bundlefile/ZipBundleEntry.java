@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 253942)
  *******************************************************************************/
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
@@ -24,19 +25,19 @@ public class ZipBundleEntry extends BundleEntry {
 	/**
 	 * ZipEntry for this entry.
 	 */
-	protected ZipEntry zipEntry;
+	protected final ZipEntry zipEntry;
 
 	/**
 	 * The BundleFile for this entry.
 	 */
-	protected BundleFile bundleFile;
+	protected final ZipBundleFile bundleFile;
 
 	/**
 	 * Constructs the BundleEntry using a ZipEntry.
 	 * @param bundleFile BundleFile object this entry is a member of
 	 * @param zipEntry ZipEntry object of this entry
 	 */
-	ZipBundleEntry(ZipEntry zipEntry, BundleFile bundleFile) {
+	ZipBundleEntry(ZipEntry zipEntry, ZipBundleFile bundleFile) {
 		this.zipEntry = zipEntry;
 		this.bundleFile = bundleFile;
 	}
@@ -48,9 +49,11 @@ public class ZipBundleEntry extends BundleEntry {
 	 * @exception java.io.IOException
 	 */
 	public InputStream getInputStream() throws IOException {
-		if (!ZipBundleFile.mruList.isEnabled())
-			return ((ZipBundleFile) bundleFile).getZipFile().getInputStream(zipEntry);
-		ZipBundleFile zipBundleFile = (ZipBundleFile) bundleFile;
+		ZipBundleFile zipBundleFile = bundleFile;
+
+		if (!zipBundleFile.isMruEnabled())
+			return bundleFile.getZipFile().getInputStream(zipEntry);
+
 		zipBundleFile.incrementReference();
 		InputStream result = null;
 		try {
@@ -132,7 +135,7 @@ public class ZipBundleEntry extends BundleEntry {
 						return;
 					closed = true;
 				}
-				((ZipBundleFile) bundleFile).decrementReference();
+				bundleFile.decrementReference();
 			}
 		}
 

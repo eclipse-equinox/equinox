@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 253942)
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.baseadaptor;
@@ -20,7 +21,6 @@ import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
-import org.eclipse.osgi.baseadaptor.bundlefile.ZipBundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.*;
@@ -345,8 +345,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		// shutdown the bundle file closer thread if it exists
-		ZipBundleFile.shutdown();
+		// do nothing
 	}
 
 	public void frameworkStopping(BundleContext context) {

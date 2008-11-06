@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Rob Harrop - SpringSource Inc. (bug 247520)  
+ *     Rob Harrop - SpringSource Inc. (bug 247520 and 253942)
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.baseadaptor;
@@ -83,6 +83,8 @@ public class BaseStorage implements SynchronousBundleListener {
 	public static final String DELETE_FLAG = ".delete"; //$NON-NLS-1$
 	private static final String PERM_DATA_FILE = ".permdata"; //$NON-NLS-1$
 	private static final byte PERMDATA_VERSION = 1;
+
+	private final MRUBundleFileList mruList = new MRUBundleFileList();
 
 	private BaseAdaptor adaptor;
 	// assume a file: installURL
@@ -674,7 +676,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			if (file.isDirectory())
 				result = new DirBundleFile(file);
 			else
-				result = new ZipBundleFile(file, data);
+				result = new ZipBundleFile(file, data, this.mruList);
 		}
 
 		if (result == null && content instanceof String) {
@@ -834,6 +836,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		storageManagerClosed = true;
 		if (extensionListener != null)
 			context.removeBundleListener(extensionListener);
+		mruList.shutdown();
 	}
 
 	public void frameworkStopping(BundleContext fwContext) {
