@@ -312,6 +312,11 @@ public class DeclarationParser implements ExTagListener {
 			IllegalArgumentException e = new IllegalArgumentException("The 'service' tag must have one 'provide' tag set at line " + tag.getLine());
 			throw e;
 		}
+		if (currentComponent.serviceInterfaces != null) {
+			//there are already defined service interfaces. The service tag seems to be duplicated
+			IllegalArgumentException e = new IllegalArgumentException("The 'service' tag is duplicated at line " + tag.getLine());
+			throw e;
+		}
 		for (int i = 0; i < size; i++) {
 			Tag p = tag.getTagAt(i);
 			String pName = p.getName().intern();
