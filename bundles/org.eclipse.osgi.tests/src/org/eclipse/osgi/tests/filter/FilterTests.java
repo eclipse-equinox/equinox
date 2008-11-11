@@ -127,8 +127,9 @@ public class FilterTests extends TestCase {
 		}
 	}
 
-	private void testFilter(String query, Properties props, int expect) {
+	private void testFilter(String query, Dictionary props, int expect) {
 		final BundleContext testContext = OSGiTestsActivator.getContext();
+		final ServiceReference ref = new DictionaryServiceReference(props);
 		Filter p;
 		try {
 			p = testContext.createFilter(query);
@@ -144,6 +145,28 @@ public class FilterTests extends TestCase {
 		}
 
 		boolean val = p.match(props);
+		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
+
+		val = p.match(ref);
+		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
+
+		try {
+			p = FrameworkUtil.createFilter(query);
+
+			if (expect == ISILLEGAL) {
+				fail("expected exception"); //$NON-NLS-1$
+			}
+		} catch (InvalidSyntaxException e) {
+			if (expect != ISILLEGAL) {
+				fail("exception: " + e.toString()); //$NON-NLS-1$
+			}
+			return;
+		}
+
+		val = p.match(props);
+		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
+
+		val = p.match(ref);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 	}
 
@@ -161,10 +184,29 @@ public class FilterTests extends TestCase {
 		comp = new SampleComparable("42"); //$NON-NLS-1$
 		hash.put("comparable", comp); //$NON-NLS-1$
 		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 
 		comp = new Long(42);
 		hash.put("comparable", comp); //$NON-NLS-1$
 		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+
+		try {
+			filter = FrameworkUtil.createFilter("(comparable=42)"); //$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			fail("invalid syntax" + e); //$NON-NLS-1$
+		}
+		hash = new Hashtable();
+
+		comp = new SampleComparable("42"); //$NON-NLS-1$
+		hash.put("comparable", comp); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+
+		comp = new Long(42);
+		hash.put("comparable", comp); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 	}
 
 	private static class SampleComparable implements Comparable {
@@ -183,4 +225,61 @@ public class FilterTests extends TestCase {
 		}
 	}
 
+	private static class DictionaryServiceReference implements ServiceReference {
+		private final Dictionary dictionary;
+		private final String[] keys;
+
+		DictionaryServiceReference(Dictionary dictionary) {
+			if (dictionary == null) {
+				this.dictionary = null;
+				this.keys = new String[] {};
+				return;
+			}
+			this.dictionary = dictionary;
+			List keyList = new ArrayList(dictionary.size());
+			for (Enumeration e = dictionary.keys(); e.hasMoreElements();) {
+				Object k = e.nextElement();
+				if (k instanceof String) {
+					String key = (String) k;
+					for (Iterator i = keyList.iterator(); i.hasNext();) {
+						if (key.equalsIgnoreCase((String) i.next())) {
+							throw new IllegalArgumentException();
+						}
+					}
+					keyList.add(key);
+				}
+			}
+			this.keys = (String[]) keyList.toArray(new String[keyList.size()]);
+		}
+
+		public int compareTo(Object reference) {
+			throw new UnsupportedOperationException();
+		}
+
+		public Bundle getBundle() {
+			return OSGiTestsActivator.getContext().getBundle();
+		}
+
+		public Object getProperty(String k) {
+			for (int i = 0, length = keys.length; i < length; i++) {
+				String key = keys[i];
+				if (key.equalsIgnoreCase(k)) {
+					return dictionary.get(key);
+				}
+			}
+			return null;
+		}
+
+		public String[] getPropertyKeys() {
+			return (String[]) keys.clone();
+		}
+
+		public Bundle[] getUsingBundles() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean isAssignableTo(Bundle bundle, String className) {
+			throw new UnsupportedOperationException();
+		}
+	}
 }

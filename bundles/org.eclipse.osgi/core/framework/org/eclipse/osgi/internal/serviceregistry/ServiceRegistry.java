@@ -178,15 +178,16 @@ public class ServiceRegistry {
 		}
 
 		/* copy the array so that changes to the original will not affect us. */
-		List copy = new ArrayList(clazzes.length);
+		List copy = new ArrayList(size);
 		// intern the strings and remove duplicates
-		for (int i = 0; i < clazzes.length; i++) {
+		for (int i = 0; i < size; i++) {
 			String clazz = clazzes[i].intern();
 			if (!copy.contains(clazz)) {
 				copy.add(clazz);
 			}
 		}
-		clazzes = (String[]) copy.toArray(new String[copy.size()]);
+		size = copy.size();
+		clazzes = (String[]) copy.toArray(new String[size]);
 
 		/* check for ServicePermissions. */
 		checkRegisterServicePermission(clazzes);
@@ -294,8 +295,7 @@ public class ServiceRegistry {
 		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
 		List references = changeRegistrationsToReferences(lookupServiceRegistrations(clazz, filter));
-		Iterator iter = references.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			if (allservices || isAssignableTo(context, reference)) {
 				if (clazz == null) {
@@ -510,8 +510,7 @@ public class ServiceRegistry {
 	 */
 	public ServiceReferenceImpl[] getRegisteredServices(BundleContextImpl context) {
 		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context));
-		Iterator iter = references.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			try { /* test for permission to the classes */
 				checkGetServicePermission(reference.getClasses());
@@ -565,8 +564,7 @@ public class ServiceRegistry {
 			}
 			references = changeRegistrationsToReferences(new ArrayList(servicesInUse.keySet()));
 		}
-		Iterator iter = references.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			try { /* test for permission to the classes */
 				checkGetServicePermission(reference.getClasses());
@@ -590,8 +588,7 @@ public class ServiceRegistry {
 	 */
 	public void unregisterServices(BundleContextImpl context) {
 		List registrations = lookupServiceRegistrations(context);
-		Iterator iter = registrations.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = registrations.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			try {
 				registration.unregister();
@@ -622,8 +619,7 @@ public class ServiceRegistry {
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 			Debug.println("Releasing services"); //$NON-NLS-1$
 		}
-		Iterator iter = registrations.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = registrations.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			registration.releaseService(context);
 		}
@@ -735,8 +731,7 @@ public class ServiceRegistry {
 		Map /*<BundleContextImpl,Set<Map.Entry<Object,Object>>>*/listenerSnapshot;
 		synchronized (serviceEventListeners) {
 			listenerSnapshot = new HashMap(serviceEventListeners.size());
-			Iterator iter = serviceEventListeners.entrySet().iterator();
-			while (iter.hasNext()) {
+			for (Iterator iter = serviceEventListeners.entrySet().iterator(); iter.hasNext();) {
 				Map.Entry entry = (Map.Entry) iter.next();
 				BundleContextImpl context = (BundleContextImpl) entry.getKey();
 				Map listeners = (Map) entry.getValue();
@@ -759,8 +754,7 @@ public class ServiceRegistry {
 
 		/* deliver the event to the snapshot */
 		ListenerQueue queue = framework.newListenerQueue();
-		Iterator iter = listenerSnapshot.entrySet().iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = listenerSnapshot.entrySet().iterator(); iter.hasNext();) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			EventDispatcher dispatcher = (BundleContextImpl) entry.getKey();
 			Set listeners = (Set) entry.getValue();
@@ -799,10 +793,8 @@ public class ServiceRegistry {
 
 		// Add the ServiceRegistrationImpl to the list of Services published by Class Name.
 		String[] clazzes = registration.getClasses();
-		int size = clazzes.length;
 		int insertIndex;
-
-		for (int i = 0; i < size; i++) {
+		for (int i = 0, size = clazzes.length; i < size; i++) {
 			String clazz = clazzes[i];
 
 			List services = (List) publishedServicesByClass.get(clazz);
@@ -839,9 +831,7 @@ public class ServiceRegistry {
 
 		// Remove the ServiceRegistrationImpl from the list of Services published by Class Name.
 		String[] clazzes = serviceReg.getClasses();
-		int size = clazzes.length;
-
-		for (int i = 0; i < size; i++) {
+		for (int i = 0, size = clazzes.length; i < size; i++) {
 			String clazz = clazzes[i];
 			List services = (List) publishedServicesByClass.get(clazz);
 			services.remove(serviceReg);
@@ -880,8 +870,7 @@ public class ServiceRegistry {
 			return result;
 		}
 
-		Iterator iter = result.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = result.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			if (!filter.match(registration.getReferenceImpl())) {
 				iter.remove();
@@ -913,8 +902,7 @@ public class ServiceRegistry {
 	 * @return result which has been changed to List<ServiceReferenceImpl>
 	 */
 	private static List changeRegistrationsToReferences(List result) {
-		ListIterator iter = result.listIterator();
-		while (iter.hasNext()) {
+		for (ListIterator iter = result.listIterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			iter.set(registration.getReferenceImpl()); /* replace the registration with its reference */
 		}
@@ -931,8 +919,7 @@ public class ServiceRegistry {
 		if (sm == null) {
 			return;
 		}
-		int len = names.length;
-		for (int i = 0; i < len; i++) {
+		for (int i = 0, len = names.length; i < len; i++) {
 			sm.checkPermission(new ServicePermission(names[i], ServicePermission.REGISTER));
 		}
 	}
@@ -959,8 +946,7 @@ public class ServiceRegistry {
 			return;
 		}
 		SecurityException se = null;
-		int len = names.length;
-		for (int i = 0; i < len; i++) {
+		for (int i = 0, len = names.length; i < len; i++) {
 			try {
 				sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
 				return;
@@ -982,8 +968,7 @@ public class ServiceRegistry {
 
 		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
 		String[] names = reference.getClasses();
-		int len = names.length;
-		for (int i = 0; i < len; i++) {
+		for (int i = 0, len = names.length; i < len; i++) {
 			if (domain.implies(new ServicePermission(names[i], ServicePermission.GET))) {
 				return true;
 			}
@@ -1004,7 +989,7 @@ public class ServiceRegistry {
 				return serviceObject.getClass().getClassLoader();
 			}
 		});
-		for (int i = 0; i < clazzes.length; i++) {
+		for (int i = 0, len = clazzes.length; i < len; i++) {
 			try {
 				Class serviceClazz = cl == null ? Class.forName(clazzes[i]) : cl.loadClass(clazzes[i]);
 				if (!serviceClazz.isInstance(serviceObject))
@@ -1022,7 +1007,7 @@ public class ServiceRegistry {
 		if (clazz.equals(serviceClazz.getName()))
 			return false;
 		Class[] interfaces = serviceClazz.getInterfaces();
-		for (int i = 0; i < interfaces.length; i++)
+		for (int i = 0, len = interfaces.length; i < len; i++)
 			if (!extensiveCheckServiceClass(clazz, interfaces[i]))
 				return false;
 		Class superClazz = serviceClazz.getSuperclass();
@@ -1035,7 +1020,7 @@ public class ServiceRegistry {
 	static boolean isAssignableTo(BundleContextImpl context, ServiceReferenceImpl reference) {
 		Bundle bundle = context.getBundleImpl();
 		String[] clazzes = reference.getClasses();
-		for (int i = 0; i < clazzes.length; i++)
+		for (int i = 0, len = clazzes.length; i < len; i++)
 			if (!reference.isAssignableTo(bundle, clazzes[i]))
 				return false;
 		return true;
@@ -1079,8 +1064,7 @@ public class ServiceRegistry {
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
-		Iterator iter = hooks.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			Object findHook = registration.getService(systemBundleContext);
 			if (findHook == null) { // if the hook is null
@@ -1127,8 +1111,7 @@ public class ServiceRegistry {
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
-		Iterator iter = hooks.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			Object publishHook = registration.getService(systemBundleContext);
 			if (publishHook == null) { // if the hook is null
@@ -1185,8 +1168,7 @@ public class ServiceRegistry {
 
 		Collection addedListeners = new ArrayList(initialCapacity);
 		synchronized (serviceEventListeners) {
-			Iterator iter = serviceEventListeners.values().iterator();
-			while (iter.hasNext()) {
+			for (Iterator iter = serviceEventListeners.values().iterator(); iter.hasNext();) {
 				Map listeners = (Map) iter.next();
 				if (!listeners.isEmpty()) {
 					addedListeners.addAll(listeners.values());
@@ -1254,8 +1236,7 @@ public class ServiceRegistry {
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
-		Iterator iter = hooks.iterator();
-		while (iter.hasNext()) {
+		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			Object listenerHook = registration.getService(systemBundleContext);
 			if (listenerHook == null) { // if the hook is null
