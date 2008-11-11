@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.loader.buddy;
 
-import org.eclipse.osgi.internal.loader.BundleLoader;
-
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -31,8 +30,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 	//The loader to which this policy is attached.
 	private final BundleLoader policedLoader;
 	//List of the policies as well as cache for the one that have been created. The size of this array never changes over time. This is why the synchronization is not done when iterating over it.
-	// @GuardedBy (this)
-	private Object[] policies = null;
+	private volatile Object[] policies = null;
 
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
 	private final ThreadLocal beingLoaded;
@@ -58,68 +56,70 @@ public class PolicyHandler implements SynchronousBundleListener {
 		return list.isEmpty() ? new Object[0] : (Object[]) list.toArray(new Object[list.size()]);
 	}
 
-	private synchronized IBuddyPolicy getPolicyImplementation(int policyOrder) {
-		if (policyOrder >= policies.length)
-			return null;
-		if (policies[policyOrder] instanceof String) {
-			String buddyName = (String) policies[policyOrder];
+	private IBuddyPolicy getPolicyImplementation(Object[] policiesSnapshot, int policyOrder) {
+		synchronized (policiesSnapshot) {
+			if (policyOrder >= policiesSnapshot.length)
+				return null;
+			if (policiesSnapshot[policyOrder] instanceof String) {
+				String buddyName = (String) policiesSnapshot[policyOrder];
 
-			if (REGISTERED_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new RegisteredPolicy(policedLoader);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (BOOT_POLICY.equals(buddyName)) {
-				policies[policyOrder] = SystemPolicy.getInstance(SystemPolicy.BOOT);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (APP_POLICY.equals(buddyName)) {
-				policies[policyOrder] = SystemPolicy.getInstance(SystemPolicy.APP);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (EXT_POLICY.equals(buddyName)) {
-				policies[policyOrder] = SystemPolicy.getInstance(SystemPolicy.EXT);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (DEPENDENT_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new DependentPolicy(policedLoader);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (GLOBAL_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new GlobalPolicy(packageAdmin);
-				return (IBuddyPolicy) policies[policyOrder];
-			}
-			if (PARENT_POLICY.equals(buddyName)) {
-				policies[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
-				return (IBuddyPolicy) policies[policyOrder];
-			}
+				if (REGISTERED_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = new RegisteredPolicy(policedLoader);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (BOOT_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.BOOT);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (APP_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.APP);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (EXT_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = SystemPolicy.getInstance(SystemPolicy.EXT);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (DEPENDENT_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = new DependentPolicy(policedLoader);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (GLOBAL_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = new GlobalPolicy(packageAdmin);
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
+				if (PARENT_POLICY.equals(buddyName)) {
+					policiesSnapshot[policyOrder] = new SystemPolicy(policedLoader.getParentClassLoader());
+					return (IBuddyPolicy) policiesSnapshot[policyOrder];
+				}
 
-			//			//Buddy policy can be provided by service implementations
-			//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
-			//			ServiceReference[] matchingBuddies = null;
-			//			try {
-			//				matchingBuddies = fwkCtx.getAllServiceReferences(IBuddyPolicy.class.getName(), "buddyName=" + buddyName);
-			//			} catch (InvalidSyntaxException e) {
-			//				//The filter is valid
-			//			}
-			//			if (matchingBuddies == null)
-			//				return new IBuddyPolicy() {
-			//					public Class loadClass(String name) {
-			//						return null;
-			//					}
-			//
-			//					public URL loadResource(String name) {
-			//						return null;
-			//					}
-			//
-			//					public Enumeration loadResources(String name) {
-			//						return null;
-			//					}
-			//				};
-			//
-			//			//The policies loaded through service are not cached
-			//			return ((IBuddyPolicy) fwkCtx.getService(matchingBuddies[0]));
+				//			//Buddy policy can be provided by service implementations
+				//			BundleContext fwkCtx = policedLoader.bundle.framework.systemBundle.context;
+				//			ServiceReference[] matchingBuddies = null;
+				//			try {
+				//				matchingBuddies = fwkCtx.getAllServiceReferences(IBuddyPolicy.class.getName(), "buddyName=" + buddyName);
+				//			} catch (InvalidSyntaxException e) {
+				//				//The filter is valid
+				//			}
+				//			if (matchingBuddies == null)
+				//				return new IBuddyPolicy() {
+				//					public Class loadClass(String name) {
+				//						return null;
+				//					}
+				//
+				//					public URL loadResource(String name) {
+				//						return null;
+				//					}
+				//
+				//					public Enumeration loadResources(String name) {
+				//						return null;
+				//					}
+				//				};
+				//
+				//			//The policies loaded through service are not cached
+				//			return ((IBuddyPolicy) fwkCtx.getService(matchingBuddies[0]));
+			}
+			return (IBuddyPolicy) policiesSnapshot[policyOrder];
 		}
-		return (IBuddyPolicy) policies[policyOrder];
 	}
 
 	public Class doBuddyClassLoading(String name) {
@@ -127,9 +127,10 @@ public class PolicyHandler implements SynchronousBundleListener {
 			return null;
 
 		Class result = null;
-		int policyCount = getPolicyCount();
+		Object[] policiesSnapshot = policies;
+		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount && result == null; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(i);
+			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy != null)
 				result = policy.loadClass(name);
 		}
@@ -141,10 +142,11 @@ public class PolicyHandler implements SynchronousBundleListener {
 		if (startLoading(name) == false)
 			return null;
 
-		int policyCount = getPolicyCount();
 		URL result = null;
+		Object[] policiesSnapshot = policies;
+		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount && result == null; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(i);
+			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy != null)
 				result = policy.loadResource(name);
 		}
@@ -156,10 +158,11 @@ public class PolicyHandler implements SynchronousBundleListener {
 		if (startLoading(name) == false)
 			return null;
 
-		int policyCount = getPolicyCount();;
 		Vector results = null;
+		Object[] policiesSnapshot = policies;
+		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount; i++) {
-			IBuddyPolicy policy = getPolicyImplementation(i);
+			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy == null)
 				continue;
 			Enumeration result = policy.loadResources(name);
@@ -194,10 +197,6 @@ public class PolicyHandler implements SynchronousBundleListener {
 		((Set) beingLoaded.get()).remove(name);
 	}
 
-	private synchronized int getPolicyCount() {
-		return policies == null ? 0 : policies.length;
-	}
-
 	public void open(BundleContext context) {
 		context.addBundleListener(this);
 	}
@@ -212,9 +211,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 		// reinitialize the policies
 		try {
 			String list = (String) policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
-			synchronized (this) {
-				policies = getArrayFromList(list);
-			}
+			policies = getArrayFromList(list);
 		} catch (BundleException e) {
 			//Ignore
 		}
