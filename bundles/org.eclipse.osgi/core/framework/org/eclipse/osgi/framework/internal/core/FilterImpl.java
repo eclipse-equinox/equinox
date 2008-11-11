@@ -1440,7 +1440,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			char c = filterChars[pos];
 
-			while ("~<>=()".indexOf(c) == -1) { //$NON-NLS-1$
+			while (c != '~' && c != '<' && c != '>' && c != '=' && c != '(' && c != ')') {
 				pos++;
 
 				if (!Character.isWhitespace(c)) {
