@@ -1307,15 +1307,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 
 	URL getEntry0(String fileName) {
 		checkValid();
-		if (System.getSecurityManager() == null)
-			return bundledata.getEntry(fileName);
-		final String ffileName = fileName;
-		// TODO this doPrivileged is probably not needed.  The adaptor isolates callers from disk access
-		return (URL) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				return bundledata.getEntry(ffileName);
-			}
-		});
+		return bundledata.getEntry(fileName);
 	}
 
 	public String getSymbolicName() {

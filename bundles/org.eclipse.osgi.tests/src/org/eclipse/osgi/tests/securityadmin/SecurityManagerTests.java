@@ -233,4 +233,92 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
+
+	public void testBug254600() {
+		File config = OSGiTestsActivator.getContext().getDataFile("testBug254600"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+
+		Bundle securityB = null;
+		long idB = -1;
+		try {
+			String locationSecurityA = installer.getBundleLocation("security.a"); //$NON-NLS-1$
+			String locationSecurityB = installer.getBundleLocation("security.b"); //$NON-NLS-1$
+			systemContext.installBundle(locationSecurityA);
+			securityB = systemContext.installBundle(locationSecurityB);
+			idB = securityB.getBundleId();
+		} catch (BundleException e) {
+			fail("Failed to install security test bundles", e); //$NON-NLS-1$
+		}
+
+		try {
+			securityB.start();
+			securityB.stop();
+		} catch (BundleException e) {
+			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
+		}
+
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		securityB = systemContext.getBundle(idB);
+
+		try {
+			securityB.start();
+			securityB.stop();
+		} catch (BundleException e) {
+			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
+		}
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
 }

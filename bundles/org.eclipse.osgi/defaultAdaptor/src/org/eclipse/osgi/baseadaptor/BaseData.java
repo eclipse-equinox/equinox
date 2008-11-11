@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
@@ -93,7 +95,17 @@ public class BaseData implements BundleData {
 		return cl;
 	}
 
-	public final URL getEntry(String path) {
+	public final URL getEntry(final String path) {
+		if (System.getSecurityManager() == null)
+			return getEntry0(path);
+		return (URL) AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return getEntry0(path);
+			}
+		});
+	}
+
+	final URL getEntry0(String path) {
 		BundleEntry entry = getBundleFile().getEntry(path);
 		if (entry == null)
 			return null;

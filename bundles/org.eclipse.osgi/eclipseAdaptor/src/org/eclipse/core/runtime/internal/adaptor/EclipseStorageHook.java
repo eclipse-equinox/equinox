@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
 import java.net.URL;
+import java.security.*;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.core.runtime.adaptor.LocationManager;
@@ -368,6 +369,20 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	}
 
 	public Dictionary getGeneratedManifest() throws BundleException {
+		if (System.getSecurityManager() == null)
+			return getGeneratedManifest0();
+		try {
+			return (Dictionary) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws BundleException {
+					return getGeneratedManifest0();
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (BundleException) e.getException();
+		}
+	}
+
+	final Dictionary getGeneratedManifest0() throws BundleException {
 		Dictionary builtIn = AdaptorUtil.loadManifestFrom(bundledata);
 		if (builtIn != null) {
 			// the bundle has a built-in manifest - we may not have to generate one
