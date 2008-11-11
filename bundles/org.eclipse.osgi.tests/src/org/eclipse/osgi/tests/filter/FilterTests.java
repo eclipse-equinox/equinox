@@ -130,9 +130,9 @@ public class FilterTests extends TestCase {
 	private void testFilter(String query, Dictionary props, int expect) {
 		final BundleContext testContext = OSGiTestsActivator.getContext();
 		final ServiceReference ref = new DictionaryServiceReference(props);
-		Filter p;
+		Filter f1;
 		try {
-			p = testContext.createFilter(query);
+			f1 = testContext.createFilter(query);
 
 			if (expect == ISILLEGAL) {
 				fail("expected exception"); //$NON-NLS-1$
@@ -144,14 +144,15 @@ public class FilterTests extends TestCase {
 			return;
 		}
 
-		boolean val = p.match(props);
+		boolean val = f1.match(props);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 
-		val = p.match(ref);
+		val = f1.match(ref);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 
+		Filter f2;
 		try {
-			p = FrameworkUtil.createFilter(query);
+			f2 = FrameworkUtil.createFilter(query);
 
 			if (expect == ISILLEGAL) {
 				fail("expected exception"); //$NON-NLS-1$
@@ -163,18 +164,20 @@ public class FilterTests extends TestCase {
 			return;
 		}
 
-		val = p.match(props);
+		val = f2.match(props);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 
-		val = p.match(ref);
+		val = f2.match(ref);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
+
+		assertEquals("not equal", f1, f2); //$NON-NLS-1$
 	}
 
 	public void testComparable() {
 		final BundleContext testContext = OSGiTestsActivator.getContext();
-		Filter filter = null;
+		Filter f1 = null;
 		try {
-			filter = testContext.createFilter("(comparable=42)"); //$NON-NLS-1$
+			f1 = testContext.createFilter("(comparable=42)"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
 			fail("invalid syntax" + e); //$NON-NLS-1$
 		}
@@ -183,16 +186,17 @@ public class FilterTests extends TestCase {
 
 		comp = new SampleComparable("42"); //$NON-NLS-1$
 		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+		assertTrue("does not match filter", f1.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", f1.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 
 		comp = new Long(42);
 		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+		assertTrue("does not match filter", f1.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", f1.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 
+		Filter f2 = null;
 		try {
-			filter = FrameworkUtil.createFilter("(comparable=42)"); //$NON-NLS-1$
+			f2 = FrameworkUtil.createFilter("(comparable=42)"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
 			fail("invalid syntax" + e); //$NON-NLS-1$
 		}
@@ -200,13 +204,15 @@ public class FilterTests extends TestCase {
 
 		comp = new SampleComparable("42"); //$NON-NLS-1$
 		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+		assertTrue("does not match filter", f2.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", f2.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 
 		comp = new Long(42);
 		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", filter.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+		assertTrue("does not match filter", f2.match(hash)); //$NON-NLS-1$
+		assertTrue("does not match filter", f2.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
+
+		assertEquals("not equal", f1, f2); //$NON-NLS-1$
 	}
 
 	private static class SampleComparable implements Comparable {

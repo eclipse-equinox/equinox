@@ -323,7 +323,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return true;
 		}
 
-		if (!(obj instanceof FilterImpl)) {
+		if (!(obj instanceof Filter)) {
 			return false;
 		}
 
