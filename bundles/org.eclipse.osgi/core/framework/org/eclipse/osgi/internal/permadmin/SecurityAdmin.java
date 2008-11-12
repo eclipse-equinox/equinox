@@ -32,7 +32,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			DEFAULT_DEFAULT.add(allPerm);
 	}
 
-	private static final String ADMIN_IMPLIED_ACTIONS = AdminPermission.RESOURCE + ',' + AdminPermission.METADATA + ',' + AdminPermission.CLASS;
+	private static final String ADMIN_IMPLIED_ACTIONS = AdminPermission.RESOURCE + ',' + AdminPermission.METADATA + ',' + AdminPermission.CLASS + ',' + AdminPermission.CONTEXT;
 	private static final PermissionInfo[] EMPTY_PERM_INFO = new PermissionInfo[0];
 	/* @GuardedBy(lock) */
 	private final PermissionAdminTable permAdminTable = new PermissionAdminTable();
