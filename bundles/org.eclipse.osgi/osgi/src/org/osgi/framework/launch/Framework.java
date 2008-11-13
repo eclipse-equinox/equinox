@@ -17,11 +17,7 @@
 package org.osgi.framework.launch;
 
 import java.io.InputStream;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.*;
 
 /**
  * A Framework instance. A Framework is also known as a System Bundle.
@@ -51,7 +47,7 @@ import org.osgi.framework.FrameworkEvent;
  * @ThreadSafe
  * @version $Revision: 5834 $
  */
-public interface Framework extends SystemBundle {
+public interface Framework extends Bundle {
 
 	/**
 	 * Initialize this Framework. After calling this method, this Framework
