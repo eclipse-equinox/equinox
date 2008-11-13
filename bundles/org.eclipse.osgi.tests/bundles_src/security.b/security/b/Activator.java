@@ -11,47 +11,42 @@
 
 package security.b;
 
-import java.util.Dictionary;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.*;
 
 public class Activator implements BundleActivator {
 
-  private BundleContext bc;
-  
+	private BundleContext bc;
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		System.out.println("Starting bundle Test2!!");
-		System.out.println("Security manager: "+System.getSecurityManager());
+		System.out.println("Starting bundle Test2!!"); //$NON-NLS-1$
+		System.out.println("Security manager: " + System.getSecurityManager()); //$NON-NLS-1$
 		this.bc = context;
 		doTestAction();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		System.out.println("Stopping bundle Test2!!");
+		System.out.println("Stopping bundle Test2!!"); //$NON-NLS-1$
 	}
 
-	private void doTestAction()  {
-	  Bundle[] bundles = bc.getBundles();
-    Bundle thisBundle = bc.getBundle();
-    for (int i = 0; i < bundles.length; i++) {
-      if (thisBundle.getBundleId() != bundles[i].getBundleId()) {
-        checkBundle(bundles[i]);
-      }
-    }
+	private void doTestAction() {
+		Bundle[] bundles = bc.getBundles();
+		Bundle thisBundle = bc.getBundle();
+		for (int i = 0; i < bundles.length; i++) {
+			if (thisBundle.getBundleId() != bundles[i].getBundleId()) {
+				checkBundle(bundles[i]);
+			}
+		}
 	}
-	
+
 	private void checkBundle(Bundle bundle) {
-	  Dictionary headers = bundle.getHeaders();
-
+		bundle.getHeaders();
 	}
 }
