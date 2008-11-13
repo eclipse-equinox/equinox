@@ -38,6 +38,11 @@ package org.osgi.framework;
 public class BundleException extends Exception {
 	static final long		serialVersionUID		= 3571095144220455665L;
 	/**
+	 * Nested exception.
+	 */
+	private final Throwable	cause;
+
+	/**
 	 * Type of bundle exception.
 	 * 
 	 * @since 1.5
@@ -133,7 +138,7 @@ public class BundleException extends Exception {
 	 * @param msg The message.
 	 */
 	public BundleException(String msg) {
-		this(msg, UNSPECIFIED);
+		this(msg, UNSPECIFIED, null);
 	}
 
 	/**
@@ -146,8 +151,9 @@ public class BundleException extends Exception {
 	 * @since 1.5
 	 */
 	public BundleException(String msg, int type, Throwable cause) {
-		super(msg, cause);
+		super(msg);
 		this.type = type;
+		this.cause = cause;
 	}
 
 	/**
@@ -159,8 +165,7 @@ public class BundleException extends Exception {
 	 * @since 1.5
 	 */
 	public BundleException(String msg, int type) {
-		super(msg);
-		this.type = type;
+		this(msg, type, null);
 	}
 
 	/**
@@ -176,6 +181,32 @@ public class BundleException extends Exception {
 	 */
 	public Throwable getNestedException() {
 		return getCause();
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause
+	 * was specified when this exception was created.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause
+	 *         was specified.
+	 * @since 1.3
+	 */
+	public Throwable getCause() {
+		return cause;
+	}
+
+	/**
+	 * The cause of this exception can only be set when constructed.
+	 * 
+	 * @param cause Cause of the exception.
+	 * @return This object.
+	 * @throws java.lang.IllegalStateException This method will always throw an
+	 *         <code>IllegalStateException</code> since the cause of this
+	 *         exception can only be set when constructed.
+	 * @since 1.3
+	 */
+	public Throwable initCause(Throwable cause) {
+		throw new IllegalStateException();
 	}
 
 	/**
