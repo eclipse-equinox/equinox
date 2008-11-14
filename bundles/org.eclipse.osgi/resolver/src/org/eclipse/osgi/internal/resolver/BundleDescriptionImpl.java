@@ -519,7 +519,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		if (!isFullyLoaded())
 			return;
 		setFullyLoaded(false);
-		LazyData tempData = lazyData;
 		lazyData = null;
 	}
 

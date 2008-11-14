@@ -721,7 +721,7 @@ class StateReader {
 		return skipBytes;
 	}
 
-	synchronized void flushLazyObjectCache() {
+	void flushLazyObjectCache() {
 		for (Iterator entries = objectTable.entrySet().iterator(); entries.hasNext();) {
 			Map.Entry entry = (Entry) entries.next();
 			if (entry.getValue() instanceof ExportPackageDescription || entry.getValue() instanceof GenericDescription)
