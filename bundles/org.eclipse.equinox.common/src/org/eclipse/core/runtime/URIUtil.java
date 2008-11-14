@@ -12,6 +12,8 @@ package org.eclipse.core.runtime;
 
 import java.io.File;
 import java.net.*;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 /**
  * A utility class for manipulating URIs. This class works around some of the
@@ -212,4 +214,90 @@ public class URIUtil {
 			result.append('#').append(fragment);
 		return result.toString();
 	}
+
+	/**
+	 * Return a URI which is absolute to the given base. Return the original URI
+	 * if it is already absolute or if either URI has a non-local scheme.
+	 * @param original the relative URI
+	 * @param baseURI the base URI
+	 * @return an absolute URI
+	 */
+	public static URI makeAbsolute(URI original, URI baseURI) {
+		// we only calculate the result if both URIs are local.
+		if (!SCHEME_FILE.equals(baseURI.getScheme()))
+			return original;
+		String scheme = original.getScheme();
+		if (scheme != null && !SCHEME_FILE.equals(scheme))
+			return original;
+		File file = scheme == null ? new File(original.toString()) : toFile(original);
+		File base = toFile(baseURI);
+
+		// make sure we have relative path to start
+		if (file.isAbsolute())
+			return original;
+
+		IPath root = new Path(base.getAbsolutePath());
+		try {
+			String path = root.addTrailingSeparator().append(file.getPath().replace(':', '}')).toOSString().replace('}', ':');
+			return scheme == null ? fromString(SCHEME_FILE + ':' + path) : fromString(scheme + ':' + path);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return original;
+		}
+	}
+
+	/**
+	 * Return a URI which is considered to be relative to the given base URI.
+	 * Return the original URI if either URI has a non-local scheme.
+	 * @param original the original URI
+	 * @param baseURI the base URI
+	 * @return a relative URI
+	 */
+	public static URI makeRelative(URI original, URI baseURI) {
+		// we only calculate the result if both URIs are local.
+		if (!SCHEME_FILE.equals(original.getScheme()) || !SCHEME_FILE.equals(baseURI.getScheme()))
+			return original;
+
+		File file = toFile(original);
+		File base = toFile(baseURI);
+
+		// make sure we have an absolute path to start
+		if (!file.isAbsolute())
+			return original;
+
+		IPath one = new Path(file.getPath());
+		IPath two = new Path(base.getPath());
+		String deviceOne = one.getDevice();
+		String deviceTwo = two.getDevice();
+		// do checking here because we want to return the exact string we got initially if
+		// we are unable to make it relative.
+		if (deviceOne != deviceTwo && (deviceOne == null || !deviceOne.equalsIgnoreCase(two.getDevice())))
+			return original;
+
+		try {
+			return fromString(makeRelative(one, two).toString());
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return original;
+		}
+	}
+
+	/*
+	 * Make the given path relative to the specified base.
+	 */
+	private static IPath makeRelative(IPath original, IPath base) {
+		int i = base.matchingFirstSegments(original);
+		if (i == 0)
+			return original.segmentCount() == 0 ? Path.EMPTY : original;
+		IPath result = Path.EMPTY;
+		for (int j = 0; j < (base.segmentCount() - i); j++)
+			result = result.append(".."); //$NON-NLS-1$
+		if (i == original.segmentCount())
+			return new Path("."); //$NON-NLS-1$
+		result = result.append(original.setDevice(null).removeFirstSegments(i));
+		return result;
+	}
+
 }
