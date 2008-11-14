@@ -15,6 +15,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.InvalidSyntaxException;
@@ -718,5 +719,13 @@ class StateReader {
 			skipBytes[i] = current.getLazyDataOffset() - previous.getLazyDataOffset() - previous.getLazyDataSize();
 		}
 		return skipBytes;
+	}
+
+	synchronized void flushLazyObjectCache() {
+		for (Iterator entries = objectTable.entrySet().iterator(); entries.hasNext();) {
+			Map.Entry entry = (Entry) entries.next();
+			if (entry.getValue() instanceof ExportPackageDescription || entry.getValue() instanceof GenericDescription)
+				entries.remove();
+		}
 	}
 }

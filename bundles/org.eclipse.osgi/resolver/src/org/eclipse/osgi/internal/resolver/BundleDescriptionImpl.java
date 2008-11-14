@@ -521,10 +521,6 @@ public class BundleDescriptionImpl extends BaseDescriptionImpl implements Bundle
 		setFullyLoaded(false);
 		LazyData tempData = lazyData;
 		lazyData = null;
-		if (tempData == null || tempData.selectedExports == null)
-			return;
-		for (int i = 0; i < tempData.selectedExports.length; i++)
-			currentState.getReader().objectTable.remove(new Integer(((ExportPackageDescriptionImpl) tempData.selectedExports[i]).getTableIndex()));
 	}
 
 	void setDynamicStamps(HashMap dynamicStamps) {

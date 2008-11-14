@@ -814,6 +814,7 @@ public abstract class StateImpl implements State {
 			BundleDescription[] bundles = getBundles();
 			for (int i = 0; i < bundles.length; i++)
 				((BundleDescriptionImpl) bundles[i]).unload();
+			reader.flushLazyObjectCache();
 		}
 	}
 
