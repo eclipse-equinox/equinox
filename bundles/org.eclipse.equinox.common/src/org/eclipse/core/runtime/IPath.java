@@ -298,11 +298,27 @@ public interface IPath extends Cloneable {
 	public IPath makeRelative();
 
 	/**
+	 * Returns a path equivalent to this path, but relative to the given base path if possible. 
+	 * <p>
+	 * The path is only made relative if the base path if both paths have the same device 
+	 * and have a non-zero length common prefix. If the paths have different devices,
+	 * or no common prefix, then this path is simply returned. If the path is successfully
+	 * made relative, then appending the returned path to the base will always produce
+	 * a path equal to this path.
+	 * </p>
+	 * @param base The base path to make this path relative to
+	 * @return A path relative to the base path, or this path if it could
+	 * not be made relative to the given base
+	 * @since org.eclipse.equinox.common 3.5
+	 */
+	public IPath makeRelativeTo(IPath base);
+
+	/**
 	 * Return a new path which is the equivalent of this path converted to UNC
 	 * form (if the given boolean is true) or this path not as a UNC path (if the given
 	 * boolean is false). If UNC, the returned path will not have a device and the 
 	 * first 2 characters of the path string will be <code>Path.SEPARATOR</code>. If not UNC, the
-	 * 	first 2 characters of the returned path string will not be <code>Path.SEPARATOR</code>.
+	 * first 2 characters of the returned path string will not be <code>Path.SEPARATOR</code>.
 	 * 
 	 * @param toUNC true if converting to UNC, false otherwise
 	 * @return the new path, either in UNC form or not depending on the boolean parameter

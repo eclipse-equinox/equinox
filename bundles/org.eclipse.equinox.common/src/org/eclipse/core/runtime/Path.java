@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime;
 
 import java.io.File;
+import java.util.Arrays;
 
 /** 
  * The standard implementation of the <code>IPath</code> interface.
@@ -729,6 +730,23 @@ public class Path implements IPath, Cloneable {
 			return this;
 		}
 		return new Path(device, segments, separators & HAS_TRAILING);
+	}
+
+	/* (Intentionally not included in javadoc)
+	 * @see IPath#makeRelativeTo(IPath)
+	 */
+	public IPath makeRelativeTo(IPath base) {
+		//can't make relative if devices are not equal
+		if (device != base.getDevice() && (device == null || !device.equals(base.getDevice())))
+			return this;
+		int commonLength = matchingFirstSegments(base);
+		final int differenceLength = base.segmentCount() - commonLength;
+		String[] newSegments = new String[differenceLength + segmentCount() - commonLength];
+		//add parent references for each segment different from the base
+		Arrays.fill(newSegments, 0, differenceLength, ".."); //$NON-NLS-1$
+		//append the segments of this path not in common with the base
+		System.arraycopy(segments, commonLength, newSegments, differenceLength, newSegments.length - differenceLength);
+		return new Path(null, newSegments, separators & HAS_TRAILING);
 	}
 
 	/* (Intentionally not included in javadoc)
