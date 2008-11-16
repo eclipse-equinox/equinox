@@ -502,7 +502,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 		if (url == null)
 			// the profile url is still null then use the osgi min profile in OSGi by default
-			url = findInSystemBundle("OSGi_Minimum-1.1.profile"); //$NON-NLS-1$
+			url = findInSystemBundle("OSGi_Minimum-1.2.profile"); //$NON-NLS-1$
 		if (url != null) {
 			InputStream in = null;
 			try {
@@ -525,7 +525,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				result.put(Constants.OSGI_JAVA_PROFILE_NAME, vmProfile.replace('_', '/'));
 			else
 				// last resort; default to the absolute minimum profile name for the framework
-				result.put(Constants.OSGI_JAVA_PROFILE_NAME, "OSGi/Minimum-1.1"); //$NON-NLS-1$
+				result.put(Constants.OSGI_JAVA_PROFILE_NAME, "OSGi/Minimum-1.2"); //$NON-NLS-1$
 		return result;
 	}
 
