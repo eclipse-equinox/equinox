@@ -8,61 +8,85 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
 
-public abstract class VersionConstraintImpl implements VersionConstraint {
+abstract class VersionConstraintImpl implements VersionConstraint {
+
+	protected final Object monitor = new Object();
+
 	private String name;
 	private VersionRange versionRange;
 	private BundleDescription bundle;
 	private BaseDescription supplier;
 
 	public String getName() {
-		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name)) {
-			StateImpl state = (StateImpl) getBundle().getContainingState();
-			return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
+		synchronized (this.monitor) {
+			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(name)) {
+				StateImpl state = (StateImpl) getBundle().getContainingState();
+				return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
+			}
+			return name;
 		}
-		return name;
 	}
 
 	public VersionRange getVersionRange() {
-		if (versionRange == null)
-			return VersionRange.emptyRange;
-		return versionRange;
+		synchronized (this.monitor) {
+			if (versionRange == null)
+				return VersionRange.emptyRange;
+			return versionRange;
+		}
 	}
 
 	public BundleDescription getBundle() {
-		return bundle;
+		synchronized (this.monitor) {
+			return bundle;
+		}
 	}
 
 	public boolean isResolved() {
-		return supplier != null;
+		synchronized (this.monitor) {
+			return supplier != null;
+		}
 	}
 
 	public BaseDescription getSupplier() {
-		return supplier;
+		synchronized (this.monitor) {
+			return supplier;
+		}
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {
-		return false;
+		synchronized (this.monitor) {
+			return false;
+		}
 	}
 
 	protected void setName(String name) {
-		this.name = name;
+		synchronized (this.monitor) {
+			this.name = name;
+		}
 	}
 
 	protected void setVersionRange(VersionRange versionRange) {
-		this.versionRange = versionRange;
+		synchronized (this.monitor) {
+			this.versionRange = versionRange;
+		}
 	}
 
 	protected void setBundle(BundleDescription bundle) {
-		this.bundle = bundle;
+		synchronized (this.monitor) {
+			this.bundle = bundle;
+		}
 	}
 
 	protected void setSupplier(BaseDescription supplier) {
-		this.supplier = supplier;
+		synchronized (this.monitor) {
+			this.supplier = supplier;
+		}
 	}
 }

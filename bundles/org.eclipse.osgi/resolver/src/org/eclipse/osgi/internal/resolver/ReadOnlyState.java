@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
-  *     Danail Nachev -  ProSyst - bug 218625
+ *     Danail Nachev -  ProSyst - bug 218625
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -16,8 +17,8 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
-public class ReadOnlyState implements State {
-	private State target;
+public final class ReadOnlyState implements State {
+	private final State target;
 
 	public ReadOnlyState(State target) {
 		this.target = target;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -20,11 +21,15 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	private GenericDescription[] suppliers;
 
 	public String getMatchingFilter() {
-		return matchingFilter == null ? null : matchingFilter.toString();
+		synchronized (this.monitor) {
+			return matchingFilter == null ? null : matchingFilter.toString();
+		}
 	}
 
 	void setMatchingFilter(String matchingFilter) throws InvalidSyntaxException {
-		this.matchingFilter = matchingFilter == null ? null : FrameworkUtil.createFilter(matchingFilter);
+		synchronized (this.monitor) {
+			this.matchingFilter = matchingFilter == null ? null : FrameworkUtil.createFilter(matchingFilter);
+		}
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {
@@ -50,50 +55,68 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	}
 
 	public String getType() {
-		return type;
+		synchronized (this.monitor) {
+			return type;
+		}
 	}
 
 	void setType(String type) {
-		if (type == null || type.equals(GenericDescription.DEFAULT_TYPE))
-			this.type = GenericDescription.DEFAULT_TYPE;
-		else
-			this.type = type;
+		synchronized (this.monitor) {
+			if (type == null || type.equals(GenericDescription.DEFAULT_TYPE))
+				this.type = GenericDescription.DEFAULT_TYPE;
+			else
+				this.type = type;
+		}
 	}
 
 	public int getResolution() {
-		return resolution;
+		synchronized (this.monitor) {
+			return resolution;
+		}
 	}
 
 	public boolean isResolved() {
-		return suppliers != null && suppliers.length > 0;
+		synchronized (this.monitor) {
+			return suppliers != null && suppliers.length > 0;
+		}
 	}
 
 	void setResolution(int resolution) {
-		this.resolution = resolution;
+		synchronized (this.monitor) {
+			this.resolution = resolution;
+		}
 	}
 
 	public BaseDescription getSupplier() {
-		return suppliers == null || suppliers.length == 0 ? null : suppliers[0];
+		synchronized (this.monitor) {
+			return suppliers == null || suppliers.length == 0 ? null : suppliers[0];
+		}
 	}
 
 	protected void setSupplier(BaseDescription supplier) {
-		if (supplier == null) {
-			suppliers = null;
-			return;
+		synchronized (this.monitor) {
+			if (supplier == null) {
+				suppliers = null;
+				return;
+			}
+			int len = suppliers == null ? 0 : suppliers.length;
+			GenericDescription[] temp = new GenericDescription[len + 1];
+			if (suppliers != null)
+				System.arraycopy(suppliers, 0, temp, 0, len);
+			temp[len] = (GenericDescription) supplier;
+			suppliers = temp;
 		}
-		int len = suppliers == null ? 0 : suppliers.length;
-		GenericDescription[] temp = new GenericDescription[len + 1];
-		if (suppliers != null)
-			System.arraycopy(suppliers, 0, temp, 0, len);
-		temp[len] = (GenericDescription) supplier;
-		suppliers = temp;
 	}
 
 	public GenericDescription[] getSuppliers() {
-		return suppliers;
+		synchronized (this.monitor) {
+			return suppliers;
+		}
 	}
 
 	void setSupplers(GenericDescription[] suppliers) {
-		this.suppliers = suppliers;
+		synchronized (this.monitor) {
+			this.suppliers = suppliers;
+		}
 	}
 }

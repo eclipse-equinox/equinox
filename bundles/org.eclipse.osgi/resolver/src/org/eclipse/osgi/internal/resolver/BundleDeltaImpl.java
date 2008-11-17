@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,16 +7,17 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.service.resolver.BundleDelta;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 
-public class BundleDeltaImpl implements BundleDelta {
+final class BundleDeltaImpl implements BundleDelta {
 
-	private BundleDescription bundleDescription;
-	private int type;
+	private volatile BundleDescription bundleDescription;
+	private volatile int type;
 
 	public BundleDeltaImpl(BundleDescription bundleDescription) {
 		this(bundleDescription, 0);

@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -21,7 +22,12 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
 
-class StateReader {
+/**
+ * This class is internally threadsafe and supports client locking. Clients must <strong>not</strong> hold the monitor for
+ * any {@link StateImpl} or {@link BundleDescriptionImpl} object when calling into the public methods of this class to prevent
+ * possible deadlock.
+ */
+final class StateReader {
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE_LAZY = 4096;
@@ -32,14 +38,16 @@ class StateReader {
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	protected Map objectTable = new HashMap();
+	final Map objectTable = Collections.synchronizedMap(new HashMap());
 
-	private File stateFile;
-	private File lazyFile;
+	private final Map stringCache = Collections.synchronizedMap(new WeakHashMap());
 
-	private boolean lazyLoad = true;
-	private int numBundles;
-	private boolean accessedFlag = false;
+	private volatile File stateFile;
+	private volatile File lazyFile;
+
+	private volatile boolean lazyLoad = true;
+	private volatile int numBundles;
+	private volatile boolean accessedFlag = false;
 
 	public static final byte STATE_CACHE_VERSION = 30;
 	public static final byte NULL = 0;
@@ -590,7 +598,7 @@ class StateReader {
 	 * expectedTimestamp is the expected value for the timestamp. or -1, if
 	 * 	no checking should be performed 
 	 */
-	public final boolean loadStateDeprecated(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
+	public synchronized boolean loadStateDeprecated(StateImpl state, DataInputStream input, long expectedTimestamp) throws IOException {
 		try {
 			return readStateDeprecated(state, input, expectedTimestamp);
 		} finally {
@@ -602,11 +610,9 @@ class StateReader {
 	 * expectedTimestamp is the expected value for the timestamp. or -1, if
 	 * 	no checking should be performed 
 	 */
-	public final boolean loadState(StateImpl state, long expectedTimestamp) throws IOException {
+	public synchronized boolean loadState(StateImpl state, long expectedTimestamp) throws IOException {
 		return readState(state, expectedTimestamp);
 	}
-
-	private WeakHashMap stringCache = new WeakHashMap();
 
 	private String readString(DataInputStream in, boolean intern) throws IOException {
 		byte type = in.readByte();

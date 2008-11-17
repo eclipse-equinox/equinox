@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -17,11 +18,13 @@ import org.osgi.framework.Constants;
 
 public class GenericDescriptionImpl extends BaseDescriptionImpl implements GenericDescription {
 	private Dictionary attributes;
-	private BundleDescription supplier;
-	private String type = GenericDescription.DEFAULT_TYPE;
+	private volatile BundleDescription supplier;
+	private volatile String type = GenericDescription.DEFAULT_TYPE;
 
 	public Dictionary getAttributes() {
-		return attributes;
+		synchronized (this.monitor) {
+			return attributes;
+		}
 	}
 
 	public BundleDescription getSupplier() {
@@ -29,9 +32,11 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	}
 
 	void setAttributes(Dictionary attributes) {
-		this.attributes = attributes;
-		// always add/replace the version attribute with the actual Version object
-		attributes.put(Constants.VERSION_ATTRIBUTE, getVersion());
+		synchronized (this.monitor) {
+			this.attributes = attributes;
+			// always add/replace the version attribute with the actual Version object
+			attributes.put(Constants.VERSION_ATTRIBUTE, getVersion());
+		}
 	}
 
 	void setSupplier(BundleDescription supplier) {

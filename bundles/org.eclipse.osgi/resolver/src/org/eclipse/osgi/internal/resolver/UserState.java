@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 
@@ -20,9 +20,9 @@ import org.osgi.framework.BundleException;
  */
 public class UserState extends StateImpl {
 	// TODO this is not an accurate way to record updates
-	private Set updated = new HashSet();
+	private final Set updated = Collections.synchronizedSet(new HashSet());
 
-	public synchronized boolean removeBundle(BundleDescription description) {
+	public boolean removeBundle(BundleDescription description) {
 		if (description.getLocation() != null)
 			updated.remove(description.getLocation());
 		if (!super.removeBundle(description))

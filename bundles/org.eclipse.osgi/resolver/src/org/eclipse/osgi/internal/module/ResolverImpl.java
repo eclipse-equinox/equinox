@@ -7,6 +7,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
@@ -1648,6 +1649,9 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	public void setState(State newState) {
+		if (this.state != null) {
+			throw new IllegalStateException("Cannot change the State of a Resolver"); //$NON-NLS-1$
+		}
 		state = newState;
 		flush();
 	}

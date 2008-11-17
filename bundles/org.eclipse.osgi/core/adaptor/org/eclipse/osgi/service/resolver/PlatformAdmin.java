@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
@@ -81,8 +82,16 @@ public interface PlatformAdmin {
 	 * Returns a resolver supplied by the system.  The returned resolver 
 	 * will not be associated with any state.
 	 * @return a system resolver
+	 * @deprecated in favour of {@link #createResolver()}.
 	 */
 	public Resolver getResolver();
+
+	/**
+	 * Creates a new {@link Resolver} that is not associated with any {@link State}.
+	 * @return the new <code>Resolver</code>.
+	 * @since 3.5
+	 */
+	public Resolver createResolver();
 
 	/**
 	 * Returns a factory that knows how to create state objects, such as bundle 

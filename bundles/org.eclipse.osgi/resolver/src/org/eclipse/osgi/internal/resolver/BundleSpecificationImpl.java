@@ -7,31 +7,38 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.BaseDescription;
-import org.eclipse.osgi.service.resolver.BundleSpecification;
 
 public class BundleSpecificationImpl extends VersionConstraintImpl implements BundleSpecification {
 	private boolean exported;
 	private boolean optional;
 
 	protected void setExported(boolean exported) {
-		this.exported = exported;
+		synchronized (this.monitor) {
+			this.exported = exported;
+		}
 	}
 
 	protected void setOptional(boolean optional) {
-		this.optional = optional;
+		synchronized (this.monitor) {
+			this.optional = optional;
+		}
 	}
 
 	public boolean isExported() {
-		return exported;
+		synchronized (this.monitor) {
+			return exported;
+		}
 	}
 
 	public boolean isOptional() {
-		return optional;
+		synchronized (this.monitor) {
+			return optional;
+		}
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {

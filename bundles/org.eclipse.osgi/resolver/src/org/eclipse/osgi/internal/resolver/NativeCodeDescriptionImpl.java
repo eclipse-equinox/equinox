@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -18,47 +19,57 @@ import org.osgi.framework.*;
 public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements NativeCodeDescription {
 	private static final VersionRange[] EMPTY_VERSIONRANGES = new VersionRange[0];
 
-	private Filter filter;
+	private volatile Filter filter;
 	private String[] languages;
 	private String[] nativePaths;
 	private String[] osNames;
 	private VersionRange[] osVersions;
 	private String[] processors;
 	private BundleDescription supplier;
-	private boolean invalidNativePaths = false;
+	private volatile boolean invalidNativePaths = false;
 
 	public Filter getFilter() {
 		return filter;
 	}
 
 	public String[] getLanguages() {
-		if (languages == null)
-			return BundleDescriptionImpl.EMPTY_STRING;
-		return languages;
+		synchronized (this.monitor) {
+			if (languages == null)
+				return BundleDescriptionImpl.EMPTY_STRING;
+			return languages;
+		}
 	}
 
 	public String[] getNativePaths() {
-		if (nativePaths == null)
-			return BundleDescriptionImpl.EMPTY_STRING;
-		return nativePaths;
+		synchronized (this.monitor) {
+			if (nativePaths == null)
+				return BundleDescriptionImpl.EMPTY_STRING;
+			return nativePaths;
+		}
 	}
 
 	public String[] getOSNames() {
-		if (osNames == null)
-			return BundleDescriptionImpl.EMPTY_STRING;
-		return osNames;
+		synchronized (this.monitor) {
+			if (osNames == null)
+				return BundleDescriptionImpl.EMPTY_STRING;
+			return osNames;
+		}
 	}
 
 	public VersionRange[] getOSVersions() {
-		if (osVersions == null)
-			return EMPTY_VERSIONRANGES;
-		return osVersions;
+		synchronized (this.monitor) {
+			if (osVersions == null)
+				return EMPTY_VERSIONRANGES;
+			return osVersions;
+		}
 	}
 
 	public String[] getProcessors() {
-		if (processors == null)
-			return BundleDescriptionImpl.EMPTY_STRING;
-		return processors;
+		synchronized (this.monitor) {
+			if (processors == null)
+				return BundleDescriptionImpl.EMPTY_STRING;
+			return processors;
+		}
 	}
 
 	public BundleDescription getSupplier() {
@@ -161,11 +172,15 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	}
 
 	void setOSNames(String[] osNames) {
-		this.osNames = osNames;
+		synchronized (this.monitor) {
+			this.osNames = osNames;
+		}
 	}
 
 	void setOSVersions(VersionRange[] osVersions) {
-		this.osVersions = osVersions;
+		synchronized (this.monitor) {
+			this.osVersions = osVersions;
+		}
 	}
 
 	void setFilter(String filter) throws InvalidSyntaxException {
@@ -173,15 +188,21 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	}
 
 	void setLanguages(String[] languages) {
-		this.languages = languages;
+		synchronized (this.monitor) {
+			this.languages = languages;
+		}
 	}
 
 	void setNativePaths(String[] nativePaths) {
-		this.nativePaths = nativePaths;
+		synchronized (this.monitor) {
+			this.nativePaths = nativePaths;
+		}
 	}
 
 	void setProcessors(String[] processors) {
-		this.processors = processors;
+		synchronized (this.monitor) {
+			this.processors = processors;
+		}
 	}
 
 	void setSupplier(BundleDescription supplier) {

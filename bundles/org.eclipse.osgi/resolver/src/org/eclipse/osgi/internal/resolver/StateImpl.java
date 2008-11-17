@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -30,26 +31,30 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
+
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
-	transient private boolean resolving = false;
+	transient volatile private boolean resolving = false;
 	transient private HashSet removalPendings = new HashSet();
-	private boolean resolved = true;
-	private long timeStamp = System.currentTimeMillis();
-	private KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
-	private HashMap resolverErrors = new HashMap();
+
+	private volatile boolean resolved = true;
+	private volatile long timeStamp = System.currentTimeMillis();
+	private final KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
+	private final HashMap resolverErrors = new HashMap();
 	private StateObjectFactory factory;
-	private KeyedHashSet resolvedBundles = new KeyedHashSet();
-	private HashMap disabledBundles = new HashMap();
-	boolean fullyLoaded = false;
+	private final KeyedHashSet resolvedBundles = new KeyedHashSet();
+	private final HashMap disabledBundles = new HashMap();
+	private volatile boolean fullyLoaded = false;
 	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
 	private long highestBundleId = -1;
-	private HashSet platformPropertyKeys = new HashSet(PROPS.length);
+	private final HashSet platformPropertyKeys = new HashSet(PROPS.length);
 
 	private static long cumulativeTime;
+
+	private final Object monitor = new Object();
 
 	// to prevent extra-package instantiation 
 	protected StateImpl() {
@@ -58,45 +63,47 @@ public abstract class StateImpl implements State {
 	}
 
 	public boolean addBundle(BundleDescription description) {
-		if (!basicAddBundle(description))
-			return false;
-		String platformFilter = description.getPlatformFilter();
-		if (platformFilter != null) {
-			try {
-				// add any new platform filter propery keys this bundle is using
-				FilterImpl filter = (FilterImpl) FrameworkUtil.createFilter(platformFilter);
-				addPlatformPropertyKeys(filter.getAttributes());
-			} catch (InvalidSyntaxException e) {
-				// ignore this is handled in another place
-			}
-		}
-		NativeCodeSpecification nativeCode = description.getNativeCodeSpecification();
-		if (nativeCode != null) {
-			NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
-			for (int i = 0; i < suppliers.length; i++) {
-				FilterImpl filter = (FilterImpl) suppliers[i].getFilter();
-				if (filter != null)
+		synchronized (this.monitor) {
+			if (!basicAddBundle(description))
+				return false;
+			String platformFilter = description.getPlatformFilter();
+			if (platformFilter != null) {
+				try {
+					// add any new platform filter propery keys this bundle is using
+					FilterImpl filter = (FilterImpl) FrameworkUtil.createFilter(platformFilter);
 					addPlatformPropertyKeys(filter.getAttributes());
+				} catch (InvalidSyntaxException e) {
+					// ignore this is handled in another place
+				}
 			}
+			NativeCodeSpecification nativeCode = description.getNativeCodeSpecification();
+			if (nativeCode != null) {
+				NativeCodeDescription[] suppliers = nativeCode.getPossibleSuppliers();
+				for (int i = 0; i < suppliers.length; i++) {
+					FilterImpl filter = (FilterImpl) suppliers[i].getFilter();
+					if (filter != null)
+						addPlatformPropertyKeys(filter.getAttributes());
+				}
+			}
+			resolved = false;
+			getDelta().recordBundleAdded((BundleDescriptionImpl) description);
+			if (getSystemBundle().equals(description.getSymbolicName()))
+				resetSystemExports();
+			if (resolver != null)
+				resolver.bundleAdded(description);
+			updateTimeStamp();
+			return true;
 		}
-		resolved = false;
-		getDelta().recordBundleAdded((BundleDescriptionImpl) description);
-		if (getSystemBundle().equals(description.getSymbolicName()))
-			resetSystemExports();
-		if (resolver != null)
-			resolver.bundleAdded(description);
-		updateTimeStamp();
-		return true;
 	}
 
 	public boolean updateBundle(BundleDescription newDescription) {
-		BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((BundleDescriptionImpl) newDescription);
-		if (existing == null)
-			return false;
-		if (!bundleDescriptions.remove(existing))
-			return false;
-		resolvedBundles.remove(existing);
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
+			BundleDescriptionImpl existing = (BundleDescriptionImpl) bundleDescriptions.get((BundleDescriptionImpl) newDescription);
+			if (existing == null)
+				return false;
+			if (!bundleDescriptions.remove(existing))
+				return false;
+			resolvedBundles.remove(existing);
 			ArrayList infos = (ArrayList) disabledBundles.remove(existing);
 			if (infos != null) {
 				ArrayList newInfos = new ArrayList(infos.size());
@@ -106,23 +113,21 @@ public abstract class StateImpl implements State {
 				}
 				disabledBundles.put(newDescription, newInfos);
 			}
-		}
-		existing.setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
-		if (!basicAddBundle(newDescription))
-			return false;
-		resolved = false;
-		getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
-		if (getSystemBundle().equals(newDescription.getSymbolicName()))
-			resetSystemExports();
-		if (resolver != null) {
-			boolean pending = existing.getDependents().length > 0;
-			resolver.bundleUpdated(newDescription, existing, pending);
-			if (pending) {
-				getDelta().recordBundleRemovalPending(existing);
-				removalPendings.add(existing);
-			} else {
-				// an existing bundle has been updated with no dependents it can safely be unresolved now
-				synchronized (this) {
+			existing.setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
+			if (!basicAddBundle(newDescription))
+				return false;
+			resolved = false;
+			getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
+			if (getSystemBundle().equals(newDescription.getSymbolicName()))
+				resetSystemExports();
+			if (resolver != null) {
+				boolean pending = existing.getDependents().length > 0;
+				resolver.bundleUpdated(newDescription, existing, pending);
+				if (pending) {
+					getDelta().recordBundleRemovalPending(existing);
+					removalPendings.add(existing);
+				} else {
+					// an existing bundle has been updated with no dependents it can safely be unresolved now
 					try {
 						resolving = true;
 						resolverErrors.remove(existing);
@@ -132,37 +137,37 @@ public abstract class StateImpl implements State {
 					}
 				}
 			}
+			updateTimeStamp();
+			return true;
 		}
-		updateTimeStamp();
-		return true;
 	}
 
 	public BundleDescription removeBundle(long bundleId) {
-		BundleDescription toRemove = getBundle(bundleId);
-		if (toRemove == null || !removeBundle(toRemove))
-			return null;
-		return toRemove;
+		synchronized (this.monitor) {
+			BundleDescription toRemove = getBundle(bundleId);
+			if (toRemove == null || !removeBundle(toRemove))
+				return null;
+			return toRemove;
+		}
 	}
 
 	public boolean removeBundle(BundleDescription toRemove) {
-		if (!bundleDescriptions.remove((KeyedElement) toRemove))
-			return false;
-		resolvedBundles.remove((KeyedElement) toRemove);
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
+			if (!bundleDescriptions.remove((KeyedElement) toRemove))
+				return false;
+			resolvedBundles.remove((KeyedElement) toRemove);
 			disabledBundles.remove(toRemove);
-		}
-		resolved = false;
-		getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
-		((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
-		if (resolver != null) {
-			boolean pending = toRemove.getDependents().length > 0;
-			resolver.bundleRemoved(toRemove, pending);
-			if (pending) {
-				getDelta().recordBundleRemovalPending((BundleDescriptionImpl) toRemove);
-				removalPendings.add(toRemove);
-			} else {
-				// a bundle has been removed with no dependents it can safely be unresolved now
-				synchronized (this) {
+			resolved = false;
+			getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
+			((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
+			if (resolver != null) {
+				boolean pending = toRemove.getDependents().length > 0;
+				resolver.bundleRemoved(toRemove, pending);
+				if (pending) {
+					getDelta().recordBundleRemovalPending((BundleDescriptionImpl) toRemove);
+					removalPendings.add(toRemove);
+				} else {
+					// a bundle has been removed with no dependents it can safely be unresolved now
 					try {
 						resolving = true;
 						resolverErrors.remove(toRemove);
@@ -172,13 +177,15 @@ public abstract class StateImpl implements State {
 					}
 				}
 			}
+			updateTimeStamp();
+			return true;
 		}
-		updateTimeStamp();
-		return true;
 	}
 
 	public StateDelta getChanges() {
-		return getDelta();
+		synchronized (this.monitor) {
+			return getDelta();
+		}
 	}
 
 	private StateDeltaImpl getDelta() {
@@ -188,80 +195,89 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription[] getBundles(String symbolicName) {
-		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
-			symbolicName = getSystemBundle();
-		final List bundles = new ArrayList();
-		for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
-			BundleDescription bundle = (BundleDescription) iter.next();
-			if (symbolicName.equals(bundle.getSymbolicName()))
-				bundles.add(bundle);
+		synchronized (this.monitor) {
+			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
+				symbolicName = getSystemBundle();
+			final List bundles = new ArrayList();
+			for (Iterator iter = bundleDescriptions.iterator(); iter.hasNext();) {
+				BundleDescription bundle = (BundleDescription) iter.next();
+				if (symbolicName.equals(bundle.getSymbolicName()))
+					bundles.add(bundle);
+			}
+			return (BundleDescription[]) bundles.toArray(new BundleDescription[bundles.size()]);
 		}
-		return (BundleDescription[]) bundles.toArray(new BundleDescription[bundles.size()]);
 	}
 
 	public BundleDescription[] getBundles() {
-		return (BundleDescription[]) bundleDescriptions.elements(new BundleDescription[bundleDescriptions.size()]);
+		synchronized (this.monitor) {
+			return (BundleDescription[]) bundleDescriptions.elements(new BundleDescription[bundleDescriptions.size()]);
+		}
 	}
 
 	public BundleDescription getBundle(long id) {
-		BundleDescription result = (BundleDescription) bundleDescriptions.getByKey(new Long(id));
-		if (result != null)
-			return result;
-		// need to look in removal pending bundles;
-		for (Iterator iter = removalPendings.iterator(); iter.hasNext();) {
-			BundleDescription removedBundle = (BundleDescription) iter.next();
-			if (removedBundle.getBundleId() == id) // just return the first matching id
-				return removedBundle;
+		synchronized (this.monitor) {
+			BundleDescription result = (BundleDescription) bundleDescriptions.getByKey(new Long(id));
+			if (result != null)
+				return result;
+			// need to look in removal pending bundles;
+			for (Iterator iter = removalPendings.iterator(); iter.hasNext();) {
+				BundleDescription removedBundle = (BundleDescription) iter.next();
+				if (removedBundle.getBundleId() == id) // just return the first matching id
+					return removedBundle;
+			}
+			return null;
 		}
-		return null;
 	}
 
 	public BundleDescription getBundle(String name, Version version) {
-		BundleDescription[] allBundles = getBundles(name);
-		if (allBundles.length == 1)
-			return version == null || allBundles[0].getVersion().equals(version) ? allBundles[0] : null;
+		synchronized (this.monitor) {
+			BundleDescription[] allBundles = getBundles(name);
+			if (allBundles.length == 1)
+				return version == null || allBundles[0].getVersion().equals(version) ? allBundles[0] : null;
+			if (allBundles.length == 0)
+				return null;
+			BundleDescription unresolvedFound = null;
+			BundleDescription resolvedFound = null;
+			for (int i = 0; i < allBundles.length; i++) {
+				BundleDescription current = allBundles[i];
+				BundleDescription base;
 
-		if (allBundles.length == 0)
-			return null;
+				if (current.isResolved())
+					base = resolvedFound;
+				else
+					base = unresolvedFound;
 
-		BundleDescription unresolvedFound = null;
-		BundleDescription resolvedFound = null;
-		for (int i = 0; i < allBundles.length; i++) {
-			BundleDescription current = allBundles[i];
-			BundleDescription base;
+				if (version == null || current.getVersion().equals(version)) {
+					if (base != null && (base.getVersion().compareTo(current.getVersion()) <= 0 || base.getBundleId() > current.getBundleId())) {
+						if (base == resolvedFound)
+							resolvedFound = current;
+						else
+							unresolvedFound = current;
+					} else {
+						if (current.isResolved())
+							resolvedFound = current;
+						else
+							unresolvedFound = current;
+					}
 
-			if (current.isResolved())
-				base = resolvedFound;
-			else
-				base = unresolvedFound;
-
-			if (version == null || current.getVersion().equals(version)) {
-				if (base != null && (base.getVersion().compareTo(current.getVersion()) <= 0 || base.getBundleId() > current.getBundleId())) {
-					if (base == resolvedFound)
-						resolvedFound = current;
-					else
-						unresolvedFound = current;
-				} else {
-					if (current.isResolved())
-						resolvedFound = current;
-					else
-						unresolvedFound = current;
 				}
-
 			}
+			if (resolvedFound != null)
+				return resolvedFound;
+			return unresolvedFound;
 		}
-		if (resolvedFound != null)
-			return resolvedFound;
-
-		return unresolvedFound;
 	}
 
 	public long getTimeStamp() {
-		return timeStamp;
+		synchronized (this.monitor) {
+			return timeStamp;
+		}
 	}
 
 	public boolean isResolved() {
-		return resolved || isEmpty();
+		synchronized (this.monitor) {
+			return resolved || isEmpty();
+		}
 	}
 
 	public void resolveConstraint(VersionConstraint constraint, BaseDescription supplier) {
@@ -273,36 +289,40 @@ public abstract class StateImpl implements State {
 	}
 
 	public synchronized void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
-		if (!resolving)
-			throw new IllegalStateException(); // TODO need error message here!
-		BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
-		// must record the change before setting the resolve state to 
-		// accurately record if a change has happened.
-		getDelta().recordBundleResolved(modifiable, status);
-		// force the new resolution data to stay in memory; we will not read this from disk anymore
-		modifiable.setLazyLoaded(false);
-		modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
-		if (status) {
-			resolverErrors.remove(modifiable);
-			resolvedBundles.add(modifiable);
-		} else {
-			// remove the bundle from the resolved pool
-			resolvedBundles.remove(modifiable);
-			modifiable.removeDependencies();
+		synchronized (this.monitor) {
+			if (!resolving)
+				throw new IllegalStateException(); // TODO need error message here!
+			BundleDescriptionImpl modifiable = (BundleDescriptionImpl) bundle;
+			// must record the change before setting the resolve state to 
+			// accurately record if a change has happened.
+			getDelta().recordBundleResolved(modifiable, status);
+			// force the new resolution data to stay in memory; we will not read this from disk anymore
+			modifiable.setLazyLoaded(false);
+			modifiable.setStateBit(BundleDescriptionImpl.RESOLVED, status);
+			if (status) {
+				resolverErrors.remove(modifiable);
+				resolvedBundles.add(modifiable);
+			} else {
+				// remove the bundle from the resolved pool
+				resolvedBundles.remove(modifiable);
+				modifiable.removeDependencies();
+			}
+			// to support develoment mode we will resolveConstraints even if the resolve status == false
+			// we only do this if the resolved constraints are not null
+			if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
+				unresolveConstraints(modifiable);
+			else
+				resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, resolvedRequires, resolvedImports);
 		}
-		// to support develoment mode we will resolveConstraints even if the resolve status == false
-		// we only do this if the resolved constraints are not null
-		if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
-			unresolveConstraints(modifiable);
-		else
-			resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, resolvedRequires, resolvedImports);
 	}
 
-	public synchronized void removeBundleComplete(BundleDescription bundle) {
-		if (!resolving)
-			throw new IllegalStateException(); // TODO need error message here!
-		getDelta().recordBundleRemovalComplete((BundleDescriptionImpl) bundle);
-		removalPendings.remove(bundle);
+	public void removeBundleComplete(BundleDescription bundle) {
+		synchronized (this.monitor) {
+			if (!resolving)
+				throw new IllegalStateException(); // TODO need error message here!
+			getDelta().recordBundleRemovalComplete((BundleDescriptionImpl) bundle);
+			removalPendings.remove(bundle);
+		}
 	}
 
 	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
@@ -391,57 +411,59 @@ public abstract class StateImpl implements State {
 		bundle.removeDependencies();
 	}
 
-	private synchronized StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
-		try {
-			resolving = true;
-			if (resolver == null)
-				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
-			fullyLoad();
-			long start = 0;
-			if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
-				start = System.currentTimeMillis();
-			if (!incremental) {
-				resolved = false;
-				reResolve = getBundles();
-				// need to get any removal pendings before flushing
+	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
+		synchronized (this.monitor) {
+			try {
+				resolving = true;
+				if (resolver == null)
+					throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+				fullyLoad();
+				long start = 0;
+				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
+					start = System.currentTimeMillis();
+				if (!incremental) {
+					resolved = false;
+					reResolve = getBundles();
+					// need to get any removal pendings before flushing
+					if (removalPendings.size() > 0) {
+						BundleDescription[] removed = getRemovalPendings();
+						reResolve = mergeBundles(reResolve, removed);
+					}
+					flush(reResolve);
+				}
+				if (resolved && reResolve == null)
+					return new StateDeltaImpl(this);
 				if (removalPendings.size() > 0) {
 					BundleDescription[] removed = getRemovalPendings();
 					reResolve = mergeBundles(reResolve, removed);
 				}
-				flush(reResolve);
-			}
-			if (resolved && reResolve == null)
-				return new StateDeltaImpl(this);
-			if (removalPendings.size() > 0) {
-				BundleDescription[] removed = getRemovalPendings();
-				reResolve = mergeBundles(reResolve, removed);
-			}
-			// use the Headers class to handle ignoring case while matching keys (bug 180817)
-			Headers[] tmpPlatformProperties = new Headers[platformProperties.length];
-			for (int i = 0; i < platformProperties.length; i++) {
-				tmpPlatformProperties[i] = new Headers(platformProperties[i].size());
-				for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
-					Object key = keys.nextElement();
-					tmpPlatformProperties[i].put(key, platformProperties[i].get(key));
+				// use the Headers class to handle ignoring case while matching keys (bug 180817)
+				Headers[] tmpPlatformProperties = new Headers[platformProperties.length];
+				for (int i = 0; i < platformProperties.length; i++) {
+					tmpPlatformProperties[i] = new Headers(platformProperties[i].size());
+					for (Enumeration keys = platformProperties[i].keys(); keys.hasMoreElements();) {
+						Object key = keys.nextElement();
+						tmpPlatformProperties[i].put(key, platformProperties[i].get(key));
+					}
 				}
-			}
-			resolver.resolve(reResolve, tmpPlatformProperties);
-			resolved = removalPendings.size() == 0;
+				resolver.resolve(reResolve, tmpPlatformProperties);
+				resolved = removalPendings.size() == 0;
 
-			StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
-			changes = new StateDeltaImpl(this);
+				StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
+				changes = new StateDeltaImpl(this);
 
-			if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
-				long time = System.currentTimeMillis() - start;
-				Debug.println("Time spent resolving: " + time); //$NON-NLS-1$
-				cumulativeTime = cumulativeTime + time;
-				FrameworkDebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
+				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {
+					long time = System.currentTimeMillis() - start;
+					Debug.println("Time spent resolving: " + time); //$NON-NLS-1$
+					cumulativeTime = cumulativeTime + time;
+					FrameworkDebugOptions.getDefault().setOption("org.eclipse.core.runtime.adaptor/resolver/timing/value", Long.toString(cumulativeTime)); //$NON-NLS-1$
+				}
+				if (savedChanges.getChanges().length > 0)
+					updateTimeStamp();
+				return savedChanges;
+			} finally {
+				resolving = false;
 			}
-			if (savedChanges.getChanges().length > 0)
-				updateTimeStamp();
-			return savedChanges;
-		} finally {
-			resolving = false;
 		}
 	}
 
@@ -497,37 +519,47 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription[] getResolvedBundles() {
-		return (BundleDescription[]) resolvedBundles.elements(new BundleDescription[resolvedBundles.size()]);
+		synchronized (this.monitor) {
+			return (BundleDescription[]) resolvedBundles.elements(new BundleDescription[resolvedBundles.size()]);
+		}
 	}
 
 	public boolean isEmpty() {
-		return bundleDescriptions.isEmpty();
+		synchronized (this.monitor) {
+			return bundleDescriptions.isEmpty();
+		}
 	}
 
 	void setResolved(boolean resolved) {
-		this.resolved = resolved;
+		synchronized (this.monitor) {
+			this.resolved = resolved;
+		}
 	}
 
 	boolean basicAddBundle(BundleDescription description) {
-		StateImpl origState = (StateImpl) description.getContainingState();
-		if (origState != null && origState != this) {
-			if (origState.removalPendings.contains(description))
-				throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_PENDING_REMOVE_STATE, description.toString()));
-			if (origState.getBundle(description.getBundleId()) == description)
-				throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_IN_OTHER_STATE, description.toString()));
+		synchronized (this.monitor) {
+			StateImpl origState = (StateImpl) description.getContainingState();
+			if (origState != null && origState != this) {
+				if (origState.removalPendings.contains(description))
+					throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_PENDING_REMOVE_STATE, description.toString()));
+				if (origState.getBundle(description.getBundleId()) == description)
+					throw new IllegalStateException(NLS.bind(StateMsg.BUNDLE_IN_OTHER_STATE, description.toString()));
+			}
+			((BundleDescriptionImpl) description).setContainingState(this);
+			((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
+			if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
+				if (description.getBundleId() > getHighestBundleId())
+					highestBundleId = description.getBundleId();
+				return true;
+			}
+			return false;
 		}
-		((BundleDescriptionImpl) description).setContainingState(this);
-		((BundleDescriptionImpl) description).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, false);
-		if (bundleDescriptions.add((BundleDescriptionImpl) description)) {
-			if (description.getBundleId() > getHighestBundleId())
-				highestBundleId = description.getBundleId();
-			return true;
-		}
-		return false;
 	}
 
 	void addResolvedBundle(BundleDescriptionImpl resolvedBundle) {
-		resolvedBundles.add(resolvedBundle);
+		synchronized (this.monitor) {
+			resolvedBundles.add(resolvedBundle);
+		}
 	}
 
 	public ExportPackageDescription[] getExportedPackages() {
@@ -572,13 +604,17 @@ public abstract class StateImpl implements State {
 	}
 
 	public void setTimeStamp(long newTimeStamp) {
-		timeStamp = newTimeStamp;
+		synchronized (this.monitor) {
+			timeStamp = newTimeStamp;
+		}
 	}
 
 	private void updateTimeStamp() {
-		if (getTimeStamp() == Long.MAX_VALUE)
-			setTimeStamp(0);
-		setTimeStamp(getTimeStamp() + 1);
+		synchronized (this.monitor) {
+			if (getTimeStamp() == Long.MAX_VALUE)
+				setTimeStamp(0);
+			setTimeStamp(getTimeStamp() + 1);
+		}
 	}
 
 	public StateObjectFactory getFactory() {
@@ -590,16 +626,20 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription getBundleByLocation(String location) {
-		for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
-			BundleDescription current = (BundleDescription) i.next();
-			if (location.equals(current.getLocation()))
-				return current;
+		synchronized (this.monitor) {
+			for (Iterator i = bundleDescriptions.iterator(); i.hasNext();) {
+				BundleDescription current = (BundleDescription) i.next();
+				if (location.equals(current.getLocation()))
+					return current;
+			}
+			return null;
 		}
-		return null;
 	}
 
 	public Resolver getResolver() {
-		return resolver;
+		synchronized (this.monitor) {
+			return resolver;
+		}
 	}
 
 	public void setResolver(Resolver newResolver) {
@@ -610,7 +650,9 @@ public abstract class StateImpl implements State {
 			resolver = null;
 			oldResolver.setState(null);
 		}
-		resolver = newResolver;
+		synchronized (this.monitor) {
+			resolver = newResolver;
+		}
 		if (resolver == null)
 			return;
 		resolver.setState(this);
@@ -750,12 +792,14 @@ public abstract class StateImpl implements State {
 	public String getSystemBundle() {
 		String symbolicName = null;
 		if (platformProperties != null && platformProperties.length > 0)
-			symbolicName = (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE); //$NON-NLS-1$
+			symbolicName = (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE);
 		return symbolicName != null ? symbolicName : Constants.getInternalSymbolicName();
 	}
 
 	public BundleDescription[] getRemovalPendings() {
-		return (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+		synchronized (this.monitor) {
+			return (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+		}
 	}
 
 	public synchronized ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
@@ -767,31 +811,42 @@ public abstract class StateImpl implements State {
 		try {
 			resolving = true;
 			fullyLoad();
-			// ask the resolver to resolve our dynamic import
-			ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
-			if (result == null)
-				importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
-			else {
-				importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
-				// need to add the result to the list of resolved imports
-				importer.addDynamicResolvedImport(result);
+			synchronized (this.monitor) {
+				// ask the resolver to resolve our dynamic import
+				ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
+				if (result == null)
+					importer.setDynamicStamp(requestedPackage, new Long(getTimeStamp()));
+				else {
+					importer.setDynamicStamp(requestedPackage, null); // remove any cached timestamp
+					// need to add the result to the list of resolved imports
+					importer.addDynamicResolvedImport(result);
+				}
+				setDynamicCacheChanged(true);
+				return result;
 			}
-			setDynamicCacheChanged(true);
-			return result;
 		} finally {
 			resolving = false;
 		}
 	}
 
 	void setReader(StateReader reader) {
-		this.reader = reader;
+		synchronized (this.monitor) {
+			this.reader = reader;
+		}
 	}
 
 	StateReader getReader() {
-		return reader;
+		synchronized (this.monitor) {
+			return reader;
+		}
 	}
 
-	public void fullyLoad() {
+	// not synchronized on this to prevent deadlock
+	public final void fullyLoad() {
+		// TODO add back if ee min 1.2 adds holdsLock method
+		//if (Thread.holdsLock(this.monitor)) {
+		//	throw new IllegalStateException("Should not call fullyLoad() holding monitor."); //$NON-NLS-1$
+		//}
 		if (reader == null)
 			return;
 		synchronized (reader) {
@@ -803,7 +858,8 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	public void unloadLazyData(long expireTime) {
+	// not synchronized on this to prevent deadlock
+	public final void unloadLazyData() {
 		// make sure no other thread is trying to unload or load
 		synchronized (reader) {
 			if (reader.getAccessedFlag()) {
@@ -819,52 +875,66 @@ public abstract class StateImpl implements State {
 	}
 
 	public ExportPackageDescription[] getSystemPackages() {
-		ArrayList result = new ArrayList();
-		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-		if (systemBundles.length > 0) {
-			BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
-			ExportPackageDescription[] exports = systemBundle.getExportPackages();
-			for (int i = 0; i < exports.length; i++)
-				if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
-					result.add(exports[i]);
+		synchronized (this.monitor) {
+			ArrayList result = new ArrayList();
+			BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+			if (systemBundles.length > 0) {
+				BundleDescriptionImpl systemBundle = (BundleDescriptionImpl) systemBundles[0];
+				ExportPackageDescription[] exports = systemBundle.getExportPackages();
+				for (int i = 0; i < exports.length; i++)
+					if (((Integer) exports[i].getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue() >= 0)
+						result.add(exports[i]);
+			}
+			return (ExportPackageDescription[]) result.toArray(new ExportPackageDescription[result.size()]);
 		}
-		return (ExportPackageDescription[]) result.toArray(new ExportPackageDescription[result.size()]);
 	}
 
 	boolean inStrictMode() {
-		return Constants.STRICT_MODE.equals(getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
-	}
-
-	public synchronized ResolverError[] getResolverErrors(BundleDescription bundle) {
-		if (bundle.isResolved())
-			return new ResolverError[0];
-		ArrayList result = (ArrayList) resolverErrors.get(bundle);
-		return result == null ? new ResolverError[0] : (ResolverError[]) result.toArray(new ResolverError[result.size()]);
-	}
-
-	public synchronized void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
-		if (!resolving)
-			throw new IllegalStateException(); // TODO need error message here!
-		ArrayList errors = (ArrayList) resolverErrors.get(bundle);
-		if (errors == null) {
-			errors = new ArrayList(1);
-			resolverErrors.put(bundle, errors);
+		synchronized (this.monitor) {
+			return Constants.STRICT_MODE.equals(getPlatformProperties()[0].get(Constants.OSGI_RESOLVER_MODE));
 		}
-		errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data, unsatisfied));
 	}
 
-	public synchronized void removeResolverErrors(BundleDescription bundle) {
-		if (!resolving)
-			throw new IllegalStateException(); // TODO need error message here!
-		resolverErrors.remove(bundle);
+	public ResolverError[] getResolverErrors(BundleDescription bundle) {
+		synchronized (this.monitor) {
+			if (bundle.isResolved())
+				return new ResolverError[0];
+			ArrayList result = (ArrayList) resolverErrors.get(bundle);
+			return result == null ? new ResolverError[0] : (ResolverError[]) result.toArray(new ResolverError[result.size()]);
+		}
+	}
+
+	public void addResolverError(BundleDescription bundle, int type, String data, VersionConstraint unsatisfied) {
+		synchronized (this.monitor) {
+			if (!resolving)
+				throw new IllegalStateException(); // TODO need error message here!
+			ArrayList errors = (ArrayList) resolverErrors.get(bundle);
+			if (errors == null) {
+				errors = new ArrayList(1);
+				resolverErrors.put(bundle, errors);
+			}
+			errors.add(new ResolverErrorImpl((BundleDescriptionImpl) bundle, type, data, unsatisfied));
+		}
+	}
+
+	public void removeResolverErrors(BundleDescription bundle) {
+		synchronized (this.monitor) {
+			if (!resolving)
+				throw new IllegalStateException(); // TODO need error message here!
+			resolverErrors.remove(bundle);
+		}
 	}
 
 	public boolean dynamicCacheChanged() {
-		return dynamicCacheChanged;
+		synchronized (this.monitor) {
+			return dynamicCacheChanged;
+		}
 	}
 
 	void setDynamicCacheChanged(boolean dynamicCacheChanged) {
-		this.dynamicCacheChanged = dynamicCacheChanged;
+		synchronized (this.monitor) {
+			this.dynamicCacheChanged = dynamicCacheChanged;
+		}
 	}
 
 	public StateHelper getStateHelper() {
@@ -886,7 +956,9 @@ public abstract class StateImpl implements State {
 	}
 
 	public long getHighestBundleId() {
-		return highestBundleId;
+		synchronized (this.monitor) {
+			return highestBundleId;
+		}
 	}
 
 	public void setNativePathsInvalid(NativeCodeDescription nativeCodeDescription, boolean hasInvalidNativePaths) {
@@ -894,15 +966,15 @@ public abstract class StateImpl implements State {
 	}
 
 	public BundleDescription[] getDisabledBundles() {
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
 			return (BundleDescription[]) disabledBundles.keySet().toArray(new BundleDescription[0]);
 		}
 	}
 
 	public void addDisabledInfo(DisabledInfo disabledInfo) {
-		if (getBundle(disabledInfo.getBundle().getBundleId()) != disabledInfo.getBundle())
-			throw new IllegalArgumentException(NLS.bind(StateMsg.BUNDLE_NOT_IN_STATE, disabledInfo.getBundle()));
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
+			if (getBundle(disabledInfo.getBundle().getBundleId()) != disabledInfo.getBundle())
+				throw new IllegalArgumentException(NLS.bind(StateMsg.BUNDLE_NOT_IN_STATE, disabledInfo.getBundle()));
 			ArrayList currentInfos = (ArrayList) disabledBundles.get(disabledInfo.getBundle());
 			if (currentInfos == null) {
 				currentInfos = new ArrayList(1);
@@ -919,12 +991,12 @@ public abstract class StateImpl implements State {
 				}
 				currentInfos.add(disabledInfo);
 			}
+			updateTimeStamp();
 		}
-		updateTimeStamp();
 	}
 
 	public void removeDisabledInfo(DisabledInfo disabledInfo) {
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
 			ArrayList currentInfos = (ArrayList) disabledBundles.get(disabledInfo.getBundle());
 			if ((currentInfos != null) && currentInfos.contains(disabledInfo)) {
 				currentInfos.remove(disabledInfo);
@@ -932,12 +1004,12 @@ public abstract class StateImpl implements State {
 					disabledBundles.remove(disabledInfo.getBundle());
 				}
 			}
+			updateTimeStamp();
 		}
-		updateTimeStamp();
 	}
 
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName) {
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
 			ArrayList currentInfos = (ArrayList) disabledBundles.get(bundle);
 			if (currentInfos == null)
 				return null;
@@ -953,7 +1025,7 @@ public abstract class StateImpl implements State {
 	}
 
 	public DisabledInfo[] getDisabledInfos(BundleDescription bundle) {
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
 			ArrayList currentInfos = (ArrayList) disabledBundles.get(bundle);
 			return currentInfos == null ? EMPTY_DISABLEDINFOS : (DisabledInfo[]) currentInfos.toArray(new DisabledInfo[currentInfos.size()]);
 		}
@@ -964,7 +1036,7 @@ public abstract class StateImpl implements State {
 	 */
 	DisabledInfo[] getDisabledInfos() {
 		ArrayList results = new ArrayList();
-		synchronized (disabledBundles) {
+		synchronized (this.monitor) {
 			for (Iterator allDisabledInfos = disabledBundles.values().iterator(); allDisabledInfos.hasNext();)
 				results.addAll((Collection) allDisabledInfos.next());
 		}

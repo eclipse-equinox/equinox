@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,17 +7,18 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 
-public class ResolverErrorImpl implements ResolverError {
-	private BundleDescriptionImpl bundle;
-	private int type;
-	private String data;
-	private VersionConstraint unsatisfied;
+public final class ResolverErrorImpl implements ResolverError {
+	private final BundleDescriptionImpl bundle;
+	private final int type;
+	private final String data;
+	private final VersionConstraint unsatisfied;
 
 	public ResolverErrorImpl(BundleDescriptionImpl bundle, int type, String data, VersionConstraint unsatisfied) {
 		this.bundle = bundle;

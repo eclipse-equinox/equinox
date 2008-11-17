@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.baseadaptor;
 
@@ -119,7 +120,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 		StateImpl state = systemState;
 		if (removalPendings.length > 0) {
 			state = (StateImpl) state.getFactory().createState(systemState);
-			state.setResolver(getResolver(System.getSecurityManager() != null));
+			state.setResolver(createResolver(System.getSecurityManager() != null));
 			state.setPlatformProperties(FrameworkProperties.getProperties());
 			state.resolve(false);
 		}
@@ -188,7 +189,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	}
 
 	private boolean initializeSystemState() {
-		systemState.setResolver(getResolver(System.getSecurityManager() != null));
+		systemState.setResolver(createResolver(System.getSecurityManager() != null));
 		lastTimeStamp = systemState.getTimeStamp();
 		return !systemState.setPlatformProperties(FrameworkProperties.getProperties());
 	}
@@ -274,12 +275,20 @@ public class StateManager implements PlatformAdmin, Runnable {
 
 	/**
 	 * @see PlatformAdmin#getResolver()
+	 * @deprecated
 	 */
 	public Resolver getResolver() {
-		return getResolver(false);
+		return createResolver(false);
 	}
 
-	private Resolver getResolver(boolean checkPermissions) {
+	/**
+	 * @see PlatformAdmin#createResolver()
+	 */
+	public Resolver createResolver() {
+		return createResolver(false);
+	}
+
+	private Resolver createResolver(boolean checkPermissions) {
 		return new org.eclipse.osgi.internal.module.ResolverImpl(context, checkPermissions);
 	}
 
@@ -301,7 +310,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 			if (systemState != null)
 				synchronized (systemState) {
 					if (timeStamp == systemState.getTimeStamp() && !systemState.dynamicCacheChanged())
-						systemState.unloadLazyData(expireTime);
+						systemState.unloadLazyData();
 				}
 		}
 	}

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -22,46 +23,60 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	private Map attributes;
 
 	public Map getDirectives() {
-		Map result = new HashMap(5);
-		if (resolution != null)
-			result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
-		return result;
+		synchronized (this.monitor) {
+			Map result = new HashMap(5);
+			if (resolution != null)
+				result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
+			return result;
+		}
 	}
 
 	public Object getDirective(String key) {
-		if (key.equals(Constants.RESOLUTION_DIRECTIVE))
-			return resolution;
-		return null;
+		synchronized (this.monitor) {
+			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
+				return resolution;
+			return null;
+		}
 	}
 
 	public Object setDirective(String key, Object value) {
-		if (key.equals(Constants.RESOLUTION_DIRECTIVE))
-			return resolution = (String) value;
-		return null;
+		synchronized (this.monitor) {
+			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
+				return resolution = (String) value;
+			return null;
+		}
 	}
 
 	public void setDirectives(Map directives) {
-		if (directives == null)
-			return;
-		resolution = (String) directives.get(Constants.RESOLUTION_DIRECTIVE);
+		synchronized (this.monitor) {
+			if (directives == null)
+				return;
+			resolution = (String) directives.get(Constants.RESOLUTION_DIRECTIVE);
+		}
 	}
 
 	public String getBundleSymbolicName() {
-		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
-			StateImpl state = (StateImpl) getBundle().getContainingState();
-			return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
+		synchronized (this.monitor) {
+			if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName)) {
+				StateImpl state = (StateImpl) getBundle().getContainingState();
+				return state == null ? Constants.getInternalSymbolicName() : state.getSystemBundle();
+			}
+			return symbolicName;
 		}
-		return symbolicName;
 	}
 
 	public VersionRange getBundleVersionRange() {
-		if (bundleVersionRange == null)
-			return VersionRange.emptyRange;
-		return bundleVersionRange;
+		synchronized (this.monitor) {
+			if (bundleVersionRange == null)
+				return VersionRange.emptyRange;
+			return bundleVersionRange;
+		}
 	}
 
 	public Map getAttributes() {
-		return attributes;
+		synchronized (this.monitor) {
+			return attributes;
+		}
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {
@@ -146,15 +161,21 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	protected void setBundleSymbolicName(String symbolicName) {
-		this.symbolicName = symbolicName;
+		synchronized (this.monitor) {
+			this.symbolicName = symbolicName;
+		}
 	}
 
 	protected void setBundleVersionRange(VersionRange bundleVersionRange) {
-		this.bundleVersionRange = bundleVersionRange;
+		synchronized (this.monitor) {
+			this.bundleVersionRange = bundleVersionRange;
+		}
 	}
 
 	protected void setAttributes(Map attributes) {
-		this.attributes = attributes;
+		synchronized (this.monitor) {
+			this.attributes = attributes;
+		}
 	}
 
 	public String toString() {

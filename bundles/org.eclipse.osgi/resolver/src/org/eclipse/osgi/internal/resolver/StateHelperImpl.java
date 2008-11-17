@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -19,8 +20,8 @@ import org.eclipse.osgi.service.resolver.*;
  * provided  by the PlatformAdmin. Since this helper is a general facility for
  * state manipulation, it should not be tied to any implementation details.
  */
-public class StateHelperImpl implements StateHelper {
-	private static StateHelper instance = new StateHelperImpl();
+public final class StateHelperImpl implements StateHelper {
+	private static final StateHelper instance = new StateHelperImpl();
 
 	/**
 	 * @see StateHelper

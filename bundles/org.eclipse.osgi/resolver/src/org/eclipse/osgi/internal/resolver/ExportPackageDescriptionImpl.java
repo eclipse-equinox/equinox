@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.resolver;
@@ -22,84 +23,94 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private static final Integer EQUINOX_EE_DEFAULT = new Integer(-1);
 	private String[] uses;
 	private Map attributes;
-	private BundleDescription exporter;
+	private volatile BundleDescription exporter;
 	private String exclude;
 	private String include;
 	private String[] friends;
 	private String[] mandatory;
 	private Boolean internal = Boolean.FALSE;
 	private int equinox_ee = -1;
-	private int tableIndex;
+	private volatile int tableIndex;
 
 	public Map getDirectives() {
-		Map result = new HashMap(5);
-		if (uses != null)
-			result.put(Constants.USES_DIRECTIVE, uses);
-		if (exclude != null)
-			result.put(Constants.EXCLUDE_DIRECTIVE, exclude);
-		if (include != null)
-			result.put(Constants.INCLUDE_DIRECTIVE, include);
-		if (mandatory != null)
-			result.put(Constants.MANDATORY_DIRECTIVE, mandatory);
-		if (friends != null)
-			result.put(Constants.FRIENDS_DIRECTIVE, friends);
-		result.put(Constants.INTERNAL_DIRECTIVE, internal);
-		result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
-		return result;
+		synchronized (this.monitor) {
+			Map result = new HashMap(5);
+			if (uses != null)
+				result.put(Constants.USES_DIRECTIVE, uses);
+			if (exclude != null)
+				result.put(Constants.EXCLUDE_DIRECTIVE, exclude);
+			if (include != null)
+				result.put(Constants.INCLUDE_DIRECTIVE, include);
+			if (mandatory != null)
+				result.put(Constants.MANDATORY_DIRECTIVE, mandatory);
+			if (friends != null)
+				result.put(Constants.FRIENDS_DIRECTIVE, friends);
+			result.put(Constants.INTERNAL_DIRECTIVE, internal);
+			result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
+			return result;
+		}
 	}
 
 	public Object getDirective(String key) {
-		if (key.equals(Constants.USES_DIRECTIVE))
-			return uses;
-		if (key.equals(Constants.EXCLUDE_DIRECTIVE))
-			return exclude;
-		if (key.equals(Constants.INCLUDE_DIRECTIVE))
-			return include;
-		if (key.equals(Constants.MANDATORY_DIRECTIVE))
-			return mandatory;
-		if (key.equals(Constants.FRIENDS_DIRECTIVE))
-			return friends;
-		if (key.equals(Constants.INTERNAL_DIRECTIVE))
-			return internal;
-		if (key.equals(EQUINOX_EE))
-			return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee);
-		return null;
+		synchronized (this.monitor) {
+			if (key.equals(Constants.USES_DIRECTIVE))
+				return uses;
+			if (key.equals(Constants.EXCLUDE_DIRECTIVE))
+				return exclude;
+			if (key.equals(Constants.INCLUDE_DIRECTIVE))
+				return include;
+			if (key.equals(Constants.MANDATORY_DIRECTIVE))
+				return mandatory;
+			if (key.equals(Constants.FRIENDS_DIRECTIVE))
+				return friends;
+			if (key.equals(Constants.INTERNAL_DIRECTIVE))
+				return internal;
+			if (key.equals(EQUINOX_EE))
+				return equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee);
+			return null;
+		}
 	}
 
 	public Object setDirective(String key, Object value) {
-		if (key.equals(Constants.USES_DIRECTIVE))
-			return uses = (String[]) value;
-		if (key.equals(Constants.EXCLUDE_DIRECTIVE))
-			return exclude = (String) value;
-		if (key.equals(Constants.INCLUDE_DIRECTIVE))
-			return include = (String) value;
-		if (key.equals(Constants.MANDATORY_DIRECTIVE))
-			return mandatory = (String[]) value;
-		if (key.equals(Constants.FRIENDS_DIRECTIVE))
-			return friends = (String[]) value;
-		if (key.equals(Constants.INTERNAL_DIRECTIVE))
-			return internal = (Boolean) value;
-		if (key.equals(EQUINOX_EE)) {
-			equinox_ee = ((Integer) value).intValue();
-			return value;
+		synchronized (this.monitor) {
+			if (key.equals(Constants.USES_DIRECTIVE))
+				return uses = (String[]) value;
+			if (key.equals(Constants.EXCLUDE_DIRECTIVE))
+				return exclude = (String) value;
+			if (key.equals(Constants.INCLUDE_DIRECTIVE))
+				return include = (String) value;
+			if (key.equals(Constants.MANDATORY_DIRECTIVE))
+				return mandatory = (String[]) value;
+			if (key.equals(Constants.FRIENDS_DIRECTIVE))
+				return friends = (String[]) value;
+			if (key.equals(Constants.INTERNAL_DIRECTIVE))
+				return internal = (Boolean) value;
+			if (key.equals(EQUINOX_EE)) {
+				equinox_ee = ((Integer) value).intValue();
+				return value;
+			}
+			return null;
 		}
-		return null;
 	}
 
 	public void setDirectives(Map directives) {
-		if (directives == null)
-			return;
-		uses = (String[]) directives.get(Constants.USES_DIRECTIVE);
-		exclude = (String) directives.get(Constants.EXCLUDE_DIRECTIVE);
-		include = (String) directives.get(Constants.INCLUDE_DIRECTIVE);
-		mandatory = (String[]) directives.get(Constants.MANDATORY_DIRECTIVE);
-		friends = (String[]) directives.get(Constants.FRIENDS_DIRECTIVE);
-		internal = (Boolean) directives.get(Constants.INTERNAL_DIRECTIVE);
-		equinox_ee = ((Integer) directives.get(EQUINOX_EE)).intValue();
+		synchronized (this.monitor) {
+			if (directives == null)
+				return;
+			uses = (String[]) directives.get(Constants.USES_DIRECTIVE);
+			exclude = (String) directives.get(Constants.EXCLUDE_DIRECTIVE);
+			include = (String) directives.get(Constants.INCLUDE_DIRECTIVE);
+			mandatory = (String[]) directives.get(Constants.MANDATORY_DIRECTIVE);
+			friends = (String[]) directives.get(Constants.FRIENDS_DIRECTIVE);
+			internal = (Boolean) directives.get(Constants.INTERNAL_DIRECTIVE);
+			equinox_ee = ((Integer) directives.get(EQUINOX_EE)).intValue();
+		}
 	}
 
 	public Map getAttributes() {
-		return attributes;
+		synchronized (this.monitor) {
+			return attributes;
+		}
 	}
 
 	public BundleDescription getSupplier() {
@@ -115,7 +126,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	protected void setAttributes(Map attributes) {
-		this.attributes = attributes;
+		synchronized (this.monitor) {
+			this.attributes = attributes;
+		}
 	}
 
 	protected void setExporter(BundleDescription exporter) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 
 package org.eclipse.osgi.internal.resolver;
@@ -30,18 +31,24 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	}
 
 	public BundleDescription[] getHosts() {
-		return hosts == null ? BundleDescriptionImpl.EMPTY_BUNDLEDESCS : hosts;
+		synchronized (this.monitor) {
+			return hosts == null ? BundleDescriptionImpl.EMPTY_BUNDLEDESCS : hosts;
+		}
 	}
 
 	public boolean isResolved() {
-		return hosts != null && hosts.length > 0;
+		synchronized (this.monitor) {
+			return hosts != null && hosts.length > 0;
+		}
 	}
 
 	/*
 	 * The resolve algorithm will call this method to set the hosts.
 	 */
 	void setHosts(BundleDescription[] hosts) {
-		this.hosts = hosts;
+		synchronized (this.monitor) {
+			this.hosts = hosts;
+		}
 	}
 
 	public String toString() {
@@ -49,16 +56,22 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	}
 
 	public BaseDescription getSupplier() {
-		if (hosts == null || hosts.length == 0)
-			return null;
-		return hosts[0];
+		synchronized (this.monitor) {
+			if (hosts == null || hosts.length == 0)
+				return null;
+			return hosts[0];
+		}
 	}
 
 	public boolean isMultiHost() {
-		return multihost;
+		synchronized (this.monitor) {
+			return multihost;
+		}
 	}
 
 	void setIsMultiHost(boolean multihost) {
-		this.multihost = multihost;
+		synchronized (this.monitor) {
+			this.multihost = multihost;
+		}
 	}
 }

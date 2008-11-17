@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -24,21 +25,29 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 	private boolean optional;
 
 	public NativeCodeDescription[] getPossibleSuppliers() {
-		if (possibleSuppliers == null)
-			return EMPTY_NATIVECODEDESCRIPTIONS;
-		return possibleSuppliers;
+		synchronized (this.monitor) {
+			if (possibleSuppliers == null)
+				return EMPTY_NATIVECODEDESCRIPTIONS;
+			return possibleSuppliers;
+		}
 	}
 
 	void setPossibleSuppliers(NativeCodeDescription[] possibleSuppliers) {
-		this.possibleSuppliers = possibleSuppliers;
+		synchronized (this.monitor) {
+			this.possibleSuppliers = possibleSuppliers;
+		}
 	}
 
 	public boolean isOptional() {
-		return optional;
+		synchronized (this.monitor) {
+			return optional;
+		}
 	}
 
 	void setOptional(boolean optional) {
-		this.optional = optional;
+		synchronized (this.monitor) {
+			this.optional = optional;
+		}
 	}
 
 	public boolean isSatisfiedBy(BaseDescription supplier) {

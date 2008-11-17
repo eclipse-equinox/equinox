@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Rob Harrop - SpringSource Inc. (bug 247522)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -15,14 +16,19 @@ import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
+/**
+ * This class is <strong>not</strong> thread safe. Instances must not be
+ * shared across multiple threads.
+ */
 class StateWriter {
 
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	private Map objectTable = new HashMap();
-	private ArrayList forcedWrite = new ArrayList();
+	private final Map objectTable = new HashMap();
+
+	private final ArrayList forcedWrite = new ArrayList();
 
 	private int addToObjectTable(Object object) {
 		Integer cur = (Integer) objectTable.get(object);
