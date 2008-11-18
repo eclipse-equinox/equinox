@@ -26,14 +26,17 @@ import org.osgi.service.component.ComponentException;
 
 /**
  * This is an OO wrapper for the XML representing the components. It also caches
- * the (de)activate & (un)bind methods (reflection) of the component.
+ * the activate and deactivate methods of the component.
  * 
  * @author Valentin Valchev
  * @author Pavlin Dobrev
- * @version 1.0
+ * @author Stoyan Boshev
  */
-
 public class ServiceComponent implements Externalizable {
+
+	public static String CONF_POLICY_OPTIONAL = "optional";
+	public static String CONF_POLICY_REQUIRE = "require";
+	public static String CONF_POLICY_IGNORE = "ignore";
 
 	public Vector componentProps = null;
 
@@ -42,6 +45,9 @@ public class ServiceComponent implements Externalizable {
 	public String factory;
 	String implementation; // the class name
 	Properties properties; // property or properties
+	String configurationPolicy = CONF_POLICY_OPTIONAL;
+	String activateMethodName = "activate";
+	String deactivateMethodName = "deactivate";
 
 	// service
 	public Vector serviceInterfaces; // all strings
@@ -52,13 +58,14 @@ public class ServiceComponent implements Externalizable {
 
 	public boolean autoenable = true;
 	public boolean immediate = false;
+	public boolean namespace11 = true;
 	// --- end: XML def
 
 	// --- begin: cache
 	private boolean activateCached = false;
 	private boolean deactivateCached = false;
-	private Method activate; // this is optional!
-	private Method deactivate;
+	private Method activateMethod; // this is optional!
+	private Method deactivateMethod;
 	// --- end: cache
 
 	// --- begin: model
@@ -108,14 +115,14 @@ public class ServiceComponent implements Externalizable {
 			// retrieve the activate method from cache
 			if (!activateCached) {
 				activateCached = true;
-				activate = getMethod(instance, "activate");
+				activateMethod = getMethod(instance, "activate");
 			}
 			// invoke the method if any
-			if (activate != null) {
+			if (activateMethod != null) {
 				Object[] params = SCRUtil.getObjectArray();
 				params[0] = context;
 				try {
-					activate.invoke(instance, params);
+					activateMethod.invoke(instance, params);
 				} finally {
 					SCRUtil.release(params);
 				}
@@ -133,14 +140,14 @@ public class ServiceComponent implements Externalizable {
 			// retrieve the activate method from cache
 			if (!deactivateCached) {
 				deactivateCached = true;
-				deactivate = getMethod(instance, "deactivate");
+				deactivateMethod = getMethod(instance, "deactivate");
 			}
 			// invoke the method
-			if (deactivate != null) {
+			if (deactivateMethod != null) {
 				Object[] params = SCRUtil.getObjectArray();
 				params[0] = context;
 				try {
-					deactivate.invoke(instance, params);
+					deactivateMethod.invoke(instance, params);
 				} finally {
 					SCRUtil.release(params);
 				}
@@ -156,12 +163,23 @@ public class ServiceComponent implements Externalizable {
 	 * 
 	 * @param line
 	 *            the line at which the the component definition ends
+	 * @param namespace11 specify whether the namespace of the component is according to XML SCR schema v1.1
 	 */
-	void validate(int line) {
-		// name & implementations are required
+	void validate(int line, boolean namespace11) {
+		//		System.out.println("Validating component " + name + " with namespace " + (namespace11 ? "1.1" : "1.0"));
 		if (name == null) {
-			throw new IllegalArgumentException("The component definition misses 'name' attribute, line " + line);
+			if (namespace11) {
+				name = implementation;
+			} else {
+				throw new IllegalArgumentException("The component definition misses 'name' attribute, line " + line);
+			}
 		}
+		if (namespace11) {
+			if (!(configurationPolicy == CONF_POLICY_OPTIONAL || configurationPolicy == CONF_POLICY_REQUIRE || configurationPolicy == CONF_POLICY_IGNORE)) {
+				throw new IllegalArgumentException("The component '" + name + "' has incorrect value for attribute 'configuration-policy', line " + line);
+			}
+		}
+
 		if (implementation == null) {
 			throw new IllegalArgumentException("The component '" + name + "' misses 'implementation' attribute, line " + line);
 		}
@@ -186,7 +204,14 @@ public class ServiceComponent implements Externalizable {
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				ComponentReference r = (ComponentReference) references.elementAt(i);
-				if (r.name == null || r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) {
+				if (r.name == null) {
+					if (namespace11) {
+						r.name = r.interfaceName;
+					} else {
+						throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains illegal reference " + r);
+					}
+				}
+				if (r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) {
 					throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains illegal reference " + r);
 				}
 				for (int j = i + 1; j < references.size(); j++) {
@@ -203,6 +228,8 @@ public class ServiceComponent implements Externalizable {
 			provides = new String[serviceInterfaces.size()];
 			serviceInterfaces.copyInto(provides);
 		}
+
+		this.namespace11 = namespace11;
 
 		// make sure that the component will get automatically enabled!
 		enabled = autoenable;
@@ -233,7 +260,7 @@ public class ServiceComponent implements Externalizable {
 	public final void dispose() {
 
 		activateCached = deactivateCached = false;
-		activate = deactivate = null;
+		activateMethod = deactivateMethod = null;
 
 		enabled = false;
 		bundle = null;
@@ -272,8 +299,13 @@ public class ServiceComponent implements Externalizable {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Component[");
 		buffer.append("\n\tname = ").append(name);
-		buffer.append("\n\tautoenable = ").append(autoenable);
+		if (namespace11) {
+			buffer.append("\n\tactivate = ").append(activateMethodName);
+			buffer.append("\n\tdeactivate = ").append(deactivateMethodName);
+			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy);
+		}
 		buffer.append("\n\tfactory = ").append(factory);
+		buffer.append("\n\tautoenable = ").append(autoenable);
 		buffer.append("\n\timmediate = ").append(immediate);
 
 		buffer.append("\n\timplementation = ").append(implementation);
@@ -297,9 +329,7 @@ public class ServiceComponent implements Externalizable {
 	}
 
 	public synchronized void writeObject(OutputStream s) throws Exception {
-
 		try {
-
 			DataOutputStream out;
 			if (s instanceof DataOutputStream) {
 				out = (DataOutputStream) s;
@@ -341,7 +371,11 @@ public class ServiceComponent implements Externalizable {
 				dictionary.copyFrom(properties);
 				dictionary.writeObject(out);
 			}
-
+			if (namespace11) {
+				out.writeUTF(configurationPolicy);
+				out.writeUTF(activateMethodName);
+				out.writeUTF(deactivateMethodName);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -357,7 +391,6 @@ public class ServiceComponent implements Externalizable {
 	 */
 	public synchronized void readObject(InputStream s) throws Exception {
 		try {
-
 			DataInputStream in;
 			if (s instanceof DataInputStream) {
 				in = (DataInputStream) s;
@@ -408,6 +441,15 @@ public class ServiceComponent implements Externalizable {
 				}
 				properties = props;
 			}
+			namespace11 = false;
+			try {
+				configurationPolicy = in.readUTF();
+				activateMethodName = in.readUTF();
+				deactivateMethodName = in.readUTF();
+				namespace11 = true;
+			} catch (EOFException eof) {
+				//this could happen if we read component v1.0
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -427,11 +469,9 @@ public class ServiceComponent implements Externalizable {
 
 	public void addServiceComponentProp(ServiceComponentProp scp) {
 		if (componentProps == null) {
-			componentProps = new Vector(2);
+			componentProps = new Vector(1);
 		}
-		if (!componentProps.contains(scp)) {
-			componentProps.addElement(scp);
-		}
+		componentProps.addElement(scp);
 	}
 
 	public boolean isImmediate() {
@@ -440,5 +480,9 @@ public class ServiceComponent implements Externalizable {
 
 	public void setImmediate(boolean immediate) {
 		this.immediate = immediate;
+	}
+
+	public String getConfigurationPolicy() {
+		return configurationPolicy;
 	}
 }

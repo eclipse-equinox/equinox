@@ -16,8 +16,7 @@ package org.eclipse.equinox.internal.ds.model;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
@@ -27,9 +26,7 @@ import org.osgi.service.component.ComponentInstance;
 /**
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.1
  */
-
 public class ComponentReference implements Externalizable {
 
 	public static final int CARDINALITY_0_1 = 0;
@@ -172,6 +169,30 @@ public class ComponentReference implements Externalizable {
 			}
 			if (method != null)
 				break;
+
+			//implement search for bind/unbind methods according to schema v1.1.0
+			if (component.namespace11) {
+				for (int i = 0; i < methods.length; i++) {
+					Class[] params = methods[i].getParameterTypes();
+					if (params.length == 2 && methods[i].getName().equals(methodName) && params[0] == interfaceClass && params[1] == Map.class) {
+						method = methods[i];
+						break;
+					}
+				}
+				if (method != null)
+					break;
+
+				for (int i = 0; i < methods.length; i++) {
+					Class[] params = methods[i].getParameterTypes();
+					if (params.length == 2 && methods[i].getName().equals(methodName) && params[0].isAssignableFrom(serviceObjectClass) && params[1] == Map.class) {
+						method = methods[i];
+						break;
+					}
+				}
+				if (method != null)
+					break;
+			}
+
 			// we couldn't find the method - try the superclass
 			consumerClass = consumerClass.getSuperclass();
 		}
@@ -307,7 +328,8 @@ public class ComponentReference implements Externalizable {
 			// invoke the method
 			if (bindMethod != null) {
 				Object methodParam = null;
-				if (bindMethod.getParameterTypes()[0].equals(ServiceReference.class)) {
+				Class[] paramTypes = bindMethod.getParameterTypes();
+				if (paramTypes.length == 1 && paramTypes[0].equals(ServiceReference.class)) {
 					methodParam = serviceReference;
 				} else {
 					// bindedServices is filled by the getMethod function
@@ -335,14 +357,28 @@ public class ComponentReference implements Externalizable {
 					}
 				}
 
-				Object[] params = SCRUtil.getObjectArray();
-				params[0] = methodParam;
+				Object[] params = null;
+				if (paramTypes.length == 1) {
+					params = SCRUtil.getObjectArray();
+					params[0] = methodParam;
+				} else {
+					//this is the case where we have 2 parameters: a service object and a Map, holding the service properties
+					HashMap map = new HashMap();
+					String[] keys = serviceReference.getPropertyKeys();
+					for (int i = 0; i < keys.length; i++) {
+						map.put(keys[i], serviceReference.getProperty(keys[i]));
+					}
+					params = new Object[] {methodParam, map};
+				}
+
 				try {
 					bindMethod.invoke(instance.getInstance(), params);
 				} catch (Throwable t) {
 					logError("[SCR] Error while trying to bind reference " + this, t, reference); //$NON-NLS-1$
 				} finally {
-					SCRUtil.release(params);
+					if (params.length == 1) {
+						SCRUtil.release(params);
+					}
 				}
 			} else {
 				//remove the component instance marked as bind
@@ -423,7 +459,8 @@ public class ComponentReference implements Externalizable {
 				// invoke the method
 				if (unbindMethod != null) {
 					Object methodParam = null;
-					if (unbindMethod.getParameterTypes()[0].equals(ServiceReference.class)) {
+					Class[] paramTypes = bindMethod.getParameterTypes();
+					if (paramTypes.length == 1 && paramTypes[0].equals(ServiceReference.class)) {
 						methodParam = serviceReference;
 					} else {
 						// bindedServices is filled by the getMethod function
@@ -438,14 +475,27 @@ public class ComponentReference implements Externalizable {
 						}
 					}
 
-					Object[] params = SCRUtil.getObjectArray();
-					params[0] = methodParam;
+					Object[] params = null;
+					if (paramTypes.length == 1) {
+						params = SCRUtil.getObjectArray();
+						params[0] = methodParam;
+					} else {
+						//this is the case where we have 2 parameters: a service object and a Map, holding the service properties
+						HashMap map = new HashMap();
+						String[] keys = serviceReference.getPropertyKeys();
+						for (int i = 0; i < keys.length; i++) {
+							map.put(keys[i], serviceReference.getProperty(keys[i]));
+						}
+						params = new Object[] {methodParam, map};
+					}
 					try {
 						unbindMethod.invoke(instance.getInstance(), params);
 					} catch (Throwable t) {
 						logError("[SCR] Exception occurred while unbinding reference " + this, t, reference);
 					} finally {
-						SCRUtil.release(params);
+						if (params.length == 1) {
+							SCRUtil.release(params);
+						}
 					}
 				}
 			}
