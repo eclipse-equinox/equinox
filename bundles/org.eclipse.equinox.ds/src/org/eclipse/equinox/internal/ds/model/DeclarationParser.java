@@ -21,26 +21,30 @@ import org.osgi.framework.*;
 import org.osgi.service.metatype.AttributeDefinition;
 
 /**
- * ComponentParser.java
+ * Processes the parsing of the component description XMLs
  * 
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
  * @author Teodor Bakardzhiev
- * @version 1.0
  */
-
 public class DeclarationParser implements ExTagListener {
 
-	private static final String XMLNS = "http://www.osgi.org/xmlns/scr/v1.0.0";
+	private static final String XMLNS_1_0 = "http://www.osgi.org/xmlns/scr/v1.0.0";
+	private static final String XMLNS_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
 	private static final String ATTR_XMLNS = "xmlns";
 
 	private static final String COMPONENT_TAG_NAME = "component";
 
+	//component attributes
 	private static final String ATTR_AUTOENABLE = "enabled";
 	private static final String ATTR_NAME = "name";
 	private static final String ATTR_FACTORY = "factory";
 	private static final String ATTR_IMMEDIATE = "immediate";
+	//component attributes according to schema v1.1
+	private static final String ATTR_CONF_POLICY = "configuration-policy";
+	private static final String ATTR_ACTIVATE = "activate";
+	private static final String ATTR_DEACTIVATE = "deactivate";
 
 	private static final String TAG_IMPLEMENTATION = "implementation";
 	private static final String ATTR_CLASS = "class";
@@ -152,13 +156,12 @@ public class DeclarationParser implements ExTagListener {
 				// the component is completed - we can now fully validate it!
 
 				if (!immediateSet && (currentComponent.factory == null)) {
-					// if unset, immediate attribute is false if service element
-					// is
+					// if unset, immediate attribute is false if service element is
 					// specified or true otherwise
 					// if component factory then immediate by default is false
 					currentComponent.setImmediate(currentComponent.serviceInterfaces == null);
 				}
-				currentComponent.validate(tag.getLine());
+				currentComponent.validate(tag.getLine(), isNamespace11(tag.getName()));
 				if (components == null) {
 					components = new Vector(1, 1);
 				}
@@ -218,10 +221,10 @@ public class DeclarationParser implements ExTagListener {
 
 	private void doReference(Tag tag) throws InvalidSyntaxException {
 		String name = tag.getAttribute(ATTR_NAME);
-		if (name == null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'name' attribute, at line " + tag.getLine());
-			throw e;
-		}
+		//		if (name == null) {
+		//			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'name' attribute, at line " + tag.getLine());
+		//			throw e;
+		//		}
 
 		String iface = tag.getAttribute(ATTR_INTERFACE);
 		if (iface == null) {
@@ -454,9 +457,9 @@ public class DeclarationParser implements ExTagListener {
 	private void doCorrectComponentTag(Tag tag, String tagName) {
 		closeTag = tagName.intern();
 		String tmp = tag.getAttribute(ATTR_NAME);
-		if (tmp == null || tmp.equals("")) {
-			throw new IllegalArgumentException("The 'component' tag MUST have 'name' tag set, at line " + tag.getLine());
-		}
+		//		if (tmp == null || tmp.equals("")) {
+		//			throw new IllegalArgumentException("The 'component' tag MUST have 'name' tag set, at line " + tag.getLine());
+		//		}
 		immediateSet = false;
 
 		currentComponent = new ServiceComponent();
@@ -481,6 +484,42 @@ public class DeclarationParser implements ExTagListener {
 			currentComponent.immediate = Boolean.valueOf(tmp).booleanValue();
 			immediateSet = true;
 		}
+		if (isNamespace11(tagName)) {
+			//processing attribute configuration-policy
+			tmp = tag.getAttribute(ATTR_CONF_POLICY);
+			if (tmp != null && tmp.length() == 0) {
+				tmp = null;
+			}
+			if (tmp != null) {
+				currentComponent.configurationPolicy = tmp.intern();
+			}
+			//processing attribute activate
+			tmp = tag.getAttribute(ATTR_ACTIVATE);
+			if (tmp != null && tmp.length() == 0) {
+				tmp = null;
+			}
+			if (tmp != null) {
+				currentComponent.activateMethodName = tmp;
+			}
+			//processing attribute deactivate
+			tmp = tag.getAttribute(ATTR_DEACTIVATE);
+			if (tmp != null && tmp.length() == 0) {
+				tmp = null;
+			}
+			if (tmp != null) {
+				currentComponent.deactivateMethodName = tmp;
+			}
+		} else {
+			if (tag.getAttribute(ATTR_CONF_POLICY) != null) {
+				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_CONF_POLICY + "' tag set, at line " + tag.getLine());
+			}
+			if (tag.getAttribute(ATTR_ACTIVATE) != null) {
+				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_ACTIVATE + "' tag set, at line " + tag.getLine());
+			}
+			if (tag.getAttribute(ATTR_DEACTIVATE) != null) {
+				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_DEACTIVATE + "' tag set, at line " + tag.getLine());
+			}
+		}
 	}
 
 	private boolean isCorrectComponentTag(String tagName) {
@@ -491,9 +530,9 @@ public class DeclarationParser implements ExTagListener {
 		}
 		String namespace = getCurrentNamespace(qualifier);
 		if (!rootPassed) { // this is the root element
-			return namespace.length() == 0 || namespace.equals(XMLNS);
+			return namespace.length() == 0 || namespace.equals(XMLNS_1_0) || namespace.equals(XMLNS_1_1);
 		} else { // not a root element
-			return namespace.equals(XMLNS);
+			return namespace.equals(XMLNS_1_0) || namespace.equals(XMLNS_1_1);
 		}
 	}
 
@@ -645,6 +684,16 @@ public class DeclarationParser implements ExTagListener {
 			default : {
 				throw new IllegalArgumentException("Unsupported type: ".concat(String.valueOf(syntax)));
 			}
+		}
+	}
+
+	private boolean isNamespace11(String tagName) {
+		String qualifier = getNamespaceQualifier(tagName);
+		String namespace = getCurrentNamespace(qualifier);
+		if (!rootPassed) { // this is the root element
+			return namespace.length() == 0 || namespace.equals(XMLNS_1_1);
+		} else { // not a root element
+			return namespace.equals(XMLNS_1_1);
 		}
 	}
 
