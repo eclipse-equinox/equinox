@@ -162,14 +162,19 @@ public interface StateHelper {
 	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
 	 * search is done for all packages which are available through the required bundles and 
 	 * any bundles which are reexported.  This method also takes into account all directives
-	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.) <p>
-	 * 
+	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.)
+	 * <p>
 	 * The returned list will not include any packages which are exported by the system bundle 
 	 * on the behave of the running execution environment.  For example, when running on a 
 	 * 1.4.2 JRE the system bundle will export the javax.xml.parsers package.  These types of 
 	 * system packages will are not included in the returned list.
 	 * <p>
+	 * Note that only the constraints declared by the specified bundle are taken into
+	 * account.  In the case of fragment bundles, the constraints declared by the host are 
+	 * not included in the list of visible packages.
+	 * <p>
 	 * Same as calling getVisiblePackages(bundle, 0)
+	 * 
 	 * @param bundle a bundle to get the list of packages for.
 	 * @return a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.
@@ -182,7 +187,12 @@ public interface StateHelper {
 	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
 	 * search is done for all packages which are available through the required bundles and 
 	 * any bundles which are reexported.  This method also takes into account all directives
-	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.) 
+	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.)
+	 * <p>
+	 * Note that only the constraints declared by the specified bundle are taken into
+	 * account.  In the case of fragment bundles, the constraints declared by the host are 
+	 * not included in the list of visible packages.
+	 * 
 	 * @param bundle a bundle to get the list of packages for.
 	 * @param options the options for selecting the visible packages
 	 * @return a list of all packages that the specified bundle has access to which are
