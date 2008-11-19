@@ -732,12 +732,13 @@ public class Path implements IPath, Cloneable {
 		return new Path(device, segments, separators & HAS_TRAILING);
 	}
 
-	/* (Intentionally not included in javadoc)
-	 * @see IPath#makeRelativeTo(IPath)
+	/**
+	 * {@inheritDoc}
+	 * @since org.eclipse.equinox.common 3.5
 	 */
 	public IPath makeRelativeTo(IPath base) {
 		//can't make relative if devices are not equal
-		if (device != base.getDevice() && (device == null || !device.equals(base.getDevice())))
+		if (device != base.getDevice() && (device == null || !device.equalsIgnoreCase(base.getDevice())))
 			return this;
 		int commonLength = matchingFirstSegments(base);
 		final int differenceLength = base.segmentCount() - commonLength;
