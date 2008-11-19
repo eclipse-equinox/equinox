@@ -990,25 +990,25 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return floatval == floatval2;
+				return Float.compare(floatval, floatval2) == 0;
 			}
 			case APPROX : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("APPROX(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return floatval == floatval2;
+				return Float.compare(floatval, floatval2) == 0;
 			}
 			case GREATER : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("GREATER(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return floatval >= floatval2;
+				return Float.compare(floatval, floatval2) >= 0;
 			}
 			case LESS : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("LESS(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return floatval <= floatval2;
+				return Float.compare(floatval, floatval2) <= 0;
 			}
 		}
 
@@ -1029,25 +1029,25 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return doubleval == doubleval2;
+				return Double.compare(doubleval, doubleval2) == 0;
 			}
 			case APPROX : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("APPROX(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return doubleval == doubleval2;
+				return Double.compare(doubleval, doubleval2) == 0;
 			}
 			case GREATER : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("GREATER(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return doubleval >= doubleval2;
+				return Double.compare(doubleval, doubleval2) >= 0;
 			}
 			case LESS : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("LESS(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				return doubleval <= doubleval2;
+				return Double.compare(doubleval, doubleval2) <= 0;
 			}
 		}
 
@@ -1338,16 +1338,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
 			}
 
-			ArrayList operands = new ArrayList(10);
+			List operands = new ArrayList(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter(false);
 				operands.add(child);
 			}
 
-			int size = operands.size();
-
-			return new FilterImpl(topLevel, FilterImpl.AND, null, operands.toArray(new FilterImpl[size]));
+			return new FilterImpl(topLevel, FilterImpl.AND, null, operands.toArray(new FilterImpl[operands.size()]));
 		}
 
 		private FilterImpl parse_or(boolean topLevel) throws InvalidSyntaxException {
@@ -1357,16 +1355,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
 			}
 
-			ArrayList operands = new ArrayList(10);
+			List operands = new ArrayList(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter(false);
 				operands.add(child);
 			}
 
-			int size = operands.size();
-
-			return new FilterImpl(topLevel, FilterImpl.OR, null, operands.toArray(new FilterImpl[size]));
+			return new FilterImpl(topLevel, FilterImpl.OR, null, operands.toArray(new FilterImpl[operands.size()]));
 		}
 
 		private FilterImpl parse_not(boolean topLevel) throws InvalidSyntaxException {
@@ -1498,7 +1494,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		private Object parse_substring() throws InvalidSyntaxException {
 			StringBuffer sb = new StringBuffer(filterChars.length - pos);
 
-			ArrayList operands = new ArrayList(10);
+			List operands = new ArrayList(10);
 
 			parseloop: while (true) {
 				char c = filterChars[pos];
@@ -1557,17 +1553,11 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				}
 			}
 
-			String[] strings = new String[size];
-
-			operands.toArray(strings);
-
-			return strings;
+			return operands.toArray(new String[size]);
 		}
 
 		private void skipWhiteSpace() {
-			int length = filterChars.length;
-
-			while ((pos < length) && Character.isWhitespace(filterChars[pos])) {
+			for (int length = filterChars.length; (pos < length) && Character.isWhitespace(filterChars[pos]);) {
 				pos++;
 			}
 		}
