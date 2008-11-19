@@ -16,11 +16,17 @@ import java.net.*;
 /**
  * A utility class for manipulating URIs. This class works around some of the
  * broken behavior of the java.net.URI class.
+ * 
+ * @noinstantiate This class is not intended to be instantiated by clients.
  * @since org.eclipse.equinox.common 3.5
  */
-public class URIUtil {
+public final class URIUtil {
 
 	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
+
+	private URIUtil() {
+		// prevent instantiation
+	}
 
 	/**
 	 * Appends the given extension to the path of the give base URI and returns

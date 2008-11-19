@@ -19,7 +19,6 @@ package org.eclipse.core.runtime;
  * This class is not intended to be subclassed by clients but
  * may be instantiated.
  * </p>
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class OperationCanceledException extends RuntimeException {
 	/**

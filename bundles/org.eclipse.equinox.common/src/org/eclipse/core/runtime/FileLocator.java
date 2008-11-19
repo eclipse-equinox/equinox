@@ -25,7 +25,6 @@ import org.osgi.framework.Bundle;
  * The class is not intended to be subclassed or instantiated by clients.
  * </p>
  * @since org.eclipse.equinox.common 3.2
- * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class FileLocator {

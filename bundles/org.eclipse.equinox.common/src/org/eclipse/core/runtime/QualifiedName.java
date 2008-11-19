@@ -21,7 +21,6 @@ package org.eclipse.core.runtime;
  * </p><p>
  * This class is not intended to be subclassed by clients.
  * </p>
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class QualifiedName {
 

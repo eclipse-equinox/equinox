@@ -54,7 +54,6 @@ import org.osgi.framework.Version;
  * </p>
  * @see java.lang.String#compareTo(java.lang.String)
  * @deprecated clients should use {@link org.osgi.framework.Version} instead
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class PluginVersionIdentifier {
 

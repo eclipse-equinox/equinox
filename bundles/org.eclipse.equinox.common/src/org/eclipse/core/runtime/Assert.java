@@ -26,7 +26,6 @@ package org.eclipse.core.runtime;
  * This class is not intended to be instantiated or sub-classed by clients.
  * </p>
  * @since org.eclipse.equinox.common 3.2
- * @noextend This class is not intended to be subclassed by clients.
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public final class Assert {
