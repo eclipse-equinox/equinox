@@ -1,0 +1,18 @@
+-Djava.home=.
+-Djava.library.path=.
+
+-Dee.vm.library=dummy.dll
+-Dee.library.path=.
+
+-Dee.executable=dummy
+-Dee.executable.console=dummy
+
+-Dee.bootclasspath=ee.foundation.jar
+-Dee.src=
+-Dee.ext.dirs=
+
+-Dee.language.level=1.4
+-Dee.class.library.level=CDC-1.1/Foundation-1.1
+-Dee.id=CDC-1.1/Foundation-1.1
+-Dee.name=CDC-1.1 Foundation-1.1
+-Dee.description=CDC v1.1 / Foundation v1.1
