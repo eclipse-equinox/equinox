@@ -73,8 +73,13 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 	}
 
 	private void setEquinoxProperties(Map configuration) {
-		// always need to use an active thread
-		FrameworkProperties.setProperty(Framework.PROP_FRAMEWORK_THREAD, Framework.THREAD_NORMAL);
+		Object threadBehavior = configuration == null ? null : configuration.get(Framework.PROP_FRAMEWORK_THREAD);
+		if (threadBehavior == null) {
+			if (FrameworkProperties.getProperty(Framework.PROP_FRAMEWORK_THREAD) == null)
+				FrameworkProperties.setProperty(Framework.PROP_FRAMEWORK_THREAD, Framework.THREAD_NORMAL);
+		} else {
+			FrameworkProperties.setProperty(Framework.PROP_FRAMEWORK_THREAD, (String) threadBehavior);
+		}
 
 		// first check props we are required to provide reasonable defaults for
 		Object windowSystem = configuration == null ? null : configuration.get(Constants.FRAMEWORK_WINDOWSYSTEM);
