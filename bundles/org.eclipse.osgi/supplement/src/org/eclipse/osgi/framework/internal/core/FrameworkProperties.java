@@ -96,7 +96,7 @@ public class FrameworkProperties {
 		for (Iterator keys = input.keySet().iterator(); keys.hasNext();) {
 			String key = (String) keys.next();
 			Object value = input.get(key);
-			if (value != null) {
+			if (value instanceof String) {
 				toSet.setProperty(key, (String) value);
 				continue;
 			}
