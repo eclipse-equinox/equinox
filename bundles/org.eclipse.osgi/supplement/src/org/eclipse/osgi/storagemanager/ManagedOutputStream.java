@@ -19,7 +19,6 @@ import java.io.*;
  * <p>
  * Clients may not extend this class.
  * </p>
- * @noextend This class is not intended to be subclassed by clients.
  * @since 3.2
  */
 // Note the implementation of this class originated from the following deprecated classes:

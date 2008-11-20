@@ -21,8 +21,7 @@ package org.eclipse.osgi.service.resolver;
  * must not be allowed to resolve and a ResolverError of type {@link ResolverError#DISABLED_BUNDLE}
  * must be added to the state.
  * </p>
- *@see State
- *@noextend This class is not intended to be subclassed by clients.
+ * @see State
  * @since 3.4
  */
 public final class DisabledInfo {

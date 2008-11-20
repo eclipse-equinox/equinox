@@ -78,7 +78,6 @@ import org.eclipse.osgi.framework.util.SecureAction;
  * content as it was when the instance was first opened.
  * </p>
  * @since 3.2
- * @noextend This class is not intended to be subclassed by clients.
  */
 
 // Note the implementation of this class originated from the following deprecated classes: 
