@@ -61,7 +61,7 @@ public class AdaptorUtil {
 	/**
 	 * Read a file from an InputStream and write it to the file system.
 	 *
-	 * @param in InputStream from which to read.
+	 * @param in InputStream from which to read. This stream will be closed by this method.
 	 * @param file output file to create.
 	 * @exception IOException
 	 */
@@ -75,22 +75,14 @@ public class AdaptorUtil {
 			while ((count = in.read(buffer, 0, buffer.length)) > 0) {
 				fos.write(buffer, 0, count);
 			}
-
-			fos.close();
-			fos = null;
-
-			in.close();
-			in = null;
 		} catch (IOException e) {
-			// close open streams
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ee) {
-					// nothing to do here
-				}
+			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				Debug.println("Unable to read file"); //$NON-NLS-1$
+				Debug.printStackTrace(e);
 			}
 
+			throw e;
+		} finally {
 			if (in != null) {
 				try {
 					in.close();
@@ -99,12 +91,13 @@ public class AdaptorUtil {
 				}
 			}
 
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to read file"); //$NON-NLS-1$
-				Debug.printStackTrace(e);
+			if (fos != null) {
+				try {
+					fos.close();
+				} catch (IOException ee) {
+					// nothing to do here
+				}
 			}
-
-			throw e;
 		}
 	}
 
