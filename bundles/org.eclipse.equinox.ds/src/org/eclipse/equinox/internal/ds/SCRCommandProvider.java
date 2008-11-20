@@ -328,6 +328,11 @@ public class SCRCommandProvider implements CommandProvider {
 				printSCP(intp, scp);
 			}
 		}
+		if (sc.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_REQUIRE) {
+			if (resolved && (sc.componentProps == null || sc.componentProps.size() == 0)) {
+				intp.println("  *The component has NO built configurations! The reason might be that it requires inicialization by configuration provided by Configuration Admin but none was found"); //$NON-NLS-1$
+			}
+		}
 		intp.println();
 	}
 
