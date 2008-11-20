@@ -24,9 +24,7 @@ import org.osgi.service.component.ComponentException;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.1
  */
-
 public final class Resolver implements WorkPerformer {
 
 	// these strings are used only for debugging purpose
@@ -127,6 +125,12 @@ public final class Resolver implements WorkPerformer {
 						continue;
 					}
 
+					if (current.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_IGNORE) {
+						//skip looking for configurations 
+						map(current, (Dictionary) null);
+						continue;
+					}
+
 					// check for a Configuration properties for this component
 					try {
 						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))";
@@ -136,8 +140,12 @@ public final class Resolver implements WorkPerformer {
 					}
 					// if no Configuration
 					if (configs == null || configs.length == 0) {
-						// create ServiceComponent + Prop
-						map(current, (Dictionary) null);
+						if (current.getConfigurationPolicy() != ServiceComponent.CONF_POLICY_REQUIRE) {
+							// create ServiceComponent + Prop
+							map(current, (Dictionary) null);
+						} else {
+							Activator.log.warning("[SCR - Resolver]: Component " + current.name + " is NOT resolved because it requires to be inited by a configuration but it was not found", null);
+						}
 					} else {
 						// if ManagedServiceFactory
 						Configuration config = configs[0];

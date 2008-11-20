@@ -64,7 +64,7 @@ public class ServiceComponent implements Externalizable {
 	// --- begin: cache
 	private boolean activateCached = false;
 	private boolean deactivateCached = false;
-	private Method activateMethod; // this is optional!
+	private Method activateMethod;
 	private Method deactivateMethod;
 	// --- end: cache
 
@@ -79,20 +79,57 @@ public class ServiceComponent implements Externalizable {
 	public ServiceComponent() {
 	}
 
-	private final Method getMethod(Object instance, String methodName) throws Exception {
+	private final Method getMethod(Object instance, String methodName, boolean isActivate) throws Exception {
 		if (Activator.DEBUG) {
 			Activator.log.debug(0, 10034, methodName, null, false);
 			// //Activator.log.debug("getMethod() " + name, null);
 		}
 		Method method = null;
+		Class[] paramTypes = null;
 		Class clazz = instance != null ? instance.getClass() : null;
 
 		while (method == null && clazz != null) {
-			try {
-				method = clazz.getDeclaredMethod(methodName, ACTIVATE_METHODS_PARAMETERS);
-			} catch (NoSuchMethodException e) {
-				// the method activate/deactivate may not exist in the component implementation class
+			if (namespace11) {
+				Method[] methods = clazz.getDeclaredMethods();
+				for (int i = 0; i < methods.length; i++) {
+					if (methods[i].getName().equals(methodName)) {
+						Class[] params = methods[i].getParameterTypes();
+						boolean accepted = true;
+						for (int j = 0; j < params.length; j++) {
+							if (params[j] == ComponentContext.class || params[j] == BundleContext.class || params[j] == Map.class) {
+								// correct parameter for both activate and deactivate methods
+							} else if (!isActivate && (params[j] == Integer.class || params[j] == int.class)) {
+								//we are checking int/Integer as special deactivate parameters
+
+							} else {
+								//the parameter is not recognized
+								accepted = false;
+								break;
+							}
+						}
+						if (accepted) {
+							//check if the newly accepted method has more parameters than the previous one and use it
+							if (paramTypes == null || paramTypes.length < params.length) {
+								//skip the method if it is private
+								if (!Modifier.isPrivate(methods[i].getModifiers())) {
+									method = methods[i];
+									paramTypes = params;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				try {
+					method = clazz.getDeclaredMethod(methodName, ACTIVATE_METHODS_PARAMETERS);
+				} catch (NoSuchMethodException e) {
+					// the method activate/deactivate may not exist in the component implementation class
+				}
 			}
+
+			if (method != null)
+				break;
+
 			// search for the method in the parent classes!
 			clazz = clazz.getSuperclass();
 		}
@@ -112,22 +149,65 @@ public class ServiceComponent implements Externalizable {
 
 	void activate(Object instance, ComponentContext context) throws ComponentException {
 		try {
-			// retrieve the activate method from cache
-			if (!activateCached) {
-				activateCached = true;
-				activateMethod = getMethod(instance, "activate");
-			}
-			// invoke the method if any
-			if (activateMethod != null) {
-				Object[] params = SCRUtil.getObjectArray();
-				params[0] = context;
-				try {
-					activateMethod.invoke(instance, params);
-				} finally {
-					SCRUtil.release(params);
+			if (namespace11) {
+				if (!activateCached) {
+					activateCached = true;
+					activateMethod = getMethod(instance, activateMethodName, true);
+				}
+				// invoke the method if any
+				if (activateMethod != null) {
+					Class[] paramTypes = activateMethod.getParameterTypes();
+					Object[] params = null;
+					if (paramTypes.length == 1) {
+						params = SCRUtil.getObjectArray();
+					} else {
+						params = new Object[paramTypes.length];
+					}
+					for (int i = 0; i < params.length; i++) {
+						if (paramTypes[i] == ComponentContext.class) {
+							params[i] = context;
+						} else if (paramTypes[i] == BundleContext.class) {
+							params[i] = context.getBundleContext();
+						} else if (paramTypes[i] == Map.class) {
+							params[i] = context.getProperties();
+						}
+					}
+
+					try {
+						activateMethod.invoke(instance, params);
+					} finally {
+						if (params.length == 1) {
+							SCRUtil.release(params);
+						}
+					}
+				} else {
+					if (activateMethodName != "activate") {
+						//the activate method is specified in the component description XML by the user.
+						//It is expected to find it in the implementation class
+						throw new ComponentException("[SCR] Cannot activate instance " + instance + " of component " + this + "! The specified activate method was not found!");
+					}
+				}
+			} else {
+				// retrieve the activate method from cache
+				if (!activateCached) {
+					activateCached = true;
+					activateMethod = getMethod(instance, "activate", true);
+				}
+				// invoke the method if any
+				if (activateMethod != null) {
+					Object[] params = SCRUtil.getObjectArray();
+					params[0] = context;
+					try {
+						activateMethod.invoke(instance, params);
+					} finally {
+						SCRUtil.release(params);
+					}
 				}
 			}
 		} catch (Throwable t) {
+			if (t instanceof ComponentException) {
+				throw (ComponentException) t;
+			}
 			Activator.log.error("[SCR] Cannot activate instance " + instance + " of component " + this, null);
 			throw new ComponentException("[SCR] Exception while activating instance " + instance + " of component " + name, t);
 			// rethrow exception so resolver is eventually notified that
@@ -137,19 +217,63 @@ public class ServiceComponent implements Externalizable {
 
 	void deactivate(Object instance, ComponentContext context) {
 		try {
-			// retrieve the activate method from cache
-			if (!deactivateCached) {
-				deactivateCached = true;
-				deactivateMethod = getMethod(instance, "deactivate");
-			}
-			// invoke the method
-			if (deactivateMethod != null) {
-				Object[] params = SCRUtil.getObjectArray();
-				params[0] = context;
-				try {
-					deactivateMethod.invoke(instance, params);
-				} finally {
-					SCRUtil.release(params);
+			if (namespace11) {
+				if (!deactivateCached) {
+					deactivateCached = true;
+					deactivateMethod = getMethod(instance, deactivateMethodName, false);
+				}
+				// invoke the method if any
+				if (deactivateMethod != null) {
+					Class[] paramTypes = deactivateMethod.getParameterTypes();
+					Object[] params = null;
+					if (paramTypes.length == 1) {
+						params = SCRUtil.getObjectArray();
+					} else {
+						params = new Object[paramTypes.length];
+					}
+					for (int i = 0; i < params.length; i++) {
+						if (paramTypes[i] == ComponentContext.class) {
+							params[i] = context;
+						} else if (paramTypes[i] == BundleContext.class) {
+							params[i] = context.getBundleContext();
+						} else if (paramTypes[i] == Map.class) {
+							params[i] = context.getProperties();
+						} else if (paramTypes[i] == Integer.class) {
+							params[i] = new Integer(0); //TODO deactivate reason will be specified later
+						} else if (paramTypes[i] == int.class) {
+							params[i] = new Integer(0); //TODO deactivate reason will be specified later
+						}
+					}
+
+					try {
+						deactivateMethod.invoke(instance, params);
+					} finally {
+						if (params.length == 1) {
+							SCRUtil.release(params);
+						}
+					}
+				} else {
+					if (deactivateMethodName != "deactivate") {
+						//the deactivate method is specified in the component description XML by the user.
+						//It is expected to find it in the implementation class
+						Activator.log.error("[SCR] Cannot correctly deactivate instance " + instance + " of component " + this + "! The specified deactivate method was not found!", null);
+					}
+				}
+			} else {
+				// retrieve the activate method from cache
+				if (!deactivateCached) {
+					deactivateCached = true;
+					deactivateMethod = getMethod(instance, "deactivate", false);
+				}
+				// invoke the method
+				if (deactivateMethod != null) {
+					Object[] params = SCRUtil.getObjectArray();
+					params[0] = context;
+					try {
+						deactivateMethod.invoke(instance, params);
+					} finally {
+						SCRUtil.release(params);
+					}
 				}
 			}
 		} catch (Throwable t) {

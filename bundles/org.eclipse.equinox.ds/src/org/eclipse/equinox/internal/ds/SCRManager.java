@@ -297,6 +297,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				if (bundleComps != null) {
 					for (int i = 0; i < bundleComps.size(); i++) {
 						ServiceComponent sc = (ServiceComponent) bundleComps.elementAt(i);
+						if (sc.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_IGNORE) {
+							//skip processing of this component - it is not interested in configuration changes
+							continue;
+						}
 						String name = sc.name;
 						if (Activator.DEBUG) {
 							Activator.log.debug(0, 10014, name, null, false);
