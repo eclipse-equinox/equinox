@@ -15,6 +15,7 @@ package org.eclipse.equinox.weaving.aspectj;
 import java.util.Properties;
 
 import org.eclipse.equinox.service.weaving.IWeavingService;
+import org.eclipse.equinox.weaving.aspectj.loadtime.AspectDefinitionRegistry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -33,6 +34,8 @@ public class WeavingServicePlugin implements BundleActivator {
     //The shared instance.
     private static WeavingServicePlugin plugin;
 
+    private AspectDefinitionRegistry aspectDefinitionRegistry;
+
     private BundleContext context;
 
     /**
@@ -50,6 +53,10 @@ public class WeavingServicePlugin implements BundleActivator {
         return plugin;
     }
 
+    public AspectDefinitionRegistry getAspectDefinitionRegistry() {
+        return aspectDefinitionRegistry;
+    }
+
     /**
      * @return The bundle context of the weaving service bundle or null, of
      *         bundle is not started
@@ -63,6 +70,10 @@ public class WeavingServicePlugin implements BundleActivator {
      */
     public void start(final BundleContext context) throws Exception {
         this.context = context;
+
+        this.aspectDefinitionRegistry = new AspectDefinitionRegistry();
+        context.addBundleListener(this.aspectDefinitionRegistry);
+        this.aspectDefinitionRegistry.initialize(context.getBundles());
 
         loadOptions(context);
         if (verbose)

@@ -12,4 +12,4 @@ Import-Package: org.aspectj.weaver,
  org.eclipse.osgi.service.debug,
  org.eclipse.osgi.service.resolver,
  org.osgi.framework
-Bundle-RequiredExecutionEnvironment: J2SE-1.3
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

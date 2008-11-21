@@ -15,18 +15,15 @@
 package org.eclipse.equinox.weaving.aspectj.loadtime;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor;
-import org.aspectj.weaver.loadtime.definition.DocumentParser;
+import org.aspectj.weaver.loadtime.definition.Definition;
 import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 import org.osgi.framework.Bundle;
 
@@ -35,10 +32,6 @@ import org.osgi.framework.Bundle;
  * OSGi specifics for load-time weaving
  */
 public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
-
-    private static final String AOP_CONTEXT_LOCATION_HEADER = "Eclipse-AspectContext";
-
-    private static final String DEFAULT_AOP_CONTEXT_LOCATION = "META-INF/aop.xml";
 
     private final List aspectDefinitions;
 
@@ -71,6 +64,7 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
     /**
      * @see org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor#getNamespace()
      */
+    @Override
     public String getNamespace() {
         //        final String namespace = super.getNamespace();
         return namespaceAddon.toString();
@@ -112,6 +106,7 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
      * @see org.aspectj.weaver.tools.WeavingAdaptor#weaveClass(java.lang.String,
      *      byte[], boolean)
      */
+    @Override
     public byte[] weaveClass(final String name, byte[] bytes,
             final boolean mustWeave) throws IOException {
 
@@ -129,42 +124,22 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         return bytes;
     }
 
-    private void addToNamespaceAddon(final URL xml) {
-        final String bundleName = weavingContext.getBundleIdFromURL(xml);
-        final String bundleVersion = weavingContext
-                .getBundleVersionFromURL(xml);
-
-        namespaceAddon.append(bundleName);
+    private void addToNamespaceAddon(final Bundle bundle) {
+        namespaceAddon.append(bundle.getSymbolicName());
         namespaceAddon.append(":");
-        namespaceAddon.append(bundleVersion);
+        namespaceAddon.append(weavingContext.getBundleVersion(bundle));
         namespaceAddon.append(";");
-    }
-
-    private String getDefinitionLocation(final Bundle bundle) {
-        String aopContextHeader = (String) bundle.getHeaders().get(
-                AOP_CONTEXT_LOCATION_HEADER);
-        if (aopContextHeader != null) {
-            aopContextHeader = aopContextHeader.trim();
-            return aopContextHeader;
-        }
-
-        return DEFAULT_AOP_CONTEXT_LOCATION;
     }
 
     private void parseDefinitionFromRequiredBundle(final Bundle bundle,
             final List definitions, final Set seenBefore) {
         try {
-            final URL aopXmlDef = bundle
-                    .getEntry(getDefinitionLocation(bundle));
-            if (aopXmlDef != null) {
-                if (!seenBefore.contains(aopXmlDef)) {
-                    definitions.add(DocumentParser.parse(aopXmlDef));
-                    seenBefore.add(aopXmlDef);
-
-                    addToNamespaceAddon(aopXmlDef);
-                } else {
-                    warn("ignoring duplicate definition: " + aopXmlDef);
-                }
+            final Definition aspectDefinition = WeavingServicePlugin
+                    .getDefault().getAspectDefinitionRegistry()
+                    .getAspectDefinition(bundle);
+            if (aspectDefinition != null) {
+                definitions.add(aspectDefinition);
+                addToNamespaceAddon(bundle);
             }
         } catch (final Exception e) {
             warn("parse definitions failed", e);
@@ -183,7 +158,6 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         final Set seenBefore = new HashSet();
 
         try {
-            parseDefinitionsFromVisibility(definitions, seenBefore);
             parseDefinitionsFromRequiredBundles(definitions, seenBefore);
             if (definitions.isEmpty()) {
                 info("no configuration found. Disabling weaver for bundler "
@@ -213,36 +187,6 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         for (int i = 0; i < bundles.length; i++) {
             parseDefinitionFromRequiredBundle(bundles[i], definitions,
                     seenBefore);
-        }
-    }
-
-    private void parseDefinitionsFromVisibility(final List definitions,
-            final Set seenBefore) {
-        final String resourcePath = System.getProperty(
-                "org.aspectj.weaver.loadtime.configuration", "");
-        final StringTokenizer st = new StringTokenizer(resourcePath, ";");
-
-        while (st.hasMoreTokens()) {
-            try {
-                final Enumeration xmls = weavingContext.getResources(st
-                        .nextToken());
-
-                while (xmls.hasMoreElements()) {
-                    final URL xml = (URL) xmls.nextElement();
-                    if (!seenBefore.contains(xml)) {
-                        info("using configuration "
-                                + weavingContext.getFile(xml));
-                        definitions.add(DocumentParser.parse(xml));
-                        seenBefore.add(xml);
-
-                        addToNamespaceAddon(xml);
-                    } else {
-                        warn("ignoring duplicate definition: " + xml);
-                    }
-                }
-            } catch (final Exception e) {
-                warn("parse definitions failed", e);
-            }
         }
     }
 

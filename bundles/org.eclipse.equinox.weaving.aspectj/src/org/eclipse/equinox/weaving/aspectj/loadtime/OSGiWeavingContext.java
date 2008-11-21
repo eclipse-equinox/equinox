@@ -58,11 +58,6 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
                     + loader + ", bundle=" + bundle.getSymbolicName());
     }
 
-    public String getBundleIdFromURL(final URL url) {
-        return resolverState.getBundle(Integer.parseInt(url.getHost()))
-                .getSymbolicName();
-    }
-
     public Bundle[] getBundles() {
         final Set bundles = new HashSet();
 
@@ -105,14 +100,22 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
         return (Bundle[]) bundles.toArray(new Bundle[bundles.size()]);
     }
 
-    public String getBundleVersionFromURL(final URL url) {
-        return resolverState.getBundle(Integer.parseInt(url.getHost()))
-                .getVersion().toString();
+    /**
+     * Extracts the version of the bundle to which the given url belongs to
+     * 
+     * @param url An URL of a bundles resource
+     * @return The version of the bundle of the resource to which the URL points
+     *         to
+     */
+    public String getBundleVersion(final Bundle bundle) {
+        return resolverState.getBundle(bundle.getBundleId()).getVersion()
+                .toString();
     }
 
     /**
      * @see org.aspectj.weaver.loadtime.DefaultWeavingContext#getClassLoaderName()
      */
+    @Override
     public String getClassLoaderName() {
         return bundleDescription.getSymbolicName();
     }
@@ -121,6 +124,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
      * @see org.aspectj.weaver.loadtime.DefaultWeavingContext#getDefinitions(java.lang.ClassLoader,
      *      org.aspectj.weaver.tools.WeavingAdaptor)
      */
+    @Override
     public List getDefinitions(final ClassLoader loader,
             final WeavingAdaptor adaptor) {
         final List definitions = ((OSGiWeavingAdaptor) adaptor)
@@ -131,6 +135,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
     /**
      * @see org.aspectj.weaver.loadtime.DefaultWeavingContext#getFile(java.net.URL)
      */
+    @Override
     public String getFile(final URL url) {
         return getBundleIdFromURL(url) + url.getFile();
     }
@@ -138,6 +143,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
     /**
      * @see org.aspectj.weaver.loadtime.DefaultWeavingContext#getId()
      */
+    @Override
     public String getId() {
         return bundleDescription.getSymbolicName();
     }
@@ -145,6 +151,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
     /**
      * @see org.aspectj.weaver.loadtime.DefaultWeavingContext#getResources(java.lang.String)
      */
+    @Override
     public Enumeration getResources(final String name) throws IOException {
         Enumeration result = super.getResources(name);
 
@@ -191,6 +198,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
         return result;
     }
 
+    @Override
     public String toString() {
         return getClass().getName() + "[" + bundleDescription.getSymbolicName()
                 + "]";
