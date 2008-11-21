@@ -247,7 +247,7 @@ public final class URIUtil {
 	 */
 	public static URI makeAbsolute(URI original, URI baseURI) {
 		// we only calculate the result if both URIs are local.
-		if (!SCHEME_FILE.equals(baseURI.getScheme()))
+		if (original.isAbsolute() || !SCHEME_FILE.equals(baseURI.getScheme()))
 			return original;
 		String scheme = original.getScheme();
 		if (scheme != null && !SCHEME_FILE.equals(scheme))
