@@ -288,7 +288,7 @@ public abstract class StateImpl implements State {
 		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
 	}
 
-	public synchronized void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		synchronized (this.monitor) {
 			if (!resolving)
 				throw new IllegalStateException(); // TODO need error message here!
@@ -802,16 +802,16 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	public synchronized ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
+	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage) {
 		if (resolver == null)
 			throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
 		BundleDescriptionImpl importer = (BundleDescriptionImpl) importingBundle;
 		if (importer.getDynamicStamp(requestedPackage) == getTimeStamp())
 			return null;
-		try {
-			resolving = true;
-			fullyLoad();
-			synchronized (this.monitor) {
+		fullyLoad();
+		synchronized (this.monitor) {
+			try {
+				resolving = true;
 				// ask the resolver to resolve our dynamic import
 				ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
 				if (result == null)
@@ -823,10 +823,11 @@ public abstract class StateImpl implements State {
 				}
 				setDynamicCacheChanged(true);
 				return result;
+			} finally {
+				resolving = false;
 			}
-		} finally {
-			resolving = false;
 		}
+
 	}
 
 	void setReader(StateReader reader) {
