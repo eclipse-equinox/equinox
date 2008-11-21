@@ -239,40 +239,39 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Return a URI which is absolute to the given base. Return the original URI
-	 * if it is already absolute or if either URI has a non-local scheme.
-	 * @param original the relative URI
+	 * Returns an absolute URI that is created by appending the given relative URI to 
+	 * the given base.  If the <tt>relative</tt> URI is already absolute it is simply returned.
+	 * <p>
+	 * This method is guaranteed to be the inverse of {@link #makeRelative(URI, URI)}.
+	 * That is, if R = makeRelative(O, B), then makeAbsolute(R, B), will return the original
+	 * URI O.
+	 * 
+	 * @param relative the relative URI
 	 * @param baseURI the base URI
 	 * @return an absolute URI
 	 */
-	public static URI makeAbsolute(URI original, URI baseURI) {
-		// we only calculate the result if both URIs are local.
-		if (original.isAbsolute() || !SCHEME_FILE.equals(baseURI.getScheme()))
-			return original;
-		String scheme = original.getScheme();
-		if (scheme != null && !SCHEME_FILE.equals(scheme))
-			return original;
-		IPath originalPath = new Path(original.getSchemeSpecificPart());
-		IPath basePath = new Path(baseURI.getSchemeSpecificPart());
-
-		//can't make absolute if devices don't agree
-		String originalDevice = originalPath.getDevice();
-		if (originalDevice != null && !originalDevice.equalsIgnoreCase(basePath.getDevice()))
-			return original;
-		return append(baseURI, originalPath.setDevice(null).toString()).normalize();
+	public static URI makeAbsolute(URI relative, URI baseURI) {
+		if (relative.isAbsolute())
+			return relative;
+		return append(baseURI, relative.toString()).normalize();
 	}
 
 	/**
-	 * Return a URI which is considered to be relative to the given base URI.
-	 * Return the original URI if either URI has a non-local scheme.
+	 * Returns a URI equivalent to the given original URI, but relative to the given base 
+	 * URI if possible.
+	 * <p>
+	 * This method is equivalent to {@link java.net.URI#relativize}, except for its
+	 * handling of file URIs. For file URIs, this method handles file system path devices.
+	 * If the URIs are not on the same device, then the original URI is returned.
+	 * 
 	 * @param original the original URI
 	 * @param baseURI the base URI
 	 * @return a relative URI
 	 */
 	public static URI makeRelative(URI original, URI baseURI) {
-		// we only calculate the result if both URIs are local.
+		// for non-local URIs just use the built in relativize method
 		if (!SCHEME_FILE.equals(original.getScheme()) || !SCHEME_FILE.equals(baseURI.getScheme()))
-			return original;
+			return baseURI.relativize(original);
 
 		IPath originalPath = new Path(original.getSchemeSpecificPart());
 		IPath basePath = new Path(baseURI.getSchemeSpecificPart());
