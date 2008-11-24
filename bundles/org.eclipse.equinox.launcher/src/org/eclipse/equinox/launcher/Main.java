@@ -358,14 +358,15 @@ public class Main {
 		if (libPath == null) {
 			//find our fragment name
 			String fragmentOS = getOS();
+			String fragmentArch = getArch();
 			StringBuffer buffer = new StringBuffer(PLUGIN_ID);
 			buffer.append('.');
 			buffer.append(getWS());
 			buffer.append('.');
 			buffer.append(fragmentOS);
-			if (!fragmentOS.equals("macosx")) { //$NON-NLS-1$
+			if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
 				buffer.append('.');
-				buffer.append(getArch());
+				buffer.append(fragmentArch);
 			}
 			String fragmentName = buffer.toString();
 			String fragment = null;
