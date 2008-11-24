@@ -17,6 +17,7 @@ package org.eclipse.osgi.service.environment;
  * This interface is not intended to be implemented by clients.
  * </p>
  * @noimplement This interface is not intended to be implemented by clients.
+ * @noextend This interface is not intended to be extended by clients.
  */
 public interface Constants {
 	//TODO These constants need to be aligned with the OSGi ones. See page 64-588 of the spec
