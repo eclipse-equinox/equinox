@@ -7,3 +7,4 @@ Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
 Eclipse-PlatformFilter: (& (osgi.ws=gtk) (osgi.os=linux) (osgi.arch=s390))
 Bundle-Localization: launcher.gtk.linux.s390
+Eclipse-BundleShape: dir

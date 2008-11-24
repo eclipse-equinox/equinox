@@ -7,3 +7,4 @@ Bundle-Version: 1.0.100.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Eclipse-PlatformFilter: (& (osgi.ws=gtk) (osgi.os=solaris) (osgi.arch=x86))
 Bundle-Localization: launcher.gtk.solaris.x86
+Eclipse-BundleShape: dir

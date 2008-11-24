@@ -7,3 +7,4 @@ Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="1.0.0"
 Eclipse-PlatformFilter: (& (osgi.ws=cocoa) (osgi.os=macosx) (|(osgi.arch=x86)(osgi.arch=ppc)) )
 Bundle-Localization: launcher.cocoa.macosx
+Eclipse-BundleShape: dir

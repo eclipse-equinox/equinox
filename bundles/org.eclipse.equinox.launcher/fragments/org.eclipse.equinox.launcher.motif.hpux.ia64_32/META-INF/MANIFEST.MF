@@ -7,3 +7,4 @@ Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Bundle-Vendor: %providerName
 Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=hpux) (osgi.arch=ia64_32) )
 Bundle-Localization: launcher.motif.hpux.ia64_32
+Eclipse-BundleShape: dir
