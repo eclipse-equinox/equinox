@@ -40,7 +40,7 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 LIBS = -L$(MOTIF_HOME)/lib -L$(X11_HOME)/lib -lpthread
 MOTIF_LIBS = -DXM_LIB="\"libXm.so.1\"" -DXT_LIB="\"libXt.so.1\"" -DX11_LIB="\"libX11.so.1\""
-LFLAGS = -shared
+LFLAGS = -shared -static-libgcc
 # -Wl,--export-dynamic
 CFLAGS = -O -s \
 	-DNO_XINERAMA_EXTENSIONS \
