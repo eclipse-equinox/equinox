@@ -27,7 +27,7 @@ cd `dirname $0`
 # Define default values for environment variables used in the makefiles.
 programOutput="eclipse"
 defaultOS="macosx"
-defaultOSArch="" # for universal binary the arch is not specified
+defaultOSArch="x86"
 defaultWS="carbon"
 makefile="make_carbon.mak"
 if [ "$OS" = "" ];  then
@@ -62,12 +62,24 @@ DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
 PPC_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/ppc/Eclipse.app/Contents/MacOS"
 X86_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86/Eclipse.app/Contents/MacOS"
-
-export PPC_OUTPUT_DIR X86_OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS
+X86_64_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86_64/Eclipse.app/Contents/MacOS"
 
 if [ "$DEFAULT_WS" == "cocoa" ]; then
-	makefile = "make_cocoa.mak"
+	makefile="make_cocoa.mak"
 fi
+
+if [ "$DEFAULT_OS_ARCH" == "x86_64" ]; then
+	echo "build x86_64"
+	ARCHS="-arch x86_64"
+	PROGRAM_OUTPUT_DIR=$X86_64_OUTPUT_DIR
+	DEFAULT_OS_ARCH="x86_64"
+else
+	echo "build x86 and ppc"
+	ARCHS="-arch i386 -arch ppc"
+	PROGRAM_OUTPUT_DIR=$X86_OUTPUT_DIR
+fi
+ 
+export PPC_OUTPUT_DIR X86_OUTPUT_DIR X86_64_OUTPUT_DIR PROGRAM_OUTPUT DEFAULT_OS DEFAULT_OS_ARCH DEFAULT_WS ARCHS PROGRAM_OUTPUT_DIR
 
 # If the OS is supported (a makefile exists)
 if [ "$makefile" != "" ]; then
@@ -77,6 +89,7 @@ if [ "$makefile" != "" ]; then
 		echo "Building $OS launcher. Defaults: -os $DEFAULT_OS -arch $DEFAULT_OS_ARCH -ws $DEFAULT_WS"
 		make -f $makefile clean
 		make -f $makefile all
+		make -f $makefile install
 	fi
 else
 	echo "Unknown OS ($OS) -- build aborted"

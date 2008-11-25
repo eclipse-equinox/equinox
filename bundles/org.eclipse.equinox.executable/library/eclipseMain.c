@@ -420,7 +420,8 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	_tcscat(fragment, wsArg);
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArg);
-#ifndef MACOSX
+	//!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))
+#if !(defined(MACOSX) && !defined(__x86_64__)) 
 	/* The Mac fragment covers both archs and does not have that last segment */
 	_tcscat(fragment, dot);
 	_tcscat(fragment, osArchArg);

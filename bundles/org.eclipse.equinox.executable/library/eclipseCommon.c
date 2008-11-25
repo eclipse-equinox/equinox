@@ -33,8 +33,6 @@ _TCHAR* osArg        = _T_ECLIPSE(DEFAULT_OS);
 	/* on the mac we have a universal binary, decide ppc vs x86 based on endianness */
 	#ifdef __BIG_ENDIAN__
 		_TCHAR* osArchArg    = _T_ECLIPSE("ppc");
-	#elif __LITTLE_ENDIAN__
-		_TCHAR* osArchArg    = _T_ECLIPSE("x86");
 	#else
 		_TCHAR* osArchArg    = _T_ECLIPSE(DEFAULT_OS_ARCH);
 	#endif

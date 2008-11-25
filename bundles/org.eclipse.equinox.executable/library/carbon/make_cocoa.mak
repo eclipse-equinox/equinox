@@ -1,5 +1,5 @@
 #**********************************************************************
-# Copyright (c) 2000, 2005 IBM Corporation and others.
+# Copyright (c) 2000, 2008 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -32,9 +32,12 @@ DLL_OBJS	= eclipse.o eclipseCarbon.o eclipseUtil.o eclipseJNI.o eclipseShm.o
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-#LIBS = -framework Carbon
 LIBS = -framework Cocoa
+
+ifeq ($(ARCHS),)
 ARCHS = -arch i386 -arch ppc
+endif
+
 CFLAGS = -O -s \
 	-Wall \
 	-DCOCOA -xobjective-c \
@@ -87,8 +90,7 @@ $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) -bundle -o $(DLL) $(ARCHS) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
 
 install: all
-	cp $(EXEC) $(PPC_OUTPUT_DIR)
-	cp $(EXEC) $(X86_OUTPUT_DIR)
+	cp -v $(EXEC) $(PROGRAM_OUTPUT_DIR)
 	rm -f $(EXEC) $(OBJS)
 
 clean:

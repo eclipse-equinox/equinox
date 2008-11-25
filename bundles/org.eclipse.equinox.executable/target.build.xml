@@ -111,6 +111,15 @@
 		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
 		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}" includes="${launcherName}.app/Contents/Resources/Splash.app/Contents/MacOS/${launcherName}"/>
 	</target>
+	<target name="rootFilesmacosx_cocoa_x86_64">
+		<mkdir dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}"/>
+		<copy todir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/cocoa/macosx/x86_64" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="${launcherName}.app/Contents/MacOS/${launcherName}" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.x86_64/${collectingFolder}" includes="${launcherName}.app/Contents/Resources/Splash.app/Contents/MacOS/${launcherName}"/>
+	</target>
 	<target name="rootFileslinux_gtk_x86">
 		<mkdir dir="${feature.base}/linux.gtk.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.x86/${collectingFolder}" failonerror="true" overwrite="true">
