@@ -12,7 +12,6 @@
 
 package org.eclipse.equinox.internal.util.impl.tpt.threadpool;
 
-import java.lang.reflect.Method;
 import java.security.*;
 import org.eclipse.equinox.internal.util.UtilActivator;
 import org.eclipse.equinox.internal.util.impl.tpt.ServiceFactoryImpl;
@@ -20,20 +19,8 @@ import org.eclipse.equinox.internal.util.threadpool.ThreadContext;
 
 /**
  * @author Pavlin Dobrev
- * @version 1.0
  */
-
 public class Executor extends Thread implements ThreadContext {
-
-	static Method setCCL;
-	static Object[] args;
-	static {
-		try {
-			setCCL = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class});
-			args = new Object[] {null};
-		} catch (Throwable ignore) {
-		}
-	}
 
 	public static final String iname = "[ThreadPool Manager] - Idle Thread";
 	public static final String nullname = "[ThreadPool Manager] - Occupied Thread ";
@@ -48,9 +35,13 @@ public class Executor extends Thread implements ThreadContext {
 
 	AccessControlContext acc;
 	PEA pea;
+	static ClassLoader defaultTCCL;
+
+	static {
+		defaultTCCL = Thread.currentThread().getContextClassLoader();
+	}
 
 	public synchronized void setRunnable(Runnable job, String name, ThreadPoolFactoryImpl factory, AccessControlContext acc) {
-
 		this.job = job;
 		this.factory = factory;
 
@@ -69,7 +60,6 @@ public class Executor extends Thread implements ThreadContext {
 					if (UtilActivator.debugLevel == 2 && UtilActivator.LOG_DEBUG) {
 						UtilActivator.log.debug(0x0100, 10003, getName(), null, false);
 					}
-
 					accessed = true;
 					if (acc != null) {
 						if (pea == null)
@@ -87,6 +77,10 @@ public class Executor extends Thread implements ThreadContext {
 						ServiceFactoryImpl.log.error("[ThreadPool Manager]\r\nException while executing: \r\nNAME: " + this + "\r\nJOB: " + job + "\r\n", t);
 					}
 
+				} finally {
+					if (getContextClassLoader() != defaultTCCL) {
+						setContextClassLoader(defaultTCCL);
+					}
 				}
 				if (UtilActivator.debugLevel == 2 && UtilActivator.LOG_DEBUG) {
 					UtilActivator.log.debug(0x0100, 10004, getName(), null, false);
@@ -129,11 +123,9 @@ public class Executor extends Thread implements ThreadContext {
 
 	public Executor() {
 		super(ServiceFactoryImpl.useNames ? iname : xname);
-		if (setCCL != null)
-			try {
-				setCCL.invoke(this, args);
-			} catch (Throwable ignore) {
-			}
+		if (getContextClassLoader() != defaultTCCL) {
+			setContextClassLoader(defaultTCCL);
+		}
 		start();
 	}
 
