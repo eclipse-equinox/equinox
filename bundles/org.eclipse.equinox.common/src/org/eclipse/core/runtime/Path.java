@@ -742,11 +742,14 @@ public class Path implements IPath, Cloneable {
 			return this;
 		int commonLength = matchingFirstSegments(base);
 		final int differenceLength = base.segmentCount() - commonLength;
-		String[] newSegments = new String[differenceLength + segmentCount() - commonLength];
+		final int newSegmentLength = differenceLength + segmentCount() - commonLength;
+		if (newSegmentLength == 0)
+			return Path.EMPTY;
+		String[] newSegments = new String[newSegmentLength];
 		//add parent references for each segment different from the base
 		Arrays.fill(newSegments, 0, differenceLength, ".."); //$NON-NLS-1$
 		//append the segments of this path not in common with the base
-		System.arraycopy(segments, commonLength, newSegments, differenceLength, newSegments.length - differenceLength);
+		System.arraycopy(segments, commonLength, newSegments, differenceLength, newSegmentLength - differenceLength);
 		return new Path(null, newSegments, separators & HAS_TRAILING);
 	}
 
