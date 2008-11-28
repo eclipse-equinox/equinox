@@ -124,6 +124,8 @@ public class DeclarationParser implements ExTagListener {
 				doCorrectComponentTag(tag, tagName);
 			}
 		} catch (IllegalArgumentException iae) {
+			currentComponent = null; //the component is bad - ignoring it
+			closeTag = null;
 			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! The error is: " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
@@ -138,8 +140,8 @@ public class DeclarationParser implements ExTagListener {
 	}
 
 	private void doEndTag(Tag tag) throws InvalidSyntaxException {
-		String tagName = tag.getName().intern();
 		if (currentComponent != null) {
+			String tagName = tag.getName().intern();
 			if (tagName == TAG_IMPLEMENTATION) {
 				doImplementation(tag);
 			} else if (tagName == TAG_PROPERTY) {
