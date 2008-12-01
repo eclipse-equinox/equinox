@@ -1330,16 +1330,17 @@ public class EclipseStarter {
 			if (!candidateName.startsWith(target))
 				continue;
 			boolean simpleJar = false;
-			if (candidateName.length() > target.length() && candidateName.charAt(target.length()) != '_') {
-				// make sure this is not just a jar with no _version tacked on the end
+			final char versionSep = candidateName.length() > target.length() ? candidateName.charAt(target.length()) : 0;
+			if (candidateName.length() > target.length() && versionSep != '_' && versionSep != '-') {
+				// make sure this is not just a jar with no (_|-)version tacked on the end
 				if (candidateName.length() == 4 + target.length() && candidateName.endsWith(".jar")) //$NON-NLS-1$
 					simpleJar = true;
 				else
-					// name does not match the target properly with an _version at the end
+					// name does not match the target properly with an (_|-) version at the end
 					continue;
 			}
 			// Note: directory with version suffix is always > than directory without version suffix
-			String version = candidateName.length() > target.length() + 1 && candidateName.charAt(target.length()) == '_' ? candidateName.substring(target.length() + 1) : ""; //$NON-NLS-1$ 
+			String version = candidateName.length() > target.length() + 1 && (versionSep == '_' || versionSep == '-') ? candidateName.substring(target.length() + 1) : ""; //$NON-NLS-1$ 
 			Object[] currentVersion = getVersionElements(version);
 			if (currentVersion != null && compareVersion(maxVersion, currentVersion) < 0) {
 				File candidate = new File(start, candidateName);
