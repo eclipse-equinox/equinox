@@ -124,16 +124,14 @@ public class EclipseStarter {
 
 	private static final int DEFAULT_INITIAL_STARTLEVEL = 6; // default value for legacy purposes
 	private static final String DEFAULT_BUNDLES_STARTLEVEL = "4"; //$NON-NLS-1$
-	// Console information
-	protected static final String DEFAULT_CONSOLE_CLASS = "org.eclipse.osgi.framework.internal.core.FrameworkConsole"; //$NON-NLS-1$
-	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
 
-	private static Runnable console;
 	private static FrameworkLog log;
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
 	private static HashMap searchCandidates = new HashMap(4);
 	private static EclipseAppLauncher appLauncher;
 	private static List shutdownHandlers;
+
+	private static ConsoleManager consoleMgr = null;
 
 	/**
 	 * This is the main to start osgi.
@@ -291,11 +289,9 @@ public class EclipseStarter {
 		publishSplashScreen(endSplashHandler);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
-		String consolePort = FrameworkProperties.getProperty(PROP_CONSOLE);
-		if (consolePort != null) {
-			startConsole(framework, new String[0], consolePort);
-			if (Profile.PROFILE && Profile.STARTUP)
-				Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
+		consoleMgr = ConsoleManager.startConsole(framework);
+		if (consoleMgr != null && Profile.PROFILE && Profile.STARTUP) {
+			Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		framework.launch();
 		// save the cached timestamp before loading basic bundles; this is needed so we can do a proper timestamp check when logging resolver errors
@@ -404,7 +400,10 @@ public class EclipseStarter {
 		appLauncher = null;
 		splashStreamRegistration = null;
 		defaultMonitorRegistration = null;
-		stopConsole();
+		if (consoleMgr != null) {
+			consoleMgr.stopConsole();
+			consoleMgr = null;
+		}
 		framework.close();
 		framework = null;
 		context = null;
@@ -734,56 +733,6 @@ public class EclipseStarter {
 			} catch (InterruptedException e) {
 				break;
 			}
-		}
-	}
-
-	/**
-	 *  Invokes the OSGi Console on another thread
-	 *
-	 * @param equinox The current OSGi instance for the console to attach to
-	 * @param consoleArgs An String array containing commands from the command line
-	 * for the console to execute
-	 * @param consolePort the port on which to run the console.  Empty string implies the default port.
-	 */
-	private static void startConsole(Framework equinox, String[] consoleArgs, String consolePort) {
-		try {
-			String consoleClassName = FrameworkProperties.getProperty(PROP_CONSOLE_CLASS, DEFAULT_CONSOLE_CLASS);
-			Class consoleClass = Class.forName(consoleClassName);
-			Class[] parameterTypes;
-			Object[] parameters;
-			if (consolePort.length() == 0) {
-				parameterTypes = new Class[] {Framework.class, String[].class};
-				parameters = new Object[] {equinox, consoleArgs};
-			} else {
-				parameterTypes = new Class[] {Framework.class, int.class, String[].class};
-				parameters = new Object[] {equinox, new Integer(consolePort), consoleArgs};
-			}
-			Constructor constructor = consoleClass.getConstructor(parameterTypes);
-			console = (Runnable) constructor.newInstance(parameters);
-			Thread t = new Thread(console, CONSOLE_NAME);
-			t.setDaemon(false);
-			t.start();
-		} catch (NumberFormatException nfe) {
-			// TODO log or something other than write on System.err
-			System.err.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_INVALID_PORT, consolePort));
-		} catch (Exception ex) {
-			System.out.println(NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FAILED_FIND, CONSOLE_NAME));
-		}
-
-	}
-
-	/**
-	 *  Stops the OSGi Command console
-	 *
-	 */
-	private static void stopConsole() {
-		if (console == null)
-			return;
-		try {
-			Method shutdownMethod = console.getClass().getMethod("shutdown", null); //$NON-NLS-1$
-			shutdownMethod.invoke(console, null);
-		} catch (Exception ex) {
-			System.err.println(ex.getMessage());
 		}
 	}
 

@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -415,6 +416,12 @@ public class FrameworkConsole implements Runnable {
 		 */
 		ConsoleSocketGetter(ServerSocket server) {
 			this.server = server;
+			try {
+				Method reuseAddress = server.getClass().getMethod("setReuseAddress", new Class[] {boolean.class}); //$NON-NLS-1$
+				reuseAddress.invoke(server, new Object[] {Boolean.TRUE});
+			} catch (Exception ex) {
+				// try to set the socket re-use property, it isn't a problem if it can't be set
+			}
 			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
 			t.setDaemon(true);
 			t.start();

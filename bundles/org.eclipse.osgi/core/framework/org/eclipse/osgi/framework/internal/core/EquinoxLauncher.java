@@ -26,6 +26,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
 	private final Map configuration;
+	private volatile ConsoleManager consoleMgr = null;
 
 	public EquinoxLauncher(Map configuration) {
 		this.configuration = configuration;
@@ -61,6 +62,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 			// make sure the active framework thread is used
 			setEquinoxProperties(configuration);
 			current = new Framework(new BaseAdaptor(new String[0]));
+			consoleMgr = ConsoleManager.startConsole(current);
 			current.launch();
 			framework = current;
 			systemBundle = current.systemBundle;
@@ -275,6 +277,11 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		Bundle current = systemBundle;
 		if (current == null)
 			return;
+		ConsoleManager currentConsole = consoleMgr;
+		if (currentConsole != null) {
+			currentConsole.stopConsole();
+			consoleMgr = null;
+		}
 		current.stop();
 	}
 
