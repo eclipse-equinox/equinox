@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Declarative Services
 Bundle-SymbolicName: org.eclipse.equinox.ds
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: Eclipse
 Bundle-Activator: org.eclipse.equinox.internal.ds.Activator
 Bundle-Description: This bundle provides support for OSGi 
