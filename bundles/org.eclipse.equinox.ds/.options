@@ -6,6 +6,8 @@ org.eclipse.equinox.ds/debug=false
 org.eclipse.equinox.ds/print_on_console=false
 # Enables generating and printing logs about the time performance of the operations executed by the SCR
 org.eclipse.equinox.ds/performance=false
+# Makes instance of each component nevertheless components are "immediate" or not
+org.eclipse.equinox.ds/instantiate_all=false
 
 #Advanced options 
 # Enables caching of the parsed XML documents of the component descriptions

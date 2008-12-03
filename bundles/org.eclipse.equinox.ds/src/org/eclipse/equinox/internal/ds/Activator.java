@@ -58,6 +58,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	public static boolean DEBUG;
 	public static boolean PERF;
 	public static boolean DBSTORE;
+	public static boolean INSTANTIATE_ALL;
 	public static boolean startup;
 
 	static long time[] = null;
@@ -146,6 +147,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		log = new Log(bc, false);
 		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug");
 		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf");
+		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all");
+
 		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", false) || getBoolean("equinox.ds.dbstore");
 		log.setDebug(DEBUG);
 		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print");

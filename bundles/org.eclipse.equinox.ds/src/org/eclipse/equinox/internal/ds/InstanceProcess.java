@@ -173,7 +173,7 @@ public class InstanceProcess {
 					}
 					scp.setState(ServiceComponentProp.BUILDING);
 					sc = scp.serviceComponent;
-					if (sc.immediate) {
+					if (sc.immediate || (sc.factory == null && Activator.INSTANTIATE_ALL)) {
 						if (Activator.DEBUG) {
 							Activator.log.debug(0, 10003, scp.name, null, false);
 							// //Activator.log.debug("InstanceProcess.buildComponents():
