@@ -365,7 +365,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					// there is only one SCP for this SC, so we can disable the SC
 					Vector components = new Vector();
 					components.addElement(sc);
-					resolver.disableComponents(components);
+					resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
 
 					// now re-enable the SC - the resolver will pick up the new
 					// config
@@ -383,13 +383,13 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					if (scp == null && sc.componentProps != null && sc.componentProps.size() == 1 && (((ServiceComponentProp) sc.componentProps.elementAt(0)).getProperties().get(Constants.SERVICE_PID) == null)) {
 						scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
 					}
-					// if old scp exists, dispose of it
+					// if old scp exists, dispose it
 					if (scp != null) {
 						// config already exists - dispose of it
 						sc.componentProps.removeElement(scp);
 						Vector components = new Vector();
 						components.addElement(scp);
-						resolver.disposeComponentConfigs(components);
+						resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
 					}
 
 					// create a new scp (adds to resolver enabledSCPs list)
@@ -408,7 +408,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					// there is only one SCP for this SC, so we can disable the SC
 					Vector components = new Vector();
 					components.addElement(sc);
-					resolver.disableComponents(components);
+					resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
 
 					// now re-enable the SC - the resolver will create SCP with
 					// no configAdmin properties
@@ -426,7 +426,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						// SC
 						Vector components = new Vector();
 						components.addElement(sc);
-						resolver.disableComponents(components);
+						resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
 						// now re-enable the SC - the resolver will create SCP
 						// with no configAdmin properties
 						sc.enabled = true;
@@ -436,7 +436,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						sc.componentProps.removeElement(scp);
 						Vector components = new Vector();
 						components.addElement(scp);
-						resolver.disposeComponentConfigs(components);
+						resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
 					}
 				}
 				break;
@@ -467,7 +467,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					// //log.debug("SCRManager.stoppingBundle(" + bundleName
 					// + ')', null);
 				}
-				resolver.disableComponents(components);
+				resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED);
 				if (bundleToServiceComponents.size() == 0) {
 					hasRegisteredServiceListener = false;
 					bc.removeServiceListener(this);
@@ -705,7 +705,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				workObject.notify();
 			}
 		} else if (workAction == DISABLE_COMPONENTS) {
-			resolver.disableComponents((Vector) workObject);
+			resolver.disableComponents((Vector) workObject, ComponentConstants.DEACTIVATION_REASON_DISABLED);
 		}
 	}
 

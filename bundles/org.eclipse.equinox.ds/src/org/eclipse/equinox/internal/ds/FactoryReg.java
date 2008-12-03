@@ -13,8 +13,7 @@ package org.eclipse.equinox.internal.ds;
 
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.osgi.framework.*;
-import org.osgi.service.component.ComponentException;
-import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.component.*;
 
 /**
  * @author Pavlin Dobrev
@@ -59,8 +58,7 @@ final class FactoryReg implements ServiceFactory {
 		if (Activator.DEBUG) {
 			Activator.log.debug(0, 10002, registration.toString(), null, false);
 		}
-
-		component.disposeObj(service);
+		component.disposeObj(service, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 	}
 
 	public String toString() {

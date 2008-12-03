@@ -228,7 +228,7 @@ public class InstanceProcess {
 								if (factoryPid != null) {
 									Vector toDisable = new Vector(1);
 									toDisable.addElement(sc);
-									InstanceProcess.resolver.disableComponents(toDisable);
+									InstanceProcess.resolver.disableComponents(toDisable, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 									successfullyBuilt = false;
 									throw new org.osgi.service.component.ComponentException("ManagedServiceFactory and ComponentFactory are incompatible");
 								}
@@ -269,7 +269,7 @@ public class InstanceProcess {
 	 *            list of ComponentDescriptions plus Property objects to be
 	 *            disposed
 	 */
-	void disposeInstances(Vector scpList) {
+	void disposeInstances(Vector scpList, int deactivateReason) {
 		// loop through SC+P list to be disposed
 		if (scpList != null) {
 			for (int i = 0; i < scpList.size(); i++) {
@@ -287,7 +287,7 @@ public class InstanceProcess {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start disposing component " + scp);
 					}
-					disposeInstances(scp);
+					disposeInstances(scp, deactivateReason);
 				} catch (Throwable t) {
 					Activator.log.error("Exception while disposing instances of component " + scp, t);
 				} finally {
@@ -305,7 +305,7 @@ public class InstanceProcess {
 	/**
 	 * @param scp
 	 */
-	private void disposeInstances(ServiceComponentProp scp) {
+	private void disposeInstances(ServiceComponentProp scp, int deactivateReason) {
 		ServiceComponent sc = scp.serviceComponent;
 		// if no Services provided - dispose of instance immediately
 		if (sc.provides == null) {
@@ -314,7 +314,7 @@ public class InstanceProcess {
 				// //Activator.log.debug("InstanceProcess.disposeInstances():
 				// disposing non-provider component " + scp.name, null);
 			}
-			scp.dispose();
+			scp.dispose(deactivateReason);
 		} else {
 			// if ComponentFactory or if just Services
 			if (scp.isComponentFactory()) {
@@ -356,7 +356,7 @@ public class InstanceProcess {
 					// cannot find registrations for " + scp.name, null);
 				}
 			}
-			scp.dispose();
+			scp.dispose(deactivateReason);
 		}
 	}
 

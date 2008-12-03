@@ -14,6 +14,7 @@ package org.eclipse.equinox.internal.ds;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.osgi.framework.*;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentException;
 
 /**
@@ -89,7 +90,7 @@ final class ServiceReg implements ServiceFactory {
 				}
 				// dispose only the instance - don't dispose the component
 				// itself!
-				scp.disposeObj(service);
+				scp.disposeObj(service, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 				// delete the instance so it can be garbage collected!
 				instance = null;
 			} else {

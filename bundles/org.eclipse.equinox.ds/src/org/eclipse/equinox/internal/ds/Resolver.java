@@ -16,6 +16,7 @@ import org.eclipse.equinox.internal.ds.model.*;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentException;
 
 /**
@@ -289,7 +290,7 @@ public final class Resolver implements WorkPerformer {
 					}
 				}
 				if (componentsWithStaticRefs != null) {
-					instanceProcess.disposeInstances(componentsWithStaticRefs);
+					instanceProcess.disposeInstances(componentsWithStaticRefs, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 				}
 
 				synchronized (syncLock) {
@@ -325,7 +326,7 @@ public final class Resolver implements WorkPerformer {
 				}
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
 					// synchronously dispose newly unsatisfied components
-					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs);
+					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
 				}
 
 				Vector componentsToDispose;
@@ -339,7 +340,7 @@ public final class Resolver implements WorkPerformer {
 				}
 				//dispose instances from staticUnbind
 				if (componentsToDispose != null) {
-					instanceProcess.disposeInstances(componentsToDispose);
+					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 				}
 
 				synchronized (syncLock) {
@@ -378,7 +379,7 @@ public final class Resolver implements WorkPerformer {
 				}
 
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
-					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs);
+					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
 				}
 
 				synchronized (syncLock) {
@@ -390,7 +391,7 @@ public final class Resolver implements WorkPerformer {
 				}
 
 				if (componentsToDispose != null) {
-					instanceProcess.disposeInstances(componentsToDispose);
+					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 				}
 
 				synchronized (syncLock) {
@@ -542,7 +543,7 @@ public final class Resolver implements WorkPerformer {
 	 * 
 	 * @param componentDescriptions
 	 */
-	void disableComponents(Vector componentDescriptions) {
+	void disableComponents(Vector componentDescriptions, int deactivateReason) {
 		long start = 0l;
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
@@ -576,7 +577,7 @@ public final class Resolver implements WorkPerformer {
 					}
 				}
 				if (removeList != null) {
-					disposeComponentConfigs(removeList);
+					disposeComponentConfigs(removeList, deactivateReason);
 					removeList.removeAllElements();
 				}
 				if (component.componentProps != null) {
@@ -585,31 +586,34 @@ public final class Resolver implements WorkPerformer {
 			}
 		}
 
-		Vector newlyUnsatisfiedSCPs;
-		synchronized (syncLock) {
-			// synchronously dispose newly unsatisfied components
-			newlyUnsatisfiedSCPs = (Vector) satisfiedSCPs.clone();
-			removeAll(newlyUnsatisfiedSCPs, resolveEligible());
-			if (!newlyUnsatisfiedSCPs.isEmpty()) {
-				removeAll(satisfiedSCPs, newlyUnsatisfiedSCPs);
-			}
-		}
-		if (!newlyUnsatisfiedSCPs.isEmpty()) {
-			instanceProcess.disposeInstances(newlyUnsatisfiedSCPs);
-		}
+		//no need of this code
+		//		Vector newlyUnsatisfiedSCPs;
+		//		synchronized (syncLock) {
+		//			// synchronously dispose newly unsatisfied components
+		//			newlyUnsatisfiedSCPs = (Vector) satisfiedSCPs.clone();
+		//			removeAll(newlyUnsatisfiedSCPs, resolveEligible());
+		//			if (!newlyUnsatisfiedSCPs.isEmpty()) {
+		//				removeAll(satisfiedSCPs, newlyUnsatisfiedSCPs);
+		//			}
+		//		}
+		//		if (!newlyUnsatisfiedSCPs.isEmpty()) {
+		//			instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+		//		}
+		//no need of this code
+
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
 			Activator.log.info("[DS perf] " + componentDescriptions.size() + " Components disabled for " + start + " ms");
 		}
 	}
 
-	public void disposeComponentConfigs(Vector scps) {
+	public void disposeComponentConfigs(Vector scps, int deactivateReason) {
 		// unregister, deactivate, and unbind
 		synchronized (syncLock) {
 			removeAll(satisfiedSCPs, scps);
 			removeAll(scpEnabled, scps);
 		}
-		instanceProcess.disposeInstances(scps);
+		instanceProcess.disposeInstances(scps, deactivateReason);
 	}
 
 	// -- end *service listener*
@@ -637,23 +641,27 @@ public final class Resolver implements WorkPerformer {
 								return;
 						}
 						instanceProcess.buildComponents(queue, false);
-
-						// dispose configs that were already tried to dispose while building
-						Vector toDispose = null;
-						synchronized (syncLock) {
-							for (int i = queue.size() - 1; i >= 0; i--) {
-								if (!satisfiedSCPs.contains(queue.elementAt(i))) {
-									//System.out.println("-----DISPOSE after BUILD: removing "+queue.elementAt(i));
-									if (toDispose == null) {
-										toDispose = new Vector(2);
-									}
-									toDispose.addElement(queue.elementAt(i));
-								}
-							}
-							if (toDispose == null)
-								return; //nothing to dispose
-						}
-						instanceProcess.disposeInstances(toDispose);
+						//I think there is no need of this code
+						//						// dispose configs that were already tried to dispose while building
+						//						Vector toDispose = null;
+						//						synchronized (syncLock) {
+						//							for (int i = queue.size() - 1; i >= 0; i--) {
+						//								if (!satisfiedSCPs.contains(queue.elementAt(i))) {
+						//									ServiceComponentProp scp = (ServiceComponentProp) queue.elementAt(i);
+						//									if (!(scp.getState() <= ServiceComponentProp.DISPOSING)) {
+						//										//System.out.println("-----DISPOSE after BUILD: removing "+queue.elementAt(i));
+						//										if (toDispose == null) {
+						//											toDispose = new Vector(2);
+						//										}
+						//										toDispose.addElement(queue.elementAt(i));
+						//									}
+						//								}
+						//							}
+						//							if (toDispose == null)
+						//								return; //nothing to dispose
+						//						}
+						//						instanceProcess.disposeInstances(toDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+						//I think there is no need of this code
 					}
 					break;
 				case DYNAMICBIND :

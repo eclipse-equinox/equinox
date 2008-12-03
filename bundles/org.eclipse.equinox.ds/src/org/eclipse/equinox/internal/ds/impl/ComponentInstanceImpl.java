@@ -16,8 +16,7 @@ import org.eclipse.equinox.internal.ds.Activator;
 import org.eclipse.equinox.internal.ds.InstanceProcess;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.component.*;
 
 /**
  * ComponentInstanceImpl.java
@@ -25,7 +24,6 @@ import org.osgi.service.component.ComponentInstance;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
  */
 
 public class ComponentInstanceImpl implements ComponentInstance {
@@ -64,10 +62,10 @@ public class ComponentInstanceImpl implements ComponentInstance {
 			scp.serviceComponent.componentProps.removeElement(scp);
 			Vector toDispose = new Vector(1);
 			toDispose.addElement(scp);
-			InstanceProcess.resolver.disposeComponentConfigs(toDispose);
+			InstanceProcess.resolver.disposeComponentConfigs(toDispose, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
 			scp = null;
 		} else {
-			scp.dispose(this);
+			scp.dispose(this, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
 		}
 
 		// free service references if some are left ungotten

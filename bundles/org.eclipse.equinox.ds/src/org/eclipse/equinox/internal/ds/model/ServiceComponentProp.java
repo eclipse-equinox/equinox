@@ -95,7 +95,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * This method will dispose the service component instance. Along with the
 	 * service component itself and the properties files.
 	 */
-	public void dispose() {
+	public void dispose(int deactivateReason) {
 		if (Activator.DEBUG) {
 			Activator.log.debug(0, 10035, name, null, false);
 			// //Activator.log.debug("ServiceComponentProp.dispose(): ", null);
@@ -103,7 +103,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		setState(DISPOSED);
 		while (!instances.isEmpty()) {
 			ComponentInstanceImpl current = (ComponentInstanceImpl) instances.firstElement();
-			dispose(current);
+			dispose(current, deactivateReason);
 			current.dispose();
 		}
 	}
@@ -158,13 +158,13 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * @param componentInstance
 	 *            component instance wrapper
 	 */
-	private void deactivate(ComponentInstanceImpl componentInstance) {
+	private void deactivate(ComponentInstanceImpl componentInstance, int deactivateReason) {
 		if (Activator.DEBUG) {
 			Activator.log.debug(0, 10038, name, null, false);
 			// //Activator.log.debug("ServiceComponentProp.deactivate(): " +
 			// name, null);
 		}
-		serviceComponent.deactivate(componentInstance.getInstance(), componentInstance.getComponentContext());
+		serviceComponent.deactivate(componentInstance.getInstance(), componentInstance.getComponentContext(), deactivateReason);
 	}
 
 	/**
@@ -302,7 +302,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		return componentInstance;
 	}
 
-	public void disposeObj(Object obj) {
+	public void disposeObj(Object obj, int deactivateReason) {
 		ComponentInstanceImpl ci = null;
 		synchronized (instances) {
 			for (int i = 0; i < instances.size(); i++) {
@@ -315,18 +315,18 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			}
 		}
 		if (ci != null) {
-			dispose(ci);
+			dispose(ci, deactivateReason);
 			return;
 		}
 		throw new RuntimeException("The Object '" + obj + "' is not created by the component named " + name);
 	}
 
-	public void dispose(ComponentInstanceImpl componentInstance) {
+	public void dispose(ComponentInstanceImpl componentInstance, int deactivateReason) {
 		if (!instances.removeElement(componentInstance)) {
 			return; //the instance is already disposed  
 		}
 
-		deactivate(componentInstance);
+		deactivate(componentInstance, deactivateReason);
 		unbind(componentInstance);
 	}
 

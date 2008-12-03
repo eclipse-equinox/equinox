@@ -16,6 +16,7 @@ import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.*;
+import org.osgi.service.component.ComponentConstants;
 
 /** 
  * SCRCommandProvider class provides some useful commands for managing the Service Component Runtime
@@ -539,7 +540,7 @@ public class SCRCommandProvider implements CommandProvider {
 						}
 					}
 					if (!componentsToDisable.isEmpty()) {
-						resolver.disableComponents(componentsToDisable);
+						resolver.disableComponents(componentsToDisable, ComponentConstants.DEACTIVATION_REASON_DISABLED);
 					}
 				}
 			}
@@ -559,7 +560,7 @@ public class SCRCommandProvider implements CommandProvider {
 					}
 				}
 				if (!componentsToDisable.isEmpty()) {
-					resolver.disableComponents(componentsToDisable);
+					resolver.disableComponents(componentsToDisable, ComponentConstants.DEACTIVATION_REASON_DISABLED);
 				}
 			}
 		}

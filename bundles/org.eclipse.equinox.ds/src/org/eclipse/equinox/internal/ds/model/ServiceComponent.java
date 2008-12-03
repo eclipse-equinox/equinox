@@ -215,7 +215,7 @@ public class ServiceComponent implements Externalizable {
 		}
 	}
 
-	void deactivate(Object instance, ComponentContext context) {
+	void deactivate(Object instance, ComponentContext context, int deactivateReason) {
 		try {
 			if (namespace11) {
 				if (!deactivateCached) {
@@ -238,10 +238,10 @@ public class ServiceComponent implements Externalizable {
 							params[i] = context.getBundleContext();
 						} else if (paramTypes[i] == Map.class) {
 							params[i] = context.getProperties();
-						} else if (paramTypes[i] == Integer.class) {
-							params[i] = new Integer(0); //TODO deactivate reason will be specified later
 						} else if (paramTypes[i] == int.class) {
-							params[i] = new Integer(0); //TODO deactivate reason will be specified later
+							params[i] = new Integer(deactivateReason);
+						} else if (paramTypes[i] == Integer.class) {
+							params[i] = new Integer(deactivateReason);
 						}
 					}
 
