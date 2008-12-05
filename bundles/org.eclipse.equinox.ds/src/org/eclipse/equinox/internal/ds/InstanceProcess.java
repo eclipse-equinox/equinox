@@ -179,18 +179,7 @@ public class InstanceProcess {
 							// //Activator.log.debug("InstanceProcess.buildComponents():
 							// building immediate component " + scp.name, null);
 						}
-						if (sc.serviceInterfaces != null) {
-							// this component registers service
-
-							// this will create either plain service component
-							// registration
-							// or a service factory registration
-							registerService(scp, sc.serviceFactory, null);
-						}
 						if (scp.instances.isEmpty()) {
-							// nobody has required the service after registration
-							// (and no service instance could be created),
-							// so we need to force instance creation
 							try {
 								buildComponent(null, scp, null, security);
 							} catch (Exception e) {
@@ -198,6 +187,14 @@ public class InstanceProcess {
 									Activator.log.error("[SCR] Cannot build component " + scp, e);
 								}
 							}
+						}
+						if (sc.serviceInterfaces != null) {
+							// this component registers service
+
+							// this will create either plain service component
+							// registration
+							// or a service factory registration
+							registerService(scp, sc.serviceFactory, null);
 						}
 					} else {
 
