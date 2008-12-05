@@ -30,4 +30,6 @@ DynamicImport-Package: org.osgi.service.event;version="1.0.0"
 Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
 Eclipse-LazyStart: true
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2,
+ CDC-1.1/Foundation-1.1,
+ J2SE-1.4

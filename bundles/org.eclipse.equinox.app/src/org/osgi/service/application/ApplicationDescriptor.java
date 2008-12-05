@@ -1,6 +1,4 @@
 /*
- * $Date: 2007-11-12 04:35:34 -0500 (Mon, 12 Nov 2007) $
- * 
  * Copyright (c) OSGi Alliance (2004, 2006). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +26,8 @@ import org.osgi.framework.InvalidSyntaxException;
  * An OSGi service that represents an installed application and stores
  * information about it. The application descriptor can be used for instance
  * creation.
+ * 
+ * @version $Revision: 5654 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -205,6 +205,7 @@ public abstract class ApplicationDescriptor {
 					unlockSpecific();
 			}
 		}
+		/* replace the container's lock with the application model's lock, that's the correct */
 		props.put( APPLICATION_LOCKED, new Boolean( locked[0] ) );
 		return props;
 	}

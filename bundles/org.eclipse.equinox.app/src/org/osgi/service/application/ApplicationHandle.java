@@ -1,6 +1,4 @@
 /*
- * $Date: 2008-08-05 13:38:19 -0400 (Tue, 05 Aug 2008) $
- * 
  * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +23,8 @@ import org.osgi.framework.Constants;
  * of an application. It provides the functionality to query and manipulate the
  * lifecycle state of the represented application instance. It defines constants
  * for the lifecycle states.
+ * 
+ * @version $Revision: 5654 $
  */
 public abstract class ApplicationHandle {
 	/*
