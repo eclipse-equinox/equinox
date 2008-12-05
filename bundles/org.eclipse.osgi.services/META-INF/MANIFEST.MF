@@ -26,4 +26,6 @@ Import-Package: org.osgi.framework; version=1.2,
  javax.servlet.http; resolution:="optional"
 DynamicImport-Package: javax.servlet,
  javax.servlet.http
-Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2,
+ CDC-1.1/Foundation-1.1,
+ J2SE-1.4
