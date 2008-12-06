@@ -14,6 +14,7 @@ package org.eclipse.equinox.weaving.internal.caching;
 import java.net.URL;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
+import org.eclipse.equinox.service.weaving.ICachingService;
 
 /**
  * This implementation of the caching service is responsible for those bundles
@@ -26,23 +27,27 @@ import org.eclipse.equinox.service.weaving.CacheEntry;
  * 
  * @author Martin Lippert
  */
-public class UnchangedCachingService extends BaseCachingService {
+public class UnchangedCachingService implements ICachingService {
 
     /**
-     * @see org.eclipse.equinox.weaving.internal.caching.BaseCachingService#findStoredClass(java.lang.String,
+     * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
      *      java.net.URL, java.lang.String)
      */
-    @Override
     public CacheEntry findStoredClass(final String namespace,
             final URL sourceFileURL, final String name) {
         return new CacheEntry(true, null);
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.internal.caching.BaseCachingService#storeClass(java.lang.String,
+     * @see org.eclipse.equinox.service.weaving.ICachingService#stop()
+     */
+    public void stop() {
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#storeClass(java.lang.String,
      *      java.net.URL, java.lang.Class, byte[])
      */
-    @Override
     public boolean storeClass(final String namespace, final URL sourceFileURL,
             final Class clazz, final byte[] classbytes) {
         return false;

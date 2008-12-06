@@ -10,6 +10,7 @@
  *   Matthew Webster           Eclipse 3.2 changes
  *   Heiko Seeberger           AJDT 1.5.1 changes     
  *   Martin Lippert            weaving context and adaptors reworked     
+ *   Martin Lippert            extracted weaving service factory
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
@@ -108,27 +109,14 @@ public class WeavingService implements IWeavingService {
     }
 
     /**
-     * Extracts the version of the bundle to which the given url belongs to
+     * Identifies the version of the given bundle
      * 
-     * @param url An URL of a bundles resource
-     * @return The version of the bundle of the resource to which the URL points
-     *         to
+     * @param bundle The bundle for which the version should be identified
+     * @return The version of the bundle
      */
     public String getBundleVersion(final Bundle bundle) {
         return resolverState.getBundle(bundle.getBundleId()).getVersion()
                 .toString();
-    }
-
-    /**
-     * Return an instance of this service, initalised with the specified
-     * classloader
-     */
-    public IWeavingService getInstance(final ClassLoader loader,
-            final Bundle bundle, final State resolverState,
-            final BundleDescription bundleDesciption,
-            final ISupplementerRegistry supplementerRegistry) {
-        return new WeavingService(loader, bundle, resolverState,
-                bundleDesciption, supplementerRegistry);
     }
 
     /**
@@ -149,7 +137,8 @@ public class WeavingService implements IWeavingService {
     }
 
     /**
-     * See Aj.preProcess
+     * @see org.eclipse.equinox.service.weaving.IWeavingService#preProcess(java.lang.String,
+     *      byte[], java.lang.ClassLoader)
      */
     public byte[] preProcess(final String name, final byte[] classbytes,
             final ClassLoader loader) throws IOException {

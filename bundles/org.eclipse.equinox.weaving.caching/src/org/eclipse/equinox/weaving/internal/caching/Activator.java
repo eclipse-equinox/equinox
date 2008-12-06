@@ -6,7 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html.
  * 
  * Contributors:
- *     Heiko Seeberger - initial implementation
+ *   Heiko Seeberger           initial implementation
+ *   Martin Lippert            extracted caching service factory
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -15,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
+import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -31,12 +33,12 @@ public class Activator implements BundleActivator {
     public static boolean verbose = Boolean
             .getBoolean("org.aspectj.osgi.verbose");
 
-    private SingletonCachingService singletonCachingService;
+    private CachingServiceFactory cachingServiceFactory;
 
-    private ServiceRegistration singletonCachingServiceRegistration;
+    private ServiceRegistration cachingServiceFactoryRegistration;
 
     /**
-     * Registers a new {@link SingletonCachingService} instance as OSGi service
+     * Registers a new {@link CachingServiceFactory} instance as OSGi service
      * under the interface {@link ICachingService}.
      * 
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
@@ -48,7 +50,7 @@ public class Activator implements BundleActivator {
             if (verbose)
                 System.err
                         .println("[org.eclipse.equinox.weaving.caching] info starting standard caching service ...");
-            registerSingletonCachingService(bundleContext);
+            registerCachingServiceFactory(bundleContext);
         } else {
             if (verbose)
                 System.err
@@ -57,23 +59,23 @@ public class Activator implements BundleActivator {
     }
 
     /**
-     * Shuts down the {@link SingletonCachingService}.
+     * Shuts down the {@link CachingServiceFactory}.
      * 
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext context) {
-        singletonCachingService.stop();
-        singletonCachingServiceRegistration.unregister();
+        cachingServiceFactory.stop();
+        cachingServiceFactoryRegistration.unregister();
         if (Log.isDebugEnabled()) {
             Log.debug("Shut down and unregistered SingletonCachingService.");
         }
     }
 
-    private void registerSingletonCachingService(
-            final BundleContext bundleContext) {
-        singletonCachingService = new SingletonCachingService(bundleContext);
-        singletonCachingServiceRegistration = bundleContext.registerService(
-                ICachingService.class.getName(), singletonCachingService, null);
+    private void registerCachingServiceFactory(final BundleContext bundleContext) {
+        cachingServiceFactory = new CachingServiceFactory(bundleContext);
+        cachingServiceFactoryRegistration = bundleContext.registerService(
+                ICachingServiceFactory.class.getName(), cachingServiceFactory,
+                null);
         if (Log.isDebugEnabled()) {
             Log.debug("Created and registered SingletonCachingService.");
         }

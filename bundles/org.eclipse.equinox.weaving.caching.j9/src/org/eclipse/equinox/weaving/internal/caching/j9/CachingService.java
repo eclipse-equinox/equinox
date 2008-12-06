@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes     
+ *   Martin Lippert            extracted caching service factory
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching.j9;
@@ -28,16 +29,11 @@ public class CachingService implements ICachingService {
 
     SharedClassURLHelper urlhelper;
 
-    private Bundle bundle;
+    private final Bundle bundle;
 
-    private ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
-    private String partition;
-
-    public CachingService() {
-        if (CachingServicePlugin.DEBUG)
-            System.out.println("- CachingService.<init>()");
-    }
+    private final String partition;
 
     public CachingService(final ClassLoader loader, final Bundle bundle,
             final String key) {
@@ -59,6 +55,10 @@ public class CachingService implements ICachingService {
                     + partition + "', urlhelper=" + urlhelper);
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
+     *      java.net.URL, java.lang.String)
+     */
     public CacheEntry findStoredClass(final String namespace,
             final URL sourceFileURL, final String name) {
         final byte[] bytes = urlhelper.findSharedClass(partition,
@@ -73,11 +73,6 @@ public class CachingService implements ICachingService {
         } else {
             return new CacheEntry(false, null);
         }
-    }
-
-    public ICachingService getInstance(final ClassLoader classLoader,
-            final Bundle bundle, final String key) {
-        return new CachingService(classLoader, bundle, key);
     }
 
     /**
@@ -112,6 +107,16 @@ public class CachingService implements ICachingService {
         return new String(result);
     }
 
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#stop()
+     */
+    public void stop() {
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#storeClass(java.lang.String,
+     *      java.net.URL, java.lang.Class, byte[])
+     */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
             final Class clazz, final byte[] classbytes) {
         final boolean success = urlhelper.storeSharedClass(partition,

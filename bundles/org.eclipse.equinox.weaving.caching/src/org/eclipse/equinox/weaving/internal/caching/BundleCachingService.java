@@ -32,7 +32,7 @@ import org.osgi.framework.Constants;
 
 /**
  * <p>
- * {@link ICachingService} instantiated by {@link SingletonCachingService} for
+ * {@link ICachingService} instantiated by {@link CachingServiceFactory} for
  * each bundle.
  * </p>
  * <p>
@@ -44,7 +44,7 @@ import org.osgi.framework.Constants;
  * 
  * @author Heiko Seeberger
  */
-public class BundleCachingService extends BaseCachingService {
+public class BundleCachingService implements ICachingService {
 
     private static final int BUFFER_SIZE = 8 * 1024;
 
@@ -111,7 +111,6 @@ public class BundleCachingService extends BaseCachingService {
      * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
      *      java.net.URL, java.lang.String)
      */
-    @Override
     public CacheEntry findStoredClass(final String namespace,
             final URL sourceFileURL, final String name) {
 
@@ -143,7 +142,6 @@ public class BundleCachingService extends BaseCachingService {
     /**
      * Writes the remaining cache to disk.
      */
-    @Override
     public void stop() {
         if (cachePartition != null) {
             for (final String name : cachedClasses.keySet()) {
@@ -157,7 +155,6 @@ public class BundleCachingService extends BaseCachingService {
      * @see org.eclipse.equinox.service.weaving.ICachingService#storeClass(java.lang.String,
      *      java.net.URL, java.lang.Class, byte[])
      */
-    @Override
     public boolean storeClass(final String namespace, final URL sourceFileURL,
             final Class clazz, final byte[] classbytes) {
 

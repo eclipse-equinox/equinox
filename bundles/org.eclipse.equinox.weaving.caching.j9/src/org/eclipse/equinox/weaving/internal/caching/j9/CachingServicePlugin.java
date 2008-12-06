@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,13 +9,14 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes
  *   Martin Lippert            minor changes    
+ *   Martin Lippert            extracted caching service factory
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching.j9;
 
 import com.ibm.oti.shared.Shared;
 
-import org.eclipse.equinox.service.weaving.ICachingService;
+import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -52,11 +53,9 @@ public class CachingServicePlugin implements BundleActivator {
             if (verbose)
                 System.err
                         .println("[org.eclipse.equinox.weaving.caching.j9] info starting J9 caching service ...");
-            final String name = ICachingService.class.getName();
-            //			CachingServiceFactory factory = new CachingServiceFactory();
-            final CachingService singleCachingService = new CachingService();
-            context.registerService(name, singleCachingService, null);
-            //			System.out.println("CachingServicePlugin.start() - registered cachingService");
+            final String name = ICachingServiceFactory.class.getName();
+            final CachingServiceFactory cachingServiceFactory = new CachingServiceFactory();
+            context.registerService(name, cachingServiceFactory, null);
         } else {
             if (verbose)
                 System.err

@@ -49,6 +49,9 @@ public class AspectJHook extends AbstractAspectJHook {
         this.adaptors = new HashMap<Long, IAspectJAdaptor>();
     }
 
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#frameworkStart(org.osgi.framework.BundleContext)
+     */
     @Override
     public void frameworkStart(final BundleContext context)
             throws BundleException {
@@ -56,6 +59,9 @@ public class AspectJHook extends AbstractAspectJHook {
         initialize(context);
     }
 
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#frameworkStop(org.osgi.framework.BundleContext)
+     */
     @Override
     public void frameworkStop(final BundleContext context)
             throws BundleException {
@@ -78,6 +84,10 @@ public class AspectJHook extends AbstractAspectJHook {
         return null;
     }
 
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
+     *      org.eclipse.osgi.baseadaptor.BaseData)
+     */
     @Override
     public void initializedClassLoader(final BaseClassLoader baseClassLoader,
             final BaseData data) {
@@ -98,6 +108,12 @@ public class AspectJHook extends AbstractAspectJHook {
                     + adaptor);
     }
 
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#processClass(java.lang.String,
+     *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
+     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
     @Override
     public byte[] processClass(final String name, final byte[] classbytes,
             final ClasspathEntry classpathEntry, final BundleEntry entry,
@@ -113,6 +129,13 @@ public class AspectJHook extends AbstractAspectJHook {
         return newClassytes;
     }
 
+    /**
+     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#recordClassDefine(java.lang.String,
+     *      java.lang.Class, byte[],
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
+     *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
+     *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
+     */
     @Override
     public void recordClassDefine(final String name, final Class clazz,
             final byte[] classbytes, final ClasspathEntry classpathEntry,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes
  *   Heiko Seeberger           Enhancements for service dynamics     
+ *   Martin Lippert            extracted weaving and caching service factories
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.adaptors;
@@ -24,8 +25,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
+import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
+import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -43,8 +46,6 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class AspectJAdaptorFactory {
 
-    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics";
-
     private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
                     "org.eclipse.equinox.weaving.caching",
@@ -53,15 +54,19 @@ public class AspectJAdaptorFactory {
                     "org.eclipse.equinox.simpleconfigurator",
                     "org.eclipse.equinox.common" });
 
+    private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics";
+
     private BundleContext bundleContext;
 
-    private ServiceTracker cachingServiceTracker;
+    private ServiceTracker cachingServiceFactoryTracker;
 
     private PackageAdmin packageAdminService;
 
     private StartLevel startLevelService;
 
     private ISupplementerRegistry supplementerRegistry;
+
+    private ServiceTracker weavingServiceFactoryTracker;
 
     private ServiceListener weavingServiceListener;
 
@@ -70,8 +75,6 @@ public class AspectJAdaptorFactory {
      */
     private final Map weavingServices = Collections
             .synchronizedMap(new HashMap());
-
-    private ServiceTracker weavingServiceTracker;
 
     public AspectJAdaptorFactory() {
     }
@@ -82,11 +85,11 @@ public class AspectJAdaptorFactory {
         if (Debug.DEBUG_WEAVE)
             Debug.println("> Removed service listener for weaving service.");
 
-        weavingServiceTracker.close();
+        weavingServiceFactoryTracker.close();
         if (Debug.DEBUG_WEAVE)
             Debug.println("> Closed service tracker for weaving service.");
 
-        cachingServiceTracker.close();
+        cachingServiceFactoryTracker.close();
         if (Debug.DEBUG_CACHE)
             Debug.println("> Closed service tracker for caching service.");
     }
@@ -117,9 +120,9 @@ public class AspectJAdaptorFactory {
         initializeStartLevelService(context);
 
         // Service tracker for weaving service
-        weavingServiceTracker = new ServiceTracker(context,
-                IWeavingService.class.getName(), null);
-        weavingServiceTracker.open();
+        weavingServiceFactoryTracker = new ServiceTracker(context,
+                IWeavingServiceFactory.class.getName(), null);
+        weavingServiceFactoryTracker.open();
         if (Debug.DEBUG_WEAVE)
             Debug.println("> Opened service tracker for weaving service.");
 
@@ -196,9 +199,9 @@ public class AspectJAdaptorFactory {
         }
 
         // Service tracker for caching service
-        cachingServiceTracker = new ServiceTracker(context,
-                ICachingService.class.getName(), null);
-        cachingServiceTracker.open();
+        cachingServiceFactoryTracker = new ServiceTracker(context,
+                ICachingServiceFactory.class.getName(), null);
+        cachingServiceFactoryTracker.open();
         if (Debug.DEBUG_CACHE)
             Debug.println("> Opened service tracker for caching service.");
     }
@@ -214,11 +217,11 @@ public class AspectJAdaptorFactory {
         if (weavingService != null) {
             key = weavingService.getKey();
         }
-        final ICachingService singletonCachingService = (ICachingService) cachingServiceTracker
+        final ICachingServiceFactory cachingServiceFactory = (ICachingServiceFactory) cachingServiceFactoryTracker
                 .getService();
-        if (singletonCachingService != null) {
-            service = singletonCachingService.getInstance((ClassLoader) loader,
-                    bundle, key);
+        if (cachingServiceFactory != null) {
+            service = cachingServiceFactory.createCachingService(
+                    (ClassLoader) loader, bundle, key);
         }
         if (Debug.DEBUG_CACHE)
             Debug
@@ -241,10 +244,10 @@ public class AspectJAdaptorFactory {
 
         IWeavingService weavingService = null;
         if (!IGNORE_WEAVING_SERVICE_BUNDLES.contains(bundle.getSymbolicName())) {
-            final IWeavingService singletonWeavingService = (IWeavingService) weavingServiceTracker
+            final IWeavingServiceFactory weavingServiceFactory = (IWeavingServiceFactory) weavingServiceFactoryTracker
                     .getService();
-            if (singletonWeavingService != null) {
-                weavingService = singletonWeavingService.getInstance(
+            if (weavingServiceFactory != null) {
+                weavingService = weavingServiceFactory.createWeavingService(
                         (ClassLoader) loader, bundle, state, bundleDescription,
                         supplementerRegistry);
             }

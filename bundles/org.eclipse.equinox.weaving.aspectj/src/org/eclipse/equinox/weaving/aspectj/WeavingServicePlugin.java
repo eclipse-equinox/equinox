@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,13 +8,14 @@
  * Contributors:
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes
+ *   Martin Lippert            extracted weaving service factory
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
 
 import java.util.Properties;
 
-import org.eclipse.equinox.service.weaving.IWeavingService;
+import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
 import org.eclipse.equinox.weaving.aspectj.loadtime.AspectDefinitionRegistry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
@@ -43,7 +44,6 @@ public class WeavingServicePlugin implements BundleActivator {
      */
     public WeavingServicePlugin() {
         plugin = this;
-        //		IWeavingContext iwc = new WeavingContext(null,null);//force bundle to be resolved
     }
 
     /**
@@ -79,13 +79,10 @@ public class WeavingServicePlugin implements BundleActivator {
         if (verbose)
             System.err
                     .println("[org.eclipse.equinox.weaving.aspectj] info Starting AspectJ weaving service ...");
-        final String serviceName = IWeavingService.class.getName();
-        //		ServiceFactory factory = new WeavingServiceFactory();
-        final IWeavingService weavingService = new WeavingService();
+        final String serviceName = IWeavingServiceFactory.class.getName();
+        final IWeavingServiceFactory weavingServiceFactory = new WeavingServiceFactory();
         final Properties props = new Properties();
-        //		context.registerService(serviceName, factory, props);
-        context.registerService(serviceName, weavingService, props);
-        //		System.out.println("WeavingServicePlugin.start() - registered WeavingService");
+        context.registerService(serviceName, weavingServiceFactory, props);
     }
 
     /**
