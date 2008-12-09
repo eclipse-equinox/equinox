@@ -226,8 +226,8 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	private static final int MINIMUM_RESOLUTION = 1000;
 
 	/**
-	 * The RootInfo struct holds information about the root progress monitor. A SubMonitor and
-	 * its active descendents share the same RootInfo struct.
+	 * The RootInfo holds information about the root progress monitor. A SubMonitor and
+	 * its active descendents share the same RootInfo.
 	 */
 	private static final class RootInfo {
 		private final IProgressMonitor root;
@@ -368,7 +368,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 
 	/**
 	 * May be passed as a flag to newChild. Indicates that strings
-	 * passed to setTaskName, subTask, and beginTask should all be propogated
+	 * passed to setTaskName, subTask, and beginTask should all be propagated
 	 * to the parent.
 	 */
 	public static final int SUPPRESS_NONE = 0;
@@ -528,7 +528,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 * if and only if the SUPPRESS_BEGINTASK flag has been set on this SubMonitor
 	 * instance. 
 	 * 
-	 * <p>This method is equivalent calling setWorkRemaining(...) on the reciever. Unless 
+	 * <p>This method is equivalent calling setWorkRemaining(...) on the receiver. Unless 
 	 * the SUPPRESS_BEGINTASK flag is set, this will also be equivalent to calling 
 	 * setTaskName(...) on the parent.</p>
 	 * 
@@ -648,7 +648,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      }
 	 * </pre></code>
 	 * 
-	 * @param totalWork number of ticks to consume from the reciever
+	 * @param totalWork number of ticks to consume from the receiver
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork) {
@@ -712,7 +712,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 	 *      }
 	 * </pre></code>
 	 * 
-	 * @param totalWork number of ticks to consume from the reciever
+	 * @param totalWork number of ticks to consume from the receiver
 	 * @return new sub progress monitor that may be used in place of a new SubMonitor
 	 */
 	public SubMonitor newChild(int totalWork, int suppressFlags) {
