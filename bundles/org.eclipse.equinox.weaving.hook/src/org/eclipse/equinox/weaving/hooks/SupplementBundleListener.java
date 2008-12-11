@@ -31,13 +31,6 @@ public class SupplementBundleListener implements SynchronousBundleListener {
             supplementerRegistry.addBundle(bundle);
         } else if (event.getType() == BundleEvent.UNRESOLVED) {
             supplementerRegistry.removeBundle(bundle);
-            //        } else if (event.getType() == BundleEvent.UPDATED) {
-            //            System.err.println("bundle update: "
-            //                    + event.getBundle().getBundleId());
-            //
-            //            supplementerRegistry.removeBundle(bundle);
-            //            supplementerRegistry.addBundle(bundle);
-            //            //            supplementerRegistry.getPackageAdmin().refreshPackages(null);
         }
     }
 
