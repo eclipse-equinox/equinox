@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Stefan Xenos - bug 174539 - add a 1-argument convert(...) method     
  *     Stefan Xenos - bug 174040 - SubMonitor#convert doesn't always set task name
  *     Stefan Xenos - bug 206942 - updated javadoc to recommend better constants for infinite progress
+ *     IBM Corporation - ongoing maintenance
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
@@ -743,7 +744,7 @@ public final class SubMonitor implements IProgressMonitorWithBlocking {
 		// is no method on the child that would delegate to beginTask on the parent.
 		childFlags |= suppressFlags;
 
-		SubMonitor result = new SubMonitor(root, consume(totalWorkDouble), 0, childFlags);
+		SubMonitor result = new SubMonitor(root, consume(totalWorkDouble), (int) totalWorkDouble, childFlags);
 		lastSubMonitor = result;
 		return result;
 	}
