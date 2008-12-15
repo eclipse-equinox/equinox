@@ -29,7 +29,7 @@ public class LegacyVerifierFactory implements CertificateVerifierFactory {
 		try {
 			return new LegacyVerifier(signedContentFactory.getSignedContent(content));
 		} catch (GeneralSecurityException e) {
-			throw new IOException(e.getMessage());
+			throw (IOException) new IOException(e.getMessage()).initCause(e);
 		}
 	}
 
@@ -37,7 +37,7 @@ public class LegacyVerifierFactory implements CertificateVerifierFactory {
 		try {
 			return new LegacyVerifier(signedContentFactory.getSignedContent(bundle));
 		} catch (GeneralSecurityException e) {
-			throw new IOException(e.getMessage());
+			throw (IOException) new IOException(e.getMessage()).initCause(e);
 		}
 	}
 
