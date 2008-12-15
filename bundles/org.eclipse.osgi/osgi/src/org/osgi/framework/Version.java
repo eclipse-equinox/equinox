@@ -37,7 +37,7 @@ import java.util.StringTokenizer;
  * 
  * @since 1.3
  * @Immutable
- * @version $Revision: 5673 $
+ * @version $Revision: 5962 $
  */
 
 public class Version implements Comparable {
@@ -171,11 +171,23 @@ public class Version implements Comparable {
 		if (micro < 0) {
 			throw new IllegalArgumentException("negative micro"); //$NON-NLS-1$
 		}
-		int length = qualifier.length();
-		for (int i = 0; i < length; i++) {
-			if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".indexOf(qualifier.charAt(i)) == -1) { //$NON-NLS-1$
-				throw new IllegalArgumentException("invalid qualifier"); //$NON-NLS-1$
+		char[] chars = qualifier.toCharArray();
+		for (int i = 0, length = chars.length; i < length; i++) {
+	        char ch = chars[i];
+			if (('A' <= ch) && (ch <= 'Z')) {
+				continue;
 			}
+			if (('a' <= ch) && (ch <= 'z')) {
+				continue;
+			}
+			if (('0' <= ch) && (ch <= '9')) {
+				continue;
+			}
+			if ((ch == '_') || (ch == '-')) {
+				continue;
+			}
+			throw new IllegalArgumentException(
+					"invalid qualifier: " + qualifier); //$NON-NLS-1$
 		}
 	}
 
@@ -254,13 +266,18 @@ public class Version implements Comparable {
 	 * @return The string representation of this version identifier.
 	 */
 	public String toString() {
-		String base = major + SEPARATOR + minor + SEPARATOR + micro;
-		if (qualifier.length() == 0) { //$NON-NLS-1$
-			return base;
+		int q = qualifier.length();
+		StringBuffer result = new StringBuffer(20 + q);
+		result.append(major);
+		result.append(SEPARATOR);
+		result.append(minor);
+		result.append(SEPARATOR);
+		result.append(micro);
+		if (q > 0) {
+			result.append(SEPARATOR);
+			result.append(qualifier);
 		}
-		else {
-			return base + SEPARATOR + qualifier;
-		}
+		return result.toString();
 	}
 
 	/**

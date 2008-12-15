@@ -70,7 +70,7 @@ public abstract class StateImpl implements State {
 			if (platformFilter != null) {
 				try {
 					// add any new platform filter propery keys this bundle is using
-					FilterImpl filter = (FilterImpl) FrameworkUtil.createFilter(platformFilter);
+					FilterImpl filter = FilterImpl.newInstance(platformFilter);
 					addPlatformPropertyKeys(filter.getAttributes());
 				} catch (InvalidSyntaxException e) {
 					// ignore this is handled in another place

@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.Dictionary;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
@@ -184,7 +185,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	}
 
 	void setFilter(String filter) throws InvalidSyntaxException {
-		this.filter = filter == null ? null : FrameworkUtil.createFilter(filter);
+		this.filter = filter == null ? null : FilterImpl.newInstance(filter);
 	}
 
 	void setLanguages(String[] languages) {

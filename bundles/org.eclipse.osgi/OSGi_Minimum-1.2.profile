@@ -8,10 +8,10 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 ###############################################################################
-org.osgi.framework.system.packages = 
+org.osgi.framework.system.packages = \
+ javax.security.auth.x500
 org.osgi.framework.bootdelegation = \
- sun.*,\
- com.sun.*
+ javax.security.auth.x500
 org.osgi.framework.executionenvironment = \
  OSGi/Minimum-1.0,\
  OSGi/Minimum-1.1,\

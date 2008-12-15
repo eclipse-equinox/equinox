@@ -32,7 +32,7 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Revision: 5837 $
+ * @version $Revision: 6083 $
  */
 
 public class BundleException extends Exception {
@@ -176,6 +176,33 @@ public class BundleException extends Exception {
 	 */
 	public Throwable getNestedException() {
 		return getCause();
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
+	 * @since 1.3
+	 */
+    public Throwable getCause() {
+		return super.getCause();
+	}
+
+	/**
+	 * Initializes the cause of this exception to the specified value.
+	 * 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.3
+	 */
+	public Throwable initCause(Throwable cause) {
+		return super.initCause(cause);
 	}
 
 	/**

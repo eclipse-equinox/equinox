@@ -46,7 +46,7 @@ package org.osgi.framework;
  * 
  * @see BundleContext#getService
  * @ThreadSafe
- * @version $Revision: 5673 $
+ * @version $Revision: 5967 $
  */
 
 public interface ServiceFactory {
@@ -63,7 +63,9 @@ public interface ServiceFactory {
 	 * <p>
 	 * The Framework caches the value returned (unless it is <code>null</code>),
 	 * and will return the same service object on any future call to
-	 * <code>BundleContext.getService</code> from the same bundle.
+	 * <code>BundleContext.getService</code> for the same bundle. This means the
+	 * Framework must not allow this method to be concurrently called for the
+	 * same bundle.
 	 * 
 	 * <p>
 	 * The Framework will check if the returned service object is an instance of
@@ -73,8 +75,8 @@ public interface ServiceFactory {
 	 * @param bundle The bundle using the service.
 	 * @param registration The <code>ServiceRegistration</code> object for the
 	 *        service.
-	 * @return A service object that <strong>must </strong> be an instance of
-	 *         all the classes named when the service was registered.
+	 * @return A service object that <strong>must</strong> be an instance of all
+	 *         the classes named when the service was registered.
 	 * @see BundleContext#getService
 	 */
 	public Object getService(Bundle bundle, ServiceRegistration registration);

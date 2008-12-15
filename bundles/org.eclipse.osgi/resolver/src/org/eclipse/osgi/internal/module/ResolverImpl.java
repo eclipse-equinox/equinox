@@ -17,6 +17,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.BundleDescriptionImpl;
@@ -305,7 +306,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		if (platformProperties == null)
 			return false;
 		try {
-			Filter filter = FrameworkUtil.createFilter(platformFilter);
+			Filter filter = FilterImpl.newInstance(platformFilter);
 			for (int i = 0; i < platformProperties.length; i++)
 				// using matchCase here in case of duplicate case invarient keys (bug 180817)
 				if (filter.matchCase(platformProperties[i]))

@@ -12,12 +12,12 @@ import java.security.cert.Certificate;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.osgi.framework.*;
+import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -34,7 +34,7 @@ public class TrustEngineListener {
 		Filter filter = null;
 		if (authEngineProp != null)
 			try {
-				filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + AuthorizationEngine.class.getName() + ")(" + SignedContentConstants.AUTHORIZATION_ENGINE + "=" + authEngineProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+				filter = FilterImpl.newInstance("(&(" + Constants.OBJECTCLASS + "=" + AuthorizationEngine.class.getName() + ")(" + SignedContentConstants.AUTHORIZATION_ENGINE + "=" + authEngineProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
 			} catch (InvalidSyntaxException e) {
 				SignedBundleHook.log("Invalid authorization filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 			}

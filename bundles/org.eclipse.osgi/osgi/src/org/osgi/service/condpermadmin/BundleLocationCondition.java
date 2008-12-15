@@ -34,7 +34,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * Pattern matching is done according to the filter string matching rules.
  * 
  * @ThreadSafe
- * @version $Revision: 5654 $
+ * @version $Revision: 5901 $
  */
 public class BundleLocationCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleLocationCondition";
@@ -80,7 +80,7 @@ public class BundleLocationCondition {
 		}
 		catch (InvalidSyntaxException e) {
 			// this should never happen, but just in case
-			throw new RuntimeException("Invalid filter: " + e.getFilter());
+			throw new RuntimeException("Invalid filter: " + e.getFilter(), e);
 		}
 		Hashtable matchProps = new Hashtable(2);
 		matchProps.put("location", bundleLocation);

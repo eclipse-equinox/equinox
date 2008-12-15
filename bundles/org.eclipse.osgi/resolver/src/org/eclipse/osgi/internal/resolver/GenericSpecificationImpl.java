@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 
 public class GenericSpecificationImpl extends VersionConstraintImpl implements GenericSpecification {
 	private Filter matchingFilter;
@@ -28,7 +30,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	void setMatchingFilter(String matchingFilter) throws InvalidSyntaxException {
 		synchronized (this.monitor) {
-			this.matchingFilter = matchingFilter == null ? null : FrameworkUtil.createFilter(matchingFilter);
+			this.matchingFilter = matchingFilter == null ? null : FilterImpl.newInstance(matchingFilter);
 		}
 	}
 

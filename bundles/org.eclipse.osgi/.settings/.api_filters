@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component id="org.eclipse.osgi" version="2">
+<resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="SIGNERS_TRUSTED"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="SIGNERS_ALL"/>
+</message_arguments>
+</filter>
+<filter id="1211105284">
+<message_arguments>
+<message_argument value="getSignerCertificates(int)"/>
+</message_arguments>
+</filter>
+<filter id="1211105284">
+<message_arguments>
+<message_argument value="SIGNERS_ALL"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="getSignerCertificates(int)"/>
+</message_arguments>
+</filter>
+<filter id="1211105284">
+<message_arguments>
+<message_argument value="SIGNERS_TRUSTED"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/util/tracker/BundleTrackerCustomizer.java" type="org.osgi.util.tracker.BundleTrackerCustomizer">
 <filter id="1108344834">
 <message_arguments>
@@ -57,18 +92,17 @@
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
-</message_arguments>
-</filter>
-</resource>
 <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
 <message_argument value="3.5"/>
+<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
 <message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
 </message_arguments>
 </filter>
@@ -79,12 +113,6 @@
 <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
 </message_arguments>
 </filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="createConditionalPermissionInfoBase(String, ConditionInfo[], PermissionInfo[], String)"/>
-</message_arguments>
-</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
@@ -99,18 +127,25 @@
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
-<filter id="403767336">
+<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
+<filter id="1110441988">
 <message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
 </message_arguments>
 </filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
 <message_argument value="FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -130,13 +165,6 @@
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -150,19 +178,21 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
-<filter id="403767336">
+<filter id="1209008130">
 <message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE"/>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -172,11 +202,16 @@
 <message_argument value="FRAMEWORK_SECURITY"/>
 </message_arguments>
 </filter>
-<filter id="1209008130">
+<filter id="403767336">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_STORAGE"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -291,14 +326,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
+<message_argument value="STOPPED_UPDATE"/>
 </message_arguments>
 </filter>
 <filter id="1141899266">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_UPDATE"/>
+<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
 </message_arguments>
 </filter>
 </resource>
@@ -306,13 +341,6 @@
 <filter id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.hooks.service.FindHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/launch/SystemBundle.java" type="org.osgi.framework.launch.SystemBundle">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.launch.SystemBundle"/>
 </message_arguments>
 </filter>
 </resource>
@@ -432,6 +460,13 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.launch.Framework"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfoBase.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfoBase">
 <filter id="1108344834">
 <message_arguments>
@@ -445,13 +480,6 @@
 <message_argument value="1.1"/>
 <message_argument value="3.5"/>
 <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfoBase"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.launch.Framework"/>
 </message_arguments>
 </filter>
 </resource>

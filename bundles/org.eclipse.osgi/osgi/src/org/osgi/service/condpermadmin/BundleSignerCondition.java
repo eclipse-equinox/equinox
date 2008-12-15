@@ -16,8 +16,14 @@
 
 package org.osgi.service.condpermadmin;
 
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Condition to test if the signer of a bundle matches or does not match a
@@ -44,10 +50,10 @@ import org.osgi.framework.Bundle;
  * RDNs).
  * 
  * @ThreadSafe
- * @version $Revision: 5654 $
+ * @version $Revision: 6063 $
  */
 public class BundleSignerCondition {
-	private static final String CONDITION_TYPE = "org.osgi.service.condpermadmin.BundleSignerCondition";
+	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleSignerCondition";
 
 	/**
 	 * Constructs a Condition that tries to match the passed Bundle's location
@@ -67,16 +73,33 @@ public class BundleSignerCondition {
 	 *        then the second argument is ignored.
 	 * @return A Condition which checks the signers of the specified bundle.
 	 */
-	static public Condition getCondition(Bundle bundle, ConditionInfo info) {
+	public static Condition getCondition(Bundle bundle, ConditionInfo info) {
 		if (!CONDITION_TYPE.equals(info.getType()))
-			throw new IllegalArgumentException("ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
+			throw new IllegalArgumentException(
+					"ConditionInfo must be of type \"" + CONDITION_TYPE + "\"");
 		String[] args = info.getArgs();
 		if (args.length != 1 && args.length != 2)
-			throw new IllegalArgumentException("Illegal number of args: " + args.length);
-		// implementation specific code used here
-		AbstractBundle ab = (AbstractBundle) bundle;
+			throw new IllegalArgumentException("Illegal number of args: "
+					+ args.length);
+
+		Map/* <X509Certificate, List<X509Certificate>> */signers = bundle
+				.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
+		boolean match = false;
+		for (Iterator iSigners = signers.values().iterator(); iSigners
+				.hasNext();) {
+			List/* <X509Certificate> */signerCerts = (List) iSigners.next();
+			List/* <String> */dnChain = new ArrayList(signerCerts.size());
+			for (Iterator iCerts = signerCerts.iterator(); iCerts.hasNext();)
+				dnChain.add(((X509Certificate) iCerts.next()).getSubjectDN()
+						.getName());
+			if (FrameworkUtil.matchDistinguishedNameChain(args[0], dnChain)) {
+				match = true;
+				break;
+			}
+		}
+
 		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
-		return negate ^ ab.getBundleData().matchDNChain(args[0]) ? Condition.TRUE : Condition.FALSE;
+		return negate ^ match ? Condition.TRUE : Condition.FALSE;
 	}
 
 	private BundleSignerCondition() {
