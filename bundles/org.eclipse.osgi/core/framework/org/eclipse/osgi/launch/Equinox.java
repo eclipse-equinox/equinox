@@ -189,4 +189,8 @@ public class Equinox implements Framework {
 		getImpl().update(in);
 	}
 
+	public Map getSignerCertificates(int signersType) {
+		return getImpl().getSignerCertificates(signersType);
+	}
+
 }

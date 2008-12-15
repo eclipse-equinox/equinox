@@ -167,11 +167,6 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		// do nothing
 	}
 
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// do nothing
-		return false;
-	}
-
 	public FrameworkLog createFrameworkLog() {
 		// do nothing
 		return null;

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -24,6 +25,7 @@ import org.eclipse.osgi.internal.permadmin.EquinoxProtectionDomain;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ResolverError;
+import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -1579,5 +1581,36 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			return code;
 		}
 
+	}
+
+	public Map/* <X509Certificate, List<X509Certificate>> */getSignerCertificates(int signersType) {
+		if (signersType != SIGNERS_ALL && signersType != SIGNERS_TRUSTED)
+			throw new IllegalArgumentException("Invalid signers type: " + signersType); //$NON-NLS-1$
+		if (framework == null)
+			return Collections.EMPTY_MAP;
+		SignedContentFactory factory = framework.getSignedContentFactory();
+		if (factory == null)
+			return Collections.EMPTY_MAP;
+		try {
+			SignedContent signedContent = factory.getSignedContent(this);
+			SignerInfo[] infos = signedContent.getSignerInfos();
+			if (infos.length == 0)
+				return Collections.EMPTY_MAP;
+			Map/* <X509Certificate, List<X509Certificate>> */results = new HashMap(infos.length);
+			for (int i = 0; i < infos.length; i++) {
+				if (signersType == SIGNERS_TRUSTED && !infos[i].isTrusted())
+					continue;
+				Certificate[] certs = infos[i].getCertificateChain();
+				if (certs == null || certs.length == 0)
+					continue;
+				List/* <X509Certificate> */certChain = new ArrayList();
+				for (int j = 0; j < certs.length; j++)
+					certChain.add(certs[j]);
+				results.put(certs[0], certChain);
+			}
+			return results;
+		} catch (Exception e) {
+			return Collections.EMPTY_MAP;
+		}
 	}
 }

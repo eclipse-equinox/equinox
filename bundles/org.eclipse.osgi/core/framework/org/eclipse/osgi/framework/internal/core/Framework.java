@@ -30,9 +30,11 @@ import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Core OSGi Framework class.
@@ -118,6 +120,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	// we need to hold these so that we can unregister them at shutdown
 	private StreamHandlerFactory streamHandlerFactory;
 	private ContentHandlerFactory contentHandlerFactory;
+
+	private volatile ServiceTracker signedContentFactory;
 
 	/* 
 	 * We need to make sure that the GetDataFileAction class loads early to prevent a ClassCircularityError when checking permissions.
@@ -642,6 +646,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			Debug.println("Trying to launch framework"); //$NON-NLS-1$
 		}
 		systemBundle.resume();
+		signedContentFactory = new ServiceTracker(systemBundle.getBundleContext(), SignedContentFactory.class.getName(), null);
+		signedContentFactory.open();
 	}
 
 	/**
@@ -681,6 +687,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		} catch (IOException e) {
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, e);
 		}
+		if (signedContentFactory != null)
+			signedContentFactory.close();
 		/* mark framework as stopped */
 		active = false;
 		notifyAll();
@@ -1804,5 +1812,10 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				if (name.startsWith(bootDelegationStems[i]))
 					return true;
 		return false;
+	}
+
+	SignedContentFactory getSignedContentFactory() {
+		ServiceTracker currentTracker = signedContentFactory;
+		return (SignedContentFactory) (currentTracker == null ? null : currentTracker.getService());
 	}
 }

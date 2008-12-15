@@ -66,11 +66,6 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 
 	}
 
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// do nothing
-		return false;
-	}
-
 	public FrameworkLog createFrameworkLog() {
 		FrameworkLog frameworkLog;
 		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);

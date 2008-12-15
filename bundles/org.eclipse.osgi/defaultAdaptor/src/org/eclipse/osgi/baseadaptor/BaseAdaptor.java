@@ -409,19 +409,6 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	}
 
 	/**
-	 * This method calls all the configured adaptor hooks {@link AdaptorHook#matchDNChain(String, String[])} methods 
-	 * until one returns a true value.
-	 * @see FrameworkAdaptor#matchDNChain(String, String[])
-	 */
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		AdaptorHook[] adaptorHooks = getHookRegistry().getAdaptorHooks();
-		for (int i = 0; i < adaptorHooks.length; i++)
-			if (adaptorHooks[i].matchDNChain(pattern, dnChain))
-				return true;
-		return false;
-	}
-
-	/**
 	 * Returns true if the {@link #frameworkStopping(BundleContext)} method has been called
 	 * @return true if the framework is stopping
 	 */

@@ -135,15 +135,4 @@ public interface StorageHook extends KeyedElement {
 	 * @return false if the startlevel is not to be persistently saved; otherwise true is returned
 	 */
 	boolean forgetStartLevelChange(int startlevel);
-
-	/**
-	 * Gets called by a base data during {@link BundleData#matchDNChain(String)}.
-	 * A base data will call this method for each configured storage hook it
-	 * is associated with until one storage hook returns true.  If all configured storage 
-	 * hooks return false value then the BaseAdaptor will return false.
-	 * @param pattern the pattern of distinguished name (DN) chains to match
-	 * @return true if the pattern matches. A value of false is returned
-	 * if bundle signing is not supported.
-	 */
-	boolean matchDNChain(String pattern);
 }

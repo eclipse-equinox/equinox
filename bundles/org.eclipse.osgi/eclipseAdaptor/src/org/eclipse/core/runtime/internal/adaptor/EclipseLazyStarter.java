@@ -239,11 +239,6 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		return null;
 	}
 
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// do nothing
-		return false;
-	}
-
 	private void logCycles(Object[][] cycles) {
 		// log cycles
 		if (cycles.length > 0) {

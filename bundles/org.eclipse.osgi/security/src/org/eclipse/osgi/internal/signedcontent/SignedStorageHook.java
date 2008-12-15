@@ -217,34 +217,6 @@ public class SignedStorageHook implements StorageHook {
 		return false;
 	}
 
-	public boolean matchDNChain(String pattern) {
-		if (signedContent == null)
-			return false;
-		SignerInfo[] signerInfos = signedContent.getSignerInfos();
-		for (int i = 0; i < signerInfos.length; i++)
-			if (signerInfos[i].isTrusted() && DNChainMatching.match(getDNChainString(signerInfos[i]), pattern)) {
-				try {
-					signedContent.checkValidity(signerInfos[i]);
-					return true;
-				} catch (CertificateException e) {
-					// move to next signer
-				}
-			}
-		return false;
-	}
-
-	private String getDNChainString(SignerInfo signerInfo) {
-		StringBuffer sb = new StringBuffer();
-		Certificate certs[] = signerInfo.getCertificateChain();
-		for (int i = 0; i < certs.length; i++) {
-			if (!(certs[i] instanceof X509Certificate))
-				continue;
-			sb.append(((X509Certificate) certs[i]).getSubjectDN().getName());
-			sb.append("; "); //$NON-NLS-1$
-		}
-		return sb.toString();
-	}
-
 	public int getKeyHashCode() {
 		return HASHCODE;
 	}

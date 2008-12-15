@@ -331,11 +331,6 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		return false;
 	}
 
-	public boolean matchDNChain(String pattern) {
-		// do nothing
-		return false;
-	}
-
 	public void initialize(BaseAdaptor adaptor) {
 		// do nothing
 	}
@@ -372,11 +367,6 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 
 	public void handleRuntimeError(Throwable error) {
 		// do nothing
-	}
-
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// do nothing
-		return false;
 	}
 
 	public FrameworkLog createFrameworkLog() {

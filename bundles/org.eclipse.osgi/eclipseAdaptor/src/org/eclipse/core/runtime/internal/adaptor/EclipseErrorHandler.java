@@ -89,11 +89,6 @@ public class EclipseErrorHandler implements AdaptorHook, HookConfigurator {
 		}
 	}
 
-	public boolean matchDNChain(String pattern, String[] dnChain) {
-		// do nothing
-		return false;
-	}
-
 	public void addHooks(HookRegistry hookRegistry) {
 		hookRegistry.addAdaptorHook(this);
 	}

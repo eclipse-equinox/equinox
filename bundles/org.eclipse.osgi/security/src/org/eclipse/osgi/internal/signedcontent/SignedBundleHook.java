@@ -23,8 +23,7 @@ import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
@@ -36,6 +35,7 @@ import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
+import org.osgi.framework.Constants;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -70,18 +70,6 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	private ServiceRegistration defaultAuthEngineReg;
 	private ServiceRegistration osgiTrustEngineReg;
 	private ServiceRegistration legacyFactoryReg;
-
-	public boolean matchDNChain(String pattern, String dnChain[]) {
-		boolean satisfied = false;
-		if (dnChain != null) {
-			for (int i = 0; i < dnChain.length; i++)
-				if (DNChainMatching.match(dnChain[i], pattern)) {
-					satisfied = true;
-					break;
-				}
-		}
-		return satisfied;
-	}
 
 	public void initialize(BaseAdaptor adaptor) {
 		SignedBundleHook.ADAPTOR = adaptor;
@@ -251,14 +239,37 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	}
 
 	public SignedContent getSignedContent(Bundle bundle) throws IOException, InvalidKeyException, SignatureException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, IllegalArgumentException {
-		BundleData data = ((AbstractBundle) bundle).getBundleData();
+		final BundleData data = ((AbstractBundle) bundle).getBundleData();
 		if (!(data instanceof BaseData))
 			throw new IllegalArgumentException("Invalid bundle object.  No BaseData found."); //$NON-NLS-1$
 		SignedStorageHook hook = (SignedStorageHook) ((BaseData) data).getStorageHook(SignedStorageHook.KEY);
 		SignedContent result = hook != null ? hook.signedContent : null;
 		if (result != null)
 			return result; // just reuse the signed content the storage hook
-		return getSignedContent(((BaseData) data).getBundleFile().getBaseFile()); // must create a new signed content using the raw file
+		// must create a new signed content using the raw file
+		if (System.getSecurityManager() == null)
+			return getSignedContent(((BaseData) data).getBundleFile().getBaseFile());
+		try {
+			return (SignedContent) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws Exception {
+					return getSignedContent(((BaseData) data).getBundleFile().getBaseFile());
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof IOException)
+				throw (IOException) e.getException();
+			if (e.getException() instanceof InvalidKeyException)
+				throw (InvalidKeyException) e.getException();
+			if (e.getException() instanceof SignatureException)
+				throw (SignatureException) e.getException();
+			if (e.getException() instanceof CertificateException)
+				throw (CertificateException) e.getException();
+			if (e.getException() instanceof NoSuchAlgorithmException)
+				throw (NoSuchAlgorithmException) e.getException();
+			if (e.getException() instanceof NoSuchProviderException)
+				throw (NoSuchProviderException) e.getException();
+			throw new RuntimeException("Unknown error.", e.getException()); //$NON-NLS-1$
+		}
 	}
 
 	public static void log(String msg, int severity, Throwable t) {
@@ -288,7 +299,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			Filter filter = null;
 			if (trustEngineProp != null)
 				try {
-					filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
+					filter = FilterImpl.newInstance("(&(" + Constants.OBJECTCLASS + "=" + TrustEngine.class.getName() + ")(" + SignedContentConstants.TRUST_ENGINE + "=" + trustEngineProp + "))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$//$NON-NLS-5$
 				} catch (InvalidSyntaxException e) {
 					SignedBundleHook.log("Invalid trust engine filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 				}

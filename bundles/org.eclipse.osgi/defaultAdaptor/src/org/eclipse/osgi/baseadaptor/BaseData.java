@@ -374,19 +374,6 @@ public class BaseData implements BundleData {
 	}
 
 	/**
-	 * This method calls each configured storage hook {@link StorageHook#matchDNChain(String)} method 
-	 * until one returns true.  If no configured storage hook returns true then false is returned.
-	 * @see BundleData#matchDNChain(String)
-	 */
-	public final boolean matchDNChain(String pattern) {
-		StorageHook[] hooks = getStorageHooks();
-		for (int i = 0; i < hooks.length; i++)
-			if (hooks[i].matchDNChain(pattern))
-				return true;
-		return false;
-	}
-
-	/**
 	 * Returns the adaptor for this BaseData
 	 * @return the adaptor
 	 */

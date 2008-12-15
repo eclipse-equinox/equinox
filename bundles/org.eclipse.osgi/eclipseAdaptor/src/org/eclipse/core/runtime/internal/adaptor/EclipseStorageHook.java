@@ -494,8 +494,4 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	public boolean forgetStartLevelChange(int startlevel) {
 		return false;
 	}
-
-	public boolean matchDNChain(String pattern) {
-		return false;
-	}
 }

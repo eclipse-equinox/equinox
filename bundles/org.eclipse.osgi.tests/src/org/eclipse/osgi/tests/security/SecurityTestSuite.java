@@ -24,7 +24,7 @@ public class SecurityTestSuite extends TestCase {
 		suite.addTest(AuthorizeAnyTest.suite());
 		suite.addTest(AuthorizeSignedTest.suite());
 		suite.addTest(AuthorizeTrustedTest.suite());
-
+		suite.addTest(OSGiAPICertificateTest.suite());
 		return suite;
 	}
 }

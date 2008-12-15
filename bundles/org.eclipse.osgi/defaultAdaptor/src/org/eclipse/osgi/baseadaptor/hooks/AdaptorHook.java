@@ -90,17 +90,6 @@ public interface AdaptorHook {
 	public void handleRuntimeError(Throwable error);
 
 	/**
-	 * Gets called by the adaptor during {@link FrameworkAdaptor#matchDNChain(String, String[])}.
-	 * The adaptor will call this method for each configured adaptor hook until one 
-	 * adaptor hook returns a true value.  If no adaptor hook returns a true value 
-	 * then the adaptor will return false.
-	 * @param pattern A
-	 * @param dnChain
-	 * @return true if the pattern matches
-	 */
-	public boolean matchDNChain(String pattern, String[] dnChain);
-
-	/**
 	 * Gets called by the adaptor during {@link FrameworkAdaptor#getFrameworkLog()}.
 	 * The adaptor will call this method for each configured adaptor hook until one 
 	 * adaptor hook returns a non-null value.  If no adaptor hook returns a non-null value 

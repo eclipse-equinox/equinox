@@ -305,4 +305,11 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		update();
 	}
 
+	public Map getSignerCertificates(int signersType) {
+		Bundle current = systemBundle;
+		if (current != null)
+			return current.getSignerCertificates(signersType);
+		return Collections.EMPTY_MAP;
+	}
+
 }
