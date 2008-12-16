@@ -172,18 +172,35 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * Component
 	 * 
 	 * @param componentInstance
+	 * @return true if all mandatory references are bound
 	 * @throws Exception
 	 */
-	public void bind(ComponentInstance componentInstance) throws Exception {
+	public boolean bind(ComponentInstance componentInstance) throws Exception {
 		// Get all the required service Reference Descriptions for this Service
 		// Component
 		// call the Bind method if the Reference Description includes one
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				Reference ref = (Reference) references.elementAt(i);
-				bindReference(ref, componentInstance);
-				if (ref.reference.bind == null && Activator.DEBUG) {
-					Activator.log.debug(0, 10040, ref.reference.name, null, false);
+				if (ref.reference.bind != null) {
+					bindReference(ref, componentInstance);
+					if (ref.reference.bindMethod == null) {
+						//the bind method is not found and called for some reason
+						if (ref.reference.cardinality == ComponentReference.CARDINALITY_1_1 || ref.reference.cardinality == ComponentReference.CARDINALITY_1_N) {
+							//unbind the already bound references
+							for (int j = i - 1; j >= 0; j--) {
+								ref = (Reference) references.elementAt(i);
+								if (ref.reference.unbind != null) {
+									unbindReference(ref, componentInstance);
+								}
+							}
+							return false;
+						}
+					}
+				} else {
+					if (Activator.DEBUG) {
+						Activator.log.debug(0, 10040, ref.reference.name, null, false);
+					}
 					// //Activator.log.debug(
 					// // "ServiceComponentProp:bind(): the reference '" +
 					// ref.name + "' doesn't specify bind method",
@@ -191,6 +208,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				}
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -286,16 +304,22 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			componentInstance = new ComponentInstanceImpl(instance, this);
 			componentInstance.setComponentContext(new ComponentContextImpl(this, usingBundle, componentInstance, mgr));
 			instances.addElement(componentInstance);
-			bind(componentInstance);
-			try {
-				activate(usingBundle, componentInstance);
-			} catch (Exception e) {
-				//must unbind and dispose this component instance 
-				InstanceProcess.resolver.removeFromSatisfiedList(this);
-				if (instances.removeElement(componentInstance)) {
-					unbind(componentInstance);
+			if (bind(componentInstance)) {
+				try {
+					activate(usingBundle, componentInstance);
+				} catch (Exception e) {
+					//must unbind and dispose this component instance 
+					InstanceProcess.resolver.removeFromSatisfiedList(this);
+					if (instances.removeElement(componentInstance)) {
+						unbind(componentInstance);
+					}
+					throw e;
 				}
-				throw e;
+			} else {
+				//must remove from satisfied list and remove the instance
+				InstanceProcess.resolver.removeFromSatisfiedList(this);
+				instances.removeElement(componentInstance);
+				throw new ComponentException("The component was not built because some of its references could not be bound. The component is " + serviceComponent);
 			}
 		}
 
@@ -368,7 +392,13 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				switch (reference.reference.cardinality) {
 					case ComponentReference.CARDINALITY_1_1 :
 					case ComponentReference.CARDINALITY_0_1 :
-						reference.reference.bind(reference, componentInstance, serviceReferences[0]);
+						for (int i = 0; i < serviceReferences.length; i++) {
+							reference.reference.bind(reference, componentInstance, serviceReferences[i]);
+							if (reference.reference.bindMethod != null) {
+								//bind method for this reference was found
+								break;
+							}
+						}
 						break;
 					case ComponentReference.CARDINALITY_1_N :
 					case ComponentReference.CARDINALITY_0_N :

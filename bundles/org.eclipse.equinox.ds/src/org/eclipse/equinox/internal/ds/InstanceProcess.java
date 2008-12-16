@@ -183,13 +183,16 @@ public class InstanceProcess {
 							try {
 								buildComponent(null, scp, null, security);
 							} catch (Exception e) {
+								successfullyBuilt = false;
 								if (!(e instanceof ComponentException)) {
 									Activator.log.error("[SCR] Cannot build component " + scp, e);
 								}
 							}
 						}
-						if (sc.serviceInterfaces != null) {
+
+						if (sc.serviceInterfaces != null && successfullyBuilt) {
 							// this component registers service
+							//the service will be registered only if the component was successfully built
 
 							// this will create either plain service component
 							// registration

@@ -50,8 +50,8 @@ public class ComponentReference implements Externalizable {
 	// --- begin: cache
 	private boolean bindCached;
 	private boolean unbindCached;
-	private Method bindMethod;
-	private Method unbindMethod;
+	Method bindMethod;
+	Method unbindMethod;
 	// --- end: cache
 
 	// --- begin: model
@@ -235,7 +235,7 @@ public class ComponentReference implements Externalizable {
 		buffer.append("[SCR] Method was not found: "); //$NON-NLS-1$
 		buffer.append(methodName);
 		buffer.append('(');
-		buffer.append(reference.reference.interfaceName);
+		buffer.append("...");
 		buffer.append(')');
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
