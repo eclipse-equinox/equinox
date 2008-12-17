@@ -484,6 +484,59 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	public void testBug258659_01() throws Exception {
+		// install a bundle
+		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
+		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+					try {
+						event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
+					} catch (ClassNotFoundException e) {
+						simpleResults.addEvent(e);
+					}
+			}
+
+		};
+		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
+		try {
+			osgiA.start(Bundle.START_ACTIVATION_POLICY);
+			Object[] expectedEvents = new Object[1];
+			expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiA);
+			Object[] actualEvents = simpleResults.getResults(1);
+			compareResults(expectedEvents, actualEvents);
+		} finally {
+			OSGiTestsActivator.getContext().removeBundleListener(testLoadClassListener);
+		}
+	}
+
+	public void testBug258659_02() throws Exception {
+		// install a bundle
+		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
+		osgiA.start(Bundle.START_ACTIVATION_POLICY);
+		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				if (event.getType() == BundleEvent.LAZY_ACTIVATION)
+					try {
+						event.getBundle().loadClass("osgi.lazystart.a.ATest"); //$NON-NLS-1$
+					} catch (ClassNotFoundException e) {
+						simpleResults.addEvent(e);
+					}
+			}
+
+		};
+		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
+		try {
+			installer.refreshPackages(new Bundle[] {osgiA});
+			Object[] expectedEvents = new Object[1];
+			expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiA);
+			Object[] actualEvents = simpleResults.getResults(1);
+			compareResults(expectedEvents, actualEvents);
+		} finally {
+			OSGiTestsActivator.getContext().removeBundleListener(testLoadClassListener);
+		}
+	}
+
 	public void testBug213791() throws Exception {
 		// install a bundle and call start(START_ACTIVATION_POLICY) twice
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$

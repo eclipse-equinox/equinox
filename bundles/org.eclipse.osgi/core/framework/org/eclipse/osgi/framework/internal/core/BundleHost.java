@@ -319,6 +319,8 @@ public class BundleHost extends AbstractBundle {
 			if ((state & RESOLVED) != 0) {
 				// now we must publish the LAZY_ACTIVATION event and return
 				state = STARTING;
+				// release the state change lock before sending lazy activation event (bug 258659)
+				completeStateChange();
 				framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
 			}
 			return;
@@ -351,7 +353,8 @@ public class BundleHost extends AbstractBundle {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("->started " + this); //$NON-NLS-1$
 				}
-
+				// release the state change lock before sending lazy activation event (bug 258659)
+				completeStateChange();
 				framework.publishBundleEvent(BundleEvent.STARTED, this);
 			}
 
@@ -400,6 +403,8 @@ public class BundleHost extends AbstractBundle {
 			return false;
 		// now we can publish the LAZY_ACTIVATION event
 		state = STARTING;
+		// release the state change lock before sending lazy activation event (bug 258659)
+		completeStateChange();
 		framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
 		return false;
 	}
