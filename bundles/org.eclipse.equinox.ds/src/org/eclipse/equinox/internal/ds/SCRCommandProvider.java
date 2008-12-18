@@ -440,6 +440,20 @@ public class SCRCommandProvider implements CommandProvider {
 		}
 	}
 
+	private boolean isResolved(ServiceComponent sc) {
+		Vector unresulvedReferences = getUnresolvedReferences(sc);
+		boolean resolved = true;
+		if (unresulvedReferences != null) {
+			for (int i = 0; i < unresulvedReferences.size(); i++) {
+				if (isMandatory((ComponentReference) unresulvedReferences.elementAt(i))) {
+					resolved = false;
+					break;
+				}
+			}
+		}
+		return resolved;
+	}
+
 	private Vector getUnresolvedReferences(ServiceComponent sc) {
 		Vector unresolved = new Vector();
 		if (sc.references != null) {
@@ -605,8 +619,8 @@ public class SCRCommandProvider implements CommandProvider {
 			intp.println("\tComponent details"); //$NON-NLS-1$
 		} else {
 			intp.print("\tState"); //$NON-NLS-1$
-			intp.print("\t\tComponent Name"); //$NON-NLS-1$
-			intp.println("\t\tLocated in bundle"); //$NON-NLS-1$
+			intp.print("\t\t\tComponent Name"); //$NON-NLS-1$
+			intp.println("\t\t\tLocated in bundle"); //$NON-NLS-1$
 		}
 
 		if (b != null) {
@@ -628,9 +642,11 @@ public class SCRCommandProvider implements CommandProvider {
 						} else {
 							////print short info
 							intp.print("" + ref.id); //$NON-NLS-1$
-							intp.print(sc.enabled ? "\tEnabled" : "\tDisabled"); //$NON-NLS-1$ //$NON-NLS-2$
+							boolean resolved = isResolved(sc);
+							String stateStr = sc.enabled ? (resolved ? "\tResolved" : "\tUnresolved") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							intp.print(stateStr);
 							intp.print("\t\t" + sc.name); //$NON-NLS-1$
-							intp.println("\t\t" + getBundleRepresentationName(b) + "(bid=" + b.getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							intp.println("\t\t\t" + getBundleRepresentationName(b) + "(bid=" + b.getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}
 				}
@@ -657,9 +673,11 @@ public class SCRCommandProvider implements CommandProvider {
 							} else {
 								////print short info
 								intp.print("" + ref.id); //$NON-NLS-1$
-								intp.print(sc.enabled ? "\tEnabled" : "\tDisabled"); //$NON-NLS-1$ //$NON-NLS-2$
+								boolean resolved = isResolved(sc);
+								String stateStr = sc.enabled ? (resolved ? "\tResolved" : "\tUnresolved") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								intp.print(stateStr);
 								intp.print("\t\t" + sc.name); //$NON-NLS-1$
-								intp.println("\t\t" + getBundleRepresentationName(allBundles[j]) + "(bid=" + allBundles[j].getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								intp.println("\t\t\t" + getBundleRepresentationName(allBundles[j]) + "(bid=" + allBundles[j].getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
 						}
 					}
