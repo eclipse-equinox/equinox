@@ -537,6 +537,65 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testBug258659_03() throws Exception {
+		// install a bundle
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				if (event.getType() == BundleEvent.STARTED)
+					try {
+						event.getBundle().stop();
+					} catch (BundleException e) {
+						simpleResults.addEvent(e);
+					}
+			}
+
+		};
+		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
+		try {
+			test.start();
+			Object[] expectedEvents = new Object[2];
+			expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, test);
+			expectedEvents[1] = new BundleEvent(BundleEvent.STOPPED, test);
+			Object[] actualEvents = simpleResults.getResults(2);
+			compareResults(expectedEvents, actualEvents);
+		} finally {
+			OSGiTestsActivator.getContext().removeBundleListener(testLoadClassListener);
+		}
+	}
+
+	public void testBug258659_04() throws Exception {
+		// install a bundle
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		test.start();
+		SynchronousBundleListener testLoadClassListener = new SynchronousBundleListener() {
+			public void bundleChanged(BundleEvent event) {
+				if (event.getType() == BundleEvent.STARTED)
+					try {
+						event.getBundle().stop();
+					} catch (BundleException e) {
+						simpleResults.addEvent(e);
+					}
+			}
+
+		};
+		// clear the results from the initial start
+		simpleResults.getResults(0);
+		// listen for the events from refreshing
+		OSGiTestsActivator.getContext().addBundleListener(testLoadClassListener);
+		try {
+			installer.refreshPackages(new Bundle[] {test});
+			Object[] expectedEvents = new Object[3];
+			expectedEvents[0] = new BundleEvent(BundleEvent.STOPPED, test);
+			expectedEvents[1] = new BundleEvent(BundleEvent.STARTED, test);
+			expectedEvents[2] = new BundleEvent(BundleEvent.STOPPED, test);
+			Object[] actualEvents = simpleResults.getResults(3);
+			compareResults(expectedEvents, actualEvents);
+		} finally {
+			OSGiTestsActivator.getContext().removeBundleListener(testLoadClassListener);
+		}
+	}
+
 	public void testBug213791() throws Exception {
 		// install a bundle and call start(START_ACTIVATION_POLICY) twice
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
