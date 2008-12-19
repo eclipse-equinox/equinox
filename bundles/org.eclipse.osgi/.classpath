@@ -8,6 +8,7 @@
 	<classpathentry kind="src" path="supplement/src"/>
 	<classpathentry kind="src" path="core/adaptor"/>
 	<classpathentry kind="src" path="core/framework"/>
+	<classpathentry kind="src" path="core/composite"/>
 	<classpathentry kind="src" path="resolver/src"/>
 	<classpathentry kind="src" path="defaultAdaptor/src"/>
 	<classpathentry kind="src" path="eclipseAdaptor/src"/>

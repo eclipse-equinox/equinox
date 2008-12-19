@@ -17,6 +17,7 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.composite.CompositeBase;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.*;
@@ -183,7 +184,7 @@ public class BundleLoaderProxy implements RequiredBundle {
 	}
 
 	public boolean inUse() {
-		return description.getDependents().length > 0;
+		return (description.getDependents().length > 0) || ((bundle instanceof CompositeBase) && description.getResolvedImports().length > 0);
 	}
 
 	boolean forceSourceCreation(ExportPackageDescription export) {

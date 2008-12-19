@@ -165,10 +165,6 @@ public class SystemBundleData extends BaseData {
 		// do nothing
 	}
 
-	public File getDataFile(String path) {
-		return null;
-	}
-
 	public int getStartLevel() {
 		return 0;
 	}

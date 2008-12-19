@@ -148,26 +148,35 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public void refreshPackages(Bundle[] input) {
+		refreshPackages(input, false);
+	}
+
+	public void refreshPackages(Bundle[] input, boolean synchronously) {
 		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
 
-		AbstractBundle[] copy = null;
+		final AbstractBundle[] copy;
 		if (input != null) {
 			synchronized (input) {
 				copy = new AbstractBundle[input.length];
 				System.arraycopy(input, 0, copy, 0, input.length);
 			}
+		} else
+			copy = null;
+
+		if (synchronously) {
+			doResolveBundles(copy, true);
+			if (framework.isForcedRestart())
+				framework.systemBundle.stop();
+		} else {
+			Thread refresh = framework.secureAction.createThread(new Runnable() {
+				public void run() {
+					doResolveBundles(copy, true);
+					if (framework.isForcedRestart())
+						framework.shutdown(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
+				}
+			}, "Refresh Packages"); //$NON-NLS-1$	
+			refresh.start();
 		}
-
-		final AbstractBundle[] bundles = copy;
-		Thread refresh = framework.secureAction.createThread(new Runnable() {
-			public void run() {
-				doResolveBundles(bundles, true);
-				if (framework.isForcedRestart())
-					framework.shutdown(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
-			}
-		}, "Refresh Packages"); //$NON-NLS-1$
-
-		refresh.start();
 	}
 
 	public boolean resolveBundles(Bundle[] bundles) {

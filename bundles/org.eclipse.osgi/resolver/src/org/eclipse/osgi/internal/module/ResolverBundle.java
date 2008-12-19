@@ -392,19 +392,19 @@ public class ResolverBundle extends VersionSupplier implements Comparable {
 			return false;
 		if (!existingDescription.getVersion().equals(newDescription.getVersion()))
 			return false;
-		if (!equivalentMaps(existingDescription.getAttributes(), newDescription.getAttributes()))
+		if (!equivalentMaps(existingDescription.getAttributes(), newDescription.getAttributes(), true))
 			return false;
-		if (!equivalentMaps(existingDescription.getDirectives(), newDescription.getDirectives()))
+		if (!equivalentMaps(existingDescription.getDirectives(), newDescription.getDirectives(), true))
 			return false;
 		return true;
 	}
 
-	private boolean equivalentMaps(Map existingDirectives, Map newDirectives) {
+	public static boolean equivalentMaps(Map existingDirectives, Map newDirectives, boolean exactMatch) {
 		if (existingDirectives == null && newDirectives == null)
 			return true;
 		if (existingDirectives == null ? newDirectives != null : newDirectives == null)
 			return false;
-		if (existingDirectives.size() != newDirectives.size())
+		if (exactMatch && existingDirectives.size() != newDirectives.size())
 			return false;
 		for (Iterator entries = existingDirectives.entrySet().iterator(); entries.hasNext();) {
 			Entry entry = (Entry) entries.next();

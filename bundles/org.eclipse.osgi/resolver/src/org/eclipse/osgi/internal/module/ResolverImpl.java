@@ -72,6 +72,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private GroupingChecker groupingChecker;
 	private Comparator selectionPolicy;
 	private boolean developmentMode = false;
+	private volatile CompositeResolveHelperRegistry compositeHelpers;
 
 	public ResolverImpl(BundleContext context, boolean checkPermissions) {
 		this.permissionChecker = new PermissionChecker(context, checkPermissions, this);
@@ -535,46 +536,76 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				resolveFragment(unresolved[i]);
 		}
 		checkUsesConstraints(bundles, platformProperties, rejectedSingletons);
+		checkComposites(bundles, platformProperties, rejectedSingletons);
+	}
+
+	private void checkComposites(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+		CompositeResolveHelperRegistry helpers = getCompositeHelpers();
+		if (helpers == null)
+			return;
+		Set exclude = null;
+		for (int i = 0; i < bundles.length; i++) {
+			CompositeResolveHelper helper = helpers.getCompositeResolveHelper(bundles[i].getBundle());
+			if (helper == null)
+				continue;
+			if (!bundles[i].isResolved())
+				continue;
+			if (!helper.giveExports(getExportsWiredTo(bundles[i]))) {
+				state.addResolverError(bundles[i].getBundle(), ResolverError.DISABLED_BUNDLE, null, null);
+				bundles[i].setResolvable(false);
+				bundles[i].clearRefs();
+				setBundleUnresolved(bundles[i], false, developmentMode);
+				if (exclude == null)
+					exclude = new HashSet(1);
+				exclude.add(bundles[i]);
+			}
+		}
+		reResolveBundles(exclude, bundles, platformProperties, rejectedSingletons);
 	}
 
 	private void checkUsesConstraints(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
 		ArrayList conflictingConstraints = findBestCombination(bundles);
+		if (conflictingConstraints == null)
+			return;
 		Set conflictedBundles = null;
-		if (conflictingConstraints != null) {
-			for (Iterator conflicts = conflictingConstraints.iterator(); conflicts.hasNext();) {
-				ResolverConstraint conflict = (ResolverConstraint) conflicts.next();
-				if (conflict.isOptional()) {
-					conflict.clearPossibleSuppliers();
-					continue;
-				}
-				conflictedBundles = new HashSet(conflictingConstraints.size());
-				ResolverBundle conflictedBundle;
-				if (conflict.isFromFragment())
-					conflictedBundle = (ResolverBundle) bundleMapping.get(conflict.getVersionConstraint().getBundle());
-				else
-					conflictedBundle = conflict.getBundle();
-				if (conflictedBundle != null) {
-					if (DEBUG_USES)
-						System.out.println("Found conflicting constraint: " + conflict + " in bundle " + conflictedBundle); //$NON-NLS-1$//$NON-NLS-2$
-					conflictedBundles.add(conflictedBundle);
-					int type = conflict instanceof ResolverImport ? ResolverError.IMPORT_PACKAGE_USES_CONFLICT : ResolverError.REQUIRE_BUNDLE_USES_CONFLICT;
-					state.addResolverError(conflictedBundle.getBundle(), type, conflict.getVersionConstraint().toString(), conflict.getVersionConstraint());
-					conflictedBundle.setResolvable(false);
-					conflictedBundle.clearRefs();
-					setBundleUnresolved(conflictedBundle, false, developmentMode);
-				}
+		for (Iterator conflicts = conflictingConstraints.iterator(); conflicts.hasNext();) {
+			ResolverConstraint conflict = (ResolverConstraint) conflicts.next();
+			if (conflict.isOptional()) {
+				conflict.clearPossibleSuppliers();
+				continue;
 			}
-			if (conflictedBundles != null && conflictedBundles.size() > 0) {
-				ArrayList remainingUnresolved = new ArrayList();
-				for (int i = 0; i < bundles.length; i++) {
-					if (!conflictedBundles.contains(bundles[i])) {
-						setBundleUnresolved(bundles[i], false, developmentMode);
-						remainingUnresolved.add(bundles[i]);
-					}
-				}
-				resolveBundles0((ResolverBundle[]) remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, rejectedSingletons);
+			if (conflictedBundles == null)
+				conflictedBundles = new HashSet(conflictingConstraints.size());
+			ResolverBundle conflictedBundle;
+			if (conflict.isFromFragment())
+				conflictedBundle = (ResolverBundle) bundleMapping.get(conflict.getVersionConstraint().getBundle());
+			else
+				conflictedBundle = conflict.getBundle();
+			if (conflictedBundle != null) {
+				if (DEBUG_USES)
+					System.out.println("Found conflicting constraint: " + conflict + " in bundle " + conflictedBundle); //$NON-NLS-1$//$NON-NLS-2$
+				conflictedBundles.add(conflictedBundle);
+				int type = conflict instanceof ResolverImport ? ResolverError.IMPORT_PACKAGE_USES_CONFLICT : ResolverError.REQUIRE_BUNDLE_USES_CONFLICT;
+				state.addResolverError(conflictedBundle.getBundle(), type, conflict.getVersionConstraint().toString(), conflict.getVersionConstraint());
+				conflictedBundle.setResolvable(false);
+				conflictedBundle.clearRefs();
+				setBundleUnresolved(conflictedBundle, false, developmentMode);
 			}
 		}
+		reResolveBundles(conflictedBundles, bundles, platformProperties, rejectedSingletons);
+	}
+
+	private void reResolveBundles(Set exclude, ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+		if (exclude == null || exclude.size() == 0)
+			return;
+		ArrayList remainingUnresolved = new ArrayList();
+		for (int i = 0; i < bundles.length; i++) {
+			if (!exclude.contains(bundles[i])) {
+				setBundleUnresolved(bundles[i], false, developmentMode);
+				remainingUnresolved.add(bundles[i]);
+			}
+		}
+		resolveBundles0((ResolverBundle[]) remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, rejectedSingletons);
 	}
 
 	private ArrayList findBestCombination(ResolverBundle[] bundles) {
@@ -1434,12 +1465,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ExportPackageDescription[] substitutedExportsArray = (ExportPackageDescription[]) substitutedExports.toArray(new ExportPackageDescription[substitutedExports.size()]);
 
 		// Gather exports that have been wired to
-		ResolverImport[] imports = rb.getImportPackages();
-		ArrayList exportsWiredTo = new ArrayList(imports.length);
-		for (int i = 0; i < imports.length; i++)
-			if (imports[i].getSelectedSupplier() != null)
-				exportsWiredTo.add(imports[i].getSelectedSupplier().getBaseDescription());
-		ExportPackageDescription[] exportsWiredToArray = (ExportPackageDescription[]) exportsWiredTo.toArray(new ExportPackageDescription[exportsWiredTo.size()]);
+		ExportPackageDescription[] exportsWiredToArray = getExportsWiredTo(rb);
 
 		// Gather bundles that have been wired to
 		BundleConstraint[] requires = rb.getRequires();
@@ -1470,6 +1496,16 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 		// Resolve the bundle in the state
 		state.resolveBundle(rb.getBundle(), rb.isResolved(), hostBundles, selectedExportsArray, substitutedExportsArray, bundlesWiredToArray, exportsWiredToArray);
+	}
+
+	private static ExportPackageDescription[] getExportsWiredTo(ResolverBundle rb) {
+		// Gather exports that have been wired to
+		ResolverImport[] imports = rb.getImportPackages();
+		ArrayList exportsWiredTo = new ArrayList(imports.length);
+		for (int i = 0; i < imports.length; i++)
+			if (imports[i].getSelectedSupplier() != null)
+				exportsWiredTo.add(imports[i].getSelectedSupplier().getBaseDescription());
+		return (ExportPackageDescription[]) exportsWiredTo.toArray(new ExportPackageDescription[exportsWiredTo.size()]);
 	}
 
 	// Resolve dynamic import
@@ -1616,6 +1652,12 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 		if (!bundle.getBundle().isResolved() && !developmentMode)
 			return;
+		CompositeResolveHelperRegistry currentLinks = compositeHelpers;
+		if (currentLinks != null) {
+			CompositeResolveHelper helper = currentLinks.getCompositeResolveHelper(bundle.getBundle());
+			if (helper != null)
+				helper.giveExports(null);
+		}
 		// if not removed then add to the list of unresolvedBundles,
 		// passing false for devmode because we need all fragments detached
 		setBundleUnresolved(bundle, removed, false);
@@ -1738,5 +1780,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 
 	public Comparator getSelectionPolicy() {
 		return selectionPolicy;
+	}
+
+	public void setCompositeResolveHelperRegistry(CompositeResolveHelperRegistry compositeHelpers) {
+		this.compositeHelpers = compositeHelpers;
+	}
+
+	CompositeResolveHelperRegistry getCompositeHelpers() {
+		return compositeHelpers;
 	}
 }

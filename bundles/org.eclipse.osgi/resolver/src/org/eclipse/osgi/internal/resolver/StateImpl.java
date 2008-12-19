@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.util.*;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -121,7 +122,7 @@ public abstract class StateImpl implements State {
 			if (getSystemBundle().equals(newDescription.getSymbolicName()))
 				resetSystemExports();
 			if (resolver != null) {
-				boolean pending = existing.getDependents().length > 0;
+				boolean pending = isInUse(existing);
 				resolver.bundleUpdated(newDescription, existing, pending);
 				if (pending) {
 					getDelta().recordBundleRemovalPending(existing);
@@ -161,7 +162,7 @@ public abstract class StateImpl implements State {
 			getDelta().recordBundleRemoved((BundleDescriptionImpl) toRemove);
 			((BundleDescriptionImpl) toRemove).setStateBit(BundleDescriptionImpl.REMOVAL_PENDING, true);
 			if (resolver != null) {
-				boolean pending = toRemove.getDependents().length > 0;
+				boolean pending = isInUse(toRemove);
 				resolver.bundleRemoved(toRemove, pending);
 				if (pending) {
 					getDelta().recordBundleRemovalPending((BundleDescriptionImpl) toRemove);
@@ -180,6 +181,13 @@ public abstract class StateImpl implements State {
 			updateTimeStamp();
 			return true;
 		}
+	}
+
+	private boolean isInUse(BundleDescription bundle) {
+		Object userObject = bundle.getUserObject();
+		if (userObject instanceof BundleLoaderProxy)
+			return ((BundleLoaderProxy) userObject).inUse();
+		return bundle.getDependents().length > 0;
 	}
 
 	public StateDelta getChanges() {
