@@ -51,7 +51,7 @@ public class AbstractBundleTests extends CoreTest {
 		frameworkListenerResults = null;
 	}
 
-	public void compareResults(Object[] expectedEvents, Object[] actualEvents) {
+	static public void compareResults(Object[] expectedEvents, Object[] actualEvents) {
 		assertEquals("compareResults length", expectedEvents.length, actualEvents.length);
 		for (int i = 0; i < expectedEvents.length; i++) {
 			assertEquals("compareResults " + i, expectedEvents[i], actualEvents[i]);
@@ -66,6 +66,18 @@ public class AbstractBundleTests extends CoreTest {
 		if (isEqual(expected, actual))
 			return;
 		failNotEquals(message, toString(expected), toString(actual));
+	}
+
+	static public void assertEquals(String message, int[] expected, int[] actual) {
+		if (expected == null && actual == null)
+			return;
+		if ((expected == null || actual == null) && expected != actual)
+			failNotEquals(message, toString(expected), toString(actual));
+		if (expected.length != actual.length)
+			failNotEquals(message, toString(expected), toString(actual));
+		for (int i = 0; i < expected.length; i++)
+			if (expected[i] != actual[i])
+				failNotEquals(message, toString(expected), toString(actual));
 	}
 
 	private static boolean isEqual(Object expected, Object actual) {
@@ -84,6 +96,19 @@ public class AbstractBundleTests extends CoreTest {
 
 	private static boolean isEqual(FrameworkEvent expected, FrameworkEvent actual) {
 		return expected.getSource() == actual.getSource() && expected.getType() == actual.getType();
+	}
+
+	private static String toString(int[] array) {
+		if (array == null)
+			return "null"; //$NON-NLS-1$
+		String result = "["; //$NON-NLS-1$
+		for (int i = 0; i < array.length; i++) {
+			if (i != 0)
+				result += ',';
+			result += array[i];
+		}
+		result += "]"; //$NON-NLS-1$
+		return result;
 	}
 
 	private static Object toString(Object object) {

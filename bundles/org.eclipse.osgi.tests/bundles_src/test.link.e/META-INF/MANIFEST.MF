@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.link.e
+Bundle-SymbolicName: test.link.e
+Bundle-Version: 1.0.0
+Bundle-Activator: test.link.e.Activator
+Export-Package: 
+ test.link.e.service1; attr1="value1",
+ test.link.e.service2; attr2="value2"; uses:="test.link.e.service1",
+ test.link.e.service3; attr3="value3"; uses:="test.link.e.service2"
+Import-Package: org.osgi.framework

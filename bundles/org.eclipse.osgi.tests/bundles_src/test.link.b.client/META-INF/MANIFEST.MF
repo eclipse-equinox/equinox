@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.link.b.client
+Bundle-SymbolicName: test.link.b.client
+Bundle-Version: 1.0.0
+Bundle-Activator: test.link.b.client.Activator
+Import-Package: org.osgi.framework, test.link.b, test.link.b.params

@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests;
 
-import org.eclipse.osgi.tests.misc.MiscTests;
-
 import junit.framework.*;
 import org.eclipse.osgi.tests.bundles.BundleTests;
+import org.eclipse.osgi.tests.composites.AllCompositeTests;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
 import org.eclipse.osgi.tests.filter.FilterTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
 import org.eclipse.osgi.tests.listeners.ExceptionHandlerTests;
+import org.eclipse.osgi.tests.misc.MiscTests;
 import org.eclipse.osgi.tests.permissions.PermissionTests;
 import org.eclipse.osgi.tests.serviceregistry.ServiceRegistryTests;
 
@@ -57,6 +57,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(EventManagerTests.suite());
 		suite.addTest(FilterTests.suite());
 		suite.addTest(PermissionTests.suite());
+		suite.addTest(AllCompositeTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
 		return suite;
 	}

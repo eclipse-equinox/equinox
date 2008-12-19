@@ -12,6 +12,7 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
@@ -56,7 +57,21 @@ public class BundleInstaller {
 		return bundle;
 	}
 
-	public String getBundleLocation(String name) throws BundleException {
+	public String getBundleLocation(final String name) throws BundleException {
+		if (System.getSecurityManager() == null)
+			return getBundleLocation0(name);
+		try {
+			return (String) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws Exception {
+					return getBundleLocation0(name);
+				}
+			});
+		} catch (PrivilegedActionException e) {
+			throw (BundleException) e.getException();
+		}
+	}
+
+	String getBundleLocation0(String name) throws BundleException {
 		String bundleFileName = rootLocation + "/" + name;
 		URL bundleURL = context.getBundle().getEntry(bundleFileName);
 		if (bundleURL == null)

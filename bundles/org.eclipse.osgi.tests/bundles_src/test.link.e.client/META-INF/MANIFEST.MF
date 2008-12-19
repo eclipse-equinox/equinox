@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.link.e.client
+Bundle-SymbolicName: test.link.e.client
+Bundle-Version: 1.0.0
+Bundle-Activator: test.link.e.client.Activator
+Import-Package: test.link.e.service1, test.link.e.service2, test.link.e.service3, org.osgi.framework
