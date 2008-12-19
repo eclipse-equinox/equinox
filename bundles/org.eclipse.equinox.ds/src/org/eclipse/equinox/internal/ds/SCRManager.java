@@ -476,16 +476,14 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		}
 	}
 
-	synchronized void startedBundle(Bundle bundle) {
+	void startedBundle(Bundle bundle) {
 		long start = 0l;
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
 		}
-		if (bundleToServiceComponents != null) {
-			if (bundleToServiceComponents.get(bundle) != null) {
-				// the bundle is already processed - skipping it
-				return;
-			}
+		if (bundleToServiceComponents != null && bundleToServiceComponents.get(bundle) != null) {
+			// the bundle is already processed - skipping it
+			return;
 		}
 
 		Dictionary allHeaders = bundle.getHeaders();
@@ -506,7 +504,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				log.info("[DS perf] The components for bundle " + bundle + " are parsed for " + start + " ms");
 			}
 			if (bundleToServiceComponents == null) {
-				bundleToServiceComponents = new Hashtable(11);
+				synchronized (this) {
+					if (bundleToServiceComponents == null) {
+						bundleToServiceComponents = new Hashtable(11);
+					}
+				}
 			}
 
 			//check whether component's names are unique
