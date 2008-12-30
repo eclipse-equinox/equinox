@@ -120,12 +120,15 @@ public class FrameworkConsole implements Runnable {
 	 */
 	private boolean getSocketStream() {
 		try {
-			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, String.valueOf(port)));
 			synchronized (this) {
 				if (scsg == null)
 					scsg = new ConsoleSocketGetter(new ServerSocket(port));
 				scsg.setAcceptConnections(true);
 			}
+
+			// Print message containing port console actually bound to..
+			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, Integer.toString(scsg.getLocalPort())));
+
 			// get socket outside of sync block
 			Socket temp = scsg.getSocket();
 			if (temp == null)
@@ -425,6 +428,14 @@ public class FrameworkConsole implements Runnable {
 			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
 			t.setDaemon(true);
 			t.start();
+		}
+
+		/**
+		 * Returns the local port used for the server socket
+		 * @return
+		 */
+		public int getLocalPort() {
+			return server.getLocalPort();
 		}
 
 		public void run() {
