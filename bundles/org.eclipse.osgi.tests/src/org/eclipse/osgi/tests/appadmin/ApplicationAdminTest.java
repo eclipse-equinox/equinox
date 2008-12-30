@@ -338,7 +338,7 @@ public class ApplicationAdminTest extends OSGiTest {
 		doTestCardinality01(PI_OSGI_TESTS + ".testCardinality02", 20, false); //$NON-NLS-1$
 	}
 
-	private void doTestMainThreaded01(String appID) {
+	private void doTestMainThreaded(String appID) {
 		ApplicationDescriptor app = getApplication(appID);
 		ArrayList instances = new ArrayList();
 		try {
@@ -346,7 +346,7 @@ public class ApplicationAdminTest extends OSGiTest {
 			instances.add(app.launch(null));
 		} catch (ApplicationException e) {
 			if (instances.size() == 0)
-				fail("Unable to launch a main threaded application"); //$NON-NLS-1$
+				fail("Unable to launch a main threaded application", e); //$NON-NLS-1$
 			assertEquals("check error code", ApplicationException.APPLICATION_NOT_LAUNCHABLE, e.getErrorCode()); //$NON-NLS-1$
 		} finally {
 			for (Iterator handles = instances.iterator(); handles.hasNext();) {
@@ -357,11 +357,11 @@ public class ApplicationAdminTest extends OSGiTest {
 	}
 
 	public void testMainThreaded01() {
-		doTestMainThreaded01(PI_OSGI_TESTS + ".testMainThreaded01"); //$NON-NLS-1$
+		doTestMainThreaded(PI_OSGI_TESTS + ".testMainThreaded01"); //$NON-NLS-1$
 	}
 
 	public void testMainThreaded02() {
-		doTestMainThreaded01(PI_OSGI_TESTS + ".testMainThreaded02"); //$NON-NLS-1$
+		doTestMainThreaded(PI_OSGI_TESTS + ".testMainThreaded02"); //$NON-NLS-1$
 	}
 
 	public void testHandleEvents01() throws InvalidSyntaxException {
