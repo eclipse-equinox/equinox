@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,10 +87,12 @@ public class BundleHost extends AbstractBundle {
 			if (state == RESOLVED) {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
-				if (exporting)
+				if (exporting) {
+					// add the bundle data to the list of removals
+					framework.packageAdmin.addRemovalPending(bundledata);
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
-				else
+				} else
 					BundleLoader.closeBundleLoader(proxy);
 				state = INSTALLED;
 				proxy = null;
@@ -155,10 +157,12 @@ public class BundleHost extends AbstractBundle {
 			if (state == RESOLVED) {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
-				if (exporting)
+				if (exporting) {
+					// add the bundle data to the list of removals
+					framework.packageAdmin.addRemovalPending(bundledata);
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
-				else
+				} else
 					BundleLoader.closeBundleLoader(proxy);
 
 				state = INSTALLED;

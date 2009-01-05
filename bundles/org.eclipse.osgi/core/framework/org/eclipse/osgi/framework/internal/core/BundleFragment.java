@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,8 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
+					// add the bundle data to the list of removals
+					framework.packageAdmin.addRemovalPending(bundledata);
 					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;
@@ -144,6 +146,8 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
+					// add the bundle data to the list of removals
+					framework.packageAdmin.addRemovalPending(bundledata);
 					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;

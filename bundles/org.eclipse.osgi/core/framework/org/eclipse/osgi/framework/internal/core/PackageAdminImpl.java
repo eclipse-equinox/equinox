@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.osgi.service.packageadmin.*;
 public class PackageAdminImpl implements PackageAdmin {
 	/** framework object */
 	protected Framework framework;
+	private Map removalPendings = new HashMap();
 
 	/* 
 	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
@@ -317,6 +318,17 @@ public class PackageAdminImpl implements PackageAdmin {
 					Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
 				}
 				throw new BundleException(Msg.OSGI_INTERNAL_ERROR);
+			}
+			synchronized (removalPendings) {
+				// ensure that the bundle datas are closed, (fix for bug 259399)
+				List removals = (List) removalPendings.remove(new Long(bundle.getBundleId()));
+				if (removals != null)
+					for (Iterator iRemovals = removals.iterator(); iRemovals.hasNext();)
+						try {
+							((BundleData) iRemovals.next()).close();
+						} catch (IOException e) {
+							// ignore
+						}
 			}
 			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
 			if (proxy != null) {
@@ -665,5 +677,17 @@ public class PackageAdminImpl implements PackageAdmin {
 				break;
 			}
 		FrameworkProperties.setProperty(Constants.OSGI_IMPL_VERSION_KEY, systemBundle.getVersion().toString());
+	}
+
+	void addRemovalPending(BundleData bundledata) {
+		synchronized (removalPendings) {
+			Long id = new Long(bundledata.getBundleID());
+			List removals = (List) removalPendings.get(id);
+			if (removals == null) {
+				removals = new ArrayList(1);
+				removalPendings.put(id, removals);
+			}
+			removals.add(bundledata);
+		}
 	}
 }
