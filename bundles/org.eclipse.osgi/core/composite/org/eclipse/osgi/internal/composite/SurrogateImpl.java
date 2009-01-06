@@ -41,14 +41,12 @@ public class SurrogateImpl extends CompositeBase implements SurrogateBundle {
 	}
 
 	public boolean giveExports(ExportPackageDescription[] matchingExports) {
+		// only allow the surrogate resolution to occur if we are in the middle of resolving the composite
+		if (resolving.get() == null)
+			return false;
 		if (matchingExports == null) {
 			// set the surrogate to disabled to prevent resolution this go around
 			CompositeHelper.setDisabled(true, getBundleDescription());
-			// refresh the composite bundle (in the parent framework) asynchronously and enable it
-			// should only do this if the composite is not in the process of refreshing this 
-			// surrogate bundle
-			if (refreshing.get() == null)
-				((CompositeModule) getCompanionBundle()).refreshContent(false);
 			return true;
 		}
 		return validExports(matchingExports);

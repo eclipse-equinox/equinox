@@ -33,7 +33,7 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 
 	protected final Framework companionFramework;
 	protected final long companionID;
-	protected final ThreadLocal refreshing = new ThreadLocal();
+	protected final ThreadLocal resolving = new ThreadLocal();
 
 	public CompositeBase(BundleData bundledata, org.eclipse.osgi.framework.internal.core.Framework framework) throws BundleException {
 		super(bundledata, framework);
@@ -69,19 +69,22 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 		return getBundleLoader();
 	}
 
-	public void refreshContent(boolean synchronously) {
-		if (synchronously)
-			refreshing.set(Boolean.TRUE);
+	public void refreshContent() {
+		resolving.set(Boolean.TRUE);
 		try {
-			framework.getPackageAdmin().refreshPackages(new Bundle[] {this}, synchronously);
+			framework.getPackageAdmin().refreshPackages(new Bundle[] {this}, true);
 		} finally {
-			if (synchronously)
-				refreshing.set(null);
+			resolving.set(null);
 		}
 	}
 
 	public boolean resolveContent() {
-		return framework.getPackageAdmin().resolveBundles(new Bundle[] {this});
+		resolving.set(Boolean.TRUE);
+		try {
+			return framework.getPackageAdmin().resolveBundles(new Bundle[] {this});
+		} finally {
+			resolving.set(null);
+		}
 	}
 
 	public void started(CompositeModule surrogate) {

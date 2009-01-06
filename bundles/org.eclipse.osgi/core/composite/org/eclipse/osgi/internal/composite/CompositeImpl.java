@@ -205,8 +205,8 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 			SurrogateBundle surrogate = getSurrogateBundle();
 			// disable the surrogate
 			CompositeHelper.setDisabled(true, getSurrogateBundle(), getCompositeFramework().getBundleContext());
-			// refresh the parent composite synchronously
-			((CompositeModule) surrogate).refreshContent(true);
+			// refresh the surrogate synchronously
+			((CompositeModule) surrogate).refreshContent();
 			return true;
 		}
 		try {

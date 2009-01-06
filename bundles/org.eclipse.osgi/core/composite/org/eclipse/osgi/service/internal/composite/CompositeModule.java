@@ -14,7 +14,7 @@ import org.osgi.framework.BundleException;
 public interface CompositeModule {
 	public void updateContent(InputStream content) throws BundleException;
 
-	public void refreshContent(boolean synchronously);
+	public void refreshContent();
 
 	public boolean resolveContent();
 
