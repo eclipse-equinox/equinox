@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Danail Nachev -  ProSyst - bug 218625
- *     Rob Harrop - SpringSource Inc. (bug 247522)
+ *     Rob Harrop - SpringSource Inc. (bug 247522 and 255520)
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
@@ -71,75 +71,75 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public String getLocation() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			return lazyData.location;
+			return currentData.location;
 		}
 	}
 
 	public String getPlatformFilter() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			return lazyData.platformFilter;
+			return currentData.platformFilter;
 		}
 	}
 
 	public String[] getExecutionEnvironments() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.executionEnvironments == null)
+			if (currentData.executionEnvironments == null)
 				return EMPTY_STRING;
-			return lazyData.executionEnvironments;
+			return currentData.executionEnvironments;
 		}
 	}
 
 	public ImportPackageSpecification[] getImportPackages() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.importPackages == null)
+			if (currentData.importPackages == null)
 				return EMPTY_IMPORTS;
-			return lazyData.importPackages;
+			return currentData.importPackages;
 		}
 	}
 
 	public BundleSpecification[] getRequiredBundles() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.requiredBundles == null)
+			if (currentData.requiredBundles == null)
 				return EMPTY_BUNDLESPECS;
-			return lazyData.requiredBundles;
+			return currentData.requiredBundles;
 		}
 	}
 
 	public GenericSpecification[] getGenericRequires() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.genericRequires == null)
+			if (currentData.genericRequires == null)
 				return EMPTY_GENERICSPECS;
-			return lazyData.genericRequires;
+			return currentData.genericRequires;
 		}
 	}
 
 	public GenericDescription[] getGenericCapabilities() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.genericCapabilities == null)
+			if (currentData.genericCapabilities == null)
 				return EMPTY_GENERICDESCS;
-			return lazyData.genericCapabilities;
+			return currentData.genericCapabilities;
 		}
 	}
 
 	public NativeCodeSpecification getNativeCodeSpecification() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			return lazyData.nativeCode;
+			return currentData.nativeCode;
 		}
 	}
 
 	public ExportPackageDescription[] getExportPackages() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			return lazyData.exportPackages == null ? EMPTY_EXPORTS : lazyData.exportPackages;
+			return currentData.exportPackages == null ? EMPTY_EXPORTS : currentData.exportPackages;
 		}
 	}
 
@@ -185,38 +185,38 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public ExportPackageDescription[] getSelectedExports() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.selectedExports == null)
+			if (currentData.selectedExports == null)
 				return EMPTY_EXPORTS;
-			return lazyData.selectedExports;
+			return currentData.selectedExports;
 		}
 	}
 
 	public ExportPackageDescription[] getSubstitutedExports() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.substitutedExports == null)
+			if (currentData.substitutedExports == null)
 				return EMPTY_EXPORTS;
-			return lazyData.substitutedExports;
+			return currentData.substitutedExports;
 		}
 	}
 
 	public BundleDescription[] getResolvedRequires() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.resolvedRequires == null)
+			if (currentData.resolvedRequires == null)
 				return EMPTY_BUNDLEDESCS;
-			return lazyData.resolvedRequires;
+			return currentData.resolvedRequires;
 		}
 	}
 
 	public ExportPackageDescription[] getResolvedImports() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			if (lazyData.resolvedImports == null)
+			if (currentData.resolvedImports == null)
 				return EMPTY_EXPORTS;
-			return lazyData.resolvedImports;
+			return currentData.resolvedImports;
 		}
 	}
 
@@ -357,7 +357,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	protected void setLazyLoaded(boolean lazyLoad) {
-		fullyLoad();
+		loadLazyData();
 		synchronized (this.monitor) {
 			if (lazyLoad)
 				stateBits |= LAZY_LOADED;
@@ -548,13 +548,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	// DO NOT call while holding this.monitor
-	private void fullyLoad() {
+	private LazyData loadLazyData() {
 		// TODO add back if ee min 1.2 adds holdsLock method
 		//if (Thread.holdsLock(this.monitor)) {
 		//	throw new IllegalStateException("Should not call fullyLoad() holding monitor."); //$NON-NLS-1$
 		//}
 		if ((stateBits & LAZY_LOADED) == 0)
-			return;
+			return this.lazyData;
+
 		StateImpl currentState = (StateImpl) getContainingState();
 		StateReader reader = currentState == null ? null : currentState.getReader();
 		if (reader == null)
@@ -563,10 +564,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (reader) {
 			if (isFullyLoaded()) {
 				reader.setAccessedFlag(true); // set reader accessed flag
-				return;
+				return this.lazyData;
 			}
 			try {
 				reader.fullyLoad(this);
+				return this.lazyData;
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage()); // TODO not sure what to do here!!
 			}
@@ -610,6 +612,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	void setDynamicStamps(HashMap dynamicStamps) {
 		synchronized (this.monitor) {
+			checkLazyData();
 			lazyData.dynamicStamps = dynamicStamps;
 		}
 	}
@@ -630,17 +633,17 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	long getDynamicStamp(String requestedPackage) {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			Long stamp = lazyData.dynamicStamps == null ? null : (Long) lazyData.dynamicStamps.get(requestedPackage);
+			Long stamp = currentData.dynamicStamps == null ? null : (Long) currentData.dynamicStamps.get(requestedPackage);
 			return stamp == null ? 0 : stamp.longValue();
 		}
 	}
 
 	HashMap getDynamicStamps() {
-		fullyLoad();
+		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
-			return lazyData.dynamicStamps;
+			return currentData.dynamicStamps;
 		}
 	}
 
