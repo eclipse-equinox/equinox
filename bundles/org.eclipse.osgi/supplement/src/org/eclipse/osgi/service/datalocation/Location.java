@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,6 +143,23 @@ public interface Location {
 	 * @since 3.4
 	 */
 	public boolean set(URL value, boolean lock) throws IllegalStateException, IOException;
+
+	/**
+	 * Sets and optionally locks the location's value to the given {@link URL} using the given lock file.  If the location 
+	 * already has a value an exception is thrown.  If locking is requested and fails, <code>false</code>
+	 * is returned and the {@link URL} of this location is not set.
+	 * 
+	 * @param value the value of this location
+	 * @param lock whether or not to lock this location 
+	 * @param lockFilePath the path to the lock file.  This path will be used to establish locks on this location.
+	 * The path may be an absolute path or it may be relative to the given URL.  If a <code>null</code>
+	 * value is used then a default lock path will be used for this location.
+	 * @return whether or not the location was successfully set and, if requested, locked.
+	 * @throws IllegalStateException if the location's value is already set
+	 * @throws IOException if there was an unexpected problem while acquiring the lock
+	 * @since 3.5
+	 */
+	public boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException;
 
 	/**
 	 * Attempts to lock this location with a canonical locking mechanism and return

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,6 +146,66 @@ public class BasicLocationTests extends CoreTest {
 		} catch (Throwable t) {
 			// expected
 		}
+	}
+
+	public void testSetLocationWithEmptyLockFile() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), true, ""); //$NON-NLS-1$
+			// Make sure it has created the default lock file
+			File lockFile = new File(testLocationFile, ".metadata/.lock"); //$NON-NLS-1$
+			assertTrue("Lock file does not exist!", lockFile.exists()); //$NON-NLS-1$
+		} catch (Throwable t) {
+			fail("Failed to set location", t); //$NON-NLS-1$
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.isLocked()); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Failed to lock location", e); //$NON-NLS-1$
+		}
+		testLocation.release();
+	}
+
+	public void testSetLocationWithRelLockFile() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithRelLockFile"); //$NON-NLS-1$
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), true, ".mocklock"); //$NON-NLS-1$
+			File lockFile = new File(testLocationFile, ".mocklock"); //$NON-NLS-1$
+			assertTrue("Lock file does not exist!", lockFile.exists()); //$NON-NLS-1$
+		} catch (Throwable t) {
+			fail("Failed to set location", t); //$NON-NLS-1$
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.isLocked()); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Failed to lock location", e); //$NON-NLS-1$
+		}
+		testLocation.release();
+	}
+
+	public void testSetLocationWithAbsLockFile() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithAbsLockFile"); //$NON-NLS-1$
+		File testLocationLockFile = OSGiTestsActivator.getContext().getDataFile("testLocations/mock.lock"); //$NON-NLS-1$
+		assertTrue(testLocationLockFile.isAbsolute());
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), true, testLocationLockFile.getAbsolutePath());
+			assertTrue("The lock file should be present!", testLocationLockFile.exists()); //$NON-NLS-1$
+		} catch (Throwable t) {
+			fail("Failed to set location", t); //$NON-NLS-1$
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.isLocked()); //$NON-NLS-1$
+		} catch (IOException e) {
+			fail("Failed to lock location", e); //$NON-NLS-1$
+		}
+		testLocation.release();
+		assertTrue("The lock file could not be removed!", testLocationLockFile.delete()); //$NON-NLS-1$
 	}
 
 	public void testSlashes() {

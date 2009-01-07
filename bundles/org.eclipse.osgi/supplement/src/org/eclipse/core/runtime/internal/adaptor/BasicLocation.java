@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ public class BasicLocation implements Location {
 	private File lockFile;
 	private Locker locker;
 	public static final String PROP_OSGI_LOCKING = "osgi.locking"; //$NON-NLS-1$
-	private static String LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
+	private static String DEFAULT_LOCK_FILENAME = ".metadata/.lock"; //$NON-NLS-1$
 	public static boolean DEBUG;
 
 	private static boolean isRunningWithNio() {
@@ -126,6 +126,10 @@ public class BasicLocation implements Location {
 	}
 
 	public synchronized boolean set(URL value, boolean lock) throws IllegalStateException, IOException {
+		return set(value, lock, null);
+	}
+
+	public synchronized boolean set(URL value, boolean lock, String lockFilePath) throws IllegalStateException, IOException {
 		if (location != null)
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_CANNOT_CHANGE_LOCATION);
 		File file = null;
@@ -136,7 +140,16 @@ public class BasicLocation implements Location {
 			} catch (IOException e) {
 				// do nothing just use the original value
 			}
-			file = new File(value.getFile(), LOCK_FILENAME);
+			if (lockFilePath != null && lockFilePath.length() > 0) {
+				File givenLockFile = new File(lockFilePath);
+				if (givenLockFile.isAbsolute()) {
+					file = givenLockFile;
+				} else {
+					file = new File(value.getFile(), lockFilePath);
+				}
+			} else {
+				file = new File(value.getFile(), DEFAULT_LOCK_FILENAME);
+			}
 		}
 		lock = lock && !isReadOnly;
 		if (lock) {
