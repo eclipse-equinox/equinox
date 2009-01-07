@@ -44,13 +44,6 @@ public final class Resolver implements WorkPerformer {
 	/* Holds the enabled SCPs*/
 	protected Vector scpEnabled;
 
-	/**
-	 * List of ComponentDescriptionProps, which are currently "satisfied"
-	 * Component Configurations. this list is a subset of
-	 * {@link Resolver#scpEnabled scpEnabled}.
-	 */
-	public Vector satisfiedSCPs;
-
 	private InstanceProcess instanceProcess;
 
 	private Object syncLock = new Object();
@@ -69,7 +62,7 @@ public final class Resolver implements WorkPerformer {
 	 */
 	Resolver(SCRManager mgr) {
 		scpEnabled = new Vector();
-		satisfiedSCPs = new Vector();
+		//		satisfiedSCPs = new Vector();
 		instanceProcess = new InstanceProcess(this);
 		this.mgr = mgr;
 	}
@@ -182,7 +175,7 @@ public final class Resolver implements WorkPerformer {
 			}
 		}
 
-		buildNewlySatisfied();
+		buildNewlySatisfied(true);
 
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
@@ -284,25 +277,15 @@ public final class Resolver implements WorkPerformer {
 			case ServiceEvent.REGISTERED :
 				Vector componentsWithStaticRefs;
 				synchronized (syncLock) {
-					componentsWithStaticRefs = selectStaticBind(satisfiedSCPs, event.getServiceReference());
-					if (componentsWithStaticRefs != null) {
-						removeAll(satisfiedSCPs, componentsWithStaticRefs);
-					}
+					componentsWithStaticRefs = selectStaticBind(scpEnabled, event.getServiceReference());
 				}
 				if (componentsWithStaticRefs != null) {
 					instanceProcess.disposeInstances(componentsWithStaticRefs, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 				}
 
 				synchronized (syncLock) {
-					resolvedComponents = resolveEligible();
-					//no need to sync here
-					target = selectDynamicBind(resolvedComponents, event.getServiceReference());
-
-					// build the newly satisfied components
-					removeAll(resolvedComponents, satisfiedSCPs);
-					if (!resolvedComponents.isEmpty()) {
-						addAll(satisfiedSCPs, resolvedComponents);
-					}
+					resolvedComponents = getComponentsToBuild();
+					target = selectDynamicBind(scpEnabled, event.getServiceReference());
 				}
 
 				//do synchronous bind
@@ -318,11 +301,7 @@ public final class Resolver implements WorkPerformer {
 			case ServiceEvent.UNREGISTERING :
 				Vector newlyUnsatisfiedSCPs;
 				synchronized (syncLock) {
-					newlyUnsatisfiedSCPs = (Vector) satisfiedSCPs.clone();
-					removeAll(newlyUnsatisfiedSCPs, resolveEligible());
-					if (!newlyUnsatisfiedSCPs.isEmpty()) {
-						removeAll(satisfiedSCPs, newlyUnsatisfiedSCPs);
-					}
+					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
 				}
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
 					// synchronously dispose newly unsatisfied components
@@ -330,13 +309,9 @@ public final class Resolver implements WorkPerformer {
 				}
 
 				Vector componentsToDispose;
-				Vector newlySatisfiedSCPs = null;
 				synchronized (syncLock) {
 					//check for components with static reference to this service
-					componentsToDispose = selectStaticUnBind(satisfiedSCPs, event.getServiceReference());
-					if (componentsToDispose != null) {
-						removeAll(satisfiedSCPs, componentsToDispose);
-					}
+					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference());
 				}
 				//dispose instances from staticUnbind
 				if (componentsToDispose != null) {
@@ -346,23 +321,19 @@ public final class Resolver implements WorkPerformer {
 				synchronized (syncLock) {
 					// Pass in the set of currently resolved components, check each one -
 					// do we need to unbind
-					target = selectDynamicUnBind(satisfiedSCPs, event.getServiceReference());
+					target = selectDynamicUnBind(scpEnabled, event.getServiceReference());
 
 					if (componentsToDispose != null) {
 						// some components with static references were disposed. Try to build them again
 						// get list of newly satisfied SCPs and build them
-						newlySatisfiedSCPs = resolveEligible();
-						removeAll(newlySatisfiedSCPs, satisfiedSCPs);
-						if (!newlySatisfiedSCPs.isEmpty()) {
-							addAll(satisfiedSCPs, newlySatisfiedSCPs);
-						}
+						resolvedComponents = getComponentsToBuild();
 					}
 				}
 
 				instanceProcess.dynamicUnBind((Hashtable) target); // do synchronous unbind
 
-				if (newlySatisfiedSCPs != null && !newlySatisfiedSCPs.isEmpty()) {
-					instanceProcess.buildComponents(newlySatisfiedSCPs, false);
+				if (resolvedComponents != null && !resolvedComponents.isEmpty()) {
+					instanceProcess.buildComponents(resolvedComponents, false);
 				}
 
 				return;
@@ -371,11 +342,7 @@ public final class Resolver implements WorkPerformer {
 				synchronized (syncLock) {
 					// check for newly unsatisfied components and synchronously
 					// dispose them
-					newlyUnsatisfiedSCPs = (Vector) satisfiedSCPs.clone();
-					removeAll(newlyUnsatisfiedSCPs, resolveEligible());
-					if (!newlyUnsatisfiedSCPs.isEmpty()) {
-						removeAll(satisfiedSCPs, newlyUnsatisfiedSCPs);
-					}
+					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
 				}
 
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
@@ -384,10 +351,7 @@ public final class Resolver implements WorkPerformer {
 
 				synchronized (syncLock) {
 					//check for components with static reference to this service
-					componentsToDispose = selectStaticUnBind(satisfiedSCPs, event.getServiceReference());
-					if (componentsToDispose != null) {
-						removeAll(satisfiedSCPs, componentsToDispose);
-					}
+					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference());
 				}
 
 				if (componentsToDispose != null) {
@@ -397,7 +361,7 @@ public final class Resolver implements WorkPerformer {
 				synchronized (syncLock) {
 					// dynamic unbind
 					// check each satisfied scp - do we need to unbind
-					target = selectDynamicUnBind(satisfiedSCPs, event.getServiceReference());
+					target = selectDynamicUnBind(scpEnabled, event.getServiceReference());
 				}
 
 				if (target != null) {
@@ -406,39 +370,46 @@ public final class Resolver implements WorkPerformer {
 
 				synchronized (syncLock) {
 					// dynamic bind
-					target = selectDynamicBind(satisfiedSCPs, event.getServiceReference());
+					target = selectDynamicBind(scpEnabled, event.getServiceReference());
 
 					// get list of newly satisfied SCPs and build them
-					newlySatisfiedSCPs = resolveEligible();
-					removeAll(newlySatisfiedSCPs, satisfiedSCPs);
-					if (!newlySatisfiedSCPs.isEmpty()) {
-						addAll(satisfiedSCPs, newlySatisfiedSCPs);
-					}
+					resolvedComponents = getComponentsToBuild();
 				}
 
 				if (target != null) {
 					instanceProcess.dynamicBind((Vector) target);
 				}
-				if (!newlySatisfiedSCPs.isEmpty()) {
-					instanceProcess.buildComponents(newlySatisfiedSCPs, false);
+				if (!resolvedComponents.isEmpty()) {
+					instanceProcess.buildComponents(resolvedComponents, false);
 				}
 		}
 	}
 
-	void buildNewlySatisfied() {
+	public void buildNewlySatisfied(boolean checkForDependencyCycles) {
 		Vector resolvedComponents;
 		synchronized (syncLock) {
-			findDependencyCycles();
-			resolvedComponents = resolveEligible();
-			removeAll(resolvedComponents, satisfiedSCPs);
-			if (!resolvedComponents.isEmpty()) {
-				addAll(satisfiedSCPs, resolvedComponents);
+			if (checkForDependencyCycles) {
+				findDependencyCycles();
 			}
+			resolvedComponents = getComponentsToBuild();
 		}
 
 		if (!resolvedComponents.isEmpty()) {
 			instanceProcess.buildComponents(resolvedComponents, false);
 		}
+	}
+
+	private Vector getComponentsToBuild() {
+		Vector resolvedComponents = resolveEligible();
+		// select the satisfied components only
+		ServiceComponentProp scp;
+		for (int i = resolvedComponents.size() - 1; i >= 0; i--) {
+			scp = (ServiceComponentProp) resolvedComponents.elementAt(i);
+			if (scp.getState() != ServiceComponentProp.SATISFIED) {
+				resolvedComponents.removeElementAt(i);
+			}
+		}
+		return resolvedComponents;
 	}
 
 	/**
@@ -447,12 +418,6 @@ public final class Resolver implements WorkPerformer {
 	 *
 	 **/
 	public void componentDisposed(ServiceComponentProp scp) {
-		synchronized (syncLock) {
-			int ind = satisfiedSCPs.indexOf(scp);
-			if (ind >= 0) {
-				satisfiedSCPs.removeElementAt(ind);
-			}
-		}
 	}
 
 	private Vector resolveEligible() {
@@ -460,25 +425,30 @@ public final class Resolver implements WorkPerformer {
 			Vector enabledSCPs = (Vector) scpEnabled.clone();
 			for (int k = enabledSCPs.size() - 1; k >= 0; k--) {
 				ServiceComponentProp scp = (ServiceComponentProp) enabledSCPs.elementAt(k);
-				Vector refs = scp.references;
-				for (int i = 0; refs != null && i < refs.size(); i++) {
-					// Loop though all the references (dependencies)for a given
-					// scp. If a dependency is not met, remove it's associated
-					// scp and re-run the algorithm
-					Reference reference = (Reference) refs.elementAt(i);
-					if (reference != null) {
-						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
+				try {
+					Vector refs = scp.references;
+					for (int i = 0; refs != null && i < refs.size(); i++) {
+						// Loop though all the references (dependencies)for a given
+						// scp. If a dependency is not met, remove it's associated scp and
+						// re-run the algorithm
+						Reference reference = (Reference) refs.elementAt(i);
+						if (reference != null) {
+							boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
 
-						if (!resolved) {
-							if (Activator.DEBUG) {
-								Activator.log.debug("Resolver.resolveEligible(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null);
+							if (!resolved) {
+								if (Activator.DEBUG) {
+									Activator.log.debug("Resolver.resolveEligible(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null);
+								}
+								enabledSCPs.removeElementAt(k);
+								break;
 							}
-							enabledSCPs.removeElementAt(k);
-							break;
-						} else if (scp.getState() == ServiceComponentProp.DISPOSED) {
-							scp.setState(ServiceComponentProp.SATISFIED);
 						}
 					}
+				} catch (IllegalStateException ise) {
+					//the bundle of the scp is probably already uninstalled
+					scpEnabled.removeElementAt(k);
+					enabledSCPs.removeElementAt(k);
+					continue;
 				}
 				// check if the bundle providing the service has permission to
 				// register the provided interface(s)
@@ -517,6 +487,9 @@ public final class Resolver implements WorkPerformer {
 						continue;
 					}
 				}
+				if (scp.getState() < ServiceComponentProp.SATISFIED) {
+					scp.setState(ServiceComponentProp.SATISFIED);
+				}
 			}
 
 			if (Activator.DEBUG) {
@@ -524,6 +497,41 @@ public final class Resolver implements WorkPerformer {
 				////Activator.log.debug("Resolver:resolveEligible(): resolved components = " + enabledSCPs, null);
 			}
 			return enabledSCPs;
+		} catch (Throwable e) {
+			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			return new Vector();
+		}
+	}
+
+	private Vector selectNewlyUnsatisfied() {
+		try {
+			Vector result = (Vector) scpEnabled.clone();
+			for (int k = result.size() - 1; k >= 0; k--) {
+				ServiceComponentProp scp = (ServiceComponentProp) result.elementAt(k);
+				Vector refs = scp.references;
+				boolean toDispose = false;
+				for (int i = 0; refs != null && i < refs.size(); i++) {
+					// Loop though all the references (dependencies)for a given
+					// scp. If a dependency is not met, remove it's associated
+					// scp and re-run the algorithm
+					Reference reference = (Reference) refs.elementAt(i);
+					if (reference != null) {
+						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
+
+						if (!resolved && scp.getState() > ServiceComponentProp.SATISFIED) {
+							if (Activator.DEBUG) {
+								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null);
+							}
+							toDispose = true;
+							break;
+						}
+					}
+				}
+				if (!toDispose) {
+					result.removeElementAt(k);
+				}
+			}
+			return result;
 		} catch (Throwable e) {
 			Activator.log.error("[SCR] Unexpected exception occurred!", e);
 			return null;
@@ -586,21 +594,6 @@ public final class Resolver implements WorkPerformer {
 			}
 		}
 
-		//no need of this code
-		//		Vector newlyUnsatisfiedSCPs;
-		//		synchronized (syncLock) {
-		//			// synchronously dispose newly unsatisfied components
-		//			newlyUnsatisfiedSCPs = (Vector) satisfiedSCPs.clone();
-		//			removeAll(newlyUnsatisfiedSCPs, resolveEligible());
-		//			if (!newlyUnsatisfiedSCPs.isEmpty()) {
-		//				removeAll(satisfiedSCPs, newlyUnsatisfiedSCPs);
-		//			}
-		//		}
-		//		if (!newlyUnsatisfiedSCPs.isEmpty()) {
-		//			instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
-		//		}
-		//no need of this code
-
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
 			Activator.log.info("[DS perf] " + componentDescriptions.size() + " Components disabled for " + start + " ms");
@@ -610,7 +603,6 @@ public final class Resolver implements WorkPerformer {
 	public void disposeComponentConfigs(Vector scps, int deactivateReason) {
 		// unregister, deactivate, and unbind
 		synchronized (syncLock) {
-			removeAll(satisfiedSCPs, scps);
 			removeAll(scpEnabled, scps);
 		}
 		instanceProcess.disposeInstances(scps, deactivateReason);
@@ -628,40 +620,7 @@ public final class Resolver implements WorkPerformer {
 			switch (workAction) {
 				case BUILD :
 					if (workObject != null) {
-						Vector queue = (Vector) workObject;
-						synchronized (syncLock) {
-							// remove unsatisfied configs
-							for (int i = queue.size() - 1; i >= 0; i--) {
-								if (!satisfiedSCPs.contains(queue.elementAt(i))) {
-									//System.out.println("-----BUILD: removing "+queue.elementAt(i));
-									queue.removeElementAt(i);
-								}
-							}
-							if (queue.isEmpty())
-								return;
-						}
-						instanceProcess.buildComponents(queue, false);
-						//I think there is no need of this code
-						//						// dispose configs that were already tried to dispose while building
-						//						Vector toDispose = null;
-						//						synchronized (syncLock) {
-						//							for (int i = queue.size() - 1; i >= 0; i--) {
-						//								if (!satisfiedSCPs.contains(queue.elementAt(i))) {
-						//									ServiceComponentProp scp = (ServiceComponentProp) queue.elementAt(i);
-						//									if (!(scp.getState() <= ServiceComponentProp.DISPOSING)) {
-						//										//System.out.println("-----DISPOSE after BUILD: removing "+queue.elementAt(i));
-						//										if (toDispose == null) {
-						//											toDispose = new Vector(2);
-						//										}
-						//										toDispose.addElement(queue.elementAt(i));
-						//									}
-						//								}
-						//							}
-						//							if (toDispose == null)
-						//								return; //nothing to dispose
-						//						}
-						//						instanceProcess.disposeInstances(toDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
-						//I think there is no need of this code
+						instanceProcess.buildComponents((Vector) workObject, false);
 					}
 					break;
 				case DYNAMICBIND :
@@ -671,7 +630,7 @@ public final class Resolver implements WorkPerformer {
 							// remove unsatisfied configs
 							for (int i = toBind.size() - 1; i >= 0; i--) {
 								Reference ref = (Reference) toBind.elementAt(i);
-								if (!satisfiedSCPs.contains(ref.scp)) {
+								if (ref.scp.getState() < ServiceComponentProp.SATISFIED) {
 									//System.out.println("--BIND: removing "+ref.scp);
 									toBind.removeElementAt(i);
 								}
@@ -694,6 +653,10 @@ public final class Resolver implements WorkPerformer {
 			Vector toBind = null;
 			for (int i = 0, size = scps.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
+				if (scp.getState() < ServiceComponentProp.SATISFIED) {
+					//do not check disposed components
+					continue;
+				}
 				// if it is not already eligible it will bind with the static
 				// scps
 				Vector references = scp.references;
@@ -728,8 +691,8 @@ public final class Resolver implements WorkPerformer {
 			Vector toBind = null;
 			for (int i = 0, size = scps.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
-				if (scp.isComponentFactory()) {
-					// the component factory configuration does not have to be reactivated
+				if (scp.isComponentFactory() || scp.getState() < ServiceComponentProp.SATISFIED) {
+					// the component configuration does not have to be reactivated
 					continue;
 				}
 				// if it is not already eligible it will bind with the static
@@ -765,6 +728,10 @@ public final class Resolver implements WorkPerformer {
 			Vector toUnbind = null;
 			for (int i = 0, size = scpsToCheck.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scpsToCheck.elementAt(i);
+				if (scp.getState() < ServiceComponentProp.DISPOSING) {
+					//the scp is already disposed
+					continue;
+				}
 				// if it is not already eligible it will bind with the static
 				// scps
 				Vector references = scp.references;
@@ -817,6 +784,10 @@ public final class Resolver implements WorkPerformer {
 			for (int i = 0; i < scps.size(); i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
 
+				if (scp.getState() < ServiceComponentProp.DISPOSING) {
+					//do not check disposed components
+					continue;
+				}
 				Vector references = scp.references;
 				// some components may not contain references and it is
 				// absolutely valid
@@ -872,14 +843,11 @@ public final class Resolver implements WorkPerformer {
 
 			// get list of newly satisfied SCPs and check whether the new SCP is
 			// satisfied
-			Vector newlySatisfiedSCPs = resolveEligible();
-			removeAll(newlySatisfiedSCPs, satisfiedSCPs);
-			if (!newlySatisfiedSCPs.contains(newSCP)) {
+			Vector eligibleSCPs = resolveEligible();
+			if (!eligibleSCPs.contains(newSCP)) {
 				scpEnabled.removeElement(newSCP);
 				throw new ComponentException("Cannot resolve instance of " + newSCP + " with properties " + configProperties);
 			}
-			satisfiedSCPs.addElement(newSCP);
-
 			return newSCP;
 		}
 	}
@@ -1039,18 +1007,9 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
-	// used to add all elements of vector in another vector
-	private void addAll(Vector src, Vector elementsToAdd) {
-		for (int i = 0; i < elementsToAdd.size(); i++) {
-			if (!src.contains(elementsToAdd.elementAt(i))) {
-				src.addElement(elementsToAdd.elementAt(i));
-			}
-		}
-	}
-
 	public void removeFromSatisfiedList(ServiceComponentProp scp) {
 		synchronized (syncLock) {
-			satisfiedSCPs.remove(scp);
+			scp.setState(ServiceComponentProp.DISPOSED);
 		}
 	}
 

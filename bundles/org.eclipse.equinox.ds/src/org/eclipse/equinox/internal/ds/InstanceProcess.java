@@ -678,9 +678,9 @@ public class InstanceProcess {
 
 		// find producer scp
 		ServiceComponentProp producerSCP = null;
-		synchronized (resolver.satisfiedSCPs) {
-			for (int i = 0; i < resolver.satisfiedSCPs.size(); i++) {
-				ServiceComponentProp scp = (ServiceComponentProp) resolver.satisfiedSCPs.elementAt(i);
+		synchronized (resolver.getSyncLock()) {
+			for (int i = 0; i < resolver.scpEnabled.size(); i++) {
+				ServiceComponentProp scp = (ServiceComponentProp) resolver.scpEnabled.elementAt(i);
 				if (producerComponentName.equals(scp.serviceComponent.name)) {
 					// found the producer scp
 					producerSCP = scp;
