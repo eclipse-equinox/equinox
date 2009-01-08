@@ -148,6 +148,33 @@ public class BasicLocationTests extends CoreTest {
 		}
 	}
 
+	public void testCreateLocation05() {
+		Location configLocation = LocationManager.getConfigurationLocation();
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testCreateLocation01");
+		Location testLocation = configLocation.createLocation(null, null, false);
+		try {
+			testLocation.set(testLocationFile.toURL(), false);
+		} catch (Throwable t) {
+			fail("Failed to set location", t);
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.lock());
+			assertFalse("Could lock a secend time", testLocation.lock());
+			assertFalse("Could lock a third time", testLocation.lock());
+		} catch (IOException e) {
+			fail("Failed to lock location", e);
+		} finally {
+			testLocation.release();
+		}
+		try {
+			assertTrue("Could not lock location", testLocation.lock());
+		} catch (IOException e) {
+			fail("Failed to lock location", e);
+		} finally {
+			testLocation.release();
+		}
+	}
+
 	public void testSetLocationWithEmptyLockFile() {
 		Location configLocation = LocationManager.getConfigurationLocation();
 		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/testSetLocationWithEmptyLockFile"); //$NON-NLS-1$

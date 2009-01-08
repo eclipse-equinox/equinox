@@ -190,7 +190,8 @@ public class BasicLocation implements Location {
 				throw new IOException(NLS.bind(EclipseAdaptorMsg.location_notFileProtocol, locationValue));
 			throw new IllegalStateException(EclipseAdaptorMsg.location_noLockFile); // this is really unexpected
 		}
-
+		if (isLocked())
+			return false;
 		File parentFile = new File(lock.getParent());
 		if (!parentFile.exists())
 			if (!parentFile.mkdirs())
