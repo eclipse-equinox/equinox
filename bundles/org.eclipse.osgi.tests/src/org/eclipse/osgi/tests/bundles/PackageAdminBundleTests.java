@@ -110,4 +110,23 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			OSGiTestsActivator.getContext().removeBundleListener(testListener);
 		}
 	}
+
+	public void testBug259903() throws Exception {
+		Bundle bug259903a = installer.installBundle("test.bug259903.a");
+		Bundle bug259903b = installer.installBundle("test.bug259903.b");
+		Bundle bug259903c = installer.installBundle("test.bug259903.c");
+
+		try {
+			installer.resolveBundles(new Bundle[] {bug259903a, bug259903b, bug259903c});
+			bug259903c.start();
+			bug259903a.uninstall();
+			installer.installBundle("test.bug259903.a.update");
+			installer.refreshPackages(new Bundle[] {bug259903a});
+			Object[] expectedEvents = new Object[] {new BundleEvent(BundleEvent.STOPPED, bug259903c)};
+			Object[] actualEvents = simpleResults.getResults(expectedEvents.length);
+			compareResults(expectedEvents, actualEvents);
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		}
+	}
 }

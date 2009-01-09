@@ -92,6 +92,10 @@
 	<classpathentry kind="src" output="bundle_tests/test.link.e" path="bundles_src/test.link.e"/>
 	<classpathentry kind="src" output="bundle_tests/test.link.e.client" path="bundles_src/test.link.e.client"/>
 	<classpathentry kind="src" output="bundle_tests/test.link.postponed" path="bundles_src/test.link.postponed"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.a" path="bundles_src/test.bug259903.a"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.a.update" path="bundles_src/test.bug259903.a.update"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.b" path="bundles_src/test.bug259903.b"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug259903.c" path="bundles_src/test.bug259903.c"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

@@ -229,7 +229,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			policy.open(bundle.getFramework().getSystemBundleContext());
 	}
 
-	private synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
+	public synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
 		if ((loaderFlags & FLAG_IMPORTSINIT) != 0)
 			return importedSources;
 		BundleDescription bundleDesc = proxy.getBundleDescription();

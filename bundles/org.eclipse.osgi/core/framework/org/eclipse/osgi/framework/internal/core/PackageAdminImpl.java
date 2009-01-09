@@ -208,6 +208,9 @@ public class PackageAdminImpl implements PackageAdmin {
 					// the state.
 					descriptions = new BundleDescription[0];
 				else if (numBundles > 0) {
+					// populate the resolved hosts package sources first
+					populateLoaders(framework.bundles.getBundles());
+					// not collect the descriptions to refresh
 					ArrayList results = new ArrayList(numBundles);
 					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
@@ -250,6 +253,22 @@ public class PackageAdminImpl implements PackageAdmin {
 				framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
 				if (refreshPackages)
 					framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+			}
+		}
+	}
+
+	private void populateLoaders(List bundles) {
+		// populate all the loaders with their package source information
+		// this is needed to fix bug 259903.
+		for (Iterator iBundles = bundles.listIterator(); iBundles.hasNext();) {
+			AbstractBundle bundle = (AbstractBundle) iBundles.next();
+			// only need to do this for host bundles which are resolved
+			if (bundle instanceof BundleHost && bundle.isResolved()) {
+				// getting the BundleLoader object populates the require-bundle sources
+				BundleLoader loader = ((BundleHost) bundle).getBundleLoader();
+				if (loader != null)
+					// need to explicitly get the import package sources
+					loader.getImportedSources(null);
 			}
 		}
 	}
