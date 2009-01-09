@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.net.*;
  */
 public final class URIUtil {
 
+	private static final String UNC_PREFIX = "//"; //$NON-NLS-1$
 	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
 
 	private URIUtil() {
@@ -41,8 +42,14 @@ public final class URIUtil {
 			if (path == null)
 				return appendOpaque(base, extension);
 			//if the base is already a directory then resolve will just do the right thing
-			if (path.endsWith("/")) //$NON-NLS-1$
-				return base.resolve(extension);
+			if (path.endsWith("/")) {//$NON-NLS-1$
+				URI result = base.resolve(extension);
+				//Fix UNC paths that are incorrectly normalized by URI#resolve (see Java bug 4723726)
+				String resultPath = result.getPath();
+				if (path.startsWith(UNC_PREFIX) && (resultPath == null || !resultPath.startsWith(UNC_PREFIX)))
+					result = new URI(result.getScheme(), "///" + result.getSchemeSpecificPart(), result.getFragment()); //$NON-NLS-1$
+				return result;
+			}
 			path = path + "/" + extension; //$NON-NLS-1$
 			return new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
 		} catch (URISyntaxException e) {
@@ -174,19 +181,10 @@ public final class URIUtil {
 	 * @return The local file corresponding to the given URI, or <code>null</code>
 	 */
 	public static File toFile(URI uri) {
-		try {
-			if (!SCHEME_FILE.equalsIgnoreCase(uri.getScheme()))
-				return null;
-			//assume all illegal characters have been properly encoded, so use URI class to unencode
-			return new File(uri);
-		} catch (IllegalArgumentException e) {
-			//File constructor does not support non-hierarchical URI
-			String path = uri.getPath();
-			//path is null for non-hierarchical URI such as file:c:/tmp
-			if (path == null)
-				path = uri.getSchemeSpecificPart();
-			return new File(path);
-		}
+		if (!isFileURI(uri))
+			return null;
+		//assume all illegal characters have been properly encoded, so use URI class to unencode
+		return new File(uri.getSchemeSpecificPart());
 	}
 
 	/**
@@ -200,6 +198,10 @@ public final class URIUtil {
 			//ensure there is a leading slash to handle common malformed URLs such as file:c:/tmp
 			if (pathString.indexOf('/') != 0)
 				pathString = '/' + pathString;
+			else if (pathString.startsWith(UNC_PREFIX) && !pathString.startsWith(UNC_PREFIX, 2)) {
+				//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
+				pathString = UNC_PREFIX + pathString;
+			}
 			return new URI(SCHEME_FILE, pathString, null);
 		}
 		try {
