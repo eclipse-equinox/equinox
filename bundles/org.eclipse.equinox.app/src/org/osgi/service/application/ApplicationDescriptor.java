@@ -16,8 +16,8 @@
 
 package org.osgi.service.application;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.equinox.internal.app.AppPersistence;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -27,7 +27,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * information about it. The application descriptor can be used for instance
  * creation.
  * 
- * @version $Revision: 5654 $
+ * @version $Revision: 1.9 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -62,7 +62,6 @@ public abstract class ApplicationDescriptor {
 	 * The property key for the name of the application vendor.
 	 */
 	public static final String APPLICATION_VENDOR = Constants.SERVICE_VENDOR;
-
 
 	/**
 	 * The property key for the visibility property of the application.
@@ -109,10 +108,9 @@ public abstract class ApplicationDescriptor {
 	 */
 	public static final String APPLICATION_LOCATION = "application.location";
 
-	
-	private final String	pid;
+	private final String pid;
 
-	private boolean[]				locked = {false};
+	private boolean[] locked = {false};
 
 	/**
 	 * Constructs the <code>ApplicationDescriptor</code>.
@@ -124,11 +122,11 @@ public abstract class ApplicationDescriptor {
 	 *            be <code>null</code>.
 	 * @throws NullPointerException if the specified <code>applicationId</code> is null.
 	 */
-	protected  ApplicationDescriptor(String applicationId) {
-		if(null == applicationId ) {
+	protected ApplicationDescriptor(String applicationId) {
+		if (null == applicationId) {
 			throw new NullPointerException("Application ID must not be null!");
 		}
-		
+
 		this.pid = applicationId;
 		locked[0] = isLocked();
 	}
@@ -158,11 +156,11 @@ public abstract class ApplicationDescriptor {
 	 * @return <code>true</code> if the specified pattern matches at least
 	 *   one of the certificate chains used to authenticate this application 
 	 * @throws NullPointerException if the specified <code>pattern</code> is null.
-     * @throws IllegalStateException if the application descriptor was
-     *   unregistered
-	 */	
-	public abstract boolean matchDNChain( String pattern );
-	
+	 * @throws IllegalStateException if the application descriptor was
+	 *   unregistered
+	 */
+	public abstract boolean matchDNChain(String pattern);
+
 	/**
 	 * Returns the properties of the application descriptor as key-value pairs.
 	 * The return value contains the locale aware and unaware properties as
@@ -195,8 +193,8 @@ public abstract class ApplicationDescriptor {
 	 *             if the application descriptor is unregistered
 	 */
 	public final Map getProperties(String locale) {
-		Map props = getPropertiesSpecific( locale );
-		Boolean containerLocked = (Boolean) props.remove( APPLICATION_LOCKED );
+		Map props = getPropertiesSpecific(locale);
+		Boolean containerLocked = (Boolean) props.remove(APPLICATION_LOCKED);
 		synchronized (locked) {
 			if (containerLocked != null && containerLocked.booleanValue() != locked[0]) {
 				if (locked[0])
@@ -206,10 +204,10 @@ public abstract class ApplicationDescriptor {
 			}
 		}
 		/* replace the container's lock with the application model's lock, that's the correct */
-		props.put( APPLICATION_LOCKED, new Boolean( locked[0] ) );
+		props.put(APPLICATION_LOCKED, new Boolean(locked[0]));
 		return props;
 	}
-	
+
 	/**
 	 * Container implementations can provide application model specific
 	 * and/or container implementation specific properties via this 
@@ -301,28 +299,26 @@ public abstract class ApplicationDescriptor {
 	 *             (null objects, empty <code>String</code> or a key that is not
 	 *              <code>String</code>)
 	 */
-	public final ApplicationHandle launch(Map arguments)
-			throws ApplicationException {
+	public final ApplicationHandle launch(Map arguments) throws ApplicationException {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm!= null)
+		if (sm != null)
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.LIFECYCLE_ACTION));
 		synchronized (locked) {
 			if (locked[0])
 				throw new ApplicationException(ApplicationException.APPLICATION_LOCKED, "Application is locked, can't launch!");
 		}
-		if( !isLaunchableSpecific() )
-			throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE,
-					 "Cannot launch the application!");
-		checkArgs(arguments);
+		if (!isLaunchableSpecific())
+			throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, "Cannot launch the application!");
+		checkArgs(arguments, false, null);
 		try {
 			return launchSpecific(arguments);
-		} catch(IllegalStateException ise) {
+		} catch (IllegalStateException ise) {
 			throw ise;
-		} catch(SecurityException se) {
+		} catch (SecurityException se) {
 			throw se;
-		} catch( ApplicationException ae) {
+		} catch (ApplicationException ae) {
 			throw ae;
-		} catch(Exception t) {
+		} catch (Exception t) {
 			throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, t);
 		}
 	}
@@ -350,9 +346,8 @@ public abstract class ApplicationDescriptor {
 	 * @throws Exception
 	 *             if any problem occures.
 	 */
-	protected abstract ApplicationHandle launchSpecific(Map arguments)
-			throws Exception;
-	
+	protected abstract ApplicationHandle launchSpecific(Map arguments) throws Exception;
+
 	/**
 	 * This method is called by launch() to verify that according to the
 	 * container, the application is launchable.
@@ -374,16 +369,18 @@ public abstract class ApplicationDescriptor {
 	 * <p>
 	 * The <code>Map</code> argument of the  method contains startup 
 	 * arguments for the application. The keys used in the Map must be non-null, 
-	 * non-empty <code>String<code> objects.
-     * <p>
-     * The created schedules have a unique identifier within the scope of this
-     * <code>ApplicationDescriptor</code>. This identifier can be specified
-     * in the <code>scheduleId</code> argument. If this argument is <code>null</code>,
-     * the identifier is automatically generated.
-     * 
+	 * non-empty <code>String<code> objects. The argument values must be
+	 * of primitive types, wrapper classes of primitive types, <code>String</code>
+	 * or arrays or collections of these.
+	 * <p>
+	 * The created schedules have a unique identifier within the scope of this
+	 * <code>ApplicationDescriptor</code>. This identifier can be specified
+	 * in the <code>scheduleId</code> argument. If this argument is <code>null</code>,
+	 * the identifier is automatically generated.
+	 * 
 	 * @param scheduleId 
 	 *             the identifier of the created schedule. It can be <code>null</code>,
-     *             in this case the identifier is automatically generated.
+	 *             in this case the identifier is automatically generated.
 	 * @param arguments
 	 *            the startup arguments for the scheduled application, may be
 	 *            null
@@ -407,16 +404,19 @@ public abstract class ApplicationDescriptor {
 	 * @throws InvalidSyntaxException 
 	 * 			   if the specified <code>eventFilter</code> is not syntactically correct
 	 * @throws ApplicationException
-     *              if the schedule couldn't be created. The possible error
-     *              codes are 
-     *              <ul>
-     *               <li> {@link ApplicationException#APPLICATION_DUPLICATE_SCHEDULE_ID}
-     *                 if the specified <code>scheduleId</code> is already used
-     *                 for this <code>ApplicationDescriptor</code>
-     *               <li> {@link ApplicationException#APPLICATION_SCHEDULING_FAILED}
-     *                 if the scheduling failed due to some internal reason
-     *                 (e.g. persistent storage error).
-     *              </ul>
+	 *              if the schedule couldn't be created. The possible error
+	 *              codes are 
+	 *              <ul>
+	 *               <li> {@link ApplicationException#APPLICATION_DUPLICATE_SCHEDULE_ID}
+	 *                 if the specified <code>scheduleId</code> is already used
+	 *                 for this <code>ApplicationDescriptor</code>
+	 *               <li> {@link ApplicationException#APPLICATION_SCHEDULING_FAILED}
+	 *                 if the scheduling failed due to some internal reason
+	 *                 (e.g. persistent storage error).
+	 *               <li> {@link ApplicationException#APPLICATION_INVALID_STARTUP_ARGUMENT}
+	 *                 if the specified startup argument doesn't satisfy the 
+	 *                 type or value constraints of startup arguments.
+	 *              </ul>
 	 * @throws SecurityException
 	 *             if the caller doesn't have "schedule"
 	 *             ApplicationAdminPermission for the application.
@@ -427,13 +427,11 @@ public abstract class ApplicationDescriptor {
 	 *             (null objects, empty <code>String</code> or a key that is not
 	 *              <code>String</code>)
 	 */
-	public final ScheduledApplication schedule(String scheduleId, Map arguments, String topic,
-			String eventFilter, boolean recurring) throws InvalidSyntaxException, 
-            ApplicationException {
+	public final ScheduledApplication schedule(String scheduleId, Map arguments, String topic, String eventFilter, boolean recurring) throws InvalidSyntaxException, ApplicationException {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.SCHEDULE_ACTION));
-		checkArgs(arguments);
+		checkArgs(arguments, true, null);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
 		return AppPersistence.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
 	}
@@ -461,13 +459,13 @@ public abstract class ApplicationDescriptor {
 			saveLock(true);
 		}
 	}
-	
+
 	/**
 	 * This method is used to notify the container implementation that the
 	 * corresponding application has been locked and it should update the
 	 * <code>application.locked</code> service property accordingly.
-     * @throws IllegalStateException
-     *             if the application descriptor is unregistered
+	 * @throws IllegalStateException
+	 *             if the application descriptor is unregistered
 	 */
 	protected abstract void lockSpecific();
 
@@ -492,7 +490,7 @@ public abstract class ApplicationDescriptor {
 			saveLock(false);
 		}
 	}
-	
+
 	/**
 	 * This method is used to notify the container implementation that the
 	 * corresponding application has been unlocked and it should update the
@@ -511,17 +509,56 @@ public abstract class ApplicationDescriptor {
 		return AppPersistence.isLocked(this);
 	}
 
-	private void checkArgs(Map arguments) {
+	private static final Collection scalars = Arrays.asList(new Class[] {String.class, Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class});
+	private static final Collection scalarsArrays = Arrays.asList(new Class[] {String[].class, Integer[].class, Long[].class, Float[].class, Double[].class, Byte[].class, Short[].class, Character[].class, Boolean[].class});
+	private static final Collection primitiveArrays = Arrays.asList(new Class[] {long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class});
+
+	private static void checkArgs(Map arguments, boolean validateValues, Collection visited) throws ApplicationException {
+		if (visited == null)
+			visited = new ArrayList();
+		else if (visited.contains(arguments))
+			return;
+		visited.add(arguments);
 		if (arguments == null)
 			return;
-		for (Iterator keys = arguments.keySet().iterator(); keys.hasNext();) {
-			Object key = keys.next();
-			if (!(key instanceof String))
-				throw new IllegalArgumentException("Invalid key type: " + key == null ? "<null>" : key.getClass().getName());
-			if ("".equals(key)) //$NON-NLS-1$
+		for (Iterator entries = arguments.entrySet().iterator(); entries.hasNext();) {
+			Map.Entry entry = (Entry) entries.next();
+			if (!(entry.getKey() instanceof String))
+				throw new IllegalArgumentException("Invalid key type: " + entry.getKey() == null ? "<null>" : entry.getKey().getClass().getName());
+			if ("".equals(entry.getKey())) //$NON-NLS-1$
 				throw new IllegalArgumentException("Empty string is an invalid key");
+			if (validateValues)
+				validateValue(entry, visited);
 		}
 	}
 
+	private static void validateValue(Map.Entry entry, Collection visited) throws ApplicationException {
+		Class clazz = entry.getValue().getClass();
 
+		// Is it in the set of scalar types	
+		if (scalars.contains(clazz))
+			return;
+
+		// Is it an array of primitives or scalars
+		if (scalarsArrays.contains(clazz) || primitiveArrays.contains(clazz))
+			return;
+
+		// Is it a Collection of scalars
+		if (entry.getValue() instanceof Collection) {
+			Collection valueCollection = (Collection) entry.getValue();
+			for (Iterator it = valueCollection.iterator(); it.hasNext();) {
+				Class containedClazz = it.next().getClass();
+				if (!scalars.contains(containedClazz)) {
+					throw new ApplicationException(ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT, "The value for key \"" + entry.getKey() + "\" is a collection that contains an invalid value of type \"" + containedClazz.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+			return;
+		}
+
+		if (entry.getValue() instanceof Map) {
+			checkArgs((Map) entry.getValue(), true, visited);
+			return;
+		}
+		throw new ApplicationException(ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT, "The value for key \"" + entry.getKey() + "\" is an invalid type \"" + clazz.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 }

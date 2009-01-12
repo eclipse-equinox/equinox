@@ -40,9 +40,11 @@ package org.osgi.service.application;
  * <li> {@link #APPLICATION_EXITVALUE_NOT_AVAILABLE} - The exit value is not
  * available for an application instance because the instance has not
  * terminated.
+ * <li> {@link #APPLICATION_INVALID_STARTUP_ARGUMENT} - One of the specified 
+ * startup arguments is invalid, for example its type is not permitted.
  * </ul>
  * 
- * @version $Revision: 5837 $
+ * @version $Revision: 6083 $
  */
 public class ApplicationException extends Exception {
 	private static final long serialVersionUID = -7173190453622508207L;
@@ -68,7 +70,8 @@ public class ApplicationException extends Exception {
     
     /**
      * The application schedule could not be created due to some internal error
-     * (for example, the schedule information couldn't be saved).
+     * (for example, the schedule information couldn't be saved due to some
+	 * storage error).
      */
     public static final int APPLICATION_SCHEDULING_FAILED = 0x04;
     
@@ -81,10 +84,18 @@ public class ApplicationException extends Exception {
 	/**
 	 * The exit value is not available for an application instance because the
 	 * instance has not terminated.
-	 * 
+	 *
 	 * @since 1.1
 	 */
     public static final int APPLICATION_EXITVALUE_NOT_AVAILABLE = 0x06;
+
+	/**
+	 * One of the specified startup arguments is invalid, for example its 
+	 * type is not permitted.
+	 *
+	 * @since 1.1
+	 */
+    public static final int APPLICATION_INVALID_STARTUP_ARGUMENT = 0x07;
 
 	/**
 	 * Creates an <code>ApplicationException</code> with the specified error code.
@@ -126,6 +137,17 @@ public class ApplicationException extends Exception {
 	public ApplicationException(int errorCode, String message, Throwable cause) {
 		super(message, cause);
 		this.errorCode = errorCode;
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
+	 */
+	public Throwable getCause() {
+		return super.getCause();
 	}
 
 	/**

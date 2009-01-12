@@ -37,7 +37,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * permission <code>schedule</code> implies the permission
  * <code>lifecycle</code>.
  * 
- * @version $Revision: 5673 $
+ * @version $Revision: 5901 $
  */
 public class ApplicationAdminPermission extends Permission {
 	private static final long serialVersionUID = 1L;
@@ -150,7 +150,7 @@ public class ApplicationAdminPermission extends Permission {
 			try {
 				newPerm = new ApplicationAdminPermission( this.filter, this.actions );
 			}catch( InvalidSyntaxException e ) {
-				throw new RuntimeException( "Internal error" ); /* this can never happen */
+				throw new RuntimeException(e); /* this can never happen */
 			}
 		}
 		else	
