@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<component
+			xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+			name="org.eclipse.equinox.ds.tests.tb16.Exposer"
+			immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb16.TargetProperties"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+			<provide interface="org.eclipse.equinox.ds.tests.tb16.TargetProperties"/>
+		</service>
+	</component>
+
+	<component
+			xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+			name="org.eclipse.equinox.ds.tests.tb16.C1"
+			immediate="true"
+			enabled="false">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb16.TargetProperties"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<property
+			name="serial.num"
+			value="10"/>
+	</component>
+
+	<component
+			xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+			name="org.eclipse.equinox.ds.tests.tb16.C2"
+			immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb16.TargetProperties"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+ 		<reference
+			interface="org.eclipse.equinox.ds.tests.tb16.TargetProperties"
+			name="ref"/>
+		<property
+			name="ref.target"
+			value="(serial.num=10)"/>
+	</component>
+
+</components>

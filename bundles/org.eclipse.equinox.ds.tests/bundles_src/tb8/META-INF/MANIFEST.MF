@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-Name: Declaritive services test
+Bundle-Description: Declaritive services TB8
+Bundle-Category: test
+Import-Package: org.eclipse.equinox.ds.tests.tbc,
+ org.osgi.framework,
+ org.osgi.service.component;version="1.0.0"
+Service-Component: org/eclipse/equinox/ds/tests/tb8/root1.xml,
+  org/eclipse/equinox/ds/tests/tb8/root2.xml,
+  org/eclipse/equinox/ds/tests/tb8/root3.xml,
+  org/eclipse/equinox/ds/tests/tb8/root4.xml,
+  org/eclipse/equinox/ds/tests/tb8/root5.xml,
+  org/eclipse/equinox/ds/tests/tb8/components.xml

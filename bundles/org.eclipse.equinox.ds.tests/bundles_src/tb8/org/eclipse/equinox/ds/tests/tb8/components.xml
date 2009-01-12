@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Any non root DS component should be in namespace "http://www.osgi.org/xmlns/scr/v1.0.0" -->
+
+<components>
+
+	<!-- This ds component description is not valid
+		(the component is in the default NS, but the default NS is not set) -->
+	
+	<component name="org.eclipse.equinox.ds.tests.tb8.nonroot1"
+		immediate="true">
+		<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+		</service>
+		<property name="component.nsid" type="Integer" value="111"/>
+	</component>
+	
+	
+	<!-- This ds component description is valid
+		(the component is in the default NS and it is set properly) -->
+	
+	<component name="org.eclipse.equinox.ds.tests.tb8.nonroot2"
+		xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+		immediate="true">
+		<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+		</service>
+		<property name="component.nsid" type="Integer" value="112"/>
+	</component>
+	
+	
+	<!-- This ds component description is not valid
+		(the component is in the default NS, but the default NS is set wrongly) -->
+   
+	<component name="org.eclipse.equinox.ds.tests.tb8.nonroot3"
+		xmlns="http://www.osgi.org/wrong"
+		immediate="true">
+		<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+		</service>
+		<property name="component.nsid" type="Integer" value="113"/>
+	</component>
+	
+	
+	<!-- This ds component description is valid
+		(the component is in the "scr" NS and it is set properly) -->
+   
+	<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot4"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+		immediate="true">
+		<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+		</service>
+		<property name="component.nsid" type="Integer" value="114"/>
+	</scr:component>
+
+
+	<!-- This ds component description is not valid
+		(the component is in the "scr" NS, but it is set wrongly) -->
+	   
+	<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot5"
+		xmlns:scr="http://www.osgi.org/wrong"
+		immediate="true">
+		<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+		</service>
+		<property name="component.nsid" type="Integer" value="115"/>
+	</scr:component>
+
+
+
+	<componentsInner xmlns="http://www.osgi.org/xmlns/scr/v1.0.0">
+	
+		<!-- This ds component description is valid
+			(the component is in the default NS and it is set properly in parent) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot6"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="116"/>
+		</component>
+		
+		
+		<!-- This ds component description is not valid
+			(the component is in the "scr" NS, but it is not set
+			(although the default NS is set properly in parent)) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot7"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="117"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+	
+	
+	<componentsInner xmlns="http://www.osgi.org/wrong">
+	
+		<!-- This ds component description is not valid
+			(the component is in the default NS, but the default NS 
+			is set wrongly (in parent)) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot8"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="118"/>
+		</component>
+		
+		
+		<!-- This ds component description is not valid
+			(the component is in the "scr" NS, but it is not set
+			(not in the component nor the parent)) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot9"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="119"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+	
+	
+	<componentsInner xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	
+		<!-- This ds component description is not valid
+			(the component is in the default NS, but the default NS is not set
+			(although the "scr" NS is set properly in parent)) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot10"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="120"/>
+		</component>
+		
+		
+		<!-- This ds component description is valid
+			(the component is in the "scr" NS and it is set properly in parent) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot11"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="121"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+	
+	
+	<componentsInner xmlns:scr="http://www.osgi.org/wrong">
+	
+		<!-- This ds component description is not valid
+			(the component is in the default NS, but the default NS is not set) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot12"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="122"/>
+		</component>
+		
+		
+		<!-- This ds component description is not valid
+			(the component is in the "scr" NS, but it is set wrongly (in parent)) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot13"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="123"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+	
+	
+	<componentsInner xmlns="http://www.osgi.org/wrong">
+	
+		<!-- This ds component description is valid
+			(the component is in the default NS, and the properly defined
+			default NS in component overrides wrongly defined NS in parent) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot14"
+			xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="124"/>
+		</component>
+		
+		
+		<!-- This ds component description is valid
+			(the component is in the "scr" NS, and it is set properly in component
+			(the default NS is set wrongly in parent, but we use "scr" NS)) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot15"
+			xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="125"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+	
+	
+	<componentsInner xmlns:scr="http://www.osgi.org/wrong">
+	
+		<!-- This ds component description is valid
+			(the component is in the default NS, and it is set properly in component
+			(the "scr" NS is set wrongly in parent, but we use default NS) -->
+		
+		<component name="org.eclipse.equinox.ds.tests.tb8.nonroot16"
+			xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="126"/>
+		</component>
+		
+		
+		<!-- This ds component description is valid
+			(the component is in the "scr" NS, and the properly defined
+			"scr" NS in component overrides wrongly defined NS in parent) -->
+		
+		<scr:component name="org.eclipse.equinox.ds.tests.tb8.nonroot17"
+			xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+			immediate="true">
+			<implementation class="org.eclipse.equinox.ds.tests.tb8.NamespaceTester"/>
+			<service>
+				<provide interface="org.eclipse.equinox.ds.tests.tbc.NamespaceProvider"/>
+			</service>
+			<property name="component.nsid" type="Integer" value="127"/>
+		</scr:component>
+	
+	</componentsInner>
+	
+</components>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<!-- another bad component - component factory cannot be immediate -->
+<scr:component name="org.eclipse.equinox.ds.tests.tb1.Immediate"
+      xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+      immediate="true"
+      factory="org.eclipse.equinox.ds.tests.tb1.Immediate">
+    <implementation class="org.eclipse.equinox.ds.tests.tb1.Immediate" />
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb1.Immediate"/>
+	</service>
+</scr:component>
+
+<!-- this below should be ignored by the SCR parser -->
+<ignored>
+	<component>
+		<service servicefactory="true" />
+	</component>
+</ignored>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent"
+	enabled="true"
+	immediate="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<properties entry="org/eclipse/equinox/ds/tests/tb1/impl/sac.properties"/>
+	<property name="test.property.list" value="setFromDefinition"/>
+	<property name="test.property.cont" value="setFromDefinition"/>
+	<property name="test.property.name" value="setFromDefinition"/>
+	<property name="component.name" value="setFromDefinition"/>
+	<property name="component.id" value="-1" type="Long"/>
+	<implementation class="org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent"/>
+	</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb1.impl.BaseComp"
+	enabled="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb1.impl.BaseComp"/>
+	<property name="custom" value="customvalue"/>
+	<service servicefactory="true">
+		<provide interface="org.eclipse.equinox.ds.tests.tb1.impl.BaseComp"/>
+	</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb1.BindUnbindSuccessor"
+	enabled="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb1.BindUnbindSuccessor"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb1.BindUnbindSuccessor"/>
+	</service>
+	
+  <reference name="StandAloneComp"
+		interface="org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent"
+		target="(component.name=org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent)"
+		bind="bindSAComp"
+		unbind="unbindSAComp"
+		cardinality="0..n"
+		policy="dynamic"
+	/>
+
+</scr:component>
+
+</root>

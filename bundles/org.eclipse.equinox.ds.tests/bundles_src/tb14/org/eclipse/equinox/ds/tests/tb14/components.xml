@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<!-- This component provides ComponentContextExposer service which other components use -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb14.ContextExp"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb14.ContextExp"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider"/>
+		</service>
+	</component>
+
+	<!-- Component name not set; old XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb14.Optional"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- Component name not set; new XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb14.Optional2"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- Reference name not set; old XML Schema -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+		name="org.eclipse.equinox.ds.tests.tb14.OptRef100"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb14.Optional"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider"/>
+	</component>
+
+	<!-- Reference name not set; new XML Schema -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+		name="org.eclipse.equinox.ds.tests.tb14.OptRef110"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb14.Optional"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider"/>
+	</component>
+</components>

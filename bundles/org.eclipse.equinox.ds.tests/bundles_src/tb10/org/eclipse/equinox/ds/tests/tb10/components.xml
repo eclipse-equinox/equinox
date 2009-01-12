@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://www.osgi.org/xmlns/scr/v1.0.0">
+
+	<component name="ServiceCountHelperFactory" factory="CountHelperFactory">
+		<implementation class="org.eclipse.equinox.ds.tests.tb10.CountHelperFactory"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb10.CountHelperFactory"/>
+		</service>
+	</component>
+
+	<component name="ServiceCountFactory" factory="CountFactory">
+		<implementation class="org.eclipse.equinox.ds.tests.tb10.CountFactory"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.BoundCountProvider"/>
+		</service>
+		<reference name="HELPERFACTORY"
+			interface="org.eclipse.equinox.ds.tests.tb10.CountHelperFactory"
+			cardinality="0..n"
+			policy="dynamic"
+			bind="bindService"
+			unbind="unbindService"/>
+		<reference name="SIMPLECOMPONENT"
+			interface="org.eclipse.equinox.ds.tests.tb1.impl.BaseComp"
+			cardinality="0..n"
+			policy="dynamic"
+			bind="bindService"
+			unbind="unbindService"/>
+	</component>
+	
+	<component name="StaticServiceCountFactory" factory="StaticServiceCountFactory">
+		<implementation class="org.eclipse.equinox.ds.tests.tb10.CountFactory"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.BoundCountProvider"/>
+		</service>
+		<reference name="HELPERFACTORY"
+			interface="org.eclipse.equinox.ds.tests.tb10.CountHelperFactory"
+			cardinality="0..n"
+			policy="static"
+			bind="bindService"
+			unbind="unbindService"/>
+		<reference name="SIMPLECOMPONENT"
+			interface="org.eclipse.equinox.ds.tests.tb1.impl.BaseComp"
+			cardinality="0..n"
+			policy="static"
+			bind="bindService"
+			unbind="unbindService"/>
+	</component>
+	
+</components>

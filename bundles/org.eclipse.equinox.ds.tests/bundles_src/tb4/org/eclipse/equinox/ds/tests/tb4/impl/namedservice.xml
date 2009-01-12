@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.NamedService"
+      xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+      factory="org.eclipse.equinox.ds.tests.tb4.NamedService">
+    <implementation class="org.eclipse.equinox.ds.tests.tb4.impl.NamedFactory" />
+    <property name="override.property.1" value="setFromXML"/>
+    <properties entry="org/eclipse/equinox/ds/tests/tb4/impl/namedservice.properties"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb4.NamedService"/>
+	</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.DynamicService"
+      xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+      factory="org.eclipse.equinox.ds.tests.tb4.DynamicService">
+    <implementation class="org.eclipse.equinox.ds.tests.tb4.impl.DynamicFactory" />
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb4.DynamicService"/>
+		</service>
+</scr:component>
+
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.BoundReplacer"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb4.BoundReplacer"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb4.BoundReplacer"/>
+	</service>
+	<reference
+			name="DynamicReference"
+			interface="org.eclipse.equinox.ds.tests.tb4.DynamicService"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb4.DynamicService)"
+			cardinality="1..1"
+			bind="bindDynamicService"
+			unbind="unbindDynamicService"
+			policy="dynamic"
+	/>
+	<reference
+			name="StaticReference"
+			interface="org.eclipse.equinox.ds.tests.tb4.NamedService"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb4.NamedService)"
+			cardinality="1..1"
+			bind="bindNamedService"
+			unbind="unbindNamedService"
+			policy="static"
+	/>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.AdvancedBounder"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb4.AdvancedBounder"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb4.AdvancedBounder"/>
+	</service>
+	<reference
+			name="DynamicReference"
+			interface="org.eclipse.equinox.ds.tests.tbc.DynamicWorker"
+			target="(mandatory.property=true)"
+			cardinality="1..1"
+			bind="bindDynamicService"
+			unbind="unbindDynamicService"
+			policy="dynamic"
+	/>
+	<reference
+			name="StaticReference"
+			interface="org.eclipse.equinox.ds.tests.tbc.StaticWorker"
+			target="(mandatory.property=true)"
+			cardinality="1..1"
+			bind="bindStaticService"
+			unbind="unbindStaticService"
+			policy="static"
+	/>
+</scr:component>
+</root>

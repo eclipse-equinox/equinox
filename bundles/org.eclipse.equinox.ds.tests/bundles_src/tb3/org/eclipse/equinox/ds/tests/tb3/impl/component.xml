@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb3.impl.BindBlocker"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb3.impl.BindBlocker"/>
+	<property name="block.timeout" value="60000"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb3.impl.BindBlocker"/>
+	</service>
+	<reference
+		name="LOG"
+		cardinality="1..1"
+		interface="org.eclipse.equinox.ds.tests.tb1.impl.AnotherComponent"
+		bind="setLogger"
+		unbind="unsetLogger"
+	/>
+</scr:component>
+
+</root>

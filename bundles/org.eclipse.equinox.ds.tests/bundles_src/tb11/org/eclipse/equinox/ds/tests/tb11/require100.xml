@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This component has require confuguration policy, but old XML Schema -->
+
+<component
+      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+      name="org.eclipse.equinox.ds.tests.tb11.requireNS100"
+      configuration-policy="require"
+      immediate="true">
+   <implementation
+         class="org.eclipse.equinox.ds.tests.tb11.ConfigurationPolicyComp"/>
+   <service>
+		<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+	</service>
+</component>

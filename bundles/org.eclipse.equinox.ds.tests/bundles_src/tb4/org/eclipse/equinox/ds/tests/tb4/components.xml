@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.AnotherComponent"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb4.AnotherComponent"/>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.ServiceProvider"
+	immediate="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb4.ServiceProvider"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb4.ServiceProvider"/>
+	</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.Component3"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb4.Component3"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb4.Component3"/>
+		</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.Component2"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb4.Component2"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb4.Component2"/>
+		</service>
+		<reference
+			name="TailComponent"
+			interface="org.eclipse.equinox.ds.tests.tb4.Component3"
+		/>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.Component1"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+		<implementation class="org.eclipse.equinox.ds.tests.tb4.Component1"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tb4.Component1"/>
+		</service>
+		<reference
+			name="MiddleComponent"
+			interface="org.eclipse.equinox.ds.tests.tb4.Component2"
+		/>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb4.GiveMeContext"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb4.GiveMeContext"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider"/>
+	</service>
+</scr:component>
+</root>

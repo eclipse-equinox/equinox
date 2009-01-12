@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<!-- This component provides ComponentManager service which other components use -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.Enabler"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.Enabler"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"/>
+		</service>
+	</component>
+
+	<!-- bind/unbind with ServiceReference; old XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.SrNS100"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	    <reference
+	          bind="bindSr"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindSr"/>
+	</component>
+	
+	<!-- bind/unbind with ServiceReference; new XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.SrNS110"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+	          bind="bindSr"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindSr"/>
+	</component>
+	
+	<!-- bind/unbind with ComponentEnabler; old XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.CeNS100"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	    <reference
+	          bind="bindCm"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindCm"/>
+	</component>
+	
+	<!-- bind/unbind with ComponentEnabler; new XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.CeNS110"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+	          bind="bindCm"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindCm"/>
+	</component>
+	
+	<!-- bind/unbind with ComponentEnabler, Map; old XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.CeMapNS100"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	    <reference
+	          bind="bindCmMap"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindCmMap"/>
+	</component>
+	
+	<!-- bind/unbind with ComponentEnabler, Map; new XML Schema -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb13.CeMapNS110"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb13.BindUnbindRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+	          bind="bindCmMap"
+	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
+	          name="componentenabler"
+	          unbind="unbindCmMap"/>
+	</component>
+	
+</components>

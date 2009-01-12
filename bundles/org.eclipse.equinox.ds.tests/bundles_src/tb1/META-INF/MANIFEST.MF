@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-Name: Declaritive services test
+Bundle-Description: Declaritive services TB1
+Bundle-Category: test
+Import-Package: org.eclipse.equinox.ds.tests.tbc,
+ org.osgi.framework,
+ org.osgi.service.component;version="1.0.0"
+Bundle-Activator: org.eclipse.equinox.ds.tests.tb1.impl.Activator
+Service-Component: org/eclipse/equinox/ds/tests/tb1/impl/components.xml

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb6.ReferencedComp"
+	enabled="false"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb6.ReferencedComp"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb6.ReferencedComp"/>
+	</service>
+</scr:component>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb6.StaticComp"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb6.StaticComp"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb6.StaticComp"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb6.ReferencedComp"
+		target="(component.name=org.eclipse.equinox.ds.tests.tb6.ReferencedComp)"
+		cardinality="0..1"
+		policy="static"
+		bind="bind"
+		unbind="unbind"
+	/>
+</scr:component>
+
+</root>
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb9.WildcardComponent1"
+	immediate="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb9.WildcardTester"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb9.Wildcard1"/>
+	</service>
+</scr:component>

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-Name: Declaritive services test
+Bundle-Description: Declaritive services TB5
+Bundle-Category: test
+Service-Component: org/eclipse/equinox/ds/tests/tb5/impl/component.xml

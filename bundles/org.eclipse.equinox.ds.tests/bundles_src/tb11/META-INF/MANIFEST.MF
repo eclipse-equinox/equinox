@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-Name: Declaritive services test
+Bundle-Description: Declaritive services TB11
+Bundle-Category: test
+Import-Package: org.eclipse.equinox.ds.tests.tbc,
+ org.osgi.framework,
+ org.osgi.service.component;version="1.0.0"
+Service-Component: org/eclipse/equinox/ds/tests/tb11/optional100.xml,
+  org/eclipse/equinox/ds/tests/tb11/optional110.xml,
+  org/eclipse/equinox/ds/tests/tb11/require100.xml,
+  org/eclipse/equinox/ds/tests/tb11/require110.xml,
+  org/eclipse/equinox/ds/tests/tb11/ignore100.xml,
+  org/eclipse/equinox/ds/tests/tb11/ignore110.xml,
+  org/eclipse/equinox/ds/tests/tb11/notset100.xml,
+  org/eclipse/equinox/ds/tests/tb11/notset110.xml

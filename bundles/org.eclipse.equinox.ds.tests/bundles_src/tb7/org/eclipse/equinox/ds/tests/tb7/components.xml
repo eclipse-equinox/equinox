@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<!-- 1) unbreakable circularity - all components has mandatory references -->
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit1"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit1"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit1"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit2"
+	/>
+	</scr:component>		
+
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit2"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit2"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit2"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.UnbreakableCircuit1"
+	/>
+	</scr:component>		
+
+	<!-- 2) breakable circularity with dynamic policy -->
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit1"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit1"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit1"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit2"
+	/>
+	</scr:component>		
+	
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit2"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit2"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit2"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.DynamicCircuit1"
+		cardinality="0..1"
+		policy="dynamic"
+		bind="bind"
+		unbind="unbind"
+	/>
+	</scr:component>		
+	
+	<!-- 3) Breakable circularity with static policy -->
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.StaticCircuit1"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.StaticCircuit1"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.StaticCircuit1"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.StaticCircuit2"
+	/>
+	</scr:component>		
+	
+	<scr:component name="org.eclipse.equinox.ds.tests.tb7.StaticCircuit2"
+		xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">		
+	<implementation class="org.eclipse.equinox.ds.tests.tb7.StaticCircuit2"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb7.StaticCircuit2"/>
+	</service>
+	<reference
+		name="referencedComponent"
+		interface="org.eclipse.equinox.ds.tests.tb7.StaticCircuit1"
+		cardinality="0..1"
+		bind="bind"
+		unbind="unbind"
+	/>
+	</scr:component>		
+	
+</root>
+

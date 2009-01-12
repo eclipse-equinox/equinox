@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/CDC-1.1%Foundation-1.1"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="scr_test/tb2" path="bundles_src/tb2"/>
+	<classpathentry kind="src" output="scr_test/tb1" path="bundles_src/tb1"/>
+	<classpathentry kind="src" output="scr_test/tb10" path="bundles_src/tb10"/>
+	<classpathentry kind="src" output="scr_test/tb3" path="bundles_src/tb3"/>
+	<classpathentry kind="src" output="scr_test/tb4" path="bundles_src/tb4"/>
+	<classpathentry kind="src" output="scr_test/tb5" path="bundles_src/tb5"/>
+	<classpathentry kind="src" output="scr_test/tb6" path="bundles_src/tb6"/>
+	<classpathentry kind="src" output="scr_test/tb7" path="bundles_src/tb7"/>
+	<classpathentry kind="src" output="scr_test/tb8" path="bundles_src/tb8"/>
+	<classpathentry kind="src" output="scr_test/tb9" path="bundles_src/tb9"/>
+	<classpathentry kind="src" output="scr_test/tb11" path="bundles_src/tb11"/>
+	<classpathentry kind="src" output="scr_test/tb12" path="bundles_src/tb12"/>
+	<classpathentry kind="src" output="scr_test/tb13" path="bundles_src/tb13"/>
+	<classpathentry kind="src" output="scr_test/tb14" path="bundles_src/tb14"/>
+	<classpathentry kind="src" output="scr_test/tb15" path="bundles_src/tb15"/>
+	<classpathentry kind="src" output="scr_test/tb16" path="bundles_src/tb16"/>
+	<classpathentry kind="src" output="scr_test/tb17" path="bundles_src/tb17"/>
+	<classpathentry kind="src" output="scr_test/tb18" path="bundles_src/tb18"/>
+	<classpathentry kind="src" output="scr_test/tb19" path="bundles_src/tb19"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

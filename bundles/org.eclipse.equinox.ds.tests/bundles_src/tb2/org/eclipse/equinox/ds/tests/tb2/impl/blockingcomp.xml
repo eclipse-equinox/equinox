@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb2.impl.Blocker"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb2.impl.Blocker"/>
+	<property name="block.timeout" value="60000"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb2.impl.Blocker"/>
+	</service>
+</scr:component>
+
+</root>
