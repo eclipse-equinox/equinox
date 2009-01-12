@@ -312,4 +312,10 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return Collections.EMPTY_MAP;
 	}
 
+	public Version getVersion() {
+		Bundle current = systemBundle;
+		if (current != null)
+			current.getVersion();
+		return Version.emptyVersion;
+	}
 }

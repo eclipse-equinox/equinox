@@ -29,7 +29,7 @@ import org.osgi.framework.launch.Framework;
  * use services from other bundles which are installed in the same framework as
  * the composite bundle. The packages imported and the services used by a
  * composite bundle are shared with the components of a composite bundle through
- * the surrogate bundle installed in the child framework. Also like a normal
+ * a surrogate bundle installed in the child framework. Also like a normal
  * bundle, a composite bundle may export packages and register services which
  * can be used by bundles installed in the same framework as the composite
  * bundle. The packages exported and the services registered by a composite
@@ -39,8 +39,9 @@ import org.osgi.framework.launch.Framework;
  * A framework has one composite bundle for each of its child frameworks. A
  * framework can have zero or more composite bundles installed. A child
  * framework must have one and only one surrogate bundle which represents the
- * composite bundle. In other words a parent framework can have many children
- * frameworks but a child framework can only have one parent.
+ * composite bundle in the parent framework. In other words, a parent framework
+ * can have many child frameworks but a child framework can have only one
+ * parent.
  * <p>
  * A composite bundle does the following as specified by the composite manifest
  * map:
@@ -60,9 +61,9 @@ import org.osgi.framework.launch.Framework;
  * A newly created child <code>Framework</code> will be in the
  * {@link Bundle#STARTING STARTING} state. This child <code>Framework</code> can
  * then be used to manage and control the child framework instance. The child
- * framework instance is persistent and uses a storage area in the composite
- * bundle's data area. The child framework's lifecycle is tied to its composite
- * bundle's lifecycle in the following ways:
+ * framework instance is persistent and uses a storage area associated with the
+ * installed composite bundle. The child framework's lifecycle is tied to its
+ * composite bundle's lifecycle in the following ways:
  * <p>
  * <ul>
  * <li>If the composite bundle is marked to be persistently started (see
@@ -73,7 +74,9 @@ import org.osgi.framework.launch.Framework;
  * persistently stopped or its start level is no longer met. Performing
  * operations which transiently stop a composite bundle do not cause the child
  * framework to stop (e.g. {@link Bundle#stop(int) stop(Bundle.STOP_TRANSIENT)},
- * {@link Bundle#update() update}, refreshPackage etc.).</li>
+ * {@link Bundle#update() update}, refreshPackages etc.).</li>
+ * <li>If the composite bundle is uninstalled, the child framework's persistent
+ * storage area is also uninstalled.</li>
  * </ul>
  * <p>
  * The child framework may be persistently started and stopped by persistently
@@ -82,41 +85,41 @@ import org.osgi.framework.launch.Framework;
  * bundle is not persistently started. This allows for the child framework to be
  * initialized and populated with a set of bundles before starting the composite
  * bundle. The set of bundles installed into the child framework are the
- * component bundles which compose the composite bundle.
+ * component bundles which comprise the composite bundle.
  * <p>
- * If the child framework is started while the composite bundle is not
- * persistently started then the child framework lifecycle is tied to its parent
- * framework lifecycle. When the parent <code>Framework</code> enters the
- * {@link Bundle#STOPPING STOPPING} state then all active child frameworks of
- * that parent are shutdown using the to the {@link Framework#stop()} method.
- * The parent <code>Framework</code> must not enter the {@link Bundle#RESOLVED}
- * state until all the child frameworks have completed their shutdown process.
- * After the parent framework has completed the shutdown process then all child
- * framework instances become invalid and must not be allowed to re-initialize
- * or re-start.
+ * The child framework's lifecycle is also tied to the lifecycle of its
+ * parent framework. When the parent <code>Framework</code> enters the
+ * {@link Bundle#STOPPING STOPPING} state, all active child frameworks of that
+ * parent are shutdown using the {@link Framework#stop()} method. The parent
+ * framework must not enter the {@link Bundle#RESOLVED} state until all the
+ * child frameworks have completed their shutdown process. Just as with other
+ * Bundles, references to child frameworks (or the associated composite and
+ * surrogate bundles) become invalid after the parent framework has completed
+ * the shutdown process, and must not be allowed to re-initialize or re-start
+ * the child framework.
  * 
  * @see SurrogateBundle
  * @ThreadSafe
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 6156 $
  */
 public interface CompositeBundle extends Bundle {
 	/**
-	 * Returns the composite framework associated with this composite bundle.
+	 * Returns the child framework associated with this composite bundle.
 	 * 
-	 * @return the companion framework.
+	 * @return the child framework.
 	 */
 	Framework getCompositeFramework();
 
 	/**
 	 * Returns the surrogate bundle associated with this composite bundle. The
-	 * surrogate bundle is installed in the composite framework.
+	 * surrogate bundle is installed in the child framework.
 	 * 
 	 * @return the surrogate bundle.
 	 */
 	SurrogateBundle getSurrogateBundle();
 
 	/**
-	 * Updates this child composite bundle with the specified manifest.
+	 * Updates this composite bundle with the specified manifest.
 	 * 
 	 * @param compositeManifest the new composite manifest.
 	 * @throws BundleException If the update fails.
@@ -142,10 +145,8 @@ public interface CompositeBundle extends Bundle {
 	void update(InputStream input) throws BundleException;
 
 	/**
-	 * Uninstalls this composite bundle and its companion bundle.
-	 * <p>
-	 * If this composite bundle is a child composite then the companion child
-	 * framework is shutdown and its persistent storage area is deleted.
+	 * Uninstalls this composite bundle. The associated child framework
+	 * is shutdown, and its persistent storage area is deleted.
 	 */
 	void uninstall() throws BundleException;
 }

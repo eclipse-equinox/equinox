@@ -39,7 +39,7 @@ import javax.security.auth.x500.X500Principal;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 6100 $
+ * @version $Revision: 6127 $
  */
 public class FrameworkUtil {
 	/**
@@ -79,8 +79,8 @@ public class FrameworkUtil {
 	}
 
 	/**
-	 * Matches a Distinguished Name (DN) chain against a pattern. DNs can be
-	 * matched using wildcards. A wildcard ('*' \u002A) replaces all possible
+	 * Match a Distinguished Name (DN) chain against a pattern. DNs can be
+	 * matched using wildcards. A wildcard ('*' \\u002A) replaces all possible
 	 * values. Due to the structure of the DN, the comparison is more
 	 * complicated than string-based wildcard matching.
 	 * <p>
@@ -89,7 +89,6 @@ public class FrameworkUtil {
 	 * RDN. The DNs in the chain and the matching pattern are canonicalized
 	 * before processing. This means, among other things, that spaces must be
 	 * ignored, except in values.
-	 * </p>
 	 * <p>
 	 * The format of a wildcard match pattern is:
 	 * 
@@ -100,13 +99,10 @@ public class FrameworkUtil {
 	 * value-match 	::= '*' | value-star
 	 * value-star 	::= &lt; value, requires escaped '*' and '-' &gt;
 	 * </pre>
-	 * 
-	 * </p>
 	 * <p>
 	 * The most simple case is a single wildcard; it must match any DN. A
 	 * wildcard can also replace the first list of RDNs of a DN. The first RDNs
 	 * are the least significant. Such lists of matched RDNs can be empty.
-	 * </p>
 	 * <p>
 	 * For example, a match pattern with a wildcard that matches all all DNs
 	 * that end with RDNs of o=ACME and c=US would look like this:
@@ -119,7 +115,7 @@ public class FrameworkUtil {
 	 * 
 	 * <pre>
 	 * cn = Bugs Bunny, o = ACME, c = US
-	 * ou = Carots, cn=Daffy Duck, o=ACME, c=US
+	 * ou = Carrots, cn=Daffy Duck, o=ACME, c=US
 	 * street = 9C\, Avenue St. Drézéry, o=ACME, c=US
 	 * dc=www, dc=acme, dc=com, o=ACME, c=US
 	 * o=ACME, c=US
@@ -155,42 +151,37 @@ public class FrameworkUtil {
 	 * dc=acme.com, cn=Bugs Bunny, o=ACME, c=US
 	 * </pre>
 	 * 
-	 * </p>
 	 * <p>
 	 * A match pattern may contain a chain of DN match patterns. The
 	 * semicolon(';' \u0038) must be used to separate DN match patterns in a
 	 * chain. Wildcards can also be used to match against a complete DN within a
 	 * chain.
 	 * <p>
-	 * <p>
 	 * The following example matches a certificate signed by Tweety Inc. in the
 	 * US.
-	 * 
+	 * </p>
 	 * <pre>
 	 * * ; ou=S &amp; V, o=Tweety Inc., c=US
 	 * </pre>
-	 * 
+	 * <p>
 	 * The wildcard ('*') matches zero or one DN in the chain, however,
 	 * sometimes it is necessary to match a longer chain. The minus sign ('-'
-	 * \u002D) represents zero or more DNs, whereas the asterisk only represents
+	 * \\u002D) represents zero or more DNs, whereas the asterisk only represents
 	 * a single DN. For example, to match a DN where the Tweety Inc. is in the
 	 * DN chain, use the following expression:
-	 * 
+	 * </p>
 	 * <pre>
 	 * - ; *, o=Tweety Inc., c=US
 	 * </pre>
 	 * 
-	 * </p>
-	 * 
-	 * @param dnChain
-	 *            A DN chain. Each element of the chain must be of type
-	 *            {@link String} and use the format defined in RFC 2253.
-	 * @param matchPattern
-	 *            a pattern to match the DN chain against
-	 * @return true of the pattern matches the DN chain; otherwise false is
-	 *         returned
-	 * @throws IllegalArgumentException
-	 *             if the match pattern or the DN chain is invalid.
+	 * @param matchPattern The pattern against which to match the DN chain.
+	 * @param dnChain The DN chain to match against the specified pattern. Each
+	 *        element of the chain must be of type <code>String</code> and use
+	 *        the format defined in RFC 2253.
+	 * @return <code>true</code> If the pattern matches the DN chain; otherwise
+	 *         <code>false</code> is returned.
+	 * @throws IllegalArgumentException If the specified match pattern or DN
+	 *         chain is invalid.
 	 * @since 1.5
 	 */
 	public static boolean matchDistinguishedNameChain(String matchPattern,
@@ -198,6 +189,39 @@ public class FrameworkUtil {
 		return DNChainMatching.match(matchPattern, new ArrayList(dnChain));
 	}
 
+	/**
+	 * Return a <code>BundleReference</code> for the specified bundle class.
+	 * 
+	 * @param classFromBundle A class loaded from a bundle.
+	 * @return A <code>BundleReference</code> for the specified bundle class.
+	 * @throws IllegalArgumentException If the class was not loaded by a bundle
+	 *         class loader.
+	 * @since 1.5
+	 */
+	public static BundleReference getBundleReference(final Class classFromBundle) {
+		// We use doPriv since the caller may not have permission
+		// to call getClassLoader.
+		final Bundle bundle = (Bundle) AccessController
+				.doPrivileged(new PrivilegedAction() {
+					public Object run() {
+						try {
+							return ((BundleReference) classFromBundle
+									.getClassLoader()).getBundle();
+						}
+						catch (ClassCastException e) {
+							IllegalArgumentException iae = new IllegalArgumentException();
+							iae.initCause(e);
+							throw iae;
+						}
+					}
+				});
+		// We use an anonymous class to avoid leaking the ClassLoader object.
+		return new BundleReference() {
+			public Bundle getBundle() {
+				return bundle;
+			}
+		};
+	}
 	/**
 	 * RFC 1960-based Filter. Filter objects can be created by calling the
 	 * constructor with the desired filter string. A Filter object can be called

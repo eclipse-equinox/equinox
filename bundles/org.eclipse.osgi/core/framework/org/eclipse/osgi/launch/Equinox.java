@@ -193,4 +193,7 @@ public class Equinox implements Framework {
 		return getImpl().getSignerCertificates(signersType);
 	}
 
+	public Version getVersion() {
+		return getImpl().getVersion();
+	}
 }
