@@ -459,6 +459,13 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
+<message_argument value="getBundleReference(Class)"/>
+</message_arguments>
+</filter>
+<filter id="1141899266">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
 <message_argument value="matchDistinguishedNameChain(String, List)"/>
 </message_arguments>
 </filter>
