@@ -19,8 +19,14 @@ public class Activator implements BundleActivator {
 
 	public void start(BundleContext context) throws Exception {
 		Service1 service1 = (Service1) checkService(Service1.class.getName(), context);
+		if (service1 == null)
+			throw new Exception("missing Service1"); //$NON-NLS-1$
 		Service2 service2 = (Service2) checkService(Service2.class.getName(), context);
+		if (service2 == null)
+			throw new Exception("missing Service2"); //$NON-NLS-1$
 		Service3 service3 = (Service3) checkService(Service3.class.getName(), context);
+		if (service3 == null)
+			throw new Exception("missing Service3"); //$NON-NLS-1$
 	}
 
 	private Object checkService(String name, BundleContext context) throws BundleException {
