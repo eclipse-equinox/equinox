@@ -19,7 +19,7 @@ package org.osgi.service.prefs;
  * Thrown to indicate that a preferences operation could not complete because of
  * a failure in the backing store, or a failure to contact the backing store.
  * 
- * @version $Revision: 5837 $
+ * @version $Revision: 6083 $
  */
 public class BackingStoreException extends Exception {
     static final long serialVersionUID = -1415637364122829574L;
@@ -44,5 +44,32 @@ public class BackingStoreException extends Exception {
 	 */
 	public BackingStoreException(String message, Throwable cause) {
 		super(message, cause);
+	}
+
+	/**
+	 * Returns the cause of this exception or <code>null</code> if no cause was
+	 * set.
+	 * 
+	 * @return The cause of this exception or <code>null</code> if no cause was
+	 *         set.
+	 * @since 1.1
+	 */
+	public Throwable getCause() {
+		return super.getCause();
+	}
+
+	/**
+	 * Initializes the cause of this exception to the specified value.
+	 * 
+	 * @param cause The cause of this exception.
+	 * @return This exception.
+	 * @throws IllegalArgumentException If the specified cause is this
+	 *         exception.
+	 * @throws IllegalStateException If the cause of this exception has already
+	 *         been set.
+	 * @since 1.1
+	 */
+	public Throwable initCause(Throwable cause) {
+		return super.initCause(cause);
 	}
 }
