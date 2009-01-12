@@ -32,7 +32,7 @@ public class ApplicationAdminTest extends OSGiTest {
 	public static final String MODIFIED = "modified"; //$NON-NLS-1$
 	public static final String REMOVED = "removed"; //$NON-NLS-1$
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
-	public static final String[] tests = new String[] {"testSimpleApp", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", "testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$ //$NON-NLS-21$ //$NON-NLS-22$ //$NON-NLS-23$ //$NON-NLS-24$ //$NON-NLS-25$ //$NON-NLS-26$ //$NON-NLS-27$ //$NON-NLS-28$
+	public static final String[] tests = new String[] {"testSimpleApp", "testInvalidArgs", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", "testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$ //$NON-NLS-21$ //$NON-NLS-22$ //$NON-NLS-23$ //$NON-NLS-24$ //$NON-NLS-25$ //$NON-NLS-26$ //$NON-NLS-27$ //$NON-NLS-28$ //$NON-NLS-29$
 	private static final String PI_OSGI_SERVICES = "org.eclipse.osgi.services"; //$NON-NLS-1$
 
 	public static Test suite() {
@@ -110,6 +110,92 @@ public class ApplicationAdminTest extends OSGiTest {
 		}
 		String result = (String) results.get(simpleResults);
 		assertEquals("Check application result", SUCCESS, result); //$NON-NLS-1$
+	}
+
+	private void doInvalidScheduleArgs(ApplicationDescriptor app, String id, Map invalidArgs, String topic, String eventFilter, boolean recurring, boolean invalidKeys, boolean invalidValues) {
+		ScheduledApplication sched = null;
+		try {
+			sched = app.schedule(id, invalidArgs, topic, eventFilter, recurring);
+			try {
+				sched.remove();
+			} catch (Throwable t) {
+				// nothing
+			}
+			if (invalidKeys || invalidValues)
+				fail("Should have failed with invalid arguments"); //$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			fail("Failed to schedule an application", e); //$NON-NLS-1$
+		} catch (IllegalArgumentException e) {
+			if (!invalidKeys)
+				fail("Failed to schedule an application", e); //$NON-NLS-1$
+		} catch (ApplicationException e) {
+			if (!invalidValues)
+				fail("Failed to schedule an application", e); //$NON-NLS-1$
+			if (e.getErrorCode() != ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT)
+				fail("Failed to schedule an application", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testInvalidArgs() {
+		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".simpleApp"); //$NON-NLS-1$
+		HashMap args = new HashMap();
+		args.put("test.arg1", Boolean.TRUE); //$NON-NLS-1$
+		args.put("test.arg2", new Integer(34)); //$NON-NLS-1$
+		args.put("test.arg3", new Long(34)); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		args.put("test.arg4", this); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		Collection list = new ArrayList();
+		args.put("test.arg4", list); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		list.add(this);
+		args.put("test.arg4", list); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		list.clear();
+		list.add("test"); //$NON-NLS-1$
+		list.add(new Integer(0));
+		list.add(new Long(0));
+		list.add(new Float(0));
+		list.add(new Double(0));
+		list.add(new Byte((byte) 0));
+		list.add(new Short((short) 1));
+		list.add(new Character((char) 0));
+		list.add(new Boolean(true));
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		args.put("test.arg5", new String[0]); //$NON-NLS-1$
+		args.put("test.arg6", new int[0]); //$NON-NLS-1$
+		args.put("test.arg7", new long[0]); //$NON-NLS-1$
+		args.put("test.arg8", new float[0]); //$NON-NLS-1$
+		args.put("test.arg9", new double[0]); //$NON-NLS-1$
+		args.put("test.arg10", new byte[0]); //$NON-NLS-1$
+		args.put("test.arg11", new short[0]); //$NON-NLS-1$
+		args.put("test.arg12", new char[0]); //$NON-NLS-1$
+		args.put("test.arg12", new boolean[0]); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		args.put("test.arg13", "test"); //$NON-NLS-1$ //$NON-NLS-2$
+		args.put("test.arg14", new Integer(0)); //$NON-NLS-1$
+		args.put("test.arg15", new Long(0)); //$NON-NLS-1$
+		args.put("test.arg16", new Float(0)); //$NON-NLS-1$
+		args.put("test.arg17", new Double(0)); //$NON-NLS-1$
+		args.put("test.arg18", new Byte((byte) 0)); //$NON-NLS-1$
+		args.put("test.arg19", new Short((short) 1)); //$NON-NLS-1$
+		args.put("test.arg20", new Character((char) 0)); //$NON-NLS-1$
+		args.put("test.arg21", new Boolean(true)); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		Map testMap = new HashMap();
+		args.put("test.arg22", testMap); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		testMap.put("recurse", args); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		args.put("recurse", args); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public void testExitValue01() {
