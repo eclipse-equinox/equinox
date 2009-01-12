@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignerInfo;
+import org.osgi.framework.Bundle;
 
 /**
  * The default implemention of <code>BaseClassLoader</code>.  This implementation extends
@@ -243,5 +244,9 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 
 	public ClasspathManager getClasspathManager() {
 		return manager;
+	}
+
+	public Bundle getBundle() {
+		return manager.getBaseData().getBundle();
 	}
 }

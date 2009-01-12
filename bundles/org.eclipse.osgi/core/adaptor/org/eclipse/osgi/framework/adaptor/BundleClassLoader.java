@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import org.osgi.framework.BundleReference;
 
 /**
  * The BundleClassLoader interface is used by the Framework to load local 
@@ -31,7 +32,7 @@ import java.util.Enumeration;
  * @since 3.1
  * @see org.eclipse.osgi.framework.adaptor.BundleData#createClassLoader(ClassLoaderDelegate, BundleProtectionDomain, String[])
  */
-public interface BundleClassLoader /*extends ClassLoader*/{
+public interface BundleClassLoader /*extends ClassLoader*/extends BundleReference {
 
 	/**
 	 * Initializes the ClassLoader.  This is called after all currently resolved fragment

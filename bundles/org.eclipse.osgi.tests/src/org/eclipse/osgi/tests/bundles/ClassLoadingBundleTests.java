@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1085,6 +1085,22 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		} catch (ClassNotFoundException e) {
 			fail("Unexpected ClassNotFoundException", e); //$NON-NLS-1$
 		}
+	}
+
+	public void testBundleReference01() throws Exception {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
+		BundleReference ref = FrameworkUtil.getBundleReference(clazz);
+		assertEquals("Wrong bundle", test, ref.getBundle()); //$NON-NLS-1$
+	}
+
+	public void testBundleReference02() throws Exception {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
+		ClassLoader cl = clazz.getClassLoader();
+		if (!(cl instanceof BundleReference))
+			fail("ClassLoader is not of type BundleReference"); //$NON-NLS-1$
+		assertEquals("Wrong bundle", test, ((BundleReference) cl).getBundle()); //$NON-NLS-1$
 	}
 
 	private String readURL(URL url) throws IOException {
