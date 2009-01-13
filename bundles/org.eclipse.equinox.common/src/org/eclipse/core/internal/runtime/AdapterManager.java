@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.IAdapterManager;
  * <li>the target's class: X
  * <li>X's superclasses in order to <code>Object</code>
  * <li>a breadth-first traversal of the target class's interfaces in the order returned by
- * <code>getInterfaces</code> (in the example, A and its superinterfaces then B and its
- * superinterfaces) </il>
+ * <code>getInterfaces</code> (in the example, X and its
+	 * superinterfaces then Y and its superinterfaces) </il>
  * </ul>
  * 
  * @see IAdapterFactory
@@ -215,6 +215,10 @@ public final class AdapterManager implements IAdapterManager {
 		return table;
 	}
 
+	/**
+	 * Returns the super-type search order starting with <code>adaptable</code>. 
+	 * The search order is defined in this class' comment.
+	 */
 	public Class[] computeClassOrder(Class adaptable) {
 		Class[] classes = null;
 		//cache reference to lookup to protect against concurrent flush
@@ -225,32 +229,30 @@ public final class AdapterManager implements IAdapterManager {
 			classes = (Class[]) lookup.get(adaptable);
 		// compute class order only if it hasn't been cached before
 		if (classes == null) {
-			ArrayList classList = new ArrayList();
-			computeClassOrder(adaptable, classList);
-			classes = (Class[]) classList.toArray(new Class[classList.size()]);
+			classes = doComputeClassOrder(adaptable);
 			lookup.put(adaptable, classes);
 		}
 		return classes;
 	}
 
 	/**
-	 * Builds and returns a table of adapters for the given adaptable type.
-	 * The table is keyed by adapter class name. The
-	 * value is the <b>sole<b> factory that defines that adapter. Note that
-	 * if multiple adapters technically define the same property, only the
-	 * first found in the search order is considered.
-	 * 
-	 * Note that it is important to maintain a consistent class and interface
-	 * lookup order. See the class comment for more details.
+	 * Computes the super-type search order starting with <code>adaptable</code>. 
+	 * The search order is defined in this class' comment.
 	 */
-	private void computeClassOrder(Class adaptable, Collection classes) {
+	private Class[] doComputeClassOrder(Class adaptable) {
+		List classes = new ArrayList();
 		Class clazz = adaptable;
 		Set seen = new HashSet(4);
+		//first traverse class hierarchy
 		while (clazz != null) {
 			classes.add(clazz);
-			computeInterfaceOrder(clazz.getInterfaces(), classes, seen);
 			clazz = clazz.getSuperclass();
 		}
+		//now traverse interface hierarchy for each class
+		Class[] classHierarchy = (Class[]) classes.toArray(new Class[classes.size()]);
+		for (int i = 0; i < classHierarchy.length; i++)
+			computeInterfaceOrder(classHierarchy[i].getInterfaces(), classes, seen);
+		return (Class[]) classes.toArray(new Class[classes.size()]);
 	}
 
 	private void computeInterfaceOrder(Class[] interfaces, Collection classes, Set seen) {

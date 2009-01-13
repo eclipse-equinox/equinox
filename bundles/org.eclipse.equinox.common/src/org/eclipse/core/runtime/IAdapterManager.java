@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,9 +111,9 @@ public interface IAdapterManager {
 	 * <ul>
 	 * <li>the target's class: X
 	 * <li>X's superclasses in order to <code>Object</code>
-	 * <li>a breadth-first traversal of the target class's interfaces in the
-	 * order returned by <code>getInterfaces</code> (in the example, A and its
-	 * superinterfaces then B and its superinterfaces) </li>
+	 * <li>a breadth-first traversal of each class's interfaces in the
+	 * order returned by <code>getInterfaces</code> (in the example, X and its
+	 * superinterfaces then Y and its superinterfaces) </li>
 	 * </ul>
 	 * 
 	 * @param clazz the class for which to return the class order. 
