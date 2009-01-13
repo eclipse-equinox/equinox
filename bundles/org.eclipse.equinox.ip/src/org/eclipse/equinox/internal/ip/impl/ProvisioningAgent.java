@@ -516,7 +516,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 	private static final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	private static final byte[] buffer = new byte[1024];
 
-	private static byte[] readSream(InputStream is) throws IOException {
+	private static byte[] readStream(InputStream is) throws IOException {
 		synchronized (buffer) {
 			baos.reset();
 			int read;
@@ -549,48 +549,53 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 
 	public void addInformation(ZipInputStream zis) {
 		Log.debug("Add Information form ZIS.");
+		Hashtable entries = new Hashtable(2);//cache for unprocessed entries 
+		boolean manifestFound = false;
 		Dictionary info = new Hashtable(5);
+		Dictionary entriesFromHeader = null;
 		Vector bundlesToStart = new Vector(5);
+		String header = null;
 		try {
 			ZipEntry ze;
-
+			String name, type;
+			/* read the rest of the entries */
 			while ((ze = zis.getNextEntry()) != null) {
-				/* read type */
-				byte[] extra = ze.getExtra();
-				String type = extra == null ? null : new String(extra).toLowerCase();
 				/* read name */
-				String name = ze.getName();
+				name = ze.getName();
+				if (name.endsWith("/")) {// path entry
+					zis.closeEntry();
+					continue;
+
+				}
 				if (name.charAt(0) == '/')
 					name = name.substring(1);
-
-				if (Log.debug) {
-					Log.debug("Processing entry '" + name + "' of type " + type);
-				}
-
-				/* process entry */
-				if (MIME_BUNDLE.equals(type)) {
-					installBundle(name, new ISWrapper(zis));
-				} else if (MIME_BYTE_ARRAY.equals(type)) {
-					info.put(name, readSream(zis));
-				} else if (MIME_STRING.equals(type)) {
-					String value = getUTF8String(readSream(zis));
-					info.put(name, value);
-					/*
-					 * FIXME: actually there can be only ONE key of that type! -
-					 * so why using vector
-					 */
-					if (PROVISIONING_START_BUNDLE.equals(name)) {
-						grantAllPermissions(value);
-						bundlesToStart.addElement(value);
+				/* read extra */
+				byte[] extra = ze.getExtra();
+				type = extra == null ? null : new String(extra).toLowerCase();
+				if (extra != null && !"META-INF/MANIFEST.MF".equals(name)) {
+					processEntry(type, name, null, zis, info, null, bundlesToStart);
+					zis.closeEntry();
+					continue;
+				}//the extra field is null or the entry is the manifest
+				if (!manifestFound) {
+					if ("META-INF/MANIFEST.MF".equals(name)) {//the entry is the manifest
+						manifestFound = true;
+						header = getHeaderFromManifest(zis);
+						entriesFromHeader = parseEntries(header);
+					} else {//no manifest yet, so cache the entry
+						System.out.println("---put : " + name);
+						entries.put(name, readStream(zis));
 					}
-				} else if (MIME_BUNDLE_URL.equals(type)) {
-					String value = getUTF8String(readSream(zis));
-					installBundle(name, new URL(value).openStream());
-				} else {
-					this.info.setError(ERROR_CORRUPTED_ZIP, "Unknown MIME type (" + type + ") for entry '" + name + "'");
-					setHasFailedPrv(true);
+				} else {//the manifest is found so we process the entry
+					processEntry(type, name, null, zis, info, entriesFromHeader, bundlesToStart);
 				}
 				zis.closeEntry();
+			}
+
+			/*process the cached entries*/
+			Enumeration names = entries.keys();
+			while (names.hasMoreElements()) {
+				processEntry(null, name = (String) names.nextElement(), (byte[]) entries.get(name), null, info, entriesFromHeader, bundlesToStart);
 			}
 		} catch (Throwable e) {
 			this.info.setError(ERROR_CORRUPTED_ZIP, e.toString());
@@ -608,6 +613,58 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 
 		/* update info and start all required bundles */
 		addInformation(info, bundlesToStart); // bundle should
+	}
+
+	private void processEntry(String type, String name, byte[] content, InputStream is, Dictionary info, Dictionary entriesFromHeader, Vector bundlesToStart) throws IOException {
+		/* 
+		 * if there is no value in the extra field 
+		 * try to initialize it from the InitialProvisioning-Entries header 
+		 */
+		if (type == null) {
+			if (entriesFromHeader != null) {
+				type = (String) entriesFromHeader.get(name);
+			}
+		}
+		/*
+		 * if type is still null try to to initialize it 
+		 * according to the extension of the entry's name 
+		 */
+		if (type == null) {
+			type = getMIMEfromExtension(name);
+		}
+		/* process entry */
+		if (Log.debug) {
+			Log.debug("Processing entry '" + name + "' of type " + type);
+		}
+		if (MIME_BUNDLE.equals(type) || MIME_BUNDLE_ALT.equals(type)) {
+			installBundle(name, content == null ? new ISWrapper(is) : new ISWrapper(new ByteArrayInputStream(content)));
+		} else if (MIME_BYTE_ARRAY.equals(type)) {
+			info.put(name, content == null ? readStream(is) : content);
+		} else if (MIME_STRING.equals(type)) {
+			String value = getUTF8String(content == null ? readStream(is) : content);
+			info.put(name, value);
+			/*
+			 * FIXME: actually there can be only ONE key of that type! - so why
+			 * using vector
+			 */
+			if (PROVISIONING_START_BUNDLE.equals(name)) {
+				/* Make management agent bundle deployment. Sets java.security.AllPermission
+				 * if PermissionAdmin is available..*/
+				try {
+					grantAllPermissions(value);
+				} catch (Throwable e) {
+					Log.debug("Failed to grant all permissions", e);
+				}
+				bundlesToStart.addElement(value);
+			}
+		} else if (MIME_BUNDLE_URL.equals(type)) {
+			String value = getUTF8String(content == null ? readStream(is) : content);
+			installBundle(name, new URL(value).openStream());
+		} else {
+			this.info.setError(ERROR_CORRUPTED_ZIP, //
+					"Unknown MIME type (" + type + ") for entry '" + name + "'");
+			setHasFailedPrv(true);
+		}
 	}
 
 	public void serviceChanged(ServiceEvent se) {
@@ -1054,12 +1111,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 	private void grantAllPermissions(String location) {
 		try {
 			ServiceReference sref = bc.getServiceReference("org.osgi.service.permissionadmin.PermissionAdmin"); // the
-			// org.osgi.service.permissionadmin
-			// is
-			// not
-			// imported
-			// for
-			// R1
+			// org.osgi.service.permissionadmin is not imported for R1
 			if (sref != null) {
 				Method method = Class.forName("org.osgi.service.permissionadmin.PermissionAdmin").getMethod("setPermissions", new Class[] {String.class, Class.forName("[Lorg.osgi.service.permissionadmin.PermissionInfo;")});
 				Object[] allPerms = (Object[]) Array.newInstance(Class.forName("org.osgi.service.permissionadmin.PermissionInfo"), 1);
@@ -1178,6 +1230,138 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 			info.putPrivate(HAS_FAILED_PROVISIONG, hasFailedPrv ? "true" : null);
 			store();
 		}
+	}
+
+	/**
+	 * 
+	 * @param header the contents of the InitialProvisioning-Entries manifest header, if any
+	 * @return dictionary with key-value pairs parsed from header
+	 *         or null if no such header is found in the manifest
+	 */
+	static Dictionary parseEntries(String header) {
+		if (header == null || header.length() == 0)
+			return null; //no such header
+		Dictionary entries = new Hashtable(2);
+		int index;
+		StringTokenizer tokens = new StringTokenizer(header, ",");
+		String token;
+		String path, type = null;
+		while (tokens.hasMoreTokens()) {
+			token = removeWhiteSpaces(tokens.nextToken());
+			index = token.indexOf(";");
+			if (index == -1)
+				continue; //there is no type/mime attribute
+			path = token.substring(0, index);
+			index = token.indexOf("mime=", index);
+			if (index != -1) { //there is mime attribute
+				type = token.substring(index + 5);
+				if (isValidMIME(type)) {
+					entries.put(path, type);
+					continue;
+				}
+			}
+			index = token.indexOf("type=");
+			if (index != -1) { //there is type attribute
+				type = token.substring(index + 5);
+				if ((type = typeToMIME(type)) != null) {
+					entries.put(path, type);
+				}
+			}
+		}
+		return entries;
+	}
+
+	/**
+	 * 
+	 * @param mime mime type 
+	 * @return true if mime is avalid mime type
+	 */
+	private static boolean isValidMIME(String mime) {
+		return ProvisioningService.MIME_BUNDLE.equals(mime) || ProvisioningService.MIME_BUNDLE_ALT.equals(mime) || ProvisioningService.MIME_STRING.equals(mime) || ProvisioningService.MIME_BYTE_ARRAY.equals(mime) || ProvisioningService.MIME_BUNDLE_URL.equals(mime);
+	}
+
+	/**
+	 * Maps type to an appropriate mime type constant
+	 * @param type the value of the type attribute from the InitialProvisioning-Entries header
+	 * @return the mime type for the string type or null if type is not a valid type
+	 */
+	private static String typeToMIME(String type) {
+		if ("text".equals(type))
+			return ProvisioningService.MIME_STRING;
+		if ("binary".equals(type))
+			return ProvisioningService.MIME_BYTE_ARRAY;
+		if ("bundle".equals(type))
+			return ProvisioningService.MIME_BUNDLE;
+		if ("bundle-url".equals(type))
+			return ProvisioningService.MIME_BUNDLE_URL;
+		return null;
+	}
+
+	/** 
+	 * @param filename the name of the zip entry 
+	 * @return the MIME type of the entry according to its extension 
+	 *         or null if the mime type cannot be defined
+	 */
+	static String getMIMEfromExtension(String filename) {
+		int index = filename.lastIndexOf(".");
+		//no extension -> we cannot identify the type
+		if (index == -1)
+			return null;
+		String extension = filename.substring(index + 1);
+		if (extension.equals("jar"))
+			return ProvisioningService.MIME_BUNDLE;
+		if (extension.equals("txt"))
+			return ProvisioningService.MIME_STRING;
+		if (extension.equals("url"))
+			return ProvisioningService.MIME_BUNDLE_URL;
+		return ProvisioningService.MIME_BYTE_ARRAY;
+	}
+
+	/**
+	 * @param is the InputStream containing the information in the manifest
+	 * @return the contents of the InitialProvisioning-Entries header if any or null otherwise 
+	 */
+	private static String getHeaderFromManifest(InputStream is) {
+		boolean blank = false;
+		StringBuffer header = new StringBuffer();
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		String line = null;
+		boolean loop = true;
+		try {
+			while ((line = br.readLine()) != null && loop) {
+				if (line.length() == 0) {
+					if (blank) {
+						break;
+					}
+					blank = true;
+					continue;
+				} else {
+					blank = false;
+				}
+				if (line.startsWith(ProvisioningService.INITIALPROVISIONING_ENTRIES)) {
+					header.append(removeWhiteSpaces(line.substring(ProvisioningService.INITIALPROVISIONING_ENTRIES.length() + 1)));
+					line = br.readLine();//next line
+					while (loop = (line.length() != 0 && Character.isWhitespace(line.charAt(0)))) {
+						header.append(removeWhiteSpaces(line));
+						line = br.readLine();
+					}
+				}
+			}
+		} catch (IOException ioe) {
+			return null;
+		}
+		return (header.length() == 0 ? null : header.toString());
+	}
+
+	private static String removeWhiteSpaces(String s) {
+		char curr;
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			if (!Character.isWhitespace(curr = s.charAt(i))) {
+				sb.append(curr);
+			}
+		}
+		return sb.toString();
 	}
 
 	private static class ISWrapper extends InputStream {
