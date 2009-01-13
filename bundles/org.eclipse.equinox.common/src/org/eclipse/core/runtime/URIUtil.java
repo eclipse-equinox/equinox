@@ -42,16 +42,19 @@ public final class URIUtil {
 			if (path == null)
 				return appendOpaque(base, extension);
 			//if the base is already a directory then resolve will just do the right thing
+			URI result;
 			if (path.endsWith("/")) {//$NON-NLS-1$
-				URI result = base.resolve(extension);
-				//Fix UNC paths that are incorrectly normalized by URI#resolve (see Java bug 4723726)
-				String resultPath = result.getPath();
-				if (path.startsWith(UNC_PREFIX) && (resultPath == null || !resultPath.startsWith(UNC_PREFIX)))
-					result = new URI(result.getScheme(), "///" + result.getSchemeSpecificPart(), result.getFragment()); //$NON-NLS-1$
-				return result;
+				result = base.resolve(extension);
+			} else {
+				path = path + '/' + extension;
+				result = new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
 			}
-			path = path + "/" + extension; //$NON-NLS-1$
-			return new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
+			result = result.normalize();
+			//Fix UNC paths that are incorrectly normalized by URI#resolve (see Java bug 4723726)
+			String resultPath = result.getPath();
+			if (isFileURI(base) && path != null && path.startsWith(UNC_PREFIX) && (resultPath == null || !resultPath.startsWith(UNC_PREFIX)))
+				result = new URI(result.getScheme(), "///" + result.getSchemeSpecificPart(), result.getFragment()); //$NON-NLS-1$
+			return result;
 		} catch (URISyntaxException e) {
 			//shouldn't happen because we started from a valid URI
 			throw new RuntimeException(e);
@@ -255,7 +258,7 @@ public final class URIUtil {
 	public static URI makeAbsolute(URI relative, URI baseURI) {
 		if (relative.isAbsolute())
 			return relative;
-		return append(baseURI, relative.toString()).normalize();
+		return append(baseURI, relative.toString());
 	}
 
 	/**
