@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.IAdapterManager;
  * <code>class X extends Y implements A, B</code><br> is as follows: <il>
  * <li>the target's class: X
  * <li>X's superclasses in order to <code>Object</code>
- * <li>a breadth-first traversal of the target class's interfaces in the order returned by
- * <code>getInterfaces</code> (in the example, X and its
-	 * superinterfaces then Y and its superinterfaces) </il>
+ * <li>a breadth-first traversal of each class's interfaces in the
+ * order returned by <code>getInterfaces</code> (in the example, X's 
+ * superinterfaces then Y's superinterfaces) </li>
  * </ul>
  * 
  * @see IAdapterFactory

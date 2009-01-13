@@ -112,8 +112,8 @@ public interface IAdapterManager {
 	 * <li>the target's class: X
 	 * <li>X's superclasses in order to <code>Object</code>
 	 * <li>a breadth-first traversal of each class's interfaces in the
-	 * order returned by <code>getInterfaces</code> (in the example, X and its
-	 * superinterfaces then Y and its superinterfaces) </li>
+	 * order returned by <code>getInterfaces</code> (in the example, X's 
+	 * superinterfaces then Y's superinterfaces) </li>
 	 * </ul>
 	 * 
 	 * @param clazz the class for which to return the class order. 
