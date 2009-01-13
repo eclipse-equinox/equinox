@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006-2007 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006-2009 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,16 +13,7 @@ package org.eclipse.equinox.internal.cm;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -58,13 +49,13 @@ public class ConfigurationDictionary extends Dictionary implements Serializable 
 		if (simpleArrays.contains(clazz) || primitiveArrays.contains(clazz))
 			return;
 
-		// Is it a vector of simples
-		if (clazz == Vector.class) {
-			Vector valueVector = (Vector) value;
-			for (Iterator it = valueVector.iterator(); it.hasNext();) {
+		// Is it a Collection of simples
+		if (value instanceof Collection) {
+			Collection valueCollection = (Collection) value;
+			for (Iterator it = valueCollection.iterator(); it.hasNext();) {
 				Class containedClazz = it.next().getClass();
 				if (!simples.contains(containedClazz)) {
-					throw new IllegalArgumentException(containedClazz.getName() + " in " + Vector.class.getName()); //$NON-NLS-1$
+					throw new IllegalArgumentException(containedClazz.getName() + " in " + clazz.getName()); //$NON-NLS-1$
 				}
 			}
 			return;
