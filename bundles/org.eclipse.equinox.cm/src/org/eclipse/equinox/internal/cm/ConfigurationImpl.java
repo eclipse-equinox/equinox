@@ -12,8 +12,8 @@
 package org.eclipse.equinox.internal.cm;
 
 import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.lang.reflect.Array;
+import java.util.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.*;
@@ -264,9 +264,18 @@ class ConfigurationImpl implements Configuration {
 		Enumeration keys = properties.keys();
 		while (keys.hasMoreElements()) {
 			Object key = keys.nextElement();
-			if (newDictionary.get(key) == null)
-				newDictionary.put(key, properties.get(key));
-			else
+			if (newDictionary.get(key) == null) {
+				Object value = properties.get(key);
+				if (value.getClass().isArray()) {
+					int arrayLength = Array.getLength(value);
+					Object copyOfArray = Array.newInstance(value.getClass().getComponentType(), arrayLength);
+					System.arraycopy(value, 0, copyOfArray, 0, arrayLength);
+					newDictionary.put(key, copyOfArray);
+				} else if (value instanceof Collection)
+					newDictionary.put(key, new Vector((Collection) value));
+				else
+					newDictionary.put(key, properties.get(key));
+			} else
 				throw new IllegalArgumentException(key + " is already present or is a case variant."); //$NON-NLS-1$
 		}
 		newDictionary.remove(Constants.SERVICE_PID);

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.cm.test;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import junit.framework.TestCase;
 import org.osgi.framework.Constants;
@@ -80,7 +82,17 @@ public class ConfigurationDictionaryTest extends TestCase {
 			v.add(new Character('a'));
 			v.add(new Boolean(true));
 			dict.put("28", v);
-
+			Collection c = new ArrayList();
+			c.add(new String("x"));
+			c.add(new Integer(1));
+			c.add(new Long(1));
+			c.add(new Float(1));
+			c.add(new Double(1));
+			c.add(new Byte((byte) 1));
+			c.add(new Short((short) 1));
+			c.add(new Character('a'));
+			c.add(new Boolean(true));
+			dict.put("29", c);
 		} catch (IllegalArgumentException e) {
 			fail(e.getMessage());
 		}
@@ -88,12 +100,30 @@ public class ConfigurationDictionaryTest extends TestCase {
 		config.update(dict);
 		Dictionary dict2 = config.getProperties();
 
-		Enumeration enum1 = dict.elements();
-		Enumeration enum2 = dict.elements();
-		while (enum1.hasMoreElements())
-			assertEquals(enum1.nextElement(), enum2.nextElement());
-
-		assertFalse(enum2.hasMoreElements());
+		assertTrue(dict.size() == dict2.size());
+		Enumeration keys = dict.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			Object value1 = dict.get(key);
+			Class class1 = value1.getClass();
+			Object value2 = dict2.get(key);
+			Class class2 = value2.getClass();
+			if (value1.getClass().isArray()) {
+				assertTrue(class1 == class2);
+				assertTrue(class1.getComponentType() == class2.getComponentType());
+				int arrayLength1 = Array.getLength(value1);
+				int arrayLength2 = Array.getLength(value1);
+				assertTrue(arrayLength1 == arrayLength2);
+				if (value1 instanceof Object[])
+					assertTrue(Arrays.asList((Object[]) value1).containsAll(Arrays.asList((Object[]) value2)));
+			} else if (value1 instanceof Collection) {
+				Collection c1 = (Collection) value1;
+				Collection c2 = (Collection) value2;
+				assertTrue(c1.size() == c2.size());
+				assertTrue(c1.containsAll(c2));
+			} else
+				assertEquals(value1, value2);
+		}
 		config.delete();
 	}
 
@@ -167,6 +197,37 @@ public class ConfigurationDictionaryTest extends TestCase {
 			config.delete();
 		}
 		fail();
+	}
+
+	public void testObjectCollection() throws Exception {
+		Configuration config = cm.getConfiguration("test2");
+		config.update();
+		Dictionary dict = config.getProperties();
+		try {
+			Collection c = new ArrayList();
+			c.add(new Object());
+			dict.put("x", c);
+		} catch (IllegalArgumentException e) {
+			return;
+		} finally {
+			config.delete();
+		}
+		fail();
+	}
+
+	public void testPutGetCustomCollection() throws Exception {
+		Configuration config = cm.getConfiguration("test2");
+		config.update();
+		Dictionary dict = config.getProperties();
+		try {
+			Collection c = new ArrayList() {};
+			dict.put("x", c);
+			config.update(dict);
+		} catch (IOException e) {
+			fail();
+		} finally {
+			config.delete();
+		}
 	}
 
 	public void testGet() throws Exception {
