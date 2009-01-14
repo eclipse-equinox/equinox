@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,8 @@ public class EclipseStarter {
 	private static final String WS = "-ws"; //$NON-NLS-1$
 	private static final String OS = "-os"; //$NON-NLS-1$
 	private static final String ARCH = "-arch"; //$NON-NLS-1$
-	private static final String NL = "-nl"; //$NON-NLS-1$	
+	private static final String NL = "-nl"; //$NON-NLS-1$
+	private static final String NL_EXTENSIONS = "-nlExtensions"; //$NON-NLS-1$
 	private static final String CONFIGURATION = "-configuration"; //$NON-NLS-1$	
 	private static final String USER = "-user"; //$NON-NLS-1$
 	private static final String NOEXIT = "-noExit"; //$NON-NLS-1$
@@ -97,6 +98,7 @@ public class EclipseStarter {
 	public static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
 	public static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
 	public static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
+	private static final String PROP_NL_EXTENSIONS = "osgi.nl.extensions"; //$NON-NLS-1$
 	public static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String PROP_ADAPTOR = "osgi.adaptor"; //$NON-NLS-1$
 	public static final String PROP_SYSPATH = "osgi.syspath"; //$NON-NLS-1$
@@ -887,6 +889,13 @@ public class EclipseStarter {
 				FrameworkProperties.setProperty(PROP_NL, arg);
 				found = true;
 			}
+
+			// look for the locale extensions
+			if (args[i - 1].equalsIgnoreCase(NL_EXTENSIONS)) {
+				FrameworkProperties.setProperty(PROP_NL_EXTENSIONS, arg);
+				found = true;
+			}
+
 			// done checking for args.  Remember where an arg was found 
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
