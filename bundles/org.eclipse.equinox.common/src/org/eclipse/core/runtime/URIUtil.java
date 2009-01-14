@@ -15,7 +15,8 @@ import java.net.*;
 
 /**
  * A utility class for manipulating URIs. This class works around some of the
- * broken behavior of the java.net.URI class.
+ * undesirable behavior of the {@link java.net.URI} class, and provides additional
+ * path manipulation methods that are not available on the URI class.
  * 
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @since org.eclipse.equinox.common 3.5
@@ -30,8 +31,18 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Appends the given extension to the path of the give base URI and returns
-	 * the corresponding new path.
+	 * Returns a new URI with all the same components as the given base URI,
+	 * but with a path component created by appending the given extension to the
+	 * base URI's path.
+	 * <p>
+	 * The important difference between this method
+	 * and {@link java.net.URI#resolve(String)} is in the treatment of the final segment.
+	 * The URI resolve method drops the last segment if there is no trailing slash as
+	 * specified in section 5.2 of RFC 2396. This leads to unpredictable behaviour
+	 * when working with file: URIs, because the existence of the trailing slash
+	 * depends on the existence of a local file on disk. This method operates
+	 * like a traditional path append and always preserves all segments of the base path.
+	 * 
 	 * @param base The base URI to append to
 	 * @param extension The path extension to be added
 	 * @return The appended URI
@@ -112,8 +123,9 @@ public final class URIUtil {
 	/**
 	 * Returns the last segment of the given URI. For a hierarchical URL this returns
 	 * the last segment of the path. For opaque URIs this treats the scheme-specific
-	 * part as a path and returns the last segment. Returns null if the URI has no
-	 * path or the path is empty.
+	 * part as a path and returns the last segment. Returns <code>null</code> for
+	 * a hierarchical URI with an empty path, and for opaque URIs whose scheme-specific
+	 * part cannot be interpreted as a path.
 	 */
 	public static String lastSegment(URI location) {
 		String path = location.getPath();
@@ -123,9 +135,8 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Returns a new URI which is the same as this URI but with
-	 * the file extension removed from the path part.  If this URI does not have an 
-	 * extension, this path is returned.
+	 * Returns a new URI which is the same as this URI but with the file extension removed 
+	 * from the path part.  If this URI does not have an extension, this path is returned.
 	 * <p>
 	 * The file extension portion is defined as the string
 	 * following the last period (".") character in the last segment.
@@ -149,28 +160,32 @@ public final class URIUtil {
 		return URI.create(uriString);
 	}
 
-	/*
-	 * Compares two URI for equality.
-	 * Return false if one of them is null
+	/**
+	 * Returns true if the two URIs are equal. URIs are considered equal if
+	 * {@link URI#equals(Object)} returns true, if the string representation
+	 * of the URIs is equal, or if they URIs are represent the same local file.
+	 * @param uri1 The first URI to compare
+	 * @param uri2 The second URI to compare
+	 * @return <code>true</code> if the URIs are the same, and <code>false</code> otherwise.
 	 */
-	public static boolean sameURI(URI url1, URI url2) {
-		if (url1 == url2)
+	public static boolean sameURI(URI uri1, URI uri2) {
+		if (uri1 == uri2)
 			return true;
-		if (url1 == null || url2 == null)
+		if (uri1 == null || uri2 == null)
 			return false;
 
-		if (url1.equals(url2))
+		if (uri1.equals(uri2))
 			return true;
 
-		if (sameString(url1.getScheme(), url2.getScheme()) && sameString(url1.getSchemeSpecificPart(), url2.getSchemeSpecificPart()) && sameString(url1.getFragment(), url2.getFragment()))
+		if (sameString(uri1.getScheme(), uri2.getScheme()) && sameString(uri1.getSchemeSpecificPart(), uri2.getSchemeSpecificPart()) && sameString(uri1.getFragment(), uri2.getFragment()))
 			return true;
 
-		if (url1.isAbsolute() != url2.isAbsolute())
+		if (uri1.isAbsolute() != uri2.isAbsolute())
 			return false;
 
 		// check if we have two local file references that are case variants
-		File file1 = toFile(url1);
-		return file1 == null ? false : file1.equals(toFile(url2));
+		File file1 = toFile(uri1);
+		return file1 == null ? false : file1.equals(toFile(uri2));
 	}
 
 	private static boolean sameString(String s1, String s2) {
@@ -191,8 +206,11 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Returns the URL as a URI. This method will handle broken URLs that are
+	 * Returns the URL as a URI. This method will handle URLs that are
 	 * not properly encoded (for example they contain unencoded space characters).
+	 * 
+	 * @param url The URL to convert into a URI
+	 * @return A URI representing the given URL
 	 */
 	public static URI toURI(URL url) throws URISyntaxException {
 		//URL behaves differently across platforms so for file: URLs we parse from string form
@@ -295,5 +313,4 @@ public final class URIUtil {
 			return original;
 		}
 	}
-
 }
