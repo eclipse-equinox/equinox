@@ -1,56 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component id="org.eclipse.osgi" version="2">
-<resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
-<filter id="403767336">
+<resource path="osgi/src/org/osgi/service/framework/CompositeBundle.java" type="org.osgi.service.framework.CompositeBundle">
+<filter id="1110441988">
 <message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="SIGNERS_TRUSTED"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getSignerCertificates(int)"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="SIGNERS_ALL"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SIGNERS_TRUSTED"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getVersion()"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getSignerCertificates(int)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SIGNERS_ALL"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getVersion()"/>
+<message_argument value="org.osgi.service.framework.CompositeBundle"/>
 </message_arguments>
 </filter>
 </resource>
@@ -60,6 +13,60 @@
 <message_argument value="1.4"/>
 <message_argument value="3.5"/>
 <message_argument value="org.osgi.util.tracker.BundleTrackerCustomizer"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="getSignerCertificates(int)"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="SIGNERS_TRUSTED"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="SIGNERS_ALL"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="SIGNERS_TRUSTED"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="getSignerCertificates(int)"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="getVersion()"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="SIGNERS_ALL"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="getVersion()"/>
 </message_arguments>
 </filter>
 </resource>
@@ -129,6 +136,15 @@
 <filter id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
+<filter id="1108344834">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="org.osgi.framework.BundleReference"/>
 </message_arguments>
 </filter>
 </resource>
@@ -222,26 +238,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="SERVICE_TYPE"/>
+<message_argument value="FRAMEWORK_SYSTEMPACKAGES_EXTRA"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SYSTEMPACKAGES_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_EXECPERMISSION"/>
+<message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -254,20 +258,13 @@
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_TYPE"/>
+<message_argument value="FRAMEWORK_EXECPERMISSION"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SECURITY"/>
+<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -277,16 +274,35 @@
 <message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
 </message_arguments>
 </filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="FRAMEWORK_SECURITY"/>
+</message_arguments>
+</filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
+<message_argument value="FRAMEWORK_STORAGE"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="SERVICE_TYPE"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
+</message_arguments>
+</filter>
+<filter id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
 </message_arguments>
 </filter>
 </resource>
@@ -311,14 +327,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_UPDATE"/>
+<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
 </message_arguments>
 </filter>
 <filter id="1141899266">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
+<message_argument value="STOPPED_UPDATE"/>
 </message_arguments>
 </filter>
 </resource>
@@ -438,10 +454,10 @@
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
+<resource path="osgi/src/org/osgi/service/framework/CompositeBundleFactory.java" type="org.osgi.service.framework.CompositeBundleFactory">
 <filter id="1110441988">
 <message_arguments>
-<message_argument value="org.osgi.framework.launch.Framework"/>
+<message_argument value="org.osgi.service.framework.CompositeBundleFactory"/>
 </message_arguments>
 </filter>
 </resource>
@@ -454,7 +470,21 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.launch.Framework"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/FrameworkUtil.java" type="org.osgi.framework.FrameworkUtil">
+<filter id="1141899266">
+<message_arguments>
+<message_argument value="1.5"/>
+<message_argument value="3.5"/>
+<message_argument value="matchDistinguishedNameChain(String, List)"/>
+</message_arguments>
+</filter>
 <filter id="1141899266">
 <message_arguments>
 <message_argument value="1.5"/>
@@ -462,11 +492,11 @@
 <message_argument value="getBundleReference(Class)"/>
 </message_arguments>
 </filter>
-<filter id="1141899266">
+</resource>
+<resource path="osgi/src/org/osgi/service/framework/SurrogateBundle.java" type="org.osgi.service.framework.SurrogateBundle">
+<filter id="1110441988">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="matchDistinguishedNameChain(String, List)"/>
+<message_argument value="org.osgi.service.framework.SurrogateBundle"/>
 </message_arguments>
 </filter>
 </resource>
