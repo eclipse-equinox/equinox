@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,20 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+/**
+ * The java.net.URLClassLoader class allows one to load resources from arbitrary URLs and in particular is optimized to handle
+ * "jar" URLs. Unfortunately for jar files this optimization ends up holding the file open which ultimately prevents the file from
+ * being deleted or update until the VM is shutdown.
+ *   
+ * The CloseableURLClassLoader is meant to replace the URLClassLoader and provides an additional method to allow one to "close" any
+ * resources left open. In the current version the CloseableURLClassLoader will only ensure the closing of jar file resources. The
+ * jar handling behavior in this class will also provides a construct to allow one to turn off jar file verification in performance
+ * sensitive situations where the verification us not necessary. 
+ * 
+ * also see https://bugs.eclipse.org/bugs/show_bug.cgi?id=190279 
+ */
+
 package org.eclipse.equinox.servletbridge;
 
 import java.io.*;
@@ -32,7 +46,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 	private final AccessControlContext context;
 	private final boolean verifyJars;
 
-	public static class CloseableJarURLConnection extends JarURLConnection {
+	private static class CloseableJarURLConnection extends JarURLConnection {
 		private final JarFile jarFile;
 		// @GuardedBy("this")
 		private JarEntry entry;
@@ -72,7 +86,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
-	public static class CloseableJarURLStreamHandler extends URLStreamHandler {
+	private static class CloseableJarURLStreamHandler extends URLStreamHandler {
 		private final JarFile jarFile;
 
 		public CloseableJarURLStreamHandler(JarFile jarFile) {
@@ -88,7 +102,7 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
-	public static class CloseableJarFileLoader {
+	private static class CloseableJarFileLoader {
 		private final JarFile jarFile;
 		private final Manifest manifest;
 		private final CloseableJarURLStreamHandler jarURLStreamHandler;
@@ -124,14 +138,29 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
+	/**
+	 * @param urls the array of URLs to use for loading resources
+	 * @see URLClassLoader
+	 */
 	public CloseableURLClassLoader(URL[] urls) {
 		this(urls, ClassLoader.getSystemClassLoader(), true);
 	}
 
+	/**
+	 * @param urls the URLs from which to load classes and resources
+	 * @param parent the parent class loader used for delegation
+	 * @see URLClassLoader
+	 */
 	public CloseableURLClassLoader(URL[] urls, ClassLoader parent) {
 		this(excludeFileJarURLS(urls), parent, true);
 	}
 
+	/**
+	 * @param urls the URLs from which to load classes and resources
+	 * @param parent the parent class loader used for delegation
+	 * @param verifyJars flag to determine if jar file verification should be performed
+	 * @see URLClassLoader
+	 */
 	public CloseableURLClassLoader(URL[] urls, ClassLoader parent, boolean verifyJars) {
 		super(excludeFileJarURLS(urls), parent);
 		this.context = AccessController.getContext();
@@ -177,6 +206,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.net.URLClassLoader#findClass(java.lang.String)
+	 */
 	protected Class findClass(final String name) throws ClassNotFoundException {
 		try {
 			Class clazz = (Class) AccessController.doPrivileged(new PrivilegedExceptionAction() {
@@ -262,6 +294,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 			throw new SecurityException("The package '" + packageName + "' was previously loaded unsealed. Cannot seal package."); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/* (non-Javadoc)
+	 * @see java.net.URLClassLoader#findResource(java.lang.String)
+	 */
 	public URL findResource(final String name) {
 		URL url = (URL) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
@@ -283,6 +318,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		return super.findResource(name);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.net.URLClassLoader#findResources(java.lang.String)
+	 */
 	public Enumeration findResources(final String name) throws IOException {
 		final List resources = new ArrayList();
 		AccessController.doPrivileged(new PrivilegedAction() {
@@ -307,6 +345,10 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		return Collections.enumeration(resources);
 	}
 
+	/**
+	 * The "close" method is called when the class loader is no longer needed and we should close any open resources.
+	 * In particular this method will close the jar files associated with this class loader.
+	 */
 	public void close() {
 		synchronized (loaders) {
 			if (closed)
@@ -319,6 +361,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.net.URLClassLoader#addURL(java.net.URL)
+	 */
 	protected void addURL(URL url) {
 		synchronized (loaders) {
 			if (isFileJarURL(url)) {
@@ -332,6 +377,9 @@ public class CloseableURLClassLoader extends URLClassLoader {
 		super.addURL(url);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.net.URLClassLoader#getURLs()
+	 */
 	public URL[] getURLs() {
 		List result = new ArrayList();
 		synchronized (loaders) {
