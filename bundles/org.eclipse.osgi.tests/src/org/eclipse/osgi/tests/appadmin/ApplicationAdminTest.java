@@ -191,11 +191,11 @@ public class ApplicationAdminTest extends OSGiTest {
 
 		Map testMap = new HashMap();
 		args.put("test.arg22", testMap); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		testMap.put("recurse", args); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		args.put("recurse", args); //$NON-NLS-1$
-		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, false, true); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		args.clear();
+		args.put(new Long(0), "test"); //$NON-NLS-1$
+		doInvalidScheduleArgs(app, "schedule.testargs", args, "org/osgi/application/timer", "(minute=*)", true, true, false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public void testExitValue01() {
