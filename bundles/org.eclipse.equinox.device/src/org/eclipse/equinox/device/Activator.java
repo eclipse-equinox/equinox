@@ -384,29 +384,30 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	 */
 	private synchronized DeviceTracker dequeue() throws InterruptedException {
 		while (running && (head == null)) {
+			// TODO need to determine if this code is needed (bug 261197)
 			/* This should be included per Section 8.7.7 of the OSGi SP R2
 			 * spec, but it causes the OSGi SP R2 Test Suite to fail.
 			 * We should turn this on for R3.
 
 			 if (driverServiceRegistered)
 			 */
-			if (false) {
-				driverServiceRegistered = false;
+			//			if (false) {
+			//				driverServiceRegistered = false;
+			//
+			//				refineIdleDevices();
+			//			} else {
+			locators.uninstallDriverBundles();
 
-				refineIdleDevices();
-			} else {
-				locators.uninstallDriverBundles();
-
-				try {
-					if (Activator.DEBUG) {
-						log.log(LogService.LOG_DEBUG, "DeviceManager waiting on queue"); //$NON-NLS-1$
-					}
-
-					wait();
-				} catch (InterruptedException e) {
-					// do nothing
+			try {
+				if (Activator.DEBUG) {
+					log.log(LogService.LOG_DEBUG, "DeviceManager waiting on queue"); //$NON-NLS-1$
 				}
+
+				wait();
+			} catch (InterruptedException e) {
+				// do nothing
 			}
+			//			}
 		}
 
 		if (!running) /* if we are stopping */
