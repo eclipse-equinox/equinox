@@ -16,6 +16,7 @@
 
 package org.osgi.service.application;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.equinox.internal.app.AppPersistence;
@@ -27,7 +28,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * information about it. The application descriptor can be used for instance
  * creation.
  * 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -309,7 +310,7 @@ public abstract class ApplicationDescriptor {
 		}
 		if (!isLaunchableSpecific())
 			throw new ApplicationException(ApplicationException.APPLICATION_NOT_LAUNCHABLE, "Cannot launch the application!");
-		checkArgs(arguments, false, null);
+		checkArgs(arguments, false);
 		try {
 			return launchSpecific(arguments);
 		} catch (IllegalStateException ise) {
@@ -431,7 +432,7 @@ public abstract class ApplicationDescriptor {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPermission(new ApplicationAdminPermission(this, ApplicationAdminPermission.SCHEDULE_ACTION));
-		checkArgs(arguments, true, null);
+		arguments = checkArgs(arguments, true);
 		isLaunchableSpecific(); // checks if the ApplicationDescriptor was already unregistered
 		return AppPersistence.addScheduledApp(this, scheduleId, arguments, topic, eventFilter, recurring);
 	}
@@ -513,14 +514,10 @@ public abstract class ApplicationDescriptor {
 	private static final Collection scalarsArrays = Arrays.asList(new Class[] {String[].class, Integer[].class, Long[].class, Float[].class, Double[].class, Byte[].class, Short[].class, Character[].class, Boolean[].class});
 	private static final Collection primitiveArrays = Arrays.asList(new Class[] {long[].class, int[].class, short[].class, char[].class, byte[].class, double[].class, float[].class, boolean[].class});
 
-	private static void checkArgs(Map arguments, boolean validateValues, Collection visited) throws ApplicationException {
-		if (visited == null)
-			visited = new ArrayList();
-		else if (visited.contains(arguments))
-			return;
-		visited.add(arguments);
+	private static Map checkArgs(Map arguments, boolean validateValues) throws ApplicationException {
 		if (arguments == null)
-			return;
+			return arguments;
+		Map copy = validateValues ? new HashMap() : null;
 		for (Iterator entries = arguments.entrySet().iterator(); entries.hasNext();) {
 			Map.Entry entry = (Entry) entries.next();
 			if (!(entry.getKey() instanceof String))
@@ -528,20 +525,28 @@ public abstract class ApplicationDescriptor {
 			if ("".equals(entry.getKey())) //$NON-NLS-1$
 				throw new IllegalArgumentException("Empty string is an invalid key");
 			if (validateValues)
-				validateValue(entry, visited);
+				validateValue(entry, copy);
 		}
+		return validateValues ? copy : arguments;
 	}
 
-	private static void validateValue(Map.Entry entry, Collection visited) throws ApplicationException {
+	private static void validateValue(Map.Entry entry, Map copy) throws ApplicationException {
 		Class clazz = entry.getValue().getClass();
 
 		// Is it in the set of scalar types	
-		if (scalars.contains(clazz))
+		if (scalars.contains(clazz)) {
+			copy.put(entry.getKey(), entry.getValue());
 			return;
+		}
 
 		// Is it an array of primitives or scalars
-		if (scalarsArrays.contains(clazz) || primitiveArrays.contains(clazz))
+		if (scalarsArrays.contains(clazz) || primitiveArrays.contains(clazz)) {
+			int arrayLength = Array.getLength(entry.getValue());
+			Object copyOfArray = Array.newInstance(entry.getValue().getClass().getComponentType(), arrayLength);
+			System.arraycopy(entry.getValue(), 0, copyOfArray, 0, arrayLength);
+			copy.put(entry.getKey(), copyOfArray);
 			return;
+		}
 
 		// Is it a Collection of scalars
 		if (entry.getValue() instanceof Collection) {
@@ -552,11 +557,7 @@ public abstract class ApplicationDescriptor {
 					throw new ApplicationException(ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT, "The value for key \"" + entry.getKey() + "\" is a collection that contains an invalid value of type \"" + containedClazz.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}
-			return;
-		}
-
-		if (entry.getValue() instanceof Map) {
-			checkArgs((Map) entry.getValue(), true, visited);
+			copy.put(entry.getKey(), new ArrayList((Collection) entry.getValue()));
 			return;
 		}
 		throw new ApplicationException(ApplicationException.APPLICATION_INVALID_STARTUP_ARGUMENT, "The value for key \"" + entry.getKey() + "\" is an invalid type \"" + clazz.getName() + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
