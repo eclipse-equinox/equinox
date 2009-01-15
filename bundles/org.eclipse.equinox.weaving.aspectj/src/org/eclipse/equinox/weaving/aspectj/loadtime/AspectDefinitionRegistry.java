@@ -64,8 +64,10 @@ public class AspectDefinitionRegistry implements SynchronousBundleListener {
      */
     public void bundleResolved(final Bundle bundle) {
         if (!this.aspectDefinitions.containsKey(bundle)) {
-            this.aspectDefinitions.put(bundle,
-                    parseDefinitionFromRequiredBundle(bundle));
+            final Definition aspectDefinitions = parseDefinitionFromRequiredBundle(bundle);
+            if (aspectDefinitions != null) {
+                this.aspectDefinitions.put(bundle, aspectDefinitions);
+            }
         }
     }
 
