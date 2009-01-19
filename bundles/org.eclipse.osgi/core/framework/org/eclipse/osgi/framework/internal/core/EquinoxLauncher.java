@@ -36,13 +36,16 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		checkAdminPermission(AdminPermission.EXECUTE);
 		if (System.getSecurityManager() == null)
 			internalInit();
-		else
+		else {
+			if (configuration.get(Constants.FRAMEWORK_SECURITY) != null)
+				throw new SecurityException("Cannot specify the \"" + Constants.FRAMEWORK_SECURITY + "\" configuration property when a security manager is already installed."); //$NON-NLS-1$ //$NON-NLS-2$
 			AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					internalInit();
 					return null;
 				}
 			});
+		}
 	}
 
 	synchronized Framework internalInit() {
