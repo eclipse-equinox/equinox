@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.net.*;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.Hashtable;
-import java.util.Properties;
+import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
@@ -68,7 +67,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	private ServiceRegistration signedContentFactoryReg;
 	private ServiceRegistration systemTrustEngineReg;
 	private ServiceRegistration defaultAuthEngineReg;
-	private ServiceRegistration osgiTrustEngineReg;
+	private List osgiTrustEngineReg;
 	private ServiceRegistration legacyFactoryReg;
 
 	public void initialize(BaseAdaptor adaptor) {
@@ -89,26 +88,34 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		}
 
 		// always register the trust engine
-		Hashtable properties = new Hashtable(7);
-		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
-		properties.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
+		Hashtable trustEngineProps = new Hashtable(7);
+		trustEngineProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
 		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System"); //$NON-NLS-1$
-		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine, properties);
+		systemTrustEngineReg = context.registerService(TrustEngine.class.getName(), systemTrustEngine, trustEngineProps);
 		String osgiTrustPath = context.getProperty(OSGI_KEYSTORE);
 		if (osgiTrustPath != null) {
 			try {
 				URL url = new URL(osgiTrustPath);
 				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
+					trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, OSGI_KEYSTORE);
 					String path = url.getPath();
-					osgiTrustEngineReg = context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE), null);
+					osgiTrustEngineReg = new ArrayList(1);
+					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE), trustEngineProps));
 				}
 			} catch (MalformedURLException e) {
 				SignedBundleHook.log("Invalid setting for " + OSGI_KEYSTORE, FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 			}
 		} else {
-			osgiTrustPath = context.getProperty(Constants.FRAMEWORK_TRUST_REPOSITORIES);
-			if (osgiTrustPath != null) {
-				osgiTrustEngineReg = context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(osgiTrustPath, CACERTS_TYPE, null, OSGI_KEYSTORE), null);
+			String osgiTrustRepoPaths = context.getProperty(Constants.FRAMEWORK_TRUST_REPOSITORIES);
+			if (osgiTrustRepoPaths != null) {
+				trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, Constants.FRAMEWORK_TRUST_REPOSITORIES);
+				StringTokenizer st = new StringTokenizer(osgiTrustRepoPaths, File.pathSeparator);
+				osgiTrustEngineReg = new ArrayList(1);
+				while (st.hasMoreTokens()) {
+					String trustRepoPath = st.nextToken();
+					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(trustRepoPath, CACERTS_TYPE, null, OSGI_KEYSTORE), trustEngineProps));
+				}
 			}
 		}
 		if ((supportSignedBundles & VERIFY_TRUST) != 0)
@@ -133,7 +140,8 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			systemTrustEngineReg = null;
 		}
 		if (osgiTrustEngineReg != null) {
-			osgiTrustEngineReg.unregister();
+			for (Iterator it = osgiTrustEngineReg.iterator(); it.hasNext();)
+				((ServiceRegistration) it.next()).unregister();
 			osgiTrustEngineReg = null;
 		}
 		if (defaultAuthEngineReg != null) {
