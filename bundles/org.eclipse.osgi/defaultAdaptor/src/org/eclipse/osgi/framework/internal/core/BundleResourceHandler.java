@@ -66,7 +66,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		//Default is to use path and bundleId from context
 		String path = url.getPath();
 		String host = url.getHost();
-		int resIndex = 0; // must start at 0 index if using a context
+		int resIndex = url.getPort();
+		if (resIndex < 0) // -1 indicates port was not set; must default to 0
+			resIndex = 0;
 		int pathIdx = 0;
 		if (spec.startsWith("//")) { //$NON-NLS-1$
 			int bundleIdIdx = 2;

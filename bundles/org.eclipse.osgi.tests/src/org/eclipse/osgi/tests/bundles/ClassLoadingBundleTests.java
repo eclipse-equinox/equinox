@@ -762,6 +762,23 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("stuff resource", "stuff classpath test2", readURL((URL) resourceURLs.get(3))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	public void testMultipleGetResources03() throws Exception {
+		installer.installBundle("test"); //$NON-NLS-1$
+		Bundle test2 = installer.installBundle("test2"); //$NON-NLS-1$
+		// test that we can get multiple resources from a bundle
+		// test that using a context gives correct results for multiple resources (bug 261853)
+		Enumeration resources = test2.getResources("data/"); //$NON-NLS-1$
+		assertNotNull("resources", resources); //$NON-NLS-1$
+		ArrayList resourceURLs = new ArrayList();
+		while (resources.hasMoreElements())
+			resourceURLs.add(resources.nextElement());
+		assertEquals("resource number", 4, resourceURLs.size()); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL(new URL((URL) resourceURLs.get(0), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("stuff resource", "stuff classpath", readURL(new URL((URL) resourceURLs.get(1), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("root resource", "root classpath test2", readURL(new URL((URL) resourceURLs.get(2), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals("stuff resource", "stuff classpath test2", readURL(new URL((URL) resourceURLs.get(3), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 	public void testURLExternalFormat01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		// test the external format of bundle entry URLs
@@ -1125,6 +1142,14 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		if (!(cl instanceof BundleReference))
 			fail("ClassLoader is not of type BundleReference"); //$NON-NLS-1$
 		assertEquals("Wrong bundle", test, ((BundleReference) cl).getBundle()); //$NON-NLS-1$
+	}
+
+	public void testResolveURLRelativeBundleResourceWithPort() throws Exception {
+		URL directory = new URL("bundleresource://82:1/dictionaries/");
+		assertEquals(1, directory.getPort());
+
+		URL resource = new URL(directory, "en_GB.dictionary");
+		assertEquals(1, resource.getPort());
 	}
 
 	private String readURL(URL url) throws IOException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ package org.eclipse.osgi.framework.internal.protocol.bundleresource;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
@@ -44,16 +43,10 @@ public class Handler extends BundleResourceHandler {
 		if (classloader == null)
 			throw new FileNotFoundException(url.getPath());
 		ClasspathManager cpManager = classloader.getClasspathManager();
-		int index = url.getPort();
-		BundleEntry entry = null;
-		if (index == 0) {
+		BundleEntry entry = cpManager.findLocalEntry(url.getPath(), url.getPort());
+		if (entry == null)
+			// this isn't strictly needed but is kept to maintain compatibility
 			entry = cpManager.findLocalEntry(url.getPath());
-		} else {
-			Enumeration entries = cpManager.findLocalEntries(url.getPath());
-			if (entries != null)
-				for (int i = 0; entries.hasMoreElements() && i <= index; i++)
-					entry = (BundleEntry) entries.nextElement();
-		}
 		if (entry == null)
 			throw new FileNotFoundException(url.getPath());
 		return entry;

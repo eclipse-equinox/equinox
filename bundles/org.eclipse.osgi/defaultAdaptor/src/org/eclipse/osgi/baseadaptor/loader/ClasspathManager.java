@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -274,7 +274,7 @@ public class ClasspathManager {
 			hooks[i].preFindLocalResource(resource, this);
 		URL result = null;
 		try {
-			result = findLocalResourceImpl(resource);
+			result = findLocalResourceImpl(resource, -1);
 			return result;
 		} finally {
 			for (int i = 0; i < hooks.length; i++)
@@ -282,22 +282,25 @@ public class ClasspathManager {
 		}
 	}
 
-	private URL findLocalResourceImpl(String resource) {
+	private URL findLocalResourceImpl(String resource, int classPathIndex) {
 		URL result = null;
+		int curIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				result = findResourceImpl(resource, entries[i].getBundleFile());
-				if (result != null)
+				result = findResourceImpl(resource, entries[i].getBundleFile(), curIndex);
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
 			}
+			curIndex++;
 		}
 		// look in fragments
 		for (int i = 0; i < fragments.length; i++) {
 			ClasspathEntry[] fragEntries = fragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
-				result = findResourceImpl(resource, fragEntries[j].getBundleFile());
-				if (result != null)
+				result = findResourceImpl(resource, fragEntries[j].getBundleFile(), curIndex);
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
+				curIndex++;
 			}
 		}
 		return null;
@@ -310,29 +313,28 @@ public class ClasspathManager {
 	 */
 	public Enumeration findLocalResources(String resource) {
 		Vector resources = new Vector(6); // use a Vector instead of ArrayList because we need an enumeration
+		int classPathIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
-				URL url = findResourceImpl(resource, entries[i].getBundleFile(), resources.size());
+				URL url = findResourceImpl(resource, entries[i].getBundleFile(), classPathIndex);
 				if (url != null)
 					resources.addElement(url);
 			}
+			classPathIndex++;
 		}
 		// look in fragments
 		for (int i = 0; i < fragments.length; i++) {
 			ClasspathEntry[] fragEntries = fragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
-				URL url = findResourceImpl(resource, fragEntries[j].getBundleFile(), resources.size());
+				URL url = findResourceImpl(resource, fragEntries[j].getBundleFile(), classPathIndex);
 				if (url != null)
 					resources.addElement(url);
+				classPathIndex++;
 			}
 		}
 		if (resources.size() > 0)
 			return resources.elements();
 		return null;
-	}
-
-	private URL findResourceImpl(String name, BundleFile bundlefile) {
-		return findResourceImpl(name, bundlefile, 0);
 	}
 
 	private URL findResourceImpl(String name, BundleFile bundlefile, int index) {
@@ -345,21 +347,35 @@ public class ClasspathManager {
 	 * @return the requested entry or null if the entry does not exist
 	 */
 	public BundleEntry findLocalEntry(String path) {
+		return findLocalEntry(path, -1);
+	}
+
+	/**
+	 * Finds a local entry by searching the ClasspathEntry with the specified
+	 * class path index.
+	 * @param path the requested entry path.
+	 * @param classPathIndex the index of the ClasspathEntry to search
+	 * @return the requested entry or null if the entry does not exist
+	 */
+	public BundleEntry findLocalEntry(String path, int classPathIndex) {
 		BundleEntry result = null;
+		int curIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				result = findEntryImpl(path, entries[i].getBundleFile());
-				if (result != null)
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
 			}
+			curIndex++;
 		}
 		// look in fragments
 		for (int i = 0; i < fragments.length; i++) {
 			ClasspathEntry[] fragEntries = fragments[i].getEntries();
 			for (int j = 0; j < fragEntries.length; j++) {
 				result = findEntryImpl(path, fragEntries[j].getBundleFile());
-				if (result != null)
+				if (result != null && (classPathIndex == -1 || classPathIndex == curIndex))
 					return result;
+				curIndex++;
 			}
 		}
 		return null;
