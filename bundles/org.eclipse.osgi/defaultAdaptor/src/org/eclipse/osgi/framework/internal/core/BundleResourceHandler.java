@@ -120,7 +120,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
-		long bundleId = getBunldeID(host);
+		long bundleId = getBundleID(host);
 		Bundle bundle = adaptor == null ? null : adaptor.getContext().getBundle(bundleId);
 		if (checkAuthorization(bundle))
 			authorized = SECURITY_CHECKED;
@@ -155,7 +155,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		AbstractBundle bundle = null;
 		long bundleID;
 		try {
-			bundleID = getBunldeID(host);
+			bundleID = getBundleID(host);
 		} catch (NumberFormatException nfe) {
 			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host));
 		}
@@ -294,7 +294,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		return (BaseClassLoader) loader.createClassLoader();
 	}
 
-	private long getBunldeID(String host) {
+	private long getBundleID(String host) {
 		int dotIndex = host.indexOf('.');
 		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(dotIndex + 1)) : Long.parseLong(host);
 	}
