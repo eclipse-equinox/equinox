@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,7 +113,7 @@ public class BaseData implements BundleData {
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id), 0, path, new Handler(entry, adaptor));
+			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Integer.toString(adaptor.hashCode()) + '.' + Long.toString(id), 0, path, new Handler(entry, adaptor));
 		} catch (MalformedURLException e) {
 			return null;
 		}

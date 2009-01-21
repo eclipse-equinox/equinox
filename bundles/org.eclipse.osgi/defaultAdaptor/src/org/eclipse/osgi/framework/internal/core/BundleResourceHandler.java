@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,7 +65,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		end -= start;
 		//Default is to use path and bundleId from context
 		String path = url.getPath();
-		String bundleId = url.getHost();
+		String host = url.getHost();
 		int resIndex = 0; // must start at 0 index if using a context
 		int pathIdx = 0;
 		if (spec.startsWith("//")) { //$NON-NLS-1$
@@ -85,7 +85,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 				} catch (NumberFormatException e) {
 					// do nothing; results in resIndex == 0
 				}
-			bundleId = spec.substring(bundleIdIdx, bundleIdEnd);
+			host = spec.substring(bundleIdIdx, bundleIdEnd);
 		}
 		if (pathIdx < end && spec.charAt(pathIdx) == '/')
 			path = spec.substring(pathIdx, end);
@@ -120,15 +120,18 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		// Check the permission of the caller to see if they
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
-		Bundle bundle = adaptor == null ? null : adaptor.getContext().getBundle(Long.parseLong(bundleId));
+		long bundleId = getBunldeID(host);
+		Bundle bundle = adaptor == null ? null : adaptor.getContext().getBundle(bundleId);
 		if (checkAuthorization(bundle))
 			authorized = SECURITY_CHECKED;
-
+		// Always force the use of the hash from the adaptor
+		if (adaptor != null)
+			host = Integer.toString(adaptor.hashCode()) + '.' + Long.toString(bundleId);
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
 		// that have the authority set to this.
-		setURL(url, url.getProtocol(), bundleId, resIndex, authorized, null, path, null, url.getRef());
+		setURL(url, url.getProtocol(), host, resIndex, authorized, null, path, null, url.getRef());
 	}
 
 	/**
@@ -145,16 +148,16 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		if (bundleEntry != null) // if the bundleEntry is not null then return quick
 			return (new BundleURLConnection(url, bundleEntry));
 
-		String bidString = url.getHost();
-		if (bidString == null) {
+		String host = url.getHost();
+		if (host == null) {
 			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_ID, url.toExternalForm()));
 		}
 		AbstractBundle bundle = null;
 		long bundleID;
 		try {
-			bundleID = Long.parseLong(bidString);
+			bundleID = getBunldeID(host);
 		} catch (NumberFormatException nfe) {
-			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, bidString));
+			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host));
 		}
 		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getContext().getBundle(bundleID);
 		if (bundle == null)
@@ -189,9 +192,9 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		StringBuffer result = new StringBuffer(url.getProtocol());
 		result.append("://"); //$NON-NLS-1$
 
-		String bundleId = url.getHost();
-		if ((bundleId != null) && (bundleId.length() > 0))
-			result.append(bundleId);
+		String host = url.getHost();
+		if ((host != null) && (host.length() > 0))
+			result.append(host);
 		int index = url.getPort();
 		if (index > 0)
 			result.append(':').append(index);
@@ -289,5 +292,10 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		if (loader == null)
 			return null;
 		return (BaseClassLoader) loader.createClassLoader();
+	}
+
+	private long getBunldeID(String host) {
+		int dotIndex = host.indexOf('.');
+		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(dotIndex + 1)) : Long.parseLong(host);
 	}
 }

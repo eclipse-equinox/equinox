@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -158,7 +158,7 @@ abstract public class BundleFile {
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
+			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Integer.toString(hostData.getAdaptor().hashCode()) + '.' + Long.toString(hostBundleID), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
 		} catch (MalformedURLException e) {
 			return null;
 		}

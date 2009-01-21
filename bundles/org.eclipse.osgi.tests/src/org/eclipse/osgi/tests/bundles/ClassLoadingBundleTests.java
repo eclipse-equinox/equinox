@@ -728,7 +728,9 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			manifestURLs.add(manifests.nextElement());
 		assertEquals("manifest number", 1, manifestURLs.size()); //$NON-NLS-1$
 		URL manifest = (URL) manifestURLs.get(0);
-		assertEquals("host id", test.getBundleId(), Long.parseLong(manifest.getHost())); //$NON-NLS-1$
+		int dotIndex = manifest.getHost().indexOf('.');
+		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(dotIndex + 1)) : Long.parseLong(manifest.getHost());
+		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
 	}
 
 	public void testMultipleGetResources01() throws Exception {
@@ -758,6 +760,28 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("stuff resource", "stuff classpath", readURL((URL) resourceURLs.get(1))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("root resource", "root classpath test2", readURL((URL) resourceURLs.get(2))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("stuff resource", "stuff classpath test2", readURL((URL) resourceURLs.get(3))); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testURLExternalFormat01() throws Exception {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		// test the external format of bundle entry URLs
+		URL entry = test.getEntry("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry", entry); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL(entry)); //$NON-NLS-1$ //$NON-NLS-2$
+		URL entryCopy = new URL(entry.toExternalForm());
+		assertEquals("external format", entry.toExternalForm(), entryCopy.toExternalForm()); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL(entryCopy)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testURLExternalFormat02() throws Exception {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		// test the external format of bundle entry URLs
+		URL entry = test.getResource("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry", entry); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL(entry)); //$NON-NLS-1$ //$NON-NLS-2$
+		URL entryCopy = new URL(entry.toExternalForm());
+		assertEquals("external format", entry.toExternalForm(), entryCopy.toExternalForm()); //$NON-NLS-1$
+		assertEquals("root resource", "root classpath", readURL(entryCopy)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public void testMultipleExportFragments01() throws Exception {

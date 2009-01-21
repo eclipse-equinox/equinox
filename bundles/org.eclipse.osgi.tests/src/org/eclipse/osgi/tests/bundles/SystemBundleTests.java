@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -909,6 +909,99 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
+	public void testURLExternalFormat01() {
+		// create multiple instances test
+		File config1 = OSGiTestsActivator.getContext().getDataFile("testURLExternalFormat01_1"); //$NON-NLS-1$
+		Properties configuration1 = new Properties();
+		configuration1.put(Constants.FRAMEWORK_STORAGE, config1.getAbsolutePath());
+		Equinox equinox1 = new Equinox(configuration1);
+		try {
+			equinox1.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox1.getState()); //$NON-NLS-1$
+
+		File config2 = OSGiTestsActivator.getContext().getDataFile("testURLExternalFormat01_2"); //$NON-NLS-1$
+		Properties configuration2 = new Properties();
+		configuration2.put(Constants.FRAMEWORK_STORAGE, config2.getAbsolutePath());
+		Equinox equinox2 = new Equinox(configuration2);
+		try {
+			equinox2.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox2.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext1 = equinox1.getBundleContext();
+		assertNotNull("System context is null", systemContext1); //$NON-NLS-1$
+		BundleContext systemContext2 = equinox2.getBundleContext();
+		assertNotNull("System context is null", systemContext2); //$NON-NLS-1$
+
+		assertNotSame(systemContext1, systemContext2);
+
+		Bundle test1 = null;
+		Bundle test2 = null;
+		try {
+			test1 = systemContext1.installBundle(installer.getBundleLocation("test"));//$NON-NLS-1$
+			test2 = systemContext2.installBundle(installer.getBundleLocation("test"));//$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected error installing bundle", e);//$NON-NLS-1$
+		}
+		URL entry1 = test1.getEntry("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry1", entry1); //$NON-NLS-1$
+		URL entry2 = test2.getEntry("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry2", entry2); //$NON-NLS-1$
+		assertFalse("External form is equal: " + entry1.toExternalForm(), entry1.toExternalForm().equals(entry2.toExternalForm())); //$NON-NLS-1$
+		assertFalse("Host is equal: " + entry1.getHost(), entry1.getHost().equals(entry2.getHost())); //$NON-NLS-1$
+		assertFalse("URL is equal: " + entry1.toExternalForm(), entry1.equals(entry2)); //$NON-NLS-1$
+
+		Bundle substitutes1 = null;
+		Bundle substitutes2 = null;
+		try {
+			substitutes1 = systemContext1.installBundle(installer.getBundleLocation("substitutes.a"));//$NON-NLS-1$
+			substitutes2 = systemContext2.installBundle(installer.getBundleLocation("substitutes.a"));//$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected error installing bundle", e);//$NON-NLS-1$
+		}
+
+		entry1 = substitutes1.getResource("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry1", entry1); //$NON-NLS-1$
+		entry2 = substitutes2.getResource("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry2", entry2); //$NON-NLS-1$
+		assertFalse("External form is equal: " + entry1.toExternalForm(), entry1.toExternalForm().equals(entry2.toExternalForm())); //$NON-NLS-1$
+		assertFalse("Host is equal: " + entry1.getHost(), entry1.getHost().equals(entry2.getHost())); //$NON-NLS-1$
+		assertFalse("URL is equal: " + entry1.toExternalForm(), entry1.equals(entry2)); //$NON-NLS-1$
+
+		// put the framework 1 back to the RESOLVED state
+		try {
+			equinox1.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox1.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox1.getState()); //$NON-NLS-1$
+
+		// put the framework 2 back to the RESOLVED state
+		try {
+			equinox2.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox2.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
 	}
 
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
