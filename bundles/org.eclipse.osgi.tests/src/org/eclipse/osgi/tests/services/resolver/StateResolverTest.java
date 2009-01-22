@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1253,6 +1253,72 @@ public class StateResolverTest extends AbstractStateTest {
 		assertFalse("2.4", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", platform10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.6", rcp20.isResolved()); //$NON-NLS-1$
+	}
+
+	public void testSingletonsSelection7() throws BundleException {
+		State state = buildEmptyState();
+		long id = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "singleton; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "singleton"); //$NON-NLS-1$
+		BundleDescription singleton1 = state.getFactory().createBundleDescription(state, manifest, "singleton1", id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "singleton"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "a;version=1.0.0"); //$NON-NLS-1$
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, "a1", id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "a"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "b", id++); //$NON-NLS-1$
+
+		state.addBundle(singleton1);
+		state.addBundle(a1);
+		state.addBundle(b);
+		state.resolve();
+
+		assertTrue("1.0", singleton1.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", a1.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "singleton; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
+		manifest.put(Constants.BUNDLE_VERSION, "1.1"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "singleton"); //$NON-NLS-1$
+		BundleDescription singleton2 = state.getFactory().createBundleDescription(state, manifest, "singleton2", id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.1"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "singleton"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "a;version=1.0.1"); //$NON-NLS-1$
+		BundleDescription a2 = state.getFactory().createBundleDescription(state, manifest, "a2", id++); //$NON-NLS-1$
+
+		state.addBundle(singleton2);
+		state.addBundle(a2);
+		state.resolve(new BundleDescription[] {singleton1, singleton2, a1, a2});
+
+		assertFalse("2.0", singleton1.isResolved()); //$NON-NLS-1$
+		assertTrue("2.1", singleton2.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", a1.isResolved()); //$NON-NLS-1$
+		assertTrue("2.3", a2.isResolved()); //$NON-NLS-1$
+		assertTrue("2.4", b.isResolved()); //$NON-NLS-1$
+
+		ExportPackageDescription[] imports = b.getResolvedImports();
+		assertEquals("Unexpected number of imports", 1, imports.length); //$NON-NLS-1$
+		assertEquals("Unexpected exporter", a2, imports[0].getExporter()); //$NON-NLS-1$
 	}
 
 	public void testNonSingletonsSameVersion() throws BundleException {
