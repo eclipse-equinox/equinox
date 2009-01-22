@@ -11,6 +11,10 @@ package org.eclipse.equinox.concurrent.future;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * Abstract implementation of {@link IExecutor} and {@link IRunnableExecutor}.
+ *
+ */
 public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 
 	public void execute(final Runnable runnable) {
@@ -24,6 +28,13 @@ public abstract class AbstractExecutor implements IRunnableExecutor, IExecutor {
 
 	public abstract IFuture execute(IProgressRunnable runnable, IProgressMonitor monitor);
 
+	/**
+	 * Create an {@link AbstractFuture} instance.  Subclasses must override to define 
+	 * the concrete type of future to return from  {@link #execute(IProgressRunnable, IProgressMonitor)}.
+	 * @param progressMonitor any progress monitor to provide to the future upon construction.  May be
+	 * <code>null</code>.
+	 * @return the created future
+	 */
 	protected abstract AbstractFuture createFuture(IProgressMonitor progressMonitor);
 
 }

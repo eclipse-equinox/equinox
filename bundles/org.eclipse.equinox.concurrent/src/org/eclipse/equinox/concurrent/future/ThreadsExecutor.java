@@ -12,6 +12,20 @@ package org.eclipse.equinox.concurrent.future;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * <p>
+ * An executor that implements running the given{@link IProgressRunnable}s
+ * via a new {@link Thread}.
+ * </p>
+ * <p>
+ * The {@link #execute(IProgressRunnable, IProgressMonitor)} method on this class will
+ * create a new Thread (with name provided as result of {@link #createThreadName(IProgressRunnable)},
+ * that will run the {@link IProgressRunnable} and set the result in the future returned
+ * from {@link #execute(IProgressRunnable, IProgressMonitor)}.
+ * <p>
+ * Subclasses may extend the behavior of this ThreadsExecutor.
+ * </p>
+ */
 public class ThreadsExecutor extends AbstractExecutor {
 
 	public ThreadsExecutor() {
@@ -22,19 +36,37 @@ public class ThreadsExecutor extends AbstractExecutor {
 		return "ThreadsExecutor(" + runnable.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	protected Runnable createRunnable(final ISafeProgressRunner sof, final IProgressRunnable progressRunnable) {
+	/**
+	 * Create a runnable given an {@link IProgressRunnable} and an {@link ISafeProgressRunner} to
+	 * run the runnable.
+	 * @param runner the safe progress runner to run the runnable
+	 * @param progressRunnable the runnable to run.
+	 * @return Runnable that when run will use the safe progress runner to run the progressRunnable
+	 */
+	protected Runnable createRunnable(final ISafeProgressRunner runner, final IProgressRunnable progressRunnable) {
 		return new Runnable() {
 			public void run() {
-				sof.runWithProgress(progressRunnable);
+				runner.runWithProgress(progressRunnable);
 			}
 		};
 	}
 
-	public void configureThreadForExecution(Thread t) {
+	/**
+	 * Configure the given thread prior to starting it.  Subclasses may override as
+	 * appropriate to configure the given thread appropriately.  The default implementation
+	 * calls {@link Thread#setDaemon(boolean)}.
+	 * 
+	 * @param thread the thread to configure
+	 */
+	protected void configureThreadForExecution(Thread thread) {
 		// By default, we'll make the thread a daemon thread
-		t.setDaemon(true);
+		thread.setDaemon(true);
 	}
 
+	/**
+	 * Create an {@link AbstractFuture} with the given IProgressMonitor.
+	 * @param monitor a progress monitor to associate with the future.  May be <code>null</code>.
+	 */
 	protected AbstractFuture createFuture(IProgressMonitor monitor) {
 		return new SingleOperationFuture(monitor);
 	}

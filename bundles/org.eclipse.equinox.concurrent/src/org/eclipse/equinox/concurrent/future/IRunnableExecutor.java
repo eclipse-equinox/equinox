@@ -9,6 +9,11 @@
 ******************************************************************************/
 package org.eclipse.equinox.concurrent.future;
 
+/**
+ * An executor that can execute Runnables, rather than {@link IProgressRunnable}s.
+ *
+ * @see IExecutor#execute(IProgressRunnable, org.eclipse.core.runtime.IProgressMonitor)
+ */
 public interface IRunnableExecutor {
 	void execute(Runnable runnable);
 }

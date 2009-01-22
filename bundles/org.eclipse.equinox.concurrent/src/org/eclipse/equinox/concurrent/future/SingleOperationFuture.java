@@ -12,8 +12,14 @@ package org.eclipse.equinox.concurrent.future;
 import org.eclipse.core.runtime.*;
 
 /**
+ * <p>
  * Future implementation for a single operation.
- * 
+ * </p>
+ * <p>
+ * Subclasses may be created if desired.  Note that if subclasses are created, that 
+ * they should/must be very careful with respect to overriding the synchronized
+ * methods in this class.
+ * </p>
  */
 public class SingleOperationFuture extends AbstractFuture {
 	private static final String PLUGIN_ID = "org.eclipse.equinox.concurrent";
@@ -29,7 +35,7 @@ public class SingleOperationFuture extends AbstractFuture {
 
 	public SingleOperationFuture(IProgressMonitor progressMonitor) {
 		super();
-		setProgressMonitor(new FutureProgressMonitor((progressMonitor == null) ? new NullProgressMonitor() : progressMonitor));
+		this.progressMonitor = new FutureProgressMonitor((progressMonitor == null) ? new NullProgressMonitor() : progressMonitor);
 	}
 
 	public synchronized Object get() throws InterruptedException, OperationCanceledException {
@@ -142,10 +148,6 @@ public class SingleOperationFuture extends AbstractFuture {
 		if (pm != null && pm.isCanceled()) {
 			throw new OperationCanceledException("Single operation canceled"); //$NON-NLS-1$
 		}
-	}
-
-	protected synchronized void setProgressMonitor(IProgressMonitor progressMonitor) {
-		this.progressMonitor = progressMonitor;
 	}
 
 	public synchronized IProgressMonitor getProgressMonitor() {

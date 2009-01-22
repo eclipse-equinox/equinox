@@ -27,6 +27,10 @@ public class TimeoutException extends Exception {
 		this.duration = time;
 	}
 
+	/**
+	 * Return the timeout duration.
+	 * @return long the timeout duration that caused this timeout exception.
+	 */
 	public long getDuration() {
 		return duration;
 	}

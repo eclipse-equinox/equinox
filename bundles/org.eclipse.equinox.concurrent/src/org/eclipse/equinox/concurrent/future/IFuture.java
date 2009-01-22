@@ -18,21 +18,27 @@ import org.eclipse.core.runtime.OperationCanceledException;
  * A future represents the future outcome of some operation(s).
  * </p>
  * <p>
- * It allows clients to access information about whether operation(s) have
- * completed (#isDone()), along with method to access status information
- * associated with the completed operation(s) ({@link #getStatus()}), and 
- * the actual result(s) of the operation(s) if completed successfully (i.e. {@link #get()} and
- * {@link #get(long)}.
+ * The expected usage of a future is as a return value from some operation 
+ * that is to be executed asynchronously and then return some result.  
  * </p>
  * <p>
- * Clients may also access an associated IProgressMonitor via {@link #getProgressMonitor()},
- * and the returned progress monitor allows cancellation of the underlying operation(s) via
- * {@link IProgressMonitor#setCanceled(boolean)}.
+ * So, for example, a simple usage of an IFuture would be:
+ * <pre>
+ * IFuture future = foo();
+ * ...
+ * Object result = future.get();
+ * </pre>
+ * Clients generally will hold onto the future for some amount of time, and then call
+ * {@link #get()} or {@link #get(long)} to retrieve the result of the operation.  They
+ * may also call {@link #hasValue()} to determine whether any values have been provided
+ * to the future (if <code>true</code>, meaning that subsequent calls to 
+ * {@link #get()} will not block), or {@link #isDone()} to determine if <b>all</b> 
+ * operations and results have been completed.
  * </p>
  * <p>
- * Clients may also access information about whether all operations have completed (if multiple
- * operations are involved) by calling {@link #isDone()}, and access information about whether
- * any of multiple operations have completed by calling {@link #hasValue()}.
+ * If {@link #hasValue()} is true, then the client may access status information
+ * associated with the completed operation(s) via {@link #getStatus()}.  Until {@link #hasValue()}
+ * is <code>true</code>, {@link #getStatus()} will be <code>null</code>.
  * </p>
  * 
  * @see IStatus

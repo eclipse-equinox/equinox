@@ -12,8 +12,8 @@ package org.eclipse.equinox.concurrent.future;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * Interface defining a block that can be called, can return an Object result
- * and throw an arbitrary Throwable
+ * Interface defining a block of code that can be run, return an Object result,
+ * and throw an arbitrary Exception.
  * 
  */
 public interface IProgressRunnable {
