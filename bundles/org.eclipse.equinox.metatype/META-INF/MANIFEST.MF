@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.metatype
 Bundle-Activator: org.eclipse.equinox.metatype.Activator
 Import-Package: org.eclipse.osgi.util,
@@ -17,3 +17,5 @@ Bundle-Vendor: %bundleVendor
 Bundle-Copyright: %bundleCopyright
 Bundle-Localization: plugin
 Export-Service: org.osgi.service.metatype.MetaTypeService
+Bundle-RequiredExecutionEnvironment: J2SE-1.4,
+ OSGi/Minimum-1.1
