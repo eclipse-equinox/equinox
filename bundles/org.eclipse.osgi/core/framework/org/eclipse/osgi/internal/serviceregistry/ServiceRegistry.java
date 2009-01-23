@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class ServiceRegistry {
 	public static final int SERVICEEVENT = 3;
 
 	private static final String findHookName = FindHook.class.getName();
-	private static final String publishHookName = PublishHook.class.getName();
+	private static final String eventHookName = EventHook.class.getName();
 	private static final String listenerHookName = ListenerHook.class.getName();
 
 	/** Published services by class name. 
@@ -747,7 +747,7 @@ public class ServiceRegistry {
 		 * entry from the snapshot.
 		 */
 		Collection/*<BundleContextImpl>*/shrinkable = listenerSnapshot.keySet();
-		notifyPublishHooksPrivileged(event, shrinkable);
+		notifyEventHooksPrivileged(event, shrinkable);
 		if (listenerSnapshot.isEmpty()) {
 			return;
 		}
@@ -1090,45 +1090,45 @@ public class ServiceRegistry {
 	}
 
 	/**
-	 * Call the registered PublishHook services to allow them to inspect and possibly shrink the result.
-	 * The PublishHooks must be called in order: descending by service.ranking, then ascending by service.id.
+	 * Call the registered EventHook services to allow them to inspect and possibly shrink the result.
+	 * The EventHooks must be called in order: descending by service.ranking, then ascending by service.id.
 	 * This is the natural order for ServiceReference.
 	 * 
 	 * @param event The service event to be delivered.
-	 * @param result The result to return to the caller which may have been shrunk by the PublishHooks.
+	 * @param result The result to return to the caller which may have been shrunk by the EventHooks.
 	 */
-	private void notifyPublishHooksPrivileged(ServiceEvent event, Collection result) {
+	private void notifyEventHooksPrivileged(ServiceEvent event, Collection result) {
 		BundleContextImpl systemBundleContext = framework.getSystemBundleContext();
 		if (systemBundleContext == null) { // if no system bundle context, we are done!
 			return;
 		}
 
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-			Debug.println("notifyPublishHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			Debug.println("notifyEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 
-		List hooks = lookupServiceRegistrations(publishHookName, null);
+		List hooks = lookupServiceRegistrations(eventHookName, null);
 		// Since the list is already sorted, we don't need to sort the list to call the hooks
 		// in the proper order.
 
 		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			Object publishHook = registration.getService(systemBundleContext);
-			if (publishHook == null) { // if the hook is null
+			Object eventHook = registration.getService(systemBundleContext);
+			if (eventHook == null) { // if the hook is null
 				continue;
 			}
 			try {
-				if (publishHook instanceof PublishHook) { // if the hook is usable
-					((PublishHook) publishHook).event(event, result);
+				if (eventHook instanceof EventHook) { // if the hook is usable
+					((EventHook) eventHook).event(event, result);
 				}
 			} catch (Throwable t) {
 				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-					Debug.println(publishHook + ".event() exception: " + t.getMessage()); //$NON-NLS-1$
+					Debug.println(eventHook + ".event() exception: " + t.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(t);
 				}
 				// allow the adaptor to handle this unexpected error
 				framework.getAdaptor().handleRuntimeError(t);
-				ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, publishHook.getClass().getName(), "event"), t); //$NON-NLS-1$ 
+				ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, eventHook.getClass().getName(), "event"), t); //$NON-NLS-1$ 
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 			} finally {
 				registration.ungetService(systemBundleContext);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -312,9 +312,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 	}
 
-	public void testPublishHook01() {
-		final String testMethodName = "testPublishHook01"; //$NON-NLS-1$
-		// test the FindHook is called and can remove a reference from the results
+	public void testEventHook01() {
+		final String testMethodName = "testEventHook01"; //$NON-NLS-1$
+		// test the EventHook is called and can remove a reference from the results
 		Runnable runIt = new Runnable() {
 			public void run() {
 				// nothing
@@ -344,7 +344,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		}
 
 		final Filter filter = tmpFilter;
-		PublishHook hook1 = new PublishHook() {
+		EventHook hook1 = new EventHook() {
 			public void event(ServiceEvent event, Collection contexts) {
 				try {
 					if (!filter.match(event.getServiceReference())) {
@@ -377,7 +377,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 				}
 			}
 		};
-		PublishHook hook2 = new PublishHook() {
+		EventHook hook2 = new EventHook() {
 			public void event(ServiceEvent event, Collection contexts) {
 				try {
 					if (!filter.match(event.getServiceReference())) {
@@ -413,9 +413,9 @@ public class ServiceHookTests extends AbstractBundleTests {
 
 		Hashtable props = new Hashtable();
 		props.put("name", testMethodName); //$NON-NLS-1$
-		// register publish hook 1
-		props.put(Constants.SERVICE_DESCRIPTION, "publish hook 1"); //$NON-NLS-1$
-		ServiceRegistration regHook = testContext.registerService(PublishHook.class.getName(), hook1, props);
+		// register event hook 1
+		props.put(Constants.SERVICE_DESCRIPTION, "event hook 1"); //$NON-NLS-1$
+		ServiceRegistration regHook = testContext.registerService(EventHook.class.getName(), hook1, props);
 
 		ServiceRegistration reg1 = null;
 		try {
@@ -461,8 +461,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			}
 			assertEquals("hooks called", 0, hookCalled[0]); //$NON-NLS-1$
 
-			props.put(Constants.SERVICE_DESCRIPTION, "publish hook 2"); //$NON-NLS-1$
-			regHook = testContext.registerService(PublishHook.class.getName(), hook2, props);
+			props.put(Constants.SERVICE_DESCRIPTION, "event hook 2"); //$NON-NLS-1$
+			regHook = testContext.registerService(EventHook.class.getName(), hook2, props);
 
 			synchronized (events) {
 				events.clear();

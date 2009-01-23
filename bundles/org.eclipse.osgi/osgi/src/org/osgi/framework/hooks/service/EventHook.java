@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceEvent;
  * @version $Revision: 5793 $
  */
 
-public interface PublishHook {
+public interface EventHook {
 	/**
 	 * Event hook method. This method is called prior to service event delivery
 	 * when a publishing bundle registers, modifies or unregisters a service.
