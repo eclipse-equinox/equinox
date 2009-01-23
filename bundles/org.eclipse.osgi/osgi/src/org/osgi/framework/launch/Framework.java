@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,14 @@ import org.osgi.framework.FrameworkEvent;
  * <code>null</code>. The framework instance must copy any information needed
  * from the configuration argument since the configuration argument can be
  * changed after the Framework has been created.
- * 
  * <p>
  * A newly constructed Framework must be in the {@link #INSTALLED} state.
- * 
+ * <p>
+ * When constructing a Framework a <code>SecurityException</code> is thrown
+ * if the caller does not have <code>AllPermission</code>, and the Java 
+ * Runtime Environment supports permissions.
  * @ThreadSafe
- * @version $Revision: 5987 $
+ * @version $Revision: 6201 $
  */
 public interface Framework extends Bundle {
 
@@ -77,6 +79,14 @@ public interface Framework extends Bundle {
 	 * 
 	 * @throws BundleException
 	 *             If this Framework could not be initialized.
+	 * @throws java.lang.SecurityException
+	 *             If the Java Runtime Environment supports permissions
+	 *             and the caller does not have the appropriate
+	 *             <code>AdminPermission[this,EXECUTE]</code> or if there is 
+	 *             a security manager already installed and 
+	 *             the {@link Constants#FRAMEWORK_SECURITY} configuration
+	 *             property is set.
+	 *             
 	 */
 	public void init() throws BundleException;
 

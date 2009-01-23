@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * addition and removal.
  * 
  * @ThreadSafe
- * @version $Revision: 5902 $
+ * @version $Revision: 6211 $
  */
 
 public interface ListenerHook {
@@ -74,7 +74,7 @@ public interface ListenerHook {
 		 * 
 		 * @return The context of the bundle which added the listener.
 		 */
-		public BundleContext getBundleContext();
+		BundleContext getBundleContext();
 
 		/**
 		 * Return the filter string with which the listener was added.
@@ -83,6 +83,25 @@ public interface ListenerHook {
 		 *         be <code>null</code> if the listener was added without a
 		 *         filter.
 		 */
-		public String getFilter();
+		String getFilter();
+
+		/**
+		 * Compares this <code>ListenerInfo</code> to another
+		 * <code>ListenerInfo</code>.
+		 * 
+		 * @param obj The object to compare against this
+		 *        <code>ListenerInfo</code>.
+		 * @return <code>true</code> if the other object is a
+		 *         <code>ListenerInfo</code> object and both objects refer to
+		 *         the same listener.
+		 */
+		boolean equals(Object obj);
+
+		/**
+		 * Returns the hash code for this <code>ListenerInfo</code>.
+		 * 
+		 * @return The hash code of this <code>ListenerInfo</code>.
+		 */
+		int hashCode();
 	}
 }

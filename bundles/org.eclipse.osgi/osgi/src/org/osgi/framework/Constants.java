@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ package org.osgi.framework;
  * <code>java.lang.String</code>, unless otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 5684 $
+ * @version $Revision: 6201 $
  */
 
 public interface Constants {
@@ -1149,6 +1149,9 @@ public interface Constants {
 	 * <li> osgi - Enables a security manager that supports all security aspects
 	 * of the OSGi R4 specification (including postponed conditions).</li>
 	 * </ul>
+	 * If specified and there is a security manager already installed then a 
+	 * <code>SecurityException</code> must be thrown when the Framework is 
+	 * initialized.
 	 * 
 	 * @since 1.5
 	 */
