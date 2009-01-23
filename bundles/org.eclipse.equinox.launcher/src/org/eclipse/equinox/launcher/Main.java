@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -713,7 +713,7 @@ public class Main {
 		ArrayList extensionResults = new ArrayList(extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			//Search the extension relatively to the osgi plugin 
-			String path = searchFor(extensions[i], parent);
+			String path = searchForBundle(extensions[i], parent);
 			if (path == null) {
 				log("Could not find extension: " + extensions[i]); //$NON-NLS-1$
 				continue;
@@ -752,8 +752,19 @@ public class Main {
 				qualifiedPath += ", " + FILE_SCHEME + path + entries[j]; //$NON-NLS-1$
 			extensionProperties.put(PROP_CLASSPATH, qualifiedPath);
 			mergeProperties(System.getProperties(), extensionProperties);
-			if (inDevelopmentMode)
-				addDevEntries(extensionURL, result, extensions[i]);
+			if (inDevelopmentMode) {
+				String name = extensions[i];
+				if (name.startsWith(REFERENCE_SCHEME)) {
+					// need to extract the BSN from the path
+					name = new File(path).getName();
+					// Note that we do not extract any version information.
+					// We assume the extension is located in the workspace in a project
+					// that has the same name as the BSN.
+					// We could add more logic here to support versions in project folder names
+					// but it will likely be complicated and error prone.
+				}
+				addDevEntries(extensionURL, result, name);
+			}
 		}
 		extensionPaths = (String[]) extensionResults.toArray(new String[extensionResults.size()]);
 	}
@@ -915,6 +926,22 @@ public class Main {
 			return null;
 		File candidate = new File(start, names[result]);
 		return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
+	}
+
+	private String searchForBundle(String target, String start) {
+		File fileLocation = null;
+		//Only handle "reference:file:" urls, and not simple "file:" because we will be using the jar wherever it is.
+		if (target.startsWith(REFERENCE_SCHEME)) {
+			target = target.substring(REFERENCE_SCHEME.length());
+			if (!target.startsWith(FILE_SCHEME))
+				throw new IllegalArgumentException("Bundle URL is invalid: " + target); //$NON-NLS-1$
+			target = target.substring(FILE_SCHEME.length());
+			File child = new File(target);
+			fileLocation = child.isAbsolute() ? child : new File(start, child.getPath());
+			return searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
+
+		}
+		return searchFor(target, start);
 	}
 
 	protected int findMax(String[] candidates) {
