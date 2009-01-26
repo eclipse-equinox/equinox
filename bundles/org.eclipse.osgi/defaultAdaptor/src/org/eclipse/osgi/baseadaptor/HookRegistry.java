@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.baseadaptor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.hooks.*;
@@ -115,10 +116,12 @@ public final class HookRegistry {
 		int curBuiltin = 0;
 		while (hookConfigurators.hasMoreElements()) {
 			URL url = (URL) hookConfigurators.nextElement();
+			InputStream input = null;
 			try {
 				// check each file for a hook.configurators property
 				Properties configuratorProps = new Properties();
-				configuratorProps.load(url.openStream());
+				input = url.openStream();
+				configuratorProps.load(input);
 				String hooksValue = configuratorProps.getProperty(HOOK_CONFIGURATORS);
 				if (hooksValue == null)
 					continue;
@@ -134,6 +137,13 @@ public final class HookRegistry {
 			} catch (IOException e) {
 				errors.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, "error loading: " + url.toExternalForm(), 0, e, null)); //$NON-NLS-1$
 				// ignore and continue to next URL
+			} finally {
+				if (input != null)
+					try {
+						input.close();
+					} catch (IOException e) {
+						// do nothing
+					}
 			}
 		}
 	}
