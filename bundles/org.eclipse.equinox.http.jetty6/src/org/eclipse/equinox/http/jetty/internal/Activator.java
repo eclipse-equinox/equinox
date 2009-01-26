@@ -35,6 +35,12 @@ public class Activator implements BundleActivator {
 	// Note: only used if the bundle is explicitly started (e.g. not "lazy" activated)
 	private static final String AUTOSTART = "org.eclipse.equinox.http.jetty.autostart"; //$NON-NLS-1$
 
+	// Jetty will use a basic stderr logger if no other logging mechanism is provided.
+	// This setting can be used to over-ride the stderr logger threshold(and only this default logger)
+	// Valid values are in increasing threshold: "debug", "info", "warn", "error", and "off"
+	// (default threshold is "warn")
+	private static final String LOG_STDERR_THRESHOLD = "org.eclipse.equinox.http.jetty.log.stderr.threshold"; //$NON-NLS-1$
+
 	// The staticServerManager is use by the start and stopServer methods and must be accessed in a static synchronized block
 	// to ensure it is correctly handled in terms of the bundle life-cycle.
 	private static HttpServerManager staticServerManager;
@@ -45,6 +51,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$ 
 		jettyWorkDir.mkdir();
+		setStdErrLogThreshold(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		String autostart = context.getProperty(AUTOSTART);
@@ -58,6 +65,16 @@ public class Activator implements BundleActivator {
 
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
+	}
+
+	private void setStdErrLogThreshold(String property) {
+		try {
+			Class clazz = Class.forName("org.slf4j.Logger");
+			Method method = clazz.getMethod("setThresholdLogger", new Class[] {String.class});
+			method.invoke(null, new Object[] {property});
+		} catch (Throwable t) {
+			// ignore
+		}
 	}
 
 	private boolean isBundleActivationPolicyUsed(BundleContext context) {
@@ -217,5 +234,4 @@ public class Activator implements BundleActivator {
 	private synchronized static void setStaticServerManager(HttpServerManager httpServerManager) {
 		staticServerManager = httpServerManager;
 	}
-
 }

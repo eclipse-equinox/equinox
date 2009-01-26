@@ -16,6 +16,7 @@ Import-Package: javax.servlet;version="[2.5.0,2.6.0)",
  org.mortbay.jetty.nio;version="[6.1.0,7.0.0)",
  org.mortbay.jetty.security;version="[6.1.0,7.0.0)",
  org.mortbay.jetty.servlet;version="[6.1.0,7.0.0)",
+ org.mortbay.log;version="[6.1.0,7.0.0)",
  org.osgi.framework;version="1.3.0",
  org.osgi.service.cm;version="1.2.0",
  org.osgi.service.startlevel;version="1.0"
