@@ -122,6 +122,7 @@ org.osgi.framework.system.packages = \
  javax.xml.ws.http,\
  javax.xml.ws.soap,\
  javax.xml.ws.spi,\
+ javax.xml.ws.wsaddressing,\
  javax.xml.xpath,\
  org.ietf.jgss,\
  org.omg.CORBA,\
@@ -161,7 +162,8 @@ org.osgi.framework.system.packages = \
  org.w3c.dom.ranges,\
  org.w3c.dom.stylesheets,\
  org.w3c.dom.traversal,\
- org.w3c.dom.views ,\
+ org.w3c.dom.views,\
+ org.w3c.dom.xpath,\
  org.xml.sax,\
  org.xml.sax.ext,\
  org.xml.sax.helpers
