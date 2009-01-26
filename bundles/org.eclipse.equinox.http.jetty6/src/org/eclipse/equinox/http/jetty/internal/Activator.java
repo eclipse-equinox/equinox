@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		String autostart = context.getProperty(AUTOSTART);
-		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && ! isBundleActivationPolicyUsed(context)) {
+		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && !isBundleActivationPolicyUsed(context)) {
 			Dictionary defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
 
 	private boolean isBundleActivationPolicyUsed(BundleContext context) {
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
-		StartLevel sl =  ((reference != null) ? (StartLevel) context.getService(reference) : null);
+		StartLevel sl = ((reference != null) ? (StartLevel) context.getService(reference) : null);
 		if (sl != null) {
 			try {
 				Bundle bundle = context.getBundle();
@@ -127,8 +127,8 @@ public class Activator implements BundleActivator {
 		if (httpsEnabled.booleanValue()) {
 			// HTTPS Port
 			String httpsPortProperty = context.getProperty(PROPERTY_PREFIX + JettyConstants.HTTPS_PORT);
-			if (httpPortProperty == null)
-				httpPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT_SECURE);
+			if (httpsPortProperty == null)
+				httpsPortProperty = context.getProperty(ORG_OSGI_SERVICE_HTTP_PORT_SECURE);
 
 			int httpsPort = 443;
 			if (httpsPortProperty != null) {
