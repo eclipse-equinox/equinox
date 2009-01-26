@@ -36,6 +36,11 @@ public interface JettyConstants {
 	public static final String HTTP_HOST = "http.host"; //$NON-NLS-1$
 
 	/**
+	 * name="http.nio" type="Boolean" (default: true, with some exceptions for JREs with known NIO problems)
+	 */
+	public static final String HTTP_NIO = "http.nio"; //$NON-NLS-1$
+
+	/**
 	 * name="https.enabled" type="Boolean" (default: false)
 	 */
 	public static final String HTTPS_ENABLED = "https.enabled"; //$NON-NLS-1$

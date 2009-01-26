@@ -19,6 +19,7 @@ import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.servlet.*;
@@ -110,7 +111,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 		if (httpPort == null)
 			return null;
 
-		Connector connector = new SelectChannelConnector();
+		Boolean nioEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_NIO);
+		if (nioEnabled == null)
+			nioEnabled = getDefaultNIOEnablement();
+
+		Connector connector;
+		if (nioEnabled.booleanValue())
+			connector = new SelectChannelConnector();
+		else
+			connector = new SocketConnector();
+
 		connector.setPort(httpPort.intValue());
 
 		String httpHost = (String) dictionary.get(JettyConstants.HTTP_HOST);
@@ -127,6 +137,25 @@ public class HttpServerManager implements ManagedServiceFactory {
 			}
 		}
 		return connector;
+	}
+
+	private Boolean getDefaultNIOEnablement() {
+		Properties systemProperties = System.getProperties();
+		String javaVendor = systemProperties.getProperty("java.vendor", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		if (javaVendor.equals("IBM Corporation")) { //$NON-NLS-1$
+			String javaVersion = systemProperties.getProperty("java.version", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			if (javaVersion.startsWith("1.4")) //$NON-NLS-1$
+				return Boolean.FALSE;
+			// Note: no problems currently logged with 1.5
+			if (javaVersion.equals("1.6.0")) { //$NON-NLS-1$
+				String jclVersion = systemProperties.getProperty("java.jcl.version", ""); //$NON-NLS-1$ //$NON-NLS-2$
+				if (jclVersion.startsWith("2007")) //$NON-NLS-1$
+					return Boolean.FALSE;
+				if (jclVersion.startsWith("2008") && !jclVersion.startsWith("200811") && !jclVersion.startsWith("200812")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					return Boolean.FALSE;
+			}
+		}
+		return Boolean.TRUE;
 	}
 
 	private Connector createHttpsConnector(Dictionary dictionary) {
