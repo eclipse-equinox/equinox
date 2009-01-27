@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -34,26 +36,29 @@ import org.osgi.framework.Constants;
  */
 public class JspClassLoader extends URLClassLoader {
 
-	private static final Bundle JASPERBUNDLE = Activator.getBundle(org.apache.jasper.servlet.JspServlet.class);
+	private static final Bundle JASPERBUNDLE = Activator.getJasperBundle();
 	private static final ClassLoader PARENT = JspClassLoader.class.getClassLoader().getParent();
-	private static final String JAVA_PACKAGE = "java.";	 //$NON-NLS-1$
+	private static final String JAVA_PACKAGE = "java."; //$NON-NLS-1$
 	private static final ClassLoader EMPTY_CLASSLOADER = new ClassLoader() {
 		public URL getResource(String name) {
 			return null;
 		}
+
 		public Enumeration findResources(String name) throws IOException {
 			return new Enumeration() {
 				public boolean hasMoreElements() {
 					return false;
 				}
+
 				public Object nextElement() {
 					return null;
-				}				
+				}
 			};
 		}
+
 		public Class loadClass(String name) throws ClassNotFoundException {
 			throw new ClassNotFoundException(name);
-		}		
+		}
 	};
 
 	public JspClassLoader(Bundle bundle) {
@@ -64,7 +69,7 @@ public class JspClassLoader extends URLClassLoader {
 			for (int i = 0; i < fragments.length; i++) {
 				addBundleClassPathJars(fragments[i]);
 			}
-		}		
+		}
 	}
 
 	private void addBundleClassPathJars(Bundle bundle) {

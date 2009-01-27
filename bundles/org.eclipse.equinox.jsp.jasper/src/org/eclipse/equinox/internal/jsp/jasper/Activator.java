@@ -15,6 +15,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -23,10 +24,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private ServiceTracker packageAdminTracker;
 	private static PackageAdmin packageAdmin;
+	private volatile static Bundle thisBundle;
 	private BundleContext context;
 
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
+		thisBundle = context.getBundle();
 		packageAdminTracker = new ServiceTracker(context, PackageAdmin.class.getName(), this);
 		packageAdminTracker.open();
 	}
@@ -34,6 +37,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public void stop(BundleContext context) throws Exception {
 		packageAdminTracker.close();
 		packageAdminTracker = null;
+		thisBundle = null;
 		this.context = null;
 	}
 
@@ -60,11 +64,30 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 		return packageAdmin.getBundle(clazz);
 	}
-	
+
 	public static Bundle[] getFragments(Bundle bundle) {
 		if (packageAdmin == null)
 			throw new IllegalStateException("Not started"); //$NON-NLS-1$
 
 		return packageAdmin.getFragments(bundle);
+	}
+
+	public static Bundle getJasperBundle() {
+		Bundle bundle = getBundle(org.apache.jasper.servlet.JspServlet.class);
+		if (bundle != null)
+			return bundle;
+
+		if (thisBundle == null)
+			throw new IllegalStateException("Not started"); //$NON-NLS-1$
+
+		ExportedPackage[] exportedPackages = packageAdmin.getExportedPackages("org.apache.jasper.servlet"); //$NON-NLS-1$
+		for (int i = 0; i < exportedPackages.length; i++) {
+			Bundle[] importingBundles = exportedPackages[i].getImportingBundles();
+			for (int j = 0; j < importingBundles.length; j++) {
+				if (thisBundle.equals(importingBundles[j]))
+					return exportedPackages[i].getExportingBundle();
+			}
+		}
+		return null;
 	}
 }
