@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,27 @@ public interface Constants {
 	 * @since 3.4
 	 */
 	public static final String OS_EPOC32 = "epoc32";//$NON-NLS-1$
+
+	/**
+	 * Constant string (value "os/400") indicating the platform is running on a
+	 * OS/400 operating system.
+	 * @since 3.5
+	 */
+	public static final String OS_OS400 = "os/400"; //$NON-NLS-1$
+
+	/**
+	 * Constant string (value "os/390") indicating the platform is running on a
+	 * OS/390 operating system.
+	 * @since 3.5
+	 */
+	public static final String OS_OS390 = "os/390"; //$NON-NLS-1$
+
+	/**
+	 * Constant string (value "z/os") indicating the platform is running on a
+	 * z/OS operating system.
+	 * @since 3.5
+	 */
+	public static final String OS_ZOS = "z/os"; //$NON-NLS-1$
 
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a

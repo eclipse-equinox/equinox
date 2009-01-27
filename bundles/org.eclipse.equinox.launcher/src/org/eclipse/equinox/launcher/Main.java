@@ -321,6 +321,12 @@ public class Main {
 			return Constants.OS_AIX;
 		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_HPUX))
 			return Constants.OS_HPUX;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS400))
+			return Constants.OS_OS400;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_OS390))
+			return Constants.OS_OS390;
+		if (osName.equalsIgnoreCase(Constants.INTERNAL_OS_ZOS))
+			return Constants.OS_ZOS;
 		// os.name on Mac OS can be either Mac OS or Mac OS X
 		if (osName.regionMatches(true, 0, Constants.INTERNAL_OS_MACOSX, 0, Constants.INTERNAL_OS_MACOSX.length()))
 			return Constants.OS_MACOSX;

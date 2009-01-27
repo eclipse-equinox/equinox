@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,9 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	private static final String INTERNAL_OS_AIX = "AIX"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_HPUX = "HP-UX"; //$NON-NLS-1$
 	private static final String INTERNAL_OS_QNX = "QNX"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_OS400 = "OS/400"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_OS390 = "OS/390"; //$NON-NLS-1$
+	private static final String INTERNAL_OS_ZOS = "z/OS"; //$NON-NLS-1$
 
 	// While we recognize the i386 architecture, we change
 	// this internally to be x86.
@@ -218,6 +221,12 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 			return Constants.OS_AIX;
 		if (osName.equalsIgnoreCase(INTERNAL_OS_HPUX))
 			return Constants.OS_HPUX;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_OS400))
+			return Constants.OS_OS400;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_OS390))
+			return Constants.OS_OS390;
+		if (osName.equalsIgnoreCase(INTERNAL_OS_ZOS))
+			return Constants.OS_ZOS;
 		// os.name on Mac OS can be either Mac OS or Mac OS X
 		if (osName.regionMatches(true, 0, INTERNAL_OS_MACOSX, 0, INTERNAL_OS_MACOSX.length()))
 			return Constants.OS_MACOSX;

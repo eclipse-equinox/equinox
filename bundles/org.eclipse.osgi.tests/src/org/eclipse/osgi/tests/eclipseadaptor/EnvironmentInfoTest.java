@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,5 +76,22 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("1.3", Constants.OS_WIN32, EclipseEnvironmentInfo.guessOS("Windows NT"));
 		assertEquals("1.4", Constants.OS_WIN32, EclipseEnvironmentInfo.guessOS("Windows 95"));
 		assertEquals("2.0", Constants.WS_WIN32, EclipseEnvironmentInfo.guessWS(Constants.OS_WIN32));
+	}
+
+	public void testISeries() {
+		assertEquals("1.0", Constants.OS_OS400, EclipseEnvironmentInfo.guessOS("OS/400"));
+		assertEquals("1.1", Constants.OS_OS400, EclipseEnvironmentInfo.guessOS("os/400"));
+		assertEquals("1.2", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("OS/400 xyz"));
+		assertEquals("2.0", Constants.WS_UNKNOWN, EclipseEnvironmentInfo.guessWS(Constants.OS_OS400));
+	}
+
+	public void testZSeries() {
+		assertEquals("1.0", Constants.OS_OS390, EclipseEnvironmentInfo.guessOS("OS/390"));
+		assertEquals("1.1", Constants.OS_OS390, EclipseEnvironmentInfo.guessOS("os/390"));
+		assertEquals("1.1", Constants.OS_ZOS, EclipseEnvironmentInfo.guessOS("z/os"));
+		assertEquals("1.1", Constants.OS_ZOS, EclipseEnvironmentInfo.guessOS("Z/OS"));
+		assertEquals("1.2", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("OS/400 xyz"));
+		assertEquals("1.2", Constants.OS_UNKNOWN, EclipseEnvironmentInfo.guessOS("z/os xyz"));
+		assertEquals("2.0", Constants.WS_UNKNOWN, EclipseEnvironmentInfo.guessWS(Constants.OS_OS390));
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -23,6 +23,9 @@ public class Constants {
 	public static final String INTERNAL_OS_AIX = "AIX"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_HPUX = "HP-UX"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_QNX = "QNX"; //$NON-NLS-1$
+	public static final String INTERNAL_OS_OS400 = "OS/400"; //$NON-NLS-1$
+	public static final String INTERNAL_OS_OS390 = "OS/390"; //$NON-NLS-1$
+	public static final String INTERNAL_OS_ZOS = "z/OS"; //$NON-NLS-1$
 
 	public static final String ARCH_X86 = "x86";//$NON-NLS-1$
 	public static final String ARCH_X86_64 = "x86_64";//$NON-NLS-1$
@@ -68,6 +71,24 @@ public class Constants {
 	 * Mac OS X operating system.
 	 */
 	public static final String OS_MACOSX = "macosx";//$NON-NLS-1$
+
+	/**
+	 * Constant string (value "os/400") indicating the platform is running on a
+	 * OS/400 operating system.
+	 */
+	public static final String OS_OS400 = "os/400"; //$NON-NLS-1$
+
+	/**
+	 * Constant string (value "os/390") indicating the platform is running on a
+	 * OS/390 operating system.
+	 */
+	public static final String OS_OS390 = "os/390"; //$NON-NLS-1$
+
+	/**
+	 * Constant string (value "z/os") indicating the platform is running on a
+	 * z/OS operating system.
+	 */
+	public static final String OS_ZOS = "z/os"; //$NON-NLS-1$
 
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
@@ -116,7 +137,7 @@ public class Constants {
 	 * machine using the Cocoa windowing system (Mac OS X).
 	 */
 	public static final String WS_COCOA = "cocoa"; //$NON-NLS-1$
-	
+
 	/**
 	 * Constant string (value "unknown") indicating the platform is running on a
 	 * machine running an unknown windowing system.
