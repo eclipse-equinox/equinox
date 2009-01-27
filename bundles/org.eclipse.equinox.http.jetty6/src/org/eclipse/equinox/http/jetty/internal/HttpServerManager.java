@@ -67,14 +67,14 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		Connector httpConnector = createHttpConnector(dictionary);
 		if (null != customizer)
-			customizer.customizeHttpConnector(httpConnector, dictionary);
+			httpConnector = (Connector) customizer.customizeHttpConnector(httpConnector, dictionary);
 
 		if (httpConnector != null)
 			server.addConnector(httpConnector);
 
 		Connector httpsConnector = createHttpsConnector(dictionary);
 		if (null != customizer)
-			customizer.customizeHttpsConnector(httpsConnector, dictionary);
+			httpsConnector = (Connector) customizer.customizeHttpsConnector(httpsConnector, dictionary);
 		if (httpsConnector != null)
 			server.addConnector(httpsConnector);
 
@@ -93,7 +93,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		Context httpContext = createHttpContext(dictionary);
 		if (null != customizer)
-			customizer.customizeContext(httpContext, dictionary);
+			httpContext = (Context) customizer.customizeContext(httpContext, dictionary);
 
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.addHandler(httpContext);
