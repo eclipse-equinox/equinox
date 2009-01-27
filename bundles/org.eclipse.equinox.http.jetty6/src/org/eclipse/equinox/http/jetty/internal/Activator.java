@@ -216,6 +216,11 @@ public class Activator implements BundleActivator {
 		if (otherInfo != null)
 			defaultSettings.put(JettyConstants.OTHER_INFO, otherInfo);
 
+		// customizer
+		String customizerClass = context.getProperty(PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
+		if (customizerClass != null)
+			defaultSettings.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
+
 		return defaultSettings;
 	}
 

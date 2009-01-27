@@ -106,6 +106,14 @@ public interface JettyConstants {
 	public static final String CONTEXT_SESSIONINACTIVEINTERVAL = "context.sessioninactiveinterval"; //$NON-NLS-1$
 
 	/**
+	 * name="customizer.class" type="String" <br />
+	 * (full qualified name of the class that implements
+	 * <code>org.eclipse.equinox.http.jetty.JettyCustomizer</code> and has a public no-arg constructor;
+	 * the class must be supplied via a fragment to this bundle's classpath)</li>
+	 */
+	public static final String CUSTOMIZER_CLASS = "customizer.class"; //$NON-NLS-1$
+
+	/**
 	 * name="other.info" type="String"
 	 */
 	public static final String OTHER_INFO = "other.info"; //$NON-NLS-1$

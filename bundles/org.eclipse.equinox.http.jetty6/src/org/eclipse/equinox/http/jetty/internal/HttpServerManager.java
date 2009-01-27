@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.*;
 import org.eclipse.equinox.http.jetty.JettyConstants;
+import org.eclipse.equinox.http.jetty.JettyCustomizer;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
@@ -61,11 +62,19 @@ public class HttpServerManager implements ManagedServiceFactory {
 	public synchronized void updated(String pid, Dictionary dictionary) throws ConfigurationException {
 		deleted(pid);
 		Server server = new Server();
+
+		JettyCustomizer customizer = createJettyCustomizer(dictionary);
+
 		Connector httpConnector = createHttpConnector(dictionary);
+		if (null != customizer)
+			customizer.customizeHttpConnector(httpConnector, dictionary);
+
 		if (httpConnector != null)
 			server.addConnector(httpConnector);
 
 		Connector httpsConnector = createHttpsConnector(dictionary);
+		if (null != customizer)
+			customizer.customizeHttpsConnector(httpsConnector, dictionary);
 		if (httpsConnector != null)
 			server.addConnector(httpsConnector);
 
@@ -83,6 +92,9 @@ public class HttpServerManager implements ManagedServiceFactory {
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
 
 		Context httpContext = createHttpContext(dictionary);
+		if (null != customizer)
+			customizer.customizeContext(httpContext, dictionary);
+
 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
 		server.addHandler(httpContext);
 
@@ -242,7 +254,22 @@ public class HttpServerManager implements ManagedServiceFactory {
 			sessionManager.setMaxInactiveInterval(sessionInactiveInterval.intValue());
 
 		httpContext.setSessionHandler(new SessionHandler(sessionManager));
+
 		return httpContext;
+	}
+
+	private JettyCustomizer createJettyCustomizer(Dictionary dictionary) {
+		String customizerClass = (String) dictionary.get(JettyConstants.CUSTOMIZER_CLASS);
+		if (null == customizerClass)
+			return null;
+
+		try {
+			return (JettyCustomizer) Class.forName(customizerClass).newInstance();
+		} catch (Exception e) {
+			// TODO: consider logging this, but we should still continue 
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static class InternalHttpServiceServlet implements Servlet {
