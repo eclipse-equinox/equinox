@@ -316,7 +316,7 @@ int launchJavaVM( char* args[] )
 	/* If the JVM is still running, wait for it to terminate. */
 	if (jvmProcess != 0)
 	{
-		waitpid(jvmExitCode, &exitCode, 0);
+		waitpid(jvmProcess, &exitCode, 0);
 		jvmExitCode = ((exitCode & 0x00ff) == 0 ? (exitCode >> 8) : exitCode); /* see wait(2) */
 	}
 	
