@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,20 +14,23 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import junit.framework.*;
-import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 
-public class FilterTests extends TestCase {
+public abstract class FilterTests extends TestCase {
 	public static Test suite() {
-		return new TestSuite(FilterTests.class);
+		TestSuite suite = new TestSuite(FilterTests.class.getName());
+		suite.addTest(BundleContextFilterTests.suite());
+		suite.addTest(FrameworkUtilFilterTests.suite());
+		return suite;
 	}
 
 	static final int ISTRUE = 1;
 	static final int ISFALSE = 2;
 	static final int ISILLEGAL = 3;
 
+	public abstract Filter createFilter(String filterString) throws InvalidSyntaxException;
+
 	public void testFilter() {
-		final BundleContext testContext = OSGiTestsActivator.getContext();
 		Properties props = new Properties();
 		props.put("room", "bedroom"); //$NON-NLS-1$ //$NON-NLS-2$
 		props.put("channel", new Object[] {new Integer(34), "101"}); //$NON-NLS-1$//$NON-NLS-2$
@@ -115,8 +118,8 @@ public class FilterTests extends TestCase {
 		testFilter("  (room = =b**oo*m*) ) ", props, ISILLEGAL); //$NON-NLS-1$
 
 		try {
-			Filter f1 = testContext.createFilter("( a = bedroom  )"); //$NON-NLS-1$
-			Filter f2 = testContext.createFilter(" (a= bedroom  ) "); //$NON-NLS-1$
+			Filter f1 = createFilter("( a = bedroom  )"); //$NON-NLS-1$
+			Filter f2 = createFilter(" (a= bedroom  ) "); //$NON-NLS-1$
 			assertEquals("not equal", "(a= bedroom  )", f1.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("not equal", "(a= bedroom  )", f2.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			assertEquals("not equal", f1, f2); //$NON-NLS-1$
@@ -128,11 +131,10 @@ public class FilterTests extends TestCase {
 	}
 
 	private void testFilter(String query, Dictionary props, int expect) {
-		final BundleContext testContext = OSGiTestsActivator.getContext();
 		final ServiceReference ref = new DictionaryServiceReference(props);
 		Filter f1;
 		try {
-			f1 = testContext.createFilter(query);
+			f1 = createFilter(query);
 
 			if (expect == ISILLEGAL) {
 				fail("expected exception"); //$NON-NLS-1$
@@ -150,17 +152,12 @@ public class FilterTests extends TestCase {
 		val = f1.match(ref);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 
+		String normalized = f1.toString();
 		Filter f2;
 		try {
-			f2 = FrameworkUtil.createFilter(query);
-
-			if (expect == ISILLEGAL) {
-				fail("expected exception"); //$NON-NLS-1$
-			}
+			f2 = createFilter(normalized);
 		} catch (InvalidSyntaxException e) {
-			if (expect != ISILLEGAL) {
-				fail("exception: " + e.toString()); //$NON-NLS-1$
-			}
+			fail("exception: " + e.toString()); //$NON-NLS-1$
 			return;
 		}
 
@@ -170,14 +167,14 @@ public class FilterTests extends TestCase {
 		val = f2.match(ref);
 		assertEquals("wrong result", expect == ISTRUE, val); //$NON-NLS-1$
 
-		assertEquals("not equal", f1, f2); //$NON-NLS-1$
+		assertEquals("normalized not equal", normalized, f2.toString()); //$NON-NLS-1$
+
 	}
 
 	public void testComparable() {
-		final BundleContext testContext = OSGiTestsActivator.getContext();
 		Filter f1 = null;
 		try {
-			f1 = testContext.createFilter("(comparable=42)"); //$NON-NLS-1$
+			f1 = createFilter("(comparable=42)"); //$NON-NLS-1$
 		} catch (InvalidSyntaxException e) {
 			fail("invalid syntax" + e); //$NON-NLS-1$
 		}
@@ -194,25 +191,6 @@ public class FilterTests extends TestCase {
 		assertTrue("does not match filter", f1.match(hash)); //$NON-NLS-1$
 		assertTrue("does not match filter", f1.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
 
-		Filter f2 = null;
-		try {
-			f2 = FrameworkUtil.createFilter("(comparable=42)"); //$NON-NLS-1$
-		} catch (InvalidSyntaxException e) {
-			fail("invalid syntax" + e); //$NON-NLS-1$
-		}
-		hash = new Hashtable();
-
-		comp = new SampleComparable("42"); //$NON-NLS-1$
-		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", f2.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", f2.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
-
-		comp = new Long(42);
-		hash.put("comparable", comp); //$NON-NLS-1$
-		assertTrue("does not match filter", f2.match(hash)); //$NON-NLS-1$
-		assertTrue("does not match filter", f2.match(new DictionaryServiceReference(hash))); //$NON-NLS-1$
-
-		assertEquals("not equal", f1, f2); //$NON-NLS-1$
 	}
 
 	private static class SampleComparable implements Comparable {
@@ -263,7 +241,7 @@ public class FilterTests extends TestCase {
 		}
 
 		public Bundle getBundle() {
-			return OSGiTestsActivator.getContext().getBundle();
+			throw new UnsupportedOperationException();
 		}
 
 		public Object getProperty(String k) {

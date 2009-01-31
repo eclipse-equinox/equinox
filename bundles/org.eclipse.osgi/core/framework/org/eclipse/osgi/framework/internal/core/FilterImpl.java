@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,106 +207,116 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 *
 	 * @return Filter string.
 	 */
+
 	public String toString() {
-		String result = this.filterString;
+		String result = filterString;
 		if (result == null) {
-			StringBuffer sb = new StringBuffer();
-			sb.append('(');
+			filterString = result = normalize();
+		}
+		return result;
+	}
 
-			switch (op) {
-				case AND : {
-					sb.append('&');
+	/**
+	 * Returns this <code>Filter</code>'s normalized filter string.
+	 * <p>
+	 * The filter string is normalized by removing whitespace which does not
+	 * affect the meaning of the filter.
+	 * 
+	 * @return This <code>Filter</code>'s filter string.
+	 */
+	private String normalize() {
+		StringBuffer sb = new StringBuffer();
+		sb.append('(');
 
-					FilterImpl[] filters = (FilterImpl[]) value;
-					for (int i = 0, size = filters.length; i < size; i++) {
-						sb.append(filters[i].toString());
-					}
+		switch (op) {
+			case AND : {
+				sb.append('&');
 
-					break;
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (int i = 0, size = filters.length; i < size; i++) {
+					sb.append(filters[i].normalize());
 				}
 
-				case OR : {
-					sb.append('|');
-
-					FilterImpl[] filters = (FilterImpl[]) value;
-					for (int i = 0, size = filters.length; i < size; i++) {
-						sb.append(filters[i].toString());
-					}
-
-					break;
-				}
-
-				case NOT : {
-					sb.append('!');
-					sb.append(value.toString());
-
-					break;
-				}
-
-				case SUBSTRING : {
-					sb.append(attr);
-					sb.append('=');
-
-					String[] substrings = (String[]) value;
-
-					for (int i = 0, size = substrings.length; i < size; i++) {
-						String substr = substrings[i];
-
-						if (substr == null) /* * */{
-							sb.append('*');
-						} else /* xxx */{
-							sb.append(encodeValue(substr));
-						}
-					}
-
-					break;
-				}
-				case EQUAL : {
-					sb.append(attr);
-					sb.append('=');
-					sb.append(encodeValue(value.toString()));
-
-					break;
-				}
-				case GREATER : {
-					sb.append(attr);
-					sb.append(">="); //$NON-NLS-1$
-					sb.append(encodeValue(value.toString()));
-
-					break;
-				}
-				case LESS : {
-					sb.append(attr);
-					sb.append("<="); //$NON-NLS-1$
-					sb.append(encodeValue(value.toString()));
-
-					break;
-				}
-				case APPROX : {
-					sb.append(attr);
-					sb.append("~="); //$NON-NLS-1$
-					sb.append(encodeValue(approxString(value.toString())));
-
-					break;
-				}
-
-				case PRESENT : {
-					sb.append(attr);
-					sb.append("=*"); //$NON-NLS-1$
-
-					break;
-				}
+				break;
 			}
 
-			sb.append(')');
+			case OR : {
+				sb.append('|');
 
-			result = sb.toString();
-			if (topLevel) /* only hold onto String object at toplevel */{
-				this.filterString = result;
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (int i = 0, size = filters.length; i < size; i++) {
+					sb.append(filters[i].normalize());
+				}
+
+				break;
+			}
+
+			case NOT : {
+				sb.append('!');
+				FilterImpl filter = (FilterImpl) value;
+				sb.append(filter.normalize());
+
+				break;
+			}
+
+			case SUBSTRING : {
+				sb.append(attr);
+				sb.append('=');
+
+				String[] substrings = (String[]) value;
+
+				for (int i = 0, size = substrings.length; i < size; i++) {
+					String substr = substrings[i];
+
+					if (substr == null) /* * */{
+						sb.append('*');
+					} else /* xxx */{
+						sb.append(encodeValue(substr));
+					}
+				}
+
+				break;
+			}
+			case EQUAL : {
+				sb.append(attr);
+				sb.append('=');
+				sb.append(encodeValue((String) value));
+
+				break;
+			}
+			case GREATER : {
+				sb.append(attr);
+				sb.append(">="); //$NON-NLS-1$
+				sb.append(encodeValue((String) value));
+
+				break;
+			}
+			case LESS : {
+				sb.append(attr);
+				sb.append("<="); //$NON-NLS-1$
+				sb.append(encodeValue((String) value));
+
+				break;
+			}
+			case APPROX : {
+				sb.append(attr);
+				sb.append("~="); //$NON-NLS-1$
+				sb.append(encodeValue(approxString((String) value)));
+
+				break;
+			}
+
+			case PRESENT : {
+				sb.append(attr);
+				sb.append("=*"); //$NON-NLS-1$
+
+				break;
 			}
 		}
 
-		return result;
+		sb.append(')');
+
+		return sb.toString();
 	}
 
 	/**
@@ -362,11 +372,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/* normalized filter string for topLevel Filter object */
 	private transient volatile String filterString;
 
-	/* true if root Filter object */
-	private final boolean topLevel;
-
-	FilterImpl(boolean topLevel, int operation, String attr, Object value) {
-		this.topLevel = topLevel;
+	FilterImpl(int operation, String attr, Object value) {
 		this.op = operation;
 		this.attr = attr;
 		this.value = value;
@@ -1273,7 +1279,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		FilterImpl parse() throws InvalidSyntaxException {
 			FilterImpl filter;
 			try {
-				filter = parse_filter(true);
+				filter = parse_filter();
 			} catch (ArrayIndexOutOfBoundsException e) {
 				throw new InvalidSyntaxException(Msg.FILTER_TERMINATED_ABRUBTLY, filterstring);
 			}
@@ -1284,7 +1290,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return filter;
 		}
 
-		private FilterImpl parse_filter(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_filter() throws InvalidSyntaxException {
 			FilterImpl filter;
 			skipWhiteSpace();
 
@@ -1294,7 +1300,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			pos++;
 
-			filter = parse_filtercomp(topLevel);
+			filter = parse_filtercomp();
 
 			skipWhiteSpace();
 
@@ -1309,7 +1315,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return filter;
 		}
 
-		private FilterImpl parse_filtercomp(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_filtercomp() throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			char c = filterChars[pos];
@@ -1317,21 +1323,21 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			switch (c) {
 				case '&' : {
 					pos++;
-					return parse_and(topLevel);
+					return parse_and();
 				}
 				case '|' : {
 					pos++;
-					return parse_or(topLevel);
+					return parse_or();
 				}
 				case '!' : {
 					pos++;
-					return parse_not(topLevel);
+					return parse_not();
 				}
 			}
-			return parse_item(topLevel);
+			return parse_item();
 		}
 
-		private FilterImpl parse_and(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_and() throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
@@ -1341,14 +1347,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			List operands = new ArrayList(10);
 
 			while (filterChars[pos] == '(') {
-				FilterImpl child = parse_filter(false);
+				FilterImpl child = parse_filter();
 				operands.add(child);
 			}
 
-			return new FilterImpl(topLevel, FilterImpl.AND, null, operands.toArray(new FilterImpl[operands.size()]));
+			return new FilterImpl(FilterImpl.AND, null, operands.toArray(new FilterImpl[operands.size()]));
 		}
 
-		private FilterImpl parse_or(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_or() throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
@@ -1358,26 +1364,26 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			List operands = new ArrayList(10);
 
 			while (filterChars[pos] == '(') {
-				FilterImpl child = parse_filter(false);
+				FilterImpl child = parse_filter();
 				operands.add(child);
 			}
 
-			return new FilterImpl(topLevel, FilterImpl.OR, null, operands.toArray(new FilterImpl[operands.size()]));
+			return new FilterImpl(FilterImpl.OR, null, operands.toArray(new FilterImpl[operands.size()]));
 		}
 
-		private FilterImpl parse_not(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_not() throws InvalidSyntaxException {
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
 				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
 			}
 
-			FilterImpl child = parse_filter(false);
+			FilterImpl child = parse_filter();
 
-			return new FilterImpl(topLevel, FilterImpl.NOT, null, child);
+			return new FilterImpl(FilterImpl.NOT, null, child);
 		}
 
-		private FilterImpl parse_item(boolean topLevel) throws InvalidSyntaxException {
+		private FilterImpl parse_item() throws InvalidSyntaxException {
 			String attr = parse_attr();
 
 			skipWhiteSpace();
@@ -1386,21 +1392,21 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				case '~' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(topLevel, FilterImpl.APPROX, attr, parse_value());
+						return new FilterImpl(FilterImpl.APPROX, attr, parse_value());
 					}
 					break;
 				}
 				case '>' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(topLevel, FilterImpl.GREATER, attr, parse_value());
+						return new FilterImpl(FilterImpl.GREATER, attr, parse_value());
 					}
 					break;
 				}
 				case '<' : {
 					if (filterChars[pos + 1] == '=') {
 						pos += 2;
-						return new FilterImpl(topLevel, FilterImpl.LESS, attr, parse_value());
+						return new FilterImpl(FilterImpl.LESS, attr, parse_value());
 					}
 					break;
 				}
@@ -1410,7 +1416,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 						pos += 2;
 						skipWhiteSpace();
 						if (filterChars[pos] == ')') {
-							return new FilterImpl(topLevel, FilterImpl.PRESENT, attr, null);
+							return new FilterImpl(FilterImpl.PRESENT, attr, null);
 						}
 						pos = oldpos;
 					}
@@ -1419,9 +1425,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 					Object string = parse_substring();
 
 					if (string instanceof String) {
-						return new FilterImpl(topLevel, FilterImpl.EQUAL, attr, string);
+						return new FilterImpl(FilterImpl.EQUAL, attr, string);
 					}
-					return new FilterImpl(topLevel, FilterImpl.SUBSTRING, attr, string);
+					return new FilterImpl(FilterImpl.SUBSTRING, attr, string);
 				}
 			}
 
