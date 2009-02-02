@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,28 +78,33 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	public String nextArgument() {
 		if (tok == null || !tok.hasMoreElements())
 			return null;
+		return consumeQuotes(tok.nextToken());
+	}
 
-		String arg = tok.nextToken();
-		if (arg.startsWith("\"")) { //$NON-NLS-1$
-			if (arg.endsWith("\"")) { //$NON-NLS-1$
-				if (arg.length() >= 2)
-					// strip the beginning and ending quotes
-					return arg.substring(1, arg.length() - 1);
-			}
-			String remainingArg = tok.nextToken("\""); //$NON-NLS-1$
-			arg = arg.substring(1) + remainingArg;
+	private String consumeQuotes(String arg) {
+		if (!(arg.startsWith("\"") || arg.startsWith("'"))) //$NON-NLS-1$//$NON-NLS-2$
+			return arg;
+		String quote = arg.substring(0, 1);
+		if (arg.endsWith(quote)) {
+			if (arg.length() >= 2)
+				// strip the beginning and ending quotes
+				return arg.substring(1, arg.length() - 1);
+			// single quote case; return empty string
+			return ""; //$NON-NLS-1$
+		}
+
+		try {
+			arg = arg.substring(1) + tok.nextToken(quote);
+		} catch (NoSuchElementException e) {
+			// should not happen
+			printStackTrace(e);
+			return ""; //$NON-NLS-1$
+		}
+		try {
 			// skip to next whitespace separated token
 			tok.nextToken(WS_DELIM);
-		} else if (arg.startsWith("'")) { //$NON-NLS-1$ //$NON-NLS-2$
-			if (arg.endsWith("'")) { //$NON-NLS-1$
-				if (arg.length() >= 2)
-					// strip the beginning and ending quotes
-					return arg.substring(1, arg.length() - 1);
-			}
-			String remainingArg = tok.nextToken("'"); //$NON-NLS-1$
-			arg = arg.substring(1) + remainingArg;
-			// skip to next whitespace separated token
-			tok.nextToken(WS_DELIM);
+		} catch (NoSuchElementException e) {
+			// this is ok we are at the end
 		}
 		return arg;
 	}
