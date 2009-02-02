@@ -25,9 +25,9 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	private static String os;
 	private static String ws;
 	private static String arch;
-	static String[] allArgs;
-	static String[] frameworkArgs;
-	static String[] appArgs;
+	private volatile static String[] allArgs;
+	private volatile static String[] frameworkArgs;
+	private volatile static String[] appArgs;
 
 	// While we recognize the SunOS operating system, we change
 	// this internally to be Solaris.
@@ -172,18 +172,18 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 	}
 
 	public static void setAllArgs(String[] allArgs) {
-		if (EclipseEnvironmentInfo.allArgs == null)
-			EclipseEnvironmentInfo.allArgs = allArgs;
+		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		EclipseEnvironmentInfo.allArgs = allArgs;
 	}
 
 	public static void setAppArgs(String[] appArgs) {
-		if (EclipseEnvironmentInfo.appArgs == null)
-			EclipseEnvironmentInfo.appArgs = appArgs;
+		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		EclipseEnvironmentInfo.appArgs = appArgs;
 	}
 
 	public static void setFrameworkArgs(String[] frameworkArgs) {
-		if (EclipseEnvironmentInfo.frameworkArgs == null)
-			EclipseEnvironmentInfo.frameworkArgs = frameworkArgs;
+		// do not check if this is set already to allow arguments to change when multiple applications are launched
+		EclipseEnvironmentInfo.frameworkArgs = frameworkArgs;
 	}
 
 	public static String guessWS(String os) {
