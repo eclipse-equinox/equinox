@@ -175,7 +175,7 @@ public class PackageAdminImpl implements PackageAdmin {
 					if (framework.isForcedRestart())
 						framework.shutdown(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
 				}
-			}, "Refresh Packages"); //$NON-NLS-1$	
+			}, "Refresh Packages", framework.getContextFinder()); //$NON-NLS-1$	
 			refresh.start();
 		}
 	}
@@ -424,7 +424,7 @@ public class PackageAdminImpl implements PackageAdmin {
 		// first sort by id/start-level order
 		Util.sort(refresh);
 		// then sort by dependency order
-		StartLevelManager.sortByDependency(refresh);
+		framework.startLevelManager.sortByDependency(refresh);
 		boolean[] previouslyResolved = new boolean[refresh.length];
 		int[] previousStates = new int[refresh.length];
 		try {

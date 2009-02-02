@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -291,19 +291,27 @@ public class SecureAction {
 
 	/**
 	 * Creates a new Thread from a Runnable.  Same as calling
-	 * new Thread(target,name).
+	 * new Thread(target,name).setContextClassLoader(contextLoader).
 	 * @param target the Runnable to create the Thread from.
 	 * @param name The name of the Thread.
+	 * @param contextLoader the context class loader for the thread
 	 * @return The new Thread
 	 */
-	public Thread createThread(final Runnable target, final String name) {
+	public Thread createThread(final Runnable target, final String name, final ClassLoader contextLoader) {
 		if (System.getSecurityManager() == null)
-			return new Thread(target, name);
+			return createThread0(target, name, contextLoader);
 		return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				return new Thread(target, name);
+				return createThread0(target, name, contextLoader);
 			}
 		}, controlContext);
+	}
+
+	Thread createThread0(Runnable target, String name, ClassLoader contextLoader) {
+		Thread result = new Thread(target, name);
+		if (contextLoader != null)
+			result.setContextClassLoader(contextLoader);
+		return result;
 	}
 
 	/**

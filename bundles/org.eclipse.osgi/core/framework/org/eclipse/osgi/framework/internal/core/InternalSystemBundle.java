@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,7 +246,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 						framework.adaptor.handleRuntimeError(t);
 					}
 				}
-			}, "System Bundle Shutdown"); //$NON-NLS-1$
+			}, "System Bundle Shutdown", framework.getContextFinder()); //$NON-NLS-1$
 
 			shutdown.start();
 		}
@@ -300,7 +300,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 					framework.startLevelManager.doSetStartLevel(sl);
 					FrameworkProperties.clearProperty(Constants.PROP_OSGI_RELAUNCH);
 				}
-			}, "System Bundle Update"); //$NON-NLS-1$
+			}, "System Bundle Update", framework.getContextFinder()); //$NON-NLS-1$
 
 			restart.start();
 		}

@@ -1,0 +1,30 @@
+/*******************************************************************************
+ * Copyright (c) 2009 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package test.tccl;
+
+import org.osgi.framework.*;
+
+public class Activator implements BundleActivator {
+
+	public void start(BundleContext context) throws Exception {
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		ClassLoader serviceTCCL = (ClassLoader) context.getService(context.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
+		if (tccl != serviceTCCL)
+			throw new BundleException("Wrong thread context class loader found"); //$NON-NLS-1$
+	}
+
+	public void stop(BundleContext context) throws Exception {
+		ClassLoader tccl = Thread.currentThread().getContextClassLoader();
+		ClassLoader serviceTCCL = (ClassLoader) context.getService(context.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]); //$NON-NLS-1$
+		if (tccl != serviceTCCL)
+			throw new BundleException("Wrong thread context class loader found"); //$NON-NLS-1$
+	}
+}

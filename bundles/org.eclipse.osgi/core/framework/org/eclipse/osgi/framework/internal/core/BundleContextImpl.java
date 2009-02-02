@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -794,6 +794,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected void startActivator(final BundleActivator bundleActivator) throws BundleException {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("BundleContextImpl.startActivator()", null); //$NON-NLS-1$
+		Object previousTCCL = setContextFinder();
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
@@ -822,10 +823,22 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$ 
 		} finally {
+			if (previousTCCL != Boolean.FALSE)
+				Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logExit("BundleContextImpl.startActivator()"); //$NON-NLS-1$
 		}
+	}
 
+	private Object setContextFinder() {
+		Thread currentThread = Thread.currentThread();
+		ClassLoader previousTCCL = currentThread.getContextClassLoader();
+		ClassLoader contextFinder = framework.getContextFinder();
+		if (previousTCCL != contextFinder) {
+			currentThread.setContextClassLoader(framework.getContextFinder());
+			return previousTCCL;
+		}
+		return Boolean.FALSE;
 	}
 
 	/**
@@ -888,6 +901,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		// save the bundle ref to a local variable 
 		// to avoid interference from another thread closing this context
 		AbstractBundle tmpBundle = bundle;
+		Object previousTCCL = setContextFinder();
 		try {
 			if (isValid()) /* if context still valid */{
 				switch (action) {
@@ -965,6 +979,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 				framework.publishFrameworkEvent(FrameworkEvent.ERROR, tmpBundle, t);
 			}
+		} finally {
+			if (previousTCCL != Boolean.FALSE)
+				Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
 		}
 	}
 

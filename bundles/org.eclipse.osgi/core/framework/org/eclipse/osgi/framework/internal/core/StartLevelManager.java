@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,6 @@ import org.osgi.service.startlevel.StartLevel;
  * registered in the framework.
  */
 public class StartLevelManager implements EventDispatcher, EventListener, StartLevel {
-
-	protected static Framework framework;
 	protected static EventManager eventManager;
 	protected static Map startLevelListeners;
 
@@ -47,18 +45,19 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 
 	/** An object used to lock the active startlevel while it is being referenced */
 	private final Object lock = new Object();
-
+	private final Framework framework;
 	volatile private boolean settingStartLevel = false;
 
 	/** This constructor is called by the Framework */
 	protected StartLevelManager(Framework framework) {
-		StartLevelManager.framework = framework;
+		this.framework = framework;
 	}
 
 	protected void initialize() {
 		initialBundleStartLevel = framework.adaptor.getInitialBundleStartLevel();
 
 		// create an event manager and a start level listener
+		// note that we do not pass the ContextFinder because it is set each time doSetStartLevel is called
 		eventManager = new EventManager("Start Level Event Dispatcher"); //$NON-NLS-1$
 		startLevelListeners = new CopyOnWriteIdentityMap();
 		startLevelListeners.put(this, this);
@@ -226,6 +225,12 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	void doSetStartLevel(int newSL) {
 		synchronized (lock) {
 			settingStartLevel = true;
+			ClassLoader previousTCCL = Thread.currentThread().getContextClassLoader();
+			ClassLoader contextFinder = framework.getContextFinder();
+			if (contextFinder == previousTCCL)
+				contextFinder = null;
+			else
+				Thread.currentThread().setContextClassLoader(contextFinder);
 			try {
 				int tempSL = activeSL;
 				if (newSL > tempSL) {
@@ -266,6 +271,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 					Debug.println("StartLevelImpl: doSetStartLevel: STARTLEVEL_CHANGED event published"); //$NON-NLS-1$
 				}
 			} finally {
+				if (contextFinder != null)
+					Thread.currentThread().setContextClassLoader(previousTCCL);
 				settingStartLevel = false;
 			}
 		}
@@ -483,7 +490,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		return installedBundles;
 	}
 
-	static void sortByDependency(AbstractBundle[] bundles) {
+	void sortByDependency(AbstractBundle[] bundles) {
 		synchronized (framework.bundles) {
 			if (bundles.length <= 1)
 				return;
@@ -506,7 +513,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		}
 	}
 
-	private static void sortByDependencies(AbstractBundle[] bundles, int start, int end) {
+	private void sortByDependencies(AbstractBundle[] bundles, int start, int end) {
 		if (end - start <= 1)
 			return;
 		List descList = new ArrayList(end - start);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,6 +122,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	private ContentHandlerFactory contentHandlerFactory;
 
 	private volatile ServiceTracker signedContentFactory;
+	private volatile ContextFinder contextFinder;
 
 	/* 
 	 * We need to make sure that the GetDataFileAction class loads early to prevent a ClassCircularityError when checking permissions.
@@ -1439,10 +1440,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private void initializeContextFinder() {
-		//if (true)
-		//	return;
 		Thread current = Thread.currentThread();
-		Throwable error = null;
 		try {
 			ClassLoader parent = null;
 			// check property for specified parent
@@ -1458,31 +1456,16 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				if (appCL != null)
 					parent = appCL.getParent();
 			} else { // default is ccl (null or any other value will use ccl)
-				Method getContextClassLoader = Thread.class.getMethod("getContextClassLoader", null); //$NON-NLS-1$
-				parent = (ClassLoader) getContextClassLoader.invoke(current, null);
+				parent = current.getContextClassLoader();
 			}
-			Method setContextClassLoader = Thread.class.getMethod("setContextClassLoader", new Class[] {ClassLoader.class}); //$NON-NLS-1$
-			Object[] params = new Object[] {new ContextFinder(parent)};
-			setContextClassLoader.invoke(current, params);
+			contextFinder = new ContextFinder(parent);
+			current.setContextClassLoader(contextFinder);
 			return;
-		} catch (SecurityException e) {
-			// log the error
-			error = e;
-		} catch (NoSuchMethodException e) {
-			// Ignore; must be running on a class library that does not support context class loaders.
-			return; // we really do not want to log this
-		} catch (IllegalArgumentException e) {
-			// log the error
-			error = e;
-		} catch (IllegalAccessException e) {
-			// log the error
-			error = e;
-		} catch (InvocationTargetException e) {
-			// log the error; get the target exception
-			error = e.getTargetException();
+		} catch (Exception e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.INFO, 0, NLS.bind(Msg.CANNOT_SET_CONTEXTFINDER, null), 0, e, null);
+			adaptor.getFrameworkLog().log(entry);
 		}
-		FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.INFO, 0, NLS.bind(Msg.CANNOT_SET_CONTEXTFINDER, null), 0, error, null);
-		adaptor.getFrameworkLog().log(entry);
+
 	}
 
 	private static Field getStaticField(Class clazz, Class type) {
@@ -1817,5 +1800,9 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	SignedContentFactory getSignedContentFactory() {
 		ServiceTracker currentTracker = signedContentFactory;
 		return (SignedContentFactory) (currentTracker == null ? null : currentTracker.getService());
+	}
+
+	ContextFinder getContextFinder() {
+		return contextFinder;
 	}
 }

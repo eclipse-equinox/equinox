@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,13 +22,14 @@ import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
  */
 
 public class SystemBundleActivator implements BundleActivator {
-	protected BundleContext context;
-	protected InternalSystemBundle bundle;
-	protected Framework framework;
-	protected ServiceRegistration packageAdmin;
-	protected ServiceRegistration securityAdmin;
-	protected ServiceRegistration startLevel;
-	protected ServiceRegistration debugOptions;
+	private BundleContext context;
+	private InternalSystemBundle bundle;
+	private Framework framework;
+	private ServiceRegistration packageAdmin;
+	private ServiceRegistration securityAdmin;
+	private ServiceRegistration startLevel;
+	private ServiceRegistration debugOptions;
+	private ServiceRegistration contextFinder;
 
 	public SystemBundleActivator() {
 	}
@@ -39,14 +40,20 @@ public class SystemBundleActivator implements BundleActivator {
 		framework = bundle.framework;
 
 		if (framework.packageAdmin != null)
-			packageAdmin = register(new String[] {Constants.OSGI_PACKAGEADMIN_NAME}, framework.packageAdmin);
+			packageAdmin = register(new String[] {Constants.OSGI_PACKAGEADMIN_NAME}, framework.packageAdmin, null);
 		if (framework.securityAdmin != null)
-			securityAdmin = register(new String[] {Constants.OSGI_PERMISSIONADMIN_NAME, ConditionalPermissionAdmin.class.getName()}, framework.securityAdmin);
+			securityAdmin = register(new String[] {Constants.OSGI_PERMISSIONADMIN_NAME, ConditionalPermissionAdmin.class.getName()}, framework.securityAdmin, null);
 		if (framework.startLevelManager != null)
-			startLevel = register(new String[] {Constants.OSGI_STARTLEVEL_NAME}, framework.startLevelManager);
+			startLevel = register(new String[] {Constants.OSGI_STARTLEVEL_NAME}, framework.startLevelManager, null);
 		FrameworkDebugOptions dbgOptions = null;
 		if ((dbgOptions = FrameworkDebugOptions.getDefault()) != null)
-			debugOptions = register(new String[] {org.eclipse.osgi.service.debug.DebugOptions.class.getName()}, dbgOptions);
+			debugOptions = register(new String[] {org.eclipse.osgi.service.debug.DebugOptions.class.getName()}, dbgOptions, null);
+		ClassLoader tccl = framework.getContextFinder();
+		if (tccl != null) {
+			Hashtable props = new Hashtable(7);
+			props.put("equinox.classloader.type", "contextClassLoader"); //$NON-NLS-1$ //$NON-NLS-2$
+			contextFinder = register(new String[] {ClassLoader.class.getName()}, tccl, props);
+		}
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
 		framework.adaptor.frameworkStart(context);
@@ -70,6 +77,8 @@ public class SystemBundleActivator implements BundleActivator {
 			startLevel.unregister();
 		if (debugOptions != null)
 			debugOptions.unregister();
+		if (contextFinder != null)
+			contextFinder.unregister();
 
 		framework = null;
 		bundle = null;
@@ -80,8 +89,9 @@ public class SystemBundleActivator implements BundleActivator {
 	 * Register a service object.
 	 *
 	 */
-	protected ServiceRegistration register(String[] names, Object service) {
-		Hashtable properties = new Hashtable(7);
+	private ServiceRegistration register(String[] names, Object service, Hashtable properties) {
+		if (properties == null)
+			properties = new Hashtable(7);
 		Dictionary headers = bundle.getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));

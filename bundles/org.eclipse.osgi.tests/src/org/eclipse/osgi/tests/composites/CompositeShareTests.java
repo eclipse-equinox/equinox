@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.launch.Framework;
 import org.osgi.service.framework.*;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class CompositeShareTests extends AbstractCompositeTests {
@@ -831,5 +833,70 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		}
 
 		uninstallCompositeBundle(composite);
+	}
+
+	public void testBug258209_1() {
+		// create a composite bundle to test thread context class loaders
+		Map linkManifest = new HashMap();
+		linkManifest.put(Constants.BUNDLE_SYMBOLICNAME, "Bug258209.01"); //$NON-NLS-1$
+		linkManifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, "Bug258209.01", null, linkManifest, false, false); //$NON-NLS-1$
+		Bundle testTCCL = installIntoChild(compositeBundle.getCompositeFramework(), "test.tccl"); //$NON-NLS-1$
+		try {
+			testTCCL.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception starting bundle", e); //$NON-NLS-1$
+		}
+		assertEquals("Unexpected state", Bundle.RESOLVED, testTCCL.getState()); //$NON-NLS-1$
+		// this will start the framework on the current thread; test that the correct tccl is used
+		startCompositeBundle(compositeBundle, false);
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// test that the correct tccl is used for framework update
+		Framework framework = compositeBundle.getCompositeFramework();
+		try {
+			framework.update();
+			checkActive(testTCCL);
+		} catch (Exception e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// test that the correct tccl is used for refresh packages
+		PackageAdmin pa = getPackageAdmin(compositeBundle.getCompositeFramework());
+		pa.refreshPackages(new Bundle[] {testTCCL});
+		checkActive(testTCCL);
+		assertEquals("Unexpected state", Bundle.ACTIVE, testTCCL.getState()); //$NON-NLS-1$
+
+		// use the tccl service to start the test bundle.
+		BundleContext context = compositeBundle.getCompositeFramework().getBundleContext();
+		ClassLoader serviceTCCL = null;
+		try {
+			serviceTCCL = (ClassLoader) context.getService(context.getServiceReferences(ClassLoader.class.getName(), "(equinox.classloader.type=contextClassLoader)")[0]);//$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			fail("Unexpected", e);//$NON-NLS-1$
+		}
+		ClassLoader current = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(serviceTCCL);
+		try {
+			testTCCL.stop();
+			testTCCL.start();
+		} catch (BundleException e) {
+			fail("Unepected", e); //$NON-NLS-1$
+		} finally {
+			Thread.currentThread().setContextClassLoader(current);
+		}
+		uninstallCompositeBundle(compositeBundle);
+	}
+
+	private void checkActive(Bundle b) {
+		try {
+			// just a hack to make sure we are restarted
+			Thread.sleep(500);
+			if (b.getState() != Bundle.ACTIVE)
+				Thread.sleep(500);
+		} catch (Exception e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
 	}
 }
