@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
-import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
@@ -90,7 +89,10 @@ public class PackageAdminImpl implements PackageAdmin {
 	public ExportedPackage[] getExportedPackages(Bundle bundle) {
 		ArrayList allExports = new ArrayList();
 		synchronized (framework.bundles) {
-			ExportPackageDescription[] allDescriptions = framework.adaptor.getState().getExportedPackages();
+			FrameworkAdaptor adaptor = framework.adaptor;
+			if (adaptor == null)
+				return null;
+			ExportPackageDescription[] allDescriptions = adaptor.getState().getExportedPackages();
 			for (int i = 0; i < allDescriptions.length; i++) {
 				ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
 				if (exportedPackage == null)
