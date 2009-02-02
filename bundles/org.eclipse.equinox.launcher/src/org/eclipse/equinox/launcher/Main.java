@@ -1638,11 +1638,13 @@ public class Main {
 		// setup the path to the framework
 		String urlString = System.getProperty(PROP_FRAMEWORK, null);
 		if (urlString != null) {
+			urlString = resolve(urlString);
 			//ensure that the install location is set before resolving framework
 			getInstallLocation();
 			URL url = buildURL(urlString, true);
-			System.getProperties().put(PROP_FRAMEWORK, url.toExternalForm());
-			bootLocation = resolve(urlString);
+			urlString = url.toExternalForm();
+			System.getProperties().put(PROP_FRAMEWORK, urlString);
+			bootLocation = urlString;
 		}
 	}
 
@@ -2128,10 +2130,8 @@ public class Main {
 	 */
 	private String resolve(String urlString) {
 		// handle the case where people mistakenly spec a refererence: url.
-		if (urlString.startsWith(REFERENCE_SCHEME)) {
+		if (urlString.startsWith(REFERENCE_SCHEME))
 			urlString = urlString.substring(10);
-			System.getProperties().put(PROP_FRAMEWORK, urlString);
-		}
 		if (urlString.startsWith(PLATFORM_URL)) {
 			String path = urlString.substring(PLATFORM_URL.length());
 			return getInstallLocation() + path;
