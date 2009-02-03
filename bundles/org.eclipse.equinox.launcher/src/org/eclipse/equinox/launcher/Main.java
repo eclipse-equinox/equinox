@@ -907,8 +907,10 @@ public class Main {
 	}
 
 	protected String searchFor(final String target, final String targetSuffix, String start) {
+		File root = resolveFile(new File(start));
+
 		// Note that File.list only gives you file names not the complete path from start
-		String[] candidates = new File(start).list();
+		String[] candidates = root.list();
 		if (candidates == null)
 			return null;
 
@@ -935,7 +937,6 @@ public class Main {
 	}
 
 	private String searchForBundle(String target, String start) {
-		File fileLocation = null;
 		//Only handle "reference:file:" urls, and not simple "file:" because we will be using the jar wherever it is.
 		if (target.startsWith(REFERENCE_SCHEME)) {
 			target = target.substring(REFERENCE_SCHEME.length());
@@ -943,9 +944,12 @@ public class Main {
 				throw new IllegalArgumentException("Bundle URL is invalid: " + target); //$NON-NLS-1$
 			target = target.substring(FILE_SCHEME.length());
 			File child = new File(target);
-			fileLocation = child.isAbsolute() ? child : new File(start, child.getPath());
-			return searchFor(fileLocation.getName(), new File(fileLocation.getParent()).getAbsolutePath());
-
+			File fileLocation = child;
+			if (!child.isAbsolute()) {
+				File parent = resolveFile(new File(start));
+				fileLocation = new File(parent, child.getPath());
+			}
+			return searchFor(fileLocation.getName(), fileLocation.getParentFile().getAbsolutePath());
 		}
 		return searchFor(target, start);
 	}
@@ -1037,15 +1041,7 @@ public class Main {
 		try {
 			if (isFile) {
 				File toAdjust = new File(spec.substring(5));
-				if (!toAdjust.isAbsolute()) {
-					String installArea = System.getProperties().getProperty(PROP_INSTALL_AREA);
-					if (installArea != null) {
-						if (installArea.startsWith(FILE_SCHEME))
-							toAdjust = new File(installArea.substring(5), toAdjust.getPath());
-						else if (new File(installArea).exists())
-							toAdjust = new File(installArea, toAdjust.getPath());
-					}
-				}
+				toAdjust = resolveFile(toAdjust);
 				if (toAdjust.isDirectory())
 					return adjustTrailingSlash(toAdjust.toURL(), trailingSlash);
 				return toAdjust.toURL();
@@ -1065,6 +1061,24 @@ public class Main {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Resolve the given file against  osgi.install.area.
+	 * If osgi.install.area is not set, or the file is not relative, then
+	 * the file is returned as is. 
+	 */
+	private static File resolveFile(File toAdjust) {
+		if (!toAdjust.isAbsolute()) {
+			String installArea = System.getProperties().getProperty(PROP_INSTALL_AREA);
+			if (installArea != null) {
+				if (installArea.startsWith(FILE_SCHEME))
+					toAdjust = new File(installArea.substring(5), toAdjust.getPath());
+				else if (new File(installArea).exists())
+					toAdjust = new File(installArea, toAdjust.getPath());
+			}
+		}
+		return toAdjust;
 	}
 
 	private static URL adjustTrailingSlash(URL url, boolean trailingSlash) throws MalformedURLException {
