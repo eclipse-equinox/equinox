@@ -30,6 +30,7 @@ import org.osgi.framework.*;
 public abstract class BundleResourceHandler extends URLStreamHandler implements ProtocolActivator {
 	public static final String SECURITY_CHECKED = "SECURITY_CHECKED"; //$NON-NLS-1$
 	public static final String SECURITY_UNCHECKED = "SECURITY_UNCHECKED"; //$NON-NLS-1$
+	public static final String BID_FWKID_SEPARATOR = ".fwk"; //$NON-NLS-1$
 	private BaseAdaptor adaptor;
 	protected BundleEntry bundleEntry;
 
@@ -128,7 +129,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 			authorized = SECURITY_CHECKED;
 		// Always force the use of the hash from the adaptor
 		if (adaptor != null)
-			host = Integer.toString(adaptor.hashCode()) + '.' + Long.toString(bundleId);
+			host = Long.toString(bundleId) + BID_FWKID_SEPARATOR + Integer.toString(adaptor.hashCode());
 		// Setting the authority portion of the URL to SECURITY_ATHORIZED
 		// ensures that this URL was created by using this parseURL
 		// method.  The openConnection method will only open URLs
@@ -298,6 +299,6 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 
 	private long getBundleID(String host) {
 		int dotIndex = host.indexOf('.');
-		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(dotIndex + 1)) : Long.parseLong(host);
+		return (dotIndex >= 0 && dotIndex < host.length() - 1) ? Long.parseLong(host.substring(0, dotIndex)) : Long.parseLong(host);
 	}
 }

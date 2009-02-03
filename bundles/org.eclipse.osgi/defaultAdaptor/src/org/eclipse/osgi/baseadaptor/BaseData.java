@@ -25,6 +25,7 @@ import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -113,7 +114,7 @@ public class BaseData implements BundleData {
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Integer.toString(adaptor.hashCode()) + '.' + Long.toString(id), 0, path, new Handler(entry, adaptor));
+			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(adaptor.hashCode()), 0, path, new Handler(entry, adaptor));
 		} catch (MalformedURLException e) {
 			return null;
 		}

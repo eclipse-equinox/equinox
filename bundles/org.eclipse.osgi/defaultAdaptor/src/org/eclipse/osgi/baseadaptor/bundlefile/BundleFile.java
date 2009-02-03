@@ -19,8 +19,7 @@ import java.security.AccessController;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseData;
-import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.util.ManifestElement;
@@ -158,7 +157,7 @@ abstract public class BundleFile {
 			path = '/' + path;
 		try {
 			//use the constant string for the protocol to prevent duplication
-			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Integer.toString(hostData.getAdaptor().hashCode()) + '.' + Long.toString(hostBundleID), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
+			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(hostData.getAdaptor().hashCode()), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
 		} catch (MalformedURLException e) {
 			return null;
 		}

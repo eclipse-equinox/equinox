@@ -11,7 +11,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import junit.framework.Test;
@@ -729,7 +729,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("manifest number", 1, manifestURLs.size()); //$NON-NLS-1$
 		URL manifest = (URL) manifestURLs.get(0);
 		int dotIndex = manifest.getHost().indexOf('.');
-		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(dotIndex + 1)) : Long.parseLong(manifest.getHost());
+		long bundleId = dotIndex >= 0 && dotIndex < manifest.getHost().length() - 1 ? Long.parseLong(manifest.getHost().substring(0, dotIndex)) : Long.parseLong(manifest.getHost());
 		assertEquals("host id", test.getBundleId(), bundleId); //$NON-NLS-1$
 	}
 
@@ -799,6 +799,81 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		URL entryCopy = new URL(entry.toExternalForm());
 		assertEquals("external format", entry.toExternalForm(), entryCopy.toExternalForm()); //$NON-NLS-1$
 		assertEquals("root resource", "root classpath", readURL(entryCopy)); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public void testURLExternalFormat03() throws BundleException {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		// test the external format of bundle resource URLs
+		URL entry = test.getEntry("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry", entry); //$NON-NLS-1$
+		URI uri1 = null;
+		URI uri2 = null;
+		URI uri3 = null;
+		try {
+			uri1 = new URI(entry.getProtocol(), null, entry.getHost(), entry.getPort(), entry.getPath(), null, entry.getQuery());
+			uri2 = new URI(entry.getProtocol(), entry.getHost(), entry.getPath(), entry.getQuery());
+			uri3 = new URI(entry.toExternalForm());
+		} catch (URISyntaxException e) {
+			fail("Unexpected URI exception", e); //$NON-NLS-1$
+		}
+		URL url1 = null;
+		URL url2 = null;
+		URL url3 = null;
+		URL url4 = null;
+		try {
+			url1 = uri1.toURL();
+			url2 = uri2.toURL();
+			url3 = uri3.toURL();
+			url4 = new URL(uri1.toString());
+		} catch (MalformedURLException e) {
+			fail("Unexpected URL exception", e); //$NON-NLS-1$
+		}
+		checkURL("root classpath", entry, url1); //$NON-NLS-1$
+		checkURL("root classpath", entry, url2); //$NON-NLS-1$
+		checkURL("root classpath", entry, url3); //$NON-NLS-1$
+		checkURL("root classpath", entry, url4); //$NON-NLS-1$
+	}
+
+	public void testURLExternalFormat04() throws BundleException {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		// test the external format of bundle resource URLs
+		URL entry = test.getResource("data/resource1"); //$NON-NLS-1$
+		assertNotNull("entry", entry); //$NON-NLS-1$
+		URI uri1 = null;
+		URI uri2 = null;
+		URI uri3 = null;
+		try {
+			uri1 = new URI(entry.getProtocol(), null, entry.getHost(), entry.getPort(), entry.getPath(), null, entry.getQuery());
+			uri2 = new URI(entry.getProtocol(), entry.getHost(), entry.getPath(), entry.getQuery());
+			uri3 = new URI(entry.toExternalForm());
+		} catch (URISyntaxException e) {
+			fail("Unexpected URI exception", e); //$NON-NLS-1$
+		}
+		URL url1 = null;
+		URL url2 = null;
+		URL url3 = null;
+		URL url4 = null;
+		try {
+			url1 = uri1.toURL();
+			url2 = uri2.toURL();
+			url3 = uri3.toURL();
+			url4 = new URL(uri1.toString());
+		} catch (MalformedURLException e) {
+			fail("Unexpected URL exception", e); //$NON-NLS-1$
+		}
+		checkURL("root classpath", entry, url1); //$NON-NLS-1$
+		checkURL("root classpath", entry, url2); //$NON-NLS-1$
+		checkURL("root classpath", entry, url3); //$NON-NLS-1$
+		checkURL("root classpath", entry, url4); //$NON-NLS-1$
+	}
+
+	private void checkURL(String content, URL orig, URL copy) {
+		assertEquals("external format", orig.toExternalForm(), copy.toExternalForm()); //$NON-NLS-1$
+		assertEquals(content, content, readURL(copy));
+	}
+
+	public void testURI() throws URISyntaxException {
+		new URI("bundleentry", "1", "/test", null);
 	}
 
 	public void testMultipleExportFragments01() throws Exception {
@@ -1145,25 +1220,29 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testResolveURLRelativeBundleResourceWithPort() throws Exception {
-		URL directory = new URL("bundleresource://82:1/dictionaries/");
+		URL directory = new URL("bundleresource://82:1/dictionaries/"); //$NON-NLS-1$
 		assertEquals(1, directory.getPort());
 
-		URL resource = new URL(directory, "en_GB.dictionary");
+		URL resource = new URL(directory, "en_GB.dictionary"); //$NON-NLS-1$
 		assertEquals(1, resource.getPort());
 	}
 
-	private String readURL(URL url) throws IOException {
+	private String readURL(URL url) {
 		StringBuffer sb = new StringBuffer();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
 		try {
-			for (String line = reader.readLine(); line != null;) {
-				sb.append(line);
-				line = reader.readLine();
-				if (line != null)
-					sb.append('\n');
+			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+			try {
+				for (String line = reader.readLine(); line != null;) {
+					sb.append(line);
+					line = reader.readLine();
+					if (line != null)
+						sb.append('\n');
+				}
+			} finally {
+				reader.close();
 			}
-		} finally {
-			reader.close();
+		} catch (IOException e) {
+			fail("Unexpected exception reading url: " + url.toExternalForm(), e); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
