@@ -32,7 +32,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	private final PermissionInfoCollection permissionInfoCollection;
 	private final boolean deny;
 	/* GuardedBy(bundleConditions) */
-	private final HashMap bundleConditions;
+	final HashMap bundleConditions;
 
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		this.securityAdmin = securityAdmin;
