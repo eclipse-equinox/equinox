@@ -794,15 +794,21 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	protected void startActivator(final BundleActivator bundleActivator) throws BundleException {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("BundleContextImpl.startActivator()", null); //$NON-NLS-1$
-		Object previousTCCL = setContextFinder();
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
 					if (bundleActivator != null) {
 						if (Profile.PROFILE && Profile.STARTUP)
 							Profile.logTime("BundleContextImpl.startActivator()", "calling " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						// make sure the context class loader is set correctly
+						Object previousTCCL = setContextFinder();
 						/* Start the bundle synchronously */
-						bundleActivator.start(BundleContextImpl.this);
+						try {
+							bundleActivator.start(BundleContextImpl.this);
+						} finally {
+							if (previousTCCL != Boolean.FALSE)
+								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+						}
 						if (Profile.PROFILE && Profile.STARTUP)
 							Profile.logTime("BundleContextImpl.startActivator()", "returned from " + bundle.getLocation() + " bundle activator"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
@@ -823,14 +829,12 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 
 			throw new BundleException(NLS.bind(Msg.BUNDLE_ACTIVATOR_EXCEPTION, new Object[] {clazz, "start", bundle.getSymbolicName() == null ? "" + bundle.getBundleId() : bundle.getSymbolicName()}), BundleException.ACTIVATOR_ERROR, t); //$NON-NLS-1$ //$NON-NLS-2$ 
 		} finally {
-			if (previousTCCL != Boolean.FALSE)
-				Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logExit("BundleContextImpl.startActivator()"); //$NON-NLS-1$
 		}
 	}
 
-	private Object setContextFinder() {
+	Object setContextFinder() {
 		Thread currentThread = Thread.currentThread();
 		ClassLoader previousTCCL = currentThread.getContextClassLoader();
 		ClassLoader contextFinder = framework.getContextFinder();
@@ -854,8 +858,15 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 				public Object run() throws Exception {
 					if (activator != null) {
-						/* Stop the bundle synchronously */
-						activator.stop(BundleContextImpl.this);
+						// make sure the context class loader is set correctly
+						Object previousTCCL = setContextFinder();
+						try {
+							/* Stop the bundle synchronously */
+							activator.stop(BundleContextImpl.this);
+						} finally {
+							if (previousTCCL != Boolean.FALSE)
+								Thread.currentThread().setContextClassLoader((ClassLoader) previousTCCL);
+						}
 					}
 					return null;
 				}
