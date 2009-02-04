@@ -429,9 +429,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		String option = intp.nextArgument();
 		String filteredName = null;
 		int stateFilter = -1;
-		if (option != null && option.equals("-s")) {
+		if (option != null && option.equals("-s")) { //$NON-NLS-1$
 			String searchedState = intp.nextArgument();
-			StringTokenizer tokens = new StringTokenizer(searchedState, ",");
+			StringTokenizer tokens = new StringTokenizer(searchedState, ","); //$NON-NLS-1$
 			while (tokens.hasMoreElements()) {
 				String desiredState = (String) tokens.nextElement();
 				Field match = null;
@@ -441,10 +441,10 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 						stateFilter = 0;
 					stateFilter |= match.getInt(match);
 				} catch (NoSuchFieldException e) {
-					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState);
+					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState); //$NON-NLS-1$
 					return null;
 				} catch (IllegalAccessException e) {
-					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState);
+					intp.println(ConsoleMsg.CONSOLE_INVALID_INPUT + ": " + desiredState); //$NON-NLS-1$
 					return null;
 				}
 			}

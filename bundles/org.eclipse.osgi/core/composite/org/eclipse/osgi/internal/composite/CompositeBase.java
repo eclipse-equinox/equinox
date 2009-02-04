@@ -100,7 +100,7 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 	}
 
 	public void update() throws BundleException {
-		throw new BundleException("Cannot update composite bundles", BundleException.INVALID_OPERATION);
+		throw new BundleException("Cannot update composite bundles", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 	}
 
 	public void update(InputStream in) throws BundleException {
@@ -109,6 +109,6 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 		} catch (IOException e) {
 			// ignore
 		}
-		throw new BundleException("Cannot update composite bundles", BundleException.INVALID_OPERATION);
+		throw new BundleException("Cannot update composite bundles", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 	}
 }

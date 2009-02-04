@@ -274,7 +274,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		if (allElements == null)
 			return;
 		// the single value for this type is lazy
-		if (!Constants.ACTIVATION_LAZY.equalsIgnoreCase(allElements[0].getValue())) //$NON-NLS-1$
+		if (!Constants.ACTIVATION_LAZY.equalsIgnoreCase(allElements[0].getValue()))
 			return;
 		storageHook.flags |= FLAG_LAZY_START;
 		// look for any include or exclude attrs

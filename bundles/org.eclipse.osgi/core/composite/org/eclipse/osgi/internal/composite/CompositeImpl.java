@@ -49,7 +49,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 		try {
 			props.load(childConfig.openStream());
 		} catch (IOException e) {
-			throw new BundleException("Could not load child configuration", e);
+			throw new BundleException("Could not load child configuration", e); //$NON-NLS-1$
 		}
 		props.put(Constants.FRAMEWORK_STORAGE, compositeStorage.getAbsolutePath());
 		// save the parent framework so the parent companion bundle can find it
@@ -71,7 +71,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 			InputStream surrogateContent = CompositeHelper.getSurrogateInput(thisData.getManifest(), null, null);
 			surrogate = companionContext.installBundle(thisData.getLocation(), surrogateContent);
 		} catch (IOException e) {
-			throw new BundleException("Error installing parent companion composite bundle", e);
+			throw new BundleException("Error installing parent companion composite bundle", e); //$NON-NLS-1$
 		}
 		// disable the surrogate initially since we know we have not resolved the composite yet.
 		CompositeHelper.setDisabled(true, surrogate, companionContext);
@@ -85,7 +85,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 		try {
 			surrogateContent = CompositeHelper.getSurrogateInput(thisData.getManifest(), child, matchingExports);
 		} catch (IOException e) {
-			throw new BundleException("Error updating surrogate bundle.", e);
+			throw new BundleException("Error updating surrogate bundle.", e); //$NON-NLS-1$
 		}
 		CompositeModule surrogateComposite = (CompositeModule) getSurrogateBundle();
 		surrogateComposite.updateContent(surrogateContent);
@@ -110,7 +110,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 		try {
 			return findSurrogateBundle();
 		} catch (BundleException e) {
-			throw new RuntimeException("Error intializing child framework", e);
+			throw new RuntimeException("Error intializing child framework", e); //$NON-NLS-1$
 		}
 	}
 
@@ -131,7 +131,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 			// update the content with the new manifest
 			updateContent(CompositeHelper.getCompositeInput(frameworkConfig, compositeManifest));
 		} catch (IOException e) {
-			throw new BundleException("Error updating composite.", e);
+			throw new BundleException("Error updating composite.", e); //$NON-NLS-1$
 		}
 	}
 
@@ -186,17 +186,17 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 			FrameworkEvent stopped = companionFramework.waitForStop(30000);
 			switch (stopped.getType()) {
 				case FrameworkEvent.ERROR :
-					throw new BundleException("Error stopping the child framework.", stopped.getThrowable());
+					throw new BundleException("Error stopping the child framework.", stopped.getThrowable()); //$NON-NLS-1$
 				case FrameworkEvent.INFO :
-					throw new BundleException("Timed out waiting for the child framework to stop.");
+					throw new BundleException("Timed out waiting for the child framework to stop."); //$NON-NLS-1$
 				case FrameworkEvent.STOPPED :
 					// normal stop, just return
 					return;
 				default :
-					throw new BundleException("Unexpected code returned when stopping the child framework:" + stopped.getType());
+					throw new BundleException("Unexpected code returned when stopping the child framework:" + stopped.getType()); //$NON-NLS-1$
 			}
 		} catch (InterruptedException e) {
-			throw new BundleException("Error stopping child framework", e);
+			throw new BundleException("Error stopping child framework", e); //$NON-NLS-1$
 		}
 	}
 

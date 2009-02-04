@@ -203,7 +203,7 @@ public class CompositeHelper {
 		ServiceReference ref = systemContext.getServiceReference(PermissionAdmin.class.getName());
 		PermissionAdmin permAdmin = (PermissionAdmin) (ref == null ? null : systemContext.getService(ref));
 		if (permAdmin == null)
-			throw new RuntimeException("No Permission Admin service is available");
+			throw new RuntimeException("No Permission Admin service is available"); //$NON-NLS-1$
 		try {
 			permAdmin.setPermissions(bundleLocation, COMPOSITE_PERMISSIONS);
 		} finally {
@@ -215,7 +215,7 @@ public class CompositeHelper {
 		ServiceReference ref = systemContext.getServiceReference(PlatformAdmin.class.getName());
 		PlatformAdmin pa = (PlatformAdmin) (ref == null ? null : systemContext.getService(ref));
 		if (pa == null)
-			throw new RuntimeException("No Platform Admin service is available.");
+			throw new RuntimeException("No Platform Admin service is available."); //$NON-NLS-1$
 		try {
 			State state = pa.getState(false);
 			BundleDescription desc = state.getBundle(bundle.getBundleId());
@@ -228,7 +228,7 @@ public class CompositeHelper {
 	static void setDisabled(boolean disable, BundleDescription bundle) {
 		State state = bundle.getContainingState();
 		if (disable) {
-			state.addDisabledInfo(new DisabledInfo(COMPOSITE_POLICY, "Composite companion bundle is not resolved.", bundle));
+			state.addDisabledInfo(new DisabledInfo(COMPOSITE_POLICY, "Composite companion bundle is not resolved.", bundle)); //$NON-NLS-1$
 		} else {
 			DisabledInfo toRemove = state.getDisabledInfo(bundle, COMPOSITE_POLICY);
 			if (toRemove != null)
@@ -238,14 +238,14 @@ public class CompositeHelper {
 
 	static void validateCompositeManifest(Map compositeManifest) throws BundleException {
 		if (compositeManifest == null)
-			throw new BundleException("The composite manifest cannot be null.", BundleException.MANIFEST_ERROR);
+			throw new BundleException("The composite manifest cannot be null.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		// check for symbolic name
 		if (compositeManifest.get(Constants.BUNDLE_SYMBOLICNAME) == null)
-			throw new BundleException("The composite manifest must contain a Bundle-SymbolicName header.", BundleException.MANIFEST_ERROR);
+			throw new BundleException("The composite manifest must contain a Bundle-SymbolicName header.", BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		// check for invalid manifests headers
 		for (int i = 0; i < INVALID_COMPOSITE_HEADERS.length; i++)
 			if (compositeManifest.get(INVALID_COMPOSITE_HEADERS[i]) != null)
-				throw new BundleException("The composite manifest must not contain the header " + INVALID_COMPOSITE_HEADERS[i], BundleException.MANIFEST_ERROR);
+				throw new BundleException("The composite manifest must not contain the header " + INVALID_COMPOSITE_HEADERS[i], BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		// validate manifest version
 		String manifestVersion = (String) compositeManifest.get(Constants.BUNDLE_MANIFESTVERSION);
 		if (manifestVersion == null) {
@@ -254,9 +254,9 @@ public class CompositeHelper {
 			try {
 				Integer parsed = Integer.valueOf(manifestVersion);
 				if (parsed.intValue() > 2 || parsed.intValue() < 2)
-					throw new BundleException("Invalid Bundle-ManifestVersion: " + manifestVersion);
+					throw new BundleException("Invalid Bundle-ManifestVersion: " + manifestVersion); //$NON-NLS-1$
 			} catch (NumberFormatException e) {
-				throw new BundleException("Invalid Bundle-ManifestVersion: " + manifestVersion);
+				throw new BundleException("Invalid Bundle-ManifestVersion: " + manifestVersion); //$NON-NLS-1$
 			}
 		}
 	}

@@ -299,7 +299,7 @@ public class BundleHost extends AbstractBundle {
 			setStatus(Constants.BUNDLE_STARTED, true);
 			setStatus(Constants.BUNDLE_ACTIVATION_POLICY, (options & START_ACTIVATION_POLICY) != 0);
 			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
-				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
+				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace(); //$NON-NLS-1$
 		}
 		if (!framework.active || (state & ACTIVE) != 0)
 			return;
@@ -455,7 +455,7 @@ public class BundleHost extends AbstractBundle {
 			setStatus(Constants.BUNDLE_STARTED, false);
 			setStatus(Constants.BUNDLE_ACTIVATION_POLICY, false);
 			if (Debug.DEBUG && Debug.MONITOR_ACTIVATION)
-				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace();
+				new Exception("A persistent start has been called on bundle: " + getBundleData()).printStackTrace(); //$NON-NLS-1$
 		}
 		if (framework.active) {
 			if ((state & (STOPPING | RESOLVED | INSTALLED)) != 0) {

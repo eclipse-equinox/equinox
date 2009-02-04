@@ -320,13 +320,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			for (int i = 0; i < newRows.length; i++) {
 				Object rowObj = rows.get(i);
 				if (!(rowObj instanceof ConditionalPermissionInfoBase))
-					throw new IllegalStateException("Invalid type \"" + rowObj.getClass().getName() + "\" at row: " + i);
+					throw new IllegalStateException("Invalid type \"" + rowObj.getClass().getName() + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
 				ConditionalPermissionInfoBase infoBaseRow = (ConditionalPermissionInfoBase) rowObj;
 				String name = infoBaseRow.getName();
 				if (name == null)
 					name = generateName();
 				if (names.contains(name))
-					throw new IllegalStateException("Duplicate name \"" + name + "\" at row: " + i);
+					throw new IllegalStateException("Duplicate name \"" + name + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
 				newRows[i] = new SecurityRow(this, name, infoBaseRow.getConditionInfos(), infoBaseRow.getPermissionInfos(), infoBaseRow.getGrantDecision());
 			}
 			condAdminTable = new SecurityTable(this, newRows);

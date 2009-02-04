@@ -117,7 +117,7 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 			CompositeHelper.setCompositePermissions(location, systemContext);
 			return result;
 		} catch (IOException e) {
-			throw new BundleException("Error creating composite bundle", e);
+			throw new BundleException("Error creating composite bundle", e); //$NON-NLS-1$
 		}
 	}
 

@@ -144,7 +144,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 				}
 				if (!grant)
 					// did not find a condition to grant the permission for this domain
-					throw new SecurityException("Conditions not satisfied");
+					throw new SecurityException("Conditions not satisfied"); //$NON-NLS-1$
 				// continue to next domain
 			}
 

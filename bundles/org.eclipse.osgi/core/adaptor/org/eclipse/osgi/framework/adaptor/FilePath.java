@@ -170,7 +170,7 @@ public class FilePath {
 					original = original.substring(uncPrefixEnd, original.length());
 				} else
 					// not a valid UNC
-					throw new IllegalArgumentException("Not a valid UNC: " + original); //TODO add message
+					throw new IllegalArgumentException("Not a valid UNC: " + original); //$NON-NLS-1$
 			}
 		}
 		// device names letters and UNCs properly stripped off

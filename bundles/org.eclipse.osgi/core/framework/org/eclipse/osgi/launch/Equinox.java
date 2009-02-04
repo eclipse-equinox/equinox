@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * @since 3.5
  */
 public class Equinox implements Framework {
-	private static final String implName = "org.eclipse.osgi.framework.internal.core.EquinoxLauncher";
+	private static final String implName = "org.eclipse.osgi.framework.internal.core.EquinoxLauncher"; //$NON-NLS-1$
 	/**@GuardedBy this*/
 	private Framework impl;
 	private final boolean useSeparateCL;

@@ -1064,7 +1064,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		File[] files = null;
 		try {
 			String[] paths = bundleData.getClassPath();
-			if (DevClassPathHelper.inDevelopmentMode()) { //$NON-NLS-1$
+			if (DevClassPathHelper.inDevelopmentMode()) {
 				String[] devPaths = DevClassPathHelper.getDevClassPath(bundleData.getSymbolicName());
 				String[] origPaths = paths;
 

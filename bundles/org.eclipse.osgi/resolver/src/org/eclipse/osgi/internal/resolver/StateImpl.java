@@ -30,7 +30,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
-	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 
 	transient private Resolver resolver;

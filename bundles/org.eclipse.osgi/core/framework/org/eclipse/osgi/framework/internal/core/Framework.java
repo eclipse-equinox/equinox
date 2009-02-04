@@ -367,8 +367,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			// set the value of the framework language property
 			properties.put(Constants.FRAMEWORK_LANGUAGE, Locale.getDefault().getLanguage());
 		// set the support properties for fragments and require-bundle (bug 173090)
-		properties.put(Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true");
-		properties.put(Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true");
+		properties.put(Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
+		properties.put(Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
 	}
 
 	private int parseVersionInt(String value) {
