@@ -11,25 +11,26 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import org.osgi.service.condpermadmin.ConditionInfo;
-import org.osgi.service.condpermadmin.ConditionalPermissionInfoBase;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
-public class SecurityInfoBase implements ConditionalPermissionInfoBase {
+public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 
 	private final String name;
 	private final ConditionInfo[] conditionInfos;
 	private final PermissionInfo[] permissionInfos;
 	private final String decision;
 
-	public SecurityInfoBase(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
+	public SecurityRowSnapShot(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		this.name = name;
-		this.conditionInfos = conditionInfos;
-		this.permissionInfos = permissionInfos;
+		// must create copies of the passed in arrays to prevent changes
+		this.conditionInfos = (ConditionInfo[]) SecurityRow.cloneArray(conditionInfos);
+		this.permissionInfos = (PermissionInfo[]) SecurityRow.cloneArray(permissionInfos);
 		this.decision = decision;
 	}
 
 	public ConditionInfo[] getConditionInfos() {
-		return conditionInfos;
+		return (ConditionInfo[]) SecurityRow.cloneArray(conditionInfos);
 	}
 
 	public String getGrantDecision() {
@@ -41,7 +42,14 @@ public class SecurityInfoBase implements ConditionalPermissionInfoBase {
 	}
 
 	public PermissionInfo[] getPermissionInfos() {
-		return permissionInfos;
+		return (PermissionInfo[]) SecurityRow.cloneArray(permissionInfos);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public void delete() {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -37,7 +37,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		this.securityAdmin = securityAdmin;
 		this.conditionInfos = conditionInfos;
-		this.deny = ConditionalPermissionInfoBase.DENY.equals(decision);
+		this.deny = ConditionalPermissionInfo.DENY.equals(decision);
 		this.name = name;
 		this.permissionInfoCollection = new PermissionInfoCollection(permissionInfos);
 		if (conditionInfos == null || conditionInfos.length == 0)
@@ -53,7 +53,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			throw new IllegalArgumentException(encoded);
 		String decision = null;
 		if (encoded.charAt(encoded.length() - 1) == '!')
-			decision = ConditionalPermissionInfoBase.DENY;
+			decision = ConditionalPermissionInfo.DENY;
 		String encodedName = null;
 		if (start != 0)
 			encodedName = encoded.substring(0, start);
@@ -92,22 +92,43 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return new SecurityRow(securityAdmin, encodedName, conds, perms, decision);
 	}
 
+	static Object cloneArray(Object[] array) {
+		if (array == null)
+			return null;
+		Object result = Array.newInstance(array.getClass().getComponentType(), array.length);
+		System.arraycopy(array, 0, result, 0, array.length);
+		return result;
+	}
+
 	public String getName() {
 		return name;
 	}
 
 	public ConditionInfo[] getConditionInfos() {
+		// must make a copy for the public API method to prevent modification
+		return (ConditionInfo[]) cloneArray(conditionInfos);
+	}
+
+	ConditionInfo[] internalGetConditionInfos() {
 		return conditionInfos;
 	}
 
 	public String getGrantDecision() {
-		return deny ? ConditionalPermissionInfoBase.DENY : ConditionalPermissionInfoBase.ALLOW;
+		return deny ? ConditionalPermissionInfo.DENY : ConditionalPermissionInfo.ALLOW;
 	}
 
 	public PermissionInfo[] getPermissionInfos() {
+		// must make a copy for the public API method to prevent modification
+		return (PermissionInfo[]) cloneArray(permissionInfoCollection.getPermissionInfos());
+	}
+
+	PermissionInfo[] internalGetPermissionInfos() {
 		return permissionInfoCollection.getPermissionInfos();
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void delete() {
 		securityAdmin.delete(this, true);
 	}
@@ -228,12 +249,11 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		StringBuffer result = new StringBuffer();
 		if (name != null)
 			result.append(name);
-		ConditionInfo[] curConds = getConditionInfos();
-		PermissionInfo[] curPerms = getPermissionInfos();
 		result.append('{').append(' ');
-		if (curConds != null)
-			for (int i = 0; i < curConds.length; i++)
-				result.append(curConds[i].getEncoded()).append(' ');
+		if (conditionInfos != null)
+			for (int i = 0; i < conditionInfos.length; i++)
+				result.append(conditionInfos[i].getEncoded()).append(' ');
+		PermissionInfo[] curPerms = internalGetPermissionInfos();
 		if (curPerms != null)
 			for (int i = 0; i < curPerms.length; i++)
 				result.append(curPerms[i].getEncoded()).append(' ');

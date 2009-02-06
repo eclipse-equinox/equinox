@@ -184,10 +184,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	void delete(SecurityRow securityRow, boolean firstTry) {
-		ConditionalPermissionsUpdate update = createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
 		for (Iterator iRows = rows.iterator(); iRows.hasNext();) {
-			ConditionalPermissionInfoBase info = (ConditionalPermissionInfoBase) iRows.next();
+			ConditionalPermissionInfo info = (ConditionalPermissionInfo) iRows.next();
 			if (securityRow.getName().equals(info.getName())) {
 				iRows.remove();
 				synchronized (lock) {
@@ -202,15 +202,18 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public ConditionalPermissionInfo addConditionalPermissionInfo(ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(null, conds, perms, true);
 	}
 
-	public ConditionalPermissionInfoBase createConditionalPermissionInfoBase(String name, ConditionInfo[] conditions, PermissionInfo[] permissions, String decision) {
-		return new SecurityInfoBase(name, conditions, permissions, decision);
+	public ConditionalPermissionInfo newConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions, String decision) {
+		return new SecurityRowSnapShot(name, conditions, permissions, decision);
 	}
 
-	public ConditionalPermissionsUpdate createConditionalPermissionsUpdate() {
+	public ConditionalPermissionUpdate newConditionalPermissionUpdate() {
 		synchronized (lock) {
 			return new SecurityTableUpdate(this, condAdminTable.getRows(), timeStamp);
 		}
@@ -223,7 +226,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			// enumerate through all the rows
 			while (infos.hasMoreElements()) {
 				SecurityRow condPermInfo = (SecurityRow) infos.nextElement();
-				ConditionInfo[] condInfo = condPermInfo.getConditionInfos();
+				ConditionInfo[] condInfo = condPermInfo.internalGetConditionInfos();
 				boolean match = true;
 				// check that each condition is a signer condition
 				for (int i = 0; match && i < condInfo.length; i++) {
@@ -258,12 +261,18 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return new AccessControlContext(new ProtectionDomain[] {new ProtectionDomain(null, table)});
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public ConditionalPermissionInfo getConditionalPermissionInfo(String name) {
 		synchronized (lock) {
 			return condAdminTable.getRow(name);
 		}
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public Enumeration getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance here.  Just do something simple:
 		synchronized (lock) {
@@ -275,21 +284,24 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(name, conds, perms, true);
 	}
 
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
-		ConditionalPermissionsUpdate update = createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		ConditionalPermissionInfoBase infoBase = createConditionalPermissionInfoBase(name, conds, perms, ConditionalPermissionInfoBase.ALLOW);
+		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionInfo infoBase = newConditionalPermissionInfo(name, conds, perms, ConditionalPermissionInfo.ALLOW);
 		int index = -1;
 		if (name == null) {
 			rows.add(infoBase);
 			index = rows.size() - 1;
 		} else {
 			for (int i = 0; i < rows.size() && index < 0; i++) {
-				ConditionalPermissionInfoBase info = (ConditionalPermissionInfoBase) rows.get(i);
+				ConditionalPermissionInfo info = (ConditionalPermissionInfo) rows.get(i);
 				if (name.equals(info.getName())) {
 					rows.set(i, infoBase);
 					index = i;
@@ -319,9 +331,9 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			Collection names = new ArrayList();
 			for (int i = 0; i < newRows.length; i++) {
 				Object rowObj = rows.get(i);
-				if (!(rowObj instanceof ConditionalPermissionInfoBase))
+				if (!(rowObj instanceof ConditionalPermissionInfo))
 					throw new IllegalStateException("Invalid type \"" + rowObj.getClass().getName() + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
-				ConditionalPermissionInfoBase infoBaseRow = (ConditionalPermissionInfoBase) rowObj;
+				ConditionalPermissionInfo infoBaseRow = (ConditionalPermissionInfo) rowObj;
 				String name = infoBaseRow.getName();
 				if (name == null)
 					name = generateName();

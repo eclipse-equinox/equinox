@@ -12,9 +12,9 @@ package org.eclipse.osgi.internal.permadmin;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.osgi.service.condpermadmin.ConditionalPermissionsUpdate;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 
-public class SecurityTableUpdate implements ConditionalPermissionsUpdate {
+public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 
 	private final SecurityAdmin securityAdmin;
 	private final List rows;
@@ -23,16 +23,20 @@ public class SecurityTableUpdate implements ConditionalPermissionsUpdate {
 	public SecurityTableUpdate(SecurityAdmin securityAdmin, SecurityRow[] rows, long timeStamp) {
 		this.securityAdmin = securityAdmin;
 		this.timeStamp = timeStamp;
+		// must make a snap shot of the security rows.
 		this.rows = new ArrayList(rows.length);
 		for (int i = 0; i < rows.length; i++)
-			this.rows.add(new SecurityInfoBase(rows[i].getName(), rows[i].getConditionInfos(), rows[i].getPermissionInfos(), rows[i].getGrantDecision()));
+			// Use SecurityRowSnapShot to prevent modification before commit 
+			// and to throw exceptions from delete
+			this.rows.add(new SecurityRowSnapShot(rows[i].getName(), rows[i].internalGetConditionInfos(), rows[i].internalGetPermissionInfos(), rows[i].getGrantDecision()));
 	}
 
 	public boolean commit() {
 		return securityAdmin.commit(rows, timeStamp);
 	}
 
-	public List getConditionalPermissionInfoBases() {
+	public List getConditionalPermissionInfos() {
+		// it is fine to return the internal list; it is a snap shot and we allow clients to modify it.
 		return rows;
 	}
 

@@ -148,9 +148,9 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		String locationSecurityAFragA = installer.getBundleLocation("security.a.frag.a"); //$NON-NLS-1$
 		// set the security for the host and fragment
 		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
-		ConditionalPermissionsUpdate update = ca.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(ca.createConditionalPermissionInfoBase(null, null, new PermissionInfo[] {hostFragmentPermission, allPackagePermission}, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo(null, null, new PermissionInfo[] {hostFragmentPermission, allPackagePermission}, ConditionalPermissionInfo.ALLOW));
 		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
 
 		Bundle securityA = systemContext.installBundle(locationSecurityA);
@@ -199,9 +199,9 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		String locationSecurityAFragA = installer.getBundleLocation("security.a.frag.a"); //$NON-NLS-1$
 		// set the security for the host and fragment
 		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
-		ConditionalPermissionsUpdate update = ca.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(ca.createConditionalPermissionInfoBase(null, null, new PermissionInfo[] {hostFragmentPermission, allPackagePermission}, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo(null, null, new PermissionInfo[] {hostFragmentPermission, allPackagePermission}, ConditionalPermissionInfo.ALLOW));
 		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
 
 		Bundle securityA = systemContext.installBundle(locationSecurityA);

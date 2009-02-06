@@ -72,7 +72,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		return collection.implies(perm);
 	}
 
-	public PermissionInfo[] getPermissionInfos() {
+	PermissionInfo[] getPermissionInfos() {
 		return permInfos;
 	}
 

@@ -116,8 +116,8 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Wrong exception type", BundleException.RESOLVE_ERROR, e.getType()); //$NON-NLS-1$
 		}
 
-		ConditionalPermissionsUpdate update = childCondAdmin.createConditionalPermissionsUpdate();
-		List infos = update.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update = childCondAdmin.newConditionalPermissionUpdate();
+		List infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 
@@ -125,7 +125,7 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 		PermissionInfo servicePerm = new PermissionInfo(ServicePermission.class.getName(), "*", ServicePermission.GET + ',' + ServicePermission.REGISTER); //$NON-NLS-1$
 		PermissionInfo allPerm = new PermissionInfo(AllPermission.class.getName(), "*", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		PermissionInfo[] permissions = new PermissionInfo[] {packagePerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {
@@ -136,12 +136,12 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Unexpected exception message", "Missing Service Permission", e.getCause().getMessage()); //$NON-NLS-1$//$NON-NLS-2$
 		}
 
-		update = childCondAdmin.createConditionalPermissionsUpdate();
-		infos = update.getConditionalPermissionInfoBases();
+		update = childCondAdmin.newConditionalPermissionUpdate();
+		infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 		permissions = new PermissionInfo[] {packagePerm, servicePerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {
@@ -152,12 +152,12 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Unexpected exception message", "Missing AllPermissions", e.getCause().getMessage()); //$NON-NLS-1$//$NON-NLS-2$
 		}
 
-		update = childCondAdmin.createConditionalPermissionsUpdate();
-		infos = update.getConditionalPermissionInfoBases();
+		update = childCondAdmin.newConditionalPermissionUpdate();
+		infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 		permissions = new PermissionInfo[] {allPerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {
@@ -191,8 +191,8 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Wrong exception type", BundleException.RESOLVE_ERROR, e.getType()); //$NON-NLS-1$
 		}
 
-		ConditionalPermissionsUpdate update = childCondAdmin.createConditionalPermissionsUpdate();
-		List infos = update.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update = childCondAdmin.newConditionalPermissionUpdate();
+		List infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 
@@ -200,7 +200,7 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 		PermissionInfo servicePerm = new PermissionInfo(ServicePermission.class.getName(), "*", ServicePermission.GET + ',' + ServicePermission.REGISTER); //$NON-NLS-1$
 		PermissionInfo allPerm = new PermissionInfo(AllPermission.class.getName(), "*", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		PermissionInfo[] permissions = new PermissionInfo[] {packagePerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {
@@ -211,12 +211,12 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Unexpected exception message", "Missing Service Permission", e.getCause().getMessage()); //$NON-NLS-1$//$NON-NLS-2$
 		}
 
-		update = childCondAdmin.createConditionalPermissionsUpdate();
-		infos = update.getConditionalPermissionInfoBases();
+		update = childCondAdmin.newConditionalPermissionUpdate();
+		infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 		permissions = new PermissionInfo[] {packagePerm, servicePerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {
@@ -227,12 +227,12 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 			assertEquals("Unexpected exception message", "Missing AllPermissions", e.getCause().getMessage()); //$NON-NLS-1$//$NON-NLS-2$
 		}
 
-		update = childCondAdmin.createConditionalPermissionsUpdate();
-		infos = update.getConditionalPermissionInfoBases();
+		update = childCondAdmin.newConditionalPermissionUpdate();
+		infos = update.getConditionalPermissionInfos();
 		assertEquals("Wrong number of infos", 1, infos.size()); //$NON-NLS-1$
 		infos.clear();
 		permissions = new PermissionInfo[] {allPerm};
-		infos.add(childCondAdmin.createConditionalPermissionInfoBase("test.link.d", conditions, permissions, ConditionalPermissionInfoBase.ALLOW)); //$NON-NLS-1$
+		infos.add(childCondAdmin.newConditionalPermissionInfo("test.link.d", conditions, permissions, ConditionalPermissionInfo.ALLOW)); //$NON-NLS-1$
 		update.commit();
 
 		try {

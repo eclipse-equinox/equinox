@@ -274,17 +274,17 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testUpdate01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
 		assertTrue("table is not empty", rows.isEmpty()); //$NON-NLS-1$
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 	}
 
 	public void testUpdate02() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		ConditionalPermissionInfoBase info = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW);
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionInfo info = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW);
 		rows.add(info);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
@@ -294,8 +294,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.clear();
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		testPermission(pd, new FilePermission("test", "write"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -305,10 +305,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testUpdate03() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		ConditionalPermissionInfoBase info1 = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READWRITE_INFOS, ConditionalPermissionInfoBase.DENY);
-		ConditionalPermissionInfoBase info2 = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW);
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionInfo info1 = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READWRITE_INFOS, ConditionalPermissionInfo.DENY);
+		ConditionalPermissionInfo info2 = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW);
 		rows.add(info1);
 		rows.add(info2);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
@@ -319,16 +319,16 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		testPermission(pd, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.remove(0);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.remove(0);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		testPermission(pd, new FilePermission("test", "write"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -338,20 +338,20 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testUpdate04() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		ConditionalPermissionInfoBase info1 = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READWRITE_INFOS, ConditionalPermissionInfoBase.DENY);
-		ConditionalPermissionInfoBase info2 = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW);
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionInfo info1 = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READWRITE_INFOS, ConditionalPermissionInfo.DENY);
+		ConditionalPermissionInfo info2 = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW);
 		rows.add(info1);
 		rows.add(info2);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		ConditionalPermissionsUpdate update1 = securityAdmin.createConditionalPermissionsUpdate();
-		List rows1 = update1.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update1 = securityAdmin.newConditionalPermissionUpdate();
+		List rows1 = update1.getConditionalPermissionInfos();
 		rows1.remove(0);
 
-		ConditionalPermissionsUpdate update2 = securityAdmin.createConditionalPermissionsUpdate();
-		List rows2 = update2.getConditionalPermissionInfoBases();
+		ConditionalPermissionUpdate update2 = securityAdmin.newConditionalPermissionUpdate();
+		List rows2 = update2.getConditionalPermissionInfos();
 		rows2.remove(0);
 		assertTrue("failed to commit", update2.commit()); //$NON-NLS-1$
 
@@ -363,8 +363,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		assertFalse("succeeded commit", update1.commit()); //$NON-NLS-1$
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.remove(0);
 
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
@@ -375,9 +375,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testSecurityManager01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		ConditionalPermissionInfoBase info = securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW);
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		ConditionalPermissionInfo info = securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW);
 		rows.add(info);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
@@ -389,8 +389,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 		testSMPermission(sm, pds, new AllPermission(), false);
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.clear();
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		testSMPermission(sm, pds, new FilePermission("test", "write"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -409,11 +409,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.DENY));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -436,8 +436,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 		tc1sat.setSatisfied(true);
 		tc2sat.setSatisfied(true);
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.remove(0);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -446,8 +446,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		tc2unsat.setSatisfied(false);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
 		rows.remove(0);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -464,12 +464,12 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.DENY));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -500,12 +500,12 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -538,11 +538,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -573,13 +573,13 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_SAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {POST_MUT_UNSAT}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, ALLLOCATION_CONDS, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$);
 
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -602,9 +602,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext01() {
 		// test single row with signer condition
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
@@ -624,11 +624,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext02() {
 		// test with DENY row
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.DENY));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.DENY));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
@@ -648,9 +648,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext03() {
 		// test multiple signer conditions
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
@@ -667,9 +667,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			// expected
 		}
 
-		update = securityAdmin.createConditionalPermissionsUpdate();
-		rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		update = securityAdmin.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
@@ -688,10 +688,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext04() {
 		// test multiple signer conditions
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1, SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1, SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
@@ -753,10 +753,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext06() {
 		// test with empty condition rows
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
@@ -776,9 +776,9 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	public void testAccessControlContext07() {
 		// test ! signer condition
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		ConditionalPermissionsUpdate update = securityAdmin.createConditionalPermissionsUpdate();
-		List rows = update.getConditionalPermissionInfoBases();
-		rows.add(securityAdmin.createConditionalPermissionInfoBase(null, new ConditionInfo[] {NOT_SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfoBase.ALLOW));
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {NOT_SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
 		try {
