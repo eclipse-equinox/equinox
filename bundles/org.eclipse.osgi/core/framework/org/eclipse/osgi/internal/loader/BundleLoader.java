@@ -179,20 +179,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the provided packages set
 		ExportPackageDescription[] exports = description.getSelectedExports();
 		if (exports != null && exports.length > 0) {
-			exportedPackages = exports.length > 10 ? (Collection) new HashSet(exports.length) : new ArrayList(exports.length);
-			for (int i = 0; i < exports.length; i++) {
-				if (proxy.forceSourceCreation(exports[i])) {
-					if (!exportedPackages.contains(exports[i].getName())) {
-						// must force filtered and reexport sources to be created early
-						// to prevent lazy normal package source creation.
-						// We only do this for the first export of a package name. 
-						proxy.createPackageSource(exports[i], true);
-					}
-				}
-				exportedPackages.add(exports[i].getName());
-			}
+			exportedPackages = Collections.synchronizedCollection(exports.length > 10 ? (Collection) new HashSet(exports.length) : new ArrayList(exports.length));
+			initializeExports(exports, exportedPackages);
 		} else {
-			exportedPackages = null;
+			exportedPackages = Collections.synchronizedCollection(new ArrayList(0));
 		}
 
 		ExportPackageDescription substituted[] = description.getSubstitutedExports();
@@ -227,6 +217,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 		policy = buddyList != null ? new PolicyHandler(this, buddyList, bundle.getFramework().getPackageAdmin()) : null;
 		if (policy != null)
 			policy.open(bundle.getFramework().getSystemBundleContext());
+	}
+
+	private void initializeExports(ExportPackageDescription[] exports, Collection exportNames) {
+		for (int i = 0; i < exports.length; i++) {
+			if (proxy.forceSourceCreation(exports[i])) {
+				if (!exportNames.contains(exports[i].getName())) {
+					// must force filtered and reexport sources to be created early
+					// to prevent lazy normal package source creation.
+					// We only do this for the first export of a package name. 
+					proxy.createPackageSource(exports[i], true);
+				}
+			}
+			exportNames.add(exports[i].getName());
+		}
 	}
 
 	public synchronized KeyedHashSet getImportedSources(KeyedHashSet visited) {
@@ -916,7 +920,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	final boolean isExportedPackage(String name) {
-		return exportedPackages == null ? false : exportedPackages.contains(name);
+		return exportedPackages.contains(name);
 	}
 
 	final boolean isSubstitutedExport(String name) {
@@ -1008,11 +1012,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	synchronized public void attachFragment(BundleFragment fragment) throws BundleException {
-		if (classloader == null)
+		ExportPackageDescription[] exports = proxy.getBundleDescription().getSelectedExports();
+		if (classloader == null) {
+			initializeExports(exports, exportedPackages);
 			return;
+		}
 		String[] classpath = fragment.getBundleData().getClassPath();
 		if (classpath != null)
 			classloader.attachFragment(fragment.getBundleData(), fragment.getProtectionDomain(), classpath);
+		initializeExports(exports, exportedPackages);
 	}
 
 	/*

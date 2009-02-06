@@ -11,7 +11,9 @@
 	<classpathentry kind="src" output="bundle_tests/circularity.test" path="bundles_src/circularity.test"/>
 	<classpathentry kind="src" output="bundle_tests/circularity.test.a" path="bundles_src/circularity.test.a"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a" path="bundles_src/fragment.test.attach.host.a"/>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.require" path="bundles_src/fragment.test.attach.host.a.require"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.a" path="bundles_src/fragment.test.attach.frag.a"/>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.b" path="bundles_src/fragment.test.attach.frag.b"/>
 	<classpathentry kind="src" output="bundle_tests/legacy.lazystart" path="bundles_src/legacy.lazystart"/>
 	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.a" path="bundles_src/legacy.lazystart.a"/>
 	<classpathentry kind="src" output="bundle_tests/legacy.lazystart.b" path="bundles_src/legacy.lazystart.b"/>
@@ -42,6 +44,7 @@
 	<classpathentry kind="src" output="bundle_tests/xfriends.test3" path="bundles_src/xfriends.test3"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.a" path="bundles_src/ext.framework.a"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.a.importer" path="bundles_src/ext.framework.a.importer"/>
+	<classpathentry kind="src" output="bundle_tests/ext.framework.a.requires" path="bundles_src/ext.framework.a.requires"/>
 	<classpathentry kind="src" output="bundle_tests/ext.framework.b" path="bundles_src/ext.framework.b"/>
 	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a" path="bundles_src/ext.extclasspath.a"/>
 	<classpathentry kind="src" output="bundle_tests/ext.extclasspath.a.importer" path="bundles_src/ext.extclasspath.a.importer"/>

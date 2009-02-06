@@ -171,6 +171,23 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testFragmentExportPackage() throws Exception {
+		Bundle hostA = installer.installBundle("fragment.test.attach.host.a"); //$NON-NLS-1$
+		assertTrue("Host resolve", installer.resolveBundles(new Bundle[] {hostA})); //$NON-NLS-1$
+
+		// make sure class loader for hostA is initialized
+		hostA.loadClass("fragment.test.attach.host.a.internal.test.PackageAccessTest"); //$NON-NLS-1$
+
+		Bundle fragB = installer.installBundle("fragment.test.attach.frag.b"); //$NON-NLS-1$
+		Bundle hostARequire = installer.installBundle("fragment.test.attach.host.a.require"); //$NON-NLS-1$
+		assertTrue("RequireA/Frag", installer.resolveBundles(new Bundle[] {hostARequire, fragB})); //$NON-NLS-1$
+		try {
+			hostARequire.loadClass("fragment.test.attach.frag.b.Test"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected class loading exception", e); //$NON-NLS-1$
+		}
+	}
+
 	public void testLegacyLazyStart() throws Exception {
 		Bundle legacy = installer.installBundle("legacy.lazystart"); //$NON-NLS-1$
 		Bundle legacyA = installer.installBundle("legacy.lazystart.a"); //$NON-NLS-1$
