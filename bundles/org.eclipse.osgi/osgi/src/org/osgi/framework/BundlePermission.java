@@ -44,7 +44,7 @@ import java.util.HashMap;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 5654 $
+ * @version $Revision: 6270 $
  */
 
 public final class BundlePermission extends BasicPermission {
@@ -499,7 +499,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 				}
 			}
 			else {
-				permissions.put(name, permission);
+				permissions.put(name, bp);
 			}
 
 			if (!all_allowed) {
