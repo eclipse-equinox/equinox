@@ -651,14 +651,13 @@ public class ServiceRegistry {
 		}
 
 		if (oldFilteredListener != null) {
-			Collection removedListeners = new ArrayList(1);
-			removedListeners.add(oldFilteredListener);
-			notifyListenerHooks(Collections.unmodifiableCollection(removedListeners), false);
+			oldFilteredListener.markRemoved();
+			Collection removedListeners = Collections.singletonList(oldFilteredListener);
+			notifyListenerHooks(removedListeners, false);
 		}
 
-		Collection addedListeners = new ArrayList(1);
-		addedListeners.add(filteredListener);
-		notifyListenerHooks(Collections.unmodifiableCollection(addedListeners), true);
+		Collection addedListeners = Collections.singletonList(filteredListener);
+		notifyListenerHooks(addedListeners, true);
 	}
 
 	/**
@@ -685,9 +684,9 @@ public class ServiceRegistry {
 		if (oldFilteredListener == null) {
 			return;
 		}
-		Collection removedListeners = new ArrayList(1);
-		removedListeners.add(oldFilteredListener);
-		notifyListenerHooks(Collections.unmodifiableCollection(removedListeners), false);
+		oldFilteredListener.markRemoved();
+		Collection removedListeners = Collections.singletonList(oldFilteredListener);
+		notifyListenerHooks(removedListeners, false);
 	}
 
 	/**
@@ -703,7 +702,12 @@ public class ServiceRegistry {
 		if ((removedListenersMap == null) || (removedListenersMap.size() == 0)) {
 			return;
 		}
-		notifyListenerHooks(removedListenersMap.values(), false);
+		Collection removedListeners = removedListenersMap.values();
+		for (Iterator iter = removedListeners.iterator(); iter.hasNext();) {
+			FilteredServiceListener oldFilteredListener = (FilteredServiceListener) iter.next();
+			oldFilteredListener.markRemoved();
+		}
+		notifyListenerHooks(removedListeners, false);
 	}
 
 	/**

@@ -17,7 +17,6 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
-
 import org.osgi.framework.BundleContext;
 
 /**
@@ -84,6 +83,18 @@ public interface ListenerHook {
 		 *         filter.
 		 */
 		String getFilter();
+
+		/**
+		 * Return the state of the listener for this addition and removal life
+		 * cycle. Initially this method will return <code>false</code>
+		 * indicating the listener has been added but has not been removed.
+		 * After the listener has been removed, this method must always return
+		 * <code>true</code>.
+		 * 
+		 * @return <code>false</code> if the listener has not been been removed,
+		 *         <code>true</code> otherwise.
+		 */
+		boolean isRemoved();
 
 		/**
 		 * Compares this <code>ListenerInfo</code> to another
