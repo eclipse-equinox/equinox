@@ -86,7 +86,14 @@ public final class URIUtil {
 	}
 
 	/**
-	 * Returns a URI corresponding to the given unencoded string.
+	 * Returns a URI corresponding to the given unencoded string. This method
+	 * will take care of encoding any characters that must be encoded according
+	 * to the URI specification. This method must not be called with a string that
+	 * already contains an encoded URI, since this will result in the URI escape character ('%')
+	 * being escaped itself.
+	 * 
+	 * @param uriString An unencoded URI string
+	 * @return A URI corresponding to the given string
 	 * @throws URISyntaxException If the string cannot be formed into a valid URI
 	 */
 	public static URI fromString(String uriString) throws URISyntaxException {
@@ -104,9 +111,11 @@ public final class URIUtil {
 			File file = new File(ssp);
 			if (file.isAbsolute())
 				return file.toURI();
-			scheme = null;
 			if (File.separatorChar != '/')
 				ssp = ssp.replace(File.separatorChar, '/');
+			//relative URIs have a null scheme.
+			if (!ssp.startsWith("/"))//$NON-NLS-1$
+				scheme = null;
 		}
 		return new URI(scheme, ssp, fragment);
 	}
