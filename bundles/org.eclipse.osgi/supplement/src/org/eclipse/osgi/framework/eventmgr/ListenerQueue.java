@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,8 +121,7 @@ public class ListenerQueue {
 		}
 		EventThread eventThread = manager.getEventThread();
 		synchronized (eventThread) { /* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
-			Iterator iter = queue.entrySet().iterator();
-			while (iter.hasNext()) { /* iterate over the list of listener lists */
+			for (Iterator iter = queue.entrySet().iterator(); iter.hasNext();) { /* iterate over the list of listener lists */
 				Map.Entry entry = (Map.Entry) iter.next();
 				eventThread.postEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
 			}
@@ -145,8 +144,7 @@ public class ListenerQueue {
 		}
 		// We can't guarantee any delivery order for synchronous events.
 		// Attempts to do so result in deadly embraces.
-		Iterator iter = queue.entrySet().iterator();
-		while (iter.hasNext()) { /* iterate over the list of listener lists */
+		for (Iterator iter = queue.entrySet().iterator(); iter.hasNext();) { /* iterate over the list of listener lists */
 			Map.Entry entry = (Map.Entry) iter.next();
 			EventManager.dispatchEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
 		}

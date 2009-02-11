@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -211,12 +211,13 @@ public class EventManager {
 	 * is passed to this method. This is passed on to the call back object.
 	 */
 	static void dispatchEvent(Set/*<Map.Entry<Object,Object>>*/listeners, EventDispatcher dispatcher, int eventAction, Object eventObject) {
-		Iterator iter = listeners.iterator();
-		while (iter.hasNext()) { /* iterate over the list of listeners */
+		for (Iterator iter = listeners.iterator(); iter.hasNext();) { /* iterate over the list of listeners */
 			Map.Entry listener = (Map.Entry) iter.next();
+			Object eventListener = listener.getKey();
+			Object listenerObject = listener.getValue();
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
-				dispatcher.dispatchEvent(listener.getKey(), listener.getValue(), eventAction, eventObject);
+				dispatcher.dispatchEvent(eventListener, listenerObject, eventAction, eventObject);
 			} catch (Throwable t) {
 				/* Consume and ignore any exceptions thrown by the listener */
 				if (DEBUG) {
