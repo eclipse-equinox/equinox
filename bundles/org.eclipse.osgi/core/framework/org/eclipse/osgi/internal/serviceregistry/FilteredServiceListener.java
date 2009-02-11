@@ -34,6 +34,8 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	/** Indicates if the last event was delivered because of a filter match */
 	/* @GuardedBy this */
 	private boolean matched;
+	/** indicates whether the listener has been removed */
+	private volatile boolean removed;
 
 	/**
 	 * Constructor.
@@ -59,6 +61,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			}
 		}
 		this.matched = false;
+		this.removed = false;
 		this.listener = listener;
 		this.context = context;
 		this.allservices = (listener instanceof AllServiceListener);
@@ -155,6 +158,27 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			return filter.toString();
 		}
 		return getObjectClassFilterString(objectClass);
+	}
+
+	/**
+	 * Return the state of the listener for this addition and removal life
+	 * cycle. Initially this method will return <code>false</code>
+	 * indicating the listener has been added but has not been removed.
+	 * After the listener has been removed, this method must always return
+	 * <code>true</code>.
+	 * 
+	 * @return <code>false</code> if the listener has not been been removed,
+	 *         <code>true</code> otherwise.
+	 */
+	public boolean isRemoved() {
+		return removed;
+	}
+
+	/** 
+	 * Mark the service listener registration as removed.
+	 */
+	void markRemoved() {
+		removed = true;
 	}
 
 	/**
