@@ -37,8 +37,6 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		if (System.getSecurityManager() == null)
 			internalInit();
 		else {
-			if (configuration.get(Constants.FRAMEWORK_SECURITY) != null)
-				throw new SecurityException("Cannot specify the \"" + Constants.FRAMEWORK_SECURITY + "\" configuration property when a security manager is already installed."); //$NON-NLS-1$ //$NON-NLS-2$
 			AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
 					internalInit();
@@ -51,6 +49,9 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 	synchronized Framework internalInit() {
 		if ((getState() & (Bundle.ACTIVE | Bundle.STARTING | Bundle.STOPPING)) != 0)
 			return framework; // no op
+
+		if (System.getSecurityManager() != null && configuration.get(Constants.FRAMEWORK_SECURITY) != null)
+			throw new SecurityException("Cannot specify the \"" + Constants.FRAMEWORK_SECURITY + "\" configuration property when a security manager is already installed."); //$NON-NLS-1$ //$NON-NLS-2$
 
 		Framework current = framework;
 		if (current != null) {
@@ -108,8 +109,11 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		if (storage != null && storage instanceof String)
 			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, (String) storage);
 		Object clean = configuration.get(Constants.FRAMEWORK_STORAGE_CLEAN);
-		if (Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(clean))
+		if (Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(clean)) {
+			// remove this so we only clean on first init
+			configuration.remove(Constants.FRAMEWORK_STORAGE_CLEAN);
 			FrameworkProperties.setProperty(EclipseStarter.PROP_CLEAN, Boolean.TRUE.toString());
+		}
 	}
 
 	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {

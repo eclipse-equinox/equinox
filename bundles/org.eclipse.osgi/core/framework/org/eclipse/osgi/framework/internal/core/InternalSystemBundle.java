@@ -290,7 +290,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 	public void update() {
 		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
 
-		if (state == ACTIVE) {
+		if ((state & (ACTIVE | STARTING)) != 0) {
 			Thread restart = framework.secureAction.createThread(new Runnable() {
 				public void run() {
 					int sl = framework.startLevelManager.getStartLevel();
