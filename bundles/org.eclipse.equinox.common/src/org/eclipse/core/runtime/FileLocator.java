@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,11 +19,9 @@ import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.Bundle;
 
 /**
- * This class contains collection of helper methods aimed at finding files in bundles.
- * This class can only be used if OSGi plugin is available.
- * <p>
- * The class is not intended to be subclassed or instantiated by clients.
- * </p>
+ * This class contains a collection of helper methods for finding files in bundles.
+ * This class can only be used if the OSGi plugin is available.
+ * 
  * @since org.eclipse.equinox.common 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
@@ -37,19 +35,19 @@ public final class FileLocator {
 	 * Returns a URL for the given path in the given bundle.  Returns <code>null</code> if the URL
 	 * could not be computed or created. 
 	 * <p>
-	 * find looks for this path in given bundle and any attached fragments.  
+	 * This method looks for the path in the given bundle and any attached fragments.  
 	 * <code>null</code> is returned if no such entry is found.  Note that
 	 * there is no specific order to the fragments.
 	 * </p><p>
-	 * The following arguments may also be used
-	 * <pre>
-	 *     $nl$ - for language specific information
-	 *     $os$ - for operating system specific information
-	 *     $ws$ - for windowing system specific information
-	 * </pre>
+	 * The following variables may also be used as entries in the provided path:
+	 * <ul>
+	 *     <li>$nl$ - for language specific information</li>
+	 *     <li>$os$ - for operating system specific information</li>
+	 *     <li>$ws$ - for windowing system specific information</li>
+	 * </ul>
 	 * </p><p>
-	 * A path of $nl$/about.properties in an environment with a default 
-	 * locale of en_CA will return a URL corresponding to the first place
+	 * A path of "$nl$/about.properties" in an environment with a default 
+	 * locale of en_CA will return a URL corresponding to the first location
 	 * about.properties is found according to the following order:
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
@@ -87,7 +85,7 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Same as {@link #findEntries(Bundle, IPath, Map)} except multiple entries
+	 * This method is the same as {@link #find(Bundle, IPath, Map)} except multiple entries
 	 * can be returned if more than one entry matches the path in the host and 
 	 * any of its fragments.
 	 * 
@@ -109,9 +107,8 @@ public final class FileLocator {
 	}
 
 	/**
-	 * Same as {@link #findEntries(Bundle, IPath)} except multiple entries 
-	 * can be returned if more than one entry matches the path in the host 
-	 * any of its fragments.
+	 * This is a convenience method, fully equivalent to {@link #findEntries(Bundle, IPath, Map)},
+	 * with a value of <code>null</code> for the map argument.
 	 * 
 	 * @param bundle the bundle in which to search
 	 * @param path file path relative to plug-in installation location
