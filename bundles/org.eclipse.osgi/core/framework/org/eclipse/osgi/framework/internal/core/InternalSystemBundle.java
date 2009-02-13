@@ -297,7 +297,8 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 					FrameworkProperties.setProperty(Constants.PROP_OSGI_RELAUNCH, ""); //$NON-NLS-1$
 					framework.shutdown(FrameworkEvent.STOPPED_UPDATE);
 					framework.launch();
-					framework.startLevelManager.doSetStartLevel(sl);
+					if (sl > 0)
+						framework.startLevelManager.doSetStartLevel(sl);
 					FrameworkProperties.clearProperty(Constants.PROP_OSGI_RELAUNCH);
 				}
 			}, "System Bundle Update", framework.getContextFinder()); //$NON-NLS-1$
