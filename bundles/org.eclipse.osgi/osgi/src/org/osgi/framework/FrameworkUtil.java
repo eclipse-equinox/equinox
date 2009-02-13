@@ -39,7 +39,7 @@ import javax.security.auth.x500.X500Principal;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 6254 $
+ * @version $Revision: 6359 $
  */
 public class FrameworkUtil {
 	/**
@@ -80,7 +80,7 @@ public class FrameworkUtil {
 
 	/**
 	 * Match a Distinguished Name (DN) chain against a pattern. DNs can be
-	 * matched using wildcards. A wildcard ('*' \\u002A) replaces all possible
+	 * matched using wildcards. A wildcard ('*' \u002A) replaces all possible
 	 * values. Due to the structure of the DN, the comparison is more
 	 * complicated than string-based wildcard matching.
 	 * <p>
@@ -160,16 +160,18 @@ public class FrameworkUtil {
 	 * The following example matches a certificate signed by Tweety Inc. in the
 	 * US.
 	 * </p>
+	 * 
 	 * <pre>
 	 * * ; ou=S &amp; V, o=Tweety Inc., c=US
 	 * </pre>
 	 * <p>
 	 * The wildcard ('*') matches zero or one DN in the chain, however,
 	 * sometimes it is necessary to match a longer chain. The minus sign ('-'
-	 * \\u002D) represents zero or more DNs, whereas the asterisk only represents
+	 * \u002D) represents zero or more DNs, whereas the asterisk only represents
 	 * a single DN. For example, to match a DN where the Tweety Inc. is in the
 	 * DN chain, use the following expression:
 	 * </p>
+	 * 
 	 * <pre>
 	 * - ; *, o=Tweety Inc., c=US
 	 * </pre>
@@ -190,6 +192,30 @@ public class FrameworkUtil {
 	}
 
 	/**
+	 * Return a <code>Bundle</code> for the specified bundle class.
+	 * 
+	 * @param classFromBundle A class loaded from a bundle.
+	 * @return A <code>Bundle</code> for the specified bundle class or
+	 *         <code>null</code> if the class was not loaded by a bundle class
+	 *         loader.
+	 * @since 1.5
+	 */
+	public static Bundle getBundle(final Class classFromBundle) {
+		// We use doPriv since the caller may not have permission
+		// to call getClassLoader.
+		Object cl = AccessController.doPrivileged(new PrivilegedAction() {
+			public Object run() {
+				return classFromBundle.getClassLoader();
+			}
+		});
+
+		if (cl instanceof BundleReference) {
+			return ((BundleReference) cl).getBundle();
+		}
+		return null;
+	}
+
+	/**
 	 * Return a <code>BundleReference</code> for the specified bundle class.
 	 * 
 	 * @param classFromBundle A class loaded from a bundle.
@@ -197,6 +223,7 @@ public class FrameworkUtil {
 	 * @throws IllegalArgumentException If the class was not loaded by a bundle
 	 *         class loader.
 	 * @since 1.5
+	 * @deprecated use getBundle, will be removed by M6
 	 */
 	public static BundleReference getBundleReference(final Class classFromBundle) {
 		// We use doPriv since the caller may not have permission
@@ -227,7 +254,7 @@ public class FrameworkUtil {
 			return bundle;
 		}
 	}
-	
+
 	/**
 	 * RFC 1960-based Filter. Filter objects can be created by calling the
 	 * constructor with the desired filter string. A Filter object can be called

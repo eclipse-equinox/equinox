@@ -1223,8 +1223,8 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	public void testBundleReference01() throws Exception {
 		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
 		Class clazz = test.loadClass("test1.Activator"); //$NON-NLS-1$
-		BundleReference ref = FrameworkUtil.getBundleReference(clazz);
-		assertEquals("Wrong bundle", test, ref.getBundle()); //$NON-NLS-1$
+		Bundle bundle = FrameworkUtil.getBundle(clazz);
+		assertEquals("Wrong bundle", test, bundle); //$NON-NLS-1$
 	}
 
 	public void testBundleReference02() throws Exception {

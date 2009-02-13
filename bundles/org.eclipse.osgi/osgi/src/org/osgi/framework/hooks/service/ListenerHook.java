@@ -17,6 +17,7 @@
 package org.osgi.framework.hooks.service;
 
 import java.util.Collection;
+
 import org.osgi.framework.BundleContext;
 
 /**
@@ -26,8 +27,17 @@ import org.osgi.framework.BundleContext;
  * Bundles registering this service will be called during service listener
  * addition and removal.
  * 
+ * <p>
+ * There is an extremely rare case in which removed notification can be made
+ * before added notification if two threads are racing to add and remove the
+ * same service listener. Because this hook is called synchronously during
+ * service listener addition and removal, the Framework cannot guarantee
+ * in-order delivery of added and removed notification for a given service
+ * listener. The {@link ListenerInfo#isRemoved()} method can be used to detect
+ * this rare occurrence.
+ * 
  * @ThreadSafe
- * @version $Revision: 6211 $
+ * @version $Revision: 6344 $
  */
 
 public interface ListenerHook {
@@ -98,13 +108,18 @@ public interface ListenerHook {
 
 		/**
 		 * Compares this <code>ListenerInfo</code> to another
+		 * <code>ListenerInfo</code>. Two <code>ListenerInfo</code>s are equals
+		 * if they refer to the same listener for a given addition and removal
+		 * life cycle. If the same listener is added again, it must have a
+		 * different <code>ListenerInfo</code> which is not equal to this
 		 * <code>ListenerInfo</code>.
 		 * 
 		 * @param obj The object to compare against this
 		 *        <code>ListenerInfo</code>.
 		 * @return <code>true</code> if the other object is a
 		 *         <code>ListenerInfo</code> object and both objects refer to
-		 *         the same listener.
+		 *         the same listener for a given addition and removal life
+		 *         cycle.
 		 */
 		boolean equals(Object obj);
 

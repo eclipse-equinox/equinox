@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ package org.osgi.framework;
  * <code>instanceof Configurable</code>.
  * 
  * @deprecated As of 1.2. Please use Configuration Admin service.
- * @version $Revision: 5673 $
+ * @version $Revision: 6361 $
  */
 public interface Configurable {
 	/**
@@ -42,7 +42,7 @@ public interface Configurable {
 	 * returning the configuration object.
 	 * 
 	 * @return The configuration object for this service.
-	 * @throws java.lang.SecurityException If the caller does not have an
+	 * @throws SecurityException If the caller does not have an
 	 *         appropriate permission and the Java Runtime Environment supports
 	 *         permissions.
 	 * @deprecated As of 1.2. Please use Configuration Admin service.

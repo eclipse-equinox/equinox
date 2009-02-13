@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.EventObject;
  * 
  * @Immutable
  * @see FrameworkListener
- * @version $Revision: 5680 $
+ * @version $Revision: 6347 $
  */
 
 public class FrameworkEvent extends EventObject {
@@ -243,6 +243,9 @@ public class FrameworkEvent extends EventObject {
 	 * <li>{@link #INFO}
 	 * <li>{@link #PACKAGES_REFRESHED}
 	 * <li>{@link #STARTLEVEL_CHANGED}
+	 * <li>{@link #STOPPED}
+	 * <li>{@link #STOPPED_BOOTCLASSPATH_MODIFIED}
+	 * <li>{@link #STOPPED_UPDATE}
 	 * </ul>
 	 * 
 	 * @return The type of state change.
