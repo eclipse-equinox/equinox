@@ -22,7 +22,7 @@ public interface ICachingService {
 
     public void stop();
 
-    public boolean storeClass(String namespace, URL sourceFileURL, Class clazz,
-            byte[] classbytes);
+    public boolean storeClass(String namespace, URL sourceFileURL,
+            Class<?> clazz, byte[] classbytes);
 
 }

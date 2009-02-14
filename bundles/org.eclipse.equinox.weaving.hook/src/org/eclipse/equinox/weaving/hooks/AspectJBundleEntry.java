@@ -62,11 +62,13 @@ public class AspectJBundleEntry extends BundleEntry {
         return bundleFileURL;
     }
 
+    @Override
     public byte[] getBytes() throws IOException {
         if (bytes == null) return delegate.getBytes();
         return bytes;
     }
 
+    @Override
     public URL getFileURL() {
         if (bytes == null)
             return delegate.getFileURL();
@@ -74,15 +76,20 @@ public class AspectJBundleEntry extends BundleEntry {
             return null;
     }
 
+    @Override
     public InputStream getInputStream() throws IOException {
         // this always returns the original stream of the delegate to
         // allow getResourceAsStream to be used even in the context of
         // caching with J9 class sharing
         //
         // class loading uses getBytes instead (where the caching is considered)
+        if (delegate == null) {
+            System.err.println("error in: " + name);
+        }
         return delegate.getInputStream();
     }
 
+    @Override
     public URL getLocalURL() {
         if (bytes == null)
             return delegate.getLocalURL();
@@ -90,6 +97,7 @@ public class AspectJBundleEntry extends BundleEntry {
             return null;
     }
 
+    @Override
     public String getName() {
         if (bytes == null)
             return delegate.getName();
@@ -97,6 +105,7 @@ public class AspectJBundleEntry extends BundleEntry {
             return name;
     }
 
+    @Override
     public long getSize() {
         if (delegate != null)
             return delegate.getSize();
@@ -104,6 +113,7 @@ public class AspectJBundleEntry extends BundleEntry {
             return bytes.length;
     }
 
+    @Override
     public long getTime() {
         if (delegate != null)
             return delegate.getTime();
