@@ -22,10 +22,25 @@ import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
+/**
+ * This is a wrapper for bundle files that allows the weaving runtime to create
+ * wrapped instances of bundle entry objects.
+ * 
+ * Those bundle entry objects are used to return class bytes from the cache
+ * instead of the bundle itself.
+ */
 public class AspectJBundleFile extends AbstractAJBundleFile {
 
     private final URL url;
 
+    /**
+     * Create a new wrapper for a bundle file
+     * 
+     * @param adaptorProvider A provider that allows this wrapper to gain access
+     *            to the adaptor of this bundle
+     * @param bundleFile The wrapped bundle file
+     * @throws IOException
+     */
     public AspectJBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) throws IOException {
         super(adaptorProvider, bundleFile);
@@ -39,29 +54,23 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
                     + ", url=" + url);
         BundleEntry entry = delegate.getEntry(path);
 
-        if (path.endsWith(".class")) {
+        if (path.endsWith(".class") && entry != null) {
             final int offset = path.lastIndexOf('.');
             final String name = path.substring(0, offset).replace('/', '.');
             final IAspectJAdaptor adaptor = getAdaptor();
             if (adaptor != null) {
                 final CacheEntry cacheEntry = adaptor.findClass(name, url);
                 if (cacheEntry == null) {
-                    if (entry != null) {
-                        entry = new AspectJBundleEntry(adaptor, entry, url,
-                                false);
-                        if (Debug.DEBUG_BUNDLE)
-                            Debug
-                                    .println("- AspectJBundleFile.getEntry() path="
-                                            + path + ", entry=" + entry);
-                    }
+                    entry = new AspectJBundleEntry(adaptor, entry, url, false);
+                    if (Debug.DEBUG_BUNDLE)
+                        Debug.println("- AspectJBundleFile.getEntry() path="
+                                + path + ", entry=" + entry);
+                } else if (cacheEntry.getCachedBytes() != null) {
+                    entry = new AspectJBundleEntry(adaptor, entry, path,
+                            cacheEntry.getCachedBytes(), url);
                 } else {
-                    if (cacheEntry.getCachedBytes() != null) {
-                        entry = new AspectJBundleEntry(adaptor, entry, path,
-                                cacheEntry.getCachedBytes(), url);
-                    } else if (entry != null) {
-                        entry = new AspectJBundleEntry(adaptor, entry, url,
-                                cacheEntry.dontWeave());
-                    }
+                    entry = new AspectJBundleEntry(adaptor, entry, url,
+                            cacheEntry.dontWeave());
                 }
             }
         }
@@ -69,10 +78,6 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
         if (Debug.DEBUG_BUNDLE)
             Debug.println("< AspectJBundleFile.getEntry() entry=" + entry);
         return entry;
-    }
-
-    public URL getURL() {
-        return url;
     }
 
 }
