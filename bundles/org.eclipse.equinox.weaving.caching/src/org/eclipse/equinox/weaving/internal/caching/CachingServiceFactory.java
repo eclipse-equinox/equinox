@@ -7,7 +7,7 @@
  * 
  * Contributors:
  *     Heiko Seeberger - initial implementation
- *     Martin Lippert - further improvements and optimisations
+ *     Martin Lippert - further improvements and optimizations
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -15,6 +15,8 @@ package org.eclipse.equinox.weaving.internal.caching;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.ICachingServiceFactory;
@@ -36,6 +38,10 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 
     private final BundleContext bundleContext;
 
+    private final BlockingQueue<CacheItem> cacheQueue;
+
+    private final CacheWriter cacheWriter;
+
     /**
      * @param bundleContext Must not be null!
      * @throws IllegalArgumentException if given bundleContext is null.
@@ -43,9 +49,12 @@ public class CachingServiceFactory implements ICachingServiceFactory {
     public CachingServiceFactory(final BundleContext bundleContext) {
         if (bundleContext == null) {
             throw new IllegalArgumentException(
-                    "Argument \"bundleContext\" must not be null!");
+                    "Argument \"bundleContext\" must not be null!"); //$NON-NLS-1$
         }
         this.bundleContext = bundleContext;
+        this.cacheQueue = new ArrayBlockingQueue<CacheItem>(5000);
+        this.cacheWriter = new CacheWriter(this.cacheQueue);
+        this.cacheWriter.start();
 
         this.bundleContext.addBundleListener(new SynchronousBundleListener() {
 
@@ -68,7 +77,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 
         if (bundle == null) {
             throw new IllegalArgumentException(
-                    "Argument \"bundle\" must not be null!");
+                    "Argument \"bundle\" must not be null!"); //$NON-NLS-1$
         }
 
         final String cacheId = getCacheId(bundle);
@@ -80,7 +89,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 
             if (key != null && key.length() > 0) {
                 bundleCachingService = new BundleCachingService(bundleContext,
-                        bundle, key);
+                        bundle, key, this.cacheQueue);
             } else {
                 bundleCachingService = new UnchangedCachingService();
             }
@@ -88,7 +97,7 @@ public class CachingServiceFactory implements ICachingServiceFactory {
 
             if (Log.isDebugEnabled()) {
                 Log.debug(MessageFormat.format(
-                        "Created BundleCachingService for [{0}].", cacheId));
+                        "Created BundleCachingService for [{0}].", cacheId)); //$NON-NLS-1$
             }
         }
 
@@ -120,10 +129,14 @@ public class CachingServiceFactory implements ICachingServiceFactory {
             bundleCachingService.stop();
         }
         bundleCachingServices.clear();
+        this.cacheWriter.stop();
     }
 
     /**
      * Stops individual bundle caching service if the bundle is uninstalled
+     * 
+     * @param event The event contains the information for which bundle to stop
+     *            the caching service
      */
     protected void stopBundleCachingService(final BundleEvent event) {
         final String cacheId = getCacheId(event.getBundle());

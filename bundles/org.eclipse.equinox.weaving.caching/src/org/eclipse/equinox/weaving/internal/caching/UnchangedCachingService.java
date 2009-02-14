@@ -49,7 +49,7 @@ public class UnchangedCachingService implements ICachingService {
      *      java.net.URL, java.lang.Class, byte[])
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
-            final Class clazz, final byte[] classbytes) {
+            final Class<?> clazz, final byte[] classbytes) {
         return false;
     }
 }

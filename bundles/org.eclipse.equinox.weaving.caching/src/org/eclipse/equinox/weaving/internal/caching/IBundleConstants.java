@@ -21,5 +21,5 @@ public interface IBundleConstants {
     /**
      * The symbolic name for this bundle: "org.aspectj.osgi.service.caching".
      */
-    public static final String BUNDLE_SYMBOLIC_NAME = "org.aspectj.osgi.service.caching"; //$NON-NLS-1$
+    public static final String BUNDLE_SYMBOLIC_NAME = "org.eclipse.equinox.weaving.caching"; //$NON-NLS-1$
 }

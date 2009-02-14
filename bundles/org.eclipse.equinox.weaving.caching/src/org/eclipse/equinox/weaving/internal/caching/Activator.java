@@ -30,8 +30,8 @@ import org.osgi.framework.ServiceRegistration;
  */
 public class Activator implements BundleActivator {
 
-    public static boolean verbose = Boolean
-            .getBoolean("org.aspectj.osgi.verbose");
+    private static boolean verbose = Boolean
+            .getBoolean("org.aspectj.osgi.verbose"); //$NON-NLS-1$
 
     private CachingServiceFactory cachingServiceFactory;
 
@@ -49,12 +49,12 @@ public class Activator implements BundleActivator {
         if (shouldRegister()) {
             if (verbose)
                 System.err
-                        .println("[org.eclipse.equinox.weaving.caching] info starting standard caching service ...");
+                        .println("[org.eclipse.equinox.weaving.caching] info starting standard caching service ..."); //$NON-NLS-1$
             registerCachingServiceFactory(bundleContext);
         } else {
             if (verbose)
                 System.err
-                        .println("[org.eclipse.equinox.weaving.caching] warning cannot start standard caching service on J9 VM");
+                        .println("[org.eclipse.equinox.weaving.caching] warning cannot start standard caching service on J9 VM"); //$NON-NLS-1$
         }
     }
 
@@ -67,7 +67,7 @@ public class Activator implements BundleActivator {
         cachingServiceFactory.stop();
         cachingServiceFactoryRegistration.unregister();
         if (Log.isDebugEnabled()) {
-            Log.debug("Shut down and unregistered SingletonCachingService.");
+            Log.debug("Shut down and unregistered SingletonCachingService."); //$NON-NLS-1$
         }
     }
 
@@ -77,7 +77,7 @@ public class Activator implements BundleActivator {
                 ICachingServiceFactory.class.getName(), cachingServiceFactory,
                 null);
         if (Log.isDebugEnabled()) {
-            Log.debug("Created and registered SingletonCachingService.");
+            Log.debug("Created and registered SingletonCachingService."); //$NON-NLS-1$
         }
     }
 

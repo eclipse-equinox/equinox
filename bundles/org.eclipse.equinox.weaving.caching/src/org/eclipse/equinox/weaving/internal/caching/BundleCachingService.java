@@ -7,28 +7,25 @@
  * 
  * Contributors:
  *     Heiko Seeberger - initial implementation
+ *     Martin Lippert - asynchronous cache writing
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 
 /**
  * <p>
@@ -36,48 +33,34 @@ import org.osgi.framework.Constants;
  * each bundle.
  * </p>
  * <p>
- * The maximum number of classes cached in memory before writing to disk is
- * definded via the system property
- * <code>org.aspectj.osgi.service.caching.maxCachedClasses</code>. The default
- * is 20.
- * </p>
  * 
  * @author Heiko Seeberger
+ * @author Martin Lippert
  */
 public class BundleCachingService implements ICachingService {
 
-    private static final int BUFFER_SIZE = 8 * 1024;
-
-    private static final Integer MAX_CACHED_CLASSES = Integer.getInteger(
-            "org.aspectj.osgi.service.caching.maxCachedClasses", 20);
+    private static final int READ_BUFFER_SIZE = 8 * 1024;
 
     private final Bundle bundle;
 
-    private final BundleContext bundleContext;
-
-    private String bundleVersion;
-
-    private final Map<String, byte[]> cachedClasses = new HashMap<String, byte[]>(
-            MAX_CACHED_CLASSES + 10);
-
-    private final Map<String, File> cacheDirectories = new HashMap<String, File>();
-
-    private final Map<String, URL> cachedSourceFileURLs = new HashMap<String, URL>(
-            MAX_CACHED_CLASSES + 10);
+    private File cacheDirectory;
 
     private final String cacheKey;
 
-    private File cachePartition;
+    private final BlockingQueue<CacheItem> cacheWriterQueue;
 
     /**
      * @param bundleContext Must not be null!
      * @param bundle Must not be null!
      * @param key Must not be null!
+     * @param cacheWriterQueue The queue for items to be written to the cache,
+     *            must not be null
      * @throws IllegalArgumentException if given bundleContext or bundle is
      *             null.
      */
     public BundleCachingService(final BundleContext bundleContext,
-            final Bundle bundle, final String key) {
+            final Bundle bundle, final String key,
+            final BlockingQueue<CacheItem> cacheWriterQueue) {
 
         if (bundleContext == null) {
             throw new IllegalArgumentException(
@@ -92,19 +75,17 @@ public class BundleCachingService implements ICachingService {
                     "Argument \"key\" must not be null!"); //$NON-NLS-1$
         }
 
-        this.bundleContext = bundleContext;
         this.bundle = bundle;
         this.cacheKey = hashNamespace(key);
+        this.cacheWriterQueue = cacheWriterQueue;
 
-        final Object version = bundle.getHeaders()
-                .get(Constants.BUNDLE_VERSION);
-        if (version != null) {
-            this.bundleVersion = (String) version;
+        final File dataFile = bundleContext.getDataFile(cacheKey);
+        if (dataFile != null) {
+            cacheDirectory = new File(dataFile, Long.toString(bundle
+                    .getBundleId()));
         } else {
-            this.bundleVersion = "0.0.0"; //$NON-NLS-1$
+            Log.error("Cannot initialize cache!", null); //$NON-NLS-1$
         }
-
-        initCache();
     }
 
     /**
@@ -122,8 +103,7 @@ public class BundleCachingService implements ICachingService {
         byte[] storedClass = null;
         boolean isCached = false;
 
-        if (cachePartition != null) {
-            final File cacheDirectory = getCacheDirectory(sourceFileURL);
+        if (cacheDirectory != null) {
             final File cachedBytecodeFile = new File(cacheDirectory, name);
             if (cachedBytecodeFile.exists()) {
                 storedClass = read(name, cachedBytecodeFile);
@@ -143,12 +123,6 @@ public class BundleCachingService implements ICachingService {
      * Writes the remaining cache to disk.
      */
     public void stop() {
-        if (cachePartition != null) {
-            for (final String name : cachedClasses.keySet()) {
-                final URL sourceFileURL = cachedSourceFileURLs.get(name);
-                write(name, sourceFileURL);
-            }
-        }
     }
 
     /**
@@ -156,7 +130,7 @@ public class BundleCachingService implements ICachingService {
      *      java.net.URL, java.lang.Class, byte[])
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
-            final Class clazz, final byte[] classbytes) {
+            final Class<?> clazz, final byte[] classbytes) {
 
         if (clazz == null) {
             throw new IllegalArgumentException(
@@ -167,43 +141,15 @@ public class BundleCachingService implements ICachingService {
                     "Argument \"classbytes\" must not be null!"); //$NON-NLS-1$
         }
 
-        if (cachePartition == null) {
+        if (cacheDirectory == null) {
             return false;
         }
 
-        cachedClasses.put(clazz.getName(), classbytes);
-        cachedSourceFileURLs.put(clazz.getName(), sourceFileURL);
-        if (cachedClasses.size() > MAX_CACHED_CLASSES) {
+        final CacheItem item = new CacheItem(classbytes, cacheDirectory
+                .getAbsolutePath(), clazz.getName());
 
-            final Iterator<String> names = cachedClasses.keySet().iterator();
-            while (names.hasNext()) {
-                final String name = names.next();
-                final URL url = cachedSourceFileURLs.get(name);
-                write(name, url);
-                names.remove();
-                cachedSourceFileURLs.remove(name);
-            }
-        }
+        this.cacheWriterQueue.offer(item);
         return true;
-    }
-
-    private File getCacheDirectory(final URL sourceFileUrl) {
-        final String directoryName = sourceFileUrl.toString()
-                + this.bundleVersion;
-
-        File cacheDir = this.cacheDirectories.get(directoryName);
-
-        if (cacheDir == null) {
-            final String cacheDirFromUrl = hashNamespace(directoryName);
-            cacheDir = new File(cachePartition, cacheDirFromUrl);
-            if (!cacheDir.exists()) {
-                cacheDir.mkdirs();
-            }
-
-            this.cacheDirectories.put(directoryName, cacheDir);
-        }
-
-        return cacheDir;
     }
 
     /**
@@ -237,22 +183,6 @@ public class BundleCachingService implements ICachingService {
         return new String(result);
     }
 
-    private void initCache() {
-        boolean isInitialized = false;
-        final File dataFile = bundleContext.getDataFile(""); //$NON-NLS-1$
-        if (dataFile != null) {
-            cachePartition = new File(dataFile, cacheKey);
-            if (!cachePartition.exists()) {
-                isInitialized = cachePartition.mkdirs();
-            } else {
-                isInitialized = true;
-            }
-        }
-        if (!isInitialized) {
-            Log.error("Cannot initialize cache!", null); //$NON-NLS-1$
-        }
-    }
-
     private byte[] read(final String name, final File file) {
         int length = (int) file.length();
 
@@ -273,7 +203,7 @@ public class BundleCachingService implements ICachingService {
                     break; /* leave the loop */
                 }
             } else /* BundleEntry does not know its own length! */{
-                length = BUFFER_SIZE;
+                length = READ_BUFFER_SIZE;
                 classbytes = new byte[length];
                 readloop: while (true) {
                     for (; bytesread < length; bytesread += readcount) {
@@ -283,7 +213,7 @@ public class BundleCachingService implements ICachingService {
                         break readloop; /* leave the loop */
                     }
                     final byte[] oldbytes = classbytes;
-                    length += BUFFER_SIZE;
+                    length += READ_BUFFER_SIZE;
                     classbytes = new byte[length];
                     System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
                 }
@@ -303,36 +233,6 @@ public class BundleCachingService implements ICachingService {
             if (in != null) {
                 try {
                     in.close();
-                } catch (final IOException e) {
-                    Log.error(MessageFormat.format(
-                            "for [{0}]: Cannot close cache file for [1]!", //$NON-NLS-1$
-                            bundle.getSymbolicName(), name), e);
-                }
-            }
-        }
-    }
-
-    private void write(final String name, final URL sourceFileURL) {
-        // TODO Think about synchronization !!!
-        FileOutputStream out = null;
-        try {
-            final File cacheDirectory = getCacheDirectory(sourceFileURL);
-            out = new FileOutputStream(new File(cacheDirectory, name));
-            out.write(cachedClasses.get(name));
-            out.close();
-            if (Log.isDebugEnabled()) {
-                Log.debug(MessageFormat.format(
-                        "for [{0}]: Written {1} to cache.", bundle //$NON-NLS-1$
-                                .getSymbolicName(), name));
-            }
-        } catch (final IOException e) {
-            Log.error(MessageFormat.format(
-                    "for [{0}]: Cannot write [1] to cache!", bundle //$NON-NLS-1$
-                            .getSymbolicName(), name), e);
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
                 } catch (final IOException e) {
                     Log.error(MessageFormat.format(
                             "for [{0}]: Cannot close cache file for [1]!", //$NON-NLS-1$
