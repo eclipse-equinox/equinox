@@ -81,8 +81,9 @@ public class BundleCachingService implements ICachingService {
 
         final File dataFile = bundleContext.getDataFile(cacheKey);
         if (dataFile != null) {
-            cacheDirectory = new File(dataFile, Long.toString(bundle
-                    .getBundleId()));
+            final String bundleCacheDir = bundle.getBundleId()
+                    + "-" + bundle.getLastModified(); //$NON-NLS-1$
+            cacheDirectory = new File(dataFile, bundleCacheDir);
         } else {
             Log.error("Cannot initialize cache!", null); //$NON-NLS-1$
         }
