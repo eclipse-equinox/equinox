@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,15 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 	private static String dnChain07True = dn7 + ';' + dn6;
 	private static String dnChain08True = dn5 + ';' + dn7;
 
+	private static String dnChain01TrueEscaped = escapeStar(dnChain01True);
+	private static String dnChain02TrueEscaped = escapeStar(dnChain02True);
+	private static String dnChain03TrueEscaped = escapeStar(dnChain03True);
+	private static String dnChain04FalseEscaped = escapeStar(dnChain04False);
+	private static String dnChain05FalseEscaped = escapeStar(dnChain05False);
+	private static String dnChain06TrueEscaped = escapeStar(dnChain06True);
+	private static String dnChain07TrueEscaped = escapeStar(dnChain07True);
+	private static String dnChain08TrueEscaped = escapeStar(dnChain08True);
+
 	private static ConditionInfo info01True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {"-"}); //$NON-NLS-1$
 	private static ConditionInfo info02False = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {"-", "!"}); //$NON-NLS-1$ //$NON-NLS-2$
 	private static ConditionInfo info03True = new ConditionInfo(BundleSignerCondition.class.getName(), new String[] {dnChain01True});
@@ -46,6 +55,14 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 
 	public static TestSuite suite() {
 		return new TestSuite(OSGiAPICertificateTest.class);
+	}
+
+	private static String escapeStar(String dnChain) {
+		if (dnChain == null || dnChain.length() == 0)
+			return dnChain;
+		for (int star = dnChain.indexOf('*'); star >= 0; star = dnChain.indexOf('*', star + 2))
+			dnChain = dnChain.substring(0, star) + '\\' + dnChain.substring(star);
+		return dnChain;
 	}
 
 	public OSGiAPICertificateTest() {
@@ -224,7 +241,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain01True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain01TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -250,7 +267,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(!(signer=" + dnChain01True + "))", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(!(signer=" + dnChain01TrueEscaped + "))", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -263,7 +280,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain02True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain02TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -276,7 +293,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain03True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain03TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -289,7 +306,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain04False + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain04FalseEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -302,7 +319,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain05False + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain05FalseEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertFalse("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -315,7 +332,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain06True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain06TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -328,7 +345,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain07True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain07TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -341,7 +358,7 @@ public class OSGiAPICertificateTest extends BaseSecurityTest {
 		try {
 			getTrustEngine().addTrustAnchor(getTestCertificate("ca1_leafa"), "ca1_leafa"); //$NON-NLS-1$ //$NON-NLS-2$
 			Bundle testBundle = installBundle(getTestJarPath("signed")); //$NON-NLS-1$
-			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain08True + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
+			AdminPermission declaredPerm = new AdminPermission("(signer=" + dnChain08TrueEscaped + ")", AdminPermission.CONTEXT); //$NON-NLS-1$ //$NON-NLS-2$
 			AdminPermission checkedPerm = new AdminPermission(testBundle, AdminPermission.CONTEXT);
 			assertTrue("Security check failed", declaredPerm.implies(checkedPerm)); //$NON-NLS-1$
 		} catch (Exception e) {
