@@ -310,17 +310,17 @@ public class ServiceComponent implements Externalizable {
 
 		// component factory is incompatible with service factory
 		if (factory != null && serviceFactory) {
-			throw new IllegalArgumentException("The component '" + name + "' invalid specifies both ComponentFactory and ServiceFactory");
+			throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both factory component and service factory");
 		}
 
 		if (immediate) {
 			if (serviceFactory)
-				throw new IllegalArgumentException("The component '" + name + "' is invalid specified both as immediate and ServiceFactory");
+				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both immediate and a service factory");
 			if (factory != null)
-				throw new IllegalArgumentException("The component '" + name + "' is invalid specified both as immediate and ComponentFactory");
+				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both immediate and a factory component");
 		} else {
 			if ((serviceInterfaces == null) && (factory == null)) {
-				throw new IllegalArgumentException("The component '" + name + "' is invalid specifying immediate to false and providing no Services");
+				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component must be immediate since it does not provide any services");
 			}
 		}
 

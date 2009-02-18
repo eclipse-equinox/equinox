@@ -126,7 +126,7 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null; //the component is bad - ignoring it
 			closeTag = null;
-			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! The error is: " + iae.getMessage(), null);
+			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
@@ -189,7 +189,7 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! The error is: " + iae.getMessage(), null);
+			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
@@ -408,7 +408,7 @@ public class DeclarationParser implements ExTagListener {
 			}
 			currentComponent.properties.put(name, _value);
 		} catch (IllegalArgumentException iae) {
-			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! The error is: " + iae.getMessage(), null);
+			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
