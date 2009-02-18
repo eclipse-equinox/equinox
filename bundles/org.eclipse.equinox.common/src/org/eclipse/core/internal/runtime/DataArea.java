@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,11 +70,36 @@ public class DataArea {
 		return location;
 	}
 
+	/**
+	 * Returns the local file system path of the log file, or the default log location
+	 * if the log is not in the local file system.
+	 */
 	public IPath getLogLocation() throws IllegalStateException {
+		//make sure the log location is initialized if the instance location is known
+		if (isInstanceLocationSet())
+			assertLocationInitialized();
 		FrameworkLog log = Activator.getDefault().getFrameworkLog();
-		if (log == null)
-			return null;
-		return new Path(log.getFile().getAbsolutePath());
+		if (log != null) {
+			java.io.File file = log.getFile();
+			if (file != null)
+				return new Path(file.getAbsolutePath());
+		}
+		if (location == null)
+			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
+		return location.append(F_META_AREA).append(F_LOG);
+	}
+
+	/**
+	 * Returns true if the instance location has been set, and <code>false</code> otherwise.
+	 */
+	private boolean isInstanceLocationSet() {
+		Activator activator = Activator.getDefault();
+		if (activator == null)
+			return false;
+		Location service = activator.getInstanceLocation();
+		if (service == null)
+			return false;
+		return service.isSet();
 	}
 
 	/**
