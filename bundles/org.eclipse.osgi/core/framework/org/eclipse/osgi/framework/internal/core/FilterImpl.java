@@ -749,15 +749,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Integer(int operation, int intval, Object value2) {
-		int intval2 = Integer.parseInt(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		int intval2 = Integer.parseInt(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + intval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -788,15 +788,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Long(int operation, long longval, Object value2) {
-		long longval2 = Long.parseLong(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		long longval2 = Long.parseLong(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + longval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -827,15 +827,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Byte(int operation, byte byteval, Object value2) {
-		byte byteval2 = Byte.parseByte(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		byte byteval2 = Byte.parseByte(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + byteval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -866,15 +866,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Short(int operation, short shortval, Object value2) {
-		short shortval2 = Short.parseShort(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		short shortval2 = Short.parseShort(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + shortval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -905,15 +905,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Character(int operation, char charval, Object value2) {
-		char charval2 = (((String) value2).trim()).charAt(0);
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		char charval2 = (((String) value2).trim()).charAt(0);
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + charval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -944,15 +944,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Boolean(int operation, boolean boolval, Object value2) {
-		boolean boolval2 = new Boolean(((String) value2).trim()).booleanValue();
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		boolean boolval2 = Boolean.valueOf(((String) value2).trim()).booleanValue();
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + boolval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -983,15 +983,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Float(int operation, float floatval, Object value2) {
-		float floatval2 = Float.parseFloat(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		float floatval2 = Float.parseFloat(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + floatval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -1022,15 +1022,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Double(int operation, double doubleval, Object value2) {
-		double doubleval2 = Double.parseDouble(((String) value2).trim());
-
-		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			return false;
+		}
+
+		double doubleval2 = Double.parseDouble(((String) value2).trim());
+		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + doubleval + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -1063,8 +1063,14 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	private static final Class[] constructorType = new Class[] {String.class};
 
 	private boolean compare_Comparable(int operation, Comparable value1, Object value2) {
-		Constructor constructor;
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			return false;
+		}
 
+		Constructor constructor;
 		try {
 			constructor = value1.getClass().getConstructor(constructorType);
 		} catch (NoSuchMethodException e) {
@@ -1083,12 +1089,6 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 
 		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
-			}
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -1119,6 +1119,13 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_Unknown(int operation, Object value1, Object value2) { //RFC 59
+		if (operation == SUBSTRING) {
+			if (Debug.DEBUG && Debug.DEBUG_FILTER) {
+				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			return false;
+		}
+
 		Constructor constructor;
 		try {
 			constructor = value1.getClass().getConstructor(constructorType);
@@ -1141,12 +1148,6 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 
 		switch (operation) {
-			case SUBSTRING : {
-				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
-					Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				return false;
-			}
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
 					Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
