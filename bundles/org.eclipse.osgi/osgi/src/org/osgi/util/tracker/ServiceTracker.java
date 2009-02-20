@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.osgi.framework.Version;
  * thread-safe.
  * 
  * @ThreadSafe
- * @version $Revision: 6325 $
+ * @version $Revision: 6386 $
  */
 public class ServiceTracker implements ServiceTrackerCustomizer {
 	/* set this to true to compile in debug messages */
@@ -826,13 +826,6 @@ public class ServiceTracker implements ServiceTrackerCustomizer {
 				return;
 			}
 			final ServiceReference reference = event.getServiceReference();
-			if (reference.getBundle() == null) {
-				/*
-				 * handle extremely rare corner case where service events are
-				 * delivered out of order
-				 */
-				return;
-			}
 			if (DEBUG) {
 				System.out
 						.println("ServiceTracker.Tracked.serviceChanged["

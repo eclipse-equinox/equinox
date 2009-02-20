@@ -27,17 +27,8 @@ import org.osgi.framework.BundleContext;
  * Bundles registering this service will be called during service listener
  * addition and removal.
  * 
- * <p>
- * There is an extremely rare case in which removed notification can be made
- * before added notification if two threads are racing to add and remove the
- * same service listener. Because this hook is called synchronously during
- * service listener addition and removal, the Framework cannot guarantee
- * in-order delivery of added and removed notification for a given service
- * listener. The {@link ListenerInfo#isRemoved()} method can be used to detect
- * this rare occurrence.
- * 
  * @ThreadSafe
- * @version $Revision: 6344 $
+ * @version $Revision: 6405 $
  */
 
 public interface ListenerHook {
@@ -100,6 +91,16 @@ public interface ListenerHook {
 		 * indicating the listener has been added but has not been removed.
 		 * After the listener has been removed, this method must always return
 		 * <code>true</code>.
+		 * 
+		 * <p>
+		 * There is an extremely rare case in which removed notification to
+		 * {@link ListenerHook}s can be made before added notification if two
+		 * threads are racing to add and remove the same service listener.
+		 * Because {@link ListenerHook}s are called synchronously during service
+		 * listener addition and removal, the Framework cannot guarantee
+		 * in-order delivery of added and removed notification for a given
+		 * service listener. This method can be used to detect this rare
+		 * occurrence.
 		 * 
 		 * @return <code>false</code> if the listener has not been been removed,
 		 *         <code>true</code> otherwise.

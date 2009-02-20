@@ -40,12 +40,12 @@ import org.osgi.framework.Bundle;
  * Launchers can find the name of the FrameworkFactory implementation class in
  * the resource and then load and construct a FrameworkFactory object for the
  * framework implementation. The FrameworkFactory implementation class must have
- * a public, no-argument constructor. Java&trade; SE 6 introduced the
+ * a public, no-argument constructor. Java&#8482; SE 6 introduced the
  * <code>ServiceLoader</code> class which can create a FrameworkFactory instance
  * from the resource.
  * 
  * @ThreadSafe
- * @version $Revision: 6360 $
+ * @version $Revision: 6397 $
  */
 public interface FrameworkFactory {
 

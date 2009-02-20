@@ -25,7 +25,7 @@ package org.osgi.framework;
  * <code>String</code>, unless otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 6361 $
+ * @version $Revision: 6417 $
  */
 
 public interface Constants {
@@ -33,7 +33,7 @@ public interface Constants {
 	 * Location identifier of the OSGi <i>system bundle </i>, which is defined
 	 * to be &quot;System Bundle&quot;.
 	 */
-	public static final String SYSTEM_BUNDLE_LOCATION = "System Bundle";
+	public static final String	SYSTEM_BUNDLE_LOCATION					= "System Bundle";
 
 	/**
 	 * Alias for the symbolic name of the OSGi <i>system bundle </i>. It is
@@ -41,7 +41,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String SYSTEM_BUNDLE_SYMBOLICNAME = "system.bundle";
+	public static final String	SYSTEM_BUNDLE_SYMBOLICNAME				= "system.bundle";
 
 	/**
 	 * Manifest header identifying the bundle's category.
@@ -49,7 +49,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_CATEGORY = "Bundle-Category";
+	public static final String	BUNDLE_CATEGORY							= "Bundle-Category";
 
 	/**
 	 * Manifest header identifying a list of directories and embedded JAR files,
@@ -59,7 +59,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_CLASSPATH = "Bundle-ClassPath";
+	public static final String	BUNDLE_CLASSPATH						= "Bundle-ClassPath";
 
 	/**
 	 * Manifest header identifying the bundle's copyright information.
@@ -67,7 +67,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_COPYRIGHT = "Bundle-Copyright";
+	public static final String	BUNDLE_COPYRIGHT						= "Bundle-Copyright";
 
 	/**
 	 * Manifest header containing a brief description of the bundle's
@@ -76,7 +76,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_DESCRIPTION = "Bundle-Description";
+	public static final String	BUNDLE_DESCRIPTION						= "Bundle-Description";
 
 	/**
 	 * Manifest header identifying the bundle's name.
@@ -84,7 +84,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_NAME = "Bundle-Name";
+	public static final String	BUNDLE_NAME								= "Bundle-Name";
 
 	/**
 	 * Manifest header identifying a number of hardware environments and the
@@ -95,7 +95,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_NATIVECODE = "Bundle-NativeCode";
+	public static final String	BUNDLE_NATIVECODE						= "Bundle-NativeCode";
 
 	/**
 	 * Manifest header identifying the packages that the bundle offers to the
@@ -105,7 +105,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String EXPORT_PACKAGE = "Export-Package";
+	public static final String	EXPORT_PACKAGE							= "Export-Package";
 
 	/**
 	 * Manifest header identifying the fully qualified class names of the
@@ -118,7 +118,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
-	public static final String EXPORT_SERVICE = "Export-Service";
+	public static final String	EXPORT_SERVICE							= "Export-Service";
 
 	/**
 	 * Manifest header identifying the packages on which the bundle depends.
@@ -127,7 +127,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String IMPORT_PACKAGE = "Import-Package";
+	public static final String	IMPORT_PACKAGE							= "Import-Package";
 
 	/**
 	 * Manifest header identifying the packages that the bundle may dynamically
@@ -139,7 +139,7 @@ public interface Constants {
 	 * 
 	 * @since 1.2
 	 */
-	public static final String DYNAMICIMPORT_PACKAGE = "DynamicImport-Package";
+	public static final String	DYNAMICIMPORT_PACKAGE					= "DynamicImport-Package";
 
 	/**
 	 * Manifest header identifying the fully qualified class names of the
@@ -151,7 +151,7 @@ public interface Constants {
 	 * 
 	 * @deprecated As of 1.2.
 	 */
-	public static final String IMPORT_SERVICE = "Import-Service";
+	public static final String	IMPORT_SERVICE							= "Import-Service";
 
 	/**
 	 * Manifest header identifying the bundle's vendor.
@@ -160,7 +160,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_VENDOR = "Bundle-Vendor";
+	public static final String	BUNDLE_VENDOR							= "Bundle-Vendor";
 
 	/**
 	 * Manifest header identifying the bundle's version.
@@ -169,7 +169,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_VERSION = "Bundle-Version";
+	public static final String	BUNDLE_VERSION							= "Bundle-Version";
 
 	/**
 	 * Manifest header identifying the bundle's documentation URL, from which
@@ -179,7 +179,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_DOCURL = "Bundle-DocURL";
+	public static final String	BUNDLE_DOCURL							= "Bundle-DocURL";
 
 	/**
 	 * Manifest header identifying the contact address where problems with the
@@ -189,7 +189,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_CONTACTADDRESS = "Bundle-ContactAddress";
+	public static final String	BUNDLE_CONTACTADDRESS					= "Bundle-ContactAddress";
 
 	/**
 	 * Manifest header attribute identifying the bundle's activator class.
@@ -204,7 +204,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_ACTIVATOR = "Bundle-Activator";
+	public static final String	BUNDLE_ACTIVATOR						= "Bundle-Activator";
 
 	/**
 	 * Manifest header identifying the location from which a new bundle version
@@ -214,7 +214,7 @@ public interface Constants {
 	 * The attribute value may be retrieved from the <code>Dictionary</code>
 	 * object returned by the <code>Bundle.getHeaders</code> method.
 	 */
-	public static final String BUNDLE_UPDATELOCATION = "Bundle-UpdateLocation";
+	public static final String	BUNDLE_UPDATELOCATION					= "Bundle-UpdateLocation";
 
 	/**
 	 * Manifest header attribute identifying the version of a package specified
@@ -223,7 +223,7 @@ public interface Constants {
 	 * @deprecated As of 1.3. This has been replaced by
 	 *             {@link #VERSION_ATTRIBUTE}.
 	 */
-	public static final String PACKAGE_SPECIFICATION_VERSION = "specification-version";
+	public static final String	PACKAGE_SPECIFICATION_VERSION			= "specification-version";
 
 	/**
 	 * Manifest header attribute identifying the processor required to run
@@ -239,7 +239,7 @@ public interface Constants {
 	 * 
 	 * @see #BUNDLE_NATIVECODE
 	 */
-	public static final String BUNDLE_NATIVECODE_PROCESSOR = "processor";
+	public static final String	BUNDLE_NATIVECODE_PROCESSOR				= "processor";
 
 	/**
 	 * Manifest header attribute identifying the operating system required to
@@ -255,7 +255,7 @@ public interface Constants {
 	 * 
 	 * @see #BUNDLE_NATIVECODE
 	 */
-	public static final String BUNDLE_NATIVECODE_OSNAME = "osname";
+	public static final String	BUNDLE_NATIVECODE_OSNAME				= "osname";
 
 	/**
 	 * Manifest header attribute identifying the operating system version
@@ -271,7 +271,7 @@ public interface Constants {
 	 * 
 	 * @see #BUNDLE_NATIVECODE
 	 */
-	public static final String BUNDLE_NATIVECODE_OSVERSION = "osversion";
+	public static final String	BUNDLE_NATIVECODE_OSVERSION				= "osversion";
 
 	/**
 	 * Manifest header attribute identifying the language in which the native
@@ -287,7 +287,7 @@ public interface Constants {
 	 * 
 	 * @see #BUNDLE_NATIVECODE
 	 */
-	public static final String BUNDLE_NATIVECODE_LANGUAGE = "language";
+	public static final String	BUNDLE_NATIVECODE_LANGUAGE				= "language";
 
 	/**
 	 * Manifest header identifying the required execution environment for the
@@ -301,7 +301,7 @@ public interface Constants {
 	 * 
 	 * @since 1.2
 	 */
-	public static final String BUNDLE_REQUIREDEXECUTIONENVIRONMENT = "Bundle-RequiredExecutionEnvironment";
+	public static final String	BUNDLE_REQUIREDEXECUTIONENVIRONMENT		= "Bundle-RequiredExecutionEnvironment";
 
 	/**
 	 * Manifest header identifying the bundle's symbolic name.
@@ -312,7 +312,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public final static String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
+	public final static String	BUNDLE_SYMBOLICNAME						= "Bundle-SymbolicName";
 
 	/**
 	 * Manifest header directive identifying whether a bundle is a singleton.
@@ -333,7 +333,7 @@ public interface Constants {
 	 * @see #BUNDLE_SYMBOLICNAME
 	 * @since 1.3
 	 */
-	public final static String SINGLETON_DIRECTIVE = "singleton";
+	public final static String	SINGLETON_DIRECTIVE						= "singleton";
 
 	/**
 	 * Manifest header directive identifying if and when a fragment may attach
@@ -354,7 +354,7 @@ public interface Constants {
 	 * @see #FRAGMENT_ATTACHMENT_NEVER
 	 * @since 1.3
 	 */
-	public final static String FRAGMENT_ATTACHMENT_DIRECTIVE = "fragment-attachment";
+	public final static String	FRAGMENT_ATTACHMENT_DIRECTIVE			= "fragment-attachment";
 
 	/**
 	 * Manifest header directive value identifying a fragment attachment type of
@@ -373,7 +373,7 @@ public interface Constants {
 	 * @see #FRAGMENT_ATTACHMENT_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String FRAGMENT_ATTACHMENT_ALWAYS = "always";
+	public final static String	FRAGMENT_ATTACHMENT_ALWAYS				= "always";
 
 	/**
 	 * Manifest header directive value identifying a fragment attachment type of
@@ -392,7 +392,7 @@ public interface Constants {
 	 * @see #FRAGMENT_ATTACHMENT_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String FRAGMENT_ATTACHMENT_RESOLVETIME = "resolve-time";
+	public final static String	FRAGMENT_ATTACHMENT_RESOLVETIME			= "resolve-time";
 
 	/**
 	 * Manifest header directive value identifying a fragment attachment type of
@@ -410,7 +410,7 @@ public interface Constants {
 	 * @see #FRAGMENT_ATTACHMENT_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String FRAGMENT_ATTACHMENT_NEVER = "never";
+	public final static String	FRAGMENT_ATTACHMENT_NEVER				= "never";
 
 	/**
 	 * Manifest header identifying the base name of the bundle's localization
@@ -423,7 +423,7 @@ public interface Constants {
 	 * @see #BUNDLE_LOCALIZATION_DEFAULT_BASENAME
 	 * @since 1.3
 	 */
-	public final static String BUNDLE_LOCALIZATION = "Bundle-Localization";
+	public final static String	BUNDLE_LOCALIZATION						= "Bundle-Localization";
 
 	/**
 	 * Default value for the <code>Bundle-Localization</code> manifest header.
@@ -431,7 +431,7 @@ public interface Constants {
 	 * @see #BUNDLE_LOCALIZATION
 	 * @since 1.3
 	 */
-	public final static String BUNDLE_LOCALIZATION_DEFAULT_BASENAME = "OSGI-INF/l10n/bundle";
+	public final static String	BUNDLE_LOCALIZATION_DEFAULT_BASENAME	= "OSGI-INF/l10n/bundle";
 
 	/**
 	 * Manifest header identifying the symbolic names of other bundles required
@@ -443,7 +443,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public final static String REQUIRE_BUNDLE = "Require-Bundle";
+	public final static String	REQUIRE_BUNDLE							= "Require-Bundle";
 
 	/**
 	 * Manifest header attribute identifying a range of versions for a bundle
@@ -469,7 +469,7 @@ public interface Constants {
 	 * @see #REQUIRE_BUNDLE
 	 * @since 1.3
 	 */
-	public static final String BUNDLE_VERSION_ATTRIBUTE = "bundle-version";
+	public static final String	BUNDLE_VERSION_ATTRIBUTE				= "bundle-version";
 
 	/**
 	 * Manifest header identifying the symbolic name of another bundle for which
@@ -481,7 +481,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public final static String FRAGMENT_HOST = "Fragment-Host";
+	public final static String	FRAGMENT_HOST							= "Fragment-Host";
 
 	/**
 	 * Manifest header attribute is used for selection by filtering based upon
@@ -497,7 +497,7 @@ public interface Constants {
 	 * @see #BUNDLE_NATIVECODE
 	 * @since 1.3
 	 */
-	public final static String SELECTION_FILTER_ATTRIBUTE = "selection-filter";
+	public final static String	SELECTION_FILTER_ATTRIBUTE				= "selection-filter";
 
 	/**
 	 * Manifest header identifying the bundle manifest version. A bundle
@@ -514,7 +514,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public final static String BUNDLE_MANIFESTVERSION = "Bundle-ManifestVersion";
+	public final static String	BUNDLE_MANIFESTVERSION					= "Bundle-ManifestVersion";
 
 	/**
 	 * Manifest header attribute identifying the version of a package specified
@@ -532,7 +532,7 @@ public interface Constants {
 	 * @see #IMPORT_PACKAGE
 	 * @since 1.3
 	 */
-	public final static String VERSION_ATTRIBUTE = "version";
+	public final static String	VERSION_ATTRIBUTE						= "version";
 
 	/**
 	 * Manifest header attribute identifying the symbolic name of a bundle that
@@ -549,7 +549,7 @@ public interface Constants {
 	 * @see #IMPORT_PACKAGE
 	 * @since 1.3
 	 */
-	public final static String BUNDLE_SYMBOLICNAME_ATTRIBUTE = "bundle-symbolic-name";
+	public final static String	BUNDLE_SYMBOLICNAME_ATTRIBUTE			= "bundle-symbolic-name";
 
 	/**
 	 * Manifest header directive identifying the resolution type in the
@@ -571,7 +571,7 @@ public interface Constants {
 	 * @see #RESOLUTION_OPTIONAL
 	 * @since 1.3
 	 */
-	public final static String RESOLUTION_DIRECTIVE = "resolution";
+	public final static String	RESOLUTION_DIRECTIVE					= "resolution";
 
 	/**
 	 * Manifest header directive value identifying a mandatory resolution type.
@@ -591,7 +591,7 @@ public interface Constants {
 	 * @see #RESOLUTION_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String RESOLUTION_MANDATORY = "mandatory";
+	public final static String	RESOLUTION_MANDATORY					= "mandatory";
 
 	/**
 	 * Manifest header directive value identifying an optional resolution type.
@@ -613,7 +613,7 @@ public interface Constants {
 	 * @see #RESOLUTION_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String RESOLUTION_OPTIONAL = "optional";
+	public final static String	RESOLUTION_OPTIONAL						= "optional";
 
 	/**
 	 * Manifest header directive identifying a list of packages that an exported
@@ -630,7 +630,7 @@ public interface Constants {
 	 * @see #EXPORT_PACKAGE
 	 * @since 1.3
 	 */
-	public final static String USES_DIRECTIVE = "uses";
+	public final static String	USES_DIRECTIVE							= "uses";
 
 	/**
 	 * Manifest header directive identifying a list of classes to include in the
@@ -660,7 +660,7 @@ public interface Constants {
 	 * @see #BUNDLE_ACTIVATIONPOLICY
 	 * @since 1.3
 	 */
-	public final static String INCLUDE_DIRECTIVE = "include";
+	public final static String	INCLUDE_DIRECTIVE						= "include";
 
 	/**
 	 * Manifest header directive identifying a list of classes to exclude in the
@@ -689,7 +689,7 @@ public interface Constants {
 	 * @see #BUNDLE_ACTIVATIONPOLICY
 	 * @since 1.3
 	 */
-	public final static String EXCLUDE_DIRECTIVE = "exclude";
+	public final static String	EXCLUDE_DIRECTIVE						= "exclude";
 
 	/**
 	 * Manifest header directive identifying names of matching attributes which
@@ -707,7 +707,7 @@ public interface Constants {
 	 * @see #EXPORT_PACKAGE
 	 * @since 1.3
 	 */
-	public final static String MANDATORY_DIRECTIVE = "mandatory";
+	public final static String	MANDATORY_DIRECTIVE						= "mandatory";
 
 	/**
 	 * Manifest header directive identifying the visibility of a required bundle
@@ -727,7 +727,7 @@ public interface Constants {
 	 * @see #VISIBILITY_REEXPORT
 	 * @since 1.3
 	 */
-	public final static String VISIBILITY_DIRECTIVE = "visibility";
+	public final static String	VISIBILITY_DIRECTIVE					= "visibility";
 
 	/**
 	 * Manifest header directive value identifying a private visibility type. A
@@ -746,7 +746,7 @@ public interface Constants {
 	 * @see #VISIBILITY_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String VISIBILITY_PRIVATE = "private";
+	public final static String	VISIBILITY_PRIVATE						= "private";
 
 	/**
 	 * Manifest header directive value identifying a reexport visibility type. A
@@ -766,7 +766,7 @@ public interface Constants {
 	 * @see #VISIBILITY_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String VISIBILITY_REEXPORT = "reexport";
+	public final static String	VISIBILITY_REEXPORT						= "reexport";
 
 	/**
 	 * Manifest header directive identifying the type of the extension fragment.
@@ -783,7 +783,7 @@ public interface Constants {
 	 * @see #EXTENSION_BOOTCLASSPATH
 	 * @since 1.3
 	 */
-	public final static String EXTENSION_DIRECTIVE = "extension";
+	public final static String	EXTENSION_DIRECTIVE						= "extension";
 
 	/**
 	 * Manifest header directive value identifying the type of extension
@@ -800,7 +800,7 @@ public interface Constants {
 	 * @see #EXTENSION_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String EXTENSION_FRAMEWORK = "framework";
+	public final static String	EXTENSION_FRAMEWORK						= "framework";
 
 	/**
 	 * Manifest header directive value identifying the type of extension
@@ -817,7 +817,7 @@ public interface Constants {
 	 * @see #EXTENSION_DIRECTIVE
 	 * @since 1.3
 	 */
-	public final static String EXTENSION_BOOTCLASSPATH = "bootclasspath";
+	public final static String	EXTENSION_BOOTCLASSPATH					= "bootclasspath";
 
 	/**
 	 * Manifest header identifying the bundle's activation policy.
@@ -830,7 +830,7 @@ public interface Constants {
 	 * @see #INCLUDE_DIRECTIVE
 	 * @see #EXCLUDE_DIRECTIVE
 	 */
-	public final static String BUNDLE_ACTIVATIONPOLICY = "Bundle-ActivationPolicy";
+	public final static String	BUNDLE_ACTIVATIONPOLICY					= "Bundle-ActivationPolicy";
 
 	/**
 	 * Bundle activation policy declaring the bundle must be activated when the
@@ -854,7 +854,7 @@ public interface Constants {
 	 * @see Bundle#START_ACTIVATION_POLICY
 	 * @since 1.4
 	 */
-	public final static String ACTIVATION_LAZY = "lazy";
+	public final static String	ACTIVATION_LAZY							= "lazy";
 
 	/**
 	 * Framework environment property identifying the Framework version.
@@ -863,7 +863,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_VERSION = "org.osgi.framework.version";
+	public static final String	FRAMEWORK_VERSION						= "org.osgi.framework.version";
 
 	/**
 	 * Framework environment property identifying the Framework implementation
@@ -873,7 +873,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_VENDOR = "org.osgi.framework.vendor";
+	public static final String	FRAMEWORK_VENDOR						= "org.osgi.framework.vendor";
 
 	/**
 	 * Framework environment property identifying the Framework implementation
@@ -883,7 +883,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_LANGUAGE = "org.osgi.framework.language";
+	public static final String	FRAMEWORK_LANGUAGE						= "org.osgi.framework.language";
 
 	/**
 	 * Framework environment property identifying the Framework host-computer's
@@ -893,7 +893,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_OS_NAME = "org.osgi.framework.os.name";
+	public static final String	FRAMEWORK_OS_NAME						= "org.osgi.framework.os.name";
 
 	/**
 	 * Framework environment property identifying the Framework host-computer's
@@ -903,7 +903,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_OS_VERSION = "org.osgi.framework.os.version";
+	public static final String	FRAMEWORK_OS_VERSION					= "org.osgi.framework.os.version";
 
 	/**
 	 * Framework environment property identifying the Framework host-computer's
@@ -913,7 +913,7 @@ public interface Constants {
 	 * The value of this property may be retrieved by calling the
 	 * <code>BundleContext.getProperty</code> method.
 	 */
-	public static final String FRAMEWORK_PROCESSOR = "org.osgi.framework.processor";
+	public static final String	FRAMEWORK_PROCESSOR						= "org.osgi.framework.processor";
 
 	/**
 	 * Framework environment property identifying execution environments
@@ -925,7 +925,7 @@ public interface Constants {
 	 * 
 	 * @since 1.2
 	 */
-	public static final String FRAMEWORK_EXECUTIONENVIRONMENT = "org.osgi.framework.executionenvironment";
+	public static final String	FRAMEWORK_EXECUTIONENVIRONMENT			= "org.osgi.framework.executionenvironment";
 
 	/**
 	 * Framework environment property identifying packages for which the
@@ -939,7 +939,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 * @since 1.3
 	 */
-	public static final String FRAMEWORK_BOOTDELEGATION = "org.osgi.framework.bootdelegation";
+	public static final String	FRAMEWORK_BOOTDELEGATION				= "org.osgi.framework.bootdelegation";
 
 	/**
 	 * Framework environment property identifying packages which the system
@@ -955,7 +955,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String FRAMEWORK_SYSTEMPACKAGES = "org.osgi.framework.system.packages";
+	public static final String	FRAMEWORK_SYSTEMPACKAGES				= "org.osgi.framework.system.packages";
 
 	/**
 	 * Framework environment property identifying extra packages which the
@@ -972,7 +972,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_SYSTEMPACKAGES
 	 * @since 1.5
 	 */
-	public static final String FRAMEWORK_SYSTEMPACKAGES_EXTRA = "org.osgi.framework.system.packages.extra";
+	public static final String	FRAMEWORK_SYSTEMPACKAGES_EXTRA			= "org.osgi.framework.system.packages.extra";
 
 	/**
 	 * Framework environment property identifying whether the Framework supports
@@ -988,7 +988,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String SUPPORTS_FRAMEWORK_EXTENSION = "org.osgi.supports.framework.extension";
+	public static final String	SUPPORTS_FRAMEWORK_EXTENSION			= "org.osgi.supports.framework.extension";
 
 	/**
 	 * Framework environment property identifying whether the Framework supports
@@ -1004,7 +1004,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String SUPPORTS_BOOTCLASSPATH_EXTENSION = "org.osgi.supports.bootclasspath.extension";
+	public static final String	SUPPORTS_BOOTCLASSPATH_EXTENSION		= "org.osgi.supports.bootclasspath.extension";
 
 	/**
 	 * Framework environment property identifying whether the Framework supports
@@ -1019,7 +1019,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String SUPPORTS_FRAMEWORK_FRAGMENT = "org.osgi.supports.framework.fragment";
+	public static final String	SUPPORTS_FRAMEWORK_FRAGMENT				= "org.osgi.supports.framework.fragment";
 
 	/**
 	 * Framework environment property identifying whether the Framework supports
@@ -1035,7 +1035,7 @@ public interface Constants {
 	 * 
 	 * @since 1.3
 	 */
-	public static final String SUPPORTS_FRAMEWORK_REQUIREBUNDLE = "org.osgi.supports.framework.requirebundle";
+	public static final String	SUPPORTS_FRAMEWORK_REQUIREBUNDLE		= "org.osgi.supports.framework.requirebundle";
 
 	/**
 	 * Specifies the type of security manager the framework must use. If not
@@ -1044,7 +1044,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_SECURITY_OSGI
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_SECURITY = "org.osgi.framework.security";
+	public final static String	FRAMEWORK_SECURITY						= "org.osgi.framework.security";
 
 	/**
 	 * Specifies that a security manager that supports all security aspects of
@@ -1059,7 +1059,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_SECURITY
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_SECURITY_OSGI = "osgi";
+	public final static String	FRAMEWORK_SECURITY_OSGI					= "osgi";
 
 	/**
 	 * Specified the persistent storage area used by the framework. The value of
@@ -1075,7 +1075,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_STORAGE = "org.osgi.framework.storage";
+	public final static String	FRAMEWORK_STORAGE						= "org.osgi.framework.storage";
 
 	/**
 	 * Specifies if and when the persistent storage area for the framework
@@ -1085,7 +1085,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_STORAGE_CLEAN = "org.osgi.framework.storage.clean";
+	public final static String	FRAMEWORK_STORAGE_CLEAN					= "org.osgi.framework.storage.clean";
 
 	/**
 	 * Specifies that the framework storage area must be cleaned before the
@@ -1095,17 +1095,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT = "onFirstInit";
-
-	/**
-	 * A framework configuration property value for 
-	 * {@link #FRAMEWORK_STORAGE_CLEAN org.osgi.framework.storage.clean} (named &quot;none&quot;) identifying 
-	 * that the framework storage area should not be cleaned.
-	 * 
-	 * @since 1.5
-	 * @deprecated no replacement, will be removed by M6
-	 */
-	public final static String FRAMEWORK_STORAGE_CLEAN_NONE = "none";
+	public final static String  FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT			= "onFirstInit";
 
 	/**
 	 * Specifies a comma separated list of additional library file extensions
@@ -1120,7 +1110,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_LIBRARY_EXTENSIONS = "org.osgi.framework.library.extensions";
+	public final static String	FRAMEWORK_LIBRARY_EXTENSIONS			= "org.osgi.framework.library.extensions";
 
 	/**
 	 * Specifies an optional OS specific command to set file permissions on
@@ -1138,7 +1128,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_EXECPERMISSION = "org.osgi.framework.command.execpermission";
+	public final static String	FRAMEWORK_EXECPERMISSION				= "org.osgi.framework.command.execpermission";
 
 	/**
 	 * Specifies the trust repositories used by the framework. The value is a
@@ -1156,7 +1146,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_TRUST_REPOSITORIES = "org.osgi.framework.trust.repositories";
+	public final static String	FRAMEWORK_TRUST_REPOSITORIES			= "org.osgi.framework.trust.repositories";
 
 	/**
 	 * Specifies the current windowing system. The framework should provide a
@@ -1164,7 +1154,7 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_WINDOWSYSTEM = "org.osgi.framework.windowsystem";
+	public final static String	FRAMEWORK_WINDOWSYSTEM					= "org.osgi.framework.windowsystem";
 
 	/**
 	 * Specifies the beginning start level of the framework.
@@ -1172,7 +1162,7 @@ public interface Constants {
 	 * @see "Core Specification, section 8.2.3."
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_BEGINNING_STARTLEVEL = "org.osgi.framework.startlevel.beginning";
+	public final static String	FRAMEWORK_BEGINNING_STARTLEVEL			= "org.osgi.framework.startlevel.beginning";
 
 	/**
 	 * Specifies the parent class loader type for all bundle class loaders.
@@ -1184,7 +1174,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_BUNDLE_PARENT_FRAMEWORK
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT = "org.osgi.framework.bundle.parent";
+	public final static String FRAMEWORK_BUNDLE_PARENT 					= "org.osgi.framework.bundle.parent";
 
 	/**
 	 * Specifies to use of the boot class loader as the parent class loader for
@@ -1193,7 +1183,7 @@ public interface Constants {
 	 * @since 1.5
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT_BOOT = "boot";
+	public final static String	FRAMEWORK_BUNDLE_PARENT_BOOT			= "boot";
 
 	/**
 	 * Specifies to use the application class loader as the parent class loader
@@ -1202,7 +1192,7 @@ public interface Constants {
 	 * @since 1.5
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT_APP = "app";
+	public final static String	FRAMEWORK_BUNDLE_PARENT_APP				= "app";
 
 	/**
 	 * Specifies to use the extension class loader as the parent class loader
@@ -1211,7 +1201,7 @@ public interface Constants {
 	 * @since 1.5
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT_EXT = "ext";
+	public final static String	FRAMEWORK_BUNDLE_PARENT_EXT				= "ext";
 
 	/**
 	 * Specifies to use the framework class loader as the parent class loader
@@ -1221,12 +1211,12 @@ public interface Constants {
 	 * @since 1.5
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT_FRAMEWORK = "framework";
+	public final static String	FRAMEWORK_BUNDLE_PARENT_FRAMEWORK		= "framework";
 
 	/*
 	 * Service properties.
 	 */
-
+	
 	/**
 	 * Service property identifying all of the class names under which a service
 	 * was registered in the Framework. The value of this property must be of
@@ -1235,7 +1225,7 @@ public interface Constants {
 	 * <p>
 	 * This property is set by the Framework when a service is registered.
 	 */
-	public static final String OBJECTCLASS = "objectClass";
+	public static final String	OBJECTCLASS								= "objectClass";
 
 	/**
 	 * Service property identifying a service's registration number. The value
@@ -1247,7 +1237,7 @@ public interface Constants {
 	 * previously assigned values since the Framework was started. These values
 	 * are NOT persistent across restarts of the Framework.
 	 */
-	public static final String SERVICE_ID = "service.id";
+	public static final String	SERVICE_ID								= "service.id";
 
 	/**
 	 * Service property identifying a service's persistent identifier.
@@ -1269,7 +1259,7 @@ public interface Constants {
 	 * a dot (.). A bundle may use this as the prefix of the persistent
 	 * identifiers for the services it registers.
 	 */
-	public static final String SERVICE_PID = "service.pid";
+	public static final String	SERVICE_PID								= "service.pid";
 
 	/**
 	 * Service property identifying a service's ranking number.
@@ -1296,7 +1286,7 @@ public interface Constants {
 	 * If the supplied property value is not of type <code>Integer</code>, it is
 	 * deemed to have a ranking value of zero.
 	 */
-	public static final String SERVICE_RANKING = "service.ranking";
+	public static final String	SERVICE_RANKING							= "service.ranking";
 
 	/**
 	 * Service property identifying a service's vendor.
@@ -1305,7 +1295,7 @@ public interface Constants {
 	 * This property may be supplied in the properties <code>Dictionary</code>
 	 * object passed to the <code>BundleContext.registerService</code> method.
 	 */
-	public static final String SERVICE_VENDOR = "service.vendor";
+	public static final String	SERVICE_VENDOR							= "service.vendor";
 
 	/**
 	 * Service property identifying a service's description.
@@ -1314,7 +1304,7 @@ public interface Constants {
 	 * This property may be supplied in the properties <code>Dictionary</code>
 	 * object passed to the <code>BundleContext.registerService</code> method.
 	 */
-	public static final String SERVICE_DESCRIPTION = "service.description";
+	public static final String	SERVICE_DESCRIPTION						= "service.description";
 
 	/**
 	 * Service property to provide information about the type of the service.
@@ -1333,5 +1323,5 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public static final String SERVICE_TYPE = "service.type";
+	public static final String	SERVICE_TYPE							= "service.type"; 
 }
