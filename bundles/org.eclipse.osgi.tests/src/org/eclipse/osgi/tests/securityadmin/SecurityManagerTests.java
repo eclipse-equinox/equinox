@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,11 +21,14 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.*;
+import org.osgi.service.packageadmin.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public class SecurityManagerTests extends AbstractBundleTests {
 	private static final PermissionInfo hostFragmentPermission = new PermissionInfo(BundlePermission.class.getName(), "*", "host,fragment"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final PermissionInfo hostFragmentProvidePermission = new PermissionInfo(BundlePermission.class.getName(), "*", "host,fragment,provide"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final PermissionInfo allPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "*", "import,export"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final PermissionInfo importPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "*", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 	private Policy previousPolicy;
 
 	public static Test suite() {
@@ -162,6 +165,75 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			securityA.start();
 		} catch (BundleException e) {
 			fail("Failed to start securityA", e); //$NON-NLS-1$
+		} finally {
+			// put the framework back to the RESOLVED state
+			equinox.stop();
+
+			try {
+				equinox.waitForStop(10000);
+			} catch (InterruptedException e) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
+	public void testEnableSecurityManager03() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager03"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing a bundle to tests bug 
+		String locationSecurityA = installer.getBundleLocation("security.a"); //$NON-NLS-1$
+		// set the security for the bundle
+		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo(null, null, new PermissionInfo[] {hostFragmentPermission, importPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+
+		Bundle securityA = systemContext.installBundle(locationSecurityA);
+
+		equinox.start();
+		PackageAdmin pa = (PackageAdmin) systemContext.getService(systemContext.getServiceReference(PackageAdmin.class.getName()));
+
+		try {
+			assertTrue(pa.resolveBundles(new Bundle[] {securityA}));
+			ExportedPackage[] eps = pa.getExportedPackages(securityA);
+			assertNull("Found unexpected exports", eps); //$NON-NLS-1$
+			RequiredBundle[] rbs = pa.getRequiredBundles(securityA.getSymbolicName());
+			assertNull("Found unexpected required bundle", rbs); //$NON-NLS-1$
+			// grant export permission
+			update = ca.newConditionalPermissionUpdate();
+			rows = update.getConditionalPermissionInfos();
+			rows.clear();
+			rows.add(ca.newConditionalPermissionInfo(null, null, new PermissionInfo[] {hostFragmentProvidePermission, allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+			assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+
+			securityA.uninstall();
+			securityA = systemContext.installBundle(locationSecurityA);
+			assertTrue(pa.resolveBundles(new Bundle[] {securityA}));
+			eps = pa.getExportedPackages(securityA);
+			assertNotNull("Did not find expected exports", eps); //$NON-NLS-1$
+			assertEquals("Wrong number of exports found", 1, eps.length); //$NON-NLS-1$
+			rbs = pa.getRequiredBundles(securityA.getSymbolicName());
+			assertNotNull("Did not find required bundle", eps); //$NON-NLS-1$
+			assertEquals("Wrong number of required bundles found", 1, rbs.length); //$NON-NLS-1$
+
 		} finally {
 			// put the framework back to the RESOLVED state
 			equinox.stop();

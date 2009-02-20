@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ public class PermissionChecker {
 	public boolean checkPermission(VersionConstraint vc, BaseDescription bd) {
 		if (!checkPermissions)
 			return true;
+		// TODO could optimize out the producer permission check on export package
 		boolean success = false;
 		Permission producerPermission = null, consumerPermission = null;
 		Bundle producer = null, consumer = null;
@@ -71,5 +72,12 @@ public class PermissionChecker {
 		}
 
 		return success;
+	}
+
+	boolean checkPackagePermission(ExportPackageDescription export) {
+		if (!checkPermissions)
+			return true;
+		Bundle bundle = context.getBundle(export.getExporter().getBundleId());
+		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORT));
 	}
 }

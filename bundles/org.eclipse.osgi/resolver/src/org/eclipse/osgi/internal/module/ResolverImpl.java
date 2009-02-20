@@ -53,7 +53,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	// The State associated with this resolver
 	private State state;
 	// Used to check permissions for import/export, provide/require, host/fragment
-	private PermissionChecker permissionChecker;
+	private final PermissionChecker permissionChecker;
 	// Set of bundles that are pending removal
 	private MappedList removalPending = new MappedList();
 	// Indicates whether this resolver has been initialized
@@ -1456,7 +1456,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ResolverExport[] exports = rb.getSelectedExports();
 		ArrayList selectedExports = new ArrayList(exports.length);
 		for (int i = 0; i < exports.length; i++) {
-			selectedExports.add(exports[i].getExportPackageDescription());
+			if (permissionChecker.checkPackagePermission(exports[i].getExportPackageDescription()))
+				selectedExports.add(exports[i].getExportPackageDescription());
 		}
 		ExportPackageDescription[] selectedExportsArray = (ExportPackageDescription[]) selectedExports.toArray(new ExportPackageDescription[selectedExports.size()]);
 

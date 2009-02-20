@@ -563,7 +563,8 @@ public class PackageAdminImpl implements PackageAdmin {
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i].isFragment() || !bundles[i].isResolved() || bundles[i].getSymbolicName() == null)
 				continue;
-			result.add(((BundleHost) bundles[i]).getLoaderProxy());
+			if (bundles[i].hasPermission(new BundlePermission(bundles[i].getSymbolicName(), BundlePermission.PROVIDE)))
+				result.add(((BundleHost) bundles[i]).getLoaderProxy());
 		}
 		return result.size() == 0 ? null : (RequiredBundle[]) result.toArray(new RequiredBundle[result.size()]);
 	}
