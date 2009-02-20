@@ -35,6 +35,7 @@ public class PreferencesService implements IPreferencesService {
 	// cheat here and add "project" even though we really shouldn't know about it
 	// because of plug-in dependencies and it being defined in the resources plug-in
 	private static final String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] {"project", //$NON-NLS-1$ 
+			"profile", //$NON-NLS-1$
 			InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
 			DefaultScope.SCOPE};
