@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2009 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,7 @@
 package org.eclipse.osgi.framework.internal.protocol;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.net.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
@@ -85,6 +84,10 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return (URLConnection) openConnectionMethod.invoke(handler, new Object[] {url});
+			} catch (InvocationTargetException e) {
+				if (e.getTargetException() instanceof IOException)
+					throw (IOException) e.getTargetException();
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "openConnection", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -98,6 +101,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return ((Boolean) equalsMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "equals", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -111,6 +116,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return ((Integer) getDefaultPortMethod.invoke(handler, null)).intValue();
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "getDefaultPort", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -124,6 +131,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return (InetAddress) getHostAddressMethod.invoke(handler, new Object[] {url});
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -137,6 +146,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return ((Integer) hashCodeMethod.invoke(handler, new Object[] {url})).intValue();
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -150,6 +161,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return ((Boolean) hostsEqualMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hostsEqual", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -166,6 +179,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				handlerField.set(arg0, handler);
 				parseURLMethod.invoke(handler, new Object[] {arg0, arg1, new Integer(arg2), new Integer(arg3)});
 				return;
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "parseURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -179,6 +194,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return ((Boolean) sameFileMethod.invoke(handler, new Object[] {url1, url2})).booleanValue();
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "sameFile", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -195,6 +212,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				handlerField.set(arg0, handler);
 				setURLMethod.invoke(handler, new Object[] {arg0, arg1, arg2, new Integer(arg3), arg4, arg5, arg6, arg7, arg8});
 				return;
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "setURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
@@ -208,6 +227,8 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		if (handler != null) {
 			try {
 				return (String) toExternalFormMethod.invoke(handler, new Object[] {url});
+			} catch (InvocationTargetException e) {
+				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "toExternalForm", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage());
