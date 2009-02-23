@@ -14,6 +14,7 @@ package org.eclipse.equinox.internal.ds;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Pavlin Dobrev
@@ -45,7 +46,7 @@ final class FactoryReg implements ServiceFactory {
 			}
 		} catch (Throwable t) {
 			if (!(t instanceof ComponentException)) {
-				Activator.log.error("RegisterComponentService: Cannot create instance of " + component.name, t);
+				Activator.log(component.bc, LogService.LOG_ERROR, "RegisterComponentService: Cannot create instance of " + component.name, t);
 			} else {
 				throw (ComponentException) t;
 			}

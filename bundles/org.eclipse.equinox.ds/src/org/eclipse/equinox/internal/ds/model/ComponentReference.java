@@ -22,6 +22,7 @@ import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Stoyan Boshev
@@ -227,7 +228,7 @@ public class ComponentReference implements Externalizable {
 		buffer.append(" is not protected or public!"); //$NON-NLS-1$
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
-		Activator.log.error(message, null);
+		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, message, null);
 	}
 
 	private void logMethodNotFoundError(ComponentInstanceImpl componentInstance, Reference reference, String methodName) {
@@ -239,7 +240,7 @@ public class ComponentReference implements Externalizable {
 		buffer.append(')');
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
-		Activator.log.error(message, null);
+		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, message, null);
 	}
 
 	private void appendDetails(StringBuffer buffer, Reference reference) {
@@ -270,14 +271,14 @@ public class ComponentReference implements Externalizable {
 		StringBuffer buffer = createBuffer();
 		buffer.append(message);
 		appendDetails(buffer, reference);
-		Activator.log.warning(buffer.toString(), t);
+		Activator.log(reference.reference.component.bc, LogService.LOG_WARNING, buffer.toString(), t);
 	}
 
 	private void logError(String message, Throwable t, Reference reference) {
 		StringBuffer buffer = createBuffer();
 		buffer.append(message);
 		appendDetails(buffer, reference);
-		Activator.log.error(buffer.toString(), t);
+		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, buffer.toString(), t);
 	}
 
 	private StringBuffer createBuffer() {

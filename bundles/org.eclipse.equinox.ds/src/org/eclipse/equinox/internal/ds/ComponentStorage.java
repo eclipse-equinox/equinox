@@ -18,6 +18,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.model.DeclarationParser;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Pavlin Dobrev
@@ -61,7 +62,7 @@ public abstract class ComponentStorage {
 
 					Enumeration urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
 					if (urls == null || !urls.hasMoreElements()) {
-						Activator.log.error("[SCR] Component definition XMLs not found in bundle " + bundle.getSymbolicName() + ". The component header value is " + definitionFile, null);
+						Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Component definition XMLs not found in bundle " + bundle.getSymbolicName() + ". The component header value is " + definitionFile, null);
 						continue;
 					}
 
@@ -78,18 +79,18 @@ public abstract class ComponentStorage {
 						try {
 							is = url.openStream();
 							if (is == null) {
-								Activator.log.error("[SCR] Could not open stream to component definition file " + url, null);
+								Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Could not open stream to component definition file " + url, null);
 							} else {
 								int compSize = components.size();
 								parser.parse(is, bundle, components, url.toString());
 								if (compSize == components.size()) {
-									Activator.log.warning("[SCR] No components were found while processing component definition file " + url, null);
+									Activator.log(bundle.getBundleContext(), LogService.LOG_WARNING, "[SCR] No components were found while processing component definition file " + url, null);
 								}
 							}
 						} catch (IOException ie) {
-							Activator.log.error("[SCR] Error occurred while opening component definition file " + url, ie);
+							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while opening component definition file " + url, ie);
 						} catch (Throwable t) {
-							Activator.log.error("[SCR] Illegal definition file: " + url, t);
+							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Illegal definition file: " + url, t);
 						} finally {
 							if (is != null) {
 								is.close();

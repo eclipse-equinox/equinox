@@ -20,6 +20,7 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -272,6 +273,58 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
 		}
 		return defaultValue;
+	}
+
+	public static void log(BundleContext bundleContext, int level, String message, Throwable t) {
+		LogService logService = null;
+		ServiceReference logRef = null;
+		try {
+			logRef = bundleContext.getServiceReference(LogService.class.getName());
+			logService = (LogService) bundleContext.getService(logRef);
+		} catch (Exception e) {
+			if (Activator.DEBUG) {
+				log.debug("Cannot get LogService for bundle " + bundleContext.getBundle().getSymbolicName(), e);
+			}
+		}
+		if (logService != null) {
+			logService.log(level, message, t);
+			bundleContext.ungetService(logRef);
+			if (log.getPrintOnConsole()) {
+				String prefix = "";
+				switch (level) {
+					case LogService.LOG_ERROR :
+						prefix = "ERROR ";
+						break;
+					case LogService.LOG_WARNING :
+						prefix = "WARNING ";
+						break;
+					case LogService.LOG_INFO :
+						prefix = "INFO ";
+						break;
+				}
+				dumpOnConsole(prefix, bundleContext, message, t);
+			}
+		} else {
+			//using the SCR log
+			switch (level) {
+				case LogService.LOG_ERROR :
+					log.error(message, t);
+					break;
+				case LogService.LOG_WARNING :
+					log.warning(message, t);
+					break;
+				default :
+					log.error(message, t);
+					break;
+			}
+		}
+	}
+
+	private static void dumpOnConsole(String prefix, BundleContext bundleContext, String msg, Throwable t) {
+		System.out.println(prefix + bundleContext.getBundle().getBundleId() + " " + msg);
+		if (t != null) {
+			t.printStackTrace();
+		}
 	}
 
 }

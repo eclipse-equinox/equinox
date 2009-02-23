@@ -18,6 +18,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.Activator;
 import org.eclipse.equinox.internal.util.xml.*;
 import org.osgi.framework.*;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 
 /**
@@ -126,12 +127,12 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null; //the component is bad - ignoring it
 			closeTag = null;
-			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		} finally {
 			if (!rootPassed) {
 				rootPassed = true;
@@ -189,14 +190,14 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log.error("[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
 		}
 	}
 
@@ -408,13 +409,13 @@ public class DeclarationParser implements ExTagListener {
 			}
 			currentComponent.properties.put(name, _value);
 		} catch (IllegalArgumentException iae) {
-			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! " + iae.getMessage(), null);
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae);
 			}
 		} catch (Throwable e) {
 			//logging unrecognized exception
-			Activator.log.error("[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL, e);
 		}
 	}
 
@@ -446,7 +447,7 @@ public class DeclarationParser implements ExTagListener {
 				currentComponent.properties.load(is);
 				invalid = false;
 			} catch (IOException e) {
-				Activator.log.error("[SCR - DeclarationParser.doProperties()] Error while loading properties file", e);
+				Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperties()] Error while loading properties file", e);
 			}
 		}
 

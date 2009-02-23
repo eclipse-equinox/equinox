@@ -23,6 +23,7 @@ import org.eclipse.equinox.internal.util.threadpool.ThreadPoolManager;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -309,7 +310,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						}
 						if (name.equals(pid) || name.equals(fpid)) {
 							if (name.equals(fpid) && sc.factory != null) {
-								Activator.log.error("[SCR - SCRManager] ComponentFactory " + name + " cannot be managed using factory configuration!", null);
+								Activator.log(sc.bc, LogService.LOG_ERROR, "[SCR - SCRManager] ComponentFactory " + name + " cannot be managed using factory configuration!", null);
 								return;
 							}
 							if (sc.enabled) {
@@ -520,7 +521,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				for (int j = i + 1; j < components.size(); j++) {
 					comp2 = (ServiceComponent) components.elementAt(j);
 					if (comp.name.equals(comp2.name)) {
-						Activator.log.error("[SCR] Found components with duplicated names inside their bundle! This component will not be processed: " + comp, null);
+						Activator.log(comp.bc, LogService.LOG_ERROR, "[SCR] Found components with duplicated names inside their bundle! This component will not be processed: " + comp, null);
 						//removing one of the components
 						components.remove(i);
 						i--;
@@ -534,7 +535,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					for (int j = 0; j < components2.size(); j++) {
 						comp2 = (ServiceComponent) components2.elementAt(j);
 						if (comp.name.equals(comp2.name)) {
-							Activator.log.warning("[SCR] Found components with duplicated names! Details: \nComponent1 : " + comp + "\nComponent2: " + comp2, null);
+							Activator.log(comp.bc, LogService.LOG_WARNING, "[SCR] Found components with duplicated names! Details: \nComponent1 : " + comp + "\nComponent2: " + comp2, null);
 						}
 					}
 				}
@@ -616,7 +617,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							}
 						}
 					} else {
-						Activator.log.warning("[SCRManager] Cannot dispose all components of a bundle at once!", null);
+						Activator.log.warning("[SCRManager] Cannot dispose all components of a bundle at once!", new Exception("Debug stack trace"));
 					}
 				}
 

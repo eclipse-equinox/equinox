@@ -18,6 +18,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.log.LogService;
 
 /**
  * Resolver.java
@@ -138,7 +139,7 @@ public final class Resolver implements WorkPerformer {
 							// create ServiceComponent + Prop
 							map(current, (Dictionary) null);
 						} else {
-							Activator.log.warning("[SCR - Resolver]: Component " + current.name + " is NOT resolved because it requires to be inited by a configuration but it was not found", null);
+							Activator.log(current.bc, LogService.LOG_WARNING, "[SCR - Resolver]: Component " + current.name + " is NOT resolved because it requires to be inited by a configuration but it was not found", null);
 						}
 					} else {
 						// if ManagedServiceFactory
@@ -146,7 +147,7 @@ public final class Resolver implements WorkPerformer {
 						if (config.getFactoryPid() != null) {
 							// if ComponentFactory is specified
 							if (current.factory != null) {
-								Activator.log.error("[SCR - Resolver] Cannot specify both ComponentFactory and ManagedServiceFactory\n" + "The name of the ComponentFactory component is " + current.name, null);
+								Activator.log(current.bc, LogService.LOG_ERROR, "[SCR - Resolver] Cannot specify both ComponentFactory and ManagedServiceFactory\n" + "The name of the ComponentFactory component is " + current.name, null);
 								continue; // skip current component
 							}
 							if (Activator.DEBUG) {
@@ -241,7 +242,7 @@ public final class Resolver implements WorkPerformer {
 			scpEnabled.addElement(scp);
 
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception while creating configuration for component " + component, t);
+			Activator.log(component.bc, LogService.LOG_ERROR, "[SCR] Unexpected exception while creating configuration for component " + component, t);
 		}
 		return scp;
 	}
@@ -907,7 +908,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 		} catch (CircularityException e) {
-			Activator.log.error("[SCR] Circularity Exception found for component: " + e.getCausingComponent().serviceComponent, e);
+			Activator.log(e.getCausingComponent().serviceComponent.bc, LogService.LOG_ERROR, "[SCR] Circularity Exception found for component: " + e.getCausingComponent().serviceComponent, e);
 			// disable offending SCP
 			scpEnabled.removeElement(e.getCausingComponent());
 			// try again
@@ -988,7 +989,7 @@ public final class Resolver implements WorkPerformer {
 		// check whether the optional reference is static - this is not allowed
 		// because of the way components with static refereces are built
 		if (optionalRefSCP.ref.policy == ComponentReference.POLICY_STATIC) {
-			Activator.log.error("[SCR] Static optional reference detected in a component cycle " + "and it will be removed.The referece is " + optionalRefSCP.ref.reference, null);
+			Activator.log(optionalRefSCP.ref.scp.bc, LogService.LOG_ERROR, "[SCR] Static optional reference detected in a component cycle and it will be removed. The referece is " + optionalRefSCP.ref.reference, null);
 
 			optionalRefSCP.ref.scp.references.removeElement(optionalRefSCP.ref);
 		}

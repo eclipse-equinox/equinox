@@ -23,6 +23,7 @@ import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Pavlin Dobrev
@@ -229,7 +230,7 @@ public class FileStorage extends ComponentStorage {
 		try {
 			return ManifestElement.parseHeader(ComponentConstants.SERVICE_COMPONENT, files);
 		} catch (BundleException e) {
-			Activator.log.error("Error attempting parse manifest element header", e); //$NON-NLS-1$
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "Error attempting parse manifest element header", e); //$NON-NLS-1$
 			return new ManifestElement[0];
 		}
 	}

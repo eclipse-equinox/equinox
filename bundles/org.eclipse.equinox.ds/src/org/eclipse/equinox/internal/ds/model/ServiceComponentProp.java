@@ -19,6 +19,7 @@ import org.eclipse.equinox.internal.ds.impl.ComponentContextImpl;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
+import org.osgi.service.log.LogService;
 
 /**
  * The ServiceComponentProp represents a ServiceComponent mapped to it's CM
@@ -379,10 +380,9 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			// get all registered services using this target filter
 			serviceReferences = bc.getServiceReferences(reference.reference.interfaceName, reference.getTarget());
 		} catch (Exception e) {
-			Activator.log.error("[SCR] Cannot get references for " + reference.reference.interfaceName, e);
+			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot get references for " + reference.reference.interfaceName, e);
 			throw e;
-			// rethrow exception so resolver is eventually notified that this
-			// SCP is bad
+			// rethrow exception so resolver is eventually notified that this SCP is bad
 		}
 
 		// bind only if there is at least ONE service

@@ -23,6 +23,7 @@ import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.log.LogService;
 
 /**
  * This is an OO wrapper for the XML representing the components. It also caches
@@ -139,7 +140,7 @@ public class ServiceComponent implements Externalizable {
 				SCRUtil.setAccessible(method);
 			} else if (!Modifier.isPublic(modifiers)) {
 				// not protected neither public
-				Activator.log.warning("[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the implementation class of component: " + this, null);
+				Activator.log(bc, LogService.LOG_WARNING, "[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the implementation class of component: " + this, null);
 				method = null;
 			}
 		}
@@ -208,7 +209,7 @@ public class ServiceComponent implements Externalizable {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			Activator.log.error("[SCR] Cannot activate instance " + instance + " of component " + this, null);
+			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot activate instance " + instance + " of component " + this, null);
 			throw new ComponentException("[SCR] Exception while activating instance " + instance + " of component " + name, t);
 			// rethrow exception so resolver is eventually notified that
 			// the processed SCP is bad
@@ -256,7 +257,7 @@ public class ServiceComponent implements Externalizable {
 					if (deactivateMethodName != "deactivate") {
 						//the deactivate method is specified in the component description XML by the user.
 						//It is expected to find it in the implementation class
-						Activator.log.error("[SCR] Cannot correctly deactivate instance " + instance + " of component " + this + "! The specified deactivate method was not found!", null);
+						Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot correctly deactivate instance " + instance + " of component " + this + "! The specified deactivate method was not found!", null);
 					}
 				}
 			} else {
@@ -277,7 +278,7 @@ public class ServiceComponent implements Externalizable {
 				}
 			}
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Error while attempting to deactivate instance of component " + this, t);
+			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Error while attempting to deactivate instance of component " + this, t);
 		}
 	}
 

@@ -17,6 +17,7 @@ import java.util.Vector;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.log.LogService;
 
 /**
  * The reference class is used only in the resolver. It is actually like
@@ -126,7 +127,7 @@ public final class Reference {
 				return true;
 			}
 		} catch (InvalidSyntaxException e) {
-			Activator.log.warning("Reference.hasLegacyProviders(): invalid target filter " + target, e);
+			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.hasProviders(): invalid target filter " + target, e);
 		}
 		return false;
 	}
@@ -249,7 +250,7 @@ public final class Reference {
 		try {
 			filter = FrameworkUtil.createFilter(target);
 		} catch (InvalidSyntaxException e) {
-			Activator.log.warning("Reference.findProviderSCP(): invalid target filter " + target, e);
+			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.selectProviders(): invalid target filter " + target, e);
 			return null;
 		}
 		Vector result = new Vector(2);
