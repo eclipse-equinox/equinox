@@ -489,7 +489,19 @@ public class InstanceProcess {
 		} else {
 			service = new ServiceReg(scp, ci);
 		}
-		reg = scp.bc.registerService(scp.serviceComponent.provides, service, scp.getProperties());
+
+		//remove the private properties from the component properties before registering as service
+		Hashtable props = scp.getProperties();
+		Hashtable publicProps = (Hashtable) props.clone();
+		Enumeration keys = props.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			if (key.startsWith(".")) {
+				publicProps.remove(key);
+			}
+		}
+
+		reg = scp.bc.registerService(scp.serviceComponent.provides, service, publicProps);
 
 		if (Activator.DEBUG) {
 			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null);
