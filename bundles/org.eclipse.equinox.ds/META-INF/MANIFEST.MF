@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Declarative Services
-Bundle-SymbolicName: org.eclipse.equinox.ds
+Bundle-SymbolicName: org.eclipse.equinox.ds;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: Eclipse
 Bundle-Activator: org.eclipse.equinox.internal.ds.Activator
