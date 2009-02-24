@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -582,6 +582,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		return properties.keys();
 	}
 
+	/**
+	 * Loads the preference node. This method returns silently if the node does not exist
+	 * in the backing store (for example non-existent project).
+	 * 
+	 * @throws BackingStoreException if the node exists in the backing store but it
+	 * could not be loaded
+	 */
 	protected void load() throws BackingStoreException {
 		load(getLocation());
 	}
@@ -949,6 +956,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			PrefsMessages.message("Removed preference property change listener: " + listener + " from: " + absolutePath()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/**
+	 * Saves the preference node. This method returns silently if the node does not exist
+	 * in the backing store (for example non-existent project)
+	 * 
+	 * @throws BackingStoreException if the node exists in the backing store but it
+	 * could not be saved
+	 */
 	protected void save() throws BackingStoreException {
 		save(getLocation());
 	}
