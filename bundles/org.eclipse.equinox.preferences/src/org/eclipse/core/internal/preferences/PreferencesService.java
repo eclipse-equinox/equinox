@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -595,32 +595,40 @@ public class PreferencesService implements IPreferencesService {
 		return order;
 	}
 
-	private Preferences[] getNodes(String qualifier, String key, IScopeContext[] contexts) {
+	private Preferences[] getNodes(final String qualifier, String key, final IScopeContext[] contexts) {
 		String[] order = getLookupOrder(qualifier, key);
-		String childPath = EclipsePreferences.makeRelative(EclipsePreferences.decodePath(key)[0]);
-		ArrayList result = new ArrayList();
+		final String childPath = EclipsePreferences.makeRelative(EclipsePreferences.decodePath(key)[0]);
+		final ArrayList result = new ArrayList();
 		for (int i = 0; i < order.length; i++) {
-			String scopeString = order[i];
-			boolean found = false;
-			for (int j = 0; contexts != null && j < contexts.length; j++) {
-				IScopeContext context = contexts[j];
-				if (context != null && context.getName().equals(scopeString)) {
-					Preferences node = context.getNode(qualifier);
-					if (node != null) {
-						found = true;
+			final String scopeString = order[i];
+			SafeRunner.run(new ISafeRunnable() {
+				public void run() throws Exception {
+					boolean found = false;
+					for (int j = 0; contexts != null && j < contexts.length; j++) {
+						IScopeContext context = contexts[j];
+						if (context != null && context.getName().equals(scopeString)) {
+							Preferences node = context.getNode(qualifier);
+							if (node != null) {
+								found = true;
+								if (childPath != null)
+									node = node.node(childPath);
+								result.add(node);
+							}
+						}
+					}
+					if (!found) {
+						Preferences node = getRootNode().node(scopeString).node(qualifier);
 						if (childPath != null)
 							node = node.node(childPath);
 						result.add(node);
 					}
+					found = false;
 				}
-			}
-			if (!found) {
-				Preferences node = getRootNode().node(scopeString).node(qualifier);
-				if (childPath != null)
-					node = node.node(childPath);
-				result.add(node);
-			}
-			found = false;
+
+				public void handleException(Throwable exception) {
+					log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.preferences_contextError, exception));
+				}
+			});
 		}
 		return (Preferences[]) result.toArray(new Preferences[result.size()]);
 	}
