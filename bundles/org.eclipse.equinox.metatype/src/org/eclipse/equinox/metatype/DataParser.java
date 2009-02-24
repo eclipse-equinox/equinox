@@ -334,10 +334,10 @@ public class DataParser {
 				if (ocd != null) {
 					if (designateHandler._factory_val == null) {
 						ocd.setType(ObjectClassDefinitionImpl.PID);
-						_dp_pid_to_OCDs_.put(designateHandler._pid_val,ocd);
+						_dp_pid_to_OCDs_.put(designateHandler._pid_val, ocd);
 					} else {
 						ocd.setType(ObjectClassDefinitionImpl.FPID);
-						_dp_pid_to_OCDs_.put(designateHandler._factory_val,ocd);
+						_dp_pid_to_OCDs_.put(designateHandler._factory_val, ocd);
 					}
 				} else {
 					Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
@@ -702,7 +702,7 @@ public class DataParser {
 	/**
 	 * Handler for the Designate element.
 	 */
-	private class DesignateHandler extends AbstractHandler {
+	class DesignateHandler extends AbstractHandler {
 
 		String _pid_val = null;
 		String _factory_val = null;
