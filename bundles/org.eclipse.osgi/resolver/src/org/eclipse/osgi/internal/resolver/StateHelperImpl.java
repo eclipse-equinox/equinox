@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -342,7 +342,7 @@ public final class StateHelperImpl implements StateHelper {
 				if (bundleSupplier != null)
 					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames, options);
 			}
-			importList.add(imports[i].getName()); // besure to add to direct import list
+			importList.add(imports[i].getName()); // be sure to add to direct import list
 		}
 		// now find all the packages that are visible from required bundles
 		BundleSpecification[] requires = bundle.getRequiredBundles();
@@ -362,15 +362,28 @@ public final class StateHelperImpl implements StateHelper {
 		visited.add(requiredBundle);
 		// add all the exported packages from the required bundle; take x-friends into account.
 		ExportPackageDescription[] substitutedExports = requiredBundle.getSubstitutedExports();
+		ExportPackageDescription[] imports = requiredBundle.getResolvedImports();
+		Set substituteNames = null; // a temporary set used to scope packages we get from getPackages
 		for (int i = 0; i < substitutedExports.length; i++) {
-			ExportPackageDescription[] imports = requiredBundle.getResolvedImports();
-			for (int j = 0; j < imports.length; j++) {
-				if (substitutedExports[i].getName().equals(imports[j].getName()) && !pkgSet.contains(imports[j])) {
-					getPackages(imports[j].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
-					return; // should not continue to local exports or required bundles	
+			if ((pkgNames == null || pkgNames.contains(substitutedExports[i].getName()))) {
+				for (int j = 0; j < imports.length; j++) {
+					if (substitutedExports[i].getName().equals(imports[j].getName()) && !pkgSet.contains(imports[j])) {
+						if (substituteNames == null)
+							substituteNames = new HashSet(1);
+						else
+							substituteNames.clear();
+						// substituteNames is a set of one package containing the single substitute we are trying to get the source for
+						substituteNames.add(substitutedExports[i].getName());
+						getPackages(imports[j].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, new HashSet(0), strict, substituteNames, options);
+					}
 				}
 			}
 		}
+		importList = substitutedExports.length == 0 ? importList : new HashSet(importList);
+		for (int i = 0; i < substitutedExports.length; i++)
+			// we add the package name to the import list to prevent required bundles from adding more sources
+			importList.add(substitutedExports[i].getName());
+
 		ExportPackageDescription[] exports = requiredBundle.getSelectedExports();
 		HashSet exportNames = new HashSet(exports.length); // set is used to improve performance of duplicate check.
 		for (int i = 0; i < exports.length; i++)

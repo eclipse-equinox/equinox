@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.EXPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "x; y; z; version=1.0"); //$NON-NLS-1$
 		manifest.put(Constants.IMPORT_PACKAGE, "x; y; version=1.0"); //$NON-NLS-1$
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
@@ -1313,17 +1313,18 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("aVisible wrong number", 0, aVisible.length); //$NON-NLS-1$
 		assertEquals("bVisible wrong number", 2, bVisible.length); //$NON-NLS-1$
 		assertEquals("cVisible wrong number", 2, cVisible.length); //$NON-NLS-1$
-		assertEquals("dVisible wrong number", 2, dVisible.length); //$NON-NLS-1$
+		assertEquals("dVisible wrong number", 3, dVisible.length); //$NON-NLS-1$
 		assertEquals("eVisible wrong number", 2, eVisible.length); //$NON-NLS-1$
 		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
 
 		ExportPackageDescription[] aExports = a.getSelectedExports();
+		ExportPackageDescription[] aSubtitutes = new ExportPackageDescription[] {aExports[0], aExports[1]};
 		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
-		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
-		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertEquals("bVisible not correct", aSubtitutes, bVisible); //$NON-NLS-1$
+		assertEquals("cVisible not correct", aSubtitutes, cVisible); //$NON-NLS-1$
 		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
-		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
-		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertEquals("eVisible not correct", aSubtitutes, eVisible); //$NON-NLS-1$
+		assertEquals("fVisible not correct", aSubtitutes, fVisible); //$NON-NLS-1$
 	}
 
 	public void testSubstitutableExports002() throws BundleException {
