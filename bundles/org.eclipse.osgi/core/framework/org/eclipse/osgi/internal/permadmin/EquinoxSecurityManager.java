@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,13 +168,14 @@ public class EquinoxSecurityManager extends SecurityManager {
 			if (cc.CondClassSet.contains(postponed[i].getClass()))
 				return SecurityTable.ABSTAIN;
 			cc.CondClassSet.add(postponed[i].getClass());
-			boolean isSatisfied = false;
 			try {
-				isSatisfied = postponed[i].isSatisfied(new Condition[] {postponed[i]}, condContext);
+				// must call isMutable before calling isSatisfied according to the specification
+				boolean mutable = postponed[i].isMutable();
+				boolean isSatisfied = postponed[i].isSatisfied(new Condition[] {postponed[i]}, condContext);
+				decision.handleImmutable(postponed[i], isSatisfied, mutable);
 				if (!isSatisfied)
 					return SecurityTable.ABSTAIN;
 			} finally {
-				decision.handleImmutable(postponed[i], isSatisfied);
 				cc.CondClassSet.remove(postponed[i].getClass());
 			}
 		}

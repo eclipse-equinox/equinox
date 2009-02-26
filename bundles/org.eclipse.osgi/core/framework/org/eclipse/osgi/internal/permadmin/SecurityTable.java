@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public class SecurityTable extends PermissionCollection {
 			return ABSTAIN;
 		boolean postponed = false;
 		Decision[] results = new Decision[rows.length];
-		int immediateDecision = -1;
+		int immediateDecisionIdx = -1;
 		// evaluate each row
 		for (int i = 0; i < rows.length; i++) {
 			try {
@@ -62,37 +62,28 @@ public class SecurityTable extends PermissionCollection {
 				return results[i].decision; // return GRANTED or DENIED
 			// got an immediate answer; but it is after a postponed condition.
 			// no need to process the rest of the rows
-			immediateDecision = i;
+			immediateDecisionIdx = i;
 			break;
 		}
 		if (postponed) {
+			int immediateDecision = immediateDecisionIdx < 0 ? DENIED : results[immediateDecisionIdx].decision;
 			// iterate over all postponed conditions; 
 			// if they all provide the same decision as the immediate decision then return the immediate decision
-			boolean allSameDecision = immediateDecision > 0;
-			for (int i = immediateDecision - 1; i >= 0 && allSameDecision; i--) {
+			boolean allSameDecision = true;
+			int i = immediateDecisionIdx < 0 ? results.length - 1 : immediateDecisionIdx - 1;
+			for (; i >= 0 && allSameDecision; i--) {
 				if (results[i] == null)
 					continue;
 				if ((results[i].decision & POSTPONED) != 0) {
-					if ((results[i].decision & results[immediateDecision].decision) == 0)
+					if ((results[i].decision & immediateDecision) == 0)
 						allSameDecision = false;
 					else
 						results[i] = SecurityRow.DECISION_ABSTAIN; // we can clear postpones with the same decision as the immediate
 				}
 			}
 			if (allSameDecision)
-				return results[immediateDecision].decision;
-			// if there is no immediate Decision then check to make sure there is at lease one Grant postponed decision
-			if (immediateDecision < 0) {
-				boolean allDeny = true;
-				for (int i = results.length - 1; i >= 0 && allDeny; i--) {
-					if (results[i] == null)
-						continue;
-					if ((results[i].decision & GRANTED) != 0)
-						allDeny = false;
-				}
-				if (allDeny)
-					return DENIED;
-			}
+				return immediateDecision;
+
 			// we now are forced to postpone; we need to also remember the postponed decisions and 
 			// the immediate decision if there is one.
 			EquinoxSecurityManager equinoxManager = securityAdmin.getSupportedSecurityManager();

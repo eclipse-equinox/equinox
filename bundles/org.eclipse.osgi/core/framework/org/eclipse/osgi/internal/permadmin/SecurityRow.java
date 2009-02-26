@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,11 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		this.securityAdmin = securityAdmin;
 		this.conditionInfos = conditionInfos;
-		this.deny = ConditionalPermissionInfo.DENY.equals(decision);
+		boolean d = ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision);
+		boolean a = ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision);
+		if (!(d | a))
+			throw new IllegalArgumentException("Invalid decision: " + decision); //$NON-NLS-1$
+		this.deny = d;
 		this.name = name;
 		this.permissionInfoCollection = new PermissionInfoCollection(permissionInfos);
 		if (conditionInfos == null || conditionInfos.length == 0)
@@ -202,11 +206,13 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			if (condition == null)
 				continue; // this condition must have been satisfied && !mutable in a previous check
 			if (!isPostponed(condition)) {
+				// must call isMutable before calling isSatisfied according to the specification.
+				boolean mutable = condition.isMutable();
 				if (condition.isSatisfied()) {
-					if (!condition.isMutable())
+					if (!mutable)
 						conditions[i] = null; // ignore this condition for future checks
 				} else {
-					if (!condition.isMutable())
+					if (!mutable)
 						// this will cause the row to always abstain; mark this to be ignored in future checks
 						synchronized (bundleConditions) {
 							bundleConditions.put(bundlePermissions, ABSTAIN_LIST);
@@ -288,8 +294,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			this.bundlePermissions = bundlePermissions;
 		}
 
-		void handleImmutable(Condition condition, boolean isSatisfied) {
-			if (condition.isMutable() || !condition.isPostponed())
+		void handleImmutable(Condition condition, boolean isSatisfied, boolean mutable) {
+			if (mutable || !condition.isPostponed())
 				return; // do nothing
 			if (isSatisfied) {
 				synchronized (row.bundleConditions) {
