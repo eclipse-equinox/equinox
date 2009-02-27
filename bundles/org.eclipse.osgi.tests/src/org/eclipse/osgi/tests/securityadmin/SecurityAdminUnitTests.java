@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -859,6 +859,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"\"", securityAdmin); //$NON-NLS-1$
 		// good info; no whit space
 		checkGoodInfo("allow{[Test1 \"arg1\" \"arg2\"](Type1 \"name1\" \"action1\")}\"name1\"", securityAdmin); //$NON-NLS-1$
+		// good info; '}' in quoted value
+		checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"name\"", securityAdmin); //$NON-NLS-1$
+		// good info; '}' in quoted value
+		checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"na } me\"", securityAdmin); //$NON-NLS-1$
 
 		// bad decision test
 		checkBadInfo("invalid { [Test1] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
@@ -896,7 +900,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		try {
 			return securityAdmin.newConditionalPermissionInfo(encoded);
 		} catch (IllegalArgumentException e) {
-			fail("Unexpected failure with good info: " + encoded); //$NON-NLS-1$
+			fail("Unexpected failure with good info: " + encoded, e); //$NON-NLS-1$
 		}
 		return null;
 	}
