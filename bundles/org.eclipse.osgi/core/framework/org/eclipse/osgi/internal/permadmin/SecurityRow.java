@@ -62,8 +62,39 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	private static ConditionalPermissionInfo createConditionalPermissionInfo(SecurityAdmin securityAdmin, String encoded) {
+		encoded = encoded.trim();
+		if (encoded.length() == 0)
+			throw new IllegalArgumentException("Empty encoded string is invalid"); //$NON-NLS-1$
+		char[] chars = encoded.toCharArray();
+		int end = encoded.length() - 1;
+		char lastChar = chars[end];
+		if (lastChar != '}' && lastChar != '"')
+			throw new IllegalArgumentException(encoded);
+		String encodedName = null;
+		if (lastChar == '"') {
+			// we have a name: an empty name must have at least 2 chars for the quotes
+			if (chars.length < 2)
+				throw new IllegalArgumentException(encoded);
+			int endName = encoded.length() - 1;
+			int startName = endName - 1;
+			while (startName > 0) {
+				if (chars[startName] == '"') {
+					startName--;
+					if (startName > 0 && chars[startName] == '\\')
+						startName--;
+					else {
+						startName++;
+						break;
+					}
+				}
+				startName--;
+			}
+			if (chars[startName] != '"')
+				throw new IllegalArgumentException(encoded);
+			encodedName = unescapeString(encoded.substring(startName + 1, endName));
+			end = encoded.lastIndexOf('}', startName);
+		}
 		int start = encoded.indexOf('{');
-		int end = encoded.lastIndexOf('}');
 		if (start < 0 || end < start)
 			throw new IllegalArgumentException(encoded);
 
@@ -71,29 +102,18 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		decision = decision.trim();
 		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
 			throw new IllegalArgumentException(encoded);
-		String encodedName = encoded.substring(end + 1);
-		encodedName = encodedName.trim();
-		if (encodedName.length() == 0) {
-			encodedName = null;
-		} else {
-			if (encodedName.length() == 1 || encodedName.charAt(0) != '"' || encodedName.charAt(encodedName.length() - 1) != '"')
-				throw new IllegalArgumentException(encoded);
-			encodedName = unescapeString(encodedName.substring(1, encodedName.length() - 1));
-			if (encodedName.length() == 0)
-				encodedName = null;
-		}
-		char[] chars = encoded.substring(start + 1, end).toCharArray();
+
 		ArrayList condList = new ArrayList();
 		ArrayList permList = new ArrayList();
-		int pos = 0;
-		while (pos < chars.length) {
-			while (pos < chars.length && chars[pos] != '[' && chars[pos] != '(')
+		int pos = start + 1;
+		while (pos < end) {
+			while (pos < end && chars[pos] != '[' && chars[pos] != '(')
 				pos++;
-			if (pos == chars.length)
+			if (pos == end)
 				break; // no perms or conds left
 			int startPos = pos;
 			char endChar = chars[startPos] == '[' ? ']' : ')';
-			while (chars[pos] != endChar) {
+			while (pos < end && chars[pos] != endChar) {
 				if (chars[pos] == '"') {
 					pos++;
 					while (chars[pos] != '"') {
@@ -140,10 +160,10 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 					output.append(c);
 					break;
 				case '\r' :
-					output.append("\\r");
+					output.append("\\r"); //$NON-NLS-1$
 					break;
 				case '\n' :
-					output.append("\\n");
+					output.append("\\n"); //$NON-NLS-1$
 					break;
 				default :
 					output.append(c);
@@ -160,7 +180,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			if (c == '\\') {
 				i++;
 				if (i < end) {
-					c = str.charAt(i);;
+					c = str.charAt(i);
 					switch (c) {
 						case '"' :
 						case '\\' :
@@ -359,6 +379,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			h = 31 * h + conds[i].hashCode();
 		for (int i = 0; i < perms.length; i++)
 			h = 31 * h + perms[i].hashCode();
+		if (name != null)
+			h = 31 * h + name.hashCode();
 		return h;
 	}
 
