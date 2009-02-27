@@ -16,6 +16,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * The framework factory implementation for the Equinox framework.
+ * @since 3.5
  */
 public class EquinoxFactory implements FrameworkFactory {
 

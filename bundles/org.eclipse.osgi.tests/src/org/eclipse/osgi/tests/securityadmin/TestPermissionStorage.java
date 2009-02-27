@@ -1,14 +1,18 @@
 package org.eclipse.osgi.tests.securityadmin;
 
 import java.io.IOException;
-
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 public class TestPermissionStorage implements PermissionStorage {
 
+	private String[] conditionPermissionInfo;
+
+	public TestPermissionStorage(String[] conditionPermissionInfo) {
+		this.conditionPermissionInfo = conditionPermissionInfo;
+	}
+
 	public String[] getConditionalPermissionInfos() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		return conditionPermissionInfo;
 	}
 
 	public String[] getLocations() throws IOException {
@@ -22,7 +26,7 @@ public class TestPermissionStorage implements PermissionStorage {
 	}
 
 	public void saveConditionalPermissionInfos(String[] infos) throws IOException {
-		// TODO Auto-generated method stub
+		conditionPermissionInfo = infos;
 
 	}
 

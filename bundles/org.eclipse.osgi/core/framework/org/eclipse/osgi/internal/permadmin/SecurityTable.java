@@ -115,7 +115,7 @@ public class SecurityTable extends PermissionCollection {
 	String[] getEncodedRows() {
 		String[] encoded = new String[rows.length];
 		for (int i = 0; i < rows.length; i++)
-			encoded[i] = rows[i].toString();
+			encoded[i] = rows[i].getEncoded();
 		return encoded;
 	}
 

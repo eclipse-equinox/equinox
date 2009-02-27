@@ -15,7 +15,7 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.net.SocketPermission;
 import java.security.*;
-import java.util.List;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.internal.core.AbstractBundle;
@@ -56,8 +56,12 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	private SecurityAdmin createSecurityAdmin(EquinoxSecurityManager sm) {
+		return createSecurityAdmin(sm, null);
+	}
+
+	private SecurityAdmin createSecurityAdmin(EquinoxSecurityManager sm, String[] condPermInfos) {
 		try {
-			return new SecurityAdmin(sm, null, new TestPermissionStorage());
+			return new SecurityAdmin(sm, null, new TestPermissionStorage(condPermInfos));
 		} catch (IOException e) {
 			fail("unexpected exception creating SecuirtyAdmin", e); //$NON-NLS-1$;
 		}
@@ -806,6 +810,95 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		} catch (AccessControlException e) {
 			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
 		}
+	}
+
+	public void testEncodingInfos01() {
+		String info1 = "ALLOW { [Test1] (Type1 \"name1\" \"action1\") } \"name1\""; //$NON-NLS-1$
+		String info2 = "ALLOW { [Test2] (Type2 \"name2\" \"action2\") } \"name2\""; //$NON-NLS-1$
+		String info3 = "deny { [Test3] (Type3 \"name3\" \"action3\") } \"name3\""; //$NON-NLS-1$
+
+		String[] condPermInfos = new String[] {info1, info2};
+		SecurityAdmin securityAdmin = createSecurityAdmin(null, condPermInfos);
+		ArrayList infos = new ArrayList();
+		for (Enumeration eInfos = securityAdmin.getConditionalPermissionInfos(); eInfos.hasMoreElements();)
+			infos.add(eInfos.nextElement());
+		assertEquals("Wrong number of infos", 2, infos.size()); //$NON-NLS-1$
+		assertTrue("Missing info1", infos.contains(securityAdmin.newConditionalPermissionInfo(info1))); //$NON-NLS-1$
+		assertTrue("Missing info2", infos.contains(securityAdmin.newConditionalPermissionInfo(info2))); //$NON-NLS-1$
+		assertEquals("Wrong index of info1", 0, infos.indexOf(securityAdmin.newConditionalPermissionInfo(info1))); //$NON-NLS-1$
+		assertEquals("Wrong index of info2", 1, infos.indexOf(securityAdmin.newConditionalPermissionInfo(info2))); //$NON-NLS-1$
+
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List updateInfos = update.getConditionalPermissionInfos();
+		assertTrue("Info lists are not equal", updateInfos.equals(infos)); //$NON-NLS-1$
+		updateInfos.add(securityAdmin.newConditionalPermissionInfo(info3));
+		assertTrue("Failed commit", update.commit()); //$NON-NLS-1$
+
+		infos = new ArrayList();
+		for (Enumeration eInfos = securityAdmin.getConditionalPermissionInfos(); eInfos.hasMoreElements();)
+			infos.add(eInfos.nextElement());
+		assertTrue("Info lists are not equal", updateInfos.equals(infos)); //$NON-NLS-1$
+	}
+
+	public void testEncodingInfos02() {
+		// test bad infos
+		String info1 = "ALLOW { [Test1] (Type1 \"name1\" \"action1\") } \"name1\""; //$NON-NLS-1$
+		String info2 = "ALLOW { [Test2] (Type2 \"name2\" \"action2\") } \"name2\""; //$NON-NLS-1$
+		String info3 = "deny { [Test3] (Type3 \"name3\" \"action3\") } \"name3\""; //$NON-NLS-1$
+
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+
+		// good info; mix case decision
+		checkGoodInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkGoodInfo("dEnY { [Test1 \"arg1\" \"arg2\" \"arg3\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// good info; no conditions
+		checkGoodInfo("dEnY { (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// good info; no name
+		checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") }", securityAdmin); //$NON-NLS-1$
+		// good info; empty name
+		checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"\"", securityAdmin); //$NON-NLS-1$
+		// good info; no whit space
+		checkGoodInfo("allow{[Test1 \"arg1\" \"arg2\"](Type1 \"name1\" \"action1\")}\"name1\"", securityAdmin); //$NON-NLS-1$
+
+		// bad decision test
+		checkBadInfo("invalid { [Test1] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// bad condition; missing type
+		checkBadInfo("allow { [] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkBadInfo("deny { [\"arg1\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// bad permission (none)
+		checkBadInfo("ALLOW { [Test1 \"arg1\" \"arg2\"] } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// bad permission; missing type
+		checkBadInfo("ALLOW { [Test1 \"arg1\" \"arg2\"] () } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkBadInfo("ALLOW { [Test1 \"arg1\" \"arg2\"] (\"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		// bad name; no quotes
+		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } name1", securityAdmin); //$NON-NLS-1$
+		// bad name; missing end quote
+		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1", securityAdmin); //$NON-NLS-1$
+		// bad name; missing start quote
+		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } name1\"", securityAdmin); //$NON-NLS-1$
+		// bad name; single quote
+		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"", securityAdmin); //$NON-NLS-1$
+		// bad name; extra stuff
+		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1\" extrajunk", securityAdmin); //$NON-NLS-1$
+
+	}
+
+	private void checkBadInfo(String encoded, SecurityAdmin securityAdmin) {
+		try {
+			securityAdmin.newConditionalPermissionInfo(encoded);
+			fail("Expecting fail with bad info: " + encoded); //$NON-NLS-1$
+		} catch (IllegalArgumentException e) {
+			// expected
+		}
+	}
+
+	private ConditionalPermissionInfo checkGoodInfo(String encoded, SecurityAdmin securityAdmin) {
+		try {
+			return securityAdmin.newConditionalPermissionInfo(encoded);
+		} catch (IllegalArgumentException e) {
+			fail("Unexpected failure with good info: " + encoded); //$NON-NLS-1$
+		}
+		return null;
 	}
 
 	private void testSMPermission(EquinoxSecurityManager sm, ProtectionDomain[] pds, Permission permission, boolean expectedToPass) {

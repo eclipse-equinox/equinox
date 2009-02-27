@@ -35,10 +35,13 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	final HashMap bundleConditions;
 
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
+		if (permissionInfos == null || permissionInfos.length == 0)
+			throw new IllegalArgumentException("It is invalid to have empty permissionInfos"); //$NON-NLS-1$
 		this.securityAdmin = securityAdmin;
-		this.conditionInfos = conditionInfos;
-		boolean d = ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision);
-		boolean a = ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision);
+		this.conditionInfos = conditionInfos == null ? new ConditionInfo[0] : conditionInfos;
+		decision = decision.toLowerCase();
+		boolean d = ConditionalPermissionInfo.DENY.equals(decision);
+		boolean a = ConditionalPermissionInfo.ALLOW.equals(decision);
 		if (!(d | a))
 			throw new IllegalArgumentException("Invalid decision: " + decision); //$NON-NLS-1$
 		this.deny = d;
@@ -50,17 +53,35 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			bundleConditions = new HashMap();
 	}
 
+	static SecurityRowSnapShot createSecurityRowSnapShot(String encoded) {
+		return (SecurityRowSnapShot) createConditionalPermissionInfo(null, encoded);
+	}
+
 	static SecurityRow createSecurityRow(SecurityAdmin securityAdmin, String encoded) {
+		return (SecurityRow) createConditionalPermissionInfo(securityAdmin, encoded);
+	}
+
+	private static ConditionalPermissionInfo createConditionalPermissionInfo(SecurityAdmin securityAdmin, String encoded) {
 		int start = encoded.indexOf('{');
 		int end = encoded.lastIndexOf('}');
 		if (start < 0 || end < start)
 			throw new IllegalArgumentException(encoded);
-		String decision = null;
-		if (encoded.charAt(encoded.length() - 1) == '!')
-			decision = ConditionalPermissionInfo.DENY;
-		String encodedName = null;
-		if (start != 0)
-			encodedName = encoded.substring(0, start);
+
+		String decision = encoded.substring(0, start);
+		decision = decision.trim();
+		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
+			throw new IllegalArgumentException(encoded);
+		String encodedName = encoded.substring(end + 1);
+		encodedName = encodedName.trim();
+		if (encodedName.length() == 0) {
+			encodedName = null;
+		} else {
+			if (encodedName.length() == 1 || encodedName.charAt(0) != '"' || encodedName.charAt(encodedName.length() - 1) != '"')
+				throw new IllegalArgumentException(encoded);
+			encodedName = unescapeString(encodedName.substring(1, encodedName.length() - 1));
+			if (encodedName.length() == 0)
+				encodedName = null;
+		}
 		char[] chars = encoded.substring(start + 1, end).toCharArray();
 		ArrayList condList = new ArrayList();
 		ArrayList permList = new ArrayList();
@@ -91,8 +112,12 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 				permList.add(new PermissionInfo(token));
 			pos++;
 		}
+		if (permList.size() == 0)
+			throw new IllegalArgumentException("No Permission infos: " + encoded); //$NON-NLS-1$
 		ConditionInfo[] conds = (ConditionInfo[]) condList.toArray(new ConditionInfo[condList.size()]);
 		PermissionInfo[] perms = (PermissionInfo[]) permList.toArray(new PermissionInfo[permList.size()]);
+		if (securityAdmin == null)
+			return new SecurityRowSnapShot(encodedName, conds, perms, decision);
 		return new SecurityRow(securityAdmin, encodedName, conds, perms, decision);
 	}
 
@@ -102,6 +127,61 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		Object result = Array.newInstance(array.getClass().getComponentType(), array.length);
 		System.arraycopy(array, 0, result, 0, array.length);
 		return result;
+	}
+
+	private static void escapeString(String str, StringBuffer output) {
+		int len = str.length();
+		for (int i = 0; i < len; i++) {
+			char c = str.charAt(i);
+			switch (c) {
+				case '"' :
+				case '\\' :
+					output.append('\\');
+					output.append(c);
+					break;
+				case '\r' :
+					output.append("\\r");
+					break;
+				case '\n' :
+					output.append("\\n");
+					break;
+				default :
+					output.append(c);
+					break;
+			}
+		}
+	}
+
+	private static String unescapeString(String str) {
+		StringBuffer output = new StringBuffer(str.length());
+		int end = str.length();
+		for (int i = 0; i < end; i++) {
+			char c = str.charAt(i);
+			if (c == '\\') {
+				i++;
+				if (i < end) {
+					c = str.charAt(i);;
+					switch (c) {
+						case '"' :
+						case '\\' :
+							break;
+						case 'r' :
+							c = '\r';
+							break;
+						case 'n' :
+							c = '\n';
+							break;
+						default :
+							c = '\\';
+							i--;
+							break;
+					}
+				}
+			}
+			output.append(c);
+		}
+
+		return output.toString();
 	}
 
 	public String getName() {
@@ -252,20 +332,55 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	public String toString() {
+		return getEncoded();
+	}
+
+	public String getEncoded() {
+		return getEncoded(name, conditionInfos, internalGetPermissionInfos(), deny);
+	}
+
+	public boolean equals(Object obj) {
+		// doing the simple (slow) thing for now
+		if (obj == this)
+			return true;
+		if (!(obj instanceof ConditionalPermissionInfo))
+			return false;
+		// we assume the encoded string provides a canonical (comparable) form
+		return getEncoded().equals(((ConditionalPermissionInfo) obj).getEncoded());
+	}
+
+	public int hashCode() {
+		return getHashCode(name, internalGetConditionInfos(), internalGetPermissionInfos(), getGrantDecision());
+	}
+
+	static int getHashCode(String name, ConditionInfo[] conds, PermissionInfo[] perms, String decision) {
+		int h = 31 * 17 + decision.hashCode();
+		for (int i = 0; i < conds.length; i++)
+			h = 31 * h + conds[i].hashCode();
+		for (int i = 0; i < perms.length; i++)
+			h = 31 * h + perms[i].hashCode();
+		return h;
+	}
+
+	static String getEncoded(String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, boolean deny) {
 		StringBuffer result = new StringBuffer();
-		if (name != null)
-			result.append(name);
-		result.append('{').append(' ');
+		if (deny)
+			result.append(ConditionalPermissionInfo.DENY);
+		else
+			result.append(ConditionalPermissionInfo.ALLOW);
+		result.append(" { "); //$NON-NLS-1$
 		if (conditionInfos != null)
 			for (int i = 0; i < conditionInfos.length; i++)
 				result.append(conditionInfos[i].getEncoded()).append(' ');
-		PermissionInfo[] curPerms = internalGetPermissionInfos();
-		if (curPerms != null)
-			for (int i = 0; i < curPerms.length; i++)
-				result.append(curPerms[i].getEncoded()).append(' ');
+		if (permissionInfos != null)
+			for (int i = 0; i < permissionInfos.length; i++)
+				result.append(permissionInfos[i].getEncoded()).append(' ');
 		result.append('}');
-		if (deny)
-			result.append('!');
+		if (name != null) {
+			result.append(" \""); //$NON-NLS-1$
+			escapeString(name, result);
+			result.append('"');
+		}
 		return result.toString();
 	}
 

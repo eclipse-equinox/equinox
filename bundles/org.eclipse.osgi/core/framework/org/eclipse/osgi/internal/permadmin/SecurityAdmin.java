@@ -75,8 +75,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			condAdminTable = new SecurityTable(this, new SecurityRow[0]);
 		else {
 			SecurityRow[] rows = new SecurityRow[encodedCondPermInfos.length];
-			for (int i = 0; i < rows.length; i++)
-				rows[i] = SecurityRow.createSecurityRow(this, encodedCondPermInfos[i]);
+			try {
+				for (int i = 0; i < rows.length; i++)
+					rows[i] = SecurityRow.createSecurityRow(this, encodedCondPermInfos[i]);
+			} catch (IllegalArgumentException e) {
+				// TODO should log
+				// bad format persisted in storage; start clean
+				rows = new SecurityRow[0];
+			}
 			condAdminTable = new SecurityTable(this, rows);
 		}
 	}
@@ -211,6 +217,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	public ConditionalPermissionInfo newConditionalPermissionInfo(String name, ConditionInfo[] conditions, PermissionInfo[] permissions, String decision) {
 		return new SecurityRowSnapShot(name, conditions, permissions, decision);
+	}
+
+	public ConditionalPermissionInfo newConditionalPermissionInfo(String encoded) {
+		return SecurityRow.createSecurityRowSnapShot(encoded);
 	}
 
 	public ConditionalPermissionUpdate newConditionalPermissionUpdate() {
