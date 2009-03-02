@@ -108,7 +108,7 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 
 		ConditionInfo[] conditions = new ConditionInfo[] {new ConditionInfo(BundleLocationCondition.class.getName(), new String[] {linkD.getLocation()})};
 		ConditionalPermissionAdmin childCondAdmin = getCondPermAdmin(composite.getCompositeFramework().getBundleContext());
-		childCondAdmin.addConditionalPermissionInfo(conditions, new PermissionInfo[] {});
+		childCondAdmin.addConditionalPermissionInfo(conditions, new PermissionInfo[] {new PermissionInfo("(test)")}); //$NON-NLS-1$
 		try {
 			linkD.start();
 			fail("Should fail to start test.link.d"); //$NON-NLS-1$
@@ -183,7 +183,7 @@ public class CompositeSecurityTests extends AbstractCompositeTests {
 
 		ConditionInfo[] conditions = new ConditionInfo[] {new ConditionInfo(BundleLocationCondition.class.getName(), new String[] {linkD.getLocation()})};
 		ConditionalPermissionAdmin childCondAdmin = getCondPermAdmin(composite.getCompositeFramework().getBundleContext());
-		childCondAdmin.addConditionalPermissionInfo(conditions, new PermissionInfo[] {});
+		childCondAdmin.addConditionalPermissionInfo(conditions, new PermissionInfo[] {new PermissionInfo("(test)")}); //$NON-NLS-1$
 		try {
 			linkD.start();
 			fail("Should fail to start test.link.d"); //$NON-NLS-1$
