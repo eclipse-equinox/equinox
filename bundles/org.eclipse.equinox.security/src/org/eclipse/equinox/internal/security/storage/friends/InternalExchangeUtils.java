@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,6 @@ public class InternalExchangeUtils {
 
 	static private final String JUNIT_APPS1 = "org.eclipse.pde.junit.runtime."; //$NON-NLS-1$
 	static private final String JUNIT_APPS2 = "org.eclipse.test."; //$NON-NLS-1$
-
-	static private List listeners = new ArrayList();
 
 	/**
 	 * Detects ciphers supplied by the current JVM that can be used with
@@ -99,23 +97,7 @@ public class InternalExchangeUtils {
 		if (StorageUtils.exists(location))
 			StorageUtils.delete(location);
 
-		// notify listeners
-		synchronized (listeners) {
-			for (Iterator i = listeners.iterator(); i.hasNext();) {
-				IDeleteListener listener = (IDeleteListener) i.next();
-				listener.onDeleted();
-			}
-		}
-	}
-
-	/**
-	 * Registers a new listener to be notified when default preferences are deleted.
-	 * @param listener class to be notified after default preferences are deleted
-	 */
-	static public void addDeleteListener(IDeleteListener listener) {
-		synchronized (listeners) {
-			listeners.add(listener);
-		}
+		// FUTURE: this is a good place to notify delete listeners
 	}
 
 	static public void setupRecovery(String[][] userParts, String moduleID, IPreferencesContainer container) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -127,7 +127,6 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 		valuesView = new ValuesView(tableOfValues, this, shell);
 
 		GridLayoutFactory.fillDefaults().margins(LayoutConstants.getSpacing()).generateLayout(page);
-		InternalExchangeUtils.addDeleteListener(this);
 		validateSave();
 	}
 
@@ -214,6 +213,9 @@ public class TabContents implements ISecurePreferencesSelection, IDeleteListener
 
 		// clear it from the list of open storages, delete the file 
 		InternalExchangeUtils.defaultStorageDelete();
+
+		if (nodesView != null)
+			nodesView.postDeleted();
 
 		// suggest restart in case somebody holds on to the deleted storage
 		MessageBox postDeletionBox = new MessageBox(shell, SWT.YES | SWT.NO);
