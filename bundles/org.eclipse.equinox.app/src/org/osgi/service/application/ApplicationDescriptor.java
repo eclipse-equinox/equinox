@@ -28,7 +28,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * information about it. The application descriptor can be used for instance
  * creation.
  * 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public abstract class ApplicationDescriptor {
@@ -111,7 +111,7 @@ public abstract class ApplicationDescriptor {
 
 	private final String pid;
 
-	private boolean[] locked = {false};
+	private final boolean[] locked = {false};
 
 	/**
 	 * Constructs the <code>ApplicationDescriptor</code>.
@@ -129,7 +129,7 @@ public abstract class ApplicationDescriptor {
 		}
 
 		this.pid = applicationId;
-		locked[0] = isLocked();
+		locked[0] = isPersistentlyLocked();
 	}
 
 	/**
@@ -506,7 +506,7 @@ public abstract class ApplicationDescriptor {
 		AppPersistence.saveLock(this, locked);
 	}
 
-	private boolean isLocked() {
+	private boolean isPersistentlyLocked() {
 		return AppPersistence.isLocked(this);
 	}
 
