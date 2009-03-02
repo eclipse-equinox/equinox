@@ -841,28 +841,52 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	}
 
 	public void testEncodingInfos02() {
-		// test bad infos
-		String info1 = "ALLOW { [Test1] (Type1 \"name1\" \"action1\") } \"name1\""; //$NON-NLS-1$
-		String info2 = "ALLOW { [Test2] (Type2 \"name2\" \"action2\") } \"name2\""; //$NON-NLS-1$
-		String info3 = "deny { [Test3] (Type3 \"name3\" \"action3\") } \"name3\""; //$NON-NLS-1$
-
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 
+		ConditionInfo cond1 = new ConditionInfo("Test1", new String[] {"arg1", "arg2"}); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		ConditionInfo cond2 = new ConditionInfo("Test1", new String[] {"arg1", "arg2", "arg3"}); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
+		ConditionInfo cond3 = new ConditionInfo("Test1", new String[] {"test } test", "} test"}); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+
+		PermissionInfo perm1 = new PermissionInfo("Type1", "name1", "action1"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		PermissionInfo perm2 = new PermissionInfo("Type1", "}", "test }"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+
 		// good info; mix case decision
-		checkGoodInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
-		checkGoodInfo("dEnY { [Test1 \"arg1\" \"arg2\" \"arg3\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		ConditionalPermissionInfo testInfo1 = securityAdmin.newConditionalPermissionInfo("name1", new ConditionInfo[] {cond1}, new PermissionInfo[] {perm1}, "allow"); //$NON-NLS-1$ //$NON-NLS-2$
+		ConditionalPermissionInfo testInfo2 = checkGoodInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("name1", new ConditionInfo[] {cond2}, new PermissionInfo[] {perm1}, "deny"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("dEnY { [Test1 \"arg1\" \"arg2\" \"arg3\"] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
 		// good info; no conditions
-		checkGoodInfo("dEnY { (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("name1", null, new PermissionInfo[] {perm1}, "deny"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("dEnY { (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
 		// good info; no name
-		checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") }", securityAdmin); //$NON-NLS-1$
+		testInfo1 = securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {cond1}, new PermissionInfo[] {perm1}, "allow"); //$NON-NLS-1$
+		testInfo2 = checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") }", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
 		// good info; empty name
-		checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"\"", securityAdmin); //$NON-NLS-1$
-		// good info; no whit space
-		checkGoodInfo("allow{[Test1 \"arg1\" \"arg2\"](Type1 \"name1\" \"action1\")}\"name1\"", securityAdmin); //$NON-NLS-1$
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("", new ConditionInfo[] {cond1}, new PermissionInfo[] {perm1}, "allow"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("allow { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
+		// good info; no white space
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("name1", new ConditionInfo[] {cond1}, new PermissionInfo[] {perm1}, "allow"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("allow{[Test1 \"arg1\" \"arg2\"](Type1 \"name1\" \"action1\")}\"name1\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
 		// good info; '}' in quoted value
-		checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"name\"", securityAdmin); //$NON-NLS-1$
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("name", new ConditionInfo[] {cond3}, new PermissionInfo[] {perm2}, "allow"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"name\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
+
 		// good info; '}' in quoted value
-		checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"na } me\"", securityAdmin); //$NON-NLS-1$
+		testInfo1 = securityAdmin.newConditionalPermissionInfo("na } me", new ConditionInfo[] {cond3}, new PermissionInfo[] {perm2}, "allow"); //$NON-NLS-1$ //$NON-NLS-2$
+		testInfo2 = checkGoodInfo("allow { [Test1 \"test } test\" \"} test\"] (Type1 \"}\" \"test }\") } \"na } me\"", securityAdmin); //$NON-NLS-1$
+		checkInfos(testInfo1, testInfo2);
 
 		// bad decision test
 		checkBadInfo("invalid { [Test1] (Type1 \"name1\" \"action1\") } \"name1\"", securityAdmin); //$NON-NLS-1$
@@ -885,6 +909,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		// bad name; extra stuff
 		checkBadInfo("AlLoW { [Test1 \"arg1\" \"arg2\"] (Type1 \"name1\" \"action1\") } \"name1\" extrajunk", securityAdmin); //$NON-NLS-1$
 
+	}
+
+	private void checkInfos(ConditionalPermissionInfo testInfo1, ConditionalPermissionInfo testInfo2) {
+		assertTrue("Infos are not equal: " + testInfo1.getEncoded() + " " + testInfo2.getEncoded(), testInfo1.equals(testInfo2)); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Info hash code is not equal", testInfo1.hashCode(), testInfo2.hashCode()); //$NON-NLS-1$
 	}
 
 	private void checkBadInfo(String encoded, SecurityAdmin securityAdmin) {
