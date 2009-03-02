@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.security.ui.preferences;
 
-import java.lang.reflect.Constructor;
-import java.security.*;
+import java.security.Provider;
+import java.security.Security;
 import java.util.*;
 import java.util.List;
 import org.eclipse.equinox.internal.security.ui.SecurityUIMsg;
@@ -335,7 +335,6 @@ public class AdvancedPage extends PreferencePage implements IWorkbenchPreference
 		private final String className;
 		private final List aliases;
 		private final Map attributes;
-		private final Bundle providingBundle;
 
 		public ProviderService(String type, String algorithm, String className, List aliases, Map attributes, Bundle providingBundle) {
 			this.type = type;
@@ -343,7 +342,6 @@ public class AdvancedPage extends PreferencePage implements IWorkbenchPreference
 			this.className = className;
 			this.aliases = aliases;
 			this.attributes = attributes;
-			this.providingBundle = providingBundle;
 		}
 
 		public String getType() {
@@ -364,37 +362,6 @@ public class AdvancedPage extends PreferencePage implements IWorkbenchPreference
 
 		public Map getAttributes() {
 			return attributes;
-		}
-
-		public Object newInstance(Object parameter) throws NoSuchAlgorithmException {
-			Object obj = null;
-			try {
-				Class clazz = providingBundle.loadClass(getClassName());
-				if (parameter != null) {
-					try {
-						Constructor cons = clazz.getDeclaredConstructor(new Class[] {parameter.getClass()});
-						obj = cons.newInstance(new Object[] {parameter});
-					} catch (NoSuchMethodException e) {
-						throw new InvalidParameterException();
-					}
-				} else {
-					obj = clazz.newInstance();
-				}
-			} catch (Throwable t) {
-				throw new NoSuchAlgorithmException();
-			}
-
-			return obj;
-		}
-
-		public boolean supportsParameter(Object parameter) {
-			try {
-				Class clazz = providingBundle.loadClass(getClassName());
-				clazz.getDeclaredConstructor(new Class[] {parameter.getClass()});
-			} catch (Throwable t) {
-				return false;
-			}
-			return true;
 		}
 	}
 
