@@ -124,8 +124,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		// If the bundle is not a singleton, then it is not added
 		if (!isSingleton(bundle)) {
 			if (report) {
-				String message = NLS.bind(RegistryMessages.parse_nonSingleton, bundle.getLocation());
-				RuntimeLog.log(new Status(IStatus.INFO, RegistryMessages.OWNER_NAME, 0, message, null));
+				String message = NLS.bind(RegistryMessages.parse_nonSingleton, bundle.getSymbolicName());
+				RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
 			}
 			return null;
 		}
@@ -141,8 +141,8 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return extensionURL;
 
 		if (report) {
-			String message = NLS.bind(RegistryMessages.parse_nonSingleton, hosts[0].getLocation());
-			RuntimeLog.log(new Status(IStatus.INFO, RegistryMessages.OWNER_NAME, 0, message, null));
+			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(), hosts[0].getSymbolicName());
+			RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
 		}
 		return null;
 	}
@@ -155,7 +155,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		IContributor contributor = ContributorFactoryOSGi.createContributor(bundle);
 		if (registry.hasContributor(contributor))
 			return;
-		URL pluginManifest = getExtensionURL(bundle, registry.debug());
+		URL pluginManifest = getExtensionURL(bundle, true);
 		if (pluginManifest == null)
 			return;
 		InputStream is;
