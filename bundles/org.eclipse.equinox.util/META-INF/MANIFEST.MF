@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.eclipse.equinox.util
-Bundle-Name: Equinox Util Bundle
-Bundle-Version: 1.0.1.qualifier
-Bundle-Vendor: Eclipse
+Bundle-Name: %bundleName
+Bundle-Version: 1.0.100.qualifier
+Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.util.UtilActivator
 Bundle-Description: The Equinox Util Bundle contains services to facilitate bundle developers in their programming, and to lighten resource usage at runtime.
 Import-Package: 
@@ -25,3 +25,4 @@ Export-Package:
  org.eclipse.equinox.internal.util.timer;version="1.0";x-friends:="org.eclipse.equinox.ds,org.eclipse.equinox.ip"
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin

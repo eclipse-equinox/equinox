@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Declarative Services
+Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.ds;singleton:=true
 Bundle-Version: 1.1.0.qualifier
-Bundle-Vendor: Eclipse
+Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.ds.Activator
 Bundle-Description: This bundle provides support for OSGi 
  Declarative Services. This module implements a declarative service model,
@@ -40,3 +40,4 @@ Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2,
  CDC-1.1/Foundation-1.1,
  J2SE-1.4
 Lazy-ManifestFilter: (Service-Component=*)
+Bundle-Localization: plugin

@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: IO Connector Service
+Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.io
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: Eclipse
+Bundle-Version: 1.0.100.qualifier
+Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.io.impl.Activator
 Bundle-Description: This bundle contains service for creating connections. 
 Import-Package: 
@@ -22,3 +22,4 @@ Export-Package:
  org.eclipse.equinox.internal.io.util; x-internal:=true
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.0
 Provided-Services: class=org.osgi.service.io.ConnectorService
+Bundle-Localization: plugin
