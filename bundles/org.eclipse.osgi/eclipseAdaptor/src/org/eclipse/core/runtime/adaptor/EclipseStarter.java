@@ -154,7 +154,7 @@ public class EclipseStarter {
 
 	/**
 	 * Launches the platform and runs a single application. The application is either identified
-	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code> 
+	 * in the given arguments (e.g., -application &lt;app id&gt;) or in the <code>eclipse.application</code> 
 	 * System property.  This convenience method starts 
 	 * up the platform, runs the indicated application, and then shuts down the 
 	 * platform. The platform must not be running already. 
@@ -256,7 +256,7 @@ public class EclipseStarter {
 
 	/**
 	 * Starts the platform and sets it up to run a single application. The application is either identified
-	 * in the given arguments (e.g., -application &ltapp id&gt) or in the <code>eclipse.application</code>
+	 * in the given arguments (e.g., -application &lt;app id&gt;) or in the <code>eclipse.application</code>
 	 * System property.  The platform must not be running already. 
 	 * <p>
 	 * The given runnable (if not <code>null</code>) is used to tear down the splash screen if required.
