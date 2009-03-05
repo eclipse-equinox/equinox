@@ -23,14 +23,10 @@ import java.security.BasicPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedAction;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A bundle's authority to perform specific privileged administrative operations
@@ -72,7 +68,7 @@ import java.util.Map;
  * <code>execute</code> and <code>resource</code> actions.
  * <p>
  * The name of this permission is a filter expression. The filter gives access
- * to the following parameters:
+ * to the following attributes:
  * <ul>
  * <li>signer - A Distinguished Name chain used to sign a bundle. Wildcards in a
  * DN are not matched according to the filter string rules, but according to the
@@ -81,9 +77,10 @@ import java.util.Map;
  * <li>id - The bundle ID of the designated bundle.</li>
  * <li>name - The symbolic name of a bundle.</li>
  * </ul>
+ * Filter attribute names are processed in a case sensitive manner.
  * 
  * @ThreadSafe
- * @version $Revision: 6381 $
+ * @version $Revision: 6506 $
  */
 
 public final class AdminPermission extends BasicPermission {
@@ -206,11 +203,11 @@ public final class AdminPermission extends BasicPermission {
 	transient final Bundle		bundle;
 
 	/**
-	 * If this AdminPermission was constructed with a bundle, this dictionary
-	 * holds the properties of that bundle, used to match a filter in implies.
-	 * This is not initialized until necessary, and then cached in this object.
+	 * This dictionary holds the properties of the permission, used to match a
+	 * filter in implies. This is not initialized until necessary, and then
+	 * cached in this object.
 	 */
-	private transient volatile Dictionary	bundleProperties;
+	private transient volatile Dictionary	properties;
 
 	/**
 	 * Creates a new <code>AdminPermission</code> object that matches all
@@ -242,13 +239,15 @@ public final class AdminPermission extends BasicPermission {
 	 * 
 	 * @param filter A filter expression that can use signer, location, id, and
 	 *        name keys. A value of &quot;*&quot; or <code>null</code> matches
-	 *        all bundle.
+	 *        all bundle. Filter attribute names are processed in a case
+	 *        sensitive manner.
 	 * @param actions <code>class</code>, <code>execute</code>,
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>, <code>resolve</code>
 	 *        , <code>resource</code>, <code>startlevel</code> or
 	 *        <code>context</code>. A value of "*" or <code>null</code>
 	 *        indicates all actions.
+	 * @throws IllegalArgumentException If the filter has an invalid syntax.
 	 */
 	public AdminPermission(String filter, String actions) {
 		// arguments will be null if called from a PermissionInfo defined with
@@ -257,12 +256,12 @@ public final class AdminPermission extends BasicPermission {
 	}
 
 	/**
-	 * Creates a new <code>AdminPermission</code> object to be used by the code
-	 * that must check a <code>Permission</code> object.
+	 * Creates a new requested <code>AdminPermission</code> object to be used by
+	 * the code that must perform <code>checkPermission</code>.
 	 * <code>AdminPermission</code> objects created with this constructor cannot
 	 * be added to an <code>AdminPermission</code> permission collection.
 	 * 
-	 * @param bundle A bundle
+	 * @param bundle A bundle.
 	 * @param actions <code>class</code>, <code>execute</code>,
 	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
 	 *        <code>listener</code>, <code>metadata</code>, <code>resolve</code>
@@ -284,6 +283,9 @@ public final class AdminPermission extends BasicPermission {
 	 * @return permission name.
 	 */
 	private static String createName(Bundle bundle) {
+		if (bundle == null) {
+			throw new IllegalArgumentException("bundle must not be null");
+		}
 		StringBuffer sb = new StringBuffer();
 		sb.append("(id=");
 		sb.append(bundle.getBundleId());
@@ -555,6 +557,11 @@ public final class AdminPermission extends BasicPermission {
 		return mask;
 	}
 
+	/**
+	 * Returns the filter.
+	 * 
+	 * @return Current filter.
+	 */
 	synchronized Filter getFilter() {
 		return filter;
 	}
@@ -566,9 +573,14 @@ public final class AdminPermission extends BasicPermission {
 	 * @return a Filter for this bundle. If the specified filterString is
 	 *         <code>null</code> or equals "*", then <code>null</code> is
 	 *         returned to indicate a wildcard.
+	 * @throws IllegalArgumentException If the filter syntax is invalid.
 	 */
 	private static Filter parseFilter(String filterString) {
-		if ((filterString == null) || filterString.equals("*")) {
+		if (filterString == null) {
+			return null;
+		}
+		filterString = filterString.trim();
+		if (filterString.equals("*")) {
 			return null;
 		}
 		
@@ -605,14 +617,9 @@ public final class AdminPermission extends BasicPermission {
 	 * filter is "*" and this object's actions include all of the specified
 	 * permission's actions
 	 * 
-	 * @param p The permission to interrogate.
-	 * 
+	 * @param p The requested permission.
 	 * @return <code>true</code> if the specified permission is implied by this
 	 *         object; <code>false</code> otherwise.
-	 * @throws UnsupportedOperationException If this permission was constructed
-	 *         with a Bundle.
-	 * @throws IllegalArgumentException If specified permission was not
-	 *         constructed with a Bundle or "*".
 	 */
 	public boolean implies(Permission p) {
 		if (!(p instanceof AdminPermission)) {
@@ -620,14 +627,26 @@ public final class AdminPermission extends BasicPermission {
 		}
 		AdminPermission requested = (AdminPermission) p;
 		if (bundle != null) {
-			throw new UnsupportedOperationException(
-					"implies cannot be called because this permission constructed with a Bundle");
+			return false;
 		}
 		// if requested permission has a filter, then it is an invalid argument
 		if (requested.getFilter() != null) {
-			throw new IllegalArgumentException(
-					"argument must be constructed with a Bundle or filter of *");
+			return false;
 		}
+		return implies0(requested);
+	}
+
+	/**
+	 * Internal implies method. Used by the implies and the permission
+	 * collection implies methods.
+	 * 
+	 * @param requested The requested AdminPermision which has already be
+	 *        validated as a proper argument. The requested AdminPermission must
+	 *        not have a filter expression.
+	 * @return <code>true</code> if the specified permission is implied by this
+	 *         object; <code>false</code> otherwise.
+	 */
+	boolean implies0(AdminPermission requested) {
 		// check actions first - much faster
 		int requestedMask = requested.getActionsMask();
 		if ((getActionsMask() & requestedMask) != requestedMask) {
@@ -644,7 +663,7 @@ public final class AdminPermission extends BasicPermission {
 		if (requested.bundle == null) {
 			return false;
 		}
-		return f.match(requested.getProperties());
+		return f.matchCase(requested.getProperties());
 	}
 
 	/**
@@ -816,7 +835,7 @@ public final class AdminPermission extends BasicPermission {
 	 * @return a dictionary of properties for this bundle
 	 */
 	private Dictionary getProperties() {
-		Dictionary result = bundleProperties;
+		Dictionary result = properties;
 		if (result == null) {
 			final Dictionary dict = new Hashtable(4);
 			AccessController.doPrivileged(new PrivilegedAction() {
@@ -834,87 +853,9 @@ public final class AdminPermission extends BasicPermission {
 					return null;
 				}
 			});
-			bundleProperties = result = dict;
+			properties = result = dict;
 		}
 		return result;
-	}
-
-	/**
-	 * Used for Filter matching on signer key.
-	 * 
-	 */
-	private static class SignerProperty {
-		private final Bundle	bundle;
-		private final String	pattern;
-
-		/**
-		 * String constructor used by the filter matching algorithm to construct
-		 * SignerPropertys from the attribute value in the filter string.
-		 * 
-		 * @param pattern Attribute value in the filter string.
-		 */
-		public SignerProperty(String pattern) {
-			this.pattern = pattern;
-			this.bundle = null;
-		}
-
-		/**
-		 * Used by implies to build the properties for a filter match.
-		 * 
-		 * @param bundle The bundle whose signers are to be matched.
-		 */
-		SignerProperty(Bundle bundle) {
-			this.bundle = bundle;
-			this.pattern = null;
-		}
-
-		/**
-		 * Used by the filter matching algorithm to
-		 * 
-		 * @param o SignerProperty to compare against.
-		 * @return true if the DN name chain matches the pattern.
-		 */
-		public boolean equals(Object o) {
-			if (!(o instanceof SignerProperty))
-				return false;
-			SignerProperty other = (SignerProperty) o;
-			Bundle matchBundle = bundle != null ? bundle : other.bundle;
-			String matchPattern = bundle != null ? other.pattern : pattern;
-			Map/* <X509Certificate, List<X509Certificate>> */signers = matchBundle
-					.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
-			for (Iterator iSigners = signers.values().iterator(); iSigners
-					.hasNext();) {
-				List/* <X509Certificate> */signerCerts = (List) iSigners.next();
-				List/* <String> */dnChain = new ArrayList(signerCerts.size());
-				for (Iterator iCerts = signerCerts.iterator(); iCerts.hasNext();) {
-					dnChain.add(((X509Certificate) iCerts.next())
-							.getSubjectDN().getName());
-				}
-				if (FrameworkUtil.matchDistinguishedNameChain(matchPattern,
-						dnChain)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public int hashCode() {
-			// It is not possible to make unique hash codes for this object
-			// because of the way equals is implemented to behave differently
-			// when the fields are null. This is an inner class that is only
-			// used. for filter evaluations. No need to make its hashcode unique
-			// for map usage.
-			return 31;
-		}
-
-		boolean isBundleSigned() {
-			if (bundle == null) {
-				return false;
-			}
-			Map/* <X509Certificate, List<X509Certificate>> */signers = bundle
-					.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
-			return !signers.isEmpty();
-		}
 	}
 }
 
@@ -943,23 +884,19 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * Create an empty AdminPermissions object.
 	 * 
 	 */
-
 	public AdminPermissionCollection() {
 		permissions = new Hashtable();
 	}
 
 	/**
-	 * Adds a permission to the <code>AdminPermission</code> objects. The key
-	 * for the hashtable is the name
+	 * Adds a permission to this permission collection.
 	 * 
 	 * @param permission The <code>AdminPermission</code> object to add.
-	 * 
-	 * @exception IllegalArgumentException If the permission is not an
-	 *            <code>AdminPermission</code> instance.
-	 * 
-	 * @exception SecurityException If this
-	 *            <code>AdminPermissionCollection</code> object has been marked
-	 *            read-only.
+	 * @throws IllegalArgumentException If the specified permission is not an
+	 *         <code>AdminPermission</code> instance or was constructed with a
+	 *         Bundle object.
+	 * @throws SecurityException If this <code>AdminPermissionCollection</code>
+	 *         object has been marked read-only.
 	 */
 	public void add(Permission permission) {
 		if (!(permission instanceof AdminPermission)) {
@@ -1004,7 +941,6 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 * @param permission The Permission object to compare with the
 	 *        <code>AdminPermission</code> objects in this collection.
-	 * 
 	 * @return <code>true</code> if <code>permission</code> is implied by an
 	 *         <code>AdminPermission</code> in this collection,
 	 *         <code>false</code> otherwise.
@@ -1017,8 +953,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 		AdminPermission requested = (AdminPermission) permission;
 		// if requested permission has a filter, then it is an invalid argument
 		if (requested.getFilter() != null) {
-			throw new IllegalArgumentException(
-					"argument must be constructed with a Bundle or filter of *");
+			return false;
 		}
 		synchronized (this) {
 			// short circuit if the "*" Permission was added
@@ -1035,9 +970,9 @@ final class AdminPermissionCollection extends PermissionCollection {
 		}
 
 		// just iterate one by one
-		Iterator permItr = permissions.values().iterator();
-		while (permItr.hasNext()) {
-			if (((AdminPermission) permItr.next()).implies(requested)) {
+		for (Iterator iter = permissions.values().iterator(); iter
+				.hasNext();) {
+			if (((AdminPermission) iter.next()).implies0(requested)) {
 				return true;
 			}
 		}
@@ -1050,7 +985,6 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 * @return Enumeration of all <code>AdminPermission</code> objects.
 	 */
-
 	public Enumeration elements() {
 		return permissions.elements();
 	}
