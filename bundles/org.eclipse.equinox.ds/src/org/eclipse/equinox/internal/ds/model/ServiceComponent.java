@@ -59,7 +59,7 @@ public class ServiceComponent implements Externalizable {
 
 	public boolean autoenable = true;
 	public boolean immediate = false;
-	public boolean namespace11 = true;
+	public boolean namespace11 = false;
 	// --- end: XML def
 
 	// --- begin: cache
@@ -86,7 +86,7 @@ public class ServiceComponent implements Externalizable {
 			// //Activator.log.debug("getMethod() " + name, null);
 		}
 		Method method = null;
-		Class[] paramTypes = null;
+		int methodPriority = Integer.MAX_VALUE;
 		Class clazz = instance != null ? instance.getClass() : null;
 
 		while (method == null && clazz != null) {
@@ -108,14 +108,13 @@ public class ServiceComponent implements Externalizable {
 								break;
 							}
 						}
-						if (accepted) {
-							//check if the newly accepted method has more parameters than the previous one and use it
-							if (paramTypes == null || paramTypes.length < params.length) {
-								//skip the method if it is private
-								if (!Modifier.isPrivate(methods[i].getModifiers())) {
-									method = methods[i];
-									paramTypes = params;
-								}
+						if (accepted && SCRUtil.checkMethodAccess(instance.getClass(), clazz, methods[i], true)) {
+							//check if the newly accepted method has higher priority than the previous one and use it
+							int prio = getMethodPriority(params);
+							if (prio < methodPriority) {
+								//found a method with a higher priority
+								method = methods[i];
+								methodPriority = prio;
 							}
 						}
 					}
@@ -123,6 +122,14 @@ public class ServiceComponent implements Externalizable {
 			} else {
 				try {
 					method = clazz.getDeclaredMethod(methodName, ACTIVATE_METHODS_PARAMETERS);
+					if (method != null) {
+						if (!SCRUtil.checkMethodAccess(instance.getClass(), clazz, method, false)) {
+							//the method is not accessible. Stop the search
+							Activator.log(bc, LogService.LOG_WARNING, "[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the class: " + clazz, null);
+							method = null;
+							break;
+						}
+					}
 				} catch (NoSuchMethodException e) {
 					// the method activate/deactivate may not exist in the component implementation class
 				}
@@ -136,16 +143,33 @@ public class ServiceComponent implements Externalizable {
 		}
 		if (method != null) {
 			int modifiers = method.getModifiers();
-			if (Modifier.isProtected(modifiers)) {
+			if (!Modifier.isPublic(modifiers)) {
 				SCRUtil.setAccessible(method);
-			} else if (!Modifier.isPublic(modifiers)) {
-				// not protected neither public
-				Activator.log(bc, LogService.LOG_WARNING, "[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the implementation class of component: " + this, null);
-				method = null;
 			}
 		}
-
 		return method;
+	}
+
+	private int getMethodPriority(Class[] params) {
+		int priority = Integer.MAX_VALUE;
+		if (params.length == 1) {
+			if (params[0] == ComponentContext.class) {
+				priority = 0; //highest priority
+			} else if (params[0] == BundleContext.class) {
+				priority = 1;
+			} else if (params[0] == Map.class) {
+				priority = 2;
+			} else if (params[0] == int.class) {
+				priority = 3;
+			} else if (params[0] == Integer.class) {
+				priority = 4;
+			}
+		} else if (params.length >= 2) {
+			priority = 5;
+		} else if (params.length == 0) {
+			priority = 6;
+		}
+		return priority;
 	}
 
 	void activate(Object instance, ComponentContext context) throws ComponentException {
