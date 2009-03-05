@@ -23,8 +23,10 @@ import java.net.*;
  */
 public final class URIUtil {
 
+	private static final String JAR_SUFFIX = "!/"; //$NON-NLS-1$
 	private static final String UNC_PREFIX = "//"; //$NON-NLS-1$
 	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
+	private static final String SCHEME_JAR = "jar"; //$NON-NLS-1$
 
 	private URIUtil() {
 		// prevent instantiation
@@ -212,6 +214,32 @@ public final class URIUtil {
 			return null;
 		//assume all illegal characters have been properly encoded, so use URI class to unencode
 		return new File(uri.getSchemeSpecificPart());
+	}
+
+	/**
+	 * Returns a Java ARchive (JAR) URI for an entry in a jar or zip file.  The given input URI 
+	 * should represent a zip or jar file, but this method will not check for existence or 
+	 * validity of a file at the given URI.
+	 * <p>
+	 * The entry path parameter can optionally be used to obtain the URI of an entry
+	 * in a zip or jar file. If an entry path of <code>null</code> is provided, the resulting
+	 * URI will represent the jar file itself.
+	 * </p>
+	 * 
+	 * @param uri The URI of a zip or jar file
+	 * @param entryPath The path of a file inside the jar, or <code>null</code> to
+	 * obtain the URI for the jar file itself.
+	 * @return A URI with the "jar" scheme for the given input URI and entry path
+	 * @see JarURLConnection
+	 */
+	public static URI toJarURI(URI uri, IPath entryPath) {
+		try {
+			//must deconstruct the input URI to obtain unencoded strings, and then pass to URI constructor that will encode the entry path
+			return new URI(SCHEME_JAR, uri.getScheme() + ':' + uri.getSchemeSpecificPart() + JAR_SUFFIX + entryPath.toString(), null);
+		} catch (URISyntaxException e) {
+			//should never happen
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
