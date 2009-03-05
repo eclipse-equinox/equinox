@@ -41,7 +41,7 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 		return (ConditionInfo[]) SecurityRow.cloneArray(conditionInfos);
 	}
 
-	public String getGrantDecision() {
+	public String getAccessDecision() {
 		return decision;
 	}
 
@@ -79,7 +79,7 @@ public class SecurityRowSnapShot implements ConditionalPermissionInfo {
 	}
 
 	public int hashCode() {
-		return SecurityRow.getHashCode(name, conditionInfos, permissionInfos, getGrantDecision());
+		return SecurityRow.getHashCode(name, conditionInfos, permissionInfos, getAccessDecision());
 	}
 
 }

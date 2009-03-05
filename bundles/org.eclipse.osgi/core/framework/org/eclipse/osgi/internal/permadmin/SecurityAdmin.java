@@ -349,7 +349,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 					name = generateName();
 				if (names.contains(name))
 					throw new IllegalStateException("Duplicate name \"" + name + "\" at row: " + i); //$NON-NLS-1$//$NON-NLS-2$
-				newRows[i] = new SecurityRow(this, name, infoBaseRow.getConditionInfos(), infoBaseRow.getPermissionInfos(), infoBaseRow.getGrantDecision());
+				newRows[i] = new SecurityRow(this, name, infoBaseRow.getConditionInfos(), infoBaseRow.getPermissionInfos(), infoBaseRow.getAccessDecision());
 			}
 			condAdminTable = new SecurityTable(this, newRows);
 			try {

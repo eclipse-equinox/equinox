@@ -217,7 +217,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		return conditionInfos;
 	}
 
-	public String getGrantDecision() {
+	public String getAccessDecision() {
 		return deny ? ConditionalPermissionInfo.DENY : ConditionalPermissionInfo.ALLOW;
 	}
 
@@ -370,7 +370,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	}
 
 	public int hashCode() {
-		return getHashCode(name, internalGetConditionInfos(), internalGetPermissionInfos(), getGrantDecision());
+		return getHashCode(name, internalGetConditionInfos(), internalGetPermissionInfos(), getAccessDecision());
 	}
 
 	static int getHashCode(String name, ConditionInfo[] conds, PermissionInfo[] perms, String decision) {
