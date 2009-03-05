@@ -11,6 +11,7 @@ package org.eclipse.osgi.framework.internal.protocol;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.net.*;
+import org.eclipse.osgi.framework.internal.core.Framework;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
 public class MultiplexingURLStreamHandler extends URLStreamHandler {
@@ -64,11 +65,17 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			toExternalFormMethod = URLStreamHandler.class.getDeclaredMethod("toExternalForm", new Class[] {URL.class}); //$NON-NLS-1$
 			toExternalFormMethod.setAccessible(true);
 
-			handlerField = URL.class.getDeclaredField("handler"); //$NON-NLS-1$
+			try {
+				handlerField = URL.class.getDeclaredField("handler"); //$NON-NLS-1$
+			} catch (NoSuchFieldException e) {
+				handlerField = Framework.getField(URL.class, URLStreamHandler.class, true);
+				if (handlerField == null)
+					throw e;
+			}
 			handlerField.setAccessible(true);
 		} catch (Exception e) {
 			factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "initializeMethods", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 		methodsInitialized = true;
 	}

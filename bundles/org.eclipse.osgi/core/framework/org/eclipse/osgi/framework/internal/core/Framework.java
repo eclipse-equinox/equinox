@@ -1468,13 +1468,15 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	}
 
-	private static Field getStaticField(Class clazz, Class type) {
+	public static Field getField(Class clazz, Class type, boolean instance) {
 		Field[] fields = clazz.getDeclaredFields();
-		for (int i = 0; i < fields.length; i++)
-			if (Modifier.isStatic(fields[i].getModifiers()) && fields[i].getType().equals(type)) {
+		for (int i = 0; i < fields.length; i++) {
+			boolean isStatic = Modifier.isStatic(fields[i].getModifiers());
+			if (instance != isStatic && fields[i].getType().equals(type)) {
 				fields[i].setAccessible(true);
 				return fields[i];
 			}
+		}
 		return null;
 	}
 
@@ -1497,7 +1499,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private static void forceContentHandlerFactory(ContentHandlerFactory chf) throws Exception {
-		Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+		Field factoryField = getField(URLConnection.class, java.net.ContentHandlerFactory.class, false);
 		if (factoryField == null)
 			throw new Exception("Could not find ContentHandlerFactory field"); //$NON-NLS-1$
 		synchronized (URLConnection.class) {
@@ -1527,7 +1529,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	private void uninstallContentHandlerFactory() {
 		try {
-			Field factoryField = getStaticField(URLConnection.class, java.net.ContentHandlerFactory.class);
+			Field factoryField = getField(URLConnection.class, java.net.ContentHandlerFactory.class, false);
 			if (factoryField == null)
 				return; // oh well, we tried.
 			synchronized (URLConnection.class) {
@@ -1558,7 +1560,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private static void resetContentHandlers() throws IllegalAccessException {
-		Field handlersField = getStaticField(URLConnection.class, Hashtable.class);
+		Field handlersField = getField(URLConnection.class, Hashtable.class, false);
 		if (handlersField != null) {
 			Hashtable handlers = (Hashtable) handlersField.get(null);
 			if (handlers != null)
@@ -1584,7 +1586,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private static void forceURLStreamHandlerFactory(StreamHandlerFactory shf) throws Exception {
-		Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+		Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
 		if (factoryField == null)
 			throw new Exception("Could not find URLStreamHandlerFactory field"); //$NON-NLS-1$
 		// look for a lock to synchronize on
@@ -1614,7 +1616,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 	private void uninstallURLStreamHandlerFactory() {
 		try {
-			Field factoryField = getStaticField(URL.class, URLStreamHandlerFactory.class);
+			Field factoryField = getField(URL.class, URLStreamHandlerFactory.class, false);
 			if (factoryField == null)
 				return; // oh well, we tried
 			Object lock = getURLStreamHandlerFactoryLock();
@@ -1655,7 +1657,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	private static void resetURLStreamHandlers() throws IllegalAccessException {
-		Field handlersField = getStaticField(URL.class, Hashtable.class);
+		Field handlersField = getField(URL.class, Hashtable.class, false);
 		if (handlersField != null) {
 			Hashtable handlers = (Hashtable) handlersField.get(null);
 			if (handlers != null)
