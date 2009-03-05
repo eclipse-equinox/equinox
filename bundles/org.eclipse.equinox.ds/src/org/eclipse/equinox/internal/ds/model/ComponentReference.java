@@ -98,7 +98,7 @@ public class ComponentReference implements Externalizable {
 				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
 
-			if (method != null)
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
 				break;
 
 			// we need a serviceObject to keep looking, create one if necessary
@@ -108,15 +108,14 @@ public class ComponentReference implements Externalizable {
 					serviceObject = InstanceProcess.staticRef.getService(reference, serviceReference);
 				}
 				if (serviceObject == null) {
-					// we could not create a serviceObject because of
-					// circularity
+					// we could not create a serviceObject because of circularity
+					logWarning("[SCR] Could not get the service object relevant to the reference. A very possible reason is a circularity problem.", null, reference);
 					return null;
 				}
 				componentInstance.bindedServices.put(serviceReference, serviceObject);
 				serviceObjectClass = serviceObject.getClass();
 
-				// figure out the interface class - this is guaranteed to
-				// succeed or else
+				// figure out the interface class - this is guaranteed to succeed or else
 				// the framework would not have let us have the service object
 				Class searchForInterfaceClass = serviceObjectClass;
 				while (searchForInterfaceClass != null) {
@@ -154,7 +153,7 @@ public class ComponentReference implements Externalizable {
 				// this may happen on skelmir VM or in case of class loading problems
 				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
 			}
-			if (method != null)
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
 				break;
 
 			// 3) check for bind(class.isAssignableFrom(serviceObjectClass))
@@ -168,7 +167,7 @@ public class ComponentReference implements Externalizable {
 					break;
 				}
 			}
-			if (method != null)
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
 				break;
 
 			//implement search for bind/unbind methods according to schema v1.1.0
@@ -180,7 +179,7 @@ public class ComponentReference implements Externalizable {
 						break;
 					}
 				}
-				if (method != null)
+				if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, true))
 					break;
 
 				for (int i = 0; i < methods.length; i++) {
@@ -190,9 +189,9 @@ public class ComponentReference implements Externalizable {
 						break;
 					}
 				}
-				if (method != null)
-					break;
 			}
+			if (method != null)
+				break;
 
 			// we couldn't find the method - try the superclass
 			consumerClass = consumerClass.getSuperclass();
@@ -203,29 +202,33 @@ public class ComponentReference implements Externalizable {
 			return null;
 		}
 
-		// if method is not protected or public, log error message
-		int modifier = method.getModifiers();
-		if (!(Modifier.isProtected(modifier) || Modifier.isPublic(modifier))) {
-			logMethodNotVisible(componentInstance, reference, methodName, method.getParameterTypes()[0]);
+		if (!SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11)) {
+			// if method is not visible, log error message
+			logMethodNotVisible(componentInstance, reference, methodName, method.getParameterTypes());
 			return null;
 		}
 
-		if (Modifier.isProtected(modifier)) {
+		int modifier = method.getModifiers();
+		if (!Modifier.isPublic(modifier)) {
 			SCRUtil.setAccessible(method);
 		}
 
 		return method;
 	}
 
-	private void logMethodNotVisible(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class param_interfaceClass) {
-		String param_interfaceName = param_interfaceClass.getName();
+	private void logMethodNotVisible(ComponentInstanceImpl componentInstance, Reference reference, String methodName, Class[] param_interfaceClasses) {
 		StringBuffer buffer = createBuffer();
 		buffer.append("[SCR] Method "); //$NON-NLS-1$
 		buffer.append(methodName);
 		buffer.append('(');
-		buffer.append(param_interfaceName);
+		for (int i = 0; i < param_interfaceClasses.length; i++) {
+			buffer.append(param_interfaceClasses[i].getName());
+			if (i < param_interfaceClasses.length - 1) {
+				buffer.append(',');
+			}
+		}
 		buffer.append(')');
-		buffer.append(" is not protected or public!"); //$NON-NLS-1$
+		buffer.append(" is not accessible!"); //$NON-NLS-1$
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
 		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, message, null);
