@@ -694,7 +694,7 @@ public class DeclarationParser implements ExTagListener {
 		String qualifier = getNamespaceQualifier(tagName);
 		String namespace = getCurrentNamespace(qualifier);
 		if (!rootPassed) { // this is the root element
-			return namespace.length() == 0 || namespace.equals(XMLNS_1_1);
+			return namespace.length() != 0 && namespace.equals(XMLNS_1_1);
 		} else { // not a root element
 			return namespace.equals(XMLNS_1_1);
 		}
