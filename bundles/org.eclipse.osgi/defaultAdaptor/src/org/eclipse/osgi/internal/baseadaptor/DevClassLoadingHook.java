@@ -11,10 +11,12 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
+import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
@@ -44,7 +46,9 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 				result = true;
 			else {
 				// if in dev mode, try using the cp as an absolute path
-				ClasspathEntry entry = hostmanager.getExternalClassPath(devClassPath[i], sourcedata, sourcedomain);
+				// we assume absolute entries come from fragments.  Find the source
+				BaseData fragData = findFragmentSource(sourcedata, devClassPath[i], hostmanager);
+				ClasspathEntry entry = hostmanager.getExternalClassPath(devClassPath[i], fragData, sourcedomain);
 				if (entry != null) {
 					cpEntries.add(entry);
 					result = true;
@@ -56,6 +60,22 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 		if (result && cpEntries.size() > 0)
 			((ClasspathEntry) cpEntries.get(0)).addUserObject(this);
 		return result;
+	}
+
+	private BaseData findFragmentSource(BaseData hostData, String cp, ClasspathManager manager) {
+		if (hostData != manager.getBaseData())
+			return hostData;
+		File file = new File(cp);
+		if (!file.isAbsolute())
+			return hostData;
+		FragmentClasspath[] fragCP = manager.getFragmentClasspaths();
+		for (int i = 0; i < fragCP.length; i++) {
+			BundleFile fragBase = fragCP[i].getBundleData().getBundleFile();
+			File fragFile = fragBase.getBaseFile();
+			if (fragFile != null && file.getPath().startsWith(fragFile.getPath()))
+				return fragCP[i].getBundleData();
+		}
+		return hostData;
 	}
 
 	public String findLibrary(BaseData data, String libName) {

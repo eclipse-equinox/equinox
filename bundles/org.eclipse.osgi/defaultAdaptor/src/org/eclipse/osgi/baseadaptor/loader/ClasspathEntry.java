@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.baseadaptor.loader;
 
 import java.security.ProtectionDomain;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
@@ -24,9 +25,11 @@ import org.eclipse.osgi.framework.util.KeyedHashSet;
  * @since 3.2
  */
 public class ClasspathEntry {
-	private BundleFile bundlefile;
-	private ProtectionDomain domain;
+	private final BundleFile bundlefile;
+	private final ProtectionDomain domain;
 	private KeyedHashSet userObjects = null;
+	// Note that PDE has internal dependency on this field type/name (bug 267238)
+	private volatile BaseData data;
 
 	/**
 	 * Constructs a ClasspathElement with the specified bundlefile and domain
@@ -44,6 +47,18 @@ public class ClasspathEntry {
 	 */
 	public BundleFile getBundleFile() {
 		return bundlefile;
+	}
+
+	/**
+	 * Returns the base data which this entry is associated with.  This can be
+	 * either a host or fragment base data.
+	 */
+	public BaseData getBaseData() {
+		return data;
+	}
+
+	void setBaseData(BaseData data) {
+		this.data = data;
 	}
 
 	/**

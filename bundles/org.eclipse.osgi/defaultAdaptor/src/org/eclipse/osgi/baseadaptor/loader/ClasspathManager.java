@@ -48,8 +48,10 @@ public class ClasspathManager {
 
 	private BaseData data;
 	private String[] classpath;
+	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private ClasspathEntry[] entries;
 	private BaseClassLoader classloader;
+	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private FragmentClasspath[] fragments = emptyFragments;
 	// a collection of String[2], each element is {"libname", "libpath"}
 	private Collection loadedLibraries = null;
@@ -183,10 +185,10 @@ public class ClasspathManager {
 	 */
 	public static boolean addClassPathEntry(ArrayList result, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		if (cp.equals(".")) { //$NON-NLS-1$
-			result.add(hostloader.createClassPathEntry(sourcedata.getBundleFile(), sourcedomain));
+			result.add(hostloader.createClassPathEntry(sourcedata.getBundleFile(), sourcedomain, sourcedata));
 			return true;
 		}
-		Object element = hostloader.getClasspath(cp, sourcedata, sourcedomain);
+		ClasspathEntry element = hostloader.getClasspath(cp, sourcedata, sourcedomain);
 		if (element != null) {
 			result.add(element);
 			return true;
@@ -223,7 +225,7 @@ public class ClasspathManager {
 		else if ((file = sourcedata.getBundleFile().getFile(cp, false)) != null)
 			bundlefile = createBundleFile(file, sourcedata);
 		if (bundlefile != null)
-			return createClassPathEntry(bundlefile, sourcedomain);
+			return createClassPathEntry(bundlefile, sourcedomain, sourcedata);
 		return null;
 	}
 
@@ -240,7 +242,7 @@ public class ClasspathManager {
 			return null;
 		BundleFile bundlefile = createBundleFile(file, sourcedata);
 		if (bundlefile != null)
-			return createClassPathEntry(bundlefile, sourcedomain);
+			return createClassPathEntry(bundlefile, sourcedomain, sourcedata);
 		return null;
 	}
 
@@ -255,8 +257,10 @@ public class ClasspathManager {
 		return null;
 	}
 
-	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain) {
-		return classloader.createClassPathEntry(bundlefile, cpDomain);
+	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain, BaseData data) {
+		ClasspathEntry entry = classloader.createClassPathEntry(bundlefile, cpDomain);
+		entry.setBaseData(data);
+		return entry;
 	}
 
 	/**

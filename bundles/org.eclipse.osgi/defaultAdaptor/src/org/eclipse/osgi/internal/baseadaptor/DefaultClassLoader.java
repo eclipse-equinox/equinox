@@ -51,6 +51,7 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 
 	protected ClassLoaderDelegate delegate;
 	protected ProtectionDomain domain;
+	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	protected ClasspathManager manager;
 
 	/**
