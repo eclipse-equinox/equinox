@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.tests;
 import junit.framework.*;
 import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.composites.AllCompositeTests;
+import org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
 import org.eclipse.osgi.tests.filter.FilterTests;
 import org.eclipse.osgi.tests.internal.plugins.InstallTests;
@@ -45,6 +46,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(new TestSuite(InstallTests.class));
 		suite.addTest(org.eclipse.osgi.tests.eclipseadaptor.AllTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.services.resolver.AllTests.suite());
+		suite.addTest(DebugOptionsTestCase.suite());
 		suite.addTest(org.eclipse.osgi.tests.security.SecurityTestSuite.suite());
 		suite.addTest(org.eclipse.osgi.tests.appadmin.AllTests.suite());
 		suite.addTest(new TestSuite(ExceptionHandlerTests.class));

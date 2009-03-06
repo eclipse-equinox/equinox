@@ -46,8 +46,10 @@ public class SystemBundleActivator implements BundleActivator {
 		if (framework.startLevelManager != null)
 			startLevel = register(new String[] {Constants.OSGI_STARTLEVEL_NAME}, framework.startLevelManager, null);
 		FrameworkDebugOptions dbgOptions = null;
-		if ((dbgOptions = FrameworkDebugOptions.getDefault()) != null)
+		if ((dbgOptions = FrameworkDebugOptions.getDefault()) != null) {
+			dbgOptions.start(context);
 			debugOptions = register(new String[] {org.eclipse.osgi.service.debug.DebugOptions.class.getName()}, dbgOptions, null);
+		}
 		ClassLoader tccl = framework.getContextFinder();
 		if (tccl != null) {
 			Hashtable props = new Hashtable(7);
@@ -75,8 +77,12 @@ public class SystemBundleActivator implements BundleActivator {
 			securityAdmin.unregister();
 		if (startLevel != null)
 			startLevel.unregister();
-		if (debugOptions != null)
+		if (debugOptions != null) {
+			FrameworkDebugOptions dbgOptions = FrameworkDebugOptions.getDefault();
+			if (dbgOptions != null)
+				dbgOptions.stop(context);
 			debugOptions.unregister();
+		}
 		if (contextFinder != null)
 			contextFinder.unregister();
 
