@@ -28,6 +28,11 @@ public final class URIUtil {
 	private static final String SCHEME_FILE = "file"; //$NON-NLS-1$
 	private static final String SCHEME_JAR = "jar"; //$NON-NLS-1$
 
+	private static final boolean decodeResolved;
+	static {
+		decodeResolved = URI.create("foo:/a%20b/").resolve("c").getSchemeSpecificPart().indexOf('%') > 0; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	private URIUtil() {
 		// prevent instantiation
 	}
@@ -46,7 +51,7 @@ public final class URIUtil {
 	 * like a traditional path append and always preserves all segments of the base path.
 	 * 
 	 * @param base The base URI to append to
-	 * @param extension The path extension to be added
+	 * @param extension The unencoded path extension to be added
 	 * @return The appended URI
 	 */
 	public static URI append(URI base, String extension) {
@@ -57,7 +62,11 @@ public final class URIUtil {
 			//if the base is already a directory then resolve will just do the right thing
 			URI result;
 			if (path.endsWith("/")) {//$NON-NLS-1$
-				result = base.resolve(extension);
+				result = base.resolve(new URI(null, extension, null));
+				if (decodeResolved) {
+					//see bug 267219 - Java 1.4 implementation of URI#resolve incorrectly encoded the ssp
+					result = new URI(toUnencodedString(result));
+				}
 			} else {
 				path = path + '/' + extension;
 				result = new URI(base.getScheme(), base.getUserInfo(), base.getHost(), base.getPort(), path, base.getQuery(), base.getFragment());
@@ -66,7 +75,7 @@ public final class URIUtil {
 			//Fix UNC paths that are incorrectly normalized by URI#resolve (see Java bug 4723726)
 			String resultPath = result.getPath();
 			if (isFileURI(base) && path != null && path.startsWith(UNC_PREFIX) && (resultPath == null || !resultPath.startsWith(UNC_PREFIX)))
-				result = new URI(result.getScheme(), "///" + result.getSchemeSpecificPart(), result.getFragment()); //$NON-NLS-1$
+				result = new URI(result.getScheme(), ensureUNCPath(result.getSchemeSpecificPart()), result.getFragment());
 			return result;
 		} catch (URISyntaxException e) {
 			//shouldn't happen because we started from a valid URI
@@ -85,6 +94,20 @@ public final class URIUtil {
 		else
 			ssp = ssp + "/" + extension; //$NON-NLS-1$
 		return new URI(base.getScheme(), ssp, base.getFragment());
+	}
+
+	/**
+	 * Ensures the given path string starts with exactly four leading slashes.
+	 */
+	private static String ensureUNCPath(String path) {
+		int len = path.length();
+		StringBuffer result = new StringBuffer(len);
+		for (int i = 0; i < 4; i++) {
+			if (i >= len || path.charAt(i) != '/')
+				result.append('/');
+		}
+		result.append(path);
+		return result.toString();
 	}
 
 	/**
@@ -258,7 +281,7 @@ public final class URIUtil {
 				pathString = '/' + pathString;
 			else if (pathString.startsWith(UNC_PREFIX) && !pathString.startsWith(UNC_PREFIX, 2)) {
 				//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
-				pathString = UNC_PREFIX + pathString;
+				pathString = ensureUNCPath(pathString);
 			}
 			return new URI(SCHEME_FILE, pathString, null);
 		}
