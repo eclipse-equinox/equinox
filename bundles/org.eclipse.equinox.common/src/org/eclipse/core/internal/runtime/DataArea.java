@@ -29,6 +29,8 @@ public class DataArea {
 	/* package */static final String F_META_AREA = ".metadata"; //$NON-NLS-1$
 	/* package */static final String F_PLUGIN_DATA = ".plugins"; //$NON-NLS-1$
 	/* package */static final String F_LOG = ".log"; //$NON-NLS-1$
+	/* package */static final String F_TRACE = "trace.log"; //$NON-NLS-1$
+
 	/**
 	 * Internal name of the preference storage file (value <code>"pref_store.ini"</code>) in this plug-in's (read-write) state area.
 	 */
@@ -87,6 +89,15 @@ public class DataArea {
 		if (location == null)
 			throw new IllegalStateException(CommonMessages.meta_instanceDataUnspecified);
 		return location.append(F_META_AREA).append(F_LOG);
+	}
+
+	public IPath getTraceLocation() throws IllegalStateException {
+
+		DebugOptions debugOptions = Activator.getDefault().getDebugOptions();
+		if (debugOptions == null) {
+			return null;
+		}
+		return new Path(debugOptions.getFile().getAbsolutePath());
 	}
 
 	/**
@@ -151,18 +162,30 @@ public class DataArea {
 			throw new CoreException(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, IRuntimeConstants.FAILED_WRITE_METADATA, message, null));
 		}
 		// set the log file location now that we created the data area
-		IPath path = location.append(F_META_AREA).append(F_LOG);
+		IPath logPath = location.append(F_META_AREA).append(F_LOG);
 		try {
 			Activator activator = Activator.getDefault();
 			if (activator != null) {
 				FrameworkLog log = activator.getFrameworkLog();
 				if (log != null)
-					log.setFile(path.toFile(), true);
+					log.setFile(logPath.toFile(), true);
 				else if (debug())
-					System.out.println("ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled.");
+					System.out.println("ERROR: Unable to acquire log service. Application will proceed, but logging will be disabled."); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+
+		// set the trace file location now that we created the data area
+		IPath tracePath = location.append(F_META_AREA).append(F_TRACE);
+		Activator activator = Activator.getDefault();
+		if (activator != null) {
+			DebugOptions debugOptions = activator.getDebugOptions();
+			if (debugOptions != null) {
+				debugOptions.setFile(tracePath.toFile());
+			} else {
+				System.out.println("ERROR: Unable to acquire debug service. Application will proceed, but debugging will be disabled."); //$NON-NLS-1$
+			}
 		}
 	}
 
