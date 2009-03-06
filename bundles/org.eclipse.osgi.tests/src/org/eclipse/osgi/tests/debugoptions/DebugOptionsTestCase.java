@@ -33,9 +33,9 @@ public class DebugOptionsTestCase extends TestCase {
 
 	protected void setUp() throws Exception {
 		ref = OSGiTestsActivator.getContext().getServiceReference(DebugOptions.class.getName());
-		assertNotNull("DebugOptions service is not available", ref);
+		assertNotNull("DebugOptions service is not available", ref); //$NON-NLS-1$
 		debugOptions = (DebugOptions) OSGiTestsActivator.getContext().getService(ref);
-		assertNotNull("DebugOptions service is not available", debugOptions);
+		assertNotNull("DebugOptions service is not available", debugOptions); //$NON-NLS-1$
 		props = new Hashtable();
 		props.put(DebugOptions.LISTENER_SYMBOLICNAME, getName());
 		listener = new TestDebugOptionsListener();
@@ -60,13 +60,13 @@ public class DebugOptionsTestCase extends TestCase {
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
 		debugOptions.setDebugEnabled(true);
-		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled());
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
 		Map checkValues = new HashMap();
-		checkValues.put(getName() + "/debug", "true");
+		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		listener.setCheckValues(checkValues);
-		debugOptions.setOption(getName() + "/debug", "true");
+		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
-		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue());
+		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 		debugOptions.setDebugEnabled(false);
 	}
 
@@ -75,13 +75,13 @@ public class DebugOptionsTestCase extends TestCase {
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
 		debugOptions.setDebugEnabled(true);
-		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled());
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
 		Map checkValues = new HashMap();
-		checkValues.put(getName() + "/debug", "false");
+		checkValues.put(getName() + "/debug", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		listener.setCheckValues(checkValues);
-		debugOptions.setOption(getName() + "/debug", "true");
+		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
-		assertNotNull("Should find bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue());
+		assertNotNull("Should find bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 		debugOptions.setDebugEnabled(false);
 	}
 
@@ -91,34 +91,34 @@ public class DebugOptionsTestCase extends TestCase {
 			return; // cannot test
 		TestDebugOptionsListener anotherListener = new TestDebugOptionsListener();
 		Dictionary anotherProps = new Hashtable();
-		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, "anotherListener");
+		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, "anotherListener"); //$NON-NLS-1$
 		ServiceRegistration anotherReg = OSGiTestsActivator.getContext().registerService(DebugOptionsListener.class.getName(), anotherListener, anotherProps);
-		assertTrue("Not called", anotherListener.gotCalled());
+		assertTrue("Not called", anotherListener.gotCalled()); //$NON-NLS-1$
 		anotherListener.clear();
 
 		debugOptions.setDebugEnabled(true);
-		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled());
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
 
 		Map checkValues = new HashMap();
-		checkValues.put(getName() + "/debug", "true");
+		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		listener.setCheckValues(checkValues);
-		debugOptions.setOption(getName() + "/debug", "true");
-		assertFalse("Should not call wrong listener", anotherListener.gotCalled());
+		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertFalse("Should not call wrong listener", anotherListener.gotCalled()); //$NON-NLS-1$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
-		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue());
+		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
 		listener.clear();
 		anotherListener.clear();
-		debugOptions.setOption("anotherListener/test", "blah");
-		assertFalse("Listener should not have been called", listener.gotCalled());
-		assertTrue("Another listener should have been called", anotherListener.gotCalled());
+		debugOptions.setOption("anotherListener/test", "blah"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertFalse("Listener should not have been called", listener.gotCalled()); //$NON-NLS-1$
+		assertTrue("Another listener should have been called", anotherListener.gotCalled()); //$NON-NLS-1$
 
 		listener.clear();
 		anotherListener.clear();
 		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, getName());
 		anotherReg.setProperties(anotherProps);
-		debugOptions.setOption(getName() + "/debug", "false");
+		debugOptions.setOption(getName() + "/debug", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
-		assertTrue("Another listener did not get called", anotherListener.gotCalled());
+		assertTrue("Another listener did not get called", anotherListener.gotCalled()); //$NON-NLS-1$
 
 		debugOptions.setDebugEnabled(false);
 		anotherReg.unregister();
