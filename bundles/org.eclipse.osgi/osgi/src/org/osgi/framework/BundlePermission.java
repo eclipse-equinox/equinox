@@ -17,23 +17,36 @@
 package org.osgi.framework;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamField;
 import java.security.BasicPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * A bundle's authority to require or provide a bundle or to receive or attach
  * fragments.
  * 
  * <p>
- * A bundle symbolic name defines a unique fully qualified name.
- * <p>
- * For example:
+ * A bundle symbolic name defines a unique fully qualified name. Wildcards may
+ * be used.
+ * 
+ * <pre>
+ * name ::= &lt;symbolic name&gt; | &lt;symbolic name ending in &quot;.*&quot;&gt; | *
+ * </pre>
+ * 
+ * Examples:
  * 
  * <pre>
  * org.osgi.example.bundle
+ * org.osgi.example.*
+ * *
  * </pre>
  * 
  * <p>
@@ -43,7 +56,7 @@ import java.util.Hashtable;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 6479 $
+ * @version $Revision: 6522 $
  */
 
 public final class BundlePermission extends BasicPermission {
@@ -105,9 +118,9 @@ public final class BundlePermission extends BasicPermission {
 	 * for that symbolic name; a bundle that specifies a fragment host must have
 	 * the appropriate <code>BundlePermission</code> for that symbolic name.
 	 * 
-	 * @param symbolicName the bundle symbolic name.
-	 * @param actions <code>PROVIDE</code>,<code>REQUIRE</code>,
-	 *        <code>HOST</code>,<code>FRAGMENT</code> (canonical order).
+	 * @param symbolicName The bundle symbolic name.
+	 * @param actions <code>provide</code>,<code>require</code>,
+	 *        <code>host</code>,<code>fragment</code> (canonical order).
 	 */
 	public BundlePermission(String symbolicName, String actions) {
 		this(symbolicName, parseActions(actions));
@@ -279,20 +292,19 @@ public final class BundlePermission extends BasicPermission {
 	 *       x.y,&quot;provide&quot; -&gt; x.y.z, &quot;provide&quot;  is false
 	 * </pre>
 	 * 
-	 * @param p The target permission to interrogate.
+	 * @param p The requested permission.
 	 * @return <code>true</code> if the specified <code>BundlePermission</code>
 	 *         action is implied by this object; <code>false</code> otherwise.
 	 */
 	public boolean implies(Permission p) {
-		if (p instanceof BundlePermission) {
-			BundlePermission requested = (BundlePermission) p;
-
-			int requestedMask = requested.getActionsMask();
-			return ((getActionsMask() & requestedMask) == requestedMask)
-					&& super.implies(p);
+		if (!(p instanceof BundlePermission)) {
+			return false;
 		}
+		BundlePermission requested = (BundlePermission) p;
 
-		return false;
+		int requestedMask = requested.getActionsMask();
+		return ((getActionsMask() & requestedMask) == requestedMask)
+				&& super.implies(p);
 	}
 
 	/**
@@ -301,8 +313,8 @@ public final class BundlePermission extends BasicPermission {
 	 * 
 	 * <p>
 	 * Always returns present <code>BundlePermission</code> actions in the
-	 * following order: <code>PROVIDE</code>,<code>REQUIRE</code>,
-	 * <code>HOST</code>,<code>FRAGMENT.
+	 * following order: <code>provide</code>, <code>require</code>,
+	 * <code>host</code>, <code>fragment</code>.
 	 * 
 	 * @return Canonical string representation of the <code>BundlePermission
 	 *         </code> actions.
@@ -428,19 +440,14 @@ public final class BundlePermission extends BasicPermission {
  */
 
 final class BundlePermissionCollection extends PermissionCollection {
-
-	/**
-	 * Comment for <code>serialVersionUID</code>
-	 */
 	private static final long	serialVersionUID	= 3258407326846433079L;
 
 	/**
 	 * Table of permissions.
 	 * 
-	 * @serial
 	 * @GuardedBy this
 	 */
-	private final Hashtable		permissions;
+	private transient Map		permissions;
 
 	/**
 	 * Boolean saying if "*" is in the collection.
@@ -455,7 +462,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public BundlePermissionCollection() {
-		permissions = new Hashtable();
+		permissions = new HashMap();
 		all_allowed = false;
 	}
 
@@ -469,31 +476,30 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 *         object has been marked read-only.
 	 */
 	public void add(final Permission permission) {
-		if (!(permission instanceof BundlePermission))
+		if (!(permission instanceof BundlePermission)) {
 			throw new IllegalArgumentException("invalid permission: "
 					+ permission);
-		if (isReadOnly())
+		}
+		if (isReadOnly()) {
 			throw new SecurityException("attempt to add a Permission to a "
 					+ "readonly PermissionCollection");
-
+		}
 		final BundlePermission bp = (BundlePermission) permission;
 		final String name = bp.getName();
-		final int newMask = bp.getActionsMask();
-
 		synchronized (this) {
-			final BundlePermission existing = (BundlePermission) permissions
-					.get(name);
-
+			Map pc = permissions;
+			BundlePermission existing = (BundlePermission) pc.get(name);
 			if (existing != null) {
 				final int oldMask = existing.getActionsMask();
+				final int newMask = bp.getActionsMask();
 				if (oldMask != newMask) {
-					permissions.put(name, new BundlePermission(name, oldMask
+					pc.put(name, new BundlePermission(name, oldMask
 							| newMask));
 
 				}
 			}
 			else {
-				permissions.put(name, bp);
+				pc.put(name, bp);
 			}
 
 			if (!all_allowed) {
@@ -513,18 +519,21 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 *         of a permission in the set; <code>false</code> otherwise.
 	 */
 	public boolean implies(final Permission permission) {
-		if (!(permission instanceof BundlePermission))
+		if (!(permission instanceof BundlePermission)) {
 			return false;
-		final BundlePermission requested = (BundlePermission) permission;
+		}
+		BundlePermission requested = (BundlePermission) permission;
 		String name = requested.getName();
 		final int desired = requested.getActionsMask();
 		BundlePermission x;
 		int effective = 0;
 
 		// short circuit if the "*" Permission was added
+		Map pc;
 		synchronized (this) {
+			pc = permissions;
 			if (all_allowed) {
-				x = (BundlePermission) permissions.get("*");
+				x = (BundlePermission) pc.get("*");
 				if (x != null) {
 					effective |= x.getActionsMask();
 					if ((effective & desired) == desired) {
@@ -532,7 +541,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 					}
 				}
 			}
-			x = (BundlePermission) permissions.get(name);
+			x = (BundlePermission) pc.get(name);
 		}
 		// strategy:
 		// Check for full match first. Then work our way up the
@@ -550,7 +559,7 @@ final class BundlePermissionCollection extends PermissionCollection {
 		while ((last = name.lastIndexOf(".", offset)) != -1) {
 			name = name.substring(0, last + 1) + "*";
 			synchronized (this) {
-				x = (BundlePermission) permissions.get(name);
+				x = (BundlePermission) pc.get(name);
 			}
 			if (x != null) {
 				effective |= x.getActionsMask();
@@ -571,7 +580,29 @@ final class BundlePermissionCollection extends PermissionCollection {
 	 * 
 	 * @return Enumeration of all <code>BundlePermission</code> objects.
 	 */
-	public Enumeration elements() {
-		return permissions.elements();
+	public synchronized Enumeration elements() {
+		return Collections.enumeration(permissions.values());
+	}
+	
+	/* serialization logic */
+	private static final ObjectStreamField[]	serialPersistentFields	= {
+			new ObjectStreamField("permissions", Hashtable.class),
+			new ObjectStreamField("all_allowed", Boolean.TYPE)			};
+
+	private synchronized void writeObject(ObjectOutputStream out)
+			throws IOException {
+		Hashtable hashtable = new Hashtable(permissions);
+		ObjectOutputStream.PutField pfields = out.putFields();
+		pfields.put("permissions", hashtable);
+		pfields.put("all_allowed", all_allowed);
+		out.writeFields();
+	}
+
+	private synchronized void readObject(java.io.ObjectInputStream in)
+			throws IOException, ClassNotFoundException {
+		ObjectInputStream.GetField gfields = in.readFields();
+		Hashtable hashtable = (Hashtable) gfields.get("permissions", null);
+		permissions = new HashMap(hashtable);
+		all_allowed = gfields.get("all_allowed", false);
 	}
 }
