@@ -29,6 +29,7 @@ public class SecurityManagerTests extends AbstractBundleTests {
 	private static final PermissionInfo hostFragmentProvidePermission = new PermissionInfo(BundlePermission.class.getName(), "*", "host,fragment,provide"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final PermissionInfo allPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "*", "import,export"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final PermissionInfo importPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "*", "import"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final PermissionInfo importFrameworkPackagePermission = new PermissionInfo(PackagePermission.class.getName(), "org.osgi.framework", "import"); //$NON-NLS-1$ //$NON-NLS-2$
 	private Policy previousPolicy;
 
 	public static Test suite() {
@@ -234,6 +235,76 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			assertNotNull("Did not find required bundle", eps); //$NON-NLS-1$
 			assertEquals("Wrong number of required bundles found", 1, rbs.length); //$NON-NLS-1$
 
+		} finally {
+			// put the framework back to the RESOLVED state
+			equinox.stop();
+
+			try {
+				equinox.waitForStop(10000);
+			} catch (InterruptedException e) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
+	public void testEnableSecurityManager04() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile("testEnableSecurityManager04"); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing a bundle to tests bug 
+		String locationLinkA = installer.getBundleLocation("test.link.a"); //$NON-NLS-1$
+		String locationLinkAClient = installer.getBundleLocation("test.link.a.client"); //$NON-NLS-1$
+
+		// set the security for the bundles
+		ConditionInfo linkACondition = new ConditionInfo(BundleLocationCondition.class.getName(), new String[] {locationLinkA});
+		ConditionInfo linkAClientCondition = new ConditionInfo(BundleLocationCondition.class.getName(), new String[] {locationLinkAClient});
+		PermissionInfo filterPermission = new PermissionInfo(PackagePermission.class.getName(), "(&(name=test.link.a)(package.name=test.link.*))", "import"); //$NON-NLS-1$ //$NON-NLS-2$
+		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo(null, new ConditionInfo[] {linkACondition}, new PermissionInfo[] {hostFragmentProvidePermission, allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		rows.add(ca.newConditionalPermissionInfo(null, new ConditionInfo[] {linkAClientCondition}, new PermissionInfo[] {importFrameworkPackagePermission, filterPermission}, ConditionalPermissionInfo.ALLOW));
+		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+
+		Bundle linkA = systemContext.installBundle(locationLinkA);
+		Bundle linkAClient = systemContext.installBundle(locationLinkAClient);
+		equinox.start();
+		PackageAdmin pa = (PackageAdmin) systemContext.getService(systemContext.getServiceReference(PackageAdmin.class.getName()));
+
+		try {
+			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
+			// change import permission to fail filter match
+			filterPermission = new PermissionInfo(PackagePermission.class.getName(), "(&(name=fail.match)(package.name=test.link.*))", "import"); //$NON-NLS-1$ //$NON-NLS-2$
+			update = ca.newConditionalPermissionUpdate();
+			rows = update.getConditionalPermissionInfos();
+			rows.clear();
+			rows.add(ca.newConditionalPermissionInfo(null, new ConditionInfo[] {linkACondition}, new PermissionInfo[] {hostFragmentProvidePermission, allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+			rows.add(ca.newConditionalPermissionInfo(null, new ConditionInfo[] {linkAClientCondition}, new PermissionInfo[] {importFrameworkPackagePermission, filterPermission}, ConditionalPermissionInfo.ALLOW));
+			assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+			pa.refreshPackages(new Bundle[] {linkA, linkAClient});
+			// hack to wait for refresh to end
+			Thread.sleep(2000);
+			assertEquals("linkA has wrong state", Bundle.RESOLVED, linkA.getState()); //$NON-NLS-1$
+			assertEquals("linkAClient has wrong state", Bundle.INSTALLED, linkAClient.getState()); //$NON-NLS-1$
+		} catch (InterruptedException e) {
+			// fail
+			fail("interrupted", e); //$NON-NLS-1$
 		} finally {
 			// put the framework back to the RESOLVED state
 			equinox.stop();

@@ -39,9 +39,9 @@ public class PermissionChecker {
 		int errorType = 0;
 		if (vc instanceof ImportPackageSpecification) {
 			errorType = ResolverError.IMPORT_PACKAGE_PERMISSION;
-			producerPermission = new PackagePermission(bd.getName(), PackagePermission.EXPORT);
-			consumerPermission = new PackagePermission(vc.getName(), PackagePermission.IMPORT);
 			producer = context.getBundle(((ExportPackageDescription) bd).getExporter().getBundleId());
+			producerPermission = new PackagePermission(bd.getName(), PackagePermission.EXPORTONLY);
+			consumerPermission = new PackagePermission(vc.getName(), producer, PackagePermission.IMPORT);
 		} else {
 			boolean requireBundle = vc instanceof BundleSpecification;
 			errorType = requireBundle ? ResolverError.REQUIRE_BUNDLE_PERMISSION : ResolverError.FRAGMENT_BUNDLE_PERMISSION;
@@ -78,6 +78,6 @@ public class PermissionChecker {
 		if (!checkPermissions)
 			return true;
 		Bundle bundle = context.getBundle(export.getExporter().getBundleId());
-		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORT));
+		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORTONLY));
 	}
 }
