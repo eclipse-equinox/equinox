@@ -54,6 +54,18 @@ typedef struct {
 	int result;
 } StartVMArgs;
 
+#ifdef COCOA
+@interface KeyWindow : NSWindow { }
+- (BOOL)canBecomeKeyWindow;
+@end
+
+@implementation KeyWindow
+- (BOOL)canBecomeKeyWindow {
+	return YES;
+}
+@end
+#endif
+
 static CFRunLoopRef loopRef = NULL;
 static void * startThread(void * init); 
 static void runEventLoop(CFRunLoopRef ref);
@@ -64,7 +76,8 @@ int main() {
 }
 
 #ifdef COCOA
-static NSWindow* window = nil;
+
+static KeyWindow* window = nil;
 
 /* Show the Splash Window
  *
@@ -85,7 +98,7 @@ int showSplash( const _TCHAR* featureImage )
 		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
 		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
 		[image autorelease];
-		window = [[NSWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
+		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
 		if (window != nil) {
 			[window center];
 			[window setBackgroundColor: [NSColor colorWithPatternImage: image]];
