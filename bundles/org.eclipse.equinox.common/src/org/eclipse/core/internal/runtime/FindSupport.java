@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -272,5 +272,31 @@ public class FindSupport {
 		if (url != null)
 			return url.openStream();
 		throw new IOException("Cannot find " + file.toString()); //$NON-NLS-1$
+	}
+
+	/**
+	 * See doc on {@link FileLocator#find(URL)} 
+	 */
+	public static URL find(URL url) {
+		// if !platform/plugin | fragment URL return
+		if (!"platform".equalsIgnoreCase(url.getProtocol())) //$NON-NLS-1$
+			return null;
+
+		// call a helper method to get the bundle object and rest of the path
+		String spec = url.getFile().trim();
+		Object[] obj = null;
+		try {
+			obj = PlatformURLPluginConnection.parse(spec, url);
+		} catch (IOException e) {
+			RuntimeLog.log(new Status(IStatus.ERROR, IRuntimeConstants.PI_RUNTIME, "Invalid input url:" + url, e)); //$NON-NLS-1$
+			return null;
+		}
+		Bundle bundle = (Bundle) obj[0];
+		String path = (String) obj[1];
+
+		// use FileLocator.find(bundle, path, null) to look for the file
+		if ("/".equals(path)) //$NON-NLS-1$
+			return bundle.getEntry(path);
+		return find(bundle, new Path(path), null);
 	}
 }

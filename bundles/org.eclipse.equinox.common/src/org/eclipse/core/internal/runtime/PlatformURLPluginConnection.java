@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,32 +41,45 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#resolve()
+	/*
+	 * spec - /plugin/com.example/META-INF/MANIFEST.MF
+	 * originalURL - used only for exception messages
+	 * result[0] - Bundle (e.g. com.example)
+	 * result[1] - String (path) (e.g. META-INF/MANIFEST.MF)
 	 */
-	protected URL resolve() throws IOException {
-		String spec = url.getFile().trim();
+	public static Object[] parse(String spec, URL originalURL) throws IOException {
+		Object[] result = new Object[2];
 		if (spec.startsWith("/")) //$NON-NLS-1$
 			spec = spec.substring(1);
 		if (!spec.startsWith(PLUGIN))
-			throw new IOException(NLS.bind(CommonMessages.url_badVariant, url));
+			throw new IOException(NLS.bind(CommonMessages.url_badVariant, originalURL));
 		int ix = spec.indexOf("/", PLUGIN.length() + 1); //$NON-NLS-1$
 		String ref = ix == -1 ? spec.substring(PLUGIN.length() + 1) : spec.substring(PLUGIN.length() + 1, ix);
 		String id = getId(ref);
 		Activator activator = Activator.getDefault();
 		if (activator == null)
 			throw new IOException(CommonMessages.activator_not_available);
-		target = activator.getBundle(id);
-		if (target == null)
-			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, url));
-		if (ix == -1 || (ix + 1) >= spec.length())
-			return target.getEntry("/"); //$NON-NLS-1$
-		URL result = target.getEntry(spec.substring(ix + 1));
-		if (result != null)
+		Bundle bundle = activator.getBundle(id);
+		if (bundle == null)
+			throw new IOException(NLS.bind(CommonMessages.url_resolvePlugin, originalURL));
+		result[0] = bundle;
+		result[1] = (ix == -1 || (ix + 1) >= spec.length()) ? "/" : spec.substring(ix + 1); //$NON-NLS-1$
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.equinox.internal.url.PlatformURLConnection#resolve()
+	 */
+	protected URL resolve() throws IOException {
+		String spec = url.getFile().trim();
+		Object[] obj = parse(spec, url);
+		Bundle b = (Bundle) obj[0];
+		String path = (String) obj[1];
+		URL result = b.getEntry(path);
+		if (result != null || "/".equals(path)) //$NON-NLS-1$
 			return result;
 		// if the result is null then force the creation of a URL that will throw FileNotFoundExceptions
-		return new URL(target.getEntry("/"), spec.substring(ix + 1)); //$NON-NLS-1$
-
+		return new URL(b.getEntry("/"), path); //$NON-NLS-1$
 	}
 
 	public static void startup() {

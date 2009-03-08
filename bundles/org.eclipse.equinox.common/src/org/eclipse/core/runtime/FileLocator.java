@@ -107,6 +107,51 @@ public final class FileLocator {
 	}
 
 	/**
+	 * Returns the URL of a resource inside a bundle corresponding to the given URL.
+	 * Returns <code>null</code> if the URL could not be computed or created. 
+	 * <p>
+	 * This method looks for a bundle resource described by the given input URL,
+	 * and returns the URL of the first resource found in the bundle or any attached
+	 * fragments.  <code>null</code> is returned if no such entry is found.  Note that
+	 * there is no specific order to the fragments.
+	 * </p><p>
+	 * The following variables may also be used as segments in the path of the provided URL:
+	 * <ul>
+	 *     <li>$nl$ - for language specific information</li>
+	 *     <li>$os$ - for operating system specific information</li>
+	 *     <li>$ws$ - for windowing system specific information</li>
+	 * </ul>
+	 * </p><p>
+	 * A URL path of "$nl$/about.properties" in an environment with a default 
+	 * locale of en_CA will return a URL corresponding to the first location
+	 * about.properties is found according to the following order:
+	 * <pre>
+	 *     plugin root/nl/en/CA/about.properties
+	 *     fragment1 root/nl/en/CA/about.properties
+	 *     fragment2 root/nl/en/CA/about.properties
+	 *     ...
+	 *     plugin root/nl/en/about.properties
+	 *     fragment1 root/nl/en/about.properties
+	 *     fragment2 root/nl/en/about.properties
+	 *     ...
+	 *     plugin root/about.properties
+	 *     fragment1 root/about.properties
+	 *     fragment2 root/about.properties
+	 *     ...
+	 * </pre>
+	 * </p>
+	 * 
+	 * @param url The location of a bundle entry that potentially includes the above
+	 * environment variables
+	 * @return The URL of the bundle entry matching the input URL, or <code>null</code>
+	 * if no matching entry could be found. The actual form of the returned URL is not specified.
+	 * @since org.eclipse.equinox.common 3.5
+	 */
+	public static URL find(URL url) {
+		return FindSupport.find(url);
+	}
+
+	/**
 	 * This is a convenience method, fully equivalent to {@link #findEntries(Bundle, IPath, Map)},
 	 * with a value of <code>null</code> for the map argument.
 	 * 

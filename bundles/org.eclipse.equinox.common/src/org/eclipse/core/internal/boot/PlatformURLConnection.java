@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -321,17 +321,17 @@ public abstract class PlatformURLConnection extends URLConnection {
 		throw new IOException();
 	}
 
-	protected String getId(String spec) {
+	protected static String getId(String spec) {
 		String id = (String) parse(spec)[0];
 		return id == null ? spec : id;
 	}
 
-	protected String getVersion(String spec) {
+	protected static String getVersion(String spec) {
 		Version version = (Version) parse(spec)[1];
 		return version == null ? "" : version.toString(); //$NON-NLS-1$
 	}
 
-	private Object[] parse(String spec) {
+	private static Object[] parse(String spec) {
 		String bsn = null;
 		Version version = null;
 		int underScore = spec.indexOf('_');
