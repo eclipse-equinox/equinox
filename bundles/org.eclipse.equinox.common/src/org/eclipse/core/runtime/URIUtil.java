@@ -257,6 +257,8 @@ public final class URIUtil {
 	 */
 	public static URI toJarURI(URI uri, IPath entryPath) {
 		try {
+			if (entryPath == null)
+				entryPath = Path.EMPTY;
 			//must deconstruct the input URI to obtain unencoded strings, and then pass to URI constructor that will encode the entry path
 			return new URI(SCHEME_JAR, uri.getScheme() + ':' + uri.getSchemeSpecificPart() + JAR_SUFFIX + entryPath.toString(), null);
 		} catch (URISyntaxException e) {
