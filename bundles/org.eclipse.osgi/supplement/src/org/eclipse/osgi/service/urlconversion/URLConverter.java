@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ public interface URLConverter {
 	 * installation configurations, others may result in jar: or http: URLs.
 	 * </p>
 	 * <p>
-	 * If the protocol is not reconized by this converter, then the original URL is
+	 * If the protocol is not recognized by this converter, then the original URL is
 	 * returned as-is.
 	 * </p>
 	 * @param url the original URL
