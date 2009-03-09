@@ -187,7 +187,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 			switch (stopped.getType()) {
 				case FrameworkEvent.ERROR :
 					throw new BundleException("Error stopping the child framework.", stopped.getThrowable()); //$NON-NLS-1$
-				case FrameworkEvent.INFO :
+				case FrameworkEvent.WAIT_TIMEDOUT :
 					throw new BundleException("Timed out waiting for the child framework to stop."); //$NON-NLS-1$
 				case FrameworkEvent.STOPPED :
 					// normal stop, just return

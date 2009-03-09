@@ -1707,7 +1707,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				}
 			}
 			if (event == null || event[0] == null)
-				return new FrameworkEvent(FrameworkEvent.INFO, systemBundle, null);
+				return new FrameworkEvent(FrameworkEvent.WAIT_TIMEDOUT, systemBundle, null);
 			return event[0];
 		}
 	}

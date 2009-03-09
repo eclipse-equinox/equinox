@@ -677,7 +677,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
-		assertEquals("Wrong stopEvent", FrameworkEvent.INFO, stopEvent.getType()); //$NON-NLS-1$
+		assertEquals("Wrong stopEvent", FrameworkEvent.WAIT_TIMEDOUT, stopEvent.getType()); //$NON-NLS-1$
 
 		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
 		try {
