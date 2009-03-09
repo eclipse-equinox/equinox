@@ -831,6 +831,88 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
 
+	public void testSystemBundle16() {
+		// test parent boot
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_BOOT);
+		checkParentClassLoader(configuration);
+	}
+
+	public void testSystemBundle17() {
+		// test parent app
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_APP);
+		checkParentClassLoader(configuration);
+	}
+
+	public void testSystemBundle18() {
+		// test parent ext
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_EXT);
+		checkParentClassLoader(configuration);
+	}
+
+	public void testSystemBundle19() {
+		// test parent framework
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK);
+		checkParentClassLoader(configuration);
+	}
+
+	private void checkParentClassLoader(Properties configuration) {
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		Bundle test = null;
+		try {
+			test = equinox.getBundleContext().installBundle(installer.getBundleLocation("substitutes.a")); //$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Failed to install bundle", e); //$NON-NLS-1$
+		}
+		try {
+			Class activatorClazz = test.loadClass("substitutes.x.Ax"); //$NON-NLS-1$
+			ClassLoader parentCL = activatorClazz.getClassLoader().getParent();
+			String configParent = configuration.getProperty(Constants.FRAMEWORK_BUNDLE_PARENT);
+			if (Constants.FRAMEWORK_BUNDLE_PARENT_APP.equals(configParent))
+				assertTrue("Wrong parent", parentCL == ClassLoader.getSystemClassLoader()); //$NON-NLS-1$
+			else if (Constants.FRAMEWORK_BUNDLE_PARENT_EXT.equals(configParent))
+				assertTrue("Wrong parent", parentCL == ClassLoader.getSystemClassLoader().getParent()); //$NON-NLS-1$
+			else if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equals(configParent))
+				assertTrue("Wrong parent", parentCL == equinox.getClass().getClassLoader()); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("failed to load class", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+
+		FrameworkEvent stopEvent = null;
+		try {
+			stopEvent = equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertNotNull("Stop event is null", stopEvent); //$NON-NLS-1$
+		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
+	}
+
 	public void testBug253942() {
 		// create/start/stop/start/stop test
 		File config = OSGiTestsActivator.getContext().getDataFile("testBug253942"); //$NON-NLS-1$

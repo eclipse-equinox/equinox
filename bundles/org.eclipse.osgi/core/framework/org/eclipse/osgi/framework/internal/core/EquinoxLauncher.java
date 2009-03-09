@@ -114,6 +114,11 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 			configuration.remove(Constants.FRAMEWORK_STORAGE_CLEAN);
 			FrameworkProperties.setProperty(EclipseStarter.PROP_CLEAN, Boolean.TRUE.toString());
 		}
+		Object parentCL = configuration.get(Constants.FRAMEWORK_BUNDLE_PARENT);
+		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equals(parentCL))
+			parentCL = "fwk"; //$NON-NLS-1$
+		if (parentCL instanceof String)
+			FrameworkProperties.setProperty("osgi.parentClassloader", (String) parentCL); //$NON-NLS-1$
 	}
 
 	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {
