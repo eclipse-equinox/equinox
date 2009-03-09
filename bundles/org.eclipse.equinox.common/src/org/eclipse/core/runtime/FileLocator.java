@@ -122,9 +122,9 @@ public final class FileLocator {
 	 *     <li>$ws$ - for windowing system specific information</li>
 	 * </ul>
 	 * </p><p>
-	 * A URL path of "$nl$/about.properties" in an environment with a default 
-	 * locale of en_CA will return a URL corresponding to the first location
-	 * about.properties is found according to the following order:
+	 * For example, a URL of "platform:/plugin/org.eclipse.core.runtime/$nl$/about.properties" in an 
+	 * environment with a default locale of en_CA will return a URL corresponding to 
+	 * the first location about.properties is found according to the following order:
 	 * <pre>
 	 *     plugin root/nl/en/CA/about.properties
 	 *     fragment1 root/nl/en/CA/about.properties
