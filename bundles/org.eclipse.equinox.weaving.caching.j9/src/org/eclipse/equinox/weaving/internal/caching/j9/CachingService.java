@@ -43,7 +43,8 @@ public class CachingService implements ICachingService {
                     + ", key='" + key + "'");
         this.bundle = bundle;
         this.classLoader = loader;
-        this.partition = hashNamespace(key);
+        this.partition = hashNamespace(key + bundle.getBundleId()
+                + bundle.getLastModified());
         try {
             urlhelper = Shared.getSharedClassHelperFactory().getURLHelper(
                     classLoader);
