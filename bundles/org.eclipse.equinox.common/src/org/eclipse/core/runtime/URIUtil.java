@@ -338,7 +338,7 @@ public final class URIUtil {
 	public static URI makeAbsolute(URI relative, URI baseURI) {
 		if (relative.isAbsolute())
 			return relative;
-		return append(baseURI, relative.toString());
+		return append(baseURI, toUnencodedString(relative));
 	}
 
 	/**
