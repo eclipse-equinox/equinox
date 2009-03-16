@@ -707,13 +707,9 @@ public class EclipseStarter {
 		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
 		// but this should allow for some progress...
 		final Semaphore semaphore = new Semaphore(0);
-		FrameworkListener listener = new FrameworkListener() {
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.PACKAGES_REFRESHED)
-					semaphore.release();
-			}
-		};
+		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.PACKAGES_REFRESHED);
 		context.addFrameworkListener(listener);
+		context.addBundleListener(listener);
 		packageAdmin.refreshPackages(bundles);
 		context.ungetService(packageAdminRef);
 		updateSplash(semaphore, listener);
@@ -1227,19 +1223,36 @@ public class EclipseStarter {
 		if (startLevel == null)
 			return;
 		final Semaphore semaphore = new Semaphore(0);
-		FrameworkListener listener = new FrameworkListener() {
-			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED && startLevel.getStartLevel() == value)
-					semaphore.release();
-			}
-		};
+		StartupEventListener listener = new StartupEventListener(semaphore, FrameworkEvent.STARTLEVEL_CHANGED);
 		context.addFrameworkListener(listener);
+		context.addBundleListener(listener);
 		startLevel.setStartLevel(value);
 		context.ungetService(reference);
 		updateSplash(semaphore, listener);
 	}
 
-	private static void updateSplash(Semaphore semaphore, FrameworkListener listener) {
+	static class StartupEventListener implements SynchronousBundleListener, FrameworkListener {
+		private final Semaphore semaphore;
+		private final int frameworkEventType;
+
+		public StartupEventListener(Semaphore semaphore, int frameworkEventType) {
+			this.semaphore = semaphore;
+			this.frameworkEventType = frameworkEventType;
+		}
+
+		public void bundleChanged(BundleEvent event) {
+			if (event.getBundle().getBundleId() == 0 && event.getType() == BundleEvent.STOPPING)
+				semaphore.release();
+		}
+
+		public void frameworkEvent(FrameworkEvent event) {
+			if (event.getType() == frameworkEventType)
+				semaphore.release();
+		}
+
+	}
+
+	private static void updateSplash(Semaphore semaphore, StartupEventListener listener) {
 		ServiceTracker monitorTracker = new ServiceTracker(context, StartupMonitor.class.getName(), null);
 		monitorTracker.open();
 		try {
@@ -1258,8 +1271,10 @@ public class EclipseStarter {
 				//else still working, spin another update
 			}
 		} finally {
-			if (listener != null)
+			if (listener != null) {
 				context.removeFrameworkListener(listener);
+				context.removeBundleListener(listener);
+			}
 			monitorTracker.close();
 		}
 	}
