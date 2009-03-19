@@ -347,7 +347,9 @@ public class Debug {
 						printStackTrace(nested);
 					}
 				} catch (IllegalAccessException e) {
+					// nothing
 				} catch (InvocationTargetException e) {
+					// nothing
 				}
 			}
 		}
