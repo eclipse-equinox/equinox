@@ -615,8 +615,11 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	Bundle getBundlePriv(Class clazz) {
 		ClassLoader cl = clazz.getClassLoader();
-		if (cl instanceof BundleClassLoader)
-			return ((BundleLoader) ((BundleClassLoader) cl).getDelegate()).getBundle();
+		if (cl instanceof BundleClassLoader) {
+			ClassLoaderDelegate delegate = ((BundleClassLoader) cl).getDelegate();
+			if (delegate instanceof BundleLoader)
+				return ((BundleLoader) delegate).getBundle();
+		}
 		if (cl == getClass().getClassLoader())
 			return framework.systemBundle;
 		return null;
