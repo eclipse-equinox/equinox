@@ -36,33 +36,36 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
 	 * trace file.  The DebugOptions object will be used to determine if tracing should occur.  
 	 * 
-	 * @param traceFile The Eclipse trace file
 	 * @param bundleSymbolicName The symbolic name of the bundle being traced
 	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
 	 */
-	public EclipseDebugTrace(final File traceFile, final String bundleSymbolicName, final DebugOptions debugOptions) {
+	public EclipseDebugTrace(final String bundleSymbolicName, final DebugOptions debugOptions) {
 
-		this(traceFile, bundleSymbolicName, debugOptions, null);
+		this(bundleSymbolicName, debugOptions, null);
 	}
 
 	/**
 	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
 	 * trace file.  
 	 * 
-	 * @param traceFile The Eclipse trace file
 	 * @param bundleSymbolicName The symbolic name of the bundle being traced
 	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
 	 * @param traceClass The class that the client is using to perform trace API calls
 	 */
-	public EclipseDebugTrace(final File traceFile, final String bundleSymbolicName, final DebugOptions debugOptions, final Class traceClass) {
+	public EclipseDebugTrace(final String bundleSymbolicName, final DebugOptions debugOptions, final Class traceClass) {
 
 		this.traceClass = traceClass;
 		this.debugOptions = debugOptions;
 		this.bundleSymbolicName = bundleSymbolicName;
-		this.traceFile = traceFile;
 		this.readLogProperties();
 	}
 
+	/**
+	 * Is debugging enabled for the specified option-path
+	 * 
+	 * @param optionPath The <i>option-path</i>
+	 * @return Returns true if debugging is enabled for the specified option-path on this bundle; Otherwise false.
+	 */
 	protected final boolean isDebuggingEnabled(final String optionPath) {
 		if (optionPath == null)
 			return true;
@@ -239,25 +242,29 @@ public class EclipseDebugTrace implements DebugTrace {
 
 		if (entry != null) {
 			synchronized (EclipseDebugTrace.writeLock) {
+				final File tracingFile = this.debugOptions.getFile(); // the tracing file may be null if it has not been set
+				Writer traceWriter = null;
 				try {
-					// check to see if the file can be written to
-					this.checkTraceFileSize();
+					// check to see if the file should be rotated
+					this.checkTraceFileSize(tracingFile);
 					// open the trace file
-					this.openFile();
-					if (this.newSession) {
-						this.writeSession();
-						this.newSession = false;
+					traceWriter = this.openWriter(tracingFile);
+					if (EclipseDebugTrace.newSession) {
+						this.writeSession(traceWriter);
+						EclipseDebugTrace.newSession = false;
 					}
-					this.writeMessage(entry);
+					this.writeMessage(traceWriter, entry);
 					// flush the writer
-					this.traceWriter.flush();
+					traceWriter.flush();
 				} catch (Exception ex) {
 					// any exceptions during tracing should be caught 
 					System.err.println("An exception occurred while writing to the platform trace file: ");//$NON-NLS-1$
 					ex.printStackTrace(System.err);
 				} finally {
-					// close the trace file
-					this.closeFile();
+					// close the trace writer
+					if (tracingFile != null) {
+						this.closeWriter(traceWriter);
+					}
 				}
 			}
 		}
@@ -291,16 +298,17 @@ public class EclipseDebugTrace implements DebugTrace {
 	/**
 	 * Checks the trace file size.  If the file size reaches the limit then the trace file is rotated. 
 	 * 
+	 * @param traceFile The tracing file
 	 * @return false if an error occurred trying to rotate the trace file
 	 */
-	protected boolean checkTraceFileSize() {
+	protected boolean checkTraceFileSize(final File traceFile) {
 
 		// 0 file size means there is no size limit
 		boolean isBackupOK = true;
 		if (this.maxTraceFileSize > 0) {
-			if (this.traceFile != null) {
-				if ((this.traceFile.length() >> 10) > this.maxTraceFileSize) { // Use KB as file size unit.
-					final String traceFileName = this.traceFile.getAbsolutePath();
+			if ((traceFile != null) && traceFile.exists()) {
+				if ((traceFile.length() >> 10) > this.maxTraceFileSize) { // Use KB as file size unit.
+					final String traceFileName = traceFile.getAbsolutePath();
 
 					// Delete old backup file that will be replaced.
 					String backupFilename = ""; //$NON-NLS-1$
@@ -323,25 +331,28 @@ public class EclipseDebugTrace implements DebugTrace {
 					}
 
 					// Rename current log file to backup one.
-					boolean isRenameOK = this.traceFile.renameTo(backupFile);
+					boolean isRenameOK = traceFile.renameTo(backupFile);
 					if (!isRenameOK) {
 						System.err.println("Error when trying to rename trace file to backup one."); //$NON-NLS-1$
 						isBackupOK = false;
 					}
-					/**
-					 * Write a new SESSION header to new log file.  this method should already be called with the
-					 * file lock set so we should be safe to update it.
+					/*
+					 * Write a header to new log file stating that this new file is a continuation file. 
+					 * This method should already be called with the file lock set so we should be safe 
+					 * to update it here.
 					*/
-					this.traceFile = new File(traceFileName);
+					Writer traceWriter = null;
 					try {
-						this.openFile();
-						this.writeComment("This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
-						this.writeComment(EclipseDebugTrace.TRACE_FILE_DATE + EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(System.currentTimeMillis())));
-						this.traceWriter.flush();
+						traceWriter = this.openWriter(traceFile);
+						this.writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
+						this.writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(System.currentTimeMillis())));
+						traceWriter.flush();
 					} catch (IOException ioEx) {
 						ioEx.printStackTrace();
 					} finally {
-						this.closeFile();
+						if (traceFile != null) {
+							this.closeWriter(traceWriter);
+						}
 					}
 					this.backupTraceFileIndex = (++this.backupTraceFileIndex) % this.maxTraceFiles;
 				}
@@ -353,18 +364,17 @@ public class EclipseDebugTrace implements DebugTrace {
 	/**
 	 * Writes a comment to the trace file
 	 *
-	 * 
+	 * @param traceWriter the trace writer
 	 * @param comment the comment to be written to the trace file
-	 * 
-	 * @throws IOException If an error occurs while writing this information
+	 * @throws IOException If an error occurs while writing the comment
 	 */
-	protected void writeComment(String comment) throws IOException {
+	protected void writeComment(final Writer traceWriter, final String comment) throws IOException {
 
 		StringBuffer commentText = new StringBuffer(EclipseDebugTrace.TRACE_COMMENT);
 		commentText.append(" "); //$NON-NLS-1$
 		commentText.append(comment);
 		commentText.append(EclipseDebugTrace.LINE_SEPARATOR);
-		this.traceWriter.write(commentText.toString());
+		traceWriter.write(commentText.toString());
 	}
 
 	/**
@@ -390,16 +400,17 @@ public class EclipseDebugTrace implements DebugTrace {
 	/**
 	 * Writes header information to a new trace file
 	 * 
-	 * @throws IOException If an error occurs while writing this information 
+	 * @param traceWriter the trace writer
+	 * @throws IOException If an error occurs while writing this session information 
 	 */
-	protected void writeSession() throws IOException {
+	protected void writeSession(final Writer traceWriter) throws IOException {
 
-		this.writeComment(EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate());
-		this.writeComment(EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
-		this.writeComment("The following option strings are specified for this debug session:"); //$NON-NLS-1$ 
+		this.writeComment(traceWriter, EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate());
+		this.writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
+		this.writeComment(traceWriter, "The following option strings are specified for this debug session:"); //$NON-NLS-1$ 
 		final String[] allOptions = FrameworkDebugOptions.getDefault().getAllOptions();
 		for (int i = 0; i < allOptions.length; i++) {
-			this.writeComment("\t" + allOptions[i]); //$NON-NLS-1$
+			this.writeComment(traceWriter, "\t" + allOptions[i]); //$NON-NLS-1$
 		}
 	}
 
@@ -408,10 +419,11 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * {@link EclipseDebugTrace#TRACE_ELEMENT_DELIMITER} as the delimiter between
 	 * each element of the entry.
 	 * 
+	 * @param traceWriter the trace writer
 	 * @param entry The trace entry object to write to the trace file
-	 * @throws IOException If an error occurs while writing this information
+	 * @throws IOException If an error occurs while writing this message
 	 */
-	protected void writeMessage(final FrameworkDebugTraceEntry entry) throws IOException {
+	protected void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
 
 		// format the trace entry
 		StringBuffer message = new StringBuffer(entry.getThreadName());
@@ -450,8 +462,8 @@ public class EclipseDebugTrace implements DebugTrace {
 		}
 		message.append(EclipseDebugTrace.LINE_SEPARATOR);
 		// write the message
-		if (message != null) {
-			this.traceWriter.write(message.toString());
+		if ((traceWriter != null) && (message != null)) {
+			traceWriter.write(message.toString());
 		}
 	}
 
@@ -470,34 +482,42 @@ public class EclipseDebugTrace implements DebugTrace {
 	}
 
 	/**
-	 * Creates the writer for printing the trace information
+	 * Creates the trace writer.
+	 * If the tracing file is null then the writer will use System.out to print any messages.
+	 * 
+	 * @param traceFile The tracing file
+	 * @return Returns a new Writer object  
 	 */
-	protected void openFile() {
+	protected Writer openWriter(final File traceFile) {
 
-		if ((this.traceWriter == null) && (this.traceFile != null)) {
+		Writer traceWriter = null;
+		if (traceFile != null) {
 			try {
-				this.traceWriter = this.logForStream(secureAction.getFileOutputStream(this.traceFile, true));
-			} catch (IOException e) {
-				this.traceWriter = this.logForStream(System.out);
+				traceWriter = this.logForStream(secureAction.getFileOutputStream(traceFile, true));
+			} catch (IOException ioEx) {
+				traceWriter = this.logForStream(System.out);
 			}
 		} else {
-			this.traceWriter = this.logForStream(System.out);
+			traceWriter = this.logForStream(System.out);
 		}
+		return traceWriter;
 	}
 
 	/**
-	 * Close the output writer
+	 * Close the trace writer
+	 * 
+	 * @param traceWriter The trace writer
 	 */
-	protected void closeFile() {
+	protected void closeWriter(Writer traceWriter) {
 
-		if ((this.traceFile != null) && (this.traceWriter != null)) {
+		if (traceWriter != null) {
 			try {
-				this.traceWriter.close();
+				traceWriter.close();
 			} catch (IOException ioEx) {
 				// we cannot log here; just print the stacktrace.
 				ioEx.printStackTrace();
 			}
-			this.traceWriter = null;
+			traceWriter = null;
 		}
 	}
 
@@ -538,10 +558,6 @@ public class EclipseDebugTrace implements DebugTrace {
 	/** A lock object used to synchronize access to the trace file */
 	protected final static Object writeLock = new Object();
 
-	/** The Writer object used to write the trace messages to the trace file. */
-	protected Writer traceWriter = null;
-	/** The trace file object */
-	protected File traceFile = null;
 	/** An optional argument to specify the name of the class used by clients to trace messages.  If no trace class is specified
 	 * then the class calling this API is assumed to be the class being traced.
 	*/
@@ -549,7 +565,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	/** The symbolic name of the bundle being traced */
 	protected String bundleSymbolicName = null;
 	/** A flag to determine if the message being written is done to a new file (i.e. should the header information be written) */
-	protected boolean newSession = true;
+	protected static boolean newSession = true;
 	/** DebugOptions are used to determine if the specified bundle symbolic name + option-path has debugging enabled */
 	protected DebugOptions debugOptions = null;
 

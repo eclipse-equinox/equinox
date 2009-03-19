@@ -293,6 +293,10 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 */
 	public void setDebugEnabled(boolean enabled) {
 		if (enabled) {
+			if (!this.isDebugEnabled()) {
+				// notify the trace that a new session is started
+				EclipseDebugTrace.newSession = true;
+			}
 			// enable platform debugging - there is no .options file
 			FrameworkProperties.setProperty(OSGI_DEBUG, ""); //$NON-NLS-1$
 			if (this.options == null)
@@ -322,7 +326,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		synchronized (FrameworkDebugOptions.debugTraceCache) {
 			debugTrace = (DebugTrace) FrameworkDebugOptions.debugTraceCache.get(bundleSymbolicName);
 			if (debugTrace == null) {
-				debugTrace = new EclipseDebugTrace(this.outFile, bundleSymbolicName, FrameworkDebugOptions.singleton, traceEntryClass);
+				debugTrace = new EclipseDebugTrace(bundleSymbolicName, FrameworkDebugOptions.singleton, traceEntryClass);
 				FrameworkDebugOptions.debugTraceCache.put(bundleSymbolicName, debugTrace);
 			}
 		}
@@ -346,6 +350,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 
 		this.outFile = traceFile;
 		FrameworkProperties.setProperty(PROP_TRACEFILE, this.outFile.getAbsolutePath());
+		// the file changed so start a new session
+		EclipseDebugTrace.newSession = true;
 	}
 
 	/**
