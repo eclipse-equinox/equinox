@@ -13,4 +13,6 @@ Bundle-Activator: org.eclipse.equinox.log.internal.Activator
 Export-Package: org.eclipse.equinox.log;version="1.0.0",
  org.eclipse.equinox.log.internal;x-internal:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
- OSGi/Minimum-1.2
+ OSGi/Minimum-1.2,
+ CDC-1.1/Foundation-1.1,
+ J2SE-1.4
