@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.ds;
 
 import java.util.*;
 import org.eclipse.equinox.internal.ds.model.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -30,7 +31,7 @@ import org.osgi.service.log.LogService;
 public final class Resolver implements WorkPerformer {
 
 	// these strings are used only for debugging purpose
-	static final String[] WORK_TITLES = {"BUILD ", "DYNAMICBIND "};
+	static final String[] WORK_TITLES = {"BUILD ", "DYNAMICBIND "}; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * Service Component instances need to be built.
@@ -93,9 +94,7 @@ public final class Resolver implements WorkPerformer {
 	void enableComponents(Vector serviceComponents) {
 		long start = 0l;
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10062, serviceComponents != null ? serviceComponents.toString() : "null", null, false);
-			// //Activator.log.debug("Resolver.enableComponents(): " +
-			// serviceComponents, null);
+			Activator.log.debug("Resolver.enableComponents(): " + serviceComponents != null ? serviceComponents.toString() : "null", null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
@@ -112,10 +111,7 @@ public final class Resolver implements WorkPerformer {
 					// saves a little memory
 					if (!current.enabled) {
 						if (Activator.DEBUG) {
-							Activator.log.debug(0, 10019, current.name, null, false);
-							// //Activator.log.debug("Resolver.enableComponents():
-							// ignoring not enabled component " + current.name,
-							// null);
+							Activator.log.debug("Resolver.enableComponents(): ignoring not enabled component " + current.name, null); //$NON-NLS-1$
 						}
 						continue;
 					}
@@ -128,10 +124,10 @@ public final class Resolver implements WorkPerformer {
 
 					// check for a Configuration properties for this component
 					try {
-						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))";
+						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						configs = ConfigurationManager.listConfigurations(filter);
 					} catch (Exception e) {
-						Activator.log.error("[SCR] Cannot list configurations for component " + current.name, e);
+						Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 					}
 					// if no Configuration
 					if (configs == null || configs.length == 0) {
@@ -139,7 +135,7 @@ public final class Resolver implements WorkPerformer {
 							// create ServiceComponent + Prop
 							map(current, (Dictionary) null);
 						} else {
-							Activator.log(current.bc, LogService.LOG_WARNING, "[SCR - Resolver]: Component " + current.name + " is NOT resolved because it requires to be inited by a configuration but it was not found", null);
+							Activator.log(current.bc, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name), null);
 						}
 					} else {
 						// if ManagedServiceFactory
@@ -147,16 +143,16 @@ public final class Resolver implements WorkPerformer {
 						if (config.getFactoryPid() != null) {
 							// if ComponentFactory is specified
 							if (current.factory != null) {
-								Activator.log(current.bc, LogService.LOG_ERROR, "[SCR - Resolver] Cannot specify both ComponentFactory and ManagedServiceFactory\n" + "The name of the ComponentFactory component is " + current.name, null);
+								Activator.log(current.bc, LogService.LOG_ERROR, NLS.bind(Messages.REGISTERED_AS_COMPONENT_AND_MANAGED_SERVICE_FACORY, current.name), null);
 								continue; // skip current component
 							}
 							if (Activator.DEBUG) {
-								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *managed service factory*", null);
+								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *managed service factory*", null); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 							try {
-								configs = ConfigurationManager.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")");
+								configs = ConfigurationManager.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							} catch (Exception e) {
-								Activator.log.error("[SCR] Cannot list configurations for component " + current.name, e);
+								Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 							}
 							// for each MSF set of properties(P), map(CD, new
 							// CD+P(CD,P))
@@ -167,7 +163,7 @@ public final class Resolver implements WorkPerformer {
 							}
 						} else {
 							if (Activator.DEBUG) {
-								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *service*", null);
+								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *service*", null); //$NON-NLS-1$ //$NON-NLS-2$
 							} // if Service, not ManagedServiceFactory
 							map(current, config);
 						}
@@ -180,7 +176,7 @@ public final class Resolver implements WorkPerformer {
 
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			Activator.log.info((serviceComponents != null ? "[DS perf] " + serviceComponents.size() : "[DS perf]") + " Components enabled for " + start + " ms");
+			Activator.log.info(NLS.bind(Messages.COMPONENTS_ENABLED, serviceComponents != null ? Integer.toString(serviceComponents.size()) : "", Long.toString(start))); //$NON-NLS-1$
 		}
 	}
 
@@ -216,9 +212,7 @@ public final class Resolver implements WorkPerformer {
 		ServiceComponentProp scp = null;
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10063, component.name, null, false);
-				// //Activator.log.debug("Resolver.map(): Creating SCP for
-				// component " + component.name, null);
+				Activator.log.debug(NLS.bind(Messages.CREATING_SCP, component.name), null);
 			}
 			scp = new ServiceComponentProp(component, configProperties, mgr);
 
@@ -242,7 +236,7 @@ public final class Resolver implements WorkPerformer {
 			scpEnabled.addElement(scp);
 
 		} catch (Throwable t) {
-			Activator.log(component.bc, LogService.LOG_ERROR, "[SCR] Unexpected exception while creating configuration for component " + component, t);
+			Activator.log(component.bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_CREATING_SCP, component), t);
 		}
 		return scp;
 	}
@@ -259,17 +253,16 @@ public final class Resolver implements WorkPerformer {
 			return; // check for any enabled configurations
 
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10020, event.toString(), null, false);
-			////Activator.log.debug("Resolver.getEligible(): processing service event " + event, null);
-			String eventType = "";
+			Activator.log.debug(NLS.bind(Messages.PROCESSING_SERVICE_EVENT, event.toString()), null);
+			String eventType = ""; //$NON-NLS-1$
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
-				eventType = "UNREGISTERING";
+				eventType = "UNREGISTERING"; //$NON-NLS-1$
 			} else if (event.getType() == ServiceEvent.REGISTERED) {
-				eventType = "REGISTERED";
+				eventType = "REGISTERED"; //$NON-NLS-1$
 			} else if (event.getType() == ServiceEvent.MODIFIED) {
-				eventType = "MODIFIED";
+				eventType = "MODIFIED"; //$NON-NLS-1$
 			}
-			Activator.log.debug(0, 10050, eventType, null, false);
+			Activator.log.debug(NLS.bind(Messages.SERVICE_EVENT_TYPE, eventType), null);
 		}
 
 		Object target = null;
@@ -419,6 +412,7 @@ public final class Resolver implements WorkPerformer {
 	 *
 	 **/
 	public void componentDisposed(ServiceComponentProp scp) {
+		//
 	}
 
 	private Vector resolveEligible() {
@@ -438,7 +432,7 @@ public final class Resolver implements WorkPerformer {
 
 							if (!resolved) {
 								if (Activator.DEBUG) {
-									Activator.log.debug("Resolver.resolveEligible(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null);
+									Activator.log.debug("Resolver.resolveEligible(): " + NLS.bind(Messages.REFERENCE_NOT_RESOLVED, reference.reference.name, scp.name), null); //$NON-NLS-1$
 								}
 								enabledSCPs.removeElementAt(k);
 								break;
@@ -481,7 +475,7 @@ public final class Resolver implements WorkPerformer {
 					}
 					if (!hasPermission) {
 						if (Activator.DEBUG) {
-							Activator.log.debug("Resolver.resolveEligible(): Cannot satisfy component '" + scp.name + "' because its bundle does not have permissions to register service with interface " + provides[i], null);
+							Activator.log.debug(NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
 						}
 						scpEnabled.removeElementAt(k);
 						enabledSCPs.removeElementAt(k);
@@ -494,12 +488,11 @@ public final class Resolver implements WorkPerformer {
 			}
 
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10021, enabledSCPs.toString(), null, false);
-				////Activator.log.debug("Resolver:resolveEligible(): resolved components = " + enabledSCPs, null);
+				Activator.log.debug(NLS.bind(Messages.RESOLVED_COMPONENTS, enabledSCPs.toString()), null);
 			}
 			return enabledSCPs;
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 			return new Vector();
 		}
 	}
@@ -521,7 +514,7 @@ public final class Resolver implements WorkPerformer {
 
 						if (!resolved && scp.getState() > ServiceComponentProp.SATISFIED) {
 							if (Activator.DEBUG) {
-								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null);
+								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): " + NLS.bind(Messages.REFERENCE_NOT_RESOLVED, reference.reference.name, scp.name), null); //$NON-NLS-1$
 							}
 							toDispose = true;
 							break;
@@ -534,7 +527,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return result;
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 			return null;
 		}
 	}
@@ -570,8 +563,7 @@ public final class Resolver implements WorkPerformer {
 				component = (ServiceComponent) componentDescriptions.elementAt(i);
 				component.enabled = false;
 				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10022, component.name, null, false);
-					////Activator.log.debug("Resolver.disableComponents()" + component.name, null);
+					Activator.log.debug("Resolver.disableComponents() " + component.name, null); //$NON-NLS-1$
 				}
 
 				// then get the list of SCPs for this CD
@@ -597,7 +589,7 @@ public final class Resolver implements WorkPerformer {
 
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			Activator.log.info("[DS perf] " + componentDescriptions.size() + " Components disabled for " + start + " ms");
+			Activator.log.info(NLS.bind(Messages.COMPONENTS_DISABLED, Integer.toString(componentDescriptions.size()), Long.toString(start)));
 		}
 	}
 
@@ -615,8 +607,7 @@ public final class Resolver implements WorkPerformer {
 		try {
 			if (Activator.DEBUG) {
 				String work = WORK_TITLES[workAction - 1];
-				Activator.log.debug(0, 10023, work + workObject, null, false);
-				////Activator.log.debug("Resolver.dispatchWork(): " + work + workObject, null);
+				Activator.log.debug("Resolver.performWork(): " + work + workObject, null); //$NON-NLS-1$
 			}
 			switch (workAction) {
 				case BUILD :
@@ -645,7 +636,7 @@ public final class Resolver implements WorkPerformer {
 					break;
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 
@@ -676,13 +667,11 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 			if (toBind != null && Activator.DEBUG) {
-				Activator.log.debug(0, 10025, toBind.toString(), null, false);
-				// //Activator.log.debug("Resolver.selectDynamicBind(): selected
-				// = " + bindTable, null);
+				Activator.log.debug("Resolver.selectDynamicBind(): selected = " + toBind.toString(), null); //$NON-NLS-1$
 			}
 			return toBind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", t);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -713,13 +702,11 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 			if (toBind != null && Activator.DEBUG) {
-				Activator.log.debug(0, 10061, toBind.toString(), null, false);
-				// //Activator.log.debug("Resolver.selectStaticBind(): selected
-				// = " + toBind, null);
+				Activator.log.debug("Resolver.selectStaticBind(): selected = " + toBind.toString(), null); //$NON-NLS-1$
 			}
 			return toBind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", t);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -752,13 +739,11 @@ public final class Resolver implements WorkPerformer {
 			}
 			if (toUnbind != null)
 				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10060, toUnbind.toString(), null, false);
-					// //Activator.log.debug("Resolver.selectStaticUnBind():
-					// selected = " + toUnbind, null);
+					Activator.log.debug("Resolver.selectStaticUnBind(): selected = " + toUnbind.toString(), null); //$NON-NLS-1$
 				}
 			return toUnbind;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", t);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -776,9 +761,7 @@ public final class Resolver implements WorkPerformer {
 	private Hashtable selectDynamicUnBind(Vector scps, ServiceReference serviceReference) {
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10026, null, null, false);
-				// //Activator.log.debug("Resolver.selectDynamicUnBind():
-				// entered", null);
+				Activator.log.debug("Resolver.selectDynamicUnBind(): entered", null); //$NON-NLS-1$
 			}
 			Hashtable unbindTable = null; // ReferenceDescription:subTable
 			Hashtable unbindSubTable = null; // scp:sr
@@ -799,9 +782,7 @@ public final class Resolver implements WorkPerformer {
 						// object to check
 						if (reference.dynamicUnbindReference(serviceReference)) {
 							if (Activator.DEBUG) {
-								Activator.log.debug(0, 10027, scp.toString(), null, false);
-								// //Activator.log.debug("Resolver.selectDynamicUnBind():
-								// unbinding " + scp, null);
+								Activator.log.debug("Resolver.selectDynamicUnBind(): unbinding " + scp.toString(), null); //$NON-NLS-1$
 							}
 							if (unbindSubTable == null) {
 								unbindSubTable = new Hashtable(11);
@@ -813,20 +794,18 @@ public final class Resolver implements WorkPerformer {
 							unbindTable.put(reference, unbindSubTable);
 						} else {
 							if (Activator.DEBUG) {
-								Activator.log.debug("Resolver.selectDynamicUnBind(): not unbinding " + scp + " service ref=" + serviceReference, null);
+								Activator.log.debug("Resolver.selectDynamicUnBind(): not unbinding " + scp + " service ref=" + serviceReference, null); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 						}
 					}
 				}
 			}
 			if (unbindTable != null && Activator.DEBUG) {
-				Activator.log.debug(0, 10028, unbindTable.toString(), null, false);
-				// //Activator.log.debug("Resolver.selectDynamicUnBind():
-				// unbindTable is " + unbindTable, null);
+				Activator.log.debug("Resolver.selectDynamicUnBind(): unbindTable is " + unbindTable.toString(), null); //$NON-NLS-1$
 			}
 			return unbindTable;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", t);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -847,7 +826,7 @@ public final class Resolver implements WorkPerformer {
 			Vector eligibleSCPs = resolveEligible();
 			if (!eligibleSCPs.contains(newSCP)) {
 				scpEnabled.removeElement(newSCP);
-				throw new ComponentException("Cannot resolve instance of " + newSCP + " with properties " + configProperties);
+				throw new ComponentException(NLS.bind(Messages.CANT_RESOLVE_COMPONENT_INSTANCE, newSCP, configProperties));
 			}
 			return newSCP;
 		}
@@ -908,7 +887,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			}
 		} catch (CircularityException e) {
-			Activator.log(e.getCausingComponent().serviceComponent.bc, LogService.LOG_ERROR, "[SCR] Circularity Exception found for component: " + e.getCausingComponent().serviceComponent, e);
+			Activator.log(e.getCausingComponent().serviceComponent.bc, LogService.LOG_ERROR, NLS.bind(Messages.CIRCULARITY_EXCEPTION_FOUND, e.getCausingComponent().serviceComponent), e);
 			// disable offending SCP
 			scpEnabled.removeElement(e.getCausingComponent());
 			// try again
@@ -961,7 +940,7 @@ public final class Resolver implements WorkPerformer {
 				currentStack.removeElement(refSCP);
 			}
 		}
-		visited.put(scp, "");
+		visited.put(scp, ""); //$NON-NLS-1$
 	}
 
 	/**
@@ -989,7 +968,7 @@ public final class Resolver implements WorkPerformer {
 		// check whether the optional reference is static - this is not allowed
 		// because of the way components with static refereces are built
 		if (optionalRefSCP.ref.policy == ComponentReference.POLICY_STATIC) {
-			Activator.log(optionalRefSCP.ref.scp.bc, LogService.LOG_ERROR, "[SCR] Static optional reference detected in a component cycle and it will be removed. The referece is " + optionalRefSCP.ref.reference, null);
+			Activator.log(optionalRefSCP.ref.scp.bc, LogService.LOG_ERROR, NLS.bind(Messages.STATIC_OPTIONAL_REFERENCE_TO_BE_REMOVED, optionalRefSCP.ref.reference), null);
 
 			optionalRefSCP.ref.scp.references.removeElement(optionalRefSCP.ref);
 		}
@@ -1028,7 +1007,7 @@ public final class Resolver implements WorkPerformer {
 		}
 
 		public String toString() {
-			return "Reference : " + ref + " ::: SCP : " + producer;
+			return "Reference : " + ref + " ::: SCP : " + producer; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

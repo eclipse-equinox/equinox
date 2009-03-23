@@ -16,6 +16,7 @@ import java.util.Dictionary;
 import java.util.Vector;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
 
@@ -73,9 +74,7 @@ public class ComponentContextImpl implements ComponentContext {
 			return null;
 		}
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10070, name, null, false);
-			// //Activator.log.debug("ComponentContextImpl.locateService(): " +
-			// name, null);
+			Activator.log.debug("ComponentContextImpl.locateService(): " + name, null); //$NON-NLS-1$
 		}
 		Vector references = scp.references;
 		for (int i = 0; i < references.size(); i++) {
@@ -116,10 +115,10 @@ public class ComponentContextImpl implements ComponentContext {
 					if (t instanceof ComponentException) {
 						throw (ComponentException) t;
 					}
-					throw new ComponentException("Exception occurred while locating service for interface " + name, t); //$NON-NLS-1$
+					throw new ComponentException(NLS.bind(Messages.EXCEPTION_LOCATING_SERVICE, name), t);
 				}
 				if (Activator.DEBUG) {
-					Activator.log.debug("ComponentContextImpl.locateService(): error, service not found - " + ref.interfaceName + "; the comp. context belongs to " + scp.name, null);
+					Activator.log.debug("ComponentContextImpl.locateService(): error, service not found - " + ref.interfaceName + "; the comp. context belongs to " + scp.name, null); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -146,9 +145,7 @@ public class ComponentContextImpl implements ComponentContext {
 		}
 
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10071, name, null, false);
-			// //Activator.log.debug("ComponentContextImpl.locateServices(): " +
-			// name, null);
+			Activator.log.debug("ComponentContextImpl.locateServices(): " + name, null); //$NON-NLS-1$
 		}
 		Vector references = scp.references;
 		for (int i = 0; i < references.size(); i++) {
@@ -198,7 +195,7 @@ public class ComponentContextImpl implements ComponentContext {
 					if (t instanceof ComponentException) {
 						throw (ComponentException) t;
 					}
-					throw new ComponentException("Exception occurred while locating services for interface " + name, t);
+					throw new ComponentException(NLS.bind(Messages.EXCEPTION_LOCATING_SERVICES, name), t);
 				}
 			}
 		}
@@ -216,9 +213,7 @@ public class ComponentContextImpl implements ComponentContext {
 			return null;
 		}
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10070, name + " by service reference : " + serviceReference, null, false);
-			// //Activator.log.debug("ComponentContextImpl.locateService(): " +
-			// name, null);
+			Activator.log.debug("ComponentContextImpl.locateService(): " + name + " by service reference : " + serviceReference, null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		Vector references = scp.references;
 		try {
@@ -232,7 +227,7 @@ public class ComponentContextImpl implements ComponentContext {
 						// reference
 						if (Activator.DEBUG) {
 							String referenceToString = (serviceReference == null) ? null : serviceReference.toString();
-							Activator.log.debug(0, 10072, referenceToString, null, false);
+							Activator.log.debug("ComponentContextImpl.locateService(): the specified service reference is not bound to the specified reference" + referenceToString, null); //$NON-NLS-1$
 						}
 						return null;
 					}
@@ -243,7 +238,7 @@ public class ComponentContextImpl implements ComponentContext {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			throw new ComponentException("Exception occurred while locating service for interface " + name, t);
+			throw new ComponentException(NLS.bind(Messages.EXCEPTION_LOCATING_SERVICE, name), t);
 		}
 		return null;
 	}

@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.ds;
 
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentException;
@@ -35,8 +36,8 @@ final class ServiceReg implements ServiceFactory {
 	private ServiceComponentProp scp;
 
 	static {
-		String tmp = Activator.bc.getProperty("equinox.scr.dontDisposeInstances");
-		dontDisposeInstances = (tmp != null) ? !tmp.equalsIgnoreCase("false") : true;
+		String tmp = Activator.bc.getProperty("equinox.scr.dontDisposeInstances"); //$NON-NLS-1$
+		dontDisposeInstances = (tmp != null) ? !tmp.equalsIgnoreCase("false") : true; //$NON-NLS-1$
 	}
 
 	ServiceReg(ServiceComponentProp scp, ComponentInstanceImpl instance) {
@@ -58,12 +59,12 @@ final class ServiceReg implements ServiceFactory {
 				useCount++;
 			}
 			if (Activator.DEBUG) {
-				Activator.log.debug("ServiceReg.getService(): service '" + scp.name + " is used " + useCount + " time(s), object = " + instance.getInstance(), null);
+				Activator.log.debug("ServiceReg.getService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)) + ", object = " + instance.getInstance(), null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			return instance.getInstance();
 		} catch (Exception e) {
 			if (!(e instanceof ComponentException)) {
-				Activator.log.error("ServiceReg.getService(): Could not create instance of " + scp.name, e);
+				Activator.log.error(NLS.bind(Messages.CANNOT_CREATE_INSTANCE, scp.name), e);
 				return null;
 			}
 			throw (ComponentException) e;
@@ -86,7 +87,7 @@ final class ServiceReg implements ServiceFactory {
 				//Immediate components are custom case - according to me, their instances should not be disposed
 				// because they are probably needed during the whole component's life  
 				if (Activator.DEBUG) {
-					Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + "' no longer used, disposing object = " + service, null);
+					Activator.log.debug(NLS.bind(Messages.SERVICE_NO_LONGER_USED, scp.name, service), null);
 				}
 				// dispose only the instance - don't dispose the component
 				// itself!
@@ -95,14 +96,14 @@ final class ServiceReg implements ServiceFactory {
 				instance = null;
 			} else {
 				if (Activator.DEBUG) {
-					Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + " is used " + useCount + " times(s)", null);
+					Activator.log.debug("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), null); //$NON-NLS-1$
 				}
 			}
 		} else {
 			if (useCount < 0) {
-				Activator.log.warning("ServiceReg.ungetService(): service '" + scp.name + " is used " + useCount + " times(s)", new Exception("Debug callstack"));
+				Activator.log.warning("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), new Exception("Debug callstack")); //$NON-NLS-1$ //$NON-NLS-2$
 			} else if (Activator.DEBUG) {
-				Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + " is used " + useCount + " times(s)", null);
+				Activator.log.debug("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), null); //$NON-NLS-1$
 			}
 		}
 	}
@@ -113,6 +114,6 @@ final class ServiceReg implements ServiceFactory {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return scp.name + " Service Registration";
+		return scp.name + " Service Registration"; //$NON-NLS-1$
 	}
 }

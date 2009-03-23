@@ -14,11 +14,12 @@ package org.eclipse.equinox.internal.ds;
 import org.eclipse.equinox.internal.util.event.Queue;
 import org.eclipse.equinox.internal.util.ref.TimerRef;
 import org.eclipse.equinox.internal.util.timer.TimerListener;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.service.cm.ConfigurationEvent;
 
 /**
+ * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
  */
 
 public class WorkThread implements Runnable, TimerListener {
@@ -51,14 +52,14 @@ public class WorkThread implements Runnable, TimerListener {
 						break;
 					}
 					if (Activator.DEBUG) {
-						Activator.log.debug(0, 10029, null, null, false);
-						// //Activator.log.debug("WorkThread.Run()", null);
+						Activator.log.debug("WorkThread.run()", null); //$NON-NLS-1$
 					}
 					if (queue.size() == 0) { // wait for more events
 						try {
 							waiting++;
 							queue.wait(IDLE_TIMEOUT);
 						} catch (Exception ignore) {
+							//ignore
 						}
 						waiting--;
 						if (mgr.stopped || queue.size() == 0) {
@@ -70,9 +71,7 @@ public class WorkThread implements Runnable, TimerListener {
 
 					if (objectToProcess != null) {
 						if (Activator.DEBUG) {
-							Activator.log.debug(0, 10030, objectToProcess.toString(), null, false);
-							// //Activator.log.debug("WorkThread.getObject " +
-							// object, null);
+							Activator.log.debug("WorkThread.run(): object to process " + objectToProcess.toString(), null); //$NON-NLS-1$
 						}
 					} else {
 						continue;
@@ -82,7 +81,7 @@ public class WorkThread implements Runnable, TimerListener {
 					TimerRef.notifyAfter(this, BLOCK_TIMEOUT, 1);
 				} else {
 					if (Activator.DEBUG) {
-						Activator.log.debug("[SCR] WorkThread.run(): Timer service is not available! Skipping timeout check", null);
+						Activator.log.debug(Messages.TIMER_SERVICE_UNAVAILABLE, null);
 					}
 				}
 				if (objectToProcess instanceof SCRManager.QueuedJob) {
@@ -91,9 +90,8 @@ public class WorkThread implements Runnable, TimerListener {
 					mgr.processConfigurationEvent((ConfigurationEvent) objectToProcess);
 				}
 			} catch (Throwable t) {
-				// just for any case. Must not happen in order to keep thread
-				// alive
-				Activator.log.error("[SCR - WorkThread] Unexpected exception occurred!", t);
+				// just for any case. Must not happen in order to keep thread alive
+				Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
 			} finally {
 				TimerRef.removeListener(this, 1);
 			}
@@ -102,7 +100,7 @@ public class WorkThread implements Runnable, TimerListener {
 	}
 
 	public void timer(int event) {
-		Activator.log.warning("[SCR - WorkThread] Timeout occurred! Thread was blocked on processing " + objectToProcess, null);
+		Activator.log.warning(NLS.bind(Messages.TIMEOUT_PROCESSING, objectToProcess), null);
 		running = false;
 		objectToProcess = null;
 		mgr.queueBlocked();

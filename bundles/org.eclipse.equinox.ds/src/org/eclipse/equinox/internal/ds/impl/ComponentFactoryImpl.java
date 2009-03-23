@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.impl;
 
+import org.eclipse.equinox.internal.ds.Messages;
+
 import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
@@ -56,9 +58,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 		ComponentInstanceImpl instance = null;
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10032, sci.name, null, false);
-				// //Activator.log.debug("ComponentFactoryImpl.newInstance(): "
-				// + sci.name, null);
+				Activator.log.debug("ComponentFactoryImpl.newInstance(): " + sci.name, null); //$NON-NLS-1$
 			}
 
 			// merge properties
@@ -87,8 +87,8 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			if (e instanceof ComponentException) {
 				throw (ComponentException) e;
 			}
-			Activator.log.error("ComponentFactoryImpl.newInstance(): failed for " + sci.name + " with properties " + additionalProps, e);
-			throw new ComponentException("Failed to create new instance", e);
+			Activator.log.error("ComponentFactoryImpl.newInstance(): failed for " + sci.name + " with properties " + additionalProps, e); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new ComponentException(Messages.COULD_NOT_CREATE_NEW_INSTANCE, e);
 		}
 		return instance;
 	}
@@ -99,7 +99,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return "ComponentFactory for " + sci.name;
+		return "ComponentFactory for " + sci.name; //$NON-NLS-1$
 	}
 
 }

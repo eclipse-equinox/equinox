@@ -16,13 +16,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.equinox.internal.ds.model.DeclarationParser;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 
 /**
+ * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
  */
 
 public abstract class ComponentStorage {
@@ -50,19 +51,19 @@ public abstract class ComponentStorage {
 		String header = (String) headers.get(ComponentConstants.SERVICE_COMPONENT);
 
 		if (header != null) {
-			StringTokenizer tok = new StringTokenizer(header, ",");
+			StringTokenizer tok = new StringTokenizer(header, ","); //$NON-NLS-1$
 			// the parser is not thread safe!!!
 			synchronized (parser) {
 				// process all definition file
 				while (tok.hasMoreElements()) {
 					String definitionFile = tok.nextToken().trim();
 					int ind = definitionFile.lastIndexOf('/');
-					String path = ind != -1 ? definitionFile.substring(0, ind) : "/";
+					String path = ind != -1 ? definitionFile.substring(0, ind) : "/"; //$NON-NLS-1$
 					InputStream is = null;
 
 					Enumeration urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
 					if (urls == null || !urls.hasMoreElements()) {
-						Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Component definition XMLs not found in bundle " + bundle.getSymbolicName() + ". The component header value is " + definitionFile, null);
+						Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.COMPONENT_XML_NOT_FOUND, bundle.getSymbolicName(), definitionFile), null);
 						continue;
 					}
 
@@ -73,24 +74,23 @@ public abstract class ComponentStorage {
 					while (urls.hasMoreElements()) {
 						url = (URL) urls.nextElement();
 						if (Activator.DEBUG) {
-							Activator.log.debug(0, 10017, url.toString(), null, false);
-							////Activator.log.debug("ComponentStorage.parseXMLDeclaration(): loading " + definitionFile, null);
+							Activator.log.debug("ComponentStorage.parseXMLDeclaration(): loading " + url.toString(), null); //$NON-NLS-1$
 						}
 						try {
 							is = url.openStream();
 							if (is == null) {
-								Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Could not open stream to component definition file " + url, null);
+								Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.CANT_OPEN_STREAM_TO_COMPONENT_XML, url), null);
 							} else {
 								int compSize = components.size();
 								parser.parse(is, bundle, components, url.toString());
 								if (compSize == components.size()) {
-									Activator.log(bundle.getBundleContext(), LogService.LOG_WARNING, "[SCR] No components were found while processing component definition file " + url, null);
+									Activator.log(bundle.getBundleContext(), LogService.LOG_WARNING, NLS.bind(Messages.NO_COMPONENTS_FOUND, url), null);
 								}
 							}
 						} catch (IOException ie) {
-							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while opening component definition file " + url, ie);
+							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_OPENING_COMP_XML, url), ie);
 						} catch (Throwable t) {
-							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Illegal definition file: " + url, t);
+							Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ILLEGAL_DEFINITION_FILE, url), t);
 						} finally {
 							if (is != null) {
 								is.close();

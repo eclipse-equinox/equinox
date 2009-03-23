@@ -17,6 +17,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentContextImpl;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
 import org.osgi.service.log.LogService;
@@ -98,8 +99,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	public void dispose(int deactivateReason) {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10035, name, null, false);
-			// //Activator.log.debug("ServiceComponentProp.dispose(): ", null);
+			Activator.log.debug("ServiceComponentProp.dispose(): " + name, null); //$NON-NLS-1$
 		}
 		setState(DISPOSED);
 		while (!instances.isEmpty()) {
@@ -132,19 +132,9 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	public void activate(Bundle usingBundle, ComponentInstanceImpl componentInstance) throws Exception {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10036, name, null, false);
-			// //Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.activate():
-			// name: " + name, null);
-			Activator.log.debug(0, 10039, (usingBundle != null ? usingBundle.getSymbolicName() : null), null, false);
-			// //Activator.log.debug(
-			// // "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.using
-			// bundle: "
-			// // + (usingBundle != null ? usingBundle.getSymbolicName() :
-			// null),
-			// // null);
-			Activator.log.debug(0, 10037, componentInstance.toString(), null, false);
-			// //Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.instance:
-			// " + componentInstance, null);
+			Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.activate(): name: " + name, null); //$NON-NLS-1$
+			Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.activate(): using bundle: " + (usingBundle != null ? usingBundle.getSymbolicName() : null), null); //$NON-NLS-1$
+			Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.activate(): instance: " + componentInstance.toString(), null); //$NON-NLS-1$
 		}
 
 		// call the activate method on the Service Component
@@ -161,9 +151,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	private void deactivate(ComponentInstanceImpl componentInstance, int deactivateReason) {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10038, name, null, false);
-			// //Activator.log.debug("ServiceComponentProp.deactivate(): " +
-			// name, null);
+			Activator.log.debug("ServiceComponentProp.deactivate(): " + name, null); //$NON-NLS-1$
 		}
 		serviceComponent.deactivate(componentInstance.getInstance(), componentInstance.getComponentContext(), deactivateReason);
 	}
@@ -200,12 +188,8 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 					}
 				} else {
 					if (Activator.DEBUG) {
-						Activator.log.debug(0, 10040, ref.reference.name, null, false);
+						Activator.log.debug("ServiceComponentProp.bind(): the folowing reference doesn't specify bind method: " + ref.reference.name, null); //$NON-NLS-1$
 					}
-					// //Activator.log.debug(
-					// // "ServiceComponentProp:bind(): the reference '" +
-					// ref.name + "' doesn't specify bind method",
-					// // null);
 				}
 			}
 		}
@@ -248,6 +232,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				waiting++;
 				wait();
 			} catch (Exception _) {
+				//
 			}
 			waiting--;
 		}
@@ -274,7 +259,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	public ComponentInstanceImpl build(Bundle usingBundle, Object instance, boolean security) throws Exception {
 		if (getState() == DISPOSED) {
 			if (Activator.DEBUG) {
-				Activator.log.debug("Cannot build component, because it is already disposed: " + this, null);
+				Activator.log.debug("Cannot build component, because it is already disposed: " + this, null); //$NON-NLS-1$
 			}
 			return null;
 		}
@@ -284,7 +269,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			try {
 				return (ComponentInstanceImpl) AccessController.doPrivileged(this);
 			} catch (PrivilegedActionException pae) {
-
+				//
 			}
 		}
 		ComponentInstanceImpl componentInstance = null;
@@ -320,7 +305,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				//must remove from satisfied list and remove the instance
 				InstanceProcess.resolver.removeFromSatisfiedList(this);
 				instances.removeElement(componentInstance);
-				throw new ComponentException("The component was not built because some of its references could not be bound. The component is " + serviceComponent);
+				throw new ComponentException(NLS.bind(Messages.COMPONENT_WAS_NOT_BUILT, serviceComponent));
 			}
 		}
 
@@ -334,16 +319,15 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				ci = (ComponentInstanceImpl) instances.elementAt(i);
 				if (ci.getInstance() == obj) {
 					break;
-				} else {
-					ci = null;
 				}
+				ci = null;
 			}
 		}
 		if (ci != null) {
 			dispose(ci, deactivateReason);
 			return;
 		}
-		throw new RuntimeException("The Object '" + obj + "' is not created by the component named " + name);
+		throw new RuntimeException(NLS.bind(Messages.INVALID_OBJECT, obj, name));
 	}
 
 	public void dispose(ComponentInstanceImpl componentInstance, int deactivateReason) {
@@ -366,11 +350,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	public void bindReference(Reference reference, ComponentInstance componentInstance) throws Exception {
 
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10041, serviceComponent.name + " -> " + reference.reference, null, false);
-			// //Activator.log.debug(
-			// // "ServiceComponentProp.bindReferences(): component " +
-			// serviceComponent.name + " to " + componentReference,
-			// // null);
+			Activator.log.debug("ServiceComponentProp.bindReference(): component " + serviceComponent.name + " -> " + reference.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		ServiceReference[] serviceReferences = null;
@@ -380,7 +360,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			// get all registered services using this target filter
 			serviceReferences = bc.getServiceReferences(reference.reference.interfaceName, reference.getTarget());
 		} catch (Exception e) {
-			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot get references for " + reference.reference.interfaceName, e);
+			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_GET_REFERENCES, reference.reference.interfaceName), e);
 			throw e;
 			// rethrow exception so resolver is eventually notified that this SCP is bad
 		}
@@ -414,7 +394,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			}
 		} else {
 			if (Activator.DEBUG) {
-				Activator.log.debug("ServiceComponentProp.bindReference(): The service is not yet registered, but it is already instantiated", null);
+				Activator.log.debug("ServiceComponentProp.bindReference(): The service is not yet registered, but it is already instantiated", null); //$NON-NLS-1$
 			}
 		}
 	}
@@ -435,11 +415,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		// ok, proceed!
 
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10042, serviceComponent.name + " <- " + reference.reference, null, false);
-			// //Activator.log.debug(
-			// // "ServiceComponentProp.unbindReference(): component " + name +
-			// " from " + componentReference,
-			// // null);
+			Activator.log.debug("ServiceComponentProp.unbindReference(): component " + serviceComponent.name + " <- " + reference.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		Enumeration serviceReferences = reference.reference.serviceReferences.keys();
@@ -458,7 +434,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	public void unbindDynamicReference(Reference ref, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
 		if (Activator.DEBUG) {
-			Activator.log.debug("ServiceComponentProp.unbindDynamicReference(): component = " + name + ", reference = " + ref.reference.name, null);
+			Activator.log.debug("ServiceComponentProp.unbindDynamicReference(): component = " + name + ", reference = " + ref.reference.name, null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		// check if we need to rebind
 		switch (ref.reference.cardinality) {
@@ -527,7 +503,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 	private void assertCreateSingleInstance() {
 		if (!serviceComponent.serviceFactory && !instances.isEmpty()) {
-			throw new ComponentException("Instance of '" + name + "'is already created!");
+			throw new ComponentException(NLS.bind(Messages.INSTANCE_ALREADY_CREATED, name));
 		}
 	}
 
@@ -547,7 +523,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 */
 	public void setDelayActivateSCPName(String scpName) {
 		if (Activator.DEBUG) {
-			Activator.log.debug("Setting delay activate SCP: " + scpName, null);
+			Activator.log.debug("Setting delay activate SCP: " + scpName, null); //$NON-NLS-1$
 		}
 		if (delayActivateSCPNames == null) {
 			delayActivateSCPNames = new Vector(1);

@@ -16,6 +16,7 @@ import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -36,7 +37,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.1
  */
 
 public class Activator implements BundleActivator, SynchronousBundleListener {
@@ -64,9 +64,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	static long time[] = null;
 
-	public static void timeLog(int id) {
+	public static void timeLog(String message) {
 		time[1] = time[0];
-		log.debug(0x0100, id, String.valueOf((time[0] = System.currentTimeMillis()) - time[1]), null, false, true);
+		log.debug(message + String.valueOf((time[0] = System.currentTimeMillis()) - time[1]), null);
 	}
 
 	private void initSCR() {
@@ -82,40 +82,34 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			time = new long[] {tmp, 0, tmp};
 			lazyIniting = true;
 			if (startup)
-				timeLog(114); /* 114 = "[BEGIN - lazy SCR init] " */
+				timeLog("[BEGIN - lazy SCR init]"); //$NON-NLS-1$
 		}
 
-		WorkThread.IDLE_TIMEOUT = getInteger("equinox.ds.idle_timeout", 1000);
-		WorkThread.BLOCK_TIMEOUT = getInteger("equinox.ds.block_timeout", 30000);
+		WorkThread.IDLE_TIMEOUT = getInteger("equinox.ds.idle_timeout", 1000); //$NON-NLS-1$
+		WorkThread.BLOCK_TIMEOUT = getInteger("equinox.ds.block_timeout", 30000); //$NON-NLS-1$
 
 		// start the config tracker
 		cmTracker = new ServiceTracker(bc, ConfigurationAdmin.class.getName(), null);
 
-		if (startup)
-			timeLog(102);
-		/*102 = "ConfigurationAdmin ServiceTracker instantiation took "*/
-
 		ConfigurationManager.cmTracker = cmTracker;
 		cmTracker.open();
 		if (startup)
-			timeLog(103); /* 103 = "ServiceTracker starting took " */
+			timeLog("ServiceTracker starting took "); //$NON-NLS-1$
 
 		scrManager = new SCRManager(bc, log);
 		if (startup)
-			timeLog(104); /* 104 = "SCRManager instantiation took " */
+			timeLog("SCRManager instantiation took "); //$NON-NLS-1$
 
 		// add the configuration listener - we to receive CM events to restart
 		// components
 		cmTrackerReg = bc.registerService(ConfigurationListener.class.getName(), scrManager, null);
 		if (startup)
-			timeLog(106); /*106 = "ConfigurationListener service registered for "*/
+			timeLog("ConfigurationListener service registered for "); //$NON-NLS-1$
 		bc.addServiceListener(scrManager);
-		if (startup)
-			timeLog(107); /* 107 = "addServiceListener() method took " */
 
 		scrManager.startIt();
 		if (Activator.startup)
-			Activator.timeLog(113); /* 113 = "startIt() method took " */
+			Activator.timeLog("startIt() method took "); //$NON-NLS-1$
 
 		if (scrCommandProvider == null) {
 			scrCommandProvider = new SCRCommandProvider(scrManager);
@@ -124,8 +118,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		}
 
 		if (startup && lazyIniting) {
-			/* 115 = "[END - lazy SCR init] Activator.initSCR() method executed for "*/
-			log.debug(0x0100, 115, String.valueOf(time[0] - time[2]), null, false);
+			log.debug("[END - lazy SCR init] Activator.initSCR() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
 			time = null;
 		}
 	}
@@ -137,7 +130,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 */
 	public void start(BundleContext bc) throws Exception {
 		Activator.bc = bc;
-		startup = getBoolean("equinox.measurements.bundles");
+		startup = getBoolean("equinox.measurements.bundles"); //$NON-NLS-1$
 		if (startup) {
 			long tmp = System.currentTimeMillis();
 			time = new long[] {tmp, 0, tmp};
@@ -146,24 +139,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		debugTracker = new ServiceTracker(bc, DebugOptions.class.getName(), null);
 		debugTracker.open();
 		log = new Log(bc, false);
-		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug");
-		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf");
-		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all");
+		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug"); //$NON-NLS-1$ //$NON-NLS-2$
+		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf"); //$NON-NLS-1$ //$NON-NLS-2$
+		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", false) || getBoolean("equinox.ds.dbstore");
+		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", false) || getBoolean("equinox.ds.dbstore"); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setDebug(DEBUG);
-		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print");
+		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print"); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setPrintOnConsole(print);
-		if (DEBUG) {
-			log.setMaps(TracerMap.getMap(), TracerMap.getStarts());
-		}
 
 		if (startup)
-			timeLog(100);
-		/*
-		 * 100 = "[BEGIN - start method] Creating Log
-		 * instance and initializing log system took "
-		 */
+			timeLog("[BEGIN - start method] Creating Log instance and initializing log system took "); //$NON-NLS-1$
 
 		boolean hasHeaders = false;
 		Bundle[] allBundles = bc.getBundles();
@@ -183,7 +169,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			bc.addBundleListener(this);
 		}
 		if (startup) {
-			log.debug(0x0100, 108, String.valueOf(time[0] - time[2]), null, false);
+			log.debug("[END - start method] Activator.start() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
 			time = null;
 		}
 	}
@@ -247,7 +233,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	public static boolean getBoolean(String property) {
 		String prop = (bc != null) ? bc.getProperty(property) : System.getProperty(property);
-		return ((prop != null) && prop.equalsIgnoreCase("true"));
+		return ((prop != null) && prop.equalsIgnoreCase("true")); //$NON-NLS-1$
 	}
 
 	public static int getInteger(String property, int defaultValue) {
@@ -283,23 +269,23 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			logService = (LogService) bundleContext.getService(logRef);
 		} catch (Exception e) {
 			if (Activator.DEBUG) {
-				log.debug("Cannot get LogService for bundle " + bundleContext.getBundle().getSymbolicName(), e);
+				log.debug(NLS.bind(Messages.CANNOT_GET_LOGSERVICE, bundleContext.getBundle().getSymbolicName()), e);
 			}
 		}
 		if (logService != null) {
 			logService.log(level, message, t);
 			bundleContext.ungetService(logRef);
 			if (log.getPrintOnConsole()) {
-				String prefix = "";
+				String prefix = ""; //$NON-NLS-1$
 				switch (level) {
 					case LogService.LOG_ERROR :
-						prefix = "ERROR ";
+						prefix = "ERROR "; //$NON-NLS-1$
 						break;
 					case LogService.LOG_WARNING :
-						prefix = "WARNING ";
+						prefix = "WARNING "; //$NON-NLS-1$
 						break;
 					case LogService.LOG_INFO :
-						prefix = "INFO ";
+						prefix = "INFO "; //$NON-NLS-1$
 						break;
 				}
 				dumpOnConsole(prefix, bundleContext, message, t);
@@ -321,7 +307,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	}
 
 	private static void dumpOnConsole(String prefix, BundleContext bundleContext, String msg, Throwable t) {
-		System.out.println(prefix + bundleContext.getBundle().getBundleId() + " " + msg);
+		System.out.println(prefix + bundleContext.getBundle().getBundleId() + " " + msg); //$NON-NLS-1$
 		if (t != null) {
 			t.printStackTrace();
 		}

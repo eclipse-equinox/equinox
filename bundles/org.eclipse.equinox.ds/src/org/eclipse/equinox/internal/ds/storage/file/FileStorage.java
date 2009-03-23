@@ -16,11 +16,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
 import java.util.Vector;
-import org.eclipse.equinox.internal.ds.Activator;
-import org.eclipse.equinox.internal.ds.ComponentStorage;
+import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponent;
 import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
@@ -34,13 +34,13 @@ public class FileStorage extends ComponentStorage {
 
 	//TODO: this constant should be public and shared across other bundles that use the same property. 
 	//Probably it should be in the supplement bundle?
-	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration";
+	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 
 	private BundleContext bc;
 
 	private String[] dbBundlePath = new String[1];
-	private String[] dbCompPath = new String[] {null, "COMPONENTS"};
-	private static String CUSTOM_DB_NAME = "SCR";
+	private String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
+	private static String CUSTOM_DB_NAME = "SCR"; //$NON-NLS-1$
 	private File file;
 	private ExternalizableDictionary data = new ExternalizableDictionary();
 	private StringBuffer pathBuffer = new StringBuffer();
@@ -48,7 +48,7 @@ public class FileStorage extends ComponentStorage {
 
 	public FileStorage(BundleContext bc) {
 		this.bc = bc;
-		separator = bc.getProperty("path.separator");
+		separator = bc.getProperty("path.separator"); //$NON-NLS-1$
 		file = bc.getDataFile(CUSTOM_DB_NAME);
 		try {
 			if (file.exists()) {
@@ -58,9 +58,9 @@ public class FileStorage extends ComponentStorage {
 			// should be never thrown
 			e.printStackTrace();
 		} catch (IOException e) {
-			Activator.log.error("[SCR] Error while loading components from data file " + file.getAbsolutePath(), e);
+			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
 		} catch (Exception e) {
-			Activator.log.error("[SCR] Error while loading components from data file " + file.getAbsolutePath(), e);
+			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
 		}
 	}
 
@@ -87,7 +87,7 @@ public class FileStorage extends ComponentStorage {
 			if (lastModifiedValue == null) {
 				components = parseXMLDeclaration(bundle);
 				if (components != null && components.size() != 0) {
-					data.put(getPath(dbBundlePath), "" + lastModified);
+					data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
 					saveComponentDefinitions(components, bundleID);
 				}
 
@@ -96,7 +96,7 @@ public class FileStorage extends ComponentStorage {
 				if (lastModified > dbLastModified) {
 					components = parseXMLDeclaration(bundle);
 					if (components != null && components.size() != 0) {
-						data.put(getPath(dbBundlePath), "" + lastModified);
+						data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
 						saveComponentDefinitions(components, bundleID);
 					}
 
@@ -106,7 +106,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception while processing bundle with id " + bundleID + " : " + bundle, e);
+			Activator.log.error(NLS.bind(Messages.PROCESSING_BUNDLE_FAILED, Long.toString(bundleID), bundle), e);
 			return null;
 		}
 	}
@@ -131,7 +131,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable t) {
-			Activator.log.error("[SCR] Error while loading components from DB", t);
+			Activator.log.error(Messages.ERROR_LOADING_COMPONENTS, t);
 		}
 		return null;
 	}

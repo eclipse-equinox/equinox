@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.ds;
 
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
 import org.osgi.service.log.LogService;
@@ -35,9 +36,7 @@ final class FactoryReg implements ServiceFactory {
 
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10001, component.name, null, false);
-				// //Activator.log.debug("FactoryReg.getService(): created new
-				// service for component '" + component.name, null);
+				Activator.log.debug(NLS.bind(Messages.NEW_SERVICE_CREATED, component.name), null);
 			}
 			ComponentInstance ci = InstanceProcess.staticRef.buildComponent(bundle, component, null, false);
 			// ci can be null if the component is already disposed while being built
@@ -46,7 +45,7 @@ final class FactoryReg implements ServiceFactory {
 			}
 		} catch (Throwable t) {
 			if (!(t instanceof ComponentException)) {
-				Activator.log(component.bc, LogService.LOG_ERROR, "RegisterComponentService: Cannot create instance of " + component.name, t);
+				Activator.log(component.bc, LogService.LOG_ERROR, NLS.bind(Messages.CANT_GET_SERVICE, component.name), t);
 			} else {
 				throw (ComponentException) t;
 			}
@@ -57,12 +56,12 @@ final class FactoryReg implements ServiceFactory {
 	// ServiceFactory.ungetService method.
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10002, registration.toString(), null, false);
+			Activator.log.debug("FactoryReg.ungetService(): registration = " + registration.toString(), null); //$NON-NLS-1$
 		}
 		component.disposeObj(service, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 	}
 
 	public String toString() {
-		return component.name + " FactoryRegistration";
+		return component.name + " FactoryRegistration"; //$NON-NLS-1$
 	}
 }

@@ -15,6 +15,7 @@ package org.eclipse.equinox.internal.ds;
 import java.util.Dictionary;
 import java.util.Vector;
 import org.eclipse.equinox.internal.ds.model.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
@@ -74,7 +75,7 @@ public final class Reference {
 			target = (String) properties.get(reference.name + ComponentConstants.REFERENCE_TARGET_SUFFIX);
 		}
 		if (target == null) {
-			target = "(objectClass=" + interfaceName + ")";
+			target = "(objectClass=" + interfaceName + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		// If it is not specified, then a policy of �static� is used.
@@ -127,7 +128,7 @@ public final class Reference {
 				return true;
 			}
 		} catch (InvalidSyntaxException e) {
-			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.hasProviders(): invalid target filter " + target, e);
+			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.hasProviders(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, target), e); //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -250,7 +251,7 @@ public final class Reference {
 		try {
 			filter = FrameworkUtil.createFilter(target);
 		} catch (InvalidSyntaxException e) {
-			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.selectProviders(): invalid target filter " + target, e);
+			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.selectProviders(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, target), e); //$NON-NLS-1$
 			return null;
 		}
 		Vector result = new Vector(2);

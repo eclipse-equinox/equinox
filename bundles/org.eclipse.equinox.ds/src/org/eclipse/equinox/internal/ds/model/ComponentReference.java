@@ -20,6 +20,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
@@ -93,9 +94,10 @@ public class ComponentReference implements Externalizable {
 			try {
 				method = consumerClass.getDeclaredMethod(methodName, SERVICE_REFERENCE);
 			} catch (NoSuchMethodException e) {
+				//
 			} catch (NoClassDefFoundError err) {
 				// this may happen on skelmir VM or in case of class loading problems
-				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
+				logWarning(NLS.bind(Messages.EXCEPTION_GETTING_METHOD, methodName, consumerClass.getName()), err, reference);
 			}
 
 			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
@@ -109,7 +111,7 @@ public class ComponentReference implements Externalizable {
 				}
 				if (serviceObject == null) {
 					// we could not create a serviceObject because of circularity
-					logWarning("[SCR] Could not get the service object relevant to the reference. A very possible reason is a circularity problem.", null, reference);
+					logWarning(Messages.CANT_GET_SERVICE_OBJECT, null, reference);
 					return null;
 				}
 				componentInstance.bindedServices.put(serviceReference, serviceObject);
@@ -149,9 +151,10 @@ public class ComponentReference implements Externalizable {
 			try {
 				method = consumerClass.getDeclaredMethod(methodName, param_interfaceClass);
 			} catch (NoSuchMethodException e) {
+				//
 			} catch (NoClassDefFoundError err) {
 				// this may happen on skelmir VM or in case of class loading problems
-				logWarning("[SCR] Exception occurred while getting method '" + methodName + "' of class " + consumerClass.getName(), err, reference);
+				logWarning(NLS.bind(Messages.EXCEPTION_GETTING_METHOD, methodName, consumerClass.getName()), err, reference);
 			}
 			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
 				break;
@@ -239,7 +242,7 @@ public class ComponentReference implements Externalizable {
 		buffer.append("[SCR] Method was not found: "); //$NON-NLS-1$
 		buffer.append(methodName);
 		buffer.append('(');
-		buffer.append("...");
+		buffer.append("..."); //$NON-NLS-1$
 		buffer.append(')');
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
@@ -301,7 +304,7 @@ public class ComponentReference implements Externalizable {
 						serviceReferences.put(serviceReference, instances);
 					} else if (instances.contains(instance)) {
 						if (reference.isUnary()) {
-							logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+							logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
 						}
 						return;
 					} else {
@@ -311,11 +314,11 @@ public class ComponentReference implements Externalizable {
 					Object compInstance = serviceReferences.get(serviceReference);
 					if (compInstance == instance) {
 						if (reference.isUnary()) {
-							logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to instance " + instance, null, reference);
+							logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
 						}
 						return;
 					} else if (compInstance != null) {
-						logWarning("[SCR] ComponentReference.bind(): service reference " + serviceReference + " is already bound to another instance: " + compInstance, null, reference);
+						logWarning(NLS.bind(Messages.SERVICE_REFERENCE_BOUND, serviceReference, compInstance), null, reference);
 						return;
 					}
 					serviceReferences.put(serviceReference, instance);
@@ -378,7 +381,7 @@ public class ComponentReference implements Externalizable {
 				try {
 					bindMethod.invoke(instance.getInstance(), params);
 				} catch (Throwable t) {
-					logError("[SCR] Error while trying to bind reference " + this, t, reference); //$NON-NLS-1$
+					logError(NLS.bind(Messages.ERROR_BINDING_REFERENCE, this), t, reference);
 				} finally {
 					if (params.length == 1) {
 						SCRUtil.release(params);
@@ -397,7 +400,7 @@ public class ComponentReference implements Externalizable {
 				}
 
 				// could be also circularity break
-				logWarning("[SCR] ComponentReference.bind(): bind method '" + bind + "' is not found or it is not accessible!", null, reference); //$NON-NLS-1$//$NON-NLS-2$
+				logWarning(NLS.bind(Messages.BIND_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE, bind), null, reference);
 			}
 		}
 	}
@@ -413,7 +416,7 @@ public class ComponentReference implements Externalizable {
 					referenceExists = false;
 				} else {
 					if (!instances.contains(instance)) {
-						logWarning("[SCR] ComponentReference.unbind(): component instance not bound! It is: " + instance, null, reference);
+						logWarning(NLS.bind(Messages.INSTANCE_NOT_BOUND, instance), null, reference);
 						return;
 					}
 				}
@@ -423,7 +426,7 @@ public class ComponentReference implements Externalizable {
 					referenceExists = false;
 				} else {
 					if (compInstance != instance) {
-						logWarning("[SCR] ComponentReference.unbind(): component instance not bound! It is: " + instance, null, reference);
+						logWarning(NLS.bind(Messages.INSTANCE_NOT_BOUND, instance), null, reference);
 						return;
 					}
 				}
@@ -450,7 +453,7 @@ public class ComponentReference implements Externalizable {
 			}
 		}
 		if (!referenceExists) {
-			logWarning("[SCR] ComponentReference.unbind(): invalid service reference " + serviceReference, null, reference);
+			logWarning(NLS.bind(Messages.INVALID_SERVICE_REFERENCE, serviceReference), null, reference);
 			return;
 		}
 		try {
@@ -495,7 +498,7 @@ public class ComponentReference implements Externalizable {
 					try {
 						unbindMethod.invoke(instance.getInstance(), params);
 					} catch (Throwable t) {
-						logError("[SCR] Exception occurred while unbinding reference " + this, t, reference);
+						logError(NLS.bind(Messages.EXCEPTION_UNBINDING_REFERENCE, this), t, reference);
 					} finally {
 						if (params.length == 1) {
 							SCRUtil.release(params);
@@ -536,36 +539,36 @@ public class ComponentReference implements Externalizable {
 
 	public final String toString() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("Reference[");
-		buffer.append("name = ").append(name);
-		buffer.append(", interface = ").append(interfaceName);
-		buffer.append(", policy = ");
+		buffer.append("Reference["); //$NON-NLS-1$
+		buffer.append("name = ").append(name); //$NON-NLS-1$
+		buffer.append(", interface = ").append(interfaceName); //$NON-NLS-1$
+		buffer.append(", policy = "); //$NON-NLS-1$
 		switch (policy) {
 			case POLICY_DYNAMIC :
-				buffer.append("dynamic");
+				buffer.append("dynamic"); //$NON-NLS-1$
 				break;
 			case POLICY_STATIC :
-				buffer.append("static");
+				buffer.append("static"); //$NON-NLS-1$
 		}
 
-		buffer.append(", cardinality = ");
+		buffer.append(", cardinality = "); //$NON-NLS-1$
 		switch (cardinality) {
 			case CARDINALITY_0_1 :
-				buffer.append("0..1");
+				buffer.append("0..1"); //$NON-NLS-1$
 				break;
 			case CARDINALITY_0_N :
-				buffer.append("0..n");
+				buffer.append("0..n"); //$NON-NLS-1$
 				break;
 			case CARDINALITY_1_1 :
-				buffer.append("1..1");
+				buffer.append("1..1"); //$NON-NLS-1$
 				break;
 			case CARDINALITY_1_N :
-				buffer.append("1..n");
+				buffer.append("1..n"); //$NON-NLS-1$
 		}
-		buffer.append(", target = ").append(target);
-		buffer.append(", bind = ").append(bind);
-		buffer.append(", unbind = ").append(unbind);
-		buffer.append("]");
+		buffer.append(", target = ").append(target); //$NON-NLS-1$
+		buffer.append(", bind = ").append(bind); //$NON-NLS-1$
+		buffer.append(", unbind = ").append(unbind); //$NON-NLS-1$
+		buffer.append("]"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 

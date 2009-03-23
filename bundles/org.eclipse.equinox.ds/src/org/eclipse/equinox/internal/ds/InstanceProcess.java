@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentFactoryImpl;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.ds.model.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.*;
@@ -49,7 +50,7 @@ public class InstanceProcess {
 	//key - the building thread;   value - Counter - holds the count of entries in buildComponent method  
 	static Hashtable stackCounts = new Hashtable(7);
 	//specifies the maximum time that a thread must wait for the building thread to complete the building of the SCP
-	static int waitTime = Activator.getInteger("equinox.scr.waitTimeOnBlock", 10000);
+	static int waitTime = Activator.getInteger("equinox.scr.waitTimeOnBlock", 10000); //$NON-NLS-1$
 
 	//a flag used for synchronization of build/dispose operations
 	boolean busyBuilding = false;
@@ -114,7 +115,7 @@ public class InstanceProcess {
 				if (!lockSucceeded) {
 					// The lock is not yet released!
 					// Allow the operation but log a warning
-					Activator.log.warning("Getting a lock required more than " + InstanceProcess.waitTime + " ms. There might be a synchronization problem in this callstack " + "or just the build/dispose process of some components took too long!", new Exception("Debug stacktrace"));
+					Activator.log.warning(NLS.bind(Messages.TIMEOUT_GETTING_LOCK, Integer.toString(InstanceProcess.waitTime)), new Exception("Debug stacktrace")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -169,15 +170,13 @@ public class InstanceProcess {
 				try {
 					if (Activator.PERF) {
 						start = System.currentTimeMillis();
-						Activator.log.info("[DS perf] Start building component " + scp);
+						Activator.log.info(NLS.bind(Messages.START_BUILDING_COMPONENT, scp));
 					}
 					scp.setState(ServiceComponentProp.BUILDING);
 					sc = scp.serviceComponent;
 					if (sc.immediate || (sc.factory == null && Activator.INSTANTIATE_ALL)) {
 						if (Activator.DEBUG) {
-							Activator.log.debug(0, 10003, scp.name, null, false);
-							// //Activator.log.debug("InstanceProcess.buildComponents():
-							// building immediate component " + scp.name, null);
+							Activator.log.debug(NLS.bind(Messages.BUILDING_IMMEDIATE_COMPONENT, scp.name), null);
 						}
 						if (scp.instances.isEmpty()) {
 							try {
@@ -185,7 +184,7 @@ public class InstanceProcess {
 							} catch (Exception e) {
 								successfullyBuilt = false;
 								if (!(e instanceof ComponentException)) {
-									Activator.log.error("[SCR] Cannot build component " + scp, e);
+									Activator.log.error(NLS.bind(Messages.CANNOT_BUILD_COMPONENT, scp), e);
 								}
 							}
 						}
@@ -207,10 +206,7 @@ public class InstanceProcess {
 							// component factory
 							if (scp.isComponentFactory()) {
 								if (Activator.DEBUG) {
-									Activator.log.debug(0, 10004, scp.name, null, false);
-									// //Activator.log.debug("InstanceProcess.buildComponents():
-									// building component factory " + scp.name,
-									// null);
+									Activator.log.debug(NLS.bind(Messages.BUILDING_COMPONENT_FACTORY, scp.name), null);
 								}
 
 								// check if MSF
@@ -220,7 +216,7 @@ public class InstanceProcess {
 										factoryPid = config.getFactoryPid();
 									}
 								} catch (Exception e) {
-									Activator.log.error("[SCR] Cannot get configuration for component " + sc.name, e);
+									Activator.log.error(NLS.bind(Messages.CANNOT_GET_CONFIGURATION, sc.name), e);
 								}
 
 								// if MSF throw exception - can't be
@@ -230,7 +226,7 @@ public class InstanceProcess {
 									toDisable.addElement(sc);
 									InstanceProcess.resolver.disableComponents(toDisable, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
 									successfullyBuilt = false;
-									throw new org.osgi.service.component.ComponentException("ManagedServiceFactory and ComponentFactory are incompatible");
+									throw new org.osgi.service.component.ComponentException(Messages.INCOMPATIBLE_COMBINATION);
 								}
 								registerComponentFactory(scp);
 								// when registering a ComponentFactory we must not
@@ -247,13 +243,13 @@ public class InstanceProcess {
 						}
 					}
 				} catch (Throwable t) {
-					Activator.log.error("[SCR] Exception occurred while building component configuration of component " + scp.serviceComponent, t);
+					Activator.log.error(NLS.bind(Messages.EXCEPTION_BUILDING_COMPONENT, scp.serviceComponent), t);
 				} finally {
 					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
 					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
-						Activator.log.info("[DS perf] The component " + scp + " is built for " + start + " ms");
+						Activator.log.info(NLS.bind(Messages.COMPONENT_BUILT_TIME, scp, Long.toString(start)));
 					}
 				}
 			} // end for
@@ -285,17 +281,17 @@ public class InstanceProcess {
 					scp.setState(ServiceComponentProp.DISPOSING);
 					if (Activator.PERF) {
 						start = System.currentTimeMillis();
-						Activator.log.info("[DS perf] Start disposing component " + scp);
+						Activator.log.info(NLS.bind(Messages.DISPOSING_COMPONENT, scp));
 					}
 					disposeInstances(scp, deactivateReason);
 				} catch (Throwable t) {
-					Activator.log.error("Exception while disposing instances of component " + scp, t);
+					Activator.log.error(NLS.bind(Messages.ERROR_DISPOSING_INSTANCES, scp), t);
 				} finally {
 					resolver.componentDisposed(scp);
 					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
-						Activator.log.info("[DS perf] The component " + scp + " is disposed for " + start + " ms");
+						Activator.log.info(NLS.bind(Messages.COMPONENT_DISPOSE_TIME, scp, Long.toString(start)));
 					}
 				}
 			}
@@ -310,18 +306,14 @@ public class InstanceProcess {
 		// if no Services provided - dispose of instance immediately
 		if (sc.provides == null) {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10006, scp.name, null, false);
-				// //Activator.log.debug("InstanceProcess.disposeInstances():
-				// disposing non-provider component " + scp.name, null);
+				Activator.log.debug("InstanceProcess.disposeInstances(): disposing non-provider component " + scp.name, null); //$NON-NLS-1$
 			}
 			scp.dispose(deactivateReason);
 		} else {
 			// if ComponentFactory or if just Services
 			if (scp.isComponentFactory()) {
 				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10007, scp.name, null, false);
-					// //Activator.log.debug("InstanceProcess.disposeInstances():
-					// disposing component factory " + scp.name, null);
+					Activator.log.debug("InstanceProcess.disposeInstances(): disposing component factory " + scp.name, null); //$NON-NLS-1$
 				}
 				ServiceRegistration reg = (ServiceRegistration) factoryRegistrations.remove(scp);
 				try {
@@ -329,14 +321,12 @@ public class InstanceProcess {
 						reg.unregister();
 				} catch (IllegalStateException e) {
 					// Service is already unregistered do nothing
-					Activator.log.warning("InstanceProcess.disposeInstances(): registration for component factory " + scp.name + " is already diposed!", null);
+					Activator.log.warning(NLS.bind(Messages.FACTORY_REGISTRATION_ALREADY_DISPOSED, scp.name), null);
 				}
 			}
 
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10008, scp.name, null, false);
-				// //Activator.log.debug("InstanceProcess.disposeInstances():
-				// unregistering component " + scp.name, null);
+				Activator.log.debug(NLS.bind(Messages.UNREGISTERING_COMPONENT, scp.name), null);
 			}
 
 			// unregister services if any
@@ -347,13 +337,11 @@ public class InstanceProcess {
 					reg.unregister();
 				} catch (IllegalStateException e) {
 					// Service is already unregistered do nothing
-					Activator.log.warning("InstanceProcess.disposeInstances(): registration for component " + scp.name + " is already diposed!", null);
+					Activator.log.warning(NLS.bind(Messages.REGISTRATION_ALREADY_DISPOSED, scp.name), null);
 				}
 			} else {
 				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10009, scp.name, null, false);
-					// //Activator.log.debug("InstanceProcess.disposeInstances():
-					// cannot find registrations for " + scp.name, null);
+					Activator.log.debug(NLS.bind(Messages.CANNOT_FIND_REGISTRATION, scp.name), null);
 				}
 			}
 			scp.dispose(deactivateReason);
@@ -415,9 +403,7 @@ public class InstanceProcess {
 				// the component is not used and therefore it is not yet
 				// instantiated!
 				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10012, scp.name, null, false);
-					// //Activator.log.debug("InstanceProcess.dynamicBind():
-					// null instances! for component " + scp.name, null);
+					Activator.log.debug(NLS.bind(Messages.NO_COMPONENT_INSTANCES, scp.name), null);
 				}
 			}
 		}
@@ -452,7 +438,7 @@ public class InstanceProcess {
 							try {
 								scp.unbindDynamicReference(ref, compInstance, serviceReference);
 							} catch (Throwable t) {
-								Activator.log.error("[SCR] Error while dynamically unbinding reference '" + ref.reference + "' of component instance " + compInstance.getInstance(), t);
+								Activator.log.error(NLS.bind(Messages.ERROR_UNBINDING_REFERENCE, ref.reference, compInstance.getInstance()), t);
 							}
 						}
 					}
@@ -460,7 +446,7 @@ public class InstanceProcess {
 			}
 		} catch (Throwable e) {
 			//should not happen
-			Activator.log.error("[SCR] Unexpected error!", e);
+			Activator.log.error(Messages.UNEXPECTED_ERROR, e);
 		}
 	}
 
@@ -496,7 +482,7 @@ public class InstanceProcess {
 		Enumeration keys = props.keys();
 		while (keys.hasMoreElements()) {
 			String key = (String) keys.nextElement();
-			if (key.startsWith(".")) {
+			if (key.startsWith(".")) { //$NON-NLS-1$
 				publicProps.remove(key);
 			}
 		}
@@ -504,14 +490,14 @@ public class InstanceProcess {
 		reg = scp.bc.registerService(scp.serviceComponent.provides, service, publicProps);
 
 		if (Activator.DEBUG) {
-			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null);
+			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		if (scp.getState() <= ServiceComponentProp.DISPOSING) {
 			//must unregister the service because it was not able to unregister when the component was disposed
 			try {
 				reg.unregister();
 				if (Activator.DEBUG) {
-					Activator.log.debug("InstanceProcess.registerService(): " + scp.name + "'s service was unregistered because the component is already disposed!", null);
+					Activator.log.debug("InstanceProcess.registerService(): " + NLS.bind(Messages.SERVICE_UNREGISTERED_BECAUSE_COMP_DISPOSED, scp.name), null); //$NON-NLS-1$
 				}
 			} catch (IllegalStateException e) {
 				// Service is already unregistered do nothing
@@ -523,9 +509,7 @@ public class InstanceProcess {
 
 	public ComponentInstanceImpl buildComponent(Bundle usingBundle, ServiceComponentProp scp, Object instance, boolean security) throws ComponentException {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10005, scp.name, null, false);
-			// //Activator.log.debug("buildInstances.buildComponent(): building
-			// component " + scp.name, null);
+			Activator.log.debug(NLS.bind(Messages.BUILDING_COMPONENT, scp.name), null);
 		}
 		getLock();
 		Counter counter;
@@ -560,11 +544,11 @@ public class InstanceProcess {
 						// 1 - Return the instance (if already created) nevertheless it is not finished its binding and activation phase
 						// 2 - throw an exception because something may have gone wrong
 						if (!scp.instances.isEmpty()) {
-							Activator.log.warning("Returning SCP instance which is not fully activated!", new Exception("Debug callstack"));
+							Activator.log.warning(Messages.RETURNING_NOT_FULLY_ACTIVATED_INSTANCE, new Exception("Debug callstack")); //$NON-NLS-1$
 							return (ComponentInstanceImpl) scp.instances.firstElement();
 						}
 
-						throw new RuntimeException("The instance creation of component " + scp + " took longer than " + waitTime + " ms. There might be a synchronization problem in this callstack or just the instance creation took too long!");
+						throw new RuntimeException(NLS.bind(Messages.INSTANCE_CREATION_TOOK_LONGER, scp, Integer.toString(waitTime)));
 					}
 				}
 			}
@@ -583,7 +567,7 @@ public class InstanceProcess {
 		try {
 			if (Activator.PERF) {
 				start = System.currentTimeMillis();
-				Activator.log.info("[DS perf] Start building instance of component " + scp);
+				Activator.log.info(NLS.bind(Messages.BUILDING_COMPONENT_INSTANCE, scp));
 			}
 			ComponentInstanceImpl componentInstance = null;
 			try {
@@ -592,14 +576,14 @@ public class InstanceProcess {
 				Activator.log.error(e.getMessage(), e.getCause());
 				throw e;
 			} catch (Throwable t) {
-				Activator.log.error("[SCR] Error while building configuration of component " + scp.serviceComponent, t);
-				throw new ComponentException("Error while building configuration of component " + scp.serviceComponent, t);
+				Activator.log.error(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
+				throw new ComponentException(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
 			} finally {
 				// keep track of how many times we have re-entered this method
 				counter.count--;
 				if (Activator.PERF) {
 					start = System.currentTimeMillis() - start;
-					Activator.log.info("[DS perf] The instance of component " + scp + " is built for " + start + " ms");
+					Activator.log.info(NLS.bind(Messages.COMPONENT_INSTANCE_BUILT, scp, Long.toString(start)));
 				}
 			}
 
@@ -640,10 +624,7 @@ public class InstanceProcess {
 		// check if getting this service would cause a circularity
 		if (checkCanCauseCycle(reference, serviceReference)) {
 			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10010, reference.reference.name + " ; The service reference is " + serviceReference, null, false);
-				// //Activator.log.debug("InstanceProcess.getService(): cannot
-				// get service because of circularity! Reference is: " +
-				// reference.reference.name, null);
+				Activator.log.debug(NLS.bind(Messages.CANNOT_GET_SERVICE_BECAUSEOF_CIRCULARITY, reference.reference.name, serviceReference), null);
 			}
 			return null;
 		}

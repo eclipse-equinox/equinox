@@ -19,11 +19,11 @@ import org.eclipse.equinox.internal.util.pool.ObjectCreator;
 import org.eclipse.equinox.internal.util.pool.ObjectPool;
 
 /**
- * Util.java
+ * Holds useful methods used by SCR.
  * 
  * @author Valentin Valchev
+ * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
  */
 
 public final class SCRUtil implements ObjectCreator {
@@ -38,6 +38,7 @@ public final class SCRUtil implements ObjectCreator {
 	}
 
 	private SCRUtil() {
+		//
 	}
 
 	public static Object[] getObjectArray() {
@@ -118,7 +119,7 @@ public final class SCRUtil implements ObjectCreator {
 	public static final void setAccessible(Method method) {
 		try {
 			if (setAccessibleMethod == null && !failed) {
-				setAccessibleMethod = Class.forName("java.lang.reflect.AccessibleObject").getMethod("setAccessible", new Class[] {boolean.class});
+				setAccessibleMethod = Class.forName("java.lang.reflect.AccessibleObject").getMethod("setAccessible", new Class[] {boolean.class}); //$NON-NLS-1$ //$NON-NLS-2$
 				args = new Object[] {Boolean.TRUE};
 			}
 			if (setAccessibleMethod != null)

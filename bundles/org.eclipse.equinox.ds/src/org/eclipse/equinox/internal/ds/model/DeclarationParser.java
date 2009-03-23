@@ -16,7 +16,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.eclipse.equinox.internal.ds.Activator;
+import org.eclipse.equinox.internal.ds.Messages;
 import org.eclipse.equinox.internal.util.xml.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
@@ -31,43 +33,43 @@ import org.osgi.service.metatype.AttributeDefinition;
  */
 public class DeclarationParser implements ExTagListener {
 
-	private static final String XMLNS_1_0 = "http://www.osgi.org/xmlns/scr/v1.0.0";
-	private static final String XMLNS_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0";
-	private static final String ATTR_XMLNS = "xmlns";
+	private static final String XMLNS_1_0 = "http://www.osgi.org/xmlns/scr/v1.0.0"; //$NON-NLS-1$
+	private static final String XMLNS_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0"; //$NON-NLS-1$
+	private static final String ATTR_XMLNS = "xmlns"; //$NON-NLS-1$
 
-	private static final String COMPONENT_TAG_NAME = "component";
+	private static final String COMPONENT_TAG_NAME = "component"; //$NON-NLS-1$
 
 	//component attributes
-	private static final String ATTR_AUTOENABLE = "enabled";
-	private static final String ATTR_NAME = "name";
-	private static final String ATTR_FACTORY = "factory";
-	private static final String ATTR_IMMEDIATE = "immediate";
+	private static final String ATTR_AUTOENABLE = "enabled"; //$NON-NLS-1$
+	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
+	private static final String ATTR_FACTORY = "factory"; //$NON-NLS-1$
+	private static final String ATTR_IMMEDIATE = "immediate"; //$NON-NLS-1$
 	//component attributes according to schema v1.1
-	private static final String ATTR_CONF_POLICY = "configuration-policy";
-	private static final String ATTR_ACTIVATE = "activate";
-	private static final String ATTR_DEACTIVATE = "deactivate";
+	private static final String ATTR_CONF_POLICY = "configuration-policy"; //$NON-NLS-1$
+	private static final String ATTR_ACTIVATE = "activate"; //$NON-NLS-1$
+	private static final String ATTR_DEACTIVATE = "deactivate"; //$NON-NLS-1$
 
-	private static final String TAG_IMPLEMENTATION = "implementation";
-	private static final String ATTR_CLASS = "class";
+	private static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
+	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 
-	private static final String TAG_PROPERTY = "property";
-	private static final String ATTR_VALUE = "value";
-	private static final String ATTR_TYPE = "type";
+	private static final String TAG_PROPERTY = "property"; //$NON-NLS-1$
+	private static final String ATTR_VALUE = "value"; //$NON-NLS-1$
+	private static final String ATTR_TYPE = "type"; //$NON-NLS-1$
 
-	private static final String TAG_PROPERTIES = "properties";
-	private static final String ATTR_ENTRY = "entry";
+	private static final String TAG_PROPERTIES = "properties"; //$NON-NLS-1$
+	private static final String ATTR_ENTRY = "entry"; //$NON-NLS-1$
 
-	private static final String TAG_SERVICE = "service";
-	private static final String ATTR_SERVICEFACTORY = "servicefactory";
-	private static final String TAG_PROVIDE = "provide";
-	private static final String ATTR_INTERFACE = "interface";
+	private static final String TAG_SERVICE = "service"; //$NON-NLS-1$
+	private static final String ATTR_SERVICEFACTORY = "servicefactory"; //$NON-NLS-1$
+	private static final String TAG_PROVIDE = "provide"; //$NON-NLS-1$
+	private static final String ATTR_INTERFACE = "interface"; //$NON-NLS-1$
 
-	private static final String TAG_REFERENCE = "reference";
-	private static final String ATTR_CARDINALITY = "cardinality";
-	private static final String ATTR_POLICY = "policy";
-	private static final String ATTR_TARGET = "target";
-	private static final String ATTR_BIND = "bind";
-	private static final String ATTR_UNBIND = "unbind";
+	private static final String TAG_REFERENCE = "reference"; //$NON-NLS-1$
+	private static final String ATTR_CARDINALITY = "cardinality"; //$NON-NLS-1$
+	private static final String ATTR_POLICY = "policy"; //$NON-NLS-1$
+	private static final String ATTR_TARGET = "target"; //$NON-NLS-1$
+	private static final String ATTR_BIND = "bind"; //$NON-NLS-1$
+	private static final String ATTR_UNBIND = "unbind"; //$NON-NLS-1$
 
 	public Vector components;
 
@@ -127,12 +129,12 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null; //the component is bad - ignoring it
 			closeTag = null;
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_START_TAG, currentURL, bundle) + iae.getMessage(), null);
 			if (Activator.DEBUG) {
-				Activator.log.debug("[SCR] Tracing the last exception", iae);
+				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
 		} catch (Throwable e) {
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing start tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_START_TAG, currentURL, bundle), e);
 		} finally {
 			if (!rootPassed) {
 				rootPassed = true;
@@ -172,7 +174,7 @@ public class DeclarationParser implements ExTagListener {
 				currentComponent = null;
 				closeTag = null;
 			} else {
-				IllegalArgumentException e = new IllegalArgumentException("Found illegal tag named '" + tagName + "' in component XML, at line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.ILLEGAL_TAG_FOUND, tagName, Integer.toString(tag.getLine())));
 				throw e;
 			}
 		}
@@ -190,14 +192,14 @@ public class DeclarationParser implements ExTagListener {
 		} catch (IllegalArgumentException iae) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_END_TAG, currentURL, bundle) + iae.getMessage(), null);
 			if (Activator.DEBUG) {
-				Activator.log.debug("[SCR] Tracing the last exception", iae);
+				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR] Error occurred while processing end tag of XML '" + currentURL + "' in bundle " + bundle, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_END_TAG, currentURL, bundle), e);
 		}
 	}
 
@@ -209,13 +211,13 @@ public class DeclarationParser implements ExTagListener {
 	 * @return the cardinality or -1 to indicate error
 	 */
 	private int getCardinality(String value) {
-		if ("0..1".equals(value)) {
+		if ("0..1".equals(value)) { //$NON-NLS-1$
 			return ComponentReference.CARDINALITY_0_1;
-		} else if ("0..n".equals(value)) {
+		} else if ("0..n".equals(value)) { //$NON-NLS-1$
 			return ComponentReference.CARDINALITY_0_N;
-		} else if ("1..1".equals(value)) {
+		} else if ("1..1".equals(value)) { //$NON-NLS-1$
 			return ComponentReference.CARDINALITY_1_1;
-		} else if ("1..n".equals(value)) {
+		} else if ("1..n".equals(value)) { //$NON-NLS-1$
 			return ComponentReference.CARDINALITY_1_N;
 		} else {
 			return -1;
@@ -231,7 +233,7 @@ public class DeclarationParser implements ExTagListener {
 
 		String iface = tag.getAttribute(ATTR_INTERFACE);
 		if (iface == null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'interface' attribute, at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.NO_INTERFACE_ATTR_IN_REFERENCE_TAG, Integer.toString(tag.getLine())));
 			throw e;
 		}
 
@@ -240,7 +242,7 @@ public class DeclarationParser implements ExTagListener {
 		if (cardinalityS != null) {
 			cardinality = getCardinality(cardinalityS);
 			if (cardinality < 0) {
-				IllegalArgumentException e = new IllegalArgumentException("The 'cardinality' attribute has invalid value '" + cardinalityS + "' at line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_CARDINALITY_ATTR, cardinalityS, Integer.toString(tag.getLine())));
 				throw e;
 			}
 		} // if null - default cardinality is already initialized in
@@ -250,12 +252,12 @@ public class DeclarationParser implements ExTagListener {
 		int policy = ComponentReference.POLICY_STATIC; // default
 		if (policyS != null) {
 			// verify the policy attribute values
-			if (policyS.equals("static")) {
+			if (policyS.equals("static")) { //$NON-NLS-1$
 				policy = ComponentReference.POLICY_STATIC;
-			} else if (policyS.equals("dynamic")) {
+			} else if (policyS.equals("dynamic")) { //$NON-NLS-1$
 				policy = ComponentReference.POLICY_DYNAMIC;
 			} else {
-				IllegalArgumentException e = new IllegalArgumentException("The 'policy' attribute has invalid value '" + policyS + "' at line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_POLICY_ATTR, policyS, Integer.toString(tag.getLine())));
 				throw e;
 			}
 		} // if null - default policy is already initialized in constructor
@@ -263,17 +265,17 @@ public class DeclarationParser implements ExTagListener {
 		String bind = tag.getAttribute(ATTR_BIND);
 		String unbind = tag.getAttribute(ATTR_UNBIND);
 		if (bind != null) {
-			if (bind.equals("")) {
-				IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'bind' attribute is empty!");
+			if (bind.equals("")) { //$NON-NLS-1$
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_REFERENCE_TAG__BIND_ATTR_EMPTY, Integer.toString(tag.getLine())));
 				throw e;
 			}
 			if (bind.equals(unbind)) {
-				IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'bind' and 'unbind' values are equal!");
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_REFERENCE_TAG__BIND_EQUALS_UNBIND, Integer.toString(tag.getLine())));
 				throw e;
 			}
 		}
-		if (unbind != null && unbind.equals("")) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag at line " + tag.getLine() + " is invalid: 'unbind' attribute is empty!");
+		if (unbind != null && unbind.equals("")) { //$NON-NLS-1$
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_REFERENCE_TAG__UNBIND_ATTR_EMPTY, Integer.toString(tag.getLine())));
 			throw e;
 		}
 
@@ -297,12 +299,12 @@ public class DeclarationParser implements ExTagListener {
 
 	private void doImplementation(Tag tag) {
 		if (currentComponent.implementation != null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'component' tag must have exactly one 'implementation' attribute at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_TAG__MULTIPLE_IMPL_ATTRIBS, Integer.toString(tag.getLine())));
 			throw e;
 		}
 		String tmp = tag.getAttribute(ATTR_CLASS);
 		if (tmp == null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'implementation' element must have 'class' attribute set at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_TAG__NO_CLASS_ATTR, Integer.toString(tag.getLine())));
 			throw e;
 		}
 		currentComponent.implementation = tmp;
@@ -315,12 +317,12 @@ public class DeclarationParser implements ExTagListener {
 		}
 		int size = tag.size();
 		if (size == 0) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'service' tag must have one 'provide' tag set at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_SERVICE_TAG__NO_PROVIDE_TAG, Integer.toString(tag.getLine())));
 			throw e;
 		}
 		if (currentComponent.serviceInterfaces != null) {
 			//there are already defined service interfaces. The service tag seems to be duplicated
-			IllegalArgumentException e = new IllegalArgumentException("The 'service' tag is duplicated at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.DUPLICATED_SERVICE_TAGS, Integer.toString(tag.getLine())));
 			throw e;
 		}
 		for (int i = 0; i < size; i++) {
@@ -329,7 +331,7 @@ public class DeclarationParser implements ExTagListener {
 			if (pName == TAG_PROVIDE) {
 				String iFace = p.getAttribute(ATTR_INTERFACE);
 				if (iFace == null) {
-					IllegalArgumentException e = new IllegalArgumentException("The 'provide' tag must have 'interface' attribute set at line " + tag.getLine());
+					IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROVIDE_TAG__NO_INTERFACE_ATTR, Integer.toString(tag.getLine())));
 					throw e;
 				}
 				if (currentComponent.serviceInterfaces == null) {
@@ -337,7 +339,7 @@ public class DeclarationParser implements ExTagListener {
 				}
 				currentComponent.serviceInterfaces.addElement(iFace);
 			} else {
-				IllegalArgumentException e = new IllegalArgumentException("Found illegal element '" + pName + "' for tag 'service' at line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.ILLEGAL_ELEMENT_IN_SERVICE_TAG, pName, Integer.toString(tag.getLine())));
 				throw e;
 			}
 		}
@@ -348,32 +350,32 @@ public class DeclarationParser implements ExTagListener {
 		try {
 			name = tag.getAttribute(ATTR_NAME);
 			if (name == null) {
-				IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have 'name' attribute set at line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROPERTY_TAG__NO_NAME_ATTR, Integer.toString(tag.getLine())));
 				throw e;
 			}
 
 			String type = tag.getAttribute(ATTR_TYPE);
 			int mtType;
-			if (type == null || "String".equals(type)) {
+			if (type == null || "String".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.STRING;
-			} else if ("Boolean".equals(type)) {
+			} else if ("Boolean".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.BOOLEAN;
-			} else if ("Integer".equals(type)) {
+			} else if ("Integer".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.INTEGER;
-			} else if ("Long".equals(type)) {
+			} else if ("Long".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.LONG;
-			} else if ("Char".equals(type) || "Character".equals(type)) {
+			} else if ("Char".equals(type) || "Character".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
 				mtType = AttributeDefinition.CHARACTER;
-			} else if ("Double".equals(type)) {
+			} else if ("Double".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.DOUBLE;
-			} else if ("Float".equals(type)) {
+			} else if ("Float".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.FLOAT;
-			} else if ("Byte".equals(type)) {
+			} else if ("Byte".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.BYTE;
-			} else if ("Short".equals(type)) {
+			} else if ("Short".equals(type)) { //$NON-NLS-1$
 				mtType = AttributeDefinition.SHORT;
 			} else {
-				IllegalArgumentException e = new IllegalArgumentException("Illegal property type '" + type + "' on line " + tag.getLine());
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROPERTY_TYPE, type, Integer.toString(tag.getLine())));
 				throw e;
 			}
 
@@ -385,10 +387,10 @@ public class DeclarationParser implements ExTagListener {
 				// body must be specified
 				value = tag.getContent();
 				if (value == null) {
-					IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have body content if 'value' attribute is not specified!");
+					IllegalArgumentException e = new IllegalArgumentException(Messages.INVALID_PROPERTY_TAG__NO_BODY_CONTENT);
 					throw e;
 				}
-				StringTokenizer tok = new StringTokenizer(value, "\n\r");
+				StringTokenizer tok = new StringTokenizer(value, "\n\r"); //$NON-NLS-1$
 				Vector el = new Vector(10);
 				while (tok.hasMoreTokens()) {
 					String next = tok.nextToken().trim();
@@ -397,7 +399,7 @@ public class DeclarationParser implements ExTagListener {
 					}
 				}
 				if (el.size() == 0) {
-					IllegalArgumentException e = new IllegalArgumentException("The 'property' tag must have body content if 'value' attribute is not specified!");
+					IllegalArgumentException e = new IllegalArgumentException(Messages.INVALID_PROPERTY_TAG__NO_BODY_CONTENT);
 					throw e;
 				}
 				String[] values = new String[el.size()];
@@ -409,20 +411,20 @@ public class DeclarationParser implements ExTagListener {
 			}
 			currentComponent.properties.put(name, _value);
 		} catch (IllegalArgumentException iae) {
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL + "! " + iae.getMessage(), null);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_PROPERTY, name, currentURL) + iae.getMessage(), null);
 			if (Activator.DEBUG) {
-				Activator.log.debug("[SCR] Tracing the last exception", iae);
+				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
 		} catch (Throwable e) {
 			//logging unrecognized exception
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperty()] Error while processing property '" + name + "' in XML " + currentURL, e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_PROPERTY, name, currentURL), e);
 		}
 	}
 
 	private void doProperties(Tag tag) {
 		String fileEntry = tag.getAttribute(ATTR_ENTRY);
 		if (fileEntry == null) {
-			IllegalArgumentException e = new IllegalArgumentException("The 'properties' tag must include 'entry' attribute, at line " + tag.getLine());
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROPERTIES_TAG__NO_ENTRY_ATTR, Integer.toString(tag.getLine())));
 			throw e;
 		}
 
@@ -447,12 +449,12 @@ public class DeclarationParser implements ExTagListener {
 				currentComponent.properties.load(is);
 				invalid = false;
 			} catch (IOException e) {
-				Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "[SCR - DeclarationParser.doProperties()] Error while loading properties file", e);
+				Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, Messages.ERROR_LOADING_PROPERTIES_FILE, e);
 			}
 		}
 
 		if (invalid) {
-			IllegalArgumentException e = new IllegalArgumentException("The specified 'entry' for the 'properties' tag at line " + tag.getLine() + " doesn't contain valid reference to a property file: " + fileEntry);
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROPERTIES_TAG__INVALID_ENTRY_VALUE, Integer.toString(tag.getLine()), fileEntry));
 			throw e;
 		}
 	}
@@ -460,9 +462,6 @@ public class DeclarationParser implements ExTagListener {
 	private void doCorrectComponentTag(Tag tag, String tagName) {
 		closeTag = tagName.intern();
 		String tmp = tag.getAttribute(ATTR_NAME);
-		//		if (tmp == null || tmp.equals("")) {
-		//			throw new IllegalArgumentException("The 'component' tag MUST have 'name' tag set, at line " + tag.getLine());
-		//		}
 		immediateSet = false;
 
 		currentComponent = new ServiceComponent();
@@ -514,13 +513,13 @@ public class DeclarationParser implements ExTagListener {
 			}
 		} else {
 			if (tag.getAttribute(ATTR_CONF_POLICY) != null) {
-				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_CONF_POLICY + "' tag set, at line " + tag.getLine());
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_CONF_POLICY, Integer.toString(tag.getLine())));
 			}
 			if (tag.getAttribute(ATTR_ACTIVATE) != null) {
-				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_ACTIVATE + "' tag set, at line " + tag.getLine());
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_ACTIVATE, Integer.toString(tag.getLine())));
 			}
 			if (tag.getAttribute(ATTR_DEACTIVATE) != null) {
-				throw new IllegalArgumentException("The component is according to namespace v1.0.0 and must not have '" + ATTR_DEACTIVATE + "' tag set, at line " + tag.getLine());
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_DEACTIVATE, Integer.toString(tag.getLine())));
 			}
 		}
 	}
@@ -587,7 +586,7 @@ public class DeclarationParser implements ExTagListener {
 				}
 				case AttributeDefinition.CHARACTER : {
 					if (string.length() == 0) {
-						throw new IllegalArgumentException("Missing character ");
+						throw new IllegalArgumentException(Messages.MISSING_CHARACTER);
 					}
 					return new Character(string.charAt(0));
 				}
@@ -595,11 +594,11 @@ public class DeclarationParser implements ExTagListener {
 					return Boolean.valueOf(string);
 				}
 				default : {
-					throw new IllegalArgumentException("Unsupported type: ".concat(String.valueOf(syntax)));
+					throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(syntax)));
 				}
 			}
 		} catch (NumberFormatException ex) {
-			throw new IllegalArgumentException("Value: " + string + " does not fit its type!");
+			throw new IllegalArgumentException(NLS.bind(Messages.INCORRECT_VALUE_TYPE, string));
 		}
 	}
 
@@ -685,7 +684,7 @@ public class DeclarationParser implements ExTagListener {
 				return booleans;
 			}
 			default : {
-				throw new IllegalArgumentException("Unsupported type: ".concat(String.valueOf(syntax)));
+				throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(syntax)));
 			}
 		}
 	}
@@ -725,11 +724,11 @@ public class DeclarationParser implements ExTagListener {
 
 	private String getCurrentNamespace(String qualifier) {
 		if (namespaces == null || qualifier == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		Stack stack = (Stack) namespaces.get(qualifier);
 		if (stack == null || stack.empty()) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 		return (String) stack.peek();
@@ -764,7 +763,7 @@ public class DeclarationParser implements ExTagListener {
 	private String getNamespaceQualifier(String name) {
 		int index = name.indexOf(':');
 		if (index < 0) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		return name.substring(0, index);
 	}

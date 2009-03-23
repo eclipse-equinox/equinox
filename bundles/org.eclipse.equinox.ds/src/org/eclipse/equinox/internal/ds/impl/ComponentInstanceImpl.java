@@ -53,9 +53,7 @@ public class ComponentInstanceImpl implements ComponentInstance {
 			return;
 		}
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10080, scp.name, null, false);
-			// //Activator.log.debug("ComponentInstanceImpl.dispose(): disposing
-			// instance of component " + scp.name, null);
+			Activator.log.debug("ComponentInstanceImpl.dispose(): disposing instance of component " + scp.name, null); //$NON-NLS-1$
 		}
 		if (!scp.isComponentFactory() && scp.serviceComponent.factory != null) {
 			// this is a component factory instance, so dispose SCP

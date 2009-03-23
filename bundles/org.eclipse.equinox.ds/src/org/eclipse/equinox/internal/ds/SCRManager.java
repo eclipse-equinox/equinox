@@ -20,6 +20,7 @@ import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.eclipse.equinox.internal.util.event.Queue;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.equinox.internal.util.threadpool.ThreadPoolManager;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
@@ -64,10 +65,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public SCRManager(BundleContext bc, Log log) {
 		this.bc = bc;
 		SCRManager.log = log;
-		String doSynchronousComponentResolvingValue = System.getProperty("equinox.ds.synchronous_build");
+		String doSynchronousComponentResolvingValue = System.getProperty("equinox.ds.synchronous_build"); //$NON-NLS-1$
 		if (doSynchronousComponentResolvingValue != null) {
 			//def value is true
-			doSynchronousComponentResolving = !doSynchronousComponentResolvingValue.equalsIgnoreCase("false");
+			doSynchronousComponentResolving = !doSynchronousComponentResolvingValue.equalsIgnoreCase("false"); //$NON-NLS-1$
 		}
 
 		security = Log.security();
@@ -75,30 +76,29 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		hasRegisteredServiceListener = true;
 		queue = new Queue(10);
 		if (Activator.startup)
-			Activator.timeLog(110); /* 110 = "Queue instantiated for " */
+			Activator.timeLog("Queue instantiated for "); //$NON-NLS-1$
 
 		threadPoolManagerTracker = new ServiceTracker(bc, ThreadPoolManager.class.getName(), null);
 		threadPoolManagerTracker.open();
 		if (Activator.startup)
-			Activator.timeLog(111);
-		/*111 = "Threadpool service tracker opened for "*/
+			Activator.timeLog("Threadpool service tracker opened for "); //$NON-NLS-1$
 
 		resolver = new Resolver(this);
 		if (Activator.startup)
-			Activator.timeLog(112); /* 112 = "Resolver instantiated for " */
+			Activator.timeLog("Resolver instantiated for "); //$NON-NLS-1$
 
 		bc.addBundleListener(this);
 		if (Activator.startup)
-			Activator.timeLog(105); /* 105 = "addBundleListener() method took " */
+			Activator.timeLog("addBundleListener() method took "); //$NON-NLS-1$
 
-		String storageClass = bc.getProperty("scr.storage.class");
+		String storageClass = bc.getProperty("scr.storage.class"); //$NON-NLS-1$
 		if (storageClass == null) {
-			storageClass = "org.eclipse.equinox.internal.ds.storage.file.FileStorage";
+			storageClass = "org.eclipse.equinox.internal.ds.storage.file.FileStorage"; //$NON-NLS-1$
 		}
 		try {
 			storage = (ComponentStorage) Class.forName(storageClass).getConstructor(new Class[] {BundleContext.class}).newInstance(new Object[] {bc});
 		} catch (Exception e) {
-			log.error("[SCR - SCRManager] could not create instance for " + storageClass, e);
+			log.error(NLS.bind(Messages.COULD_NOT_CREATE_INSTANCE, storageClass), e);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				if (current.getState() == Bundle.ACTIVE) {
 					startedBundle(current);
 				} else if (current.getState() == Bundle.STARTING) {
-					String lazy = (String) current.getHeaders("").get(Constants.BUNDLE_ACTIVATIONPOLICY);
+					String lazy = (String) current.getHeaders("").get(Constants.BUNDLE_ACTIVATIONPOLICY); //$NON-NLS-1$
 					if (lazy != null && lazy.indexOf(Constants.ACTIVATION_LAZY) >= 0) {
 						startedBundle(current);
 					}
@@ -128,7 +128,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	 * @param upEv
 	 *            event, holding info for update/deletion of a configuration.
 	 */
-	public void addEvent(Object upEv, boolean security) {
+	public void addEvent(Object upEv, boolean securityCall) {
 		try {
 			synchronized (queue) {
 				queue.put(upEv);
@@ -136,15 +136,15 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					if (queue.size() > 0) {
 						running = true;
 						workThread = new WorkThread(this);
-						if (security) {
+						if (securityCall) {
 							AccessController.doPrivileged(this);
 							return;
 						}
 						ThreadPoolManager threadPool = (ThreadPoolManager) threadPoolManagerTracker.getService();
 						if (threadPool != null) {
-							threadPool.execute(workThread, Thread.MAX_PRIORITY, "Component Resolve Thread");
+							threadPool.execute(workThread, Thread.MAX_PRIORITY, "Component Resolve Thread"); //$NON-NLS-1$
 						} else {
-							new Thread(workThread, "Component Resolve Thread").start();
+							new Thread(workThread, "Component Resolve Thread").start(); //$NON-NLS-1$
 						}
 					}
 				} else if (workThread.waiting > 0) {
@@ -152,7 +152,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 
@@ -161,9 +161,9 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public Object run() {
 		ThreadPoolManager threadPool = (ThreadPoolManager) threadPoolManagerTracker.getService();
 		if (threadPool != null) {
-			threadPool.execute(workThread, Thread.MAX_PRIORITY, "Component Resolve Thread");
+			threadPool.execute(workThread, Thread.MAX_PRIORITY, "Component Resolve Thread"); //$NON-NLS-1$
 		} else {
-			new Thread(workThread, "Component Resolve Thread").start();
+			new Thread(workThread, "Component Resolve Thread").start(); //$NON-NLS-1$
 		}
 		return null;
 	}
@@ -187,10 +187,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	 *            Action for this item
 	 * @param o
 	 *            Object for this item
-	 * @param security specifies whether to use security privileged call
+	 * @param securityCall specifies whether to use security privileged call
 	 */
-	public void enqueueWork(WorkPerformer d, int a, Object o, boolean security) {
-		addEvent(new QueuedJob(d, a, o), security);
+	public void enqueueWork(WorkPerformer d, int a, Object o, boolean securityCall) {
+		addEvent(new QueuedJob(d, a, o), securityCall);
 	}
 
 	/**
@@ -213,6 +213,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException ie) {
+					//nothing to do
 				}
 				counter++;
 			}
@@ -230,7 +231,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		long start = 0l;
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
-			log.info("[DS perf] Started processing bundle event " + event);
+			log.info(NLS.bind(Messages.PROCESSING_BUNDLE_EVENT, event));
 		}
 		int type = event.getType();
 		if (type == BundleEvent.STOPPING) {
@@ -248,7 +249,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		}
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			log.info("[DS perf] Processed bundle event '" + event + "' for " + start + " ms");
+			log.info(NLS.bind(Messages.PROCESSED_BUNDLE_EVENT, event, new Long(start)));
 		}
 	}
 
@@ -278,20 +279,16 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		long start = 0l;
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(" Resolver.configurationEvent(): pid = " + event.getPid() + ", fpid = " + event.getFactoryPid(), null);
+				Activator.log.debug(" Resolver.configurationEvent(): pid = " + event.getPid() + ", fpid = " + event.getFactoryPid(), null); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis();
-				log.info("[DS perf] Started processing configuration event " + event);
+				log.info(NLS.bind(Messages.PROCESSING_CONF_EVENT, event));
 			}
 
 			String pid = event.getPid();
 			String fpid = event.getFactoryPid();
 			for (Enumeration keys = bundleToServiceComponents.keys(); keys.hasMoreElements();) {
-				if (Activator.DEBUG) {
-					Activator.log.debug(0, 10013, null, null, false);
-					// //Activator.log.debug(" hasNext", null);
-				}
 				Vector bundleComps = (Vector) bundleToServiceComponents.get(keys.nextElement());
 				// bundleComps may be null since bundleToServiceComponents
 				// may have been modified by another thread
@@ -303,22 +300,14 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							continue;
 						}
 						String name = sc.name;
-						if (Activator.DEBUG) {
-							Activator.log.debug(0, 10014, name, null, false);
-							// //Activator.log.debug(" component name " + name,
-							// null);
-						}
 						if (name.equals(pid) || name.equals(fpid)) {
 							if (name.equals(fpid) && sc.factory != null) {
-								Activator.log(sc.bc, LogService.LOG_ERROR, "[SCR - SCRManager] ComponentFactory " + name + " cannot be managed using factory configuration!", null);
+								Activator.log(sc.bc, LogService.LOG_ERROR, NLS.bind(Messages.FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY, name), null);
 								return;
 							}
 							if (sc.enabled) {
 								if (Activator.DEBUG) {
-									Activator.log.debug(0, 10015, pid, null, false);
-									// //Activator.log.debug("
-									// Resolver.configurationEvent(): found
-									// component - " + pid, null);
+									Activator.log.debug("SCRManager.processConfigurationEvent(): found component - " + pid, null); //$NON-NLS-1$
 								}
 								processConfigurationEvent(event, sc);
 							}
@@ -328,11 +317,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Error while processing configuration event for " + event.getReference().getBundle(), e);
+			Activator.log.error(NLS.bind(Messages.ERROR_PROCESSING_CONFIGURATION, event.getReference().getBundle()), e);
 		} finally {
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;
-				log.info("[DS perf] Processed configuration event '" + event + "' for " + start + " ms");
+				log.info(NLS.bind(Messages.PROCESSED_CONF_EVENT, event, new Long(start)));
 			}
 		}
 	}
@@ -346,13 +335,13 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		switch (event.getType()) {
 			case ConfigurationEvent.CM_UPDATED :
 
-				String filter = (fpid != null ? "(&" : "") + "(" + Constants.SERVICE_PID + "=" + pid + ")" + (fpid != null ? ("(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + fpid + "))") : "");
+				String filter = (fpid != null ? "(&" : "") + "(" + Constants.SERVICE_PID + "=" + pid + ")" + (fpid != null ? ("(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + fpid + "))") : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 				try {
 					config = ConfigurationManager.listConfigurations(filter);
 				} catch (IOException e) {
-					log.error("Error while listing CM Configurations", e);
+					log.error(Messages.ERROR_LISTING_CONFIGURATIONS, e);
 				} catch (InvalidSyntaxException e) {
-					log.error("Error while listing CM Configurations", e);
+					log.error(Messages.ERROR_LISTING_CONFIGURATIONS, e);
 				}
 
 				if (config == null) {
@@ -463,10 +452,8 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			if (components != null) {
 				if (Activator.DEBUG) {
 					String bundleName = bundle.getSymbolicName();
-					bundleName = (bundleName == null || "".equals(bundleName)) ? bundle.getLocation() : bundleName;
-					log.debug(0, 10016, bundleName, null, false);
-					// //log.debug("SCRManager.stoppingBundle(" + bundleName
-					// + ')', null);
+					bundleName = (bundleName == null || "".equals(bundleName)) ? bundle.getLocation() : bundleName; //$NON-NLS-1$
+					log.debug("SCRManager.stoppingBundle : " + bundleName, null); //$NON-NLS-1$
 				}
 				resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED);
 				if (bundleToServiceComponents.size() == 0) {
@@ -502,7 +489,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;
-				log.info("[DS perf] The components for bundle " + bundle + " are parsed for " + start + " ms");
+				log.info(NLS.bind(Messages.COMPONENTS_PARSED_TIME, bundle, new Long(start)));
 			}
 			if (bundleToServiceComponents == null) {
 				synchronized (this) {
@@ -521,7 +508,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				for (int j = i + 1; j < components.size(); j++) {
 					comp2 = (ServiceComponent) components.elementAt(j);
 					if (comp.name.equals(comp2.name)) {
-						Activator.log(comp.bc, LogService.LOG_ERROR, "[SCR] Found components with duplicated names inside their bundle! This component will not be processed: " + comp, null);
+						Activator.log(comp.bc, LogService.LOG_ERROR, NLS.bind(Messages.FOUND_COMPONENTS_WITH_DUPLICATED_NAMES, comp), null);
 						//removing one of the components
 						components.remove(i);
 						i--;
@@ -535,7 +522,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					for (int j = 0; j < components2.size(); j++) {
 						comp2 = (ServiceComponent) components2.elementAt(j);
 						if (comp.name.equals(comp2.name)) {
-							Activator.log(comp.bc, LogService.LOG_WARNING, "[SCR] Found components with duplicated names! Details: \nComponent1 : " + comp + "\nComponent2: " + comp2, null);
+							Activator.log(comp.bc, LogService.LOG_WARNING, NLS.bind(Messages.FOUND_COMPONENTS_WITH_DUPLICATED_NAMES2, comp, comp2), null);
 						}
 					}
 				}
@@ -555,7 +542,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						components.wait(1000);
 					} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
 					if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
-						Activator.log.warning("[SCR] Enabling of components of bundle " + getBundleName(bundle) + " did not complete in " + WorkThread.BLOCK_TIMEOUT + "ms", null);
+						Activator.log.warning(NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
 					}
 				} catch (InterruptedException e) {
 					//do nothing
@@ -580,16 +567,16 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	private void changeComponent(String name, Bundle bundle, boolean enable) {
+		if (bundleToServiceComponents == null) {
+			// already disposed!
+			return;
+		}
 		try {
 			Vector componentsToProcess = null;
 
 			if (Activator.DEBUG) {
-				String message = (enable ? "SCRManager.enableComponent(): " : "SCRManager.disableComponent(): ").concat(name != null ? name : "*all*") + " from bundle " + bundle.getSymbolicName();
+				String message = (enable ? "SCRManager.enableComponent(): " : "SCRManager.disableComponent(): ").concat(name != null ? name : "*all*") + " from bundle " + bundle.getSymbolicName(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				Activator.log.debug(message, null);
-			}
-			if (bundleToServiceComponents == null) {
-				// already disposed!
-				return;
 			}
 			Vector bundleComponents = (Vector) bundleToServiceComponents.get(bundle);
 			if (bundleComponents != null) {
@@ -617,7 +604,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							}
 						}
 					} else {
-						Activator.log.warning("[SCRManager] Cannot dispose all components of a bundle at once!", new Exception("Debug stack trace"));
+						Activator.log.warning(Messages.CANNOT_DISPOSE_ALL_COMPONENTS, new Exception("Debug stack trace")); //$NON-NLS-1$
 					}
 				}
 
@@ -630,12 +617,8 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					enqueueWork(this, DISABLE_COMPONENTS, componentsToProcess, security);
 				}
 			}
-			if (Activator.DEBUG) {
-				Activator.log.debug(0, 10018, null, null, false);
-				// //Activator.log.debug("changeComponent method end", null);
-			}
 		} catch (Throwable e) {
-			Activator.log.error("[SCR] Unexpected exception occurred!", e);
+			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 
@@ -670,12 +653,12 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				/* Call the WorkPerformer to process the work. */
 				performer.performWork(actionType, workToDo);
 			} catch (Throwable t) {
-				log.error("[SCR] Error dispatching work ", t);
+				log.error(Messages.ERROR_DISPATCHING_WORK, t);
 			}
 		}
 
 		public String toString() {
-			return "[QueuedJob] WorkPerformer: " + performer + "; actionType " + actionType;
+			return "[QueuedJob] WorkPerformer: " + performer + "; actionType " + actionType; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

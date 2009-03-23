@@ -16,10 +16,10 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import org.eclipse.equinox.internal.ds.Activator;
-import org.eclipse.equinox.internal.ds.SCRUtil;
+import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -35,9 +35,9 @@ import org.osgi.service.log.LogService;
  */
 public class ServiceComponent implements Externalizable {
 
-	public static String CONF_POLICY_OPTIONAL = "optional";
-	public static String CONF_POLICY_REQUIRE = "require";
-	public static String CONF_POLICY_IGNORE = "ignore";
+	public static String CONF_POLICY_OPTIONAL = "optional"; //$NON-NLS-1$
+	public static String CONF_POLICY_REQUIRE = "require"; //$NON-NLS-1$
+	public static String CONF_POLICY_IGNORE = "ignore"; //$NON-NLS-1$
 
 	public Vector componentProps = null;
 
@@ -47,8 +47,8 @@ public class ServiceComponent implements Externalizable {
 	String implementation; // the class name
 	Properties properties; // property or properties
 	String configurationPolicy = CONF_POLICY_OPTIONAL;
-	String activateMethodName = "activate";
-	String deactivateMethodName = "deactivate";
+	String activateMethodName = "activate"; //$NON-NLS-1$
+	String deactivateMethodName = "deactivate"; //$NON-NLS-1$
 
 	// service
 	public Vector serviceInterfaces; // all strings
@@ -78,12 +78,12 @@ public class ServiceComponent implements Externalizable {
 	private static final Class ACTIVATE_METHODS_PARAMETERS[] = new Class[] {ComponentContext.class};
 
 	public ServiceComponent() {
+		//
 	}
 
 	private final Method getMethod(Object instance, String methodName, boolean isActivate) throws Exception {
 		if (Activator.DEBUG) {
-			Activator.log.debug(0, 10034, methodName, null, false);
-			// //Activator.log.debug("getMethod() " + name, null);
+			Activator.log.debug("ServiceComponent.getMethod(): " + methodName, null); //$NON-NLS-1$
 		}
 		Method method = null;
 		int methodPriority = Integer.MAX_VALUE;
@@ -125,7 +125,7 @@ public class ServiceComponent implements Externalizable {
 					if (method != null) {
 						if (!SCRUtil.checkMethodAccess(instance.getClass(), clazz, method, false)) {
 							//the method is not accessible. Stop the search
-							Activator.log(bc, LogService.LOG_WARNING, "[SCR] Method '" + methodName + "' is not public or protected and cannot be executed! The method is located in the class: " + clazz, null);
+							Activator.log(bc, LogService.LOG_WARNING, NLS.bind(Messages.METHOD_UNACCESSABLE, methodName, clazz), null);
 							method = null;
 							break;
 						}
@@ -206,17 +206,17 @@ public class ServiceComponent implements Externalizable {
 						}
 					}
 				} else {
-					if (activateMethodName != "activate") {
+					if (activateMethodName != "activate") { //$NON-NLS-1$
 						//the activate method is specified in the component description XML by the user.
 						//It is expected to find it in the implementation class
-						throw new ComponentException("[SCR] Cannot activate instance " + instance + " of component " + this + "! The specified activate method was not found!");
+						throw new ComponentException(NLS.bind(Messages.SPECIFIED_ACTIVATE_METHOD_NOT_FOUND, instance, this));
 					}
 				}
 			} else {
 				// retrieve the activate method from cache
 				if (!activateCached) {
 					activateCached = true;
-					activateMethod = getMethod(instance, "activate", true);
+					activateMethod = getMethod(instance, "activate", true); //$NON-NLS-1$
 				}
 				// invoke the method if any
 				if (activateMethod != null) {
@@ -233,8 +233,8 @@ public class ServiceComponent implements Externalizable {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot activate instance " + instance + " of component " + this, null);
-			throw new ComponentException("[SCR] Exception while activating instance " + instance + " of component " + name, t);
+			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.CANT_ACTIVATE_INSTANCE, instance, this), null);
+			throw new ComponentException(NLS.bind(Messages.EXCEPTION_ACTIVATING_INSTANCE, instance, name), t);
 			// rethrow exception so resolver is eventually notified that
 			// the processed SCP is bad
 		}
@@ -278,17 +278,17 @@ public class ServiceComponent implements Externalizable {
 						}
 					}
 				} else {
-					if (deactivateMethodName != "deactivate") {
+					if (deactivateMethodName != "deactivate") { //$NON-NLS-1$
 						//the deactivate method is specified in the component description XML by the user.
 						//It is expected to find it in the implementation class
-						Activator.log(bc, LogService.LOG_ERROR, "[SCR] Cannot correctly deactivate instance " + instance + " of component " + this + "! The specified deactivate method was not found!", null);
+						Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.SPECIFIED_DEACTIVATE_METHOD_NOT_FOUND, instance, this), null);
 					}
 				}
 			} else {
 				// retrieve the activate method from cache
 				if (!deactivateCached) {
 					deactivateCached = true;
-					deactivateMethod = getMethod(instance, "deactivate", false);
+					deactivateMethod = getMethod(instance, "deactivate", false); //$NON-NLS-1$
 				}
 				// invoke the method
 				if (deactivateMethod != null) {
@@ -302,7 +302,7 @@ public class ServiceComponent implements Externalizable {
 				}
 			}
 		} catch (Throwable t) {
-			Activator.log(bc, LogService.LOG_ERROR, "[SCR] Error while attempting to deactivate instance of component " + this, t);
+			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_DEACTIVATING_INSTANCE, this), t);
 		}
 	}
 
@@ -320,32 +320,32 @@ public class ServiceComponent implements Externalizable {
 			if (namespace11) {
 				name = implementation;
 			} else {
-				throw new IllegalArgumentException("The component definition misses 'name' attribute, line " + line);
+				throw new IllegalArgumentException(NLS.bind(Messages.NO_NAME_ATTRIBUTE, Integer.toString(line)));
 			}
 		}
 		if (namespace11) {
 			if (!(configurationPolicy == CONF_POLICY_OPTIONAL || configurationPolicy == CONF_POLICY_REQUIRE || configurationPolicy == CONF_POLICY_IGNORE)) {
-				throw new IllegalArgumentException("The component '" + name + "' has incorrect value for attribute 'configuration-policy', line " + line);
+				throw new IllegalArgumentException(NLS.bind(Messages.INCORRECT_ACTIVATION_POLICY, name, Integer.toString(line)));
 			}
 		}
 
 		if (implementation == null) {
-			throw new IllegalArgumentException("The component '" + name + "' misses 'implementation' attribute, line " + line);
+			throw new IllegalArgumentException(NLS.bind(Messages.NO_IMPLEMENTATION_ATTRIBUTE, name, Integer.toString(line)));
 		}
 
 		// component factory is incompatible with service factory
 		if (factory != null && serviceFactory) {
-			throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both factory component and service factory");
+			throw new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_FACTORY_AND_SERVICE_FACTORY, name));
 		}
 
 		if (immediate) {
 			if (serviceFactory)
-				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both immediate and a service factory");
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_IMMEDIATE_AND_SERVICE_FACTORY, name));
 			if (factory != null)
-				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component cannot be both immediate and a factory component");
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_IMMEDIATE_AND_FACTORY, name));
 		} else {
 			if ((serviceInterfaces == null) && (factory == null)) {
-				throw new IllegalArgumentException("The component '" + name + "' is invalid. The component must be immediate since it does not provide any services");
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_COMPONENT_NO_SERVICES_NO_IMMEDIATE, name));
 			}
 		}
 
@@ -357,16 +357,16 @@ public class ServiceComponent implements Externalizable {
 					if (namespace11) {
 						r.name = r.interfaceName;
 					} else {
-						throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains illegal reference " + r);
+						throw new IllegalArgumentException(NLS.bind(Messages.COMPONENT_HAS_ILLEGAL_REFERENCE, new Object[] {name, Integer.toString(line), r}));
 					}
 				}
-				if (r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) {
-					throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains illegal reference " + r);
+				if (r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) { //$NON-NLS-1$ //$NON-NLS-2$
+					throw new IllegalArgumentException(NLS.bind(Messages.COMPONENT_HAS_ILLEGAL_REFERENCE, new Object[] {name, Integer.toString(line), r}));
 				}
 				for (int j = i + 1; j < references.size(); j++) {
 					ComponentReference ref2 = (ComponentReference) references.elementAt(j);
 					if (r.name.equals(ref2.name)) {
-						throw new IllegalArgumentException("The component '" + name + "' defined at line " + line + " contains references with duplicate names");
+						throw new IllegalArgumentException(NLS.bind(Messages.DUPLICATED_REFERENCE_NAMES, name, Integer.toString(line)));
 					}
 				}
 			}
@@ -398,7 +398,7 @@ public class ServiceComponent implements Externalizable {
 		try {
 			return bundle.loadClass(implementation).newInstance();
 		} catch (Throwable t) {
-			throw new ComponentException("Exception occurred while creating new instance of component " + this, t);
+			throw new ComponentException(NLS.bind(Messages.EXCEPTION_CREATING_COMPONENT_INSTANCE, this), t);
 		}
 	}
 
@@ -446,34 +446,34 @@ public class ServiceComponent implements Externalizable {
 	 */
 	public final String toString() {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("Component[");
-		buffer.append("\n\tname = ").append(name);
+		buffer.append("Component["); //$NON-NLS-1$
+		buffer.append("\n\tname = ").append(name); //$NON-NLS-1$
 		if (namespace11) {
-			buffer.append("\n\tactivate = ").append(activateMethodName);
-			buffer.append("\n\tdeactivate = ").append(deactivateMethodName);
-			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy);
+			buffer.append("\n\tactivate = ").append(activateMethodName); //$NON-NLS-1$
+			buffer.append("\n\tdeactivate = ").append(deactivateMethodName); //$NON-NLS-1$
+			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy); //$NON-NLS-1$
 		}
-		buffer.append("\n\tfactory = ").append(factory);
-		buffer.append("\n\tautoenable = ").append(autoenable);
-		buffer.append("\n\timmediate = ").append(immediate);
+		buffer.append("\n\tfactory = ").append(factory); //$NON-NLS-1$
+		buffer.append("\n\tautoenable = ").append(autoenable); //$NON-NLS-1$
+		buffer.append("\n\timmediate = ").append(immediate); //$NON-NLS-1$
 
-		buffer.append("\n\timplementation = ").append(implementation);
-		buffer.append("\n\tproperties = ").append(properties);
+		buffer.append("\n\timplementation = ").append(implementation); //$NON-NLS-1$
+		buffer.append("\n\tproperties = ").append(properties); //$NON-NLS-1$
 
-		buffer.append("\n\tserviceFactory = ").append(serviceFactory);
-		buffer.append("\n\tserviceInterface = ").append(serviceInterfaces);
+		buffer.append("\n\tserviceFactory = ").append(serviceFactory); //$NON-NLS-1$
+		buffer.append("\n\tserviceInterface = ").append(serviceInterfaces); //$NON-NLS-1$
 
 		if (references == null) {
-			buffer.append("\n\treferences = ").append("null");
+			buffer.append("\n\treferences = ").append("null"); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			buffer.append("\n\treferences = {");
+			buffer.append("\n\treferences = {"); //$NON-NLS-1$
 			for (int i = 0; i < references.size(); i++) {
-				buffer.append("\n\t\t").append(references.elementAt(i));
+				buffer.append("\n\t\t").append(references.elementAt(i)); //$NON-NLS-1$
 			}
-			buffer.append("\n\t}");
+			buffer.append("\n\t}"); //$NON-NLS-1$
 		}
-		buffer.append("\n\tlocated in bundle = ").append(bundle);
-		buffer.append("\n]");
+		buffer.append("\n\tlocated in bundle = ").append(bundle); //$NON-NLS-1$
+		buffer.append("\n]"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 

@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
 
@@ -25,14 +26,6 @@ import org.osgi.service.component.ComponentConstants;
  * @version 1.0
  */
 public class SCRCommandProvider implements CommandProvider {
-
-	private final static String helpText = "---Service Component Runtime---\n" + //$NON-NLS-1$
-			"\tlist/ls [-c] [bundle id] - Lists all components; add -c to display the complete info for each component;" + "\n\t\t\tuse [bundle id] to list the components of the specified bundle\n" + //$NON-NLS-1$ //$NON-NLS-2$
-			"\tcomponent/comp <component id> - Prints all available information about the specified component;" + "\n\t\t\t<component id> - The ID of the component as displayed by the list command\n" + //$NON-NLS-1$ //$NON-NLS-2$
-			"\tenable/en <component id> - Enables the specified component; " + "\n\t\t\t<component id> - The ID of the component as displayed by the list command\n" + //$NON-NLS-1$ //$NON-NLS-2$
-			"\tdisable/dis <component id> - Disables the specified component; " + "\n\t\t\t<component id> - The ID of the component as displayed by the list command\n" + //$NON-NLS-1$ //$NON-NLS-2$
-			"\tenableAll/enAll [bundle id] - Enables all components; use [bundle id] to enable all components of the specified bundle\n" + //$NON-NLS-1$
-			"\tdisableAll/disAll [bundle id] - Disables all components; use [bundle id] to disable all components of the specified bundle\n"; //$NON-NLS-1$
 
 	private Resolver resolver;
 	private SCRManager scrManager;
@@ -46,7 +39,19 @@ public class SCRCommandProvider implements CommandProvider {
 	}
 
 	public String getHelp() {
-		return helpText;
+		StringBuffer res = new StringBuffer(1000);
+		res.append("---").append(Messages.SCR).append("---\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		res.append("\tlist/ls [-c] [bundle id] - ").append(Messages.LIST_ALL_COMPONENTS); //$NON-NLS-1$
+		res.append("\n\t\t\t").append(Messages.LIST_ALL_BUNDLE_COMPONENTS); //$NON-NLS-1$
+		res.append("\n\tcomponent/comp <component id> - ").append(Messages.PRINT_COMPONENT_INFO); //$NON-NLS-1$
+		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		res.append("\n\tenable/en <component id> - ").append(Messages.ENABLE_COMPONENT); //$NON-NLS-1$
+		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		res.append("\n\tdisable/dis <component id> - ").append(Messages.DISABLE_COMPONENT); //$NON-NLS-1$
+		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		res.append("\n\tenableAll/enAll [bundle id] - ").append(Messages.ENABLE_ALL_COMPONENTS); //$NON-NLS-1$
+		res.append("\tdisableAll/disAll [bundle id] - ").append(Messages.DISABLE_ALL_COMPONENTS).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		return res.toString();
 	}
 
 	/**
@@ -98,13 +103,13 @@ public class SCRCommandProvider implements CommandProvider {
 			try {
 				compIndex = Integer.parseInt(params[0]);
 			} catch (NumberFormatException nfe) {
-				intp.println("Wrong parameter " + params[0] + " ! It is not a number!"); //$NON-NLS-1$ //$NON-NLS-2$
+				intp.println(NLS.bind(Messages.WRONG_PARAMETER, params[0]));
 				return;
 			}
 			printComponentDetails(intp, compIndex);
 			return;
 		}
-		intp.println("This command expects a component ID as parameter!"); //$NON-NLS-1$
+		intp.println(Messages.EXPECTED_PARAMETER_COMPONENT_ID);
 	}
 
 	/**
@@ -128,13 +133,13 @@ public class SCRCommandProvider implements CommandProvider {
 			try {
 				compIndex = Integer.parseInt(params[0]);
 			} catch (NumberFormatException nfe) {
-				intp.println("Wrong parameter " + params[0] + " ! It is not a number!"); //$NON-NLS-1$ //$NON-NLS-2$
+				intp.println(NLS.bind(Messages.WRONG_PARAMETER, params[0]));
 				return;
 			}
 			enableComponent(intp, compIndex);
 			return;
 		}
-		intp.println("This command expects a component ID as parameter!"); //$NON-NLS-1$
+		intp.println(Messages.EXPECTED_PARAMETER_COMPONENT_ID);
 	}
 
 	/**
@@ -158,13 +163,13 @@ public class SCRCommandProvider implements CommandProvider {
 			try {
 				compIndex = Integer.parseInt(params[0]);
 			} catch (NumberFormatException nfe) {
-				intp.println("Wrong parameter " + params[0] + " ! It is not a number!"); //$NON-NLS-1$ //$NON-NLS-2$
+				intp.println(NLS.bind(Messages.WRONG_PARAMETER, params[0]));
 				return;
 			}
 			disableComponent(intp, compIndex);
 			return;
 		}
-		intp.println("This command expects a component ID as parameter!"); //$NON-NLS-1$
+		intp.println(Messages.EXPECTED_PARAMETER_COMPONENT_ID);
 	}
 
 	/**
@@ -247,12 +252,12 @@ public class SCRCommandProvider implements CommandProvider {
 		try {
 			bid = Long.parseLong(bidString);
 		} catch (NumberFormatException nfe) {
-			intp.println("Wrong parameter " + bidString); //$NON-NLS-1$
+			intp.println(NLS.bind(Messages.WRONG_PARAMETER2, bidString));
 			return null;
 		}
 		Bundle b = scrManager.bc.getBundle(bid);
 		if (b == null) {
-			intp.println("Bundle with ID " + bidString + " was not found!"); //$NON-NLS-1$ //$NON-NLS-2$
+			intp.println(NLS.bind(Messages.BUNDLE_NOT_FOUND, bidString));
 		}
 		return b;
 	}
@@ -273,7 +278,7 @@ public class SCRCommandProvider implements CommandProvider {
 	private void printComponentDetails(CommandInterpreter intp, int componentIndex) {
 		ComponentRef cRef = findComponentWithID(componentIndex);
 		if (cRef == null) {
-			intp.println("Invalid component ID!"); //$NON-NLS-1$
+			intp.println(Messages.INVALID_COMPONENT_ID);
 			return;
 		}
 
@@ -290,13 +295,13 @@ public class SCRCommandProvider implements CommandProvider {
 				}
 			}
 		} else {
-			intp.println("Could not find the bundle of the specified component! It is possibly uninstalled."); //$NON-NLS-1$
+			intp.println(Messages.CANNOT_FIND_COMPONENT_BUNDLE);
 		}
 	}
 
 	private void printComponentDetails(CommandInterpreter intp, ServiceComponent sc) {
 		intp.println("\t" + sc.toString()); //$NON-NLS-1$
-		intp.println("Dynamic information :"); //$NON-NLS-1$
+		intp.println(Messages.DYNAMIC_INFO);
 		Vector unresulvedReferences = getUnresolvedReferences(sc);
 		boolean resolved = true;
 		if (unresulvedReferences != null) {
@@ -308,20 +313,20 @@ public class SCRCommandProvider implements CommandProvider {
 			}
 		}
 		if (resolved) {
-			intp.println("  The component is resolved"); //$NON-NLS-1$
+			intp.println(Messages.COMPONENT_RESOLVED);
 		} else {
-			intp.println("  *The component is NOT resolved"); //$NON-NLS-1$
+			intp.println(Messages.COMPONENT_NOT_RESOLVED);
 		}
 
 		if (unresulvedReferences != null) {
-			intp.println("  The following references are not resolved:"); //$NON-NLS-1$
+			intp.println(Messages.NOT_RESOLVED_REFERENCES);
 			for (int i = 0; i < unresulvedReferences.size(); i++) {
 				intp.println("    " + unresulvedReferences.elementAt(i)); //$NON-NLS-1$
 			}
 		} else {
-			intp.println("  All component references are resolved"); //$NON-NLS-1$
+			intp.println(Messages.ALL_REFERENCES_RESOLVED);
 		}
-		intp.println("  Component configurations :"); //$NON-NLS-1$
+		intp.println(Messages.COMPONENT_CONFIGURATIONS);
 		Vector enabledSCPs = (Vector) resolver.scpEnabled.clone();
 		for (int i = 0; i < enabledSCPs.size(); i++) {
 			ServiceComponentProp scp = (ServiceComponentProp) enabledSCPs.elementAt(i);
@@ -331,7 +336,7 @@ public class SCRCommandProvider implements CommandProvider {
 		}
 		if (sc.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_REQUIRE) {
 			if (resolved && (sc.componentProps == null || sc.componentProps.size() == 0)) {
-				intp.println("  *The component has NO built configurations! The reason might be that it requires inicialization by configuration provided by Configuration Admin but none was found"); //$NON-NLS-1$
+				intp.println(Messages.NO_BUILT_COMPONENT_CONFIGURATIONS);
 			}
 		}
 		intp.println();
@@ -339,7 +344,7 @@ public class SCRCommandProvider implements CommandProvider {
 
 	private void printSCP(CommandInterpreter intp, ServiceComponentProp scp) {
 		Hashtable props = scp.properties;
-		intp.println("    Configuration properties:"); //$NON-NLS-1$
+		intp.println(Messages.CONFIG_PROPERTIES);
 		Enumeration keys = props.keys();
 		while (keys.hasMoreElements()) {
 			Object key = keys.nextElement();
@@ -493,9 +498,9 @@ public class SCRCommandProvider implements CommandProvider {
 	private void enableAll(CommandInterpreter intp, Bundle b) {
 		Vector componentsToEnable = new Vector();
 		if (b != null) {
-			intp.println("Enabling all components in bundle " + getBundleRepresentationName(b)); //$NON-NLS-1$
+			intp.println(NLS.bind(Messages.ENABLING_ALL_BUNDLE_COMPONENTS, getBundleRepresentationName(b)));
 		} else {
-			intp.println("Enabling all components"); //$NON-NLS-1$
+			intp.println(Messages.ENABLING_ALL_COMPONENTS);
 		}
 		if (b != null) {
 			if (scrManager.bundleToServiceComponents != null) {
@@ -538,9 +543,9 @@ public class SCRCommandProvider implements CommandProvider {
 	private void disableAll(CommandInterpreter intp, Bundle b) {
 		Vector componentsToDisable = new Vector();
 		if (b != null) {
-			intp.println("Disabling all components in bundle " + getBundleRepresentationName(b)); //$NON-NLS-1$
+			intp.println(NLS.bind(Messages.DISABLING_ALL_BUNDLE_COMPONENTS, getBundleRepresentationName(b)));
 		} else {
-			intp.println("Disabling all components"); //$NON-NLS-1$
+			intp.println(Messages.DISABLING_ALL_COMPONENTS);
 		}
 		if (b != null) {
 			if (scrManager.bundleToServiceComponents != null) {
@@ -583,21 +588,21 @@ public class SCRCommandProvider implements CommandProvider {
 	private void enableComponent(CommandInterpreter intp, int componentIndex) {
 		ComponentRef cRef = findComponentWithID(componentIndex);
 		if (cRef == null) {
-			intp.println("Invalid component ID!"); //$NON-NLS-1$
+			intp.println(Messages.INVALID_COMPONENT_ID);
 			return;
 		}
 		scrManager.enableComponent(cRef.name, scrManager.bc.getBundle(cRef.bid));
-		intp.println("Sent request for enabling component " + cRef.name); //$NON-NLS-1$
+		intp.println(NLS.bind(Messages.SENT_ENABLING_REQUEST, cRef.name));
 	}
 
 	private void disableComponent(CommandInterpreter intp, int componentIndex) {
 		ComponentRef cRef = findComponentWithID(componentIndex);
 		if (cRef == null) {
-			intp.println("Invalid component ID!"); //$NON-NLS-1$
+			intp.println(Messages.INVALID_COMPONENT_ID);
 			return;
 		}
 		scrManager.disableComponent(cRef.name, scrManager.bc.getBundle(cRef.bid));
-		intp.println("Sent request for disabling component " + cRef.name); //$NON-NLS-1$
+		intp.println(NLS.bind(Messages.SENT_DISABLING_REQUEST, cRef.name));
 	}
 
 	/* commands */
@@ -607,20 +612,20 @@ public class SCRCommandProvider implements CommandProvider {
 			componentRefsIDs = new Hashtable(101);
 
 		if (b != null) {
-			intp.println("Components in bundle " + getBundleRepresentationName(b) + " :"); //$NON-NLS-1$ //$NON-NLS-2$
+			intp.println(NLS.bind(Messages.COMPONENTS_IN_BUNDLE, getBundleRepresentationName(b)));
 			if (componentRefsIDs.isEmpty()) {
 				initComponentRefs();
 			}
 		} else {
-			intp.println("All Components:"); //$NON-NLS-1$
+			intp.println(Messages.ALL_COMPONENTS);
 		}
 		intp.print("ID"); //$NON-NLS-1$
 		if (completeInfo) {
-			intp.println("\tComponent details"); //$NON-NLS-1$
+			intp.println(Messages.COMPONENT_DETAILS);
 		} else {
-			intp.print("\tState"); //$NON-NLS-1$
-			intp.print("\t\t\tComponent Name"); //$NON-NLS-1$
-			intp.println("\t\t\tLocated in bundle"); //$NON-NLS-1$
+			intp.print(Messages.STATE);
+			intp.print(Messages.COMPONENT_NAME);
+			intp.println(Messages.LOCATED_IN_BUNDLE);
 		}
 
 		if (b != null) {
@@ -643,7 +648,7 @@ public class SCRCommandProvider implements CommandProvider {
 							////print short info
 							intp.print("" + ref.id); //$NON-NLS-1$
 							boolean resolved = isResolved(sc);
-							String stateStr = sc.enabled ? (resolved ? "\tResolved" : "\tUnresolved") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							String stateStr = sc.enabled ? (resolved ? "\tSatisfied" : "\tUnsatisfied") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							intp.print(stateStr);
 							intp.print("\t\t" + sc.name); //$NON-NLS-1$
 							intp.println("\t\t\t" + getBundleRepresentationName(b) + "(bid=" + b.getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -674,7 +679,7 @@ public class SCRCommandProvider implements CommandProvider {
 								////print short info
 								intp.print("" + ref.id); //$NON-NLS-1$
 								boolean resolved = isResolved(sc);
-								String stateStr = sc.enabled ? (resolved ? "\tResolved" : "\tUnresolved") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								String stateStr = sc.enabled ? (resolved ? "\tSatisfied" : "\tUnsatisfied") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								intp.print(stateStr);
 								intp.print("\t\t" + sc.name); //$NON-NLS-1$
 								intp.println("\t\t\t" + getBundleRepresentationName(allBundles[j]) + "(bid=" + allBundles[j].getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
