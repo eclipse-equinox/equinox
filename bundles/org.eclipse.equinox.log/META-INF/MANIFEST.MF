@@ -16,3 +16,6 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5,
  OSGi/Minimum-1.2,
  CDC-1.1/Foundation-1.1,
  J2SE-1.4
+Comment-Bundle-RequiredExecutionEnvironment: Need to compile with J2SE-1.5 for Thread.getId() support in ExtendedLogEntryImpl.
+ OSGi/Minimum-1.2 is the correct runtime BREE but for maximum compatibility with older framework versions we need Foundation-1.1 
+ and J2SE-1.4 on the list.
