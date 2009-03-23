@@ -37,13 +37,14 @@ public class ExtendedLogServiceFactory implements ServiceFactory, BundleListener
 	}
 
 	protected synchronized ExtendedLogServiceImpl getLogService(Bundle bundle) {
-		if (logServices == null || bundle.getState() == Bundle.UNINSTALLED)
-			throw new IllegalStateException("LogService for " + bundle.getSymbolicName() + " (id=" + bundle.getBundleId() + ") is shutdown."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (logServices == null)
+			throw new IllegalStateException("LogService is shutdown."); //$NON-NLS-1$
 
 		ExtendedLogServiceImpl logService = (ExtendedLogServiceImpl) logServices.get(bundle);
 		if (logService == null) {
 			logService = new ExtendedLogServiceImpl(this, bundle);
-			logServices.put(bundle, logService);
+			if (bundle.getState() != Bundle.UNINSTALLED)
+				logServices.put(bundle, logService);
 		}
 		return logService;
 	}
