@@ -9,6 +9,10 @@ package org.eclipse.equinox.log;
 
 import org.osgi.service.log.LogListener;
 
+/**
+ * Marker interface to denotes a log listener that should be called on the logging thread
+ * @see LogListener
+ */
 public interface SynchronousLogListener extends LogListener {
-	// denotes a log listener that should be called on the logging thread
+	//
 }
