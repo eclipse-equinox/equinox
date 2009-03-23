@@ -1,26 +1,23 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation.
+ * Copyright (c) 2007, 2008 IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.equinox.log;
+package org.eclipse.equinox.log.internal;
 
 import java.util.Hashtable;
-import org.osgi.framework.*;
+import org.eclipse.equinox.log.SynchronousLogListener;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.log.*;
 import org.osgi.service.log.LogEntry;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.service.log.LogService;
 
-public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomizer {
+public class EventAdminLogListener implements SynchronousLogListener {
+
 	// constants for Event topic substring
 	public static final String TOPIC = "org/osgi/service/log/LogEntry"; //$NON-NLS-1$
 	public static final char TOPIC_SEPARATOR = '/';
@@ -47,34 +44,18 @@ public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomiz
 	public static final String EXCEPTION_CLASS = "exception.class"; //$NON-NLS-1$
 	public static final String EXCEPTION_MESSAGE = "exception.message"; //$NON-NLS-1$
 
-	private BundleContext context;
-	volatile private ServiceTracker eventAdminTracker;
-	private ServiceTracker logReaderTracker;
+	private EventAdmin eventAdmin;
 
-	public LogEntryEventAdapter(BundleContext context) {
-		this.context = context;
-	}
-
-	public void start() {
-		eventAdminTracker = new ServiceTracker(context, EventAdmin.class.getName(), null);
-		eventAdminTracker.open();
-		logReaderTracker = new ServiceTracker(context, org.osgi.service.log.LogReaderService.class.getName(), this);
-		logReaderTracker.open();
-	}
-
-	public void stop() throws Exception {
-		if (logReaderTracker != null)
-			logReaderTracker.close();
-		if (eventAdminTracker != null)
-			eventAdminTracker.close();
-		this.context = null;
+	public EventAdminLogListener(EventAdmin eventAdmin) {
+		this.eventAdmin = eventAdmin;
 	}
 
 	public void logged(LogEntry entry) {
-		EventAdmin eventAdmin = (EventAdmin) eventAdminTracker.getService();
-		if (eventAdmin == null)
-			return;
+		Event convertedEvent = convertEvent(entry);
+		eventAdmin.postEvent(convertedEvent);
+	}
 
+	private static Event convertEvent(LogEntry entry) {
 		String topic = TOPIC;
 		int level = entry.getLevel();
 		switch (level) {
@@ -112,11 +93,10 @@ public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomiz
 		if (entry.getMessage() != null)
 			properties.put(MESSAGE, entry.getMessage());
 		properties.put(TIMESTAMP, new Long(entry.getTime()));
-		Event convertedEvent = new Event(topic, properties);
-		eventAdmin.postEvent(convertedEvent);
+		return new Event(topic, properties);
 	}
 
-	public void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
+	public static void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
 		properties.put(SERVICE, ref);
 		properties.put(SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
 		Object o = ref.getProperty(org.osgi.framework.Constants.SERVICE_PID);
@@ -129,7 +109,7 @@ public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomiz
 		}
 	}
 
-	public void putBundleProperties(Hashtable properties, Bundle bundle) {
+	public static void putBundleProperties(Hashtable properties, Bundle bundle) {
 		properties.put(BUNDLE_ID, new Long(bundle.getBundleId()));
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName != null) {
@@ -138,7 +118,7 @@ public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomiz
 		properties.put(BUNDLE, bundle);
 	}
 
-	public void putExceptionProperties(Hashtable properties, Throwable t) {
+	public static void putExceptionProperties(Hashtable properties, Throwable t) {
 		properties.put(EXCEPTION, t);
 		properties.put(EXCEPTION_CLASS, t.getClass().getName());
 		String message = t.getMessage();
@@ -146,21 +126,4 @@ public class LogEntryEventAdapter implements LogListener, ServiceTrackerCustomiz
 			properties.put(EXCEPTION_MESSAGE, t.getMessage());
 		}
 	}
-
-	public Object addingService(ServiceReference reference) {
-		if (reference.getBundle() != context.getBundle())
-			return null; // we only care about our own reader
-		LogReaderService reader = (LogReaderService) context.getService(reference);
-		reader.addLogListener(this);
-		return reader;
-	}
-
-	public void modifiedService(ServiceReference reference, Object service) {
-		// nothing
-	}
-
-	public void removedService(ServiceReference reference, Object service) {
-		((LogReaderService) service).removeLogListener(this);
-	}
-
 }
