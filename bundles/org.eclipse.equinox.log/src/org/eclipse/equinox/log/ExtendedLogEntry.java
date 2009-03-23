@@ -16,6 +16,7 @@ import org.osgi.service.log.LogListener;
  * 
  * @ThreadSafe
  * @see LogListener
+ * @since 1.1
  */
 public interface ExtendedLogEntry extends LogEntry {
 

@@ -13,6 +13,7 @@ import org.osgi.service.log.*;
  * Extends the OSGi Log Service's LogReaderService to allow better control of log listeners.
  * @ThreadSafe
  * @see LogListener
+ * @since 1.1
  */
 public interface ExtendedLogReaderService extends LogReaderService {
 	/**

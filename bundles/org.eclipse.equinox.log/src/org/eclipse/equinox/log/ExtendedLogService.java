@@ -15,6 +15,7 @@ import org.osgi.service.log.LogService;
  * some additional context when logging.
  * @ThreadSafe
  * @see Logger
+ * @since 1.1
  */
 public interface ExtendedLogService extends LogService, Logger {
 

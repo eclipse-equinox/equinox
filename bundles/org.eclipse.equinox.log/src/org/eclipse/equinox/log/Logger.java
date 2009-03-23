@@ -10,6 +10,12 @@ package org.eclipse.equinox.log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 
+/**
+  * Provides named logger support for the OSGi LogService. Otherwise very similar to the <code>LogeServie</code>.
+  * @ThreadSafe
+  * @see LogService
+  * @since 1.1 
+ */
 public interface Logger {
 	/**
 	 * @see LogService#log(int, String)

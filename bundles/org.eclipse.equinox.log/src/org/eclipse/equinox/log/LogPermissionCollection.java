@@ -14,10 +14,12 @@ import java.util.NoSuchElementException;
 
 /**
  * Stores a set of <code>LogPermission</code> permissions.
- * 
+ *
+ * @ThreadSafe
  * @see java.security.Permission
  * @see java.security.Permissions
  * @see java.security.PermissionCollection
+ * @since 1.1 
  */
 public final class LogPermissionCollection extends PermissionCollection {
 	private static final long serialVersionUID = -1955409691185916778L;
