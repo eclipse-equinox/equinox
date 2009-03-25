@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,45 +11,33 @@
  *   Heiko Seeberger           AJDT 1.5.1 changes     
  *   Martin Lippert            weaving context and adaptors reworked     
  *   Martin Lippert            extracted weaving service factory
+ *   Martin Lippert            advanced aspect resolving implemented
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
+import org.eclipse.equinox.weaving.aspectj.loadtime.AspectResolver;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingAdaptor;
 import org.eclipse.equinox.weaving.aspectj.loadtime.OSGiWeavingContext;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 
 public class WeavingService implements IWeavingService {
 
     private List<Definition> aspectDefinitions;
 
-    private Bundle bundle;
-
     private BundleDescription bundleDescription;
 
     private boolean enabled;
 
-    private ClassLoader loader;
-
-    private StringBuffer namespaceAddOn;
-
-    private State resolverState;
-
-    private ISupplementerRegistry supplementerRegistry;
+    private String namespaceAddOn;
 
     private OSGiWeavingAdaptor weavingAdaptor;
 
@@ -63,13 +51,14 @@ public class WeavingService implements IWeavingService {
     public WeavingService(final ClassLoader loader, final Bundle bundle,
             final State state, final BundleDescription bundleDescription,
             final ISupplementerRegistry supplementerRegistry) {
-        this.bundle = bundle;
-        this.resolverState = state;
-        this.supplementerRegistry = supplementerRegistry;
-        this.namespaceAddOn = new StringBuffer();
-        this.loader = loader;
         this.bundleDescription = bundleDescription;
-        this.aspectDefinitions = parseDefinitionsForBundle();
+
+        final AspectResolver aspectResolver = new AspectResolver(state,
+                supplementerRegistry);
+        final AspectConfiguration aspectConfig = aspectResolver
+                .resolveAspectsFor(bundle, bundleDescription);
+        this.namespaceAddOn = aspectConfig.getFingerprint();
+        this.aspectDefinitions = aspectConfig.getAspectDefinitions();
 
         this.enabled = this.aspectDefinitions.size() > 0;
         if (this.enabled) {
@@ -78,9 +67,11 @@ public class WeavingService implements IWeavingService {
             this.weavingAdaptor = new OSGiWeavingAdaptor(loader,
                     weavingContext, namespaceAddOn.toString());
         } else {
-            System.err
-                    .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
-                            + bundle.getSymbolicName() + "'");
+        	if (WeavingServicePlugin.DEBUG) {
+	            System.err
+    	                .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
+        	                    + bundle.getSymbolicName() + "'");
+        	}
         }
     }
 
@@ -106,17 +97,6 @@ public class WeavingService implements IWeavingService {
         } else {
             return false;
         }
-    }
-
-    /**
-     * Identifies the version of the given bundle
-     * 
-     * @param bundle The bundle for which the version should be identified
-     * @return The version of the bundle
-     */
-    public String getBundleVersion(final Bundle bundle) {
-        return resolverState.getBundle(bundle.getBundleId()).getVersion()
-                .toString();
     }
 
     /**
@@ -161,114 +141,8 @@ public class WeavingService implements IWeavingService {
         }
     }
 
-    protected Bundle[] getBundles() {
-        final Set<Bundle> bundles = new HashSet<Bundle>();
-
-        // the bundle this context belongs to should be used
-        bundles.add(this.bundle);
-
-        final BundleContext weavingBundleContext = WeavingServicePlugin
-                .getDefault() != null ? WeavingServicePlugin.getDefault()
-                .getContext() : null;
-        if (weavingBundleContext != null) {
-
-            // add required bundles
-            final BundleDescription[] resolvedRequires = this.bundleDescription
-                    .getResolvedRequires();
-            for (int i = 0; i < resolvedRequires.length; i++) {
-                final Bundle requiredBundle = weavingBundleContext
-                        .getBundle(resolvedRequires[i].getBundleId());
-                if (requiredBundle != null) {
-                    bundles.add(requiredBundle);
-                }
-            }
-
-            // add fragment bundles
-            final BundleDescription[] fragments = this.bundleDescription
-                    .getFragments();
-            for (int i = 0; i < fragments.length; i++) {
-                final Bundle fragmentBundle = weavingBundleContext
-                        .getBundle(fragments[i].getBundleId());
-                if (fragmentBundle != null) {
-                    bundles.add(fragmentBundle);
-                }
-            }
-        }
-
-        // add supplementers
-        final Bundle[] supplementers = this.supplementerRegistry
-                .getSupplementers(this.bundleDescription.getBundleId());
-        bundles.addAll(Arrays.asList(supplementers));
-
-        return bundles.toArray(new Bundle[bundles.size()]);
-    }
-
-    private void addToNamespaceAddon(final Bundle bundle) {
-        namespaceAddOn.append(bundle.getSymbolicName());
-        namespaceAddOn.append(":");
-        namespaceAddOn.append(getBundleVersion(bundle));
-        namespaceAddOn.append(";");
-    }
-
     private void ensureAdaptorInit() {
         weavingAdaptor.initialize();
-    }
-
-    private void parseDefinitionFromRequiredBundle(final Bundle bundle,
-            final List<Definition> definitions) {
-        try {
-            final Definition aspectDefinition = WeavingServicePlugin
-                    .getDefault().getAspectDefinitionRegistry()
-                    .getAspectDefinition(bundle);
-            if (aspectDefinition != null) {
-                definitions.add(aspectDefinition);
-                addToNamespaceAddon(bundle);
-            }
-        } catch (final Exception e) {
-            //            warn("parse definitions failed", e);
-        }
-    }
-
-    /**
-     * Load and cache the aop.xml/properties according to the classloader
-     * visibility rules
-     * 
-     * @param weaver
-     * @param loader
-     */
-    private List<Definition> parseDefinitionsForBundle() {
-        final List<Definition> definitions = new ArrayList<Definition>();
-
-        try {
-            parseDefinitionsFromRequiredBundles(definitions);
-            //            if (definitions.isEmpty()) {
-            //                info("no configuration found. Disabling weaver for bundler "
-            //                        + weavingContext.getClassLoaderName());
-            //            }
-        } catch (final Exception e) {
-            definitions.clear();
-            //            warn("parse definitions failed", e);
-        }
-
-        return definitions;
-    }
-
-    private void parseDefinitionsFromRequiredBundles(
-            final List<Definition> definitions) {
-        final Bundle[] bundles = getBundles();
-
-        Arrays.sort(bundles, new Comparator() {
-
-            public int compare(final Object arg0, final Object arg1) {
-                final long bundleId1 = ((Bundle) arg0).getBundleId();
-                final long bundleId2 = ((Bundle) arg1).getBundleId();
-                return (int) (bundleId1 - bundleId2);
-            }
-        });
-
-        for (int i = 0; i < bundles.length; i++) {
-            parseDefinitionFromRequiredBundle(bundles[i], definitions);
-        }
     }
 
 }
