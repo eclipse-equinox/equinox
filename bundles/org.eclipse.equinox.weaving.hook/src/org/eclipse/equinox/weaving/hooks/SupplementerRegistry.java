@@ -387,11 +387,12 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Bundle[] bundles = bundlesToRefresh
                     .toArray(new Bundle[bundlesToRefresh.size()]);
 
-            for (int i = 0; i < bundles.length; i++) {
-                System.out.println("refresh bundle: "
-                        + bundles[i].getSymbolicName());
+            if (AbstractAspectJHook.verbose) {
+                for (int i = 0; i < bundles.length; i++) {
+                    System.out.println("refresh bundle: "
+                            + bundles[i].getSymbolicName());
+                }
             }
-
             refreshBundles(bundles);
         }
     }
