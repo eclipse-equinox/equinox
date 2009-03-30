@@ -46,6 +46,7 @@ public class Messages extends NLS {
 	public static String COMPONENTS_ENABLED;
 	public static String COMPONENTS_IN_BUNDLE;
 	public static String COMPONENTS_PARSED_TIME;
+	public static String CONFIG_ADMIN_SERVICE_NOT_AVAILABLE;
 	public static String CONFIG_PROPERTIES;
 	public static String COULD_NOT_CREATE_INSTANCE;
 	public static String COULD_NOT_CREATE_NEW_INSTANCE;

@@ -135,7 +135,8 @@ public final class Resolver implements WorkPerformer {
 							// create ServiceComponent + Prop
 							map(current, (Dictionary) null);
 						} else {
-							Activator.log(current.bc, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name), null);
+							String customReason = ConfigurationManager.cmTracker.getService() != null ? "" : Messages.CONFIG_ADMIN_SERVICE_NOT_AVAILABLE; //$NON-NLS-1$
+							Activator.log(current.bc, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name) + customReason, null);
 						}
 					} else {
 						// if ManagedServiceFactory
