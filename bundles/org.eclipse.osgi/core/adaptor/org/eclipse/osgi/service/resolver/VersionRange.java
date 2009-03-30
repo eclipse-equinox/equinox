@@ -20,7 +20,7 @@ import org.osgi.framework.Version;
 public class VersionRange {
 	private static final Version versionMax = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	/**
-	 * An empty version
+	 * An empty version range: "0.0.0".  The empty version range includes all valid versions.
 	 */
 	public static final VersionRange emptyRange = new VersionRange(null);
 
@@ -45,7 +45,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * Created a version range from the specified string.
+	 * Creates a version range from the specified string.
 	 * 
 	 * <p>
 	 * Here is the grammar for version range strings.
@@ -62,7 +62,9 @@ public class VersionRange {
 	 * </pre>
 	 * </p>
 	 * 
-	 * @param versionRange String representation of the version range
+	 * @param versionRange string representation of the version range or <code>null</code>
+	 * for the empty range "0.0.0"
+	 * @see Version#Version(String) definition of <code>version</code>
 	 */
 	public VersionRange(String versionRange) {
 		if (versionRange == null || versionRange.length() == 0) {
@@ -94,7 +96,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * Returns the minimum Version of this VersionRange
+	 * Returns the minimum Version of this VersionRange.
 	 * @return the minimum Version of this VersionRange
 	 */
 	public Version getMinimum() {
@@ -111,7 +113,7 @@ public class VersionRange {
 	}
 
 	/**
-	 * Returns the maximum Version of this VersionRange
+	 * Returns the maximum Version of this VersionRange.
 	 * @return the maximum Version of this VersionRange
 	 */
 	public Version getMaximum() {
@@ -168,7 +170,7 @@ public class VersionRange {
 
 	/**
 	 * Returns the string representation of this version range.
-	 * The encoded format uses the following grammer:
+	 * The encoded format uses the following grammar:
 	 * <pre>
 	 * version-range ::= interval | atleast
 	 * interval ::= ( include-min | exclude-min ) min-version ',' max-version ( include-max | exclude-max )
@@ -192,6 +194,7 @@ public class VersionRange {
 	 * Note that a simple version (e.g. &quot;1.2.3&quot;) indicates a version range which is
 	 * any version greater than or equal to the specified version.
 	 * @return The string representation of this version range.
+	 * @see Version#toString() string representation of <code>version</code>
 	 */
 	public String toString() {
 		if (VersionRange.versionMax.equals(maxVersion))
