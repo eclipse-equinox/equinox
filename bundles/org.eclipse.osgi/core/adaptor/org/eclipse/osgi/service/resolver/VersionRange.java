@@ -20,7 +20,8 @@ import org.osgi.framework.Version;
 public class VersionRange {
 	private static final Version versionMax = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	/**
-	 * An empty version range: "0.0.0".  The empty version range includes all valid versions.
+	 * An empty version range: "0.0.0".  The empty version range includes all valid versions
+	 * (any version greater than or equal to the version 0.0.0).
 	 */
 	public static final VersionRange emptyRange = new VersionRange(null);
 
