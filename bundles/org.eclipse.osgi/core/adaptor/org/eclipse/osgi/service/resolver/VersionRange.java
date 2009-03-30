@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,20 +31,38 @@ public class VersionRange {
 
 	/**
 	 * Constructs a VersionRange with the specified minVersion and maxVersion.
-	 * @param minVersion the minimum version of the range
-	 * @param maxVersion the maximum version of the range
+	 * @param minVersion the minimum version of the range. If <code>null</code>
+	 * then {@link Version#emptyVersion} is used.
+	 * @param maxVersion the maximum version of the range. If <code>null</code>
+	 * then new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE)
+	 * is used. 
 	 */
 	public VersionRange(Version minVersion, boolean includeMin, Version maxVersion, boolean includeMax) {
-		this.minVersion = minVersion;
+		this.minVersion = minVersion == null ? Version.emptyVersion : minVersion;
 		this.includeMin = includeMin;
-		this.maxVersion = maxVersion;
+		this.maxVersion = maxVersion == null ? VersionRange.versionMax : maxVersion;
 		this.includeMax = includeMax;
 	}
 
 	/**
-	 * Constructs a VersionRange from the given versionRange String.
-	 * @param versionRange a version range String that specifies a range of
-	 * versions.
+	 * Created a version range from the specified string.
+	 * 
+	 * <p>
+	 * Here is the grammar for version range strings.
+	 * <pre>
+	 * version-range ::= interval | atleast
+	 * interval ::= ( include-min | exclude-min ) min-version ',' max-version ( include-max | exclude-max )
+	 * atleast ::= version
+	 * floor ::= version
+	 * ceiling ::= version
+	 * include-min ::= '['
+	 * exclude-min ::= '('
+	 * include-max ::= ']'
+	 * exclude-max ::= ')'
+	 * </pre>
+	 * </p>
+	 * 
+	 * @param versionRange String representation of the version range
 	 */
 	public VersionRange(String versionRange) {
 		if (versionRange == null || versionRange.length() == 0) {
@@ -115,20 +133,16 @@ public class VersionRange {
 	 * and the given version.
 	 * 
 	 * @param version a version to be tested for inclusion in this VersionRange. 
-	 * (may be <code>null</code>)
-	 * @return <code>true</code> if the version is include, 
+	 * If <code>null</code> then {@link Version#emptyVersion} is used.
+	 * @return <code>true</code> if the version is included, 
 	 * <code>false</code> otherwise 
 	 */
 	public boolean isIncluded(Version version) {
-		Version minRequired = getMinimum();
-		if (minRequired == null)
-			return true;
 		if (version == null)
-			return false;
-		Version maxRequired = getMaximum() == null ? VersionRange.versionMax : getMaximum();
+			version = Version.emptyVersion;
 		int minCheck = includeMin ? 0 : 1;
 		int maxCheck = includeMax ? 0 : -1;
-		return version.compareTo(minRequired) >= minCheck && version.compareTo(maxRequired) <= maxCheck;
+		return version.compareTo(minVersion) >= minCheck && version.compareTo(maxVersion) <= maxCheck;
 
 	}
 
@@ -136,34 +150,52 @@ public class VersionRange {
 		if (!(object instanceof VersionRange))
 			return false;
 		VersionRange vr = (VersionRange) object;
-		if (minVersion != null && vr.getMinimum() != null) {
-			if (minVersion.equals(vr.getMinimum()) && includeMin == vr.includeMin)
-				if (maxVersion != null && vr.getMaximum() != null) {
-					if (maxVersion.equals(vr.getMaximum()) && includeMax == vr.includeMax)
-						return true;
-				} else
-					return maxVersion == vr.getMaximum();
-		} else {
-			return minVersion == vr.getMinimum();
-		}
+		if (minVersion.equals(vr.getMinimum()) && includeMin == vr.includeMin)
+			if (maxVersion.equals(vr.getMaximum()) && includeMax == vr.includeMax)
+				return true;
 		return false;
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (maxVersion != null ? maxVersion.hashCode() : VersionRange.versionMax.hashCode());
-		result = prime * result + (minVersion != null ? minVersion.hashCode() : Version.emptyVersion.hashCode());
+		result = prime * result + maxVersion.hashCode();
+		result = prime * result + minVersion.hashCode();
 		result = prime * result + (includeMax ? 1231 : 1237);
 		result = prime * result + (includeMin ? 1231 : 1237);
 		return result;
 	}
 
+	/**
+	 * Returns the string representation of this version range.
+	 * The encoded format uses the following grammer:
+	 * <pre>
+	 * version-range ::= interval | atleast
+	 * interval ::= ( include-min | exclude-min ) min-version ',' max-version ( include-max | exclude-max )
+	 * atleast ::= version
+	 * floor ::= version
+	 * ceiling ::= version
+	 * include-min ::= '['
+	 * exclude-min ::= '('
+	 * include-max ::= ']'
+	 * exclude-max ::= ')'
+	 * </pre>
+	 * The following are some examples of version range strings and their predicate 
+	 * equivalent:
+	 * <pre>
+	 * [1.2.3, 4.5.6) -> 1.2.3 <= x < 4.5.6
+	 * [1.2.3, 4.5.6] -> 1.2.3 <= x <= 4.5.6
+	 * (1.2.3, 4.5.6) -> 1.2.3 < x < 4.5.6
+	 * (1.2.3, 4.5.6] -> 1.2.3 < x <= 4.5.6
+	 * 1.2.3          -> 1.2.3 <= x
+	 * </pre>
+	 * Note that a simple version (e.g. &quot;1.2.3&quot;) indicates a version range which is
+	 * any version greater than or equal to the specified version.
+	 * @return The string representation of this version range.
+	 */
 	public String toString() {
-		if (minVersion == null)
-			return Version.emptyVersion.toString();
 		if (VersionRange.versionMax.equals(maxVersion))
-			return minVersion.toString();
+			return minVersion.toString(); // we assume infinity max; use simple version (i.e version="1.0")
 		StringBuffer result = new StringBuffer();
 		result.append(includeMin ? '[' : '(');
 		result.append(minVersion);
