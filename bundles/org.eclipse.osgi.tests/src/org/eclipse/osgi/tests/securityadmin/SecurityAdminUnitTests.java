@@ -483,13 +483,16 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
 		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
 
-		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
-		assertNull("tc2sat", tc2sat); //$NON-NLS-1$
-		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
-		assertNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+		// Note that we need to avoid an ordering assumption on the order in which
+		// ProtectionDomains are processed by the AccessControlContext (bug 269917)
+		// Just make sure both tc1 and tc2 are not non-null at the same time.
+		assertTrue("tc1sat and tc2sat are either both null or both non-null", (tc1sat == null) ^ (tc2sat == null)); //$NON-NLS-1$
+		assertTrue("tc1unsat and tc2unsat are either both null or both non-null", (tc1unsat == null) ^ (tc2unsat == null)); //$NON-NLS-1$
 
-		tc1sat.setSatisfied(false);
-		tc1unsat.setSatisfied(true);
+		TestCondition modifySat = tc1sat != null ? tc1sat : tc2sat;
+		TestCondition modifyUnsat = tc1unsat != null ? tc1unsat : tc2unsat;
+		modifySat.setSatisfied(false);
+		modifyUnsat.setSatisfied(true);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
@@ -556,13 +559,16 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition tc1unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test1.getBundleId()); //$NON-NLS-1$
 		TestCondition tc2unsat = TestCondition.getTestCondition("POST_MUT_UNSAT_" + test2.getBundleId()); //$NON-NLS-1$
 
-		assertNotNull("tc1sat", tc1sat); //$NON-NLS-1$
-		assertNull("tc2sat", tc2sat); //$NON-NLS-1$
-		assertNotNull("tc1unsat", tc1unsat); //$NON-NLS-1$
-		assertNull("tc2unsat", tc2unsat); //$NON-NLS-1$
+		// Note that we need to avoid an ordering assumption on the order in which
+		// ProtectionDomains are processed by the AccessControlContext (bug 269917)
+		// Just make sure both tc1 and tc2 are not non-null at the same time.
+		assertTrue("tc1sat and tc2sat are either both null or both non-null", (tc1sat == null) ^ (tc2sat == null)); //$NON-NLS-1$
+		assertTrue("tc1unsat and tc2unsat are either both null or both non-null", (tc1unsat == null) ^ (tc2unsat == null)); //$NON-NLS-1$
 
-		tc1sat.setSatisfied(false);
-		tc1unsat.setSatisfied(true);
+		TestCondition modifySat = tc1sat != null ? tc1sat : tc2sat;
+		TestCondition modifyUnsat = tc1unsat != null ? tc1unsat : tc2unsat;
+		modifySat.setSatisfied(false);
+		modifyUnsat.setSatisfied(true);
 		testSMPermission(sm, pds, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

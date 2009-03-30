@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package ext.framework.b;
 
 import java.util.Dictionary;
@@ -36,7 +46,7 @@ public class TestCondition implements Condition {
 		String identity = args[0] + '_' + bundle.getBundleId();
 		boolean mut = Boolean.valueOf(args[1]).booleanValue();
 		boolean post = Boolean.valueOf(args[2]).booleanValue();
-		boolean sat = Boolean.valueOf(args[3]).booleanValue();;
+		boolean sat = Boolean.valueOf(args[3]).booleanValue();
 		synchronized (conditionIDs) {
 			TestCondition condition = (TestCondition) conditionIDs.get(identity);
 			if (condition == null) {
