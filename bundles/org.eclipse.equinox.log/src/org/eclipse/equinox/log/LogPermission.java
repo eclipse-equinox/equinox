@@ -16,7 +16,6 @@ import java.security.PermissionCollection;
  * This permission has only a single action: LOG.
  * 
  * @ThreadSafe
- * @since 1.1
  */
 public class LogPermission extends Permission {
 	private static final long serialVersionUID = -441193976837153362L;

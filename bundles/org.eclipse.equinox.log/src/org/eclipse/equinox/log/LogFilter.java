@@ -14,7 +14,6 @@ import org.osgi.service.log.LogEntry;
  * A <code>LogFilter</code> is used to pre-filter log requests before sending events to a <code>LogListener</code>.
  * @ThreadSafe
  * @see ExtendedLogReaderService#addLogListener(org.osgi.service.log.LogListener, LogFilter)
- * @since 1.1
  */
 public interface LogFilter {
 

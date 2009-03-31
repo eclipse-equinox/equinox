@@ -14,7 +14,6 @@ import org.osgi.service.log.LogService;
   * Provides named logger support for the OSGi LogService. Otherwise very similar to the <code>LogService</code>.
   * @ThreadSafe
   * @see LogService
-  * @since 1.1 
  */
 public interface Logger {
 	/**

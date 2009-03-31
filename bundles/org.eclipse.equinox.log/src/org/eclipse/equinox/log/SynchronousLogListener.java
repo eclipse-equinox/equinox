@@ -12,7 +12,6 @@ import org.osgi.service.log.LogListener;
 /**
  * Marker interface to denotes a log listener that should be called on the logging thread
  * @see LogListener
- * @since 1.1 
  */
 public interface SynchronousLogListener extends LogListener {
 	//
