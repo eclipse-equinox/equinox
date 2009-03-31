@@ -119,14 +119,15 @@ public class TableReader {
 			extensionPoints.load(tableInput);
 			return new Object[] {offsets, extensionPoints, nextId};
 		} catch (IOException e) {
+			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
+			return null;
+		} finally {
 			if (tableInput != null)
 				try {
 					tableInput.close();
 				} catch (IOException e1) {
 					//Ignore
 				}
-			log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, fileError, RegistryMessages.meta_registryCacheReadProblems, e));
-			return null;
 		}
 
 	}
