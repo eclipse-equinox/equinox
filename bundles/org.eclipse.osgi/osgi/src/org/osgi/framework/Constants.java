@@ -25,7 +25,7 @@ package org.osgi.framework;
  * <code>String</code>, unless otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 6417 $
+ * @version $Revision: 6552 $
  */
 
 public interface Constants {
@@ -1169,8 +1169,8 @@ public interface Constants {
 	 * Default value is {@link #FRAMEWORK_BUNDLE_PARENT_BOOT boot}.
 	 * 
 	 * @see #FRAMEWORK_BUNDLE_PARENT_BOOT
-	 * @see #FRAMEWORK_BUNDLE_PARENT_APP
 	 * @see #FRAMEWORK_BUNDLE_PARENT_EXT
+	 * @see #FRAMEWORK_BUNDLE_PARENT_APP
 	 * @see #FRAMEWORK_BUNDLE_PARENT_FRAMEWORK
 	 * @since 1.5
 	 */
@@ -1186,15 +1186,6 @@ public interface Constants {
 	public final static String	FRAMEWORK_BUNDLE_PARENT_BOOT			= "boot";
 
 	/**
-	 * Specifies to use the application class loader as the parent class loader
-	 * for all bundle class loaders.
-	 * 
-	 * @since 1.5
-	 * @see #FRAMEWORK_BUNDLE_PARENT
-	 */
-	public final static String	FRAMEWORK_BUNDLE_PARENT_APP				= "app";
-
-	/**
 	 * Specifies to use the extension class loader as the parent class loader
 	 * for all bundle class loaders.
 	 * 
@@ -1204,9 +1195,22 @@ public interface Constants {
 	public final static String	FRAMEWORK_BUNDLE_PARENT_EXT				= "ext";
 
 	/**
+	 * Specifies to use the application class loader as the parent class loader
+	 * for all bundle class loaders.  Depending on how the framework is 
+	 * launched, this may refer to the same class loader as 
+	 * {@link #FRAMEWORK_BUNDLE_PARENT_FRAMEWORK}.
+	 * 
+	 * @since 1.5
+	 * @see #FRAMEWORK_BUNDLE_PARENT
+	 */
+	public final static String	FRAMEWORK_BUNDLE_PARENT_APP				= "app";
+
+	/**
 	 * Specifies to use the framework class loader as the parent class loader
 	 * for all bundle class loaders. The framework class loader is the class
-	 * loader used to load the framework implementation.
+	 * loader used to load the framework implementation.  Depending on how the 
+	 * framework is launched, this may refer to the same class loader as 
+	 * {@link #FRAMEWORK_BUNDLE_PARENT_APP}.
 	 * 
 	 * @since 1.5
 	 * @see #FRAMEWORK_BUNDLE_PARENT
@@ -1304,24 +1308,5 @@ public interface Constants {
 	 * This property may be supplied in the properties <code>Dictionary</code>
 	 * object passed to the <code>BundleContext.registerService</code> method.
 	 */
-	public static final String	SERVICE_DESCRIPTION						= "service.description";
-
-	/**
-	 * Service property to provide information about the type of the service.
-	 * For example, if this service is proxied, the property value might contain
-	 * a string such as &quot;proxied&quot;.
-	 * 
-	 * <p>
-	 * The OSGi Alliance reserves all property value strings that start with
-	 * &quot;osgi.&quot;.
-	 * 
-	 * <p>
-	 * This property may be supplied in the properties <code>Dictionary</code>
-	 * object passed to the <code>BundleContext.registerService</code> method.
-	 * The value of this property must be of type <code>String</code>,
-	 * <code>String[]</code>, or <code>Collection</code> of <code>String</code>.
-	 * 
-	 * @since 1.5
-	 */
-	public static final String	SERVICE_TYPE							= "service.type"; 
+	public static final String	SERVICE_DESCRIPTION						= "service.description"; 
 }
