@@ -25,7 +25,7 @@ import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.internal.core.BundleResourceHandler;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -42,6 +42,7 @@ import org.osgi.framework.*;
  * @since 3.2
  */
 public class BaseData implements BundleData {
+	private final static boolean COPY_NATIVES = Boolean.valueOf(FrameworkProperties.getProperty("osgi.classloader.copy.natives")).booleanValue(); //$NON-NLS-1$
 	private long id;
 	private BaseAdaptor adaptor;
 	private Bundle bundle;
@@ -142,7 +143,7 @@ public class BaseData implements BundleData {
 			synchronized (this) {
 				if (loadedNativeCode == null)
 					loadedNativeCode = new ArrayList(1);
-				if (loadedNativeCode.contains(result)) {
+				if (loadedNativeCode.contains(result) || COPY_NATIVES) {
 					// we must copy the library to a temp space to allow another class loader to load the library
 					String temp = copyToTempLibrary(result);
 					if (temp != null)
