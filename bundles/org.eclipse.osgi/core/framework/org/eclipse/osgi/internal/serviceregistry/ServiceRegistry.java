@@ -286,24 +286,15 @@ public class ServiceRegistry {
 		if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
 			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" + filterstring + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		if (clazz != null) {
-			try /* test for permission to get clazz */{
-				checkGetServicePermission(clazz);
-			} catch (SecurityException se) {
-				return null;
-			}
-		}
 		Filter filter = (filterstring == null) ? null : context.createFilter(filterstring);
 		List references = changeRegistrationsToReferences(lookupServiceRegistrations(clazz, filter));
 		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			if (allservices || isAssignableTo(context, reference)) {
-				if (clazz == null) {
-					try { /* test for permission to the classes */
-						checkGetServicePermission(reference.getClasses());
-					} catch (SecurityException se) {
-						iter.remove();
-					}
+				try { /* test for permission to get the service */
+					checkGetServicePermission(reference);
+				} catch (SecurityException se) {
+					iter.remove();
 				}
 			} else {
 				iter.remove();
@@ -433,11 +424,10 @@ public class ServiceRegistry {
 	 * @see ServiceFactory
 	 */
 	public Object getService(BundleContextImpl context, ServiceReferenceImpl reference) {
-		ServiceRegistrationImpl registration = reference.getRegistration();
+		/* test for permission to get the service */
+		checkGetServicePermission(reference);
 
-		checkGetServicePermission(registration.getClasses());
-
-		return registration.getService(context);
+		return reference.getRegistration().getService(context);
 	}
 
 	/**
@@ -512,8 +502,8 @@ public class ServiceRegistry {
 		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context));
 		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
-			try { /* test for permission to the classes */
-				checkGetServicePermission(reference.getClasses());
+			try { /* test for permission to get the service */
+				checkGetServicePermission(reference);
 			} catch (SecurityException se) {
 				iter.remove();
 			}
@@ -566,8 +556,8 @@ public class ServiceRegistry {
 		}
 		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
-			try { /* test for permission to the classes */
-				checkGetServicePermission(reference.getClasses());
+			try { /* test for permission to get the service */
+				checkGetServicePermission(reference);
 			} catch (SecurityException se) {
 				iter.remove();
 			}
@@ -931,34 +921,12 @@ public class ServiceRegistry {
 	/**
 	 * Check for permission to get a service.
 	 */
-	private static void checkGetServicePermission(String name) {
+	private static void checkGetServicePermission(ServiceReference reference) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm == null) {
 			return;
 		}
-		sm.checkPermission(new ServicePermission(name, ServicePermission.GET));
-	}
-
-	/**
-	 * Check for permission to get a service.
-	 * 
-	 * The caller must have permission for at least ONE name.
-	 */
-	private static void checkGetServicePermission(String[] names) {
-		SecurityManager sm = System.getSecurityManager();
-		if (sm == null) {
-			return;
-		}
-		SecurityException se = null;
-		for (int i = 0, len = names.length; i < len; i++) {
-			try {
-				sm.checkPermission(new ServicePermission(names[i], ServicePermission.GET));
-				return;
-			} catch (SecurityException e) {
-				se = e;
-			}
-		}
-		throw se;
+		sm.checkPermission(new ServicePermission(reference, ServicePermission.GET));
 	}
 
 	/**
@@ -970,15 +938,7 @@ public class ServiceRegistry {
 			return true;
 		}
 
-		ServiceReferenceImpl reference = (ServiceReferenceImpl) event.getServiceReference();
-		String[] names = reference.getClasses();
-		for (int i = 0, len = names.length; i < len; i++) {
-			if (domain.implies(new ServicePermission(names[i], ServicePermission.GET))) {
-				return true;
-			}
-		}
-
-		return false;
+		return domain.implies(new ServicePermission(event.getServiceReference(), ServicePermission.GET));
 	}
 
 	/** 
