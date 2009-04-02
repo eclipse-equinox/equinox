@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -551,114 +551,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		}
 	}
 
-	/**
-	 * Update this bundle. If the bundle is {@link #ACTIVE}, the bundle will
-	 * be stopped before the update and started after the update successfully
-	 * completes.
-	 * 
-	 * <p>
-	 * The following steps are followed to update a bundle:
-	 * <ol>
-	 * <li>If the bundle is {@link #UNINSTALLED}then an <code>IllegalStateException</code>
-	 * is thrown.
-	 * <li>If the bundle is {@link #ACTIVE}or {@link #STARTING}, the bundle
-	 * is stopped as described in the {@link #stop()}method. If {@link #stop()}
-	 * throws an exception, the exception is rethrown terminating the update.
-	 * <li>The location for the new version of the bundle is determined from
-	 * either the manifest header <code>Bundle-UpdateLocation</code> if
-	 * available or the original location.
-	 * <li>The location is interpreted in an implementation dependent way
-	 * (typically as a URL) and the new version of the bundle is obtained from
-	 * the location.
-	 * <li>The new version of the bundle is installed. If the framework is
-	 * unable to install the new version of the bundle, the original version of
-	 * the bundle will be restored and a {@link BundleException}will be thrown
-	 * after completion of the remaining steps.
-	 * <li>The state of the bundle is set to {@link #INSTALLED}.
-	 * <li>If the new version of the bundle was successfully installed, a
-	 * {@link BundleEvent}of type {@link BundleEvent#UPDATED}is broadcast.
-	 * <li>If the bundle was originally {@link #ACTIVE}, the updated bundle
-	 * is started as described in the {@link #start()}method. If {@link #start()}
-	 * throws an exception, a {@link FrameworkEvent}of type
-	 * {@link FrameworkEvent#ERROR}is broadcast containing the exception.
-	 * </ol>
-	 * 
-	 * <h5>Preconditions</h5>
-	 * <ul>
-	 * <li>getState() not in {{@link #UNINSTALLED}}.
-	 * </ul>
-	 * <h5>Postconditons, no exceptions thrown</h5>
-	 * <ul>
-	 * <li>getState() in {{@link #INSTALLED},{@link #RESOLVED},
-	 * {@link #ACTIVE}}.
-	 * <li>The bundle has been updated.
-	 * </ul>
-	 * <h5>Postconditions, when an exception is thrown</h5>
-	 * <ul>
-	 * <li>getState() in {{@link #INSTALLED},{@link #RESOLVED},
-	 * {@link #ACTIVE}}.
-	 * <li>Original bundle is still used, no update took place.
-	 * </ul>
-	 * 
-	 * @exception BundleException
-	 *                If the update fails.
-	 * @exception java.lang.IllegalStateException
-	 *                If the bundle has been uninstalled or the bundle tries to
-	 *                change its own state.
-	 * @exception java.lang.SecurityException
-	 *                If the caller does not have {@link AdminPermission}
-	 *                permission and the Java runtime environment supports
-	 *                permissions.
-	 * @see #stop()
-	 * @see #start()
-	 */
 	public void update() throws BundleException {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
-		}
-		framework.checkAdminPermission(this, AdminPermission.LIFECYCLE);
-		if ((bundledata.getType() & (BundleData.TYPE_BOOTCLASSPATH_EXTENSION | BundleData.TYPE_FRAMEWORK_EXTENSION | BundleData.TYPE_EXTCLASSPATH_EXTENSION)) != 0)
-			// need special permission to update extensions
-			framework.checkAdminPermission(this, AdminPermission.EXTENSIONLIFECYCLE);
-		checkValid();
-		beginStateChange();
-		try {
-			final AccessControlContext callerContext = AccessController.getContext();
-			//note AdminPermission is checked again after updated bundle is loaded
-			updateWorker(new PrivilegedExceptionAction() {
-				public Object run() throws BundleException {
-					/* compute the update location */
-					String updateLocation = bundledata.getLocation();
-					if (bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION) != null) {
-						updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
-						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-							Debug.println("   from location: " + updateLocation); //$NON-NLS-1$
-						}
-					}
-					/* Map the identity to a URLConnection */
-					URLConnection source = framework.adaptor.mapLocationToURLConnection(updateLocation);
-					/* call the worker */
-					updateWorkerPrivileged(source, callerContext);
-					return null;
-				}
-			});
-		} finally {
-			completeStateChange();
-		}
+		update(null);
 	}
 
-	/**
-	 * Update this bundle from an InputStream.
-	 * 
-	 * <p>
-	 * This method performs all the steps listed in {@link #update()}, except
-	 * the bundle will be read in through the supplied <code>InputStream</code>,
-	 * rather than a <code>URL</code>.
-	 * 
-	 * @param in
-	 *            The InputStream from which to read the new bundle.
-	 * @see #update()
-	 */
 	public void update(final InputStream in) throws BundleException {
 		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 			Debug.println("update location " + bundledata.getLocation()); //$NON-NLS-1$
@@ -675,8 +571,20 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			//note AdminPermission is checked again after updated bundle is loaded
 			updateWorker(new PrivilegedExceptionAction() {
 				public Object run() throws BundleException {
-					/* Map the InputStream to a URLConnection */
-					URLConnection source = new BundleSource(in);
+					/* compute the update location */
+					URLConnection source = null;
+					if (in == null) {
+						String updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
+						if (updateLocation == null)
+							updateLocation = bundledata.getLocation();
+						if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+							Debug.println("   from location: " + updateLocation); //$NON-NLS-1$
+						/* Map the update location to a URLConnection */
+						source = framework.adaptor.mapLocationToURLConnection(updateLocation);
+					} else {
+						/* Map the InputStream to a URLConnection */
+						source = new BundleSource(in);
+					}
 					/* call the worker */
 					updateWorkerPrivileged(source, callerContext);
 					return null;
@@ -737,7 +645,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {
+				// must remove this bundle from the repository to flush the BNS/version etc.
+				bundles.remove(this);
 				exporting = reload(newBundle);
+				// add this back with the new BSN/version etc.
+				bundles.add(this);
 				manifestLocalization = null;
 			}
 			// indicate we have loaded from the new version of the bundle
@@ -773,7 +685,9 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				 * bundle
 				 */{
 					synchronized (bundles) {
+						bundles.remove(this);
 						reload(oldBundle); /* revert to old version */
+						bundles.add(this);
 					}
 				}
 			} catch (BundleException ee) {

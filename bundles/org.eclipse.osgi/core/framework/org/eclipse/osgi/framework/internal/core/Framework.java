@@ -810,32 +810,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	}
 
 	/**
-	 * Install a bundle from a location.
-	 * 
-	 * The bundle is obtained from the location parameter as interpreted by the
-	 * framework in an implementation dependent way. Typically, location will
-	 * most likely be a URL.
-	 * 
-	 * @param location
-	 *            The location identifier of the bundle to install.
-	 * @return The Bundle object of the installed bundle.
-	 */
-	public AbstractBundle installBundle(final String location) throws BundleException {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-			Debug.println("install from location: " + location); //$NON-NLS-1$
-		}
-		final AccessControlContext callerContext = AccessController.getContext();
-		return installWorker(location, new PrivilegedExceptionAction() {
-			public Object run() throws BundleException {
-				/* Map the identity to a URLConnection */
-				URLConnection source = adaptor.mapLocationToURLConnection(location);
-				/* call the worker to install the bundle */
-				return installWorkerPrivileged(location, source, callerContext);
-			}
-		});
-	}
-
-	/**
 	 * Install a bundle from an InputStream.
 	 * 
 	 * <p>
@@ -847,7 +821,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * @param location
 	 *            The location identifier of the bundle to install.
 	 * @param in
-	 *            The InputStream from which the bundle will be read.
+	 *            The InputStream from which the bundle will be read.  If null
+	 *            then the location is used to get the bundle content.
 	 * @return The Bundle of the installed bundle.
 	 */
 	protected AbstractBundle installBundle(final String location, final InputStream in) throws BundleException {
@@ -857,8 +832,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		final AccessControlContext callerContext = AccessController.getContext();
 		return installWorker(location, new PrivilegedExceptionAction() {
 			public Object run() throws BundleException {
-				/* Map the InputStream to a URLConnection */
-				URLConnection source = new BundleSource(in);
+				/* Map the InputStream or location to a URLConnection */
+				URLConnection source = in != null ? new BundleSource(in) : adaptor.mapLocationToURLConnection(location);
 				/* call the worker to install the bundle */
 				return installWorkerPrivileged(location, source, callerContext);
 			}

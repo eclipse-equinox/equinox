@@ -156,36 +156,10 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		return bundle;
 	}
 
-	/**
-	 * Install a bundle from a location.
-	 *
-	 * The bundle is obtained from the location
-	 * parameter as interpreted by the framework
-	 * in an implementation dependent way. Typically, location
-	 * will most likely be a URL.
-	 *
-	 * @param location The location identifier of the bundle to install.
-	 * @return The Bundle object of the installed bundle.
-	 */
 	public Bundle installBundle(String location) throws BundleException {
-		checkValid();
-		//note AdminPermission is checked after bundle is loaded
-		return framework.installBundle(location);
+		return installBundle(location, null);
 	}
 
-	/**
-	 * Install a bundle from an InputStream.
-	 *
-	 * <p>This method performs all the steps listed in
-	 * {@link #installBundle(java.lang.String)}, except the
-	 * bundle's content will be read from the InputStream.
-	 * The location identifier specified will be used
-	 * as the identity of the bundle.
-	 *
-	 * @param location The location identifier of the bundle to install.
-	 * @param in The InputStream from which the bundle will be read.
-	 * @return The Bundle of the installed bundle.
-	 */
 	public Bundle installBundle(String location, InputStream in) throws BundleException {
 		checkValid();
 		//note AdminPermission is checked after bundle is loaded
