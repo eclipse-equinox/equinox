@@ -655,7 +655,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 */
 	public Object getService(ServiceReference reference) {
 		checkValid();
-
+		if (reference == null)
+			throw new NullPointerException("A null service reference is not allowed."); //$NON-NLS-1$
 		synchronized (contextLock) {
 			if (servicesInUse == null)
 				// Cannot predict how many services a bundle will use, start with a small table.
