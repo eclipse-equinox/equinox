@@ -28,6 +28,12 @@ import org.osgi.framework.Bundle;
 public interface AspectAdmin {
 
     /**
+     * This is the default value for the location of the aop.xml file inside a
+     * bundle
+     */
+    public static final String AOP_CONTEXT_DEFAULT_LOCATION = "META-INF/aop.xml"; //$NON-NLS-1$
+
+    /**
      * The name of the header to determine where to look for the aop.xml files
      * inside a bundle Bundles can use this header to specify the location where
      * their aop.xml is located
@@ -35,22 +41,66 @@ public interface AspectAdmin {
     public static final String AOP_CONTEXT_LOCATION_HEADER = "Eclipse-AspectContext"; //$NON-NLS-1$
 
     /**
-     * This is the default value for the location of the aop.xml file inside a
-     * bundle
+     * directive for the policy to apply aspects from imported or required
+     * bundles
      */
-    public static final String DEFAULT_AOP_CONTEXT_LOCATION = "META-INF/aop.xml"; //$NON-NLS-1$
+    public static final String ASPECT_APPLY_POLICY_DIRECTIVE = "apply-aspects"; //$NON-NLS-1$
+
+    /**
+     * apply policy is false in this case, do not apply aspects for weaving
+     */
+    public static final int ASPECT_APPLY_POLICY_FALSE = 2;
+
+    /**
+     * apply policy is not defined
+     */
+    public static final int ASPECT_APPLY_POLICY_NOT_DEFINED = 0;
+
+    /**
+     * apply policy is true, so apply aspects for weaving
+     */
+    public static final int ASPECT_APPLY_POLICY_TRUE = 1;
+
+    /**
+     * directive to declare the aspect policy. possible values are "opt-in" or
+     * "opt-out"
+     */
+    public static final String ASPECT_POLICY_DIRECTIVE = "aspect-policy"; //$NON-NLS-1$
+
+    /**
+     * policy directive value to tell the weaver that clients have explicitly to
+     * ask for those aspects to be applied
+     */
+    public static final String ASPECT_POLICY_DIRECTIVE_OPT_IN = "opt-in"; //$NON-NLS-1$
+
+    /**
+     * policy directive value to tell the weaver that clients will get those
+     * aspects applied automatically unless they ask for not applying them
+     */
+    public static final String ASPECT_POLICY_DIRECTIVE_OPT_OUT = "opt-out"; //$NON-NLS-1$
+
+    /**
+     * This indicates that there is no aspects policy defined
+     */
+    public static final int ASPECT_POLICY_NOT_DEFINED = 0;
 
     /**
      * Policy to indicate that the aspects of this package should only be woven
      * if the importer explicitly asks for it
      */
-    public static final int OPT_IN_POLICY = 1;
+    public static final int ASPECT_POLICY_OPT_IN = 1;
 
     /**
      * Policy to indicate that the aspects of this package should automatically
      * be woven if the importer does not prohibit it
      */
-    public static final int OPT_OUT_POLICY = 2;
+    public static final int ASPECT_POLICY_OPT_OUT = 2;
+
+    /**
+     * directive to declare the exported aspects. The values should list the
+     * aspect class names without the package
+     */
+    public static final String ASPECTS_ATTRIBUTE = "aspects"; //$NON-NLS-1$
 
     /**
      * Returns the cached aspect definition for the given bundle, if the bundle
@@ -84,5 +134,31 @@ public interface AspectAdmin {
      *         visible
      */
     public Definition getExportedAspectDefinitions(final Bundle bundle);
+
+    /**
+     * Calculates the set of aspects to be woven if the given imported package
+     * is wired to the given bundle (with the given policy on applying aspects)
+     * 
+     * @param bundle The bundle from which the given package is imported
+     * @param packageName The name of the package that is imported
+     * @param applyAspects the policy for applying visible aspects for weaving
+     * @return The set of aspects that should be woven from the given imported
+     *         package
+     */
+    public Definition resolveImportedPackage(final Bundle bundle,
+            String packageName, final int applyAspectsPolicy);
+
+    /**
+     * Calculates the set of aspects to be woven if the given bundle is declared
+     * as a required bundle (with the given policy on applying aspects)
+     * 
+     * @param bundle The bundle which is required and might export aspects that
+     *            should be woven
+     * @param applyAspects the policy for applying visible aspects for weaving
+     * @return The set of aspects that should be woven from the given required
+     *         bundle
+     */
+    public Definition resolveRequiredBundle(final Bundle bundle,
+            final int applyAspectsPolicy);
 
 }

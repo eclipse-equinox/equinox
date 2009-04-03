@@ -53,10 +53,6 @@ public class WeavingServicePlugin implements BundleActivator {
         return plugin;
     }
 
-    public AspectAdmin getAspectDefinitionRegistry() {
-        return aspectDefinitionRegistry;
-    }
-
     /**
      * @return The bundle context of the weaving service bundle or null, of
      *         bundle is not started
@@ -80,7 +76,8 @@ public class WeavingServicePlugin implements BundleActivator {
             System.err
                     .println("[org.eclipse.equinox.weaving.aspectj] info Starting AspectJ weaving service ...");
         final String serviceName = IWeavingServiceFactory.class.getName();
-        final IWeavingServiceFactory weavingServiceFactory = new WeavingServiceFactory();
+        final IWeavingServiceFactory weavingServiceFactory = new WeavingServiceFactory(
+                aspectDefinitionRegistry);
         final Properties props = new Properties();
         context.registerService(serviceName, weavingServiceFactory, props);
     }

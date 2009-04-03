@@ -12,20 +12,23 @@
 package org.eclipse.equinox.weaving.aspectj.loadtime;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
+import org.eclipse.equinox.weaving.aspectj.AspectAdmin;
 import org.eclipse.equinox.weaving.aspectj.AspectConfiguration;
-import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * The aspect resolver is responsible for finding the right connections between
@@ -37,154 +40,198 @@ import org.osgi.framework.BundleContext;
  */
 public class AspectResolver {
 
+    private final AspectAdmin aspectAdmin;
+
     private final State state;
 
     private final ISupplementerRegistry supplementerRegistry;
 
+    private final BundleContext weavingBundleContext;
+
+    /**
+     * Creates a new instance of an aspect resolver for the given state. This
+     * resolver can be used to resolve aspect configurations for bundles. It
+     * does not carry any own state, it just uses the injected components to
+     * retrieve the necessary informaton to determine which aspects to weave
+     * into which bundles.
+     * 
+     * @param state The state of the OSGi framework (contains wiring
+     *            information)
+     * @param supplementerRegistry The supplementer registry
+     * @param aspectAdmin The aspect admin, which tells us which bundle exports
+     *            which aspects
+     * @param bundleContext The bundle context in which the aspect resolver is
+     *            used
+     */
     public AspectResolver(final State state,
-            final ISupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry,
+            final AspectAdmin aspectAdmin, final BundleContext bundleContext) {
         this.state = state;
         this.supplementerRegistry = supplementerRegistry;
+        this.aspectAdmin = aspectAdmin;
+        this.weavingBundleContext = bundleContext;
     }
 
     /**
      * Resolve the aspects to be woven into the given bundle
      * 
-     * @param bundle
-     * @param bundleDescription
-     * @return
+     * @param bundle The bundle in which the aspects should be woven into
+     * @param bundleDescription The description of the bundle to be woven into
+     * @return The configuration of aspects what should be woven into the bundle
      */
     public AspectConfiguration resolveAspectsFor(final Bundle bundle,
             final BundleDescription bundleDescription) {
-        final StringBuilder fingerprint = new StringBuilder();
-        final List<Definition> definitions = parseDefinitionsForBundle(
-                fingerprint, bundle, bundleDescription);
+        final List<String> fingerprintElements = new ArrayList<String>();
+
+        final List<Definition> definitions = resolveAspectsForBundle(
+                fingerprintElements, bundle, bundleDescription);
 
         final Definition[] foundDefinitions = definitions
                 .toArray(new Definition[definitions.size()]);
+
+        Collections.sort(fingerprintElements);
+        final StringBuilder fingerprint = new StringBuilder();
+        final Iterator<String> iterator = fingerprintElements.iterator();
+        while (iterator.hasNext()) {
+            final String element = iterator.next();
+            fingerprint.append(element);
+            fingerprint.append(';');
+        }
+
         return new AspectConfiguration(bundle, foundDefinitions, fingerprint
                 .toString());
     }
 
-    private void addToNamespaceAddon(final Bundle bundle,
-            final StringBuilder fingerprintBuilder) {
-        fingerprintBuilder.append(bundle.getSymbolicName());
-        fingerprintBuilder.append(':');
-        fingerprintBuilder.append(getBundleVersion(bundle));
-        fingerprintBuilder.append(';');
-    }
+    private int getApplyAspectsPolicy(final Bundle bundle,
+            final String manifestElement, final String importedPackage) {
+        int result = AspectAdmin.ASPECT_APPLY_POLICY_NOT_DEFINED;
 
-    private Bundle[] getBundles(final Bundle bundle,
-            final BundleDescription bundleDescription) {
-        final Set<Bundle> bundles = new HashSet<Bundle>();
+        final Dictionary<?, ?> manifest = bundle.getHeaders();
+        try {
+            final ManifestElement[] headers = ManifestElement.parseHeader(
+                    manifestElement, (String) manifest.get(manifestElement));
 
-        // the bundle this context belongs to should be used
-        bundles.add(bundle);
-
-        final BundleContext weavingBundleContext = WeavingServicePlugin
-                .getDefault() != null ? WeavingServicePlugin.getDefault()
-                .getContext() : null;
-        if (weavingBundleContext != null) {
-
-            // add required bundles
-            final BundleDescription[] resolvedRequires = bundleDescription
-                    .getResolvedRequires();
-            for (int i = 0; i < resolvedRequires.length; i++) {
-                final Bundle requiredBundle = weavingBundleContext
-                        .getBundle(resolvedRequires[i].getBundleId());
-                if (requiredBundle != null) {
-                    bundles.add(requiredBundle);
+            if (headers != null) {
+                for (int i = 0; i < headers.length; i++) {
+                    if (headers[i].getValue().equals(importedPackage)) {
+                        final String directive = headers[i]
+                                .getDirective(AspectAdmin.ASPECT_APPLY_POLICY_DIRECTIVE);
+                        if ("true".equals(directive)) { //$NON-NLS-1$
+                            result = AspectAdmin.ASPECT_APPLY_POLICY_TRUE;
+                        } else if ("false".equals(directive)) { //$NON-NLS-1$
+                            result = AspectAdmin.ASPECT_APPLY_POLICY_FALSE;
+                        }
+                    }
                 }
             }
+        } catch (final BundleException e) {
+        }
+        return result;
+    }
 
-            // add fragment bundles
+    private String getBundleVersion(final Bundle bundle) {
+        return state.getBundle(bundle.getBundleId()).getVersion().toString();
+    }
+
+    private List<Definition> resolveAspectsForBundle(
+            final List<String> fingerprintElements, final Bundle bundle,
+            final BundleDescription bundleDescription) {
+        final List<Definition> result = new ArrayList<Definition>();
+
+        if (weavingBundleContext != null) {
+
+            // this bundle
+            Definition aspects = aspectAdmin.getAspectDefinition(bundle);
+            if (aspects != null) {
+                result.add(aspects);
+                fingerprintElements.add(bundle.getSymbolicName() + ":" //$NON-NLS-1$
+                        + bundleDescription.getVersion().toString());
+            }
+
+            // fragments
             final BundleDescription[] fragments = bundleDescription
                     .getFragments();
             for (int i = 0; i < fragments.length; i++) {
                 final Bundle fragmentBundle = weavingBundleContext
                         .getBundle(fragments[i].getBundleId());
                 if (fragmentBundle != null) {
-                    bundles.add(fragmentBundle);
+                    aspects = aspectAdmin.getAspectDefinition(fragmentBundle);
+                    if (aspects != null) {
+                        result.add(aspects);
+                        fingerprintElements.add(fragmentBundle
+                                .getSymbolicName()
+                                + ":" //$NON-NLS-1$
+                                + fragments[i].getVersion().toString());
+                    }
                 }
             }
-        }
 
-        // add supplementers
-        final Bundle[] supplementers = this.supplementerRegistry
-                .getSupplementers(bundleDescription.getBundleId());
-        bundles.addAll(Arrays.asList(supplementers));
+            // required bundles
+            final BundleDescription[] resolvedRequires = bundleDescription
+                    .getResolvedRequires();
+            for (int i = 0; i < resolvedRequires.length; i++) {
+                final Bundle requiredBundle = weavingBundleContext
+                        .getBundle(resolvedRequires[i].getBundleId());
+                if (requiredBundle != null) {
+                    final int applyPolicy = getApplyAspectsPolicy(bundle,
+                            Constants.REQUIRE_BUNDLE, requiredBundle
+                                    .getSymbolicName());
 
-        return bundles.toArray(new Bundle[bundles.size()]);
-    }
+                    aspects = aspectAdmin.resolveRequiredBundle(requiredBundle,
+                            applyPolicy);
 
-    /**
-     * Identifies the version of the given bundle
-     * 
-     * @param bundle The bundle for which the version should be identified
-     * @return The version of the bundle
-     */
-    private String getBundleVersion(final Bundle bundle) {
-        return state.getBundle(bundle.getBundleId()).getVersion().toString();
-    }
-
-    private void parseDefinitionFromRequiredBundle(final Bundle bundle,
-            final List<Definition> definitions,
-            final StringBuilder fingerprintBuilder) {
-        try {
-            final Definition aspectDefinition = WeavingServicePlugin
-                    .getDefault().getAspectDefinitionRegistry()
-                    .getAspectDefinition(bundle);
-            if (aspectDefinition != null) {
-                definitions.add(aspectDefinition);
-                addToNamespaceAddon(bundle, fingerprintBuilder);
+                    if (aspects != null) {
+                        result.add(aspects);
+                        fingerprintElements.add(requiredBundle
+                                .getSymbolicName()
+                                + ":" //$NON-NLS-1$
+                                + resolvedRequires[i].getVersion().toString());
+                    }
+                }
             }
-        } catch (final Exception e) {
-            //            warn("parse definitions failed", e);
-        }
-    }
 
-    /**
-     * Load and cache the aop.xml/properties according to the classloader
-     * visibility rules
-     * 
-     * @param fingerprintBuilder
-     * @param bundle
-     * @param bundleDescription
-     */
-    private List<Definition> parseDefinitionsForBundle(
-            final StringBuilder fingerprintBuilder, final Bundle bundle,
-            final BundleDescription bundleDescription) {
-        final List<Definition> definitions = new ArrayList<Definition>();
+            // imported packages
+            final ExportPackageDescription[] resolvedImports = bundleDescription
+                    .getResolvedImports();
+            for (int i = 0; i < resolvedImports.length; i++) {
+                final Bundle exportingBundle = weavingBundleContext
+                        .getBundle(resolvedImports[i].getExporter()
+                                .getBundleId());
+                if (exportingBundle != null) {
+                    final String importedPackage = resolvedImports[i].getName();
 
-        try {
-            parseDefinitionsFromRequiredBundles(definitions,
-                    fingerprintBuilder, bundle, bundleDescription);
-        } catch (final Exception e) {
-            definitions.clear();
-        }
+                    final int applyPolicy = getApplyAspectsPolicy(bundle,
+                            Constants.IMPORT_PACKAGE, importedPackage);
 
-        return definitions;
-    }
+                    aspects = aspectAdmin.resolveImportedPackage(
+                            exportingBundle, importedPackage, applyPolicy);
 
-    private void parseDefinitionsFromRequiredBundles(
-            final List<Definition> definitions,
-            final StringBuilder fingerprintBuilder, final Bundle bundle,
-            final BundleDescription bundleDescription) {
-        final Bundle[] bundles = getBundles(bundle, bundleDescription);
-
-        Arrays.sort(bundles, new Comparator() {
-
-            public int compare(final Object arg0, final Object arg1) {
-                final long bundleId1 = ((Bundle) arg0).getBundleId();
-                final long bundleId2 = ((Bundle) arg1).getBundleId();
-                return (int) (bundleId1 - bundleId2);
+                    if (aspects != null) {
+                        result.add(aspects);
+                        fingerprintElements.add(importedPackage + ":" //$NON-NLS-1$
+                                + resolvedImports[i].getVersion().toString());
+                    }
+                }
             }
-        });
 
-        for (int i = 0; i < bundles.length; i++) {
-            parseDefinitionFromRequiredBundle(bundles[i], definitions,
-                    fingerprintBuilder);
+            // supplementers
+            final Bundle[] supplementers = this.supplementerRegistry
+                    .getSupplementers(bundleDescription.getBundleId());
+
+            for (int i = 0; i < supplementers.length; i++) {
+                aspects = aspectAdmin
+                        .getExportedAspectDefinitions(supplementers[i]);
+                if (aspects != null) {
+                    result.add(aspects);
+                    fingerprintElements.add(supplementers[i].getSymbolicName()
+                            + ":" //$NON-NLS-1$
+                            + getBundleVersion(supplementers[i]));
+                }
+            }
+
         }
+
+        return result;
     }
 
 }

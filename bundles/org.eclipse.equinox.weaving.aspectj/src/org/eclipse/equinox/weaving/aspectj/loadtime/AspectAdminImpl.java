@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,18 +46,6 @@ import org.osgi.framework.SynchronousBundleListener;
  * @author Martin Lippert
  */
 public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
-
-    // directive to declare the aspect policy. possible values are "opt-in" or "opt-out"
-    private static final String ASPECT_POLICY_DIRECTIVE = "aspect-policy"; //$NON-NLS-1$
-
-    // policy directive value to tell the weaver that clients have explicitly to ask for those aspects to be applied
-    private static final String ASPECT_POLICY_DIRECTIVE_OPT_IN = "opt-in"; //$NON-NLS-1$
-
-    // policy directive value to tell the weaver that clients will get those aspects applied automatically unless they ask for not applying them
-    private static final String ASPECT_POLICY_DIRECTIVE_OPT_OUT = "opt-out"; //$NON-NLS-1$
-
-    // directive to declare the exported aspects. The values should list the aspect class names without the package
-    private static final String ASPECTS_ATTRIBUTE = "aspects"; //$NON-NLS-1$
 
     // remember all aspect definitions for the given bundle (regardless of the way they are declared)
     private final Map<Bundle, Definition> aspectDefinitions;
@@ -131,7 +120,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
             }
         }
 
-        return AspectAdmin.OPT_OUT_POLICY;
+        return AspectAdmin.ASPECT_POLICY_NOT_DEFINED;
     }
 
     /**
@@ -152,7 +141,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
             return aopContextHeader;
         }
 
-        return DEFAULT_AOP_CONTEXT_LOCATION;
+        return AOP_CONTEXT_DEFAULT_LOCATION;
     }
 
     /**
@@ -181,11 +170,102 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
     }
 
     /**
+     * @see org.eclipse.equinox.weaving.aspectj.AspectAdmin#resolveImportedPackage(org.osgi.framework.Bundle,
+     *      java.lang.String, boolean)
+     */
+    public Definition resolveImportedPackage(final Bundle bundle,
+            final String packageName, final int applyAspectsPolicy) {
+        if (AspectAdmin.ASPECT_APPLY_POLICY_TRUE == applyAspectsPolicy) {
+            final Definition exportedAspectDefinitions = getExportedAspectDefinitions(bundle);
+            final Definition result = new Definition();
+            if (exportedAspectDefinitions != null) {
+                final List<?> aspectClassNames = exportedAspectDefinitions
+                        .getAspectClassNames();
+                for (final Iterator<?> iterator = aspectClassNames.iterator(); iterator
+                        .hasNext();) {
+                    final String aspectName = (String) iterator.next();
+                    final String aspectPackageName = getPackage(aspectName);
+                    if (aspectPackageName.equals(packageName)) {
+                        result.getAspectClassNames().add(aspectName);
+                    }
+                }
+            }
+            if (result.getAspectClassNames().size() > 0) {
+                return result;
+            } else {
+                return null;
+            }
+        } else if (AspectAdmin.ASPECT_APPLY_POLICY_FALSE == applyAspectsPolicy) {
+            return null;
+        } else {
+            final Definition exportedAspectDefinitions = getExportedAspectDefinitions(bundle);
+            final Definition result = new Definition();
+            if (exportedAspectDefinitions != null) {
+                final List<?> aspectClassNames = exportedAspectDefinitions
+                        .getAspectClassNames();
+                for (final Iterator<?> iterator = aspectClassNames.iterator(); iterator
+                        .hasNext();) {
+                    final String aspectName = (String) iterator.next();
+                    final String aspectPackageName = getPackage(aspectName);
+                    final int aspectPolicy = getAspectPolicy(bundle,
+                            aspectPackageName);
+                    if (aspectPackageName.equals(packageName)
+                            && (AspectAdmin.ASPECT_POLICY_NOT_DEFINED == aspectPolicy || AspectAdmin.ASPECT_POLICY_OPT_OUT == aspectPolicy)) {
+                        result.getAspectClassNames().add(aspectName);
+                    }
+                }
+            }
+
+            if (result.getAspectClassNames().size() > 0) {
+                return result;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * @see org.eclipse.equinox.weaving.aspectj.AspectAdmin#resolveRequiredBundle(org.osgi.framework.Bundle,
+     *      int)
+     */
+    public Definition resolveRequiredBundle(final Bundle bundle,
+            final int applyAspectsPolicy) {
+        if (AspectAdmin.ASPECT_APPLY_POLICY_TRUE == applyAspectsPolicy) {
+            return getExportedAspectDefinitions(bundle);
+        } else if (AspectAdmin.ASPECT_APPLY_POLICY_FALSE == applyAspectsPolicy) {
+            return null;
+        } else {
+            final Definition exportedAspectDefinitions = getExportedAspectDefinitions(bundle);
+            final Definition result = new Definition();
+
+            if (exportedAspectDefinitions != null) {
+                final Iterator<?> aspects = exportedAspectDefinitions
+                        .getAspectClassNames().iterator();
+                while (aspects.hasNext()) {
+                    final String aspect = (String) aspects.next();
+                    final String aspectPackage = getPackage(aspect);
+                    final int aspectPolicy = getAspectPolicy(bundle,
+                            aspectPackage);
+
+                    if (aspectPolicy == AspectAdmin.ASPECT_POLICY_NOT_DEFINED
+                            || aspectPolicy == AspectAdmin.ASPECT_POLICY_OPT_OUT) {
+                        result.getAspectClassNames().add(aspect);
+                    }
+                }
+            }
+
+            if (result.getAspectClassNames().size() > 0) {
+                return result;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Parse the aspect definition for the given bundle, if there is one.
      * 
      * @param bundle The bundle for which the aspect definition should be parsed
-     * @return The parsed definition or null, if the bundle does not provide an
-     *         aspect definition
      */
     protected void parseDefinitions(final Bundle bundle) {
         try {
@@ -217,12 +297,13 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
                 if (policy != null
                         && policy.trim().toLowerCase().equals(
                                 ASPECT_POLICY_DIRECTIVE_OPT_OUT)) {
-                    policies.put(packageName, AspectAdmin.OPT_OUT_POLICY);
+                    policies
+                            .put(packageName, AspectAdmin.ASPECT_POLICY_OPT_OUT);
                 }
                 if (policy != null
                         && policy.trim().toLowerCase().equals(
                                 ASPECT_POLICY_DIRECTIVE_OPT_IN)) {
-                    policies.put(packageName, AspectAdmin.OPT_IN_POLICY);
+                    policies.put(packageName, AspectAdmin.ASPECT_POLICY_OPT_IN);
                 }
 
                 // aspects
@@ -239,7 +320,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
                 }
             }
 
-            // add aop.xml declared aspects to the list of exported aspects if there packages are exported
+            // add aop.xml declared aspects to the list of exported aspects if their packages are exported
             if (allAspectsDefinition != null
                     && allAspectsDefinition.getAspectClassNames() != null) {
                 final Iterator<?> iterator = allAspectsDefinition
@@ -257,10 +338,19 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
                 this.aspectDefinitions.put(bundle, allAspectsDefinition);
             }
 
-            if (exportedAspects.size() > 0) {
+            if (exportedAspects.size() > 0
+                    || (allAspectsDefinition != null && allAspectsDefinition
+                            .getWeaverOptions().length() > 0)) {
                 final Definition exportedAspectsDefinition = new Definition();
                 exportedAspectsDefinition.getAspectClassNames().addAll(
                         exportedAspects);
+
+                if (allAspectsDefinition != null) {
+                    exportedAspectsDefinition
+                            .appendWeaverOptions(allAspectsDefinition
+                                    .getWeaverOptions());
+                }
+
                 this.aspectDefinitionsExported.put(bundle,
                         exportedAspectsDefinition);
             }

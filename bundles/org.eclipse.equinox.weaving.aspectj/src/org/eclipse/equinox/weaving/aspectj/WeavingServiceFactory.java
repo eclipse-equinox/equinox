@@ -14,6 +14,7 @@ package org.eclipse.equinox.weaving.aspectj;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
 import org.eclipse.equinox.service.weaving.IWeavingService;
 import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
+import org.eclipse.equinox.weaving.aspectj.loadtime.AspectAdminImpl;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
@@ -24,6 +25,12 @@ import org.osgi.framework.Bundle;
  * @author martinlippert
  */
 public class WeavingServiceFactory implements IWeavingServiceFactory {
+
+    private final AspectAdminImpl aspectDefinitionRegistry;
+
+    public WeavingServiceFactory(final AspectAdminImpl aspectDefinitionRegistry) {
+        this.aspectDefinitionRegistry = aspectDefinitionRegistry;
+    }
 
     /**
      * @see org.eclipse.equinox.service.weaving.IWeavingServiceFactory#createWeavingService(java.lang.ClassLoader,
@@ -36,7 +43,8 @@ public class WeavingServiceFactory implements IWeavingServiceFactory {
             final BundleDescription bundleDesciption,
             final ISupplementerRegistry supplementerRegistry) {
         return new WeavingService(loader, bundle, resolverState,
-                bundleDesciption, supplementerRegistry);
+                bundleDesciption, supplementerRegistry,
+                aspectDefinitionRegistry);
     }
 
 }

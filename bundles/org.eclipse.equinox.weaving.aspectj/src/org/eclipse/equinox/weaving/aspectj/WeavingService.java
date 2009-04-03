@@ -50,11 +50,13 @@ public class WeavingService implements IWeavingService {
 
     public WeavingService(final ClassLoader loader, final Bundle bundle,
             final State state, final BundleDescription bundleDescription,
-            final ISupplementerRegistry supplementerRegistry) {
+            final ISupplementerRegistry supplementerRegistry,
+            final AspectAdmin aspectAdmin) {
         this.bundleDescription = bundleDescription;
 
         final AspectResolver aspectResolver = new AspectResolver(state,
-                supplementerRegistry);
+                supplementerRegistry, aspectAdmin, WeavingServicePlugin
+                        .getDefault().getContext());
         final AspectConfiguration aspectConfig = aspectResolver
                 .resolveAspectsFor(bundle, bundleDescription);
         this.namespaceAddOn = aspectConfig.getFingerprint();
@@ -67,11 +69,11 @@ public class WeavingService implements IWeavingService {
             this.weavingAdaptor = new OSGiWeavingAdaptor(loader,
                     weavingContext, namespaceAddOn.toString());
         } else {
-        	if (WeavingServicePlugin.DEBUG) {
-	            System.err
-    	                .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
-        	                    + bundle.getSymbolicName() + "'");
-        	}
+            if (WeavingServicePlugin.DEBUG) {
+                System.err
+                        .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
+                                + bundle.getSymbolicName() + "'");
+            }
         }
     }
 
