@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,39 +85,43 @@ public final class BundleRepository {
 	public synchronized void add(AbstractBundle bundle) {
 		bundlesByInstallOrder.add(bundle);
 		bundlesById.add(bundle);
-		String symbolicName = bundle.getSymbolicName();
-		if (symbolicName != null) {
-			AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
-			if (bundles == null) {
-				// making the initial capacity on this 1 since it
-				// should be rare that multiple version exist
-				bundles = new AbstractBundle[1];
-				bundles[0] = bundle;
-				bundlesBySymbolicName.put(symbolicName, bundles);
-				return;
-			}
+		addSymbolicName(bundle);
+	}
 
-			ArrayList list = new ArrayList(bundles.length + 1);
-			// find place to insert the bundle
-			Version newVersion = bundle.getVersion();
-			boolean added = false;
-			for (int i = 0; i < bundles.length; i++) {
-				AbstractBundle oldBundle = bundles[i];
-				Version oldVersion = oldBundle.getVersion();
-				if (!added && newVersion.compareTo(oldVersion) >= 0) {
-					added = true;
-					list.add(bundle);
-				}
-				list.add(oldBundle);
-			}
-			if (!added) {
+	private void addSymbolicName(AbstractBundle bundle) {
+		String symbolicName = bundle.getSymbolicName();
+		if (symbolicName == null)
+			return;
+		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
+		if (bundles == null) {
+			// making the initial capacity on this 1 since it
+			// should be rare that multiple version exist
+			bundles = new AbstractBundle[1];
+			bundles[0] = bundle;
+			bundlesBySymbolicName.put(symbolicName, bundles);
+			return;
+		}
+
+		ArrayList list = new ArrayList(bundles.length + 1);
+		// find place to insert the bundle
+		Version newVersion = bundle.getVersion();
+		boolean added = false;
+		for (int i = 0; i < bundles.length; i++) {
+			AbstractBundle oldBundle = bundles[i];
+			Version oldVersion = oldBundle.getVersion();
+			if (!added && newVersion.compareTo(oldVersion) >= 0) {
+				added = true;
 				list.add(bundle);
 			}
-
-			bundles = new AbstractBundle[list.size()];
-			list.toArray(bundles);
-			bundlesBySymbolicName.put(symbolicName, bundles);
+			list.add(oldBundle);
 		}
+		if (!added) {
+			list.add(bundle);
+		}
+
+		bundles = new AbstractBundle[list.size()];
+		list.toArray(bundles);
+		bundlesBySymbolicName.put(symbolicName, bundles);
 	}
 
 	public synchronized boolean remove(AbstractBundle bundle) {
@@ -132,10 +136,14 @@ public final class BundleRepository {
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName == null)
 			return true;
+		removeSymbolicName(symbolicName, bundle);
+		return true;
+	}
 
+	private void removeSymbolicName(String symbolicName, AbstractBundle bundle) {
 		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
 		if (bundles == null)
-			return true;
+			return;
 
 		// found some bundles with the global name.
 		// remove all references to the specified bundle.
@@ -163,8 +171,17 @@ public final class BundleRepository {
 				bundlesBySymbolicName.put(symbolicName, newBundles);
 			}
 		}
+	}
 
-		return true;
+	public synchronized void update(String oldSymbolicName, AbstractBundle bundle) {
+		if (oldSymbolicName != null) {
+			if (!oldSymbolicName.equals(bundle.getSymbolicName())) {
+				removeSymbolicName(oldSymbolicName, bundle);
+				addSymbolicName(bundle);
+			}
+		} else {
+			addSymbolicName(bundle);
+		}
 	}
 
 	public synchronized void removeAllBundles() {

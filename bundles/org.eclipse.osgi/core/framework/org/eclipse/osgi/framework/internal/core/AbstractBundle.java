@@ -645,11 +645,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {
-				// must remove this bundle from the repository to flush the BNS/version etc.
-				bundles.remove(this);
+				String oldBSN = this.getSymbolicName();
 				exporting = reload(newBundle);
-				// add this back with the new BSN/version etc.
-				bundles.add(this);
+				// update this to flush the old BSN/version etc.
+				bundles.update(oldBSN, this);
 				manifestLocalization = null;
 			}
 			// indicate we have loaded from the new version of the bundle
@@ -685,9 +684,10 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 				 * bundle
 				 */{
 					synchronized (bundles) {
-						bundles.remove(this);
-						reload(oldBundle); /* revert to old version */
-						bundles.add(this);
+						String oldBSN = this.getSymbolicName();
+						reload(oldBundle);
+						// update this to flush the new BSN/version back to the old one etc.
+						bundles.update(oldBSN, this);
 					}
 				}
 			} catch (BundleException ee) {

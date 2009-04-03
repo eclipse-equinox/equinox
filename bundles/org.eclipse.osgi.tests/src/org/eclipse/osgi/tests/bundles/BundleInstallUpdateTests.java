@@ -123,7 +123,7 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 	}
 
 	// test update with null stream
-	public void testUpdateNoStream03() {
+	public void testUpdateWithStream01() {
 		Bundle test = null;
 		try {
 			String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
@@ -132,6 +132,36 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
 			test.update(new URL(location2).openStream());
 			assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (Exception e) {
+			fail("Unexpected failure", e); //$NON-NLS-1$
+		} finally {
+			try {
+				if (test != null)
+					test.uninstall();
+			} catch (BundleException e) {
+				// nothing
+			}
+		}
+	}
+
+	// test update with null stream
+	public void testUpdateWithStream02() {
+		Bundle test = null;
+		try {
+			String location1 = installer.getBundleLocation("test"); //$NON-NLS-1$
+			String location2 = installer.getBundleLocation("test2"); //$NON-NLS-1$
+			test = OSGiTestsActivator.getContext().installBundle(location1);
+			Bundle b1 = installer.installBundle("chain.test"); //$NON-NLS-1$
+			assertEquals("Wrong BSN", "test1", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+			test.update(new URL(location2).openStream());
+			assertEquals("Wrong BSN", "test2", test.getSymbolicName()); //$NON-NLS-1$ //$NON-NLS-2$
+			// make sure b1 is still last bundle in bundles list
+			Bundle[] bundles = OSGiTestsActivator.getContext().getBundles();
+			assertTrue("Wrong bundle at the end: " + bundles[bundles.length - 1], bundles[bundles.length - 1] == b1); //$NON-NLS-1$
+			Bundle[] tests = installer.getPackageAdmin().getBundles(test.getSymbolicName(), null);
+			assertNotNull("null tests", tests); //$NON-NLS-1$
+			assertEquals("Wrong number", 1, tests.length); //$NON-NLS-1$
+			assertTrue("Wrong bundle: " + tests[0], tests[0] == test); //$NON-NLS-1$
 		} catch (Exception e) {
 			fail("Unexpected failure", e); //$NON-NLS-1$
 		} finally {
