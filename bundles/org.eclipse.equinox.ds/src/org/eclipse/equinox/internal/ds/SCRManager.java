@@ -581,14 +581,21 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			Vector bundleComponents = (Vector) bundleToServiceComponents.get(bundle);
 			if (bundleComponents != null) {
 				if (name != null) {
+					boolean found = false;
 					for (int i = 0; i < bundleComponents.size(); i++) {
 						ServiceComponent component = (ServiceComponent) bundleComponents.elementAt(i);
-						if (component.name.equals(name) && component.enabled != enable) {
-							component.enabled = enable;
-							componentsToProcess = new Vector(2);
-							componentsToProcess.addElement(component);
-							break;
+						if (component.name.equals(name)) {
+							found = true;
+							if (component.enabled != enable) {
+								component.enabled = enable;
+								componentsToProcess = new Vector(2);
+								componentsToProcess.addElement(component);
+								break;
+							}
 						}
+					}
+					if (!found) {
+						throw new IllegalArgumentException(NLS.bind(Messages.COMPONENT_NOT_FOUND, name, bundle));
 					}
 				} else {
 					if (enable) {
@@ -603,8 +610,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 								sc.enabled = enable;
 							}
 						}
-					} else {
-						Activator.log.warning(Messages.CANNOT_DISPOSE_ALL_COMPONENTS, new Exception("Debug stack trace")); //$NON-NLS-1$
 					}
 				}
 
@@ -617,6 +622,8 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					enqueueWork(this, DISABLE_COMPONENTS, componentsToProcess, security);
 				}
 			}
+		} catch (IllegalArgumentException iae) {
+			throw iae;
 		} catch (Throwable e) {
 			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
 		}

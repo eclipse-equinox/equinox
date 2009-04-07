@@ -14,7 +14,6 @@ public class Messages extends NLS {
 	public static String BUNDLE_NOT_FOUND;
 	public static String CANNOT_BUILD_COMPONENT;
 	public static String CANNOT_CREATE_INSTANCE;
-	public static String CANNOT_DISPOSE_ALL_COMPONENTS;
 	public static String CANNOT_FIND_COMPONENT_BUNDLE;
 	public static String CANNOT_FIND_REGISTRATION;
 	public static String CANNOT_GET_CONFIGURATION;
@@ -37,6 +36,8 @@ public class Messages extends NLS {
 	public static String COMPONENT_INSTANCE_BUILT;
 	public static String COMPONENT_LACKS_APPROPRIATE_PERMISSIONS;
 	public static String COMPONENT_NAME;
+	public static String COMPONENT_NAME_IS_NULL;
+	public static String COMPONENT_NOT_FOUND;
 	public static String COMPONENT_NOT_RESOLVED;
 	public static String COMPONENT_REQURES_CONFIGURATION_ACTIVATION;
 	public static String COMPONENT_RESOLVED;
