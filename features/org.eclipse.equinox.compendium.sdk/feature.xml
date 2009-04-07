@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.equinox.compendium.sdk"
-      label="Equinox Compendium SDK"
-      version="1.0.0">
+      label="%featureName"
+      version="3.5.0.qualifier"
+      provider-name="%providerName">
 
    <description>
-      A collection of Equinox bundles that implement optional parts of the current OSGi specifications--the so called &quot;Compendium Services&quot;. 
-
-This feature includes the corresponding source and is intended to be added to target platforms at development time rather than deployed with end-user systems.
+      %description
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      %copyright
    </copyright>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <license url="%licenseURL">
+      %license
    </license>
-
+   
    <plugin
          id="org.eclipse.equinox.app"
          download-size="0"
