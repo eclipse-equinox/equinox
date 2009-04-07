@@ -408,7 +408,19 @@ public class DSTest extends TestCase {
         trackerSC.getServiceReferences().length > 0);
 
     // *** test disableComponent() method
-    ((ComponentManager)extendedClass).enableComponent("InvalidParameter", true); // test for disabling unexistent
+    boolean exceptionThrown = false;
+    try {
+      ((ComponentManager)extendedClass).enableComponent("InvalidParameter", true); // test for disabling unexistent
+    } catch (IllegalArgumentException iae) {
+      //expected exception
+      exceptionThrown = true;
+    } catch (Exception e) {
+      //unexpected exception
+      fail("Unexpected exception "+e.getMessage());
+    }
+    if (!exceptionThrown) {
+      fail("Expected IllegalArgumentException but not thrown");
+    }
     
     ((ComponentManager)extendedClass).enableComponent(SAC_CLASS, false);
     Thread.sleep(timeout * 2); // let the SCR to unregister the service
