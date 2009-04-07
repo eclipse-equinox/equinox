@@ -305,6 +305,9 @@ public class ComponentContextImpl implements ComponentContext {
 	 * @see org.osgi.service.component.ComponentContext#disableComponent(java.lang.String)
 	 */
 	public void disableComponent(String name) {
+		if (name == null) {
+			throw new IllegalArgumentException(Messages.COMPONENT_NAME_IS_NULL);
+		}
 		mgr.disableComponent(name, scp.bc.getBundle());
 	}
 
