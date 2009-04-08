@@ -140,13 +140,7 @@ public class AspectResolver {
 
         if (weavingBundleContext != null) {
 
-            // this bundle
-            Definition aspects = aspectAdmin.getAspectDefinition(bundle);
-            if (aspects != null) {
-                result.add(aspects);
-                fingerprintElements.add(bundle.getSymbolicName() + ":" //$NON-NLS-1$
-                        + bundleDescription.getVersion().toString());
-            }
+            Definition aspects = null;
 
             // fragments
             final BundleDescription[] fragments = bundleDescription
@@ -226,6 +220,16 @@ public class AspectResolver {
                     fingerprintElements.add(supplementers[i].getSymbolicName()
                             + ":" //$NON-NLS-1$
                             + getBundleVersion(supplementers[i]));
+                }
+            }
+
+            // this bundle
+            if (result.size() > 0) {
+                aspects = aspectAdmin.getAspectDefinition(bundle);
+                if (aspects != null) {
+                    result.add(aspects);
+                    fingerprintElements.add(bundle.getSymbolicName() + ":" //$NON-NLS-1$
+                            + bundleDescription.getVersion().toString());
                 }
             }
 
