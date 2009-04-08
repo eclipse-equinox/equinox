@@ -1244,6 +1244,15 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals(1, resource.getPort());
 	}
 
+	public void testManifestPackageSpec() {
+		try {
+			Bundle test = installer.installBundle("test.manifestpackage");
+			test.start();
+		} catch (Exception e) {
+			fail("Unexpected exception", e);
+		}
+	}
+
 	private String readURL(URL url) {
 		StringBuffer sb = new StringBuffer();
 		try {

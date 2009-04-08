@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.manifestpackage
+Bundle-SymbolicName: test.manifestpackage
+Bundle-Version: 1.0.0
+Bundle-Activator: test.manifestpackage.Activator
+Import-Package: org.osgi.framework
+
+Name: test/manifestpackage/a/
+Specification-Title: a
+Specification-Version: 1.1
+Specification-Vendor: equinox
+Implementation-Title: A
+Implementation-Version: 11.0
+Implementation-Vendor: equinox
+
+Name: test/manifestpackage/b/
+Specification-Title: b
+Specification-Version: 1.2
+Specification-Vendor: equinox
+Implementation-Title: B
+Implementation-Version: 12.0
+Implementation-Vendor: equinox
+
+Name: test/manifestpackage/c/
+Specification-Title: c
+Specification-Version: 1.3
+Specification-Vendor: equinox
+Implementation-Title: C
+Implementation-Version: 13.0
+Implementation-Vendor: equinox

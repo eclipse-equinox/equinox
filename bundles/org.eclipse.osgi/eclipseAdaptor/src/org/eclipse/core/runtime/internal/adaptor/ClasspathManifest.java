@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class ClasspathManifest implements KeyedElement {
 		return KEY;
 	}
 
-	public Manifest getManifest(ClasspathEntry cpEntry, ClasspathManager loader) {
+	public synchronized Manifest getManifest(ClasspathEntry cpEntry, ClasspathManager loader) {
 		if (initialized)
 			return manifest;
 		if (!hasPackageInfo(cpEntry, loader)) {
@@ -47,14 +47,20 @@ public class ClasspathManifest implements KeyedElement {
 			return manifest;
 		}
 		BundleEntry mfEntry = cpEntry.getBundleFile().getEntry(org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST);
-		if (mfEntry != null)
+		if (mfEntry != null) {
+			InputStream manIn = null;
 			try {
-				InputStream manIn = mfEntry.getInputStream();
-				manifest = new Manifest(manIn);
-				manIn.close();
+				try {
+					manIn = mfEntry.getInputStream();
+					manifest = new Manifest(manIn);
+				} finally {
+					if (manIn != null)
+						manIn.close();
+				}
 			} catch (IOException e) {
 				// do nothing
 			}
+		}
 		initialized = true;
 		return manifest;
 	}

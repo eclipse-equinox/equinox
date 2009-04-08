@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -295,8 +295,19 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			br = new BufferedReader(new InputStreamReader(url.openStream()));
 			String line;
 			while ((line = br.readLine()) != null) {
-				if (line.startsWith("Specification-Title: ") || line.startsWith("Specification-Version: ") || line.startsWith("Specification-Vendor: ") || line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-					return true;
+				if (line.length() < 20)
+					continue;
+				switch (line.charAt(0)) {
+					case 'S' :
+						if (line.charAt(1) == 'p')
+							if (line.startsWith("Specification-Title: ") || line.startsWith("Specification-Version: ") || line.startsWith("Specification-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+								return true;
+						break;
+					case 'I' :
+						if (line.startsWith("Implementation-Title: ") || line.startsWith("Implementation-Version: ") || line.startsWith("Implementation-Vendor: ")) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$ 
+							return true;
+						break;
+				}
 			}
 		} catch (IOException ioe) {
 			// do nothing
