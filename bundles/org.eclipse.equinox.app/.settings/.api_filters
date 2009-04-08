@@ -8,6 +8,13 @@
 <message_argument value="APPLICATION_EXITVALUE_NOT_AVAILABLE"/>
 </message_arguments>
 </filter>
+<filter id="1141899266">
+<message_arguments>
+<message_argument value="1.1"/>
+<message_argument value="1.2"/>
+<message_argument value="APPLICATION_INVALID_STARTUP_ARGUMENT"/>
+</message_arguments>
+</filter>
 </resource>
 <resource path="src/org/osgi/service/application/ApplicationHandle.java" type="org.osgi.service.application.ApplicationHandle">
 <filter id="1141899266">
