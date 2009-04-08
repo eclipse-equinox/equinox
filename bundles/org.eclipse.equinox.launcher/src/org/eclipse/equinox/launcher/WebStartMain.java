@@ -28,6 +28,9 @@ import java.util.zip.ZipFile;
  * using Java webstart. To launch Eclipse programmatically, use 
  * org.eclipse.core.runtime.adaptor.EclipseStarter. The fields and methods
  * on this class are not API.
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
 //The bundles are discovered by finding all the jars on the classpath. Then they are added with their full path to the osgi.bundles list.
 public class WebStartMain extends Main {
@@ -46,6 +49,9 @@ public class WebStartMain extends Main {
 		String location;
 	}
 
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public static void main(String[] args) {
 		System.setSecurityManager(null); //TODO Hack so that when the classloader loading the fwk is created we don't have funny permissions. This should be revisited. 
 		int result = new WebStartMain().run(args);

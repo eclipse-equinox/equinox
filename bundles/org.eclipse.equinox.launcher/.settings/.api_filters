@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.launcher" version="2">
+    <resource path="src/org/eclipse/equinox/launcher/Main.java" type="org.eclipse.equinox.launcher.Main$EclipsePolicy">
+        <filter id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.launcher.Main.EclipsePolicy.implies(ProtectionDomain, Permission)"/>
+                <message_argument value="Policy"/>
+                <message_argument value="implies(ProtectionDomain, Permission)"/>
+                <message_argument value="J2SE-1.3"/>
+            </message_arguments>
+        </filter>
+        <filter id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.launcher.Main.EclipsePolicy.getPermissions(ProtectionDomain)"/>
+                <message_argument value="Policy"/>
+                <message_argument value="getPermissions(ProtectionDomain)"/>
+                <message_argument value="J2SE-1.3"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

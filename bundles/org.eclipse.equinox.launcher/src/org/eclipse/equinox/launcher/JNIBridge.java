@@ -10,30 +10,43 @@
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
-
 /**
  * <b>Note:</b> This class should not be referenced programmatically by
  * other Java code. This class exists only for the purpose of interacting with
  * a native launcher. To launch Eclipse programmatically, use 
  * org.eclipse.core.runtime.adaptor.EclipseStarter. This class is not API.
+ *
+ * @noextend This class is not intended to be subclassed by clients.
+ * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class JNIBridge {
 	//TODO: This class should not be public
 	private native void _set_exit_data(String sharedId, String data);
+
 	private native void _update_splash();
-	private native long  _get_splash_handle();
+
+	private native long _get_splash_handle();
+
 	private native void _show_splash(String bitmap);
+
 	private native void _takedown_splash();
-	
+
 	private native int OleInitialize(int reserved);
+
 	private native void OleUninitialize();
-	
+
 	private String library;
 	private boolean libraryLoaded = false;
+
+	/**
+	 * @noreference This constructor is not intended to be referenced by clients.
+	 * 
+	 * @param library the given library
+	 */
 	public JNIBridge(String library) {
 		this.library = library;
 	}
-	
+
 	private void loadLibrary() {
 		if (library != null) {
 			try {
@@ -54,12 +67,15 @@ public class JNIBridge {
 		libraryLoaded = true;
 	}
 
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public boolean setExitData(String sharedId, String data) {
 		try {
 			_set_exit_data(sharedId, data);
 			return true;
 		} catch (UnsatisfiedLinkError e) {
-			if(!libraryLoaded){
+			if (!libraryLoaded) {
 				loadLibrary();
 				return setExitData(sharedId, data);
 			}
@@ -67,25 +83,31 @@ public class JNIBridge {
 		}
 	}
 
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public boolean showSplash(String bitmap) {
 		try {
 			_show_splash(bitmap);
 			return true;
 		} catch (UnsatisfiedLinkError e) {
-			if(!libraryLoaded){
+			if (!libraryLoaded) {
 				loadLibrary();
 				return showSplash(bitmap);
 			}
 			return false;
 		}
 	}
-	
+
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public boolean updateSplash() {
 		try {
 			_update_splash();
 			return true;
 		} catch (UnsatisfiedLinkError e) {
-			if(!libraryLoaded){
+			if (!libraryLoaded) {
 				loadLibrary();
 				return updateSplash();
 			}
@@ -93,34 +115,43 @@ public class JNIBridge {
 		}
 	}
 
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public long getSplashHandle() {
-		try { 
+		try {
 			return _get_splash_handle();
 		} catch (UnsatisfiedLinkError e) {
-			if(!libraryLoaded){
+			if (!libraryLoaded) {
 				loadLibrary();
 				return getSplashHandle();
 			}
 			return -1;
 		}
 	}
-	
+
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public boolean takeDownSplash() {
 		try {
 			_takedown_splash();
 			return true;
 		} catch (UnsatisfiedLinkError e) {
-			if(!libraryLoaded){
+			if (!libraryLoaded) {
 				loadLibrary();
 				return takeDownSplash();
 			}
 			return false;
 		}
 	}
-	
+
+	/**
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
 	public boolean uninitialize() {
 		if (libraryLoaded && library != null) {
-			if (library.indexOf("wpf") != -1)  { //$NON-NLS-1$
+			if (library.indexOf("wpf") != -1) { //$NON-NLS-1$
 				try {
 					OleUninitialize();
 				} catch (UnsatisfiedLinkError e) {
