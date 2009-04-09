@@ -51,6 +51,20 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		uninstallCompositeBundle(compositeBundle);
 	}
 
+	public void testCompositeShare01a() {
+		// simple test to create an empty composite bundle
+		// sharing one package from the parent
+		Map linkManifest = new HashMap();
+		linkManifest.put(Constants.BUNDLE_SYMBOLICNAME, getName());
+		linkManifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		linkManifest.put(Constants.IMPORT_PACKAGE, "org.osgi.service.application"); //$NON-NLS-1$
+		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, getName(), null, linkManifest, false, false);
+		startCompositeBundle(compositeBundle, false);
+
+		stopCompositeBundle(compositeBundle);
+		uninstallCompositeBundle(compositeBundle);
+	}
+
 	public void testCompositeShare02() {
 		// simple test to create an empty composite bundle
 		// sharing one package from the parent and sharing one non-existing package from child
@@ -187,6 +201,8 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		} catch (BundleException e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
 		}
+		// refresh client to clear class laoder
+		installer.refreshPackages(new Bundle[] {testClient});
 
 		// put bad value back
 		linkManifest.put(Constants.EXPORT_PACKAGE, "test.link.a; attr1=\"bad value\"; uses:=\"org.osgi.framework, test.link.a.params\", test.link.a.params; attr2=\"bad value\""); //$NON-NLS-1$
@@ -195,6 +211,14 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		} catch (BundleException e) {
 			fail("Unexpected composite update exception", e); //$NON-NLS-1$
 		}
+
+		// make sure testClient can still start before refresh
+		try {
+			testClient.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+
 		installer.refreshPackages(new Bundle[] {compositeBundle});
 		startCompositeBundle(compositeBundle, true);
 		try {
@@ -204,7 +228,23 @@ public class CompositeShareTests extends AbstractCompositeTests {
 			assertEquals("Unexpected exception type", BundleException.RESOLVE_ERROR, e.getType()); //$NON-NLS-1$
 		}
 
+		// put good value back
+		linkManifest.put(Constants.EXPORT_PACKAGE, "test.link.a; attr1=\"value1\"; uses:=\"org.osgi.framework, test.link.a.params\", test.link.a.params; attr2=\"value2\""); //$NON-NLS-1$
+		try {
+			compositeBundle.update(linkManifest);
+		} catch (BundleException e) {
+			fail("Unexpected composite update exception", e); //$NON-NLS-1$
+		}
+
+		startCompositeBundle(compositeBundle, false);
 		uninstallCompositeBundle(compositeBundle);
+		// make sure testClient can still start after uninstall
+		try {
+			testClient.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+
 	}
 
 	public void testCompositeShare05() {

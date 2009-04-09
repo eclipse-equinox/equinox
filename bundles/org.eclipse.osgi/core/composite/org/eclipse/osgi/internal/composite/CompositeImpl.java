@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
+import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.loader.BundleLoader;
@@ -96,22 +97,22 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 		return disable ? false : surrogateComposite.resolveContent();
 	}
 
-	private SurrogateBundle findSurrogateBundle() throws BundleException {
-		if ((companionFramework.getState() & (Bundle.INSTALLED | Bundle.RESOLVED)) != 0)
-			companionFramework.init();
-		return (SurrogateBundle) getCompanionBundle();
-	}
-
 	public Framework getCompositeFramework() {
 		return companionFramework;
 	}
 
 	public SurrogateBundle getSurrogateBundle() {
-		try {
-			return findSurrogateBundle();
-		} catch (BundleException e) {
-			throw new RuntimeException("Error intializing child framework", e); //$NON-NLS-1$
-		}
+		return (SurrogateBundle) getCompanionBundle();
+	}
+
+	protected Bundle getCompanionBundle() {
+		if ((companionFramework.getState() & (Bundle.INSTALLED | Bundle.RESOLVED)) != 0)
+			try {
+				companionFramework.init();
+			} catch (BundleException e) {
+				throw new RuntimeException("Cannot initialize child framework.", e);
+			}
+		return companionFramework.getBundleContext().getBundle(1);
 	}
 
 	public void update(Map compositeManifest) throws BundleException {
@@ -153,8 +154,10 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 
 	private void checkClassLoader() {
 		BundleLoaderProxy proxy = getLoaderProxy();
-		if (proxy != null && proxy.inUse() && proxy.getBundleLoader() != null)
-			proxy.getBundleLoader().createClassLoader();
+		if (proxy != null && proxy.inUse() && proxy.getBundleLoader() != null) {
+			BundleClassLoader loader = proxy.getBundleLoader().createClassLoader();
+			loader.getResource("dummy"); //$NON-NLS-1$
+		}
 	}
 
 	protected void startHook() throws BundleException {

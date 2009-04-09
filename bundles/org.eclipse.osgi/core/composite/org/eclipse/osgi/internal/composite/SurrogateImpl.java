@@ -18,12 +18,16 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
+import org.osgi.service.framework.CompositeBundle;
 import org.osgi.service.framework.SurrogateBundle;
 
 public class SurrogateImpl extends CompositeBase implements SurrogateBundle {
 
+	private final CompositeBundle composite;
+
 	public SurrogateImpl(BundleData bundledata, org.eclipse.osgi.framework.internal.core.Framework framework) throws BundleException {
 		super(bundledata, framework);
+		this.composite = (CompositeBundle) FrameworkProperties.getProperties().get(PROP_COMPOSITE);
 	}
 
 	protected Framework findCompanionFramework(org.eclipse.osgi.framework.internal.core.Framework thisFramework, BundleData thisData) {
@@ -32,8 +36,11 @@ public class SurrogateImpl extends CompositeBase implements SurrogateBundle {
 	}
 
 	public BundleContext getCompositeBundleContext() {
-		Bundle composite = getCompanionBundle();
-		return composite == null ? null : composite.getBundleContext();
+		return composite.getBundleContext();
+	}
+
+	protected Bundle getCompanionBundle() {
+		return composite;
 	}
 
 	protected boolean isSurrogate() {

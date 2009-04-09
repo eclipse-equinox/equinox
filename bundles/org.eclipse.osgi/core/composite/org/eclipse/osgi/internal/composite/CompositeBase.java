@@ -15,14 +15,12 @@ import java.io.InputStream;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.module.CompositeResolveHelper;
 import org.eclipse.osgi.service.internal.composite.CompositeModule;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
-import org.osgi.service.framework.CompositeBundle;
 
 /**
  * This is a base class for both composite and surrogate bundles.
@@ -32,13 +30,11 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 	protected static String PROP_PARENTFRAMEWORK = "org.eclipse.equinox.parentFramework"; //$NON-NLS-1$
 
 	protected final Framework companionFramework;
-	protected final long companionID;
 	protected final ThreadLocal resolving = new ThreadLocal();
 
 	public CompositeBase(BundleData bundledata, org.eclipse.osgi.framework.internal.core.Framework framework) throws BundleException {
 		super(bundledata, framework);
 		this.companionFramework = findCompanionFramework(framework, bundledata);
-		this.companionID = isSurrogate() ? ((CompositeBundle) FrameworkProperties.getProperties().get(PROP_COMPOSITE)).getBundleId() : 1;
 	}
 
 	/* 
@@ -53,9 +49,7 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 	 * For surrogate bundles this is the composite bundle.
 	 * For composite bundles this is the surrogate bundle.
 	 */
-	Bundle getCompanionBundle() {
-		return companionFramework.getBundleContext().getBundle(companionID);
-	}
+	abstract protected Bundle getCompanionBundle();
 
 	protected boolean isSurrogate() {
 		return false;
