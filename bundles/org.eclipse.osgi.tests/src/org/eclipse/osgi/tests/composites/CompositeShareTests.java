@@ -245,6 +245,13 @@ public class CompositeShareTests extends AbstractCompositeTests {
 			fail("Unexpected exception", e); //$NON-NLS-1$
 		}
 
+		installer.refreshPackages(new Bundle[] {compositeBundle});
+		try {
+			testClient.start();
+			fail("Expected start failure"); //$NON-NLS-1$
+		} catch (BundleException e) {
+			assertEquals("Unexpected exception type", BundleException.RESOLVE_ERROR, e.getType()); //$NON-NLS-1$
+		}
 	}
 
 	public void testCompositeShare05() {
