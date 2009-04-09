@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,7 +123,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 
 		// If the bundle is not a singleton, then it is not added
 		if (!isSingleton(bundle)) {
-			if (report) {
+			if (report && !isGeneratedManifest(bundle)) {
 				String message = NLS.bind(RegistryMessages.parse_nonSingleton, bundle.getSymbolicName());
 				RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
 			}
@@ -141,10 +141,15 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 			return extensionURL;
 
 		if (report) {
+			// if the host is not a singleton we always report the error; even if the host has a generated manifest
 			String message = NLS.bind(RegistryMessages.parse_nonSingletonFragment, bundle.getSymbolicName(), hosts[0].getSymbolicName());
 			RuntimeLog.log(new Status(IStatus.WARNING, RegistryMessages.OWNER_NAME, 0, message, null));
 		}
 		return null;
+	}
+
+	private static boolean isGeneratedManifest(Bundle bundle) {
+		return bundle.getHeaders("").get("Generated-from") != null; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void addBundle(Bundle bundle, boolean checkNLSFragments) {
