@@ -12,12 +12,15 @@
  *   Martin Lippert            weaving context and adaptors reworked     
  *   Martin Lippert            extracted weaving service factory
  *   Martin Lippert            advanced aspect resolving implemented
+ *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
@@ -98,6 +101,18 @@ public class WeavingService implements IWeavingService {
             return weavingAdaptor.generatedClassesExistFor(className);
         } else {
             return false;
+        }
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.IWeavingService#getGeneratedClassesFor(java.lang.String)
+     */
+    public Map<String, byte[]> getGeneratedClassesFor(final String className) {
+        if (enabled) {
+            ensureAdaptorInit();
+            return weavingAdaptor.getGeneratedClassesFor(className);
+        } else {
+            return new HashMap<String, byte[]>();
         }
     }
 

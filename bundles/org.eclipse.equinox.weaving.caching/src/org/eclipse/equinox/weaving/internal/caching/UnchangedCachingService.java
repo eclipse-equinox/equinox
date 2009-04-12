@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Martin Lippert and others.
+ * Copyright (c) 2008, 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,13 @@
  * 
  * Contributors:
  *     Martin Lippert - initial implementation
+ *     Martin Lippert - caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
 
 import java.net.URL;
+import java.util.Map;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
@@ -28,6 +30,13 @@ import org.eclipse.equinox.service.weaving.ICachingService;
  * @author Martin Lippert
  */
 public class UnchangedCachingService implements ICachingService {
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#canCacheGeneratedClasses()
+     */
+    public boolean canCacheGeneratedClasses() {
+        return false;
+    }
 
     /**
      * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
@@ -50,6 +59,16 @@ public class UnchangedCachingService implements ICachingService {
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
             final Class<?> clazz, final byte[] classbytes) {
+        return false;
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#storeClassAndGeneratedClasses(java.lang.String,
+     *      java.net.URL, java.lang.Class, byte[], java.util.Map)
+     */
+    public boolean storeClassAndGeneratedClasses(final String namespace,
+            final URL sourceFileUrl, final Class<?> clazz,
+            final byte[] classbytes, final Map<String, byte[]> generatedClasses) {
         return false;
     }
 }

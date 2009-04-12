@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,17 @@
  *   Heiko Seeberger           AJDT 1.5.1 changes
  *   Martin Lippert            minor changes and bugfixes
  *   Martin Lippert            reworked
+ *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj.loadtime;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.aspectj.weaver.IUnwovenClassFile;
 import org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor;
 import org.eclipse.equinox.weaving.aspectj.WeavingServicePlugin;
 
@@ -42,6 +47,25 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
         this.classLoader = loader;
         this.weavingContext = context;
         this.namespace = namespace;
+    }
+
+    public Map<String, byte[]> getGeneratedClassesFor(final String className) {
+        final Map<?, ?> generated = this.generatedClasses;
+        final Map<String, byte[]> result = new HashMap<String, byte[]>();
+
+        final Iterator<?> generatedClassNames = generated.keySet().iterator();
+        while (generatedClassNames.hasNext()) {
+            final String name = (String) generatedClassNames.next();
+            final IUnwovenClassFile unwovenClass = (IUnwovenClassFile) generated
+                    .get(name);
+
+            if (!className.equals(name)) {
+                result.put(name, unwovenClass.getBytes());
+            }
+        }
+
+        flushGeneratedClasses();
+        return result;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes     
  *   Martin Lippert            extracted caching service factory
+ *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching.j9;
@@ -16,6 +17,7 @@ package org.eclipse.equinox.weaving.internal.caching.j9;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import com.ibm.oti.shared.HelperAlreadyDefinedException;
 import com.ibm.oti.shared.Shared;
@@ -54,6 +56,13 @@ public class CachingService implements ICachingService {
         if (CachingServicePlugin.DEBUG)
             System.out.println("< CachingService.<init>() partition='"
                     + partition + "', urlhelper=" + urlhelper);
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#canCacheGeneratedClasses()
+     */
+    public boolean canCacheGeneratedClasses() {
+        return false;
     }
 
     /**
@@ -119,7 +128,7 @@ public class CachingService implements ICachingService {
      *      java.net.URL, java.lang.Class, byte[])
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
-            final Class clazz, final byte[] classbytes) {
+            final Class<?> clazz, final byte[] classbytes) {
         final boolean success = urlhelper.storeSharedClass(partition,
                 sourceFileURL, clazz);
         if (CachingServicePlugin.DEBUG && success)
@@ -127,6 +136,16 @@ public class CachingService implements ICachingService {
                     + bundle.getSymbolicName() + ", clazz=" + clazz + ", url="
                     + sourceFileURL);
         return success;
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#storeClassAndGeneratedClasses(java.lang.String,
+     *      java.net.URL, java.lang.Class, byte[], java.util.Map)
+     */
+    public boolean storeClassAndGeneratedClasses(final String namespace,
+            final URL sourceFileUrl, final Class<?> clazz,
+            final byte[] classbytes, final Map<String, byte[]> generatedClasses) {
+        return false;
     }
 
 }

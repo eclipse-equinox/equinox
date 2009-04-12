@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     Martin Lippert - initial implementation
+ *     Martin Lippert - caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -14,8 +15,11 @@ package org.eclipse.equinox.weaving.internal.caching;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -78,28 +82,49 @@ public class CacheWriter {
      * @throws IOException if an error occurs while writing to the cache
      */
     protected void store(final CacheItem item) throws IOException {
-        DataOutputStream outState = null;
-        FileOutputStream fosState = null;
+
+        // write out generated classes first
+        final Map<String, byte[]> generatedClasses = item.getGeneratedClasses();
+        if (generatedClasses != null) {
+            final Iterator<String> generatedClassNames = generatedClasses
+                    .keySet().iterator();
+            while (generatedClassNames.hasNext()) {
+                final String className = generatedClassNames.next();
+                final byte[] classBytes = generatedClasses.get(className);
+                storeSingleClass(className, classBytes, item.getDirectory());
+            }
+        }
+
+        // write out the woven class
+        storeSingleClass(item.getName(), item.getCachedBytes(), item
+                .getDirectory());
+    }
+
+    private void storeSingleClass(final String className,
+            final byte[] classBytes, final String cacheDirectory)
+            throws FileNotFoundException, IOException {
+        DataOutputStream outCache = null;
+        FileOutputStream fosCache = null;
         try {
-            final File directory = new File(item.getDirectory());
+            final File directory = new File(cacheDirectory);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            fosState = new FileOutputStream(new File(directory, item.getName()));
-            outState = new DataOutputStream(new BufferedOutputStream(fosState));
+            fosCache = new FileOutputStream(new File(directory, className));
+            outCache = new DataOutputStream(new BufferedOutputStream(fosCache));
 
-            outState.write(item.getCachedBytes());
+            outCache.write(classBytes);
         } finally {
-            if (outState != null) {
+            if (outCache != null) {
                 try {
-                    outState.flush();
-                    fosState.getFD().sync();
+                    outCache.flush();
+                    fosCache.getFD().sync();
                 } catch (final IOException e) {
                     // do nothing, we tried
                 }
                 try {
-                    outState.close();
+                    outCache.close();
                 } catch (final IOException e) {
                     // do nothing
                 }

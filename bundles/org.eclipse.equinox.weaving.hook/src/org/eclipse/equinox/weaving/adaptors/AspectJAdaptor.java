@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes
  *   Martin Lippert            minor changes and bugfixes     
+ *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.adaptors;
@@ -16,6 +17,7 @@ package org.eclipse.equinox.weaving.adaptors;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
@@ -193,15 +195,23 @@ public class AspectJAdaptor implements IAspectJAdaptor {
         initialize();
         if (cachingService != null) {
             //have we generated a closure? 
-            //If so we cannot store in shared cache (as closure will be lost for future runs)
             if (weavingService != null
                     && weavingService.generatedClassesExistFor(
                             (ClassLoader) baseLoader, name)) {
-                weavingService.flushGeneratedClasses((ClassLoader) baseLoader);
-                if (Debug.DEBUG_CACHE)
-                    Debug
-                            .println("- AspectJAdaptor.storeClass() generatedClassesExistFor=true");
-                //				return clazz;
+                //If so we need to ask the cache if its capable of handling generated closures
+                if (cachingService.canCacheGeneratedClasses()) {
+                    final Map<String, byte[]> generatedClasses = weavingService
+                            .getGeneratedClassesFor(name);
+
+                    stored = cachingService.storeClassAndGeneratedClasses("",
+                            sourceFileURL, clazz, classbytes, generatedClasses);
+                } else {
+                    weavingService
+                            .flushGeneratedClasses((ClassLoader) baseLoader);
+                    if (Debug.DEBUG_CACHE)
+                        Debug
+                                .println("- AspectJAdaptor.storeClass() generatedClassesExistFor=true");
+                }
             } else {
                 stored = cachingService.storeClass("", sourceFileURL, clazz,
                         classbytes);

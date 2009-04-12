@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *   David Knibb               initial implementation      
  *   Matthew Webster           Eclipse 3.2 changes
  *   Martin Lippert            caching optimizations     
+ *   Martin Lippert            caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.hooks;
@@ -66,11 +67,22 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
                         Debug.println("- AspectJBundleFile.getEntry() path="
                                 + path + ", entry=" + entry);
                 } else if (cacheEntry.getCachedBytes() != null) {
-                    entry = new AspectJBundleEntry(adaptor, entry, path,
+                    entry = new CachedClassBundleEntry(adaptor, entry, path,
                             cacheEntry.getCachedBytes(), url);
                 } else {
                     entry = new AspectJBundleEntry(adaptor, entry, url,
                             cacheEntry.dontWeave());
+                }
+            }
+        } else if (path.endsWith(".class") && entry == null) {
+            final int offset = path.lastIndexOf('.');
+            final String name = path.substring(0, offset).replace('/', '.');
+            final IAspectJAdaptor adaptor = getAdaptor();
+            if (adaptor != null) {
+                final CacheEntry cacheEntry = adaptor.findClass(name, url);
+                if (cacheEntry != null && cacheEntry.getCachedBytes() != null) {
+                    entry = new CachedGeneratedClassBundleEntry(adaptor, path,
+                            cacheEntry.getCachedBytes(), url);
                 }
             }
         }

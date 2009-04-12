@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Heiko Seeberger and others.
+ * Copyright (c) 2008, 2009 Heiko Seeberger and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     Heiko Seeberger - initial implementation
  *     Martin Lippert - asynchronous cache writing
+ *     Martin Lippert - caching of generated classes
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.internal.caching;
@@ -20,6 +21,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
@@ -90,6 +92,13 @@ public class BundleCachingService implements ICachingService {
     }
 
     /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#canCacheGeneratedClasses()
+     */
+    public boolean canCacheGeneratedClasses() {
+        return true;
+    }
+
+    /**
      * @see org.eclipse.equinox.service.weaving.ICachingService#findStoredClass(java.lang.String,
      *      java.net.URL, java.lang.String)
      */
@@ -132,7 +141,6 @@ public class BundleCachingService implements ICachingService {
      */
     public boolean storeClass(final String namespace, final URL sourceFileURL,
             final Class<?> clazz, final byte[] classbytes) {
-
         if (clazz == null) {
             throw new IllegalArgumentException(
                     "Argument \"clazz\" must not be null!"); //$NON-NLS-1$
@@ -141,7 +149,6 @@ public class BundleCachingService implements ICachingService {
             throw new IllegalArgumentException(
                     "Argument \"classbytes\" must not be null!"); //$NON-NLS-1$
         }
-
         if (cacheDirectory == null) {
             return false;
         }
@@ -149,8 +156,21 @@ public class BundleCachingService implements ICachingService {
         final CacheItem item = new CacheItem(classbytes, cacheDirectory
                 .getAbsolutePath(), clazz.getName());
 
-        this.cacheWriterQueue.offer(item);
-        return true;
+        return this.cacheWriterQueue.offer(item);
+    }
+
+    /**
+     * @see org.eclipse.equinox.service.weaving.ICachingService#storeClassAndGeneratedClasses(java.lang.String,
+     *      java.net.URL, java.lang.Class, byte[], java.util.Map)
+     */
+    public boolean storeClassAndGeneratedClasses(final String namespace,
+            final URL sourceFileUrl, final Class<?> clazz,
+            final byte[] classbytes, final Map<String, byte[]> generatedClasses) {
+
+        final CacheItem item = new CacheItem(classbytes, cacheDirectory
+                .getAbsolutePath(), clazz.getName(), generatedClasses);
+
+        return this.cacheWriterQueue.offer(item);
     }
 
     /**
@@ -242,4 +262,5 @@ public class BundleCachingService implements ICachingService {
             }
         }
     }
+
 }

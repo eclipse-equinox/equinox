@@ -1,15 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
- *   David Knibb               initial implementation      
- *   Matthew Webster           Eclipse 3.2 changes
- *   Martin Lippert            minor changes and bugfixes     
- *   Martin Lippert            splitted into different types of bundle entries
+ *   Martin Lippert               initial implementation      
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.hooks;
@@ -21,26 +18,30 @@ import java.net.URL;
 import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 
-public class AspectJBundleEntry extends BundleEntry {
+public class CachedClassBundleEntry extends BundleEntry {
 
     private final IAspectJAdaptor adaptor;
 
     private final URL bundleFileURL;
 
+    private final byte[] bytes;
+
     private final BundleEntry delegate;
 
-    private final boolean dontWeave;
+    private final String name;
 
-    public AspectJBundleEntry(final IAspectJAdaptor aspectjAdaptor,
-            final BundleEntry delegate, final URL url, final boolean dontWeave) {
+    public CachedClassBundleEntry(final IAspectJAdaptor aspectjAdaptor,
+            final BundleEntry delegate, final String name, final byte[] bytes,
+            final URL url) {
         this.adaptor = aspectjAdaptor;
         this.bundleFileURL = url;
         this.delegate = delegate;
-        this.dontWeave = dontWeave;
+        this.name = name;
+        this.bytes = bytes;
     }
 
     public boolean dontWeave() {
-        return dontWeave;
+        return true;
     }
 
     public IAspectJAdaptor getAdaptor() {
@@ -53,37 +54,40 @@ public class AspectJBundleEntry extends BundleEntry {
 
     @Override
     public byte[] getBytes() throws IOException {
-        return delegate.getBytes();
+        return bytes;
     }
 
     @Override
     public URL getFileURL() {
-        return delegate.getFileURL();
+        return null;
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
+        if (delegate == null) {
+            System.err.println("error in: " + name);
+        }
         return delegate.getInputStream();
     }
 
     @Override
     public URL getLocalURL() {
-        return delegate.getLocalURL();
+        return null;
     }
 
     @Override
     public String getName() {
-        return delegate.getName();
+        return name;
     }
 
     @Override
     public long getSize() {
-        return delegate.getSize();
+        return bytes.length;
     }
 
     @Override
     public long getTime() {
-        return delegate.getTime();
+        return 0;
     }
 
 }
