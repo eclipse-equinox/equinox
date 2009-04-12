@@ -13,7 +13,6 @@ package org.eclipse.equinox.weaving.aspectj.loadtime;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Iterator;
 import java.util.List;
 
@@ -102,29 +101,22 @@ public class AspectResolver {
                 .toString());
     }
 
-    private int getApplyAspectsPolicy(final Bundle bundle,
-            final String manifestElement, final String importedPackage) {
+    private int getApplyAspectsPolicy(final ManifestElement[] headers,
+            final String manifestValue) {
         int result = AspectAdmin.ASPECT_APPLY_POLICY_NOT_DEFINED;
 
-        final Dictionary<?, ?> manifest = bundle.getHeaders();
-        try {
-            final ManifestElement[] headers = ManifestElement.parseHeader(
-                    manifestElement, (String) manifest.get(manifestElement));
-
-            if (headers != null) {
-                for (int i = 0; i < headers.length; i++) {
-                    if (headers[i].getValue().equals(importedPackage)) {
-                        final String directive = headers[i]
-                                .getDirective(AspectAdmin.ASPECT_APPLY_POLICY_DIRECTIVE);
-                        if ("true".equals(directive)) { //$NON-NLS-1$
-                            result = AspectAdmin.ASPECT_APPLY_POLICY_TRUE;
-                        } else if ("false".equals(directive)) { //$NON-NLS-1$
-                            result = AspectAdmin.ASPECT_APPLY_POLICY_FALSE;
-                        }
+        if (headers != null) {
+            for (int i = 0; i < headers.length; i++) {
+                if (headers[i].getValue().equals(manifestValue)) {
+                    final String directive = headers[i]
+                            .getDirective(AspectAdmin.ASPECT_APPLY_POLICY_DIRECTIVE);
+                    if ("true".equals(directive)) { //$NON-NLS-1$
+                        result = AspectAdmin.ASPECT_APPLY_POLICY_TRUE;
+                    } else if ("false".equals(directive)) { //$NON-NLS-1$
+                        result = AspectAdmin.ASPECT_APPLY_POLICY_FALSE;
                     }
                 }
             }
-        } catch (final BundleException e) {
         }
         return result;
     }
@@ -163,13 +155,22 @@ public class AspectResolver {
             // required bundles
             final BundleDescription[] resolvedRequires = bundleDescription
                     .getResolvedRequires();
+            ManifestElement[] requireHeaders = null;
+            if (resolvedRequires.length > 0) {
+                try {
+                    requireHeaders = ManifestElement
+                            .parseHeader(Constants.REQUIRE_BUNDLE,
+                                    (String) bundle.getHeaders().get(
+                                            Constants.REQUIRE_BUNDLE));
+                } catch (final BundleException e) {
+                }
+            }
             for (int i = 0; i < resolvedRequires.length; i++) {
                 final Bundle requiredBundle = weavingBundleContext
                         .getBundle(resolvedRequires[i].getBundleId());
                 if (requiredBundle != null) {
-                    final int applyPolicy = getApplyAspectsPolicy(bundle,
-                            Constants.REQUIRE_BUNDLE, requiredBundle
-                                    .getSymbolicName());
+                    final int applyPolicy = getApplyAspectsPolicy(
+                            requireHeaders, requiredBundle.getSymbolicName());
 
                     aspects = aspectAdmin.resolveRequiredBundle(requiredBundle,
                             applyPolicy);
@@ -187,6 +188,16 @@ public class AspectResolver {
             // imported packages
             final ExportPackageDescription[] resolvedImports = bundleDescription
                     .getResolvedImports();
+            ManifestElement[] importHeaders = null;
+            if (resolvedImports.length > 0) {
+                try {
+                    importHeaders = ManifestElement
+                            .parseHeader(Constants.IMPORT_PACKAGE,
+                                    (String) bundle.getHeaders().get(
+                                            Constants.IMPORT_PACKAGE));
+                } catch (final BundleException e) {
+                }
+            }
             for (int i = 0; i < resolvedImports.length; i++) {
                 final Bundle exportingBundle = weavingBundleContext
                         .getBundle(resolvedImports[i].getExporter()
@@ -194,8 +205,8 @@ public class AspectResolver {
                 if (exportingBundle != null) {
                     final String importedPackage = resolvedImports[i].getName();
 
-                    final int applyPolicy = getApplyAspectsPolicy(bundle,
-                            Constants.IMPORT_PACKAGE, importedPackage);
+                    final int applyPolicy = getApplyAspectsPolicy(
+                            importHeaders, importedPackage);
 
                     aspects = aspectAdmin.resolveImportedPackage(
                             exportingBundle, importedPackage, applyPolicy);
