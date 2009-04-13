@@ -20,8 +20,8 @@
    <plugin
          id="javax.servlet"
          download-size="0"
-         install-size="0"
-         version="0.0.0"
+         install-size="0"         
+         version="2.5.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -63,7 +63,7 @@
          id="org.eclipse.equinox.http.jetty"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="2.0.0.qualifier" 
          unpack="false"/>
 
    <plugin
