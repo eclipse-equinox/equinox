@@ -38,7 +38,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	private static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 	private static final String PROP_COMPATIBILITY_LAZYSTART = "osgi.compatibility.eagerStart.LazyActivation"; //$NON-NLS-1$
 	private static final boolean COMPATIBILITY_LAZYSTART = Boolean.valueOf(FrameworkProperties.getProperty(PROP_COMPATIBILITY_LAZYSTART, "true")).booleanValue(); //$NON-NLS-1$
-	private static final int STORAGE_VERION = 3;
+	private static final int STORAGE_VERION = 4;
 
 	public static final String KEY = EclipseStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
@@ -66,6 +66,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 	private String buddyList;
 	/** shortcut to know if a bundle is a registrant to a registered policy */
 	private String registeredBuddyList;
+	/** DS Service Component header */
+	private String serviceComponent;
 	private byte flags = 0;
 
 	public int getStorageVersion() {
@@ -112,6 +114,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			if (COMPATIBILITY_LAZYSTART)
 				bundledata.setStatus(bundledata.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
 		}
+		serviceComponent = (String) manifest.get(CachedManifest.SERVICE_COMPONENT);
 	}
 
 	public StorageHook load(BaseData target, DataInputStream in) throws IOException {
@@ -144,6 +147,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			if (COMPATIBILITY_LAZYSTART && (target.getStatus() & Constants.BUNDLE_STARTED) == 0)
 				target.setStatus(target.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
 		}
+		storageHook.serviceComponent = AdaptorUtil.readString(in, false);
 		return storageHook;
 	}
 
@@ -176,6 +180,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		out.writeLong(getManifestTimeStamp());
 		out.writeByte(getManifestType());
 		out.writeInt(getBundleManifestVersion());
+		AdaptorUtil.writeStringOrNull(out, serviceComponent);
 	}
 
 	public int getKeyHashCode() {
@@ -228,6 +233,10 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 
 	public int getBundleManifestVersion() {
 		return bundleManfestVersion;
+	}
+
+	public String getServiceComponent() {
+		return serviceComponent;
 	}
 
 	/**

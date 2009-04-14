@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.osgi.framework.Version;
  * Internal class.
  */
 public class CachedManifest extends Dictionary {
-
+	static final String SERVICE_COMPONENT = "Service-Component"; //$NON-NLS-1$
 	private Dictionary manifest = null;
 	private EclipseStorageHook storageHook;
 
@@ -130,6 +130,8 @@ public class CachedManifest extends Dictionary {
 		}
 		if (Constants.BUNDLE_MANIFESTVERSION.equals(keyString))
 			return storageHook.getBundleManifestVersion() == 0 ? null : Integer.toString(storageHook.getBundleManifestVersion());
+		if (SERVICE_COMPONENT.equals(keyString))
+			return storageHook.getServiceComponent();
 		Dictionary result = getManifest();
 		return result == null ? null : result.get(key);
 	}
