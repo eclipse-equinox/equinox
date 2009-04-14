@@ -115,10 +115,8 @@ public class BundleCachingService implements ICachingService {
 
         if (cacheDirectory != null) {
             final File cachedBytecodeFile = new File(cacheDirectory, name);
-            if (cachedBytecodeFile.exists()) {
-                storedClass = read(name, cachedBytecodeFile);
-                isCached = true;
-            }
+            storedClass = read(name, cachedBytecodeFile);
+            isCached = storedClass != null;
         }
 
         if (Log.isDebugEnabled()) {
