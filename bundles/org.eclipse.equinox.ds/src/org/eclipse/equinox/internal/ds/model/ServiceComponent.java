@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -49,6 +49,7 @@ public class ServiceComponent implements Externalizable {
 	String configurationPolicy = CONF_POLICY_OPTIONAL;
 	String activateMethodName = "activate"; //$NON-NLS-1$
 	String deactivateMethodName = "deactivate"; //$NON-NLS-1$
+	String modifyMethodName = "modify"; //$NON-NLS-1$
 
 	// service
 	public Vector serviceInterfaces; // all strings
@@ -65,8 +66,10 @@ public class ServiceComponent implements Externalizable {
 	// --- begin: cache
 	private boolean activateCached = false;
 	private boolean deactivateCached = false;
+	private boolean modifyCached = false;
 	private Method activateMethod;
 	private Method deactivateMethod;
+	private Method modifyMethod;
 	// --- end: cache
 
 	// --- begin: model
@@ -235,6 +238,58 @@ public class ServiceComponent implements Externalizable {
 			}
 			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.CANT_ACTIVATE_INSTANCE, instance, this), null);
 			throw new ComponentException(NLS.bind(Messages.EXCEPTION_ACTIVATING_INSTANCE, instance, name), t);
+			// rethrow exception so resolver is eventually notified that
+			// the processed SCP is bad
+		}
+	}
+
+	void modify(Object instance, ComponentContext context) throws ComponentException {
+		try {
+			if (namespace11) {
+				if (!modifyCached) {
+					modifyCached = true;
+					modifyMethod = getMethod(instance, modifyMethodName, true);
+				}
+				// invoke the method if any
+				if (modifyMethod != null) {
+					Class[] paramTypes = modifyMethod.getParameterTypes();
+					Object[] params = null;
+					if (paramTypes.length == 1) {
+						params = SCRUtil.getObjectArray();
+					} else {
+						params = new Object[paramTypes.length];
+					}
+					for (int i = 0; i < params.length; i++) {
+						if (paramTypes[i] == ComponentContext.class) {
+							params[i] = context;
+						} else if (paramTypes[i] == BundleContext.class) {
+							params[i] = context.getBundleContext();
+						} else if (paramTypes[i] == Map.class) {
+							params[i] = context.getProperties();
+						}
+					}
+
+					try {
+						modifyMethod.invoke(instance, params);
+					} finally {
+						if (params.length == 1) {
+							SCRUtil.release(params);
+						}
+					}
+				} else {
+					if (modifyMethodName != "modify") { //$NON-NLS-1$
+						//the modify method is specified in the component description XML by the user.
+						//It is expected to find it in the implementation class
+						throw new ComponentException(NLS.bind("[SCR] Cannot modify instance {0} of component {1}! The specified modify method was not found!", instance, this));
+					}
+				}
+			}
+		} catch (Throwable t) {
+			if (t instanceof ComponentException) {
+				throw (ComponentException) t;
+			}
+			Activator.log(bc, LogService.LOG_ERROR, NLS.bind("[SCR] Cannot modify instance {0} of component {1}", instance, this), null);
+			throw new ComponentException(NLS.bind("[SCR] Exception while modifying instance {0} of component {1}", instance, name), t);
 			// rethrow exception so resolver is eventually notified that
 			// the processed SCP is bad
 		}
@@ -451,6 +506,7 @@ public class ServiceComponent implements Externalizable {
 		if (namespace11) {
 			buffer.append("\n\tactivate = ").append(activateMethodName); //$NON-NLS-1$
 			buffer.append("\n\tdeactivate = ").append(deactivateMethodName); //$NON-NLS-1$
+			buffer.append("\n\tmodify = ").append(modifyMethodName); //$NON-NLS-1$
 			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy); //$NON-NLS-1$
 		}
 		buffer.append("\n\tfactory = ").append(factory); //$NON-NLS-1$
@@ -520,10 +576,37 @@ public class ServiceComponent implements Externalizable {
 				dictionary.copyFrom(properties);
 				dictionary.writeObject(out);
 			}
+
+			out.writeBoolean(namespace11);
 			if (namespace11) {
-				out.writeUTF(configurationPolicy);
-				out.writeUTF(activateMethodName);
-				out.writeUTF(deactivateMethodName);
+				if (configurationPolicy == CONF_POLICY_OPTIONAL) {
+					//this is the default value. Do not write it. Just add a mark
+					out.writeBoolean(false);
+				} else {
+					out.writeBoolean(true);
+					out.writeUTF(configurationPolicy);
+				}
+				if (activateMethodName == "activate") { //$NON-NLS-1$
+					//this is the default value. Do not write it. Just add a mark
+					out.writeBoolean(false);
+				} else {
+					out.writeBoolean(true);
+					out.writeUTF(activateMethodName);
+				}
+				if (deactivateMethodName == "deactivate") { //$NON-NLS-1$
+					//this is the default value. Do not write it. Just add a mark
+					out.writeBoolean(false);
+				} else {
+					out.writeBoolean(true);
+					out.writeUTF(deactivateMethodName);
+				}
+				if (modifyMethodName == "modify") { //$NON-NLS-1$
+					//this is the default value. Do not write it. Just add a mark
+					out.writeBoolean(false);
+				} else {
+					out.writeBoolean(true);
+					out.writeUTF(modifyMethodName);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -590,14 +673,20 @@ public class ServiceComponent implements Externalizable {
 				}
 				properties = props;
 			}
-			namespace11 = false;
-			try {
-				configurationPolicy = in.readUTF();
-				activateMethodName = in.readUTF();
-				deactivateMethodName = in.readUTF();
-				namespace11 = true;
-			} catch (EOFException eof) {
-				//this could happen if we read component v1.0
+			namespace11 = in.readBoolean();
+			if (namespace11) {
+				flag = in.readBoolean();
+				if (flag)
+					configurationPolicy = in.readUTF();
+				flag = in.readBoolean();
+				if (flag)
+					activateMethodName = in.readUTF();
+				flag = in.readBoolean();
+				if (flag)
+					deactivateMethodName = in.readUTF();
+				flag = in.readBoolean();
+				if (flag)
+					modifyMethodName = in.readUTF();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
