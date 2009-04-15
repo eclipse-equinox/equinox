@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -241,11 +241,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		} else if (type == BundleEvent.LAZY_ACTIVATION) {
 			startedBundle(event.getBundle());
 		} else if (type == BundleEvent.UNINSTALLED && Activator.DBSTORE) {
-			try {
-				storage.deleteComponentDefinitions(event.getBundle().getBundleId());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			storage.deleteComponentDefinitions(event.getBundle().getBundleId());
 		}
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
@@ -474,14 +470,15 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			return;
 		}
 
-		Dictionary allHeaders = bundle.getHeaders();
+		String dsHeader = null;
+		Dictionary allHeaders = bundle.getHeaders(""); //$NON-NLS-1$
 
-		if (!((allHeaders.get(ComponentConstants.SERVICE_COMPONENT)) != null)) {
+		if (!((dsHeader = (String) allHeaders.get(ComponentConstants.SERVICE_COMPONENT)) != null)) {
 			// no component descriptions in this bundle
 			return;
 		}
 
-		Vector components = storage.loadComponentDefinitions(bundle.getBundleId());
+		Vector components = storage.loadComponentDefinitions(bundle, dsHeader);
 		if (components != null && !components.isEmpty()) {
 			if (!hasRegisteredServiceListener) {
 				hasRegisteredServiceListener = true;
@@ -552,14 +549,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	private String getBundleName(Bundle b) {
-		String res = null;
 		if (b.getSymbolicName() != null) {
 			return b.getSymbolicName();
-		} else if ((res = (String) b.getHeaders().get(Constants.BUNDLE_NAME)) != null) {
-			return res;
-		} else {
-			return b.getLocation();
 		}
+		return b.getLocation();
 	}
 
 	public void enableComponent(String name, Bundle bundle) {
