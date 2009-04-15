@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,8 +26,10 @@ import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 
 /**
+ * This class implements a cache for the parsed component XML descriptions. 
+ * 
  * @author Pavlin Dobrev
- * @version 1.1
+ * @author Stoyan Boshev
  */
 
 public class FileStorage extends ComponentStorage {
@@ -36,8 +38,6 @@ public class FileStorage extends ComponentStorage {
 	//Probably it should be in the supplement bundle?
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 
-	private BundleContext bc;
-
 	private String[] dbBundlePath = new String[1];
 	private String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 	private static String CUSTOM_DB_NAME = "SCR"; //$NON-NLS-1$
@@ -45,32 +45,36 @@ public class FileStorage extends ComponentStorage {
 	private ExternalizableDictionary data = new ExternalizableDictionary();
 	private StringBuffer pathBuffer = new StringBuffer();
 	private String separator;
+	private boolean isDirty = false;
 
 	public FileStorage(BundleContext bc) {
-		this.bc = bc;
 		separator = bc.getProperty("path.separator"); //$NON-NLS-1$
 		file = bc.getDataFile(CUSTOM_DB_NAME);
+		FileInputStream fis = null;
 		try {
 			if (file.exists()) {
-				data.readObject(new BufferedInputStream(new FileInputStream(file)));
+				data.readObject(new BufferedInputStream(fis = new FileInputStream(file)));
 			}
-		} catch (FileNotFoundException e) {
-			// should be never thrown
-			e.printStackTrace();
 		} catch (IOException e) {
 			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
 		} catch (Exception e) {
 			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (Exception e) {
+					// ignore
+				}
+			}
 		}
 	}
 
-	public Vector loadComponentDefinitions(long bundleID) {
-		Bundle bundle = null;
+	public Vector loadComponentDefinitions(Bundle bundle, String dsHeader) {
 		try {
-			bundle = bc.getBundle(bundleID);
 			Vector components = null;
 			if (!Activator.DBSTORE) {
-				return parseXMLDeclaration(bundle);
+				return parseXMLDeclaration(bundle, dsHeader);
 			}
 
 			long lastModified;
@@ -81,23 +85,23 @@ public class FileStorage extends ComponentStorage {
 				lastModified = getLastModifiedTimestamp(bundle);
 			}
 
-			dbBundlePath[0] = String.valueOf(bundleID);
+			dbBundlePath[0] = String.valueOf(bundle.getBundleId());
 
 			String lastModifiedValue = (String) data.get(getPath(dbBundlePath));
 			if (lastModifiedValue == null) {
-				components = parseXMLDeclaration(bundle);
+				components = parseXMLDeclaration(bundle, dsHeader);
 				if (components != null && components.size() != 0) {
 					data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
-					saveComponentDefinitions(components, bundleID);
+					saveComponentDefinitions(components, bundle.getBundleId());
 				}
 
 			} else {
 				long dbLastModified = Long.parseLong(lastModifiedValue);
 				if (lastModified > dbLastModified) {
-					components = parseXMLDeclaration(bundle);
+					components = parseXMLDeclaration(bundle, dsHeader);
 					if (components != null && components.size() != 0) {
 						data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
-						saveComponentDefinitions(components, bundleID);
+						saveComponentDefinitions(components, bundle.getBundleId());
 					}
 
 				} else {
@@ -106,7 +110,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable e) {
-			Activator.log.error(NLS.bind(Messages.PROCESSING_BUNDLE_FAILED, Long.toString(bundleID), bundle), e);
+			Activator.log.error(NLS.bind(Messages.PROCESSING_BUNDLE_FAILED, Long.toString(bundle.getBundleId()), bundle), e);
 			return null;
 		}
 	}
@@ -136,9 +140,16 @@ public class FileStorage extends ComponentStorage {
 		return null;
 	}
 
-	public void deleteComponentDefinitions(long bundleID) throws Exception {
+	public void deleteComponentDefinitions(long bundleID) {
 		dbBundlePath[0] = String.valueOf(bundleID);
 		data.remove(getPath(dbBundlePath));
+		dbCompPath[0] = String.valueOf(bundleID);
+		data.remove(getPath(dbCompPath));
+		if (file.exists()) {
+			//delete the file to prevent leaving old information in it
+			file.delete();
+		}
+		isDirty = true;
 	}
 
 	private void saveComponentDefinitions(Vector components, long bundleID) throws Exception {
@@ -152,14 +163,16 @@ public class FileStorage extends ComponentStorage {
 			ByteArrayOutputStream buf = new ByteArrayOutputStream();
 			tmpObj.writeObject(buf);
 			data.put(getPath(dbCompPath), buf.toByteArray());
-			saveFile();
+			isDirty = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void stop() {
-		//no body
+		if (isDirty) {
+			saveFile();
+		}
 	}
 
 	private void saveFile() {
@@ -168,9 +181,7 @@ public class FileStorage extends ComponentStorage {
 			fos = new FileOutputStream(file);
 			try {
 				data.writeObject(fos);
-				fos.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
+				isDirty = false;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -223,14 +234,14 @@ public class FileStorage extends ComponentStorage {
 	}
 
 	private ManifestElement[] parseManifestHeader(Bundle bundle) {
-		Dictionary headers = bundle.getHeaders();
+		Dictionary headers = bundle.getHeaders(""); //$NON-NLS-1$
 		String files = (String) headers.get(ComponentConstants.SERVICE_COMPONENT);
 		if (files == null)
 			return new ManifestElement[0];
 		try {
 			return ManifestElement.parseHeader(ComponentConstants.SERVICE_COMPONENT, files);
 		} catch (BundleException e) {
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "Error attempting parse manifest element header", e); //$NON-NLS-1$
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "Error attempting parse manifest element header", e);
 			return new ManifestElement[0];
 		}
 	}
