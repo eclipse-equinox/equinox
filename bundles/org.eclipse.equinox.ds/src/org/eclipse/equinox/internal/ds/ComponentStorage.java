@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,7 +18,6 @@ import java.util.*;
 import org.eclipse.equinox.internal.ds.model.DeclarationParser;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
-import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 
 /**
@@ -34,24 +33,27 @@ public abstract class ComponentStorage {
 	 * This method will load the component definitions from a bundle. The
 	 * returned value should contain vector with 'ServiceComponent' elements.
 	 * 
-	 * @param bundleID
-	 *            id of the bundle, which is processed and if contains a
-	 *            component definitions - it's xml definition file got parsed.
+	 * @param bundle  bundle, containing DS components
+	 * @param dsHeader  the DS header value which is in the bundle's manifest
 	 * @return <code>null</code> if there are no component definitions.
 	 */
-	public abstract Vector loadComponentDefinitions(long bundleID);
+	public abstract Vector loadComponentDefinitions(Bundle bundle, String dsHeader);
 
-	public abstract void deleteComponentDefinitions(long bundleID) throws Exception;
+	/**
+	 * This method is called when a bundle has been uninstalled and therefore its cached components must be removed
+	 * @param bundleID the id of the uninstalled bundle 
+	 */
+	public abstract void deleteComponentDefinitions(long bundleID);
 
+	/**
+	 * Called when the DS bundle is about to stop. This method must store any unsaved data
+	 */
 	public abstract void stop();
 
-	protected Vector parseXMLDeclaration(Bundle bundle) throws Exception {
+	protected Vector parseXMLDeclaration(Bundle bundle, String dsHeader) throws Exception {
 		Vector components = new Vector();
-		Dictionary headers = bundle.getHeaders(null);
-		String header = (String) headers.get(ComponentConstants.SERVICE_COMPONENT);
-
-		if (header != null) {
-			StringTokenizer tok = new StringTokenizer(header, ","); //$NON-NLS-1$
+		if (dsHeader != null) {
+			StringTokenizer tok = new StringTokenizer(dsHeader, ","); //$NON-NLS-1$
 			// the parser is not thread safe!!!
 			synchronized (parser) {
 				// process all definition file
