@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -48,6 +48,7 @@ public class DeclarationParser implements ExTagListener {
 	private static final String ATTR_CONF_POLICY = "configuration-policy"; //$NON-NLS-1$
 	private static final String ATTR_ACTIVATE = "activate"; //$NON-NLS-1$
 	private static final String ATTR_DEACTIVATE = "deactivate"; //$NON-NLS-1$
+	private static final String ATTR_MODIFY = "modify"; //$NON-NLS-1$
 
 	private static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
 	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
@@ -511,6 +512,14 @@ public class DeclarationParser implements ExTagListener {
 			if (tmp != null) {
 				currentComponent.deactivateMethodName = tmp;
 			}
+			//processing attribute modify
+			tmp = tag.getAttribute(ATTR_MODIFY);
+			if (tmp != null && tmp.length() == 0) {
+				tmp = null;
+			}
+			if (tmp != null) {
+				currentComponent.modifyMethodName = tmp;
+			}
 		} else {
 			if (tag.getAttribute(ATTR_CONF_POLICY) != null) {
 				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_CONF_POLICY, Integer.toString(tag.getLine())));
@@ -520,6 +529,9 @@ public class DeclarationParser implements ExTagListener {
 			}
 			if (tag.getAttribute(ATTR_DEACTIVATE) != null) {
 				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_DEACTIVATE, Integer.toString(tag.getLine())));
+			}
+			if (tag.getAttribute(ATTR_MODIFY) != null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_MODIFY, Integer.toString(tag.getLine())));
 			}
 		}
 	}
