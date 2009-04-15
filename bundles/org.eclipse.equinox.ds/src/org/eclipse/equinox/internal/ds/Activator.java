@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -130,7 +130,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 */
 	public void start(BundleContext bc) throws Exception {
 		Activator.bc = bc;
-		startup = getBoolean("equinox.measurements.bundles"); //$NON-NLS-1$
+		startup = getBoolean("equinox.measurements.bundles", false); //$NON-NLS-1$
 		if (startup) {
 			long tmp = System.currentTimeMillis();
 			time = new long[] {tmp, 0, tmp};
@@ -139,13 +139,13 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		debugTracker = new ServiceTracker(bc, DebugOptions.class.getName(), null);
 		debugTracker.open();
 		log = new Log(bc, false);
-		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug"); //$NON-NLS-1$ //$NON-NLS-2$
-		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf"); //$NON-NLS-1$ //$NON-NLS-2$
-		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all"); //$NON-NLS-1$ //$NON-NLS-2$
+		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug", false); //$NON-NLS-1$ //$NON-NLS-2$
+		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf", false); //$NON-NLS-1$ //$NON-NLS-2$
+		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all", false); //$NON-NLS-1$ //$NON-NLS-2$
 
-		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", false) || getBoolean("equinox.ds.dbstore"); //$NON-NLS-1$ //$NON-NLS-2$
+		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", true) || getBoolean("equinox.ds.dbstore", true); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setDebug(DEBUG);
-		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print"); //$NON-NLS-1$ //$NON-NLS-2$
+		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print", false); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setPrintOnConsole(print);
 
 		if (startup)
@@ -154,7 +154,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		boolean hasHeaders = false;
 		Bundle[] allBundles = bc.getBundles();
 		for (int i = 0; i < allBundles.length; i++) {
-			Dictionary allHeaders = allBundles[i].getHeaders();
+			Dictionary allHeaders = allBundles[i].getHeaders(""); //$NON-NLS-1$
 			if (allHeaders.get(ComponentConstants.SERVICE_COMPONENT) != null) {
 				hasHeaders = true;
 				break;
@@ -221,8 +221,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	}
 
 	public void bundleChanged(BundleEvent event) {
-		if (event.getType() == BundleEvent.STARTING) {
-			Dictionary allHeaders = event.getBundle().getHeaders();
+		if (event.getType() == BundleEvent.STARTED || event.getType() == BundleEvent.LAZY_ACTIVATION) {
+			Dictionary allHeaders = event.getBundle().getHeaders(""); //$NON-NLS-1$ 
 			if ((allHeaders.get(ComponentConstants.SERVICE_COMPONENT)) != null) {
 				// The bundle is holding components - activate scr
 				bc.removeBundleListener(this);
@@ -231,9 +231,16 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		}
 	}
 
-	public static boolean getBoolean(String property) {
+	public static boolean getBoolean(String property, boolean defaultValue) {
 		String prop = (bc != null) ? bc.getProperty(property) : System.getProperty(property);
-		return ((prop != null) && prop.equalsIgnoreCase("true")); //$NON-NLS-1$
+		if (prop != null) {
+			return prop.equalsIgnoreCase("true"); //$NON-NLS-1$
+		}
+		return defaultValue;
+	}
+
+	public static boolean getBoolean(String property) {
+		return getBoolean(property, false);
 	}
 
 	public static int getInteger(String property, int defaultValue) {
