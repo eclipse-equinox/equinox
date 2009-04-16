@@ -153,8 +153,7 @@ abstract public class BundleFile {
 			return null;
 		if (hostData != null)
 			hostBundleID = hostData.getBundleID();
-		if (path.length() == 0 || path.charAt(0) != '/')
-			path = '/' + path;
+		path = fixTrailingSlash(path, bundleEntry);
 		try {
 			//use the constant string for the protocol to prevent duplication
 			return secureAction.getURL(Constants.OSGI_RESOURCE_URL_PROTOCOL, Long.toString(hostBundleID) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(hostData.getAdaptor().hashCode()), index, path, new Handler(bundleEntry, hostData == null ? null : hostData.getAdaptor()));
@@ -211,4 +210,20 @@ abstract public class BundleFile {
 	public String toString() {
 		return String.valueOf(basefile);
 	}
+
+	public static String fixTrailingSlash(String path, BundleEntry entry) {
+		if (path.length() == 0 || path.charAt(0) != '/')
+			path = '/' + path;
+		String name = entry.getName();
+		boolean pathSlash = path.charAt(path.length() - 1) == '/';
+		boolean entrySlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
+		if (entrySlash != pathSlash) {
+			if (entrySlash)
+				path = path + '/';
+			else
+				path = path.substring(0, path.length() - 1);
+		}
+		return path;
+	}
+
 }

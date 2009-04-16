@@ -111,8 +111,7 @@ public class BaseData implements BundleData {
 		BundleEntry entry = getBundleFile().getEntry(path);
 		if (entry == null)
 			return null;
-		if (path.length() == 0 || path.charAt(0) != '/')
-			path = '/' + path;
+		path = BundleFile.fixTrailingSlash(path, entry);
 		try {
 			//use the constant string for the protocol to prevent duplication
 			return new URL(Constants.OSGI_ENTRY_URL_PROTOCOL, Long.toString(id) + BundleResourceHandler.BID_FWKID_SEPARATOR + Integer.toString(adaptor.hashCode()), 0, path, new Handler(entry, adaptor));

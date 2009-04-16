@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,11 +24,11 @@ public class FileBundleEntry extends BundleEntry {
 	/**
 	 * File for this entry.
 	 */
-	private File file;
+	private final File file;
 	/**
 	 * The name for this entry
 	 */
-	String name;
+	private final String name;
 
 	/**
 	 * Constructs the BundleEntry using a File.
@@ -37,6 +37,12 @@ public class FileBundleEntry extends BundleEntry {
 	 */
 	FileBundleEntry(File file, String name) {
 		this.file = file;
+		boolean endsInSlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
+		if (file.isDirectory()) {
+			if (!endsInSlash)
+				name += '/';
+		} else if (endsInSlash)
+			name = name.substring(0, name.length() - 1);
 		this.name = name;
 	}
 

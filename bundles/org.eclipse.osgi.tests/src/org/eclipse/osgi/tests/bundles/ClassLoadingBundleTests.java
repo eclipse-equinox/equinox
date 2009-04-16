@@ -733,6 +733,60 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("hashcode equals 3.1", testResource4.hashCode(), testResource3.hashCode()); //$NON-NLS-1$
 	}
 
+	public void testGetEntryDir01() throws BundleException {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {test});
+		URL aDir = test.getEntry("a"); //$NON-NLS-1$
+		assertNotNull("aDir", aDir); //$NON-NLS-1$
+		assertTrue(aDir.toExternalForm(), aDir.getFile().endsWith("/")); //$NON-NLS-1$
+		URL bDir = test.getEntry("a/b"); //$NON-NLS-1$
+		assertNotNull("bDir", bDir); //$NON-NLS-1$
+		assertTrue(bDir.toExternalForm(), bDir.getFile().endsWith("/")); //$NON-NLS-1$
+
+		aDir = test.getEntry("a/"); //$NON-NLS-1$
+		assertNotNull("aDir", aDir); //$NON-NLS-1$
+		assertTrue(aDir.toExternalForm(), aDir.getFile().endsWith("/")); //$NON-NLS-1$
+		bDir = test.getEntry("a/b/"); //$NON-NLS-1$
+		assertNotNull("bDir", bDir); //$NON-NLS-1$
+		assertTrue(bDir.toExternalForm(), bDir.getFile().endsWith("/")); //$NON-NLS-1$
+
+		URL dResource = test.getEntry("a/b/c/d"); //$NON-NLS-1$
+		assertNotNull("dResource", dResource); //$NON-NLS-1$
+		assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+
+		dResource = test.getEntry("a/b/c/d/"); //$NON-NLS-1$
+		if (dResource != null) // note that File bundles will return non-null whilc jar'ed bundles will return null
+			assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+
+	}
+
+	public void testGetResourceDir01() throws BundleException {
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		installer.resolveBundles(new Bundle[] {test});
+		URL aDir = test.getResource("a"); //$NON-NLS-1$
+		assertNotNull("aDir", aDir); //$NON-NLS-1$
+		assertTrue(aDir.toExternalForm(), aDir.getFile().endsWith("/")); //$NON-NLS-1$
+		URL bDir = test.getResource("a/b"); //$NON-NLS-1$
+		assertNotNull("bDir", bDir); //$NON-NLS-1$
+		assertTrue(bDir.toExternalForm(), bDir.getFile().endsWith("/")); //$NON-NLS-1$
+
+		aDir = test.getResource("a/"); //$NON-NLS-1$
+		assertNotNull("aDir", aDir); //$NON-NLS-1$
+		assertTrue(aDir.toExternalForm(), aDir.getFile().endsWith("/")); //$NON-NLS-1$
+		bDir = test.getResource("a/b/"); //$NON-NLS-1$
+		assertNotNull("bDir", bDir); //$NON-NLS-1$
+		assertTrue(bDir.toExternalForm(), bDir.getFile().endsWith("/")); //$NON-NLS-1$
+
+		URL dResource = test.getResource("a/b/c/d"); //$NON-NLS-1$
+		assertNotNull("dResource", dResource); //$NON-NLS-1$
+		assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+
+		dResource = test.getResource("a/b/c/d/"); //$NON-NLS-1$
+		if (dResource != null) // note that File bundles will return non-null whilc jar'ed bundles will return null
+			assertFalse(dResource.toExternalForm(), dResource.getFile().endsWith("/")); //$NON-NLS-1$
+
+	}
+
 	public void testBootGetResources() throws Exception {
 		if (System.getProperty(Constants.FRAMEWORK_BOOTDELEGATION) != null)
 			return; // cannot really test this if this property is set
@@ -890,7 +944,7 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 	}
 
 	public void testURI() throws URISyntaxException {
-		new URI("bundleentry", "1", "/test", null);
+		new URI("bundleentry", "1", "/test", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public void testMultipleExportFragments01() throws Exception {
@@ -1246,10 +1300,10 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 	public void testManifestPackageSpec() {
 		try {
-			Bundle test = installer.installBundle("test.manifestpackage");
+			Bundle test = installer.installBundle("test.manifestpackage"); //$NON-NLS-1$
 			test.start();
 		} catch (Exception e) {
-			fail("Unexpected exception", e);
+			fail("Unexpected exception", e); //$NON-NLS-1$
 		}
 	}
 
