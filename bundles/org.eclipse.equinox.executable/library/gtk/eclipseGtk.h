@@ -15,6 +15,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 struct GTK_PTRS { 
+	short not_initialized;
 	GtkObject*	(*gtk_adjustment_new)		(gdouble, gdouble, gdouble, gdouble, gdouble, gdouble);
 	void		(*gtk_box_set_child_packing)(GtkBox*, GtkWidget*, gboolean, gboolean, guint, GtkPackType);
 	void		(*gtk_container_add)		(GtkContainer*, GtkWidget*);

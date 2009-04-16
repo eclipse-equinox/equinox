@@ -47,77 +47,37 @@
 </scannerInfoProvider>
 </profile>
 </storageModule>
-<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-<pathentry kind="src" path=""/>
-<pathentry kind="out" path=""/>
-<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-</storageModule>
-
 <storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="converted.config.1797282818" moduleId="org.eclipse.cdt.core.settings" name="convertedConfig">
 <externalSettings/>
 <extensions>
 <extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
 <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-<extension id="org.eclipse.cdt.core.MachO" point="org.eclipse.cdt.core.BinaryParser">
-<attribute key="c++filt" value="c++filt"/>
-</extension>
+<extension id="org.eclipse.cdt.core.MachO" point="org.eclipse.cdt.core.BinaryParser"/>
 </extensions>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
-
-<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-
-
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
-<target name="all - carbon" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<target name="all" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_carbon.mak</buildArguments>
+<buildArguments>-f make_macosx.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_carbon.mak</buildArguments>
+<buildArguments>-f make_macosx.mak</buildArguments>
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="all - cocoa" path="library/carbon" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_cocoa.mak DEFAULT_WS=cocoa</buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif MOTIF_HOME=/eclipse/motif21</buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-f make_linux.mak</buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="all-mingw" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
-<buildArguments>-f make_mingw.mak JAVA_HOME=C:/Dev/Java/IBM-1.5.0</buildArguments>
+<buildArguments>-f make_mingw.mak JAVA_HOME=C:/Dev/Java/IBM_1.5.0</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/win32" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -125,15 +85,27 @@
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="linux-all" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-f make_linux.mak JAVA_HOME=/usr/java/1.5 DEFAULT_WS=motif MOTIF_HOME=/eclipse/motif21</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" path="library/motif" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-f make_linux.mak</buildArguments>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
 </target>
 <target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make JAVA_HOME=/usr/java/sun-150 DEFAULT_OS_ARCH=x86_64</buildCommand>
+<buildCommand>make</buildCommand>
 <buildArguments>-f make_linux.mak</buildArguments>
 <buildTarget>all</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
 </target>
 <target name="clean" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
@@ -141,9 +113,18 @@
 <buildTarget>clean</buildTarget>
 <stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
 </target>
 </buildTargets>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry include="/usr/X11R6/include" kind="inc" path="" system="true"/>
+<pathentry include="/opt/gnome/include/gtk-2.0" kind="inc" path="" system="true"/>
+<pathentry include="/opt/gnome/include/glib-2.0" kind="inc" path="" system="true"/>
+<pathentry kind="src" path=""/>
+<pathentry kind="out" path=""/>
+<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
 </storageModule>
 </cconfiguration>
 </storageModule>

@@ -14,7 +14,7 @@
 #include <dlfcn.h>
 #include <string.h>
 
-struct GTK_PTRS gtk;
+struct GTK_PTRS gtk = { 1 }; /* initialize the first field "not_initialized" so we can tell when we've loaded the pointers */
 
 /* tables to help initialize the function pointers */
 /* functions from libgtk-x11-2.0 */
