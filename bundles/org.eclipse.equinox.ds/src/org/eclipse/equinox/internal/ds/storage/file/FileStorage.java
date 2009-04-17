@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.storage.file;
 
+import org.eclipse.equinox.internal.ds.Messages;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -165,7 +167,7 @@ public class FileStorage extends ComponentStorage {
 			data.put(getPath(dbCompPath), buf.toByteArray());
 			isDirty = true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.ERROR_SAVING_COMPONENT_DEFINITIONS, e);
 		}
 	}
 
@@ -183,16 +185,16 @@ public class FileStorage extends ComponentStorage {
 				data.writeObject(fos);
 				isDirty = false;
 			} catch (Exception e) {
-				e.printStackTrace();
+				Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
 			}
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.FILE_DOESNT_EXIST_OR_DIRECTORY, e);
 		} finally {
 			if (fos != null) {
 				try {
 					fos.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					//ignore
 				}
 			}
 		}
@@ -241,7 +243,7 @@ public class FileStorage extends ComponentStorage {
 		try {
 			return ManifestElement.parseHeader(ComponentConstants.SERVICE_COMPONENT, files);
 		} catch (BundleException e) {
-			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, "Error attempting parse manifest element header", e);
+			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, Messages.ERROR_PARSING_MANIFEST_HEADER, e);
 			return new ManifestElement[0];
 		}
 	}
