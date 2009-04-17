@@ -609,7 +609,7 @@ public class ServiceComponent implements Externalizable {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
 		}
 	}
 
@@ -689,7 +689,7 @@ public class ServiceComponent implements Externalizable {
 					modifyMethodName = in.readUTF();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.ERROR_READING_OBJECT, e);
 		}
 	}
 

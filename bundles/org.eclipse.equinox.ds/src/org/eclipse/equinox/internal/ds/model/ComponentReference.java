@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -579,7 +579,6 @@ public class ComponentReference implements Externalizable {
 	 */
 	public synchronized void writeObject(OutputStream o) throws Exception {
 		try {
-
 			DataOutputStream out;
 			if (o instanceof DataOutputStream) {
 				out = (DataOutputStream) o;
@@ -607,7 +606,7 @@ public class ComponentReference implements Externalizable {
 			if (flag)
 				out.writeUTF(unbind);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
 		}
 	}
 
@@ -618,7 +617,6 @@ public class ComponentReference implements Externalizable {
 	 */
 	public synchronized void readObject(InputStream s) throws Exception {
 		try {
-
 			DataInputStream in;
 			if (s instanceof DataInputStream) {
 				in = (DataInputStream) s;
@@ -642,7 +640,7 @@ public class ComponentReference implements Externalizable {
 			if (flag)
 				unbind = in.readUTF();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Activator.log.error(Messages.ERROR_READING_OBJECT, e);
 		}
 	}
 
