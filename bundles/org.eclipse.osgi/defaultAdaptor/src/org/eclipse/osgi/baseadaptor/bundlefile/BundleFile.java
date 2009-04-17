@@ -217,6 +217,8 @@ abstract public class BundleFile {
 		if (path.charAt(0) != '/')
 			path = '/' + path;
 		String name = entry.getName();
+		if (name.length() == 0)
+			return path;
 		boolean pathSlash = path.charAt(path.length() - 1) == '/';
 		boolean entrySlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
 		if (entrySlash != pathSlash) {
