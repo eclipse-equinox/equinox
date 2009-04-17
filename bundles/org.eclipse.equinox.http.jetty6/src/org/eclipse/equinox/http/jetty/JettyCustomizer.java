@@ -19,6 +19,7 @@ import java.util.Dictionary;
  * This abstract class must be extended by clients which wish to customize
  * the created Jetty contexts or connectors further.
  * </p>
+ * @since 1.1
  */
 public abstract class JettyCustomizer {
 
