@@ -13,7 +13,7 @@ package org.slf4j;
 import org.mortbay.log.Log;
 import org.mortbay.log.StdErrLog;
 
-// NOTE: This class is not a real SLF4J implementation and MUST NOT be exported!
+// NOTE: This class is not a real SLF4J implementation and MUST NOT be exported as a general implementation!
 // It is a place-holder to allow overriding the default logging done in Jetty
 // See org.mortbay.log.Log and org.mortbay.log.Slf4jLog 
 public class Logger extends StdErrLog {
@@ -135,6 +135,6 @@ public class Logger extends StdErrLog {
 		if (threshold > ERROR)
 			return;
 
-		super.warn("ERROR:  " + msg, th);
+		super.warn("ERROR:  " + msg, th); //$NON-NLS-1$
 	}
 }
