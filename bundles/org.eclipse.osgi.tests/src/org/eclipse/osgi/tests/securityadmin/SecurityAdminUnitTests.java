@@ -617,7 +617,29 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		try {
+			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
+			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
+		} catch (AccessControlException e) {
+			// expected
+		}
+		try {
+			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (AccessControlException e) {
+			fail("Unexpected AccessControlExcetpion", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testAccessControlContext01a() {
+		// test single row with signer condition
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
+		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
+
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=test1,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -641,7 +663,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test1,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -663,7 +685,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -681,7 +703,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows = update.getConditionalPermissionInfos();
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION2}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
-		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -704,7 +726,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -718,7 +740,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			// expected
 		}
 
-		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US", "cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$ //$NON-NLS-2$
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test1,c=US", "cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$ //$NON-NLS-2$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (AccessControlException e) {
@@ -735,7 +757,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		// test with empty rows
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -745,7 +767,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		}
 		// set the default permissions
 		securityAdmin.setDefaultPermissions(READWRITE_INFOS);
-		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -769,7 +791,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {SIGNER_CONDITION1}, READWRITE_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "read")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (AccessControlException e) {
@@ -790,7 +812,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		List rows = update.getConditionalPermissionInfos();
 		rows.add(securityAdmin.newConditionalPermissionInfo(null, new ConditionInfo[] {NOT_SIGNER_CONDITION1}, READONLY_INFOS, ConditionalPermissionInfo.ALLOW));
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
-		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test1,c=US"}); //$NON-NLS-1$
+		AccessControlContext acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test1,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$
@@ -804,7 +826,7 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 			// expected
 		}
 
-		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,cn=FR;cn=test2,c=US"}); //$NON-NLS-1$
+		acc = securityAdmin.getAccessControlContext(new String[] {"cn=t1,c=FR;cn=test2,c=US"}); //$NON-NLS-1$
 		try {
 			acc.checkPermission(new FilePermission("test", "write")); //$NON-NLS-1$ //$NON-NLS-2$
 			fail("expecting AccessControlExcetpion"); //$NON-NLS-1$

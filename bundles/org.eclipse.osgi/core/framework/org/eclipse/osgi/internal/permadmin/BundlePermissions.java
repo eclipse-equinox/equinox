@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.osgi.framework.Bundle;
 
 public final class BundlePermissions extends PermissionCollection {
 	private static final long serialVersionUID = -5443618108312606612L;
@@ -30,12 +30,12 @@ public final class BundlePermissions extends PermissionCollection {
 		}
 	};
 
-	private final AbstractBundle bundle;
+	private final Bundle bundle;
 	private final SecurityAdmin securityAdmin;
 	private final PermissionInfoCollection impliedPermissions;
 	private final PermissionInfoCollection restrictedPermissions;
 
-	public BundlePermissions(AbstractBundle bundle, SecurityAdmin securityAdmin, PermissionInfoCollection impliedPermissions, PermissionInfoCollection restrictedPermissions) {
+	public BundlePermissions(Bundle bundle, SecurityAdmin securityAdmin, PermissionInfoCollection impliedPermissions, PermissionInfoCollection restrictedPermissions) {
 		this.bundle = bundle;
 		this.securityAdmin = securityAdmin;
 		this.impliedPermissions = impliedPermissions;
@@ -64,7 +64,7 @@ public final class BundlePermissions extends PermissionCollection {
 		return securityAdmin.checkPermission(permission, this);
 	}
 
-	public AbstractBundle getBundle() {
+	public Bundle getBundle() {
 		return bundle;
 	}
 

@@ -11,14 +11,15 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.URL;
 import java.security.*;
+import java.security.cert.*;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.internal.core.*;
-import org.eclipse.osgi.internal.signedcontent.DNChainMatching;
-import org.osgi.framework.AdminPermission;
-import org.osgi.framework.FrameworkEvent;
+import org.eclipse.osgi.framework.internal.core.Constants;
+import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
@@ -50,6 +51,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	private final Framework framework;
 	private final PermissionInfo[] impliedPermissionInfos;
 	private final EquinoxSecurityManager supportedSecurityManager;
+
+	private SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, Framework framework, PermissionInfo[] impliedPermissionInfos, PermissionInfoCollection permAdminDefaults) {
+		this.supportedSecurityManager = supportedSecurityManager;
+		this.framework = framework;
+		this.impliedPermissionInfos = impliedPermissionInfos;
+		this.permAdminDefaults = permAdminDefaults;
+		this.permissionStorage = null;
+	}
 
 	public SecurityAdmin(EquinoxSecurityManager supportedSecurityManager, Framework framework, PermissionStorage permissionStorage) throws IOException {
 		this.supportedSecurityManager = supportedSecurityManager;
@@ -104,7 +113,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		// save off the current state of the world while holding the lock
 		synchronized (lock) {
 			// get location the hard way to avoid permission check
-			locationCollection = permAdminTable.getCollection(bundlePermissions.getBundle().getBundleData().getLocation());
+			Bundle bundle = bundlePermissions.getBundle();
+			locationCollection = bundle instanceof AbstractBundle ? permAdminTable.getCollection(((AbstractBundle) bundle).getBundleData().getLocation()) : null;
 			curCondAdminTable = condAdminTable;
 			curPermAdminDefaults = permAdminDefaults;
 		}
@@ -230,45 +240,8 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	public AccessControlContext getAccessControlContext(String[] signers) {
-		Enumeration infos = getConditionalPermissionInfos();
-		ArrayList securityRows = new ArrayList();
-		if (infos != null && infos.hasMoreElements()) {
-			// enumerate through all the rows
-			while (infos.hasMoreElements()) {
-				SecurityRow condPermInfo = (SecurityRow) infos.nextElement();
-				ConditionInfo[] condInfo = condPermInfo.internalGetConditionInfos();
-				boolean match = true;
-				// check that each condition is a signer condition
-				for (int i = 0; match && i < condInfo.length; i++) {
-					if (BundleSignerCondition.class.getName().equals(condInfo[i].getType())) {
-						String[] args = condInfo[i].getArgs();
-						String condSigners = args.length > 0 ? args[0] : null;
-						if (condSigners != null) {
-							match = false;
-							boolean negate = (args.length == 2) ? "!".equals(args[1]) : false; //$NON-NLS-1$
-							for (int j = 0; j < signers.length && !match; j++)
-								match = (negate ^ DNChainMatching.match(signers[i], condSigners));
-						} else {
-							match = false;
-						}
-					} else {
-						// contains a non signer condition; cannot match
-						match = false;
-					}
-				}
-				if (match)
-					// found match add the row; keeping the row order
-					securityRows.add(condPermInfo);
-			}
-		} else {
-			PermissionCollection defaultPermissions;
-			synchronized (lock) {
-				defaultPermissions = permAdminDefaults == null ? DEFAULT_DEFAULT : permAdminDefaults;
-			}
-			return new AccessControlContext(new ProtectionDomain[] {new ProtectionDomain(null, defaultPermissions)});
-		}
-		SecurityTable table = new SecurityTable(this, (SecurityRow[]) securityRows.toArray(new SecurityRow[securityRows.size()]));
-		return new AccessControlContext(new ProtectionDomain[] {new ProtectionDomain(null, table)});
+		SecurityAdmin snapShot = getSnapShot();
+		return new AccessControlContext(new ProtectionDomain[] {createProtectionDomain(createMockBundle(signers), snapShot)});
 	}
 
 	/**
@@ -299,6 +272,19 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	 */
 	public ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms) {
 		return setConditionalPermissionInfo(name, conds, perms, true);
+	}
+
+	private SecurityAdmin getSnapShot() {
+		SecurityAdmin sa;
+		synchronized (lock) {
+			sa = new SecurityAdmin(supportedSecurityManager, framework, impliedPermissionInfos, permAdminDefaults);
+			SecurityRow[] rows = condAdminTable.getRows();
+			SecurityRow[] rowsSnapShot = new SecurityRow[rows.length];
+			for (int i = 0; i < rows.length; i++)
+				rowsSnapShot[i] = new SecurityRow(sa, rows[i].getName(), rows[i].getConditionInfos(), rows[i].getPermissionInfos(), rows[i].getAccessDecision());
+			sa.condAdminTable = new SecurityTable(sa, rowsSnapShot);
+		}
+		return sa;
 	}
 
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
@@ -368,15 +354,19 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return "generated_" + Long.toString(nextID++); //$NON-NLS-1$;
 	}
 
-	public EquinoxProtectionDomain createProtectionDomain(AbstractBundle bundle) {
+	public EquinoxProtectionDomain createProtectionDomain(Bundle bundle) {
+		return createProtectionDomain(bundle, this);
+	}
+
+	private EquinoxProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
 		PermissionInfoCollection impliedPermissions = getImpliedPermission(bundle);
 		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm"), framework), bundle); //$NON-NLS-1$
 		PermissionInfoCollection restrictedPermissions = restrictedInfos == null ? null : new PermissionInfoCollection(restrictedInfos);
-		BundlePermissions bundlePermissions = new BundlePermissions(bundle, this, impliedPermissions, restrictedPermissions);
+		BundlePermissions bundlePermissions = new BundlePermissions(bundle, sa, impliedPermissions, restrictedPermissions);
 		return new EquinoxProtectionDomain(bundlePermissions);
 	}
 
-	private PermissionInfoCollection getImpliedPermission(AbstractBundle bundle) {
+	private PermissionInfoCollection getImpliedPermission(Bundle bundle) {
 		if (impliedPermissionInfos == null)
 			return null;
 		// create the implied AdminPermission actions for this bundle
@@ -387,16 +377,16 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return new PermissionInfoCollection(getFileRelativeInfos(bundleImpliedInfos, bundle));
 	}
 
-	private PermissionInfo[] getFileRelativeInfos(PermissionInfo[] permissionInfos, AbstractBundle bundle) {
-		if (permissionInfos == null)
-			return null;
+	private PermissionInfo[] getFileRelativeInfos(PermissionInfo[] permissionInfos, Bundle bundle) {
+		if (permissionInfos == null || !(bundle instanceof AbstractBundle))
+			return permissionInfos;
 		PermissionInfo[] results = new PermissionInfo[permissionInfos.length];
 		for (int i = 0; i < permissionInfos.length; i++) {
 			results[i] = permissionInfos[i];
 			if ("java.io.FilePermission".equals(permissionInfos[i].getType())) { //$NON-NLS-1$
 				File file = new File(permissionInfos[i].getName());
 				if (!file.isAbsolute()) { // relative name
-					File target = bundle.getBundleData().getDataFile(permissionInfos[i].getName());
+					File target = ((AbstractBundle) bundle).getBundleData().getDataFile(permissionInfos[i].getName());
 					if (target != null)
 						results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
 				}
@@ -476,5 +466,392 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			}
 		}
 		return info;
+	}
+
+	private static Bundle createMockBundle(String[] signers) {
+		Map /* <X509Certificate, List<X509Certificate>> */signersMap = new HashMap();
+		for (int i = 0; i < signers.length; i++) {
+			List chain = parseDNchain(signers[i]);
+			List /* <X509Certificate> */signersList = new ArrayList();
+			Principal subject = null, issuer = null;
+			X509Certificate first = null;
+			for (Iterator iChain = chain.iterator(); iChain.hasNext();) {
+				subject = issuer == null ? new MockPrincipal((String) iChain.next()) : issuer;
+				issuer = iChain.hasNext() ? new MockPrincipal((String) iChain.next()) : subject;
+				X509Certificate cert = new MockX509Certificate(subject, issuer);
+				if (first == null)
+					first = cert;
+				signersList.add(cert);
+			}
+			if (subject != issuer)
+				signersList.add(new MockX509Certificate(issuer, issuer));
+			signersMap.put(first, signersList);
+		}
+		return new MockBundle(signersMap);
+	}
+
+	static class MockBundle implements Bundle {
+		private final Map signers;
+
+		MockBundle(Map signers) {
+			this.signers = signers;
+		}
+
+		public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+			return null;
+		}
+
+		public BundleContext getBundleContext() {
+			return null;
+		}
+
+		public long getBundleId() {
+			return -1;
+		}
+
+		public URL getEntry(String path) {
+			return null;
+		}
+
+		public Enumeration getEntryPaths(String path) {
+			return null;
+		}
+
+		public Dictionary getHeaders() {
+			return new Hashtable();
+		}
+
+		public Dictionary getHeaders(String locale) {
+			return getHeaders();
+		}
+
+		public long getLastModified() {
+			return 0;
+		}
+
+		public String getLocation() {
+			return ""; //$NON-NLS-1$
+		}
+
+		public ServiceReference[] getRegisteredServices() {
+			return null;
+		}
+
+		public URL getResource(String name) {
+			return null;
+		}
+
+		/**
+		 * @throws IOException  
+		 */
+		public Enumeration getResources(String name) throws IOException {
+			return null;
+		}
+
+		public ServiceReference[] getServicesInUse() {
+			return null;
+		}
+
+		public Map getSignerCertificates(int signersType) {
+			return new HashMap(signers);
+		}
+
+		public int getState() {
+			return Bundle.UNINSTALLED;
+		}
+
+		public String getSymbolicName() {
+			return null;
+		}
+
+		public Version getVersion() {
+			return Version.emptyVersion;
+		}
+
+		public boolean hasPermission(Object permission) {
+			return false;
+		}
+
+		/**
+		 * @throws ClassNotFoundException  
+		 */
+		public Class loadClass(String name) throws ClassNotFoundException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void start(int options) throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void start() throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void stop(int options) throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void stop() throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void uninstall() throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void update() throws BundleException {
+			throw new IllegalStateException();
+		}
+
+		/**
+		 * @throws BundleException  
+		 */
+		public void update(InputStream in) throws BundleException {
+			throw new IllegalStateException();
+		}
+	}
+
+	private static class MockX509Certificate extends X509Certificate {
+		private final Principal subject;
+		private final Principal issuer;
+
+		MockX509Certificate(Principal subject, Principal issuer) {
+			this.subject = subject;
+			this.issuer = issuer;
+		}
+
+		public Principal getSubjectDN() {
+			return subject;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj instanceof MockX509Certificate)
+				return subject.equals(((MockX509Certificate) obj).subject) && issuer.equals(((MockX509Certificate) obj).issuer);
+			return false;
+		}
+
+		public int hashCode() {
+			return subject.hashCode() + issuer.hashCode();
+		}
+
+		public String toString() {
+			return subject.toString();
+		}
+
+		/**
+		 * @throws CertificateExpiredException 
+		 * @throws java.security.cert.CertificateNotYetValidException  
+		 */
+		public void checkValidity() throws CertificateExpiredException, java.security.cert.CertificateNotYetValidException {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @throws java.security.cert.CertificateExpiredException 
+		 * @throws java.security.cert.CertificateNotYetValidException  
+		 */
+		public void checkValidity(Date var0) throws java.security.cert.CertificateExpiredException, java.security.cert.CertificateNotYetValidException {
+			throw new UnsupportedOperationException();
+		}
+
+		public int getBasicConstraints() {
+			throw new UnsupportedOperationException();
+		}
+
+		public Principal getIssuerDN() {
+			return issuer;
+		}
+
+		public boolean[] getIssuerUniqueID() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean[] getKeyUsage() {
+			throw new UnsupportedOperationException();
+		}
+
+		public Date getNotAfter() {
+			throw new UnsupportedOperationException();
+		}
+
+		public Date getNotBefore() {
+			throw new UnsupportedOperationException();
+		}
+
+		public BigInteger getSerialNumber() {
+			throw new UnsupportedOperationException();
+		}
+
+		public String getSigAlgName() {
+			throw new UnsupportedOperationException();
+		}
+
+		public String getSigAlgOID() {
+			throw new UnsupportedOperationException();
+		}
+
+		public byte[] getSigAlgParams() {
+			throw new UnsupportedOperationException();
+		}
+
+		public byte[] getSignature() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean[] getSubjectUniqueID() {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @throws CertificateEncodingException  
+		 */
+		public byte[] getTBSCertificate() throws CertificateEncodingException {
+			throw new UnsupportedOperationException();
+		}
+
+		public int getVersion() {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @throws CertificateEncodingException  
+		 */
+		public byte[] getEncoded() throws CertificateEncodingException {
+			throw new UnsupportedOperationException();
+		}
+
+		public PublicKey getPublicKey() {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @throws java.security.InvalidKeyException 
+		 * @throws java.security.NoSuchAlgorithmException  
+		 * @throws java.security.NoSuchProviderException 
+		 * @throws java.security.SignatureException 
+		 * @throws java.security.cert.CertificateException 
+		 */
+		public void verify(PublicKey var0) throws java.security.InvalidKeyException, java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException, java.security.SignatureException, java.security.cert.CertificateException {
+			throw new UnsupportedOperationException();
+		}
+
+		/**
+		 * @throws InvalidKeyException 
+		 * @throws NoSuchAlgorithmException 
+		 * @throws NoSuchProviderException 
+		 * @throws SignatureException 
+		 * @throws CertificateException  
+		 */
+		public void verify(PublicKey var0, String var1) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException, CertificateException {
+			throw new UnsupportedOperationException();
+		}
+
+		public Set getCriticalExtensionOIDs() {
+			throw new UnsupportedOperationException();
+		}
+
+		public byte[] getExtensionValue(String var0) {
+			throw new UnsupportedOperationException();
+		}
+
+		public Set getNonCriticalExtensionOIDs() {
+			throw new UnsupportedOperationException();
+		}
+
+		public boolean hasUnsupportedCriticalExtension() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	private static class MockPrincipal implements Principal {
+		private final String name;
+
+		MockPrincipal(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof MockPrincipal) {
+				return name.equals(((MockPrincipal) obj).name);
+			}
+			return false;
+		}
+
+		public int hashCode() {
+			return name.hashCode();
+		}
+
+		public String toString() {
+			return getName();
+		}
+	}
+
+	private static ArrayList parseDNchain(String dnChain) {
+		if (dnChain == null) {
+			throw new IllegalArgumentException("The DN chain must not be null."); //$NON-NLS-1$
+		}
+		ArrayList parsed = new ArrayList();
+		int startIndex = 0;
+		startIndex = skipSpaces(dnChain, startIndex);
+		while (startIndex < dnChain.length()) {
+			int endIndex = startIndex;
+			boolean inQuote = false;
+			out: while (endIndex < dnChain.length()) {
+				char c = dnChain.charAt(endIndex);
+				switch (c) {
+					case '"' :
+						inQuote = !inQuote;
+						break;
+					case '\\' :
+						endIndex++; // skip the escaped char
+						break;
+					case ';' :
+						if (!inQuote)
+							break out;
+				}
+				endIndex++;
+			}
+			if (endIndex > dnChain.length()) {
+				throw new IllegalArgumentException("unterminated escape");
+			}
+			parsed.add(dnChain.substring(startIndex, endIndex));
+			startIndex = endIndex + 1;
+			startIndex = skipSpaces(dnChain, startIndex);
+		}
+		return parsed;
+	}
+
+	private static int skipSpaces(String dnChain, int startIndex) {
+		while (startIndex < dnChain.length() && dnChain.charAt(startIndex) == ' ') {
+			startIndex++;
+		}
+		return startIndex;
 	}
 }

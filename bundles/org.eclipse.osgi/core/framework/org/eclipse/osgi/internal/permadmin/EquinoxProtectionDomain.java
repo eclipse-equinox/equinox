@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.osgi.framework.Bundle;
 
 public class EquinoxProtectionDomain extends BundleProtectionDomain {
 
@@ -19,7 +19,7 @@ public class EquinoxProtectionDomain extends BundleProtectionDomain {
 		super(bundlePermissions);
 	}
 
-	public AbstractBundle getBundle() {
+	public Bundle getBundle() {
 		return ((BundlePermissions) getPermissions()).getBundle();
 	}
 
