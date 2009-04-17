@@ -108,9 +108,11 @@ case $OS in
 		case ${PROC} in
 			"i386")
 				defaultOSArch="x86"
+				CC=gcc
 				;;
 			"sparc")
 				defaultOSArch="sparc"
+				CC=cc
 				;;
 			*)
 				echo "*** Unknown processor type <${PROC}>"
@@ -121,7 +123,7 @@ case $OS in
 	echo "Unknown OS -- build aborted"
 	;;
 esac
-
+export CC
 # Parse the command line arguments and override the default values.
 extraArgs=""
 while [ "$1" != "" ]; do
