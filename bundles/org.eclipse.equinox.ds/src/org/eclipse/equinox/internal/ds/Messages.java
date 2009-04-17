@@ -75,6 +75,7 @@ public class Messages extends NLS {
 	public static String ERROR_LOADING_DATA_FILE;
 	public static String ERROR_LOADING_PROPERTIES_FILE;
 	public static String ERROR_OPENING_COMP_XML;
+	public static String ERROR_PARSING_MANIFEST_HEADER;
 	public static String ERROR_PROCESSING_CONFIGURATION;
 	public static String ERROR_PROCESSING_END_TAG;
 	public static String ERROR_PROCESSING_PROPERTY;
@@ -173,6 +174,13 @@ public class Messages extends NLS {
 	public static String UNSUPPORTED_TYPE;
 	public static String WRONG_PARAMETER;
 	public static String WRONG_PARAMETER2;
+	public static String ERROR_DELETING_COMPONENT_DEFINITIONS;
+	public static String ERROR_WRITING_OBJECT;
+	public static String ERROR_READING_OBJECT;
+	public static String DBMANAGER_SERVICE_TRACKER_OPENED;
+	public static String ERROR_LOADING_COMPONENT_DEFINITIONS;
+	public static String ERROR_SAVING_COMPONENT_DEFINITIONS;
+	public static String FILE_DOESNT_EXIST_OR_DIRECTORY;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
