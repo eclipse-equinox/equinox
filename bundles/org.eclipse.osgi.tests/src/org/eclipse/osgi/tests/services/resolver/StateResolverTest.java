@@ -1725,6 +1725,123 @@ public class StateResolverTest extends AbstractStateTest {
 		assertNull("3.1 Packages are not consistent: " + isConsistent, isConsistent); //$NON-NLS-1$
 	}
 
+	public void testFragmentUses01() throws BundleException {
+		long id = 0;
+		State state = buildEmptyState();
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "a"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "C2"); //$NON-NLS-1$
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "A1"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "b; good=true"); //$NON-NLS-1$
+		BundleDescription a1frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "b; good=true; uses:=c"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "c; good=true"); //$NON-NLS-1$
+		BundleDescription b1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "c; good=true"); //$NON-NLS-1$
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "c; bad=true"); //$NON-NLS-1$
+		BundleDescription c2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		state.addBundle(a1);
+		state.addBundle(a1frag);
+		state.addBundle(b1);
+		state.addBundle(c1);
+		state.addBundle(c2);
+		state.resolve();
+
+		assertTrue("0.1", a1.isResolved()); //$NON-NLS-1$
+		assertFalse("0.2", a1frag.isResolved()); //$NON-NLS-1$
+		assertTrue("0.3", b1.isResolved()); //$NON-NLS-1$
+		assertTrue("0.4", c1.isResolved()); //$NON-NLS-1$
+		assertTrue("0.5", c2.isResolved()); //$NON-NLS-1$
+	}
+
+	public void testFragmentUses02() throws BundleException {
+		long id = 0;
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("osgi.resolverMode", "development");
+		state.setPlatformProperties(props);
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "a"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "C2"); //$NON-NLS-1$
+		BundleDescription a1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A1.Frag"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "A1"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "b; good=true"); //$NON-NLS-1$
+		BundleDescription a1frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "b; good=true; uses:=c"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "c; good=true"); //$NON-NLS-1$
+		BundleDescription b1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C1"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "c; good=true"); //$NON-NLS-1$
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "c; bad=true"); //$NON-NLS-1$
+		BundleDescription c2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), id++); //$NON-NLS-1$
+
+		state.addBundle(a1);
+		state.addBundle(a1frag);
+		state.addBundle(b1);
+		state.addBundle(c1);
+		state.addBundle(c2);
+		state.resolve();
+
+		assertTrue("0.1", a1.isResolved()); //$NON-NLS-1$
+		assertFalse("0.2", a1frag.isResolved()); //$NON-NLS-1$
+		assertTrue("0.3", b1.isResolved()); //$NON-NLS-1$
+		assertTrue("0.4", c1.isResolved()); //$NON-NLS-1$
+		assertTrue("0.5", c2.isResolved()); //$NON-NLS-1$
+	}
+
 	public void testCyclicUsesExportDrop() throws BundleException {
 		State state = buildEmptyState();
 		Hashtable manifest = new Hashtable();

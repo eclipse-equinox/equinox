@@ -554,7 +554,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				state.addResolverError(bundles[i].getBundle(), ResolverError.DISABLED_BUNDLE, null, null);
 				bundles[i].setResolvable(false);
 				bundles[i].clearRefs();
-				setBundleUnresolved(bundles[i], false, developmentMode);
+				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
+				setBundleUnresolved(bundles[i], false, false);
 				if (exclude == null)
 					exclude = new HashSet(1);
 				exclude.add(bundles[i]);
@@ -589,7 +590,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				state.addResolverError(conflictedBundle.getBundle(), type, conflict.getVersionConstraint().toString(), conflict.getVersionConstraint());
 				conflictedBundle.setResolvable(false);
 				conflictedBundle.clearRefs();
-				setBundleUnresolved(conflictedBundle, false, developmentMode);
+				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
+				setBundleUnresolved(conflictedBundle, false, false);
 			}
 		}
 		reResolveBundles(conflictedBundles, bundles, platformProperties, rejectedSingletons);
@@ -601,7 +603,8 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		ArrayList remainingUnresolved = new ArrayList();
 		for (int i = 0; i < bundles.length; i++) {
 			if (!exclude.contains(bundles[i])) {
-				setBundleUnresolved(bundles[i], false, developmentMode);
+				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
+				setBundleUnresolved(bundles[i], false, false);
 				remainingUnresolved.add(bundles[i]);
 			}
 		}
