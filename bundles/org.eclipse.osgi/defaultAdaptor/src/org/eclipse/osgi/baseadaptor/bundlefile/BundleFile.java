@@ -212,7 +212,9 @@ abstract public class BundleFile {
 	}
 
 	public static String fixTrailingSlash(String path, BundleEntry entry) {
-		if (path.length() == 0 || path.charAt(0) != '/')
+		if (path.length() == 0)
+			return "/"; //$NON-NLS-1$
+		if (path.charAt(0) != '/')
 			path = '/' + path;
 		String name = entry.getName();
 		boolean pathSlash = path.charAt(path.length() - 1) == '/';

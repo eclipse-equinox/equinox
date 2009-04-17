@@ -34,7 +34,7 @@ public class DirZipBundleEntry extends BundleEntry {
 	String name;
 
 	public DirZipBundleEntry(ZipBundleFile bundleFile, String name) {
-		this.name = (name.length() > 0 && name.charAt(0) == '/') ? name.substring(1) : name;
+		this.name = (name.length() > 1 && name.charAt(0) == '/') ? name.substring(1) : name;
 		this.bundleFile = bundleFile;
 	}
 
