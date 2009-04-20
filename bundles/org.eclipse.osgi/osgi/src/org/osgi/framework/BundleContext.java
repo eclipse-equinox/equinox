@@ -68,7 +68,7 @@ import java.util.Dictionary;
  * objects and they are only valid within the Framework that created them.
  * 
  * @ThreadSafe
- * @version $Revision: 6574 $
+ * @version $Revision: 6781 $
  */
 
 public interface BundleContext {
@@ -102,21 +102,27 @@ public interface BundleContext {
 	public Bundle getBundle();
 
 	/**
-	 * Installs a bundle from the specified location string. A bundle is
-	 * obtained from <code>location</code> as interpreted by the Framework in
-	 * an implementation dependent manner.
+	 * Installs a bundle from the specified <code>InputStream</code> object.
+	 * 
 	 * <p>
-	 * Every installed bundle is uniquely identified by its location string,
-	 * typically in the form of a URL.
+	 * If the specified <code>InputStream</code> is <code>null</code>, the
+	 * Framework must create the <code>InputStream</code> from which to read the
+	 * bundle by interpreting, in an implementation dependent manner, the
+	 * specified <code>location</code>.
+	 * 
+	 * <p>
+	 * The specified <code>location</code> identifier will be used as the
+	 * identity of the bundle. Every installed bundle is uniquely identified by
+	 * its location identifier which is typically in the form of a URL.
 	 * 
 	 * <p>
 	 * The following steps are required to install a bundle:
 	 * <ol>
-	 * <li>If a bundle containing the same location string is already
+	 * <li>If a bundle containing the same location identifier is already
 	 * installed, the <code>Bundle</code> object for that bundle is returned.
 	 * 
-	 * <li>The bundle's content is read from the location string. If this
-	 * fails, a {@link BundleException} is thrown.
+	 * <li>The bundle's content is read from the input stream. If this fails, a
+	 * {@link BundleException} is thrown.
 	 * 
 	 * <li>The bundle's associated resources are allocated. The associated
 	 * resources minimally consist of a unique identifier and a persistent
@@ -127,13 +133,14 @@ public interface BundleContext {
 	 * 
 	 * <li>A bundle event of type {@link BundleEvent#INSTALLED} is fired.
 	 * 
-	 * <li>The <code>Bundle</code> object for the newly or previously
-	 * installed bundle is returned.
+	 * <li>The <code>Bundle</code> object for the newly or previously installed
+	 * bundle is returned.
 	 * </ol>
 	 * 
 	 * <b>Postconditions, no exceptions thrown </b>
 	 * <ul>
-	 * <li><code>getState()</code> in {<code>INSTALLED</code>,<code>RESOLVED</code>}.
+	 * <li><code>getState()</code> in &#x007B; <code>INSTALLED</code>,
+	 * <code>RESOLVED</code> &#x007D;.
 	 * <li>Bundle has a unique ID.
 	 * </ul>
 	 * <b>Postconditions, when an exception is thrown </b>
@@ -142,47 +149,40 @@ public interface BundleContext {
 	 * </ul>
 	 * 
 	 * @param location The location identifier of the bundle to install.
-	 * @return The <code>Bundle</code> object of the installed bundle.
-	 * @throws BundleException If the installation failed.
-	 * @throws SecurityException If the caller does not have the
-	 *         appropriate
-	 *         <code>AdminPermission[installed bundle,LIFECYCLE]</code>, and
-	 *         the Java Runtime Environment supports permissions.
-	 * @throws IllegalStateException If this BundleContext is no
-	 *         longer valid.
-	 */
-	public Bundle installBundle(String location) throws BundleException;
-
-	/**
-	 * Installs a bundle from the specified <code>InputStream</code> object.
-	 * 
-	 * <p>
-	 * This method performs all of the steps listed in
-	 * <code>BundleContext.installBundle(String location)</code>, except that
-	 * the bundle's content will be read from the <code>InputStream</code>
-	 * object. The location identifier string specified will be used as the
-	 * identity of the bundle.
-	 * 
-	 * <p>
-	 * This method must always close the <code>InputStream</code> object, even
-	 * if an exception is thrown.
-	 * 
-	 * @param location The location identifier of the bundle to install.
 	 * @param input The <code>InputStream</code> object from which this bundle
-	 *        will be read.
+	 *        will be read or <code>null</code> to indicate the Framework must
+	 *        create the input stream from the specified location identifier.
+	 *        The input stream must always be closed when this method completes,
+	 *        even if an exception is thrown.
 	 * @return The <code>Bundle</code> object of the installed bundle.
-	 * @throws BundleException If the provided stream cannot be read or the
+	 * @throws BundleException If the input stream cannot be read or the
 	 *         installation failed.
-	 * @throws SecurityException If the caller does not have the
-	 *         appropriate
-	 *         <code>AdminPermission[installed bundle,LIFECYCLE]</code>, and
-	 *         the Java Runtime Environment supports permissions.
-	 * @throws IllegalStateException If this BundleContext is no
-	 *         longer valid.
-	 * @see #installBundle(String)
+	 * @throws SecurityException If the caller does not have the appropriate
+	 *         <code>AdminPermission[installed bundle,LIFECYCLE]</code>, and the
+	 *         Java Runtime Environment supports permissions.
+	 * @throws IllegalStateException If this BundleContext is no longer valid.
 	 */
 	public Bundle installBundle(String location, InputStream input)
 			throws BundleException;
+
+	/**
+	 * Installs a bundle from the specified <code>location</code> identifier.
+	 * 
+	 * <p>
+	 * This method performs the same function as calling
+	 * {@link #installBundle(String,InputStream)} with the specified
+	 * <code>location</code> identifier and a <code>null</code> InputStream.
+	 * 
+	 * @param location The location identifier of the bundle to install.
+	 * @return The <code>Bundle</code> object of the installed bundle.
+	 * @throws BundleException If the installation failed.
+	 * @throws SecurityException If the caller does not have the appropriate
+	 *         <code>AdminPermission[installed bundle,LIFECYCLE]</code>, and the
+	 *         Java Runtime Environment supports permissions.
+	 * @throws IllegalStateException If this BundleContext is no longer valid.
+	 * @see #installBundle(String, InputStream)
+	 */
+	public Bundle installBundle(String location) throws BundleException;
 
 	/**
 	 * Returns the bundle with the specified identifier.
@@ -248,12 +248,10 @@ public interface BundleContext {
 	 * 
 	 * @param listener The <code>ServiceListener</code> object to be added.
 	 * @param filter The filter criteria.
-	 * 
 	 * @throws InvalidSyntaxException If <code>filter</code> contains an
 	 *         invalid filter string that cannot be parsed.
 	 * @throws IllegalStateException If this BundleContext is no
 	 *         longer valid.
-	 * 
 	 * @see ServiceEvent
 	 * @see ServiceListener
 	 * @see ServicePermission
@@ -274,7 +272,6 @@ public interface BundleContext {
 	 * @param listener The <code>ServiceListener</code> object to be added.
 	 * @throws IllegalStateException If this BundleContext is no
 	 *         longer valid.
-	 * 
 	 * @see #addServiceListener(ServiceListener, String)
 	 */
 	public void addServiceListener(ServiceListener listener);
@@ -311,7 +308,6 @@ public interface BundleContext {
 	 *         have the appropriate
 	 *         <code>AdminPermission[context bundle,LISTENER]</code>, and the
 	 *         Java Runtime Environment supports permissions.
-	 * 
 	 * @see BundleEvent
 	 * @see BundleListener
 	 */
@@ -349,7 +345,6 @@ public interface BundleContext {
 	 * @param listener The <code>FrameworkListener</code> object to be added.
 	 * @throws IllegalStateException If this BundleContext is no
 	 *         longer valid.
-	 * 
 	 * @see FrameworkEvent
 	 * @see FrameworkListener
 	 */
@@ -420,11 +415,9 @@ public interface BundleContext {
 	 *        {@link ServiceRegistration#setProperties} method must be called.
 	 *        The set of properties may be <code>null</code> if the service has
 	 *        no properties.
-	 * 
 	 * @return A <code>ServiceRegistration</code> object for use by the bundle
 	 *         registering the service to update the service's properties or to
 	 *         unregister the service.
-	 * 
 	 * @throws IllegalArgumentException If one of the following is true:
 	 *         <ul>
 	 *         <li><code>service</code> is <code>null</code>. <li><code>service
@@ -433,14 +426,11 @@ public interface BundleContext {
 	 *         <code>properties</code> contains case variants of the same key
 	 *         name.
 	 *         </ul>
-	 * 
 	 * @throws SecurityException If the caller does not have the
 	 *         <code>ServicePermission</code> to register the service for all
 	 *         the named classes and the Java Runtime Environment supports
 	 *         permissions.
-	 * 
 	 * @throws IllegalStateException If this BundleContext is no longer valid.
-	 * 
 	 * @see ServiceRegistration
 	 * @see ServiceFactory
 	 */
@@ -463,11 +453,9 @@ public interface BundleContext {
 	 * @param service The service object or a <code>ServiceFactory</code>
 	 *        object.
 	 * @param properties The properties for this service.
-	 * 
 	 * @return A <code>ServiceRegistration</code> object for use by the bundle
 	 *         registering the service to update the service's properties or to
 	 *         unregister the service.
-	 * 
 	 * @throws IllegalStateException If this BundleContext is no longer valid.
 	 * @see #registerService(String[], Object, Dictionary)
 	 */
@@ -759,12 +747,10 @@ public interface BundleContext {
 	 * @throws InvalidSyntaxException If <code>filter</code> contains an invalid
 	 *         filter string that cannot be parsed.
 	 * @throws NullPointerException If <code>filter</code> is null.
-	 * @throws IllegalStateException If this BundleContext is no
-	 *         longer valid.
-	 * 
-	 * @since 1.1
+	 * @throws IllegalStateException If this BundleContext is no longer valid.
 	 * @see "Framework specification for a description of the filter string syntax."
 	 * @see FrameworkUtil#createFilter(String)
+	 * @since 1.1
 	 */
 	public Filter createFilter(String filter) throws InvalidSyntaxException;
 }
