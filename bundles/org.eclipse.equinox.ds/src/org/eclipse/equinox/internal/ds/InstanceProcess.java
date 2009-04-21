@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -27,7 +27,6 @@ import org.osgi.service.component.*;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.2
  */
 
 public class InstanceProcess {
@@ -302,6 +301,19 @@ public class InstanceProcess {
 	 * @param scp
 	 */
 	private void disposeInstances(ServiceComponentProp scp, int deactivateReason) {
+		if (scp.isComponentFactory()) {
+			if (Activator.DEBUG) {
+				Activator.log.debug("InstanceProcess.disposeInstances(): disposing component factory " + scp.name, null); //$NON-NLS-1$
+			}
+			ServiceRegistration reg = (ServiceRegistration) factoryRegistrations.remove(scp);
+			try {
+				if (reg != null)
+					reg.unregister();
+			} catch (IllegalStateException e) {
+				// Service is already unregistered do nothing
+				Activator.log.warning(NLS.bind(Messages.FACTORY_REGISTRATION_ALREADY_DISPOSED, scp.name), null);
+			}
+		}
 		ServiceComponent sc = scp.serviceComponent;
 		// if no Services provided - dispose of instance immediately
 		if (sc.provides == null) {
@@ -310,21 +322,7 @@ public class InstanceProcess {
 			}
 			scp.dispose(deactivateReason);
 		} else {
-			// if ComponentFactory or if just Services
-			if (scp.isComponentFactory()) {
-				if (Activator.DEBUG) {
-					Activator.log.debug("InstanceProcess.disposeInstances(): disposing component factory " + scp.name, null); //$NON-NLS-1$
-				}
-				ServiceRegistration reg = (ServiceRegistration) factoryRegistrations.remove(scp);
-				try {
-					if (reg != null)
-						reg.unregister();
-				} catch (IllegalStateException e) {
-					// Service is already unregistered do nothing
-					Activator.log.warning(NLS.bind(Messages.FACTORY_REGISTRATION_ALREADY_DISPOSED, scp.name), null);
-				}
-			}
-
+			// The component registers services
 			if (Activator.DEBUG) {
 				Activator.log.debug(NLS.bind(Messages.UNREGISTERING_COMPONENT, scp.name), null);
 			}
