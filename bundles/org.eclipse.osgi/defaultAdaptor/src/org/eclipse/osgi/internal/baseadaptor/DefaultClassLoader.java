@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
@@ -29,24 +30,40 @@ import org.eclipse.osgi.signedcontent.SignerInfo;
 import org.osgi.framework.Bundle;
 
 /**
- * The default implemention of <code>BaseClassLoader</code>.  This implementation extends
+ * The default implementation of <code>BaseClassLoader</code>.  This implementation extends
  * <code>ClassLoader</code>.
  * @see BaseClassLoader
  * @see ClasspathManager
  */
-public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
+public class DefaultClassLoader extends ClassLoader implements ParallelClassLoader {
 	/**
 	 * A PermissionCollection for AllPermissions; shared across all ProtectionDomains when security is disabled
 	 */
 	protected static final PermissionCollection ALLPERMISSIONS;
 	private final static String CLASS_CERTIFICATE_SUPPORT = "osgi.support.class.certificate"; //$NON-NLS-1$
+	private final static String CLASS_LOADER_TYPE = "osgi.classloader.type"; //$NON-NLS-1$
+	private final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 	private static final boolean CLASS_CERTIFICATE;
+	private static final boolean PARALLEL_CAPABLE;
 	static {
 		CLASS_CERTIFICATE = Boolean.valueOf(FrameworkProperties.getProperty(CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		AllPermission allPerm = new AllPermission();
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
 		if (ALLPERMISSIONS != null)
 			ALLPERMISSIONS.add(allPerm);
+		boolean typeParallel = CLASS_LOADER_TYPE_PARALLEL.equals(FrameworkProperties.getProperty(CLASS_LOADER_TYPE));
+		boolean parallelCapable = false;
+		try {
+			if (typeParallel) {
+				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", null); //$NON-NLS-1$
+				parallelCapableMetod.setAccessible(true);
+				parallelCapable = ((Boolean) parallelCapableMetod.invoke(null, null)).booleanValue();
+			}
+		} catch (Throwable e) {
+			// must do everything to avoid failing in clinit
+			parallelCapable = false;
+		}
+		PARALLEL_CAPABLE = parallelCapable;
 	}
 
 	protected ClassLoaderDelegate delegate;
@@ -249,5 +266,9 @@ public class DefaultClassLoader extends ClassLoader implements BaseClassLoader {
 
 	public Bundle getBundle() {
 		return manager.getBaseData().getBundle();
+	}
+
+	public boolean isParallelCapable() {
+		return PARALLEL_CAPABLE;
 	}
 }

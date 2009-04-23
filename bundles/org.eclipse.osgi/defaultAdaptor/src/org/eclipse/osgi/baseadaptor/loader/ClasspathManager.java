@@ -56,6 +56,7 @@ public class ClasspathManager {
 	// a collection of String[2], each element is {"libname", "libpath"}
 	private Collection loadedLibraries = null;
 	private HashMap classNameLocks = new HashMap(5);
+	private final boolean isParallelClassLoader;
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -67,6 +68,7 @@ public class ClasspathManager {
 		this.data = data;
 		this.classpath = classpath;
 		this.classloader = classloader;
+		isParallelClassLoader = (classloader instanceof ParallelClassLoader) ? ((ParallelClassLoader) classloader).isParallelCapable() : false;
 	}
 
 	/**
@@ -437,7 +439,7 @@ public class ClasspathManager {
 		try {
 			for (int i = 0; i < hooks.length; i++)
 				hooks[i].preFindLocalClass(classname, this);
-			if (LOCK_CLASSNAME)
+			if (LOCK_CLASSNAME || isParallelClassLoader)
 				result = findLocalClass_LockClassName(classname, hooks);
 			else
 				result = findLocalClass_LockClassLoader(classname, hooks);
