@@ -108,7 +108,7 @@ case $OS in
 		case ${PROC} in
 			"i386")
 				defaultOSArch="x86"
-				CC=gcc
+				CC=cc
 				;;
 			"sparc")
 				defaultOSArch="sparc"
