@@ -16,7 +16,7 @@
    <license url="%licenseURL">
       %license
    </license>
-   
+
    <plugin
          id="org.eclipse.osgi"
          download-size="0"
@@ -182,6 +182,8 @@
 
    <plugin
          id="org.eclipse.equinox.security.win32.x86"
+         os="win32"
+         arch="x86"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -190,6 +192,8 @@
 
    <plugin
          id="org.eclipse.equinox.security.win32.x86.source"
+         os="win32"
+         arch="x86"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -197,6 +201,18 @@
 
    <plugin
          id="org.eclipse.equinox.security.macosx"
+         os="macosx"
+         arch="x86"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.security.macosx"
+         os="macosx"
+         arch="ppc"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -205,6 +221,17 @@
 
    <plugin
          id="org.eclipse.equinox.security.macosx.source"
+         os="macosx"
+         arch="x86"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.security.macosx.source"
+         os="macosx"
+         arch="ppc"
          download-size="0"
          install-size="0"
          version="0.0.0"
