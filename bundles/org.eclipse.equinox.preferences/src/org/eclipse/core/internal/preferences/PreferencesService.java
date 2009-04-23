@@ -737,8 +737,10 @@ public class PreferencesService implements IPreferencesService {
 			// if the mapping is null then we match everything
 			if (mapping == null) {
 				// if we are the root check to see if the scope exists
-				if (tree.parent() == null && tree.nodeExists(scope))
-					return containsKeys((IEclipsePreferences) tree.node(scope));
+				if (tree.parent() == null && tree.nodeExists(scope)) {
+					if (containsKeys((IEclipsePreferences) tree.node(scope)))
+						return true;
+				}
 				// otherwise check to see if we are in the right scope
 				if (scopeMatches(scope, tree) && containsKeys(tree))
 					return true;
@@ -766,12 +768,15 @@ public class PreferencesService implements IPreferencesService {
 					// if there are no entries defined then we return false even if we
 					// are supposed to match on the existence of the node as a whole (bug 88820)
 					Preferences child = tree.node(childPath);
-					if (entries == null)
-						return child.keys().length != 0 || child.childrenNames().length != 0;
-					// otherwise check to see if we have any applicable keys
-					for (int j = 0; j < entries.length; j++) {
-						if (entries[j] != null && child.get(entries[j].getKey(), null) != null)
+					if (entries == null) {
+						if (child.keys().length != 0 || child.childrenNames().length != 0)
 							return true;
+					} else {
+						// otherwise check to see if we have any applicable keys
+						for (int j = 0; j < entries.length; j++) {
+							if (entries[j] != null && child.get(entries[j].getKey(), null) != null)
+								return true;
+						}
 					}
 				}
 			}
