@@ -298,7 +298,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	 *
 	 * <p>When the implementation of updated detects any kind of
 	 * error in the configuration properties, it should create a
-	 * new {@Link ConfigurationException}which describes the problem.
+	 * new {@link ConfigurationException}which describes the problem.
 	 *
 	 * <p>The Configuration Admin service must call this method on a thread
 	 * other than the thread which necessitated the callback. This implies that
