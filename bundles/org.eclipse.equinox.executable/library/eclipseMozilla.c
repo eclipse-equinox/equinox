@@ -41,7 +41,18 @@ int filter(const struct dirent *dir)
 #else
 	char* root = "/usr/lib/";
 #endif
+
+#if defined (SOLARIS)
+	/*
+	 * The solaris compiler does not do static linking, so just check
+	 * for a common lib to ensure that the install seems valid.
+	 */
+	char* testlib = "/libxpcom.so";
+#else
+	/* Ensure that the install is dynamically-linked and is built with GTK2 */
 	char* testlib = "/components/libwidget_gtk2.so";
+#endif
+
 	struct stat buf;
 	int index = 0;
 	char* dirname = (char *)dir->d_name;
@@ -191,6 +202,14 @@ void fixEnvForMozilla() {
 					"/usr/lib64/seamonkey/",
 					"/usr/lib64/mozilla/",
 #endif
+#if defined (SOLARIS)
+					"/usr/sfw/lib/xulrunner/",
+					"/usr/sfw/lib/mozilla-firefox/",
+					"/usr/sfw/lib/firefox/",
+					"/usr/sfw/lib/mozilla/",
+					"/usr/sfw/lib/mozilla-seamonkey/",
+					"/usr/sfw/lib/seamonkey/",
+#endif
 					"/usr/lib/xulrunner/",
 					"/usr/lib/mozilla-firefox/",
 					"/usr/lib/firefox/",
@@ -211,7 +230,18 @@ void fixEnvForMozilla() {
 					"/opt/mozilla/",
 					NULL
 				};
+
+#if defined (SOLARIS)
+				/*
+				 * The solaris compiler does not do static linking, so just check
+				 * for a common lib to ensure that the install seems valid.
+				 */
+				char* testlib = "libxpcom.so";
+#else
+				/* Ensure that the install is dynamically-linked and is built with GTK2 */
 				char* testlib = "components/libwidget_gtk2.so";
+#endif
+
 				struct stat buf;
 				int index = 0;
 
