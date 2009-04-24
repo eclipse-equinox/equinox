@@ -195,8 +195,25 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 * @since 1.4
 	 */
 	public int compareTo(Object object) {
-		ServiceReferenceImpl other = (ServiceReferenceImpl) object;
-		return registration.compareTo(other.registration);
+		ServiceRegistrationImpl other = ((ServiceReferenceImpl) object).registration;
+
+		final int thisRanking = registration.getRanking();
+		final int otherRanking = other.getRanking();
+		if (thisRanking != otherRanking) {
+			if (thisRanking < otherRanking) {
+				return -1;
+			}
+			return 1;
+		}
+		final long thisId = registration.getId();
+		final long otherId = other.getId();
+		if (thisId == otherId) {
+			return 0;
+		}
+		if (thisId < otherId) {
+			return 1;
+		}
+		return -1;
 	}
 
 	/**

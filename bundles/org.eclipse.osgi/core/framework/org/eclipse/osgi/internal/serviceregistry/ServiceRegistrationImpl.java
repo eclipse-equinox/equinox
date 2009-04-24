@@ -602,30 +602,34 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 * <code>ServiceRegistrationImpl</code> for order.
 	 * 
 	 * <p>
-	 * If this <code>ServiceRegistrationImpl</code> and the specified
-	 * <code>ServiceRegistrationImpl</code> have the same
-	 * {@link Constants#SERVICE_ID service id} they are equal. This
-	 * <code>ServiceRegistrationImpl</code> is less than the specified
-	 * <code>ServiceRegistrationImpl</code> if it has a lower
-	 * {@link Constants#SERVICE_RANKING service ranking} and greater if it has a
-	 * higher service ranking. Otherwise, if this <code>ServiceRegistrationImpl</code>
-	 * and the specified <code>ServiceRegistrationImpl</code> have the same
-	 * {@link Constants#SERVICE_RANKING service ranking}, this
-	 * <code>ServiceRegistrationImpl</code> is less than the specified
-	 * <code>ServiceRegistrationImpl</code> if it has a higher
-	 * {@link Constants#SERVICE_ID service id} and greater if it has a lower
-	 * service id.
+	 * This does a reverse comparison so that the highest item is sorted to the left.
+	 * We keep ServiceRegistationImpls in sorted lists such that the highest
+	 * ranked service is at element 0 for quick retrieval.
 	 * 
 	 * @param object The <code>ServiceRegistrationImpl</code> to be compared.
 	 * @return Returns a negative integer, zero, or a positive integer if this
-	 *         <code>ServiceRegistrationImpl</code> is less than, equal to, or
-	 *         greater than the specified <code>ServiceRegistrationImpl</code>.
+	 *         <code>ServiceRegistrationImpl</code> is greater than, equal to, or
+	 *         less than the specified <code>ServiceRegistrationImpl</code>.
 	 */
 	public int compareTo(Object object) {
 		ServiceRegistrationImpl other = (ServiceRegistrationImpl) object;
 
-		if (this.getRanking() != other.getRanking())
-			return this.getRanking() > other.getRanking() ? -1 : 1;
-		return this.getId() == other.getId() ? 0 : this.getId() > other.getId() ? 1 : -1;
+		final int thisRanking = this.getRanking();
+		final int otherRanking = other.getRanking();
+		if (thisRanking != otherRanking) {
+			if (thisRanking < otherRanking) {
+				return 1;
+			}
+			return -1;
+		}
+		final long thisId = this.getId();
+		final long otherId = other.getId();
+		if (thisId == otherId) {
+			return 0;
+		}
+		if (thisId < otherId) {
+			return -1;
+		}
+		return 1;
 	}
 }

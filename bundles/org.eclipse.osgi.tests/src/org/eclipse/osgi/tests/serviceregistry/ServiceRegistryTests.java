@@ -270,6 +270,61 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testServiceReferenceCompare01() {
+		final String testMethodName = getName();
+		// test that getServiceReference returns the proper service
+		Runnable runIt = new Runnable() {
+			public void run() {
+				// nothing
+			}
+		};
+		Hashtable props = new Hashtable();
+		props.put("name", testMethodName); //$NON-NLS-1$ 
+		props.put(Constants.SERVICE_DESCRIPTION, "min value"); //$NON-NLS-1$
+		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
+		ServiceRegistration reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+
+		props.put(Constants.SERVICE_DESCRIPTION, "max value first"); //$NON-NLS-1$
+		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		ServiceRegistration reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+
+		props.put(Constants.SERVICE_DESCRIPTION, "max value second"); //$NON-NLS-1$
+		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+		ServiceRegistration reg3 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+
+		try {
+			ServiceReference ref = OSGiTestsActivator.getContext().getServiceReference(Runnable.class.getName());
+			ServiceReference ref1 = reg1.getReference();
+			ServiceReference ref2 = reg2.getReference();
+			ServiceReference ref3 = reg3.getReference();
+
+			assertNotNull("service ref is null", ref); //$NON-NLS-1$
+			assertEquals("Wrong reference", ref2, ref); //$NON-NLS-1$
+
+			assertEquals("Wrong references", 0, ref2.compareTo(ref)); //$NON-NLS-1$
+			assertEquals("Wrong references", 0, ref.compareTo(ref2)); //$NON-NLS-1$
+
+			assertTrue("Wrong compareTo value: " + ref1.compareTo(ref1), ref1.compareTo(ref1) == 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref1.compareTo(ref2), ref1.compareTo(ref2) < 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref1.compareTo(ref3), ref1.compareTo(ref3) < 0); //$NON-NLS-1$
+
+			assertTrue("Wrong compareTo value: " + ref2.compareTo(ref1), ref2.compareTo(ref1) > 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref2.compareTo(ref2), ref2.compareTo(ref2) == 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref2.compareTo(ref3), ref2.compareTo(ref3) > 0); //$NON-NLS-1$
+
+			assertTrue("Wrong compareTo value: " + ref3.compareTo(ref1), ref3.compareTo(ref1) > 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref3.compareTo(ref2), ref3.compareTo(ref2) < 0); //$NON-NLS-1$
+			assertTrue("Wrong compareTo value: " + ref3.compareTo(ref3), ref3.compareTo(ref3) == 0); //$NON-NLS-1$
+		} finally {
+			if (reg1 != null)
+				reg1.unregister();
+			if (reg2 != null)
+				reg2.unregister();
+			if (reg3 != null)
+				reg3.unregister();
+		}
+	}
+
 	private void clearResults(boolean[] results) {
 		for (int i = 0; i < results.length; i++)
 			results[i] = false;
