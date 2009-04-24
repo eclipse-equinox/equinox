@@ -14,8 +14,8 @@ import org.eclipse.core.internal.runtime.*;
 import org.eclipse.osgi.util.NLS;
 
 /**
- * Runs the given ISafeRunnable in a protected mode: exceptions
- * thrown in the runnable are logged and passed to the runnable's
+ * Runs the given ISafeRunnable in a protected mode: exceptions and certain
+ * errors thrown in the runnable are logged and passed to the runnable's
  * exception handler.  Such exceptions are not rethrown by this method.
  * <p>
  * This class can be used without OSGi running.
@@ -28,6 +28,11 @@ public final class SafeRunner {
 	 * Runs the given runnable in a protected mode.   Exceptions
 	 * thrown in the runnable are logged and passed to the runnable's
 	 * exception handler.  Such exceptions are not rethrown by this method.
+	 * <p>
+	 * In addition to catching all {@link Exception} types, this method also catches certain {@link Error} 
+	 * types that typically result from programming errors in the code being executed. 
+	 * Severe errors that are not generally safe to catch are not caught by this method.
+	 * </p>
 	 *
 	 * @param code the runnable to run
 	 */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,12 @@ public interface ISafeRunnable {
 	 * method.  The processing done here should be specific to the
 	 * particular usecase for this runnable.  Generalized exception
 	 * processing (e.g., logging in the platform's log) is done by the
-	 * Platform's run mechanism.
+	 * {@link SafeRunner}.
+	 * <p>
+	 * All exceptions from the {@link #run} method are passed to this method,
+	 * along with certain {@link Error} types that are typically caused by
+	 * programming errors in the untrusted code being run.
+	 * </p>
 	 *
 	 * @param exception an exception which occurred during processing
 	 *		the body of this runnable (i.e., in <code>run()</code>)
