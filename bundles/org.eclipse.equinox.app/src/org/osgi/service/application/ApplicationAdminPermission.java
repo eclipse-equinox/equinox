@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * permission <code>schedule</code> implies the permission
  * <code>lifecycle</code>.
  * 
- * @version $Revision: 6556 $
+ * @version $Revision: 6860 $
  */
 public class ApplicationAdminPermission extends Permission {
 	private static final long serialVersionUID = 1L;
