@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.osgi.framework.launch.Framework;
  * with the Framework.
  * 
  * @ThreadSafe
- * @version $Revision: 6491 $
+ * @version $Revision: 6860 $
  */
 // TODO javadoc needs review
 public interface CompositeBundleFactory {

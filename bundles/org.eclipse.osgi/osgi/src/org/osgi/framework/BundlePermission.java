@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import java.util.Map;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Revision: 6530 $
+ * @version $Revision: 6860 $
  */
 
 public final class BundlePermission extends BasicPermission {

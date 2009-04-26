@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008 2009). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceEvent;
  * (register, modify, and unregister service) operations.
  * 
  * @ThreadSafe
- * @version $Revision: 6211 $
+ * @version $Revision: 6860 $
  */
 
 public interface EventHook {

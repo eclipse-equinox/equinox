@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2008). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import java.util.Dictionary;
  * @since 1.1
  * @see "Core Specification, section 5.5, for a description of the filter string syntax."
  * @ThreadSafe
- * @version $Revision: 6470 $
+ * @version $Revision: 6860 $
  */
 public interface Filter {
 	/**

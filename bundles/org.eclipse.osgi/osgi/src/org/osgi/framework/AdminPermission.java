@@ -87,11 +87,11 @@ import java.util.Map;
  * Filter attribute names are processed in a case sensitive manner.
  * 
  * @ThreadSafe
- * @version $Revision: 6530 $
+ * @version $Revision: 6867 $
  */
 
 public final class AdminPermission extends BasicPermission {
-	static final long			serialVersionUID			= 407051004521261705L;
+	static final long						serialVersionUID			= 307051004521261705L;
 
 	/**
 	 * The action string <code>class</code>. The <code>class</code> action
