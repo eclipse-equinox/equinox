@@ -42,7 +42,7 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 
 	private static String pIgnoreMax = "equinox.util.threadpool.ignoreMaximum";
 
-	private static int defMin = 4;
+	private static int defMin = 1;
 
 	private static int defMax = 48;
 
@@ -64,12 +64,13 @@ public class ThreadPoolManagerImpl extends ObjectPool implements TimerListener, 
 	public static ThreadPoolManagerImpl getThreadPool() {
 		if (threadPool == null) {
 			int intSize = UtilActivator.getInteger(pMin, defMin);
+			int minFill = intSize;
 			int factor = UtilActivator.getInteger(pMax, defMax);
 			intSize = intSize < 2 ? 2 : intSize;
 			if (intSize > factor) {
 				factor = (int) (intSize * 1.5 + 0.5);
 			}
-			threadPool = new ThreadPoolManagerImpl(intSize, (factor / intSize), intSize);
+			threadPool = new ThreadPoolManagerImpl(intSize, (factor / intSize), minFill);
 		}
 		return threadPool;
 	}
