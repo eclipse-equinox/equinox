@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -36,7 +36,6 @@ import org.osgi.service.log.LogService;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.2
  */
 
 public class ServiceComponentProp implements PrivilegedExceptionAction {
@@ -85,7 +84,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		this.name = serviceComponent.name;
 		this.bc = serviceComponent.bc;
 
-		initProperties(configProperties);
+		properties = initProperties(configProperties, null);
 
 		isComponentFactory = serviceComponent.factory != null;
 
@@ -122,10 +121,10 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * This method will call the activate method on the specified object.
 	 * 
 	 * @param usingBundle
-	 *            the bundle that is using the component - this hase only means
+	 *            the bundle that is using the component - this has only means
 	 *            when the component is factory
 	 * @param componentInstance
-	 *            the component instance whcich will be activated.
+	 *            the component instance which will be activated.
 	 * @throws Exception
 	 *             could be thrown if the activate fails for some reason but NOT
 	 *             in case, if the instance doesn't define an activate method.
@@ -157,6 +156,43 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	/**
+	 * This method will update the properties of the component
+	 * 
+	 * @param newProps
+	 *            the new properties
+	 * @throws Exception
+	 *             could be thrown if the modify method fails for some reason but NOT
+	 *             in case, if the instance doesn't define modify method
+	 */
+	public void modify(Dictionary newProps) throws Exception {
+		if (Activator.DEBUG) {
+			Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.modify(): name: " + name, null); //$NON-NLS-1$
+		}
+		Hashtable oldProperties = null;
+		if (references != null && references.size() > 0) {
+			oldProperties = (Hashtable) properties.clone();
+		}
+		//1. update the properties
+		properties = initProperties(newProps, (Long) properties.get(ComponentConstants.COMPONENT_ID));
+		//2. call the modify method on the Service Component for all instances of this scp
+		for (int i = 0; i < instances.size(); i++) {
+			ComponentInstanceImpl componentInstance = (ComponentInstanceImpl) instances.elementAt(i);
+			Activator.log.debug("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ServiceComponentProp.modify(): instance: " + componentInstance.toString(), null); //$NON-NLS-1$
+			serviceComponent.modified(componentInstance.getInstance(), componentInstance.getComponentContext());
+		}
+		//3. modify the bound services if necessary
+		if (oldProperties != null) {
+			handleBoundServicesUpdate(oldProperties, properties);
+		}
+
+		//4. if the component configuration is registered as a service, 
+		// modify the service’s service properties 
+		if (registration != null) {
+			registration.setProperties(getPublicServiceProperties());
+		}
+	}
+
+	/**
 	 * Call the bind method for each of the Referenced Services in this Service
 	 * Component
 	 * 
@@ -165,16 +201,15 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * @throws Exception
 	 */
 	public boolean bind(ComponentInstance componentInstance) throws Exception {
-		// Get all the required service Reference Descriptions for this Service
-		// Component
+		// Get all the required service Reference Descriptions for this ServiceComponent
 		// call the Bind method if the Reference Description includes one
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				Reference ref = (Reference) references.elementAt(i);
 				if (ref.reference.bind != null) {
 					bindReference(ref, componentInstance);
-					if (ref.reference.bindMethod == null) {
-						//the bind method is not found and called for some reason
+					if (ref.reference.bindMethod == null || !ref.isBound()) {
+						//the bind method is not found and called for some reason or it has thrown exception
 						if (ref.reference.cardinality == ComponentReference.CARDINALITY_1_1 || ref.reference.cardinality == ComponentReference.CARDINALITY_1_N) {
 							//unbind the already bound references
 							for (int j = i - 1; j >= 0; j--) {
@@ -400,6 +435,143 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	/**
+	 * Handles the update of the bound services in case the target properties have changed
+	 * @param oldProps the old component properties
+	 * @param newProps the new component properties
+	 */
+	private void handleBoundServicesUpdate(Hashtable oldProps, Dictionary newProps) {
+		Enumeration keys = oldProps.keys();
+		Vector checkedFilters = new Vector();
+		//check for changed target filters in the properties
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			if (key.endsWith(".target")) { //$NON-NLS-1$
+				checkedFilters.addElement(key);
+				String newFilter = (String) newProps.get(key);
+				Reference reference = null;
+				String refName = key.substring(0, key.length() - ".target".length()); //$NON-NLS-1$
+				for (int i = 0; i < references.size(); i++) {
+					reference = (Reference) references.elementAt(i);
+					if (reference.reference.name.equals(refName)) {
+						break;
+					}
+					reference = null;
+				}
+				//check if there is a reference corresponding to the target property
+				if (reference != null && reference.reference.policy == ComponentReference.POLICY_DYNAMIC) {
+					if (newFilter != null) {
+						if (!newFilter.equals(oldProps.get(key))) {
+							//the filter differs the old one - update the reference bound services
+							processReferenceBoundServices(reference, newFilter);
+						}
+					} else {
+						//the target filter is removed. using the default one 
+						processReferenceBoundServices(reference, "(objectClass=" + reference.reference.interfaceName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			}
+		}
+		//now check for newly added target filters
+		keys = newProps.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			if (key.endsWith(".target") && !checkedFilters.contains(key)) { //$NON-NLS-1$
+				Reference reference = null;
+				String refName = key.substring(0, key.length() - ".target".length()); //$NON-NLS-1$
+				for (int i = 0; i < references.size(); i++) {
+					reference = (Reference) references.elementAt(i);
+					if (reference.reference.name.equals(refName)) {
+						break;
+					}
+					reference = null;
+				}
+				//check if there is a reference corresponding to the target property
+				if (reference != null && reference.reference.policy == ComponentReference.POLICY_DYNAMIC) {
+					processReferenceBoundServices(reference, (String) newProps.get(key));
+				}
+			}
+		}
+	}
+
+	private void processReferenceBoundServices(Reference reference, String newTargetFilter) {
+		reference.setTarget(newTargetFilter);
+		ServiceReference[] refs = null;
+		try {
+			refs = bc.getServiceReferences(reference.reference.interfaceName, newTargetFilter);
+		} catch (InvalidSyntaxException e) {
+			Activator.log(bc, LogService.LOG_WARNING, "[SCR] " + NLS.bind(Messages.INVALID_TARGET_FILTER, newTargetFilter), e); //$NON-NLS-1$
+			return;
+		}
+
+		if (refs == null) {
+			//must remove all currently bound services
+			if (reference.reference.bind != null) {
+				if (reference.reference.serviceReferences.size() > 0) {
+					for (int i = 0; i < instances.size(); i++) {
+						ComponentInstance componentInstance = (ComponentInstance) instances.elementAt(i);
+						unbindReference(reference, componentInstance);
+					}
+				}
+			}
+		} else {
+			//find out which services has to be bound and which unbound
+			if (reference.reference.bind != null) {
+				Vector servicesToUnbind = new Vector();
+				Enumeration keys = reference.reference.serviceReferences.keys();
+				while (keys.hasMoreElements()) {
+					Object serviceRef = keys.nextElement();
+					boolean found = false;
+					for (int i = 0; i < refs.length; i++) {
+						if (refs[i] == serviceRef) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						//the bound service reference is not already in the satisfied references set.
+						servicesToUnbind.addElement(serviceRef);
+					}
+				}
+				if ((reference.reference.cardinality == ComponentReference.CARDINALITY_0_N || reference.reference.cardinality == ComponentReference.CARDINALITY_1_N) && (reference.reference.serviceReferences.size() - servicesToUnbind.size()) < refs.length) {
+					//there are more services to bind
+					for (int i = 0; i < refs.length; i++) {
+						keys = reference.reference.serviceReferences.keys();
+						boolean found = false;
+						while (keys.hasMoreElements()) {
+							Object serviceRef = keys.nextElement();
+							if (serviceRef == refs[i]) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							for (int j = 0; j < instances.size(); j++) {
+								ComponentInstance componentInstance = (ComponentInstance) instances.elementAt(j);
+								try {
+									reference.reference.bind(reference, componentInstance, refs[i]);
+								} catch (Exception e) {
+									Activator.log.error(NLS.bind(Messages.ERROR_BINDING_REFERENCE, reference), e);
+								}
+							}
+						}
+					}
+				}
+				//finally unbind all services that do not match the target filter
+				for (int i = 0; i < servicesToUnbind.size(); i++) {
+					for (int j = 0; j < instances.size(); j++) {
+						ComponentInstance componentInstance = (ComponentInstance) instances.elementAt(j);
+						try {
+							unbindDynamicReference(reference, componentInstance, (ServiceReference) servicesToUnbind.elementAt(i));
+						} catch (Exception e) {
+							Activator.log.error(NLS.bind(Messages.ERROR_UNBINDING_REFERENCE2, reference), e);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Call the unbind method for this Reference Description
 	 * 
 	 * @param reference
@@ -456,17 +628,20 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * 
 	 * @param configProperties
 	 *            the configuration properties
+	 * @param componentId specifies the component ID. If null, a new one will be generated
+	 * @return the fully initialized properties
 	 */
-	private void initProperties(Dictionary configProperties) {
+	private Hashtable initProperties(Dictionary configProperties, Long componentId) {
+		Hashtable result = null;
 		// default component service properties
 		Properties propertyDescriptions = serviceComponent.properties;
 		if (propertyDescriptions != null && !propertyDescriptions.isEmpty()) {
-			properties = (Hashtable) propertyDescriptions.clone();
+			result = (Hashtable) propertyDescriptions.clone();
 		}
 
 		// set the component.name
-		if (properties == null) {
-			properties = new Hashtable(7);
+		if (result == null) {
+			result = new Hashtable(7);
 		}
 
 		// put the references in the properties
@@ -475,7 +650,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			for (int i = 0; i < serviceComponent.references.size(); i++) {
 				ref = (ComponentReference) serviceComponent.references.elementAt(i);
 				if (ref.target != null) {
-					properties.put(ref.name + ComponentConstants.REFERENCE_TARGET_SUFFIX, ref.target);
+					result.put(ref.name + ComponentConstants.REFERENCE_TARGET_SUFFIX, ref.target);
 				}
 			}
 		}
@@ -485,20 +660,21 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 			for (Enumeration keys = configProperties.keys(); keys.hasMoreElements();) {
 				Object key = keys.nextElement();
 				Object val = configProperties.get(key);
-				properties.put(key, val);
+				result.put(key, val);
 			}
 		}
 
 		// always set the component name & the id
-		Long nextId = new Long(getNewComponentID());
-		properties.put(ComponentConstants.COMPONENT_ID, nextId);
-		properties.put(ComponentConstants.COMPONENT_NAME, serviceComponent.name);
+		Long nextId = (componentId == null) ? new Long(getNewComponentID()) : componentId;
+		result.put(ComponentConstants.COMPONENT_ID, nextId);
+		result.put(ComponentConstants.COMPONENT_NAME, serviceComponent.name);
 
 		if (serviceComponent.provides != null) {
 			String[] provides = new String[serviceComponent.provides.length];
 			System.arraycopy(serviceComponent.provides, 0, provides, 0, provides.length);
-			properties.put(Constants.OBJECTCLASS, provides);
+			result.put(Constants.OBJECTCLASS, provides);
 		}
+		return result;
 	}
 
 	private void assertCreateSingleInstance() {
@@ -513,6 +689,23 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 	public void setRegistration(ServiceRegistration reg) {
 		registration = reg;
+	}
+
+	/**
+	 * Removes the private properties and returns the public properties that are set to the registered service provided by this component
+	 * @return the public properties used in the registration of the service which is provided by this component
+	 */
+	public Hashtable getPublicServiceProperties() {
+		//remove the private properties from the component properties before registering as service
+		Hashtable publicProps = (Hashtable) properties.clone();
+		Enumeration keys = properties.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			if (key.startsWith(".")) { //$NON-NLS-1$
+				publicProps.remove(key);
+			}
+		}
+		return publicProps;
 	}
 
 	/**

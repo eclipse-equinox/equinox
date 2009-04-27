@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,8 +12,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
-import java.util.Dictionary;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -29,7 +28,6 @@ import org.osgi.service.log.LogService;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.1
  */
 public final class Reference {
 
@@ -110,6 +108,10 @@ public final class Reference {
 
 	public String getTarget() {
 		return target;
+	}
+
+	public void setTarget(String newTarget) {
+		target = newTarget;
 	}
 
 	// used in Resolver.resolveEligible()
@@ -195,6 +197,91 @@ public final class Reference {
 		return false;
 	}
 
+	/**
+	 * Called to determine if the specified new target filter will still satisfy the current state of the reference 
+	 * @param newTargetFilter the new target filter to be checked
+	 * @return true if the reference will still be satisfied after the filter replacement
+	 */
+	public boolean doSatisfy(String newTargetFilter) {
+		ServiceReference[] refs = null;
+		try {
+			refs = scp.bc.getServiceReferences(reference.interfaceName, newTargetFilter);
+		} catch (InvalidSyntaxException e) {
+			Activator.log(scp.bc, LogService.LOG_WARNING, "[SCR] " + NLS.bind(Messages.INVALID_TARGET_FILTER, newTargetFilter), e); //$NON-NLS-1$
+			return false;
+		}
+
+		if (refs == null) {
+			if (cardinalityLow > 0) {
+				//the reference is mandatory, but there are no matching services with the new target filter
+				return false;
+			}
+			if (policy == ComponentReference.POLICY_STATIC) {
+				if (this.reference.bind != null) {
+					if (this.reference.serviceReferences.size() > 0) {
+						//have bound services which are not matching the new filter 
+						return false;
+					}
+				} else {
+					//custom case: static reference with no bind method - check its bound service references list
+					if (boundServiceReferences.size() > 0) {
+						//have bound services which are not matching the new filter 
+						return false;
+					}
+				}
+			}
+			//the reference is not mandatory and the dynamic bound services can be unbound
+			return true;
+		}
+		if (policy == ComponentReference.POLICY_STATIC) {
+			if (this.reference.bind != null) {
+				Enumeration keys = this.reference.serviceReferences.keys();
+				while (keys.hasMoreElements()) {
+					Object serviceRef = keys.nextElement();
+					boolean found = false;
+					for (int i = 0; i < refs.length; i++) {
+						if (refs[i] == serviceRef) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						//the bound service reference is not already in the satisfied references set. 
+						//since this is a static reference a restart of the component is required
+						return false;
+					}
+				}
+				if (cardinalityHigh > 1 && this.reference.serviceReferences.size() < refs.length) {
+					//there are more services to bind. this requires restart of the component since the reference is static
+					return false;
+				}
+			} else {
+				//custom case: static reference with no bind method
+				for (int i = 0; i < boundServiceReferences.size(); i++) {
+					Object serviceRef = boundServiceReferences.elementAt(i);
+					boolean found = false;
+					for (int j = 0; j < refs.length; j++) {
+						if (refs[j] == serviceRef) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						//the bound service reference is not already in the satisfied references set. 
+						//since this is a static reference a restart of the component is required
+						return false;
+					}
+				}
+				if (cardinalityHigh > 1 && boundServiceReferences.size() < refs.length) {
+					//there are more services to bind. this requires restart of the component since the reference is static
+					return false;
+				}
+
+			}
+		}
+		return true;
+	}
+
 	// used in Resolver.selectDynamicUnBind();
 	final boolean dynamicUnbindReference(ServiceReference changedReference) {
 		// nothing dynamic to do if static
@@ -266,6 +353,13 @@ public final class Reference {
 		ServiceComponentProp[] res = new ServiceComponentProp[result.size()];
 		result.copyInto(res);
 		return res;
+	}
+
+	public boolean isBound() {
+		if (this.reference.bind != null) {
+			return (this.reference.serviceReferences.size() >= cardinalityLow);
+		}
+		return true;
 	}
 
 	public Vector getBoundServiceReferences() {

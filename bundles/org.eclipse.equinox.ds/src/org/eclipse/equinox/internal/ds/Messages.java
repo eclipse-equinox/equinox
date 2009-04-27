@@ -20,6 +20,7 @@ public class Messages extends NLS {
 	public static String CANNOT_GET_LOGSERVICE;
 	public static String CANNOT_GET_REFERENCES;
 	public static String CANNOT_GET_SERVICE_BECAUSEOF_CIRCULARITY;
+	public static String CANNOT_MODIFY_INSTANCE__MODIFY_METHOD_NOT_FOUND;
 	public static String CANT_ACTIVATE_INSTANCE;
 	public static String CANT_GET_SERVICE;
 	public static String CANT_GET_SERVICE_OBJECT;
@@ -35,6 +36,7 @@ public class Messages extends NLS {
 	public static String COMPONENT_ID_DEFINIED_BY_LIST_COMMAND;
 	public static String COMPONENT_INSTANCE_BUILT;
 	public static String COMPONENT_LACKS_APPROPRIATE_PERMISSIONS;
+	public static String COMPONENT_MODIFIED_FOR;
 	public static String COMPONENT_NAME;
 	public static String COMPONENT_NAME_IS_NULL;
 	public static String COMPONENT_NOT_FOUND;
@@ -81,12 +83,14 @@ public class Messages extends NLS {
 	public static String ERROR_PROCESSING_PROPERTY;
 	public static String ERROR_PROCESSING_START_TAG;
 	public static String ERROR_UNBINDING_REFERENCE;
+	public static String ERROR_UNBINDING_REFERENCE2;
 	public static String EXCEPTION_ACTIVATING_INSTANCE;
 	public static String EXCEPTION_BUILDING_COMPONENT;
 	public static String EXCEPTION_CREATING_COMPONENT_INSTANCE;
 	public static String EXCEPTION_GETTING_METHOD;
 	public static String EXCEPTION_LOCATING_SERVICE;
 	public static String EXCEPTION_LOCATING_SERVICES;
+	public static String EXCEPTION_MODIFYING_COMPONENT;
 	public static String EXCEPTION_UNBINDING_REFERENCE;
 	public static String EXPECTED_PARAMETER_COMPONENT_ID;
 	public static String FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY;
@@ -130,6 +134,7 @@ public class Messages extends NLS {
 	public static String LOCATED_IN_BUNDLE;
 	public static String METHOD_UNACCESSABLE;
 	public static String MISSING_CHARACTER;
+	public static String MODIFYING_COMPONENT;
 	public static String NEW_SERVICE_CREATED;
 	public static String NO_BUILT_COMPONENT_CONFIGURATIONS;
 	public static String NO_COMPONENT_INSTANCES;
@@ -179,6 +184,7 @@ public class Messages extends NLS {
 	public static String ERROR_READING_OBJECT;
 	public static String DBMANAGER_SERVICE_TRACKER_OPENED;
 	public static String ERROR_LOADING_COMPONENT_DEFINITIONS;
+	public static String ERROR_MODIFYING_COMPONENT;
 	public static String ERROR_SAVING_COMPONENT_DEFINITIONS;
 	public static String FILE_DOESNT_EXIST_OR_DIRECTORY;
 	static {

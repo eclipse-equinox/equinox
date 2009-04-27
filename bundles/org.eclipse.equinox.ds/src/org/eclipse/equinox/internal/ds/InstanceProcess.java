@@ -459,7 +459,6 @@ public class InstanceProcess {
 	 *            the component instance created by ComponentFactoryImpl!
 	 */
 	private void registerService(ServiceComponentProp scp, boolean factory, ComponentInstanceImpl ci) {
-
 		// register the service using a ServiceFactory
 		ServiceRegistration reg = null;
 		Object service;
@@ -474,18 +473,7 @@ public class InstanceProcess {
 			service = new ServiceReg(scp, ci);
 		}
 
-		//remove the private properties from the component properties before registering as service
-		Hashtable props = scp.getProperties();
-		Hashtable publicProps = (Hashtable) props.clone();
-		Enumeration keys = props.keys();
-		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			if (key.startsWith(".")) { //$NON-NLS-1$
-				publicProps.remove(key);
-			}
-		}
-
-		reg = scp.bc.registerService(scp.serviceComponent.provides, service, publicProps);
+		reg = scp.bc.registerService(scp.serviceComponent.provides, service, scp.getPublicServiceProperties());
 
 		if (Activator.DEBUG) {
 			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -603,6 +591,37 @@ public class InstanceProcess {
 				buildingThreads.remove(scp);
 				scp.notify();
 			}
+			freeLock();
+		}
+	}
+
+	public void modifyComponent(ServiceComponentProp scp, Dictionary newProps) throws ComponentException {
+		if (Activator.DEBUG) {
+			Activator.log.debug(NLS.bind(Messages.MODIFYING_COMPONENT, scp.name), null);
+		}
+		getLock();
+		long start = 0l;
+		try {
+			if (Activator.PERF) {
+				start = System.currentTimeMillis();
+				Activator.log.info(NLS.bind(Messages.MODIFYING_COMPONENT, scp));
+			}
+			try {
+				scp.modify(newProps);
+			} catch (ComponentException e) {
+				Activator.log.error(e.getMessage(), e.getCause());
+				throw e;
+			} catch (Throwable t) {
+				Activator.log.error(NLS.bind(Messages.ERROR_MODIFYING_COMPONENT, scp.serviceComponent), t);
+				throw new ComponentException(NLS.bind(Messages.ERROR_MODIFYING_COMPONENT, scp.serviceComponent), t);
+			} finally {
+				// keep track of how many times we have re-entered this method
+				if (Activator.PERF) {
+					start = System.currentTimeMillis() - start;
+					Activator.log.info(NLS.bind(Messages.COMPONENT_MODIFIED_FOR, scp, Long.toString(start)));
+				}
+			}
+		} finally {
 			freeLock();
 		}
 	}

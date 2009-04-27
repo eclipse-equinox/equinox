@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
+import org.eclipse.equinox.internal.ds.Messages;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,7 +51,7 @@ public class ServiceComponent implements Externalizable {
 	String configurationPolicy = CONF_POLICY_OPTIONAL;
 	String activateMethodName = "activate"; //$NON-NLS-1$
 	String deactivateMethodName = "deactivate"; //$NON-NLS-1$
-	String modifyMethodName = "modify"; //$NON-NLS-1$
+	public String modifyMethodName = ""; //$NON-NLS-1$
 
 	// service
 	public Vector serviceInterfaces; // all strings
@@ -243,12 +245,14 @@ public class ServiceComponent implements Externalizable {
 		}
 	}
 
-	void modify(Object instance, ComponentContext context) throws ComponentException {
+	void modified(Object instance, ComponentContext context) throws ComponentException {
 		try {
 			if (namespace11) {
 				if (!modifyCached) {
 					modifyCached = true;
-					modifyMethod = getMethod(instance, modifyMethodName, true);
+					if (modifyMethodName != "") { //$NON-NLS-1$
+						modifyMethod = getMethod(instance, modifyMethodName, true);
+					}
 				}
 				// invoke the method if any
 				if (modifyMethod != null) {
@@ -277,10 +281,10 @@ public class ServiceComponent implements Externalizable {
 						}
 					}
 				} else {
-					if (modifyMethodName != "modify") { //$NON-NLS-1$
+					if (modifyMethodName != "") { //$NON-NLS-1$
 						//the modify method is specified in the component description XML by the user.
 						//It is expected to find it in the implementation class
-						throw new ComponentException(NLS.bind("[SCR] Cannot modify instance {0} of component {1}! The specified modify method was not found!", instance, this));
+						throw new ComponentException(NLS.bind(Messages.CANNOT_MODIFY_INSTANCE__MODIFY_METHOD_NOT_FOUND, instance, this));
 					}
 				}
 			}
@@ -288,10 +292,7 @@ public class ServiceComponent implements Externalizable {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			Activator.log(bc, LogService.LOG_ERROR, NLS.bind("[SCR] Cannot modify instance {0} of component {1}", instance, this), null);
-			throw new ComponentException(NLS.bind("[SCR] Exception while modifying instance {0} of component {1}", instance, name), t);
-			// rethrow exception so resolver is eventually notified that
-			// the processed SCP is bad
+			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.EXCEPTION_MODIFYING_COMPONENT, instance, this), t);
 		}
 	}
 
@@ -506,7 +507,7 @@ public class ServiceComponent implements Externalizable {
 		if (namespace11) {
 			buffer.append("\n\tactivate = ").append(activateMethodName); //$NON-NLS-1$
 			buffer.append("\n\tdeactivate = ").append(deactivateMethodName); //$NON-NLS-1$
-			buffer.append("\n\tmodify = ").append(modifyMethodName); //$NON-NLS-1$
+			buffer.append("\n\tmodified = ").append(modifyMethodName); //$NON-NLS-1$
 			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy); //$NON-NLS-1$
 		}
 		buffer.append("\n\tfactory = ").append(factory); //$NON-NLS-1$
@@ -600,7 +601,7 @@ public class ServiceComponent implements Externalizable {
 					out.writeBoolean(true);
 					out.writeUTF(deactivateMethodName);
 				}
-				if (modifyMethodName == "modify") { //$NON-NLS-1$
+				if (modifyMethodName == "") { //$NON-NLS-1$
 					//this is the default value. Do not write it. Just add a mark
 					out.writeBoolean(false);
 				} else {

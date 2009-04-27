@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import org.eclipse.equinox.internal.ds.model.ServiceComponent;
-import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
+import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.equinox.internal.util.event.Queue;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.equinox.internal.util.threadpool.ThreadPoolManager;
@@ -24,6 +23,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -35,7 +35,6 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Maria Ivanova
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.2
  */
 
 public class SCRManager implements ServiceListener, SynchronousBundleListener, ConfigurationListener, WorkPerformer, PrivilegedAction {
@@ -348,15 +347,27 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 
 				// if NOT a factory
 				if (fpid == null) {
-					// there is only one SCP for this SC, so we can disable the SC
-					Vector components = new Vector();
-					components.addElement(sc);
-					resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
+					// there is only one SCP for this SC
+					boolean requiresRestart = true;
+					if (sc.namespace11) {
+						if (sc.componentProps != null && sc.modifyMethodName != "") { //$NON-NLS-1$
+							ServiceComponentProp scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
+							if (scp.getState() > ServiceComponentProp.SATISFIED) {
+								//process only built components
+								requiresRestart = processConfigurationChange(scp, config[0]);
+							}
+						}
+					}
+					if (requiresRestart) {
+						// there is only one SCP for this SC, so we can disable the SC
+						Vector components = new Vector();
+						components.addElement(sc);
+						resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
 
-					// now re-enable the SC - the resolver will pick up the new
-					// config
-					sc.enabled = true;
-					resolver.enableComponents(components);
+						// now re-enable the SC - the resolver will pick up the new config
+						sc.enabled = true;
+						resolver.enableComponents(components);
+					}
 
 					// If a MSF
 					// create a new SCP or update an existing one
@@ -369,20 +380,29 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					if (scp == null && sc.componentProps != null && sc.componentProps.size() == 1 && (((ServiceComponentProp) sc.componentProps.elementAt(0)).getProperties().get(Constants.SERVICE_PID) == null)) {
 						scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
 					}
-					// if old scp exists, dispose it
-					if (scp != null) {
-						// config already exists - dispose of it
-						sc.componentProps.removeElement(scp);
-						Vector components = new Vector();
-						components.addElement(scp);
-						resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
+					boolean requiresRestart = true;
+					if (sc.namespace11 && sc.modifyMethodName != "" && scp != null) { //$NON-NLS-1$
+						if (scp.getState() > ServiceComponentProp.SATISFIED) {
+							//process only built components
+							requiresRestart = processConfigurationChange(scp, config[0]);
+						}
 					}
+					if (requiresRestart) {
+						// if old scp exists, dispose it
+						if (scp != null) {
+							// config already exists - dispose of it
+							sc.componentProps.removeElement(scp);
+							Vector components = new Vector();
+							components.addElement(scp);
+							resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
+						}
 
-					// create a new scp (adds to resolver enabledSCPs list)
-					resolver.map(sc, config[0]);
+						// create a new scp (adds to resolver enabledSCPs list)
+						resolver.map(sc, config[0]);
 
-					// kick the resolver to figure out if SCP is satisfied, etc
-					resolver.enableComponents(null);
+						// kick the resolver to figure out if SCP is satisfied, etc
+						resolver.enableComponents(null);
+					}
 				}
 
 				break;
@@ -427,6 +447,85 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Process the modification of the specified component. 
+	 * If it cannot be modified, the method will return <code>true</code> indicating the component has to be restarted.
+	 * @param scp the component to modify
+	 * @param config the configuration that brings the new properties
+	 * @return true, if the component needs restart (to be deactivated and then eventually activated again)
+	 */
+	private boolean processConfigurationChange(ServiceComponentProp scp, Configuration config) {
+		boolean result = false;
+		Hashtable currentProps = scp.properties;
+		Dictionary newProps = config.getProperties();
+		Enumeration keys = currentProps.keys();
+		Vector checkedFilters = new Vector();
+		while (keys.hasMoreElements() && !result) {
+			String key = (String) keys.nextElement();
+			if (key.endsWith(".target")) { //$NON-NLS-1$
+				checkedFilters.addElement(key);
+				String newFilter = (String) newProps.get(key);
+				Reference reference = null;
+				String refName = key.substring(0, key.length() - ".target".length()); //$NON-NLS-1$
+				Vector references = scp.references;
+				for (int i = 0; i < references.size(); i++) {
+					reference = (Reference) references.elementAt(i);
+					if (reference.reference.name.equals(refName)) {
+						break;
+					}
+					reference = null;
+				}
+				//check if there is a reference corresponding to the target property
+				if (reference != null) {
+					if (newFilter != null) {
+						if (!newFilter.equals(currentProps.get(key))) {
+							//the filter differs the old one
+							result = result || !reference.doSatisfy(newFilter);
+						}
+					} else {
+						//the target filter is removed. Using the default filter to check
+						if (reference.policy == ComponentReference.POLICY_STATIC) {
+							result = result || !reference.doSatisfy("(objectClass=" + reference.reference.interfaceName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					}
+				}
+			}
+		}
+
+		//now check the new properties if they have new target properties defined
+		keys = newProps.keys();
+		while (keys.hasMoreElements() && !result) {
+			String key = (String) keys.nextElement();
+			if (key.endsWith(".target") && !checkedFilters.contains(key)) { //$NON-NLS-1$
+				Reference reference = null;
+				String refName = key.substring(0, key.length() - ".target".length()); //$NON-NLS-1$
+				Vector references = scp.references;
+				for (int i = 0; i < references.size(); i++) {
+					reference = (Reference) references.elementAt(i);
+					if (reference.reference.name.equals(refName)) {
+						break;
+					}
+					reference = null;
+				}
+				//check if there is a reference corresponding to the target property
+				if (reference != null) {
+					result = result || !reference.doSatisfy((String) newProps.get(key));
+				}
+			}
+		}
+
+		if (!result) {
+			//do process component modification via the InstanceProcess
+			try {
+				InstanceProcess.staticRef.modifyComponent(scp, newProps);
+			} catch (ComponentException ce) {
+				//could happen if the modify method is not found
+				result = true;
+			}
+		}
+		return result;
 	}
 
 	private void disposeBundles() {

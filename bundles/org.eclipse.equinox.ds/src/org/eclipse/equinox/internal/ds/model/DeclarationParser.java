@@ -48,7 +48,7 @@ public class DeclarationParser implements ExTagListener {
 	private static final String ATTR_CONF_POLICY = "configuration-policy"; //$NON-NLS-1$
 	private static final String ATTR_ACTIVATE = "activate"; //$NON-NLS-1$
 	private static final String ATTR_DEACTIVATE = "deactivate"; //$NON-NLS-1$
-	private static final String ATTR_MODIFY = "modify"; //$NON-NLS-1$
+	private static final String ATTR_MODIFIED = "modified"; //$NON-NLS-1$
 
 	private static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
 	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
@@ -512,8 +512,8 @@ public class DeclarationParser implements ExTagListener {
 			if (tmp != null) {
 				currentComponent.deactivateMethodName = tmp;
 			}
-			//processing attribute modify
-			tmp = tag.getAttribute(ATTR_MODIFY);
+			//processing attribute modified
+			tmp = tag.getAttribute(ATTR_MODIFIED);
 			if (tmp != null && tmp.length() == 0) {
 				tmp = null;
 			}
@@ -530,8 +530,8 @@ public class DeclarationParser implements ExTagListener {
 			if (tag.getAttribute(ATTR_DEACTIVATE) != null) {
 				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_DEACTIVATE, Integer.toString(tag.getLine())));
 			}
-			if (tag.getAttribute(ATTR_MODIFY) != null) {
-				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_MODIFY, Integer.toString(tag.getLine())));
+			if (tag.getAttribute(ATTR_MODIFIED) != null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_MODIFIED, Integer.toString(tag.getLine())));
 			}
 		}
 	}
