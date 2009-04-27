@@ -918,25 +918,49 @@ public class Main {
 			return null;
 
 		ArrayList matches = new ArrayList(2);
-		for (int i = 0; i < candidates.length; i++)
-			if (candidates[i].equals(target))
+		for (int i = 0; i < candidates.length; i++) {
+			if (isMatchingCandidate(target, candidates[i], root))
 				matches.add(candidates[i]);
-			else if (candidates[i].startsWith(target + "_")) { //$NON-NLS-1$
-				// is the remainder a version, or was the '_' part of the id?
-				int c1 = candidates[i].indexOf('.', target.length() + 1);
-				if (c1 < 0)
-					continue; // '_' wasn't the start of a version, no match
-				int c2 = candidates[i].indexOf('_', target.length() + 1);
-				if (c2 < 0 || c1 < c2) //ok if no more '_'s or if the '.' comes first
-					matches.add(candidates[i]);
-			}
-
+		}
 		String[] names = (String[]) matches.toArray(new String[matches.size()]);
 		int result = findMax(names);
 		if (result == -1)
 			return null;
 		File candidate = new File(start, names[result]);
 		return candidate.getAbsolutePath().replace(File.separatorChar, '/') + (candidate.isDirectory() ? "/" : ""); //$NON-NLS-1$//$NON-NLS-2$
+	}
+
+	private boolean isMatchingCandidate(String target, String candidate, File root) {
+		if (candidate.equals(target))
+			return true;
+		if (!candidate.startsWith(target + "_")) //$NON-NLS-1$
+			return false;
+		int targetLength = target.length();
+		int lastUnderscore = candidate.lastIndexOf('_');
+
+		//do we have a second '_', version (foo_1.0.0.v1_123) or id (foo.x86_64) ?
+		//files are assumed to have an extension (zip or jar only), remove it
+		//NOTE: we only remove .zip and .jar extensions because we still need to accept libraries with
+		//simple versions (e.g. eclipse_1234.dll)
+		File candidateFile = new File(root, candidate);
+		if (candidateFile.isFile() && (candidate.endsWith(".jar") || candidate.endsWith(".zip"))) { //$NON-NLS-1$//$NON-NLS-2$
+			int extension = candidate.lastIndexOf('.');
+			candidate = candidate.substring(0, extension);
+		}
+
+		int lastDot = candidate.lastIndexOf('.');
+		if (lastDot < targetLength) {
+			// no dots after target, the '_' is not in a version (foo.x86_64 case), not a match
+			return false;
+		}
+
+		//get past all '_' that are part of the qualifier
+		while (lastUnderscore > lastDot)
+			lastUnderscore = candidate.lastIndexOf('_', lastUnderscore - 1);
+
+		if (lastUnderscore == targetLength)
+			return true; //underscore at the end of target (foo_1.0.0.v1_123 case)
+		return false; //another underscore between target and version (foo_64_1.0.0.v1_123 case)
 	}
 
 	private String searchForBundle(String target, String start) {
