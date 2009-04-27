@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.storage.file;
 
-import org.eclipse.equinox.internal.ds.Messages;
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -217,7 +215,7 @@ public class FileStorage extends ComponentStorage {
 	protected long getLastModifiedTimestamp(Bundle bundle) {
 		if (bundle == null)
 			return 0;
-		long result = 0;
+		long result = Long.MAX_VALUE;
 		ManifestElement[] elements = parseManifestHeader(bundle);
 		for (int i = 0; i < elements.length; i++) {
 			URL componentURL = bundle.getEntry(elements[i].getValue());
@@ -228,7 +226,8 @@ public class FileStorage extends ComponentStorage {
 					if (lastModified > result)
 						result = lastModified;
 				} catch (IOException e) {
-					return 0;
+					//last modified cannot be calculated. should force reparse 
+					return Long.MAX_VALUE;
 				}
 			}
 		}
