@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,6 @@ import org.osgi.service.component.*;
  * @author Valentin Valchev, Nina Ruseva
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.1
  */
 
 public class ComponentContextImpl implements ComponentContext {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997-2009 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,8 +10,6 @@
  *    ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.impl;
-
-import org.eclipse.equinox.internal.ds.Messages;
 
 import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
@@ -25,7 +23,6 @@ import org.osgi.service.component.*;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
- * @version 1.0
  */
 
 public class ComponentFactoryImpl implements ComponentFactory {
