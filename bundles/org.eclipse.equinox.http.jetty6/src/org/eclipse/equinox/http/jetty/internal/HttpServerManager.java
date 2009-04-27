@@ -207,7 +207,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 			sslConnector.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
 		}
 
-		Object wantClientAuth = (Boolean) dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
+		Object wantClientAuth = dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
 		if (wantClientAuth != null) {
 			if (wantClientAuth instanceof String)
 				wantClientAuth = Boolean.valueOf((String) wantClientAuth);
