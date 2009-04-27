@@ -350,16 +350,8 @@ public class ComponentReference implements Externalizable {
 					if (methodParam == null) {
 						// cannot get serviceObject because of circularity
 
-						//remove the component instance marked as bind
-						if (isComponentFactory) {
-							Vector instances = (Vector) serviceReferences.get(serviceReference);
-							instances.removeElement(instance);
-							if (instances.isEmpty()) {
-								serviceReferences.remove(serviceReference);
-							}
-						} else {
-							serviceReferences.remove(serviceReference);
-						}
+						//remove the component instance marked as bound
+						removeServiceReference(serviceReference, instance);
 						return;
 					}
 				}
@@ -382,26 +374,32 @@ public class ComponentReference implements Externalizable {
 					bindMethod.invoke(instance.getInstance(), params);
 				} catch (Throwable t) {
 					logError(NLS.bind(Messages.ERROR_BINDING_REFERENCE, this), t, reference);
+					//remove the component instance marked as bound
+					removeServiceReference(serviceReference, instance);
 				} finally {
 					if (params.length == 1) {
 						SCRUtil.release(params);
 					}
 				}
 			} else {
-				//remove the component instance marked as bind
-				if (isComponentFactory) {
-					Vector instances = (Vector) serviceReferences.get(serviceReference);
-					instances.removeElement(instance);
-					if (instances.isEmpty()) {
-						serviceReferences.remove(serviceReference);
-					}
-				} else {
-					serviceReferences.remove(serviceReference);
-				}
-
+				//remove the component instance marked as bound
+				removeServiceReference(serviceReference, instance);
 				// could be also circularity break
 				logWarning(NLS.bind(Messages.BIND_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE, bind), null, reference);
 			}
+		}
+	}
+
+	private void removeServiceReference(ServiceReference serviceReference, ComponentInstance instance) {
+		boolean isComponentFactory = component.factory != null;
+		if (isComponentFactory) {
+			Vector instances = (Vector) serviceReferences.get(serviceReference);
+			instances.removeElement(instance);
+			if (instances.isEmpty()) {
+				serviceReferences.remove(serviceReference);
+			}
+		} else {
+			serviceReferences.remove(serviceReference);
 		}
 	}
 
