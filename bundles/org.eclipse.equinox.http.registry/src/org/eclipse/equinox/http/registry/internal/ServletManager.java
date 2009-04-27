@@ -72,7 +72,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			IConfigurationElement serviceSelectorElement = elements[i];
 			if (!SERVICESELECTOR.equals(serviceSelectorElement.getName()))
 				continue;
-			
+
 			org.osgi.framework.Filter serviceSelector = null;
 			String clazz = serviceSelectorElement.getAttribute(CLASS);
 			if (clazz != null) {
@@ -87,7 +87,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 				String filter = serviceSelectorElement.getAttribute(FILTER);
 				if (filter == null)
 					return;
-				
+
 				try {
 					serviceSelector = FrameworkUtil.createFilter(filter);
 				} catch (InvalidSyntaxException e) {
@@ -96,13 +96,13 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 					return;
 				}
 			}
-			
-			if (! serviceSelector.match(reference))
+
+			if (!serviceSelector.match(reference))
 				return;
-			
+
 			break;
-		}		
-		
+		}
+
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement servletElement = elements[i];
 			if (!SERVLET.equals(servletElement.getName()))
@@ -188,7 +188,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			destroyDelegate();
 		}
 
-		private void initializeDelegate() throws ServletException {
+		private synchronized void initializeDelegate() throws ServletException {
 			if (delegate == null) {
 				try {
 					Servlet newDelegate = (Servlet) element.createExecutableExtension(CLASS);
@@ -200,7 +200,7 @@ public class ServletManager implements ExtensionPointTracker.Listener {
 			}
 		}
 
-		private void destroyDelegate() {
+		private synchronized void destroyDelegate() {
 			if (delegate != null) {
 				Servlet doomedDelegate = delegate;
 				delegate = null;
