@@ -97,6 +97,7 @@ int showSplash( const _TCHAR* featureImage )
 	if (image != NULL) {
 		NSImageRep* imageRep = [image bestRepresentationForDevice: [[NSScreen mainScreen] deviceDescription]];
 		NSRect rect = {{0, 0}, {[imageRep pixelsWide], [imageRep pixelsHigh]}};
+		[image setSize: NSMakeSize([imageRep pixelsWide], [imageRep pixelsHigh])];
 		[image autorelease];
 		window = [[KeyWindow alloc] initWithContentRect: rect styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer: 0];
 		if (window != nil) {
