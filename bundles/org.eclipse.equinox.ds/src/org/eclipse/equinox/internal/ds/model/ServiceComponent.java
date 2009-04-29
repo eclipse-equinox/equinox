@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
-import org.eclipse.equinox.internal.ds.Messages;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -695,11 +693,13 @@ public class ServiceComponent implements Externalizable {
 	}
 
 	public ServiceComponentProp getComponentPropByPID(String pid) {
-		for (int i = 0; i < componentProps.size(); i++) {
-			ServiceComponentProp scp = (ServiceComponentProp) componentProps.elementAt(i);
-			if (scp.getProperties() != null) {
-				if (pid.equals(scp.getProperties().get(Constants.SERVICE_PID))) {
-					return scp;
+		if (componentProps != null) {
+			for (int i = 0; i < componentProps.size(); i++) {
+				ServiceComponentProp scp = (ServiceComponentProp) componentProps.elementAt(i);
+				if (scp.getProperties() != null) {
+					if (pid.equals(scp.getProperties().get(Constants.SERVICE_PID))) {
+						return scp;
+					}
 				}
 			}
 		}
