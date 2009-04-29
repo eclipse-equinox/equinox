@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,29 +43,33 @@ public class StatePerformanceTest extends BasePerformanceTest {
 		}.run(this, 10, 10);
 	}
 
-	private void testResolution(int stateSize, int repetitions, String localName) {
+	private void testResolution(int stateSize, int repetitions, String localName, String degradation) {
 		final State originalState = buildRandomState(stateSize);
-		new PerformanceTestRunner() {
+		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
 				originalState.resolve(false);
 			}
-		}.run(this, localName, 10, repetitions);
+		};
+		runner.setRegressionReason(degradation);
+		runner.run(this, localName, 10, repetitions);
 	}
 
 	public void testResolution100() throws IOException {
-		testResolution(100, 500, null);
+		testResolution(100, 500, null, null);
 	}
 
+	static private final String explanation = "Performance decrease caused thread safety fixes . See https://bugs.eclipse.org/bugs/show_bug.cgi?id=258259 for details."; //$NON-NLS-1$
+
 	public void testResolution1000() throws IOException {
-		testResolution(1000, 15, "State Resolution");
+		testResolution(1000, 15, "State Resolution", explanation);
 	}
 
 	public void testResolution500() throws IOException {
-		testResolution(500, 50, null);
+		testResolution(500, 50, null, null);
 	}
 
 	public void testResolution5000() throws IOException {
-		testResolution(5000, 1, null);
+		testResolution(5000, 1, null, null);
 	}
 
 	public void testStoreAndRetrieve() {
