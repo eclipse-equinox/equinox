@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Martin Lippert and others.
+ * Copyright (c) 2008, 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *   Martin Lippert            initial implementation
+ *   Martin Lippert            fragment handling fixed
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.hooks;
@@ -18,10 +19,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
+import org.eclipse.equinox.service.weaving.Supplementer;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegateHook;
-import org.osgi.framework.Bundle;
 
 /**
  * This class implements the delegate hook for the class loader to allow
@@ -92,12 +93,13 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
 
         postFindClassCalls.get().add(callKey);
         try {
-            final Bundle[] supplementers = supplementerRegistry
+            final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
                 for (int i = 0; i < supplementers.length; i++) {
                     try {
-                        final Class clazz = supplementers[i].loadClass(name);
+                        final Class<?> clazz = supplementers[i]
+                                .getSupplementerHost().loadClass(name);
                         if (clazz != null) {
                             return clazz;
                         }
@@ -139,12 +141,13 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
 
         postFindResourceCalls.get().add(callKey);
         try {
-            final Bundle[] supplementers = supplementerRegistry
+            final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
                 for (int i = 0; i < supplementers.length; i++) {
                     try {
-                        final URL resource = supplementers[i].getResource(name);
+                        final URL resource = supplementers[i]
+                                .getSupplementerHost().getResource(name);
                         if (resource != null) {
                             return resource;
                         }
@@ -177,13 +180,13 @@ public class WeavingLoaderDelegateHook implements ClassLoaderDelegateHook {
 
         postFindResourcesCalls.get().add(callKey);
         try {
-            final Bundle[] supplementers = supplementerRegistry
+            final Supplementer[] supplementers = supplementerRegistry
                     .getSupplementers(bundleID);
             if (supplementers != null) {
                 for (int i = 0; i < supplementers.length; i++) {
                     try {
-                        final Enumeration resource = supplementers[i]
-                                .getResources(name);
+                        final Enumeration<?> resource = supplementers[i]
+                                .getSupplementerHost().getResources(name);
                         if (resource != null) {
                             // TODO: if more than one enumeration is found, we should return all items
                             return resource;

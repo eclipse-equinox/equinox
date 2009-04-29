@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Martin Lippert and others.
+ * Copyright (c) 2008, 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,9 +8,10 @@
  * Contributors:
  *   David Knibb               initial implementation      
  *   Martin Lippert            supplementing mechanism reworked     
+ *   Martin Lippert            fragment handling fixed
  *******************************************************************************/
 
-package org.eclipse.equinox.weaving.hooks;
+package org.eclipse.equinox.service.weaving;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,15 +27,18 @@ public class Supplementer {
 
     private final Bundle supplementer;
 
+    private final Bundle supplementerHost;
+
     private final ManifestElement[] supplementExporter;
 
     private final ManifestElement[] supplementImporter;
 
-    public Supplementer(final Bundle bundle,
+    public Supplementer(final Bundle bundle, final Bundle bundleHost,
             final ManifestElement[] supplementBundle,
             final ManifestElement[] supplementImporter,
             final ManifestElement[] supplementExporter) {
         this.supplementer = bundle;
+        this.supplementerHost = bundleHost != null ? bundleHost : bundle;
         this.supplementBundle = supplementBundle;
         this.supplementImporter = supplementImporter;
         this.supplementExporter = supplementExporter;
@@ -46,12 +50,16 @@ public class Supplementer {
     }
 
     public Bundle[] getSupplementedBundles() {
-        return supplementedBundles
-                .toArray(new Bundle[supplementedBundles.size()]);
+        return supplementedBundles.toArray(new Bundle[supplementedBundles
+                .size()]);
     }
 
     public Bundle getSupplementerBundle() {
         return supplementer;
+    }
+
+    public Bundle getSupplementerHost() {
+        return supplementerHost;
     }
 
     public String getSymbolicName() {

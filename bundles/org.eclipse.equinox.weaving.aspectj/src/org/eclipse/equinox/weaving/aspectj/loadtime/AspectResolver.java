@@ -6,7 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
- *   Martin Lippert               initial implementation
+ *   Martin Lippert            initial implementation
+ *   Martin Lippert            fragment handling fixed
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj.loadtime;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
+import org.eclipse.equinox.service.weaving.Supplementer;
 import org.eclipse.equinox.weaving.aspectj.AspectAdmin;
 import org.eclipse.equinox.weaving.aspectj.AspectConfiguration;
 import org.eclipse.osgi.service.resolver.BundleDescription;
@@ -220,17 +222,19 @@ public class AspectResolver {
             }
 
             // supplementers
-            final Bundle[] supplementers = this.supplementerRegistry
+            final Supplementer[] supplementers = this.supplementerRegistry
                     .getSupplementers(bundleDescription.getBundleId());
 
             for (int i = 0; i < supplementers.length; i++) {
                 aspects = aspectAdmin
-                        .getExportedAspectDefinitions(supplementers[i]);
+                        .getExportedAspectDefinitions(supplementers[i]
+                                .getSupplementerBundle());
                 if (aspects != null) {
                     result.add(aspects);
                     fingerprintElements.add(supplementers[i].getSymbolicName()
                             + ":" //$NON-NLS-1$
-                            + getBundleVersion(supplementers[i]));
+                            + getBundleVersion(supplementers[i]
+                                    .getSupplementerBundle()));
                 }
             }
 
