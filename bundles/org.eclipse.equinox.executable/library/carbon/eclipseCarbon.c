@@ -114,8 +114,10 @@ int showSplash( const _TCHAR* featureImage )
 
 void takeDownSplash() {
 	if (window != 0) {
+		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 		[window close];
 		window = nil;
+		[pool release];
 	}
 }	
 
