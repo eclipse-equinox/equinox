@@ -172,7 +172,7 @@ public class AspectAdminImpl implements AspectAdmin, SynchronousBundleListener {
 
     /**
      * @see org.eclipse.equinox.weaving.aspectj.AspectAdmin#resolveImportedPackage(org.osgi.framework.Bundle,
-     *      java.lang.String, boolean)
+     *      java.lang.String, int)
      */
     public Definition resolveImportedPackage(final Bundle bundle,
             final String packageName, final int applyAspectsPolicy) {
