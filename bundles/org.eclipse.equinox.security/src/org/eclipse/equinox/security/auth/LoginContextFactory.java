@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ final public class LoginContextFactory {
 	 * any calls to {@link #createContext(String)}.
 	 * </p>
 	 * @param configName the name of login configuration to use
-	 * @param configFile points to the standard JASS configuration file 
+	 * @param configFile points to the standard JAAS configuration file 
 	 * @return new security context
 	 */
 	public static ILoginContext createContext(String configName, URL configFile) {
@@ -52,7 +52,7 @@ final public class LoginContextFactory {
 	 * any calls to {@link #createContext(String)}.
 	 * </p>
 	 * @param configName the name of login configuration to use
-	 * @param configFile points to the standard JASS configuration file 
+	 * @param configFile points to the standard JAAS configuration file 
 	 * @param handler optional callback handler, might be <code>null</code>
 	 * @return new security context
 	 */
