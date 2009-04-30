@@ -239,15 +239,18 @@ public class AspectResolver {
             }
 
             // this bundle
-            if (result.size() > 0) {
-                aspects = aspectAdmin.getAspectDefinition(bundle);
-                if (aspects != null) {
+            aspects = aspectAdmin.getAspectDefinition(bundle);
+            if (aspects != null) {
+                final String finishedValue = (String) bundle.getHeaders().get(
+                        AspectAdmin.AOP_BUNDLE_FINISHED_HEADER);
+                if (finishedValue == null
+                        || !AspectAdmin.AOP_BUNDLE_FINISHED_VALUE
+                                .equals(finishedValue)) {
                     result.add(aspects);
                     fingerprintElements.add(bundle.getSymbolicName() + ":" //$NON-NLS-1$
                             + bundleDescription.getVersion().toString());
                 }
             }
-
         }
 
         return result;

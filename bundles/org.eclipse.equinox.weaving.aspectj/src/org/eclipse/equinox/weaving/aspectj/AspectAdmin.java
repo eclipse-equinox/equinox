@@ -28,6 +28,20 @@ import org.osgi.framework.Bundle;
 public interface AspectAdmin {
 
     /**
+     * Header for aspect bundle manifest files to indicate whether a bundle is
+     * readily compiled with AJDT, for example. This tells Equinox Aspects that
+     * the bundle does not need to be woven if it refers to just its own
+     * aspects.
+     */
+    public static final String AOP_BUNDLE_FINISHED_HEADER = "Eclipse-AspectBundle"; //$NON-NLS-1$
+
+    /**
+     * The value for the aspect bundle header to indicate that there is no
+     * weaving necessary to finish the aspects of the bundle itself
+     */
+    public static final String AOP_BUNDLE_FINISHED_VALUE = "finished"; //$NON-NLS-1$
+
+    /**
      * This is the default value for the location of the aop.xml file inside a
      * bundle
      */
@@ -141,7 +155,8 @@ public interface AspectAdmin {
      * 
      * @param bundle The bundle from which the given package is imported
      * @param packageName The name of the package that is imported
-     * @param applyAspects the policy for applying visible aspects for weaving
+     * @param applyAspectsPolicy the policy for applying visible aspects for
+     *            weaving
      * @return The set of aspects that should be woven from the given imported
      *         package
      */
@@ -154,7 +169,8 @@ public interface AspectAdmin {
      * 
      * @param bundle The bundle which is required and might export aspects that
      *            should be woven
-     * @param applyAspects the policy for applying visible aspects for weaving
+     * @param applyAspectsPolicy the policy for applying visible aspects for
+     *            weaving
      * @return The set of aspects that should be woven from the given required
      *         bundle
      */
