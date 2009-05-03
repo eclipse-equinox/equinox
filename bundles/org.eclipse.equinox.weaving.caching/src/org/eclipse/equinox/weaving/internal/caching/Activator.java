@@ -89,7 +89,7 @@ public class Activator implements BundleActivator {
                     .getService(debugOptionsReference);
             if (debugOptions != null) {
                 Log.debugEnabled = debugOptions.getBooleanOption(
-                        "org.aspectj.osgi.service.caching/debug", true); //$NON-NLS-1$
+                        "org.eclipse.equinox.weaving.caching/debug", false); //$NON-NLS-1$
             }
         }
         if (debugOptionsReference != null) {

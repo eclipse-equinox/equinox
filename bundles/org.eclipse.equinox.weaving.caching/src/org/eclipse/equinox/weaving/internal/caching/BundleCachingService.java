@@ -244,9 +244,9 @@ public class BundleCachingService implements ICachingService {
             }
             return classbytes;
         } catch (final IOException e) {
-            Log.error(MessageFormat.format(
+            Log.debug(MessageFormat.format(
                     "for [{0}]: Cannot read [1] from cache!", bundle //$NON-NLS-1$
-                            .getSymbolicName(), name), e);
+                            .getSymbolicName(), name));
             return null;
         } finally {
             if (in != null) {
