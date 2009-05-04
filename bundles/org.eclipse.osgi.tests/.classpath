@@ -11,6 +11,7 @@
 	<classpathentry kind="src" output="bundle_tests/circularity.test" path="bundles_src/circularity.test"/>
 	<classpathentry kind="src" output="bundle_tests/circularity.test.a" path="bundles_src/circularity.test.a"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a" path="bundles_src/fragment.test.attach.host.a"/>
+	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.v2" path="bundles_src/fragment.test.attach.host.a.v2"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.host.a.require" path="bundles_src/fragment.test.attach.host.a.require"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.a" path="bundles_src/fragment.test.attach.frag.a"/>
 	<classpathentry kind="src" output="bundle_tests/fragment.test.attach.frag.b" path="bundles_src/fragment.test.attach.frag.b"/>

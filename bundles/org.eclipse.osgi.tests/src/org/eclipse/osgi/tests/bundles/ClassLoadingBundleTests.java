@@ -171,6 +171,27 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testFragmentMultiHost() throws Exception {
+		Bundle hostA1 = installer.installBundle("fragment.test.attach.host.a"); //$NON-NLS-1$
+		Bundle hostA2 = installer.installBundle("fragment.test.attach.host.a.v2"); //$NON-NLS-1$
+		Bundle fragA = installer.installBundle("fragment.test.attach.frag.a"); //$NON-NLS-1$
+		assertTrue("Host/Frag resolve", installer.resolveBundles(new Bundle[] {hostA1, hostA2, fragA})); //$NON-NLS-1$
+
+		assertEquals("Wrong number of hosts", 2, installer.getPackageAdmin().getHosts(fragA).length); //$NON-NLS-1$
+		runTestRunner(hostA1, "fragment.test.attach.host.a.internal.test.TestPackageAccess"); //$NON-NLS-1$
+		runTestRunner(hostA2, "fragment.test.attach.host.a.internal.test.TestPackageAccess2"); //$NON-NLS-1$
+	}
+
+	private void runTestRunner(Bundle host, String classname) {
+		try {
+			ITestRunner testRunner = (ITestRunner) host.loadClass(classname).newInstance();
+			testRunner.testIt();
+		} catch (Exception e) {
+			fail("Failed package access test", e); //$NON-NLS-1$
+		}
+
+	}
+
 	public void testFragmentExportPackage() throws Exception {
 		Bundle hostA = installer.installBundle("fragment.test.attach.host.a"); //$NON-NLS-1$
 		assertTrue("Host resolve", installer.resolveBundles(new Bundle[] {hostA})); //$NON-NLS-1$
