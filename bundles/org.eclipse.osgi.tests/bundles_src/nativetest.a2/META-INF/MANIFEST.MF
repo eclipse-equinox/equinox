@@ -20,6 +20,7 @@ Bundle-NativeCode: nativefile2.txt;
  osname=HP-UX,
  nativefile2.txt;
  processor=x86;
+ processor=x86_64;
  osname=Linux,
  nativefile2.txt;
  processor=ppc64;
@@ -35,6 +36,7 @@ Bundle-NativeCode: nativefile2.txt;
  osname=SunOS,
  nativefile2.txt;
  processor=x86;
+ processor=x86_64;
  osname=Windows2000;
  osname="Windows 2003";
  osname=Windows95;
@@ -46,5 +48,6 @@ Bundle-NativeCode: nativefile2.txt;
  osname=Win32,
  nativefile2.txt;
  processor=x86;
+ processor=x86_64;
  processor=ppc;
  osname=macosx
