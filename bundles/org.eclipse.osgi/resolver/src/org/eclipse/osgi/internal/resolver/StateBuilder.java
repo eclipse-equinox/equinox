@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,7 +88,7 @@ class StateBuilder {
 		result.setExecutionEnvironments(ManifestElement.getArrayFromList((String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT)));
 		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, (String) manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
-			result.setHost(createHostSpecification(host[0]));
+			result.setHost(createHostSpecification(host[0], state));
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
 		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, (String) manifest.get(Constants.PROVIDE_PACKAGE)); // TODO this is null for now until the framwork is updated to handle the new re-export semantics
 		boolean strict = state != null && state.inStrictMode();
@@ -167,8 +167,7 @@ class StateBuilder {
 	}
 
 	private static String[][] getGenericAliases(StateImpl state) {
-		Dictionary[] platformProps = state == null ? null : state.getPlatformProperties();
-		String genericAliasesProp = platformProps == null || platformProps.length == 0 ? null : (String) platformProps[0].get("osgi.genericAliases"); //$NON-NLS-1$
+		String genericAliasesProp = getPlatformProperty(state, "osgi.genericAliases"); //$NON-NLS-1$
 		if (genericAliasesProp == null)
 			return new String[0][0];
 		String[] aliases = ManifestElement.getArrayFromList(genericAliasesProp, ","); //$NON-NLS-1$
@@ -176,6 +175,11 @@ class StateBuilder {
 		for (int i = 0; i < aliases.length; i++)
 			result[i] = ManifestElement.getArrayFromList(aliases[i], ":"); //$NON-NLS-1$
 		return result;
+	}
+
+	private static String getPlatformProperty(StateImpl state, String key) {
+		Dictionary[] platformProps = state == null ? null : state.getPlatformProperties();
+		return platformProps == null || platformProps.length == 0 ? null : (String) platformProps[0].get(key);
 	}
 
 	private static void validateHeaders(Dictionary manifest, boolean jreBundle) throws BundleException {
@@ -396,13 +400,16 @@ class StateBuilder {
 		return arbitraryAttrs;
 	}
 
-	private static HostSpecification createHostSpecification(ManifestElement spec) {
+	private static HostSpecification createHostSpecification(ManifestElement spec, StateImpl state) {
 		if (spec == null)
 			return null;
 		HostSpecificationImpl result = new HostSpecificationImpl();
 		result.setName(spec.getValue());
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
-		result.setIsMultiHost("true".equals(spec.getDirective("multiple-hosts"))); //$NON-NLS-1$ //$NON-NLS-2$
+		String multiple = spec.getDirective("multiple-hosts"); //$NON-NLS-1$
+		if (multiple == null)
+			multiple = getPlatformProperty(state, "osgi.support.multipleHosts"); //$NON-NLS-1$
+		result.setIsMultiHost("true".equals(multiple)); //$NON-NLS-1$
 		return result;
 	}
 
