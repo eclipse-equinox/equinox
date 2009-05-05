@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.net.URLConnection;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.*;
-
 import org.eclipse.equinox.http.servlet.HttpServletRequestImpl;
 import org.eclipse.equinox.http.servlet.HttpServletResponseImpl;
 import org.osgi.framework.Bundle;
@@ -60,7 +59,7 @@ public class ResourceRegistration extends HttpServlet implements Registration {
 	 * This method returns the correct MIME type of a given URI by first checking
 	 * the HttpContext::getMimeType and, if null, checking the httpservice's MIMETypes table.
 	 * @return java.lang.String
-	 * @param URI java.lang.String
+	 * @param name java.lang.String
 	 */
 	private String computeMimeType(String name, URLConnection conn) {
 		String mimeType = httpContext.getMimeType(name);

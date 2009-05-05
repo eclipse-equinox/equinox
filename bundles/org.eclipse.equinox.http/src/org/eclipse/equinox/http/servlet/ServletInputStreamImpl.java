@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2005 IBM Corporation.
+ * Copyright (c) 1999, 2009 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,7 +82,6 @@ public class ServletInputStreamImpl extends ServletInputStream {
 	 *
 	 * @param len Content-Length of InputStream
 	 * @return InputStream for use by servlets
-	 * @exception
 	 */
 	ServletInputStream getServletInputStream(int len) {
 		if (servletInputStream == null) {
@@ -106,13 +105,13 @@ public class ServletInputStreamImpl extends ServletInputStream {
 	 * the last marked position so that subsequent reads re-read the same
 	 * bytes.
 	 * <p>
-	 * The <code>readlimit</code> arguments tells this input stream to
+	 * The <code>readLimit</code> arguments tells this input stream to
 	 * allow that many bytes to be read before the mark position gets
 	 * invalidated.
 	 * <p>
 	 * The <code>mark</code> method of <code>InputStream</code> does nothing.
 	 *
-	 * @param   readlimit   the maximum limit of bytes that can be read before
+	 * @param   readLimit   the maximum limit of bytes that can be read before
 	 *                      the mark position becomes invalid.
 	 * @see     java.io.InputStream#reset()
 	 * @since   JDK1.0
@@ -249,7 +248,7 @@ public class ServletInputStreamImpl extends ServletInputStream {
 	 * been reached. Subclasses are encouraged to provide a more
 	 * efficient implementation of this method.
 	 *
-	 * @param      n   the number of bytes to be skipped.
+	 * @param      len   the number of bytes to be skipped.
 	 * @return     the actual number of bytes skipped.
 	 * @exception  IOException  if an I/O error occurs.
 	 * @since      JDK1.0
@@ -318,13 +317,13 @@ public class ServletInputStreamImpl extends ServletInputStream {
 		 * the last marked position so that subsequent reads re-read the same
 		 * bytes.
 		 * <p>
-		 * The <code>readlimit</code> arguments tells this input stream to
+		 * The <code>readLimit</code> arguments tells this input stream to
 		 * allow that many bytes to be read before the mark position gets
 		 * invalidated.
 		 * <p>
 		 * The <code>mark</code> method of <code>InputStream</code> does nothing.
 		 *
-		 * @param   readlimit   the maximum limit of bytes that can be read before
+		 * @param   readLimit   the maximum limit of bytes that can be read before
 		 *                      the mark position becomes invalid.
 		 * @see     java.io.InputStream#reset()
 		 * @since   JDK1.0
@@ -491,7 +490,7 @@ public class ServletInputStreamImpl extends ServletInputStream {
 		 * been reached. Subclasses are encouraged to provide a more
 		 * efficient implementation of this method.
 		 *
-		 * @param      n   the number of bytes to be skipped.
+		 * @param      len   the number of bytes to be skipped.
 		 * @return     the actual number of bytes skipped.
 		 * @exception  IOException  if an I/O error occurs.
 		 * @since      JDK1.0

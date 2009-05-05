@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public class StaticDataReader {
 	 * files which are directories, such as
 	 * http://www.ibm.com/  are assumed to be HTML, rather than appOctet.
 	 *
-	 * @param String filename - the name of the file, which must
+	 * @param filename - the name of the file, which must
 	 * not be null.
 	 * @returns String - the mime type of the file.
 	 */

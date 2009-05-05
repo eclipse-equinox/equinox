@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -213,20 +213,20 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	 *
 	 * <p>The <tt>request</tt> object passed to the target object
 	 * will have its request URL path and other path parameters
-	 * adjusted to reflect the target URL path of the target ojbect.
+	 * adjusted to reflect the target URL path of the target object.
 	 *
 	 * <p>You cannot use this method if a <tt>ServletOutputStream</tt>
 	 * object or <tt>PrintWriter</tt> object has been obtained from
 	 * the response. In that case, the method throws an
 	 * <tt>IllegalStateException</tt>
 	 *
-	 * @param request the client's request on the servlet
-	 * @param response the client's response from the servlet
+	 * @param req the client's request on the servlet
+	 * @param res the client's response from the servlet
 	 * @exception ServletException if a servlet exception is thrown by the
 	 *            target servlet
 	 * @exception IOException if an I/O Exception occurs
 	 * @exception IllegalStateException if the ServletOutputStream or a writer
-	 *            had allready been obtained from the response object
+	 *            had already been obtained from the response object
 	 */
 	public void forward(ServletRequest req, ServletResponse res) throws ServletException, IOException {
 		// BUGBUG If the response has already been committed, then an
@@ -272,8 +272,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 	 * To ensure that a session works correctly, start the session
 	 * outside of the included servlet, even if you use session tracking.
 	 *
-	 * @param request the client's request on the servlet
-	 * @param response the client's response from the servlet
+	 * @param req the client's request on the servlet
+	 * @param res the client's response from the servlet
 	 * @exception ServletException if a servlet exception is thrown by the
 	 *            target servlet
 	 * @exception IOException if the ServletOutputStream or a writer

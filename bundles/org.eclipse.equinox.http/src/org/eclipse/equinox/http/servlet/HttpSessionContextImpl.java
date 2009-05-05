@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ public class HttpSessionContextImpl implements HttpSessionContext {
 	/**
 	 * Returns the session bound to the specified session ID.
 	 *
-	 * @param sessionID the ID of a particular session object
+	 * @param sessionId the ID of a particular session object
 	 * @return the session name. Returns null if the session ID does not refer
 	 * to a valid session.
 	 * @deprecated

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -253,10 +253,10 @@ public class ServletContextImpl implements ServletContext {
 	 * <tt>getResourceAsStream</tt> method of <tt>java.lang.Class</tt>.
 	 * The method in <tt>java.lang.Class</tt> looks up resources
 	 * based on class loader. This method allows servlet engines
-	 * to make resources avaialble to a servlet from any source
+	 * to make resources available to a servlet from any source
 	 * without regards to class loaders, location, etc.
 	 *
-	 * @param name
+	 * @param path
 	 */
 
 	public InputStream getResourceAsStream(String path) {
@@ -362,7 +362,7 @@ public class ServletContextImpl implements ServletContext {
 	 * name and type of the servlet log is servlet engine specific,
 	 * but is normally an event log.
 	 *
-	 * @param msg the message to be written
+	 * @param message the message to be written
 	 * @param throwable the exception to be written
 	 */
 
@@ -385,7 +385,7 @@ public class ServletContextImpl implements ServletContext {
 
 	/**
 	 * Binds an object to a given name in this context. If an object
-	 * is allready bound into the context with the given name,
+	 * is already bound into the context with the given name,
 	 * it will be replaced.
 	 *
 	 * Attribute names should follow the same convention as package names.
@@ -393,7 +393,7 @@ public class ServletContextImpl implements ServletContext {
 	 * definition by this specification or by the reference implementation.
 	 *
 	 * @param name the name of the attribute to store
-	 * @param value the value of the attribute
+	 * @param object the value of the attribute
 	 */
 
 	public void setAttribute(String name, Object object) {

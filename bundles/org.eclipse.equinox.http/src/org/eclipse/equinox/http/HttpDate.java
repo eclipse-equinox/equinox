@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public class HttpDate {
 
 	/**
 	 * Constructs an HTTPDate object from the passed long.
-	 * @param itime the number of uSeconds since the epoch.
+	 * @param iTime the number of uSeconds since the epoch.
 	 */
 	public HttpDate(long iTime) { // Raw mill seconds
 		this();
@@ -65,7 +65,7 @@ public class HttpDate {
 
 	/**
 	 * Constructs an HTTPDate object from the passed long.
-	 * @param itime the number of uSeconds since the epoch.
+	 * @param iTime the number of uSeconds since the epoch.
 	 */
 	public HttpDate(Date iTime) { // Raw mill seconds
 		this();
@@ -163,7 +163,7 @@ public class HttpDate {
 	}
 
 	/**
-	 * Checks wether or not the Date this object represents is valid.
+	 * Checks whether or not the Date this object represents is valid.
 	 *  It would be Invalid if the string used to construct the object was a NON
 	 * RFC 1123, 1036 or ASC Time conforming Date String.
 	 * @return true if this object represents a REAL date.
@@ -241,7 +241,7 @@ public class HttpDate {
 			return;
 		} catch (NumberFormatException e) {
 			valid = false;
-		}		
+		}
 	}
 
 	protected void parseRFC1036(String str) {
@@ -356,7 +356,6 @@ public class HttpDate {
 		} catch (NumberFormatException e) {
 			valid = false;
 		}
-
 
 	}
 

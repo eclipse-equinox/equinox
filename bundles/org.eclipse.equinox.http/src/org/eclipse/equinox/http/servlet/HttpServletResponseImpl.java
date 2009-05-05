@@ -342,10 +342,9 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	/**
 	 * Returns an output stream for writing binary response data.
 	 *
-	 * @see getWriter
+	 * @see #getWriter()
 	 * @exception IllegalStateException if getWriter has been
 	 *	called on this same request.
-	 * @exception IOException if an I/O exception has occurred
 	 */
 	public ServletOutputStream getOutputStream() {
 		if (!gotOutputStream) {
@@ -367,8 +366,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * property.  This means that the content type must be set before
 	 * calling this method.
 	 *
-	 * @see getOutputStream
-	 * @see setContentType
+	 * @see #getOutputStream()
+	 * @see #setContentType(String)
 	 *
 	 * @exception UnsupportedEncodingException if no such charset can
 	 * be provided
@@ -416,7 +415,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	/**
 	 * Sends an error response to the client using the specified
 	 * status code and a default message.
-	 * @param sc the status code
+	 * @param statusCode the status code
 	 * @exception IOException If an I/O error has occurred.
 	 */
 	public void sendError(int statusCode) throws IOException {
@@ -484,7 +483,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 */
 
 	public void setContentLength(int len) {
-		// BUGBUG response should be considered commited and closed
+		// BUGBUG response should be considered committed and closed
 		// when content length has been written.
 		// Not sure if content length is bytes or chars?
 		contentLength = len;
@@ -505,8 +504,9 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * data.
 	 *
 	 * @param type the content's MIME type
-	 * @see getOutputStream
-	 * @see getWriter */
+	 * @see #getOutputStream()
+	 * @see #getWriter()
+	 */
 	public void setContentType(String type) {
 		if (contentType == null) {
 			synchronized (this) {
@@ -617,7 +617,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * presence of a header before setting its value.
 	 *
 	 * @param name the name of the header field
-	 * @param value the header field's date value
+	 * @param date the header field's date value
 	 *
 	 * @see #containsHeader
 	 */
@@ -675,7 +675,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * is an error, the <code>sendError</code> method should be used
 	 * instead.
 	 *
-	 * @param sc the status code
+	 * @param statusCode the status code
 	 *
 	 * @see #sendError
 	 */
@@ -692,8 +692,8 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 	 * The page is sent with a default HTML header; the message
 	 * is enclosed in simple body tags (&lt;body&gt;&lt;/body&gt;).
 	 *
-	 * @param sc the status code
-	 * @param sm the status message
+	 * @param si the status code
+	 * @param ss the status message
 	 * deprecated
 	 */
 	public void setStatus(int si, String ss) {

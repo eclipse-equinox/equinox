@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.util.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.*;
-
 import org.eclipse.equinox.http.*;
 import org.eclipse.equinox.socket.SocketInterface;
 import org.eclipse.osgi.util.NLS;
@@ -382,10 +381,9 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	/**
 	 * Returns an input stream for reading binary data in the request body.
 	 *
-	 * @see getReader
+	 * @see #getReader()
 	 * @exception IllegalStateException if getReader has been
 	 *	called on this same request.
-	 * @exception IOException on other I/O related errors.
 	 */
 	public ServletInputStream getInputStream() {
 		if (inputstream == null) {
@@ -564,13 +562,10 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 * Returns a buffered reader for reading text in the request body.
 	 * This translates character set encodings as appropriate.
 	 *
-	 * @see getInputStream
+	 * @see #getInputStream()
 	 *
-	 * @exception UnsupportedEncodingException if the character set encoding
-	 *  is unsupported, so the text can't be correctly decoded.
 	 * @exception IllegalStateException if getInputStream has been
 	 *	called on this same request.
-	 * @exception IOException on other I/O related errors.
 	 */
 	public BufferedReader getReader() {
 		if (reader == null) {
@@ -1309,7 +1304,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 	 * nested servlets.
 	 *
 	 * @param name Attribute name
-	 * @param object Attribute value
+	 * @param val Attribute value
 	 */
 	public void setAttribute(String name, Object val) {
 		if (attributes == null) {
