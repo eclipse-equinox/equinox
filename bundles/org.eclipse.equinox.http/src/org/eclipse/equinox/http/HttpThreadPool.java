@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2006 IBM Corporation and others.
+ * Copyright (c) 1999, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,21 +21,21 @@ public class HttpThreadPool extends ThreadGroup {
 	final Http http;
 
 	/** container to threads waiting for work */
-	private final Vector idleThreads;		/* @GuardedBy("this") */
+	private final Vector idleThreads; /* @GuardedBy("this") */
 	/** container to threads which are working */
-	private final Vector activeThreads;	/* @GuardedBy("this") */
+	private final Vector activeThreads; /* @GuardedBy("this") */
 	/** Upper bound on size of thread pool */
-	private int upper;		/* @GuardedBy("this") */
+	private int upper; /* @GuardedBy("this") */
 	/** Lower bound on size of thread pool */
-	private int lower;		/* @GuardedBy("this") */
+	private int lower; /* @GuardedBy("this") */
 	/** Priority of thread pool */
 	private volatile int priority;
 	/** number of threads to be terminated when they are returned to the pool */
-	private int hitCount;	/* @GuardedBy("this") */
+	private int hitCount; /* @GuardedBy("this") */
 	/** Thread allocation number */
-	private int number;		/* @GuardedBy("this") */
+	private int number; /* @GuardedBy("this") */
 	/** prevent new threads from readjusting */
-	private int adjusting = 0;	/* @GuardedBy("this") */
+	private int adjusting = 0; /* @GuardedBy("this") */
 
 	/**
 	 * Constructs and populates a new thread pool with the specified thread group
@@ -145,7 +145,7 @@ public class HttpThreadPool extends ThreadGroup {
 					idleThreads.ensureCapacity(count);
 					for (int i = 0; i < delta; i++) {
 						number++;
-						final String threadName = "HttpThread_" + number;  //$NON-NLS-1$
+						final String threadName = "HttpThread_" + number; //$NON-NLS-1$
 						try {
 							AccessController.doPrivileged(new PrivilegedAction() {
 								public Object run() {
@@ -190,15 +190,15 @@ public class HttpThreadPool extends ThreadGroup {
 	 * Returns a thread to the thread pool and notifies the pool that
 	 * a thread is available.
 	 *
-	 * @param availableThread the thread being added/returned to the pool
+	 * @param thread the thread being added/returned to the pool
 	 */
 	public synchronized void putThread(HttpThread thread) {
 		if (Http.DEBUG) {
 			http.logDebug(thread.getName() + ": becoming idle"); //$NON-NLS-1$
 		}
-		
+
 		activeThreads.removeElement(thread);
-		
+
 		if (hitCount > 0) {
 			hitCount--;
 			thread.close();
