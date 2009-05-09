@@ -24,11 +24,11 @@ import org.osgi.framework.Bundle;
  * 
  * @author martinlippert
  */
-public class WeavingServiceFactory implements IWeavingServiceFactory {
+public class AspectJWeavingServiceFactory implements IWeavingServiceFactory {
 
     private final AspectAdminImpl aspectDefinitionRegistry;
 
-    public WeavingServiceFactory(final AspectAdminImpl aspectDefinitionRegistry) {
+    public AspectJWeavingServiceFactory(final AspectAdminImpl aspectDefinitionRegistry) {
         this.aspectDefinitionRegistry = aspectDefinitionRegistry;
     }
 
@@ -42,7 +42,7 @@ public class WeavingServiceFactory implements IWeavingServiceFactory {
             final Bundle bundle, final State resolverState,
             final BundleDescription bundleDesciption,
             final ISupplementerRegistry supplementerRegistry) {
-        return new WeavingService(loader, bundle, resolverState,
+        return new AspectJWeavingService(loader, bundle, resolverState,
                 bundleDesciption, supplementerRegistry,
                 aspectDefinitionRegistry);
     }

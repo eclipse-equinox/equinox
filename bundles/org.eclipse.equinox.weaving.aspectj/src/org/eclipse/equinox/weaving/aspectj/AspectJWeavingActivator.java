@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class WeavingServicePlugin implements BundleActivator {
+public class AspectJWeavingActivator implements BundleActivator {
 
     public static boolean DEBUG;
 
@@ -33,7 +33,7 @@ public class WeavingServicePlugin implements BundleActivator {
             .getBoolean("org.aspectj.osgi.verbose");
 
     //The shared instance.
-    private static WeavingServicePlugin plugin;
+    private static AspectJWeavingActivator plugin;
 
     private AspectAdminImpl aspectDefinitionRegistry;
 
@@ -42,14 +42,14 @@ public class WeavingServicePlugin implements BundleActivator {
     /**
      * The constructor.
      */
-    public WeavingServicePlugin() {
+    public AspectJWeavingActivator() {
         plugin = this;
     }
 
     /**
      * Returns the shared instance.
      */
-    public static WeavingServicePlugin getDefault() {
+    public static AspectJWeavingActivator getDefault() {
         return plugin;
     }
 
@@ -76,7 +76,7 @@ public class WeavingServicePlugin implements BundleActivator {
             System.err
                     .println("[org.eclipse.equinox.weaving.aspectj] info Starting AspectJ weaving service ...");
         final String serviceName = IWeavingServiceFactory.class.getName();
-        final IWeavingServiceFactory weavingServiceFactory = new WeavingServiceFactory(
+        final IWeavingServiceFactory weavingServiceFactory = new AspectJWeavingServiceFactory(
                 aspectDefinitionRegistry);
         final Properties props = new Properties();
         context.registerService(serviceName, weavingServiceFactory, props);

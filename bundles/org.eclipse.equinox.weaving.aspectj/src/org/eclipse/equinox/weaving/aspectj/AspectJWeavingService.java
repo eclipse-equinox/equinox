@@ -32,7 +32,7 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.Bundle;
 
-public class WeavingService implements IWeavingService {
+public class AspectJWeavingService implements IWeavingService {
 
     private List<Definition> aspectDefinitions;
 
@@ -46,19 +46,19 @@ public class WeavingService implements IWeavingService {
 
     private OSGiWeavingContext weavingContext;
 
-    public WeavingService() {
-        if (WeavingServicePlugin.DEBUG)
+    public AspectJWeavingService() {
+        if (AspectJWeavingActivator.DEBUG)
             System.out.println("- WeavingService.<init>");
     }
 
-    public WeavingService(final ClassLoader loader, final Bundle bundle,
+    public AspectJWeavingService(final ClassLoader loader, final Bundle bundle,
             final State state, final BundleDescription bundleDescription,
             final ISupplementerRegistry supplementerRegistry,
             final AspectAdmin aspectAdmin) {
         this.bundleDescription = bundleDescription;
 
         final AspectResolver aspectResolver = new AspectResolver(state,
-                supplementerRegistry, aspectAdmin, WeavingServicePlugin
+                supplementerRegistry, aspectAdmin, AspectJWeavingActivator
                         .getDefault().getContext());
         final AspectConfiguration aspectConfig = aspectResolver
                 .resolveAspectsFor(bundle, bundleDescription);
@@ -72,7 +72,7 @@ public class WeavingService implements IWeavingService {
             this.weavingAdaptor = new OSGiWeavingAdaptor(loader,
                     weavingContext, namespaceAddOn.toString());
         } else {
-            if (WeavingServicePlugin.DEBUG) {
+            if (AspectJWeavingActivator.DEBUG) {
                 System.err
                         .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
                                 + bundle.getSymbolicName() + "'");
@@ -120,13 +120,13 @@ public class WeavingService implements IWeavingService {
      * @see org.eclipse.equinox.service.weaving.IWeavingService#getKey()
      */
     public String getKey() {
-        if (WeavingServicePlugin.DEBUG)
+        if (AspectJWeavingActivator.DEBUG)
             System.out.println("> WeavingService.getKey() bundle="
                     + bundleDescription.getSymbolicName());
 
         final String namespace = namespaceAddOn.toString();
 
-        if (WeavingServicePlugin.DEBUG)
+        if (AspectJWeavingActivator.DEBUG)
             System.out.println("< WeavingService.getKey() key='" + namespace
                     + "'");
 
@@ -140,7 +140,7 @@ public class WeavingService implements IWeavingService {
     public byte[] preProcess(final String name, final byte[] classbytes,
             final ClassLoader loader) throws IOException {
         if (enabled) {
-            if (WeavingServicePlugin.DEBUG)
+            if (AspectJWeavingActivator.DEBUG)
                 System.out.println("> WeavingService.preProcess() bundle="
                         + bundleDescription.getSymbolicName() + ", name="
                         + name + ", bytes=" + classbytes.length);
@@ -149,7 +149,7 @@ public class WeavingService implements IWeavingService {
 
             // Bug 215177: Adapt to updated (AJ 1.5.4) signature.
             newBytes = weavingAdaptor.weaveClass(name, classbytes, false);
-            if (WeavingServicePlugin.DEBUG)
+            if (AspectJWeavingActivator.DEBUG)
                 System.out.println("< WeavingService.preProcess() bytes="
                         + newBytes.length);
             return newBytes;
