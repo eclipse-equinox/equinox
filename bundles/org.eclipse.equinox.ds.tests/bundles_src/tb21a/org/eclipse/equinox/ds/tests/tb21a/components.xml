@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<!-- This component provides service that is used in the latter components -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.provider"
+	      immediate="true">
+	   <implementation
+	      class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component has not set modified method, NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.notsetNS110"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="mod", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.NoArgs110"
+	      modified="mod"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="modCc", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.CcNS110"
+	      modified="modCc"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="modBc", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.BcNS110"
+	      modified="modBc"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="modMap", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.MapNS110"
+	      modified="modMap"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="modCcBcMap", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.CcBcMapNS110"
+	      modified="modCcBcMap"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+
+	<!-- modified="noSuchMethod", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.NotExistNS110"
+	      modified="noSuchMethod"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+	
+	<!-- modified="throwException", NS 1.1.0 -->
+	<component
+	      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+	      name="org.eclipse.equinox.ds.tests.tb21.ThrowExNS110"
+	      modified="throwException"
+	      immediate="true">
+	   <implementation
+	         class="org.eclipse.equinox.ds.tests.tb21a.ModifyRegistrator"/>
+	   <service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>	
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			target="(component.name=org.eclipse.equinox.ds.tests.tb21.provider)"/>
+	</component>
+</components>

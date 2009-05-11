@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+		name="org.eclipse.equinox.ds.tests.tb23.provider"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb23.BindRegistrator"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+		name="org.eclipse.equinox.ds.tests.tb23.mandatory"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb23.BindRegistrator"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			cardinality="1..1"
+			bind="bind_ex"
+			unbind="unbind"/>
+	</component>
+
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.0.0"
+		name="org.eclipse.equinox.ds.tests.tb23.optional"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb23.BindRegistrator"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			name="ref"
+			cardinality="0..1"
+			bind="bind_ex"
+			unbind="unbind"/>
+	</component>
+
+</components>
