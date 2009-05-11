@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<!-- bad component - component factory cannot be immediate -->
+<scr:component name="org.eclipse.equinox.ds.tests.tb1a.Immediate"
+      xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
+      immediate="true"
+      factory="org.eclipse.equinox.ds.tests.tb1a.Immediate">
+    <implementation class="org.eclipse.equinox.ds.tests.tb1a.Immediate" />
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb1a.Immediate"/>
+	</service>
+</scr:component>
+
+<!-- this below should be ignored by the SCR parser -->
+<ignored>
+	<component>
+		<service servicefactory="true" />
+	</component>
+</ignored>
+
+<scr:component name="org.eclipse.equinox.ds.tests.tb1a.Comp1"
+	enabled="true"
+	xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0">
+	<implementation class="org.eclipse.equinox.ds.tests.tb1a.Comp1"/>
+	<property name="custom" value="customvalue"/>
+	<service>
+		<provide interface="org.eclipse.equinox.ds.tests.tb1a.Comp1"/>
+	</service>
+</scr:component>
+
+</root>
