@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,8 @@ public class MRUBundleFileList implements EventDispatcher {
 	private int numOpen = 0;
 	// the current use stamp
 	private long curUseStamp = 0;
+	// used to work around bug 275166
+	private boolean firstDispatch = true;
 
 	public MRUBundleFileList() {
 		this(PROP_FILE_LIMIT_VALUE);
@@ -114,7 +116,7 @@ public class MRUBundleFileList implements EventDispatcher {
 			numOpen++;
 		}
 		// must not close the toRemove bundle file while holding the lock of another bundle file (bug 161976)
-		// This queue the bundle file for close asynchronously.
+		// This queues the bundle file for close asynchronously.
 		closeBundleFile(toRemove);
 	}
 
@@ -171,6 +173,11 @@ public class MRUBundleFileList implements EventDispatcher {
 	}
 
 	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
+		if (firstDispatch) {
+			// used to work around bug 275166; we don't want to leak the TCCL in this thread.
+			Thread.currentThread().setContextClassLoader(null);
+			firstDispatch = false;
+		}
 		try {
 			closingBundleFile.set(eventObject);
 			((BundleFile) eventObject).close();
