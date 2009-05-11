@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
 
-<!-- another bad component - component factory cannot be immediate -->
-<scr:component name="org.eclipse.equinox.ds.tests.tb1.Immediate"
-      xmlns:scr="http://www.osgi.org/xmlns/scr/v1.0.0"
-      immediate="true"
-      factory="org.eclipse.equinox.ds.tests.tb1.Immediate">
-    <implementation class="org.eclipse.equinox.ds.tests.tb1.Immediate" />
-	<service>
-		<provide interface="org.eclipse.equinox.ds.tests.tb1.Immediate"/>
-	</service>
-</scr:component>
-
 <!-- this below should be ignored by the SCR parser -->
 <ignored>
 	<component>
