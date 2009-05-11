@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.cm;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -80,7 +81,7 @@ public class ConfigurationEventAdapter implements ConfigurationListener {
 			properties.put(CM_FACTORY_PID, event.getFactoryPid());
 		}
 		putServiceReferenceProperties(properties, ref);
-		Event convertedEvent = new Event(topic, properties);
+		Event convertedEvent = new Event(topic, (Dictionary) properties);
 		eventAdmin.postEvent(convertedEvent);
 	}
 
