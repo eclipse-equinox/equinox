@@ -46,7 +46,7 @@ import java.util.EventListener;
  * 	}
  * 	...
  * } 
-* </pre>
+ * </pre>
  * @since 3.5
  */
 public interface DebugOptionsListener extends EventListener {
@@ -55,8 +55,8 @@ public interface DebugOptionsListener extends EventListener {
 	 * Notifies this listener that an option-path for its plug-in has changed.
 	 * This method is also called initially by the DebugOptions implementation 
 	 * when the listener is registered as a service.  This allows the listener
-	 * to optain the initial set of debug options with out the need to 
-	 * aquire the debug options service.
+	 * to obtain the initial set of debug options with out the need to 
+	 * acquire the debug options service.
 	 * @param options a reference to the DebugOptions
 	 */
 	public void optionsChanged(DebugOptions options);
