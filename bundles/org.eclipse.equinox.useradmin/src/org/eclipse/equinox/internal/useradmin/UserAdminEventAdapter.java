@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation.
+ * Copyright (c) 2005, 2009 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.equinox.internal.useradmin;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.*;
 import org.osgi.service.event.Event;
@@ -102,7 +103,7 @@ public class UserAdminEventAdapter implements UserAdminListener {
 				properties.put(ROLE_TYPE, new Integer(role.getType()));
 			}
 			properties.put(EVENT, event);
-			Event convertedEvent = new Event(topic, properties);
+			Event convertedEvent = new Event(topic, (Dictionary) properties);
 			eventAdmin.postEvent(convertedEvent);
 		}
 	}

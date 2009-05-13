@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -145,7 +145,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 		if (!scheduling && !checkSchedulingSupport())
 			throw new ApplicationException(ApplicationException.APPLICATION_SCHEDULING_FAILED, "Cannot support scheduling without org.osgi.service.event package"); //$NON-NLS-1$
 		// check the event filter for correct syntax
-		context.createFilter(eventFilter);	
+		context.createFilter(eventFilter);
 		EclipseScheduledApplication result;
 		synchronized (scheduledApps) {
 			result = new EclipseScheduledApplication(context, getNextScheduledID(scheduleId), descriptor.getApplicationId(), arguments, topic, eventFilter, recurring);
@@ -368,7 +368,7 @@ public class AppPersistence implements ServiceTrackerCustomizer {
 					props.put(ScheduledApplication.DAY_OF_WEEK, new Integer(cal.get(Calendar.DAY_OF_WEEK)));
 					props.put(ScheduledApplication.HOUR_OF_DAY, new Integer(cal.get(Calendar.HOUR_OF_DAY)));
 					props.put(ScheduledApplication.MINUTE, new Integer(minute));
-					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, props);
+					Event timerEvent = new Event(ScheduledApplication.TIMER_TOPIC, (Dictionary) props);
 					EclipseScheduledApplication[] apps = null;
 					// poor mans implementation of dispatching events; the spec will not allow us to use event admin to dispatch the virtual timer events; boo!!
 					synchronized (timerApps) {

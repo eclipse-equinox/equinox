@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation
+ * Copyright (c) 2007, 2009 IBM Corporation
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.log.internal;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.equinox.log.SynchronousLogListener;
 import org.osgi.framework.Bundle;
@@ -93,7 +94,7 @@ public class EventAdminLogListener implements SynchronousLogListener {
 		if (entry.getMessage() != null)
 			properties.put(MESSAGE, entry.getMessage());
 		properties.put(TIMESTAMP, new Long(entry.getTime()));
-		return new Event(topic, properties);
+		return new Event(topic, (Dictionary) properties);
 	}
 
 	public static void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
