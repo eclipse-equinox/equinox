@@ -9,6 +9,7 @@
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
  *    Simon Archer 		    - bug.id = 225624 
+ *    Bryan Hunt 		    - bug.id = 275997 
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
@@ -675,8 +676,14 @@ public class ServiceComponent implements Externalizable {
 			namespace11 = in.readBoolean();
 			if (namespace11) {
 				flag = in.readBoolean();
-				if (flag)
+				if (flag) {
 					configurationPolicy = in.readUTF();
+					if (configurationPolicy.equals(CONF_POLICY_IGNORE)) {
+						configurationPolicy = CONF_POLICY_IGNORE;
+					} else {
+						configurationPolicy = CONF_POLICY_REQUIRE;
+					}
+				}
 				flag = in.readBoolean();
 				if (flag)
 					activateMethodName = in.readUTF();
