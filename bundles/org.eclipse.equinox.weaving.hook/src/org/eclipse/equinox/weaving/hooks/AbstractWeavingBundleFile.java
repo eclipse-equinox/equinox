@@ -18,17 +18,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
-public abstract class AbstractAJBundleFile extends BundleFile {
+public abstract class AbstractWeavingBundleFile extends BundleFile {
 
     protected BundleFile delegate;
 
     private final BundleAdaptorProvider adaptorProvider;
 
-    public AbstractAJBundleFile(final BundleAdaptorProvider adaptorProvider,
+    public AbstractWeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) {
         super(bundleFile.getBaseFile());
         this.adaptorProvider = adaptorProvider;
@@ -54,7 +54,7 @@ public abstract class AbstractAJBundleFile extends BundleFile {
     /**
      * @return
      */
-    public IAspectJAdaptor getAdaptor() {
+    public IWeavingAdaptor getAdaptor() {
         return this.adaptorProvider.getAdaptor();
     }
 

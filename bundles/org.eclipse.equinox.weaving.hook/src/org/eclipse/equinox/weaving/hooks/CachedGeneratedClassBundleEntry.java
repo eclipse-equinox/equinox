@@ -16,12 +16,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 
 public class CachedGeneratedClassBundleEntry extends BundleEntry {
 
-    private final IAspectJAdaptor adaptor;
+    private final IWeavingAdaptor adaptor;
 
     private final URL bundleFileURL;
 
@@ -29,7 +29,7 @@ public class CachedGeneratedClassBundleEntry extends BundleEntry {
 
     private final String name;
 
-    public CachedGeneratedClassBundleEntry(final IAspectJAdaptor adaptor,
+    public CachedGeneratedClassBundleEntry(final IWeavingAdaptor adaptor,
             final String path, final byte[] cachedBytes, final URL url) {
         this.adaptor = adaptor;
         this.bundleFileURL = url;
@@ -41,7 +41,7 @@ public class CachedGeneratedClassBundleEntry extends BundleEntry {
         return true;
     }
 
-    public IAspectJAdaptor getAdaptor() {
+    public IWeavingAdaptor getAdaptor() {
         return adaptor;
     }
 

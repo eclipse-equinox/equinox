@@ -1,7 +1,7 @@
 
 package org.eclipse.equinox.weaving.hooks;
 
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.BundleFragment;
 
@@ -17,7 +17,7 @@ public class BundleAdaptorProvider {
         this.adaptorProvider = adaptorProvider;
     }
 
-    public IAspectJAdaptor getAdaptor() {
+    public IWeavingAdaptor getAdaptor() {
         if (this.baseData.getBundle() instanceof BundleFragment) {
             return this.adaptorProvider.getHostBundleAdaptor(this.baseData
                     .getBundleID());

@@ -23,7 +23,7 @@ import java.util.Set;
 import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.service.weaving.ICachingService;
 import org.eclipse.equinox.service.weaving.IWeavingService;
-import org.eclipse.equinox.weaving.hooks.AspectJBundleFile;
+import org.eclipse.equinox.weaving.hooks.WeavingBundleFile;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
@@ -31,7 +31,7 @@ import org.eclipse.osgi.framework.internal.core.BundleFragment;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.osgi.framework.Bundle;
 
-public class AspectJAdaptor implements IAspectJAdaptor {
+public class WeavingAdaptor implements IWeavingAdaptor {
 
     private static class ThreadLocalSet extends ThreadLocal {
 
@@ -72,7 +72,7 @@ public class AspectJAdaptor implements IAspectJAdaptor {
 
     private final BaseData data;
 
-    private final AspectJAdaptorFactory factory;
+    private final WeavingAdaptorFactory factory;
 
     private boolean initialized = false;
 
@@ -80,8 +80,8 @@ public class AspectJAdaptor implements IAspectJAdaptor {
 
     private IWeavingService weavingService;
 
-    public AspectJAdaptor(final BaseData baseData,
-            final AspectJAdaptorFactory serviceFactory,
+    public WeavingAdaptor(final BaseData baseData,
+            final WeavingAdaptorFactory serviceFactory,
             final BaseClassLoader baseClassLoader,
             final IWeavingService weavingService,
             final ICachingService cachingService) {
@@ -147,10 +147,10 @@ public class AspectJAdaptor implements IAspectJAdaptor {
                     final BaseData hostData = (BaseData) host.getBundleData();
                     //				System.err.println("? AspectJAdaptor.initialize() bundleData=" + hostData);
                     final BundleFile bundleFile = hostData.getBundleFile();
-                    if (bundleFile instanceof AspectJBundleFile) {
-                        final AspectJBundleFile hostFile = (AspectJBundleFile) bundleFile;
+                    if (bundleFile instanceof WeavingBundleFile) {
+                        final WeavingBundleFile hostFile = (WeavingBundleFile) bundleFile;
                         //					System.err.println("? AspectJAdaptor.initialize() bundleFile=" + hostFile);
-                        final AspectJAdaptor hostAdaptor = (AspectJAdaptor) hostFile
+                        final WeavingAdaptor hostAdaptor = (WeavingAdaptor) hostFile
                                 .getAdaptor();
                         //					System.err.println("? AspectJAdaptor.initialize() bundleFile=" + hostAdaptor);
                         weavingService = hostAdaptor.weavingService;

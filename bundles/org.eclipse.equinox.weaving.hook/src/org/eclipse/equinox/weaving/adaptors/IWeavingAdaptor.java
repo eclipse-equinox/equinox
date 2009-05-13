@@ -10,16 +10,24 @@
  *   Matthew Webster           Eclipse 3.2 changes     
  *******************************************************************************/
 
-package org.eclipse.equinox.weaving.hooks;
+package org.eclipse.equinox.weaving.adaptors;
 
-import java.io.IOException;
+import java.net.URL;
 
-import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
+import org.eclipse.equinox.service.weaving.CacheEntry;
+import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 
-public class BaseAjBundleFile extends AspectJBundleFile {
+public interface IWeavingAdaptor {
 
-    public BaseAjBundleFile(final BundleAdaptorProvider adaptorProvider,
-            final BundleFile bundleFile) throws IOException {
-        super(adaptorProvider, bundleFile);
-    }
+    public CacheEntry findClass(String name, URL sourceFileURL);
+
+    public void initialize();
+
+    public void setBaseClassLoader(BaseClassLoader baseClassLoader);
+
+    public boolean storeClass(String name, URL sourceFileURL, Class clazz,
+            byte[] classbytes);
+
+    public byte[] weaveClass(String name, byte[] bytes);
+
 }

@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
-import org.eclipse.equinox.weaving.adaptors.AspectJAdaptor;
-import org.eclipse.equinox.weaving.adaptors.AspectJAdaptorFactory;
+import org.eclipse.equinox.weaving.adaptors.WeavingAdaptor;
+import org.eclipse.equinox.weaving.adaptors.WeavingAdaptorFactory;
 import org.eclipse.equinox.weaving.adaptors.Debug;
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
@@ -35,22 +35,22 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-public class AspectJHook extends AbstractAspectJHook {
+public class WeavingHook extends AbstractWeavingHook {
 
-    private final AspectJAdaptorFactory adaptorFactory;
+    private final WeavingAdaptorFactory adaptorFactory;
 
-    private final Map<Long, IAspectJAdaptor> adaptors;
+    private final Map<Long, IWeavingAdaptor> adaptors;
 
     private BundleContext bundleContext;
 
-    public AspectJHook() {
+    public WeavingHook() {
         if (Debug.DEBUG_GENERAL) Debug.println("- AspectJHook.<init>()");
-        this.adaptorFactory = new AspectJAdaptorFactory();
-        this.adaptors = new HashMap<Long, IAspectJAdaptor>();
+        this.adaptorFactory = new WeavingAdaptorFactory();
+        this.adaptors = new HashMap<Long, IWeavingAdaptor>();
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#frameworkStart(org.osgi.framework.BundleContext)
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStart(org.osgi.framework.BundleContext)
      */
     @Override
     public void frameworkStart(final BundleContext context)
@@ -60,7 +60,7 @@ public class AspectJHook extends AbstractAspectJHook {
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#frameworkStop(org.osgi.framework.BundleContext)
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#frameworkStop(org.osgi.framework.BundleContext)
      */
     @Override
     public void frameworkStop(final BundleContext context)
@@ -68,11 +68,11 @@ public class AspectJHook extends AbstractAspectJHook {
         adaptorFactory.dispose(context);
     }
 
-    public IAspectJAdaptor getAdaptor(final long bundleID) {
+    public IWeavingAdaptor getAdaptor(final long bundleID) {
         return this.adaptors.get(bundleID);
     }
 
-    public IAspectJAdaptor getHostBundleAdaptor(final long bundleID) {
+    public IWeavingAdaptor getHostBundleAdaptor(final long bundleID) {
         final Bundle bundle = this.bundleContext.getBundle(bundleID);
         if (bundle != null) {
             final Bundle host = adaptorFactory.getHost(bundle);
@@ -85,7 +85,7 @@ public class AspectJHook extends AbstractAspectJHook {
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#initializedClassLoader(org.eclipse.osgi.baseadaptor.loader.BaseClassLoader,
      *      org.eclipse.osgi.baseadaptor.BaseData)
      */
     @Override
@@ -98,7 +98,7 @@ public class AspectJHook extends AbstractAspectJHook {
                             + baseClassLoader + ", data=" + data
                             + ", bundleFile=" + data.getBundleFile());
 
-        final IAspectJAdaptor adaptor = createAspectJAdaptor(data);
+        final IWeavingAdaptor adaptor = createAspectJAdaptor(data);
         adaptor.setBaseClassLoader(baseClassLoader);
         adaptor.initialize();
         this.adaptors.put(data.getBundleID(), adaptor);
@@ -109,7 +109,7 @@ public class AspectJHook extends AbstractAspectJHook {
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#processClass(java.lang.String,
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#processClass(java.lang.String,
      *      byte[], org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
      *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathManager)
@@ -119,10 +119,10 @@ public class AspectJHook extends AbstractAspectJHook {
             final ClasspathEntry classpathEntry, final BundleEntry entry,
             final ClasspathManager manager) {
         byte[] newClassytes = null;
-        if (entry instanceof AspectJBundleEntry) {
-            final AspectJBundleEntry ajBundleEntry = (AspectJBundleEntry) entry;
+        if (entry instanceof WeavingBundleEntry) {
+            final WeavingBundleEntry ajBundleEntry = (WeavingBundleEntry) entry;
             if (!ajBundleEntry.dontWeave()) {
-                final IAspectJAdaptor adaptor = ajBundleEntry.getAdaptor();
+                final IWeavingAdaptor adaptor = ajBundleEntry.getAdaptor();
                 newClassytes = adaptor.weaveClass(name, classbytes);
             }
         }
@@ -130,7 +130,7 @@ public class AspectJHook extends AbstractAspectJHook {
     }
 
     /**
-     * @see org.eclipse.equinox.weaving.hooks.AbstractAspectJHook#recordClassDefine(java.lang.String,
+     * @see org.eclipse.equinox.weaving.hooks.AbstractWeavingHook#recordClassDefine(java.lang.String,
      *      java.lang.Class, byte[],
      *      org.eclipse.osgi.baseadaptor.loader.ClasspathEntry,
      *      org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry,
@@ -140,10 +140,10 @@ public class AspectJHook extends AbstractAspectJHook {
     public void recordClassDefine(final String name, final Class clazz,
             final byte[] classbytes, final ClasspathEntry classpathEntry,
             final BundleEntry entry, final ClasspathManager manager) {
-        if (entry instanceof AspectJBundleEntry) {
-            final AspectJBundleEntry ajBundleEntry = (AspectJBundleEntry) entry;
+        if (entry instanceof WeavingBundleEntry) {
+            final WeavingBundleEntry ajBundleEntry = (WeavingBundleEntry) entry;
             if (!ajBundleEntry.dontWeave()) {
-                final IAspectJAdaptor adaptor = ajBundleEntry.getAdaptor();
+                final IWeavingAdaptor adaptor = ajBundleEntry.getAdaptor();
                 final URL sourceFileURL = ajBundleEntry.getBundleFileURL();
                 adaptor.storeClass(name, sourceFileURL, clazz, classbytes);
             }
@@ -171,10 +171,10 @@ public class AspectJHook extends AbstractAspectJHook {
                             + bundleFile.getBaseFile());
 
         if (base) {
-            wrapped = new BaseAjBundleFile(
+            wrapped = new BaseWeavingBundleFile(
                     new BundleAdaptorProvider(data, this), bundleFile);
         } else {
-            wrapped = new AspectJBundleFile(new BundleAdaptorProvider(data,
+            wrapped = new WeavingBundleFile(new BundleAdaptorProvider(data,
                     this), bundleFile);
         }
         if (Debug.DEBUG_BUNDLE)
@@ -184,14 +184,14 @@ public class AspectJHook extends AbstractAspectJHook {
         return wrapped;
     }
 
-    private IAspectJAdaptor createAspectJAdaptor(final BaseData baseData) {
+    private IWeavingAdaptor createAspectJAdaptor(final BaseData baseData) {
         if (Debug.DEBUG_GENERAL)
             Debug.println("> AspectJHook.createAspectJAdaptor() location="
                     + baseData.getLocation());
-        IAspectJAdaptor adaptor = null;
+        IWeavingAdaptor adaptor = null;
 
         if (adaptorFactory != null) {
-            adaptor = new AspectJAdaptor(baseData, adaptorFactory, null, null,
+            adaptor = new WeavingAdaptor(baseData, adaptorFactory, null, null,
                     null);
         } else {
             if (Debug.DEBUG_GENERAL)
@@ -205,7 +205,7 @@ public class AspectJHook extends AbstractAspectJHook {
         return adaptor;
     }
 
-    private IAspectJAdaptor getAspectJAdaptor(final BaseData data) {
+    private IWeavingAdaptor getAspectJAdaptor(final BaseData data) {
         return getAdaptor(data.getBundleID());
     }
 

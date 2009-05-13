@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 
-public class AspectJBundleEntry extends BundleEntry {
+public class WeavingBundleEntry extends BundleEntry {
 
-    private final IAspectJAdaptor adaptor;
+    private final IWeavingAdaptor adaptor;
 
     private final URL bundleFileURL;
 
@@ -31,7 +31,7 @@ public class AspectJBundleEntry extends BundleEntry {
 
     private final boolean dontWeave;
 
-    public AspectJBundleEntry(final IAspectJAdaptor aspectjAdaptor,
+    public WeavingBundleEntry(final IWeavingAdaptor aspectjAdaptor,
             final BundleEntry delegate, final URL url, final boolean dontWeave) {
         this.adaptor = aspectjAdaptor;
         this.bundleFileURL = url;
@@ -43,7 +43,7 @@ public class AspectJBundleEntry extends BundleEntry {
         return dontWeave;
     }
 
-    public IAspectJAdaptor getAdaptor() {
+    public IWeavingAdaptor getAdaptor() {
         return adaptor;
     }
 

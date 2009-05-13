@@ -15,7 +15,7 @@ import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 
 public class Debug {
 
-    public static final String ASPECTJ_OSGI = "org.aspectj.osgi";
+    public static final String ASPECTJ_OSGI = "org.eclipse.equinox.weaving.hook"; //$NON-NLS-1$
 
     public static boolean DEBUG_BUNDLE;
 
@@ -30,21 +30,21 @@ public class Debug {
     public static boolean DEBUG_WEAVE;
 
     public static final String OPTION_DEBUG_BUNDLE = ASPECTJ_OSGI
-            + "/debug/bundle";
+            + "/debug/bundle"; //$NON-NLS-1$
 
     public static final String OPTION_DEBUG_BUNDLENAME = ASPECTJ_OSGI
-            + "/debug/bundleName";
+            + "/debug/bundleName"; //$NON-NLS-1$
 
     public static final String OPTION_DEBUG_CACHE = ASPECTJ_OSGI
-            + "/debug/cache";
+            + "/debug/cache"; //$NON-NLS-1$
 
-    public static final String OPTION_DEBUG_GENERAL = ASPECTJ_OSGI + "/debug";
+    public static final String OPTION_DEBUG_GENERAL = ASPECTJ_OSGI + "/debug"; //$NON-NLS-1$
 
     public static final String OPTION_DEBUG_SUPPLEMENTS = ASPECTJ_OSGI
-            + "/debug/supplements";
+            + "/debug/supplements"; //$NON-NLS-1$
 
     public static final String OPTION_DEBUG_WEAVE = ASPECTJ_OSGI
-            + "/debug/weave";
+            + "/debug/weave"; //$NON-NLS-1$
 
     static {
         final FrameworkDebugOptions fdo = FrameworkDebugOptions.getDefault();

@@ -44,7 +44,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class AspectJAdaptorFactory {
+public class WeavingAdaptorFactory {
 
     private static final Collection IGNORE_WEAVING_SERVICE_BUNDLES = Arrays
             .asList(new String[] { "org.eclipse.equinox.weaving.aspectj",
@@ -76,7 +76,7 @@ public class AspectJAdaptorFactory {
     private final Map weavingServices = Collections
             .synchronizedMap(new HashMap());
 
-    public AspectJAdaptorFactory() {
+    public WeavingAdaptorFactory() {
     }
 
     public void dispose(final BundleContext context) {

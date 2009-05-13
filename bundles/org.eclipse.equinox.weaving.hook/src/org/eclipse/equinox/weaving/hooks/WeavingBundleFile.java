@@ -19,7 +19,7 @@ import java.net.URL;
 
 import org.eclipse.equinox.service.weaving.CacheEntry;
 import org.eclipse.equinox.weaving.adaptors.Debug;
-import org.eclipse.equinox.weaving.adaptors.IAspectJAdaptor;
+import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 
@@ -30,7 +30,7 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
  * Those bundle entry objects are used to return class bytes from the cache
  * instead of the bundle itself.
  */
-public class AspectJBundleFile extends AbstractAJBundleFile {
+public class WeavingBundleFile extends AbstractWeavingBundleFile {
 
     private final URL url;
 
@@ -42,7 +42,7 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
      * @param bundleFile The wrapped bundle file
      * @throws IOException
      */
-    public AspectJBundleFile(final BundleAdaptorProvider adaptorProvider,
+    public WeavingBundleFile(final BundleAdaptorProvider adaptorProvider,
             final BundleFile bundleFile) throws IOException {
         super(adaptorProvider, bundleFile);
         this.url = delegate.getBaseFile().toURL();
@@ -58,11 +58,11 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
         if (path.endsWith(".class") && entry != null) {
             final int offset = path.lastIndexOf('.');
             final String name = path.substring(0, offset).replace('/', '.');
-            final IAspectJAdaptor adaptor = getAdaptor();
+            final IWeavingAdaptor adaptor = getAdaptor();
             if (adaptor != null) {
                 final CacheEntry cacheEntry = adaptor.findClass(name, url);
                 if (cacheEntry == null) {
-                    entry = new AspectJBundleEntry(adaptor, entry, url, false);
+                    entry = new WeavingBundleEntry(adaptor, entry, url, false);
                     if (Debug.DEBUG_BUNDLE)
                         Debug.println("- AspectJBundleFile.getEntry() path="
                                 + path + ", entry=" + entry);
@@ -70,14 +70,14 @@ public class AspectJBundleFile extends AbstractAJBundleFile {
                     entry = new CachedClassBundleEntry(adaptor, entry, path,
                             cacheEntry.getCachedBytes(), url);
                 } else {
-                    entry = new AspectJBundleEntry(adaptor, entry, url,
+                    entry = new WeavingBundleEntry(adaptor, entry, url,
                             cacheEntry.dontWeave());
                 }
             }
         } else if (path.endsWith(".class") && entry == null) {
             final int offset = path.lastIndexOf('.');
             final String name = path.substring(0, offset).replace('/', '.');
-            final IAspectJAdaptor adaptor = getAdaptor();
+            final IWeavingAdaptor adaptor = getAdaptor();
             if (adaptor != null) {
                 final CacheEntry cacheEntry = adaptor.findClass(name, url);
                 if (cacheEntry != null && cacheEntry.getCachedBytes() != null) {

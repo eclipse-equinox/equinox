@@ -257,7 +257,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Supplementer supplementer = supplementers.get(bundle
                     .getSymbolicName());
             supplementers.remove(bundle.getSymbolicName());
-            if (AbstractAspectJHook.verbose)
+            if (AbstractWeavingHook.verbose)
                 System.err
                         .println("[org.eclipse.equinox.weaving.hook] info removing supplementer " //$NON-NLS-1$
                                 + bundle.getSymbolicName());
@@ -391,7 +391,7 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Bundle[] bundles = bundlesToRefresh
                     .toArray(new Bundle[bundlesToRefresh.size()]);
 
-            if (AbstractAspectJHook.verbose) {
+            if (AbstractWeavingHook.verbose) {
                 for (int i = 0; i < bundles.length; i++) {
                     System.out.println("refresh bundle: "
                             + bundles[i].getSymbolicName());

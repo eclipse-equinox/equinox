@@ -46,7 +46,7 @@ import org.osgi.framework.BundleException;
  * @author Matthew Webster
  * @author Martin Lippert
  */
-public abstract class AbstractAspectJHook implements HookConfigurator,
+public abstract class AbstractWeavingHook implements HookConfigurator,
         AdaptorHook, BundleFileWrapperFactoryHook, ClassLoadingHook,
         ClassLoadingStatsHook, IAdaptorProvider {
 
