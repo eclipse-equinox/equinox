@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.equinox.service.weaving.ISupplementerRegistry;
-import org.eclipse.equinox.weaving.adaptors.WeavingAdaptor;
-import org.eclipse.equinox.weaving.adaptors.WeavingAdaptorFactory;
 import org.eclipse.equinox.weaving.adaptors.Debug;
 import org.eclipse.equinox.weaving.adaptors.IWeavingAdaptor;
+import org.eclipse.equinox.weaving.adaptors.WeavingAdaptor;
+import org.eclipse.equinox.weaving.adaptors.WeavingAdaptorFactory;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
@@ -150,6 +150,10 @@ public class WeavingHook extends AbstractWeavingHook {
         }
     }
 
+    public void resetAdaptor(final long bundleID) {
+        this.adaptors.remove(bundleID);
+    }
+
     @Override
     public BundleFile wrapBundleFile(final BundleFile bundleFile,
             final Object content, final BaseData data, final boolean base)
@@ -171,8 +175,8 @@ public class WeavingHook extends AbstractWeavingHook {
                             + bundleFile.getBaseFile());
 
         if (base) {
-            wrapped = new BaseWeavingBundleFile(
-                    new BundleAdaptorProvider(data, this), bundleFile);
+            wrapped = new BaseWeavingBundleFile(new BundleAdaptorProvider(data,
+                    this), bundleFile);
         } else {
             wrapped = new WeavingBundleFile(new BundleAdaptorProvider(data,
                     this), bundleFile);

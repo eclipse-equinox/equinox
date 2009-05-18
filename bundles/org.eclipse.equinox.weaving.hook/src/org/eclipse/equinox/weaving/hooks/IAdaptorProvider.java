@@ -9,4 +9,6 @@ public interface IAdaptorProvider {
 
     public IWeavingAdaptor getHostBundleAdaptor(long bundleID);
 
+    public void resetAdaptor(long bundleID);
+
 }

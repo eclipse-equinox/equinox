@@ -13,8 +13,8 @@
 
 package org.eclipse.equinox.service.weaving;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
@@ -23,7 +23,7 @@ public class Supplementer {
 
     private final ManifestElement[] supplementBundle;
 
-    private final List<Bundle> supplementedBundles; // elements of type Bundle
+    private final Set<Bundle> supplementedBundles; // elements of type Bundle
 
     private final Bundle supplementer;
 
@@ -42,7 +42,7 @@ public class Supplementer {
         this.supplementBundle = supplementBundle;
         this.supplementImporter = supplementImporter;
         this.supplementExporter = supplementExporter;
-        this.supplementedBundles = new ArrayList<Bundle>();
+        this.supplementedBundles = new HashSet<Bundle>();
     }
 
     public void addSupplementedBundle(final Bundle supplementedBundle) {

@@ -238,6 +238,13 @@ public class SupplementerRegistry implements ISupplementerRegistry {
      */
     public void refreshBundles(final Bundle[] bundles) {
         if (this.packageAdmin != null) {
+            if (AbstractWeavingHook.verbose) {
+                for (int i = 0; i < bundles.length; i++) {
+                    System.out.println("refresh bundle: "
+                            + bundles[i].getSymbolicName());
+                }
+            }
+
             this.packageAdmin.refreshPackages(bundles);
         }
     }
@@ -249,6 +256,8 @@ public class SupplementerRegistry implements ISupplementerRegistry {
         // if this bundle is itself supplemented by others, remove the bundle from those lists
         removeSupplementedBundle(bundle);
         this.supplementersByBundle.remove(bundle.getBundleId());
+
+        this.adaptorProvider.resetAdaptor(bundle.getBundleId());
 
         // if this bundle supplements other bundles, remove this supplementer and update the other bundles
         if (supplementers.containsKey(bundle.getSymbolicName())) {
@@ -266,7 +275,19 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Bundle[] supplementedBundles = supplementer
                     .getSupplementedBundles();
             if (supplementedBundles != null && supplementedBundles.length > 0) {
-                refreshBundles(supplementedBundles);
+                final List<Bundle> bundlesToRefresh = new ArrayList<Bundle>(
+                        supplementedBundles.length);
+                for (final Bundle bundleToRefresh : supplementedBundles) {
+                    if (this.adaptorProvider.getAdaptor(bundleToRefresh
+                            .getBundleId()) != null) {
+                        bundlesToRefresh.add(bundleToRefresh);
+                    }
+                }
+
+                if (bundlesToRefresh.size() > 0) {
+                    refreshBundles(bundlesToRefresh
+                            .toArray(new Bundle[bundlesToRefresh.size()]));
+                }
             }
 
             // remove this supplementer from the list of supplementers per other bundle
@@ -391,12 +412,6 @@ public class SupplementerRegistry implements ISupplementerRegistry {
             final Bundle[] bundles = bundlesToRefresh
                     .toArray(new Bundle[bundlesToRefresh.size()]);
 
-            if (AbstractWeavingHook.verbose) {
-                for (int i = 0; i < bundles.length; i++) {
-                    System.out.println("refresh bundle: "
-                            + bundles[i].getSymbolicName());
-                }
-            }
             refreshBundles(bundles);
         }
     }
