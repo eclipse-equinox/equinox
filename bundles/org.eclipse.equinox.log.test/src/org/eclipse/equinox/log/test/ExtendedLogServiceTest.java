@@ -1,7 +1,18 @@
+/*******************************************************************************
+ * Copyright (c) 2007, 2009 IBM Corporation and others All rights reserved. This
+ * program and the accompanying materials are made available under the terms of
+ * the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.equinox.log.test;
 
 import junit.framework.TestCase;
-import org.eclipse.equinox.log.*;
+
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
+import org.eclipse.equinox.log.LogFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -145,11 +156,11 @@ public class ExtendedLogServiceTest extends TestCase {
 		String message = "test";
 		Throwable t = new Throwable("test");
 		synchronized (listener) {
-			log.getLogger(logBundle, "test").log(logReference, LogService.LOG_INFO, message, t);
+			log.getLogger(bundle, "test").log(logReference, LogService.LOG_INFO, message, t);
 			listener.wait();
 		}
 		assertTrue(listener.getEntryX().getLoggerName() == "test");
-		assertTrue(listener.getEntry().getBundle() == logBundle);
+		assertTrue(listener.getEntry().getBundle() == bundle);
 		assertTrue(listener.getEntry().getLevel() == LogService.LOG_INFO);
 		assertTrue(listener.getEntry().getMessage().equals(message));
 		assertTrue(listener.getEntry().getException().getMessage().equals(t.getMessage()));
