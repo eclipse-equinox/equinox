@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 /* Global Variables */
 _TCHAR* osArg        = _T_ECLIPSE(DEFAULT_OS);
@@ -483,8 +484,17 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     /* get the current working directory */
     workingDir = malloc(cwdLength * sizeof(_TCHAR));
     while ( _tgetcwd( workingDir, cwdLength ) == NULL ){
-    	cwdLength *= 2;
-    	workingDir = realloc(workingDir, cwdLength * sizeof(_TCHAR));
+    	if (errno == ERANGE) {
+    		/* ERANGE : the buffer isn't big enough, allocate more memory */
+			cwdLength *= 2;
+			workingDir = realloc(workingDir, cwdLength * sizeof(_TCHAR));
+			continue;
+    	} else {
+    		/* some other error occurred, perhaps ENOENT (directory has been unlinked) */
+    		/* the contents of workingDir are undefined, set it to empty, we will end up testing against root */
+    		workingDir[0] = _T_ECLIPSE('\0');
+    		break;
+    	}
     }
     
     paths[0] = reverseOrder ? programDir : workingDir;
@@ -493,6 +503,8 @@ _TCHAR* checkPath( _TCHAR* path, _TCHAR* programDir, int reverseOrder )
     /* just make a buffer big enough to hold everything */
     buffer = malloc((_tcslen(paths[0]) + _tcslen(paths[1]) + _tcslen(path) + 2) * sizeof(_TCHAR));
     for ( i = 0; i < 2; i++ ) {
+    	if (_tcslen(paths[i]) == 0)
+    		continue;
     	_stprintf(buffer, _T_ECLIPSE("%s%c%s"), paths[i], dirSeparator, path);
     	if (_tstat(buffer, &stats) == 0) {
     		result = _tcsdup(buffer);
