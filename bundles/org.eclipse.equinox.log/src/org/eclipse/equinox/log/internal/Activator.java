@@ -22,10 +22,11 @@ public class Activator implements BundleActivator, BundleListener, FrameworkList
 	private ServiceRegistration logReaderServiceRegistration;
 	private ServiceRegistration logServiceRegistration;
 	private EventAdminAdapter eventAdminAdapter;
-	private final ExtendedLogReaderServiceFactory logReaderServiceFactory = new ExtendedLogReaderServiceFactory();
+	private volatile ExtendedLogReaderServiceFactory logReaderServiceFactory;
 	private ExtendedLogServiceFactory logServiceFactory;
 
 	public void start(BundleContext context) throws Exception {
+		logReaderServiceFactory = new ExtendedLogReaderServiceFactory();
 		context.addBundleListener(this);
 		context.addServiceListener(this);
 		context.addFrameworkListener(this);
