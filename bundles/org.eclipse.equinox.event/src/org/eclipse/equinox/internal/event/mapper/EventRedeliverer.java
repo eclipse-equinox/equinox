@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation.
+ * Copyright (c) 2005, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Main class for redeliver special events like FrameworkEvents via EventAdmin.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener, ServiceListener {
 	private ServiceTracker eventAdminTracker;
