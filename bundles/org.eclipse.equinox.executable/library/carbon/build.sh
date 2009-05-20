@@ -66,6 +66,8 @@ X86_64_OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/x86_64/Eclipse.app/Contents/M
 
 if [ "$DEFAULT_WS" == "cocoa" ]; then
 	makefile="make_cocoa.mak"
+else
+	export MACOSX_DEPLOYMENT_TARGET=10.3	
 fi
 
 if [ "$DEFAULT_OS_ARCH" == "x86_64" ]; then
