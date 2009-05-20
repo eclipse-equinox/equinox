@@ -154,7 +154,8 @@ public abstract class StateImpl implements State {
 
 	public boolean removeBundle(BundleDescription toRemove) {
 		synchronized (this.monitor) {
-			if (!bundleDescriptions.remove((KeyedElement) toRemove))
+			toRemove = (BundleDescription) bundleDescriptions.get((KeyedElement) toRemove);
+			if (toRemove == null || !bundleDescriptions.remove((KeyedElement) toRemove))
 				return false;
 			resolvedBundles.remove((KeyedElement) toRemove);
 			disabledBundles.remove(toRemove);

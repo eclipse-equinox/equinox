@@ -1786,7 +1786,7 @@ public class StateResolverTest extends AbstractStateTest {
 		long id = 0;
 		State state = buildEmptyState();
 		Dictionary[] props = new Dictionary[] {new Hashtable()};
-		props[0].put("osgi.resolverMode", "development");
+		props[0].put("osgi.resolverMode", "development"); //$NON-NLS-1$ //$NON-NLS-2$
 		state.setPlatformProperties(props);
 
 		Hashtable manifest = new Hashtable();
@@ -3665,6 +3665,76 @@ public class StateResolverTest extends AbstractStateTest {
 		} catch (IllegalStateException e) {
 			fail("Unexpected IllegalStateException on adding to state", e); //$NON-NLS-1$
 		}
+	}
+
+	private State createBug266935State() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		// test the selection algorithm of the resolver to pick the bundles which
+		// resolve the largest set of bundles; with fragments
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "a"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a);
+		state.addBundle(b);
+
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		return state;
+	}
+
+	private BundleDescription updateStateBug266935(State state, BundleDescription a) throws BundleException {
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, a.getSymbolicName());
+		manifest.put(Constants.BUNDLE_VERSION, a.getVersion().toString());
+		BundleDescription newA = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), a.getBundleId());
+		state.updateBundle(newA);
+		return newA;
+	}
+
+	public void testBug266935_01() throws BundleException {
+		State state = createBug266935State();
+		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		BundleDescription newA = updateStateBug266935(state, a);
+		state.removeBundle(a);
+		state.resolve(new BundleDescription[] {newA});
+	}
+
+	public void testBug266935_02() throws BundleException {
+		State state = createBug266935State();
+		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		updateStateBug266935(state, a);
+		state.removeBundle(a);
+		state.resolve(new BundleDescription[] {a});
+	}
+
+	public void testBug266935_03() throws BundleException {
+		State state = createBug266935State();
+		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		BundleDescription newA = updateStateBug266935(state, a);
+		state.removeBundle(newA);
+		state.resolve(new BundleDescription[] {newA});
+	}
+
+	public void testBug266935_04() throws BundleException {
+		State state = createBug266935State();
+		BundleDescription a = state.getBundle("a", new Version("1.0")); //$NON-NLS-1$ //$NON-NLS-2$
+		BundleDescription newA = updateStateBug266935(state, a);
+		state.removeBundle(newA);
+		state.resolve(new BundleDescription[] {a});
 	}
 
 	public static class CatchAllValue {
