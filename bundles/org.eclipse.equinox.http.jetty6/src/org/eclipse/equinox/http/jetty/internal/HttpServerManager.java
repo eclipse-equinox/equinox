@@ -82,11 +82,18 @@ public class HttpServerManager implements ManagedServiceFactory {
 		holder.setInitOrder(0);
 		holder.setInitParameter(Constants.SERVICE_VENDOR, "Eclipse.org"); //$NON-NLS-1$
 		holder.setInitParameter(Constants.SERVICE_DESCRIPTION, "Equinox Jetty-based Http Service"); //$NON-NLS-1$
-		if (httpConnector != null)
-			holder.setInitParameter(JettyConstants.HTTP_PORT, new Integer(httpConnector.getLocalPort()).toString());
-		if (httpsConnector != null)
-			holder.setInitParameter(JettyConstants.HTTPS_PORT, new Integer(httpsConnector.getLocalPort()).toString());
-
+		if (httpConnector != null) {
+			int port = httpConnector.getLocalPort();
+			if (port == -1)
+				port = httpConnector.getPort();
+			holder.setInitParameter(JettyConstants.HTTP_PORT, Integer.toString(port));
+		}
+		if (httpsConnector != null) {
+			int port = httpsConnector.getLocalPort();
+			if (port == -1)
+				port = httpsConnector.getPort();
+			holder.setInitParameter(JettyConstants.HTTPS_PORT, Integer.toString(port));
+		}
 		String otherInfo = (String) dictionary.get(JettyConstants.OTHER_INFO);
 		if (otherInfo != null)
 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
