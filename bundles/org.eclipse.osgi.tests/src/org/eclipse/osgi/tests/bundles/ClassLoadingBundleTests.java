@@ -45,6 +45,24 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	public void testLoadTriggerClass() throws Exception {
+		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
+		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
+		installer.installBundle("chain.test.b"); //$NON-NLS-1$
+		installer.installBundle("chain.test.c"); //$NON-NLS-1$
+		installer.installBundle("chain.test.d"); //$NON-NLS-1$
+		assertTrue("Did not resolve chainTest", installer.resolveBundles(new Bundle[] {chainTest})); //$NON-NLS-1$
+		chainTest.start(Bundle.START_ACTIVATION_POLICY);
+		chainTestA.start(Bundle.START_ACTIVATION_POLICY);
+		assertEquals("Wrong state", Bundle.STARTING, chainTest.getState()); //$NON-NLS-1$
+		chainTest.loadClass("org.osgi.framework.BundleActivator"); //$NON-NLS-1$
+		assertEquals("Wrong state", Bundle.STARTING, chainTest.getState()); //$NON-NLS-1$
+		assertEquals("Wrong state", Bundle.STARTING, chainTestA.getState()); //$NON-NLS-1$
+		chainTest.loadClass("chain.test.a.AChain"); //$NON-NLS-1$
+		assertEquals("Wrong state", Bundle.STARTING, chainTest.getState()); //$NON-NLS-1$
+		assertEquals("Wrong state", Bundle.ACTIVE, chainTestA.getState()); //$NON-NLS-1$
+	}
+
 	public void testChainDepedencies() throws Exception {
 		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
 		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
