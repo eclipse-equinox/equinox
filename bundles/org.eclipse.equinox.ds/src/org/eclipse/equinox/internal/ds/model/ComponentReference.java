@@ -464,7 +464,7 @@ public class ComponentReference implements Externalizable {
 				// invoke the method
 				if (unbindMethod != null) {
 					Object methodParam = null;
-					Class[] paramTypes = bindMethod.getParameterTypes();
+					Class[] paramTypes = unbindMethod.getParameterTypes();
 					if (paramTypes.length == 1 && paramTypes[0].equals(ServiceReference.class)) {
 						methodParam = serviceReference;
 					} else {
