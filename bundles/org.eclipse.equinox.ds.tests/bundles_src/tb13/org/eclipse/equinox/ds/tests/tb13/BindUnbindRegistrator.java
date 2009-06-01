@@ -53,6 +53,10 @@ public class BindUnbindRegistrator implements PropertiesProvider {
   protected void unbindSr(ServiceReference sr) {
     setDataBits(UNBIND_SR);
   }
+  
+  protected void unbindCmMap2(ComponentManager sr, Map props) {
+    setDataBits(UNBIND_CM_MAP);
+  }
 
   protected void bindCm(ComponentManager ce) {
     setDataBits(BIND_CM);

@@ -44,7 +44,7 @@
 	          bind="bindSr"
 	          interface="org.eclipse.equinox.ds.tests.tbc.ComponentManager"
 	          name="componentenabler"
-	          unbind="unbindSr"/>
+	          unbind="unbindCmMap2"/>
 	</component>
 	
 	<!-- bind/unbind with ComponentEnabler; old XML Schema -->

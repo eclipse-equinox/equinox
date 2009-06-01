@@ -1933,7 +1933,7 @@ public class DSTest extends TestCase {
     assertEquals("Bind method of " + SR_NS110 + " should be called", 1 << 0, (1 << 0) & getBaseConfigData(bs));
     enabler.enableComponent(SR_NS110, false);
     Thread.sleep(timeout * 3);
-    assertEquals("Unbind method of " + SR_NS110 + " should be called", 1 << 1, (1 << 1) & getBaseConfigData(bs));
+    assertEquals("Unbind method of " + SR_NS110 + " should be called", 1 << 5, (1 << 5) & getBaseConfigData(bs));
 
     bs = getBaseService(CE_NS100);
     assertNotNull("Component " + CE_NS100 + " should be activated", bs);
