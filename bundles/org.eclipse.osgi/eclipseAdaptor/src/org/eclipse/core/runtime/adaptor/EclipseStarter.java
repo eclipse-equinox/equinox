@@ -699,11 +699,10 @@ public class EclipseStarter {
 	private static boolean refreshPackages(Bundle[] bundles) {
 		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = null;
-		if (packageAdminRef != null) {
+		if (packageAdminRef != null)
 			packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
-			if (packageAdmin == null)
-				return false;
-		}
+		if (packageAdmin == null)
+			return false;
 		// TODO this is such a hack it is silly.  There are still cases for race conditions etc
 		// but this should allow for some progress...
 		final Semaphore semaphore = new Semaphore(0);
