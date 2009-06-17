@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,7 @@ import org.eclipse.core.internal.runtime.PrintStackUtil;
 /**
  * A checked exception representing a failure.
  * <p>
- * Core exceptions contain a status object describing the 
- * cause of the exception.
+ * Core exceptions contain a status object describing the cause of the exception.
  * </p><p>
  * This class can be used without OSGi running.
  * </p>
@@ -32,7 +31,7 @@ public class CoreException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/** Status object. */
-	private IStatus status;
+	private final IStatus status;
 
 	/**
 	 * Creates a new exception with the given status object.  The message
@@ -61,7 +60,7 @@ public class CoreException extends Exception {
 	 *   <b>IMPORTANT:</b><br>
 	 *   The result must NOT be used to log a <code>CoreException</code>
 	 *   (e.g., using <code>yourPlugin.getLog().log(status);</code>),
-	 *   since that code pattern hides the original stacktrace.
+	 *   since that code pattern hides the original stack trace.
 	 *   Instead, create a new {@link Status} with your plug-in ID and
 	 *   this <code>CoreException</code>, and log that new status.
 	 * </p>
