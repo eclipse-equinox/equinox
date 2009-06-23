@@ -202,17 +202,17 @@ public class PackageAdminImpl implements PackageAdmin {
 			framework.publishBundleEvent(Framework.BATCHEVENT_BEGIN, framework.systemBundle);
 			State systemState = framework.adaptor.getState();
 			BundleDescription[] descriptions = null;
-			synchronized (framework.bundles) {
-				int numBundles = bundles == null ? 0 : bundles.length;
-				if (!refreshPackages)
-					// in this case we must make descriptions non-null so we do
-					// not force the removal pendings to be processed when resolving
-					// the state.
-					descriptions = new BundleDescription[0];
-				else if (numBundles > 0) {
-					// populate the resolved hosts package sources first
-					populateLoaders(framework.bundles.getBundles());
-					// not collect the descriptions to refresh
+			int numBundles = bundles == null ? 0 : bundles.length;
+			if (!refreshPackages)
+				// in this case we must make descriptions non-null so we do
+				// not force the removal pendings to be processed when resolving
+				// the state.
+				descriptions = new BundleDescription[0];
+			else if (numBundles > 0) {
+				// populate the resolved hosts package sources first (do this outside sync block: bug 280929)
+				populateLoaders(framework.bundles.getBundles());
+				synchronized (framework.bundles) {
+					// now collect the descriptions to refresh
 					ArrayList results = new ArrayList(numBundles);
 					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
