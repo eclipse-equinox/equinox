@@ -48,7 +48,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private static int MAX_USES_TIME_LIMIT = 90000; // 90 seconds
 	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	private static String[][] CURRENT_EES;
+	private String[][] CURRENT_EES;
 
 	// The State associated with this resolver
 	private State state;
