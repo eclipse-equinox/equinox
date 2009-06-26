@@ -460,6 +460,25 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		compareResults(expectedEvents, actualEvents);
 	}
 
+	public void testStartResolve() throws Exception {
+		// install a bundle and set its start-level high, then crank up the framework start-level.  This should result in no events
+		Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+		StartLevel startLevel = installer.getStartLevel();
+		startLevel.setBundleStartLevel(test, startLevel.getStartLevel() + 10);
+		try {
+			test.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state", Bundle.INSTALLED, test.getState()); //$NON-NLS-1$
+		startLevel.setStartLevel(startLevel.getStartLevel() + 15);
+		Object[] expectedFrameworkEvents = new Object[1];
+		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+		Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+		assertEquals("Wrong state", Bundle.ACTIVE, test.getState()); //$NON-NLS-1$
+	}
+
 	public void testStopTransient() throws Exception {
 		Bundle osgiA = installer.installBundle("osgi.lazystart.a"); //$NON-NLS-1$
 		installer.resolveBundles(new Bundle[] {osgiA});

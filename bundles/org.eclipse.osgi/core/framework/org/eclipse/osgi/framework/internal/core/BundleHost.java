@@ -304,11 +304,6 @@ public class BundleHost extends AbstractBundle {
 		if (!framework.active || (state & ACTIVE) != 0)
 			return;
 
-		if (state == INSTALLED) {
-			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
-				throw getResolutionFailureException();
-		}
-
 		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
 			if ((options & START_TRANSIENT) != 0) {
 				// throw exception if this is a transient start
@@ -318,6 +313,12 @@ public class BundleHost extends AbstractBundle {
 			}
 			return;
 		}
+
+		if (state == INSTALLED) {
+			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
+				throw getResolutionFailureException();
+		}
+
 		if ((options & START_ACTIVATION_POLICY) != 0 && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
 			// the bundle must use the activation policy here.
 			if ((state & RESOLVED) != 0) {
