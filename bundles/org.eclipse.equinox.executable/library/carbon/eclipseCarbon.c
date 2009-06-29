@@ -55,6 +55,7 @@ typedef struct {
 } StartVMArgs;
 
 #ifdef COCOA
+static NSWindow* window = nil;
 @interface KeyWindow : NSWindow { }
 - (BOOL)canBecomeKeyWindow;
 @end
@@ -63,6 +64,12 @@ typedef struct {
 - (BOOL)canBecomeKeyWindow {
 	return YES;
 }
+
+- (void)close {
+	[super close];
+	window = nil;
+}
+
 @end
 #endif
 
@@ -76,8 +83,6 @@ int main() {
 }
 
 #ifdef COCOA
-
-static KeyWindow* window = nil;
 
 /* Show the Splash Window
  *
