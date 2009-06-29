@@ -13,7 +13,6 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
@@ -25,6 +24,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
+import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
 
@@ -60,8 +60,6 @@ import org.osgi.service.packageadmin.RequiredBundle;
  ss - display installed bundles (short status)
  status - display installed bundles and registered services
  threads - display threads and thread groups
- ---Log Commands---
- log {(<id>|<location>)} - display log entries
  ---Extras---
  exec <command> - execute a command in a separate process and wait
  fork <command> - execute a command in a separate process
@@ -156,7 +154,6 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		addCommand("bundles", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("bundle", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("headers", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("log", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_LOG_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addHeader(ConsoleMsg.CONSOLE_HELP_EXTRAS_HEADER, help);
 		addCommand("exec", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
 		addCommand("fork", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION, help); //$NON-NLS-1$
@@ -824,7 +821,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 							PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 							if (packageAdmin != null) {
 								intp.print("  "); //$NON-NLS-1$
-								if ((packageAdmin.getBundleType(bundle) & PackageAdminImpl.BUNDLE_TYPE_FRAGMENT) > 0) {
+								if ((packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) > 0) {
 									org.osgi.framework.Bundle[] hosts = packageAdmin.getHosts(bundle);
 									if (hosts != null) {
 										intp.println(ConsoleMsg.CONSOLE_HOST_MESSAGE);
@@ -952,130 +949,6 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	}
 
 	/**
-	 *  Handle the log command's abbreviation.  Invoke _log()
-	 *
-	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
-	 */
-	public void _l(CommandInterpreter intp) throws Exception {
-		_log(intp);
-	}
-
-	/**
-	 *  Handle the log command.  Display log entries.
-	 *
-	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
-	 */
-	public void _log(CommandInterpreter intp) throws Exception {
-		long logid = -1;
-		String token = intp.nextArgument();
-		if (token != null) {
-			AbstractBundle bundle = getBundleFromToken(intp, token, false);
-
-			if (bundle == null) {
-				try {
-					logid = Long.parseLong(token);
-				} catch (NumberFormatException e) {
-					return;
-				}
-			} else {
-				logid = bundle.getBundleId();
-			}
-		}
-
-		org.osgi.framework.ServiceReference logreaderRef = context.getServiceReference("org.osgi.service.log.LogReaderService"); //$NON-NLS-1$
-		if (logreaderRef != null) {
-			Object logreader = context.getService(logreaderRef);
-			if (logreader != null) {
-				try {
-					Enumeration logs = (Enumeration) (logreader.getClass().getMethod("getLog", null).invoke(logreader, null)); //$NON-NLS-1$
-					ArrayList entriesList = new ArrayList();
-					while (logs.hasMoreElements())
-						entriesList.add(0, logs.nextElement());
-					Object[] entries = entriesList.toArray();
-					if (entries.length == 0)
-						return;
-					Class clazz = entries[0].getClass();
-					Method getBundle = clazz.getMethod("getBundle", null); //$NON-NLS-1$
-					Method getLevel = clazz.getMethod("getLevel", null); //$NON-NLS-1$
-					Method getMessage = clazz.getMethod("getMessage", null); //$NON-NLS-1$
-					Method getServiceReference = clazz.getMethod("getServiceReference", null); //$NON-NLS-1$
-					Method getException = clazz.getMethod("getException", null); //$NON-NLS-1$
-
-					for (int i = 0; i < entries.length; i++) {
-						Object logentry = entries[i];
-						AbstractBundle bundle = (AbstractBundle) getBundle.invoke(logentry, null);
-
-						if ((logid == -1) || ((bundle != null) && (logid == bundle.getBundleId()))) {
-							Integer level = (Integer) getLevel.invoke(logentry, null);
-							switch (level.intValue()) {
-								case 4 :
-									intp.print(">"); //$NON-NLS-1$
-									intp.print(ConsoleMsg.CONSOLE_DEBUG_MESSAGE);
-									intp.print(" "); //$NON-NLS-1$
-									break;
-								case 3 :
-									intp.print(">"); //$NON-NLS-1$
-									intp.print(ConsoleMsg.CONSOLE_INFO_MESSAGE);
-									intp.print(" "); //$NON-NLS-1$
-									break;
-								case 2 :
-									intp.print(">"); //$NON-NLS-1$
-									intp.print(ConsoleMsg.CONSOLE_WARNING_MESSAGE);
-									intp.print(" "); //$NON-NLS-1$
-									break;
-								case 1 :
-									intp.print(">"); //$NON-NLS-1$
-									intp.print(ConsoleMsg.CONSOLE_ERROR_MESSAGE);
-									intp.print(" "); //$NON-NLS-1$
-									break;
-								default :
-									intp.print(">"); //$NON-NLS-1$
-									intp.print(level);
-									intp.print(" "); //$NON-NLS-1$
-									break;
-							}
-
-							if (bundle != null) {
-								intp.print("["); //$NON-NLS-1$
-								intp.print(new Long(bundle.getBundleId()));
-								intp.print("] "); //$NON-NLS-1$
-							}
-
-							intp.print(getMessage.invoke(logentry, null));
-							intp.print(" "); //$NON-NLS-1$
-
-							ServiceReference svcref = (ServiceReference) getServiceReference.invoke(logentry, null);
-							if (svcref != null) {
-								intp.print("{"); //$NON-NLS-1$
-								intp.print(Constants.SERVICE_ID);
-								intp.print("="); //$NON-NLS-1$
-								intp.print(svcref.getProperty(Constants.SERVICE_ID).toString());
-								intp.println("}"); //$NON-NLS-1$
-							} else {
-								if (bundle != null) {
-									intp.println(bundle.getLocation());
-								} else {
-									intp.println();
-								}
-							}
-
-							Throwable t = (Throwable) getException.invoke(logentry, null);
-							if (t != null) {
-								intp.printStackTrace(t);
-							}
-						}
-					}
-				} finally {
-					context.ungetService(logreaderRef);
-				}
-				return;
-			}
-		}
-
-		intp.println(ConsoleMsg.CONSOLE_LOGSERVICE_NOT_REGISTERED_MESSAGE);
-	}
-
-	/**
 	 *  Handle the gc command.  Perform a garbage collection.
 	 *
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
@@ -1142,6 +1015,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			if (permLocations != null)
 				for (int i = 0; i < permLocations.length; i++)
 					securityAdmin.setPermissions(permLocations[i], null);
+			ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
+			update.getConditionalPermissionInfos().clear();
+			update.commit();
 		}
 		// clear the permissions from conditional permission admin
 		if (securityAdmin != null)

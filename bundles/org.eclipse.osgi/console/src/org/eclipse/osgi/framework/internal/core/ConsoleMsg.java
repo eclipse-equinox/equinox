@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION;
 	public static String CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION;
-	public static String CONSOLE_HELP_LOG_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_EXTRAS_HEADER;
 	public static String CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION;
 	public static String CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION;
@@ -126,11 +125,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_PROVIDED_MESSAGE;
 	public static String CONSOLE_REQUIRED_BUNDLES_MESSAGE;
 	public static String CONSOLE_NO_REQUIRED_BUNDLES_MESSAGE;
-	public static String CONSOLE_DEBUG_MESSAGE;
-	public static String CONSOLE_INFO_MESSAGE;
-	public static String CONSOLE_WARNING_MESSAGE;
-	public static String CONSOLE_ERROR_MESSAGE;
-	public static String CONSOLE_LOGSERVICE_NOT_REGISTERED_MESSAGE;
 	public static String CONSOLE_TOTAL_MEMORY_MESSAGE;
 	public static String CONSOLE_FREE_MEMORY_BEFORE_GARBAGE_COLLECTION_MESSAGE;
 	public static String CONSOLE_FREE_MEMORY_AFTER_GARBAGE_COLLECTION_MESSAGE;
