@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.eclipse.equinox.ip
-Bundle-Version: 1.1.0.qualifier
+Bundle-Version: 1.1.100.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Description: Provides implementation of the Intial Provisioning service
  defined by OSGi specification release 4.
 Bundle-Activator: org.eclipse.equinox.internal.ip.impl.ProvisioningAgent
 DynamicImport-Package: org.osgi.service.permissionadmin; version="1.0"
 Import-Package: 
- javax.servlet;version="2.2",
- javax.servlet.http;version="2.2",
+ javax.servlet;version="2.1",
+ javax.servlet.http;version="2.1",
  org.eclipse.equinox.internal.util.ref;version="1.0",
  org.eclipse.equinox.internal.util.timer;version="1.0",
  org.osgi.framework;version="1.0",
