@@ -268,11 +268,11 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		SurrogateBundle surrogate = compositeBundle.getSurrogateBundle();
 		assertNotNull("Surrogate is null", surrogate); //$NON-NLS-1$
 		startCompositeBundle(compositeBundle, true);
+		assertFalse("Bundle should not be resolved", resolveBundle(compositeBundle.getCompositeFramework(), testClient));
 		try {
 			testClient.start();
-			fail("Expected start failure"); //$NON-NLS-1$
 		} catch (BundleException e) {
-			assertEquals("Unexpected exception type", BundleException.RESOLVE_ERROR, e.getType()); //$NON-NLS-1$
+			fail("Unexpected exception type", e); //$NON-NLS-1$
 		}
 
 		// put good value back
@@ -889,6 +889,7 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		linkManifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
 		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, "Bug258209.01", null, linkManifest, false, false); //$NON-NLS-1$
 		Bundle testTCCL = installIntoChild(compositeBundle.getCompositeFramework(), "test.tccl"); //$NON-NLS-1$
+		assertTrue("Bundle should be resolved", resolveBundle(compositeBundle.getCompositeFramework(), testTCCL));
 		try {
 			testTCCL.start();
 		} catch (BundleException e) {
@@ -945,5 +946,10 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		} catch (Exception e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
 		}
+	}
+
+	private boolean resolveBundle(Bundle framework, Bundle bundle) {
+		PackageAdmin pa = getPackageAdmin(framework);
+		return pa.resolveBundles(new Bundle[] {bundle});
 	}
 }
