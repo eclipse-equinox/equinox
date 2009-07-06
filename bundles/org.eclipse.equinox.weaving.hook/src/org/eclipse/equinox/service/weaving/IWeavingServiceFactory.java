@@ -21,7 +21,7 @@ import org.osgi.framework.Bundle;
  * this interface and register an implementation as an OSGi service under this
  * interface.
  * 
- * @author martinlippert
+ * @author Martin Lippert
  */
 public interface IWeavingServiceFactory {
 

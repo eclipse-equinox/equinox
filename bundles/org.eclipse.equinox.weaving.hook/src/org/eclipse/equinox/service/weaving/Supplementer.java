@@ -19,6 +19,15 @@ import java.util.Set;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 
+/**
+ * A supplementer object is created for every bundle that contains one or many
+ * of the supplementer headers in its header.
+ * 
+ * The corresponding supplementer object contains the information which headers
+ * the bundle defines and which bundles it supplements in the running system.
+ * 
+ * @author Martin Lippert
+ */
 public class Supplementer {
 
     private final ManifestElement[] supplementBundle;
@@ -33,6 +42,19 @@ public class Supplementer {
 
     private final ManifestElement[] supplementImporter;
 
+    /**
+     * Creates a supplementer object for the given bundle.
+     * 
+     * @param bundle The bundle that defines the supplementer headers
+     * @param bundleHost The host bundle of the supplementer bundle, if the
+     *            bundle is a fragment, otherwise null
+     * @param supplementBundle The parsed manifest headers defined for
+     *            Eclipse-SupplementBundle
+     * @param supplementImporter The parsed manifest headers defined for
+     *            Eclipse-SupplementImporter
+     * @param supplementExporter The parsed manifest headers defined for
+     *            Eclipse-SupplementExporter
+     */
     public Supplementer(final Bundle bundle, final Bundle bundleHost,
             final ManifestElement[] supplementBundle,
             final ManifestElement[] supplementImporter,
@@ -45,31 +67,77 @@ public class Supplementer {
         this.supplementedBundles = new HashSet<Bundle>();
     }
 
+    /**
+     * Add a bundle to the list of supplemented bundles
+     * 
+     * @param supplementedBundle The bundle that is supplemented by this
+     *            supplementer
+     */
     public void addSupplementedBundle(final Bundle supplementedBundle) {
         this.supplementedBundles.add(supplementedBundle);
     }
 
+    /**
+     * Gives information about which bundles are currently supplemented by this
+     * supplementer
+     * 
+     * @return The currently supplemented bundles
+     */
     public Bundle[] getSupplementedBundles() {
         return supplementedBundles.toArray(new Bundle[supplementedBundles
                 .size()]);
     }
 
+    /**
+     * Returns the bundle that defines the supplementer headers (this
+     * supplementer object belongs to)
+     * 
+     * @return The bundle object this supplementer belongs to
+     */
     public Bundle getSupplementerBundle() {
         return supplementer;
     }
 
+    /**
+     * Returns the host of the supplementer bundle, if it is a fragment,
+     * otherwise this returns the same as getSupplementerBundle()
+     * 
+     * @return The host bundle this supplementer belongs to
+     */
     public Bundle getSupplementerHost() {
         return supplementerHost;
     }
 
+    /**
+     * The symbolic name of the supplementer bundle
+     * 
+     * @return The symbolic name of the supplementer bundle
+     */
     public String getSymbolicName() {
         return supplementer.getSymbolicName();
     }
 
+    /**
+     * Provides information about whether a given bundle is supplemented by this
+     * supplementer or not
+     * 
+     * @param bundle The bundle that might be supplemented by this supplementer
+     * @return true, if the bundle is supplemented by this supplementer,
+     *         otherwise false
+     */
     public boolean isSupplemented(final Bundle bundle) {
         return supplementedBundles.contains(bundle);
     }
 
+    /**
+     * Checks if the given export-package header definitions matches the
+     * supplement-exporter definitions of this supplementer
+     * 
+     * @param exports The headers to check for matching against this
+     *            supplementer
+     * @return true, if this supplementer matches against the given
+     *         export-package headers
+     */
     public boolean matchesSupplementExporter(final ManifestElement[] exports) {
         boolean matches = false;
 
@@ -86,6 +154,15 @@ public class Supplementer {
         return matches;
     }
 
+    /**
+     * Checks if the given import-package header definitions matches the
+     * supplement-importer definitions of this supplementer
+     * 
+     * @param imports The headers to check for matching against this
+     *            supplementer
+     * @return true, if this supplementer matches against the given
+     *         import-package headers
+     */
     public boolean matchesSupplementImporter(final ManifestElement[] imports) {
         boolean matches = false;
 
@@ -102,6 +179,15 @@ public class Supplementer {
         return matches;
     }
 
+    /**
+     * Checks if the given bundle symbolic name definition matches the
+     * supplement-bundle definition of this supplementer
+     * 
+     * @param symbolicName The symbolic name of the bundle that shoudl be
+     *            checked
+     * @return true, if this supplementer matches against the given bundle
+     *         symbolic name
+     */
     public boolean matchSupplementer(final String symbolicName) {
         boolean matches = false;
 
@@ -115,6 +201,13 @@ public class Supplementer {
         return matches;
     }
 
+    /**
+     * Removes the given bundle from the set of supplemented bundles (that are
+     * supplemented by this supplementer)
+     * 
+     * @param supplementedBundle The bundle that is no longer supplemented by
+     *            this supplementer
+     */
     public void removeSupplementedBundle(final Bundle supplementedBundle) {
         this.supplementedBundles.remove(supplementedBundle);
     }
