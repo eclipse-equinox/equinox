@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,8 +26,15 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
 
 public class BaseClassLoadingHook implements ClassLoadingHook {
-	private static final String[] LIB_EXTENSIONS = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions", FrameworkProperties.getProperty(Constants.FRAMEWORK_LIBRARY_EXTENSIONS)), ","); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String[] LIB_EXTENSIONS;
 	private static final String[] EMPTY_STRINGS = new String[0];
+	static {
+		String[] libExtensions = ManifestElement.getArrayFromList(FrameworkProperties.getProperty("osgi.framework.library.extensions", FrameworkProperties.getProperty(Constants.FRAMEWORK_LIBRARY_EXTENSIONS)), ","); //$NON-NLS-1$ //$NON-NLS-2$
+		for (int i = 0; i < libExtensions.length; i++)
+			if (libExtensions[i].length() > 0 && libExtensions[i].charAt(0) != '.')
+				libExtensions[i] = '.' + libExtensions[i];
+		LIB_EXTENSIONS = libExtensions;
+	}
 
 	/*
 	 * Maps an already mapped library name to additional library file extensions.
