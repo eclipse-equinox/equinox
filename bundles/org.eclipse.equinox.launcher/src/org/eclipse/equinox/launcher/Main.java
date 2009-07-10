@@ -2483,19 +2483,19 @@ public class Main {
 		}
 
 		public PermissionCollection getPermissions(CodeSource codesource) {
-			if (contains(codesource.getLocation()))
+			if (contains(codesource))
 				return allPermissions;
 			return policy == null ? allPermissions : policy.getPermissions(codesource);
 		}
 
 		public PermissionCollection getPermissions(ProtectionDomain domain) {
-			if (contains(domain.getCodeSource().getLocation()))
+			if (contains(domain.getCodeSource()))
 				return allPermissions;
 			return policy == null ? allPermissions : policy.getPermissions(domain);
 		}
 
 		public boolean implies(ProtectionDomain domain, Permission permission) {
-			if (contains(domain.getCodeSource().getLocation()))
+			if (contains(domain.getCodeSource()))
 				return true;
 			return policy == null ? true : policy.implies(domain, permission);
 		}
@@ -2505,7 +2505,12 @@ public class Main {
 				policy.refresh();
 		}
 
-		private boolean contains(URL url) {
+		private boolean contains(CodeSource codeSource) {
+			if (codeSource == null)
+				return false;
+			URL url = codeSource.getLocation();
+			if (url == null)
+				return false;
 			// Check to see if this URL is in our set of URLs to give AllPermissions to.
 			for (int i = 0; i < urls.length; i++) {
 				// We do simple equals test here because we assume the URLs will be the same objects.
