@@ -273,7 +273,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		ServiceReference logRef = null;
 		try {
 			logRef = bundleContext.getServiceReference(LogService.class.getName());
-			logService = (LogService) bundleContext.getService(logRef);
+			if (logRef != null) {
+				logService = (LogService) bundleContext.getService(logRef);
+			}
 		} catch (Exception e) {
 			if (Activator.DEBUG) {
 				log.debug(NLS.bind(Messages.CANNOT_GET_LOGSERVICE, bundleContext.getBundle().getSymbolicName()), e);
