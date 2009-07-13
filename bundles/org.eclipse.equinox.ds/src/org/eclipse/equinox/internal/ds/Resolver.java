@@ -765,8 +765,8 @@ public final class Resolver implements WorkPerformer {
 				Activator.log.debug("Resolver.selectDynamicUnBind(): entered", null); //$NON-NLS-1$
 			}
 			Hashtable unbindTable = null; // ReferenceDescription:subTable
-			Hashtable unbindSubTable = null; // scp:sr
 			for (int i = 0; i < scps.size(); i++) {
+				Hashtable unbindSubTable = null; // scp:sr
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
 
 				if (scp.getState() < ServiceComponentProp.DISPOSING) {
