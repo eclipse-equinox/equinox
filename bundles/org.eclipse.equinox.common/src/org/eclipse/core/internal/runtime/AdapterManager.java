@@ -12,8 +12,7 @@
 package org.eclipse.core.internal.runtime;
 
 import java.util.*;
-import org.eclipse.core.runtime.IAdapterFactory;
-import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.core.runtime.*;
 
 /**
  * This class is the standard implementation of <code>IAdapterManager</code>. It provides
@@ -287,6 +286,8 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
 	 */
 	public Object getAdapter(Object adaptable, Class adapterType) {
+		Assert.isNotNull(adaptable);
+		Assert.isNotNull(adapterType);
 		IAdapterFactory factory = (IAdapterFactory) getFactories(adaptable.getClass()).get(adapterType.getName());
 		Object result = null;
 		if (factory != null)
@@ -300,6 +301,8 @@ public final class AdapterManager implements IAdapterManager {
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
 	 */
 	public Object getAdapter(Object adaptable, String adapterType) {
+		Assert.isNotNull(adaptable);
+		Assert.isNotNull(adapterType);
 		return getAdapter(adaptable, adapterType, false);
 	}
 
