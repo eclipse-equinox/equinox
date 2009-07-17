@@ -191,12 +191,18 @@ public class MRUBundleFileList implements EventDispatcher {
 	private void closeBundleFile(BundleFile toRemove) {
 		if (toRemove == null)
 			return;
-		/* queue to hold set of listeners */
-		ListenerQueue queue = new ListenerQueue(bundleFileCloserManager);
-		/* add bundle file closer to the queue */
-		queue.queueListeners(bundleFileCloser.entrySet(), this);
-		/* dispatch event to set of listeners */
-		queue.dispatchEventAsynchronous(0, toRemove);
+		try {
+			/* queue to hold set of listeners */
+			ListenerQueue queue = new ListenerQueue(bundleFileCloserManager);
+			/* add bundle file closer to the queue */
+			queue.queueListeners(bundleFileCloser.entrySet(), this);
+			/* dispatch event to set of listeners */
+			queue.dispatchEventAsynchronous(0, toRemove);
+		} catch (Throwable t) {
+			// we cannot propagate exceptions out of this method
+			// failing to queue a bundle close should not cause an error (bug 283797)
+			// TODO should consider logging
+		}
 	}
 
 	/**
