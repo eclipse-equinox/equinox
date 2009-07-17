@@ -88,18 +88,16 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	public ExportedPackage[] getExportedPackages(Bundle bundle) {
 		ArrayList allExports = new ArrayList();
-		synchronized (framework.bundles) {
-			FrameworkAdaptor adaptor = framework.adaptor;
-			if (adaptor == null)
-				return null;
-			ExportPackageDescription[] allDescriptions = adaptor.getState().getExportedPackages();
-			for (int i = 0; i < allDescriptions.length; i++) {
-				ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
-				if (exportedPackage == null)
-					continue;
-				if (bundle == null || exportedPackage.getBundle() == bundle)
-					allExports.add(exportedPackage);
-			}
+		FrameworkAdaptor adaptor = framework.adaptor;
+		if (adaptor == null)
+			return null;
+		ExportPackageDescription[] allDescriptions = adaptor.getState().getExportedPackages();
+		for (int i = 0; i < allDescriptions.length; i++) {
+			ExportedPackageImpl exportedPackage = createExportedPackage(allDescriptions[i]);
+			if (exportedPackage == null)
+				continue;
+			if (bundle == null || exportedPackage.getBundle() == bundle)
+				allExports.add(exportedPackage);
 		}
 		return (ExportedPackage[]) (allExports.size() == 0 ? null : allExports.toArray(new ExportedPackage[allExports.size()]));
 	}

@@ -31,7 +31,7 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.framework.CompositeBundle;
 import org.osgi.service.framework.CompositeBundleFactory;
 
-public class CompositeConfigurator implements HookConfigurator, AdaptorHook, ClassLoadingHook, CompositeBundleFactory, CompositeResolveHelperRegistry {
+public class CompositeConfigurator implements SynchronousBundleListener, HookConfigurator, AdaptorHook, ClassLoadingHook, CompositeBundleFactory, CompositeResolveHelperRegistry {
 
 	// the base adaptor
 	private BaseAdaptor adaptor;
@@ -39,6 +39,8 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 	private ServiceRegistration factoryService;
 	// the system bundle context
 	private BundleContext systemContext;
+	// The composite resolver helpers
+	private final Collection helpers = new ArrayList(0);
 
 	public void addHooks(HookRegistry hookRegistry) {
 		// this is an adaptor hook to register the composite factory and 
@@ -62,6 +64,8 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		this.systemContext = context;
+		context.addBundleListener(this);
+		addHelpers(context.getBundles());
 		// this is a composite resolve helper registry; add it to the resolver
 		((ResolverImpl) adaptor.getState().getResolver()).setCompositeResolveHelperRegistry(this);
 		// register this as the composite bundle factory
@@ -75,6 +79,8 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 		factoryService = null;
 		// stop any child frameworks than may still be running.
 		stopFrameworks();
+		context.removeBundleListener(this);
+		removeAllHelpers();
 	}
 
 	public void frameworkStopping(BundleContext context) {
@@ -142,10 +148,18 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 	}
 
 	public CompositeResolveHelper getCompositeResolveHelper(BundleDescription bundle) {
-		// EquinoxComposite bundles implement the resolver helper
-		Bundle composite = systemContext.getBundle(bundle.getBundleId());
-		// If we found a resolver helper bundle; return it
-		return (CompositeResolveHelper) ((!(composite instanceof CompositeResolveHelper)) ? null : composite);
+		// Composite bundles implement the resolver helper
+		synchronized (helpers) {
+			if (helpers.size() == 0)
+				return null;
+			for (Iterator iHelpers = helpers.iterator(); iHelpers.hasNext();) {
+				CompositeBase composite = (CompositeBase) iHelpers.next();
+				if (composite.getBundleId() == bundle.getBundleId())
+					// If we found a resolver helper bundle; return it
+					return composite;
+			}
+			return null;
+		}
 	}
 
 	public boolean addClassPathEntry(ArrayList cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
@@ -178,5 +192,48 @@ public class CompositeConfigurator implements HookConfigurator, AdaptorHook, Cla
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// nothing
 		return null;
+	}
+
+	private void addHelpers(Bundle[] bundles) {
+		synchronized (helpers) {
+			for (int i = 0; i < bundles.length; i++)
+				addHelper(bundles[i]);
+		}
+	}
+
+	private void addHelper(Bundle bundle) {
+		if (!(bundle instanceof CompositeBase))
+			return;
+		synchronized (helpers) {
+			if (!helpers.contains(bundle))
+				helpers.add(bundle);
+		}
+	}
+
+	private void removeHelper(Bundle bundle) {
+		if (!(bundle instanceof CompositeBase))
+			return;
+		synchronized (helpers) {
+			helpers.remove(bundle);
+		}
+	}
+
+	private void removeAllHelpers() {
+		synchronized (helpers) {
+			helpers.clear();
+		}
+	}
+
+	public void bundleChanged(BundleEvent event) {
+		switch (event.getType()) {
+			case BundleEvent.INSTALLED :
+				addHelper(event.getBundle());
+				break;
+			case BundleEvent.UNINSTALLED :
+				removeHelper(event.getBundle());
+				break;
+			default :
+				break;
+		}
 	}
 }
