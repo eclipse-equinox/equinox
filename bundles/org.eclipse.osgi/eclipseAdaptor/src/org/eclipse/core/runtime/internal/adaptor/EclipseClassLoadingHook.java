@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,12 +23,14 @@ import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.loader.*;
 import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.BaseClassLoadingHook;
 import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
 
 public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurator {
 	private static String[] NL_JAR_VARIANTS = buildNLJarVariants(EclipseEnvironmentInfo.getDefault().getNL());
 	private static boolean DEFINE_PACKAGES;
+	private final static boolean DEFINE_PACKAGE_ATTRIBUTES = !"noattributes".equals(FrameworkProperties.getProperty("osgi.classloader.define.packages")); //$NON-NLS-1$ //$NON-NLS-2$
 	private static String[] LIB_VARIANTS = buildLibraryVariants();
 	private Object pkgLock = new Object();
 
@@ -75,40 +77,44 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 
 		// get info about the package from the classpath entry's manifest.
 		String specTitle = null, specVersion = null, specVendor = null, implTitle = null, implVersion = null, implVendor = null;
-		ClasspathManifest cpm = (ClasspathManifest) classpathEntry.getUserObject(ClasspathManifest.KEY);
-		if (cpm == null) {
-			cpm = new ClasspathManifest();
-			classpathEntry.addUserObject(cpm);
-		}
-		Manifest mf = cpm.getManifest(classpathEntry, manager);
-		if (mf != null) {
-			Attributes mainAttributes = mf.getMainAttributes();
-			String dirName = packageName.replace('.', '/') + '/';
-			Attributes packageAttributes = mf.getAttributes(dirName);
-			boolean noEntry = false;
-			if (packageAttributes == null) {
-				noEntry = true;
-				packageAttributes = mainAttributes;
+
+		if (DEFINE_PACKAGE_ATTRIBUTES) {
+			ClasspathManifest cpm = (ClasspathManifest) classpathEntry.getUserObject(ClasspathManifest.KEY);
+			if (cpm == null) {
+				cpm = new ClasspathManifest();
+				classpathEntry.addUserObject(cpm);
 			}
-			specTitle = packageAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
-			if (specTitle == null && !noEntry)
-				specTitle = mainAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
-			specVersion = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-			if (specVersion == null && !noEntry)
-				specVersion = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
-			specVendor = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
-			if (specVendor == null && !noEntry)
-				specVendor = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
-			implTitle = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
-			if (implTitle == null && !noEntry)
-				implTitle = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
-			implVersion = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-			if (implVersion == null && !noEntry)
-				implVersion = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
-			implVendor = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
-			if (implVendor == null && !noEntry)
-				implVendor = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
+			Manifest mf = cpm.getManifest(classpathEntry, manager);
+			if (mf != null) {
+				Attributes mainAttributes = mf.getMainAttributes();
+				String dirName = packageName.replace('.', '/') + '/';
+				Attributes packageAttributes = mf.getAttributes(dirName);
+				boolean noEntry = false;
+				if (packageAttributes == null) {
+					noEntry = true;
+					packageAttributes = mainAttributes;
+				}
+				specTitle = packageAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
+				if (specTitle == null && !noEntry)
+					specTitle = mainAttributes.getValue(Attributes.Name.SPECIFICATION_TITLE);
+				specVersion = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
+				if (specVersion == null && !noEntry)
+					specVersion = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VERSION);
+				specVendor = packageAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
+				if (specVendor == null && !noEntry)
+					specVendor = mainAttributes.getValue(Attributes.Name.SPECIFICATION_VENDOR);
+				implTitle = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
+				if (implTitle == null && !noEntry)
+					implTitle = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_TITLE);
+				implVersion = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+				if (implVersion == null && !noEntry)
+					implVersion = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VERSION);
+				implVendor = packageAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
+				if (implVendor == null && !noEntry)
+					implVendor = mainAttributes.getValue(Attributes.Name.IMPLEMENTATION_VENDOR);
+			}
 		}
+
 		// The package is not defined yet define it before we define the class.
 		// TODO still need to seal packages.
 		synchronized (pkgLock) {
