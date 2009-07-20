@@ -91,6 +91,40 @@ int filter(const struct dirent *dir)
 	return 0;	/* exclude from scandir result */
 }
 
+#if defined (SOLARIS)
+/*
+ * A replacement for 
+ * 			scandir(const char *dir, struct dirent ***namelist, filter, alphasort);
+ * because scandir & alphasort don't exist on Solaris 9.
+ * Return the dirent->d_name that was sorted the highest according to strcoll, 
+ *            or NULL on error or if no entries matched the filter.
+ * The caller is responsible for freeing the returned string
+ */
+char * scan(const char * path) {
+	DIR *dir = NULL;
+	struct dirent * entry = NULL;
+	char * candidate = NULL;
+	
+	if ((dir = opendir(path)) == NULL) {
+		return NULL;
+	}
+
+	while ((entry = readdir(dir)) != NULL) {
+		if (filter(entry)) {
+			if (candidate == NULL) {
+				candidate = strdup(entry->d_name);
+			} else if (strcoll(candidate, entry->d_name) < 0) {
+				free(candidate);
+				candidate = strdup(entry->d_name);
+			}
+		}
+	}
+	closedir(dir);
+	
+	return candidate;
+}
+#endif
+
 /* Set the environmnent required by the SWT Browser widget to bind to Mozilla. 
  * The SWT Browser widget relies on Mozilla on Linux. The LD_LIBRARY_PATH
  * and the Mozilla environment variable MOZILLA_FIVE_HOME must point
@@ -172,6 +206,10 @@ void fixEnvForMozilla() {
 #else
 			char* dir = "/usr/lib/";
 #endif
+#if defined (SOLARIS)
+			char * name = scan(dir);
+			if (name != NULL) {
+#else
 			struct dirent **namelist;
 			int i;
 			int count = scandir(dir, &namelist, filter, alphasort);
@@ -181,13 +219,18 @@ void fixEnvForMozilla() {
 				 * with the latest version number.
 				 */
 				char* name = namelist [count - 1]->d_name;
+#endif
 				grePath = malloc (strlen(dir) + strlen(name) + 1);
 				strcpy(grePath, dir);
 				strcat(grePath, name);
+#if defined (SOLARIS)
+				free(name);
+#else
 				for (i = 0; i < count; i++) {
 					free(namelist [i]);
 				}
 				free(namelist);
+#endif
 			}
 
 			if (grePath == NULL)
