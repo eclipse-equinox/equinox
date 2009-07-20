@@ -31,9 +31,6 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	private final boolean allservices;
 	/** an objectClass required by the filter */
 	private final String objectClass;
-	/** Indicates if the last event was delivered because of a filter match */
-	/* @GuardedBy this */
-	private boolean matched;
 	/** indicates whether the listener has been removed */
 	private volatile boolean removed;
 
@@ -60,7 +57,6 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 				this.filter = filterstring.equals(getObjectClassFilterString(this.objectClass)) ? null : filterImpl;
 			}
 		}
-		this.matched = false;
 		this.removed = false;
 		this.listener = listener;
 		this.context = context;
@@ -85,6 +81,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			}
 			return; // no class in this event matches a required part of the filter; we do not need to deliver this event
 		}
+		// TODO could short circuit service.id filters as well since the id is constant for a registration.
 
 		if (!ServiceRegistry.hasListenServicePermission(event, context))
 			return;
@@ -94,27 +91,10 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 
-		checkfilter: {
-			if (filter == null) {
-				break checkfilter; // no filter, so deliver event
-			}
-			final boolean match = filter.match(reference);
-			synchronized (this) {
-				if (match) { // if the filter matches now
-					matched = true; // remember that the filter matched
-					break checkfilter; // filter matched, so deliver event
-				}
-				if (matched) { // if the filter does not match now, but it previously matched
-					matched = false; // remember that the filter no longer matches
-					if (event.getType() == ServiceEvent.MODIFIED) {
-						event = new ServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, reference);
-						break checkfilter; // deliver a MODIFIED_ENDMATCH event
-					}
-				}
-			}
-			return; // there is a filter and it does not match, so do NOT deliver the event
+		event = filterMatch(event);
+		if (event == null) {
+			return;
 		}
-
 		if (allservices || ServiceRegistry.isAssignableTo(context, reference)) {
 			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
@@ -123,6 +103,33 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 
 			listener.serviceChanged(event);
 		}
+	}
+
+	/**
+	 * Returns a service event that should be delivered to the listener based on the filter evaluation.
+	 * This may result in a service event of type MODIFIED_ENDMATCH.
+	 * 
+	 * @param delivered The service event delivered by the framework.
+	 * @return The event to be delivered or null if no event is to be delivered to the listener.
+	 */
+	private ServiceEvent filterMatch(ServiceEvent delivered) {
+		boolean modified = delivered.getType() == ServiceEvent.MODIFIED;
+		ServiceEvent event = modified ? ((ModifiedServiceEvent) delivered).getModifiedEvent() : delivered;
+		if (filter == null) {
+			return event;
+		}
+		ServiceReference reference = event.getServiceReference();
+		if (filter.match(reference)) {
+			return event;
+		}
+		if (modified) {
+			ModifiedServiceEvent modifiedServiceEvent = (ModifiedServiceEvent) delivered;
+			if (modifiedServiceEvent.matchPreviousProperties(filter)) {
+				return modifiedServiceEvent.getModifiedEndMatchEvent();
+			}
+		}
+		// does not match and did not match previous properties; do not send event
+		return null;
 	}
 
 	/**

@@ -703,11 +703,9 @@ public class ServiceRegistry {
 	/**
 	 * Deliver a ServiceEvent.
 	 * 
-	 * @param type ServiceEvent type.
-	 * @param reference Affected service reference.
+	 * @param event The ServiceEvent to deliver.
 	 */
-	void publishServiceEvent(int type, ServiceReferenceImpl reference) {
-		final ServiceEvent event = new ServiceEvent(type, reference);
+	void publishServiceEvent(final ServiceEvent event) {
 		if (System.getSecurityManager() == null) {
 			publishServiceEventPrivileged(event);
 		} else {

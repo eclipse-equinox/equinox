@@ -126,7 +126,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		/* must not hold the registrations lock when this event is published */
-		registry.publishServiceEvent(ServiceEvent.REGISTERED, ref);
+		registry.publishServiceEvent(new ServiceEvent(ServiceEvent.REGISTERED, ref));
 	}
 
 	/**
@@ -153,17 +153,19 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 */
 	public void setProperties(Dictionary props) {
 		final ServiceReferenceImpl ref;
+		final ServiceProperties previousProperties;
 		synchronized (registrationLock) {
 			if (state != REGISTERED) { /* in the process of unregistering */
 				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 			}
 
 			ref = reference; /* used to publish event outside sync */
+			previousProperties = this.properties;
 			this.properties = createProperties(props);
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		registry.publishServiceEvent(ServiceEvent.MODIFIED, ref);
+		registry.publishServiceEvent(new ModifiedServiceEvent(ref, previousProperties));
 	}
 
 	/**
@@ -217,7 +219,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		/* must not hold the registrationLock when this event is published */
-		registry.publishServiceEvent(ServiceEvent.UNREGISTERING, ref);
+		registry.publishServiceEvent(new ServiceEvent(ServiceEvent.UNREGISTERING, ref));
 
 		int size = 0;
 		BundleContextImpl[] users = null;

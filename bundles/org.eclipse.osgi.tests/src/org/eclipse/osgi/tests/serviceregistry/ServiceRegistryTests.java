@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	}
 
 	public void testServiceListener01() {
-		final String testMethodName = "testServiceListener01"; //$NON-NLS-1$
+		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = new Runnable() {
 			public void run() {
@@ -55,7 +55,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			}
 		};
 		try {
-			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectClass=java.lang.Runnable)(" + testMethodName + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
 			fail("filter error", e); //$NON-NLS-1$
 		}
@@ -123,7 +123,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	}
 
 	public void testServiceListener02() {
-		final String testMethodName = "testServiceListener02"; //$NON-NLS-1$
+		final String testMethodName = getName();
 		// simple ServiceListener test
 		Runnable runIt = new Runnable() {
 			public void run() {
@@ -150,7 +150,7 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 			}
 		};
 		try {
-			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectClass=java.lang.Runnable)(" + testMethodName + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
 			fail("filter error", e); //$NON-NLS-1$
 		}
@@ -217,8 +217,138 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testServiceListener03() {
+		final String testMethodName = getName();
+		// simple ServiceListener test
+		Runnable runIt = new Runnable() {
+			public void run() {
+				// nothing
+			}
+		};
+		final int[] results = new int[] {0, 0, 0, 0};
+		ServiceListener testListener = new ServiceListener() {
+			public void serviceChanged(ServiceEvent event) {
+				switch (event.getType()) {
+					case ServiceEvent.REGISTERED :
+						results[0]++;
+						break;
+					case ServiceEvent.MODIFIED :
+						results[1]++;
+						break;
+					case ServiceEvent.MODIFIED_ENDMATCH :
+						results[2]++;
+						break;
+					case ServiceEvent.UNREGISTERING :
+						results[3]++;
+						break;
+				}
+			}
+		};
+		try {
+			OSGiTestsActivator.getContext().addServiceListener(testListener, "(&(objectclass=java.lang.Runnable)(" + testMethodName.toLowerCase() + "=true))"); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (InvalidSyntaxException e) {
+			fail("filter error", e); //$NON-NLS-1$
+		}
+		ServiceRegistration reg1 = null;
+		ServiceRegistration reg2 = null;
+		try {
+			// register service which does not match
+			Hashtable props = new Hashtable();
+			props.put(testMethodName, Boolean.FALSE);
+			reg1 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+			reg2 = OSGiTestsActivator.getContext().registerService(Runnable.class.getName(), runIt, props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+
+			// change props to still not match
+			props.put("testChangeProp", Boolean.FALSE); //$NON-NLS-1$
+			reg1.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+			reg2.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+
+			// change props to match
+			props.put(testMethodName, Boolean.TRUE);
+			reg1.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 1, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+			reg2.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 1, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+
+			// change props to still match
+			props.put("testChangeProp", Boolean.TRUE); //$NON-NLS-1$
+			reg1.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 1, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+			reg2.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 1, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+
+			// change props to no longer match
+			props.put(testMethodName, Boolean.FALSE);
+			reg1.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 1, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+			reg2.setProperties(props);
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 1, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+
+			// unregister
+			reg1.unregister();
+			reg1 = null;
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+			reg2.unregister();
+			reg2 = null;
+			assertEquals("Did get ServiceEvent.REGISTERED", 0, results[0]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED", 0, results[1]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.MODIFIED_ENDMATCH", 0, results[2]); //$NON-NLS-1$
+			assertEquals("Did get ServiceEvent.UNREGISTERING", 0, results[3]); //$NON-NLS-1$
+			clearResults(results);
+		} finally {
+			OSGiTestsActivator.getContext().removeServiceListener(testListener);
+			if (reg1 != null)
+				reg1.unregister();
+			if (reg2 != null)
+				reg2.unregister();
+		}
+	}
+
 	public void testServiceOrdering01() {
-		final String testMethodName = "testServiceOrdering01"; //$NON-NLS-1$
+		final String testMethodName = getName();
 		// test that getServiceReference returns the proper service
 		Runnable runIt = new Runnable() {
 			public void run() {
@@ -328,5 +458,10 @@ public class ServiceRegistryTests extends AbstractBundleTests {
 	private void clearResults(boolean[] results) {
 		for (int i = 0; i < results.length; i++)
 			results[i] = false;
+	}
+
+	private void clearResults(int[] results) {
+		for (int i = 0; i < results.length; i++)
+			results[i] = 0;
 	}
 }
