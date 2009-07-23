@@ -38,7 +38,7 @@ public class FileBundleEntry extends BundleEntry {
 	FileBundleEntry(File file, String name) {
 		this.file = file;
 		boolean endsInSlash = name.length() > 0 && name.charAt(name.length() - 1) == '/';
-		if (file.isDirectory()) {
+		if (BundleFile.secureAction.isDirectory(file)) {
 			if (!endsInSlash)
 				name += '/';
 		} else if (endsInSlash)
