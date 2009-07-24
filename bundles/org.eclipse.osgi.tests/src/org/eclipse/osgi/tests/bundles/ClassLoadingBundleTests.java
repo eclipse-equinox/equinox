@@ -1365,6 +1365,30 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testArrayTypeLoad() {
+		doTestArrayTypeLoad("[B"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[C"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[D"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[F"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[I"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[J"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[S"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[Z"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[Lorg.eclipse.osgi.tests.bundles.ArrayTest;"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[[D"); //$NON-NLS-1$
+		doTestArrayTypeLoad("[[Lorg.eclipse.osgi.tests.bundles.ArrayTest;"); //$NON-NLS-1$
+	}
+
+	private void doTestArrayTypeLoad(String name) {
+		try {
+			Class arrayType = OSGiTestsActivator.getContext().getBundle().loadClass(name);
+			assertNotNull("Null class", arrayType); //$NON-NLS-1$
+			assertTrue("Class is not an array: " + arrayType, arrayType.isArray()); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+	}
+
 	private String readURL(URL url) {
 		StringBuffer sb = new StringBuffer();
 		try {

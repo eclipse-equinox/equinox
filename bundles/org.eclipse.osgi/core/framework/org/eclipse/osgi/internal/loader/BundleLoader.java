@@ -318,7 +318,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
 	final public Class loadClass(String name) throws ClassNotFoundException {
-		return createClassLoader().loadClass(name);
+		BundleClassLoader bcl = createClassLoader();
+		// The instanceof check here is just to be safe.  The javadoc contract stated in BundleClassLoader
+		// mandate that BundleClassLoaders be an instance of ClassLoader.
+		if (name.length() > 0 && name.charAt(0) == '[' && bcl instanceof ClassLoader)
+			return Class.forName(name, false, (ClassLoader) bcl);
+		return bcl.loadClass(name);
 	}
 
 	/**
