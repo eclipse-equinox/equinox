@@ -31,6 +31,7 @@ public class WorkThread implements Runnable, TimerListener {
 	private SCRManager mgr;
 	private Object objectToProcess;
 	boolean running = true;
+	Thread processingThread;
 
 	int waiting = 0;
 
@@ -43,6 +44,7 @@ public class WorkThread implements Runnable, TimerListener {
 	 * ManagedService(Factories) are informed for the event.
 	 */
 	public void run() {
+		processingThread = Thread.currentThread();
 		do {
 			try {
 				Queue queue = mgr.queue;
@@ -97,6 +99,7 @@ public class WorkThread implements Runnable, TimerListener {
 			}
 		} while (running);
 		objectToProcess = null;
+		processingThread = null;
 	}
 
 	public void timer(int event) {

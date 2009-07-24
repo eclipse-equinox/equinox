@@ -629,19 +629,24 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			}
 			// store the components in the cache
 			bundleToServiceComponents.put(bundle, components.clone());
-			// this will also resolve the component dependencies!
-			enqueueWork(this, ENABLE_COMPONENTS, components, false);
-			synchronized (components) {
-				long startTime = System.currentTimeMillis();
-				try {
-					do {
-						components.wait(1000);
-					} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
-					if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
-						Activator.log.warning(NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
+			if (workThread != null && workThread.processingThread == Thread.currentThread()) {
+				//we are in the queue thread already. Processing synchronously the job
+				resolver.enableComponents(components);
+			} else {
+				// this will also resolve the component dependencies!
+				enqueueWork(this, ENABLE_COMPONENTS, components, false);
+				synchronized (components) {
+					long startTime = System.currentTimeMillis();
+					try {
+						do {
+							components.wait(1000);
+						} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
+						if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
+							Activator.log.warning(NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
+						}
+					} catch (InterruptedException e) {
+						//do nothing
 					}
-				} catch (InterruptedException e) {
-					//do nothing
 				}
 			}
 		}
