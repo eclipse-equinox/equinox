@@ -97,7 +97,7 @@ public class FileStorage extends ComponentStorage {
 
 			} else {
 				long dbLastModified = Long.parseLong(lastModifiedValue);
-				if (lastModified > dbLastModified) {
+				if (lastModified != dbLastModified) {
 					components = parseXMLDeclaration(bundle, dsHeader);
 					if (components != null && components.size() != 0) {
 						data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
@@ -215,7 +215,7 @@ public class FileStorage extends ComponentStorage {
 	protected long getLastModifiedTimestamp(Bundle bundle) {
 		if (bundle == null)
 			return 0;
-		long result = Long.MAX_VALUE;
+		long result = 0;
 		ManifestElement[] elements = parseManifestHeader(bundle);
 		for (int i = 0; i < elements.length; i++) {
 			URL componentURL = bundle.getEntry(elements[i].getValue());
