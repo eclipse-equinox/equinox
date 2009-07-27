@@ -285,7 +285,7 @@ public final class URIUtil {
 				//URL encodes UNC path with two slashes, but URI uses four (see bug 207103)
 				pathString = ensureUNCPath(pathString);
 			}
-			return new URI(SCHEME_FILE, pathString, null);
+			return new URI(SCHEME_FILE, null, pathString, null);
 		}
 		try {
 			return new URI(url.toExternalForm());
