@@ -95,7 +95,7 @@ public class StaticDataReader {
 
 		if (in != null) {
 			try {
-				BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "8859_1")); //$NON-NLS-1$
+				BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "ISO-8859-1")); //$NON-NLS-1$
 				while (true) {
 					String line = rdr.readLine();
 					if (line == null) /* EOF */
@@ -134,7 +134,7 @@ public class StaticDataReader {
 
 		if (in != null) {
 			try {
-				BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "8859_1")); //$NON-NLS-1$
+				BufferedReader rdr = new BufferedReader(new InputStreamReader(in, "ISO-8859-1")); //$NON-NLS-1$
 				while (true) {
 					String line = rdr.readLine();
 					if (line == null) /* EOF */
