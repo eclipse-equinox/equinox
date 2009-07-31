@@ -11,17 +11,19 @@
 
 package org.eclipse.osgi.tests.debugoptions;
 
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
-import junit.framework.*;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.framework.debug.FrameworkDebugTraceEntry;
-import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.osgi.service.debug.DebugOptionsListener;
+import org.eclipse.osgi.service.debug.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public class DebugOptionsTestCase extends TestCase {
+public class DebugOptionsTestCase extends CoreTest {
 	public static Test suite() {
 		return new TestSuite(DebugOptionsTestCase.class);
 	}
@@ -105,7 +107,7 @@ public class DebugOptionsTestCase extends TestCase {
 			String bundleName = OSGiTestsActivator.getContext().getBundle().getSymbolicName();
 			String optionPath = "/debug"; //$NON-NLS-1$
 			String message = "Test message"; //$NON-NLS-1$
-			Class tracingClass = this.getClass();
+			String tracingClass = this.getClass().getName();
 			return new FrameworkDebugTraceEntry(bundleName, optionPath, message, tracingClass);
 		}
 	}
@@ -174,6 +176,96 @@ public class DebugOptionsTestCase extends TestCase {
 		assertTrue("Another listener did not get called", anotherListener.gotCalled()); //$NON-NLS-1$
 
 		anotherReg.unregister();
+	}
+
+	public void testTraceFile01() {
+		if (debugOptions.isDebugEnabled())
+			return; // cannot test
+		debugOptions.setDebugEnabled(true);
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
+		debugOptions.setFile(traceFile);
+
+		DebugTrace wrapped = debugOptions.newDebugTrace(getName(), TestDebugTrace.class);
+		TestDebugTrace debugTrace = new TestDebugTrace(wrapped);
+		debugTrace.trace("/debug", "testing 1"); //$NON-NLS-1$ //$NON-NLS-2$
+		debugTrace.trace("/debug", "testing 2"); //$NON-NLS-1$ //$NON-NLS-2$
+		debugTrace.trace("/notset", "testing 3"); //$NON-NLS-1$ //$NON-NLS-2$
+		String[][] traceOutput = readTraceFile(traceFile);
+		assertEquals("Wrong number of trace entries", 2, traceOutput.length); //$NON-NLS-1$
+		assertEquals("Wrong entry length", 8, traceOutput[0].length); //$NON-NLS-1$
+		assertEquals("Wrong message", "testing 1", traceOutput[0][7]); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Wrong entry length", 8, traceOutput[1].length); //$NON-NLS-1$
+		assertEquals("Wrong message", "testing 2", traceOutput[1][7]); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private String[][] readTraceFile(File traceFile) {
+		ArrayList result = new ArrayList();
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(traceFile));
+			for (String line = br.readLine(); line != null; line = br.readLine()) {
+				if (line.startsWith("#")) //$NON-NLS-1$
+					continue;
+				StringTokenizer st = new StringTokenizer(line, "|"); //$NON-NLS-1$
+				int count = st.countTokens();
+				String[] entry = new String[count];
+				for (int i = 0; i < entry.length; i++)
+					entry[i] = st.nextToken().trim();
+				result.add(entry);
+			}
+		} catch (IOException e) {
+			fail("Failed to read trace file", e); //$NON-NLS-1$
+		} finally {
+			if (br != null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					// nothing;
+				}
+		}
+		return (String[][]) result.toArray(new String[result.size()][]);
+	}
+
+	static class TestDebugTrace implements DebugTrace {
+		private final DebugTrace wrapped;
+
+		public TestDebugTrace(DebugTrace wrapped) {
+			this.wrapped = wrapped;
+		}
+
+		public void trace(String option, String message) {
+			wrapped.trace(option, message);
+		}
+
+		public void trace(String option, String message, Throwable error) {
+			wrapped.trace(option, message, error);
+		}
+
+		public void traceDumpStack(String option) {
+			wrapped.traceDumpStack(option);
+		}
+
+		public void traceEntry(String option) {
+			wrapped.traceEntry(option);
+		}
+
+		public void traceEntry(String option, Object methodArgument) {
+			wrapped.traceEntry(option, methodArgument);
+		}
+
+		public void traceEntry(String option, Object[] methodArguments) {
+			wrapped.traceEntry(option, methodArguments);
+		}
+
+		public void traceExit(String option) {
+			wrapped.traceExit(option);
+		}
+
+		public void traceExit(String option, Object result) {
+			wrapped.traceExit(option, result);
+		}
 	}
 
 	class TestDebugOptionsListener implements DebugOptionsListener {

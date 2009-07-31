@@ -20,82 +20,78 @@ import org.eclipse.osgi.service.debug.DebugTrace;
 
 /**
  * The DebugTrace implementation for Eclipse.
- * <p>
- * Clients may extend this class.
- * </p>
- * @since 3.5
  */
-public class EclipseDebugTrace implements DebugTrace {
+class EclipseDebugTrace implements DebugTrace {
 
 	/** The system property used to specify size a trace file can grow before it is rotated */
-	public static final String PROP_TRACE_SIZE_MAX = "eclipse.trace.size.max"; //$NON-NLS-1$
+	private static final String PROP_TRACE_SIZE_MAX = "eclipse.trace.size.max"; //$NON-NLS-1$
 	/** The system property used to specify the maximum number of backup trace files to use */
-	public static final String PROP_TRACE_FILE_MAX = "eclipse.trace.backup.max"; //$NON-NLS-1$
+	private static final String PROP_TRACE_FILE_MAX = "eclipse.trace.backup.max"; //$NON-NLS-1$
 	/** The trace message for a thread stack dump */
-	protected final static String MESSAGE_THREAD_DUMP = "Thread Stack dump: "; //$NON-NLS-1$
+	private final static String MESSAGE_THREAD_DUMP = "Thread Stack dump: "; //$NON-NLS-1$
 	/** The trace message for a method completing with a return value */
-	protected final static String MESSAGE_EXIT_METHOD_WITH_RESULTS = "Exiting method with result: "; //$NON-NLS-1$
+	private final static String MESSAGE_EXIT_METHOD_WITH_RESULTS = "Exiting method with result: "; //$NON-NLS-1$
 	/** The trace message for a method completing with no return value */
-	protected final static String MESSAGE_EXIT_METHOD_NO_RESULTS = "Exiting method with a void return"; //$NON-NLS-1$
+	private final static String MESSAGE_EXIT_METHOD_NO_RESULTS = "Exiting method with a void return"; //$NON-NLS-1$
 	/** The trace message for a method starting with a set of arguments */
-	protected final static String MESSAGE_ENTER_METHOD_WITH_PARAMS = "Entering method with parameters: ("; //$NON-NLS-1$
+	private final static String MESSAGE_ENTER_METHOD_WITH_PARAMS = "Entering method with parameters: ("; //$NON-NLS-1$
 	/** The trace message for a method starting with no arguments */
-	protected final static String MESSAGE_ENTER_METHOD_NO_PARAMS = "Entering method with no parameters"; //$NON-NLS-1$
+	private final static String MESSAGE_ENTER_METHOD_NO_PARAMS = "Entering method with no parameters"; //$NON-NLS-1$
 	/** The version attribute written to the header of the trace file */
-	protected final static String TRACE_FILE_VERSION_COMMENT = "version: "; //$NON-NLS-1$
+	private final static String TRACE_FILE_VERSION_COMMENT = "version: "; //$NON-NLS-1$
 	/** The version value written to the header of the trace file */
-	protected final static String TRACE_FILE_VERSION = "1.0"; //$NON-NLS-1$
+	private final static String TRACE_FILE_VERSION = "1.0"; //$NON-NLS-1$
 	/** The new session identifier to be written whenever a new session starts */
-	protected final static String TRACE_NEW_SESSION = "!SESSION "; //$NON-NLS-1$
+	private final static String TRACE_NEW_SESSION = "!SESSION "; //$NON-NLS-1$
 	/** The date attribute written to the header of the trace file to show when this file was created */
-	protected final static String TRACE_FILE_DATE = "Time of creation: "; //$NON-NLS-1$
+	private final static String TRACE_FILE_DATE = "Time of creation: "; //$NON-NLS-1$
 	/** Trace date formatter using the pattern: yyyy-MM-dd HH:mm:ss.SSS  */
-	protected final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
+	private final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 	/** The comment character used by the trace file */
-	protected final static String TRACE_COMMENT = "#"; //$NON-NLS-1$
+	private final static String TRACE_COMMENT = "#"; //$NON-NLS-1$
 	/** The delimiter used to separate trace elements such as the time stamp, message, etc */
-	protected final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$
+	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$
 	/** OS-specific line separator */
-	protected static final String LINE_SEPARATOR;
+	private static final String LINE_SEPARATOR;
 	static {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
 	/** The value written to the trace file if a null object is being traced */
-	public final static String NULL_VALUE = "<null>"; //$NON-NLS-1$
+	private final static String NULL_VALUE = "<null>"; //$NON-NLS-1$
 	/**  */
 	private final static SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	/** A lock object used to synchronize access to the trace file */
-	protected final static Object writeLock = new Object();
+	private final static Object writeLock = new Object();
 
 	/******************* Tracing file attributes **************************/
 	/** The default size a trace file can grow before it is rotated */
-	public static final int DEFAULT_TRACE_FILE_SIZE = 1000; // The value is in KB.
+	private static final int DEFAULT_TRACE_FILE_SIZE = 1000; // The value is in KB.
 	/** The default number of backup trace files */
-	public static final int DEFAULT_TRACE_FILES = 10;
+	private static final int DEFAULT_TRACE_FILES = 10;
 	/** The minimum size limit for trace file rotation */
-	public static final int DEFAULT_TRACE_FILE_MIN_SIZE = 10;
+	private static final int DEFAULT_TRACE_FILE_MIN_SIZE = 10;
 	/** The extension used for log files */
-	public static final String TRACE_FILE_EXTENSION = ".trace"; //$NON-NLS-1$
+	private static final String TRACE_FILE_EXTENSION = ".trace"; //$NON-NLS-1$
 	/** The extension markup to use for backup log files*/
-	public static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
+	private static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
 	/** The maximum size that a trace file should grow (0 = unlimited) */
-	protected int maxTraceFileSize = DEFAULT_TRACE_FILE_SIZE; // The value is in KB.
+	private int maxTraceFileSize = DEFAULT_TRACE_FILE_SIZE; // The value is in KB.
 	/** The maximum number of trace files that should be saved */
-	protected int maxTraceFiles = DEFAULT_TRACE_FILES;
+	private int maxTraceFiles = DEFAULT_TRACE_FILES;
 	/** The index of the currently backed-up trace file */
-	protected int backupTraceFileIndex = 0;
+	private int backupTraceFileIndex = 0;
 
 	/** An optional argument to specify the name of the class used by clients to trace messages.  If no trace class is specified
 	 * then the class calling this API is assumed to be the class being traced.
 	*/
-	protected Class traceClass = null;
+	private String traceClass = null;
 	/** The symbolic name of the bundle being traced */
-	protected String bundleSymbolicName = null;
+	private String bundleSymbolicName = null;
 	/** A flag to determine if the message being written is done to a new file (i.e. should the header information be written) */
-	protected static boolean newSession = true;
+	static boolean newSession = true;
 	/** DebugOptions are used to determine if the specified bundle symbolic name + option-path has debugging enabled */
-	protected DebugOptions debugOptions = null;
+	private DebugOptions debugOptions = null;
 
 	/**
 	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
@@ -119,7 +115,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 */
 	public EclipseDebugTrace(final String bundleSymbolicName, final DebugOptions debugOptions, final Class traceClass) {
 
-		this.traceClass = traceClass;
+		this.traceClass = traceClass != null ? traceClass.getName() : null;
 		this.debugOptions = debugOptions;
 		this.bundleSymbolicName = bundleSymbolicName;
 		readLogProperties();
@@ -131,7 +127,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param optionPath The <i>option-path</i>
 	 * @return Returns true if debugging is enabled for the specified option-path on this bundle; Otherwise false.
 	 */
-	protected final boolean isDebuggingEnabled(final String optionPath) {
+	private final boolean isDebuggingEnabled(final String optionPath) {
 		if (optionPath == null)
 			return true;
 		boolean debugEnabled = false;
@@ -279,7 +275,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 *            The array of StackTraceElement objects
 	 * @return A String of the stack dump produced by the list of elements
 	 */
-	protected final String convertStackTraceElementsToString(final StackTraceElement[] elements) {
+	private final String convertStackTraceElementsToString(final StackTraceElement[] elements) {
 
 		final StringBuffer buffer = new StringBuffer();
 		if (elements != null) {
@@ -303,7 +299,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * 
 	 * @param entry The FrameworkTraceEntry to write to the log file.
 	 */
-	protected void writeRecord(final FrameworkDebugTraceEntry entry) {
+	private void writeRecord(final FrameworkDebugTraceEntry entry) {
 
 		if (entry != null) {
 			synchronized (EclipseDebugTrace.writeLock) {
@@ -338,7 +334,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	/**
 	 * Reads the PROP_TRACE_SIZE_MAX and PROP_TRACE_FILE_MAX properties.
 	 */
-	protected void readLogProperties() {
+	private void readLogProperties() {
 
 		String newMaxTraceFileSize = secureAction.getProperty(PROP_TRACE_SIZE_MAX);
 		if (newMaxTraceFileSize != null) {
@@ -366,7 +362,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param traceFile The tracing file
 	 * @return false if an error occurred trying to rotate the trace file
 	 */
-	protected boolean checkTraceFileSize(final File traceFile) {
+	private boolean checkTraceFileSize(final File traceFile) {
 
 		// 0 file size means there is no size limit
 		boolean isBackupOK = true;
@@ -433,7 +429,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param comment the comment to be written to the trace file
 	 * @throws IOException If an error occurs while writing the comment
 	 */
-	protected void writeComment(final Writer traceWriter, final String comment) throws IOException {
+	private void writeComment(final Writer traceWriter, final String comment) throws IOException {
 
 		StringBuffer commentText = new StringBuffer(EclipseDebugTrace.TRACE_COMMENT);
 		commentText.append(" "); //$NON-NLS-1$
@@ -447,7 +443,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * 
 	 * @return A formatted time stamp based on the {@link EclipseDebugTrace#TRACE_FILE_DATE_FORMATTER} formatter
 	 */
-	protected final String getFormattedDate() {
+	private final String getFormattedDate() {
 
 		return this.getFormattedDate(System.currentTimeMillis());
 	}
@@ -457,7 +453,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * 
 	 * @return A formatted time stamp based on the {@link EclipseDebugTrace#TRACE_FILE_DATE_FORMATTER} formatter
 	 */
-	protected final String getFormattedDate(long timestamp) {
+	private final String getFormattedDate(long timestamp) {
 
 		return EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(timestamp));
 	}
@@ -468,7 +464,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param traceWriter the trace writer
 	 * @throws IOException If an error occurs while writing this session information 
 	 */
-	protected void writeSession(final Writer traceWriter) throws IOException {
+	private void writeSession(final Writer traceWriter) throws IOException {
 
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate());
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
@@ -488,7 +484,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param entry The trace entry object to write to the trace file
 	 * @throws IOException If an error occurs while writing this message
 	 */
-	protected void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
+	private void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
 
 		// format the trace entry
 		StringBuffer message = new StringBuffer(entry.getThreadName());
@@ -537,7 +533,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param output an OutputStream to use for the Writer
 	 * @return A Writer for the given OutputStream
 	 */
-	protected Writer logForStream(OutputStream output) {
+	private Writer logForStream(OutputStream output) {
 
 		try {
 			return new BufferedWriter(new OutputStreamWriter(output, "UTF-8")); //$NON-NLS-1$
@@ -553,7 +549,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * @param traceFile The tracing file
 	 * @return Returns a new Writer object  
 	 */
-	protected Writer openWriter(final File traceFile) {
+	private Writer openWriter(final File traceFile) {
 
 		Writer traceWriter = null;
 		if (traceFile != null) {
@@ -573,7 +569,7 @@ public class EclipseDebugTrace implements DebugTrace {
 	 * 
 	 * @param traceWriter The trace writer
 	 */
-	protected void closeWriter(Writer traceWriter) {
+	private void closeWriter(Writer traceWriter) {
 
 		if (traceWriter != null) {
 			try {

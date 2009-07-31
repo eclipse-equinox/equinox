@@ -75,7 +75,7 @@ public class FrameworkDebugTraceEntry {
 	 * @param traceClass
 	 *            The class that calls the trace API
 	 */
-	public FrameworkDebugTraceEntry(final String bundleSymbolicName, final String optionPath, final String message, final Class traceClass) {
+	public FrameworkDebugTraceEntry(final String bundleSymbolicName, final String optionPath, final String message, final String traceClass) {
 		this(bundleSymbolicName, optionPath, message, null, traceClass);
 	}
 
@@ -93,7 +93,7 @@ public class FrameworkDebugTraceEntry {
 	 * @param traceClass
 	 *            The class that calls the trace API 
 	 */
-	public FrameworkDebugTraceEntry(String bundleSymbolicName, final String optionPath, final String message, final Throwable error, final Class traceClass) {
+	public FrameworkDebugTraceEntry(String bundleSymbolicName, final String optionPath, final String message, final Throwable error, final String traceClass) {
 		threadName = Thread.currentThread().getName();
 		if (optionPath == null) {
 			this.optionPath = FrameworkDebugTraceEntry.DEFAULT_OPTION_PATH;
@@ -122,7 +122,7 @@ public class FrameworkDebugTraceEntry {
 				 * stack element is not that class, then we assume this stack element
 				 * is the caller of the trace API. 
 				 */
-				if ((traceClass == null) || !fullClassName.equals(traceClass.getName())) {
+				if ((traceClass == null) || !fullClassName.equals(traceClass)) {
 					determineClassName = stackElements[i].getClassName();
 					determineMethodName = stackElements[i].getMethodName();
 					determineLineNumber = stackElements[i].getLineNumber();
