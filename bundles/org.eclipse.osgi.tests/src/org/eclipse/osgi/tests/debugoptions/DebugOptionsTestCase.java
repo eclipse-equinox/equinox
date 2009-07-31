@@ -14,6 +14,7 @@ package org.eclipse.osgi.tests.debugoptions;
 import java.util.*;
 import java.util.Map.Entry;
 import junit.framework.*;
+import org.eclipse.osgi.framework.debug.FrameworkDebugTraceEntry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -45,6 +46,7 @@ public class DebugOptionsTestCase extends TestCase {
 	protected void tearDown() throws Exception {
 		if (debugOptions == null)
 			return;
+		debugOptions.setDebugEnabled(false);
 		debugOptions = null;
 		OSGiTestsActivator.getContext().ungetService(ref);
 		if (reg != null)
@@ -53,6 +55,59 @@ public class DebugOptionsTestCase extends TestCase {
 
 	public void testRegistration01() {
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
+	}
+
+	/**
+	 * Test that a new {@link FrameworkDebugTraceEntry} object created without a trace class
+	 * has 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' as the class name and
+	 * 'testTracingEntry01' as the method name that it determined as the caller of it.
+	 * 
+	 * This test mimics the tracing framework to ensure that the correct class name and method name
+	 * are returned and written to the trace file.
+	 */
+	public void testTracingEntry01() {
+
+		String bundleName = OSGiTestsActivator.getContext().getBundle().getSymbolicName();
+		String optionPath = "/debug"; //$NON-NLS-1$
+		String message = "Test message"; //$NON-NLS-1$
+		FrameworkDebugTraceEntry traceEntry = new FrameworkDebugTraceEntry(bundleName, optionPath, message, null);
+		String correctClassName = "org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase"; //$NON-NLS-1$
+		String correctMethodName = "testTracingEntry01"; //$NON-NLS-1$
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$  
+		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
+	}
+
+	/**
+	 * Test that a new {@link FrameworkDebugTraceEntry} object created with a trace class
+	 * of 'org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase' has the correct class name and
+	 * method name of the caller.
+	 * 
+	 * This test mimics the tracing framework to ensure that the correct class name and method name
+	 * are returned and written to the trace file.
+	 */
+	public void testTracingEntry02() {
+
+		String correctClassName = Runner1.class.getName();
+		String correctMethodName = "run"; //$NON-NLS-1$
+		FrameworkDebugTraceEntry traceEntry = new Runner1().run();
+		assertEquals("The class calling the trace API does not match the expected value.", correctClassName, traceEntry.getClassName()); //$NON-NLS-1$  
+		assertEquals("The method calling the trace API does not match the expected value.", correctMethodName, traceEntry.getMethodName()); //$NON-NLS-1$
+	}
+
+	static class Runner1 {
+		public FrameworkDebugTraceEntry run() {
+			return new Runner2().run();
+		}
+	}
+
+	static class Runner2 {
+		public FrameworkDebugTraceEntry run() {
+			String bundleName = OSGiTestsActivator.getContext().getBundle().getSymbolicName();
+			String optionPath = "/debug"; //$NON-NLS-1$
+			String message = "Test message"; //$NON-NLS-1$
+			Class tracingClass = this.getClass();
+			return new FrameworkDebugTraceEntry(bundleName, optionPath, message, tracingClass);
+		}
 	}
 
 	public void testDyanmicEnablement01() {
@@ -67,7 +122,6 @@ public class DebugOptionsTestCase extends TestCase {
 		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
 		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
-		debugOptions.setDebugEnabled(false);
 	}
 
 	public void testDyanmicEnablement02() {
@@ -82,7 +136,6 @@ public class DebugOptionsTestCase extends TestCase {
 		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
 		assertNotNull("Should find bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
-		debugOptions.setDebugEnabled(false);
 	}
 
 	public void testDyanmicEnablement03() {
@@ -120,7 +173,6 @@ public class DebugOptionsTestCase extends TestCase {
 		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
 		assertTrue("Another listener did not get called", anotherListener.gotCalled()); //$NON-NLS-1$
 
-		debugOptions.setDebugEnabled(false);
 		anotherReg.unregister();
 	}
 

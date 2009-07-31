@@ -126,8 +126,8 @@ public class FrameworkDebugTraceEntry {
 					determineClassName = stackElements[i].getClassName();
 					determineMethodName = stackElements[i].getMethodName();
 					determineLineNumber = stackElements[i].getLineNumber();
+					break; // only break when the right stack element has been found; Otherwise keep trying
 				}
-				break;
 			}
 			i++;
 		}
