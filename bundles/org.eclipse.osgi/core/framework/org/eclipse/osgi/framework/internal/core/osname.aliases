@@ -40,4 +40,4 @@ WindowsXP "Windows XP" WinXP Win32       # Microsoft
 Windows2003 "Windows 2003" "Windows Server 2003" Win2003 Win32 # Microsoft
 WindowsVista WinVista "Windows Vista" Win32 # Microsoft
 Windows2008 "Windows 2008" "Windows Server 2008" Win2008 Win32 # Microsoft
-Windows7 "Windows 7" Win32 # Microsoft
+Windows7 "Windows 7" Win7 Win32 # Microsoft
