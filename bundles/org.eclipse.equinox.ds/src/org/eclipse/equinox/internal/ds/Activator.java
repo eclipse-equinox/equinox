@@ -297,26 +297,42 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 						prefix = "INFO "; //$NON-NLS-1$
 						break;
 				}
-				dumpOnConsole(prefix, bundleContext, message, t);
+				dumpOnConsole(prefix, bundleContext, message, t, level == LogService.LOG_ERROR);
 			}
 		} else {
-			//using the SCR log
-			switch (level) {
-				case LogService.LOG_ERROR :
-					log.error(message, t);
-					break;
-				case LogService.LOG_WARNING :
-					log.warning(message, t);
-					break;
-				default :
-					log.error(message, t);
-					break;
+			logRef = bc.getServiceReference(LogService.class.getName());
+			if (logRef == null) {
+				//log service is not available
+				if (!log.getPrintOnConsole() && !log.autoPrintOnConsole) {
+					//the log will not print the message on the console
+					if (level == LogService.LOG_ERROR) {
+						dumpOnConsole("ERROR ", bundleContext, message, t, true); //$NON-NLS-1$
+					}
+				}
+			} else {
+				//using the SCR log
+				switch (level) {
+					case LogService.LOG_ERROR :
+						log.error(message, t);
+						break;
+					case LogService.LOG_WARNING :
+						log.warning(message, t);
+						break;
+					default :
+						log.error(message, t);
+						break;
+				}
 			}
 		}
 	}
 
-	private static void dumpOnConsole(String prefix, BundleContext bundleContext, String msg, Throwable t) {
-		System.out.println(prefix + bundleContext.getBundle().getBundleId() + " " + msg); //$NON-NLS-1$
+	private static void dumpOnConsole(String prefix, BundleContext bundleContext, String msg, Throwable t, boolean printInErr) {
+		String message = prefix + bundleContext.getBundle().getBundleId() + " " + msg; //$NON-NLS-1$
+		if (printInErr) {
+			System.err.println(message);
+		} else {
+			System.out.println(message);
+		}
 		if (t != null) {
 			t.printStackTrace();
 		}
