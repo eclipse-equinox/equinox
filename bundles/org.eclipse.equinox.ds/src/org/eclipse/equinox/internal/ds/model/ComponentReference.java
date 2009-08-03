@@ -110,7 +110,7 @@ public class ComponentReference implements Externalizable {
 					serviceObject = InstanceProcess.staticRef.getService(reference, serviceReference);
 				}
 				if (serviceObject == null) {
-					// we could not create a serviceObject because of circularity
+					// we could not create a serviceObject because of circularity or the BundleContext.getService(ServiceReference) returned null
 					logWarning(Messages.CANT_GET_SERVICE_OBJECT, null, reference);
 					return null;
 				}
