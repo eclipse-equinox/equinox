@@ -647,8 +647,13 @@ public class InstanceProcess {
 		}
 
 		// getting this service will not cause a circularity
-		return reference.scp.bc.getService(serviceReference);
-
+		Object serviceObject = reference.scp.bc.getService(serviceReference);
+		if (serviceObject == null) {
+			if (Activator.DEBUG) {
+				Activator.log.debug("[SCR] Returned service object by the bundle context is null. The reference is " + reference.reference.name + "; The ServiceReference is " + serviceReference, null); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
+		return serviceObject;
 	}
 
 	/**
