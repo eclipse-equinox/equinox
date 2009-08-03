@@ -31,7 +31,7 @@ import org.osgi.service.log.LogService;
 public final class Resolver implements WorkPerformer {
 
 	// these strings are used only for debugging purpose
-	static final String[] WORK_TITLES = {"BUILD ", "DYNAMICBIND "}; //$NON-NLS-1$ //$NON-NLS-2$
+	static final String[] WORK_TITLES = {"BUILD ", "DYNAMICBIND ", "DISPOSE "}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	/**
 	 * Service Component instances need to be built.
@@ -42,6 +42,11 @@ public final class Resolver implements WorkPerformer {
 	 * Service Component instances need to be rebound
 	 */
 	public static final int DYNAMICBIND = 2;
+
+	/**
+	 * Service Component instances need to be disposed
+	 */
+	public static final int DISPOSE = 3;
 
 	/* Holds the enabled SCPs*/
 	protected Vector scpEnabled;
@@ -635,6 +640,11 @@ public final class Resolver implements WorkPerformer {
 
 					}
 					break;
+				case DISPOSE :
+					if (workObject != null) {
+						instanceProcess.disposeInstances((Vector) workObject, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+					}
+					break;
 			}
 		} catch (Throwable e) {
 			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
@@ -989,9 +999,9 @@ public final class Resolver implements WorkPerformer {
 	}
 
 	public void removeFromSatisfiedList(ServiceComponentProp scp) {
-		synchronized (syncLock) {
-			scp.setState(ServiceComponentProp.DISPOSED);
-		}
+		Vector tmp = new Vector();
+		tmp.addElement(scp);
+		mgr.enqueueWork(this, Resolver.DISPOSE, tmp, false);
 	}
 
 	/**
