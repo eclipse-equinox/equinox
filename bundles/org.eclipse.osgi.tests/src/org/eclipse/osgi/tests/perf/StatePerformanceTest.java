@@ -58,10 +58,8 @@ public class StatePerformanceTest extends BasePerformanceTest {
 		testResolution(100, 500, null, null);
 	}
 
-	static private final String explanation = "Performance decrease caused thread safety fixes . See https://bugs.eclipse.org/bugs/show_bug.cgi?id=258259 for details."; //$NON-NLS-1$
-
 	public void testResolution1000() throws IOException {
-		testResolution(1000, 15, "State Resolution", explanation);
+		testResolution(1000, 15, "State Resolution", null);
 	}
 
 	public void testResolution500() throws IOException {
