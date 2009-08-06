@@ -99,7 +99,7 @@ public final class Resolver implements WorkPerformer {
 	void enableComponents(Vector serviceComponents) {
 		long start = 0l;
 		if (Activator.DEBUG) {
-			Activator.log.debug("Resolver.enableComponents(): " + serviceComponents != null ? serviceComponents.toString() : "null", null); //$NON-NLS-1$ //$NON-NLS-2$
+			Activator.log.debug("Resolver.enableComponents(): " + (serviceComponents != null ? serviceComponents.toString() : "null"), null); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
