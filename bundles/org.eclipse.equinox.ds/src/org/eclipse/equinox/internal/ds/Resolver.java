@@ -146,7 +146,7 @@ public final class Resolver implements WorkPerformer {
 					} else {
 						// if ManagedServiceFactory
 						Configuration config = configs[0];
-						if (config.getFactoryPid() != null) {
+						if (config.getFactoryPid() != null && config.getFactoryPid().equals(current.name)) {
 							// if ComponentFactory is specified
 							if (current.factory != null) {
 								Activator.log(current.bc, LogService.LOG_ERROR, NLS.bind(Messages.REGISTERED_AS_COMPONENT_AND_MANAGED_SERVICE_FACORY, current.name), null);
