@@ -294,34 +294,19 @@ public class ComponentReference implements Externalizable {
 	final void bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
 		if (bind != null) {
 			// DON'T rebind the same object again
-			boolean isComponentFactory = component.factory != null;
 			synchronized (serviceReferences) {
-				if (isComponentFactory) {
-					Vector instances = (Vector) serviceReferences.get(serviceReference);
-					if (instances == null) {
-						instances = new Vector(2);
-						instances.addElement(instance);
-						serviceReferences.put(serviceReference, instances);
-					} else if (instances.contains(instance)) {
-						if (reference.isUnary()) {
-							logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
-						}
-						return;
-					} else {
-						instances.addElement(instance);
+				Vector instances = (Vector) serviceReferences.get(serviceReference);
+				if (instances == null) {
+					instances = new Vector(1);
+					instances.addElement(instance);
+					serviceReferences.put(serviceReference, instances);
+				} else if (instances.contains(instance)) {
+					if (reference.isUnary()) {
+						logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
 					}
+					return;
 				} else {
-					Object compInstance = serviceReferences.get(serviceReference);
-					if (compInstance == instance) {
-						if (reference.isUnary()) {
-							logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
-						}
-						return;
-					} else if (compInstance != null) {
-						logWarning(NLS.bind(Messages.SERVICE_REFERENCE_BOUND, serviceReference, compInstance), null, reference);
-						return;
-					}
-					serviceReferences.put(serviceReference, instance);
+					instances.addElement(instance);
 				}
 			}
 			// retrieve the method from cache
@@ -391,14 +376,9 @@ public class ComponentReference implements Externalizable {
 	}
 
 	private void removeServiceReference(ServiceReference serviceReference, ComponentInstance instance) {
-		boolean isComponentFactory = component.factory != null;
-		if (isComponentFactory) {
-			Vector instances = (Vector) serviceReferences.get(serviceReference);
-			instances.removeElement(instance);
-			if (instances.isEmpty()) {
-				serviceReferences.remove(serviceReference);
-			}
-		} else {
+		Vector instances = (Vector) serviceReferences.get(serviceReference);
+		instances.removeElement(instance);
+		if (instances.isEmpty()) {
 			serviceReferences.remove(serviceReference);
 		}
 	}
@@ -406,48 +386,27 @@ public class ComponentReference implements Externalizable {
 	public final void unbind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) {
 		// don't unbind an object that wasn't bound
 		boolean referenceExists = true;
-		boolean componentFactory = (component.factory != null);
 		synchronized (serviceReferences) {
-			if (componentFactory) {
-				Vector instances = (Vector) serviceReferences.get(serviceReference);
-				if (instances == null) {
-					referenceExists = false;
-				} else {
-					if (!instances.contains(instance)) {
-						logWarning(NLS.bind(Messages.INSTANCE_NOT_BOUND, instance), null, reference);
-						return;
-					}
-				}
+			Vector instances = (Vector) serviceReferences.get(serviceReference);
+			if (instances == null) {
+				referenceExists = false;
 			} else {
-				Object compInstance = serviceReferences.get(serviceReference);
-				if (compInstance == null) {
-					referenceExists = false;
-				} else {
-					if (compInstance != instance) {
-						logWarning(NLS.bind(Messages.INSTANCE_NOT_BOUND, instance), null, reference);
-						return;
-					}
+				if (!instances.contains(instance)) {
+					logWarning(NLS.bind(Messages.INSTANCE_NOT_BOUND, instance), null, reference);
+					return;
 				}
 			}
 			if (referenceExists) {
-				if (componentFactory) {
-					Vector instances = (Vector) serviceReferencesToUnbind.get(serviceReference);
-					if (instances != null && instances.contains(instance)) {
-						//the service reference is already in process of unbinding
-						return;
-					}
-					if (instances == null) {
-						instances = new Vector(2);
-						serviceReferencesToUnbind.put(serviceReference, instances);
-					}
-					instances.addElement(instance);
-				} else {
-					if (serviceReferencesToUnbind.get(serviceReference) == instance) {
-						//the service reference is already in process of unbinding
-						return;
-					}
-					serviceReferencesToUnbind.put(serviceReference, instance);
+				Vector instancesToUnbind = (Vector) serviceReferencesToUnbind.get(serviceReference);
+				if (instancesToUnbind != null && instancesToUnbind.contains(instance)) {
+					//the service reference is already in process of unbinding
+					return;
 				}
+				if (instancesToUnbind == null) {
+					instancesToUnbind = new Vector(1);
+					serviceReferencesToUnbind.put(serviceReference, instancesToUnbind);
+				}
+				instancesToUnbind.addElement(instance);
 			}
 		}
 		if (!referenceExists) {
@@ -506,20 +465,15 @@ public class ComponentReference implements Externalizable {
 			}
 		} finally {
 			synchronized (serviceReferences) {
-				if (componentFactory) {
-					Vector instances = (Vector) serviceReferences.get(serviceReference);
-					instances.removeElement(instance);
-					if (instances.isEmpty()) {
-						serviceReferences.remove(serviceReference);
-					}
-
-					instances = (Vector) serviceReferencesToUnbind.get(serviceReference);
-					instances.removeElement(instance);
-					if (instances.isEmpty()) {
-						serviceReferencesToUnbind.remove(serviceReference);
-					}
-				} else {
+				Vector instances = (Vector) serviceReferences.get(serviceReference);
+				instances.removeElement(instance);
+				if (instances.isEmpty()) {
 					serviceReferences.remove(serviceReference);
+				}
+
+				instances = (Vector) serviceReferencesToUnbind.get(serviceReference);
+				instances.removeElement(instance);
+				if (instances.isEmpty()) {
 					serviceReferencesToUnbind.remove(serviceReference);
 				}
 			}
