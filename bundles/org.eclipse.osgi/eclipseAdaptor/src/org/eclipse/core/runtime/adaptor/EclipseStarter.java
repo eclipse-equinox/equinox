@@ -183,11 +183,9 @@ public class EclipseStarter {
 				endSplashHandler.run();
 			// may use startupFailed to understand where the error happened
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, startupFailed ? EclipseAdaptorMsg.ECLIPSE_STARTUP_STARTUP_ERROR : EclipseAdaptorMsg.ECLIPSE_STARTUP_APP_ERROR, 1, e, null);
-			if (log != null) {
+			if (log != null)
 				log.log(logEntry);
-				if (context != null) // this can be null if OSGi failed to launch (bug 151413)
-					logUnresolvedBundles(context.getBundles());
-			} else
+			else
 				// TODO desperate measure - ideally, we should write this to disk (a la Main.log)
 				e.printStackTrace();
 		} finally {
@@ -357,17 +355,23 @@ public class EclipseStarter {
 		// if we are just initializing, do not run the application just return.
 		if (initialize)
 			return new Integer(0);
-		if (appLauncher == null) {
-			boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
-			// create the ApplicationLauncher and register it as a service
-			appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
-			appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), appLauncher, null);
-			// must start the launcher AFTER service restration because this method 
-			// blocks and runs the application on the current thread.  This method 
-			// will return only after the application has stopped.
-			return appLauncher.start(argument);
+		try {
+			if (appLauncher == null) {
+				boolean launchDefault = Boolean.valueOf(FrameworkProperties.getProperty(PROP_APPLICATION_LAUNCHDEFAULT, "true")).booleanValue(); //$NON-NLS-1$
+				// create the ApplicationLauncher and register it as a service
+				appLauncher = new EclipseAppLauncher(context, Boolean.valueOf(FrameworkProperties.getProperty(PROP_ALLOW_APPRELAUNCH)).booleanValue(), launchDefault, log);
+				appLauncherRegistration = context.registerService(ApplicationLauncher.class.getName(), appLauncher, null);
+				// must start the launcher AFTER service restration because this method 
+				// blocks and runs the application on the current thread.  This method 
+				// will return only after the application has stopped.
+				return appLauncher.start(argument);
+			}
+			return appLauncher.reStart(argument);
+		} catch (Exception e) {
+			if (log != null && context != null) // context can be null if OSGi failed to launch (bug 151413)
+				logUnresolvedBundles(context.getBundles());
+			throw e;
 		}
-		return appLauncher.reStart(argument);
 	}
 
 	/**
