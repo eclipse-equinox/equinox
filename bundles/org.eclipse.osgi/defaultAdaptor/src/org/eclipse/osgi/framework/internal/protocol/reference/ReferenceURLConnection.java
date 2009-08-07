@@ -42,11 +42,36 @@ public class ReferenceURLConnection extends URLConnection {
 					file = makeAbsolute(installPath, file);
 			}
 			ref = file.toURL();
-			if (!file.exists())
-				throw new FileNotFoundException(file.toString());
-			if (!file.canRead())
-				throw new FileNotFoundException(file.toString() + " (access denied)"); //$NON-NLS-1$
+
+			checkRead(file);
+
 			reference = ref;
+		}
+	}
+
+	private void checkRead(File file) throws IOException {
+		if (!file.exists())
+			throw new FileNotFoundException(file.toString());
+		if (file.isFile()) {
+			// Try to open the file to ensure that this is possible: see bug 260217
+			// If access is denied, a FileNotFoundException with (access denied) message is thrown
+			// Here file.canRead() cannot be used, because on Windows it does not 
+			// return correct values - bug 6203387 in Sun's bug database
+			InputStream is = new FileInputStream(file);
+			is.close();
+		} else if (file.isDirectory()) {
+			// There is no straightforward way to check if a directory
+			// has read permissions - same issues for File.canRead() as above; 
+			// try to list the files in the directory
+			File[] files = file.listFiles();
+			// File.listFiles() returns null if the directory does not exist 
+			// (which is not the current case, because we check that it exists and is directory),
+			// or if an IO error occurred during the listing of the files, including if the
+			// access is denied 
+			if (files == null)
+				throw new FileNotFoundException(file.toString() + " (probably access denied)"); //$NON-NLS-1$
+		} else {
+			// TODO not sure if we can get here.
 		}
 	}
 
