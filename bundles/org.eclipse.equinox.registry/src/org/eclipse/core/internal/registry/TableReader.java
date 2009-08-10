@@ -23,11 +23,12 @@ public class TableReader {
 	static final int OBJECT = 1;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 5;
+	static final int CACHE_VERSION = 6;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 	// Version 2 -> 3: added namespace index and the table of contributors
 	// Version 3 -> 4: offset table saved in a binary form (performance)
 	// Version 4 -> 5: remove support added in version 4 to save offset table in a binary form (performance)
+	// Version 5 -> 6: replace HashtableOfInt with OffsetTable (memory usage optimization)
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
@@ -103,7 +104,6 @@ public class TableReader {
 
 	// Don't need to synchronize - called only from a synchronized method
 	public Object[] loadTables(long expectedTimestamp) {
-		HashtableOfInt offsets;
 		HashtableOfStringAndInt extensionPoints;
 
 		DataInputStream tableInput = null;
@@ -113,8 +113,7 @@ public class TableReader {
 				return null;
 
 			Integer nextId = new Integer(tableInput.readInt());
-			offsets = new HashtableOfInt();
-			offsets.load(tableInput);
+			OffsetTable offsets = OffsetTable.load(tableInput);
 			extensionPoints = new HashtableOfStringAndInt();
 			extensionPoints.load(tableInput);
 			return new Object[] {offsets, extensionPoints, nextId};

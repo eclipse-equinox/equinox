@@ -42,7 +42,7 @@ public class RegistryObjectManager implements IObjectManager {
 	// key: object id, value: an object
 	private ReferenceMap cache; //Entries are added by getter. The structure is not thread safe.
 	//key: int, value: int
-	private HashtableOfInt fileOffsets; //This is read once on startup when loading from the cache. Entries are never added here. They are only removed to prevent "removed" objects to be reloaded.
+	private OffsetTable fileOffsets = null; //This is read once on startup when loading from the cache. Entries are never added here. They are only removed to prevent "removed" objects to be reloaded.
 
 	private int nextId = 1; //This is only used to get the next number available.
 
@@ -80,7 +80,6 @@ public class RegistryObjectManager implements IObjectManager {
 			cache = new ReferenceMap(ReferenceMap.SOFT, CACHE_INITIAL_SIZE, DEFAULT_LOADFACTOR);
 		}
 		newContributions = new KeyedHashSet();
-		fileOffsets = new HashtableOfInt();
 
 		this.registry = registry;
 	}
@@ -94,7 +93,7 @@ public class RegistryObjectManager implements IObjectManager {
 		if (results == null) {
 			return false;
 		}
-		fileOffsets = (HashtableOfInt) results[0];
+		fileOffsets = (OffsetTable) results[0];
 		extensionPoints = (HashtableOfStringAndInt) results[1];
 		nextId = ((Integer) results[2]).intValue();
 		fromCache = true;
@@ -402,6 +401,8 @@ public class RegistryObjectManager implements IObjectManager {
 
 	private Object load(int id, byte type) {
 		TableReader reader = registry.getTableReader();
+		if (fileOffsets == null)
+			return null;
 		int offset = fileOffsets.get(id);
 		if (offset == Integer.MIN_VALUE)
 			return null;
