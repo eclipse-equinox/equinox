@@ -103,7 +103,8 @@ public final class URIUtil {
 		int len = path.length();
 		StringBuffer result = new StringBuffer(len);
 		for (int i = 0; i < 4; i++) {
-			if (i >= len || path.charAt(i) != '/')
+			//	if we have hit the first non-slash character, add another leading slash
+			if (i >= len || result.length() > 0 || path.charAt(i) != '/')
 				result.append('/');
 		}
 		result.append(path);
