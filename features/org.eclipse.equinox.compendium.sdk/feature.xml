@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.compendium.sdk"
       label="%featureName"
-      version="3.5.0.qualifier"
+      version="3.6.0.qualifier"
       provider-name="%providerName">
 
    <description>
@@ -16,7 +16,7 @@
    <license url="%licenseURL">
       %license
    </license>
-   
+
    <plugin
          id="org.eclipse.equinox.app"
          download-size="0"
