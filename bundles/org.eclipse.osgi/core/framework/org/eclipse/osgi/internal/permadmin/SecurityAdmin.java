@@ -384,11 +384,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		for (int i = 0; i < permissionInfos.length; i++) {
 			results[i] = permissionInfos[i];
 			if ("java.io.FilePermission".equals(permissionInfos[i].getType())) { //$NON-NLS-1$
-				File file = new File(permissionInfos[i].getName());
-				if (!file.isAbsolute()) { // relative name
-					File target = ((AbstractBundle) bundle).getBundleData().getDataFile(permissionInfos[i].getName());
-					if (target != null)
-						results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
+				if (!"<<ALL FILES>>".equals(permissionInfos[i].getName())) { //$NON-NLS-1$
+					File file = new File(permissionInfos[i].getName());
+					if (!file.isAbsolute()) { // relative name
+						File target = ((AbstractBundle) bundle).getBundleData().getDataFile(permissionInfos[i].getName());
+						if (target != null)
+							results[i] = new PermissionInfo(permissionInfos[i].getType(), target.getPath(), permissionInfos[i].getActions());
+					}
 				}
 			}
 		}

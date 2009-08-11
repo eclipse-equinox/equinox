@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug286307
+Bundle-SymbolicName: test.bug286307
+Bundle-Version: 1.0.0

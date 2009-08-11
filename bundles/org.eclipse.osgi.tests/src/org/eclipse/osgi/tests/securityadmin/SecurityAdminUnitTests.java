@@ -18,7 +18,6 @@ import java.security.*;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.tests.bundles.AbstractBundleTests;
@@ -46,6 +45,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 	private static final ConditionInfo SIGNER_CONDITION1 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test1,c=US"}); //$NON-NLS-1$//$NON-NLS-2$
 	private static final ConditionInfo SIGNER_CONDITION2 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test2,c=US"}); //$NON-NLS-1$//$NON-NLS-2$
 	private static final ConditionInfo NOT_SIGNER_CONDITION1 = new ConditionInfo("org.osgi.service.condpermadmin.BundleSignerCondition", new String[] {"*;cn=test1,c=US", "!"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+	private static final String TEST_BUNDLE = "test"; //$NON-NLS-1$
+	private static final String TEST2_BUNDLE = "test2"; //$NON-NLS-1$
 
 	//private static final ConditionInfo POST_MUT_NOTSAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_MUT_NOTSAT", "true", "true", "false"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	//private static final ConditionInfo POST_NOTMUT_SAT = new ConditionInfo("ext.framework.b.TestCondition", new String[] {"POST_NOTMUT_SAT", "true", "false", "true"}); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -74,16 +75,16 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testCreateDomain() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		if (!pd.implies(new AllPermission()))
 			fail("test bundle should have AllPermission"); //$NON-NLS-1$
 	}
 
 	public void testLocationPermission01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		securityAdmin.setPermissions(test.getLocation(), READONLY_INFOS);
 
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,8 +100,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testLocationPermission02() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		securityAdmin.setPermissions(test.getLocation(), READWRITE_INFOS);
 
 		testPermission(pd, new FilePermission("test", "write"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -116,8 +117,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testLocationPermission03() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 
 		securityAdmin.setDefaultPermissions(READONLY_INFOS);
 		securityAdmin.setPermissions(test.getLocation(), READWRITE_INFOS);
@@ -151,8 +152,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testDefaultPermissions01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		securityAdmin.setDefaultPermissions(READONLY_INFOS);
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -167,8 +168,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testDefaultPermissions02() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		securityAdmin.setDefaultPermissions(READONLY_INFOS);
 
 		securityAdmin.setPermissions(test.getLocation(), SOCKET_INFOS);
@@ -194,8 +195,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testNotLocationCondition01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 
 		ConditionalPermissionInfo condPermInfo = securityAdmin.addConditionalPermissionInfo(getLocationConditions("xxx", true), SOCKET_INFOS); //$NON-NLS-1$
 		testPermission(pd, new AllPermission(), false);
@@ -208,8 +209,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testNotLocationCondition02() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 
 		ConditionalPermissionInfo condPermInfo = securityAdmin.addConditionalPermissionInfo(getLocationConditions(test.getLocation(), true), SOCKET_INFOS);
 		testPermission(pd, new AllPermission(), false);
@@ -222,8 +223,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testMultipleLocationConditions01() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 
 		ConditionalPermissionInfo condPermInfo1 = securityAdmin.addConditionalPermissionInfo(getLocationConditions("xxx", false), SOCKET_INFOS); //$NON-NLS-1$
 		ConditionalPermissionInfo condPermInfo2 = securityAdmin.addConditionalPermissionInfo(ALLLOCATION_CONDS, READONLY_INFOS);
@@ -245,8 +246,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	public void testMultipleLocationConditions02() {
 		SecurityAdmin securityAdmin = createSecurityAdmin(null);
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 
 		ConditionalPermissionInfo condPermInfo1 = securityAdmin.addConditionalPermissionInfo(getLocationConditions("xxx", false), SOCKET_INFOS); //$NON-NLS-1$
 		ConditionalPermissionInfo condPermInfo2 = securityAdmin.addConditionalPermissionInfo(ALLLOCATION_CONDS, READONLY_INFOS);
@@ -292,8 +293,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(info);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
@@ -317,8 +318,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows.add(info2);
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new FilePermission("test", "read"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
@@ -359,8 +360,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		rows2.remove(0);
 		assertTrue("failed to commit", update2.commit()); //$NON-NLS-1$
 
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		testPermission(pd, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
 		testPermission(pd, new AllPermission(), false);
@@ -386,8 +387,8 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		assertTrue("failed to commit", update.commit()); //$NON-NLS-1$
 
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
-		Bundle test = installTestBundle();
-		ProtectionDomain pd = securityAdmin.createProtectionDomain((AbstractBundle) test);
+		Bundle test = installTestBundle(TEST_BUNDLE);
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd};
 		testSMPermission(sm, pds, new FilePermission("test", "write"), false); //$NON-NLS-1$ //$NON-NLS-2$
 		testSMPermission(sm, pds, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
@@ -407,10 +408,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition.clearConditions();
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
 		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
-		Bundle test1 = installTestBundle();
-		Bundle test2 = installTest2Bundle();
-		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
-		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		Bundle test2 = installTestBundle(TEST2_BUNDLE);
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain(test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain(test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
 		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
@@ -462,10 +463,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition.clearConditions();
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
 		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
-		Bundle test1 = installTestBundle();
-		Bundle test2 = installTest2Bundle();
-		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
-		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		Bundle test2 = installTestBundle(TEST2_BUNDLE);
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain(test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain(test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
 		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
@@ -501,10 +502,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition.clearConditions();
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
 		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
-		Bundle test1 = installTestBundle();
-		Bundle test2 = installTest2Bundle();
-		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
-		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		Bundle test2 = installTestBundle(TEST2_BUNDLE);
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain(test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain(test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
 		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
@@ -539,10 +540,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition.clearConditions();
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
 		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
-		Bundle test1 = installTestBundle();
-		Bundle test2 = installTest2Bundle();
-		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
-		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		Bundle test2 = installTestBundle(TEST2_BUNDLE);
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain(test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain(test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
 		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
@@ -577,10 +578,10 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		TestCondition.clearConditions();
 		EquinoxSecurityManager sm = new EquinoxSecurityManager();
 		SecurityAdmin securityAdmin = createSecurityAdmin(sm);
-		Bundle test1 = installTestBundle();
-		Bundle test2 = installTest2Bundle();
-		ProtectionDomain pd1 = securityAdmin.createProtectionDomain((AbstractBundle) test1);
-		ProtectionDomain pd2 = securityAdmin.createProtectionDomain((AbstractBundle) test2);
+		Bundle test1 = installTestBundle(TEST_BUNDLE);
+		Bundle test2 = installTestBundle(TEST2_BUNDLE);
+		ProtectionDomain pd1 = securityAdmin.createProtectionDomain(test1);
+		ProtectionDomain pd2 = securityAdmin.createProtectionDomain(test2);
 		ProtectionDomain[] pds = new ProtectionDomain[] {pd1, pd2};
 
 		ConditionalPermissionUpdate update = securityAdmin.newConditionalPermissionUpdate();
@@ -939,6 +940,14 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 
 	}
 
+	public void testBug286307() {
+		SecurityAdmin securityAdmin = createSecurityAdmin(null);
+		Bundle test = installTestBundle("test.bug286307"); //$NON-NLS-1$
+		ProtectionDomain pd = securityAdmin.createProtectionDomain(test);
+		testPermission(pd, new FilePermission("test", "read"), true); //$NON-NLS-1$ //$NON-NLS-2$
+		testPermission(pd, new AllPermission(), false);
+	}
+
 	private void checkInfos(ConditionalPermissionInfo testInfo1, ConditionalPermissionInfo testInfo2) {
 		assertTrue("Infos are not equal: " + testInfo1.getEncoded() + " " + testInfo2.getEncoded(), testInfo1.equals(testInfo2)); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Info hash code is not equal", testInfo1.hashCode(), testInfo2.hashCode()); //$NON-NLS-1$
@@ -984,20 +993,11 @@ public class SecurityAdminUnitTests extends AbstractBundleTests {
 		return new ConditionInfo[] {new ConditionInfo("org.osgi.service.condpermadmin.BundleLocationCondition", args)}; //$NON-NLS-1$
 	}
 
-	private Bundle installTestBundle() {
+	private Bundle installTestBundle(String name) {
 		try {
-			return installer.installBundle("test"); //$NON-NLS-1$
+			return installer.installBundle(name);
 		} catch (BundleException e) {
-			fail("failed to install bundle", e); //$NON-NLS-1$
-		}
-		return null;
-	}
-
-	private Bundle installTest2Bundle() {
-		try {
-			return installer.installBundle("test2"); //$NON-NLS-1$
-		} catch (BundleException e) {
-			fail("failed to install bundle", e); //$NON-NLS-1$
+			fail("failed to install bundle: " + name, e); //$NON-NLS-1$
 		}
 		return null;
 	}
