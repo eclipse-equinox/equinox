@@ -46,7 +46,7 @@ public class FrameworkDebugTraceEntry {
 	/**
 	 * The method being traced
 	 */
-	private String methodName = null;
+	private final String methodName;
 
 	/**
 	 * The line number
