@@ -40,7 +40,7 @@ class EclipseDebugTrace implements DebugTrace {
 	/** The version attribute written to the header of the trace file */
 	private final static String TRACE_FILE_VERSION_COMMENT = "version: "; //$NON-NLS-1$
 	/** The version value written to the header of the trace file */
-	private final static String TRACE_FILE_VERSION = "1.0"; //$NON-NLS-1$
+	private final static String TRACE_FILE_VERSION = "1.1"; //$NON-NLS-1$
 	/** The new session identifier to be written whenever a new session starts */
 	private final static String TRACE_NEW_SESSION = "!SESSION "; //$NON-NLS-1$
 	/** The date attribute written to the header of the trace file to show when this file was created */
@@ -201,8 +201,10 @@ class EclipseDebugTrace implements DebugTrace {
 					} else {
 						messageBuffer.append(EclipseDebugTrace.NULL_VALUE);
 					}
-					messageBuffer.append(" "); //$NON-NLS-1$
 					i++;
+					if (i < methodArguments.length) {
+						messageBuffer.append(" "); //$NON-NLS-1$
+					}
 				}
 				messageBuffer.append(")"); //$NON-NLS-1$
 			}
@@ -459,6 +461,32 @@ class EclipseDebugTrace implements DebugTrace {
 	}
 
 	/**
+	 * Accessor to retrieve the text of a {@link Throwable} in a formatted manner so that it can be written to the
+	 * trace file. 
+	 * 
+	 * @param error The {@lnk Throwable} to format
+	 * @return The complete text of a {@link Throwable} as a {@link String} or null if the input error is null.
+	 */
+	private final String getFormattedThrowable(Throwable error) {
+
+		String result = null;
+		if (error != null) {
+			PrintStream throwableStream = null;
+			try {
+				ByteArrayOutputStream throwableByteOutputStream = new ByteArrayOutputStream();
+				throwableStream = new PrintStream(throwableByteOutputStream, false);
+				error.printStackTrace(throwableStream);
+				result = throwableByteOutputStream.toString();
+			} finally {
+				if (throwableStream != null) {
+					throwableStream.close();
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Writes header information to a new trace file
 	 * 
 	 * @param traceWriter the trace writer
@@ -487,7 +515,9 @@ class EclipseDebugTrace implements DebugTrace {
 	private void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
 
 		// format the trace entry
-		StringBuffer message = new StringBuffer(entry.getThreadName());
+		StringBuffer message = new StringBuffer(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+		message.append(" "); //$NON-NLS-1$
+		message.append(entry.getThreadName());
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
@@ -517,10 +547,13 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(" "); //$NON-NLS-1$
 		message.append(entry.getMessage());
 		if (entry.getThrowable() != null) {
+			message.append(" "); //$NON-NLS-1$
 			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 			message.append(" "); //$NON-NLS-1$
-			message.append(entry.getThrowable());
+			message.append(this.getFormattedThrowable(entry.getThrowable()));
 		}
+		message.append(" "); //$NON-NLS-1$
+		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(EclipseDebugTrace.LINE_SEPARATOR);
 		// write the message
 		if ((traceWriter != null) && (message != null)) {
