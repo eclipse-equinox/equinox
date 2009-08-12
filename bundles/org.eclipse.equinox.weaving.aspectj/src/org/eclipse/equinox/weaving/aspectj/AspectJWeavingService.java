@@ -47,7 +47,7 @@ public class AspectJWeavingService implements IWeavingService {
     private OSGiWeavingContext weavingContext;
 
     public AspectJWeavingService() {
-        if (AspectJWeavingActivator.DEBUG)
+        if (AspectJWeavingStarter.DEBUG)
             System.out.println("- WeavingService.<init>");
     }
 
@@ -58,7 +58,7 @@ public class AspectJWeavingService implements IWeavingService {
         this.bundleDescription = bundleDescription;
 
         final AspectResolver aspectResolver = new AspectResolver(state,
-                supplementerRegistry, aspectAdmin, AspectJWeavingActivator
+                supplementerRegistry, aspectAdmin, AspectJWeavingStarter
                         .getDefault().getContext());
         final AspectConfiguration aspectConfig = aspectResolver
                 .resolveAspectsFor(bundle, bundleDescription);
@@ -72,7 +72,7 @@ public class AspectJWeavingService implements IWeavingService {
             this.weavingAdaptor = new OSGiWeavingAdaptor(loader,
                     weavingContext, namespaceAddOn.toString());
         } else {
-            if (AspectJWeavingActivator.DEBUG) {
+            if (AspectJWeavingStarter.DEBUG) {
                 System.err
                         .println("[org.eclipse.equinox.weaving.aspectj] info not weaving bundle '"
                                 + bundle.getSymbolicName() + "'");
@@ -120,13 +120,13 @@ public class AspectJWeavingService implements IWeavingService {
      * @see org.eclipse.equinox.service.weaving.IWeavingService#getKey()
      */
     public String getKey() {
-        if (AspectJWeavingActivator.DEBUG)
+        if (AspectJWeavingStarter.DEBUG)
             System.out.println("> WeavingService.getKey() bundle="
                     + bundleDescription.getSymbolicName());
 
         final String namespace = namespaceAddOn.toString();
 
-        if (AspectJWeavingActivator.DEBUG)
+        if (AspectJWeavingStarter.DEBUG)
             System.out.println("< WeavingService.getKey() key='" + namespace
                     + "'");
 
@@ -140,7 +140,7 @@ public class AspectJWeavingService implements IWeavingService {
     public byte[] preProcess(final String name, final byte[] classbytes,
             final ClassLoader loader) throws IOException {
         if (enabled) {
-            if (AspectJWeavingActivator.DEBUG)
+            if (AspectJWeavingStarter.DEBUG)
                 System.out.println("> WeavingService.preProcess() bundle="
                         + bundleDescription.getSymbolicName() + ", name="
                         + name + ", bytes=" + classbytes.length);
@@ -149,7 +149,7 @@ public class AspectJWeavingService implements IWeavingService {
 
             // Bug 215177: Adapt to updated (AJ 1.5.4) signature.
             newBytes = weavingAdaptor.weaveClass(name, classbytes, false);
-            if (AspectJWeavingActivator.DEBUG)
+            if (AspectJWeavingStarter.DEBUG)
                 System.out.println("< WeavingService.preProcess() bytes="
                         + newBytes.length);
             return newBytes;

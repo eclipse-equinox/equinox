@@ -19,7 +19,7 @@ import java.util.List;
 import org.aspectj.weaver.loadtime.DefaultWeavingContext;
 import org.aspectj.weaver.loadtime.definition.Definition;
 import org.aspectj.weaver.tools.WeavingAdaptor;
-import org.eclipse.equinox.weaving.aspectj.AspectJWeavingActivator;
+import org.eclipse.equinox.weaving.aspectj.AspectJWeavingStarter;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 
 /**
@@ -38,7 +38,7 @@ public class OSGiWeavingContext extends DefaultWeavingContext {
         super(loader);
         this.bundleDescription = bundleDescription;
         this.aspectDefinitions = aspectDefinitions;
-        if (AspectJWeavingActivator.DEBUG)
+        if (AspectJWeavingStarter.DEBUG)
             System.out.println("- WeavingContext.WeavingContext() locader="
                     + loader + ", bundle="
                     + bundleDescription.getSymbolicName());

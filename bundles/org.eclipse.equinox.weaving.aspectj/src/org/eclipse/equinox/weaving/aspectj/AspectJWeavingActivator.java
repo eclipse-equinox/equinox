@@ -1,109 +1,63 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2009 Martin Lippert and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Contributors:
- *   David Knibb               initial implementation      
- *   Matthew Webster           Eclipse 3.2 changes
- *   Martin Lippert            extracted weaving service factory
+ *   Martin Lippert               initial implementation      
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
 
-import java.util.Properties;
+import java.lang.reflect.Method;
 
-import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
-import org.eclipse.equinox.weaving.aspectj.loadtime.AspectAdminImpl;
-import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  * The main plugin class to be used in the desktop.
  */
 public class AspectJWeavingActivator implements BundleActivator {
 
-    public static boolean DEBUG;
+    private static final String CHECK_ASPECTJ_CLASS = "org.aspectj.weaver.loadtime.definition.Definition"; //$NON-NLS-1$
 
-    public static boolean verbose = Boolean
-            .getBoolean("org.aspectj.osgi.verbose");
+    private static final String REAL_ACTIVATOR_CLASS = "org.eclipse.equinox.weaving.aspectj.AspectJWeavingStarter"; //$NON-NLS-1$
 
-    //The shared instance.
-    private static AspectJWeavingActivator plugin;
+    private Object starter; // to decouple the optional dependencies
 
-    private AspectAdminImpl aspectDefinitionRegistry;
-
-    private BundleContext context;
+    private Class<?> starterClass;
 
     /**
-     * The constructor.
-     */
-    public AspectJWeavingActivator() {
-        plugin = this;
-    }
-
-    /**
-     * Returns the shared instance.
-     */
-    public static AspectJWeavingActivator getDefault() {
-        return plugin;
-    }
-
-    /**
-     * @return The bundle context of the weaving service bundle or null, of
-     *         bundle is not started
-     */
-    public BundleContext getContext() {
-        return this.context;
-    }
-
-    /**
-     * This method is called upon plug-in activation
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(final BundleContext context) throws Exception {
-        this.context = context;
+        final ClassLoader loader = this.getClass().getClassLoader();
 
-        this.aspectDefinitionRegistry = new AspectAdminImpl();
-        context.addBundleListener(this.aspectDefinitionRegistry);
-        this.aspectDefinitionRegistry.initialize(context.getBundles());
+        try {
+            final Class<?> aspectjClass = loader.loadClass(CHECK_ASPECTJ_CLASS);
+            if (aspectjClass != null) {
+                starterClass = loader.loadClass(REAL_ACTIVATOR_CLASS);
+                starter = starterClass.newInstance();
 
-        loadOptions(context);
-        if (verbose)
-            System.err
-                    .println("[org.eclipse.equinox.weaving.aspectj] info Starting AspectJ weaving service ...");
-        final String serviceName = IWeavingServiceFactory.class.getName();
-        final IWeavingServiceFactory weavingServiceFactory = new AspectJWeavingServiceFactory(
-                aspectDefinitionRegistry);
-        final Properties props = new Properties();
-        context.registerService(serviceName, weavingServiceFactory, props);
+                final Method startMethod = starterClass.getMethod("start",
+                        BundleContext.class);
+                startMethod.invoke(starter, context);
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
-     * This method is called when the plug-in is stopped
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext context) throws Exception {
-        this.context = null;
-        plugin = null;
-    }
-
-    private void loadOptions(final BundleContext context) {
-        // all this is only to get the application args		
-        DebugOptions service = null;
-        final ServiceReference reference = context
-                .getServiceReference(DebugOptions.class.getName());
-        if (reference != null)
-            service = (DebugOptions) context.getService(reference);
-        if (service == null) return;
-        try {
-            DEBUG = service.getBooleanOption(
-                    "org.aspectj.osgi.service.weaving/debug", false);
-        } finally {
-            // we have what we want - release the service
-            context.ungetService(reference);
+        if (starter != null) {
+            final Method stopMethod = starterClass.getMethod("stop",
+                    BundleContext.class);
+            stopMethod.invoke(starter, context);
         }
     }
 

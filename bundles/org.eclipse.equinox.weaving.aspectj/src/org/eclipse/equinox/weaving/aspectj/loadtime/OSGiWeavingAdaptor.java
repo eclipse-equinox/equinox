@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.aspectj.weaver.IUnwovenClassFile;
 import org.aspectj.weaver.loadtime.ClassLoaderWeavingAdaptor;
-import org.eclipse.equinox.weaving.aspectj.AspectJWeavingActivator;
+import org.eclipse.equinox.weaving.aspectj.AspectJWeavingStarter;
 
 /**
  * The weaving adaptor for AspectJs load-time weaving API that deals with the
@@ -84,7 +84,7 @@ public class OSGiWeavingAdaptor extends ClassLoaderWeavingAdaptor {
                 initialized = true;
                 initializing = false;
 
-                if (AspectJWeavingActivator.verbose) {
+                if (AspectJWeavingStarter.verbose) {
                     if (isEnabled())
                         System.err
                                 .println("[org.eclipse.equinox.weaving.aspectj] info weaving bundle '"
