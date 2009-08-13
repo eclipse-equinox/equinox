@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Andrew Teirney		 - bug.id = 278732
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -55,6 +56,8 @@ public final class Resolver implements WorkPerformer {
 
 	private Object syncLock = new Object();
 
+	private Hashtable serviceReferenceTable = new Hashtable();
+
 	public SCRManager mgr;
 
 	// TODO: Add a hashtable connecting servicereference to a list of References
@@ -72,6 +75,22 @@ public final class Resolver implements WorkPerformer {
 		//		satisfiedSCPs = new Vector();
 		instanceProcess = new InstanceProcess(this);
 		this.mgr = mgr;
+	}
+
+	void synchronizeServiceReferences() {
+		synchronized (syncLock) {
+			try {
+				ServiceReference[] references = mgr.bc.getAllServiceReferences(null, null);
+				serviceReferenceTable.clear();
+				if (references != null) {
+					for (int i = 0; i < references.length; i++) {
+						serviceReferenceTable.put(references[i], Boolean.TRUE);
+					}
+				}
+			} catch (InvalidSyntaxException e) {
+				Activator.log(mgr.bc, LogService.LOG_WARNING, "Resolver(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, ""), e); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		}
 	}
 
 	public Object getSyncLock() {
@@ -277,6 +296,7 @@ public final class Resolver implements WorkPerformer {
 			case ServiceEvent.REGISTERED :
 				Vector componentsWithStaticRefs;
 				synchronized (syncLock) {
+					serviceReferenceTable.put(event.getServiceReference(), Boolean.TRUE);
 					componentsWithStaticRefs = selectStaticBind(scpEnabled, event.getServiceReference());
 				}
 				if (componentsWithStaticRefs != null) {
@@ -301,6 +321,7 @@ public final class Resolver implements WorkPerformer {
 			case ServiceEvent.UNREGISTERING :
 				Vector newlyUnsatisfiedSCPs;
 				synchronized (syncLock) {
+					serviceReferenceTable.remove(event.getServiceReference());
 					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
 				}
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
@@ -434,7 +455,7 @@ public final class Resolver implements WorkPerformer {
 						// re-run the algorithm
 						Reference reference = (Reference) refs.elementAt(i);
 						if (reference != null) {
-							boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
+							boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(this.serviceReferenceTable);
 
 							if (!resolved) {
 								if (Activator.DEBUG) {
@@ -516,7 +537,7 @@ public final class Resolver implements WorkPerformer {
 					// scp and re-run the algorithm
 					Reference reference = (Reference) refs.elementAt(i);
 					if (reference != null) {
-						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders();
+						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(null);
 
 						if (!resolved && scp.getState() > ServiceComponentProp.SATISFIED) {
 							if (Activator.DEBUG) {
@@ -692,7 +713,7 @@ public final class Resolver implements WorkPerformer {
 			Vector toBind = null;
 			for (int i = 0, size = scps.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
-				if (scp.isComponentFactory() || scp.getState() < ServiceComponentProp.SATISFIED) {
+				if (scp.isComponentFactory() || scp.getState() < ServiceComponentProp.BUILDING) {
 					// the component configuration does not have to be reactivated
 					continue;
 				}

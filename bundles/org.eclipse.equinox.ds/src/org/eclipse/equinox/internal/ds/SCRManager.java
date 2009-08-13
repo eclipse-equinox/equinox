@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Andrew Teirney		 - bug.id = 278732
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -85,6 +86,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		resolver = new Resolver(this);
 		if (Activator.startup)
 			Activator.timeLog("Resolver instantiated for "); //$NON-NLS-1$
+
+		resolver.synchronizeServiceReferences();
+		if (Activator.startup)
+			Activator.timeLog("resolver.synchronizeServiceReferences() method took "); //$NON-NLS-1$
 
 		bc.addBundleListener(this);
 		if (Activator.startup)
@@ -582,6 +587,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			if (!hasRegisteredServiceListener) {
 				hasRegisteredServiceListener = true;
 				bc.addServiceListener(this);
+				resolver.synchronizeServiceReferences();
 			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;

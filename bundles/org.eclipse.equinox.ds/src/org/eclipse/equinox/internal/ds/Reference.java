@@ -9,6 +9,7 @@
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
  *    Joerg-Christian Boehme - bug.id = 246757
+ *    Andrew Teirney		 - bug.id = 278732
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -115,7 +116,7 @@ public final class Reference {
 	}
 
 	// used in Resolver.resolveEligible()
-	final boolean hasProviders() {
+	final boolean hasProviders(Hashtable serviceReferenceTable) {
 		// check whether the component's bundle has service GET permission
 		if (System.getSecurityManager() != null && !scp.bc.getBundle().hasPermission(new ServicePermission(interfaceName, ServicePermission.GET))) {
 			return false;
@@ -124,10 +125,16 @@ public final class Reference {
 		try {
 			ServiceReference[] serviceReferences = null;
 			serviceReferences = scp.bc.getServiceReferences(interfaceName, target);
-			// if there is no service published that this Service
-			// ComponentReferences
+			// Only return true if there is a service published that this Reference
+			// represents and we know about it (if we care about it)
 			if (serviceReferences != null) {
-				return true;
+				if (serviceReferenceTable == null)
+					return true;
+				for (int i = 0; i < serviceReferences.length; i++) {
+					if (serviceReferenceTable.containsKey(serviceReferences[i])) {
+						return true;
+					}
+				}
 			}
 		} catch (InvalidSyntaxException e) {
 			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.hasProviders(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, target), e); //$NON-NLS-1$
