@@ -188,6 +188,9 @@ public class Main {
 	private static final String PROP_NL = "osgi.nl"; //$NON-NLS-1$
 	static final String PROP_NOSHUTDOWN = "osgi.noShutdown"; //$NON-NLS-1$
 	private static final String PROP_DEBUG = "osgi.debug"; //$NON-NLS-1$	
+	private static final String PROP_OS = "osgi.os"; //$NON-NLS-1$
+	private static final String PROP_WS = "osgi.ws"; //$NON-NLS-1$
+	private static final String PROP_ARCH = "osgi.arch"; //$NON-NLS-1$
 
 	private static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	private static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
@@ -289,6 +292,13 @@ public class Main {
 	private String getWS() {
 		if (ws != null)
 			return ws;
+
+		String osgiWs = System.getProperty(PROP_WS);
+		if (osgiWs != null) {
+			ws = osgiWs;
+			return ws;
+		}
+
 		String osName = getOS();
 		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
@@ -307,9 +317,26 @@ public class Main {
 		return Constants.WS_UNKNOWN;
 	}
 
+	private String getAlternateWS(String defaultWS) {
+		// We'll have already tried the default, so we only need to map
+		// in one direction. (default -> alternate)
+		if (Constants.WS_CARBON.equals(defaultWS))
+			return Constants.WS_COCOA;
+		if (Constants.WS_GTK.equals(defaultWS))
+			return Constants.WS_MOTIF;
+		if (Constants.WS_WIN32.equals(defaultWS))
+			return Constants.WS_WPF;
+		return Constants.WS_UNKNOWN;
+	}
+
 	private String getOS() {
 		if (os != null)
 			return os;
+		String osgiOs = System.getProperty(PROP_OS);
+		if (osgiOs != null) {
+			os = osgiOs;
+			return os;
+		}
 		String osName = System.getProperties().getProperty("os.name"); //$NON-NLS-1$
 		if (osName.regionMatches(true, 0, Constants.OS_WIN32, 0, 3))
 			return Constants.OS_WIN32;
@@ -339,6 +366,11 @@ public class Main {
 	private String getArch() {
 		if (arch != null)
 			return arch;
+		String osgiArch = System.getProperty(PROP_ARCH);
+		if (osgiArch != null) {
+			arch = osgiArch;
+			return arch;
+		}
 		String name = System.getProperties().getProperty("os.arch");//$NON-NLS-1$
 		// Map i386 architecture to x86
 		if (name.equalsIgnoreCase(Constants.INTERNAL_ARCH_I386))
@@ -348,6 +380,19 @@ public class Main {
 			return Constants.ARCH_X86_64;
 
 		return name;
+	}
+
+	private String getFragmentString(String fragmentOS, String fragmentWS, String fragmentArch) {
+		StringBuffer buffer = new StringBuffer(PLUGIN_ID);
+		buffer.append('.');
+		buffer.append(fragmentWS);
+		buffer.append('.');
+		buffer.append(fragmentOS);
+		if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
+			buffer.append('.');
+			buffer.append(fragmentArch);
+		}
+		return buffer.toString();
 	}
 
 	/**
@@ -367,61 +412,67 @@ public class Main {
 		if (libPath == null) {
 			//find our fragment name
 			String fragmentOS = getOS();
+			String fragmentWS = getWS();
 			String fragmentArch = getArch();
-			StringBuffer buffer = new StringBuffer(PLUGIN_ID);
-			buffer.append('.');
-			buffer.append(getWS());
-			buffer.append('.');
-			buffer.append(fragmentOS);
-			if (!(fragmentOS.equals(Constants.OS_MACOSX) && !Constants.ARCH_X86_64.equals(fragmentArch))) {
-				buffer.append('.');
-				buffer.append(fragmentArch);
-			}
-			String fragmentName = buffer.toString();
-			String fragment = null;
-			if (inDevelopmentMode) {
-				String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
-				String[] locations = getArrayFromList(devPathList);
-				if (locations.length > 0) {
-					File location = new File(locations[0]);
-					if (location.isAbsolute()) {
-						String dir = location.getParent();
-						fragment = searchFor(fragmentName, dir);
-						if (fragment != null)
-							libPath = getLibraryFromFragment(fragment);
-					}
+
+			libPath = getLibraryPath(getFragmentString(fragmentOS, fragmentWS, fragmentArch), defaultPath);
+			if (libPath == null && ws == null) {
+				// no ws was specified and we didn't find the default fragment, try an alternate ws
+				String alternateWS = getAlternateWS(fragmentWS);
+				libPath = getLibraryPath(getFragmentString(fragmentOS, alternateWS, fragmentArch), defaultPath);
+				if (libPath != null) {
+					System.getProperties().put(PROP_WS, alternateWS);
 				}
-			}
-			if (libPath == null && bootLocation != null) {
-				URL[] urls = defaultPath;
-				if (urls != null && urls.length > 0) {
-					//the last one is most interesting
-					for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
-						File entryFile = new File(urls[i].getFile());
-						String dir = entryFile.getParent();
-						if (inDevelopmentMode) {
-							String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
-							fragment = searchFor(fragmentName, devDir);
-						}
-						if (fragment == null)
-							fragment = searchFor(fragmentName, dir);
-						if (fragment != null)
-							libPath = getLibraryFromFragment(fragment);
-					}
-				}
-			}
-			if (libPath == null) {
-				URL install = getInstallLocation();
-				String location = install.getFile();
-				location += "/plugins/"; //$NON-NLS-1$
-				fragment = searchFor(fragmentName, location);
-				if (fragment != null)
-					libPath = getLibraryFromFragment(fragment);
 			}
 		}
 		library = libPath;
 		if (library != null)
 			bridge = new JNIBridge(library);
+	}
+
+	private String getLibraryPath(String fragmentName, URL[] defaultPath) {
+		String libPath = null;
+		String fragment = null;
+		if (inDevelopmentMode) {
+			String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
+			String[] locations = getArrayFromList(devPathList);
+			if (locations.length > 0) {
+				File location = new File(locations[0]);
+				if (location.isAbsolute()) {
+					String dir = location.getParent();
+					fragment = searchFor(fragmentName, dir);
+					if (fragment != null)
+						libPath = getLibraryFromFragment(fragment);
+				}
+			}
+		}
+		if (libPath == null && bootLocation != null) {
+			URL[] urls = defaultPath;
+			if (urls != null && urls.length > 0) {
+				//the last one is most interesting
+				for (int i = urls.length - 1; i >= 0 && libPath == null; i--) {
+					File entryFile = new File(urls[i].getFile());
+					String dir = entryFile.getParent();
+					if (inDevelopmentMode) {
+						String devDir = dir + "/" + PLUGIN_ID + "/fragments"; //$NON-NLS-1$ //$NON-NLS-2$
+						fragment = searchFor(fragmentName, devDir);
+					}
+					if (fragment == null)
+						fragment = searchFor(fragmentName, dir);
+					if (fragment != null)
+						libPath = getLibraryFromFragment(fragment);
+				}
+			}
+		}
+		if (libPath == null) {
+			URL install = getInstallLocation();
+			String location = install.getFile();
+			location += "/plugins/"; //$NON-NLS-1$
+			fragment = searchFor(fragmentName, location);
+			if (fragment != null)
+				libPath = getLibraryFromFragment(fragment);
+		}
+		return libPath;
 	}
 
 	private String getLibraryFromFragment(String fragment) {
