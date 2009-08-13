@@ -113,7 +113,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 		if (scrCommandProvider == null) {
 			scrCommandProvider = new SCRCommandProvider(scrManager);
-			Hashtable reg_props = new Hashtable(3, 1);
+			Hashtable reg_props = new Hashtable(1, 1);
+			reg_props.put(org.osgi.framework.Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 			scrCommandProviderReg = bc.registerService(CommandProvider.class.getName(), scrCommandProvider, reg_props);
 		}
 
