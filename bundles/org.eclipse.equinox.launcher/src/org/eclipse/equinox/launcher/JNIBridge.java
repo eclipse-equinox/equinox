@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -128,6 +128,17 @@ public class JNIBridge {
 			}
 			return -1;
 		}
+	}
+
+	/**
+	 * Whether or not we loaded the shared library here from java.  
+	 * False does not imply the library is not available, it could have
+	 * been loaded natively by the executable.
+	 * 
+	 * @return boolean
+	 */
+	boolean isLibraryLoadedByJava() {
+		return libraryLoaded;
 	}
 
 	/**

@@ -1346,9 +1346,15 @@ public class Main {
 
 	private void setExitData() {
 		String data = System.getProperty(PROP_EXITDATA);
-		if (data == null || bridge == null)
+		if (data == null)
 			return;
-		bridge.setExitData(exitData, data);
+		//if the bridge is null then we have nothing to send the data to;
+		//exitData is a shared memory id, if we loaded the library from java, we need a non-null exitData
+		//if the executable loaded the library, then we don't need the exitData id
+		if (bridge == null || (bridge.isLibraryLoadedByJava() && exitData == null))
+			System.out.println(data);
+		else
+			bridge.setExitData(exitData, data);
 	}
 
 	/**
