@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
@@ -159,7 +160,8 @@ public class AdaptorUtil {
 	public static Version loadVersion(DataInputStream in) throws IOException {
 		String versionString = readString(in, false);
 		try {
-			return Version.parseVersion(versionString);
+			//return Version.parseVersion(versionString);
+			return (Version) ObjectPool.intern(Version.parseVersion(versionString));
 		} catch (IllegalArgumentException e) {
 			return new InvalidVersion(versionString);
 		}

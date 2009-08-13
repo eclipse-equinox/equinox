@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,11 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.util.*;
 import java.util.Map.Entry;
+import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.InvalidSyntaxException;
@@ -39,8 +39,6 @@ final class StateReader {
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
 	final Map objectTable = Collections.synchronizedMap(new HashMap());
-
-	private final Map stringCache = Collections.synchronizedMap(new WeakHashMap());
 
 	private volatile File stateFile;
 	private volatile File lazyFile;
@@ -583,7 +581,8 @@ final class StateReader {
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
-		Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
+		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent));
+		//Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
 		return result;
 	}
 
@@ -618,19 +617,9 @@ final class StateReader {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
-		String result;
 		if (intern)
-			result = in.readUTF().intern();
-		else
-			result = in.readUTF();
-		WeakReference ref = (WeakReference) stringCache.get(result);
-		if (ref != null) {
-			String refString = (String) ref.get();
-			if (refString != null)
-				result = refString;
-		} else
-			stringCache.put(result, new WeakReference(result));
-		return result;
+			return in.readUTF().intern();
+		return (String) ObjectPool.intern(in.readUTF());
 	}
 
 	private byte readTag(DataInputStream in) throws IOException {

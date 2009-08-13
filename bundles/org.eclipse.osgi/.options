@@ -22,6 +22,10 @@ org.eclipse.osgi/debug/packageadmin=false
 org.eclipse.osgi/debug/bundleTime=false
 # Debug the loading of message bundles
 org.eclipse.osgi/debug/messageBundles=false
+# Debug the object pool additions
+org.eclipse.osgi/debug/objectPool/adds=false
+# Debug the object pool duplications
+org.eclipse.osgi/debug/objectPool/dups=false
 
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false

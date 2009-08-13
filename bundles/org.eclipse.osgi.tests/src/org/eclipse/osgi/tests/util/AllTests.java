@@ -17,22 +17,23 @@ import junit.framework.TestSuite;
 public class AllTests extends TestSuite {
 
 	// Test suite to run all text processor session tests
-	public static Test suite(){
+	public static Test suite() {
 		return new AllTests();
 	}
-	
+
 	public AllTests() {
+		addTest(new TestSuite(ObjectPoolTestCase.class));
 		addTest(new TestSuite(ManifestElementTestCase.class));
 		addTest(new TestSuite(NLSTestCase.class));
 		addBidiTests();
 		addLatinTests();
 	}
 
-	private void addBidiTests(){
+	private void addBidiTests() {
 		addTest(new TextProcessorSessionTest("org.eclipse.osgi.tests", BidiTextProcessorTestCase.class, "iw"));
 	}
-	
-	private void addLatinTests(){
+
+	private void addLatinTests() {
 		addTest(new TextProcessorSessionTest("org.eclipse.osgi.tests", LatinTextProcessorTestCase.class, "en"));
 	}
 }
