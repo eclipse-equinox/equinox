@@ -37,13 +37,13 @@ IF x.%1==x.x86_64 GOTO X86_64
 IF x.%1==x.ia64 GOTO IA64
 
 :X86
-IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM-1.5.0
+IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM-1.5.0-20090707-SR10
 set javaHome=%JAVA_HOME%
 if not "%MSVC_HOME%" == "" goto MAKE
-set MSVC_HOME=k:\dev\products\msvc60\vc98
+set MSVC_HOME="C:\Program Files\MS_PLAT_SDK\msvc60\VC98"
 call %MSVC_HOME%\bin\vcvars32.bat
 if not "%mssdk%" == "" goto MAKE
-set mssdk=K:\dev\PRODUCTS\PLATSDK\feb2003
+set mssdk="C:\Program Files\MS_PLAT_SDK\feb2003"
 call %mssdk%\setenv.bat
 IF x.%1==x.x86 shift
 set defaultOSArch=x86
@@ -110,6 +110,7 @@ if "%1" == "" goto WHILE_END
 		goto NEXT )
 	if "%1" == "-java" (
 		set javaHome=%2
+		echo %javaHome%
 		shift
 		goto NEXT )
 :LAST_ARG

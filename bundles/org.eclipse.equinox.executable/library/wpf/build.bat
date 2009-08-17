@@ -33,6 +33,8 @@
 @rem ******
 @echo off
 
+IF x.%1==x.x86 shift
+
 IF NOT "%JAVA_HOME%"=="" GOTO MSVC
 rem *****
 rem Javah
@@ -41,7 +43,7 @@ set JAVA_HOME="C:\Program Files\IBM\Java50"
 
 :MSVC
 
-call "J:\dev\PRODUCTS\PLATSDK\March2007VistaRTM\Bin\setenv.cmd" /vista
+call "C:\Program Files\MS_PLAT_SDK\March2007VistaRTM\Bin\setenv.cmd" /vista
 :MAKE
 
 rem --------------------------
