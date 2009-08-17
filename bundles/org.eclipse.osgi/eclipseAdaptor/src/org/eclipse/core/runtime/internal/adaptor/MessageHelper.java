@@ -13,6 +13,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.util.Date;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Constants;
 
 /**
  * @since 3.3
@@ -21,15 +22,19 @@ public class MessageHelper {
 	public static String getResolutionFailureMessage(VersionConstraint unsatisfied) {
 		if (unsatisfied.isResolved())
 			throw new IllegalArgumentException();
-		if (unsatisfied instanceof ImportPackageSpecification)
+		if (unsatisfied instanceof ImportPackageSpecification) {
+			if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_OPTIONAL_IMPORTED_PACKAGE, toString(unsatisfied));
+			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_DYNAMIC_IMPORTED_PACKAGE, toString(unsatisfied));
 			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_IMPORTED_PACKAGE, toString(unsatisfied));
-		else if (unsatisfied instanceof BundleSpecification)
+		}
+		if (unsatisfied instanceof BundleSpecification) {
 			if (((BundleSpecification) unsatisfied).isOptional())
 				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE, toString(unsatisfied));
-			else
-				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_REQUIRED_BUNDLE, toString(unsatisfied));
-		else
-			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_HOST, toString(unsatisfied));
+			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_REQUIRED_BUNDLE, toString(unsatisfied));
+		}
+		return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_HOST, toString(unsatisfied));
 	}
 
 	/**

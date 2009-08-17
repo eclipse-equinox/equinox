@@ -16,6 +16,8 @@ public class EclipseAdaptorMsg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorMessages"; //$NON-NLS-1$
 
 	public static String ECLIPSE_MISSING_IMPORTED_PACKAGE;
+	public static String ECLIPSE_MISSING_OPTIONAL_IMPORTED_PACKAGE;
+	public static String ECLIPSE_MISSING_DYNAMIC_IMPORTED_PACKAGE;
 	public static String ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE;
 	public static String ECLIPSE_MISSING_REQUIRED_BUNDLE;
 	public static String ECLIPSE_MISSING_HOST;
