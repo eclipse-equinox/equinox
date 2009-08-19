@@ -63,13 +63,14 @@ public interface NativeCodeDescription extends BaseDescription, Comparable {
 	public Filter getFilter();
 
 	/**
-	 * Native code descriptions are sorted in by the following preferences
+	 * Native code descriptions are sorted with the following preferences:
 	 * <ul>
 	 * <li>The minimum version of the os version ranges</li>
 	 * <li>The language<li>
 	 * </ul>
-	 * @param other
-	 * @return
+	 * @param other the native code description to be compared
+	 * @return a negative integer, zero, or a positive integer as this natve
+	 * code description is less than, equal to, or greater than the specified object.
 	 */
 	public int compareTo(Object other);
 
