@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,8 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.framework.internal.core.BundleHost;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
@@ -40,6 +42,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	private static final String RUNTIME_ADAPTOR = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$
+	static final boolean SET_TCCL_XMLFACTORY = "true".equals(FrameworkProperties.getProperty("eclipse.parsers.setTCCL", "true"));//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private BaseAdaptor adaptor;
 	private boolean noXML = false;
@@ -93,9 +96,9 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	private void registerEndorsedXMLParser(BundleContext bc) {
 		try {
 			Class.forName(SAXFACTORYNAME);
-			registrations.add(bc.registerService(SAXFACTORYNAME, new SaxParsingService(), new Hashtable()));
+			registrations.add(bc.registerService(SAXFACTORYNAME, new ParsingService(true), null));
 			Class.forName(DOMFACTORYNAME);
-			registrations.add(bc.registerService(DOMFACTORYNAME, new DomParsingService(), new Hashtable()));
+			registrations.add(bc.registerService(DOMFACTORYNAME, new ParsingService(false), null));
 		} catch (ClassNotFoundException e) {
 			noXML = true;
 			if (Debug.DEBUG && Debug.DEBUG_ENABLED) {
@@ -105,18 +108,42 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		}
 	}
 
-	private class SaxParsingService implements ServiceFactory {
-		public Object getService(Bundle bundle, ServiceRegistration registration) {
-			return SAXParserFactory.newInstance();
+	private static class ParsingService implements ServiceFactory {
+		private final boolean isSax;
+
+		public ParsingService(boolean isSax) {
+			this.isSax = isSax;
 		}
 
-		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-			// Do nothing.
-		}
-	}
-
-	private class DomParsingService implements ServiceFactory {
 		public Object getService(Bundle bundle, ServiceRegistration registration) {
+			BundleHost host = (bundle instanceof BundleHost) ? (BundleHost) bundle : null;
+			if (!SET_TCCL_XMLFACTORY || bundle == null)
+				return createService();
+			/*
+			 * Set the TCCL while creating jaxp factory instances to the
+			 * requesting bundles class loader.  This is needed to 
+			 * work around bug 285505.  There are issues if multiple 
+			 * xerces implementations are available on the bundles class path
+			 * 
+			 * The real issue is that the ContextFinder will only delegate
+			 * to the framework class loader in this case.  This class
+			 * loader forces the requesting bundle to be delegated to for
+			 * TCCL loads.
+			 */
+			final ClassLoader savedClassLoader = Thread.currentThread().getContextClassLoader();
+			try {
+				ClassLoader cl = host.getClassLoader();
+				if (cl != null)
+					Thread.currentThread().setContextClassLoader(cl);
+				return createService();
+			} finally {
+				Thread.currentThread().setContextClassLoader(savedClassLoader);
+			}
+		}
+
+		private Object createService() {
+			if (isSax)
+				return SAXParserFactory.newInstance();
 			return DocumentBuilderFactory.newInstance();
 		}
 

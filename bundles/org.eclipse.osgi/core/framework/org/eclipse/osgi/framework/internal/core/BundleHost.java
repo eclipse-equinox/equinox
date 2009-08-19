@@ -627,4 +627,20 @@ public class BundleHost extends AbstractBundle {
 		bundleDescription.setUserObject(proxy);
 		return proxy;
 	}
+
+	/**
+	 * Gets the class loader for the host bundle.  This may end up 
+	 * creating the bundle class loader if it was not already created.
+	 * A null value may be returned if the bundle is not resolved.
+	 * @return the bundle class loader or null if the bundle is not resolved.
+	 */
+	public ClassLoader getClassLoader() {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new RuntimePermission("getClassLoader")); //$NON-NLS-1$
+		BundleLoaderProxy curProxy = getLoaderProxy();
+		BundleLoader loader = curProxy == null ? null : curProxy.getBundleLoader();
+		BundleClassLoader bcl = loader == null ? null : loader.createClassLoader();
+		return (bcl instanceof ClassLoader) ? (ClassLoader) bcl : null;
+	}
 }

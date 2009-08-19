@@ -377,4 +377,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		return framework.waitForStop(timeout);
 	}
 
+	public ClassLoader getClassLoader() {
+		return getClass().getClassLoader();
+	}
 }
