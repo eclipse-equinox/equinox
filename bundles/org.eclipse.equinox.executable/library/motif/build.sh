@@ -92,6 +92,8 @@ case $OS in
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				javaHome="/opt/java1.5"
 				defaultJava=DEFAULT_JAVA_EXEC
+				PATH=PATH=/opt/hp-gcc/bin:$PATH
+				export PATH
 				;;
         	*)
 				makefile="make_hpux_PA_RISC.mak"
