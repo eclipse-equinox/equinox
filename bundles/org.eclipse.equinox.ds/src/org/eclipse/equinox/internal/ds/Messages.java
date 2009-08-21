@@ -172,7 +172,6 @@ public class Messages extends NLS {
 	public static String SERVICE_EVENT_TYPE;
 	public static String SERVICE_NO_LONGER_USED;
 	public static String SERVICE_REFERENCE_ALREADY_BOUND;
-	public static String SERVICE_REFERENCE_BOUND;
 	public static String SERVICE_UNREGISTERED_BECAUSE_COMP_DISPOSED;
 	public static String SERVICE_USAGE_COUNT;
 	public static String SPECIFIED_ACTIVATE_METHOD_NOT_FOUND;
