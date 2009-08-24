@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -406,7 +406,10 @@ public abstract class NLS {
 				// we know we have a public static non-final field. If we do get an exception, silently
 				// log it and continue. This means that the field will (most likely) be un-initialized and
 				// will fail later in the code and if so then we will see both the NPE and this error.
-				field.set(null, value);
+
+				// Extra care is taken to be sure we create a String with its own backing char[] (bug 287183)
+				// This is to ensure we do not keep the key chars in memory.
+				field.set(null, new String(((String) value).toCharArray()));
 			} catch (Exception e) {
 				log(SEVERITY_ERROR, "Exception setting field value.", e); //$NON-NLS-1$
 			}
