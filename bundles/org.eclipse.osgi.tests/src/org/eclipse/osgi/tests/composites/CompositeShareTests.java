@@ -934,6 +934,13 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		} finally {
 			Thread.currentThread().setContextClassLoader(current);
 		}
+		// test that starting directly works
+		try {
+			testTCCL.stop();
+			testTCCL.start();
+		} catch (BundleException e) {
+			fail("Unepected", e); //$NON-NLS-1$
+		}
 		uninstallCompositeBundle(compositeBundle);
 	}
 

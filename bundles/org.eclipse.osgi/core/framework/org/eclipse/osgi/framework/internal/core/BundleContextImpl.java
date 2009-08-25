@@ -33,6 +33,7 @@ import org.osgi.framework.*;
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
+	private static boolean SET_TCCL = "true".equals(FrameworkProperties.getProperty("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	/** true if the bundle context is still valid */
 	private volatile boolean valid;
 
@@ -810,6 +811,8 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	}
 
 	Object setContextFinder() {
+		if (!SET_TCCL)
+			return Boolean.FALSE;
 		Thread currentThread = Thread.currentThread();
 		ClassLoader previousTCCL = currentThread.getContextClassLoader();
 		ClassLoader contextFinder = framework.getContextFinder();
