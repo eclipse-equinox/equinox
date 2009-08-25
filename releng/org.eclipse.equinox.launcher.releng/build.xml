@@ -1,0 +1,247 @@
+<!--
+    Copyright (c) 2009 IBM Corporation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+        IBM Corporation - initial API and implementation
+ -->
+<project name="Launcher Build" basedir="." default="build">
+	
+	<property name="cvsRoot" value=":pserver:anonymous@dev.eclipse.org:/cvsroot/rt" />
+	<property name="cvsExecutablePath" value="org.eclipse.equinox/framework/bundles/org.eclipse.equinox.executable" />
+	<property name="cvsTag" value="HEAD" />
+	
+	<!-- Macro for execing scp -->
+	<macrodef name="SCP">
+		<attribute name="dir" />
+		<attribute name="source"/>
+		<attribute name="destination" />
+		<attribute name="failonerror" default="true" />
+		<sequential>
+			<echo message="Copying @{source} to @{destination}."/>
+			<exec dir="@{dir}" executable="scp" failonerror="@{failonerror}">
+				<arg value="-q"/>
+				<arg line="@{source}" />
+				<arg value="@{destination}" />
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<!-- macro to resolve properties because we can't do ${${prop}} -->
+	<macrodef name="resolveProperty">
+		<attribute name="name" />
+		<attribute name="value" />
+		<sequential>
+			<condition property="@{name}" value="${@{value}}" >
+				<isset property="@{value}"/>
+			</condition>
+		</sequential>
+	</macrodef>
+	
+	<target name="init_exeFolder" >
+		<!-- set to "bin" or "contributed" according to which folder under org.eclipse.equinox.executable to store the built eclipse -->
+		<condition property="exeFolder" value="contributed" else="bin">
+			<or>
+				<equals arg1="s390" arg2="${arch}" />
+				<equals arg1="s390x" arg2="${arch}" />
+				<equals arg1="motif.sparc" arg2="${ws}.${arch}" />
+				<equals arg1="win32.ia64" arg2="${ws}.${arch}" />
+			</or>
+		</condition>
+	</target>
+	
+	<target name="init_fragment" >
+		<!-- set to "contributed" or "fragments" according to which folder under org.eclipse.equinox.launcher to find the fragment -->
+		<condition property="subFolder" value="contributed" else="fragments">
+			<or>
+				<equals arg1="s390" arg2="${arch}" />
+				<equals arg1="s390x" arg2="${arch}" />
+				<equals arg1="solaris.x86" arg2="${os}.${arch}" />
+			</or>
+		</condition>
+		<!-- mac only has arch in fragment name for x86_64 -->
+		<condition property="fragmentFolder" value="${subFolder}/org.eclipse.equinox.launcher.${ws}.${os}.${arch}" 
+											 else="${subFolder}/org.eclipse.equinox.launcher.${ws}.${os}" >
+			<not>
+				<and>
+					<equals arg1="macosx" arg2="${os}"/>
+					<not> <equals arg1="x86_64" arg2="${arch}"/> </not>
+				</and>
+			</not>
+		</condition>
+	</target>
+
+	<target name="fetchExecutableSource" >
+		<!-- fetch the source and put it in a folder unique to this platform so we don't interfere with other
+		     compiles if the working folder is shared accross multiple machines -->
+		<delete dir="${basedir}/${os}.${ws}.${arch}/library" failonerror="false"/> 
+		<cvs command="export -d ${os}.${ws}.${arch}/library" tag="${cvsTag}" package="${cvsExecutablePath}/library" cvsRoot="${cvsRoot}" dest="${basedir}" quiet="true" failonerror="true"/>
+	</target>
+	
+	<target name="buildNix" if="buildNix">
+		<!-- exec the build.sh for flavors of unix -->
+		<exec dir="${libraryFolder}/${ws}" executable="sh" failonerror="true">
+				<arg value="build.sh"/>
+				<arg line="-ws ${ws} -os ${os} -arch ${arch}"/>
+				<arg line="-java ${javaHome}"/>
+				<arg value="clean all" />
+				<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin" />
+		</exec>	
+		
+		<!-- copy the resulting executable and .so -->
+		<SCP dir="${libraryFolder}/${ws}" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+	</target>
+	
+	<target name="buildWindows" if="buildWindows">
+		<!-- exec the batch file to build on windows -->
+		<exec dir="${libraryFolder}/${ws}" executable="cmd" failonerror="true">
+			<arg value="/c" />
+			<arg value="build.bat" />
+			<arg line="${arch}"/>
+			<arg value="-java"/>
+			<arg value="${javaHome}"/>
+			<arg line="clean all" />
+		</exec>
+		
+		<SCP dir="${libraryFolder}/${ws}" source="eclipse.exe eclipsec.exe" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<condition property="copyWPF">
+			<equals arg1="${ws}" arg2="wpf" />
+		</condition>
+		<antcall target="copyWPF" />
+	</target>
+	
+	<target name="copyWPF" if="copyWPF" >
+		<SCP dir="${libraryFolder}/${ws}" source="com_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
+	</target>
+	
+	<target name="buildMac" if="buildMac">
+		<exec dir="${libraryFolder}/carbon" executable="sh" failonerror="true">
+			<arg value="build.sh"/>
+			<arg line="-ws ${ws} -arch ${arch}"/>
+			<arg value="clean all" />
+			<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:${extraPath}" />
+		</exec>	
+			
+		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS" />
+		<SCP dir="${libraryFolder}/carbon" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<!-- x86 and ppc are the same universal binary, copy to both under the executable feature -->
+		<condition property="copyMacPPC">
+			<equals arg1="${arch}" arg2="x86" />
+		</condition>
+		<antcall target="copyMacPPC" />
+	</target>
+	
+	<target name="copyMacPPC" if="copyMacPPC" >
+		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
+	</target>
+	
+	<target name="determineBuild" >
+		<condition property="buildWindows" >
+			<equals arg1="${os}" arg2="win32"/>
+		</condition>
+		<condition property="buildMac" >
+			<equals arg1="${os}" arg2="macosx" />
+		</condition>
+		<condition property="buildNix" >
+			<not><or>
+				<isset property="buildWindows" />
+				<isset property="buildMac" />
+			</or></not>
+		</condition>
+	</target>
+	
+	<target name="initProperties" >
+		<property name="ws" value="${env.ws}"/>
+		<property name="os" value="${env.os}" />	
+		<property name="arch" value="${env.arch}" />
+		
+		<resolveProperty name="machine" value="m_${os}.${arch}" />
+		<resolveProperty name="javaArg" value="j_${os}.${arch}" />
+		<resolveProperty name="userName" value="u_${os}.${arch}" />
+		
+		<!-- windows is built locally, everything else is remote -->
+		<condition property="local" >
+			<equals arg1="${os}" arg2="win32"/>
+		</condition>
+		<condition property="remote" >
+			<not> <isset property="local"/> </not>
+		</condition>
+		
+		<!-- working directory defaults for our machines.  Others should
+		     pass in workspace as a property on the command line  -->
+		<condition property="workspace" value="/Users/swtbuild/build/equinox" >
+			<equals arg1="${os}" arg2="macosx"/>
+		</condition>
+		<condition property="workspace" value="~/equinox" >
+			<equals arg1="${os}.${arch}" arg2="solaris.x86" />
+		</condition>
+		<property name="workspace" value="/bluebird/teamswt/equinox" />
+	</target>
+	
+	
+	<!-- 
+		Main entry point.  We expect the following properties:
+			 os, ws, arch  - to be passed as ant properties or set as environment variables.
+			 resultsBaseFolder - location to scp the resulting binaries to, usually a workspace containing the executable & launcher projects (eg: user@machine:~/workspace)
+			 m_<os>.<arch> - name of a machine to ssh to for this os & arch
+			 u_<os>.<arch> - optional user on the machine for this platform
+			 j_<os>.<arch> - location of a jdk we can compile against
+		We expect ssh keys to be set up so that we don't need passwords
+		
+		The j_<os>.<arch> properties work together with remote.sh, and are either
+		   -javaHome /path/to/jdk
+		or -java relative/path/to/jdk
+	-->
+	<target name="build" depends="initProperties">
+		<echo message="Building for ${os}, ${ws}, ${arch}"/>
+		<antcall target="buildLocal" />
+		<antcall target="buildRemote" />
+	</target>
+	
+	<target name="buildLocal" if="local" >
+		<condition property="javaHome" value="${j_win32}" else="${java.home}" >
+			<isset property="j_win32"/>
+		</condition>
+		<antcall target="buildConfig" />
+	</target>
+	
+	<target name="buildRemote" if="remote">
+		<echo message="Machine: ${machine}" />
+		<condition property="scpDest" value="${userName}@${machine}" else="${machine}" >
+			<isset property="userName" />
+		</condition>
+		<condition property="sshUser" value="-l ${userName}" else="" >
+			<isset property="userName" />
+		</condition>
+		<SCP dir="${basedir}" source="remote.sh build.xml" destination="${scpDest}:${workspace}" />
+		<echo message="Execing ssh ${machine}" />
+		<exec executable="ssh" failonerror="true" >
+			<arg line="${sshUser} ${machine}" />
+			<arg line="sh ${workspace}/remote.sh" />
+			<arg line="${javaArg}" />
+			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch}" />
+			<arg value="-DresultsBaseFolder=${resultsBaseFolder}" />
+		</exec>
+	</target>
+
+	<target name="buildConfig" depends="init_exeFolder,init_fragment,determineBuild" >
+		<antcall target="fetchExecutableSource" />
+		<property name="javaHome" value="${java.home}/.." />
+		<property name="libraryFolder" value="${basedir}/${os}.${ws}.${arch}/library" />
+		<property file="${libraryFolder}/make_version.mak" />
+		
+		<antcall target="buildNix" />
+		<antcall target="buildWindows" />
+		<antcall target="buildMac" />
+	</target>
+	
+</project>
+
+
+
+
