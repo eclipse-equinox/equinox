@@ -23,6 +23,7 @@ import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.*;
 import org.osgi.service.packageadmin.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
+import org.osgi.service.startlevel.StartLevel;
 
 public class SecurityManagerTests extends AbstractBundleTests {
 	private static final PermissionInfo hostFragmentPermission = new PermissionInfo(BundlePermission.class.getName(), "*", "host,fragment"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -450,6 +451,65 @@ public class SecurityManagerTests extends AbstractBundleTests {
 			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
 		}
 
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
+	public void testBug287750() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+
+		Bundle testBundle = null;
+		try {
+			String locationTestBundle = installer.getBundleLocation("test.bug287750"); //$NON-NLS-1$
+			testBundle = systemContext.installBundle(locationTestBundle);
+		} catch (BundleException e) {
+			fail("Failed to install security test bundles", e); //$NON-NLS-1$
+		}
+
+		try {
+			testBundle.start();
+		} catch (BundleException e) {
+			fail("Failed to start security.b bundle", e); //$NON-NLS-1$
+		}
+		StartLevel sl = (StartLevel) systemContext.getService(systemContext.getServiceReference(StartLevel.class.getName()));
+		if (sl.getStartLevel() != 10)
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e1) {
+				// nothing
+			}
+		assertEquals("Wrong startlevel", 10, sl.getStartLevel()); //$NON-NLS-1$
 		try {
 			equinox.stop();
 		} catch (BundleException e) {

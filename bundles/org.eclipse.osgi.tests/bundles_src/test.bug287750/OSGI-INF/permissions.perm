@@ -1,0 +1,3 @@
+(org.osgi.framework.PackagePermission "*" "import")
+(org.osgi.framework.ServicePermission "*" "GET")
+(org.osgi.framework.AdminPermission "*" "*")

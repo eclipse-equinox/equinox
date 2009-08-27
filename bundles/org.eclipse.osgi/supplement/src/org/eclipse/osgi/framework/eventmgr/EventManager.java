@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 
 /**
@@ -189,10 +191,15 @@ public class EventManager {
 		}
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
-			thread = new EventThread(threadGroup, threadName);
-			thread.start(); /* start the new thread */
+			thread = (EventThread) AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					EventThread t = new EventThread(threadGroup, threadName);
+					return t;
+				}
+			});
+			/* start the new thread */
+			thread.start();
 		}
-
 		return thread;
 	}
 

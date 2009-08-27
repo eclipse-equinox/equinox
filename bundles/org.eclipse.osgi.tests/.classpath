@@ -106,6 +106,7 @@
 	<classpathentry kind="src" output="bundle_tests/test.bug287636.a1" path="bundles_src/test.bug287636.a1"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug287636.a2" path="bundles_src/test.bug287636.a2"/>
 	<classpathentry kind="src" output="bundle_tests/test.bug287636.b" path="bundles_src/test.bug287636.b"/>
+	<classpathentry kind="src" output="bundle_tests/test.bug287750" path="bundles_src/test.bug287750"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
