@@ -136,7 +136,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			return retval;
 		}
 		// handle "disconnect" command here
-		if (cmd.equalsIgnoreCase("disconnect") && con.getUseSocketStream()) { //$NON-NLS-1$
+		if (cmd.equalsIgnoreCase("disconnect")) { //$NON-NLS-1$
 			try {
 				_disconnect();
 			} catch (Exception e) {
@@ -403,12 +403,10 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		help.append(tab);
 		help.append("more - "); //$NON-NLS-1$
 		help.append(ConsoleMsg.CONSOLE_HELP_MORE);
-		if (con.getUseSocketStream()) {
-			help.append(newline);
-			help.append(tab);
-			help.append("disconnect - "); //$NON-NLS-1$
-			help.append(ConsoleMsg.CONSOLE_HELP_DISCONNECT);
-		}
+		help.append(newline);
+		help.append(tab);
+		help.append("disconnect - "); //$NON-NLS-1$
+		help.append(ConsoleMsg.CONSOLE_HELP_DISCONNECT);
 		help.append(newline);
 		return help.toString();
 	}
@@ -428,7 +426,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 
 	private void _disconnect() throws Exception {
 		if (confirm(ConsoleMsg.CONSOLE_CONFIRM_DISCONNECT, true)) {
-			con.disconnect();
+			con.shutdown();
 		}
 	}
 

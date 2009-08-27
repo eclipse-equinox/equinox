@@ -12,11 +12,9 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.net.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.osgi.framework.console.ConsoleSession;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -28,124 +26,29 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class FrameworkConsole implements Runnable {
 	/** The stream to receive commands on  */
-	protected BufferedReader in;
+	private final BufferedReader in;
 	/** The stream to write command results to */
-	protected PrintWriter out;
+	private final PrintWriter out;
 	/** The current bundle context */
-	protected final org.osgi.framework.BundleContext context;
-	/** The command line arguments passed at launch time*/
-	protected final String[] args;
-	/** The OSGi Command Provider */
-	protected final CommandProvider osgicp;
+	private final BundleContext context;
 	/** A tracker containing the service object of all registered command providers */
-	protected final ServiceTracker cptracker;
-
+	private final ServiceTracker cptracker;
+	private final ConsoleSession consoleSession;
+	private final boolean isSystemInOut;
 	/** Default code page which must be supported by all JVMs */
 	static final String defaultEncoding = "iso8859-1"; //$NON-NLS-1$
 	/** The current setting for code page */
 	static final String encoding = FrameworkProperties.getProperty("osgi.console.encoding", FrameworkProperties.getProperty("file.encoding", defaultEncoding)); //$NON-NLS-1$ //$NON-NLS-2$
-
-	/** set to true if accepting commands from port */
-	protected final boolean useSocketStream;
-	protected boolean disconnect = false;
-	protected final int port;
-	protected ConsoleSocketGetter scsg = null;
-	protected Socket s;
-	boolean blockOnready = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final boolean blockOnready = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
 	volatile boolean shutdown = false;
 
-	/**
-	 Constructor for FrameworkConsole.
-	 It creates a service tracker to track CommandProvider registrations.
-	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	 @param framework - an instance of an osgi framework
-	 @param args - any arguments passed on the command line when Launcher is started.
-	 */
-	public FrameworkConsole(Framework framework, String[] args) {
-		this(framework, args, 0, false);
-	}
-
-	/**
-	 Constructor for FrameworkConsole.
-	 It creates a service tracker to track CommandProvider registrations.
-	 The console InputStream is set to System.in and the console PrintStream is set to System.out.
-	 @param framework - an instance of an osgi framework
-	 @param args - any arguments passed on the command line when Launcher is started.
-	 */
-	public FrameworkConsole(Framework framework, int port, String[] args) {
-		this(framework, args, port, true);
-	}
-
-	private FrameworkConsole(Framework framework, String[] args, int port, boolean useSocketStream) {
-		this.args = args;
-		this.useSocketStream = useSocketStream;
-		this.port = port;
-		this.context = framework.systemBundle.getContext();
-
-		// set up a service tracker to track CommandProvider registrations
-		this.cptracker = new ServiceTracker(context, CommandProvider.class.getName(), null);
-		this.cptracker.open();
-
-		// register the OSGi command provider
-		this.osgicp = new FrameworkCommandProvider(framework).intialize();
-	}
-
-	/**
-	 *  Open streams for system.in and system.out
-	 */
-	private void getDefaultStreams() {
-		InputStream is = new FilterInputStream(System.in) {
-			public void close() throws IOException {
-				// We don't want to close System.in
-			}
-		};
-		in = createBufferedReader(is);
-
-		OutputStream os = new FilterOutputStream(System.out) {
-			public void close() throws IOException {
-				// We don't want to close System.out
-			}
-
-			public void write(byte[] var0, int var1, int var2) throws IOException {
-				this.out.write(var0, var1, var2);
-			}
-
-		};
-		out = createPrintWriter(os);
-		disconnect = false;
-	}
-
-	/**
-	 *  Open a socket and create input and output streams
-	 */
-	private boolean getSocketStream() {
-		try {
-			synchronized (this) {
-				if (scsg == null)
-					scsg = new ConsoleSocketGetter(new ServerSocket(port));
-				scsg.setAcceptConnections(true);
-			}
-
-			// Print message containing port console actually bound to..
-			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, Integer.toString(scsg.getLocalPort())));
-
-			// get socket outside of sync block
-			Socket temp = scsg.getSocket();
-			if (temp == null)
-				return false;
-			synchronized (this) {
-				s = temp;
-				in = createBufferedReader(s.getInputStream());
-				out = createPrintWriter(s.getOutputStream());
-				disconnect = false;
-			}
-			return true;
-		} catch (UnknownHostException uhe) {
-			uhe.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return false;
+	public FrameworkConsole(BundleContext context, ConsoleSession consoleSession, boolean isSystemInOut, ServiceTracker cptracker) {
+		this.context = context;
+		this.cptracker = cptracker;
+		this.isSystemInOut = isSystemInOut;
+		this.consoleSession = consoleSession;
+		in = createBufferedReader(consoleSession.getInput());
+		out = createPrintWriter(consoleSession.getOutput());
 	}
 
 	/**
@@ -154,7 +57,7 @@ public class FrameworkConsole implements Runnable {
 	 * @param _in An InputStream to wrap with a BufferedReader
 	 * @return a BufferedReader
 	 */
-	private BufferedReader createBufferedReader(InputStream _in) {
+	static BufferedReader createBufferedReader(InputStream _in) {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new InputStreamReader(_in, encoding));
@@ -171,12 +74,12 @@ public class FrameworkConsole implements Runnable {
 	 * @param _out An OutputStream to wrap with a PrintWriter
 	 * @return a PrintWriter
 	 */
-	PrintWriter createPrintWriter(OutputStream _out) {
+	static PrintWriter createPrintWriter(OutputStream _out) {
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(_out, encoding)), true);
 		} catch (UnsupportedEncodingException uee) {
-			// if the encoding is not supported by the jvm, punt and use whatever encodiing there is
+			// if the encoding is not supported by the jvm, punt and use whatever encoding there is
 			writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(_out)), true);
 		}
 		return writer;
@@ -191,99 +94,50 @@ public class FrameworkConsole implements Runnable {
 	}
 
 	/**
-	 *  Return the current input BufferedReader
-	 * @return The currently active BufferedReader
-	 */
-	public BufferedReader getReader() {
-		return in;
-	}
-
-	/**
-	 *  Return if the SocketSteam (telnet to the console) is being used 
-	 * @return Return if the SocketSteam is being used 
-	 */
-	public boolean getUseSocketStream() {
-		return useSocketStream;
-	}
-
-	/**
-	 * Begin doing the active part of the class' code. Starts up the console.
+	 * Command Line Interface for OSGi. The method processes the initial commands
+	 * and then reads and processes commands from the console InputStream.
+	 * Command output is written to the console PrintStream. The method will
+	 * loop reading commands from the console InputStream until end-of-file
+	 * is reached. This method will then return.
+	 * @throws IOException
 	 */
 	public void run() {
-		// always grab the default streams
-		getDefaultStreams();
 		try {
-			// process any arguments from the command line
-			console(args);
-		} catch (IOException e) {
-			e.printStackTrace(out);
-		}
-		while (!shutdown) {
-			if (useSocketStream && !getSocketStream())
-				return;
-			console();
+			runConsole();
+		} finally {
+			// ensure the console is shutdown before exiting the thread
+			shutdown();
 		}
 	}
 
-	/**
-	 * Command Line Interface for OSGi. The method processes the initial commands
-	 * and then reads and processes commands from the console InputStream.
-	 * Command output is written to the console PrintStream. The method will
-	 * loop reading commands from the console InputStream until end-of-file
-	 * is reached. This method will then return.
-	 *
-	 * @param args Initial set of commands to execute.
-	 * @throws IOException
-	 */
-	public void console(String args[]) throws IOException {
-		// first handle any args passed in from launch
-		if (args != null) {
-			for (int i = 0; i < args.length; i++) {
-				docommand(args[i]);
-			}
-		}
-	}
-
-	/**
-	 * Command Line Interface for OSGi. The method processes the initial commands
-	 * and then reads and processes commands from the console InputStream.
-	 * Command output is written to the console PrintStream. The method will
-	 * loop reading commands from the console InputStream until end-of-file
-	 * is reached. This method will then return.
-	 * @throws IOException
-	 */
-	protected void console() {
+	private void runConsole() {
 		// wait to receive commands from console and handle them
-		BufferedReader br = in;
 		//cache the console prompt String
 		String consolePrompt = "\r\n" + ConsoleMsg.CONSOLE_PROMPT; //$NON-NLS-1$
-		while (!disconnected()) {
+		while (!shutdown) {
 			out.print(consolePrompt);
 			out.flush();
 
 			String cmdline = null;
 			try {
-				if (blockOnready && !useSocketStream) {
+				if (blockOnready && isSystemInOut) {
 					// bug 40066: avoid waiting on input stream - apparently generates contention with other native calls 
 					try {
-						while (!br.ready())
+						while (!in.ready())
 							Thread.sleep(300);
-						cmdline = br.readLine();
+						cmdline = in.readLine();
 					} catch (InterruptedException e) {
 						// do nothing; probably got disconnected
 					}
 				} else
-					cmdline = br.readLine();
+					cmdline = in.readLine();
 			} catch (IOException ioe) {
 				if (!shutdown)
 					ioe.printStackTrace(out);
 			}
-			if (cmdline == null) {
-				if (!useSocketStream)
-					// better shutdown; the standard console has failed us.  Don't want to get in an endless loop (bug 212313) (bug 226053)
-					shutdown();
+			if (cmdline == null)
+				// we assume the session is done and break out of the loop.
 				break;
-			}
 			if (!shutdown)
 				docommand(cmdline);
 		}
@@ -303,40 +157,6 @@ public class FrameworkConsole implements Runnable {
 				intcp.execute(command);
 			}
 		}
-	}
-
-	/**
-	 * Disconnects from console if useSocketStream is set to true.  This
-	 * will cause the console to close from a telnet session.
-	 */
-	public synchronized void disconnect() {
-		if (!disconnect) {
-			disconnect = true;
-			// We don't want to close System.in and System.out
-			if (useSocketStream) {
-				if (s != null)
-					try {
-						s.close();
-					} catch (IOException ioe) {
-						// do nothing
-					}
-				if (out != null)
-					out.close();
-				if (in != null)
-					try {
-						in.close();
-					} catch (IOException ioe) {
-						// do nothing
-					}
-			}
-		}
-	}
-
-	/**
-	 * @return are we still connected?
-	 */
-	private synchronized boolean disconnected() {
-		return disconnect;
 	}
 
 	/**
@@ -382,115 +202,10 @@ public class FrameworkConsole implements Runnable {
 	 * Stops the console so the thread can be GC'ed
 	 */
 	public synchronized void shutdown() {
+		if (shutdown)
+			return;
 		shutdown = true;
-		cptracker.close();
-		disconnect();
-		if (scsg != null)
-			try {
-				scsg.shutdown();
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-			}
-	}
-
-	/**
-	 * ConsoleSocketGetter - provides a Thread that listens on the port
-	 * for FrameworkConsole.  If acceptConnections is set to true then
-	 * the thread will notify the getSocket method to return the socket.
-	 * If acceptConnections is set to false then the client is notified
-	 * that connections are not currently accepted and closes the socket.
-	 */
-	class ConsoleSocketGetter implements Runnable {
-
-		/** The ServerSocket to accept connections from */
-		private final ServerSocket server;
-		/** The current socket to be returned by getSocket */
-		private Socket socket;
-		/** if set to true then allow the socket to be returned by getSocket */
-		private boolean acceptConnections = true;
-		/** Lock object to synchronize returning of the socket */
-		private final Object lock = new Object();
-
-		/**
-		 * Constructor - sets the server and starts the thread to
-		 * listen for connections.
-		 *
-		 * @param server a ServerSocket to accept connections from
-		 */
-		ConsoleSocketGetter(ServerSocket server) {
-			this.server = server;
-			try {
-				Method reuseAddress = server.getClass().getMethod("setReuseAddress", new Class[] {boolean.class}); //$NON-NLS-1$
-				reuseAddress.invoke(server, new Object[] {Boolean.TRUE});
-			} catch (Exception ex) {
-				// try to set the socket re-use property, it isn't a problem if it can't be set
-			}
-			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
-			t.setDaemon(true);
-			t.start();
-		}
-
-		/**
-		 * Returns the local port used for the server socket
-		 * @return
-		 */
-		public int getLocalPort() {
-			return server.getLocalPort();
-		}
-
-		public void run() {
-			while (!shutdown) {
-				try {
-					socket = server.accept();
-					if (!acceptConnections) {
-						PrintWriter o = createPrintWriter(socket.getOutputStream());
-						o.println(ConsoleMsg.CONSOLE_TELNET_CONNECTION_REFUSED);
-						o.println(ConsoleMsg.CONSOLE_TELNET_CURRENTLY_USED);
-						o.println(ConsoleMsg.CONSOLE_TELNET_ONE_CLIENT_ONLY);
-						o.close();
-						socket.close();
-					} else {
-						synchronized (lock) {
-							lock.notify();
-						}
-					}
-				} catch (Exception e) {
-					if (!shutdown)
-						e.printStackTrace();
-				}
-
-			}
-		}
-
-		/**
-		 * Method to get a socket connection from a client.
-		 *
-		 * @return - Socket from a connected client
-		 */
-		public Socket getSocket() throws InterruptedException {
-			// wait for a socket to get assigned from the accepter thread
-			synchronized (lock) {
-				lock.wait(); //TODO spurious wakeup not handled
-			}
-			setAcceptConnections(false);
-			return shutdown ? null : socket;
-		}
-
-		/**
-		 * Method to indicate if connections are accepted or not.  If set
-		 * to false then the clients will be notified that connections
-		 * are not accepted.
-		 */
-		public void setAcceptConnections(boolean acceptConnections) {
-			this.acceptConnections = acceptConnections;
-		}
-
-		public void shutdown() throws IOException {
-			server.close();
-			synchronized (lock) {
-				lock.notify();
-			}
-		}
+		consoleSession.close();
 	}
 
 }

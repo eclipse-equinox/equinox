@@ -37,10 +37,6 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_LISTENING_ON_PORT;
 	public static String CONSOLE_PROMPT;
 
-	public static String CONSOLE_TELNET_CONNECTION_REFUSED;
-	public static String CONSOLE_TELNET_CURRENTLY_USED;
-	public static String CONSOLE_TELNET_ONE_CLIENT_ONLY;
-
 	public static String CONSOLE_HELP_CONTROLLING_FRAMEWORK_HEADER;
 	public static String CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION;
 	public static String CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION;

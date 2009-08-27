@@ -77,17 +77,17 @@ import org.osgi.service.packageadmin.RequiredBundle;
 public class FrameworkCommandProvider implements CommandProvider, SynchronousBundleListener {
 
 	/** An instance of the OSGi framework */
-	private Framework framework;
+	private final Framework framework;
 	/** The system bundle context */
-	private org.osgi.framework.BundleContext context;
+	private final BundleContext context;
 	/** The start level implementation */
-	private StartLevelManager slImpl;
-	private SecurityAdmin securityAdmin;
-	private PlatformAdmin platAdmin;
+	private final StartLevelManager slImpl;
+	private final SecurityAdmin securityAdmin;
+	private ServiceRegistration providerReg;
 
 	/** Strings used to format other strings */
-	private String tab = "\t"; //$NON-NLS-1$
-	private String newline = "\r\n"; //$NON-NLS-1$
+	private final static String tab = "\t"; //$NON-NLS-1$
+	private final static String newline = "\r\n"; //$NON-NLS-1$
 
 	/** this list contains the bundles known to be lazily awaiting activation */
 	private final List lazyActivation = new ArrayList();
@@ -107,20 +107,22 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	}
 
 	/**
-	 *  Intialize this CommandProvider.
+	 *  Starts this CommandProvider.
 	 *
 	 *  Registers this object as a CommandProvider with the highest ranking possible.
 	 *  Adds this object as a SynchronousBundleListener.
-	 *
-	 *	@return this
 	 */
-	public FrameworkCommandProvider intialize() {
+	void start() {
 		Dictionary props = new Hashtable();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
-		context.registerService(CommandProvider.class.getName(), this, props);
-
+		providerReg = context.registerService(CommandProvider.class.getName(), this, props);
 		context.addBundleListener(this);
-		return this;
+	}
+
+	void stop() {
+		context.removeBundleListener(this);
+		if (providerReg != null)
+			providerReg.unregister();
 	}
 
 	/**
@@ -1689,7 +1691,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		try {
 			platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
 			if (platformAdminRef != null) {
-				platAdmin = (PlatformAdmin) context.getService(platformAdminRef);
+				PlatformAdmin platAdmin = (PlatformAdmin) context.getService(platformAdminRef);
 				if (platAdmin != null) {
 					State state = platAdmin.getState(false);
 					BundleDescription bundleDesc = state.getBundle(bundle.getBundleId());
