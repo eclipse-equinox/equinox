@@ -51,7 +51,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		ALLPERMISSIONS = allPerm.newPermissionCollection();
 		if (ALLPERMISSIONS != null)
 			ALLPERMISSIONS.add(allPerm);
-		boolean typeParallel = CLASS_LOADER_TYPE_PARALLEL.equals(FrameworkProperties.getProperty(CLASS_LOADER_TYPE));
+		boolean typeParallel = CLASS_LOADER_TYPE_PARALLEL.equals(FrameworkProperties.getProperty(CLASS_LOADER_TYPE, CLASS_LOADER_TYPE_PARALLEL));
 		boolean parallelCapable = false;
 		try {
 			if (typeParallel) {
