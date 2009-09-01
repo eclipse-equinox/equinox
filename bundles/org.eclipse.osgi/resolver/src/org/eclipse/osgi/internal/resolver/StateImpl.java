@@ -805,9 +805,19 @@ public abstract class StateImpl implements State {
 		return symbolicName != null ? symbolicName : Constants.getInternalSymbolicName();
 	}
 
+	/**
+	 * Returns the latest versions BundleDescriptions which have old removal pending versions.
+	 * @return the BundleDescriptions that have removal pending versions.
+	 */
 	public BundleDescription[] getRemovalPendings() {
 		synchronized (this.monitor) {
-			return (BundleDescription[]) removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+			Iterator removed = removalPendings.iterator();
+			BundleDescription[] result = new BundleDescription[removalPendings.size()];
+			int i = 0;
+			while (removed.hasNext())
+				// we return the latest version of the description if it is still contained in the state (bug 287636)
+				result[i++] = getBundle(((BundleDescription) removed.next()).getBundleId());
+			return result;
 		}
 	}
 

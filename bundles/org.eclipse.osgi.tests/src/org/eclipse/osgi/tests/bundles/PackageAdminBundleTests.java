@@ -136,6 +136,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bundle bug287636a = installer.installBundle("test.bug287636.a1"); //$NON-NLS-1$
 		Bundle bug287636b = installer.installBundle("test.bug287636.b"); //$NON-NLS-1$
 		try {
+			bug287636a.start();
+			bug287636b.start();
 			assertTrue("Bundles are not resolved", installer.resolveBundles(new Bundle[] {bug287636a, bug287636b})); //$NON-NLS-1$
 			ExportedPackage ep = installer.getPackageAdmin().getExportedPackage("test.bug287636.a"); //$NON-NLS-1$
 			assertNotNull("Could not find exported package", ep); //$NON-NLS-1$
@@ -143,7 +145,13 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			// update bundle to export new 1.1.0 version of the pacakge
 			String updateLocation = installer.getBundleLocation("test.bug287636.a2"); //$NON-NLS-1$
 			bug287636a.update(new URL(updateLocation).openStream());
-
+			bug287636b.update();
+			updateLocation = installer.getBundleLocation("test.bug287636.a1"); //$NON-NLS-1$
+			bug287636a.update(new URL(updateLocation).openStream());
+			bug287636b.update();
+			updateLocation = installer.getBundleLocation("test.bug287636.a2"); //$NON-NLS-1$
+			bug287636a.update(new URL(updateLocation).openStream());
+			bug287636b.update();
 			installer.refreshPackages(null);
 			ep = installer.getPackageAdmin().getExportedPackage("test.bug287636.a"); //$NON-NLS-1$
 
