@@ -332,6 +332,8 @@ static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 
 #ifdef _WIN32
 static void     createConsole();
+static int 		isConsoleLauncher();
+static int      consoleLauncher = 0;
 #endif
 
 /* Record the arguments that were used to start the original executable */
@@ -370,6 +372,9 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    	 * it now.
    	 */
     initWindowSystem( &argc, argv, !noSplash );
+#elif _WIN32
+    /* this must be before doing any console stuff */
+    consoleLauncher = isConsoleLauncher();
 #endif
     
     /* Find the directory where the Eclipse program is installed. */
@@ -1186,6 +1191,20 @@ static void createConsole() {
 		*stderr = *fp;
 	}
 }
+
+/* Determine if the launcher was the eclipsec.exe or not based on whether we have an attached console.
+ * This will only be correct if called before createConsole.
+ */
+static int isConsoleLauncher() {
+	HWND (WINAPI *GetConsoleWindow)();
+	void * handle = loadLibrary(_T_ECLIPSE("Kernel32.dll"));
+	if (handle != NULL) {
+		if ( (GetConsoleWindow = findSymbol(handle, _T_ECLIPSE("GetConsoleWindow"))) != NULL) {
+			return GetConsoleWindow() != NULL;
+		}
+	}
+	return 0;
+}
 #endif
 
 /*
@@ -1199,7 +1218,13 @@ static int determineVM(_TCHAR** msg) {
 	_TCHAR* ch  = NULL;
 	_TCHAR* result = NULL;
 	_TCHAR* vmSearchPath = NULL;
+	_TCHAR* defaultJava = defaultVM; /* default exe to look for */
 	int type = 0;
+	
+#ifdef _WIN32
+	if (debug || needConsole || consoleLauncher)
+		defaultJava = consoleVM; /* windows will want java.exe for the console, not javaw.exe */
+#endif
 	
 	/* vmName is passed in on command line with -vm */
     if (vmName != NULL) {
@@ -1221,8 +1246,8 @@ static int determineVM(_TCHAR** msg) {
     		free(ch);
     		if (result == NULL) {
     			/* No default.ee file, look for default VM */
-    			ch = malloc((_tcslen(vmName) + 1 + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
-    			_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, defaultVM );
+    			ch = malloc((_tcslen(vmName) + 1 + _tcslen(defaultJava) + 1) * sizeof(_TCHAR));
+    			_stprintf( ch, _T_ECLIPSE("%s%c%s"), vmName, dirSeparator, defaultJava );
     			javaVM = findSymlinkCommand(ch, 0);
     			free(ch);
     			if (javaVM == NULL) {
@@ -1236,9 +1261,9 @@ static int determineVM(_TCHAR** msg) {
     					return LAUNCH_JNI;
     				}
     				/* found nothing, return error */
-    				*msg = malloc( (3 * (_tcslen(vmName) + 2) + _tcslen(DEFAULT_EE) + _tcslen(defaultVM) + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
+    				*msg = malloc( (3 * (_tcslen(vmName) + 2) + _tcslen(DEFAULT_EE) + _tcslen(defaultJava) + _tcslen(vmLibrary) + 1) * sizeof(_TCHAR));
     				_stprintf( *msg, _T_ECLIPSE("%s%c%s\n%s%c%s\n%s%c%s"), vmName, dirSeparator, DEFAULT_EE, 
-    																	   vmName, dirSeparator, defaultVM,
+    																	   vmName, dirSeparator, defaultJava,
     																	   vmName, dirSeparator, vmLibrary);
     				return -1;
     			}
@@ -1259,7 +1284,7 @@ static int determineVM(_TCHAR** msg) {
     				return LAUNCH_JNI;
     		}
     			
-    		if (eeConsole != NULL && (debug || needConsole) ) {
+    		if (eeConsole != NULL && (debug || needConsole || consoleLauncher) ) {
     			javaVM = findSymlinkCommand(eeConsole, 0);
     			if (javaVM != NULL)
     				return LAUNCH_EXE;
@@ -1317,8 +1342,8 @@ static int determineVM(_TCHAR** msg) {
     
     if (vmName == NULL) {
     	/* no vm specified, Try to find the VM shipped with eclipse. */
-        ch = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( defaultVM ) + 10) * sizeof(_TCHAR) );
-        _stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, defaultVM );
+        ch = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( defaultJava ) + 10) * sizeof(_TCHAR) );
+        _stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, defaultJava );
         vmSearchPath = _tcsdup(ch);
  
         javaVM = findSymlinkCommand( ch, 0 );
@@ -1327,11 +1352,11 @@ static int determineVM(_TCHAR** msg) {
     
     if (javaVM == NULL) {
     	/* vm not found yet, look for one on the search path, but don't resolve symlinks */
-    	javaVM = findSymlinkCommand(defaultVM, 0);
+    	javaVM = findSymlinkCommand(defaultJava, 0);
     	if (javaVM == NULL) {
     		/* can't find vm, error */
-    		ch = malloc( (_tcslen(pathMsg) + _tcslen(defaultVM) + 1) * sizeof(_TCHAR));
-    		_stprintf(ch, pathMsg, defaultVM);
+    		ch = malloc( (_tcslen(pathMsg) + _tcslen(defaultJava) + 1) * sizeof(_TCHAR));
+    		_stprintf(ch, pathMsg, defaultJava);
     		
     		if(vmSearchPath != NULL) {
     			*msg = malloc((_tcslen(ch) + 1 + _tcslen(vmSearchPath) + 1) * sizeof(_TCHAR));

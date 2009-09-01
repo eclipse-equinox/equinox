@@ -19,6 +19,7 @@
 #ifdef UNICODE
 #define shippedVMDir shippedVMDirW
 #define defaultVM defaultVMW
+#define consoleVM consoleVMW
 #define initWindowSystem initWindowSystemW
 #define showSplash showSplashW
 #define getArgVM getArgVMW
@@ -50,6 +51,9 @@
 
 /* Global Variables */
 extern _TCHAR*  defaultVM;   			/* name of VM to use normally      */
+#ifdef _WIN32
+extern _TCHAR*  consoleVM;				/* windows needs a different vm executable for the console */
+#endif
 extern _TCHAR*  shippedVMDir;			/* VM bin directory with separator */
 extern _TCHAR*  exitData;		  		/* exit data set from Java */
 extern _TCHAR*  vmLibrary;				/* name of the VM shared library */

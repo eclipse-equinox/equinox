@@ -39,7 +39,7 @@ IF x.%1==x.ia64 GOTO IA64
 :X86
 IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM-1.5.0-20090707-SR10
 set javaHome=%JAVA_HOME%
-if not "%MSVC_HOME%" == "" goto MAKE
+if not x.%MSVC_HOME% == x. goto MAKE
 set MSVC_HOME="C:\Program Files\MS_PLAT_SDK\msvc60\VC98"
 call %MSVC_HOME%\bin\vcvars32.bat
 if not "%mssdk%" == "" goto MAKE

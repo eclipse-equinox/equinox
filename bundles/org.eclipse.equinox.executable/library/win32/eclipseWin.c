@@ -31,6 +31,7 @@ extern HWND topWindow;
 
 /* Global Variables */
 _TCHAR*  defaultVM     = _T("javaw.exe");
+_TCHAR*  consoleVM     = _T("java.exe");
 _TCHAR*  vmLibrary 	   = _T("jvm.dll");
 _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 
