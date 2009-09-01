@@ -44,6 +44,13 @@ void setExitData(JNIEnv *env, jstring id, jstring s);
 static JavaVM * jvm = 0;
 static JNIEnv *env = 0;
 
+/* cache String class and methods to avoid looking them up all the time */
+static jclass string_class = NULL;
+#if !defined(UNICODE) && !defined(MACOSX)
+static jmethodID string_getBytesMethod = NULL;
+static jmethodID string_ctor = NULL;
+#endif
+
 /* JNI Methods                                 
  * we only want one version of the JNI functions 
  * Because there are potentially ANSI and UNICODE versions of everything, we need to be
@@ -187,11 +194,13 @@ static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
 #else
 	/* Other platforms, use java's default encoding */ 
 	_TCHAR* buffer = NULL;
-	jclass stringClass = (*env)->FindClass(env, "java/lang/String");
-	if (stringClass != NULL) {
-		jmethodID getBytesMethod = (*env)->GetMethodID(env, stringClass, "getBytes", "()[B");
-		if (getBytesMethod != NULL) {
-			jbyteArray bytes = (*env)->CallObjectMethod(env, str, getBytesMethod);
+	if (string_class == NULL)
+		string_class = (*env)->FindClass(env, "java/lang/String");
+	if (string_class != NULL) {
+		if (string_getBytesMethod == NULL)
+			string_getBytesMethod = (*env)->GetMethodID(env, string_class, "getBytes", "()[B");
+		if (string_getBytesMethod != NULL) {
+			jbyteArray bytes = (*env)->CallObjectMethod(env, str, string_getBytesMethod);
 			if (!(*env)->ExceptionOccurred(env)) {
 				jsize length = (*env)->GetArrayLength(env, bytes);
 				buffer = malloc( (length + 1) * sizeof(_TCHAR*));
@@ -235,11 +244,13 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 	if(bytes != NULL) {
 		(*env)->SetByteArrayRegion(env, bytes, 0, length, str);
 		if (!(*env)->ExceptionOccurred(env)) {
-			jclass stringClass = (*env)->FindClass(env, "java/lang/String");
-			if(stringClass != NULL) {
-				jmethodID ctor = (*env)->GetMethodID(env, stringClass, "<init>",  "([B)V");
-				if(ctor != NULL) {
-					newString = (*env)->NewObject(env, stringClass, ctor, bytes);
+			if (string_class == NULL)
+				string_class = (*env)->FindClass(env, "java/lang/String");
+			if(string_class != NULL) {
+				if (string_ctor == NULL)
+					string_ctor = (*env)->GetMethodID(env, string_class, "<init>",  "([B)V");
+				if(string_ctor != NULL) {
+					newString = (*env)->NewObject(env, string_class, string_ctor, bytes);
 				}
 			}
 		}
@@ -255,16 +266,16 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 
 static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	int index = 0, length = -1;
-	jclass stringClass;
 	jobjectArray stringArray = NULL;
 	jstring string;
 	
 	/*count the number of elements first*/
 	while(args[++length] != NULL);
 	
-	stringClass = (*env)->FindClass(env, "java/lang/String");
-	if(stringClass != NULL) {
-		stringArray = (*env)->NewObjectArray(env, length, stringClass, 0);
+	if (string_class == NULL)
+		string_class = (*env)->FindClass(env, "java/lang/String");
+	if(string_class != NULL) {
+		stringArray = (*env)->NewObjectArray(env, length, string_class, 0);
 		if(stringArray != NULL) {
 			for( index = 0; index < length; index++) {
 				string = newJavaString(env, args[index]);
