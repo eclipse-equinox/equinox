@@ -13,8 +13,7 @@ package org.eclipse.osgi.tests.bundles;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.osgi.internal.baseadaptor.StateManager;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.*;
 
 public class AbstractBundleTests extends CoreTest {
 	public static int BUNDLE_LISTENER = 0x01;
@@ -49,6 +48,10 @@ public class AbstractBundleTests extends CoreTest {
 		syncListenerResults = null;
 		simpleResults = null;
 		frameworkListenerResults = null;
+	}
+
+	public BundleContext getContext() {
+		return OSGiTestsActivator.getContext();
 	}
 
 	static public void compareResults(Object[] expectedEvents, Object[] actualEvents) {

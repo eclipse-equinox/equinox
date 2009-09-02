@@ -154,16 +154,18 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	public void setProperties(Dictionary props) {
 		final ServiceReferenceImpl ref;
 		final ServiceProperties previousProperties;
-		synchronized (registrationLock) {
-			if (state != REGISTERED) { /* in the process of unregistering */
-				throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
+		synchronized (registry) {
+			synchronized (registrationLock) {
+				if (state != REGISTERED) { /* in the process of unregistering */
+					throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
+				}
+
+				ref = reference; /* used to publish event outside sync */
+				previousProperties = this.properties;
+				this.properties = createProperties(props);
 			}
-
-			ref = reference; /* used to publish event outside sync */
-			previousProperties = this.properties;
-			this.properties = createProperties(props);
+			registry.modifyServiceRegistration(context, this);
 		}
-
 		/* must not hold the registrationLock when this event is published */
 		registry.publishServiceEvent(new ModifiedServiceEvent(ref, previousProperties));
 	}
