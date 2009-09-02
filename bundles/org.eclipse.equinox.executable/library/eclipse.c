@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -321,6 +321,7 @@ static int nEEargs = 0;
 static void     parseArgs( int* argc, _TCHAR* argv[] );
 static void     getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static int 		determineVM(_TCHAR** msg);
+static int 		vmEEProps(_TCHAR* eeFile, _TCHAR** msg);
 static int 		processEEProps(_TCHAR* eeFile);
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs );
 static _TCHAR** parseArgList( _TCHAR *data );
@@ -333,8 +334,8 @@ static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
 #ifdef _WIN32
 static void     createConsole();
 static int 		isConsoleLauncher();
-static int      consoleLauncher = 0;
 #endif
+static int      consoleLauncher = 0;
 
 /* Record the arguments that were used to start the original executable */
 JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
@@ -373,7 +374,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
    	 */
     initWindowSystem( &argc, argv, !noSplash );
 #elif _WIN32
-    /* this must be before doing any console stuff */
+    /* this must be before doing any console stuff, platforms other than win32 leave this set to 0 */
     consoleLauncher = isConsoleLauncher();
 #endif
     
@@ -1207,6 +1208,35 @@ static int isConsoleLauncher() {
 }
 #endif
 
+/* Set the vm to use based on the given .ee file.
+ */
+static int vmEEProps(_TCHAR * eeFile, _TCHAR ** msg) {
+	if (processEEProps(eeFile) != 0) {
+		*msg = _tcsdup(eeFile);
+		return -1;
+	}
+	if (eeLibrary != NULL) {
+		jniLib = findVMLibrary(eeLibrary);
+		if (jniLib != NULL)
+			return LAUNCH_JNI;
+	}
+		
+	if (eeConsole != NULL && (debug || needConsole || consoleLauncher) ) {
+		javaVM = findSymlinkCommand(eeConsole, 0);
+		if (javaVM != NULL)
+			return LAUNCH_EXE;
+	}
+	
+	if (eeExecutable != NULL) {
+		javaVM = findSymlinkCommand(eeExecutable, 0);
+		if (javaVM != NULL)
+			return LAUNCH_EXE;
+	}
+	
+	*msg = _tcsdup(eeFile);
+	return -1;
+}
+
 /*
  * determine the vm to use.
  * return LAUNCH_JNI for launching with JNI invocation API. jniLib contains the name of the library
@@ -1274,30 +1304,7 @@ static int determineVM(_TCHAR** msg) {
     		vmName = result;
     		/* fall through to VM_EE_PROPS*/
     	case VM_EE_PROPS:
-    		if (processEEProps(vmName) != 0) {
-    			*msg = _tcsdup(vmName);
-    			return -1;
-    		}
-    		if (eeLibrary != NULL) {
-    			jniLib = findVMLibrary(eeLibrary);
-    			if (jniLib != NULL)
-    				return LAUNCH_JNI;
-    		}
-    			
-    		if (eeConsole != NULL && (debug || needConsole || consoleLauncher) ) {
-    			javaVM = findSymlinkCommand(eeConsole, 0);
-    			if (javaVM != NULL)
-    				return LAUNCH_EXE;
-    		}
-    		
-    		if (eeExecutable != NULL) {
-    			javaVM = findSymlinkCommand(eeExecutable, 0);
-    			if (javaVM != NULL)
-    				return LAUNCH_EXE;
-    		}
-    		
-    		*msg = _tcsdup(vmName);
-    		return -1;
+    		return vmEEProps(vmName, msg);
     		
     	case VM_LIBRARY:
     		ch = findCommand(vmName);
@@ -1342,6 +1349,19 @@ static int determineVM(_TCHAR** msg) {
     
     if (vmName == NULL) {
     	/* no vm specified, Try to find the VM shipped with eclipse. */
+    	
+    	/* look first for default.ee */
+    	ch = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( DEFAULT_EE ) + 1) * sizeof(_TCHAR) );
+		_stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, DEFAULT_EE );
+		result = findCommand(ch);
+		free(ch);
+    	if (result != NULL) {
+    		type = vmEEProps(result, msg);
+    		free(result);
+    		return type;
+    	}
+    	
+    	/* then look for java(w).exe */
         ch = malloc( (_tcslen( programDir ) + _tcslen( shippedVMDir ) + _tcslen( defaultJava ) + 10) * sizeof(_TCHAR) );
         _stprintf( ch, _T_ECLIPSE("%s%s%s"), programDir, shippedVMDir, defaultJava );
         vmSearchPath = _tcsdup(ch);
