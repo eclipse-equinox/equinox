@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Sparc Fragment
 Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.solaris.sparc;singleton:=true
-Bundle-Version: 1.0.200.qualifier
+Bundle-Version: 1.0.300.qualifier
 Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.1.0)"
 Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=solaris) (osgi.arch=sparc))
 Bundle-Localization: launcher.motif.solaris.sparc
