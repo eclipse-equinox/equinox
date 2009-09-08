@@ -20,12 +20,12 @@ import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.*;
 
 /**
  * This object is responsible for all classloader delegation for a bundle.
@@ -41,6 +41,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final static byte FLAG_HASDYNAMICIMPORTS = 0x02;
 	public final static byte FLAG_HASDYNAMICEIMPORTALL = 0x04;
 	public final static byte FLAG_CLOSED = 0x08;
+	public final static byte FLAG_LAZYTRIGGER = 0x10;
 
 	public final static ClassContext CLASS_CONTEXT = (ClassContext) AccessController.doPrivileged(new PrivilegedAction() {
 		public Object run() {
@@ -251,6 +252,17 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 		loaderFlags |= FLAG_IMPORTSINIT;
 		return importedSources;
+	}
+
+	public synchronized boolean isLazyTriggerSet() {
+		return (loaderFlags & FLAG_LAZYTRIGGER) != 0;
+	}
+
+	public void setLazyTrigger() throws BundleException {
+		synchronized (this) {
+			loaderFlags |= FLAG_LAZYTRIGGER;
+		}
+		BundleLoaderProxy.secureAction.start(bundle, Bundle.START_TRANSIENT | BundleHost.LAZY_TRIGGER);
 	}
 
 	final PackageSource createExportPackageSource(ExportPackageDescription export, KeyedHashSet visited) {

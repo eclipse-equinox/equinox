@@ -24,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 
 public class BundleHost extends AbstractBundle {
+	public static final int LAZY_TRIGGER = 0x40000000;
 	/** 
 	 * The BundleLoader proxy; a lightweight object that acts as a proxy
 	 * to the BundleLoader and allows lazy creation of the BundleLoader object
@@ -235,7 +236,7 @@ public class BundleHost extends AbstractBundle {
 			if (!(e instanceof StatusException) && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0 && !testStateChanging(Thread.currentThread()))
 				try {
 					// only start the bundle if this is a simple CNFE
-					framework.secureAction.start(this, START_TRANSIENT);
+					loader.setLazyTrigger();
 				} catch (BundleException be) {
 					framework.adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, be.getMessage(), 0, be, null));
 				}
@@ -303,9 +304,8 @@ public class BundleHost extends AbstractBundle {
 		}
 		if (!framework.active || (state & ACTIVE) != 0)
 			return;
-
 		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
-			if ((options & START_TRANSIENT) != 0) {
+			if ((options & LAZY_TRIGGER) == 0 && (options & START_TRANSIENT) != 0) {
 				// throw exception if this is a transient start
 				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
 				// Use a StatusException to indicate to the lazy starter that this should result in a warning
@@ -409,17 +409,26 @@ public class BundleHost extends AbstractBundle {
 		// Return false if the bundle is not persistently marked for start
 		if ((status & Constants.BUNDLE_STARTED) == 0)
 			return false;
-		if ((status & Constants.BUNDLE_ACTIVATION_POLICY) == 0 || (status & Constants.BUNDLE_LAZY_START) == 0)
+		if ((status & Constants.BUNDLE_ACTIVATION_POLICY) == 0 || (status & Constants.BUNDLE_LAZY_START) == 0 || isLazyTriggerSet())
 			return true;
-		if (!isResolved())
-			// should never transition from UNRESOLVED -> STARTING
-			return false;
+		if (!isResolved()) {
+			if (framework.getAdaptor().getState().isResolved() || !framework.packageAdmin.resolveBundles(new Bundle[] {this}))
+				// should never transition from UNRESOLVED -> STARTING
+				return false;
+		}
 		// now we can publish the LAZY_ACTIVATION event
 		state = STARTING;
 		// release the state change lock before sending lazy activation event (bug 258659)
 		completeStateChange();
 		framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
 		return false;
+	}
+
+	private synchronized boolean isLazyTriggerSet() {
+		if (proxy == null)
+			return false;
+		BundleLoader loader = proxy.getBasicBundleLoader();
+		return loader != null ? loader.isLazyTriggerSet() : false;
 	}
 
 	/**

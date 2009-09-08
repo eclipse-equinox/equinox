@@ -46,7 +46,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	/** An object used to lock the active startlevel while it is being referenced */
 	private final Object lock = new Object();
 	private final Framework framework;
-	volatile private boolean settingStartLevel = false;
 
 	/** This constructor is called by the Framework */
 	protected StartLevelManager(Framework framework) {
@@ -224,7 +223,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 */
 	void doSetStartLevel(int newSL) {
 		synchronized (lock) {
-			settingStartLevel = true;
 			ClassLoader previousTCCL = Thread.currentThread().getContextClassLoader();
 			ClassLoader contextFinder = framework.getContextFinder();
 			if (contextFinder == previousTCCL)
@@ -273,7 +271,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 			} finally {
 				if (contextFinder != null)
 					Thread.currentThread().setContextClassLoader(previousTCCL);
-				settingStartLevel = false;
 			}
 		}
 	}
@@ -695,9 +692,5 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 				Debug.println("SLL: Bundle Startlevel set to " + newSL); //$NON-NLS-1$
 			}
 		}
-	}
-
-	public boolean isSettingStartLevel() {
-		return settingStartLevel;
 	}
 }

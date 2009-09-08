@@ -348,14 +348,20 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
+		expectedEvents = new Object[1];
+		expectedEvents[0] = new BundleEvent(BundleEvent.STARTED, osgiA);
+		actualEvents = simpleResults.getResults(1);
+		compareResults(expectedEvents, actualEvents);
+
 		startLevel.setStartLevel(startLevel.getStartLevel() - 15);
 		expectedFrameworkEvents = new Object[1];
 		expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 		actualFrameworkEvents = frameworkListenerResults.getResults(1);
 		compareResults(expectedFrameworkEvents, actualFrameworkEvents);
 
-		expectedEvents = new Object[0];
-		actualEvents = simpleResults.getResults(0);
+		expectedEvents = new Object[1];
+		expectedEvents[0] = new BundleEvent(BundleEvent.STOPPED, osgiA);
+		actualEvents = simpleResults.getResults(1);
 		compareResults(expectedEvents, actualEvents);
 
 		// now load a class while start-level is met.

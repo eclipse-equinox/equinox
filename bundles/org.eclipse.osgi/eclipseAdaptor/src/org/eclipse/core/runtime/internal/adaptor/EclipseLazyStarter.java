@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.baseadaptor.*;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
@@ -26,20 +25,16 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.adaptor.StatusException;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
-import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.StateHelper;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.startlevel.StartLevel;
 
 public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, HookConfigurator {
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
-	private StartLevelManager startLevelService;
-	private ServiceReference slRef;
 	private BaseAdaptor adaptor;
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
 	private ThreadLocal activationStack = new ThreadLocal();
@@ -102,14 +97,15 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 					throw (TerminatingClassNotFoundException) errors.get(managers[i]);
 				continue;
 			}
-			AbstractBundle bundle = (AbstractBundle) managers[i].getBaseData().getBundle();
+
 			// The bundle must be started.
 			// Note that another thread may already be starting this bundle;
 			// In this case we will timeout after 5 seconds and record the BundleException
 			try {
 				// do not persist the start of this bundle
-				secureAction.start(bundle, Bundle.START_TRANSIENT);
+				managers[i].getBaseClassLoader().getDelegate().setLazyTrigger();
 			} catch (BundleException e) {
+				Bundle bundle = managers[i].getBaseData().getBundle();
 				Throwable cause = e.getCause();
 				if (cause != null && cause instanceof StatusException) {
 					StatusException status = (StatusException) cause;
@@ -148,6 +144,8 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	private boolean shouldActivateFor(String className, BaseData bundledata, EclipseStorageHook storageHook, ClasspathManager manager) throws ClassNotFoundException {
 		if (!isLazyStartable(className, bundledata, storageHook))
 			return false;
+		//if (manager.getBaseClassLoader().getDelegate().isLazyTriggerSet())
+		//	return false;
 		// Don't activate non-starting bundles
 		if (bundledata.getBundle().getState() == Bundle.RESOLVED) {
 			if (throwErrorOnFailedStart) {
@@ -155,8 +153,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 				if (error != null)
 					throw error;
 			}
-			StartLevelManager sl = startLevelService;
-			return sl != null && ((sl.getStartLevel() == bundledata.getStartLevel() && sl.isSettingStartLevel()));
+			return (bundledata.getStatus() & Constants.BUNDLE_STARTED) != 0;
 		}
 		return true;
 	}
@@ -203,16 +200,11 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	}
 
 	public void frameworkStart(BundleContext context) throws BundleException {
-		slRef = context.getServiceReference(StartLevel.class.getName());
-		if (slRef != null)
-			startLevelService = (StartLevelManager) context.getService(slRef);
+		// nothing
 	}
 
 	public void frameworkStop(BundleContext context) throws BundleException {
-		if (slRef != null) {
-			context.ungetService(slRef);
-			startLevelService = null;
-		}
+		// nothing
 	}
 
 	public void frameworkStopping(BundleContext context) {

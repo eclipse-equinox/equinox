@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.osgi.framework.adaptor;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import org.osgi.framework.BundleException;
 
 /**
  * A ClassLoaderDelegate is used by the BundleClassLoader in a similar
@@ -25,6 +26,7 @@ import java.util.Enumeration;
  * <p>
  * This interface is not intended to be implemented by clients.
  * </p>
+ * @noimplement This interface is not intended to be implemented by clients.
  * @since 3.1
  */
 public interface ClassLoaderDelegate {
@@ -89,4 +91,22 @@ public interface ClassLoaderDelegate {
 	 */
 	public String findLibrary(String libraryname);
 
+	/**
+	 * Returns true if the lazy trigger has been set for this 
+	 * delegate.  The lazy trigger is set when a bundle has been 
+	 * marked for lazy activation due to a successful class load.
+	 * @return true if the lazy trigger has been set
+	 * @since 3.6
+	 */
+	public boolean isLazyTriggerSet();
+
+	/**
+	 * Sets the lazy trigger for this delegate.  This will activate
+	 * the bundle if the bundle has been started with the activation
+	 * policy and the bundle's start level is met.
+	 * @throws BundleException if an error occurred while activating the bundle
+	 * @see ClassLoaderDelegate#isLazyTriggerSet()
+	 * @since 3.6
+	 */
+	public void setLazyTrigger() throws BundleException;
 }
