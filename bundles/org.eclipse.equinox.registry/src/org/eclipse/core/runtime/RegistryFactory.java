@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.spi.RegistryStrategy;
  * </p>
  * @since org.eclipse.equinox.registry 3.2
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class RegistryFactory {
 
