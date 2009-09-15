@@ -56,8 +56,6 @@ public class WeavingAdaptorFactory {
 
     private static final String WEAVING_SERVICE_DYNAMICS_PROPERTY = "equinox.weaving.service.dynamics";
 
-    private BundleContext bundleContext;
-
     private ServiceTracker cachingServiceFactoryTracker;
 
     private PackageAdmin packageAdminService;
@@ -113,7 +111,6 @@ public class WeavingAdaptorFactory {
         if (Debug.DEBUG_GENERAL)
             Debug.println("> AspectJAdaptorFactory.initialize() context="
                     + context);
-        this.bundleContext = context;
         this.supplementerRegistry = supplementerRegistry;
 
         initializePackageAdminService(context);

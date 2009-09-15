@@ -209,10 +209,6 @@ public class WeavingHook extends AbstractWeavingHook {
         return adaptor;
     }
 
-    private IWeavingAdaptor getAspectJAdaptor(final BaseData data) {
-        return getAdaptor(data.getBundleID());
-    }
-
     private void initialize(final BundleContext context) {
         if (Debug.DEBUG_GENERAL)
             Debug.println("> AspectJHook.initialize() context=" + context);
