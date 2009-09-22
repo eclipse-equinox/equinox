@@ -1385,6 +1385,28 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		doTestArrayTypeLoad("[[Lorg.eclipse.osgi.tests.bundles.ArrayTest;"); //$NON-NLS-1$
 	}
 
+	public void testSystemBundleGetResources01() {
+		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
+		Enumeration resources = null;
+		try {
+			resources = systemBundle.getResources("hookconfigurators.properties");
+		} catch (IOException e) {
+			fail("Failed to get resources", e);
+		}
+		assertNotNull("Resources is null", resources);
+	}
+
+	public void testSystemBundleGetResources02() {
+		Bundle systemBundle = OSGiTestsActivator.getContext().getBundle(0);
+		Enumeration resources = null;
+		try {
+			resources = systemBundle.getResources("java/lang/test.resource");
+		} catch (IOException e) {
+			fail("Failed to get resources", e);
+		}
+		assertNull("Resources is not null", resources);
+	}
+
 	private void doTestArrayTypeLoad(String name) {
 		try {
 			Class arrayType = OSGiTestsActivator.getContext().getBundle().loadClass(name);

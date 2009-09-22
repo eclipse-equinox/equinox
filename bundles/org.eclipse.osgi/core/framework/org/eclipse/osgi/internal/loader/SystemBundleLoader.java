@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,14 @@ package org.eclipse.osgi.internal.loader;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.HashSet;
-import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.BundleFragment;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
 /**
@@ -187,5 +189,58 @@ public class SystemBundleLoader extends BundleLoader {
 
 	public boolean isEEPackage(String pkgName) {
 		return eePackages.contains(pkgName);
+	}
+
+	BundleClassLoader createBCL(BundleProtectionDomain pd, String[] cp) {
+		return new BundleClassLoader() {
+
+			public Bundle getBundle() {
+				return SystemBundleLoader.this.getBundle();
+			}
+
+			public Class loadClass(String name) throws ClassNotFoundException {
+				return SystemBundleLoader.this.loadClass(name);
+			}
+
+			public void initialize() {
+				// nothing
+			}
+
+			public Enumeration getResources(String name) throws IOException {
+				return findLocalResources(name);
+			}
+
+			public URL getResource(String name) {
+				return SystemBundleLoader.this.findLocalResource(name);
+			}
+
+			public ClassLoader getParent() {
+				return SystemBundleLoader.this.classLoader.getParent();
+			}
+
+			public ClassLoaderDelegate getDelegate() {
+				return SystemBundleLoader.this;
+			}
+
+			public Enumeration findLocalResources(String resource) {
+				return SystemBundleLoader.this.findLocalResources(resource);
+			}
+
+			public URL findLocalResource(String resource) {
+				return getResource(resource);
+			}
+
+			public Class findLocalClass(String classname) throws ClassNotFoundException {
+				return SystemBundleLoader.this.findLocalClass(classname);
+			}
+
+			public void close() {
+				// nothing
+			}
+
+			public void attachFragment(BundleData bundledata, ProtectionDomain domain, String[] classpath) {
+				// nothing
+			}
+		};
 	}
 }
