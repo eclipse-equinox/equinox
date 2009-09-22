@@ -55,6 +55,9 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	protected final static String HTTPSERVICEFACTORYPID = "org.eclipse.equinox.http.HttpFactory"; //$NON-NLS-1$
 	protected ServiceRegistration managedServiceFactory;
 
+	protected final static String enviroKeyHttpMinThreads = "org.eclipse.equinox.http.minThreads"; //$NON-NLS-1$
+	protected final static String enviroKeyHttpMaxThreads = "org.eclipse.equinox.http.maxThreads"; //$NON-NLS-1$
+
 	protected final static String keyHttpMinThreads = "http.minThreads"; //$NON-NLS-1$
 	protected final static String keyHttpMaxThreads = "http.maxThreads"; //$NON-NLS-1$
 	protected final static String keyHttpThreadPriority = "http.threadPriority"; //$NON-NLS-1$
@@ -96,6 +99,7 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 	 */
 	protected void initialize() {
 		setDefaultPorts();
+		setThreadPoolSizes();
 		pool = new HttpThreadPool(http, minThreads, maxThreads, threadPriority);
 		configuredListeners = new Hashtable(7);
 		synchronized (configuredListeners) {
@@ -189,6 +193,43 @@ public class HttpConfiguration implements ManagedService, ManagedServiceFactory 
 		if (DEFAULT_HTTP_ADDRESS == null) {
 			DEFAULT_HTTP_ADDRESS = "ALL"; //$NON-NLS-1$
 		}
+	}
+
+	protected void setThreadPoolSizes() {
+		BundleContext context = http.context;
+
+		String property = context.getProperty(enviroKeyHttpMinThreads);
+		if (property != null) {
+			try {
+				int min = Integer.parseInt(property);
+
+				if ((min < 0) || (min > 63)) {
+					// Don't set the property and throw the exception to get the nice logging below.
+					throw new NumberFormatException();
+				}
+
+				minThreads = min;
+			} catch (NumberFormatException e) {
+				http.logWarning(enviroKeyHttpMinThreads + " must be in the range 0-63", e); //$NON-NLS-1$
+			}
+		}
+
+		property = context.getProperty(enviroKeyHttpMaxThreads);
+		if (property != null) {
+			try {
+				int max = Integer.parseInt(property);
+
+				if ((max < 0) || (max > 63)) {
+					// Don't set the property and throw the exception to get the nice logging below.
+					throw new NumberFormatException();
+				}
+
+				maxThreads = max;
+			} catch (NumberFormatException e) {
+				http.logWarning(enviroKeyHttpMaxThreads + " must be in the range 0-63", e); //$NON-NLS-1$
+			}
+		}
+
 	}
 
 	protected Dictionary createProperties(String address, int port, String scheme, int socketTimeout) {
