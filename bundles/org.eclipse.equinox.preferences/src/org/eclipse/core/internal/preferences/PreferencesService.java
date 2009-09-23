@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Semion Chichelnitsky (semion@il.ibm.com) - bug 208564     
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
@@ -31,6 +32,7 @@ public class PreferencesService implements IPreferencesService {
 	 * strings.
 	 */
 	private static final long STRING_SHARING_INTERVAL = 300000;
+	private static final String MATCH_TYPE_PREFIX = "prefix"; //$NON-NLS-1$
 
 	// cheat here and add "project" even though we really shouldn't know about it
 	// because of plug-in dependencies and it being defined in the resources plug-in
@@ -774,7 +776,12 @@ public class PreferencesService implements IPreferencesService {
 					} else {
 						// otherwise check to see if we have any applicable keys
 						for (int j = 0; j < entries.length; j++) {
-							if (entries[j] != null && child.get(entries[j].getKey(), null) != null)
+							if (entries[j] == null)
+								continue;
+							if (entries[j].getMatchType() == null) {
+								if (child.get(entries[j].getKey(), null) != null)
+									return true;
+							} else if (internalMatchesWithMatchType(entries[j], child.keys()))
 								return true;
 						}
 					}
@@ -793,6 +800,23 @@ public class PreferencesService implements IPreferencesService {
 			if (internalMatches(tree, filters[i]))
 				result.add(filters[i]);
 		return (IPreferenceFilter[]) result.toArray(new IPreferenceFilter[result.size()]);
+	}
+
+	/*
+	 * Internal method that check the matching preferences for entry with specific match type.
+	 */
+	private boolean internalMatchesWithMatchType(PreferenceFilterEntry entry, String[] keys) {
+		if (keys == null || keys.length == 0)
+			return false;
+		String key = entry.getKey();
+		String matchType = entry.getMatchType();
+		if (!matchType.equalsIgnoreCase(MATCH_TYPE_PREFIX))
+			return false;
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].startsWith(key))
+				return true;
+		}
+		return false;
 	}
 
 	/*
@@ -961,6 +985,7 @@ public class PreferencesService implements IPreferencesService {
 				String childPath = nodeFullPath.substring(treePath.length());
 				childPath = EclipsePreferences.makeRelative(childPath);
 				if (tree.nodeExists(childPath)) {
+					Preferences child = tree.node(childPath);
 					PreferenceFilterEntry[] entries;
 					// protect against wrong classes since this is passed in by the user
 					try {
@@ -974,7 +999,7 @@ public class PreferencesService implements IPreferencesService {
 						ArrayList list = new ArrayList();
 						for (int j = 0; j < entries.length; j++) {
 							if (entries[j] != null)
-								list.add(entries[j].getKey());
+								addMatchedKeys(list, entries[j], child.keys());
 						}
 						keys = (String[]) list.toArray(new String[list.size()]);
 					}
@@ -984,6 +1009,24 @@ public class PreferencesService implements IPreferencesService {
 			}
 		}
 		return result;
+	}
+
+	/*
+	 * Internal method that adds to the given list the matching preferences for entry with or without specific match type.
+	 */
+	private void addMatchedKeys(ArrayList list, PreferenceFilterEntry entry, String[] keys) {
+		String matchType = entry.getMatchType();
+		if (matchType == null) {
+			list.add(entry.getKey());
+			return;
+		}
+		if (keys == null)
+			return;
+		String key = entry.getKey();
+		for (int i = 0; i < keys.length; i++) {
+			if (matchType.equals(MATCH_TYPE_PREFIX) && keys[i].startsWith(key))
+				list.add(keys[i]);
+		}
 	}
 
 	/**
