@@ -357,6 +357,13 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 		SecurePreferences node = node(PASSWORD_VERIFICATION_NODE);
 		node.internalPut(key, encryptedValue.toString());
 		markModified();
+		try {
+			flush();
+		} catch (IOException e) {
+			String msg = NLS.bind(SecAuthMessages.encryptingError, key, PASSWORD_VERIFICATION_NODE);
+			AuthPlugin.getDefault().logError(msg, e);
+			return false;
+		}
 
 		// store password in the memory cache
 		cachePassword(key, passwordExt);
