@@ -28,6 +28,15 @@
          class="org.eclipse.equinox.internal.security.ui.storage.StoragePreferencePage"
          id="org.eclipse.equinox.security.ui.storage"
          category="org.eclipse.equinox.security.ui.category">
+         <keywordReference
+               id="org.eclipse.equinox.security.ui.keywordPassword">
+         </keywordReference>
+         <keywordReference
+               id="org.eclipse.equinox.security.ui.keywordUsername">
+         </keywordReference>
+         <keywordReference
+               id="org.eclipse.equinox.security.ui.keywordLogin">
+         </keywordReference>
       </page>
    </extension>
 
@@ -76,5 +85,20 @@
             sectionTitle="%systemSummaryTitle">
       </section>
    </extension>
-   
+   <extension
+         point="org.eclipse.ui.keywords">
+      <keyword
+            id="org.eclipse.equinox.security.ui.keywordPassword"
+            label="%keywordPassword">
+      </keyword>
+      <keyword
+            id="org.eclipse.equinox.security.ui.keywordUsername"
+            label="%keywordUsername">
+      </keyword>
+      <keyword
+            id="org.eclipse.equinox.security.ui.keywordLogin"
+            label="%keywordLogin">
+      </keyword>
+   </extension>
+    
 </plugin>
