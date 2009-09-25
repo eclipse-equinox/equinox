@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ package org.eclipse.osgi.internal.baseadaptor;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
@@ -103,10 +105,20 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 */
 	public void shutdown(File stateFile, File lazyFile) throws IOException {
 		BundleDescription[] removalPendings = systemState.getRemovalPendings();
-		if (removalPendings.length > 0)
-			systemState.resolve(removalPendings);
+		cleanRemovalPendings(removalPendings);
 		writeState(systemState, stateFile, lazyFile);
 		stopDataManager();
+	}
+
+	private void cleanRemovalPendings(BundleDescription[] removalPendings) {
+		if (removalPendings.length == 0)
+			return;
+		systemState.resolve(removalPendings);
+		for (int i = 0; i < removalPendings.length; i++) {
+			Object userObject = removalPendings[i].getUserObject();
+			if (userObject instanceof BundleLoaderProxy)
+				BundleLoader.closeBundleLoader((BundleLoaderProxy) userObject);
+		}
 	}
 
 	/**

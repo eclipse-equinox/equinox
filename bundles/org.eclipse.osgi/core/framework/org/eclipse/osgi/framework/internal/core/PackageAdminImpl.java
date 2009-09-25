@@ -632,7 +632,20 @@ public class PackageAdminImpl implements PackageAdmin {
 		return ((AbstractBundle) bundle).isFragment() ? PackageAdmin.BUNDLE_TYPE_FRAGMENT : 0;
 	}
 
-	protected void cleanup() { //This is only called when the framework is shutting down
+	protected void cleanup() {
+		//This is only called when the framework is shutting down
+		synchronized (removalPendings) {
+			for (Iterator pendings = removalPendings.values().iterator(); pendings.hasNext();) {
+				List removals = (List) pendings.next();
+				for (Iterator iRemovals = removals.iterator(); iRemovals.hasNext();)
+					try {
+						((BundleData) iRemovals.next()).close();
+					} catch (IOException e) {
+						// ignore
+					}
+			}
+			removalPendings.clear();
+		}
 	}
 
 	protected void setResolvedBundles(InternalSystemBundle systemBundle) {

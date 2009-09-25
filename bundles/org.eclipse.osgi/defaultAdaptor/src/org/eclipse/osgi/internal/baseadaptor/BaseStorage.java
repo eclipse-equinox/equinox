@@ -917,9 +917,9 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	private void cleanOSGiCache() {
 		File osgiConfig = LocationManager.getOSGiConfigurationDir();
-		if (!AdaptorUtil.rm(osgiConfig)) {
-			// TODO log error?
-		}
+		if (!AdaptorUtil.rm(osgiConfig))
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, "Unable to clean storage area: " + osgiConfig.getAbsolutePath(), 0, null, null)); //$NON-NLS-1$
+
 	}
 
 	/**
