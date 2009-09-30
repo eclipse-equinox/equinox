@@ -756,7 +756,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		int intval2 = Integer.parseInt(((String) value2).trim());
+		int intval2;
+		try {
+			intval2 = Integer.parseInt(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -795,7 +800,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		long longval2 = Long.parseLong(((String) value2).trim());
+		long longval2;
+		try {
+			longval2 = Long.parseLong(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -834,7 +844,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		byte byteval2 = Byte.parseByte(((String) value2).trim());
+		byte byteval2;
+		try {
+			byteval2 = Byte.parseByte(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -873,7 +888,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		short shortval2 = Short.parseShort(((String) value2).trim());
+		short shortval2;
+		try {
+			shortval2 = Short.parseShort(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -912,7 +932,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		char charval2 = (((String) value2).trim()).charAt(0);
+		char charval2;
+		try {
+			charval2 = ((String) value2).charAt(0);
+		} catch (IndexOutOfBoundsException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -990,7 +1015,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		float floatval2 = Float.parseFloat(((String) value2).trim());
+		float floatval2;
+		try {
+			floatval2 = Float.parseFloat(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -1029,7 +1059,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		double doubleval2 = Double.parseDouble(((String) value2).trim());
+		double doubleval2;
+		try {
+			doubleval2 = Double.parseDouble(((String) value2).trim());
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 		switch (operation) {
 			case EQUAL : {
 				if (Debug.DEBUG && Debug.DEBUG_FILTER) {
@@ -1339,10 +1374,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 
 		private FilterImpl parse_and() throws InvalidSyntaxException {
+			int lookahead = pos;
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
+				pos = lookahead - 1;
+				return parse_item();
 			}
 
 			List operands = new ArrayList(10);
@@ -1356,10 +1393,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 
 		private FilterImpl parse_or() throws InvalidSyntaxException {
+			int lookahead = pos;
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
+				pos = lookahead - 1;
+				return parse_item();
 			}
 
 			List operands = new ArrayList(10);
@@ -1373,10 +1412,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 
 		private FilterImpl parse_not() throws InvalidSyntaxException {
+			int lookahead = pos;
 			skipWhiteSpace();
 
 			if (filterChars[pos] != '(') {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_LEFTPAREN, filterstring.substring(pos)), filterstring);
+				pos = lookahead - 1;
+				return parse_item();
 			}
 
 			FilterImpl child = parse_filter();
@@ -1549,7 +1590,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			int size = operands.size();
 
 			if (size == 0) {
-				throw new InvalidSyntaxException(NLS.bind(Msg.FILTER_MISSING_VALUE, filterstring.substring(pos)), filterstring);
+				return "";
 			}
 
 			if (size == 1) {
