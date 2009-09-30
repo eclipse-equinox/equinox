@@ -499,7 +499,7 @@ public class ServiceRegistry {
 	 * @see ServicePermission
 	 */
 	public ServiceReferenceImpl[] getRegisteredServices(BundleContextImpl context) {
-		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context, false));
+		List references = changeRegistrationsToReferences(lookupServiceRegistrations(context));
 		for (Iterator iter = references.iterator(); iter.hasNext();) {
 			ServiceReferenceImpl reference = (ServiceReferenceImpl) iter.next();
 			try { /* test for permission to get the service */
@@ -577,7 +577,7 @@ public class ServiceRegistry {
 	 * @param context The BundleContext of the closing bundle.
 	 */
 	public void unregisterServices(BundleContextImpl context) {
-		List registrations = lookupServiceRegistrations(context, true);
+		List registrations = lookupServiceRegistrations(context);
 		for (Iterator iter = registrations.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
 			try {
@@ -586,6 +586,7 @@ public class ServiceRegistry {
 				/* already unregistered */
 			}
 		}
+		removeServiceRegistrations(context); // remove empty list
 	}
 
 	/**
@@ -859,6 +860,9 @@ public class ServiceRegistry {
 			String clazz = clazzes[i];
 			List services = (List) publishedServicesByClass.get(clazz);
 			services.remove(registration);
+			if (services.isEmpty()) { // remove empty list
+				publishedServicesByClass.remove(clazz);
+			}
 		}
 
 		// Remove the ServiceRegistrationImpl from the list of all published Services.
@@ -907,17 +911,25 @@ public class ServiceRegistry {
 	 * Lookup Service Registrations in the data structure by BundleContext.
 	 * 
 	 * @param context The BundleContext for which to return Service Registrations.
-	 * @param remove Indicates that the list of registrations for the context should be removed
 	 * @return List<ServiceRegistrationImpl>
 	 */
-	private synchronized List lookupServiceRegistrations(BundleContextImpl context, boolean remove) {
-		List result = remove ? (List) publishedServicesByContext.remove(context) : (List) publishedServicesByContext.get(context);
+	private synchronized List lookupServiceRegistrations(BundleContextImpl context) {
+		List result = (List) publishedServicesByContext.get(context);
 
 		if ((result == null) || (result.size() == 0)) {
 			return Collections.EMPTY_LIST;
 		}
 
 		return new ArrayList(result); /* make a new list since we don't want to change the real list */
+	}
+
+	/**
+	 * Remove Service Registrations in the data structure by BundleContext.
+	 * 
+	 * @param context The BundleContext for which to remove Service Registrations.
+	 */
+	private synchronized void removeServiceRegistrations(BundleContextImpl context) {
+		publishedServicesByContext.remove(context);
 	}
 
 	/**
