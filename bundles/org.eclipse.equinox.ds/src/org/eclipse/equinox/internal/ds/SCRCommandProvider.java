@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Simon Archer		 	- bug.id = 288783
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -50,7 +51,7 @@ public class SCRCommandProvider implements CommandProvider {
 		res.append("\n\tdisable/dis <component id> - ").append(Messages.DISABLE_COMPONENT); //$NON-NLS-1$
 		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
 		res.append("\n\tenableAll/enAll [bundle id] - ").append(Messages.ENABLE_ALL_COMPONENTS); //$NON-NLS-1$
-		res.append("\tdisableAll/disAll [bundle id] - ").append(Messages.DISABLE_ALL_COMPONENTS).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		res.append("\n\tdisableAll/disAll [bundle id] - ").append(Messages.DISABLE_ALL_COMPONENTS).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		return res.toString();
 	}
 
