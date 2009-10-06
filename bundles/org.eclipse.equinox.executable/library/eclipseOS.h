@@ -16,31 +16,6 @@
 #include <jni.h>
 #include "eclipseUnicode.h"
 
-#ifdef UNICODE
-#define shippedVMDir shippedVMDirW
-#define defaultVM defaultVMW
-#define consoleVM consoleVMW
-#define initWindowSystem initWindowSystemW
-#define showSplash showSplashW
-#define getArgVM getArgVMW
-#define findCommand findCommandW
-#define exitData exitDataW
-#define vmLibrary vmLibraryW
-#define findVMLibrary findVMLibraryW
-#define dispatchMessages dispatchMessagesW
-#define getSplashHandle getSplashHandleW
-#define takeDownSplash takeDownSplashW
-#define restartLauncher restartLauncherW
-#define launchJavaVM launchJavaVMW
-#define startJavaVM startJavaVMW
-#define eeLibPath eeLibPathW
-#define processVMArgs processVMArgsW
-#define initialArgv initialArgvW
-#define secondThread secondThreadW
-#define isSunVM isSunVMW
-#define getVMLibrarySearchPath getVMLibrarySearchPathW
-#endif
-
 #ifdef MACOSX
 #define JAVA_FRAMEWORK "/System/Library/Frameworks/JavaVM.framework"
 #endif

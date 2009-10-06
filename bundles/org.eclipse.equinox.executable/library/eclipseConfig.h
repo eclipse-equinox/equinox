@@ -12,12 +12,6 @@
 #ifndef ECLIPSE_CONFIG_H
 #define ECLIPSE_CONFIG_H
 
-#ifdef UNICODE
-#define readIniFile readIniFileW
-#define readConfigFile readConfigFileW
-#define freeConfig freeConfigW
-#endif
-
 /* Configuration file reading utilities */
 
 /**

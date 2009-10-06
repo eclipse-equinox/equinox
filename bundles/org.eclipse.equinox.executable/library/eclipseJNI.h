@@ -14,13 +14,6 @@
 #include "eclipseUnicode.h"
 #include <jni.h>
 
-#ifdef UNICODE
-#define loadVMLibrary loadVMLibraryW
-#define unloadVMLibrary unloadVMLibraryW
-#define getInvocationFunction getInvocationFunctionW
-#define startJavaJNI startJavaJNIW
-#define cleanupVM cleanupVMW
-#endif
 
 typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args);
 

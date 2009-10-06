@@ -23,29 +23,12 @@ _TCHAR   dirSeparator  = _T('\\');
 _TCHAR   pathSeparator = _T(';');
 
 /* Global Main Window*/
-#ifdef UNICODE
-extern HWND topWindow;
-#else
 HWND    topWindow = 0;
-#endif
 
 /* Define local variables for the main window. */
 /*static WNDPROC oldProc;*/
 
 static int initialized = 0;
-
-#ifdef UNICODE
-HINSTANCE g_hInstance = NULL;
-BOOL WINAPI DllMain(HANDLE hInstDLL, DWORD dwReason, LPVOID lpvReserved)
-{
-	if (dwReason == DLL_PROCESS_ATTACH) {
-		if (g_hInstance == NULL) g_hInstance = hInstDLL;
-	}
-	return TRUE;
-}
-#else
-extern HINSTANCE g_hInstance;
-#endif
 
 /* Display a Message */
 void displayMessage( _TCHAR* title, _TCHAR* message )

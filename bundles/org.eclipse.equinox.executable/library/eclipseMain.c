@@ -57,43 +57,37 @@ static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
 static int initialArgc;
 static _TCHAR** initialArgv;
 
-#if (defined(_WIN32) || defined(VISTA))
 #ifdef UNICODE
 extern int main(int, char**);
 int mainW(int, wchar_t**);
 int wmain( int argc, wchar_t** argv ) {
-#ifndef VISTA
-	OSVERSIONINFOW info;
-	info.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
-	/*
-	* If the OS supports UNICODE functions, run the UNICODE version
-	* of the main function. Otherwise, convert the arguments to
-	* MBCS and run the ANSI version of the main function.
-	*/
-	if (!GetVersionExW (&info)) {
-		int i, result;
-		char **newArgv = malloc(argc * sizeof(char *));
-		for (i=0; i<argc; i++) {
-			wchar_t *oldArg = argv[i];
-			int byteCount = WideCharToMultiByte (CP_ACP, 0, oldArg, -1, NULL, 0, NULL, NULL);
-			char *newArg  = malloc(byteCount+1);
-			newArg[byteCount] = 0;
-			WideCharToMultiByte (CP_ACP, 0, oldArg, -1, newArg, byteCount, NULL, NULL);
-			newArgv[i] = newArg;
-		}
-		result = main(argc, newArgv);
-		for (i=0; i<argc; i++) {
-			free(newArgv[i]);
-		}
-		free(newArgv);
-		return result;
-	}
-#endif
 	return mainW(argc, argv);
 }
+
+int main(int argc, char* argv[]) {
+	/*
+	* Run the UNICODE version, convert the arguments from MBCS to UNICODE
+	*/
+	int i, result;
+	wchar_t **newArgv = malloc(argc * sizeof(wchar_t *));
+	for (i=0; i<argc; i++) {
+		char *oldArg = argv[i];
+		int numChars = MultiByteToWideChar(CP_ACP, 0, oldArg, -1, NULL, 0);
+		wchar_t *newArg  = malloc((numChars + 1) * sizeof(wchar_t));
+		newArg[numChars] = 0;
+		MultiByteToWideChar(CP_ACP, 0, oldArg, -1, newArg, numChars);
+		newArgv[i] = newArg;
+	}
+	result = mainW(argc, newArgv);
+	for (i=0; i<argc; i++) {
+		free(newArgv[i]);
+	}
+	free(newArgv);
+	return result;
+}
+
 #define main mainW
 #endif /* UNICODE */
-#endif /* _WIN32 */
 
 int main( int argc, _TCHAR* argv[] )
 {

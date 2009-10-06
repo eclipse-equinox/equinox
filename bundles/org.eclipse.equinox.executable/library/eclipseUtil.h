@@ -13,15 +13,6 @@
 #ifndef ECLIPSE_UTIL_H
 #define ECLIPSE_UTIL_H
 
-#ifdef UNICODE
-#define isJ9VM isJ9VMW
-#define isVMLibrary isVMLibraryW
-#define checkProvidedVMType checkProvidedVMTypeW
-#define checkPathList checkPathListW
-#define concatStrings concatStringsW
-#define containsPaths containsPathsW
-#endif
-
 /* constants for checkProvidedVMType */
 #define VM_NOTHING		0		/* NULL was given as input */
 #define VM_OTHER		1		/* don't know, could be executable or could be nothing */

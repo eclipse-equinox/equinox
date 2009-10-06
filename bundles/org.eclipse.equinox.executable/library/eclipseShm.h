@@ -13,13 +13,6 @@
 #ifndef ECLIPSE_SHM_H
 #define ECLIPSE_SHM_H
 
-#ifdef UNICODE
-#define createSharedData createSharedDataW
-#define destroySharedData destroySharedDataW
-#define getSharedData getSharedDataW
-#define setSharedData setSharedDataW
-#endif
-
 /* Shared memory utilities */
 
 /**

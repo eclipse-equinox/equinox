@@ -1,5 +1,5 @@
 #******************************************************************************
-# Copyright (c) 2000, 2006 IBM Corporation and others.
+# Copyright (c) 2000, 2009 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -27,11 +27,9 @@ NODEBUG=1
 PROGRAM_LIBRARY = eclipse_$(LIB_VERSION).dll
 
 # Define the object modules to be compiled and flags.
-MAIN_OBJS = eclipseMain.obj  aeclipseMain.obj  
-COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj\
-			  aeclipseConfig.obj aeclipseCommon.obj  aeclipseWinCommon.obj
-DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj\
-	  		  aeclipse.obj aeclipseWin.obj aeclipseUtil.obj aeclipseJNI.obj aeclipseShm.obj
+MAIN_OBJS = eclipseMain.obj
+COMMON_OBJS = eclipseConfig.obj eclipseCommon.obj   eclipseWinCommon.obj
+DLL_OBJS	= eclipse.obj  eclipseWin.obj  eclipseUtil.obj  eclipseJNI.obj eclipseShm.obj
 
 # using dynamic lib
 #LIBS   = kernel32.lib user32.lib comctl32.lib msvcrt.lib
@@ -51,12 +49,11 @@ EXEC   = eclipse.exe
 CONSOLE = eclipsec.exe
 DLL    = $(PROGRAM_LIBRARY)
 DEBUG  = #$(cdebug)
-acflags = -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
+wcflags = -DUNICODE -I.. -DDEFAULT_OS="\"$(DEFAULT_OS)\"" \
 	-DDEFAULT_OS_ARCH="\"$(DEFAULT_OS_ARCH)\"" \
 	-DDEFAULT_WS="\"$(DEFAULT_WS)\"" \
 	-I$(JAVA_HOME)\include -I$(JAVA_HOME)\include\win32 \
 	$(cflags) -D_CRT_SECURE_NO_WARNINGS -D_CRT_NON_CONFORMING_SWPRINTFS
-wcflags = -DUNICODE $(acflags) 
 all: $(EXEC) $(DLL) $(CONSOLE)
 
 eclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
@@ -86,33 +83,6 @@ eclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
 eclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
 	$(CC) $(DEBUG) $(wcflags) $(cvars) /Fo$*.obj ../eclipseShm.c
 	
-aeclipseShm.obj: ../eclipseShm.h ../eclipseUnicode.h ../eclipseShm.c
-	$(CC) $(DEBUG) $(acflags) $(cvars) /FoaeclipseShm.obj ../eclipseShm.c
-	
-aeclipseJNI.obj: ../eclipseCommon.h ../eclipseOS.h ../eclipseJNI.c
-	$(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseJNI.obj ../eclipseJNI.c
-		
-aeclipseMain.obj: ../eclipseUnicode.h ../eclipseCommon.h ../eclipseMain.c 
-	$(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseMain.obj ../eclipseMain.c
-	
-aeclipseCommon.obj: ../eclipseCommon.h ../eclipseUnicode.h ../eclipseCommon.c
-	$(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseCommon.obj ../eclipseCommon.c
-
-aeclipse.obj: ../eclipseOS.h ../eclipseUnicode.h ../eclipse.c
-    $(cc) $(DEBUG) $(acflags) $(cvars) /Foaeclipse.obj ../eclipse.c
-
-aeclipseUtil.obj: ../eclipseUtil.h ../eclipseUnicode.h ../eclipseUtil.c
-    $(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseUtil.obj ../eclipseUtil.c
-
-aeclipseConfig.obj: ../eclipseConfig.h ../eclipseConfig.h ../eclipseConfig.c
-    $(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseConfig.obj ../eclipseConfig.c
-    
-aeclipseWin.obj: ../eclipseOS.h ../eclipseUnicode.h eclipseWin.c
-    $(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseWin.obj eclipseWin.c
-
-aeclipseWinCommon.obj: ../eclipseCommon.h eclipseWinCommon.c
-    $(cc) $(DEBUG) $(acflags) $(cvars) /FoaeclipseWinCommon.obj eclipseWinCommon.c
-
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
     $(link) $(LFLAGS) -out:$(PROGRAM_OUTPUT) $(MAIN_OBJS) $(COMMON_OBJS) $(RES) $(LIBS)
 #$(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
@@ -122,7 +92,6 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS) $(RES)
 $(CONSOLE): $(MAIN_OBJS) $(COMMON_OBJS)
 	del -f eclipseConfig.obj aeclipseConfig.obj
 	$(cc) $(DEBUG) $(wcflags) $(cvars) -D_WIN32_CONSOLE /FoeclipseConfig.obj ../eclipseConfig.c
-	$(cc) $(DEBUG) $(acflags) $(cvars) -D_WIN32_CONSOLE /FoaeclipseConfig.obj ../eclipseConfig.c
     $(link) $(CONSOLEFLAGS) -out:$(CONSOLE) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)

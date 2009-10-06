@@ -19,39 +19,8 @@
 
 #define MAX_PATH_LENGTH   2000
 
-#ifdef UNICODE
-#define pathSeparator pathSeparatorW
-#define dirSeparator dirSeparatorW
-#define getOfficialName getOfficialNameW
-#define parseArgs parseArgsW
-#define displayMessage displayMessageW
-#define getProgramDir getProgramDirW
-#define findCommand findCommandW
-#define findSymlinkCommand findSymlinkCommandW
-#define findFile findFileW
-#define loadLibrary loadLibraryW
-#define unloadLibrary unloadLibraryW
-#define findSymbol findSymbolW
-#define run runW
-#define setInitialArgs setInitialArgsW
-#define toNarrow toNarrowW
-#define osArg osArgW
-#define wsArg wsArgW
-#define osArchArg osArchArgW
-#define resolveSymlinks resolveSymlinksW
-#define checkPath checkPathW
-#define lastDirSeparator lastDirSeparatorW
-#define firstDirSeparator firstDirSeparatorW
-#endif
-
-#ifdef UNICODE
-#define RUN_METHOD		 _T_ECLIPSE("runW")
-#define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgsW")
-#else
 #define RUN_METHOD 		 _T_ECLIPSE("run")
 #define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgs")
-#endif
-
 #define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.launcher")
 
 #ifdef _WIN32

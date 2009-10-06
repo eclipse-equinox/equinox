@@ -23,23 +23,14 @@ static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_sp
 									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
 									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
 									{"_takedown_splash", "()V", (void *)&takedown_splash}};
-  
-#ifdef UNICODE
-#define setExitData setExitDataW
-#elif WIN32
-extern void setExitDataW(JNIEnv *env, jstring id, jstring s);
-#endif
 
 /* local methods */
 static jstring newJavaString(JNIEnv *env, _TCHAR * str);
-static void splash(JNIEnv *env, jstring s);
 static void registerNatives(JNIEnv *env);
 static int shouldShutdown(JNIEnv *env);
 static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data);
 static const _TCHAR* JNI_GetStringChars(JNIEnv *env, jstring str);
 static char * getMainClass(JNIEnv *env, _TCHAR * jarFile);
-
-void setExitData(JNIEnv *env, jstring id, jstring s);
 
 static JavaVM * jvm = 0;
 static JNIEnv *env = 0;
@@ -51,101 +42,8 @@ static jmethodID string_getBytesMethod = NULL;
 static jmethodID string_ctor = NULL;
 #endif
 
-/* JNI Methods                                 
- * we only want one version of the JNI functions 
- * Because there are potentially ANSI and UNICODE versions of everything, we need to be
- * able to call out to either, so we will set hooks depending on which version of 
- * registerNatives gets called.
- */
-#if (!defined(UNICODE) || defined(VISTA))
-void (* exitDataHook)(JNIEnv *env, jstring id, jstring s);
-void (* dispatchHook)();
-jlong (* splashHandleHook)();
-void (* showSplashHook)(JNIEnv *env, jstring s);
-void (* takeDownHook)();
-#else
-extern void (* exitDataHook)(JNIEnv *env, jstring id, jstring s);
-extern void (* dispatchHook)();
-extern jlong (* splashHandleHook)();
-extern void (* showSplashHook)(JNIEnv *env, jstring s);
-extern void (* takeDownHook)();
-#endif
-
-#if (!defined(UNICODE) || defined(VISTA)) 
 /* JNI Callback methods */
 JNIEXPORT void JNICALL set_exit_data(JNIEnv * env, jobject obj, jstring id, jstring s){
-	if(exitDataHook != NULL)
-		exitDataHook(env, id, s);
-	else /* hook was not set, just call the ANSI version */
-#if (defined(_WIN32) || defined(VISTA))
-		setExitDataW(env, id, s);
-#else
-		setExitData(env, id, s);
-#endif
-}
-
-JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
-	if(dispatchHook != NULL)
-		dispatchHook();
-	else
-		dispatchMessages();
-}
-
-JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
-	if(splashHandleHook != NULL)
-		return splashHandleHook();
-	else
-		return getSplashHandle();
-}
-
-JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
-	if(showSplashHook != NULL)
-		showSplashHook(env, s);
-	else
-		splash(env, s);	
-}
-
-JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
-	if(takeDownHook != NULL)
-		takeDownHook();
-	else
-		takeDownSplash();
-}
-#endif
-
-static void registerNatives(JNIEnv *env) {
-	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");
-	if(bridge != NULL) {
-		int numNatives = sizeof(natives) / sizeof(natives[0]);
-		(*env)->RegisterNatives(env, bridge, natives, numNatives);	
-	}
-	if( (*env)->ExceptionOccurred(env) != 0 ){
-		(*env)->ExceptionDescribe(env);
-		(*env)->ExceptionClear(env);
-	}
-	/*set hooks*/
-	splashHandleHook = &getSplashHandle;
-	exitDataHook = &setExitData;
-	dispatchHook = &dispatchMessages;
-	showSplashHook = &splash;
-	takeDownHook = &takeDownSplash;
-}
-
-static void splash(JNIEnv *env, jstring s) {
-	const _TCHAR* data = NULL;
-	if(s != NULL) {
-		data = JNI_GetStringChars(env, s);
-		if(data != NULL) {
-			showSplash(data);
-			JNI_ReleaseStringChars(env, s, data);
-		} else {
-			(*env)->ExceptionDescribe(env);
-			(*env)->ExceptionClear(env);
-		}
-	}
-}
-
-void setExitData(JNIEnv *env, jstring id, jstring s){
 	const _TCHAR* data = NULL;
 	const _TCHAR* sharedId = NULL;
 	size_t length;
@@ -175,6 +73,46 @@ void setExitData(JNIEnv *env, jstring id, jstring s){
 		}
 	}
 }
+
+JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
+	dispatchMessages();
+}
+
+JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
+	return getSplashHandle();
+}
+
+JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
+	const _TCHAR* data = NULL;
+	if(s != NULL) {
+		data = JNI_GetStringChars(env, s);
+		if(data != NULL) {
+			showSplash(data);
+			JNI_ReleaseStringChars(env, s, data);
+		} else {
+			(*env)->ExceptionDescribe(env);
+			(*env)->ExceptionClear(env);
+		}
+	}
+}
+
+JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
+	takeDownSplash();
+}
+
+
+static void registerNatives(JNIEnv *env) {
+	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");
+	if(bridge != NULL) {
+		int numNatives = sizeof(natives) / sizeof(natives[0]);
+		(*env)->RegisterNatives(env, bridge, natives, numNatives);	
+	}
+	if( (*env)->ExceptionOccurred(env) != 0 ){
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+}
+
 
 /* Get a _TCHAR* from a jstring, string should be released later with JNI_ReleaseStringChars */
 static const _TCHAR * JNI_GetStringChars(JNIEnv *env, jstring str) {
