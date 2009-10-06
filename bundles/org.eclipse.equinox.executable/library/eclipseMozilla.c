@@ -63,9 +63,6 @@ int filter(const struct dirent *dir)
 		int prefixLength = strlen(prefix);
 		if (strncmp(dirname, prefix, prefixLength) == 0)
 		{
-			/* If a xulrunner install is found then success is immediate since
-			 * xulrunner always provides an embeddable GRE.
-			 */
 			if (index == XULRUNNER_INDEX) return 1;	/* include in scandir result */
 
 			/* Check if the first character following the prefix is a numeric digit.
@@ -73,7 +70,12 @@ int filter(const struct dirent *dir)
 			 * "mozilla-1.7.3", and not a different product like "mozilla-thunderbird".
 			 */
 			int dirLength = strlen(dirname);
-			if (dirLength == prefixLength || ('0' <= dirname[prefixLength] && dirname[prefixLength] <= '9')) {
+			if ('0' <= dirname[prefixLength] && dirname[prefixLength] <= '9') {
+				/* If a xulrunner install is found then success is immediate since
+				 * xulrunner always provides an embeddable GRE.
+				 */				
+				if (index == XULRUNNER_INDEX) return 1;	/* include in scandir result */
+				
 				char* testpath = malloc (strlen(root) + dirLength + strlen(testlib) + 1);
 				strcpy(testpath, root);
 				strcat(testpath, dirname);
