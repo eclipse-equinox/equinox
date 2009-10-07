@@ -338,7 +338,7 @@ static int 		isConsoleLauncher();
 static int      consoleLauncher = 0;
 
 /* Record the arguments that were used to start the original executable */
-JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
+JNIEXPORT void setInitialArgsW(int argc, _TCHAR** argv, _TCHAR* lib) {
 	initialArgc = argc;
 	initialArgv = argv;
 	library = lib;
@@ -346,7 +346,7 @@ JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
 
 /* this method must match the RunMethod typedef in eclipseMain.c */
 /* vmArgs must be NULL terminated                                */
-JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
+JNIEXPORT int runW(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 {
     _TCHAR**  vmCommand = NULL;
     _TCHAR**  vmCommandArgs = NULL;
