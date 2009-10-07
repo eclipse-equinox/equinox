@@ -434,7 +434,7 @@ public class Main {
 	private String getLibraryPath(String fragmentName, URL[] defaultPath) {
 		String libPath = null;
 		String fragment = null;
-		if (inDevelopmentMode) {
+		if (inDevelopmentMode && devClassPathProps != null) {
 			String devPathList = devClassPathProps.getProperty(PLUGIN_ID);
 			String[] locations = getArrayFromList(devPathList);
 			if (locations.length > 0) {
