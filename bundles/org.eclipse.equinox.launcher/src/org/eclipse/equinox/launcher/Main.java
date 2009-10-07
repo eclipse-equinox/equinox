@@ -195,6 +195,7 @@ public class Main {
 	private static final String PROP_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
 	private static final String PROP_EXITDATA = "eclipse.exitdata"; //$NON-NLS-1$
 	private static final String PROP_LAUNCHER = "eclipse.launcher"; //$NON-NLS-1$
+	private static final String PROP_LAUNCHER_NAME = "eclipse.launcher.name"; //$NON-NLS-1$
 
 	private static final String PROP_VM = "eclipse.vm"; //$NON-NLS-1$
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
@@ -1557,8 +1558,7 @@ public class Main {
 
 			// look for the name to use by the launcher
 			if (args[i - 1].equalsIgnoreCase(NAME)) {
-				//not doing anything with this right now, but still consume it
-				//name = arg;
+				System.getProperties().put(PROP_LAUNCHER_NAME, arg);
 				found = true;
 			}
 
@@ -1975,6 +1975,7 @@ public class Main {
 		if (splashLocation == null)
 			return;
 
+		bridge.setLauncherInfo(System.getProperty(PROP_LAUNCHER), System.getProperty(PROP_LAUNCHER_NAME));
 		bridge.showSplash(splashLocation);
 		long handle = bridge.getSplashHandle();
 		if (handle != 0 && handle != -1) {

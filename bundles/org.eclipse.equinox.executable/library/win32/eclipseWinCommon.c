@@ -52,10 +52,17 @@ int initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 	
 	if(initialized)
 		return 0;
-    /* Create a window that has no decorations. */
+
+	icon = LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON)); 
+    if (icon == NULL) {
+    	HMODULE hm = LoadLibraryEx(getProgramPath(), 0, LOAD_LIBRARY_AS_DATAFILE & 0x2 /*LOAD_LIBRARY_AS_IMAGE_RESOURCE*/);
+    	if (hm != NULL)
+    		icon = LoadIcon(hm, MAKEINTRESOURCE(ECLIPSE_ICON));
+    }
     
+    /* Create a window that has no decorations. */
 	InitCommonControls();
-    topWindow = CreateWindowEx ( WS_EX_TOOLWINDOW,
+    topWindow = CreateWindowEx ( icon != NULL ? 0 : WS_EX_TOOLWINDOW,
 		_T("STATIC"),
 		getOfficialName(),
 		SS_BITMAP | WS_POPUP | WS_CLIPCHILDREN,
@@ -68,7 +75,6 @@ int initWindowSystem( int* pArgc, _TCHAR* argv[], int showSplash )
 		module,
 		NULL);
 
-    icon = LoadIcon(module, MAKEINTRESOURCE(ECLIPSE_ICON));
     if (icon != NULL)
 #ifdef WIN64
     	SetClassLongPtr(topWindow, GCLP_HICON, (LONG_PTR)icon);

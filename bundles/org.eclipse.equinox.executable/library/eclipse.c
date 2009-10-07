@@ -925,6 +925,18 @@ _TCHAR* getOfficialName() {
 	return officialName;
 }
 
+void setOfficialName(_TCHAR* name) {
+	officialName = name;
+}
+
+_TCHAR* getProgramPath() {
+	return program;
+}
+
+void setProgramPath(_TCHAR* path) {
+	program = path;
+}
+
 /*
  * Determine the default official application name
  *

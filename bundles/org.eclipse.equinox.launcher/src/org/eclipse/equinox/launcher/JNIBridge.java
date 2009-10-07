@@ -23,6 +23,8 @@ public class JNIBridge {
 	//TODO: This class should not be public
 	private native void _set_exit_data(String sharedId, String data);
 
+	private native void _set_launcher_info(String launcher, String name);
+
 	private native void _update_splash();
 
 	private native long _get_splash_handle();
@@ -78,6 +80,22 @@ public class JNIBridge {
 			if (!libraryLoaded) {
 				loadLibrary();
 				return setExitData(sharedId, data);
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * @noreference This method is not intended to be referenced by clients
+	 */
+	public boolean setLauncherInfo(String launcher, String name) {
+		try {
+			_set_launcher_info(launcher, name);
+			return true;
+		} catch (UnsatisfiedLinkError e) {
+			if (!libraryLoaded) {
+				loadLibrary();
+				return setLauncherInfo(launcher, name);
 			}
 			return false;
 		}

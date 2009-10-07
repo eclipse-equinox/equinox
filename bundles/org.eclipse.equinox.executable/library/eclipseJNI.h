@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -20,6 +20,7 @@ typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args)
 /* JNI Callback methods */
 /* Use name mangling since we may be linking these from java with System.LoadLibrary */
 #define set_exit_data 		Java_org_eclipse_equinox_launcher_JNIBridge__1set_1exit_1data
+#define set_launcher_info	Java_org_eclipse_equinox_launcher_JNIBridge__1set_1launcher_1info
 #define update_splash 		Java_org_eclipse_equinox_launcher_JNIBridge__1update_1splash
 #define show_splash			Java_org_eclipse_equinox_launcher_JNIBridge__1show_1splash
 #define get_splash_handle 	Java_org_eclipse_equinox_launcher_JNIBridge__1get_1splash_1handle
@@ -33,6 +34,12 @@ extern "C" {
  * Signature: (Ljava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL set_exit_data(JNIEnv *, jobject, jstring, jstring);
+
+/*
+ * org_eclipse_equinox_launcher_JNIBridge#_set_launcher_info
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL set_launcher_info(JNIEnv *, jobject, jstring, jstring);
 
 /*
  * org_eclipse_equinox_launcher_JNIBridge#_update_splash

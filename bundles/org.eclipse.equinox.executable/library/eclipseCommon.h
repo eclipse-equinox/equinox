@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -58,6 +58,12 @@ extern _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix);
 extern _TCHAR* getProgramDir();
 
 extern _TCHAR* getOfficialName();
+
+extern void setOfficialName(_TCHAR * name);
+
+extern _TCHAR* getProgramPath();
+
+extern void setProgramPath(_TCHAR* name);
 
 extern _TCHAR* resolveSymlinks( _TCHAR* path );
 

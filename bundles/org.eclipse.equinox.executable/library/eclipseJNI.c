@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -21,6 +21,7 @@
 static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_splash},
 									{"_get_splash_handle", "()J", (void *)&get_splash_handle},
 									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
+									{"_set_launcher_info", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_launcher_info},
 									{"_show_splash", "(Ljava/lang/String;)V", (void *)&show_splash},
 									{"_takedown_splash", "()V", (void *)&takedown_splash}};
 
@@ -73,6 +74,28 @@ JNIEXPORT void JNICALL set_exit_data(JNIEnv * env, jobject obj, jstring id, jstr
 		}
 	}
 }
+
+JNIEXPORT void JNICALL set_launcher_info(JNIEnv * env, jobject obj, jstring launcher, jstring name){
+	const _TCHAR* launcherPath = NULL;
+	const _TCHAR* launcherName = NULL;
+	
+	if (launcher != NULL) {
+		launcherPath = JNI_GetStringChars(env, launcher);
+		if (launcherPath != NULL) {
+			setProgramPath(_tcsdup(launcherPath));
+			JNI_ReleaseStringChars(env, launcher, launcherPath);
+		}
+	}
+	
+	if (name != NULL) {
+		launcherName = JNI_GetStringChars(env, name);
+		if (launcherName != NULL) {
+			setOfficialName(_tcsdup(launcherName));
+			JNI_ReleaseStringChars(env, name, launcherName);
+		}
+	}
+}
+
 
 JNIEXPORT void JNICALL update_splash(JNIEnv * env, jobject obj){
 	dispatchMessages();

@@ -200,6 +200,10 @@ int main( int argc, _TCHAR* argv[] )
 	return exitCode;
 }
 
+_TCHAR* getProgramPath() {
+	return NULL;
+}
+
 static _TCHAR* findProgram(_TCHAR* argv[]) {
 	_TCHAR * program;
 #ifdef _WIN32
