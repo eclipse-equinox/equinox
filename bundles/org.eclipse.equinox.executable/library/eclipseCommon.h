@@ -19,8 +19,16 @@
 
 #define MAX_PATH_LENGTH   2000
 
-#define RUN_METHOD 		 _T_ECLIPSE("runW")
+#ifdef UNICODE
+#define run runW
+#define setInitialArgs setInitialArgsW
+#define RUN_METHOD		 _T_ECLIPSE("runW")
 #define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgsW")
+#else
+#define RUN_METHOD 		 _T_ECLIPSE("run")
+#define SET_INITIAL_ARGS _T_ECLIPSE("setInitialArgs")
+#endif
+
 #define DEFAULT_EQUINOX_STARTUP _T_ECLIPSE("org.eclipse.equinox.launcher")
 
 #ifdef _WIN32
