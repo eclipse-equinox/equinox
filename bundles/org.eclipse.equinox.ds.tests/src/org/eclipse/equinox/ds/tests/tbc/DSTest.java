@@ -300,10 +300,6 @@ public class DSTest extends TestCase {
     clearConfiguration(cm, "(service.pid=" + MOD_THROW_EX_NS110 + ")");
 
     getContext().ungetService(cmSR);
-    try {
-      Thread.sleep(timeout * 2);
-    } catch (InterruptedException e) {
-    }
   }
 
   private void clearConfiguration(ConfigurationAdmin cm, String filter) throws IOException, InvalidSyntaxException {
@@ -470,24 +466,24 @@ public class DSTest extends TestCase {
     }
 
     ((ComponentManager) extendedClass).enableComponent(SAC_CLASS, false);
-    Thread.sleep(timeout * 2); // let the SCR to unregister the service
+    Thread.sleep(timeout); // let the SCR to unregister the service
     assertNull("The service must not be available after we had disabled the component (AnotherComponent)", trackerSAC
         .getServiceReferences());
 
     ((ComponentManager) extendedClass).enableComponent(SC_CLASS, false);
-    Thread.sleep(timeout * 2); // let the SCR to unregister the service
+    Thread.sleep(timeout); // let the SCR to unregister the service
     assertNull("The service must not be available after we had disabled the component (Worker)", trackerSC
         .getServiceReferences());
 
     // *** test enableComponent() method
     ((ComponentManager) extendedClass).enableComponent(SAC_CLASS, true);
-    Thread.sleep(timeout * 2); // let the SCR to register the service
+    Thread.sleep(timeout); // let the SCR to register the service
     assertNotNull("The service must be available after we had enabled the component", trackerSAC.getServiceReferences());
     assertTrue("The service must be available after we had enabled the component",
         trackerSAC.getServiceReferences().length > 0);
 
     ((ComponentManager) extendedClass).enableComponent(null, true);
-    Thread.sleep(timeout * 2);
+    Thread.sleep(timeout);
     assertNotNull("The enableComponent() with passed null parameter, must enable the remaining disabled components",
         trackerSC.getServiceReferences());
     assertTrue("The enableComponent() with passed null parameter, must enable the remaining disabled components",
@@ -575,7 +571,7 @@ public class DSTest extends TestCase {
     assertNull("The reference shouldn't be available with optional cardinality and disabled component", locateSac);
 
     ((ComponentManager) extendedClass).enableComponent(SAC_CLASS, true);
-    Thread.sleep(timeout * 2);
+    Thread.sleep(timeout);
     assertTrue("Check that the component is correctly enabled", countAvailableServices(trackerSAC) > 0);
 
     // *** test locateServices(String)
@@ -639,7 +635,7 @@ public class DSTest extends TestCase {
     config.update(props);
 
     // let SCR & CM to complete it's job
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     ref = trackerSAC.getServiceReference();
     // check the correctness of the properties
@@ -670,7 +666,7 @@ public class DSTest extends TestCase {
     c.update(cmProps);
 
     // let the config update reach the SCR
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     ComponentFactory factory = (ComponentFactory) trackerNamedServiceFactory.getService();
     assertNotNull("The NamedService ComponentFactory should be available", factory);
@@ -723,7 +719,7 @@ public class DSTest extends TestCase {
         trackerNamedServiceFactory.getService());
 
     c.delete();
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     // create factory configs for Worker
     Configuration scConfig1 = cm.createFactoryConfiguration(SC_CLASS);
@@ -736,7 +732,7 @@ public class DSTest extends TestCase {
     scProps2.put("name", "instance2");
     scConfig2.update(scProps2);
 
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     try {// test factory configuration for normal component
       assertEquals("The Worker should have two instances", 2, countAvailableServices(trackerSC));
@@ -744,7 +740,7 @@ public class DSTest extends TestCase {
       scConfig1.delete();
       scConfig2.delete();
     }
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     assertEquals("The Worker should have one instance", 1, countAvailableServices(trackerSC));
     ServiceReference scRef = trackerSC.getServiceReference();
@@ -777,7 +773,7 @@ public class DSTest extends TestCase {
     assertNotNull("DynamicWorker component instance should not be null", dynServiceInstance);
     Object dynService = dynServiceInstance.getInstance();
     assertNotNull("DynamicWorker should be created properly", dynService);
-    Thread.sleep(timeout * 2);
+//    Thread.sleep(timeout * 2);
 
     Object bsrc = trackerBSRC.getService();
     assertNotNull("BoundReplacer should be available", bsrc);
@@ -1160,7 +1156,7 @@ public class DSTest extends TestCase {
       }
     }.start();
 
-    sleep0(timeout * 3); // sleep until the services are activated
+    sleep0(timeout * 2); // sleep until the services are activated
 
     // check that the first service is missing, and the second is available
     assertEquals("The blocking service should not be available", 0, countAvailableServices(trackerBAS));
@@ -1196,7 +1192,7 @@ public class DSTest extends TestCase {
       }
     }.start();
 
-    sleep0(timeout * 3); // sleep until the services are activated
+    sleep0(timeout * 2); // sleep until the services are activated
 
     assertEquals("The blocking service should not be available", 0, countAvailableServices(trackerBBS));
     assertTrue("The service in the bundle should be available",
@@ -1226,7 +1222,7 @@ public class DSTest extends TestCase {
 
     // enable the ReferencedComp
     initialCtxt.enableComponent(REFERENCED_CLASS);
-    Thread.sleep(timeout * 2);
+    Thread.sleep(timeout);
 
     // check the availability after enablement
     assertTrue("The StaticComp should be available", checkAvailability(STATIC_CLASS));
@@ -1255,7 +1251,7 @@ public class DSTest extends TestCase {
 
     // disable the component
     enabledCtxt.disableComponent(REFERENCED_CLASS);
-    Thread.sleep(timeout * 2);
+    Thread.sleep(timeout);
 
     // check the availability
     assertTrue("The StaticComp should be available", checkAvailability(STATIC_CLASS));
@@ -1555,7 +1551,7 @@ public class DSTest extends TestCase {
     // component notsetNS100 - property set by Configuration Admin; XML NS 1.0.0
     Configuration config = cm.getConfiguration(COMP_NOTSET_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for notsetNS100 and equal to 1", 1,
         getBaseConfigData(COMP_NOTSET_100));
 
@@ -1565,7 +1561,7 @@ public class DSTest extends TestCase {
     // component notsetNS110 - property set by Configuration Admin; XML NS 1.1.0
     config = cm.getConfiguration(COMP_NOTSET_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for notsetNS110 and equal to 1", 1,
         getBaseConfigData(COMP_NOTSET_110));
 
@@ -1576,7 +1572,7 @@ public class DSTest extends TestCase {
     // 1.0.0 - INVALID COMPONENT
     config = cm.getConfiguration(COMP_OPTIONAL_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component optionalNS100 should not be activated", -1, getBaseConfigData(COMP_OPTIONAL_100));
 
     // component optionalNS110 - property not set by Configuration Admin; XML NS
@@ -1587,7 +1583,7 @@ public class DSTest extends TestCase {
     // 1.1.0
     config = cm.getConfiguration(COMP_OPTIONAL_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for optionalNS110 and equal to 1", 1,
         getBaseConfigData(COMP_OPTIONAL_110));
 
@@ -1598,7 +1594,7 @@ public class DSTest extends TestCase {
     // 1.0.0 - INVALID COMPONENT
     config = cm.getConfiguration(COMP_REQUIRE_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component requireNS100 should not be activated", -1, getBaseConfigData(COMP_REQUIRE_100));
 
     // component requireNS110 - property not set by Configuration Admin; XML NS
@@ -1609,7 +1605,7 @@ public class DSTest extends TestCase {
     // 1.1.0
     config = cm.getConfiguration(COMP_REQUIRE_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for requireNS110 and equal to 1", 1,
         getBaseConfigData(COMP_REQUIRE_110));
 
@@ -1620,7 +1616,7 @@ public class DSTest extends TestCase {
     // - INVALID COMPONENT
     config = cm.getConfiguration(COMP_IGNORE_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component ignoreNS100 should not be activated", -1, getBaseConfigData(COMP_IGNORE_100));
 
     // component ignoreNS110 - property not set by Configuration Admin; XML NS
@@ -1630,7 +1626,7 @@ public class DSTest extends TestCase {
     // component ignoreNS110 - property set by Configuration Admin; XML NS 1.1.0
     config = cm.getConfiguration(COMP_IGNORE_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should not be available for ignoreNS110, but it should be satisfied", 0,
         getBaseConfigData(COMP_IGNORE_110));
 
@@ -1655,7 +1651,7 @@ public class DSTest extends TestCase {
     // component notsetNS100 - property set by Configuration Admin; XML NS 1.0.0
     Configuration config = cm.createFactoryConfiguration(COMP_NOTSET_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for notsetNS100 and equal to 1", 1,
         getBaseConfigData(COMP_NOTSET_100));
 
@@ -1665,7 +1661,7 @@ public class DSTest extends TestCase {
     // component notsetNS110 - property set by Configuration Admin; XML NS 1.1.0
     config = cm.createFactoryConfiguration(COMP_NOTSET_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for notsetNS110 and equal to 1", 1,
         getBaseConfigData(COMP_NOTSET_110));
 
@@ -1676,7 +1672,7 @@ public class DSTest extends TestCase {
     // 1.0.0 - INVALID COMPONENT
     config = cm.createFactoryConfiguration(COMP_OPTIONAL_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component optionalNS100 should not be activated", -1, getBaseConfigData(COMP_OPTIONAL_100));
 
     // component optionalNS110 - property not set by Configuration Admin; XML NS
@@ -1687,7 +1683,7 @@ public class DSTest extends TestCase {
     // 1.1.0
     config = cm.createFactoryConfiguration(COMP_OPTIONAL_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for optionalNS110 and equal to 1", 1,
         getBaseConfigData(COMP_OPTIONAL_110));
 
@@ -1698,7 +1694,7 @@ public class DSTest extends TestCase {
     // 1.0.0 - INVALID COMPONENT
     config = cm.createFactoryConfiguration(COMP_REQUIRE_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component requireNS100 should not be activated", -1, getBaseConfigData(COMP_REQUIRE_100));
 
     // component requireNS110 - property not set by Configuration Admin; XML NS
@@ -1709,7 +1705,7 @@ public class DSTest extends TestCase {
     // 1.1.0
     config = cm.createFactoryConfiguration(COMP_REQUIRE_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should be available for requireNS110 and equal to 1", 1,
         getBaseConfigData(COMP_REQUIRE_110));
 
@@ -1720,7 +1716,7 @@ public class DSTest extends TestCase {
     // - INVALID COMPONENT
     config = cm.createFactoryConfiguration(COMP_IGNORE_100);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Component ignoreNS100 should not be activated", -1, getBaseConfigData(COMP_IGNORE_100));
 
     // component ignoreNS110 - property not set by Configuration Admin; XML NS
@@ -1730,7 +1726,7 @@ public class DSTest extends TestCase {
     // component ignoreNS110 - property set by Configuration Admin; XML NS 1.1.0
     config = cm.createFactoryConfiguration(COMP_IGNORE_110);
     config.update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Configuration data should not be available for ignoreNS110, but it should be satisfied", 0,
         getBaseConfigData(COMP_IGNORE_110));
 
@@ -1764,14 +1760,14 @@ public class DSTest extends TestCase {
 
     assertEquals("Activate method of " + NOTSET_NS100 + " should be called", 1 << 0, (1 << 0) & getBaseConfigData(bs));
     cc.disableComponent(NOTSET_NS100);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + NOTSET_NS100 + " should be called", 1 << 1, (1 << 1) & getBaseConfigData(bs));
 
     bs = getBaseService(NOTSET_NS110);
     assertNotNull(bs);
     assertEquals("Activate method of " + NOTSET_NS110 + " should be called", 1 << 0, (1 << 0) & getBaseConfigData(bs));
     cc.disableComponent(NOTSET_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + NOTSET_NS110 + " should be called", 1 << 1, (1 << 1) & getBaseConfigData(bs));
 
     bs = getBaseService(NOARGS_NS100); // INVALID COMPONENT FOR XML NS 1.0.0
@@ -1781,7 +1777,7 @@ public class DSTest extends TestCase {
     assertNotNull(bs);
     assertEquals("Activate method of " + NOARGS_NS110 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
     cc.disableComponent(NOARGS_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + NOARGS_NS110 + " should be called", 1 << 3, (1 << 3) & getBaseConfigData(bs));
 
     bs = getBaseService(CC_NS100); // INVALID COMPONENT FOR XML NS 1.0.0
@@ -1791,7 +1787,7 @@ public class DSTest extends TestCase {
     assertNotNull(bs);
     assertEquals("Activate method of " + CC_NS110 + " should be called", 1 << 4, (1 << 4) & getBaseConfigData(bs));
     cc.disableComponent(CC_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + CC_NS110 + " should be called", 1 << 5, (1 << 5) & getBaseConfigData(bs));
 
     bs = getBaseService(BC_NS100); // INVALID COMPONENT FOR XML NS 1.0.0
@@ -1801,7 +1797,7 @@ public class DSTest extends TestCase {
     assertNotNull(bs);
     assertEquals("Activate method of " + BC_NS110 + " should be called", 1 << 6, (1 << 6) & getBaseConfigData(bs));
     cc.disableComponent(BC_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + BC_NS110 + " should be called", 1 << 7, (1 << 7) & getBaseConfigData(bs));
 
     bs = getBaseService(MAP_NS100); // INVALID COMPONENT FOR XML NS 1.0.0
@@ -1811,7 +1807,7 @@ public class DSTest extends TestCase {
     assertNotNull(bs);
     assertEquals("Activate method of " + MAP_NS110 + " should be called", 1 << 8, (1 << 8) & getBaseConfigData(bs));
     cc.disableComponent(MAP_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + MAP_NS110 + " should be called", 1 << 9, (1 << 9) & getBaseConfigData(bs));
 
     bs = getBaseService(CC_BC_MAP_NS100); // INVALID COMPONENT FOR XML NS 1.0.0
@@ -1822,20 +1818,20 @@ public class DSTest extends TestCase {
     assertEquals("Activate method of " + CC_BC_MAP_NS110 + " should be called", 1 << 10, (1 << 10)
         & getBaseConfigData(bs));
     cc.disableComponent(CC_BC_MAP_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + CC_BC_MAP_NS110 + " should be called", 1 << 11, (1 << 11)
         & getBaseConfigData(bs));
 
     bs = getBaseService(INT_NS110);
     assertNotNull(bs);
     cc.disableComponent(INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivate method of " + INT_NS110 + " should be called", 1 << 12, (1 << 12) & getBaseConfigData(bs));
 
     bs = getBaseService(CC_BC_MAP_INT_NS110);
     assertNotNull(bs);
     cc.disableComponent(CC_BC_MAP_INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     int data = getBaseConfigData(bs);
     assertEquals("Deactivate method of " + CC_BC_MAP_INT_NS110 + " should be called", 1 << 13, (1 << 13) & data);
 
@@ -1845,15 +1841,15 @@ public class DSTest extends TestCase {
     final String CONT_EXP = "org.eclipse.equinox.ds.tests.tb12.ContextExp";
 
     cc.enableComponent(CC_BC_MAP_INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     bs = getBaseService(CC_BC_MAP_INT_NS110);
     assertNotNull(bs);
     cc.disableComponent(CONT_EXP);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Deactivation reason shall be DEACTIVATION_REASON_REFERENCE", 2, 0xFF & (getBaseConfigData(bs) >> 16));
 
     cc.enableComponent(CONT_EXP);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
 
     bs = getBaseService(CC_BC_MAP_INT_NS110);
     assertNotNull(bs);
@@ -1866,26 +1862,26 @@ public class DSTest extends TestCase {
     }
     properties.put("configuration.dummy", "dummy");
     config.update(properties);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivation reason shall be DEACTIVATION_REASON_CONFIGURATION_MODIFIED", 3,
         0xFF & (getBaseConfigData(bs) >> 16));
 
     cc.enableComponent(CC_BC_MAP_INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout );
 
     bs = getBaseService(CC_BC_MAP_INT_NS110);
     assertNotNull(bs);
     config = cm.getConfiguration(CC_BC_MAP_INT_NS110);
     config.delete();
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivation reason shall be DEACTIVATION_REASON_CONFIGURATION_DELETED", 4,
         0xFF & (getBaseConfigData(bs) >> 16));
 
     cc.enableComponent(CC_BC_MAP_INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
 
     cc.enableComponent(INT_NS110);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
 
     bs = getBaseService(INT_NS110);
     assertNotNull(bs);
@@ -1925,28 +1921,28 @@ public class DSTest extends TestCase {
     assertNotNull("Component " + SR_NS100 + " should be activated", bs);
     assertEquals("Bind method of " + SR_NS100 + " should be called", 1 << 0, (1 << 0) & getBaseConfigData(bs));
     enabler.enableComponent(SR_NS100, false);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Unbind method of " + SR_NS100 + " should be called", 1 << 1, (1 << 1) & getBaseConfigData(bs));
 
     bs = getBaseService(SR_NS110);
     assertNotNull("Component " + SR_NS110 + " should be activated", bs);
     assertEquals("Bind method of " + SR_NS110 + " should be called", 1 << 0, (1 << 0) & getBaseConfigData(bs));
     enabler.enableComponent(SR_NS110, false);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Unbind method of " + SR_NS110 + " should be called", 1 << 5, (1 << 5) & getBaseConfigData(bs));
 
     bs = getBaseService(CE_NS100);
     assertNotNull("Component " + CE_NS100 + " should be activated", bs);
     assertEquals("Bind method of " + CE_NS100 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
     enabler.enableComponent(CE_NS100, false);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Unbind method of " + CE_NS100 + " should be called", 1 << 3, (1 << 3) & getBaseConfigData(bs));
 
     bs = getBaseService(CE_NS110);
     assertNotNull("Component " + CE_NS110 + " should be activated", bs);
     assertEquals("Bind method of " + CE_NS110 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
     enabler.enableComponent(CE_NS110, false);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Unbind method of " + CE_NS110 + " should be called", 1 << 3, (1 << 3) & getBaseConfigData(bs));
 
     bs = getBaseService(CE_MAP_NS100);
@@ -1956,7 +1952,7 @@ public class DSTest extends TestCase {
     assertNotNull("Component " + CE_MAP_NS110 + " should be activated", bs);
     assertEquals("Bind method of " + CE_MAP_NS110 + " should be called", 1 << 4, (1 << 4) & getBaseConfigData(bs));
     enabler.enableComponent(CE_MAP_NS110, false);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertEquals("Unbind method of " + CE_MAP_NS110 + " should be called", 1 << 5, (1 << 5) & getBaseConfigData(bs));
 
     getContext().ungetService(ref);
@@ -2010,7 +2006,7 @@ public class DSTest extends TestCase {
     assertNotNull("Component context should be available", cc);
 
     cc.disableComponent(C1);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
 
     assertEquals("Component " + C3 + " should be deactivated first", 0, getBaseConfigData(serviceC3));
     assertEquals("Component " + C2 + " should be deactivated second", 1, getBaseConfigData(serviceC2));
@@ -2039,7 +2035,7 @@ public class DSTest extends TestCase {
     assertNull("Component " + C2 + " should not be activated because of unsatisfied reference", serviceC2);
 
     cc.enableComponent(C1);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout);
     assertNotNull("Component " + C1 + " should be available", getBaseService(C1));
 
     serviceC2 = getBaseService(C2);
@@ -2173,7 +2169,7 @@ public class DSTest extends TestCase {
     cm.getConfiguration(MOD_MAP_NS100).update(props);
     cm.getConfiguration(MOD_CC_BC_MAP_NS100).update(props);
 
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     tb21.start();
     waitBundleStart();
@@ -2185,14 +2181,14 @@ public class DSTest extends TestCase {
     PropertiesProvider bs = getBaseService(MOD_NOTSET_NS100);
     assertNotNull(bs);
     cm.getConfiguration(MOD_NOTSET_NS100).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_NOTSET_NS100 + " should not be called", 0, (1 << 0)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_NOTSET_NS100 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     bs = getBaseService(MOD_NOTSET_NS100);
     cm.getConfiguration(MOD_NOTSET_NS100).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_NOTSET_NS100 + " should not be called", 0, (1 << 0)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_NOTSET_NS100 + " should be called", 1 << 7, (1 << 7)
@@ -2229,7 +2225,7 @@ public class DSTest extends TestCase {
     cm.getConfiguration(MOD_MAP_NS110).update(props);
     cm.getConfiguration(MOD_CC_BC_MAP_NS110).update(props);
 
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     tb21a.start();
     waitBundleStart();
@@ -2240,14 +2236,14 @@ public class DSTest extends TestCase {
 
     PropertiesProvider bs = getBaseService(MOD_NOTSET_NS110);
     cm.getConfiguration(MOD_NOTSET_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_NOTSET_NS110 + " should not be called", 0, (1 << 0)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_NOTSET_NS110 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     bs = getBaseService(MOD_NOTSET_NS110);
     cm.getConfiguration(MOD_NOTSET_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_NOTSET_NS110 + " should not be called", 0, (1 << 0)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_NOTSET_NS110 + " should be called", 1 << 7, (1 << 7)
@@ -2259,13 +2255,13 @@ public class DSTest extends TestCase {
 
     bs = getBaseService(MOD_NOARGS_NS110);
     cm.getConfiguration(MOD_NOARGS_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_NOARGS_NS110 + " should be called", 1 << 1, (1 << 1)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_NOARGS_NS110 + " should not be called", 0, (1 << 7)
         & getBaseConfigData(bs));
     cm.getConfiguration(MOD_NOARGS_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_NOARGS_NS110 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     // Re-activating
@@ -2275,11 +2271,11 @@ public class DSTest extends TestCase {
 
     bs = getBaseService(MOD_CC_NS110);
     cm.getConfiguration(MOD_CC_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_CC_NS110 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_CC_NS110 + " should not be called", 0, (1 << 7) & getBaseConfigData(bs));
     cm.getConfiguration(MOD_CC_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_CC_NS110 + " should be called", 1 << 7, (1 << 7) & getBaseConfigData(bs));
     // Re-activating
     bs = getBaseService(MOD_CC_NS110);
@@ -2287,11 +2283,11 @@ public class DSTest extends TestCase {
 
     bs = getBaseService(MOD_BC_NS110);
     cm.getConfiguration(MOD_BC_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_BC_NS110 + " should be called", 1 << 3, (1 << 3) & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_BC_NS110 + " should not be called", 0, (1 << 7) & getBaseConfigData(bs));
     cm.getConfiguration(MOD_BC_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_BC_NS110 + " should be called", 1 << 7, (1 << 7) & getBaseConfigData(bs));
     // Re-activating
     bs = getBaseService(MOD_BC_NS110);
@@ -2299,11 +2295,11 @@ public class DSTest extends TestCase {
 
     bs = getBaseService(MOD_MAP_NS110);
     cm.getConfiguration(MOD_MAP_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_MAP_NS110 + " should be called", 1 << 4, (1 << 4) & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_MAP_NS110 + " should not be called", 0, (1 << 7) & getBaseConfigData(bs));
     cm.getConfiguration(MOD_MAP_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_MAP_NS110 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     // Re-activating
@@ -2312,13 +2308,13 @@ public class DSTest extends TestCase {
 
     bs = getBaseService(MOD_CC_BC_MAP_NS110);
     cm.getConfiguration(MOD_CC_BC_MAP_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_CC_BC_MAP_NS110 + " should be called", 1 << 5, (1 << 5)
         & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_CC_BC_MAP_NS110 + " should not be called", 0, (1 << 7)
         & getBaseConfigData(bs));
     cm.getConfiguration(MOD_CC_BC_MAP_NS110).update(unsatisfyingProps);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_CC_BC_MAP_NS110 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     // Re-activating
@@ -2342,7 +2338,7 @@ public class DSTest extends TestCase {
     cm.getConfiguration(MOD_NOT_EXIST_NS110).update(props);
     cm.getConfiguration(MOD_THROW_EX_NS110).update(props);
     cm.getConfiguration(MOD_BC_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
 
     tb21a.start();
     waitBundleStart();
@@ -2351,7 +2347,7 @@ public class DSTest extends TestCase {
     PropertiesProvider bs = getBaseService(MOD_CC_NS110);
     props.put("config.dummy.data", new Integer(2));
     cm.getConfiguration(MOD_CC_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     Object val = ((ComponentContextProvider) bs).getComponentContext().getProperties().get("config.dummy.data");
     assertEquals("Modified method of " + MOD_CC_NS110 + " should be called", 1 << 2, (1 << 2) & getBaseConfigData(bs));
     assertTrue("Component properties should be updated properly for " + MOD_CC_NS110, (new Integer(2)).equals(val));
@@ -2360,7 +2356,7 @@ public class DSTest extends TestCase {
     // instead of modified
     bs = getBaseService(MOD_NOT_EXIST_NS110);
     cm.getConfiguration(MOD_NOT_EXIST_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_NOT_EXIST_NS110 + " should be called", 1 << 7, (1 << 7)
         & getBaseConfigData(bs));
     // Re-activating
@@ -2372,14 +2368,14 @@ public class DSTest extends TestCase {
     // continue, deactivate() should not be called
     bs = getBaseService(MOD_THROW_EX_NS110);
     cm.getConfiguration(MOD_THROW_EX_NS110).update(props);
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Deactivate method of " + MOD_THROW_EX_NS110 + " should not be called", 0, (1 << 7)
         & getBaseConfigData(bs));
 
     // Deleting component configuration
     bs = getBaseService(MOD_BC_NS110);
     cm.getConfiguration(MOD_BC_NS110).delete();
-    Thread.sleep(timeout * 3);
+    Thread.sleep(timeout * 2);
     assertEquals("Modified method of " + MOD_BC_NS110 + " should not be called", 0, (1 << 5) & getBaseConfigData(bs));
     assertEquals("Deactivate method of " + MOD_BC_NS110 + " should be called", 1 << 7, (1 << 7) & getBaseConfigData(bs));
     // Re-activating
