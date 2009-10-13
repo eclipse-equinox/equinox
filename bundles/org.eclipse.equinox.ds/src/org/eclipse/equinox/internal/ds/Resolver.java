@@ -332,7 +332,7 @@ public final class Resolver implements WorkPerformer {
 				Vector componentsToDispose;
 				synchronized (syncLock) {
 					//check for components with static reference to this service
-					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference());
+					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference(), false);
 				}
 				//dispose instances from staticUnbind
 				if (componentsToDispose != null) {
@@ -342,7 +342,7 @@ public final class Resolver implements WorkPerformer {
 				synchronized (syncLock) {
 					// Pass in the set of currently resolved components, check each one -
 					// do we need to unbind
-					target = selectDynamicUnBind(scpEnabled, event.getServiceReference());
+					target = selectDynamicUnBind(scpEnabled, event.getServiceReference(), false);
 
 					if (componentsToDispose != null) {
 						// some components with static references were disposed. Try to build them again
@@ -372,7 +372,7 @@ public final class Resolver implements WorkPerformer {
 
 				synchronized (syncLock) {
 					//check for components with static reference to this service
-					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference());
+					componentsToDispose = selectStaticUnBind(scpEnabled, event.getServiceReference(), true);
 				}
 
 				if (componentsToDispose != null) {
@@ -382,7 +382,7 @@ public final class Resolver implements WorkPerformer {
 				synchronized (syncLock) {
 					// dynamic unbind
 					// check each satisfied scp - do we need to unbind
-					target = selectDynamicUnBind(scpEnabled, event.getServiceReference());
+					target = selectDynamicUnBind(scpEnabled, event.getServiceReference(), true);
 				}
 
 				if (target != null) {
@@ -743,7 +743,7 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
-	private Vector selectStaticUnBind(Vector scpsToCheck, ServiceReference serviceReference) {
+	private Vector selectStaticUnBind(Vector scpsToCheck, ServiceReference serviceReference, boolean checkSatisfied) {
 		try {
 			Vector toUnbind = null;
 			for (int i = 0, size = scpsToCheck.size(); i < size; i++) {
@@ -752,15 +752,17 @@ public final class Resolver implements WorkPerformer {
 					//the scp is already disposed
 					continue;
 				}
-				// if it is not already eligible it will bind with the static
-				// scps
+				// if it is not already eligible it will bind with the static scps
 				Vector references = scp.references;
-				// it is absolutely legal component if it doesn't contains
-				// references!
+				// it is absolutely legal component if it doesn't contains references!
 				if (references != null) {
 					for (int j = 0; j < references.size(); j++) {
 						Reference reference = (Reference) references.elementAt(j);
 						if (reference.staticUnbindReference(serviceReference)) {
+							if (checkSatisfied && reference.isInSatisfiedList(serviceReference)) {
+								//the service reference do still satisfy the reference and shall not be unbound
+								continue;
+							}
 							if (toUnbind == null) {
 								toUnbind = new Vector(2);
 							}
@@ -790,7 +792,7 @@ public final class Resolver implements WorkPerformer {
 	 * @param serviceReference
 	 * @return this is fairly complex to explain ;(
 	 */
-	private Hashtable selectDynamicUnBind(Vector scps, ServiceReference serviceReference) {
+	private Hashtable selectDynamicUnBind(Vector scps, ServiceReference serviceReference, boolean checkSatisfied) {
 		try {
 			if (Activator.DEBUG) {
 				Activator.log.debug("Resolver.selectDynamicUnBind(): entered", null); //$NON-NLS-1$
@@ -813,6 +815,10 @@ public final class Resolver implements WorkPerformer {
 						// Does the scp require this service, use the Reference
 						// object to check
 						if (reference.dynamicUnbindReference(serviceReference)) {
+							if (checkSatisfied && reference.isInSatisfiedList(serviceReference)) {
+								//the service reference do still satisfy the reference and shall not be unbound
+								continue;
+							}
 							if (Activator.DEBUG) {
 								Activator.log.debug("Resolver.selectDynamicUnBind(): unbinding " + scp.toString(), null); //$NON-NLS-1$
 							}

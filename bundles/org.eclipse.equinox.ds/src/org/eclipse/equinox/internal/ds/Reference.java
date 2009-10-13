@@ -319,6 +319,22 @@ public final class Reference {
 		return false;
 	}
 
+	/**
+	 * Checks if the passed service reference is satisfying this reference according to the target filter
+	 * @param serviceReference the service reference to check
+	 * @return true, if the service reference do satisfy this reference, otherwise returns false
+	 */
+	public boolean isInSatisfiedList(ServiceReference serviceReference) {
+		Filter filter;
+		try {
+			filter = FrameworkUtil.createFilter(target);
+		} catch (InvalidSyntaxException e) {
+			Activator.log(reference.component.bc, LogService.LOG_WARNING, "Reference.isInSatisfiedList(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, target), e); //$NON-NLS-1$
+			return false;
+		}
+		return filter.match(serviceReference);
+	}
+
 	public void setBoundServiceReferences(ServiceReference[] references) {
 		if (policy == ComponentReference.POLICY_DYNAMIC) {
 			//not relevant to dynamic references
