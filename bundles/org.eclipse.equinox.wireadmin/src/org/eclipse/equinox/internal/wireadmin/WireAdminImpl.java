@@ -41,6 +41,8 @@ class WireAdminImpl implements WireAdmin, ManagedServiceFactory, ServiceListener
 
 	private Vector waitForUpdate = new Vector();
 
+	long counter = System.currentTimeMillis();
+
 	/**
 	 * Constructs an <code>WireAdminImpl</code> object, which provides
 	 * Framework with methods for manipulating a <code>Wire</code> objects.
@@ -571,8 +573,12 @@ class WireAdminImpl implements WireAdmin, ManagedServiceFactory, ServiceListener
 		return false;
 	}
 
-	private static String getNextPID() {
-		return PID_PREFIX + System.currentTimeMillis();
+	private final String getNextPID() {
+		String nextPID = PID_PREFIX + counter++;
+		while (wires.get(nextPID) != null) {
+			nextPID = PID_PREFIX + counter++;
+		}
+		return nextPID;
 	}
 
 	boolean hasAConnectedWire(boolean isProducer, String pid) {
