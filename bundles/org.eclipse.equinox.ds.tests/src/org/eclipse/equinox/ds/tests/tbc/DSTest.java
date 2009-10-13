@@ -773,7 +773,6 @@ public class DSTest extends TestCase {
     assertNotNull("DynamicWorker component instance should not be null", dynServiceInstance);
     Object dynService = dynServiceInstance.getInstance();
     assertNotNull("DynamicWorker should be created properly", dynService);
-//    Thread.sleep(timeout * 2);
 
     Object bsrc = trackerBSRC.getService();
     assertNotNull("BoundReplacer should be available", bsrc);
@@ -823,7 +822,6 @@ public class DSTest extends TestCase {
     // restore the BSRC
     assertNotNull("The DynamicWorker component instance should be created properly", dynFactory
         .newInstance((Dictionary) mandatoryProperty.clone()));
-    Thread.sleep(timeout);
 
     Object bsrcObject = trackerBSRC.getService();
     assertNotNull("The BoundReplacer should be available again", bsrcObject);
@@ -902,7 +900,6 @@ public class DSTest extends TestCase {
     ((DSEventsProvider) bsrc).resetEvents();
     // change the first instance of dynamic service
     dynRegistration1.setProperties(modifiedProps);
-    Thread.sleep(timeout);
 
     Object instance1 = bc.getService(dynRegistration1.getReference());
     Object instance2 = bc.getService(dynRegistration2.getReference());
@@ -942,7 +939,6 @@ public class DSTest extends TestCase {
         (Dictionary) initialProps.clone());
     // change the first instance
     staticRegistration1.setProperties((Dictionary) modifiedProps.clone());
-    Thread.sleep(timeout);
 
     Object bsrcObject2 = trackerMBSRC.getService(); // the BSRC object can be
     // recreated
@@ -2146,10 +2142,7 @@ public class DSTest extends TestCase {
     waitBundleStart();
 
     final String COMP = "org.eclipse.equinox.ds.tests.tb20.component";
-
-    Thread.sleep(timeout);
     assertTrue("Provided service of Component " + COMP + " should be available.", trackerBaseService.size() > 0);
-
     uninstallBundle(tb20);
   }
 
