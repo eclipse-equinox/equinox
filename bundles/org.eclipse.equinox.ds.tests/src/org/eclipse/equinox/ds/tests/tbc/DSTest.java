@@ -904,7 +904,6 @@ public class DSTest extends TestCase {
     Object instance1 = bc.getService(dynRegistration1.getReference());
     Object instance2 = bc.getService(dynRegistration2.getReference());
     try {
-
       // check that service is replaced
       assertNotSame("The bound dynamic service shouldn't be our first instance", ((BoundMainProvider) bsrc)
           .getBoundService(BoundMainProvider.DYNAMIC_SERVICE), instance1);
@@ -946,6 +945,63 @@ public class DSTest extends TestCase {
     ComponentContext bsrcCtxt2 = ((ComponentContextProvider) bsrcObject2).getComponentContext();
     assertNotNull("The second ComponentContext should not be null", bsrcCtxt2);
     assertNotSame("The second ComponentContext should be different than the first one", bsrcCtxt1, bsrcCtxt2);
+    
+    //test the modification of static service reference which is not bound
+    unregisterService(staticRegistration1);
+    unregisterService(staticRegistration2);
+    assertTrue("The AdvancedBounder must not be available", countAvailableServices(trackerMBSRC) == 0);
+    staticRegistration1 = registerService(StaticWorker.class.getName(), new StaticWorker(),
+        (Dictionary) initialProps.clone());    
+    // assure the MBSRC is available
+    assertTrue("The AdvancedBounder must be available", countAvailableServices(trackerMBSRC) > 0);
+    staticRegistration2 = registerService(StaticWorker.class.getName(), new StaticWorker(),
+        (Dictionary) initialProps.clone());
+    bsrcCtxt2 = ((ComponentContextProvider)trackerMBSRC.getService()).getComponentContext();
+    //modify the service which is not bound
+    staticRegistration2.setProperties((Dictionary) modifiedProps.clone());
+    bsrcCtxt1 = ((ComponentContextProvider)trackerMBSRC.getService()).getComponentContext();
+    //check if the component is reactivated when a service is modified but it is not bound to the component
+    assertEquals("The component context must not be changed", bsrcCtxt2, bsrcCtxt1);
+    
+    // test the modification of static service reference which is bound. 
+    // The service reference does still satisfy the component reference after the
+    // modification
+    unregisterService(staticRegistration1);
+    unregisterService(staticRegistration2);
+    assertTrue("The AdvancedBounder must not be available", countAvailableServices(trackerMBSRC) == 0);
+    staticRegistration1 = registerService(StaticWorker.class.getName(), new StaticWorker(),
+        (Dictionary) initialProps.clone());    
+    // assure the MBSRC is available
+    assertTrue("The AdvancedBounder must be available", countAvailableServices(trackerMBSRC) > 0);
+    bsrcCtxt1 = ((ComponentContextProvider)trackerMBSRC.getService()).getComponentContext();
+    //modify the service which is bound
+    Hashtable modified = (Hashtable) initialProps.clone();
+    modified.put("a", "a");
+    staticRegistration1.setProperties(modified);
+    bsrcCtxt2 = ((ComponentContextProvider)trackerMBSRC.getService()).getComponentContext();
+    //check if the component is reactivated when a bound service is modified but still satisfies the component reference
+    assertEquals("The component context must not be changed", bsrcCtxt1, bsrcCtxt2);
+    
+    // test the modification of dynamic service reference which is bound. 
+    // The service reference does still satisfy the component reference after the
+    // modification
+    unregisterService(dynRegistration1);
+    unregisterService(dynRegistration2);
+    assertTrue("The AdvancedBounder must not be available", countAvailableServices(trackerMBSRC) == 0);
+    dynRegistration1 = registerService(DynamicWorker.class.getName(), new DynamicWorker(),
+        (Dictionary) initialProps.clone());    
+    // assure the MBSRC is available
+    assertTrue("The AdvancedBounder must be available", countAvailableServices(trackerMBSRC) > 0);
+    bsrc = trackerMBSRC.getService();
+    // reset the bound services events
+    ((DSEventsProvider) bsrc).resetEvents();
+    //modify the service which is bound
+    modified = (Hashtable) initialProps.clone();
+    modified.put("a", "a");
+    dynRegistration1.setProperties(modified);
+    assertEquals(
+        "There must be no unbind/bind activity when modifying reference which still satsfies the component reference",
+        0, ((DSEventsProvider) bsrc).getEvents().length);
 
     uninstallBundle(tb4);
 
@@ -2486,12 +2542,12 @@ public class DSTest extends TestCase {
     ServiceRegistration sr = (ServiceRegistration) registeredServices.get(service);
     if (sr != null) {
       sr.unregister();
-      registeredServices.remove(sr);
+      registeredServices.remove(service);
     }
   }
 
   private void unregisterService(ServiceRegistration reg) {
-    Enumeration e = registeredServices.elements();
+    Enumeration e = registeredServices.keys();
     while (e.hasMoreElements()) {
       Object service = e.nextElement();
       if (reg == null || registeredServices.get(service) == reg) {
@@ -2501,7 +2557,7 @@ public class DSTest extends TestCase {
   }
 
   private void unregisterAllServices() {
-    Enumeration e = registeredServices.elements();
+    Enumeration e = registeredServices.keys();
     while (e.hasMoreElements()) {
       Object service = e.nextElement();
       unregisterService(service);
