@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,8 @@
 package org.eclipse.core.runtime.internal.adaptor;
 
 import java.io.*;
-import java.nio.channels.*;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -85,7 +86,15 @@ public class Locker_JavaNio implements Locker {
 				 * fix for bug http://bugs.sun.com/view_bug.do?bug_id=6628575 and
 				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=44735#c17
 				 */
-				tempLock = temp.getChannel().tryLock(0, 1, false);
+				try {
+					tempLock = temp.getChannel().tryLock(0, 1, false);
+				} catch (IOException ioe) {
+					if (BasicLocation.DEBUG)
+						System.out.println(NLS.bind(EclipseAdaptorMsg.location_cannotLock, lockFile));
+					// produce a more specific message for clients
+					String specificMessage = NLS.bind(EclipseAdaptorMsg.location_cannotLockNIO, new Object[] {lockFile, ioe.getMessage(), "\"-D" + BasicLocation.PROP_OSGI_LOCKING + "=none\""}); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new IOException(specificMessage);
+				}
 				if (tempLock != null) {
 					tempLock.release(); // allow IOException to propagate because that would mean it is still locked
 					return false;
