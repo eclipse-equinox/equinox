@@ -161,7 +161,7 @@ public final class Reference {
 	}
 
 	// used in Resolver.selectDynamicBind()
-	final boolean bindNewReference(ServiceReference reference, boolean dynamicBind) {
+	final boolean bindNewReference(ServiceReference referenceToBind, boolean dynamicBind) {
 		if (dynamicBind) {
 			if (policy == ComponentReference.POLICY_STATIC) {
 				return false;
@@ -171,7 +171,7 @@ public final class Reference {
 				return false;
 			}
 		}
-		String[] serviceNames = (String[]) reference.getProperty(Constants.OBJECTCLASS);
+		String[] serviceNames = (String[]) referenceToBind.getProperty(Constants.OBJECTCLASS);
 		boolean hasName = false;
 		for (int i = 0; i < serviceNames.length; i++) {
 			if (serviceNames[i].equals(interfaceName)) {
@@ -182,26 +182,26 @@ public final class Reference {
 		if (!hasName) {
 			return false;
 		}
+		if (this.reference.bind != null) {
+			if (this.reference.serviceReferences.size() >= cardinalityHigh) {
+				return false;
+			}
+		} else if (!dynamicBind) {
+			//custom case: static reference with no bind method - check its bound service references list
+			if (boundServiceReferences.size() >= cardinalityHigh) {
+				return false;
+			}
+		}
 		// check target filter
 		try {
 			Filter filter = FrameworkUtil.createFilter(target);
-			if (!filter.match(reference)) {
+			if (!filter.match(referenceToBind)) {
 				return false;
 			}
 		} catch (InvalidSyntaxException e) {
 			return false;
 		}
-		if (this.reference.bind != null) {
-			if (this.reference.serviceReferences.size() < cardinalityHigh) {
-				return true;
-			}
-		} else if (!dynamicBind) {
-			//custom case: static reference with no bind method - check its bound service references list
-			if (boundServiceReferences.size() < cardinalityHigh) {
-				return true;
-			}
-		}
-		return false;
+		return true;
 	}
 
 	/**
