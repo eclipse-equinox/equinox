@@ -294,16 +294,8 @@ public final class Resolver implements WorkPerformer {
 		Vector resolvedComponents = null;
 		switch (event.getType()) {
 			case ServiceEvent.REGISTERED :
-				Vector componentsWithStaticRefs;
 				synchronized (syncLock) {
 					serviceReferenceTable.put(event.getServiceReference(), Boolean.TRUE);
-					componentsWithStaticRefs = selectStaticBind(scpEnabled, event.getServiceReference());
-				}
-				if (componentsWithStaticRefs != null) {
-					instanceProcess.disposeInstances(componentsWithStaticRefs, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
-				}
-
-				synchronized (syncLock) {
 					resolvedComponents = getComponentsToBuild();
 					target = selectDynamicBind(scpEnabled, event.getServiceReference());
 				}
@@ -700,41 +692,6 @@ public final class Resolver implements WorkPerformer {
 			}
 			if (toBind != null && Activator.DEBUG) {
 				Activator.log.debug("Resolver.selectDynamicBind(): selected = " + toBind.toString(), null); //$NON-NLS-1$
-			}
-			return toBind;
-		} catch (Throwable t) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
-			return null;
-		}
-	}
-
-	private Vector selectStaticBind(Vector scps, ServiceReference serviceReference) {
-		try {
-			Vector toBind = null;
-			for (int i = 0, size = scps.size(); i < size; i++) {
-				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
-				if (scp.isComponentFactory() || scp.getState() < ServiceComponentProp.BUILDING) {
-					// the component configuration does not have to be reactivated
-					continue;
-				}
-				// if it is not already eligible it will bind with the static
-				// scps
-				Vector references = scp.references;
-				if (references != null) {
-					for (int j = 0; j < references.size(); j++) {
-						Reference reference = (Reference) references.elementAt(j);
-						if (reference.bindNewReference(serviceReference, false)) {
-							if (toBind == null) {
-								toBind = new Vector(2);
-							}
-							toBind.addElement(scp);
-							break;
-						}
-					}
-				}
-			}
-			if (toBind != null && Activator.DEBUG) {
-				Activator.log.debug("Resolver.selectStaticBind(): selected = " + toBind.toString(), null); //$NON-NLS-1$
 			}
 			return toBind;
 		} catch (Throwable t) {
