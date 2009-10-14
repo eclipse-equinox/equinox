@@ -16,6 +16,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.osgi.service.datalocation.Location;
 
 /**
  * @since 3.0
@@ -33,9 +34,12 @@ public class ConfigurationPreferences extends EclipsePreferences {
 	private static IPath baseLocation;
 
 	static {
-		URL url = PreferencesOSGiUtils.getDefault().getConfigurationLocation().getURL();
-		if (url != null)
-			baseLocation = new Path(url.getFile());
+		Location location = PreferencesOSGiUtils.getDefault().getConfigurationLocation();
+		if (location != null) {
+			URL url = location.getURL();
+			if (url != null)
+				baseLocation = new Path(url.getFile());
+		}
 	}
 
 	/**
