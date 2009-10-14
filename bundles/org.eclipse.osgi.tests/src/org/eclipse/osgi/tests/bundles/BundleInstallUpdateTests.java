@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.io.File;
 import java.net.URL;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -162,6 +164,26 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			assertNotNull("null tests", tests); //$NON-NLS-1$
 			assertEquals("Wrong number", 1, tests.length); //$NON-NLS-1$
 			assertTrue("Wrong bundle: " + tests[0], tests[0] == test); //$NON-NLS-1$
+		} catch (Exception e) {
+			fail("Unexpected failure", e); //$NON-NLS-1$
+		} finally {
+			try {
+				if (test != null)
+					test.uninstall();
+			} catch (BundleException e) {
+				// nothing
+			}
+		}
+	}
+
+	public void testBug290193() {
+		Bundle test = null;
+		try {
+			URL testBundle = OSGiTestsActivator.getContext().getBundle().getEntry("test_files/security/bundles/signed.jar");
+			File testFile = OSGiTestsActivator.getContext().getDataFile("test with space/test.jar");
+			assertTrue(testFile.getParentFile().mkdirs());
+			AdaptorUtil.readFile(testBundle.openStream(), testFile);
+			test = OSGiTestsActivator.getContext().installBundle("reference:" + testFile.toURI().toString());
 		} catch (Exception e) {
 			fail("Unexpected failure", e); //$NON-NLS-1$
 		} finally {
