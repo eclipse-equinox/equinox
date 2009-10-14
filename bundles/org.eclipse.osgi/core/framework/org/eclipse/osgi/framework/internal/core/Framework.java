@@ -470,7 +470,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				StringTokenizer st = new StringTokenizer(javaSpecVersion, " _-"); //$NON-NLS-1$
 				javaSpecVersion = st.nextToken();
 				String javaSpecName = properties.getProperty("java.specification.name"); //$NON-NLS-1$
-				if ("J2ME Foundation Specification".equals(javaSpecName)) //$NON-NLS-1$
+				// See bug 291269 we check for Foundation Specification and Foundation Profile Specification
+				if (javaSpecName != null && (javaSpecName.indexOf("Foundation Specification") >= 0 || javaSpecName.indexOf("Foundation Profile Specification") >= 0)) //$NON-NLS-1$ //$NON-NLS-2$
 					vmProfile = "CDC-" + javaSpecVersion + "_Foundation-" + javaSpecVersion; //$NON-NLS-1$ //$NON-NLS-2$
 				else {
 					// look for JavaSE if 1.6 or greater; otherwise look for J2SE
