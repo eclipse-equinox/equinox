@@ -1280,28 +1280,14 @@ public class DSTest extends TestCase {
     assertTrue("The StaticComp should be available", checkAvailability(STATIC_CLASS));
     assertTrue("The ReferencedComp should be available", checkAvailability(REFERENCED_CLASS));
 
-    // check that the SCR created new instance
     Object enabledStatic = trackerStatic.getService();
     assertNotNull(STATIC_CLASS + " component should be non-null", enabledStatic);
     ComponentContext enabledCtxt = ((ComponentContextProvider) enabledStatic).getComponentContext();
-    assertNotSame("The StaticComp must have been restarted", initialCtxt, enabledCtxt);
-    assertEquals("There should be one bound service to StaticComp", 1, ((BoundTester) enabledStatic)
+    assertSame("The StaticComp must not have been restarted", initialCtxt, enabledCtxt);
+    assertEquals("There should be no bound service to StaticComp", 0, ((BoundTester) enabledStatic)
         .getBoundObjectsCount());
 
-    // check the events
-    DSEvent[] initialEvents = ((DSEventsProvider) initialStatic).getEvents();
-    assertEquals("The events in the first instance of StaticComp should only one", 1, initialEvents.length);
-    assertEquals("The event should deactivate one", DSEvent.ACT_DEACTIVATE, initialEvents[0].getAction());
-
-    DSEvent[] enabledEvents = ((DSEventsProvider) enabledStatic).getEvents();
-    assertEquals("The events for the second instance of StaticComp should be two", 2, enabledEvents.length);
-    assertEquals("The first event should bind event", DSEvent.ACT_BOUND, enabledEvents[0].getAction());
-    assertEquals("The second event should be activate event", DSEvent.ACT_ACTIVATE, enabledEvents[1].getAction());
-
-    // reset the events
-    ((DSEventsProvider) enabledStatic).resetEvents();
-
-    // disable the component
+    // disable the referenced component
     enabledCtxt.disableComponent(REFERENCED_CLASS);
     Thread.sleep(timeout);
 
@@ -1309,24 +1295,13 @@ public class DSTest extends TestCase {
     assertTrue("The StaticComp should be available", checkAvailability(STATIC_CLASS));
     assertTrue("The ReferencedComp shouldn't be available", !checkAvailability(REFERENCED_CLASS));
 
-    // check that the SCR created new instance
-    Object disabledStatic = trackerStatic.getService();
-    assertNotNull(STATIC_CLASS + " component should be non-null", disabledStatic);
-    ComponentContext disabledCtxt = ((ComponentContextProvider) disabledStatic).getComponentContext();
-    assertNotSame("The StaticComp must have been restarted", enabledCtxt, disabledCtxt);
-    assertEquals("There should be one bound service to StaticComp", 0, ((BoundTester) disabledStatic)
+    // check that the SCR did not restarted the component with static reference
+    Object staticRefComp = trackerStatic.getService();
+    assertNotNull(STATIC_CLASS + " component should be non-null", staticRefComp);
+    ComponentContext ctxt = ((ComponentContextProvider) staticRefComp).getComponentContext();
+    assertSame("The StaticComp must not have been restarted", enabledCtxt, ctxt);
+    assertEquals("There should be none bound service to StaticComp", 0, ((BoundTester) staticRefComp)
         .getBoundObjectsCount());
-
-    enabledEvents = ((DSEventsProvider) enabledStatic).getEvents();
-    DSEvent[] disabledEvents = ((DSEventsProvider) disabledStatic).getEvents();
-
-    assertEquals("The second instance of StaticComp should have two events after disabling ReferencedComp", 2,
-        enabledEvents.length);
-    assertEquals("The first event should be deactivate", DSEvent.ACT_DEACTIVATE, enabledEvents[0].getAction());
-    assertEquals("The second event should be unbind", DSEvent.ACT_UNBOUND, enabledEvents[1].getAction());
-
-    assertEquals("There should only one event for the second instance of StaticComp", 1, disabledEvents.length);
-    assertEquals("The event should be activate", DSEvent.ACT_ACTIVATE, disabledEvents[0].getAction());
 
     uninstallBundle(tb6);
   }
