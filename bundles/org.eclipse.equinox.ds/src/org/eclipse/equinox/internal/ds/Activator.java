@@ -16,7 +16,6 @@ import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.debug.DebugOptions;
-import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -279,7 +278,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			}
 		} catch (Exception e) {
 			if (Activator.DEBUG) {
-				log.debug(NLS.bind(Messages.CANNOT_GET_LOGSERVICE, bundleContext.getBundle().getSymbolicName()), e);
+				log.debug("Cannot get LogService for bundle " + bundleContext.getBundle().getSymbolicName(), e); //$NON-NLS-1$
 			}
 		}
 		if (logService != null) {

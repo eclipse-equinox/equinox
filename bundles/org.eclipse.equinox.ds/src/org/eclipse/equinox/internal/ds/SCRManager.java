@@ -235,7 +235,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		long start = 0l;
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
-			log.info(NLS.bind(Messages.PROCESSING_BUNDLE_EVENT, event));
+			log.info("[DS perf] Started processing bundle event " + event); //$NON-NLS-1$
 		}
 		int type = event.getType();
 		if (type == BundleEvent.STOPPING) {
@@ -249,7 +249,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		}
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			log.info(NLS.bind(Messages.PROCESSED_BUNDLE_EVENT, event, new Long(start)));
+			log.info("[DS perf] Processed bundle event '" + event + "' for " + start + "ms"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 
@@ -283,7 +283,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis();
-				log.info(NLS.bind(Messages.PROCESSING_CONF_EVENT, event));
+				log.info("[DS perf] Started processing configuration event " + event); //$NON-NLS-1$
 			}
 
 			String pid = event.getPid();
@@ -321,7 +321,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		} finally {
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;
-				log.info(NLS.bind(Messages.PROCESSED_CONF_EVENT, event, new Long(start)));
+				log.info("[DS perf] Processed configuration event '" + event + "' for " + start + "ms"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			}
 		}
 	}
@@ -591,7 +591,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;
-				log.info(NLS.bind(Messages.COMPONENTS_PARSED_TIME, bundle, new Long(start)));
+				log.info("[DS perf] The components of bundle " + bundle + " are parsed for " + start + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (bundleToServiceComponents == null) {
 				synchronized (this) {

@@ -201,7 +201,7 @@ public final class Resolver implements WorkPerformer {
 
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			Activator.log.info(NLS.bind(Messages.COMPONENTS_ENABLED, serviceComponents != null ? Integer.toString(serviceComponents.size()) : "", Long.toString(start))); //$NON-NLS-1$
+			Activator.log.info("[DS perf] " + (serviceComponents != null ? Integer.toString(serviceComponents.size()) : "") + " Components enabled for " + Long.toString(start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 	}
 
@@ -237,7 +237,7 @@ public final class Resolver implements WorkPerformer {
 		ServiceComponentProp scp = null;
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(NLS.bind(Messages.CREATING_SCP, component.name), null);
+				Activator.log.debug("Resolver.map(): Creating SCP for component " + component.name, null); //$NON-NLS-1$
 			}
 			scp = new ServiceComponentProp(component, configProperties, mgr);
 
@@ -278,7 +278,7 @@ public final class Resolver implements WorkPerformer {
 			return; // check for any enabled configurations
 
 		if (Activator.DEBUG) {
-			Activator.log.debug(NLS.bind(Messages.PROCESSING_SERVICE_EVENT, event.toString()), null);
+			Activator.log.debug("Resolver.getEligible(): processing service event " + event.toString(), null); //$NON-NLS-1$
 			String eventType = ""; //$NON-NLS-1$
 			if (event.getType() == ServiceEvent.UNREGISTERING) {
 				eventType = "UNREGISTERING"; //$NON-NLS-1$
@@ -287,7 +287,7 @@ public final class Resolver implements WorkPerformer {
 			} else if (event.getType() == ServiceEvent.MODIFIED) {
 				eventType = "MODIFIED"; //$NON-NLS-1$
 			}
-			Activator.log.debug(NLS.bind(Messages.SERVICE_EVENT_TYPE, eventType), null);
+			Activator.log.debug("Service event type: " + eventType, null); //$NON-NLS-1$
 		}
 
 		Object target = null;
@@ -451,7 +451,7 @@ public final class Resolver implements WorkPerformer {
 
 							if (!resolved) {
 								if (Activator.DEBUG) {
-									Activator.log.debug("Resolver.resolveEligible(): " + NLS.bind(Messages.REFERENCE_NOT_RESOLVED, reference.reference.name, scp.name), null); //$NON-NLS-1$
+									Activator.log.debug("Resolver.resolveEligible(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
 								enabledSCPs.removeElementAt(k);
 								break;
@@ -493,9 +493,7 @@ public final class Resolver implements WorkPerformer {
 						}
 					}
 					if (!hasPermission) {
-						if (Activator.DEBUG) {
-							Activator.log.debug(NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
-						}
+						Activator.log.warning(NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
 						scpEnabled.removeElementAt(k);
 						enabledSCPs.removeElementAt(k);
 						continue;
@@ -507,7 +505,7 @@ public final class Resolver implements WorkPerformer {
 			}
 
 			if (Activator.DEBUG) {
-				Activator.log.debug(NLS.bind(Messages.RESOLVED_COMPONENTS, enabledSCPs.toString()), null);
+				Activator.log.debug("Resolver.resolveEligible(): resolved components = " + enabledSCPs.toString(), null); //$NON-NLS-1$
 			}
 			return enabledSCPs;
 		} catch (Throwable e) {
@@ -533,7 +531,7 @@ public final class Resolver implements WorkPerformer {
 
 						if (!resolved && scp.getState() > ServiceComponentProp.SATISFIED) {
 							if (Activator.DEBUG) {
-								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): " + NLS.bind(Messages.REFERENCE_NOT_RESOLVED, reference.reference.name, scp.name), null); //$NON-NLS-1$
+								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
 							toDispose = true;
 							break;
@@ -608,7 +606,7 @@ public final class Resolver implements WorkPerformer {
 
 		if (Activator.PERF) {
 			start = System.currentTimeMillis() - start;
-			Activator.log.info(NLS.bind(Messages.COMPONENTS_DISABLED, Integer.toString(componentDescriptions.size()), Long.toString(start)));
+			Activator.log.info("[DS perf] " + Integer.toString(componentDescriptions.size()) + " Components disabled for " + Long.toString(start) + "ms"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 

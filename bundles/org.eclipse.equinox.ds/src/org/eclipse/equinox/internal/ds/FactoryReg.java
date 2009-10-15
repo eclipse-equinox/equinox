@@ -36,7 +36,7 @@ final class FactoryReg implements ServiceFactory {
 
 		try {
 			if (Activator.DEBUG) {
-				Activator.log.debug(NLS.bind(Messages.NEW_SERVICE_CREATED, component.name), null);
+				Activator.log.debug("FactoryReg.getService(): created new service for component " + component.name, null); //$NON-NLS-1$
 			}
 			ComponentInstance ci = InstanceProcess.staticRef.buildComponent(bundle, component, null, false);
 			// ci can be null if the component is already disposed while being built

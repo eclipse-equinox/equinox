@@ -83,7 +83,7 @@ public class WorkThread implements Runnable, TimerListener {
 					TimerRef.notifyAfter(this, BLOCK_TIMEOUT, 1);
 				} else {
 					if (Activator.DEBUG) {
-						Activator.log.debug(Messages.TIMER_SERVICE_UNAVAILABLE, null);
+						Activator.log.debug("[SCR] WorkThread.run(): Timer service is not available! Skipping timeout check", null); //$NON-NLS-1$
 					}
 				}
 				if (objectToProcess instanceof SCRManager.QueuedJob) {

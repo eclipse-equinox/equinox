@@ -59,7 +59,7 @@ final class ServiceReg implements ServiceFactory {
 				useCount++;
 			}
 			if (Activator.DEBUG) {
-				Activator.log.debug("ServiceReg.getService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)) + ", object = " + instance.getInstance(), null); //$NON-NLS-1$ //$NON-NLS-2$
+				Activator.log.debug("ServiceReg.getService(): service '" + scp.name + "' is used " + Integer.toString(useCount) + " time(s), object = " + instance.getInstance(), null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return instance.getInstance();
 		} catch (Exception e) {
@@ -87,7 +87,7 @@ final class ServiceReg implements ServiceFactory {
 				//Immediate components are custom case - according to me, their instances should not be disposed
 				// because they are probably needed during the whole component's life  
 				if (Activator.DEBUG) {
-					Activator.log.debug(NLS.bind(Messages.SERVICE_NO_LONGER_USED, scp.name, service), null);
+					Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + "' no longer used, disposing object = " + service, null); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				// dispose only the instance - don't dispose the component
 				// itself!
@@ -96,14 +96,14 @@ final class ServiceReg implements ServiceFactory {
 				instance = null;
 			} else {
 				if (Activator.DEBUG) {
-					Activator.log.debug("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), null); //$NON-NLS-1$
+					Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + "' is used " + Integer.toString(useCount) + " time(s)", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			}
 		} else {
 			if (useCount < 0) {
 				Activator.log.warning("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), new Exception("Debug callstack")); //$NON-NLS-1$ //$NON-NLS-2$
 			} else if (Activator.DEBUG) {
-				Activator.log.debug("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), null); //$NON-NLS-1$
+				Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + "' is used " + Integer.toString(useCount) + " time(s)", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 	}
