@@ -128,4 +128,108 @@ public final class SCRUtil implements ObjectCreator {
 			failed = true;
 		}
 	}
+
+	/**
+	 * Gets the string representation of an <code>Object</code>. This method is
+	 * helpful if the passed parameter is a type of array. If the objects is not
+	 * recognized as array, the method will simply return the toString() value
+	 * 
+	 * @param value
+	 *          an object which should be represented as string
+	 * @return the string representation of the
+	 */
+	public static String getStringRepresentation(Object value) {
+		if (value == null)
+			return "null"; //$NON-NLS-1$
+		//this would speedup many cases
+		if (value instanceof String)
+			return (String) value;
+
+		StringBuffer res = new StringBuffer(200);
+
+		if (value instanceof String[]) {
+			res.append("String["); //$NON-NLS-1$
+			String[] arr = (String[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i]);
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof int[]) {
+			res.append("int["); //$NON-NLS-1$
+			int[] arr = (int[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof long[]) {
+			res.append("long["); //$NON-NLS-1$
+			long[] arr = (long[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof char[]) {
+			res.append("char["); //$NON-NLS-1$
+			char[] arr = (char[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof boolean[]) {
+			res.append("boolean["); //$NON-NLS-1$
+			boolean[] arr = (boolean[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof double[]) {
+			res.append("double["); //$NON-NLS-1$
+			double[] arr = (double[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof float[]) {
+			res.append("float["); //$NON-NLS-1$
+			float[] arr = (float[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(arr[i] + ""); //$NON-NLS-1$
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else if (value instanceof Object[]) {
+			res.append("Object["); //$NON-NLS-1$
+			Object[] arr = (Object[]) value;
+			for (int i = 0; i < arr.length; i++) {
+				res.append(getStringRepresentation(arr[i]));
+				if (i != arr.length - 1) {
+					res.append(","); //$NON-NLS-1$
+				}
+			}
+			res.append("]"); //$NON-NLS-1$
+		} else {
+			return value.toString();
+		}
+		return res.toString();
+	}
 }

@@ -351,98 +351,12 @@ public class SCRCommandProvider implements CommandProvider {
 			Object key = keys.nextElement();
 			Object value = props.get(key);
 			intp.print("      " + key + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-			printPropertyValue(intp, value);
+			intp.print(SCRUtil.getStringRepresentation(value));
 			intp.println();
 		}
 		intp.println("    Instances:"); //$NON-NLS-1$
 		for (int i = 0; i < scp.instances.size(); i++) {
 			intp.println("      " + scp.instances.elementAt(i)); //$NON-NLS-1$
-		}
-	}
-
-	private void printPropertyValue(CommandInterpreter intp, Object value) {
-		if (value instanceof Object[]) {
-			intp.print("Object["); //$NON-NLS-1$
-			Object[] arr = (Object[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				printPropertyValue(intp, arr[i]);
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof String[]) {
-			intp.print("String["); //$NON-NLS-1$
-			String[] arr = (String[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i]);
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof int[]) {
-			intp.print("int["); //$NON-NLS-1$
-			int[] arr = (int[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof long[]) {
-			intp.print("long["); //$NON-NLS-1$
-			long[] arr = (long[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof char[]) {
-			intp.print("char["); //$NON-NLS-1$
-			char[] arr = (char[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof boolean[]) {
-			intp.print("boolean["); //$NON-NLS-1$
-			boolean[] arr = (boolean[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof double[]) {
-			intp.print("double["); //$NON-NLS-1$
-			double[] arr = (double[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else if (value instanceof float[]) {
-			intp.print("float["); //$NON-NLS-1$
-			float[] arr = (float[]) value;
-			for (int i = 0; i < arr.length; i++) {
-				intp.print(arr[i] + ""); //$NON-NLS-1$
-				if (i != arr.length - 1) {
-					intp.print(","); //$NON-NLS-1$
-				}
-			}
-			intp.print("]"); //$NON-NLS-1$
-		} else {
-			intp.print(value.toString());
 		}
 	}
 

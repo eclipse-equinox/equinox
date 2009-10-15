@@ -514,7 +514,20 @@ public class ServiceComponent implements Externalizable {
 		buffer.append("\n\timmediate = ").append(immediate); //$NON-NLS-1$
 
 		buffer.append("\n\timplementation = ").append(implementation); //$NON-NLS-1$
-		buffer.append("\n\tproperties = ").append(properties); //$NON-NLS-1$
+		StringBuffer buf = new StringBuffer(200);
+		if (properties != null) {
+			buf.append('{');
+			Enumeration keys = properties.keys();
+			while (keys.hasMoreElements()) {
+				Object key = keys.nextElement();
+				buf.append(key).append('=').append(SCRUtil.getStringRepresentation(properties.get(key)));
+				if (keys.hasMoreElements()) {
+					buf.append(", "); //$NON-NLS-1$
+				}
+			}
+			buf.append('}');
+		}
+		buffer.append("\n\tproperties = ").append(buf.toString()); //$NON-NLS-1$
 
 		buffer.append("\n\tserviceFactory = ").append(serviceFactory); //$NON-NLS-1$
 		buffer.append("\n\tserviceInterface = ").append(serviceInterfaces); //$NON-NLS-1$
