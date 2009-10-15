@@ -19,12 +19,12 @@
 		  The extendedFrameworkExports parameter allows the specification of additional java package exports.
 		  The format is a comma separated list of exports as specified by the "Export-Package" bundle manifest header.
 		  For example: com.mycompany.exports; version=1.0.0, com.mycompany.otherexports; version=1.0.0
-		  
+		  -->
 		<init-param>
 			<param-name>extendedFrameworkExports</param-name>
 			<param-value></param-value>			
 		</init-param>
-		-->
+
 		<!-- 
 		  You can specify your own framework launcher here.
 		  The default is: org.eclipse.equinox.servletbridge.FrameworkLauncher
@@ -41,12 +41,13 @@
 		  If this param is set to 'true', then the existing extension bundle with be *overridden* and
 		  the one created by the FrameworkLauncher will replace any existing one.  The default is 'false' 
 		  (giving preference to the existing extension bundle if present).
-		-->	  
+		  
+		  default: false
+		 -->
 		<init-param>
 			<param-name>overrideAndReplaceExtensionBundle</param-name>
 			<param-value>true</param-value>
 		</init-param>	
-	
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

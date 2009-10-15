@@ -20,6 +20,7 @@ import java.net.URL;
 import java.security.*;
 import java.util.*;
 import java.util.jar.*;
+import java.util.jar.Attributes.Name;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -38,6 +39,7 @@ import javax.servlet.ServletContext;
  */
 public class FrameworkLauncher {
 
+	private static final String DOT_JAR = ".jar"; //$NON-NLS-1$
 	private static final String WS_DELIM = " \t\n\r\f"; //$NON-NLS-1$
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 	protected static final String FRAMEWORK_BUNDLE_NAME = "org.eclipse.osgi"; //$NON-NLS-1$
@@ -53,6 +55,8 @@ public class FrameworkLauncher {
 	protected static final String ECLIPSE = "eclipse/"; //$NON-NLS-1$
 	protected static final String LAUNCH_INI = "launch.ini"; //$NON-NLS-1$
 
+	private static final String EXTENSIONBUNDLE_DEFAULT_BSN = "org.eclipse.equinox.servletbridge.extensionbundle"; //$NON-NLS-1$
+	private static final String EXTENSIONBUNDLE_DEFAULT_VERSION = "org.eclipse.equinox.servletbridge.extensionbundle"; //$NON-NLS-1$
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String BUNDLE_MANIFEST_VERSION = "Bundle-ManifestVersion"; //$NON-NLS-1$
 	private static final String BUNDLE_NAME = "Bundle-Name"; //$NON-NLS-1$
@@ -186,25 +190,67 @@ public class FrameworkLauncher {
 	 * Additional exports can be added by using the "extendedFrameworkExports" initial-param in the ServletConfig
 	 */
 	private void deployExtensionBundle(File plugins) {
-		File extensionBundle = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0.jar"); //$NON-NLS-1$
-		File extensionBundleDir = new File(plugins, "org.eclipse.equinox.servletbridge.extensionbundle_1.0.0"); //$NON-NLS-1$
-		if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE)).booleanValue()) {
-			extensionBundle.delete();
-			deleteDirectory(extensionBundleDir);
-		} else if (extensionBundle.exists() || extensionBundleDir.isDirectory())
-			return;
+		// we might want to parameterize the extension bundle BSN in the future
+		final String extensionBundleBSN = EXTENSIONBUNDLE_DEFAULT_BSN;
+		File extensionBundleFile = findExtensionBundleFile(plugins, extensionBundleBSN);
 
+		if (extensionBundleFile == null)
+			generateExtensionBundle(plugins, extensionBundleBSN, EXTENSIONBUNDLE_DEFAULT_VERSION);
+		else if (Boolean.valueOf(config.getInitParameter(CONFIG_OVERRIDE_AND_REPLACE_EXTENSION_BUNDLE)).booleanValue()) {
+			String extensionBundleVersion = findExtensionBundleVersion(extensionBundleFile, extensionBundleBSN);
+			if (extensionBundleFile.isDirectory()) {
+				deleteDirectory(extensionBundleFile);
+			} else {
+				extensionBundleFile.delete();
+			}
+			generateExtensionBundle(plugins, extensionBundleBSN, extensionBundleVersion);
+		} else {
+			processExtensionBundle(extensionBundleFile);
+		}
+	}
+
+	private File findExtensionBundleFile(File plugins, final String extensionBundleBSN) {
+		FileFilter extensionBundleFilter = new FileFilter() {
+			public boolean accept(File candidate) {
+				return candidate.getName().startsWith(extensionBundleBSN + "_"); //$NON-NLS-1$
+			}
+		};
+		File[] extensionBundles = plugins.listFiles(extensionBundleFilter);
+		if (extensionBundles.length == 0)
+			return null;
+
+		if (extensionBundles.length > 1) {
+			for (int i = 1; i < extensionBundles.length; i++) {
+				if (extensionBundles[i].isDirectory()) {
+					deleteDirectory(extensionBundles[i]);
+				} else {
+					extensionBundles[i].delete();
+				}
+			}
+		}
+		return extensionBundles[0];
+	}
+
+	private String findExtensionBundleVersion(File extensionBundleFile, String extensionBundleBSN) {
+		String fileName = extensionBundleFile.getName();
+		if (fileName.endsWith(DOT_JAR)) {
+			return fileName.substring(extensionBundleBSN.length() + 1, fileName.length() - DOT_JAR.length());
+		}
+		return fileName.substring(extensionBundleBSN.length() + 1);
+	}
+
+	private void generateExtensionBundle(File plugins, String extensionBundleBSN, String extensionBundleVersion) {
 		Manifest mf = new Manifest();
 		Attributes attribs = mf.getMainAttributes();
 		attribs.putValue(MANIFEST_VERSION, "1.0"); //$NON-NLS-1$
 		attribs.putValue(BUNDLE_MANIFEST_VERSION, "2"); //$NON-NLS-1$
 		attribs.putValue(BUNDLE_NAME, "Servletbridge Extension Bundle"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_SYMBOLIC_NAME, "org.eclipse.equinox.servletbridge.extensionbundle"); //$NON-NLS-1$
-		attribs.putValue(BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		attribs.putValue(BUNDLE_SYMBOLIC_NAME, extensionBundleBSN);
+		attribs.putValue(BUNDLE_VERSION, extensionBundleVersion);
 		attribs.putValue(FRAGMENT_HOST, "system.bundle; extension:=framework"); //$NON-NLS-1$
 
 		String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
-		String packageExports = "org.eclipse.equinox.servletbridge; version=1.0" + //$NON-NLS-1$
+		String packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
 				", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
 				", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
 				", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
@@ -214,19 +260,53 @@ public class FrameworkLauncher {
 			packageExports += ", " + extendedExports; //$NON-NLS-1$
 
 		attribs.putValue(EXPORT_PACKAGE, packageExports);
+		writeJarFile(new File(plugins, extensionBundleBSN + "_" + extensionBundleVersion + DOT_JAR), mf); //$NON-NLS-1$
+	}
 
+	private void processExtensionBundle(File extensionBundleFile) {
+		String fileName = extensionBundleFile.getName();
+		if (fileName.endsWith(DOT_JAR)) {
+			Manifest mf = readJarFile(extensionBundleFile);
+			if (mf == null)
+				return;
+			Attributes attributes = mf.getMainAttributes();
+			String exportPackage = (String) attributes.remove(new Name("X-Deploy-Export-Package")); //$NON-NLS-1$
+			if (exportPackage != null) {
+				attributes.putValue("Export-Package", exportPackage); //$NON-NLS-1$
+				writeJarFile(extensionBundleFile, mf);
+			}
+		}
+	}
+
+	private void writeJarFile(File jarFile, Manifest mf) {
 		try {
 			JarOutputStream jos = null;
 			try {
-				jos = new JarOutputStream(new FileOutputStream(extensionBundle), mf);
+				jos = new JarOutputStream(new FileOutputStream(jarFile), mf);
 				jos.finish();
 			} finally {
 				if (jos != null)
 					jos.close();
 			}
 		} catch (IOException e) {
-			context.log("Error generating extension bundle", e); //$NON-NLS-1$
+			context.log("Error writing extension bundle", e); //$NON-NLS-1$
 		}
+	}
+
+	private Manifest readJarFile(File jarFile) {
+		try {
+			JarInputStream jis = null;
+			try {
+				jis = new JarInputStream(new FileInputStream(jarFile));
+				return jis.getManifest();
+			} finally {
+				if (jis != null)
+					jis.close();
+			}
+		} catch (IOException e) {
+			context.log("Error reading extension bundle", e); //$NON-NLS-1$
+		}
+		return null;
 	}
 
 	/** undeploy is the reverse operation of deploy and removes the OSGi framework libraries from their
@@ -715,7 +795,7 @@ public class FrameworkLauncher {
 	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
 	 */
 	private Object[] getVersionElements(String version) {
-		if (version.endsWith(".jar")) //$NON-NLS-1$
+		if (version.endsWith(DOT_JAR)) //$NON-NLS-1$
 			version = version.substring(0, version.length() - 4);
 		Object[] result = {new Integer(0), new Integer(0), new Integer(0), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$

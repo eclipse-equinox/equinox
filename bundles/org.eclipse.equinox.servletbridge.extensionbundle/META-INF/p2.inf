@@ -1,0 +1,12 @@
+provides.0.namespace = java.package
+provides.0.name = javax.servlet
+provides.0.version = 2.5
+provides.1.namespace = java.package
+provides.1.name = javax.servlet.http
+provides.1.version = 2.5
+provides.2.namespace = java.package
+provides.2.name = javax.servlet.resources
+provides.2.version = 2.5
+provides.3.namespace = java.package
+provides.3.name = org.eclipse.equinox.servletbridge
+provides.3.version = 1.1
