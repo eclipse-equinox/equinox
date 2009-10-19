@@ -25,13 +25,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This is the main starting class for the Service Component Runtime.
- * 
- * It also acts as a "Bundle Manager" - a listener for bundle events. Whenever a
- * bundle is stopped or started it will invoke the resolver to respectively
- * enable or disable necessary service components.
- * 
- * Notice, the SynchronousBundleListener bundle listeners are called prior
- * bundle event is completed. This will make the stuff a little bit faster ;)
+ * The SCR is not fully initialized until it detects at least one bundle providing DS components. 
+ * Thus it has considerably small startup time and does improve a little the runtime performance 
+ * since it does not listen for service events.
  * 
  * @author Valentin Valchev
  * @author Stoyan Boshev
@@ -44,8 +40,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 	private ServiceTracker cmTracker;
 	private ServiceRegistration cmTrackerReg;
-
-	private ServiceTracker debugTracker = null;
 
 	private SCRManager scrManager = null;
 
@@ -128,31 +122,34 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 * 
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
-	public void start(BundleContext bc) throws Exception {
-		Activator.bc = bc;
+	public void start(BundleContext bundleContext) throws Exception {
+		Activator.bc = bundleContext;
 		startup = getBoolean("equinox.measurements.bundles", false); //$NON-NLS-1$
 		if (startup) {
 			long tmp = System.currentTimeMillis();
 			time = new long[] {tmp, 0, tmp};
 		}
 		// initialize the logging routines
-		debugTracker = new ServiceTracker(bc, DebugOptions.class.getName(), null);
+		log = new Log(bundleContext, false);
+		ServiceTracker debugTracker = new ServiceTracker(bundleContext, DebugOptions.class.getName(), null);
 		debugTracker.open();
-		log = new Log(bc, false);
-		DEBUG = getBooleanDebugOption("org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug", false); //$NON-NLS-1$ //$NON-NLS-2$
-		PERF = getBooleanDebugOption("org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf", false); //$NON-NLS-1$ //$NON-NLS-2$
-		INSTANTIATE_ALL = getBooleanDebugOption("org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all", false); //$NON-NLS-1$ //$NON-NLS-2$
+		DebugOptions debugOptions = (DebugOptions) debugTracker.getService();
+		DEBUG = getBooleanDebugOption(debugOptions, "org.eclipse.equinox.ds/debug", false) || getBoolean("equinox.ds.debug", false); //$NON-NLS-1$ //$NON-NLS-2$
+		PERF = getBooleanDebugOption(debugOptions, "org.eclipse.equinox.ds/performance", false) || getBoolean("equinox.ds.perf", false); //$NON-NLS-1$ //$NON-NLS-2$
+		INSTANTIATE_ALL = getBooleanDebugOption(debugOptions, "org.eclipse.equinox.ds/instantiate_all", false) || getBoolean("equinox.ds.instantiate_all", false); //$NON-NLS-1$ //$NON-NLS-2$
 
-		DBSTORE = getBooleanDebugOption("org.eclipse.equinox.ds/cache_descriptions", true) || getBoolean("equinox.ds.dbstore", true); //$NON-NLS-1$ //$NON-NLS-2$
+		DBSTORE = getBooleanDebugOption(debugOptions, "org.eclipse.equinox.ds/cache_descriptions", true) || getBoolean("equinox.ds.dbstore", true); //$NON-NLS-1$ //$NON-NLS-2$
+		boolean print = getBooleanDebugOption(debugOptions, "org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print", false); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setDebug(DEBUG);
-		boolean print = getBooleanDebugOption("org.eclipse.equinox.ds/print_on_console", false) || getBoolean("equinox.ds.print", false); //$NON-NLS-1$ //$NON-NLS-2$
 		log.setPrintOnConsole(print);
+		//DebugOptions no longer needed
+		debugTracker.close();
 
 		if (startup)
 			timeLog("[BEGIN - start method] Creating Log instance and initializing log system took "); //$NON-NLS-1$
 
 		boolean hasHeaders = false;
-		Bundle[] allBundles = bc.getBundles();
+		Bundle[] allBundles = bundleContext.getBundles();
 		for (int i = 0; i < allBundles.length; i++) {
 			Dictionary allHeaders = allBundles[i].getHeaders(""); //$NON-NLS-1$
 			if (allHeaders.get(ComponentConstants.SERVICE_COMPONENT) != null) {
@@ -166,7 +163,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		} else {
 			// there are no bundles holding components - SCR will not be
 			// initialized yet
-			bc.addBundleListener(this);
+			bundleContext.addBundleListener(this);
 		}
 		if (startup) {
 			log.debug("[END - start method] Activator.start() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
@@ -179,10 +176,10 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 	 * 
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
-	public void stop(BundleContext bc) throws Exception {
+	public void stop(BundleContext bundleContext) throws Exception {
 		if (scrManager != null) {
 			scrManager.stopIt();
-			bc.removeServiceListener(scrManager);
+			bundleContext.removeServiceListener(scrManager);
 		}
 		// dispose the CM Listener
 		if (cmTrackerReg != null) {
@@ -194,9 +191,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		scrCommandProvider = null;
 
 		if (scrManager != null) {
-			bc.removeBundleListener(scrManager);
+			bundleContext.removeBundleListener(scrManager);
 		} else {
-			bc.removeBundleListener(this);
+			bundleContext.removeBundleListener(this);
 		}
 
 		// untrack the cm!
@@ -206,14 +203,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			cmTracker = null;
 		}
 
-		if (debugTracker != null) {
-			debugTracker.close();
-			debugTracker = null;
-		}
-
 		log.close();
 		log = null;
-		bc = null;
 	}
 
 	public static Filter createFilter(String filter) throws InvalidSyntaxException {
@@ -255,13 +246,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		return defaultValue;
 	}
 
-	public boolean getBooleanDebugOption(String option, boolean defaultValue) {
-		if (debugTracker == null) {
-			return defaultValue;
-		}
-		DebugOptions options = (DebugOptions) debugTracker.getService();
-		if (options != null) {
-			String value = options.getOption(option);
+	public boolean getBooleanDebugOption(DebugOptions optionsService, String option, boolean defaultValue) {
+		if (optionsService != null) {
+			String value = optionsService.getOption(option);
 			if (value != null)
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
 		}
@@ -337,5 +324,4 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			t.printStackTrace();
 		}
 	}
-
 }
