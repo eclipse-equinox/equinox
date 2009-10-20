@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,7 @@ package org.eclipse.core.runtime;
  * Assertion failure exceptions, like most runtime exceptions, are
  * thrown when something is misbehaving. Assertion failures are invariably
  * unspecified behavior; consequently, clients should never rely on
- * these being thrown (and certainly should not being catching them
+ * these being thrown (and certainly should not be catching them
  * specifically).
  * </p><p>
  * This class can be used without OSGi running.
@@ -38,7 +38,7 @@ public final class Assert {
 	 * not <code>true</code>, an <code>IllegalArgumentException</code>
 	 * is thrown.
 	 *
-	 * @param expression the outcode of the check
+	 * @param expression the outcome of the check
 	 * @return <code>true</code> if the check passes (does not return
 	 *    if the check fails)
 	 * @exception IllegalArgumentException if the legality test failed
@@ -52,7 +52,7 @@ public final class Assert {
 	 * is thrown.
 	 * The given message is included in that exception, to aid debugging.
 	 *
-	 * @param expression the outcode of the check
+	 * @param expression the outcome of the check
 	 * @param message the message to include in the exception
 	 * @return <code>true</code> if the check passes (does not return
 	 *    if the check fails)
@@ -88,7 +88,7 @@ public final class Assert {
 	/** Asserts that the given boolean is <code>true</code>. If this
 	 * is not the case, some kind of unchecked exception is thrown.
 	 *
-	 * @param expression the outcode of the check
+	 * @param expression the outcome of the check
 	 * @return <code>true</code> if the check passes (does not return
 	 *    if the check fails)
 	 */
@@ -100,7 +100,7 @@ public final class Assert {
 	 * is not the case, some kind of unchecked exception is thrown.
 	 * The given message is included in that exception, to aid debugging.
 	 *
-	 * @param expression the outcode of the check
+	 * @param expression the outcome of the check
 	 * @param message the message to include in the exception
 	 * @return <code>true</code> if the check passes (does not return
 	 *    if the check fails)
