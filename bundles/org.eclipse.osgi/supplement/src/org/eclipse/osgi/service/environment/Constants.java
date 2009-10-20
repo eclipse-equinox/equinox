@@ -117,6 +117,13 @@ public interface Constants {
 	public static final String ARCH_PPC = "ppc";//$NON-NLS-1$
 
 	/**
+	 * Constant string (value "ppc64") indicating the platform is running on an
+	 * PowerPC-based 64-bit architecture.
+	 * @since 3.6
+	 */
+	public static final String ARCH_PPC64 = "ppc64";//$NON-NLS-1$
+
+	/**
 	 * Constant string (value "sparc") indicating the platform is running on an
 	 * Sparc-based architecture.
 	 */
