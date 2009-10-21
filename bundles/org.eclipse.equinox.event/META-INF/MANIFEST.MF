@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.1.100.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.event
 Bundle-Activator: org.eclipse.equinox.internal.event.Activator
 Bundle-Copyright: %bundleCopyright
@@ -16,3 +16,5 @@ Bundle-Vendor: %bundleVendor
 Export-Service: org.osgi.service.event.EventAdmin
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1
+Service-Component: OSGI-INF/component.xml
+Bundle-ActivationPolicy: lazy
