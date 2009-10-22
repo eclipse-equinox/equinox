@@ -29,14 +29,14 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Acts as a "Bundle Manager" - a listener for bundle events. Whenever a
- * bundle is stopped or started it will invoke the resolver to respectively
- * enable or disable the contained components. Notice, the SynchronousBundleListener 
+ * Acts as a "Bundle Manager" - a listener for bundle events. Whenever a bundle
+ * is stopped or started it will invoke the resolver to respectively enable or
+ * disable the contained components. Notice, the SynchronousBundleListener
  * bundle listeners are called prior bundle event is completed.
  * 
- * Manager of update and delete events, forwarded by ConfigurationImpl to the
- * corresponding ManagedService(Factories). As those events are asynchronuos, a
- * separate thread is engaged for their execution.
+ * It is also a listener for update and delete configuration events, sent by
+ * Configuration Admin, thus handling the changes in configurations which are meant 
+ * to configure the properties of DS components
  * 
  * @author Maria Ivanova
  * @author Stoyan Boshev
@@ -62,7 +62,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	private boolean hasRegisteredServiceListener = false;
 
 	private ComponentStorage storage;
-	boolean doSynchronousComponentResolving = true;
 
 	/**
 	 * Constructs the SCRManager.
@@ -70,12 +69,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public SCRManager(BundleContext bc, Log log) {
 		this.bc = bc;
 		SCRManager.log = log;
-		String doSynchronousComponentResolvingValue = System.getProperty("equinox.ds.synchronous_build"); //$NON-NLS-1$
-		if (doSynchronousComponentResolvingValue != null) {
-			//def value is true
-			doSynchronousComponentResolving = !doSynchronousComponentResolvingValue.equalsIgnoreCase("false"); //$NON-NLS-1$
-		}
-
 		security = Log.security();
 
 		hasRegisteredServiceListener = true;
