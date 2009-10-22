@@ -29,6 +29,11 @@ import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
+ * Acts as a "Bundle Manager" - a listener for bundle events. Whenever a
+ * bundle is stopped or started it will invoke the resolver to respectively
+ * enable or disable the contained components. Notice, the SynchronousBundleListener 
+ * bundle listeners are called prior bundle event is completed.
+ * 
  * Manager of update and delete events, forwarded by ConfigurationImpl to the
  * corresponding ManagedService(Factories). As those events are asynchronuos, a
  * separate thread is engaged for their execution.
@@ -40,10 +45,14 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class SCRManager implements ServiceListener, SynchronousBundleListener, ConfigurationListener, WorkPerformer, PrivilegedAction {
 
-	protected Hashtable bundleToServiceComponents;
-	public BundleContext bc;
-	protected Queue queue;
+	/** work action type */
+	public final int ENABLE_COMPONENTS = 1;
+	public final int DISABLE_COMPONENTS = 2;
+
 	public static Log log;
+	public BundleContext bc;
+	protected Hashtable bundleToServiceComponents;
+	protected Queue queue;
 	private Resolver resolver;
 
 	private WorkThread workThread;
@@ -51,10 +60,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	protected boolean stopped = false;
 	private ServiceTracker threadPoolManagerTracker;
 	private boolean hasRegisteredServiceListener = false;
-
-	/** work action type */
-	public final int ENABLE_COMPONENTS = 1;
-	public final int DISABLE_COMPONENTS = 2;
 
 	private ComponentStorage storage;
 	boolean doSynchronousComponentResolving = true;
@@ -228,6 +233,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	public void serviceChanged(ServiceEvent sEv) {
+
 		resolver.getEligible(sEv);
 	}
 
@@ -337,7 +343,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 
 				String filter = (fpid != null ? "(&" : "") + "(" + Constants.SERVICE_PID + "=" + pid + ")" + (fpid != null ? ("(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + fpid + "))") : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 				try {
-					config = ConfigurationManager.listConfigurations(filter);
+					config = Activator.listConfigurations(filter);
 				} catch (IOException e) {
 					log.error(Messages.ERROR_LISTING_CONFIGURATIONS, e);
 				} catch (InvalidSyntaxException e) {
@@ -805,4 +811,57 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		}
 	}
 
+	protected void configAdminRegistered(ConfigurationAdmin configAdmin, ServiceReference caReference) {
+		Vector toProcess = new Vector(1);
+		Configuration[] configs = null;
+		try {
+			configs = configAdmin.listConfigurations(null);
+		} catch (Exception e) {
+			log.error(Messages.ERROR_LISTING_CONFIGURATIONS, e);
+		}
+		if (configs == null || configs.length == 0) {
+			//no configurations found
+			return;
+		}
+		//process all components to find such that need to be evaluated when ConfigAdmin is available
+		for (Enumeration keys = bundleToServiceComponents.keys(); keys.hasMoreElements();) {
+			Vector bundleComps = (Vector) bundleToServiceComponents.get(keys.nextElement());
+			// bundleComps may be null since bundleToServiceComponents
+			// may have been modified by another thread
+			if (bundleComps != null) {
+				for (int i = 0; i < bundleComps.size(); i++) {
+					ServiceComponent sc = (ServiceComponent) bundleComps.elementAt(i);
+					if (sc.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_IGNORE) {
+						//skip processing of this component - it is not interested in configuration changes
+						continue;
+					}
+					if (sc.enabled) {
+						for (int j = 0; j < configs.length; j++) {
+							if (configs[j].getPid().equals(sc.name) || sc.name.equals(configs[j].getFactoryPid())) {
+								if (sc.name.equals(configs[j].getFactoryPid()) && sc.factory != null) {
+									Activator.log(sc.bc, LogService.LOG_ERROR, NLS.bind(Messages.FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY, sc.name), null);
+									break;
+								}
+								//found a configuration for this component
+								if (sc.componentProps == null || sc.componentProps.size() == 0) {
+									if (sc.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_REQUIRE) {
+										//the component is not yet mapped because it is requiring configuration. Try to process it
+										toProcess.addElement(sc);
+									}
+								} else {
+									//process the component configurations and eventually modify or restart them
+									ConfigurationEvent ce = new ConfigurationEvent(caReference, ConfigurationEvent.CM_UPDATED, configs[j].getFactoryPid(), configs[j].getPid());
+									processConfigurationEvent(ce, sc);
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (toProcess.size() > 0) {
+			resolver.enableComponents(toProcess);
+		}
+	}
 }

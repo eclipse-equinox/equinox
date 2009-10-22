@@ -210,7 +210,7 @@ public class InstanceProcess {
 
 								// check if MSF
 								try {
-									Configuration config = ConfigurationManager.getConfiguration(sc.name);
+									Configuration config = Activator.getConfiguration(sc.name);
 									if (config != null) {
 										factoryPid = config.getFactoryPid();
 									}

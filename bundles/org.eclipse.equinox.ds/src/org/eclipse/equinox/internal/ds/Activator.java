@@ -11,14 +11,14 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.osgi.framework.*;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -34,18 +34,15 @@ import org.osgi.util.tracker.ServiceTracker;
  * @author Pavlin Dobrev
  */
 
-public class Activator implements BundleActivator, SynchronousBundleListener {
+public class Activator implements BundleActivator, SynchronousBundleListener, ServiceListener {
 
 	public static BundleContext bc = null;
+	public static ConfigurationAdmin configAdmin = null;
 
-	private ServiceTracker cmTracker;
-	private ServiceRegistration cmTrackerReg;
-
+	private ServiceRegistration configListenerReg;
 	private SCRManager scrManager = null;
-
 	private ServiceRegistration scrCommandProviderReg;
 	private SCRCommandProvider scrCommandProvider;
-
 	private boolean inited = false;
 
 	public static Log log;
@@ -81,13 +78,18 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		WorkThread.IDLE_TIMEOUT = getInteger("equinox.ds.idle_timeout", 1000); //$NON-NLS-1$
 		WorkThread.BLOCK_TIMEOUT = getInteger("equinox.ds.block_timeout", 30000); //$NON-NLS-1$
 
-		// start the config tracker
-		cmTracker = new ServiceTracker(bc, ConfigurationAdmin.class.getName(), null);
-
-		ConfigurationManager.cmTracker = cmTracker;
-		cmTracker.open();
+		try {
+			bc.addServiceListener(this, "(objectClass=" + ConfigurationAdmin.class.getName() + ')'); //$NON-NLS-1$
+		} catch (InvalidSyntaxException e) {
+			//should never happen
+		}
+		//get config admin service if available
+		ServiceReference caRef = bc.getServiceReference(ConfigurationAdmin.class.getName());
+		if (caRef != null) {
+			configAdmin = (ConfigurationAdmin) bc.getService(caRef);
+		}
 		if (startup)
-			timeLog("ServiceTracker starting took "); //$NON-NLS-1$
+			timeLog("ConfigurationAdmin service getting took "); //$NON-NLS-1$
 
 		scrManager = new SCRManager(bc, log);
 		if (startup)
@@ -95,7 +97,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 
 		// add the configuration listener - we to receive CM events to restart
 		// components
-		cmTrackerReg = bc.registerService(ConfigurationListener.class.getName(), scrManager, null);
+		configListenerReg = bc.registerService(ConfigurationListener.class.getName(), scrManager, null);
 		if (startup)
 			timeLog("ConfigurationListener service registered for "); //$NON-NLS-1$
 		bc.addServiceListener(scrManager);
@@ -182,8 +184,8 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			bundleContext.removeServiceListener(scrManager);
 		}
 		// dispose the CM Listener
-		if (cmTrackerReg != null) {
-			cmTrackerReg.unregister();
+		if (configListenerReg != null) {
+			configListenerReg.unregister();
 		}
 
 		if (scrCommandProviderReg != null)
@@ -194,13 +196,6 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 			bundleContext.removeBundleListener(scrManager);
 		} else {
 			bundleContext.removeBundleListener(this);
-		}
-
-		// untrack the cm!
-		if (cmTracker != null) {
-			ConfigurationManager.cmTracker = null;
-			cmTracker.close();
-			cmTracker = null;
 		}
 
 		log.close();
@@ -220,6 +215,20 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 				initSCR();
 			}
 		}
+	}
+
+	public static Configuration getConfiguration(String pid) throws IOException {
+		if (configAdmin != null) {
+			return configAdmin.getConfiguration(pid);
+		}
+		return null;
+	}
+
+	public static Configuration[] listConfigurations(String filter) throws IOException, InvalidSyntaxException {
+		if (configAdmin != null) {
+			return configAdmin.listConfigurations(filter);
+		}
+		return null;
 	}
 
 	public static boolean getBoolean(String property, boolean defaultValue) {
@@ -322,6 +331,30 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		}
 		if (t != null) {
 			t.printStackTrace();
+		}
+	}
+
+	public void serviceChanged(ServiceEvent event) {
+		switch (event.getType()) {
+			case ServiceEvent.REGISTERED :
+				Object caService = bc.getService(event.getServiceReference());
+				configAdmin = (ConfigurationAdmin) caService;
+				if (caService != null) {
+					// Config Admin registered
+					if (scrManager != null) {
+						scrManager.configAdminRegistered((ConfigurationAdmin) caService, event.getServiceReference());
+					}
+				}
+				break;
+			case ServiceEvent.UNREGISTERING :
+				//get replacement config admin service if available
+				ServiceReference caRef = bc.getServiceReference(ConfigurationAdmin.class.getName());
+				if (caRef != null) {
+					configAdmin = (ConfigurationAdmin) bc.getService(caRef);
+				} else {
+					configAdmin = null;
+				}
+				break;
 		}
 	}
 }

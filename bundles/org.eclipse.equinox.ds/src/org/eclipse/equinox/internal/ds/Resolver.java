@@ -149,7 +149,7 @@ public final class Resolver implements WorkPerformer {
 					// check for a Configuration properties for this component
 					try {
 						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						configs = ConfigurationManager.listConfigurations(filter);
+						configs = Activator.listConfigurations(filter);
 					} catch (Exception e) {
 						Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 					}
@@ -159,7 +159,7 @@ public final class Resolver implements WorkPerformer {
 							// create ServiceComponent + Prop
 							map(current, (Dictionary) null);
 						} else {
-							String customReason = ConfigurationManager.cmTracker.getService() != null ? "" : Messages.CONFIG_ADMIN_SERVICE_NOT_AVAILABLE; //$NON-NLS-1$
+							String customReason = Activator.configAdmin != null ? "" : Messages.CONFIG_ADMIN_SERVICE_NOT_AVAILABLE; //$NON-NLS-1$
 							Activator.log(current.bc, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name) + customReason, null);
 						}
 					} else {
@@ -175,7 +175,7 @@ public final class Resolver implements WorkPerformer {
 								Activator.log.debug("[SCR - Resolver] Resolver.enableComponents(): " + current.name + " as *managed service factory*", null); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 							try {
-								configs = ConfigurationManager.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+								configs = Activator.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							} catch (Exception e) {
 								Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 							}
