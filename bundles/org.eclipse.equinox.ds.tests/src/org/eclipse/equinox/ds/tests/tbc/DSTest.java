@@ -111,6 +111,13 @@ public class DSTest extends TestCase {
   private static final String MOD_NOT_EXIST_NS110 = "org.eclipse.equinox.ds.tests.tb21.NotExistNS110";
 
   private static final String MOD_THROW_EX_NS110 = "org.eclipse.equinox.ds.tests.tb21.ThrowExNS110";
+  
+  private static final String COMP_OPTIONAL = "org.eclipse.equinox.ds.tests.tb24.optional";
+  
+  private static final String COMP_REQUIRE = "org.eclipse.equinox.ds.tests.tb24.require";
+
+  private static final String COMP_IGNORE = "org.eclipse.equinox.ds.tests.tb24.ignore";
+
 
   private static int timeout = 1000;
 
@@ -299,6 +306,9 @@ public class DSTest extends TestCase {
     clearConfiguration(cm, "(service.pid=" + MOD_NOT_EXIST_NS110 + ")");
     clearConfiguration(cm, "(service.pid=" + MOD_THROW_EX_NS110 + ")");
 
+    clearConfiguration(cm, "(service.pid=" + COMP_IGNORE + ")");
+    clearConfiguration(cm, "(service.pid=" + COMP_OPTIONAL + ")");
+    clearConfiguration(cm, "(service.pid=" + COMP_REQUIRE + ")");
     getContext().ungetService(cmSR);
   }
 
@@ -2442,6 +2452,65 @@ public class DSTest extends TestCase {
 
     uninstallBundle(tb23);
   }
+  
+  // Testing config admin appear/disappear situations
+  public void testConfigAdminOnOff() throws Exception {
+    ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
+    assertNotNull("The ConfigurationAdmin should be available", cm);
+    
+    Hashtable props = new Hashtable(11);
+    props.put("config.base.data", new Integer(1));
+    //create the configurations for the test DS components
+    Configuration config = cm.getConfiguration(COMP_OPTIONAL);
+    config.update(props);
+    config = cm.getConfiguration(COMP_REQUIRE);
+    config.update(props);
+    config = cm.getConfiguration(COMP_IGNORE);
+    config.update(props);
+    //wait for CM to process the configuration updates
+    Thread.sleep(timeout * 2);
+    
+    //stop the config admin bundle
+    Bundle cmBundle = trackerCM.getServiceReference().getBundle();
+    cmBundle.stop();
+    Bundle tb24 = installBundle("tb24");
+    try {
+      tb24.start();
+      waitBundleStart();
+
+      // component with optional configuration should be available and not initialized by configuration
+      assertEquals("Component with optional configuration should be activated", 0, getBaseConfigData(COMP_OPTIONAL));
+      // component with ignored configuration should be available and not initialized by configuration
+      assertEquals("Component with ignored configuration should be activated", 0, getBaseConfigData(COMP_IGNORE));
+      // component with required configuration should NOT be available
+      assertEquals("Component with required configuration should NOT be activated", -1, getBaseConfigData(COMP_REQUIRE));
+      
+      //start again the config admin 
+      cmBundle.start();
+
+      // component with optional configuration should be available and initialized by configuration
+      assertEquals("Component with optional configuration should be activated and inited by configuration", 1, getBaseConfigData(COMP_OPTIONAL));
+      // component with ignored configuration should be available and not initialized by configuration
+      assertEquals("Component with ignored configuration should be activated", 0, getBaseConfigData(COMP_IGNORE));
+      // component with required configuration should be available
+      assertEquals("Component with required configuration should be activated", 1, getBaseConfigData(COMP_REQUIRE));
+      
+      //stop again the config admin 
+      cmBundle.stop();
+
+      /*The components should remain activated when Configuration Admin service disappears*/
+      // component with optional configuration should be available and initialized by configuration
+      assertEquals("Component with optional configuration should be activated", 1, getBaseConfigData(COMP_OPTIONAL));
+      // component with ignored configuration should be available and not initialized by configuration
+      assertEquals("Component with ignored configuration should be activated", 0, getBaseConfigData(COMP_IGNORE));
+      // component with required configuration should be available
+      assertEquals("Component with required configuration should be activated", 1, getBaseConfigData(COMP_REQUIRE));
+
+    } finally {
+      uninstallBundle(tb24);
+      cmBundle.start();
+    }
+  }
 
   /**
    * Searches for component with name componentName which provides
@@ -2553,6 +2622,11 @@ public class DSTest extends TestCase {
     } while (System.currentTimeMillis() - start < millisToSleep);
   }
 
+  /**
+   * Waits for the processing of the bundle declarative components by SCR. In
+   * case the building of the DS components is synchronous the method does not
+   * wait
+   */
   private void waitBundleStart() {
     if (!synchronousBuild) {
       sleep0(2 * timeout);

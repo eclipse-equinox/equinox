@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This component has ignore confuguration policy, and new XML Schema -->
+
+<component
+      xmlns="http://www.osgi.org/xmlns/scr/v1.1.0"
+      name="org.eclipse.equinox.ds.tests.tb24.ignore"
+      configuration-policy="ignore"
+      immediate="true">
+   <implementation
+         class="org.eclipse.equinox.ds.tests.tb24.ConfigurationPolicyComp"/>
+   <service>
+		<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+	</service>
+</component>
