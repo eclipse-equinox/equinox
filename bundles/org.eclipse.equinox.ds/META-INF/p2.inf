@@ -1,0 +1,4 @@
+instructions.configure=\
+  setProgramProperty(propName:equinox.use.ds, propValue:true);
+instructions.unconfigure=\
+  setProgramProperty(propName:equinox.use.ds, propValue:);
