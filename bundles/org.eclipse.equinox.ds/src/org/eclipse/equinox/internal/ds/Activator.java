@@ -17,6 +17,7 @@ import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentConstants;
@@ -167,6 +168,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 			// initialized yet
 			bundleContext.addBundleListener(this);
 		}
+		ServiceReference envInfoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
+		EnvironmentInfo envInfo = null;
+		if (envInfoRef != null) {
+			envInfo = (EnvironmentInfo) bc.getService(envInfoRef);
+		}
+		if (envInfo != null) {
+			envInfo.setProperty("equinox.use.ds", "true"); //$NON-NLS-1$//$NON-NLS-2$
+			bc.ungetService(envInfoRef);
+		} else {
+			System.setProperty("equinox.use.ds", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		if (startup) {
 			log.debug("[END - start method] Activator.start() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
 			time = null;
@@ -196,6 +208,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 			bundleContext.removeBundleListener(scrManager);
 		} else {
 			bundleContext.removeBundleListener(this);
+		}
+		ServiceReference envInfoRef = bc.getServiceReference(EnvironmentInfo.class.getName());
+		EnvironmentInfo envInfo = null;
+		if (envInfoRef != null) {
+			envInfo = (EnvironmentInfo) bc.getService(envInfoRef);
+		}
+		if (envInfo != null) {
+			envInfo.setProperty("equinox.use.ds", "false"); //$NON-NLS-1$//$NON-NLS-2$
+			bc.ungetService(envInfoRef);
+		} else {
+			System.setProperty("equinox.use.ds", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		log.close();
