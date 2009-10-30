@@ -29,7 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class DefaultPreferences extends EclipsePreferences {
 	// cache which nodes have been loaded from disk
-	private static Set loadedNodes = new HashSet();
+	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
 	private static final String KEY_PREFIX = "%"; //$NON-NLS-1$
 	private static final String KEY_DOUBLE_PREFIX = "%%"; //$NON-NLS-1$
 	private static final IPath NL_DIR = new Path("$nl$"); //$NON-NLS-1$
@@ -221,7 +221,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return new DefaultPreferences(nodeParent, nodeName, context);
 	}
 
-	protected synchronized boolean isAlreadyLoaded(IEclipsePreferences node) {
+	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
@@ -287,7 +287,7 @@ public class DefaultPreferences extends EclipsePreferences {
 		return result;
 	}
 
-	protected synchronized void loaded() {
+	protected void loaded() {
 		loadedNodes.add(name());
 	}
 

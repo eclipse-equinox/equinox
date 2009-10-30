@@ -29,7 +29,7 @@ public class InstancePreferences extends EclipsePreferences {
 	private IEclipsePreferences loadLevel;
 	private IPath location;
 	// cache which nodes have been loaded from disk
-	private static Set loadedNodes = new HashSet();
+	private static Set loadedNodes = Collections.synchronizedSet(new HashSet());
 	private static boolean initialized = false;
 	private static IPath baseLocation;
 
@@ -71,11 +71,11 @@ public class InstancePreferences extends EclipsePreferences {
 		// accessed before the instance location is set.
 	}
 
-	protected synchronized boolean isAlreadyLoaded(IEclipsePreferences node) {
+	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
 		return loadedNodes.contains(node.name());
 	}
 
-	protected synchronized void loaded() {
+	protected void loaded() {
 		loadedNodes.add(name());
 	}
 
