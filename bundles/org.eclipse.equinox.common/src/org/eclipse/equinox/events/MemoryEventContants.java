@@ -29,6 +29,7 @@ package org.eclipse.equinox.events;
  * when to send memory events.  This policy must use the Event Admin Service
  * to fire memory events to the registered handlers.
  * </p>
+ * @since 3.6
  */
 public final class MemoryEventContants {
 	private MemoryEventContants() {
