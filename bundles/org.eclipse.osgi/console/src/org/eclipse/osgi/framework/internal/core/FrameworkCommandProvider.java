@@ -811,8 +811,70 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 							}
 							title = true;
 							if (desc != null) {
-								ExportPackageDescription[] imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES);
+								ArrayList fragmentsImportPackages = new ArrayList();
+
+								// Get bundle' fragments imports
+								BundleDescription[] fragments = desc.getFragments();
+								for (int i = 0; i < fragments.length; i++) {
+									ImportPackageSpecification[] fragmentImports = fragments[i].getImportPackages();
+									for (int j = 0; j < fragmentImports.length; j++) {
+										fragmentsImportPackages.add(fragmentImports[j]);
+									}
+								}
+
+								// Get all bundle imports
+								ImportPackageSpecification[] importPackages;
+								if (fragmentsImportPackages.size() > 0) {
+									ImportPackageSpecification[] directImportPackages = desc.getImportPackages();
+									importPackages = new ImportPackageSpecification[directImportPackages.length + fragmentsImportPackages.size()];
+
+									for (int i = 0; i < directImportPackages.length; i++) {
+										importPackages[i] = directImportPackages[i];
+									}
+
+									int offset = directImportPackages.length;
+									for (int i = 0; i < fragmentsImportPackages.size(); i++) {
+										importPackages[offset + i] = (ImportPackageSpecification) fragmentsImportPackages.get(i);
+									}
+								} else {
+									importPackages = desc.getImportPackages();
+								}
+
+								// Get all resolved imports
+								ExportPackageDescription[] imports = null;
+								imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
+
+								// Get the unresolved optional and dynamic imports
+								ArrayList unresolvedImports = new ArrayList();
+
+								for (int i = 0; i < importPackages.length; i++) {
+									if (importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE).equals(ImportPackageSpecification.RESOLUTION_OPTIONAL)) {
+										if (importPackages[i].getSupplier() == null) {
+											unresolvedImports.add(importPackages[i]);
+										}
+									} else if (importPackages[i].getDirective(org.osgi.framework.Constants.RESOLUTION_DIRECTIVE).equals(ImportPackageSpecification.RESOLUTION_DYNAMIC)) {
+										boolean isResolvable = false;
+
+										// Check if the dynamic import can be resolved by any of the wired imports, 
+										// and if not - add it to the list of unresolved imports
+										for (int j = 0; j < imports.length; j++) {
+											if (importPackages[i].isSatisfiedBy(imports[j])) {
+												isResolvable = true;
+											}
+										}
+
+										if (isResolvable == false) {
+											unresolvedImports.add(importPackages[i]);
+										}
+									}
+								}
+
 								title = printImportedPackages(imports, intp, title);
+
+								if (desc.isResolved() && (unresolvedImports.isEmpty() == false)) {
+									printUnwiredDynamicImports(unresolvedImports, intp);
+									title = false;
+								}
 							}
 
 							if (title) {
@@ -948,6 +1010,23 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			}
 		}
 		return title;
+	}
+
+	private void printUnwiredDynamicImports(ArrayList dynamicImports, CommandInterpreter intp) {
+		for (int i = 0; i < dynamicImports.size(); i++) {
+			ImportPackageSpecification importPackage = (ImportPackageSpecification) dynamicImports.get(i);
+			intp.print("    "); //$NON-NLS-1$
+			intp.print(importPackage.getName());
+			intp.print("; version=\""); //$NON-NLS-1$
+			intp.print(importPackage.getVersionRange());
+			intp.print("\""); //$NON-NLS-1$
+			intp.print("<"); //$NON-NLS-1$
+			intp.print("unwired"); //$NON-NLS-1$
+			intp.print(">"); //$NON-NLS-1$
+			intp.print("<"); //$NON-NLS-1$
+			intp.print(importPackage.getDirective(org.osgi.framework.Constants.RESOLUTION_DIRECTIVE));
+			intp.println(">"); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -1542,7 +1621,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			return;
 		PlatformAdmin platformAdmin = (PlatformAdmin) context.getService(ref);
 		try {
-			ExportPackageDescription[] exports = platformAdmin.getStateHelper().getVisiblePackages(bundle.getBundleDescription(), StateHelper.VISIBLE_INCLUDE_EE_PACKAGES);
+			ExportPackageDescription[] exports = platformAdmin.getStateHelper().getVisiblePackages(bundle.getBundleDescription(), StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
 			for (int i = 0; i < exports.length; i++) {
 				intp.println(exports[i] + ": " + platformAdmin.getStateHelper().getAccessCode(bundle.getBundleDescription(), exports[i])); //$NON-NLS-1$
 			}

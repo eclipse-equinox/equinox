@@ -322,9 +322,9 @@ public final class StateHelperImpl implements StateHelper {
 		Set pkgSet = new HashSet();
 		Set importList = new HashSet(); // list of package names which are directly imported
 		// get the list of directly imported packages first.
-		ImportPackageSpecification[] imports = bundle.getImportPackages();
-		for (int i = 0; i < imports.length; i++) {
-			ExportPackageDescription pkgSupplier = (ExportPackageDescription) imports[i].getSupplier();
+		ImportsHolder imports = new ImportsHolder(bundle, options);
+		for (int i = 0; i < imports.getSize(); i++) {
+			ExportPackageDescription pkgSupplier = imports.getSupplier(i);
 			if (pkgSupplier == null || pkgSupplier.getExporter() == host) // do not return the bundle'sr own imports
 				continue;
 			if (!isSystemExport(pkgSupplier, options) && !pkgSet.contains(pkgSupplier)) {
@@ -336,20 +336,21 @@ public final class StateHelperImpl implements StateHelper {
 			Set visited = new HashSet();
 			visited.add(bundle); // always add self to prevent recursing into self
 			Set importNames = new HashSet(1);
-			importNames.add(imports[i].getName());
+			importNames.add(imports.getName(i));
 			for (int j = 0; j < requires.length; j++) {
 				BundleDescription bundleSupplier = (BundleDescription) requires[j].getSupplier();
 				if (bundleSupplier != null)
 					getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, importNames, options);
 			}
-			importList.add(imports[i].getName()); // be sure to add to direct import list
+			importList.add(imports.getName(i)); // be sure to add to direct import list
+
 		}
 		// now find all the packages that are visible from required bundles
-		BundleSpecification[] requires = bundle.getRequiredBundles();
-		Set visited = new HashSet(requires.length);
+		RequiresHolder requires = new RequiresHolder(bundle, options);
+		Set visited = new HashSet(requires.getSize());
 		visited.add(bundle); // always add self to prevent recursing into self
-		for (int i = 0; i < requires.length; i++) {
-			BundleDescription bundleSupplier = (BundleDescription) requires[i].getSupplier();
+		for (int i = 0; i < requires.getSize(); i++) {
+			BundleDescription bundleSupplier = requires.getSupplier(i);
 			if (bundleSupplier != null)
 				getPackages(bundleSupplier, bundle.getSymbolicName(), importList, orderedPkgList, pkgSet, visited, strict, null, options);
 		}
@@ -396,17 +397,17 @@ public final class StateHelperImpl implements StateHelper {
 				}
 			}
 		// now look for exports from the required bundle.
-		BundleSpecification[] requiredBundles = requiredBundle.getRequiredBundles();
-		for (int i = 0; i < requiredBundles.length; i++) {
-			if (requiredBundles[i].getSupplier() == null)
+		RequiresHolder requiredBundles = new RequiresHolder(requiredBundle, options);
+		for (int i = 0; i < requiredBundles.getSize(); i++) {
+			if (requiredBundles.getSupplier(i) == null)
 				continue;
-			if (requiredBundles[i].isExported()) {
+			if (requiredBundles.isExported(i)) {
 				// looking for a specific package and that package is exported by this bundle or adding all packages from a reexported bundle
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
+				getPackages(requiredBundles.getSupplier(i), symbolicName, importList, orderedPkgList, pkgSet, visited, strict, pkgNames, options);
 			} else if (exportNames.size() > 0) {
 				// adding any exports from required bundles which we also export
 				Set tmpVisited = new HashSet();
-				getPackages((BundleDescription) requiredBundles[i].getSupplier(), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames, options);
+				getPackages(requiredBundles.getSupplier(i), symbolicName, importList, orderedPkgList, pkgSet, tmpVisited, strict, exportNames, options);
 			}
 		}
 	}
@@ -439,5 +440,134 @@ public final class StateHelperImpl implements StateHelper {
 
 	public static StateHelper getInstance() {
 		return instance;
+	}
+
+}
+
+/*
+ * This class is used to encapsulate the import packages of a bundle used by getVisiblePackages(). If the method is called with the option 
+ * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved import packages to find all visible packages by a bundle. Called without this option, 
+ * it uses imported packages instead of resolved imported packages and does not consider resolved dynamic imports. 
+ * ImportsHolder serves to hide which of these is used, so that the body of getVisiblePackages() does not become full of checks.
+ * 
+ */
+class ImportsHolder {
+	private final ImportPackageSpecification[] importedPackages;
+	private final ExportPackageDescription[] resolvedImports;
+	private final boolean isUsingResolved;
+
+	// Depending on the options used, either importedPackages or resolvedImports is initialize, but not both. 
+	ImportsHolder(BundleDescription bundle, int options) {
+		isUsingResolved = (options & StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES) != 0;
+		if (isUsingResolved) {
+			importedPackages = null;
+			resolvedImports = bundle.getResolvedImports();
+		} else {
+			importedPackages = bundle.getImportPackages();
+			resolvedImports = null;
+		}
+	}
+
+	ExportPackageDescription getSupplier(int index) {
+		if (isUsingResolved)
+			return resolvedImports[index];
+		return (ExportPackageDescription) importedPackages[index].getSupplier();
+	}
+
+	String getName(int index) {
+		if (isUsingResolved)
+			return resolvedImports[index].getName();
+		return importedPackages[index].getName();
+	}
+
+	int getSize() {
+		if (isUsingResolved)
+			return resolvedImports.length;
+		return importedPackages.length;
+	}
+}
+
+/*
+ * This class is used to encapsulate the required bundles by a bundle, used by getVisiblePackages(). If the method is called with the option 
+ * VISIBLE_INCLUDE_ALL_HOST_WIRES, it uses resolved required bundles to find all visible packages by a bundle. Called without this option, 
+ * it uses required bundles instead of resolved required bundles and does not consider the constraints from fragments. 
+ * RequiresHolder serves to hide which of these is used.  
+ */
+class RequiresHolder {
+	private final BundleSpecification[] requiredBundles;
+	private final BundleDescription[] resolvedRequires;
+	private final boolean isUsingResolved;
+	private final Map resolvedBundlesExported;
+
+	// Depending on the options used, either requiredBundles or resolvedRequires is initialize, but not both.
+	RequiresHolder(BundleDescription bundle, int options) {
+		isUsingResolved = (options & StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES) != 0;
+		if (isUsingResolved) {
+			requiredBundles = null;
+			resolvedBundlesExported = new HashMap();
+			resolvedRequires = bundle.getResolvedRequires();
+			determineRequiresVisibility(bundle);
+		} else {
+			requiredBundles = bundle.getRequiredBundles();
+			resolvedBundlesExported = null;
+			resolvedRequires = null;
+		}
+	}
+
+	BundleDescription getSupplier(int index) {
+		if (isUsingResolved)
+			return resolvedRequires[index];
+		return (BundleDescription) requiredBundles[index].getSupplier();
+	}
+
+	boolean isExported(int index) {
+		if (isUsingResolved)
+			return ((Boolean) resolvedBundlesExported.get(resolvedRequires[index])).booleanValue();
+		return requiredBundles[index].isExported();
+	}
+
+	int getSize() {
+		if (isUsingResolved)
+			return resolvedRequires.length;
+		return requiredBundles.length;
+	}
+
+	/*
+	 * This method determines for all resolved required bundles if they are reexported.
+	 * Fragment bundles are also considered.
+	 */
+	private void determineRequiresVisibility(BundleDescription bundle) {
+		BundleSpecification[] required = bundle.getRequiredBundles();
+		HashSet resolved = new HashSet();
+
+		for (int i = 0; i < resolvedRequires.length; i++) {
+			resolved.add(resolvedRequires[i]);
+		}
+
+		// Get the visibility of all directly required bundles
+		for (int i = 0; i < required.length; i++) {
+			if (required[i].getSupplier() != null) {
+				resolvedBundlesExported.put(required[i].getSupplier(), new Boolean(required[i].isExported()));
+				resolved.remove(required[i].getSupplier());
+			}
+		}
+
+		BundleDescription[] fragments = bundle.getFragments();
+
+		// Get the visibility of resolved required bundles, which come from fragments
+		if (resolved.size() > 0) {
+			for (int i = 0; i < fragments.length; i++) {
+				BundleSpecification[] fragmentRequiredBundles = fragments[i].getRequiredBundles();
+				for (int j = 0; j < fragmentRequiredBundles.length; j++) {
+					if (resolved.contains(fragmentRequiredBundles[i].getSupplier())) {
+						resolvedBundlesExported.put(fragmentRequiredBundles[i].getSupplier(), new Boolean(fragmentRequiredBundles[i].isExported()));
+						resolved.remove(fragmentRequiredBundles[i].getSupplier());
+					}
+				}
+				if (resolved.size() == 0) {
+					break;
+				}
+			}
+		}
 	}
 }

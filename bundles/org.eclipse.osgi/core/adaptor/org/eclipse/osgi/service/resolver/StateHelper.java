@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,10 +33,23 @@ public interface StateHelper {
 
 	/**
 	 * An option to include packages available from the execution environment when 
-	 * getting the visible packages of a bundle.
+	 * getting the visible packages of a bundle.  For example, when running on a 
+	 * J2SE 1.4 VM the system bundle will export the javax.xml.parsers package as part of the 
+	 * execution environment.  When this option is used then any packages from the execution
+	 * environment which the bundle is wired to will be included.
 	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
 	 */
 	public static int VISIBLE_INCLUDE_EE_PACKAGES = 0x01;
+
+	/**
+	 * An option to get all visible packages that a host bundle is currently wired to.  This 
+	 * includes packages wired to as a result of a dynamic import and packages wired to as a 
+	 * result of additional constraints specified by a fragment bundle.  Using this option 
+	 * with a fragment will cause an empty array to be returned.
+	 * @see StateHelper#getVisiblePackages(BundleDescription, int)
+	 * @since 3.6
+	 */
+	public static int VISIBLE_INCLUDE_ALL_HOST_WIRES = 0x02;
 
 	/**
 	 * Returns all bundles in the state depending on the given bundles. The given bundles
@@ -158,23 +171,10 @@ public interface StateHelper {
 
 	/**
 	 * Returns a list of all packages that the specified bundle has access to which are
-	 * exported by other bundles.  This takes into account all constraint specifications
-	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
-	 * search is done for all packages which are available through the required bundles and 
-	 * any bundles which are reexported.  This method also takes into account all directives
-	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.)
-	 * <p>
-	 * The returned list will not include any packages which are exported by the system bundle 
-	 * on the behave of the running execution environment.  For example, when running on a 
-	 * 1.4.2 JRE the system bundle will export the javax.xml.parsers package.  These types of 
-	 * system packages will are not included in the returned list.
-	 * <p>
-	 * Note that only the constraints declared by the specified bundle are taken into
-	 * account.  In the case of fragment bundles, the constraints declared by the host are 
-	 * not included in the list of visible packages.
+	 * exported by other bundles.
 	 * <p>
 	 * Same as calling getVisiblePackages(bundle, 0)
-	 * 
+	 * </p>
 	 * @param bundle a bundle to get the list of packages for.
 	 * @return a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.
@@ -184,20 +184,17 @@ public interface StateHelper {
 	/**
 	 * Returns a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.  This takes into account all constraint specifications
-	 * from the specified bundle (Import-Package, Require-Bundle etc).  A deep dependancy
-	 * search is done for all packages which are available through the required bundles and 
-	 * any bundles which are reexported.  This method also takes into account all directives
+	 * (Import-Package, Require-Bundle etc).  A deep dependency search is done for all 
+	 * packages which are available through the required bundles and any bundles which 
+	 * are reexported.  This method also takes into account all directives
 	 * which may be specified on the constraint specifications (e.g. uses, x-friends etc.)
-	 * <p>
-	 * Note that only the constraints declared by the specified bundle are taken into
-	 * account.  In the case of fragment bundles, the constraints declared by the host are 
-	 * not included in the list of visible packages.
 	 * 
 	 * @param bundle a bundle to get the list of packages for.
 	 * @param options the options for selecting the visible packages
 	 * @return a list of all packages that the specified bundle has access to which are
 	 * exported by other bundles.
 	 * @see StateHelper#VISIBLE_INCLUDE_EE_PACKAGES
+	 * @see StateHelper#VISIBLE_INCLUDE_ALL_HOST_WIRES
 	 * @since 3.3
 	 */
 	public ExportPackageDescription[] getVisiblePackages(BundleDescription bundle, int options);
