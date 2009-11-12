@@ -46,6 +46,8 @@ _TCHAR* wsArg        = _T_ECLIPSE(DEFAULT_WS);	/* the SWT supported GUI to be us
 static _TCHAR* filterPrefix = NULL;  /* prefix for the find files filter */
 static size_t  prefixLength = 0;
 
+static int isFolder(const _TCHAR* path, const _TCHAR* entry);
+
 typedef struct {
 	int segment[3];
 	_TCHAR * qualifier;
@@ -345,33 +347,48 @@ char * resolveSymlinks( char * path ) {
 #endif
 
 #ifdef _WIN32
-static int filter(_TCHAR* candidate) {
+static int filter(_TCHAR* candidate, int isFolder) {
 #else
 #ifdef MACOSX
-static int filter(struct dirent *dir) {
+static int filter(struct dirent *dir, int isFolder) {
 #else
-static int filter(const struct dirent *dir) {
+static int filter(const struct dirent *dir, int isFolder) {
 #endif
-	char * candidate = dir->d_name;
+	char * candidate = (char *)dir->d_name;
 #endif
-	_TCHAR *c1, *c2;
+	_TCHAR *lastDot, *lastUnderscore;
+	int result;
 	
 	if(_tcslen(candidate) <= prefixLength)
 		return 0;
-	if (_tcsncmp(candidate, filterPrefix, prefixLength) == 0 &&
-		candidate[prefixLength] == '_') 
-	{
-		c1 = _tcschr(&candidate[prefixLength + 1], '_');
-		if(c1 != NULL) {
-			c2 = _tcschr(&candidate[prefixLength + 1], '.');
-			if (c2 != NULL) {
-				return c2 < c1;
-			} else 
-				return 0;
-		} else 
-			return 1;
+	if (_tcsncmp(candidate, filterPrefix, prefixLength) != 0 ||	candidate[prefixLength] != _T_ECLIPSE('_'))
+		return 0;
+	
+	candidate = _tcsdup(candidate);
+	
+	/* remove trailing .jar and .zip extensions, leave other extensions because we need the '.'  */
+	lastDot = _tcsrchr(candidate, _T_ECLIPSE('.'));
+	if (!isFolder && lastDot != NULL && (_tcscmp(lastDot, _T_ECLIPSE(".jar")) == 0 || _tcscmp(lastDot, _T_ECLIPSE(".zip")) == 0)) {
+		*lastDot = 0;
+		lastDot = _tcsrchr(candidate, _T_ECLIPSE('.'));
 	}
-	return 0;
+	
+	if (lastDot < &candidate[prefixLength]) {
+		free(candidate);
+		return 0;
+	}
+	
+	lastUnderscore = _tcsrchr(candidate, _T_ECLIPSE('_'));
+	
+	/* get past all the '_' that are part of the qualifier */
+	while(lastUnderscore > lastDot) {
+		*lastUnderscore = 0;
+		lastUnderscore = _tcsrchr(candidate, _T_ECLIPSE('_')); 
+	}
+	/* is this the underscore at the end of the prefix? */
+	result = (lastUnderscore == &candidate[prefixLength]);
+	free(candidate);
+	return result;
 }
 
  /* 
@@ -416,10 +433,10 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	
 	handle = FindFirstFile(fileName, &data);
 	if(handle != INVALID_HANDLE_VALUE) {
-		if (filter(data.cFileName))
+		if (filter(data.cFileName, isFolder(path, data.cFileName)))
 			candidate = _tcsdup(data.cFileName);
 		while(FindNextFile(handle, &data) != 0) {
-			if (filter(data.cFileName)) {
+			if (filter(data.cFileName, isFolder(path, data.cFileName))) {
 				if (candidate == NULL) {
 					candidate = _tcsdup(data.cFileName);
 				} else if( compareVersions(candidate + prefixLength + 1, data.cFileName + prefixLength + 1) < 0) {
@@ -438,7 +455,7 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	}
 
 	while ((entry = readdir(dir)) != NULL) {
-		if (filter(entry)) {
+		if (filter(entry, isFolder(path, entry->d_name))) {
 			if (candidate == NULL) {
 				candidate = _tcsdup(entry->d_name);
 			} else if (compareVersions(candidate + prefixLength + 1, entry->d_name + prefixLength + 1) < 0) {
@@ -460,6 +477,17 @@ _TCHAR* findFile( _TCHAR* path, _TCHAR* prefix)
 	}
 	free(path);
 	return result;
+}
+
+int isFolder(const _TCHAR* path, const _TCHAR* entry) {
+	int result = 0;
+	struct _stat stats;
+	_TCHAR * fullPath = malloc((_tcslen(path) + _tcslen(entry) + 2) * sizeof(_TCHAR));
+	_stprintf(fullPath, _T_ECLIPSE("%s%c%s"), path, dirSeparator, entry);
+	
+	result = _tstat(fullPath, &stats);
+	free(fullPath);
+	return (result == 0 && (stats.st_mode & S_IFDIR) != 0);
 }
 
 /*
