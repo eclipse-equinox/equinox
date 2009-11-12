@@ -81,7 +81,8 @@ eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c $< -o $@
 		
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) -Wl,-bM:UR -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	sedmgr -c exempt $(EXEC)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	ld $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
