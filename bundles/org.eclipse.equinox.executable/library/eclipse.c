@@ -330,6 +330,7 @@ static _TCHAR*  getDefaultOfficialName();
 static _TCHAR*  findStartupJar();
 static _TCHAR*  findSplash(_TCHAR* splashArg);
 static _TCHAR** getRelaunchCommand( _TCHAR **vmCommand );
+static const _TCHAR* getVMArch();
 
 #ifdef _WIN32
 static void     createConsole();
@@ -1516,8 +1517,9 @@ _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
 	_TCHAR * buffer = NULL;
 	_TCHAR * path, * entry, *c;
 	_TCHAR separator;
-	int numPaths = 2;
+	int numPaths = 3;
 	int i;
+	struct _stat stats;
 	
 	buffer = (eeLibPath != NULL) ? _tcsdup(eeLibPath) : _tcsdup(vmLibrary);	
 #ifdef WIN32
@@ -1546,7 +1548,7 @@ _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
 		
 	/* We are either splitting eeLibPath (eg path1:path2), or we are extracting
 	 * from libPath where we want the directory containing the library and the
-	 * parent directory of that */
+	 * parent directory of that, and also grandparent/lib/arch */
 	for (i = 0; i < numPaths; i++) {
 		c = _tcsrchr(buffer, separator);
 		if (c != 0) {
@@ -1566,8 +1568,23 @@ _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
 		}
 		if (path != NULL) {
 			entry = resolveSymlinks(path); /* this may be a new string */
-			paths[i] = malloc((_tcslen(entry) + 2) * sizeof(_TCHAR));
-			_stprintf( paths[i], _T_ECLIPSE("%s%c"), entry, pathSeparator );
+			if (eeLibPath == NULL && i == 2) {
+				/* trying grandparent/lib/arch */
+				const _TCHAR * arch = getVMArch();
+				paths[i] = malloc((_tcslen(entry) + 7 + _tcslen(arch)) * sizeof(_TCHAR));
+				_stprintf(paths[i], _T_ECLIPSE("%s/lib/%s"), entry, arch);
+				/* only add if the path actually exists */
+				if (_tstat(paths[i], &stats) == 0) {
+					_TCHAR separatorString[] = { pathSeparator, 0 };
+					_tcscat(paths[i], separatorString);
+				} else {
+					free(paths[i]);
+					paths[i] = NULL;
+				}
+			} else {
+				paths[i] = malloc((_tcslen(entry) + 2) * sizeof(_TCHAR));
+				_stprintf( paths[i], _T_ECLIPSE("%s%c"), entry, pathSeparator );
+			}
 			if (entry != path)
 				free(entry);
 			path = NULL;
@@ -1576,4 +1593,14 @@ _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary) {
 	
 	free(buffer);
 	return paths;
+}
+
+/* translate the osArchArg into the value that we expect the jre to use */
+const _TCHAR* getVMArch() {
+	if (_tcscmp(osArchArg, _T_ECLIPSE("x86_64")) == 0)
+		return _T_ECLIPSE("amd64");
+	else if (_tcscmp(osArchArg, _T_ECLIPSE("x86")) == 0)
+		return _T_ECLIPSE("i386");
+	else
+		return osArchArg;
 }
