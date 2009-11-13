@@ -36,7 +36,7 @@ case $OS in
 		;;
 esac
 
-PATH=$JAVA_HOME/jre/bin:$ANT_HOME/bin:/usr/sbin:$PATH
+PATH=$JAVA_HOME/jre/bin:$ANT_HOME/bin:$PATH
 
 export JAVA_HOME ANT_HOME PATH
 echo JAVA_HOME = $JAVA_HOME
