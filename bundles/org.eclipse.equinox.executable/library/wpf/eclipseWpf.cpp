@@ -436,7 +436,7 @@ JavaResults* launchJavaVM( _TCHAR* args[] )
 	_TCHAR* commandLine;
 	jvmProcess = -1;
 	commandLine = buildCommandLine(NULL, args);
-	jvmResults = malloc(sizeof(JavaResults));
+	jvmResults = (JavaResults*) malloc(sizeof(JavaResults));
 	memset(jvmResults, 0, sizeof(JavaResults));
 	
 	/*
