@@ -40,7 +40,7 @@ static _TCHAR*  argVM[] = { NULL };
 
 /* Define local variables for running the JVM and detecting its exit. */
 static HANDLE  jvmProcess     = 0;
-static int     jvmExitCode    = 0;
+static JavaResults* jvmResults = NULL;
 static UINT    jvmExitTimeout = 100;
 static UINT_PTR jvmExitTimerId = 99;
 
@@ -372,12 +372,14 @@ void restartLauncher( _TCHAR* program, _TCHAR* args[] )
 	free(commandLine);
 }
 
-int launchJavaVM( _TCHAR* args[] )
+JavaResults* launchJavaVM( _TCHAR* args[] )
 {
 	MSG msg;
 	_TCHAR* commandLine;
 	jvmProcess = 0;
 	commandLine = buildCommandLine(NULL, args);
+	jvmResults = malloc(sizeof(JavaResults));
+	memset(jvmResults, 0, sizeof(JavaResults));
 	
 	/*
 	* Start the Java virtual machine. Use CreateProcess() instead of spawnv()
@@ -391,7 +393,7 @@ int launchJavaVM( _TCHAR* args[] )
     	CloseHandle( pi.hThread );
     	jvmProcess = pi.hProcess;
     } else {
-    	jvmExitCode = errno;
+    	jvmResults->launchResult = errno;
     }
 	}
 
@@ -419,7 +421,7 @@ int launchJavaVM( _TCHAR* args[] )
 	}
 
 	/* Return the exit code from the JVM. */
-	return jvmExitCode;
+	return jvmResults;
 }
 
 /* Detect JVM Process Termination */
@@ -432,7 +434,7 @@ static void CALLBACK detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime 
     		 exitCode != STILL_ACTIVE)
     {
     	/* Save the JVM exit code. This should cause the loop in launchJavaVM() to exit. */
-        jvmExitCode = exitCode;
+        jvmResults->runResult = exitCode;
         jvmProcess = 0;
     }
 }
@@ -441,7 +443,7 @@ void processVMArgs(_TCHAR **vmargs[] ) {
 	/* nothing yet */
 }
 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
+JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	return startJavaJNI(libPath, vmArgs, progArgs, jarFile);
 }

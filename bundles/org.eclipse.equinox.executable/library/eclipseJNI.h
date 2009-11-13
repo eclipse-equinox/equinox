@@ -14,6 +14,11 @@
 #include "eclipseUnicode.h"
 #include <jni.h>
 
+typedef struct {
+	int launchResult;
+	int runResult;
+	_TCHAR * errorMessage;
+} JavaResults;
 
 typedef jint (JNICALL *JNI_createJavaVM)(JavaVM **pvm, JNIEnv **env, void *args);
 
@@ -76,7 +81,7 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv *, jobject);
  * be returned to the main launcher, which will display a message if
  * the termination was not normal.
  */
-extern int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile );
+extern JavaResults* startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile );
 
 extern void cleanupVM( int );
 #endif

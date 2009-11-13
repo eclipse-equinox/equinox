@@ -187,6 +187,8 @@ _TCHAR** initialArgv = NULL;
 
 /* Define error messages. (non-NLS) */
 static _TCHAR* exitMsg = _T_ECLIPSE("JVM terminated. Exit code=%d\n%s");
+static _TCHAR* javaFailureMsg = _T_ECLIPSE("Internal Error, unable to determine the results of running the JVM.");
+static _TCHAR* returnCodeMsg = _T_ECLIPSE("Java was started but returned exit code=%d\n%s");
 static _TCHAR* goVMMsg = _T_ECLIPSE("Start VM: %s\n");
 static _TCHAR* pathMsg = _T_ECLIPSE("%s in your current PATH");
 static _TCHAR* shareMsg = _T_ECLIPSE("No exit data available.");
@@ -354,7 +356,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     _TCHAR**  progCommandArgs = NULL;
     _TCHAR**  relaunchCommand = NULL;
     _TCHAR*   errorMsg = NULL, *msg = NULL;
-    int       exitCode = 0;
+    JavaResults* javaResults = NULL;
     int 	  launchMode;
     int 	  running = 1;
 	 
@@ -475,12 +477,20 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 		if (debug) _tprintf( goVMMsg, msg );
 
 		if(launchMode == LAUNCH_JNI) {
-			exitCode = startJavaVM(jniLib, vmCommandArgs, progCommandArgs, jarFile);
+			javaResults = startJavaVM(jniLib, vmCommandArgs, progCommandArgs, jarFile);
 		} else {
-			exitCode = launchJavaVM(vmCommand);
+			javaResults = launchJavaVM(vmCommand);
 		}
 		
-	    switch( exitCode ) {
+		if (javaResults == NULL) {
+			/* shouldn't happen, but just in case */
+			javaResults = malloc(sizeof(JavaResults));
+			javaResults->launchResult = -11;
+			javaResults->runResult = 0;
+			javaResults->errorMessage = _tcsdup(javaFailureMsg);
+		}
+		
+	    switch( javaResults->launchResult + javaResults->runResult ) {
 	        case 0: /* normal exit */
 	        	running = 0;
 	            break;
@@ -553,8 +563,18 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	                }
 	            }
 	            if (errorMsg == NULL) {
-	                errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
-	                _stprintf( errorMsg, exitMsg, exitCode, msg );
+	            	if (javaResults->runResult) {
+	            		/* java was started ok, but returned non-zero exit code */
+	            		errorMsg = malloc( (_tcslen(returnCodeMsg) + _tcslen(msg) + 10) *sizeof(_TCHAR));
+	            		_stprintf(errorMsg, returnCodeMsg,javaResults->runResult, msg);
+	            	} else if (javaResults->errorMessage != NULL){
+	            		/* else we had a problem launching java, use custom error message */
+	            		errorMsg = javaResults->errorMessage;
+	            	} else {
+	            		/* no custom message, use generic message */
+						errorMsg = malloc( (_tcslen(exitMsg) + _tcslen(msg) + 10) * sizeof(_TCHAR) );
+						_stprintf( errorMsg, exitMsg, javaResults->launchResult, msg );
+	            	}
 	            }
 	            
 	            if (_tcslen(errorMsg) > 0) {
@@ -575,7 +595,7 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	restartLauncher(NULL, relaunchCommand);
     	
     if (launchMode == LAUNCH_JNI)
-    	cleanupVM(exitCode);
+    	cleanupVM(javaResults->launchResult ? javaResults->launchResult : javaResults->runResult);
     
     if (sharedID != NULL) {
     	destroySharedData( sharedID );
@@ -595,7 +615,13 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     if ( exitData != NULL )		 free( exitData );
     if ( splashBitmap != NULL )  free( splashBitmap );
 
-    return exitCode;
+    if (javaResults == NULL)
+    	return -1;
+    
+    /* reuse the running variable for convenience */
+    running = javaResults->launchResult != 0 ? javaResults->launchResult : javaResults->runResult;
+    free(javaResults);
+    return running;
 }
 
 static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** progArgs ) {
@@ -1120,9 +1146,10 @@ static _TCHAR* findStartupJar(){
 		return file;
 	
 	/* old startup.jar? */
-	file = checkPath(OLD_STARTUP, programDir, 0);
+	ch = OLD_STARTUP;
+	file = checkPath(ch, programDir, 0);
 	if (_tstat( file, &stats ) == 0)
-		return (file == OLD_STARTUP) ? _tcsdup(OLD_STARTUP) : file;
+		return (file == ch) ? _tcsdup(ch) : file;
 		
 	return NULL;
 }

@@ -13,7 +13,7 @@
 #ifndef ECLIPSE_OS_H
 #define ECLIPSE_OS_H
 
-#include <jni.h>
+#include "eclipseJNI.h"
 #include "eclipseUnicode.h"
 
 #ifdef MACOSX
@@ -101,10 +101,10 @@ extern void takeDownSplash();
 extern void restartLauncher( _TCHAR* program, _TCHAR* args[] );
 
 /* launch the vm in a separate process and wait for it to finish */
-extern int launchJavaVM( _TCHAR* args[] );
+extern JavaResults* launchJavaVM( _TCHAR* args[] );
 
 /* launch the vm in this process using JNI invocation */
-extern int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile );
+extern JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile );
 
 /* do any platform specific processing of the user vmargs */
 extern void processVMArgs(_TCHAR **vmargs[] );

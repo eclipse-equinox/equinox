@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -274,8 +274,9 @@ void   fixEnvForNetscape()
 }
 #endif /* NETSCAPE_FIX */
 
-int launchJavaVM( char* args[] ) 
+JavaResults* launchJavaVM( char* args[] ) 
 {
+	JavaResults* jvmResults = NULL;
     int    exitCode;
 
 #ifdef NETSCAPE_FIX
@@ -309,17 +310,22 @@ int launchJavaVM( char* args[] )
 		execv( args[0], args );
 		
 		/* The JVM would not start ... return error code to parent process. */
+		/* TODO, how to distinguish this as a launch problem to the other process? */
 		jvmExitCode = errno;
         exit( jvmExitCode );
 	}
+	
+	jvmResults = malloc(sizeof(JavaResults));
+	memset(jvmResults, 0, sizeof(JavaResults));
 	
 	/* If the JVM is still running, wait for it to terminate. */
 	if (jvmProcess != 0)
 	{
 		waitpid(jvmProcess, &exitCode, 0);
-		jvmExitCode = ((exitCode & 0x00ff) == 0 ? (exitCode >> 8) : exitCode); /* see wait(2) */
+  		/* TODO, this should really be a runResult if we could distinguish the launch problem above */
+		jvmResults->launchResult = ((exitCode & 0x00ff) == 0 ? (exitCode >> 8) : exitCode); /* see wait(2) */
 	}
 	
 	/* Return the exit code from the JVM. */
-	return jvmExitCode;
+	return jvmResults;
 }

@@ -13,6 +13,8 @@
 #include "eclipseOS.h"
 #include "eclipseShm.h"
 
+static _TCHAR* ECLIPSE_UNITIALIZED = _T_ECLIPSE("ECLIPSE_UNINITIALIZED");
+
 #ifdef _WIN32
 
 #include <stdio.h>
@@ -32,6 +34,8 @@ int createSharedData(_TCHAR** id, int size) {
 		_stprintf(*id, _T_ECLIPSE("%lx_%lx"), GetCurrentProcessId(), (DWORD) mapHandle);
 #endif
 	}
+	/* set the shared data to "uninitialized" */
+	setSharedData(*id, ECLIPSE_UNITIALIZED);
 	return 0;
 }
 
@@ -75,6 +79,7 @@ int getSharedData(_TCHAR* id, _TCHAR** data) {
 	if (mapHandle == NULL) return -1;
 	sharedData = MapViewOfFile(handle, FILE_MAP_WRITE, 0, 0, 0);
 	if (sharedData == NULL) return -1;
+	if (_tcscmp(sharedData, ECLIPSE_UNITIALIZED)== 0) return 0;
 	if (data != NULL) {
 		size_t length = (_tcslen(sharedData) + 1) * sizeof(_TCHAR);
 		newData = malloc(length);
@@ -208,6 +213,7 @@ int createSharedData(char** id, int size) {
 		*id = malloc(9 * sizeof(char));
 		sprintf(*id, "%x", shmid);
 	}
+	setSharedData(*id, ECLIPSE_UNITIALIZED);
 	return 0;
 }
 
@@ -233,6 +239,7 @@ int getSharedData( char* id, char** data ) {
 	if (shmid == -1) return -1;
  	sharedData = shmat(shmid, (void *)0, 0);
     if (sharedData == (char *)(-1)) return -1;
+    if (_tcscmp(sharedData, ECLIPSE_UNITIALIZED) == 0) return 0;
     length = strlen(sharedData) + 1;
     newData = malloc(length);
     memcpy(newData, sharedData, length);

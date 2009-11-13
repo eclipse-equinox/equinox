@@ -35,6 +35,8 @@
 
 #define DEBUG 0
 
+static _TCHAR* noForkingMsg = _T_ECLIPSE("Internal Error, forking the jvm is not supported on MacOS.\n");
+
 char *findCommand(char *command);
 
 /* Global Variables */
@@ -51,7 +53,7 @@ typedef struct {
 	_TCHAR ** vmArgs;
 	_TCHAR ** progArgs;
 	_TCHAR * jarFile;
-	int result;
+	JavaResults* result;
 } StartVMArgs;
 
 #ifdef COCOA
@@ -337,13 +339,17 @@ void restartLauncher( char* program, char* args[] )
 	}
 }
 
-int launchJavaVM( _TCHAR* args[] )
+JavaResults* launchJavaVM( _TCHAR* args[] )
 {
 	/*for now always do JNI on Mac, should not come in here */
-	return -1;
+	JavaResults * results = malloc(sizeof(JavaResults));
+	results->launchResult = -1;
+	results->runResult = 0;
+	results->errorMessage = _tcsdup(noForkingMsg);
+	return results;
 }
 
-int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
+JavaResults* startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	if (secondThread == 0) {
 		/* Set an environment variable that tells the AWT (if started) we started the JVM on the main thread. */
@@ -379,6 +385,7 @@ int startJavaVM( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* 
 	args.vmArgs = vmArgs;
 	args.progArgs = progArgs;
 	args.jarFile = jarFile;
+	args.result = 0;
 	
 	loopRef = CFRunLoopGetCurrent();
 	

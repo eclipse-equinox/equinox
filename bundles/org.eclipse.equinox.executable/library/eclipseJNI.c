@@ -18,6 +18,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+static _TCHAR* failedToLoadLibrary = _T_ECLIPSE("Failed to load the JNI shared library \"%s\".\n");
+static _TCHAR* createVMSymbolNotFound = _T_ECLIPSE("The JVM shared library \"%s\"\ndoes not contain the JNI_CreateJavaVM symbol.\n");
+static _TCHAR* failedCreateVM = _T_ECLIPSE("Failed to create the Java Virtual Machine.\n");
+static _TCHAR* internalExpectedVMArgs = _T_ECLIPSE("Internal Error, the JVM argument list is empty.\n");
+static _TCHAR* mainClassNotFound = _T_ECLIPSE("Failed to find a Main Class in \"%s\".\n");
+
 static JNINativeMethod natives[] = {{"_update_splash", "()V", (void *)&update_splash},
 									{"_get_splash_handle", "()J", (void *)&get_splash_handle},
 									{"_set_exit_data", "(Ljava/lang/String;Ljava/lang/String;)V", (void *)&set_exit_data},
@@ -203,7 +210,7 @@ static jstring newJavaString(JNIEnv *env, _TCHAR * str)
 	size_t length = _tcslen(str);
 	jbyteArray bytes = (*env)->NewByteArray(env, length);
 	if(bytes != NULL) {
-		(*env)->SetByteArrayRegion(env, bytes, 0, length, str);
+		(*env)->SetByteArrayRegion(env, bytes, 0, length, (jbyte *)str);
 		if (!(*env)->ExceptionOccurred(env)) {
 			if (string_class == NULL)
 				string_class = (*env)->FindClass(env, "java/lang/String");
@@ -259,16 +266,16 @@ static jobjectArray createRunArgs( JNIEnv *env, _TCHAR * args[] ) {
 	return stringArray;
 }
 					 
-int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
+JavaResults * startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR* jarFile )
 {
 	int i;
 	int numVMArgs = -1;
-	int jvmExitCode = -1;
 	void * jniLibrary;
 	JNI_createJavaVM createJavaVM;
 	JavaVMInitArgs init_args;
 	JavaVMOption * options;
 	char * mainClassName = NULL;
+	JavaResults * results = NULL;
 	
 	/* JNI reflection */
 	jclass mainClass = NULL;			/* The Main class to load */
@@ -277,14 +284,23 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 	jmethodID runMethod = NULL;			/* Main.run(String[]) */
 	jobjectArray methodArgs = NULL;		/* Arguments to pass to run */
 	
+	results = malloc(sizeof(JavaResults));
+	memset(results, 0, sizeof(JavaResults));
+	
 	jniLibrary = loadLibrary(libPath);
 	if(jniLibrary == NULL) {
-		return -1; /*error*/
+		results->launchResult = -1;
+		results->errorMessage = malloc((_tcslen(failedToLoadLibrary) + _tcslen(libPath) + 1) * sizeof(_TCHAR));
+		_stprintf(results->errorMessage, failedToLoadLibrary, libPath);
+		return results; /*error*/
 	}
 
 	createJavaVM = (JNI_createJavaVM)findSymbol(jniLibrary, _T_ECLIPSE("JNI_CreateJavaVM"));
 	if(createJavaVM == NULL) {
-		return -1; /*error*/
+		results->launchResult = -2;
+		results->errorMessage = malloc((_tcslen(createVMSymbolNotFound) + _tcslen(libPath) + 1) * sizeof(_TCHAR));
+		_stprintf(results->errorMessage, createVMSymbolNotFound, libPath);
+		return results; /*error*/
 	}
 	
 	/* count the vm args */
@@ -292,7 +308,9 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 	
 	if(numVMArgs <= 0) {
 		/*error, we expect at least the required vm arg */
-		return -1;
+		results->launchResult = -3;
+		results->errorMessage = _tcsdup(internalExpectedVMArgs);
+		return results;
 	}
 	
 	options = malloc(numVMArgs * sizeof(JavaVMOption));
@@ -328,6 +346,7 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 		}	
 
 		if(mainClass != NULL) {
+			results->launchResult = -6; /* this will be reset to 0 below on success */
 			mainConstructor = (*env)->GetMethodID(env, mainClass, "<init>", "()V");
 			if(mainConstructor != NULL) {
 				mainObject = (*env)->NewObject(env, mainClass, mainConstructor);
@@ -336,19 +355,27 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 					if(runMethod != NULL) {
 						methodArgs = createRunArgs(env, progArgs);
 						if(methodArgs != NULL) {
-							jvmExitCode = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
+							results->launchResult = 0;
+							results->runResult = (*env)->CallIntMethod(env, mainObject, runMethod, methodArgs);
 							(*env)->DeleteLocalRef(env, methodArgs);
 						}
 					}
 					(*env)->DeleteLocalRef(env, mainObject);
 				}
 			}
-		} 
+		} else {
+			results->launchResult = -5;
+			results->errorMessage = malloc((_tcslen(mainClassNotFound) + _tcslen(jarFile) + 1) * sizeof(_TCHAR));
+			_stprintf(results->errorMessage, mainClassNotFound, jarFile);
+		}
 		if((*env)->ExceptionOccurred(env)){
 			(*env)->ExceptionDescribe(env);
 			(*env)->ExceptionClear(env);
 		}
 		
+	} else {
+		results->launchResult = -4;
+		results->errorMessage = _tcsdup(failedCreateVM);
 	}
 
 	/* toNarrow allocated new strings, free them */
@@ -356,7 +383,7 @@ int startJavaJNI( _TCHAR* libPath, _TCHAR* vmArgs[], _TCHAR* progArgs[], _TCHAR*
 		free( options[i].optionString );
 	}
 	free(options);
-	return jvmExitCode;
+	return results;
 }
 
 static char * getMainClass(JNIEnv *env, _TCHAR * jarFile) {
