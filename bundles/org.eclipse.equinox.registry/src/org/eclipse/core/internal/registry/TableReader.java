@@ -23,12 +23,13 @@ public class TableReader {
 	static final int OBJECT = 1;
 
 	//The version of the cache
-	static final int CACHE_VERSION = 6;
+	static final int CACHE_VERSION = 7;
 	// Version 1 -> 2: the contributor Ids changed from "long" to "String"
 	// Version 2 -> 3: added namespace index and the table of contributors
 	// Version 3 -> 4: offset table saved in a binary form (performance)
 	// Version 4 -> 5: remove support added in version 4 to save offset table in a binary form (performance)
 	// Version 5 -> 6: replace HashtableOfInt with OffsetTable (memory usage optimization)
+	// Version 6 -> 7: added option for multi-language support
 
 	//Informations representing the MAIN file
 	static final String MAIN = ".mainData"; //$NON-NLS-1$
@@ -150,14 +151,16 @@ public class TableReader {
 			String osStamp = in.readUTF();
 			String windowsStamp = in.readUTF();
 			String localeStamp = in.readUTF();
+			boolean multiLanguage = in.readBoolean();
 
 			boolean validTime = (expectedTimestamp == 0 || expectedTimestamp == registryStamp);
 			boolean validInstall = (installStamp == registry.computeState());
 			boolean validOS = (osStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty)));
 			boolean validWS = (windowsStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty)));
 			boolean validNL = (localeStamp.equals(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty)));
+			boolean validMultiLang = (registry.isMultiLanguage() == multiLanguage);
 
-			if (!validTime || !validInstall || !validOS || !validWS || !validNL)
+			if (!validTime || !validInstall || !validOS || !validWS || !validNL || !validMultiLang)
 				return false;
 
 			boolean validMain = (mainDataFileSize == mainDataFile.length());
@@ -200,7 +203,34 @@ public class TableReader {
 		int[] children = readArray(is);
 		if (actualContributorId == null)
 			actualContributorId = contributorId;
-		return getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, true);
+		ConfigurationElement result = getObjectFactory().createConfigurationElement(self, actualContributorId, name, propertiesAndValue, children, misc, parentId, parentType, true);
+		if (registry.isMultiLanguage()) { // cache is multi-language too or it would have failed validation
+			int numberOfLocales = is.readInt();
+			DirectMap translated = null;
+			if (numberOfLocales != 0) {
+				translated = new DirectMap(numberOfLocales, 0.5f);
+				String[] NLs = readStringArray(is);
+				for (int i = 0; i < numberOfLocales; i++) {
+					String[] translatedProperties = readStringArray(is);
+					translated.put(NLs[i], translatedProperties);
+				}
+			}
+			ConfigurationElementMulti multiCE = (ConfigurationElementMulti) result;
+			if (translated != null)
+				multiCE.setTranslatedProperties(translated);
+		}
+		return result;
+	}
+
+	private String[] readStringArray(DataInputStream is) throws IOException {
+		int size = is.readInt();
+		if (size == 0)
+			return null;
+		String[] result = new String[size];
+		for (int i = 0; i < size; i++) {
+			result[i] = readStringOrNull(is);
+		}
+		return result;
 	}
 
 	public Object loadThirdLevelConfigurationElements(int offset, RegistryObjectManager objectManager) {

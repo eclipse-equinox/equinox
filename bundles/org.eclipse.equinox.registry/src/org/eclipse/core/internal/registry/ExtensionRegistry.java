@@ -82,6 +82,12 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	// marks a new extended delta. The namespace that normally would not exists is used for this purpose
 	private final static String notNamespace = ""; //$NON-NLS-1$
 
+	// does this instance of the extension registry has multiple language support enabled?
+	private final boolean isMultiLanguage;
+
+	// have we already logged a error on usage of an unsupported multi-language method?
+	private boolean mlErrorLogged = false;
+
 	public RegistryObjectManager getObjectManager() {
 		return registryObjects;
 	}
@@ -633,6 +639,8 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	public ExtensionRegistry(RegistryStrategy registryStrategy, Object masterToken, Object userToken) {
+		isMultiLanguage = "true".equals(RegistryProperties.getProperty(IRegistryConstants.PROP_MULTI_LANGUAGE)); //$NON-NLS-1$
+
 		if (registryStrategy != null)
 			strategy = registryStrategy;
 		else
@@ -810,7 +818,10 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 
 	// Override to provide domain-specific elements to be stored in the extension registry
 	protected void setElementFactory() {
-		theRegistryObjectFactory = new RegistryObjectFactory(this);
+		if (isMultiLanguage)
+			theRegistryObjectFactory = new RegistryObjectFactoryMulti(this);
+		else
+			theRegistryObjectFactory = new RegistryObjectFactory(this);
 	}
 
 	// Lazy initialization.
@@ -828,7 +839,15 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		strategy.log(status);
 	}
 
+	/**
+	 * With multi-locale support enabled this method returns the non-translated
+	 * key so that they can be cached and translated later into desired languages.
+	 * In the absence of the multi-locale support the key gets translated immediately
+	 * and only translated values is cached.
+	 */
 	public String translate(String key, ResourceBundle resources) {
+		if (isMultiLanguage)
+			return key;
 		return strategy.translate(key, resources);
 	}
 
@@ -1335,4 +1354,22 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 		return userToken;
 	}
 
+	public boolean isMultiLanguage() {
+		return isMultiLanguage;
+	}
+
+	public String[] translate(String[] nonTranslated, IContributor contributor, String locale) {
+		return strategy.translate(nonTranslated, contributor, locale);
+	}
+
+	public String getLocale() {
+		return strategy.getLocale();
+	}
+
+	public void logMultiLangError() {
+		if (mlErrorLogged) // only log this error ones
+			return;
+		log(new Status(IStatus.ERROR, RegistryMessages.OWNER_NAME, 0, RegistryMessages.registry_non_multi_lang, new IllegalArgumentException()));
+		mlErrorLogged = true;
+	}
 }

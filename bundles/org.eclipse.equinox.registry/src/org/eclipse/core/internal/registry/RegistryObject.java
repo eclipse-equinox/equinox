@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,15 +95,19 @@ public abstract class RegistryObject implements KeyedElement {
 	// Accept -1 as "no extra data" on input
 	protected void setExtraDataOffset(int offset) {
 		if (offset == -1) {
-			extraDataOffset &=~OFFSET_MASK; // clear all offset bits
+			extraDataOffset &= ~OFFSET_MASK; // clear all offset bits
 			extraDataOffset |= EMPTY_MASK;
 			return;
 		}
-		
+
 		if ((offset & OFFSET_MASK) != offset)
 			throw new IllegalArgumentException("Registry object: extra data offset is out of range"); //$NON-NLS-1$
-		
-		extraDataOffset &=~(OFFSET_MASK | EMPTY_MASK) ; // clear all offset bits; mark as non-empty
+
+		extraDataOffset &= ~(OFFSET_MASK | EMPTY_MASK); // clear all offset bits; mark as non-empty
 		extraDataOffset |= (offset & OFFSET_MASK); // set all offset bits
+	}
+
+	protected String getLocale() {
+		return registry.getLocale();
 	}
 }

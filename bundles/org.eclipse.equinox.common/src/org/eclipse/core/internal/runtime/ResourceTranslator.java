@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,9 +58,27 @@ public class ResourceTranslator {
 	}
 
 	public static ResourceBundle getResourceBundle(Bundle bundle) throws MissingResourceException {
-		if (hasRuntime21(bundle))
-			return ResourceBundle.getBundle("plugin", Locale.getDefault(), createTempClassloader(bundle)); //$NON-NLS-1$
-		return Activator.getDefault().getLocalization(bundle, null);
+		return getResourceBundle(bundle, null);
+	}
+
+	private static ResourceBundle getResourceBundle(Bundle bundle, String language) throws MissingResourceException {
+		if (hasRuntime21(bundle)) {
+			Locale locale = (language == null) ? Locale.getDefault() : new Locale(language);
+			return ResourceBundle.getBundle("plugin", locale, createTempClassloader(bundle)); //$NON-NLS-1$
+		}
+		return Activator.getDefault().getLocalization(bundle, language);
+	}
+
+	public static String[] getResourceString(Bundle bundle, String[] nonTranslated, String locale) {
+		if (bundle == null)
+			return nonTranslated;
+
+		ResourceBundle resourceBundle = getResourceBundle(bundle, locale);
+		String[] translated = new String[nonTranslated.length];
+		for (int i = 0; i < nonTranslated.length; i++) {
+			translated[i] = getResourceString(bundle, nonTranslated[i], resourceBundle);
+		}
+		return translated;
 	}
 
 	private static boolean hasRuntime21(Bundle b) {

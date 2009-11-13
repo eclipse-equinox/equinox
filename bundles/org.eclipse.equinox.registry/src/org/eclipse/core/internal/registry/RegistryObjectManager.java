@@ -451,6 +451,10 @@ public class RegistryObjectManager implements IObjectManager {
 		return isDirty;
 	}
 
+	public void markDirty() {
+		isDirty = true;
+	}
+
 	synchronized void removeContribution(Object contributorId) {
 		boolean removed = newContributions.removeByKey(contributorId);
 		if (removed == false) {

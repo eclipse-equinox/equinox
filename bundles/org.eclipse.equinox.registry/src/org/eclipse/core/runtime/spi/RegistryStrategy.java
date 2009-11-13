@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,7 @@
 package org.eclipse.core.runtime.spi;
 
 import java.io.File;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.runtime.*;
@@ -33,12 +32,6 @@ import org.eclipse.osgi.util.NLS;
  * This class can be used without OSGi running.
  * </p><p>
  * This class can be overridden and/or instantiated by clients. 
- * </p><p>
- * <b>Note:</b> This class/interface is part of an interim API that is still under 
- * development and expected to change significantly before reaching stability. 
- * It is being made available at this early stage to solicit feedback from pioneering 
- * adopters on the understanding that any code that uses this API will almost certainly 
- * be broken (repeatedly) as the API evolves.
  * </p>
  * @since org.eclipse.equinox.registry 3.2
  */
@@ -55,7 +48,7 @@ public class RegistryStrategy {
 	 * Specifies if the registry file cache is read only; might be <code>null</code>
 	 */
 	private final boolean[] cacheReadOnly;
-	
+
 	/**
 	 * Constructor for this default registry strategy. 
 	 * <p>
@@ -168,7 +161,7 @@ public class RegistryStrategy {
 	public void onStart(IExtensionRegistry registry) {
 		// The default implementation
 	}
-	
+
 	/**
 	 * Override this method to provide additional processing performed 
 	 * when the registry is created and started. Overrides should call
@@ -370,7 +363,7 @@ public class RegistryStrategy {
 	 * </p><p>
 	 * This method may return 0 to indicate that no time stamp verification is required. 
 	 * </p>
-	 * @return a value corresponding to the last mofification time of contributions contained
+	 * @return a value corresponding to the last modification time of contributions contained
 	 * in the registry 
 	 */
 	public long getContributionsTimestamp() {
@@ -388,5 +381,49 @@ public class RegistryStrategy {
 		if (theXMLParserFactory == null)
 			theXMLParserFactory = SAXParserFactory.newInstance();
 		return theXMLParserFactory;
+	}
+
+	/**
+	 * Translates array of keys supplied by the contributor to the requested locale.
+	 * <p>
+	 * This method is intended to be overridden by specialized registry strategies 
+	 * that know translation conventions for the contributors, for instance, 
+	 * the agreed upon locations of the translated keys for bundle contributors.
+	 * The base implementation simply returns the array of non-translated keys. 
+	 * </p><p>
+	 * This method is only used if multi-language support is enabled.
+	 * </p>
+	 * @param nonTranslated message keys to be translated
+	 * @param contributor the contributor of the keys to be translated
+	 * @param locale the requested locale for the keys
+	 * @return the arrays of translated strings
+	 * @see IExtensionRegistry#isMultiLanguage()
+	 * @since org.eclipse.equinox.registry 3.5
+	 */
+	public String[] translate(String[] nonTranslated, IContributor contributor, String locale) {
+		return nonTranslated;
+	}
+
+	/**
+	 * Returns the current locale for the extension registry with enabled 
+	 * multi-language support.
+	 * <p>
+	 * The default implementation assumes that there is a single system wide 
+	 * locale, equivalent to {@link Locale#getDefault()}.
+	 * </p><p>
+	 * The result of this method should not be retained or passed to other threads.  
+	 * The current locale can change any time and may be different for each thread.
+	 * </p><p>
+	 * This method can be overridden by subclasses that wish to provide a way 
+	 * to change the default locale. 
+	 * </p><p>
+	 * This method is only used if multi-language support is enabled.
+	 * </p>
+	 * @see IExtensionRegistry#isMultiLanguage()
+	 * @return the default locale
+	 * @since org.eclipse.equinox.registry 3.5
+	 */
+	public String getLocale() {
+		return Locale.getDefault().toString();
 	}
 }

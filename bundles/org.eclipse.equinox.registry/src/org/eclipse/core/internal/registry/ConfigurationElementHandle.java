@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,10 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 
 	public String getAttribute(String propertyName) {
 		return getConfigurationElement().getAttribute(propertyName);
+	}
+
+	public String getAttribute(String attrName, String locale) {
+		return getConfigurationElement().getAttribute(attrName, locale);
 	}
 
 	public String[] getAttributeNames() {
@@ -102,6 +106,10 @@ public class ConfigurationElementHandle extends Handle implements IConfiguration
 
 	public String getValue() {
 		return getConfigurationElement().getValue();
+	}
+
+	public String getValue(String locale) {
+		return getConfigurationElement().getValue(locale);
 	}
 
 	public String getValueAsIs() {

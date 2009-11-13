@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.core.runtime;
-
 
 /**
  * A configuration element, with its attributes and children, 
@@ -104,6 +103,27 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
 	public String getAttribute(String name) throws InvalidRegistryObjectException;
+
+	/**
+	 * When multi-language support is enabled, this method returns the named attribute of this 
+	 * configuration element in the specified locale, or <code>null</code> if none. 
+	 * <p>
+	 * The locale matching tries to find the best match between available translations and 
+	 * the requested locale, falling back to a more generic locale ("en") when the specific 
+	 * locale ("en_US") is not available. 
+	 * </p><p>
+	 * If multi-language support is not enabled, this method is equivalent to the method 
+	 * {@link #getAttribute(String)}.
+	 * </p>
+	 * @param attrName the name of the attribute
+	 * @param locale the requested locale
+	 * @return attribute value, or <code>null</code> if none
+	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
+	 * @see #getAttribute(String)
+	 * @see IExtensionRegistry#isMultiLanguage()
+	 * @since org.eclipse.equinox.registry 3.5
+	 */
+	public String getAttribute(String attrName, String locale) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the named attribute of this configuration element, or
@@ -243,6 +263,27 @@ public interface IConfigurationElement {
 	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
 	 */
 	public String getValue() throws InvalidRegistryObjectException;
+
+	/**
+	 * When multi-language support is enabled, this method returns the text value of this 
+	 * configuration element in the specified locale, or <code>null</code> if none.
+	 * <p> 
+	 * The locale matching tries to find the best match between available translations and 
+	 * the requested locale, falling back to a more generic locale ("en") when the specific 
+	 * locale ("en_US") is not available. 
+	 * </p><p>
+	 * If multi-language support is not enabled, this method is equivalent to the method 
+	 * {@link #getValue()}.
+	 * </p>
+	 * @param locale the requested locale
+	 * @return the text value of this configuration element in the specified locale,
+	 * or <code>null</code>
+	 * @throws InvalidRegistryObjectException if this configuration element is no longer valid
+	 * @see #getValue(String)
+	 * @see IExtensionRegistry#isMultiLanguage()
+	 * @since org.eclipse.equinox.registry 3.5
+	 */
+	public String getValue(String locale) throws InvalidRegistryObjectException;
 
 	/**
 	 * Returns the untranslated text value of this configuration element.

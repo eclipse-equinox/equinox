@@ -384,7 +384,7 @@ public interface IExtensionRegistry {
 	 * Adds the given listener for registry change events. Listener will be notified
 	 * on changes to all extension points and underlying extensions.
 	 * <p>
-	 * Depending on activity, listners of this type might receive a large number 
+	 * Depending on activity, listeners of this type might receive a large number 
 	 * of modifications and negatively impact overall system performance. Whenever
 	 * possible, consider registering listener specific to an extension point rather
 	 * than a "global" listener.
@@ -396,7 +396,7 @@ public interface IExtensionRegistry {
 	 * This method has no effect if the listener is already registered. 
 	 * </p>
 	 * @param listener the listener
-	 * @since 3.4 
+	 * @since org.eclipse.equinox.registry 3.4 
 	 */
 	public void addListener(IRegistryEventListener listener);
 
@@ -413,7 +413,7 @@ public interface IExtensionRegistry {
 	 * @param listener the listener
 	 * @param extensionPointId the unique identifier of extension point
 	 * @see IExtensionPoint#getUniqueIdentifier()
-	 * @since 3.4 
+	 * @since org.eclipse.equinox.registry 3.4 
 	 */
 	public void addListener(IRegistryEventListener listener, String extensionPointId);
 
@@ -425,8 +425,19 @@ public interface IExtensionRegistry {
 	 * @param listener the listener
 	 * @see #addListener(IRegistryEventListener)
 	 * @see #addListener(IRegistryEventListener, String)
-	 * @since 3.4 
+	 * @since org.eclipse.equinox.registry 3.4 
 	 */
 	public void removeListener(IRegistryEventListener listener);
 
+	/**
+	 * Call this method to determine if this extension registry supports multiple languages.
+	 * <p>
+	 * See the runtime option "-registryMultiLanguage" for enabling multi-language
+	 * support.
+	 * </p>
+	 * @return <code>true</code> if multiple languages are supported by this 
+	 * instance of the extension registry; <code>false</code> otherwise.
+	 * @since org.eclipse.equinox.registry 3.5
+	 */
+	public boolean isMultiLanguage();
 }

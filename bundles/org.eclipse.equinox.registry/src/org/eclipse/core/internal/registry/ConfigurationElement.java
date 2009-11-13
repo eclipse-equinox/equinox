@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public class ConfigurationElement extends RegistryObject {
 	//	[p1, v1, p2, v2, configurationElementValue]
 	//If the array size is even, there is no "configurationElementValue (ie getValue returns null)".
 	//The properties and their values are alternated (v1 is the value of p1). 
-	private String[] propertiesAndValue;
+	protected String[] propertiesAndValue;
 
 	//The name of the configuration element
 	private String name;
@@ -239,7 +239,7 @@ public class ConfigurationElement extends RegistryObject {
 		}
 
 		// create a new instance
-		RegistryContributor defaultContributor = registry.getObjectManager().getContributor(contributorId); 
+		RegistryContributor defaultContributor = registry.getObjectManager().getContributor(contributorId);
 		Object result = registry.createExecutableExtension(defaultContributor, className, contributorName);
 
 		// Check if we have extension adapter and initialize;
@@ -264,4 +264,13 @@ public class ConfigurationElement extends RegistryObject {
 		return result;
 	}
 
+	String getAttribute(String attrName, String locale) {
+		registry.logMultiLangError();
+		return getAttribute(attrName);
+	}
+
+	String getValue(String locale) {
+		registry.logMultiLangError();
+		return getValue();
+	}
 }

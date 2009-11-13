@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,14 @@ package org.eclipse.core.internal.registry.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.core.internal.registry.*;
 import org.eclipse.core.internal.runtime.ResourceTranslator;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.spi.*;
+import org.eclipse.osgi.service.localization.LocaleProvider;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -60,6 +62,11 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	private ServiceTracker xmlTracker = null;
 
 	/**
+	 * Tracker for the LocaleProvider service
+	 */
+	private ServiceTracker localeTracker = null;
+
+	/**
 	 * Value of the query "should we track contributions timestamps" is cached
 	 * in this variable
 	 */
@@ -90,6 +97,13 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	public final String translate(String key, ResourceBundle resources) {
 		return ResourceTranslator.getResourceString(null, key, resources);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#translate(java.lang.String[], org.eclipse.core.runtime.IContributor, java.lang.String)
+	 */
+	public String[] translate(String[] nonTranslated, IContributor contributor, String locale) {
+		return ResourceTranslator.getResourceString(ContributorFactoryOSGi.resolve(contributor), nonTranslated, locale);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +207,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 	 */
 	public void onStart(IExtensionRegistry registry, boolean loadedFromCache) {
 		super.onStart(registry, loadedFromCache);
-		
+
 		if (!(registry instanceof ExtensionRegistry))
 			return;
 		// register a listener to catch new bundle installations/resolutions.
@@ -219,6 +233,10 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		if (xmlTracker != null) {
 			xmlTracker.close();
 			xmlTracker = null;
+		}
+		if (localeTracker != null) {
+			localeTracker.close();
+			localeTracker = null;
 		}
 		super.onStop(registry);
 	}
@@ -267,7 +285,7 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 		if (pluginManifest == null)
 			return 0;
 		try {
-			 return pluginManifest.openConnection().getLastModified() + bundle.getBundleId();
+			return pluginManifest.openConnection().getLastModified() + bundle.getBundleId();
 		} catch (IOException e) {
 			if (debug()) {
 				System.out.println("Unable to obtain timestamp for the bundle " + bundle.getSymbolicName()); //$NON-NLS-1$
@@ -286,5 +304,22 @@ public class RegistryStrategyOSGI extends RegistryStrategy {
 			xmlTracker.open();
 		}
 		return (SAXParserFactory) xmlTracker.getService();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.spi.RegistryStrategy#getLocale()
+	 */
+	public String getLocale() {
+		if (localeTracker == null) {
+			localeTracker = new ServiceTracker(Activator.getContext(), LocaleProvider.class.getName(), null);
+			localeTracker.open();
+		}
+		LocaleProvider localeProvider = (LocaleProvider) localeTracker.getService();
+		if (localeProvider != null) {
+			Locale currentLocale = localeProvider.getLocale();
+			if (currentLocale != null)
+				return currentLocale.toString();
+		}
+		return super.getLocale();
 	}
 }

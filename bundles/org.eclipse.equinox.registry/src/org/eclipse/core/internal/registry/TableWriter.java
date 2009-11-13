@@ -275,6 +275,7 @@ public class TableWriter {
 		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_OS, RegistryProperties.empty));
 		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_WS, RegistryProperties.empty));
 		output.writeUTF(RegistryProperties.getProperty(IRegistryConstants.PROP_NL, RegistryProperties.empty));
+		output.writeBoolean(registry.isMultiLanguage());
 	}
 
 	private void saveArray(int[] array, DataOutputStream out) throws IOException {
@@ -321,6 +322,15 @@ public class TableWriter {
 		}
 	}
 
+	private void writeStringArray(String[] array, int size, DataOutputStream outputStream) throws IOException {
+		outputStream.writeInt(array == null ? 0 : size);
+		if (array == null)
+			return;
+		for (int i = 0; i < size; i++) {
+			writeStringOrNull(array[i], outputStream);
+		}
+	}
+
 	//Save Configuration elements depth first
 	private void saveConfigurationElement(ConfigurationElementHandle element, DataOutputStream outputStream, DataOutputStream extraOutputStream, int depth) throws IOException {
 		if (!element.shouldPersist())
@@ -342,6 +352,19 @@ public class TableWriter {
 		writeStringArray(actualCe.getPropertiesAndValue(), currentOutput);
 		//save the children
 		saveArray(filter(actualCe.getRawChildren()), currentOutput);
+
+		if (actualCe instanceof ConfigurationElementMulti) {
+			ConfigurationElementMulti multiCE = (ConfigurationElementMulti) actualCe;
+			int NLs = multiCE.getNumCachedLocales();
+			currentOutput.writeInt(NLs);
+			if (NLs != 0) {
+				writeStringArray(multiCE.getCachedLocales(), NLs, currentOutput);
+				String[][] translated = multiCE.getCachedTranslations();
+				for (int i = 0; i < NLs; i++) {
+					writeStringArray(translated[i], currentOutput);
+				}
+			}
+		}
 
 		ConfigurationElementHandle[] childrenCEs = (ConfigurationElementHandle[]) element.getChildren();
 		for (int i = 0; i < childrenCEs.length; i++) {
@@ -377,7 +400,7 @@ public class TableWriter {
 	}
 
 	private void saveExtensionPointData(ExtensionPointHandle xpt) throws IOException {
-		writeStringOrNull(xpt.getLabel(), extraOutput);
+		writeStringOrNull(xpt.getLabelAsIs(), extraOutput);
 		writeStringOrNull(xpt.getSchemaReference(), extraOutput);
 		writeStringOrNull(xpt.getUniqueIdentifier(), extraOutput);
 		writeStringOrNull(xpt.getNamespaceIdentifier(), extraOutput);
@@ -385,7 +408,7 @@ public class TableWriter {
 	}
 
 	private void saveExtensionData(ExtensionHandle extension) throws IOException {
-		writeStringOrNull(extension.getLabel(), extraOutput);
+		writeStringOrNull(extension.getLabelAsIs(), extraOutput);
 		writeStringOrNull(extension.getExtensionPointUniqueIdentifier(), extraOutput);
 		writeStringOrNull(extension.getContributorId(), extraOutput);
 	}

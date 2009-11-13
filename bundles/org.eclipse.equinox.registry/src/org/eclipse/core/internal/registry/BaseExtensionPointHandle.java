@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,11 +36,11 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 	public String getNamespace() {
 		return getContributor().getName();
 	}
-	
+
 	public String getNamespaceIdentifier() {
 		return getExtensionPoint().getNamespace();
 	}
-	
+
 	public IContributor getContributor() {
 		return getExtensionPoint().getContributor();
 	}
@@ -74,8 +74,16 @@ public class BaseExtensionPointHandle extends Handle implements IExtensionPoint 
 		return (IConfigurationElement[]) result.toArray(new IConfigurationElement[result.size()]);
 	}
 
+	public String getLabelAsIs() {
+		return getExtensionPoint().getLabelAsIs();
+	}
+
 	public String getLabel() {
 		return getExtensionPoint().getLabel();
+	}
+
+	public String getLabel(String locale) {
+		return getExtensionPoint().getLabel(locale);
 	}
 
 	public String getSchemaReference() {

@@ -34,6 +34,7 @@ public class RegistryMessages extends NLS {
 	public static String registry_no_default;
 	public static String registry_default_exists;
 	public static String registry_bad_cache;
+	public static String registry_non_multi_lang;
 
 	// parsing/resolve
 	public static String parse_error;
