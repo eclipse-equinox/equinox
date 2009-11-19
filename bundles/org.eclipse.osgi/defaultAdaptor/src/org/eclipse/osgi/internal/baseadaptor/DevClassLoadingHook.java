@@ -26,6 +26,7 @@ import org.eclipse.osgi.framework.util.KeyedElement;
 public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, KeyedElement {
 	public static final String KEY = DevClassLoadingHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
+	private static final String FRAGMENT = "@fragment@"; //$NON-NLS-1$
 
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// Do nothing
@@ -47,11 +48,17 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 			else {
 				// if in dev mode, try using the cp as an absolute path
 				// we assume absolute entries come from fragments.  Find the source
-				BaseData fragData = findFragmentSource(sourcedata, devClassPath[i], hostmanager);
-				ClasspathEntry entry = hostmanager.getExternalClassPath(devClassPath[i], fragData, sourcedomain);
-				if (entry != null) {
-					cpEntries.add(entry);
-					result = true;
+				String devCP = devClassPath[i];
+				boolean fromFragment = devCP.endsWith(FRAGMENT);
+				if (fromFragment)
+					devCP = devCP.substring(0, devCP.length() - FRAGMENT.length());
+				BaseData fragData = findFragmentSource(sourcedata, devCP, hostmanager, fromFragment);
+				if (fragData != null) {
+					ClasspathEntry entry = hostmanager.getExternalClassPath(devCP, fragData, sourcedomain);
+					if (entry != null) {
+						cpEntries.add(entry);
+						result = true;
+					}
 				}
 			}
 		}
@@ -62,9 +69,10 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 		return result;
 	}
 
-	private BaseData findFragmentSource(BaseData hostData, String cp, ClasspathManager manager) {
+	private BaseData findFragmentSource(BaseData hostData, String cp, ClasspathManager manager, boolean fromFragment) {
 		if (hostData != manager.getBaseData())
 			return hostData;
+
 		File file = new File(cp);
 		if (!file.isAbsolute())
 			return hostData;
@@ -75,7 +83,7 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 			if (fragFile != null && file.getPath().startsWith(fragFile.getPath()))
 				return fragCP[i].getBundleData();
 		}
-		return hostData;
+		return fromFragment ? null : hostData;
 	}
 
 	public String findLibrary(BaseData data, String libName) {
