@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
  * It is expected that both attribute name and attribute value are not null.
  * </p>
  * <p>
- * This class can be instantited.
+ * This class can be instantiated.
  * </p>
  * <p>
  * This class is not intended to be subclassed.
