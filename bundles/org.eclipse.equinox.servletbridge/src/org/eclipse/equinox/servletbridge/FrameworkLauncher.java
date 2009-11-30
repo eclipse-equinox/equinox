@@ -795,7 +795,7 @@ public class FrameworkLauncher {
 	 * qualifier). Note, that returning anything else will cause exceptions in the caller.
 	 */
 	private Object[] getVersionElements(String version) {
-		if (version.endsWith(DOT_JAR)) //$NON-NLS-1$
+		if (version.endsWith(DOT_JAR))
 			version = version.substring(0, version.length() - 4);
 		Object[] result = {new Integer(0), new Integer(0), new Integer(0), ""}; //$NON-NLS-1$
 		StringTokenizer t = new StringTokenizer(version, "."); //$NON-NLS-1$

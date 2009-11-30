@@ -138,8 +138,8 @@ public class BridgeServlet extends HttpServlet {
 
 	/**
 	 * serviceFrameworkControls currently supports the following commands (identified by the request's pathinfo)
-	 * sp_deploy - Copies the contents of /platform to the install area 
-	 * sp_undeploy - Removes the copy of Eclipse from the install area
+	 * sp_deploy - Copies the contents of the Equinox application to the install area 
+	 * sp_undeploy - Removes the copy of the Equinox application from the install area
 	 * sp_redeploy - Resets the platform (e.g. stops, undeploys, deploys, starts)
 	 * sp_start - Starts a deployed platform
 	 * sp_stop - Stops the platform 
