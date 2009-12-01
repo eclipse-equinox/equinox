@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ public class CommandLineArgs {
 	private static final String UPDATE = "-update"; //$NON-NLS-1$
 	private static final String PASSWORD = "-password"; //$NON-NLS-1$
 	private static final String KEYRING = "-keyring"; //$NON-NLS-1$
+	private static final String PLUGIN_CUSTOMIZATION = "-pluginCustomization"; //$NON-NLS-1$
 
 	// supported command line args
 	private static final String PRODUCT = "-product"; //$NON-NLS-1$
@@ -72,6 +73,8 @@ public class CommandLineArgs {
 			if (args[i].equalsIgnoreCase(KEYRING))
 				found = true; // ignored  
 			if (args[i].equalsIgnoreCase(PASSWORD))
+				found = true; // ignored
+			if (args[i].equalsIgnoreCase(PLUGIN_CUSTOMIZATION))
 				found = true; // ignored
 
 			// done checking obsolete for args.  Remember where an arg was found 
