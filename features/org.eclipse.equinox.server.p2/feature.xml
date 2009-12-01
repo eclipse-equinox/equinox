@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.equinox.server.p2"
-      label="Core P2 Server Feature"
+      label="P2 Server Feature"
       version="1.0.0.qualifier"
       provider-name="Eclipse Foundation">
 
