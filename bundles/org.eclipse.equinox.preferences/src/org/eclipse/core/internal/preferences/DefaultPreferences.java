@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,12 @@ import java.util.*;
 import org.eclipse.core.internal.preferences.exchange.IProductPreferencesService;
 import org.eclipse.core.internal.runtime.RuntimeLog;
 import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.preferences.BundleDefaultsScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.prefs.Preferences;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -39,6 +41,7 @@ public class DefaultPreferences extends EclipsePreferences {
 	private static Properties productTranslation;
 	private static Properties commandLineCustomization;
 	private EclipsePreferences loadLevel;
+	private Thread initializingThread;
 
 	// cached values
 	private String qualifier;
@@ -229,14 +232,88 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#load()
 	 */
 	protected void load() {
-		loadDefaults();
-	}
-
-	private void loadDefaults() {
-		applyRuntimeDefaults();
-		applyBundleDefaults();
+		setInitializingBundleDefaults();
+		try {
+			applyRuntimeDefaults();
+			applyBundleDefaults();
+		} finally {
+			clearInitializingBundleDefaults();
+		}
 		applyProductDefaults();
 		applyCommandLineDefaults();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.internal.preferences.EclipsePreferences#internalPut(java.lang.String, java.lang.String)
+	 */
+	protected String internalPut(String key, String newValue) {
+		// set the value in this node
+		String result = super.internalPut(key, newValue);
+
+		// if we are setting the bundle defaults, then set the corresponding value in
+		// the bundle_defaults scope
+		if (isInitializingBundleDefaults()) {
+			String relativePath = getScopeRelativePath(absolutePath());
+			if (relativePath != null) {
+				Preferences node = PreferencesService.getDefault().getRootNode().node(BundleDefaultsScope.SCOPE).node(relativePath);
+				node.put(key, newValue);
+			}
+		}
+		return result;
+	}
+
+	/*
+	 * Set that we are in the middle of initializing the bundle defaults.
+	 * This is stored on the load level so we know where to look when
+	 * we are setting values on sub-nodes.
+	 */
+	private void setInitializingBundleDefaults() {
+		IEclipsePreferences node = getLoadLevel();
+		if (node instanceof DefaultPreferences) {
+			DefaultPreferences loader = (DefaultPreferences) node;
+			loader.initializingThread = Thread.currentThread();
+		}
+	}
+
+	/*
+	 * Clear the bit saying we are in the middle of initializing the bundle defaults.
+	 * This is stored on the load level so we know where to look when
+	 * we are setting values on sub-nodes.
+	 */
+	private void clearInitializingBundleDefaults() {
+		IEclipsePreferences node = getLoadLevel();
+		if (node instanceof DefaultPreferences) {
+			DefaultPreferences loader = (DefaultPreferences) node;
+			loader.initializingThread = null;
+		}
+	}
+
+	/*
+	 * Are we in the middle of initializing defaults from the bundle 
+	 * initializer or found in the bundle itself? Look on the load level in
+	 * case we are in a sub-node.
+	 */
+	private boolean isInitializingBundleDefaults() {
+		IEclipsePreferences node = getLoadLevel();
+		if (node instanceof DefaultPreferences) {
+			DefaultPreferences loader = (DefaultPreferences) node;
+			return loader.initializingThread == Thread.currentThread();
+		}
+		return false;
+	}
+
+	/*
+	 * Return a path which is relative to the scope of this node. 
+	 * e.g. com.example.foo for /instance/com.example.foo
+	 */
+	protected static String getScopeRelativePath(String absolutePath) {
+		// shouldn't happen but handle empty or root
+		if (absolutePath.length() < 2)
+			return null;
+		int index = absolutePath.indexOf('/', 1);
+		if (index == -1 || index + 1 >= absolutePath.length())
+			return null;
+		return absolutePath.substring(index + 1);
 	}
 
 	private Properties loadProperties(URL url) {

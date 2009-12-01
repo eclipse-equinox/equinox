@@ -370,6 +370,8 @@ public class PreferencesService implements IPreferencesService {
 	}
 
 	private void initializeDefaultScopes() {
+		defaultScopes.put(BundleDefaultsScope.SCOPE, new BundleDefaultPreferences());
+		root.addChild(BundleDefaultsScope.SCOPE, null);
 		defaultScopes.put(DefaultScope.SCOPE, new DefaultPreferences());
 		root.addChild(DefaultScope.SCOPE, null);
 		defaultScopes.put(InstanceScope.SCOPE, new InstancePreferences());
