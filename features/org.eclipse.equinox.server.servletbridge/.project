@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>org.eclipse.equinox.servletbridge.feature</name>
+	<name>org.eclipse.equinox.server.servletbridge</name>
 	<comment></comment>
 	<projects>
 	</projects>
