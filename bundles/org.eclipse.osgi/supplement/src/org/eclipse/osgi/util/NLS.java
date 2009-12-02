@@ -18,6 +18,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
@@ -54,6 +55,10 @@ public abstract class NLS {
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	private static final String EXTENSION = ".properties"; //$NON-NLS-1$
 	private static String[] nlSuffixes;
+	private static final String PROP_WARNINGS = "osgi.nls.warnings"; //$NON-NLS-1$
+	private static final String IGNORE = "ignore"; //$NON-NLS-1$
+	private static final boolean ignoreWarnings = IGNORE.equals(FrameworkProperties.getProperty(PROP_WARNINGS));
+
 	/*
 	 * NOTE do not change the name of this field; it is set by the Framework using reflection
 	 */
@@ -333,6 +338,8 @@ public abstract class NLS {
 	 * @param e - exception to log
 	 */
 	static void log(int severity, String message, Exception e) {
+		if (severity == SEVERITY_WARNING && ignoreWarnings)
+			return; // ignoring warnings; bug 292980
 		if (frameworkLog != null) {
 			frameworkLog.log(new FrameworkLogEntry("org.eclipse.osgi", severity, 1, message, 0, e, null)); //$NON-NLS-1$
 			return;
