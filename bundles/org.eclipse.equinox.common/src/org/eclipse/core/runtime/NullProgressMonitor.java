@@ -25,7 +25,7 @@ public class NullProgressMonitor implements IProgressMonitor {
 	/**
 	 * Indicates whether cancel has been requested.
 	 */
-	private boolean cancelled = false;
+	private volatile boolean cancelled = false;
 
 	/**
 	 * Constructs a new progress monitor.
