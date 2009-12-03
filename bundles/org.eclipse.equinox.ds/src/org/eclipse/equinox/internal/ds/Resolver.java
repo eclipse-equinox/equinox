@@ -9,6 +9,7 @@
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
  *    Andrew Teirney		 - bug.id = 278732
+ *    Simon Kaegi			 - bug.id = 296750
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
@@ -274,8 +275,6 @@ public final class Resolver implements WorkPerformer {
 	 * 
 	 */
 	void getEligible(ServiceEvent event) {
-		if (scpEnabled.isEmpty())
-			return; // check for any enabled configurations
 
 		if (Activator.DEBUG) {
 			Activator.log.debug("Resolver.getEligible(): processing service event " + event.toString(), null); //$NON-NLS-1$
@@ -296,6 +295,9 @@ public final class Resolver implements WorkPerformer {
 			case ServiceEvent.REGISTERED :
 				synchronized (syncLock) {
 					serviceReferenceTable.put(event.getServiceReference(), Boolean.TRUE);
+					if (scpEnabled.isEmpty())
+						return; // check for any enabled configurations
+
 					resolvedComponents = getComponentsToBuild();
 					target = selectDynamicBind(scpEnabled, event.getServiceReference());
 				}
@@ -314,6 +316,9 @@ public final class Resolver implements WorkPerformer {
 				Vector newlyUnsatisfiedSCPs;
 				synchronized (syncLock) {
 					serviceReferenceTable.remove(event.getServiceReference());
+					if (scpEnabled.isEmpty())
+						return; // check for any enabled configurations
+
 					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
 				}
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
@@ -353,6 +358,9 @@ public final class Resolver implements WorkPerformer {
 
 			case ServiceEvent.MODIFIED :
 				synchronized (syncLock) {
+					if (scpEnabled.isEmpty())
+						return; // check for any enabled configurations
+
 					// check for newly unsatisfied components and synchronously
 					// dispose them
 					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
