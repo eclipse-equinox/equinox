@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.security;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -183,12 +182,30 @@ public class KeyStoreTrustEngineTest extends TestCase {
 			}
 		}
 		testStoreFile = File.createTempFile("teststore", "jks"); //$NON-NLS-1$ //$NON-NLS-2$
-		testStore.store(new FileOutputStream(testStoreFile), PASSWORD_DEFAULT);
-
+		final FileOutputStream out = new FileOutputStream(testStoreFile);
+		try {
+			testStore.store(out, PASSWORD_DEFAULT);
+		} finally {
+			safeClose(out);
+		}
 		engine = new KeyStoreTrustEngine(testStoreFile.getPath(), TYPE_DEFAULT, PASSWORD_DEFAULT, "teststore"); //$NON-NLS-1$
 	}
 
-	protected void teardown() {
+	/**
+	 * Closes a stream and ignores any resulting exception. This is useful
+	 * when doing stream cleanup in a finally block where secondary exceptions
+	 * are not worth logging.
+	 */
+	protected static void safeClose(OutputStream out) {
+		try {
+			if (out != null)
+				out.close();
+		} catch (IOException e) {
+			//ignore
+		}
+	}
+
+	protected void tearDown() {
 		engine = null;
 		testStore = null;
 		testStoreFile.delete();

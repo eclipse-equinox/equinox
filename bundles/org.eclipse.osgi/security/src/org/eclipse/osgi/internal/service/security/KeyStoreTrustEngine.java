@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,13 +79,22 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	/**
 	 * Return the KeyStore managed
-	 * @return keystore - the KeyStore instance, initialized and loaded
+	 * @return The KeyStore instance, initialized and loaded
 	 * @throws KeyStoreException
 	 */
 	private synchronized KeyStore getKeyStore() throws IOException, GeneralSecurityException {
 		if (null == keyStore) {
 			keyStore = KeyStore.getInstance(getType());
-			loadStore(keyStore, getInputStream());
+			final InputStream in = getInputStream();
+			try {
+				loadStore(keyStore, in);
+			} finally {
+				try {
+					in.close();
+				} catch (IOException e) {
+					//ignore secondary failure
+				}
+			}
 		}
 
 		if (keyStore == null)
@@ -165,7 +174,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				if (null != oldCert)
 					throw new CertificateException(SignedContentMessages.Default_Trust_Existing_Alias);
 				store.setCertificateEntry(alias, cert);
-				saveStore(store, getOutputStream());
+				final OutputStream out = getOutputStream();
+				try {
+					saveStore(store, out);
+				} finally {
+					safeClose(out);
+				}
 			}
 		} catch (KeyStoreException ke) {
 			throw new CertificateException(ke.getMessage());
@@ -205,7 +219,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				if (oldCert == null)
 					throw new CertificateException(SignedContentMessages.Default_Trust_Cert_Not_Found);
 				store.deleteEntry(alias);
-				saveStore(store, getOutputStream());
+				final OutputStream out = getOutputStream();
+				try {
+					saveStore(store, out);
+				} finally {
+					safeClose(out);
+				}
 			}
 		} catch (KeyStoreException ke) {
 			throw new CertificateException(ke.getMessage());
@@ -259,6 +278,20 @@ public class KeyStoreTrustEngine extends TrustEngine {
 	 */
 	private void saveStore(KeyStore store, OutputStream os) throws IOException, GeneralSecurityException {
 		store.store(os, getPassword());
+	}
+
+	/**
+	 * Closes a stream and ignores any resulting exception. This is useful
+	 * when doing stream cleanup in a finally block where secondary exceptions
+	 * are not worth logging.
+	 */
+	private void safeClose(OutputStream out) {
+		try {
+			if (out != null)
+				out.close();
+		} catch (IOException e) {
+			//ignore
+		}
 	}
 
 	/**
