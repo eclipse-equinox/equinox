@@ -273,8 +273,6 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			Object key = i.next();
 			options.put(key, ((String) options.get(key)).trim());
 		}
-		if (options.size() == 0)
-			options = null;
 	}
 
 	/*
