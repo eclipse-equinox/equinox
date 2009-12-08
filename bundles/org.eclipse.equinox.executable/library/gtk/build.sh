@@ -73,6 +73,8 @@ case $OS in
 				defaultOSArch="ppc64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
+				M_ARCH=-m64
+				export M_ARCH
 				;;
 			"s390")
 				defaultOSArch="s390"

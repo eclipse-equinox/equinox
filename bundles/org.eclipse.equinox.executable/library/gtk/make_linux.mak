@@ -44,8 +44,8 @@ DLL = $(PROGRAM_LIBRARY)
 #LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lpthread -ldl
 LIBS = -lpthread -ldl
 GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.so.0\"" -DGDK_LIB="\"libgdk-x11-2.0.so.0\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.so.0\"" -DGOBJ_LIB="\"libgobject-2.0.so.0\""
-LFLAGS = -shared -fpic -Wl,--export-dynamic 
-CFLAGS = -g -s -Wall\
+LFLAGS = ${M_ARCH} -shared -fpic -Wl,--export-dynamic 
+CFLAGS = ${M_ARCH} -g -s -Wall\
 	-fpic \
 	-DLINUX \
 	-DMOZILLA_FIX \
@@ -95,7 +95,7 @@ eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c ../eclipseNix.c -o eclipseNix.o
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) ${M_ARCH} -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
 	
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
