@@ -34,6 +34,9 @@ case $OS in
 				;;
 		esac
 		;;
+	"AIX")
+		PATH=/bluebird/teamswt/swt-builddir/build/cvs_bin/AIX:$PATH
+		;;
 esac
 
 PATH=$JAVA_HOME/jre/bin:$ANT_HOME/bin:$PATH
