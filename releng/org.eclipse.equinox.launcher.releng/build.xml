@@ -95,6 +95,15 @@
 		<!-- copy the resulting executable and .so -->
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		
+		<condition property="copyMotifLib" >
+			<equals arg1="aix.motif" arg2="${os}.${ws}" />
+		</condition>
+		<antcall target="copyMotifLib" />
+	</target>
+			
+	<target name="copyMotifLib" if="copyMotifLib" >
+		<SCP dir="${libraryFolder}/${ws}" source="libeclipse-motif.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
 	</target>
 	
 	<target name="buildWindows" if="buildWindows">
