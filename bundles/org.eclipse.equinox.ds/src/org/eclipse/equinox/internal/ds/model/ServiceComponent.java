@@ -237,7 +237,6 @@ public class ServiceComponent implements Externalizable {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
-			Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.CANT_ACTIVATE_INSTANCE, instance, this), null);
 			throw new ComponentException(NLS.bind(Messages.EXCEPTION_ACTIVATING_INSTANCE, instance, name), t);
 			// rethrow exception so resolver is eventually notified that
 			// the processed SCP is bad
