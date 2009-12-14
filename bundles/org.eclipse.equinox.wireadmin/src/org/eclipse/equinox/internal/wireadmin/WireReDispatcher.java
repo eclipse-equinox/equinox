@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.wireadmin;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
@@ -139,7 +141,7 @@ public class WireReDispatcher implements WireAdminListener {
 	 */
 	public void wireAdminEvent(WireAdminEvent event) {
 		ServiceTracker st = eventAdminTracker;
-		EventAdmin eventAdmin = st == null ? null : ((EventAdmin) st.getService());
+		final EventAdmin eventAdmin = st == null ? null : ((EventAdmin) st.getService());
 		if (eventAdmin != null) {
 			ServiceReference ref = event.getServiceReference();
 			if (ref == null) {
@@ -202,7 +204,13 @@ public class WireReDispatcher implements WireAdminListener {
 				addExceptionProps(props, throwable);
 			}
 			props.put(EVENT, event);
-			eventAdmin.postEvent(new Event(topic, (Dictionary) props));
+			final Event eaEvent = new Event(topic, (Dictionary) props);
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					eventAdmin.postEvent(eaEvent);
+					return null;
+				}
+			});
 			if (Activator.LOG_DEBUG)
 				log.debug(0, 10018, event.toString(), null, false);
 		}
