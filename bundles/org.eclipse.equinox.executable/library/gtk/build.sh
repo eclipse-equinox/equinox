@@ -73,8 +73,6 @@ case $OS in
 				defaultOSArch="ppc64"
 				defaultJava=DEFAULT_JAVA_EXEC
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
-				M_ARCH=-m64
-				export M_ARCH
 				;;
 			"s390")
 				defaultOSArch="s390"
@@ -160,6 +158,11 @@ DEFAULT_JAVA=$defaultJava
 if [ -n  $javaHome ]; then
 	JAVA_HOME=$javaHome
 	export JAVA_HOME
+fi
+
+if [ "$defaultOSArch" = "ppc64" ];  then
+	M_ARCH=-m64
+	export M_ARCH
 fi
 
 LIBRARY_DIR="../../../org.eclipse.equinox.launcher/fragments/org.eclipse.equinox.launcher.$defaultWS.$defaultOS.$defaultOSArch"
