@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2000, 2005 IBM Corporation and others.
+# Copyright (c) 2000, 2009 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -25,17 +25,20 @@ include ../make_version.mak
 
 PROGRAM_OUTPUT=eclipse
 PROGRAM_LIBRARY=eclipse_$(LIB_VERSION).so
+SHIM=libeclipse-motif.so
 
 CC = gcc
 # Define the object modules to be compiled and flags.
 MAIN_OBJS = eclipseMain.o
+SHIM_OBJS = eclipseMotifShim.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o eclipseMotifInit.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseShm.o eclipseNix.o\
 			  NgCommon.o NgImage.o NgImageData.o NgWinBMPFileFormat.o 
 
 EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
-LIBS = -L$(MOTIF_HOME)/lib -ldl -lXm -lXt -lX11
+LIBS = -L$(MOTIF_HOME)/lib -ldl
+SHIM_LIBS = -L$(MOTIF_HOME)/lib -lXm -lXt -lX11
 MOTIF_LIBS = -DXM_LIB="\"libXm.a(shr_32.o)\"" -DXT_LIB="\"libXt.a(shr4.o)\"" -DX11_LIB="\"libX11.a(shr4.o)\""
 LFLAGS = -G -bnoentry -bexpall -lm -lc_r -lC_r
 CFLAGS = -O -s \
@@ -51,7 +54,7 @@ CFLAGS = -O -s \
 	-I$(MOTIF_HOME)/include \
 	-I/usr/java5/include
 
-all: $(EXEC) $(DLL)
+all: $(EXEC) $(DLL) $(SHIM)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -86,12 +89,16 @@ $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
 
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	ld $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
-	
+
+$(SHIM): $(SHIM_OBJS)
+	ld $(LFLAGS) -o $(SHIM) $(SHIM_OBJS) $(SHIM_LIBS)
+		
 install: all
 	cp $(EXEC) $(OUTPUT_DIR)
+	cp $(SHIM) $(OUTPUT_DIR)
 	cp  $(DLL) $(LIBRARY_DIR)
 	rm -f $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 
 clean:
-	rm -f $(EXEC) $(DLL) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
+	rm -f $(EXEC) $(DLL) $(SHIM) $(SHIM_OBJS) $(MAIN_OBJS) $(COMMON_OBJS) $(DLL_OBJS)
 	

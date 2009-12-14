@@ -45,6 +45,7 @@ extern _TCHAR*  wsArg;
 
 extern _TCHAR   dirSeparator;         /* '/' or '\\' */
 extern _TCHAR   pathSeparator;        /* separator used in PATH variable */
+extern _TCHAR* eclipseLibrary;		/* path the the eclipse_<ver>.so shared library */
 
 extern char *toNarrow(const _TCHAR* src);
 

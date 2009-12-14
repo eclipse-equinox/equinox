@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -62,6 +62,10 @@ static FN_TABLE xtFunctions[] = {	FN_TABLE_ENTRY(XtAddCallback),
 									{ NULL, NULL } 
 								};
 
+#ifdef AIX
+static FN_TABLE shimFunctions[] = { FN_TABLE_ENTRY(eclipseXtInitialize), {NULL, NULL} };
+#endif
+
 /* functions from libX11 */
 static FN_TABLE x11Functions[] = {	FN_TABLE_ENTRY(XDefaultScreenOfDisplay),
 									FN_TABLE_ENTRY(XFree),
@@ -93,8 +97,31 @@ static int loadMotifSymbols( void * library, FN_TABLE * table) {
 	return 0;
 }
 
+#ifdef AIX
+void * loadMotifShimLibrary() {
+	if (eclipseLibrary != NULL) {
+		/* library is the normal eclipse_<ver>.so, look for libeclipse-motif.so beside it */
+		_TCHAR* eclipseMotifLib = _T_ECLIPSE("libeclipse-motif.so");
+		_TCHAR* path = strdup(eclipseLibrary);
+		_TCHAR* c = strrchr(path, '/');
+		if (c == NULL)
+			return NULL;
+
+		*c = 0;
+		c = malloc((strlen(path) + 2 + strlen(eclipseMotifLib)) * sizeof(char));
+		_stprintf(c, _T_ECLIPSE("%s/%s"), path, eclipseMotifLib);
+
+		return dlopen(c, RTLD_LAZY);
+	}
+	return 0;
+}
+#endif
+
 int loadMotif() {
 	void * xmLib = NULL, *xtLib = NULL, *x11Lib = NULL, *xinLib = NULL;
+#ifdef AIX
+	void * motifShim = NULL;
+#endif
 	char * path = getProgramDir();
 	int dlFlags = RTLD_LAZY;
 	
@@ -111,7 +138,10 @@ int loadMotif() {
 	}
 #else
 	dlFlags |= RTLD_MEMBER;
-#endif 
+	motifShim = loadMotifShimLibrary();
+	if (motifShim == NULL)
+		return -1;
+#endif
 
 	if (xmLib == NULL) {
 		xmLib = dlopen(XM_LIB, dlFlags);
@@ -139,6 +169,9 @@ int loadMotif() {
 	if (loadMotifSymbols(xmLib, xmFunctions)  != 0) return -1;
 	if (loadMotifSymbols(xtLib, xtFunctions)  != 0) return -1;
 	if (loadMotifSymbols(x11Lib, x11Functions)  != 0) return -1;
+#ifdef AIX
+	if (loadMotifSymbols(motifShim, shimFunctions) !=0) return -1;
+#endif
 
 	return 0;
 }

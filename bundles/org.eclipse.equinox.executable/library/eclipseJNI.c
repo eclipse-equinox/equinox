@@ -39,6 +39,7 @@ static int shouldShutdown(JNIEnv *env);
 static void JNI_ReleaseStringChars(JNIEnv *env, jstring s, const _TCHAR* data);
 static const _TCHAR* JNI_GetStringChars(JNIEnv *env, jstring str);
 static char * getMainClass(JNIEnv *env, _TCHAR * jarFile);
+static void setLibraryLocation(JNIEnv *env, jobject obj);
 
 static JavaVM * jvm = 0;
 static JNIEnv *env = 0;
@@ -114,6 +115,9 @@ JNIEXPORT jlong JNICALL get_splash_handle(JNIEnv * env, jobject obj){
 
 JNIEXPORT void JNICALL show_splash(JNIEnv * env, jobject obj, jstring s){
 	const _TCHAR* data = NULL;
+	
+	setLibraryLocation(env, obj);
+	
 	if(s != NULL) {
 		data = JNI_GetStringChars(env, s);
 		if(data != NULL) {
@@ -130,6 +134,29 @@ JNIEXPORT void JNICALL takedown_splash(JNIEnv * env, jobject obj){
 	takeDownSplash();
 }
 
+/*
+ * On AIX we need the location of the eclipse shared library so that we
+ * can find the libeclipse-motif.so library.  Reach into the JNIBridge
+ * object to get the "library" field.
+ */
+static void setLibraryLocation(JNIEnv * env, jobject obj) {
+	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");
+	if (bridge != NULL) {
+		jfieldID libraryField = (*env)->GetFieldID(env, bridge, "library", "Ljava/lang/String;");
+		if (libraryField != NULL) {
+			jstring stringObject = (jstring) (*env)->GetObjectField(env, obj, libraryField);
+			if (stringObject != NULL) {
+				const char * str = JNI_GetStringChars(env, stringObject);
+				eclipseLibrary = strdup(str);
+				JNI_ReleaseStringChars(env, stringObject, str);
+			}
+		}
+	}
+	if( (*env)->ExceptionOccurred(env) != 0 ){
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+}
 
 static void registerNatives(JNIEnv *env) {
 	jclass bridge = (*env)->FindClass(env, "org/eclipse/equinox/launcher/JNIBridge");

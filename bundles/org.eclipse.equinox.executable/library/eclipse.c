@@ -256,14 +256,15 @@ static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
 static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user wants to run relative to the program path */
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
-static _TCHAR*  library       = NULL;			/* the shared library */
 static _TCHAR*  permGen  	  = NULL;			/* perm gen size for sun */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
 static _TCHAR* eeConsole = NULL;
 static _TCHAR* eeLibrary = NULL;
+
 _TCHAR* eeLibPath = NULL;			/* this one is global so others can see it */
+_TCHAR*  eclipseLibrary = NULL;	/* the shared library */
 
 /* Define a table for processing command line options. */
 typedef struct
@@ -344,7 +345,7 @@ static int      consoleLauncher = 0;
 JNIEXPORT void setInitialArgs(int argc, _TCHAR** argv, _TCHAR* lib) {
 	initialArgc = argc;
 	initialArgv = argv;
-	library = lib;
+	eclipseLibrary = lib;
 }
 
 /* this method must match the RunMethod typedef in eclipseMain.c */
@@ -850,9 +851,9 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	(*progArgv)[ dst++ ] = 	officialName;
 	
 	/* And the shared library */
-	if (library != NULL) {
+	if (eclipseLibrary != NULL) {
 		(*progArgv)[ dst++ ] = LIBRARY;
-		(*progArgv)[ dst++ ] = library;
+		(*progArgv)[ dst++ ] = eclipseLibrary;
 	}
 	
 	/* the startup jar */

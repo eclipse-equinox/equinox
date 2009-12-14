@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -50,6 +50,7 @@ void displayMessage( char* title, char* message )
     if ( displayName == NULL || strlen(displayName) == 0 ||
         (topWindow == 0 && initWindowSystem( &saveArgc, saveArgv, 1 ) != 0)	) 
     {
+    	printf("%s:\n%s\n", title, message);
     	return;
     }
 	msg = motif.XmStringGenerate( message, NULL, XmCHARSET_TEXT, NULL );
@@ -107,7 +108,7 @@ int initWindowSystem( int* pArgc, char* argv[], int showSplash )
        to initialize the application. 
      */
 #ifdef AIX
-    topWindow = XtInitialize(NULL, officialName, NULL, 0, pArgc, argv);
+    topWindow = motif.eclipseXtInitialize(NULL, officialName, NULL, 0, pArgc, argv);
 #else
 	topWindow = motif.XtInitialize(NULL, officialName, NULL, 0, pArgc, argv);
 #endif

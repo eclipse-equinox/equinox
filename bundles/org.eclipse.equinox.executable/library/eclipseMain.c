@@ -43,7 +43,6 @@ typedef void (*SetInitialArgs)(int argc, _TCHAR*argv[], _TCHAR* library);
 static _TCHAR*  name          = NULL;			/* program name */
 static _TCHAR** userVMarg     = NULL;     		/* user specific args for the Java VM  */
 static _TCHAR*  programDir	  = NULL;			/* directory where program resides */
-static _TCHAR*  library		  = NULL;			/* pathname of the eclipse shared library */
 static _TCHAR*  officialName  = NULL;
 static int      suppressErrors = 0;				/* supress error dialogs */
 
@@ -56,6 +55,8 @@ static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
  
 static int initialArgc;
 static _TCHAR** initialArgv;
+
+_TCHAR* eclipseLibrary; /* path to the eclipse shared library */
 
 #ifdef UNICODE
 extern int main(int, char**);
@@ -154,10 +155,10 @@ int main( int argc, _TCHAR* argv[] )
     programDir = getProgramDir(program);
 
 	/* Find the eclipse library */
-	library = findLibrary(library, program);
+    eclipseLibrary = findLibrary(eclipseLibrary, program);
 		
-	if(library != NULL)
-		handle = loadLibrary(library);
+	if(eclipseLibrary != NULL)
+		handle = loadLibrary(eclipseLibrary);
 	if(handle == NULL) {
 		errorMsg = malloc( (_tcslen(libraryMsg) + _tcslen(officialName) + 10) * sizeof(_TCHAR) );
         _stprintf( errorMsg, libraryMsg, officialName );
@@ -171,7 +172,7 @@ int main( int argc, _TCHAR* argv[] )
 
 	setArgs = (SetInitialArgs)findSymbol(handle, SET_INITIAL_ARGS);
 	if(setArgs != NULL)
-		setArgs(initialArgc, initialArgv, library);
+		setArgs(initialArgc, initialArgv, eclipseLibrary);
 	else {
 		if(!suppressErrors)
 			displayMessage(officialName, entryMsg);
@@ -192,7 +193,7 @@ int main( int argc, _TCHAR* argv[] )
 	}
 	unloadLibrary(handle);
 	
-	free( library );
+	free( eclipseLibrary );
     free( programDir );
     free( program );
     free( officialName );
@@ -257,7 +258,7 @@ static void parseArgs( int* pArgc, _TCHAR* argv[] )
         } else if(_tcsicmp(argv[index], NAME) == 0) {
         	name = argv[++index];
         } else if(_tcsicmp(argv[index], LIBRARY) == 0) {
-        	library = argv[++index];
+        	eclipseLibrary = argv[++index];
         } else if(_tcsicmp(argv[index], SUPRESSERRORS) == 0) {
         	suppressErrors = 1;
         } 
