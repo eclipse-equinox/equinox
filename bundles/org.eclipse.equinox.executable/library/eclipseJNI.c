@@ -146,8 +146,8 @@ static void setLibraryLocation(JNIEnv * env, jobject obj) {
 		if (libraryField != NULL) {
 			jstring stringObject = (jstring) (*env)->GetObjectField(env, obj, libraryField);
 			if (stringObject != NULL) {
-				const char * str = JNI_GetStringChars(env, stringObject);
-				eclipseLibrary = strdup(str);
+				const _TCHAR * str = JNI_GetStringChars(env, stringObject);
+				eclipseLibrary = _tcsdup(str);
 				JNI_ReleaseStringChars(env, stringObject, str);
 			}
 		}
