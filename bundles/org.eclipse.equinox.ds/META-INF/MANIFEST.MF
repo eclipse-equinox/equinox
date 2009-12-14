@@ -6,11 +6,7 @@ Bundle-Version: 1.1.100.qualifier
 Bundle-Vendor: %bundleVendor
 Bundle-Activator: org.eclipse.equinox.internal.ds.Activator
 Bundle-Description: This bundle provides support for OSGi 
- Declarative Services. This module implements a declarative service model,
- which allows a bundle to delay instantiating the service object until
- they are needed, and thus minimizing the resource consumption at
- any point of time. That module is  also one of the core components for
- the OSGi R4.
+ Declarative Services
 Import-Package: 
  org.eclipse.equinox.internal.util.event;version="1.0",
  org.eclipse.equinox.internal.util.hash;version="1.0",
@@ -36,7 +32,8 @@ Export-Package:
  org.eclipse.equinox.internal.util.io;x-internal:=true,
  org.eclipse.equinox.internal.util.xml;x-internal:=true,
  org.eclipse.equinox.internal.util.xml.impl;x-internal:=true,
- org.eclipse.equinox.internal.util.string;x-internal:=true
+ org.eclipse.equinox.internal.util.string;x-internal:=true,
+ org.apache.felix.scr;version="1.2"
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2,
  CDC-1.1/Foundation-1.1,
  J2SE-1.4
