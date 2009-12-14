@@ -171,6 +171,9 @@ public class AbstractBundleTests extends CoreTest {
 			case BundleEvent.STOPPED :
 				result.append("STOPPED");
 				break;
+			case BundleEvent.STOPPING :
+				result.append("STOPPING");
+				break;
 			case BundleEvent.UNINSTALLED :
 				result.append("UNINSTALLED");
 				break;

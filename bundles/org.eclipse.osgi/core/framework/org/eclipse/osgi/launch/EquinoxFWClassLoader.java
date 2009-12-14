@@ -15,8 +15,8 @@ import java.net.URLClassLoader;
 
 class EquinoxFWClassLoader extends URLClassLoader {
 
-	private static final String[] DELEGATE_PARENT = {"java.", "org.osgi.", "org.eclipse.osgi.launch.", "org.eclipse.osgi.service.", "org.eclipse.osgi.framework.log", "org.eclipse.osgi.framework.adaptor", "org.eclipse.osgi.framework.internal.core.ReferenceInputStream"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-	private static final String[] SKIP_PARENT = new String[0]; // nothing right now is skipped
+	private static final String[] DELEGATE_PARENT_FIRST = {"java.", "org.osgi.", "org.eclipse.osgi.launch.", "org.eclipse.osgi.service.", "org.eclipse.osgi.framework.log", "org.eclipse.osgi.framework.adaptor", "org.eclipse.osgi.framework.internal.core.ReferenceInputStream"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+	private static final String[] DELEGATE_CHILD_FIRST = new String[0]; // nothing right now is skipped
 
 	private final ClassLoader parent;
 
@@ -59,11 +59,11 @@ class EquinoxFWClassLoader extends URLClassLoader {
 	}
 
 	private boolean childFirst(String name) {
-		for (int i = SKIP_PARENT.length - 1; i >= 0; i--)
-			if (name.startsWith(SKIP_PARENT[i]))
+		for (int i = DELEGATE_CHILD_FIRST.length - 1; i >= 0; i--)
+			if (name.startsWith(DELEGATE_CHILD_FIRST[i]))
 				return true;
-		for (int i = DELEGATE_PARENT.length - 1; i >= 0; i--)
-			if (name.startsWith(DELEGATE_PARENT[i]))
+		for (int i = DELEGATE_PARENT_FIRST.length - 1; i >= 0; i--)
+			if (name.startsWith(DELEGATE_PARENT_FIRST[i]))
 				return false;
 		return true;
 

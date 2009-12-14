@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,8 @@ public class Util {
 	 *
 	 * @param array	The array of objects to sort
 	 */
-	public static void sort(Object[] array) {
-		qsort(array, 0, array.length - 1);
+	public static void sortByString(Object[] array) {
+		qSortByString(array, 0, array.length - 1);
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class Util {
 	 * @exception	ArrayIndexOutOfBoundsException when <code>start < 0</code>
 	 *				or <code>end >= array.length</code>
 	 */
-	public static void qsort(Object[] array, int start, int stop) {
+	public static void qSortByString(Object[] array, int start, int stop) {
 		if (start >= stop)
 			return;
 
@@ -71,11 +71,11 @@ public class Util {
 		}
 		// sort the left partition, if the right index has not reached the left side of array
 		if (start < right) {
-			qsort(array, start, right);
+			qSortByString(array, start, right);
 		}
 		// sort the right partition, if the left index has not reached the right side of array
 		if (left < stop) {
-			qsort(array, left, stop);
+			qSortByString(array, left, stop);
 		}
 	}
 

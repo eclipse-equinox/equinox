@@ -1388,12 +1388,12 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	public void _threads(CommandInterpreter intp) throws Exception {
 
 		ThreadGroup[] threadGroups = getThreadGroups();
-		Util.sort(threadGroups);
+		Util.sortByString(threadGroups);
 
 		ThreadGroup tg = getTopThreadGroup();
 		Thread[] threads = new Thread[tg.activeCount()];
 		int count = tg.enumerate(threads, true);
-		Util.sort(threads);
+		Util.sortByString(threads);
 
 		StringBuffer sb = new StringBuffer(120);
 		intp.println();

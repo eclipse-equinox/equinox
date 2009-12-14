@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -167,6 +167,44 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			assertEquals("Wrong version", new Version(1, 1, 0), eps[0].getVersion()); //$NON-NLS-1$
 		} catch (Exception e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testBug289719() throws Exception {
+		Bundle bug259903a = installer.installBundle("test.bug259903.a"); //$NON-NLS-1$
+		Bundle bug259903b = installer.installBundle("test.bug259903.b"); //$NON-NLS-1$
+		Bundle bug259903c = installer.installBundle("test.bug259903.c"); //$NON-NLS-1$
+		TestListener testListener = new TestListener();
+		OSGiTestsActivator.getContext().addBundleListener(testListener);
+		try {
+			installer.resolveBundles(new Bundle[] {bug259903a, bug259903b, bug259903c});
+			bug259903a.start();
+			bug259903b.start();
+			bug259903c.start();
+			installer.getStartLevel().setBundleStartLevel(bug259903c, 2);
+			installer.getStartLevel().setBundleStartLevel(bug259903b, 3);
+			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
+
+			testListener.getEvents(); // clear events
+			installer.refreshPackages(new Bundle[] {bug259903a});
+			Object[] expectedEvents = new Object[] {new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),};
+			Object[] actualEvents = testListener.getEvents();
+			compareResults(expectedEvents, actualEvents);
+
+			installer.getStartLevel().setBundleStartLevel(bug259903c, 4);
+			installer.getStartLevel().setBundleStartLevel(bug259903b, 4);
+			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
+			installer.refreshPackages(new Bundle[] {bug259903a});
+			expectedEvents = new Object[] {new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),};
+			actualEvents = testListener.getEvents();
+			compareResults(expectedEvents, actualEvents);
+
+		} catch (Exception e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		} finally {
+			OSGiTestsActivator.getContext().removeBundleListener(testListener);
 		}
 	}
 }

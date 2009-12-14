@@ -330,7 +330,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		while (keysEnum.hasMoreElements()) {
 			keys[i++] = (String) keysEnum.nextElement();
 		}
-		Util.sort(keys);
+		Util.sortByString(keys);
 
 		if (title != null) {
 			println(title);
