@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ public class EventHandlerWrapper {
 	private EventHandler handler;
 	private String[] topics;
 	private Filter filter;
-	
+
 	/**
 	 * Create an EventHandlerWrapper. 
 
@@ -55,28 +55,26 @@ public class EventHandlerWrapper {
 		// Get topic names
 		Object o = reference.getProperty(EventConstants.EVENT_TOPIC);
 		if (o instanceof String) {
-			topics = new String[] {(String)o};
-		}
-		else if (o instanceof String[]) {
+			topics = new String[] {(String) o};
+		} else if (o instanceof String[]) {
 			topics = (String[]) o;
 		}
-		
+
 		if (topics == null) {
 			return false;
 		}
-		
+
 		// get filter
 		o = reference.getProperty(EventConstants.EVENT_FILTER);
 		if (o instanceof String) {
 			try {
-				filter = context.createFilter((String)o);
-			}
-			catch (InvalidSyntaxException e) {
-				log.log(LogService.LOG_ERROR,NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_FILTER, o), e);
+				filter = context.createFilter((String) o);
+			} catch (InvalidSyntaxException e) {
+				log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_INVALID_HANDLER_FILTER, o), e);
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -90,18 +88,22 @@ public class EventHandlerWrapper {
 			}
 			handler = null;
 		}
-		context.ungetService(reference);
+		try {
+			context.ungetService(reference);
+		} catch (IllegalStateException e) {
+			// ignore event admin must have stopped
+		}
 	}
-	
+
 	/**
 	 * Get the event topics for the wrapped handler.
 	 * 
 	 * @return The wrapped handler's event topics
 	 */
-	public synchronized String[] getTopics()  {
+	public synchronized String[] getTopics() {
 		return topics;
 	}
-	
+
 	/**
 	 * Return the wrapped handler. 
 	 * @return The wrapped handler.
@@ -113,9 +115,14 @@ public class EventHandlerWrapper {
 				return handler;
 			}
 		}
-		
+
 		// we don't have the handler, so lets get it outside the sync region
-		EventHandler tempHandler = (EventHandler)context.getService(reference);
+		EventHandler tempHandler = null;
+		try {
+			tempHandler = (EventHandler) context.getService(reference);
+		} catch (IllegalStateException e) {
+			// ignore; event admin may have stopped
+		}
 
 		synchronized (this) {
 			// do we still need the handler we just got?
@@ -126,14 +133,18 @@ public class EventHandlerWrapper {
 			// get the current handler
 			tempHandler = handler;
 		}
-		
+
 		// unget the handler we just got since we don't need it
-		context.ungetService(reference);
-		
+		try {
+			context.ungetService(reference);
+		} catch (IllegalStateException e) {
+			// ignore; event admin may have stopped
+		}
+
 		// return the current handler (copied into the local var)
 		return tempHandler;
 	}
-	
+
 	/**
 	 * Get the filter object
 	 * 
@@ -155,28 +166,27 @@ public class EventHandlerWrapper {
 		if (bundle == null) {
 			return;
 		}
-		
+
 		// filter match
 		Filter eventFilter = getFilter();
 		if ((eventFilter != null) && !event.matches(eventFilter)) {
 			return;
 		}
-		
+
 		// permission check
 		if ((perm != null) && (!bundle.hasPermission(perm))) {
 			return;
 		}
-		
+
 		// get handler service
 		EventHandler handlerService = getHandler();
 		if (handlerService == null) {
 			return;
 		}
-	
+
 		try {
 			handlerService.handleEvent(event);
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			// log/handle any Throwable thrown by the listener
 			log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
 		}
