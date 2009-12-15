@@ -16,6 +16,7 @@ import java.net.URL;
 import java.security.*;
 import java.security.cert.*;
 import java.util.*;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
@@ -354,16 +355,16 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		return "generated_" + Long.toString(nextID++); //$NON-NLS-1$;
 	}
 
-	public EquinoxProtectionDomain createProtectionDomain(Bundle bundle) {
+	public BundleProtectionDomain createProtectionDomain(Bundle bundle) {
 		return createProtectionDomain(bundle, this);
 	}
 
-	private EquinoxProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
+	private BundleProtectionDomain createProtectionDomain(Bundle bundle, SecurityAdmin sa) {
 		PermissionInfoCollection impliedPermissions = getImpliedPermission(bundle);
 		PermissionInfo[] restrictedInfos = getFileRelativeInfos(SecurityAdmin.getPermissionInfos(bundle.getEntry("OSGI-INF/permissions.perm"), framework), bundle); //$NON-NLS-1$
 		PermissionInfoCollection restrictedPermissions = restrictedInfos == null ? null : new PermissionInfoCollection(restrictedInfos);
 		BundlePermissions bundlePermissions = new BundlePermissions(bundle, sa, impliedPermissions, restrictedPermissions);
-		return new EquinoxProtectionDomain(bundlePermissions);
+		return new BundleProtectionDomain(bundlePermissions, null, bundle);
 	}
 
 	private PermissionInfoCollection getImpliedPermission(Bundle bundle) {

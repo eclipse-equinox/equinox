@@ -22,6 +22,7 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
+import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
@@ -262,6 +263,9 @@ public class ClasspathManager {
 	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain, BaseData data) {
 		ClasspathEntry entry = classloader.createClassPathEntry(bundlefile, cpDomain);
 		entry.setBaseData(data);
+		Object domain = entry.getDomain();
+		if (domain instanceof BundleProtectionDomain)
+			((BundleProtectionDomain) domain).setBundle(data.getBundle());
 		return entry;
 	}
 

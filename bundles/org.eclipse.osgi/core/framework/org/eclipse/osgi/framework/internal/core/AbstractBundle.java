@@ -23,7 +23,6 @@ import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.composite.CompositeImpl;
 import org.eclipse.osgi.internal.composite.SurrogateImpl;
 import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.permadmin.EquinoxProtectionDomain;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ResolverError;
@@ -48,7 +47,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** Internal object used for state change synchronization */
 	protected Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
-	protected EquinoxProtectionDomain domain;
+	protected BundleProtectionDomain domain;
 
 	volatile protected ManifestLocalization manifestLocalization = null;
 

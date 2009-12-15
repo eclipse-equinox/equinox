@@ -21,8 +21,7 @@ import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.loader.*;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.signedcontent.SignedContent;
@@ -253,7 +252,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 				if (signers.length > 0)
 					certs = signers[0].getCertificateChain();
 			}
-			return new ProtectionDomain(new CodeSource(bundlefile.getBaseFile().toURL(), certs), permissions);
+			return new BundleProtectionDomain(permissions, new CodeSource(bundlefile.getBaseFile().toURL(), certs), null);
 		} catch (MalformedURLException e) {
 			// Failed to create our own domain; just return the baseDomain
 			return baseDomain;
