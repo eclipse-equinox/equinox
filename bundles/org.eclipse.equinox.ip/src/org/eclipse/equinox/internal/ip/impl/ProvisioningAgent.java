@@ -553,6 +553,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 		boolean manifestFound = false;
 		Dictionary info = new Hashtable(5);
 		Dictionary entriesFromHeader = null;
+		Dictionary extraFileds = null;
 		Vector bundlesToStart = new Vector(5);
 		String header = null;
 		try {
@@ -573,21 +574,22 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 				byte[] extra = ze.getExtra();
 				type = extra == null ? null : new String(extra).toLowerCase();
 				if (extra != null && !"META-INF/MANIFEST.MF".equals(name)) {
-					processEntry(type, name, null, zis, info, null, bundlesToStart);
-					zis.closeEntry();
-					continue;
+					if (extraFileds == null) {
+						extraFileds = new Hashtable(3, 3);
+					}
+					extraFileds.put(name, type);
 				}//the extra field is null or the entry is the manifest
 				if (!manifestFound) {
 					if ("META-INF/MANIFEST.MF".equals(name)) {//the entry is the manifest
 						manifestFound = true;
 						header = getHeaderFromManifest(zis);
-						entriesFromHeader = parseEntries(header);
+						entriesFromHeader = filterAttributes(TYPE, parseEntries(header));
 					} else {//no manifest yet, so cache the entry
 						System.out.println("---put : " + name);
 						entries.put(name, readStream(zis));
 					}
 				} else {//the manifest is found so we process the entry
-					processEntry(type, name, null, zis, info, entriesFromHeader, bundlesToStart);
+					processEntry(extraFileds, name, null, zis, info, entriesFromHeader, bundlesToStart);
 				}
 				zis.closeEntry();
 			}
@@ -595,7 +597,7 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 			/*process the cached entries*/
 			Enumeration names = entries.keys();
 			while (names.hasMoreElements()) {
-				processEntry(null, name = (String) names.nextElement(), (byte[]) entries.get(name), null, info, entriesFromHeader, bundlesToStart);
+				processEntry(extraFileds, name = (String) names.nextElement(), (byte[]) entries.get(name), null, info, entriesFromHeader, bundlesToStart);
 			}
 		} catch (Throwable e) {
 			this.info.setError(ERROR_CORRUPTED_ZIP, e.toString());
@@ -615,23 +617,31 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 		addInformation(info, bundlesToStart); // bundle should
 	}
 
-	private void processEntry(String type, String name, byte[] content, InputStream is, Dictionary info, Dictionary entriesFromHeader, Vector bundlesToStart) throws IOException {
+	private void processEntry(Dictionary extraFileds, String name, byte[] content, InputStream is, Dictionary info, Dictionary entriesFromHeader, Vector bundlesToStart) throws IOException {
 		/* 
-		 * if there is no value in the extra field 
-		 * try to initialize it from the InitialProvisioning-Entries header 
+		* first try the InitialProvisioning-Entries header
+		* if the zip file had a manifest entry
+		*/
+		String type = entriesFromHeader == null ? null : (String) entriesFromHeader.get(name);
+		/* 
+		 * If there is no value in the InitialProvisioning-Entries header for that path
+		 * try to initialize the type from the entry's extra field.
+		 * If this ZIP entry field is present, the Initial Provisioning service should not
+		 * look further, even if the extra field contains an erroneous value.
 		 */
 		if (type == null) {
-			if (entriesFromHeader != null) {
-				type = (String) entriesFromHeader.get(name);
+			if (extraFileds != null) {
+				type = (String) extraFileds.get(name);
 			}
 		}
 		/*
-		 * if type is still null try to to initialize it 
-		 * according to the extension of the entry's name 
-		 */
+		* if type is still null try to to initialize it 
+		* according to the extension of the entry's name 
+		*/
 		if (type == null) {
 			type = getMIMEfromExtension(name);
 		}
+
 		/* process entry */
 		if (Log.debug) {
 			Log.debug("Processing entry '" + name + "' of type " + type);
@@ -1233,51 +1243,186 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 	}
 
 	/**
-	 * 
+	 * Parses the InitialProvisioning-Entries manifest header.
 	 * @param header the contents of the InitialProvisioning-Entries manifest header, if any
-	 * @return dictionary with key-value pairs parsed from header
-	 *         or null if no such header is found in the manifest
+	 * @return Dictionary which maps entry paths to Dictionary representing the attributes
+	 * 		   or null, if no header is found.
 	 */
-	static Dictionary parseEntries(String header) {
+	private static Dictionary parseEntries(String header) {
+		Dictionary entries = null;
+		Dictionary attributes = null;
+		header = removeWhiteSpaces(header);
 		if (header == null || header.length() == 0)
-			return null; //no such header
-		Dictionary entries = new Hashtable(2);
-		int index;
-		StringTokenizer tokens = new StringTokenizer(header, ",");
-		String token;
-		String path, type = null;
-		while (tokens.hasMoreTokens()) {
-			token = removeWhiteSpaces(tokens.nextToken());
-			index = token.indexOf(";");
-			if (index == -1)
-				continue; //there is no type/mime attribute
-			path = token.substring(0, index);
-			index = token.indexOf("mime=", index);
-			if (index != -1) { //there is mime attribute
-				type = token.substring(index + 5);
-				if (isValidMIME(type)) {
-					entries.put(path, type);
+			return null;
+		int begin = 0, end = 1, length = header.length();
+		boolean quoted = false;
+		String path, attribute, value;
+
+		entry: while (end != -1 && begin < length - 1) {
+			end = readToken(header, begin, false, false); //read the path
+			if (end == -1)
+				break; //end of header, or only path
+
+			switch (header.charAt(end)) {
+				case ';' ://end of path , read attribute
+					if (begin == end) {
+						end = readToken(header, end + 1, false, true);
+						begin = end + 1;
+						continue;
+					}
+					path = header.substring(begin, end);
+					begin = end + 1;
+					//read the attributes
+					while (end != -1 && begin < length - 1) {
+						end = readToken(header, begin, quoted, false);
+						if (end == -1)
+							break entry;
+						if (header.charAt(end) != '=' || begin == end) {
+							//invalid syntax
+							end = readToken(header, begin, false, true); //read the attribute name
+							begin = end + 1;
+							continue entry;
+						}
+						attribute = header.substring(begin, end);
+						if (header.charAt(begin) == '\"') {
+							quoted = true;
+							begin = end + 2;
+						} else
+							begin = end + 1;
+
+						if (begin >= length - 1)
+							break entry;
+
+						end = readToken(header, begin, quoted, false); //read the attribute value
+						if (end == -1) {
+							if (quoted) {
+								//invalid syntax
+								end = readToken(header, begin, false, true);
+								begin = end + 1;
+								continue entry;
+							}
+							//end of header or last attribute-value
+							value = header.substring(begin, length);
+							if (attributes == null)
+								attributes = new Hashtable(2, 3);
+							attributes.put(attribute, value);
+							begin = end + 1;
+							break;
+						}
+						switch (header.charAt(end)) {
+							case ',' : //end of parameters list
+								value = header.substring(begin, end);
+								if (attributes == null)
+									attributes = new Hashtable(2, 3);
+								attributes.put(attribute, value);
+								if (entries == null)
+									entries = new Hashtable(3, 3);
+								entries.put(path, attributes);
+								attributes = null;
+								continue entry;
+							case ';' : //another parameter
+								value = header.substring(begin, end);
+								if (attributes == null)
+									attributes = new Hashtable(2, 3);
+								attributes.put(attribute, value);
+								begin = end + 1;
+								continue;
+							case '\"' : //endof quoted part
+								quoted = false;
+								value = header.substring(begin, end - 1);
+								if (attributes == null)
+									attributes = new Hashtable(2, 3);
+								attributes.put(attribute, value);
+								begin = end + 1;
+								continue;
+							default : //invalid syntax
+								end = readToken(header, begin, false, true);
+								begin = end + 1;
+								continue entry;
+						}
+					}
+					break;
+				case ',' : //no description
+					if (begin == end)
+						begin = end + 2;
+					else
+						begin = end + 1;
 					continue;
-				}
+				default :// invalid syntax
+					end = readToken(header, end + 1, false, true);
+					begin = end + 1;
+					continue;
 			}
-			index = token.indexOf("type=");
-			if (index != -1) { //there is type attribute
-				type = token.substring(index + 5);
-				if ((type = typeToMIME(type)) != null) {
-					entries.put(path, type);
-				}
+
+			if (attributes != null) {
+				if (entries == null)
+					entries = new Hashtable(3, 3);
+				entries.put(path, attributes);
+				attributes = null;
 			}
 		}
 		return entries;
 	}
 
 	/**
-	 * 
-	 * @param mime mime type 
-	 * @return true if mime is avalid mime type
+	 * Reads the next token from the manifest header.
+	 * @param token the valiue of the manifest header.
+	 * @param begin index of the char from which to start
+	 * @param quoted if the consequent part of teh string is guoted
+	 * @param skipInvalidPath if true all chars till the first comma are skipped
+	 * @return the index of the first character from the string which is 
+	 *         different from the expected, or -1 if not found
 	 */
-	private static boolean isValidMIME(String mime) {
-		return ProvisioningService.MIME_BUNDLE.equals(mime) || ProvisioningService.MIME_BUNDLE_ALT.equals(mime) || ProvisioningService.MIME_STRING.equals(mime) || ProvisioningService.MIME_BYTE_ARRAY.equals(mime) || ProvisioningService.MIME_BUNDLE_URL.equals(mime);
+	private static int readToken(String token, int begin, boolean quoted, boolean skipInvalidPath) {
+		char c = 0;
+		int len = token.length();
+		if (begin >= len)
+			return -1;
+		if (quoted) {
+			while ((c = token.charAt(begin)) != '\"') {
+				if (++begin == len)
+					return -1;
+			}
+			return begin;
+		}
+		if (skipInvalidPath) {
+			while ((c = token.charAt(begin)) != ',') {
+				if (++begin == len)
+					return -1;
+			}
+			return begin;
+		}
+		while ((c = token.charAt(begin)) >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == '-' || c == '/' || c == '.' || c == ':') {
+			if (++begin == len)
+				return -1;
+		}
+		return begin;
+	}
+
+	static final String TYPE = "type";
+
+	/**
+	 * Filters the Dictionary returned from {@link #parseEntries(String)}.
+	 * Returns Dictionary which maps entry paths to values of the attribute,
+	 * which name is given as argument.
+	 */
+	private static Dictionary filterAttributes(String attribute, Dictionary entries) {
+		if (entries == null)
+			return null;
+		Dictionary filtered = null;
+		Enumeration paths = entries.keys();
+		Dictionary attributes = null;
+		String path = null, type = null, mime = null;
+		while (paths.hasMoreElements()) {
+			path = (String) paths.nextElement();
+			attributes = (Dictionary) entries.get(path);
+			if ((type = (String) attributes.get(attribute)) != null && (mime = typeToMIME(type)) != null) {
+				if (filtered == null)
+					filtered = new Hashtable(3, 3);
+				filtered.put(path, mime);
+			}
+		}
+		return filtered;
 	}
 
 	/**
@@ -1354,6 +1499,8 @@ public class ProvisioningAgent implements BundleActivator, ProvisioningService, 
 	}
 
 	private static String removeWhiteSpaces(String s) {
+		if (s == null)
+			return null;
 		char curr;
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < s.length(); i++) {
