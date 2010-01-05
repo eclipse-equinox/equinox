@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -306,6 +306,55 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		} catch (InterruptedException e) {
 			// fail
 			fail("interrupted", e); //$NON-NLS-1$
+		} finally {
+			// put the framework back to the RESOLVED state
+			equinox.stop();
+
+			try {
+				equinox.waitForStop(10000);
+			} catch (InterruptedException e) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
+
+	public void testEnableSecurityManager05() throws BundleException {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing a bundle to tests bug 
+		String locationLinkA = installer.getBundleLocation("test.link.a"); //$NON-NLS-1$
+		String locationLinkAClient = installer.getBundleLocation("test.link.a.client"); //$NON-NLS-1$
+
+		Bundle linkA = systemContext.installBundle(locationLinkA);
+		Bundle linkAClient = systemContext.installBundle(locationLinkAClient);
+		equinox.start();
+
+		try {
+			PackageAdmin pa = (PackageAdmin) systemContext.getService(systemContext.getServiceReference(PackageAdmin.class.getName()));
+			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
+			linkA.uninstall();
+			linkAClient.uninstall();
+
+			linkA = systemContext.installBundle(locationLinkA);
+			linkAClient = systemContext.installBundle(locationLinkAClient);
+			assertTrue(pa.resolveBundles(new Bundle[] {linkA, linkAClient}));
 		} finally {
 			// put the framework back to the RESOLVED state
 			equinox.stop();

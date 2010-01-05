@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others. All rights reserved. This
+ * Copyright (c) 2005, 2010 IBM Corporation and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -42,9 +42,9 @@ public abstract class ResolverConstraint {
 
 	// Same as VersionConstraint but does additinal permission checks
 	boolean isSatisfiedBy(VersionSupplier vs) {
-		if (!bundle.getResolver().getPermissionChecker().checkPermission(constraint, vs.getBaseDescription()))
+		if (vs.getResolverBundle().isUninstalled() || !bundle.getResolver().getPermissionChecker().checkPermission(constraint, vs.getBaseDescription()))
 			return false;
-		return vs.getSubstitute() == null && !vs.getResolverBundle().isUninstalled() && constraint.isSatisfiedBy(vs.getBaseDescription());
+		return vs.getSubstitute() == null && constraint.isSatisfiedBy(vs.getBaseDescription());
 	}
 
 	// returns the companion VersionConstraint object from the State
