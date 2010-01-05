@@ -15,6 +15,7 @@ Import-Package:
  org.eclipse.equinox.internal.util.threadpool;version="1.0",
  org.eclipse.equinox.internal.util.timer;version="1.0",
  org.eclipse.osgi.framework.console;version="1.0",
+ org.eclipse.osgi.framework.log;version="1.0.0",
  org.eclipse.osgi.service.debug;version="1.0",
  org.eclipse.osgi.service.environment;version="1.2.0",
  org.eclipse.osgi.util,

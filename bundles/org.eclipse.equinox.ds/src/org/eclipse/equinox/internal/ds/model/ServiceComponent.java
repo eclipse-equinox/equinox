@@ -621,7 +621,7 @@ public class ServiceComponent implements Externalizable {
 				}
 			}
 		} catch (Exception e) {
-			Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_WRITING_OBJECT, e);
 		}
 	}
 
@@ -707,7 +707,7 @@ public class ServiceComponent implements Externalizable {
 					modifyMethodName = in.readUTF();
 			}
 		} catch (Exception e) {
-			Activator.log.error(Messages.ERROR_READING_OBJECT, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_READING_OBJECT, e);
 		}
 	}
 

@@ -16,6 +16,7 @@ import org.eclipse.equinox.internal.util.ref.TimerRef;
 import org.eclipse.equinox.internal.util.timer.TimerListener;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Stoyan Boshev
@@ -93,7 +94,7 @@ public class WorkThread implements Runnable, TimerListener {
 				}
 			} catch (Throwable t) {
 				// just for any case. Must not happen in order to keep thread alive
-				Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
+				Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
 			} finally {
 				TimerRef.removeListener(this, 1);
 			}
@@ -103,7 +104,7 @@ public class WorkThread implements Runnable, TimerListener {
 	}
 
 	public void timer(int event) {
-		Activator.log.warning(NLS.bind(Messages.TIMEOUT_PROCESSING, objectToProcess), null);
+		Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.TIMEOUT_PROCESSING, objectToProcess), null);
 		running = false;
 		objectToProcess = null;
 		mgr.queueBlocked();

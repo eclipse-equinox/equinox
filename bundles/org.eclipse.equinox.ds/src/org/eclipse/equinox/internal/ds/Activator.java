@@ -16,6 +16,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.*;
@@ -44,6 +46,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 	private SCRManager scrManager = null;
 	private ServiceRegistration scrCommandProviderReg;
 	private SCRCommandProvider scrCommandProvider;
+	private static FrameworkLog fwLog;
 	private boolean inited = false;
 
 	public static Log log;
@@ -147,6 +150,10 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		log.setPrintOnConsole(print);
 		//DebugOptions no longer needed
 		debugTracker.close();
+		ServiceReference fwRef = bc.getServiceReference(FrameworkLog.class.getName());
+		if (fwRef != null) {
+			fwLog = (FrameworkLog) bc.getService(fwRef);
+		}
 
 		if (startup)
 			timeLog("[BEGIN - start method] Creating Log instance and initializing log system took "); //$NON-NLS-1$
@@ -290,14 +297,16 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 	public static void log(BundleContext bundleContext, int level, String message, Throwable t) {
 		LogService logService = null;
 		ServiceReference logRef = null;
-		try {
-			logRef = bundleContext.getServiceReference(LogService.class.getName());
-			if (logRef != null) {
-				logService = (LogService) bundleContext.getService(logRef);
-			}
-		} catch (Exception e) {
-			if (Activator.DEBUG) {
-				log.debug("Cannot get LogService for bundle " + bundleContext.getBundle().getSymbolicName(), e); //$NON-NLS-1$
+		if (bundleContext != null) {
+			try {
+				logRef = bundleContext.getServiceReference(LogService.class.getName());
+				if (logRef != null) {
+					logService = (LogService) bundleContext.getService(logRef);
+				}
+			} catch (Exception e) {
+				if (Activator.DEBUG) {
+					log.debug("Cannot get LogService for bundle " + bundleContext.getBundle().getSymbolicName(), e); //$NON-NLS-1$
+				}
 			}
 		}
 		if (logService != null) {
@@ -322,8 +331,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 			logRef = bc.getServiceReference(LogService.class.getName());
 			if (logRef == null) {
 				//log service is not available
-				if (!log.getPrintOnConsole() && !log.autoPrintOnConsole) {
-					//the log will not print the message on the console
+				if (!log.getPrintOnConsole() && !log.autoPrintOnConsole && fwLog == null) {
+					//The log will not print the message on the console and the FrameworkLog service is not available
+					//Will print errors on the console as last resort
 					if (level == LogService.LOG_ERROR) {
 						dumpOnConsole("ERROR ", bundleContext, message, t, true); //$NON-NLS-1$
 					}
@@ -337,11 +347,17 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 					case LogService.LOG_WARNING :
 						log.warning(message, t);
 						break;
+					case LogService.LOG_INFO :
+						log.info(message);
+						break;
 					default :
-						log.error(message, t);
+						log.debug(message, t);
 						break;
 				}
 			}
+		}
+		if (fwLog != null) {
+			logToFWLog(bundleContext != null ? bundleContext.getBundle().getSymbolicName() : bc.getBundle().getSymbolicName(), level, message, t);
 		}
 	}
 
@@ -355,6 +371,25 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		if (t != null) {
 			t.printStackTrace();
 		}
+	}
+
+	private static void logToFWLog(String bsn, int level, String message, Throwable t) {
+		int severity = FrameworkLogEntry.INFO;
+		switch (level) {
+			case LogService.LOG_ERROR :
+				severity = FrameworkLogEntry.ERROR;
+				break;
+			case LogService.LOG_WARNING :
+				severity = FrameworkLogEntry.WARNING;
+				break;
+			case LogService.LOG_INFO :
+				severity = FrameworkLogEntry.INFO;
+				break;
+			case LogService.LOG_DEBUG :
+				severity = FrameworkLogEntry.INFO;
+				break;
+		}
+		fwLog.log(new FrameworkLogEntry(bsn, severity, 0, message, 0, t, null));
 	}
 
 	public void serviceChanged(ServiceEvent event) {

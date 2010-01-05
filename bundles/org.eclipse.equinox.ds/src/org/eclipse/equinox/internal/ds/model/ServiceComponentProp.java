@@ -550,7 +550,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 								try {
 									reference.reference.bind(reference, componentInstance, refs[i]);
 								} catch (Exception e) {
-									Activator.log.error(NLS.bind(Messages.ERROR_BINDING_REFERENCE, reference), e);
+									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BINDING_REFERENCE, reference), e);
 								}
 							}
 						}
@@ -563,7 +563,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 						try {
 							unbindDynamicReference(reference, componentInstance, (ServiceReference) servicesToUnbind.elementAt(i));
 						} catch (Exception e) {
-							Activator.log.error(NLS.bind(Messages.ERROR_UNBINDING_REFERENCE2, reference), e);
+							Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_UNBINDING_REFERENCE2, reference), e);
 						}
 					}
 				}

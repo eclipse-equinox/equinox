@@ -19,6 +19,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.component.*;
+import org.osgi.service.log.LogService;
 
 /**
  * This class is responsible for creating, tracking and disposing of service
@@ -114,7 +115,7 @@ public class InstanceProcess {
 				if (!lockSucceeded) {
 					// The lock is not yet released!
 					// Allow the operation but log a warning
-					Activator.log.warning(NLS.bind(Messages.TIMEOUT_GETTING_LOCK, Integer.toString(InstanceProcess.waitTime)), new Exception("Debug stacktrace")); //$NON-NLS-1$
+					Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.TIMEOUT_GETTING_LOCK, Integer.toString(InstanceProcess.waitTime)), new Exception("Debug stacktrace")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -183,7 +184,7 @@ public class InstanceProcess {
 							} catch (Exception e) {
 								successfullyBuilt = false;
 								if (!(e instanceof ComponentException)) {
-									Activator.log.error(NLS.bind(Messages.CANNOT_BUILD_COMPONENT, scp), e);
+									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_BUILD_COMPONENT, scp), e);
 								}
 							}
 						}
@@ -215,7 +216,7 @@ public class InstanceProcess {
 										factoryPid = config.getFactoryPid();
 									}
 								} catch (Exception e) {
-									Activator.log.error(NLS.bind(Messages.CANNOT_GET_CONFIGURATION, sc.name), e);
+									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_GET_CONFIGURATION, sc.name), e);
 								}
 
 								// if MSF throw exception - can't be
@@ -242,7 +243,7 @@ public class InstanceProcess {
 						}
 					}
 				} catch (Throwable t) {
-					Activator.log.error(NLS.bind(Messages.EXCEPTION_BUILDING_COMPONENT, scp.serviceComponent), t);
+					Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.EXCEPTION_BUILDING_COMPONENT, scp.serviceComponent), t);
 				} finally {
 					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
 					freeLock();
@@ -284,7 +285,7 @@ public class InstanceProcess {
 					}
 					disposeInstances(scp, deactivateReason);
 				} catch (Throwable t) {
-					Activator.log.error(NLS.bind(Messages.ERROR_DISPOSING_INSTANCES, scp), t);
+					Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_DISPOSING_INSTANCES, scp), t);
 				} finally {
 					resolver.componentDisposed(scp);
 					freeLock();
@@ -311,7 +312,7 @@ public class InstanceProcess {
 					reg.unregister();
 			} catch (IllegalStateException e) {
 				// Service is already unregistered do nothing
-				Activator.log.warning(NLS.bind(Messages.FACTORY_REGISTRATION_ALREADY_DISPOSED, scp.name), null);
+				Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.FACTORY_REGISTRATION_ALREADY_DISPOSED, scp.name), null);
 			}
 		}
 		ServiceComponent sc = scp.serviceComponent;
@@ -335,7 +336,7 @@ public class InstanceProcess {
 					reg.unregister();
 				} catch (IllegalStateException e) {
 					// Service is already unregistered do nothing
-					Activator.log.warning(NLS.bind(Messages.REGISTRATION_ALREADY_DISPOSED, scp.name), null);
+					Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.REGISTRATION_ALREADY_DISPOSED, scp.name), null);
 				}
 			} else {
 				if (Activator.DEBUG) {
@@ -436,7 +437,7 @@ public class InstanceProcess {
 							try {
 								scp.unbindDynamicReference(ref, compInstance, serviceReference);
 							} catch (Throwable t) {
-								Activator.log.error(NLS.bind(Messages.ERROR_UNBINDING_REFERENCE, ref.reference, compInstance.getInstance()), t);
+								Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_UNBINDING_REFERENCE, ref.reference, compInstance.getInstance()), t);
 							}
 						}
 					}
@@ -444,7 +445,7 @@ public class InstanceProcess {
 			}
 		} catch (Throwable e) {
 			//should not happen
-			Activator.log.error(Messages.UNEXPECTED_ERROR, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_ERROR, e);
 		}
 	}
 
@@ -530,7 +531,7 @@ public class InstanceProcess {
 						// 1 - Return the instance (if already created) nevertheless it is not finished its binding and activation phase
 						// 2 - throw an exception because something may have gone wrong
 						if (!scp.instances.isEmpty()) {
-							Activator.log.warning(Messages.RETURNING_NOT_FULLY_ACTIVATED_INSTANCE, new Exception("Debug callstack")); //$NON-NLS-1$
+							Activator.log(null, LogService.LOG_WARNING, Messages.RETURNING_NOT_FULLY_ACTIVATED_INSTANCE, new Exception("Debug callstack")); //$NON-NLS-1$
 							return (ComponentInstanceImpl) scp.instances.firstElement();
 						}
 
@@ -559,10 +560,10 @@ public class InstanceProcess {
 			try {
 				componentInstance = scp.build(usingBundle, instance, security);
 			} catch (ComponentException e) {
-				Activator.log.error(e.getMessage(), e.getCause());
+				Activator.log(null, LogService.LOG_ERROR, e.getMessage(), e.getCause());
 				throw e;
 			} catch (Throwable t) {
-				Activator.log.error(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
+				Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
 				throw new ComponentException(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
 			} finally {
 				// keep track of how many times we have re-entered this method
@@ -609,10 +610,10 @@ public class InstanceProcess {
 			try {
 				scp.modify(newProps);
 			} catch (ComponentException e) {
-				Activator.log.error(e.getMessage(), e.getCause());
+				Activator.log(null, LogService.LOG_ERROR, e.getMessage(), e.getCause());
 				throw e;
 			} catch (Throwable t) {
-				Activator.log.error(NLS.bind(Messages.ERROR_MODIFYING_COMPONENT, scp.serviceComponent), t);
+				Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_MODIFYING_COMPONENT, scp.serviceComponent), t);
 				throw new ComponentException(NLS.bind(Messages.ERROR_MODIFYING_COMPONENT, scp.serviceComponent), t);
 			} finally {
 				// keep track of how many times we have re-entered this method

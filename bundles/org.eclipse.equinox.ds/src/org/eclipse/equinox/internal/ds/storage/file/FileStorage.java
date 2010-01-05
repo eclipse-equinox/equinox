@@ -56,9 +56,9 @@ public class FileStorage extends ComponentStorage {
 				data.readObject(new BufferedInputStream(fis = new FileInputStream(file)));
 			}
 		} catch (IOException e) {
-			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
+			Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
 		} catch (Exception e) {
-			Activator.log.error(NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
+			Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_LOADING_DATA_FILE, file.getAbsolutePath()), e);
 		} finally {
 			if (fis != null) {
 				try {
@@ -110,7 +110,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable e) {
-			Activator.log.error(NLS.bind(Messages.PROCESSING_BUNDLE_FAILED, Long.toString(bundle.getBundleId()), bundle), e);
+			Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.PROCESSING_BUNDLE_FAILED, Long.toString(bundle.getBundleId()), bundle), e);
 			return null;
 		}
 	}
@@ -135,7 +135,7 @@ public class FileStorage extends ComponentStorage {
 			}
 			return components;
 		} catch (Throwable t) {
-			Activator.log.error(Messages.ERROR_LOADING_COMPONENTS, t);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_LOADING_COMPONENTS, t);
 		}
 		return null;
 	}
@@ -165,7 +165,7 @@ public class FileStorage extends ComponentStorage {
 			data.put(getPath(dbCompPath), buf.toByteArray());
 			isDirty = true;
 		} catch (Exception e) {
-			Activator.log.error(Messages.ERROR_SAVING_COMPONENT_DEFINITIONS, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_SAVING_COMPONENT_DEFINITIONS, e);
 		}
 	}
 
@@ -183,10 +183,10 @@ public class FileStorage extends ComponentStorage {
 				data.writeObject(fos);
 				isDirty = false;
 			} catch (Exception e) {
-				Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
+				Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_WRITING_OBJECT, e);
 			}
 		} catch (FileNotFoundException e) {
-			Activator.log.error(Messages.FILE_DOESNT_EXIST_OR_DIRECTORY, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.FILE_DOESNT_EXIST_OR_DIRECTORY, e);
 		} finally {
 			if (fos != null) {
 				try {

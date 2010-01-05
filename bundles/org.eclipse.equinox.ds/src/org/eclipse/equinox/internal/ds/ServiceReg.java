@@ -17,6 +17,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.log.LogService;
 
 /**
  * @author Stoyan Boshev
@@ -64,7 +65,7 @@ final class ServiceReg implements ServiceFactory {
 			return instance.getInstance();
 		} catch (Exception e) {
 			if (!(e instanceof ComponentException)) {
-				Activator.log.error(NLS.bind(Messages.CANNOT_CREATE_INSTANCE, scp.name), e);
+				Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_CREATE_INSTANCE, scp.name), e);
 				return null;
 			}
 			throw (ComponentException) e;
@@ -101,7 +102,7 @@ final class ServiceReg implements ServiceFactory {
 			}
 		} else {
 			if (useCount < 0) {
-				Activator.log.warning("ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), new Exception("Debug callstack")); //$NON-NLS-1$ //$NON-NLS-2$
+				Activator.log(null, LogService.LOG_WARNING, "ServiceReg.ungetService(): " + NLS.bind(Messages.SERVICE_USAGE_COUNT, scp.name, Integer.toString(useCount)), new Exception("Debug callstack")); //$NON-NLS-1$ //$NON-NLS-2$
 			} else if (Activator.DEBUG) {
 				Activator.log.debug("ServiceReg.ungetService(): service '" + scp.name + "' is used " + Integer.toString(useCount) + " time(s)", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}

@@ -154,7 +154,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 
@@ -316,7 +316,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				}
 			}
 		} catch (Throwable e) {
-			Activator.log.error(NLS.bind(Messages.ERROR_PROCESSING_CONFIGURATION, event.getReference().getBundle()), e);
+			Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_CONFIGURATION, event.getReference().getBundle()), e);
 		} finally {
 			if (Activator.PERF) {
 				start = System.currentTimeMillis() - start;
@@ -647,7 +647,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							components.wait(1000);
 						} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
 						if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
-							Activator.log.warning(NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
+							Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
 						}
 					} catch (InterruptedException e) {
 						//do nothing
@@ -727,7 +727,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		} catch (IllegalArgumentException iae) {
 			throw iae;
 		} catch (Throwable e) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 

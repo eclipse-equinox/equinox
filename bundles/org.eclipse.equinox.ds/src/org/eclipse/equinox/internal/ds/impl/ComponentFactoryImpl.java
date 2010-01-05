@@ -16,6 +16,7 @@ import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.eclipse.equinox.internal.util.ref.Log;
 import org.osgi.service.component.*;
+import org.osgi.service.log.LogService;
 
 /**
  * ComponentFactoryImpl.java
@@ -84,7 +85,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			if (e instanceof ComponentException) {
 				throw (ComponentException) e;
 			}
-			Activator.log.error("ComponentFactoryImpl.newInstance(): failed for " + sci.name + " with properties " + additionalProps, e); //$NON-NLS-1$ //$NON-NLS-2$
+			Activator.log(null, LogService.LOG_ERROR, "ComponentFactoryImpl.newInstance(): failed for " + sci.name + " with properties " + additionalProps, e); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new ComponentException(Messages.COULD_NOT_CREATE_NEW_INSTANCE, e);
 		}
 		return instance;

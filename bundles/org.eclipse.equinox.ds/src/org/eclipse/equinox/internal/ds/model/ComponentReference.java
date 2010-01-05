@@ -558,7 +558,7 @@ public class ComponentReference implements Externalizable {
 			if (flag)
 				out.writeUTF(unbind);
 		} catch (Exception e) {
-			Activator.log.error(Messages.ERROR_WRITING_OBJECT, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_WRITING_OBJECT, e);
 		}
 	}
 
@@ -592,7 +592,7 @@ public class ComponentReference implements Externalizable {
 			if (flag)
 				unbind = in.readUTF();
 		} catch (Exception e) {
-			Activator.log.error(Messages.ERROR_READING_OBJECT, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_READING_OBJECT, e);
 		}
 	}
 

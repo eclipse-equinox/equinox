@@ -152,7 +152,7 @@ public final class Resolver implements WorkPerformer {
 						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						configs = Activator.listConfigurations(filter);
 					} catch (Exception e) {
-						Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
+						Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 					}
 					// if no Configuration
 					if (configs == null || configs.length == 0) {
@@ -178,7 +178,7 @@ public final class Resolver implements WorkPerformer {
 							try {
 								configs = Activator.listConfigurations("(service.factoryPid=" + config.getFactoryPid() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							} catch (Exception e) {
-								Activator.log.error(NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
+								Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
 							}
 							// for each MSF set of properties(P), map(CD, new
 							// CD+P(CD,P))
@@ -501,7 +501,7 @@ public final class Resolver implements WorkPerformer {
 						}
 					}
 					if (!hasPermission) {
-						Activator.log.warning(NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
+						Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
 						scpEnabled.removeElementAt(k);
 						enabledSCPs.removeElementAt(k);
 						continue;
@@ -517,7 +517,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return enabledSCPs;
 		} catch (Throwable e) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 			return new Vector();
 		}
 	}
@@ -552,7 +552,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return result;
 		} catch (Throwable e) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 			return null;
 		}
 	}
@@ -666,7 +666,7 @@ public final class Resolver implements WorkPerformer {
 					break;
 			}
 		} catch (Throwable e) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, e);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 		}
 	}
 
@@ -701,7 +701,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return toBind;
 		} catch (Throwable t) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -740,7 +740,7 @@ public final class Resolver implements WorkPerformer {
 				}
 			return toUnbind;
 		} catch (Throwable t) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
@@ -806,7 +806,7 @@ public final class Resolver implements WorkPerformer {
 			}
 			return unbindTable;
 		} catch (Throwable t) {
-			Activator.log.error(Messages.UNEXPECTED_EXCEPTION, t);
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
 			return null;
 		}
 	}
