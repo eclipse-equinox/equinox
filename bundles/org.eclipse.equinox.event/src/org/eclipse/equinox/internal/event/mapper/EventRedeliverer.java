@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,22 +18,20 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Main class for redeliver special events like FrameworkEvents via EventAdmin.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener, ServiceListener {
-	private ServiceTracker eventAdminTracker;
+	private final ServiceTracker eventAdminTracker;
 	private final static boolean DEBUG = false;
 	private BundleContext bc;
 
 	public EventRedeliverer(BundleContext bc) {
 		this.bc = bc;
+		this.eventAdminTracker = new ServiceTracker(bc, EventAdmin.class.getName(), null);
 	}
 
 	public void close() {
-		if (eventAdminTracker != null) {
-			eventAdminTracker.close();
-			eventAdminTracker = null;
-		}
+		eventAdminTracker.close();
 		bc.removeFrameworkListener(this);
 		bc.removeBundleListener(this);
 		bc.removeServiceListener(this);
@@ -45,7 +43,6 @@ public class EventRedeliverer implements FrameworkListener, BundleListener, Serv
 	 */
 	public void open() {
 		// open ServiceTracker for EventAdmin
-		eventAdminTracker = new ServiceTracker(bc, EventAdmin.class.getName(), null);
 		eventAdminTracker.open();
 
 		// add legacy event listener for framework level event
@@ -55,8 +52,6 @@ public class EventRedeliverer implements FrameworkListener, BundleListener, Serv
 	}
 
 	private EventAdmin getEventAdmin() {
-		if (eventAdminTracker == null)
-			return null;
 		return (EventAdmin) eventAdminTracker.getService();
 	}
 
