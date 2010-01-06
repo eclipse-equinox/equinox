@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005-2007 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,11 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import org.osgi.service.http.HttpContext;
 
-public class ResourceRegistration extends Registration {
+public class ResourceServlet extends HttpServlet {
+	private static final long serialVersionUID = 3586876493076122102L;
 	private static final String LAST_MODIFIED = "Last-Modified"; //$NON-NLS-1$
 	private static final String IF_MODIFIED_SINCE = "If-Modified-Since"; //$NON-NLS-1$
 	private static final String IF_NONE_MATCH = "If-None-Match"; //$NON-NLS-1$
@@ -28,43 +27,37 @@ public class ResourceRegistration extends Registration {
 
 	private String internalName;
 	HttpContext httpContext;
-	ServletContext servletContext;
 	private AccessControlContext acc;
 
-	public ResourceRegistration(String internalName, HttpContext context, ServletContext servletContext, AccessControlContext acc) {
+	public ResourceServlet(String internalName, HttpContext context, AccessControlContext acc) {
 		this.internalName = internalName;
 		if (internalName.equals("/")) { //$NON-NLS-1$
 			this.internalName = ""; //$NON-NLS-1$
 		}
 		this.httpContext = context;
-		this.servletContext = servletContext;
 		this.acc = acc;
 	}
 
-	public boolean handleRequest(HttpServletRequest req, final HttpServletResponse resp, String alias) throws IOException {
-		if (httpContext.handleSecurity(req, resp)) {
-
-			String method = req.getMethod();
-			if (method.equals("GET") || method.equals("POST") || method.equals("HEAD")) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-
-				String pathInfo = HttpServletRequestAdaptor.getDispatchPathInfo(req);
-				int aliasLength = alias.equals("/") ? 0 : alias.length(); //$NON-NLS-1$
-				String resourcePath = internalName + pathInfo.substring(aliasLength);
-				URL resourceURL = httpContext.getResource(resourcePath);
-				if (resourceURL == null)
-					return false;
-
-				return writeResource(req, resp, resourcePath, resourceURL);
-			}
+	public void service(HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+		String method = req.getMethod();
+		if (method.equals("GET") || method.equals("POST") || method.equals("HEAD")) { //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			String pathInfo = HttpServletRequestAdaptor.getDispatchPathInfo(req);
+			if (pathInfo == null)
+				pathInfo = ""; //$NON-NLS-1$
+			String resourcePath = internalName + pathInfo;
+			URL resourceURL = httpContext.getResource(resourcePath);
+			if (resourceURL != null)
+				writeResource(req, resp, resourcePath, resourceURL);
+			else
+				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "ProxyServlet: " + req.getRequestURI()); //$NON-NLS-1$
+		} else {
 			resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
-		return true;
 	}
 
-	private boolean writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath, final URL resourceURL) throws IOException {
-		Boolean result = Boolean.TRUE;
+	private void writeResource(final HttpServletRequest req, final HttpServletResponse resp, final String resourcePath, final URL resourceURL) throws IOException {
 		try {
-			result = (Boolean) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			AccessController.doPrivileged(new PrivilegedExceptionAction() {
 
 				public Object run() throws Exception {
 					URLConnection connection = resourceURL.openConnection();
@@ -97,7 +90,7 @@ public class ResourceRegistration extends Registration {
 
 					String contentType = httpContext.getMimeType(resourcePath);
 					if (contentType == null)
-						contentType = servletContext.getMimeType(resourcePath);
+						contentType = getServletConfig().getServletContext().getMimeType(resourcePath);
 
 					if (contentType != null)
 						resp.setContentType(contentType);
@@ -150,7 +143,6 @@ public class ResourceRegistration extends Registration {
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}
-		return result.booleanValue();
 	}
 
 	void sendError(final HttpServletResponse resp, int sc) throws IOException {

@@ -14,6 +14,7 @@ package org.eclipse.equinox.http.servlet.internal;
 
 import java.util.*;
 import javax.servlet.ServletConfig;
+import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.osgi.framework.*;
 import org.osgi.service.http.HttpService;
 
@@ -21,16 +22,17 @@ public class Activator implements BundleActivator {
 
 	private static final String DEFAULT_SERVICE_DESCRIPTION = "Equinox Servlet Bridge"; //$NON-NLS-1$
 	private static final String DEFAULT_SERVICE_VENDOR = "Eclipse.org"; //$NON-NLS-1$
+	private static final String[] HTTP_SERVICES_CLASSES = new String[] {HttpService.class.getName(), ExtendedHttpService.class.getName()};
 
 	private static BundleContext context;
 	private static Map serviceRegistrations = new HashMap();
 
-	public void start(BundleContext context) throws Exception {
-		startHttpServiceProxy(context);
+	public void start(BundleContext bundleContext) throws Exception {
+		startHttpServiceProxy(bundleContext);
 	}
 
-	public void stop(BundleContext context) throws Exception {
-		stopHttpServiceProxy(context);
+	public void stop(BundleContext bundleContext) throws Exception {
+		stopHttpServiceProxy(bundleContext);
 	}
 
 	private static synchronized void startHttpServiceProxy(BundleContext bundleContext) {
@@ -75,7 +77,7 @@ public class Activator implements BundleActivator {
 		if (serviceProperties.get(Constants.SERVICE_DESCRIPTION) == null)
 			serviceProperties.put(Constants.SERVICE_DESCRIPTION, DEFAULT_SERVICE_DESCRIPTION);
 
-		return context.registerService(HttpService.class.getName(), factory, serviceProperties);
+		return context.registerService(HTTP_SERVICES_CLASSES, factory, serviceProperties);
 	}
 
 	static synchronized void removeProxyServlet(ProxyServlet proxyServlet) {

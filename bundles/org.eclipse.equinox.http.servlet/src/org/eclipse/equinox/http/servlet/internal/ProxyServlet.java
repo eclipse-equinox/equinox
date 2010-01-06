@@ -16,7 +16,6 @@ import java.security.AccessController;
 import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
-import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
@@ -29,8 +28,10 @@ import org.osgi.service.http.NamespaceException;
 public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 4117456123807468871L;
-	private Map registrations = new HashMap(); //alias --> registration
-	private Set servlets = new HashSet(); //All the servlets objects that have been registered 
+	private Map servletRegistrations = new HashMap(); //alias --> servlet registration
+	private Set registeredServlets = new HashSet(); //All the servlets objects that have been registered 
+
+	private Map filterRegistrations = new HashMap(); //filter --> filter registration;
 	private ProxyContext proxyContext;
 
 	public void init(ServletConfig config) throws ServletException {
@@ -89,65 +90,108 @@ public class ProxyServlet extends HttpServlet {
 	}
 
 	private boolean processAlias(HttpServletRequest req, HttpServletResponse resp, String alias, String extensionAlias) throws ServletException, IOException {
-		Registration registration = null;
+		ServletRegistration registration = null;
+		List matchingFilterRegistrations = Collections.EMPTY_LIST;
+		String dispatchPathInfo = HttpServletRequestAdaptor.getDispatchPathInfo(req);
 		synchronized (this) {
 			if (extensionAlias == null)
-				registration = (Registration) registrations.get(alias);
+				registration = (ServletRegistration) servletRegistrations.get(alias);
 			else {
-				registration = (Registration) registrations.get(alias + extensionAlias);
+				registration = (ServletRegistration) servletRegistrations.get(alias + extensionAlias);
 				if (registration != null) {
-					// for ServletRegistrations extensions should be handled on the full alias
-					if (registration instanceof ServletRegistration)
+					// for regular ServletRegistrations extensions should be handled on the full alias
+					if (!(registration.getServlet() instanceof ResourceServlet))
 						alias = HttpServletRequestAdaptor.getDispatchPathInfo(req);
 				} else
-					registration = (Registration) registrations.get(alias);
+					registration = (ServletRegistration) servletRegistrations.get(alias);
 			}
-
-			if (registration != null)
+			if (registration != null) {
 				registration.addReference();
+				if (!filterRegistrations.isEmpty()) {
+					matchingFilterRegistrations = new ArrayList();
+					for (Iterator it = filterRegistrations.values().iterator(); it.hasNext();) {
+						FilterRegistration filterRegistration = (FilterRegistration) it.next();
+						if (filterRegistration.matches(dispatchPathInfo)) {
+							matchingFilterRegistrations.add(filterRegistration);
+							filterRegistration.addReference();
+						}
+					}
+				}
+			}
 		}
 		if (registration != null) {
 			try {
-				if (registration.handleRequest(req, resp, alias))
-					return true;
+				HttpServletRequest wrappedRequest = new HttpServletRequestAdaptor(req, alias, registration.getServlet());
+				if (matchingFilterRegistrations.isEmpty()) {
+					registration.service(wrappedRequest, resp);
+				} else {
+					FilterChain chain = new FilterChainImpl(matchingFilterRegistrations, registration);
+					chain.doFilter(wrappedRequest, resp);
+				}
 			} finally {
 				registration.removeReference();
+				for (Iterator it = matchingFilterRegistrations.iterator(); it.hasNext();) {
+					FilterRegistration filterRegistration = (FilterRegistration) it.next();
+					filterRegistration.removeReference();
+				}
 			}
+			return true;
 		}
 		return false;
 	}
 
 	//Effective unregistration of servlet and resources as defined in HttpService#unregister()
 	synchronized void unregister(String alias, boolean destroy) {
-		Registration removedRegistration = (Registration) registrations.remove(alias);
+		ServletRegistration removedRegistration = (ServletRegistration) servletRegistrations.remove(alias);
 		if (removedRegistration != null) {
-			if (destroy)
-				removedRegistration.destroy();
-			removedRegistration.close();
+			registeredServlets.remove(removedRegistration.getServlet());
+			try {
+				if (destroy)
+					removedRegistration.destroy();
+			} finally {
+				proxyContext.destroyContextAttributes(removedRegistration.getHttpContext());
+			}
 		}
 	}
 
 	//Effective registration of the servlet as defined HttpService#registerServlet()  
-	synchronized void registerServlet(String alias, Servlet servlet, Dictionary initparams, HttpContext context, Bundle bundle) throws ServletException, NamespaceException {
+	synchronized void registerServlet(String alias, Servlet servlet, Dictionary initparams, HttpContext httpContext) throws ServletException, NamespaceException {
 		checkAlias(alias);
+		if (servletRegistrations.containsKey(alias))
+			throw new NamespaceException("The alias '" + alias + "' is already in use."); //$NON-NLS-1$//$NON-NLS-2$
+
 		if (servlet == null)
 			throw new IllegalArgumentException("Servlet cannot be null"); //$NON-NLS-1$
 
-		ServletRegistration registration = new ServletRegistration(servlet, proxyContext, context, bundle, servlets);
-		registration.checkServletRegistration();
+		if (registeredServlets.contains(servlet))
+			throw new ServletException("This servlet has already been registered."); //$NON-NLS-1$
 
-		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), context, AccessController.getContext());
+		ServletRegistration registration = new ServletRegistration(servlet, httpContext);
+		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
 		ServletConfig servletConfig = new ServletConfigImpl(servlet, initparams, wrappedServletContext);
 
-		registration.init(servletConfig);
-		registrations.put(alias, registration);
+		boolean initialized = false;
+		proxyContext.createContextAttributes(httpContext);
+		try {
+			registration.init(servletConfig);
+			initialized = true;
+		} finally {
+			if (!initialized)
+				proxyContext.destroyContextAttributes(httpContext);
+		}
+		registeredServlets.add(servlet);
+		servletRegistrations.put(alias, registration);
 	}
 
 	//Effective registration of the resources as defined HttpService#registerResources()  
-	synchronized void registerResources(String alias, String name, HttpContext context) throws NamespaceException {
-		checkAlias(alias);
+	synchronized void registerResources(String alias, String name, HttpContext httpContext) throws NamespaceException {
 		checkName(name);
-		registrations.put(alias, new ResourceRegistration(name, context, getServletContext(), AccessController.getContext()));
+		Servlet resourceServlet = new ResourceServlet(name, httpContext, AccessController.getContext());
+		try {
+			registerServlet(alias, resourceServlet, null, httpContext);
+		} catch (ServletException e) {
+			throw new IllegalStateException("Unexpected ServletException throw when registering resources at alias " + alias + ".", e); //$NON-NLS-1$//$NON-NLS-2$
+		}
 	}
 
 	private void checkName(String name) {
@@ -158,14 +202,47 @@ public class ProxyServlet extends HttpServlet {
 			throw new IllegalArgumentException("Invalid Name '" + name + "'"); //$NON-NLS-1$//$NON-NLS-2$		
 	}
 
-	private void checkAlias(String alias) throws NamespaceException {
+	private void checkAlias(String alias) {
 		if (alias == null)
 			throw new IllegalArgumentException("Alias cannot be null"); //$NON-NLS-1$
 
 		if (!alias.startsWith("/") || (alias.endsWith("/") && !alias.equals("/"))) //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			throw new IllegalArgumentException("Invalid alias '" + alias + "'"); //$NON-NLS-1$//$NON-NLS-2$
+	}
 
-		if (registrations.containsKey(alias))
-			throw new NamespaceException("The alias '" + alias + "' is already in use."); //$NON-NLS-1$//$NON-NLS-2$
+	public synchronized void unregisterFilter(Filter filter, boolean destroy) {
+		FilterRegistration removedRegistration = (FilterRegistration) filterRegistrations.remove(filter);
+		if (removedRegistration != null) {
+			try {
+				if (destroy)
+					removedRegistration.destroy();
+			} finally {
+				proxyContext.destroyContextAttributes(removedRegistration.getHttpContext());
+			}
+		}
+	}
+
+	public synchronized void registerFilter(String alias, Filter filter, Dictionary initparams, HttpContext httpContext) throws ServletException {
+		checkAlias(alias);
+		if (filter == null)
+			throw new IllegalArgumentException("Filter cannot be null"); //$NON-NLS-1$
+
+		if (filterRegistrations.containsKey(filter))
+			throw new ServletException("This filter has already been registered."); //$NON-NLS-1$
+
+		FilterRegistration registration = new FilterRegistration(filter, httpContext, alias);
+		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
+		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, wrappedServletContext);
+
+		boolean initialized = false;
+		proxyContext.createContextAttributes(httpContext);
+		try {
+			registration.init(filterConfig);
+			initialized = true;
+		} finally {
+			if (!initialized)
+				proxyContext.destroyContextAttributes(httpContext);
+		}
+		filterRegistrations.put(filter, registration);
 	}
 }

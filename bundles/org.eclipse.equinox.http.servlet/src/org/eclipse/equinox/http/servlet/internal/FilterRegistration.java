@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2005-2007 Cognos Incorporated, IBM Corporation and others
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
- * Contributors:
- *     Cognos Incorporated - initial API and implementation
- *     IBM Corporation - bug fixes and enhancements
- *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
@@ -18,15 +7,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.service.http.HttpContext;
 
 //This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
-public class ServletRegistration extends Registration {
+public class FilterRegistration extends Registration {
 
-	private Servlet servlet; //The actual servlet object registered against the http service. All requests will eventually be delegated to it.
-	private HttpContext httpContext; //The context used during the registration of the servlet
+	private Filter filter; //The actual filter object registered against the http service. All filter requests will eventually be delegated to it.
+	private HttpContext httpContext; //The context used during the registration of the filter
 	private ClassLoader registeredContextClassLoader;
+	private String alias;
 
-	public ServletRegistration(Servlet servlet, HttpContext context) {
-		this.servlet = servlet;
+	public FilterRegistration(Filter filter, HttpContext context, String alias) {
+		this.filter = filter;
 		this.httpContext = context;
+		this.alias = alias;
 		registeredContextClassLoader = Thread.currentThread().getContextClassLoader();
 	}
 
@@ -35,40 +26,44 @@ public class ServletRegistration extends Registration {
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
 			super.destroy();
-			servlet.destroy();
+			filter.destroy();
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
 
 	//Delegate the init call to the actual servlet
-	public void init(ServletConfig servletConfig) throws ServletException {
+	public void init(FilterConfig filterConfig) throws ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			servlet.init(servletConfig);
+			filter.init(filterConfig);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
 
 	//Delegate the handling of the request to the actual servlet
-	public void service(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+	public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(registeredContextClassLoader);
-			if (httpContext.handleSecurity(req, resp))
-				servlet.service(req, resp);
+			if (httpContext.handleSecurity(request, response))
+				filter.doFilter(request, response, chain);
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
 		}
 	}
 
-	public Servlet getServlet() {
-		return servlet;
+	public Filter getFilter() {
+		return filter;
 	}
 
 	public HttpContext getHttpContext() {
 		return httpContext;
+	}
+
+	public boolean matches(String dispatchPathInfo) {
+		return dispatchPathInfo.startsWith(alias);
 	}
 }

@@ -13,18 +13,19 @@
 package org.eclipse.equinox.http.servlet.internal;
 
 import java.util.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import javax.servlet.*;
+import org.eclipse.equinox.http.servlet.ExtendedHttpService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.http.*;
 
-public class HttpServiceImpl implements HttpService {
+public class HttpServiceImpl implements HttpService, ExtendedHttpService {
 
 	private Bundle bundle; //The bundle associated with this instance of http service
 
 	private ProxyServlet proxy; //The proxy that does the dispatching of the incoming requests
 
 	private Set aliases = new HashSet(); //Aliases registered against this particular instance of the service
+	private Set filters = new HashSet(); //Filters registered against this particular instance of the service
 
 	private boolean shutdown = false; // We prevent use of this instance if HttpServiceFactory.ungetService has called unregisterAliases.
 
@@ -34,18 +35,24 @@ public class HttpServiceImpl implements HttpService {
 	}
 
 	//Clean up method
-	synchronized void unregisterAliases() {
+	synchronized void shutdown() {
 		for (Iterator it = aliases.iterator(); it.hasNext();) {
 			String alias = (String) it.next();
 			proxy.unregister(alias, false);
 		}
 		aliases.clear();
+
+		for (Iterator it = filters.iterator(); it.hasNext();) {
+			Filter filter = (Filter) it.next();
+			proxy.unregisterFilter(filter, false);
+		}
+		filters.clear();
 		shutdown = true;
 	}
 
 	private void checkShutdown() {
 		if (shutdown)
-			throw new IllegalStateException("Service instance is already shutdown");
+			throw new IllegalStateException("Service instance is already shutdown"); //$NON-NLS-1$
 	}
 
 	/**
@@ -56,7 +63,7 @@ public class HttpServiceImpl implements HttpService {
 		if (context == null) {
 			context = createDefaultHttpContext();
 		}
-		proxy.registerServlet(alias, servlet, initparams, context, bundle);
+		proxy.registerServlet(alias, servlet, initparams, context);
 		aliases.add(alias);
 	}
 
@@ -80,7 +87,6 @@ public class HttpServiceImpl implements HttpService {
 		if (aliases.remove(alias)) {
 			proxy.unregister(alias, true);
 		} else {
-			// TODO perhaps this is too strong a reaction ?
 			throw new IllegalArgumentException("Alias not found."); //$NON-NLS-1$
 		}
 	}
@@ -88,8 +94,26 @@ public class HttpServiceImpl implements HttpService {
 	/**
 	 * @see HttpService#createDefaultHttpContext()
 	 */
-	public HttpContext createDefaultHttpContext() {
+	public synchronized HttpContext createDefaultHttpContext() {
 		checkShutdown();
 		return new DefaultHttpContext(bundle);
+	}
+
+	public void registerFilter(String alias, Filter filter, Dictionary initparams, HttpContext context) throws ServletException {
+		checkShutdown();
+		if (context == null) {
+			context = createDefaultHttpContext();
+		}
+		proxy.registerFilter(alias, filter, initparams, context);
+		filters.add(filter);
+	}
+
+	public void unregisterFilter(Filter filter) {
+		checkShutdown();
+		if (filters.remove(filter)) {
+			proxy.unregisterFilter(filter, true);
+		} else {
+			throw new IllegalArgumentException("Filter not found."); //$NON-NLS-1$
+		}
 	}
 }

@@ -11,11 +11,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public abstract class Registration {
 
 	protected int referenceCount;
@@ -47,11 +42,4 @@ public abstract class Registration {
 				Thread.currentThread().interrupt(); //restore the interrupted state
 		}
 	}
-
-	public abstract boolean handleRequest(HttpServletRequest req, HttpServletResponse resp, String alias) throws IOException, ServletException;
-
-	public void close() {
-		// do nothing
-	}
-
 }

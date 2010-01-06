@@ -28,7 +28,7 @@ public class HttpServiceFactory implements ServiceFactory {
 	}
 
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-		((HttpServiceImpl) service).unregisterAliases();
+		((HttpServiceImpl) service).shutdown();
 
 	}
 
