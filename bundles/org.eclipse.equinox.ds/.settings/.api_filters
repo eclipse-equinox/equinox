@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component id="org.eclipse.equinox.ds" version="2">
+<resource path="src/org/apache/felix/scr/Component.java" type="org.apache.felix.scr.Component">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.apache.felix.scr.Component"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="src/org/apache/felix/scr/Reference.java" type="org.apache.felix.scr.Reference">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.apache.felix.scr.Reference"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="src/org/apache/felix/scr/ScrService.java" type="org.apache.felix.scr.ScrService">
+<filter id="1110441988">
+<message_arguments>
+<message_argument value="org.apache.felix.scr.ScrService"/>
+</message_arguments>
+</filter>
+</resource>
+</component>
