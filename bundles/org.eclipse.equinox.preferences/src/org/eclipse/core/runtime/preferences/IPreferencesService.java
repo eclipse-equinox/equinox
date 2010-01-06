@@ -461,9 +461,12 @@ public interface IPreferencesService {
 	/**
 	 * Take the given preference tree and apply it to the Eclipse
 	 * global preference hierarchy. If a node is an export root, then 
-	 * remove it from the global tree before adding any preferences
-	 * contained in it or its children. The given preferences object
-	 * must not be <code>null</code>.
+	 * treat the operation for that node as an overwrite rather than a merge. 
+	 * That is, remove the node from the global tree before adding any preferences
+	 * contained in it or its children.    
+	 * <p> 
+	 * The given preferences object must not be <code>null</code>.
+	 * </p>
 	 * <p>
 	 * Before the tree is applied to the global preference tree,
 	 * the registered <code>PreferenceModifyListener</code> objects
