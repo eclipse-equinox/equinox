@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -593,7 +593,7 @@ public class EclipseLog implements FrameworkLog {
 
 		boolean isBackupOK = true;
 		if (outFile != null) {
-			if ((outFile.length() >> 10) > maxLogSize) { // Use KB as file size unit.
+			if ((secureAction.length(outFile) >> 10) > maxLogSize) { // Use KB as file size unit.
 				String logFilename = outFile.getAbsolutePath();
 
 				// Delete old backup file that will be replaced.
