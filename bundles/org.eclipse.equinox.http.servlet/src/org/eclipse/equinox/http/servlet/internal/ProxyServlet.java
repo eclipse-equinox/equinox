@@ -190,7 +190,7 @@ public class ProxyServlet extends HttpServlet {
 		try {
 			registerServlet(alias, resourceServlet, null, httpContext);
 		} catch (ServletException e) {
-			throw new IllegalStateException("Unexpected ServletException throw when registering resources at alias " + alias + ".", e); //$NON-NLS-1$//$NON-NLS-2$
+			throw new IllegalStateException("Unexpected ServletException throw when registering resources at alias " + alias + "."); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 

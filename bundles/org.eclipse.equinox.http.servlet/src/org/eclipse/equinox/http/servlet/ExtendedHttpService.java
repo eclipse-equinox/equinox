@@ -5,6 +5,9 @@ import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import org.osgi.service.http.*;
 
+/**
+ * @since 1.1
+ */
 public interface ExtendedHttpService extends HttpService {
 	/**
 	 * @param alias name in the URI namespace at which the filter is registered
