@@ -2,6 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
      <extension-point id="servlets" name="%servletsName" schema="schema/servlets.exsd"/>
+     <extension-point id="filters" name="%filtersName" schema="schema/filters.exsd"/>
      <extension-point id="resources" name="%resourcesName" schema="schema/resources.exsd"/>
      <extension-point id="httpcontexts" name="%httpcontextsName" schema="schema/httpcontexts.exsd"/>
 </plugin>

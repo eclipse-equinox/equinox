@@ -4,15 +4,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.equinox.http.registry.internal;
 
+import java.lang.reflect.Method;
 import java.util.*;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
+import javax.servlet.*;
+import javax.servlet.Filter;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.osgi.framework.*;
@@ -51,6 +52,22 @@ public class HttpRegistryManager {
 		}
 	}
 
+	class FilterContribution {
+		String alias;
+		javax.servlet.Filter filter;
+		Dictionary initparams;
+		String httpContextId;
+		IContributor contributor;
+
+		public FilterContribution(String alias, javax.servlet.Filter filter, Dictionary initparams, String httpContextId, IContributor contributor) {
+			this.alias = alias;
+			this.filter = filter;
+			this.initparams = initparams;
+			this.httpContextId = httpContextId;
+			this.contributor = contributor;
+		}
+	}
+
 	class HttpContextContribution {
 		HttpContext context;
 		IContributor contributor;
@@ -63,10 +80,12 @@ public class HttpRegistryManager {
 
 	private HttpContextManager httpContextManager;
 	private ServletManager servletManager;
+	private FilterManager filterManager;
 	private ResourceManager resourceManager;
 	private HttpService httpService;
 	private PackageAdmin packageAdmin;
 	private Map contexts = new HashMap();
+	private Map filters = new HashMap();
 	private Map servlets = new HashMap();
 	private Map resources = new HashMap();
 	private Set registered = new HashSet();
@@ -76,12 +95,14 @@ public class HttpRegistryManager {
 		this.packageAdmin = packageAdmin;
 
 		httpContextManager = new HttpContextManager(this, registry);
+		filterManager = new FilterManager(this, reference, registry);
 		servletManager = new ServletManager(this, reference, registry);
 		resourceManager = new ResourceManager(this, reference, registry);
 	}
 
 	public void start() {
 		httpContextManager.start();
+		filterManager.start();
 		servletManager.start();
 		resourceManager.start();
 	}
@@ -89,6 +110,7 @@ public class HttpRegistryManager {
 	public void stop() {
 		resourceManager.stop();
 		servletManager.stop();
+		filterManager.stop();
 		httpContextManager.stop();
 	}
 
@@ -122,6 +144,15 @@ public class HttpRegistryManager {
 		unregister(alias);
 	}
 
+	public synchronized boolean addFilterContribution(String alias, javax.servlet.Filter filter, Dictionary initparams, String httpContextId, IContributor contributor) {
+		FilterContribution contribution = new FilterContribution(alias, filter, initparams, httpContextId, contributor);
+		return registerFilter(contribution);
+	}
+
+	public synchronized void removeFilterContribution(Filter filter) {
+		unregisterFilter(filter);
+	}
+
 	public synchronized HttpContext getHttpContext(String httpContextId, Bundle bundle) {
 		HttpContextContribution contribution = (HttpContextContribution) contexts.get(httpContextId);
 		if (contribution == null)
@@ -141,6 +172,12 @@ public class HttpRegistryManager {
 			return false; // TODO: should log this
 
 		contexts.put(httpContextId, new HttpContextContribution(context, contributor));
+		for (Iterator it = filters.values().iterator(); it.hasNext();) {
+			FilterContribution contribution = (FilterContribution) it.next();
+			if (httpContextId.equals(contribution.httpContextId))
+				registerFilter(contribution);
+		}
+
 		for (Iterator it = resources.values().iterator(); it.hasNext();) {
 			ResourcesContribution contribution = (ResourcesContribution) it.next();
 			if (httpContextId.equals(contribution.httpContextId))
@@ -242,6 +279,37 @@ public class HttpRegistryManager {
 				// TODO: should log this
 				t.printStackTrace();
 			}
+		}
+	}
+
+	private boolean registerFilter(FilterContribution contribution) {
+		HttpContext context = getHttpContext(contribution.httpContextId, contribution.contributor);
+		if (context == null)
+			return false;
+		try {
+			Method registerFilterMethod = httpService.getClass().getMethod("registerFilter", new Class[] {String.class, Filter.class, Dictionary.class, HttpContext.class}); //$NON-NLS-1$
+			registerFilterMethod.invoke(httpService, new Object[] {contribution.alias, contribution.filter, contribution.initparams, context});
+			return true;
+		} catch (NoSuchMethodException t) {
+			// TODO: should log this
+			// for now ignore
+		} catch (Throwable t) {
+			// TODO: should log this
+			t.printStackTrace();
+		}
+		return false;
+	}
+
+	private void unregisterFilter(Filter filter) {
+		try {
+			Method unregisterFilterMethod = httpService.getClass().getMethod("unregisterFilter", new Class[] {Filter.class}); //$NON-NLS-1$
+			unregisterFilterMethod.invoke(httpService, new Object[] {filter});
+		} catch (NoSuchMethodException t) {
+			// TODO: should log this
+			// for now ignore
+		} catch (Throwable t) {
+			// TODO: should log this
+			t.printStackTrace();
 		}
 	}
 
