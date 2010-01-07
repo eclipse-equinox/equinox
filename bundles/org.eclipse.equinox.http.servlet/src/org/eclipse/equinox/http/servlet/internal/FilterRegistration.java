@@ -6,19 +6,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.osgi.service.http.HttpContext;
 
-//This class wraps the servlet object registered in the HttpService.registerServlet call, to manage the context classloader when handleRequests are being asked.
+//This class wraps the filter object registered in the HttpService.registerFilter call, to manage the context classloader when handleRequests are being asked.
 public class FilterRegistration extends Registration {
 
 	private Filter filter; //The actual filter object registered against the http service. All filter requests will eventually be delegated to it.
 	private HttpContext httpContext; //The context used during the registration of the filter
 	private ClassLoader registeredContextClassLoader;
-	private String alias;
+	private String prefix;
+	private String suffix;
 
 	public FilterRegistration(Filter filter, HttpContext context, String alias) {
 		this.filter = filter;
 		this.httpContext = context;
-		this.alias = alias;
 		registeredContextClassLoader = Thread.currentThread().getContextClassLoader();
+
+		int lastSlash = alias.lastIndexOf('/');
+		String lastSegment = alias.substring(alias.lastIndexOf('/') + 1);
+		if (lastSegment.startsWith("*.")) { //$NON-NLS-1$
+			prefix = alias.substring(0, lastSlash);
+			suffix = lastSegment.substring(1);
+		} else {
+			prefix = alias.equals("/") ? "" : alias; //$NON-NLS-1$//$NON-NLS-2$
+		}
 	}
 
 	public void destroy() {
@@ -32,7 +41,7 @@ public class FilterRegistration extends Registration {
 		}
 	}
 
-	//Delegate the init call to the actual servlet
+	//Delegate the init call to the actual filter
 	public void init(FilterConfig filterConfig) throws ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
@@ -43,7 +52,7 @@ public class FilterRegistration extends Registration {
 		}
 	}
 
-	//Delegate the handling of the request to the actual servlet
+	//Delegate the handling of the request to the actual filter
 	public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
@@ -64,6 +73,21 @@ public class FilterRegistration extends Registration {
 	}
 
 	public boolean matches(String dispatchPathInfo) {
-		return dispatchPathInfo.startsWith(alias);
+		if (!dispatchPathInfo.startsWith(prefix))
+			return false;
+
+		// perfect match
+		if (prefix.length() == dispatchPathInfo.length())
+			return suffix == null;
+
+		// check the next character is a path separator
+		if (dispatchPathInfo.charAt(prefix.length()) != '/')
+			return false;
+
+		// check for an extension match
+		if (suffix == null)
+			return true;
+
+		return dispatchPathInfo.endsWith(suffix) && dispatchPathInfo.length() > prefix.length() + suffix.length();
 	}
 }

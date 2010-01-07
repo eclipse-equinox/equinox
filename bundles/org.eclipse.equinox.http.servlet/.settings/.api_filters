@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.equinox.http.servlet" version="2">
+    <resource path="src/org/eclipse/equinox/http/servlet/HttpServiceServlet.java" type="org.eclipse.equinox.http.servlet.HttpServiceServlet">
+        <filter id="576720909">
+            <message_arguments>
+                <message_argument value="ProxyServlet"/>
+                <message_argument value="HttpServiceServlet"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
