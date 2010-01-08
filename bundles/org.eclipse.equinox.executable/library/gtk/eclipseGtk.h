@@ -13,6 +13,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <gdk/gdkx.h>
 
 struct GTK_PTRS { 
 	short not_initialized;
@@ -43,6 +44,8 @@ struct GTK_PTRS {
 	gboolean	(*g_main_context_iteration)	(GMainContext*, gboolean);
 	void		(*g_object_unref)			(gpointer);
 	GObject*	(*g_object_new)				(GType, const gchar*, ...);
+	guint       (*g_timeout_add)			(guint, GSourceFunc, gpointer);
+
 #ifdef SOLARIS
 	GString* 	(*g_string_insert_c) 		(GString *, gssize, gchar);
 #endif	
@@ -51,8 +54,21 @@ struct GTK_PTRS {
 	int			(*gdk_pixbuf_get_width)		(const GdkPixbuf*);
 	int			(*gdk_pixbuf_get_height)	(const GdkPixbuf*);
 	void		(*gdk_set_program_class)	(const char*);
+	GdkWindow*  (*gdk_window_foreign_new)   (GdkNativeWindow);
+	void        (*gdk_property_change)		(GdkWindow*, GdkAtom, GdkAtom, gint, GdkPropMode, const guchar*, gint);
+	GdkAtom     (*gdk_atom_intern)			(const gchar*, gboolean);
+	
+	Window 		(*XGetSelectionOwner)		(Display*, Atom);
+	void		(*XSetSelectionOwner)		(Display*, Atom, Window, Time);
+	Window 		(*XCreateWindow)			(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*);
+	void		(*XSync)					(Display*, Bool);
+	int			(*XDefaultScreen)			(Display*);
+	Window		(*XRootWindow)				(Display*, int);
+	Atom 			(*XInternAtom)					(Display*, _Xconst char*, Bool	);
+	Display          **gdk_display;
 };
 
+#define gtk_GDK_DISPLAY *(gtk.gdk_display)
 extern struct GTK_PTRS gtk;
 
 #define FN_TABLE_ENTRY(fn) { (void**)& gtk.fn, #fn } 

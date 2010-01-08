@@ -14,6 +14,7 @@
 #include "eclipseUtil.h"
 #include "eclipseCommon.h"
 #include "eclipseJNI.h"
+#include "eclipseShm.h"
 
 #include <windows.h>
 #include <commctrl.h>
@@ -35,6 +36,14 @@ _TCHAR*  consoleVM     = _T("java.exe");
 _TCHAR*  vmLibrary 	   = _T("jvm.dll");
 _TCHAR*  shippedVMDir  = _T("jre\\bin\\");
 
+/* Define local variables for communicating with running eclipse instance. */
+static HANDLE	mutex;
+static UINT		findWindowTimeout = 1000;
+static UINT_PTR findWindowTimerId = 97;
+static UINT		timerCount = 0;
+static UINT		openFileTimeout = 60;
+static _TCHAR*	openFilePath;
+
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
 
@@ -44,6 +53,7 @@ static JavaResults* jvmResults = NULL;
 static UINT    jvmExitTimeout = 100;
 static UINT_PTR jvmExitTimerId = 99;
 
+static void CALLBACK findWindowProc(HWND hwnd, UINT message, UINT idTimer, DWORD dwTime);
 static void CALLBACK  detectJvmExit( HWND hwnd, UINT uMsg, UINT id, DWORD dwTime );
 static _TCHAR* checkVMRegistryKey(HKEY jrekey, _TCHAR* subKeyName);
 static void adjustSearchPath( _TCHAR * vmLibrary );
@@ -68,6 +78,99 @@ typedef struct {
 
 #define COMPANY_NAME_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\CompanyName")
 #define SUN_MICROSYSTEMS _T_ECLIPSE("Sun Microsystems")
+
+static void sendOpenFileMessage(HWND window) {
+	_TCHAR* id;
+	UINT msg;
+	int size = (_tcslen(openFilePath) + 1) * sizeof(_TCHAR);
+	DWORD wParam;
+#ifdef WIN64
+	DWORDLONG lParam;
+#else
+	DWORD lParam;
+#endif
+	createSharedData(&id, size);
+	setSharedData(id, openFilePath);
+	msg = RegisterWindowMessage(_T("SWT_FILEOPEN"));
+	_stscanf(id, _T_ECLIPSE("%lx_%lx"), &wParam, &lParam);
+	
+	/* SendMessage does not return until the message has been processed */
+	SendMessage(window, msg, wParam, lParam);
+	destroySharedData(id);
+}
+
+static HWND findSWTMessageWindow() {
+	HWND window = NULL;
+	_TCHAR *windowTitle, *windowPrefix, *name;
+
+	windowPrefix = _T("SWT_Window_");
+	name = getOfficialName();
+	windowTitle = malloc((_tcslen(windowPrefix) + _tcslen(name) + 1) * sizeof(_TCHAR));
+	_stprintf(windowTitle, _T_ECLIPSE("%s%s"), windowPrefix, name);
+	window = FindWindow(NULL, windowTitle);
+	free(windowTitle);
+	return window;
+}
+
+static void CALLBACK findWindowProc(HWND hwnd, UINT message, UINT idTimer, DWORD dwTime) {
+	HWND window = findSWTMessageWindow();
+	if (window != NULL) {
+		sendOpenFileMessage(window);
+		ReleaseMutex(mutex);
+		CloseHandle(mutex);
+		KillTimer(hwnd, findWindowTimerId);
+		return;
+	}
+	
+	/* no window yet, set timer to try again later */
+	if (timerCount++ >= openFileTimeout) {
+		KillTimer(hwnd, findWindowTimerId);
+		ReleaseMutex(mutex);
+		CloseHandle(mutex);
+	}
+}
+
+/* return > 0 if we successfully send a message to another eclipse instance */
+int reuseWorkbench(_TCHAR* filePath, int timeout) {
+	_TCHAR*   mutexPrefix = _T("SWT_Mutex_");
+	_TCHAR*   mutexName, *name;
+	DWORD 	  lock;
+	HWND 	  window = NULL;
+
+	/* store for later */
+	openFilePath = filePath;
+	openFileTimeout = timeout;
+	
+	name = getOfficialName();
+	mutexName = malloc((_tcslen(mutexPrefix) + _tcslen(name)  + 1) * sizeof(_TCHAR));
+	_stprintf(mutexName, _T_ECLIPSE("%s%s"), mutexPrefix, name);
+	mutex = CreateMutex(NULL, FALSE, mutexName);
+	free(mutexName);
+	if (mutex == NULL) return -1;
+	
+	//wait for timeout seconds
+	lock = WaitForSingleObject(mutex, timeout * 1000);
+	if (lock != WAIT_OBJECT_0) {
+		/* failed to get the lock before timeout, We won't be reusing an existing eclipse. */
+		CloseHandle(mutex);
+		return 0;
+	}
+	
+	/* we have the mutex, look for the SWT window */
+	window = findSWTMessageWindow();
+	if (window != NULL) {
+		sendOpenFileMessage(window);
+		ReleaseMutex(mutex);
+		CloseHandle(mutex);
+		return 1; /* success! */
+	} 
+	
+	/* no window, set a timer to look again later */
+	if (initWindowSystem(0, NULL, 0) == 0)
+		SetTimer( topWindow, findWindowTimerId, findWindowTimeout, findWindowProc );
+	
+	return 0;
+}
 
 /* Show the Splash Window
  *

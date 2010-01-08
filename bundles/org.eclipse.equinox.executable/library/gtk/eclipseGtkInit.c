@@ -44,6 +44,10 @@ static FN_TABLE gtkFunctions[] = { 	FN_TABLE_ENTRY(gtk_adjustment_new),
 								 };
 /* functions from libgdk-x11-2.0 */
 static FN_TABLE gdkFunctions[] = {	FN_TABLE_ENTRY(gdk_set_program_class), 
+									FN_TABLE_ENTRY(gdk_property_change),
+									FN_TABLE_ENTRY(gdk_atom_intern),
+									FN_TABLE_ENTRY(gdk_window_foreign_new),
+									FN_TABLE_ENTRY(gdk_display), /* not a function */
 									{ NULL, NULL } 
 						  		 };
 /* functions from libgdk_pixbuf-2.0 */
@@ -57,11 +61,23 @@ static FN_TABLE gobjFunctions[] = {	FN_TABLE_ENTRY(g_log_set_handler),
 									FN_TABLE_ENTRY(g_log_remove_handler),
 									FN_TABLE_ENTRY(g_main_context_iteration),
 									FN_TABLE_ENTRY(g_object_unref),
+									FN_TABLE_ENTRY(g_timeout_add),
 #ifdef SOLARIS
 									FN_TABLE_ENTRY(g_string_insert_c),
 #endif
 									{ NULL, NULL }
 						   		  };
+
+/* functions from libX11 */
+static FN_TABLE x11Functions[] = {	FN_TABLE_ENTRY(XGetSelectionOwner),
+									FN_TABLE_ENTRY(XSetSelectionOwner),
+									FN_TABLE_ENTRY(XCreateWindow),
+									FN_TABLE_ENTRY(XSync),
+									FN_TABLE_ENTRY(XRootWindow),
+									FN_TABLE_ENTRY(XDefaultScreen),
+									FN_TABLE_ENTRY(XInternAtom),
+									{ NULL, NULL } 
+								};
 
 
 static int loadGtkSymbols( void * library, FN_TABLE * table) {
@@ -82,6 +98,7 @@ int loadGtk() {
 	void * gdkLib = dlopen(GDK_LIB, RTLD_LAZY);
 	void * pixLib = dlopen(PIXBUF_LIB, RTLD_LAZY);
 	void * gtkLib = dlopen(GTK_LIB, RTLD_LAZY);
+	void * x11Lib = dlopen(X11_LIB, RTLD_LAZY);
 	
 	/* initialize ptr struct to 0's */
 	memset(&gtk, 0, sizeof(struct GTK_PTRS));
@@ -90,6 +107,7 @@ int loadGtk() {
 	if ( gdkLib == NULL || loadGtkSymbols(gdkLib, gdkFunctions)  != 0) return -1;
 	if ( pixLib == NULL || loadGtkSymbols(pixLib, pixFunctions)  != 0) return -1;
 	if ( objLib == NULL || loadGtkSymbols(objLib, gobjFunctions) != 0) return -1;
+	if ( x11Lib == NULL || loadGtkSymbols(x11Lib, x11Functions) != 0) return -1;
 	
 	return 0;
 }

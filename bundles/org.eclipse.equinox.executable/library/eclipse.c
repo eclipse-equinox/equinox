@@ -227,6 +227,8 @@ home directory.");
 #define CLASSPATH    _T_ECLIPSE("-classpath")
 #define JAR 		 _T_ECLIPSE("-jar")
 
+#define OPENFILE	  _T_ECLIPSE("--launcher.openFile")
+#define TIMEOUT		  _T_ECLIPSE("--launcher.timeout")
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
@@ -257,6 +259,8 @@ static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user want
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
 static _TCHAR*  permGen  	  = NULL;			/* perm gen size for sun */
+static _TCHAR*  filePath	  = NULL;			/* file to open */
+static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -301,6 +305,8 @@ static Option options[] = {
     { VM,           &vmName,		0,			2 },
     { NAME,         &name,			0,			2 },
     { PERM_GEN,		&permGen,		0,			2 },
+    { OPENFILE,		&filePath,		0,			2 },
+    { TIMEOUT,		&timeoutString, 0,          2 },
     { WS,			&wsArg,			0,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
@@ -371,6 +377,19 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
     
+   	/* try to open the specified file in an already running eclipse */
+   	/* on Mac we are only registering an event handler here, always do this */
+#ifndef MACOSX
+	if (filePath != NULL)
+#endif
+	{
+		int timeout = 60;
+		if (timeoutString != NULL)
+			_stscanf(timeoutString, _T_ECLIPSE("%d"), &timeout);
+		if (reuseWorkbench(filePath, timeout) > 0)
+			return 0;
+	}
+
 #ifdef MACOSX
    	/* Most platforms, we will initialize the window system later before trying to do any
    	 * graphics.  On Mac, we need it initialized to get the dock icon properly, so always do 

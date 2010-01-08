@@ -329,3 +329,9 @@ JavaResults* launchJavaVM( char* args[] )
 	/* Return the exit code from the JVM. */
 	return jvmResults;
 }
+
+int reuseWorkbench(_TCHAR* filePath, int timeout) {
+	/* not yet implemented on motif */
+	return -1;
+}
+}

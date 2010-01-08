@@ -99,15 +99,79 @@ static NSWindow* window = nil;
 }
 
 @end
+
+@interface AppleEventDelegate : NSObject
+- (void)handleOpenDocuments:(NSAppleEventDescriptor *)event withReplyEvent: (NSAppleEventDescriptor *)replyEvent;
+@end
+@implementation AppleEventDelegate
+	NSTimer *timer;
+	NSMutableArray *files;
+	
+- (void)handleOpenDocuments:(NSAppleEventDescriptor *)event withReplyEvent: (NSAppleEventDescriptor *)replyEvent {
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+    int count = [event numberOfItems];
+    int index = 1;
+    
+ 	if (!files) {
+		files = [NSMutableArray arrayWithCapacity:count];
+		[files retain];
+	}
+		
+	for (index = 1; index<=count; index++) {
+		NSAppleEventDescriptor *desc = [event descriptorAtIndex:index];
+		if (desc) {
+			desc = [desc coerceToDescriptorType:typeFSRef];
+			CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, [[desc data] bytes]);
+			if (url) {
+				NSString *pathName = (NSString *)CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
+				[files addObject:pathName];
+				[pathName release];
+				CFRelease(url);
+			}
+		}
+	}
+	
+	if (!timer) {
+		timer = [NSTimer scheduledTimerWithTimeInterval: 1.0
+												 target: self
+											   selector: @selector(handleTimer:)
+											   userInfo: nil
+												repeats: YES];
+	}
+	[pool release];
+}
+- (void) handleTimer: (NSTimer *) timer {
+	NSObject *delegate = [[NSApplication sharedApplication] delegate];
+	if (delegate != NULL && [delegate respondsToSelector: @selector(application:openFiles:)]) {
+		[delegate performSelector:@selector(application:openFiles:)	withObject:[NSApplication sharedApplication] withObject:files];
+		[files release];
+		[timer invalidate];
+	}
+}
+@end
 #endif
 
 static CFRunLoopRef loopRef = NULL;
 static void * startThread(void * init); 
 static void runEventLoop(CFRunLoopRef ref);
 static void dummyCallback(void * info) {}
+#ifndef COCOA
+static CFMutableArrayRef files;
+static EventHandlerRef appHandler;
+static int SWT_CLASS = 'SWT-';
+static int SWT_OPEN_FILE_KIND = 1;
+static int SWT_OPEN_FILE_PARAM = 'odoc';
+#endif
 
 int main() {
 	return -1;
+}
+
+void installAppleEventHandler();
+
+int reuseWorkbench(_TCHAR* filePath, int timeout) {
+	installAppleEventHandler();
+	return 0;
 }
 
 #ifdef COCOA
@@ -175,6 +239,8 @@ typedef CGImageRef (*CGImageSourceCreateImageAtIndex_FUNC)(CGImageSourceRef, siz
 static CGImageSourceCreateWithURL_FUNC createWithURL = NULL;
 static CGImageSourceCreateImageAtIndex_FUNC createAtIndex = NULL;
 
+static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEvent *reply, long handlerRefcon);
+
 static OSStatus drawProc (EventHandlerCallRef eventHandlerCallRef, EventRef eventRef, void * data) {
 	int result = CallNextEventHandler(eventHandlerCallRef, eventRef);
 	if (image) {
@@ -207,6 +273,66 @@ void loadImageFns()
 		if (bundle) createWithURL = (CGImageSourceCreateWithURL_FUNC)CFBundleGetFunctionPointerForName(bundle, CFSTR("CGImageSourceCreateWithURL"));
 		initialized = 1;
 	}
+}
+
+static OSStatus appleEventProc(EventHandlerCallRef inCaller, EventRef theEvent, void* inRefcon) {
+	EventRecord eventRecord;
+	Boolean release = false;
+	EventQueueRef queue;
+	
+	queue = GetCurrentEventQueue();
+	if (IsEventInQueue (queue, theEvent)) {
+		RetainEvent (theEvent);
+		release = true;
+		RemoveEventFromQueue (queue, theEvent);
+	}
+	ConvertEventRefToEventRecord (theEvent, &eventRecord);
+	AEProcessAppleEvent (&eventRecord);
+	if (release) ReleaseEvent (theEvent);
+	return noErr;
+}
+
+static void timerProc(EventLoopTimerRef timer, void *userData) {
+	EventTargetRef target = GetApplicationEventTarget();
+	CFIndex count = CFArrayGetCount  (files);
+	int i;
+	for (i=0; i<count; i++) {
+		CFStringRef file = (CFStringRef) CFArrayGetValueAtIndex(files, i);
+		EventRef event = NULL;
+		CreateEvent (NULL, SWT_CLASS, SWT_OPEN_FILE_KIND, 0, kEventAttributeNone, &event);
+		SetEventParameter (event, SWT_OPEN_FILE_PARAM, typeCFStringRef, sizeof(file), &file);
+		OSStatus status = SendEventToEventTarget(event, target);
+		ReleaseEvent(event);
+		if (status == eventNotHandledErr) return;
+	}
+	CFRelease(files);
+	RemoveEventLoopTimer(timer);
+	RemoveEventHandler(appHandler);
+	AERemoveEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), false);
+}
+ 
+static pascal OSErr openDocumentsProc(const AppleEvent *theAppleEvent, AppleEvent *reply, long handlerRefcon) {
+    AEDescList  docList;
+    FSRef       theFSRef;
+    long        index;
+    long        count = 0;
+    
+    AEGetParamDesc(theAppleEvent, keyDirectObject, typeAEList, &docList);
+	AECountItems(&docList, &count);
+	for(index = 1; index <= count; index++) {
+        AEGetNthPtr(&docList, index, typeFSRef, NULL, NULL, &theFSRef, sizeof(FSRef), NULL);
+		CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &theFSRef);
+		CFStringRef pathName = CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
+		if (!files) {
+			files = CFArrayCreateMutable(kCFAllocatorDefault, count, &kCFTypeArrayCallBacks);		
+            InstallEventLoopTimer(GetMainEventLoop(), 1, 1, NewEventLoopTimerUPP(timerProc), NULL, NULL); 
+		}
+		CFArrayAppendValue(files, pathName);
+		CFRelease(pathName);
+		CFRelease(url);
+    }
+    AEDisposeDesc(&docList);
+    return noErr;
 }
 
 /* Show the Splash Window
@@ -304,6 +430,25 @@ void dispatchMessages() {
 	}
 }
 #endif	
+
+void installAppleEventHandler() {
+#ifdef COCOA
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	AppleEventDelegate *appleEventDelegate = [[AppleEventDelegate alloc] init];
+	[NSApplication sharedApplication];
+	NSAppleEventManager *manager = [NSAppleEventManager sharedAppleEventManager];
+	[manager setEventHandler:appleEventDelegate 
+				 andSelector:@selector(handleOpenDocuments:withReplyEvent:) 
+			   forEventClass:kCoreEventClass 
+				  andEventID:kAEOpenDocuments];
+//	[appleEventDelegate release];
+	[pool release];
+#else	
+	EventTypeSpec kEvents[] = { {kEventClassAppleEvent, kEventAppleEvent} };
+	InstallApplicationEventHandler(NewEventHandlerUPP(appleEventProc), GetEventTypeCount(kEvents), kEvents, 0, &appHandler);
+	AEInstallEventHandler(kCoreEventClass, kAEOpenDocuments, NewAEEventHandlerUPP(openDocumentsProc), 0, false);
+#endif
+}
 
 jlong getSplashHandle() {
 	return (jlong)window;

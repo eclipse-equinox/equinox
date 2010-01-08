@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <semaphore.h>
+#include <fcntl.h>
 
 /* Global Variables */
 char*  defaultVM     = "java";
@@ -47,10 +49,183 @@ static GtkWidget*   shellHandle = 0;
 static GdkPixbuf*	pixbuf = 0;
 static GtkWidget*   image = 0;
 
+static sem_t* mutex;
+static Atom appWindowAtom, launcherWindowAtom;
+static char* openFilePath = NULL; /* the file we want to open */
+static int openFileTimeout = 60; /* number of seconds to wait before timeout */
+
+static struct sigaction quitAction;
+static struct sigaction intAction;
+
 /* Local functions */
-static void log_handler(const gchar* domain, GLogLevelFlags flags, const gchar* msg, gpointer data) {
+static void catch_signal(int sig) {
+	//catch signals, free the lock, reinstall the original
+	//signal handlers and reraise the signal.
+	sem_post(mutex);
+	sem_close(mutex);
+	sigaction(SIGINT, &intAction, NULL);
+	sigaction(SIGQUIT, &intAction, NULL);
+	raise(sig);
+}
+
+typedef int (*LockFunc)();
+int executeWithLock(char *name, LockFunc func) {
+	int result = -1;
+	int lock = -1;
+	struct sigaction action;
+
+	mutex = sem_open(name, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG | S_IRWXO, 1);
+	if (mutex == SEM_FAILED) {
+		//create failed. Probably lock is already created so try opening the existing lock.
+		mutex = sem_open(name, 0);
+	}
+	if (mutex == SEM_FAILED)
+		return -1; //this is an error.
+
+	// install signal handler to free the lock if something bad happens.
+	// sem_t is not freed automatically when a process ends.
+	action.sa_handler = catch_signal;
+	sigaction(SIGINT, &action, &intAction);
+	sigaction(SIGQUIT, &action, &quitAction);
+
+	while ((lock = sem_trywait(mutex)) != 0) {
+		if (errno == EAGAIN) {
+			//couldn't acquire lock, sleep a bit and try again
+			sleep(1);
+			if (--openFileTimeout > 0)
+				continue;
+		}
+		break;
+	}
+
+	if (lock == 0)
+		result = func();
+
+	sem_post(mutex);
+	sem_close(mutex);
+
+	//reinstall the original signal handlers
+	sigaction(SIGINT, &intAction, NULL);
+	sigaction(SIGQUIT, &quitAction, NULL);
+	return result;
+}
+
+static void log_handler(const gchar* domain, GLogLevelFlags flags,	const gchar* msg, gpointer data) {
 	/* nothing */
 }
+
+/* Create the mutex name string, with optional suffix.  Caller should free the memory when finished */
+static char * createMutexName(char * suffix) {
+	char * prefix = _T_ECLIPSE("SWT_Window_");
+	char * result = malloc((_tcslen(prefix) + _tcslen(getOfficialName()) + (suffix != NULL ? _tcslen(suffix) : 0) + 1) * sizeof(char));
+	if (suffix != NULL)
+		_stprintf(result, _T_ECLIPSE("%s%s%s"), prefix, getOfficialName(), suffix);
+	else
+		_stprintf(result, _T_ECLIPSE("%s%s"), prefix, getOfficialName());
+	return result;
+}
+
+static int setAppWindowPropertyFn() {
+	Window appWindow;
+	GdkWindow *propWindow;
+	GdkAtom propAtom;
+	char *propVal;
+
+	//Look for the SWT window. If it's there, set a property on it.
+	appWindow = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, appWindowAtom);
+	//appWindow = XGetSelectionOwner(GDK_DISPLAY(), appWindowAtom);
+	if (appWindow) {
+		propAtom = gtk.gdk_atom_intern("org.eclipse.swt.filePath.message", FALSE);
+		//append a colon delimiter in case more than one file gets appended to the app windows property.
+		propVal = malloc((_tcslen(openFilePath) + 2) * sizeof(char));
+		_stprintf(propVal, _T_ECLIPSE("%s%s"), openFilePath, ":");
+
+		propWindow = gtk.gdk_window_foreign_new(appWindow);
+		if (propWindow != NULL) {
+			gtk.gdk_property_change(propWindow, propAtom, propAtom, 8, GDK_PROP_MODE_APPEND, (guchar *) propVal, _tcslen(propVal));
+			free(propVal);
+			return 1;
+		} //else the window got destroyed between XGetSelectionOwner and here (?)
+	}
+	return 0;
+}
+
+/* set the Application window property by executing _setWindowPropertyFn within a semaphore */
+int setAppWindowProperty() {
+	int result;
+	char * mutexName = createMutexName(NULL);
+	result = executeWithLock(mutexName, setAppWindowPropertyFn);
+	gtk.XSync(gtk_GDK_DISPLAY, False);
+	free(mutexName);
+	return result;
+}
+
+/* timer callback function to call setAppWindowProperty */
+static gboolean setAppWindowTimerProc(gpointer data) {
+	//try to set the app window property. If unsuccessful return true to reschedule the timer.
+	openFileTimeout--;
+	return !setAppWindowProperty() && openFileTimeout > 0;
+}
+
+int createLauncherWindow() {
+	Window window, launcherWindow;
+	//check if a launcher window exists. If none exists, we know we are the first and we should be launching the app.
+	window = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom);
+	if (window == 0) {
+		//create a launcher window that other processes can find.
+		launcherWindow = gtk.XCreateWindow(gtk_GDK_DISPLAY, gtk.XRootWindow(gtk_GDK_DISPLAY, gtk.XDefaultScreen(gtk_GDK_DISPLAY)), -10, -10, 1,
+				1, 0, 0, InputOnly, CopyFromParent, (unsigned long) 0, (XSetWindowAttributes *) NULL);
+		//for some reason Set and Get are both necessary. Set alone does nothing.
+		gtk.XSetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom, launcherWindow, CurrentTime);
+		gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, launcherWindowAtom);
+		//add a timeout to set the property on the apps window once the app is launched.
+		gtk.g_timeout_add(1000, setAppWindowTimerProc, 0);
+		return 0;
+	}
+	return 1;
+}
+
+int reuseWorkbench(char* filePath, int timeout) {
+	char *appName, *launcherName;
+	int result = 0;
+
+	if (initWindowSystem(&initialArgc, initialArgv, 1) != 0)
+		return -1;
+
+	openFileTimeout = timeout;
+	openFilePath = filePath;
+	
+	//App name is defined in SWT as well. Values must be consistent.
+	appName = createMutexName(NULL);
+	appWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, appName, FALSE);
+	free(appName);
+
+	//check if app is already running. Just set property if it is.
+	if (setAppWindowProperty())
+		return 1;
+
+	/* app is not running, create a launcher window to act as a mutex so we don't need to keep the semaphore locked */
+	launcherName = createMutexName(_T_ECLIPSE("_Launcher"));
+	launcherWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, launcherName, FALSE);
+	result = executeWithLock(launcherName, createLauncherWindow);
+	free(launcherName);
+
+	if (result == 1) {
+		//The app is already being launched in another process.  Set the property on that app window and exit
+		while (openFileTimeout > 0) {
+			if (setAppWindowProperty() > 0)
+				return 1; //success
+			else {
+				openFileTimeout--;
+				sleep(1);
+			}
+		}
+		//timed out trying to set the app property
+		result = 0;
+	}
+	return result;
+}
+
 /* Create and Display the Splash Window */
 int showSplash( const char* featureImage )
 {
