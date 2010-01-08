@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.runtime;
 
-import org.eclipse.core.internal.runtime.IRuntimeConstants;
 import org.eclipse.core.internal.runtime.LocalizationUtils;
 
 /**
@@ -23,17 +22,22 @@ import org.eclipse.core.internal.runtime.LocalizationUtils;
 public class Status implements IStatus {
 
 	/**
-	 * A standard OK status with an "ok"  message.
+	 * Constant used to indicate an unknown plugin id.
+	 */
+	private static final String unknownId = "unknown"; //$NON-NLS-1$
+
+	/**
+	 * A standard OK status with an "ok" message.
 	 *
 	 * @since 3.0
 	 */
-	public static final IStatus OK_STATUS = new Status(OK, IRuntimeConstants.PI_RUNTIME, OK, LocalizationUtils.safeLocalize("ok"), null); //$NON-NLS-1$
+	public static final IStatus OK_STATUS = new Status(OK, unknownId, OK, LocalizationUtils.safeLocalize("ok"), null); //$NON-NLS-1$
 	/**
 	 * A standard CANCEL status with no message.
 	 * 
 	 * @since 3.0
 	 */
-	public static final IStatus CANCEL_STATUS = new Status(CANCEL, IRuntimeConstants.PI_RUNTIME, 1, "", null); //$NON-NLS-1$
+	public static final IStatus CANCEL_STATUS = new Status(CANCEL, unknownId, 1, "", null); //$NON-NLS-1$
 	/**
 	 * The severity. One of
 	 * <ul>
