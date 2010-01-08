@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,30 @@ import org.osgi.service.application.ApplicationDescriptor;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IApplicationContext {
+
+	/**
+	 * A system property that may be set by an application to specify exit data
+	 * for the application. The value of the property must be a <code>String</code>.
+	 * <p>
+	 * Typically applications do not need to set this property.  If an error is detected
+	 * while launching or running an application then the launcher will set this property 
+	 * automatically in order to display a message to the end user.  An application may
+	 * set this property for the following reasons:
+	 * <ul>
+	 *   <li>To provide the command line arguments to relaunch the eclipse platform.  See
+	 *   {@link IApplication#EXIT_RELAUNCH}</li>
+	 *   <li>To provide an error message that will be displayed to the end user.  This will
+	 *   cause an error dialog to be displayed to the user, this option should not be used
+	 *   by headless applications.</li>
+	 *   <li>To suppress all error dialogs displayed by the launcher this property can be 
+	 *   set to the empty <code>String</code>.  This is useful for 
+	 *   headless applications where error dialogs must never be displayed.</li>
+	 * </ul>
+	 * </p>
+	 * @since 1.3
+	 */
+	public static final String EXIT_DATA_PROPERTY = "eclipse.exitdata"; //$NON-NLS-1$
+
 	/**
 	 * A key used to store arguments for the application.  The content of this argument 
 	 * is unchecked and should conform to the expectations of the application being invoked.  

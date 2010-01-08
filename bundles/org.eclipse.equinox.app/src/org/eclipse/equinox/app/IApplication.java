@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -37,7 +37,8 @@ public interface IApplication {
 	/**
 	 * Exit object requesting that the command passed back be executed.  Typically
 	 * this is used to relaunch Eclipse with different command line arguments.  When the executable is
-	 * relaunched the command line will be retrieved from the <code>eclipse.exitdata</code> system property.  
+	 * relaunched the command line will be retrieved from the 
+	 * {@link IApplicationContext#EXIT_DATA_PROPERTY eclipse.exitdata} system property.  
 	 */
 	public static final Integer EXIT_RELAUNCH = new Integer(24);
 
