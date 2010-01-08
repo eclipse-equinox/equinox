@@ -31,9 +31,11 @@ org.osgi.framework.system.packages = \
  javax.lang.model.type,\
  javax.lang.model.util,\
  javax.management,\
+ javax.management.event,\
  javax.management.loading,\
  javax.management.modelmbean,\
  javax.management.monitor,\
+ javax.management.namespace,\
  javax.management.openmbean,\
  javax.management.relation,\
  javax.management.remote,\
@@ -79,6 +81,7 @@ org.osgi.framework.system.packages = \
  javax.swing.plaf.basic,\
  javax.swing.plaf.metal,\
  javax.swing.plaf.multi,\
+ javax.swing.plaf.nimbus,\
  javax.swing.plaf.synth,\
  javax.swing.table,\
  javax.swing.text,\
