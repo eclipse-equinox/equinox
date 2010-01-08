@@ -334,4 +334,3 @@ int reuseWorkbench(_TCHAR* filePath, int timeout) {
 	/* not yet implemented on motif */
 	return -1;
 }
-}
