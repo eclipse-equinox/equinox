@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -363,6 +363,11 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 	}
 
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
+		// take into account that initial@ is special (bug 268563)
+		if (location.startsWith("initial@")) { //$NON-NLS-1$
+			location = location.substring(8);
+			return new URL(location).openConnection();
+		}
 		// see if this is an existing location
 		Bundle[] bundles = storage.getAdaptor().getContext().getBundles();
 		AbstractBundle bundle = null;
