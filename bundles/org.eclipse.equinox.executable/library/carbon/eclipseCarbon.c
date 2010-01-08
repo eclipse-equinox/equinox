@@ -8,6 +8,7 @@
  * Contributors:
  *    IBM Corporation - initial API and implementation
  * 	  Andre Weinand (OTI Labs)
+ *    David Green - OpenJDK bsd port integration
  */
  
 /* MacOS X Carbon specific logic for displaying the splash screen. */
@@ -15,8 +16,10 @@
 #include "eclipseOS.h"
 #include "eclipseCommon.h"
 #include "eclipseJNI.h"
+#include "eclipseUtil.h"
 
 #include <unistd.h>
+#include <sys/stat.h>
 #include <CoreServices/CoreServices.h>
 #ifdef COCOA
 #include <Cocoa/Cocoa.h>
@@ -43,6 +46,29 @@ char *findCommand(char *command);
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
 char*  shippedVMDir  = "jre/bin/";
+
+static void adjustLibraryPath(char * vmLibrary);
+static char * findLib(char * command);
+
+#ifdef i386
+#define JAVA_ARCH "i386"
+#elif defined(__ppc__) || defined(__powerpc64__)
+#define JAVA_ARCH "ppc"
+#elif defined(__amd64__) || defined(__x86_64__)
+#define JAVA_ARCH "amd64"
+#else
+#define JAVA_ARCH DEFAULT_OS_ARCH
+#endif
+
+#define LIB_PATH_VAR _T_ECLIPSE("LD_LIBRARY_PATH")
+#define DYLD_FALLBACK_VAR _T_ECLIPSE("DYLD_FALLBACK_LIBRARY_PATH")
+
+#define MAX_LOCATION_LENGTH 40 /* none of the jvmLocations strings should be longer than this */
+#define MAX_JVMLIB_LENGTH   15 /* none of the jvmLibs strings should be longer than this */
+static const char* jvmLocations[] = { "../lib/" JAVA_ARCH "/client",
+									  "../lib/" JAVA_ARCH "/server", "../jre/lib/" JAVA_ARCH "/client",
+									  "../jre/lib/" JAVA_ARCH "/server", NULL };
+static const char* jvmLibs[] = { "libjvm.dylib", "libjvm.jnilib", "libjvm.so", NULL };
 
 /* Define the window system arguments for the various Java VMs. */
 static char*  argVM_JAVA[] = { "-XstartOnFirstThread", NULL };
@@ -322,21 +348,120 @@ char * findVMLibrary( char* command ) {
 			
 			free(version);
 		} 
+	} else if (strstr(command, "/JavaVM.framework/") == NULL) {
+		char * lib = findLib(command);
+		if (lib != NULL) {
+			adjustLibraryPath(lib);
+			return lib;
+		}
 	}
 	return JAVA_FRAMEWORK;
 }
 
+static char * findLib(char * command) {
+	int i, q;
+	int pathLength;
+	struct stat stats;
+	char * path; /* path to resulting jvm shared library */
+	char * location; /* points to begining of jvmLocations section of path */
 
-void restartLauncher( char* program, char* args[] ) 
-{
-	pid_t pid= fork();
-	if (pid == 0) {
-		/* Child process ... start the JVM */
-		execv(program != NULL ? program : args[0], args);
+	if (command != NULL) {
+		/*check first to see if command already points to the library */
+		if (isVMLibrary(command)) {
+			if (stat(command, &stats) == 0 && (stats.st_mode & S_IFREG) != 0) { /* found it */
+				return strdup(command);
+			}
+			return NULL;
+		}
 
-		/* The JVM would not start ... return error code to parent process. */
-		_exit(errno);
+		location = strrchr(command, dirSeparator) + 1;
+		pathLength = location - command;
+		path = malloc((pathLength + MAX_LOCATION_LENGTH + 1 + MAX_JVMLIB_LENGTH	+ 1) * sizeof(char));
+		strncpy(path, command, pathLength);
+		location = &path[pathLength];
+
+		/*
+		 * We are trying base/jvmLocations[*]/vmLibrary
+		 * where base is the directory containing the given java command, normally jre/bin
+		 */
+		for (q = 0; jvmLibs[q] != NULL; ++q) {
+			const char *jvmLib = jvmLibs[q];
+			i = -1;
+			while (jvmLocations[++i] != NULL) {
+				sprintf(location, "%s%c%s", jvmLocations[i], dirSeparator, jvmLib);
+				/*fprintf(stderr,"checking path: %s\n",path);*/
+				if (stat(path, &stats) == 0 && (stats.st_mode & S_IFREG) != 0) 
+				{ /* found it */
+					return path;
+				}
+			}
+		}
 	}
+	return NULL;
+}
+
+/* adjust the LD_LIBRARY_PATH for the vmLibrary */
+static void adjustLibraryPath(char * vmLibrary) {
+	char * c;
+	char * ldPath, *dylibPath;
+	char * newPath;
+	int i;
+	int numPaths = 0;
+	int length = 0;
+	int needAdjust = 0, needDylibAdjust = 0;
+
+	char ** paths = getVMLibrarySearchPath(vmLibrary);
+
+	ldPath = (char*) getenv(LIB_PATH_VAR);
+	if (!ldPath) {
+		ldPath = _T_ECLIPSE("");
+		needAdjust = 1;
+	} else {
+		needAdjust = !containsPaths(ldPath, paths);
+	}
+
+	dylibPath = (char*) getenv(DYLD_FALLBACK_VAR);
+	if (!dylibPath) {
+		dylibPath = _T_ECLIPSE("");
+		needDylibAdjust = 1;
+	} else {
+		needDylibAdjust = !containsPaths(dylibPath, paths);
+	}
+
+	if (!needAdjust && !needDylibAdjust) {
+		for (i = 0; paths[i] != NULL; i++)
+			free(paths[i]);
+		free(paths);
+		return;
+	}
+
+	c = concatStrings(paths);
+	
+	/* set the value for LD_LIBRARY_PATH */
+	length = strlen(ldPath);
+	newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
+	_stprintf(newPath, _T_ECLIPSE("%s%s"), c, ldPath);
+	setenv(LIB_PATH_VAR, newPath, 1);
+	free(newPath);
+	
+	/* set the value for DYLD_FALLBACK_LIBRARY_PATH */
+	length = strlen(dylibPath);
+	newPath =  malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
+	_stprintf(newPath, _T_ECLIPSE("%s%s"), c, dylibPath);
+	setenv(DYLD_FALLBACK_VAR, newPath, 1);
+	free(newPath);
+	free(c);
+	
+	for (i = 0; i < numPaths; i++)
+		free(paths[i]);
+	free(paths);
+
+	/* now we must restart for this to take affect*/
+	restartLauncher(initialArgv[0], initialArgv);
+}
+
+void restartLauncher(char* program, char* args[]) {
+	execvp(program != NULL ? program : args[0], args);
 }
 
 JavaResults* launchJavaVM( _TCHAR* args[] )

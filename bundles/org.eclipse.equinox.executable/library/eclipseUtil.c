@@ -78,7 +78,7 @@ int checkProvidedVMType( _TCHAR* vm )
 #ifdef _WIN32
 	if (_tcsicmp(ch, _T_ECLIPSE(".dll")) == 0)
 #else
-	if (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0)
+	if ((_tcsicmp(ch, _T_ECLIPSE(".so")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".jnilib")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".dylib")) == 0))
 #endif
 	{
 		return VM_LIBRARY;
@@ -188,7 +188,7 @@ int isVMLibrary( _TCHAR* vm )
 #ifdef _WIN32
 	return (_tcsicmp(ch, _T_ECLIPSE(".dll")) == 0);
 #else
-	return (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0);
+	return (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".jnilib")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".dylib")) == 0);
 #endif
 }
 
