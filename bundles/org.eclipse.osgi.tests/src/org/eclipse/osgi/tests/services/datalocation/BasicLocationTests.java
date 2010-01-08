@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,6 +173,59 @@ public class BasicLocationTests extends CoreTest {
 		} finally {
 			testLocation.release();
 		}
+	}
+
+	private static final String INSTANCE_DATA_AREA_PREFIX = ".metadata/.plugins/"; //$NON-NLS-1$
+
+	public void testLocationDataArea01() {
+		Location instance = LocationManager.getInstanceLocation();
+		doAllTestLocationDataArea(instance, INSTANCE_DATA_AREA_PREFIX);
+
+		Location configuration = LocationManager.getConfigurationLocation();
+		doAllTestLocationDataArea(configuration, "");
+	}
+
+	private void doAllTestLocationDataArea(Location location, String dataAreaPrefix) {
+		doTestLocateDataArea(location, dataAreaPrefix, getName());
+		doTestLocateDataArea(location, dataAreaPrefix, "");
+		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/paths");
+		doTestLocateDataArea(location, dataAreaPrefix, "test/multiple/../paths");
+		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
+
+		File testLocationFile = OSGiTestsActivator.getContext().getDataFile("testLocations/" + getName());
+		Location createdLocation = location.createLocation(null, null, false);
+		try {
+			createdLocation.set(testLocationFile.toURL(), false);
+		} catch (Exception e) {
+			fail("Failed to set location", e);
+		}
+		doTestLocateDataArea(createdLocation, dataAreaPrefix, getName());
+		doTestLocateDataArea(createdLocation, dataAreaPrefix, "");
+		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/paths");
+		doTestLocateDataArea(createdLocation, dataAreaPrefix, "test/multiple/../paths");
+		doTestLocateDataArea(location, dataAreaPrefix, "test\\multiple\\paths");
+
+		createdLocation = location.createLocation(null, null, false);
+		try {
+			createdLocation.getDataArea("shouldFail");
+			fail("expected failure when location is not set");
+		} catch (IOException e) {
+			// expected;
+		}
+	}
+
+	private void doTestLocateDataArea(Location location, String dataAreaPrefix, String namespace) {
+		assertTrue("Location is not set", location.isSet());
+		URL dataArea = null;
+		try {
+			dataArea = location.getDataArea(namespace);
+		} catch (IOException e) {
+			fail("Failed to get data area.", e);
+		}
+		assertNotNull("Data area is null.", dataArea);
+
+		namespace = namespace.replace('\\', '/');
+		assertTrue("Data area is not the expected value: " + dataArea.toExternalForm(), dataArea.toExternalForm().endsWith(dataAreaPrefix + namespace));
 	}
 
 	public void testSetLocationWithEmptyLockFile() {

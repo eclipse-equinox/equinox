@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ public class BasicLocation implements Location {
 	private Location parent;
 	final private URL defaultValue;
 	final private String property;
+	final private String dataAreaPrefix;
 
 	// locking related fields
 	private File lockFile;
@@ -84,11 +85,12 @@ public class BasicLocation implements Location {
 
 	}
 
-	public BasicLocation(String property, URL defaultValue, boolean isReadOnly) {
+	public BasicLocation(String property, URL defaultValue, boolean isReadOnly, String dataAreaPrefix) {
 		super();
 		this.property = property;
 		this.defaultValue = defaultValue;
 		this.isReadOnly = isReadOnly;
+		this.dataAreaPrefix = dataAreaPrefix == null ? "" : dataAreaPrefix; //$NON-NLS-1$
 	}
 
 	public boolean allowsDefault() {
@@ -238,8 +240,21 @@ public class BasicLocation implements Location {
 	}
 
 	public Location createLocation(Location parentLocation, URL defaultLocation, boolean readonly) {
-		BasicLocation result = new BasicLocation(null, defaultLocation, readonly);
+		BasicLocation result = new BasicLocation(null, defaultLocation, readonly, dataAreaPrefix);
 		result.setParent(parentLocation);
 		return result;
+	}
+
+	public URL getDataArea(String filename) throws IOException {
+		URL base = getURL();
+		if (base == null)
+			throw new IOException(EclipseAdaptorMsg.location_notSet);
+		String prefix = base.toExternalForm();
+		if (prefix.length() > 0 && prefix.charAt(prefix.length() - 1) != '/')
+			prefix += '/';
+		filename = filename.replace('\\', '/');
+		if (filename.length() > 0 && filename.charAt(0) == '/')
+			filename.substring(1);
+		return new URL(prefix + dataAreaPrefix + filename);
 	}
 }

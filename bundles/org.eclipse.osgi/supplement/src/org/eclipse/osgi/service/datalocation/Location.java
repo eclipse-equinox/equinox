@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,4 +199,27 @@ public interface Location {
 	 * @since 3.4
 	 */
 	public Location createLocation(Location parent, URL defaultValue, boolean readonly);
+
+	/**
+	 * Returns a URL to the specified path within this location.  The path 
+	 * of the returned URL may not exist yet.  It is the responsibility of the 
+	 * client to create the content of the data area returned if it does not exist.
+	 * <p>
+	 * This method can be used to obtain a private area within the given location. 
+	 * For example use the symbolic name of a bundle to obtain a data area specific 
+	 * to that bundle.
+	 * </p>
+	 * <p>
+	 * Clients should check if the location is read only before writing anything
+	 * to the returned data area.  An <code>IOException</code> will be thrown if
+	 * this method is called and the location URL has not been set and there is
+	 * no default value for this location.
+	 * </p>
+	 * 
+	 * @param path the name of the path to get from this location
+	 * @return the URL to the data area with the specified path.
+	 * @throws IOException if the location URL is not already set
+	 * @since 3.6
+	 */
+	public URL getDataArea(String path) throws IOException;
 }
