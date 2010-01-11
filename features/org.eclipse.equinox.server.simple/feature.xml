@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.eclipse.equinox.server.examples.servletbridge.product"
-      label="Servletbridge Product Feature"
+      id="org.eclipse.equinox.server.simple"
+      label="Simple Http Server Feature"
       version="1.0.0.qualifier"
       provider-name="Eclipse Foundation">
 
@@ -16,5 +16,19 @@
    <license url="http://www.example.com/license">
       [Enter License Description here.]
    </license>
+
+   <plugin
+         id="javax.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.http"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
