@@ -138,7 +138,7 @@ public class ServiceUse {
 			}
 
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_OBJECT_NULL_EXCEPTION, factory.getClass().getName()), ServiceException.FACTORY_ERROR);
-			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
+			context.getFramework().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
 			return null;
 		}
 
