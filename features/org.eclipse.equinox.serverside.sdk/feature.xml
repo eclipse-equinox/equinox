@@ -17,6 +17,26 @@
       %license
    </license>
 
+   <includes
+         id="org.eclipse.equinox.server.core"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.equinox.server.jetty"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.equinox.server.p2"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.equinox.server.servletbridge"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.equinox.server.simple"
+         version="0.0.0"/>
+
    <plugin
          id="javax.servlet"
          download-size="0"
@@ -184,4 +204,21 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.servletbridge.extensionbundle"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.servletbridge.extensionbundle.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
 </feature>
