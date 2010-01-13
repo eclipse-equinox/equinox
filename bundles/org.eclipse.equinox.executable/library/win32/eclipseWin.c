@@ -91,7 +91,7 @@ static void sendOpenFileMessage(HWND window) {
 #endif
 	createSharedData(&id, size);
 	setSharedData(id, openFilePath);
-	msg = RegisterWindowMessage(_T("SWT_FILEOPEN"));
+	msg = RegisterWindowMessage(_T("SWT_OPENDOC"));
 	_stscanf(id, _T_ECLIPSE("%lx_%lx"), &wParam, &lParam);
 	
 	/* SendMessage does not return until the message has been processed */
