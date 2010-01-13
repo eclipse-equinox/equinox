@@ -606,7 +606,16 @@ static void adjustLibraryPath(char * vmLibrary) {
 }
 
 void restartLauncher(char* program, char* args[]) {
-	execvp(program != NULL ? program : args[0], args);
+	pid_t pid= fork();
+	if (pid == 0) {
+		/* Child process ... start the JVM */
+		execv(program != NULL ? program : args[0], args);
+
+		/* The JVM would not start ... return error code to parent process. */
+		_exit(errno);
+	} else {
+		exit(0);
+	}
 }
 
 JavaResults* launchJavaVM( _TCHAR* args[] )
