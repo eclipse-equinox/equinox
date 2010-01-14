@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -335,6 +335,10 @@ public class EventManager {
 						return;
 					}
 					EventManager.dispatchEvent(item.listeners, item.dispatcher, item.action, item.object);
+					// Bug 299589: since the call to getNextEvent() will eventually block for a long time, we need to make sure that the 'item'
+					// variable is cleared of the previous value before the call to getNextEvent(). See VM SPec 2.5.7 for why the compiler 
+					// will not automatically clear this variable for each loop iteration.
+					item = null;
 				}
 			} catch (RuntimeException e) {
 				if (EventManager.DEBUG) {
