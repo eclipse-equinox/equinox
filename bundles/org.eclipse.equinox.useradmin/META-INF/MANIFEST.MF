@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Vendor: %bundleVendor
-Bundle-Version: 1.1.100.qualifier
+Bundle-Version: 1.1.200.qualifier
 Bundle-Activator: org.eclipse.equinox.internal.useradmin.Activator
 Bundle-Copyright: %bundleCopyright
 Bundle-SymbolicName: org.eclipse.equinox.useradmin
