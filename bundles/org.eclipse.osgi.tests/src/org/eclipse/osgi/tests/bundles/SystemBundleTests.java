@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -581,6 +581,12 @@ public class SystemBundleTests extends AbstractBundleTests {
 			}
 		}, "test waitForStop thread"); //$NON-NLS-1$
 		t.start();
+		try {
+			// delay hack to allow t thread to block on waitForStop before we update.
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			fail("unexpected interuption", e);
+		}
 		try {
 			equinox.update();
 		} catch (BundleException e) {
