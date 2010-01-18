@@ -17,7 +17,6 @@ package org.eclipse.core.runtime.preferences;
  * 
  * @since 3.1
  * @see org.eclipse.core.runtime.preferences.IPreferenceFilter
- * @noextend This class is not intended to be subclassed by clients.
  */
 public final class PreferenceFilterEntry {
 

@@ -38,9 +38,8 @@ import org.eclipse.osgi.service.datalocation.Location;
  * </p>
  * @see Location#CONFIGURATION_FILTER
  * @since 3.0
- * @noextend This class is not intended to be subclassed by clients.
  */
-public final class ConfigurationScope extends AbstractScope implements IScopeContext {
+public final class ConfigurationScope extends AbstractScope {
 
 	/**
 	 * String constant (value of <code>"configuration"</code>) used for the 

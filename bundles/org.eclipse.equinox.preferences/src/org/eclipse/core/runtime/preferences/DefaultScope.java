@@ -37,9 +37,8 @@ import org.eclipse.core.runtime.IPath;
  * This class is not intended to be subclassed. This class may be instantiated.
  * </p>
  * @since 3.0
- * @noextend This class is not intended to be subclassed by clients.
  */
-public final class DefaultScope extends AbstractScope implements IScopeContext {
+public final class DefaultScope extends AbstractScope {
 
 	/**
 	 * String constant (value of <code>"default"</code>) used for the 

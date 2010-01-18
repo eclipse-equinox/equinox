@@ -32,9 +32,8 @@ import org.eclipse.osgi.service.datalocation.Location;
  * </p>
  * @see Location#INSTANCE_FILTER
  * @since 3.0
- * @noextend This class is not intended to be subclassed by clients.
  */
-public final class InstanceScope extends AbstractScope implements IScopeContext {
+public final class InstanceScope extends AbstractScope {
 
 	/**
 	 * String constant (value of <code>"instance"</code>) used for the 
