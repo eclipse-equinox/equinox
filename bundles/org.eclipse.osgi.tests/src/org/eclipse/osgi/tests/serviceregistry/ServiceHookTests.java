@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 		final ServiceRegistration reg3 = testContext.registerService(Runnable.class.getName(), runIt, props);
 
 		final int[] hookCalled = new int[] {0, 0, 0, 0, 0};
+		final boolean[] startTest = new boolean[] {false};
 		final AssertionFailedError[] hookError = new AssertionFailedError[] {null, null, null, null};
 
 		// register find hook 1
@@ -54,6 +55,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
 					synchronized (hookCalled) {
+						if (!startTest[0])
+							return;
 						hookCalled[++hookCalled[0]] = 1;
 					}
 					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -103,6 +106,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
 					synchronized (hookCalled) {
+						if (!startTest[0])
+							return;
 						hookCalled[++hookCalled[0]] = 2;
 					}
 					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -149,6 +154,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
 					synchronized (hookCalled) {
+						if (!startTest[0])
+							return;
 						hookCalled[++hookCalled[0]] = 3;
 					}
 					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -197,6 +204,8 @@ public class ServiceHookTests extends AbstractBundleTests {
 			public void find(BundleContext context, String name, String filter, boolean allServices, Collection references) {
 				try {
 					synchronized (hookCalled) {
+						if (!startTest[0])
+							return;
 						hookCalled[++hookCalled[0]] = 4;
 					}
 					assertEquals("wrong context in hook", testContext, context); //$NON-NLS-1$
@@ -238,6 +247,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 			}
 		}, props);
 
+		startTest[0] = true;
 		// get reference and hook removes some services
 		try {
 			ServiceReference[] refs = null;
@@ -265,6 +275,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 			assertFalse("contains service 2", refList.contains(reg2.getReference())); //$NON-NLS-1$
 			assertTrue("missing service 3", refList.contains(reg3.getReference())); //$NON-NLS-1$
 
+			startTest[0] = false;
 			// remove the hooks
 			regHook1.unregister();
 			regHook1 = null;
@@ -279,6 +290,7 @@ public class ServiceHookTests extends AbstractBundleTests {
 			refs = null;
 			hookCalled[0] = 0;
 
+			startTest[0] = true;
 			try {
 				refs = testContext.getServiceReferences(Runnable.class.getName(), "(name=" + testMethodName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (InvalidSyntaxException e) {
