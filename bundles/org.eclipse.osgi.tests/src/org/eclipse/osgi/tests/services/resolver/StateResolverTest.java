@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1836,7 +1836,8 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve();
 
 		assertTrue("0.1", a1.isResolved()); //$NON-NLS-1$
-		assertFalse("0.2", a1frag.isResolved()); //$NON-NLS-1$
+		// uses constraints are ignored when in dev mode (see 261849)
+		assertTrue("0.2", a1frag.isResolved()); //$NON-NLS-1$
 		assertTrue("0.3", b1.isResolved()); //$NON-NLS-1$
 		assertTrue("0.4", c1.isResolved()); //$NON-NLS-1$
 		assertTrue("0.5", c2.isResolved()); //$NON-NLS-1$

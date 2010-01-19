@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -72,6 +72,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private GroupingChecker groupingChecker;
 	private Comparator selectionPolicy;
 	private boolean developmentMode = false;
+	private boolean usesCalculationTimeout = false;
 	private volatile CompositeResolveHelperRegistry compositeHelpers;
 
 	public ResolverImpl(BundleContext context, boolean checkPermissions) {
@@ -388,6 +389,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		// attempt to resolve all unresolved bundles
 		ResolverBundle[] bundles = (ResolverBundle[]) unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
+		usesCalculationTimeout = false;
 		resolveBundles(bundles, platformProperties, rejectedSingletons);
 		if (selectSingletons(bundles, rejectedSingletons)) {
 			// a singleton was unresolved as a result of selecting a different version
@@ -565,7 +567,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	}
 
 	private void checkUsesConstraints(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
-		ArrayList conflictingConstraints = findBestCombination(bundles);
+		ArrayList conflictingConstraints = findBestCombination(bundles, platformProperties);
 		if (conflictingConstraints == null)
 			return;
 		Set conflictedBundles = null;
@@ -611,17 +613,21 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		resolveBundles0((ResolverBundle[]) remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, rejectedSingletons);
 	}
 
-	private ArrayList findBestCombination(ResolverBundle[] bundles) {
-		String usesMode = secureAction.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
-		if ("ignore".equals(usesMode)) //$NON-NLS-1$
+	private ArrayList findBestCombination(ResolverBundle[] bundles, Dictionary[] platformProperties) {
+		Object usesMode = platformProperties.length == 0 ? null : platformProperties[0].get("osgi.resolver.usesMode"); //$NON-NLS-1$
+		if (usesMode == null)
+			usesMode = secureAction.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
+		if ("ignore".equals(usesMode) || developmentMode) //$NON-NLS-1$
 			return null;
 		HashSet bundleConstraints = new HashSet();
 		HashSet packageConstraints = new HashSet();
 		// first try out the initial selections
 		ArrayList initialConflicts = getConflicts(bundles, packageConstraints, bundleConstraints);
-		if (initialConflicts == null || "tryFirst".equals(usesMode)) { //$NON-NLS-1$
+		if (initialConflicts == null || "tryFirst".equals(usesMode) || usesCalculationTimeout) { //$NON-NLS-1$
 			groupingChecker.clear();
-			// the first combination have no conflicts or we only are trying the first combination; return without iterating over all combinations
+			// the first combination have no conflicts or 
+			// we only are trying the first combination or
+			// we have timed out the calculation; return without iterating over all combinations
 			return initialConflicts;
 		}
 		ResolverConstraint[][] multipleSuppliers = getMultipleSuppliers(bundles, packageConstraints, bundleConstraints);
@@ -656,7 +662,13 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		long timeLimit = Math.min(MAX_USES_TIME_BASE + (bundles.length * 30), MAX_USES_TIME_LIMIT);
 		int bestConflictCount = getConflictCount(bestConflicts);
 		ResolverBundle[] bestConflictBundles = getConflictedBundles(bestConflicts);
-		while (bestConflictCount != 0 && (System.currentTimeMillis() - initialTime) < timeLimit && getNextCombination(multipleSuppliers)) {
+		while (bestConflictCount != 0 && getNextCombination(multipleSuppliers)) {
+			if ((System.currentTimeMillis() - initialTime) > timeLimit) {
+				if (DEBUG_USES)
+					System.out.println("Uses constraint check has timedout.  Using the best solution found so far."); //$NON-NLS-1$
+				usesCalculationTimeout = true;
+				break;
+			}
 			if (DEBUG_USES)
 				printCombination(getCombination(multipleSuppliers, new int[multipleSuppliers.length]));
 			// first count the conflicts for the bundles with conflicts from the best combination
