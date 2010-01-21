@@ -514,7 +514,7 @@ public class PreferencesService implements IPreferencesService {
 	 */
 	public byte[] getByteArray(String qualifier, String key, byte[] defaultValue, IScopeContext[] scopes) {
 		String result = get(EclipsePreferences.decodePath(key)[1], null, getNodes(qualifier, key, scopes));
-		return result == null ? defaultValue : result.getBytes();
+		return result == null ? defaultValue : Base64.decode(result.getBytes());
 	}
 
 	/*
