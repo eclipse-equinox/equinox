@@ -38,8 +38,6 @@ public class FileStorage extends ComponentStorage {
 	//Probably it should be in the supplement bundle?
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 
-	private String[] dbBundlePath = new String[1];
-	private String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 	private static String CUSTOM_DB_NAME = "SCR"; //$NON-NLS-1$
 	private File file;
 	private ExternalizableDictionary data = new ExternalizableDictionary();
@@ -85,6 +83,7 @@ public class FileStorage extends ComponentStorage {
 				lastModified = getLastModifiedTimestamp(bundle);
 			}
 
+			String[] dbBundlePath = new String[1];
 			dbBundlePath[0] = String.valueOf(bundle.getBundleId());
 
 			String lastModifiedValue = (String) data.get(getPath(dbBundlePath));
@@ -117,6 +116,7 @@ public class FileStorage extends ComponentStorage {
 
 	private Vector loadComponentsFromDB(Bundle bundle) throws Exception {
 		try {
+			String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 			ServiceComponent currentComponent = null;
 			long bundleId = bundle.getBundleId();
 			dbCompPath[0] = String.valueOf(bundleId);
@@ -141,8 +141,10 @@ public class FileStorage extends ComponentStorage {
 	}
 
 	public void deleteComponentDefinitions(long bundleID) {
+		String[] dbBundlePath = new String[1];
 		dbBundlePath[0] = String.valueOf(bundleID);
 		data.remove(getPath(dbBundlePath));
+		String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 		dbCompPath[0] = String.valueOf(bundleID);
 		data.remove(getPath(dbCompPath));
 		if (file.exists()) {
@@ -157,6 +159,7 @@ public class FileStorage extends ComponentStorage {
 			if (components == null || components.size() == 0) {
 				return;
 			}
+			String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 			dbCompPath[0] = String.valueOf(bundleID);
 
 			DBObject tmpObj = new DBObject(components);
@@ -199,11 +202,13 @@ public class FileStorage extends ComponentStorage {
 	}
 
 	private String getPath(String path[]) {
-		pathBuffer.setLength(0);
-		for (int i = 0; i < path.length; i++) {
-			pathBuffer.append(path[i]).append(separator);
+		synchronized (pathBuffer) {
+			pathBuffer.setLength(0);
+			for (int i = 0; i < path.length; i++) {
+				pathBuffer.append(path[i]).append(separator);
+			}
+			return pathBuffer.toString();
 		}
-		return pathBuffer.toString();
 	}
 
 	/**
