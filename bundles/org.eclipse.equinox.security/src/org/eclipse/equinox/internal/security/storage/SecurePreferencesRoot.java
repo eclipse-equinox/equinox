@@ -68,7 +68,7 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 
 	static private ILock lock = Job.getJobManager().newLock();
 
-	final private URL location;
+	private URL location;
 
 	private long timestamp = 0;
 
@@ -112,6 +112,11 @@ public class SecurePreferencesRoot extends SecurePreferences implements IStorage
 				properties.load(is);
 				timestamp = getLastModified();
 			}
+		} catch (IllegalArgumentException e) {
+			String msg = NLS.bind(SecAuthMessages.badStorageURL, location.toString());
+			AuthPlugin.getDefault().logError(msg, e);
+			location = null; // don't attempt to use it 
+			return;
 		} finally {
 			if (is != null)
 				is.close();

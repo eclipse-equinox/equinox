@@ -29,6 +29,7 @@ public class SecAuthMessages extends NLS {
 	public static String startFirst;
 	public static String stopFirst;
 	public static String unsupoprtedCharEncoding;
+	public static String badStorageURL;
 
 	// Configuration provider
 	public static String unexpectedConfigElement;
