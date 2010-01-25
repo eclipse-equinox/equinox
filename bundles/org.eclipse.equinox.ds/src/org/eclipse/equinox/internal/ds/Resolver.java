@@ -67,6 +67,12 @@ public final class Resolver implements WorkPerformer {
 	// plenty of components.
 	// Keep in mind that build process is asynchronous.
 
+	static {
+		/** preload some DS bundle classes to avoid classloader deadlocks */
+		Reference.class.getName();
+		SCRUtil.class.getName();
+	}
+
 	/**
 	 * Resolver constructor
 	 * 
