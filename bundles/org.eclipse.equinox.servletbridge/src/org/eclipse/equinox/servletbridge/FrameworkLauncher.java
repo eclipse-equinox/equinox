@@ -39,6 +39,8 @@ import javax.servlet.ServletContext;
  */
 public class FrameworkLauncher {
 
+	private static final String REFERENCE_SCHEME = "reference:";
+	private static final String CONFIG_INI = "config.ini";
 	private static final String DOT_JAR = ".jar"; //$NON-NLS-1$
 	private static final String WS_DELIM = " \t\n\r\f"; //$NON-NLS-1$
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
@@ -47,6 +49,7 @@ public class FrameworkLauncher {
 	protected static final String FRAMEWORKPROPERTIES = "org.eclipse.osgi.framework.internal.core.FrameworkProperties"; //$NON-NLS-1$
 	protected static final String NULL_IDENTIFIER = "@null"; //$NON-NLS-1$
 	protected static final String OSGI_FRAMEWORK = "osgi.framework"; //$NON-NLS-1$
+	protected static final String OSGI_FRAMEWORK_EXTENSIONS = "osgi.framework.extensions"; //$NON-NLS-1$
 	protected static final String OSGI_INSTANCE_AREA = "osgi.instance.area"; //$NON-NLS-1$
 	protected static final String OSGI_CONFIGURATION_AREA = "osgi.configuration.area"; //$NON-NLS-1$
 	protected static final String OSGI_INSTALL_AREA = "osgi.install.area"; //$NON-NLS-1$
@@ -348,19 +351,19 @@ public class FrameworkLauncher {
 			return;
 		}
 
-		Map initalPropertyMap = buildInitialPropertyMap();
+		Map initialPropertyMap = buildInitialPropertyMap();
 		String[] args = buildCommandLineArguments();
 
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
 			System.setProperty("osgi.framework.useSystemProperties", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			URL[] osgiURLArray = {new URL((String) initalPropertyMap.get(OSGI_FRAMEWORK))};
-			frameworkClassLoader = new ChildFirstURLClassLoader(osgiURLArray, this.getClass().getClassLoader());
+			URL[] frameworkURLs = findFrameworkURLs(initialPropertyMap);
+			frameworkClassLoader = new ChildFirstURLClassLoader(frameworkURLs, this.getClass().getClassLoader());
 			Class clazz = frameworkClassLoader.loadClass(STARTER);
 
 			Method setInitialProperties = clazz.getMethod("setInitialProperties", new Class[] {Map.class}); //$NON-NLS-1$
-			setInitialProperties.invoke(null, new Object[] {initalPropertyMap});
+			setInitialProperties.invoke(null, new Object[] {initialPropertyMap});
 
 			registerRestartHandler(clazz);
 
@@ -379,6 +382,85 @@ public class FrameworkLauncher {
 			throw new RuntimeException(e.getMessage());
 		} finally {
 			Thread.currentThread().setContextClassLoader(original);
+		}
+	}
+
+	private URL[] findFrameworkURLs(Map initialPropertyMap) {
+		List frameworkURLs = new ArrayList();
+		String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
+		if (installArea.startsWith(FILE_SCHEME)) {
+			installArea = installArea.substring(FILE_SCHEME.length());
+		}
+		File installBase = new File(installArea);
+
+		// OSGi framework
+		String osgiFramework = (String) initialPropertyMap.get(OSGI_FRAMEWORK);
+		File osgiFrameworkFile = null;
+		if (osgiFramework == null) {
+			// search for osgi.framework in osgi.install.area
+			String path = new File(installBase, "plugins").toString(); //$NON-NLS-1$
+			path = searchFor(FRAMEWORK_BUNDLE_NAME, path);
+			if (path == null)
+				throw new RuntimeException("Could not find framework"); //$NON-NLS-1$
+
+			osgiFrameworkFile = new File(path);
+		} else {
+			if (osgiFramework.startsWith(FILE_SCHEME)) {
+				osgiFramework = osgiFramework.substring(FILE_SCHEME.length());
+			}
+			osgiFrameworkFile = new File(osgiFramework);
+			if (!osgiFrameworkFile.isAbsolute())
+				osgiFrameworkFile = new File(installBase, osgiFramework);
+		}
+
+		try {
+			URL frameworkURL = osgiFrameworkFile.toURL();
+			frameworkURLs.add(frameworkURL);
+			// ensure the framework URL is absolute
+			initialPropertyMap.put(OSGI_FRAMEWORK, frameworkURL.toExternalForm());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Could not find framework -- " + e.getMessage()); //$NON-NLS-1$
+		}
+
+		// OSGi framework extensions
+		String osgiFrameworkExtensions = (String) initialPropertyMap.get(OSGI_FRAMEWORK_EXTENSIONS);
+		if (osgiFrameworkExtensions != null) {
+			StringTokenizer tokenizer = new StringTokenizer(osgiFrameworkExtensions, ",");
+			while (tokenizer.hasMoreTokens()) {
+				String extension = tokenizer.nextToken().trim();
+				if (extension.length() == 0)
+					continue;
+
+				URL extensionURL = findExtensionURL(extension, osgiFrameworkFile);
+				if (extensionURL != null) {
+					frameworkURLs.add(extensionURL);
+				}
+			}
+		}
+		return (URL[]) frameworkURLs.toArray(new URL[frameworkURLs.size()]);
+	}
+
+	private URL findExtensionURL(String extension, File osgiFrameworkFile) {
+		File extensionFile = null;
+		if (extension.startsWith(REFERENCE_SCHEME)) {
+			extension = extension.substring(REFERENCE_SCHEME.length());
+			if (!extension.startsWith(FILE_SCHEME))
+				throw new RuntimeException("Non-file scheme for framework extension URL -- " + extension); //$NON-NLS-1$
+			extension = extension.substring(FILE_SCHEME.length());
+			extensionFile = new File(extension);
+			if (!extensionFile.isAbsolute())
+				extensionFile = new File(osgiFrameworkFile.getParentFile(), extension);
+		} else {
+			String fullExtensionPath = searchFor(extension, osgiFrameworkFile.getParent());
+			if (fullExtensionPath == null)
+				return null;
+			extensionFile = new File(fullExtensionPath);
+		}
+
+		try {
+			return extensionFile.toURL();
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Could not find framework extension -- " + extensionFile.getAbsolutePath() + " : " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -466,27 +548,67 @@ public class FrameworkLauncher {
 				initialPropertyMap.put(OSGI_INSTANCE_AREA, workspaceDirectory.toURL().toExternalForm());
 			}
 
+			// read values from config.ini
+			Properties configurationProperties = loadConfigurationFile(initialPropertyMap);
+
 			// osgi.framework if not specified
 			if (initialPropertyMap.get(OSGI_FRAMEWORK) == null) {
-				// search for osgi.framework in osgi.install.area
-				String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
-
-				// only support file type URLs for install area
-				if (installArea.startsWith(FILE_SCHEME))
-					installArea = installArea.substring(FILE_SCHEME.length());
-
-				String path = new File(installArea, "plugins").toString(); //$NON-NLS-1$
-				path = searchFor(FRAMEWORK_BUNDLE_NAME, path);
-				if (path == null)
-					throw new RuntimeException("Could not find framework"); //$NON-NLS-1$
-
-				initialPropertyMap.put(OSGI_FRAMEWORK, new File(path).toURL().toExternalForm());
+				String osgiFramework = configurationProperties.getProperty(OSGI_FRAMEWORK);
+				if (osgiFramework != null)
+					initialPropertyMap.put(OSGI_FRAMEWORK, osgiFramework);
 			}
+
+			// osgi.framework.extensions if not specified
+			if (initialPropertyMap.get(OSGI_FRAMEWORK_EXTENSIONS) == null) {
+				String osgiFrameworkExtensions = configurationProperties.getProperty(OSGI_FRAMEWORK_EXTENSIONS);
+				if (osgiFrameworkExtensions != null)
+					initialPropertyMap.put(OSGI_FRAMEWORK_EXTENSIONS, osgiFrameworkExtensions);
+			}
+
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("Error establishing location"); //$NON-NLS-1$
 		}
 
 		return initialPropertyMap;
+	}
+
+	private Properties loadConfigurationFile(Map initialPropertyMap) {
+		InputStream is = null;
+		try {
+			String installArea = (String) initialPropertyMap.get(OSGI_INSTALL_AREA);
+			if (installArea.startsWith(FILE_SCHEME)) {
+				installArea = installArea.substring(FILE_SCHEME.length());
+			}
+			File installBase = new File(installArea);
+
+			String configurationArea = (String) initialPropertyMap.get(OSGI_CONFIGURATION_AREA);
+			if (configurationArea.startsWith(FILE_SCHEME)) {
+				configurationArea = configurationArea.substring(FILE_SCHEME.length());
+			}
+			File configurationBase = new File(configurationArea);
+			if (!configurationBase.isAbsolute())
+				configurationBase = new File(installBase, configurationArea);
+
+			File configurationFile = new File(configurationBase, CONFIG_INI);
+			if (!configurationFile.exists())
+				return null;
+
+			Properties configProperties = new Properties();
+			is = new BufferedInputStream(new FileInputStream(configurationFile));
+			configProperties.load(is);
+			return configProperties;
+		} catch (Throwable t) {
+			context.log("Error reading configuration file -- " + t.toString()); //$NON-NLS-1$
+			return null;
+		} finally {
+			if (is != null)
+				try {
+					is.close();
+				} catch (IOException e) {
+					// unexpected
+					e.printStackTrace();
+				}
+		}
 	}
 
 	/**
