@@ -16,13 +16,13 @@
 <filter id="403804204">
 <message_arguments>
 <message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getSignerCertificates(int)"/>
+<message_argument value="getVersion()"/>
 </message_arguments>
 </filter>
 <filter id="403804204">
 <message_arguments>
 <message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getVersion()"/>
+<message_argument value="getSignerCertificates(int)"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -203,7 +203,7 @@
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_APP"/>
+<message_argument value="FRAMEWORK_STORAGE"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -215,7 +215,7 @@
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE"/>
+<message_argument value="FRAMEWORK_BUNDLE_PARENT_APP"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -319,14 +319,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SECURITY"/>
+<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
+<message_argument value="FRAMEWORK_SECURITY"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -354,14 +354,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
+<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -405,14 +405,14 @@
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_UPDATE"/>
+<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
 </message_arguments>
 </filter>
 <filter id="1141899266">
 <message_arguments>
 <message_argument value="1.5"/>
 <message_argument value="3.5"/>
-<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
+<message_argument value="STOPPED_UPDATE"/>
 </message_arguments>
 </filter>
 </resource>
@@ -633,14 +633,14 @@
 <message_arguments>
 <message_argument value="1.1"/>
 <message_argument value="3.5"/>
-<message_argument value="toString()"/>
+<message_argument value="hashCode()"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.1"/>
 <message_argument value="3.5"/>
-<message_argument value="hashCode()"/>
+<message_argument value="toString()"/>
 </message_arguments>
 </filter>
 </resource>
@@ -668,13 +668,6 @@
 <message_argument value="1.4"/>
 <message_argument value="3.5"/>
 <message_argument value="org.osgi.util.tracker.BundleTrackerCustomizer"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="supplement/src/org/eclipse/osgi/service/debug/DebugOptions.java" type="org.eclipse.osgi.service.debug.DebugOptions">
-<filter id="403853384">
-<message_arguments>
-<message_argument value="org.eclipse.osgi.service.debug.DebugOptions"/>
 </message_arguments>
 </filter>
 </resource>
