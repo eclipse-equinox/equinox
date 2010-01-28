@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,14 +67,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 		}
 		// default to boot classloader
 		if (bundleClassLoaderParent == null)
-			bundleClassLoaderParent = new ParentClassLoader();
-	}
-
-	// Empty parent classloader.  This is used by default as the BundleClassLoader parent.
-	private static class ParentClassLoader extends ClassLoader {
-		protected ParentClassLoader() {
-			super(null);
-		}
+			bundleClassLoaderParent = new ClassLoader(Object.class.getClassLoader()) {/* boot class loader*/};
 	}
 
 	private EventPublisher eventPublisher;
