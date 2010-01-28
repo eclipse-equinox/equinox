@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,6 +162,138 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 		actualEvents = syncListenerResults.getResults(12);
 		compareResults(expectedEvents, actualEvents);
+	}
+
+	public void testBug300692_01() throws BundleException {
+		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
+		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
+		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
+		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
+		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
+		syncListenerResults.getResults(0);
+
+		StartLevel sl = installer.getStartLevel();
+		int currentSL = sl.getStartLevel();
+		int testSL = currentSL + 1;
+		sl.setBundleStartLevel(chainTest, testSL);
+		sl.setBundleStartLevel(chainTestA, testSL);
+		sl.setBundleStartLevel(chainTestB, testSL);
+		sl.setBundleStartLevel(chainTestC, testSL);
+		sl.setBundleStartLevel(chainTestD, testSL);
+		installer.resolveBundles(new Bundle[] {chainTest, chainTestA, chainTestB, chainTestC, chainTestD});
+
+		Object[] expectedEvents = new Object[5];
+		expectedEvents[0] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
+		expectedEvents[1] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
+		expectedEvents[2] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
+		expectedEvents[3] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
+		expectedEvents[4] = new BundleEvent(BundleEvent.RESOLVED, chainTest);
+
+		Object[] actualEvents = syncListenerResults.getResults(5);
+		compareResults(expectedEvents, actualEvents);
+		try {
+			System.setProperty("test.bug300692", "true");
+			chainTest.start();
+			sl.setStartLevel(testSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+
+			expectedEvents = new Object[14];
+			int i = 0;
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
+
+			actualFrameworkEvents = syncListenerResults.getResults(14);
+			compareResults(expectedEvents, actualFrameworkEvents);
+		} finally {
+			System.getProperties().remove("test.bug300692");
+			sl.setStartLevel(currentSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+		}
+	}
+
+	public void testBug300692_02() throws BundleException {
+		Bundle chainTest = installer.installBundle("chain.test"); //$NON-NLS-1$
+		Bundle chainTestA = installer.installBundle("chain.test.a"); //$NON-NLS-1$
+		Bundle chainTestB = installer.installBundle("chain.test.b"); //$NON-NLS-1$
+		Bundle chainTestC = installer.installBundle("chain.test.c"); //$NON-NLS-1$
+		Bundle chainTestD = installer.installBundle("chain.test.d"); //$NON-NLS-1$
+		syncListenerResults.getResults(0);
+
+		StartLevel sl = installer.getStartLevel();
+		int currentSL = sl.getStartLevel();
+		int testSL = currentSL + 1;
+		sl.setBundleStartLevel(chainTest, testSL);
+		sl.setBundleStartLevel(chainTestA, testSL);
+		sl.setBundleStartLevel(chainTestB, testSL);
+		sl.setBundleStartLevel(chainTestC, testSL);
+		sl.setBundleStartLevel(chainTestD, testSL);
+		installer.resolveBundles(new Bundle[] {chainTest, chainTestA, chainTestB, chainTestC, chainTestD});
+
+		Object[] expectedEvents = new Object[5];
+		expectedEvents[0] = new BundleEvent(BundleEvent.RESOLVED, chainTestD);
+		expectedEvents[1] = new BundleEvent(BundleEvent.RESOLVED, chainTestC);
+		expectedEvents[2] = new BundleEvent(BundleEvent.RESOLVED, chainTestB);
+		expectedEvents[3] = new BundleEvent(BundleEvent.RESOLVED, chainTestA);
+		expectedEvents[4] = new BundleEvent(BundleEvent.RESOLVED, chainTest);
+
+		Object[] actualEvents = syncListenerResults.getResults(5);
+		compareResults(expectedEvents, actualEvents);
+		try {
+			System.setProperty("test.bug300692", "true");
+			System.setProperty("test.bug300692.listener", "true");
+			chainTest.start();
+			sl.setStartLevel(testSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+
+			expectedEvents = new Object[14];
+			int i = 0;
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
+
+			actualFrameworkEvents = syncListenerResults.getResults(14);
+			compareResults(expectedEvents, actualFrameworkEvents);
+		} finally {
+			System.getProperties().remove("test.bug300692");
+			System.getProperties().remove("test.bug300692.listener");
+			sl.setStartLevel(currentSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+		}
 	}
 
 	public void testClassCircularityError() throws Exception {

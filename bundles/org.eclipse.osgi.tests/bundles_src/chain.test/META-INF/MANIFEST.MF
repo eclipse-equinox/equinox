@@ -9,3 +9,4 @@ Import-Package: chain.test.a,
  org.eclipse.osgi.tests.bundles,
  org.osgi.framework;version="1.3.0"
 Bundle-ActivationPolicy: lazy
+Bundle-Activator: chain.test.Activator

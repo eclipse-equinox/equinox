@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -335,6 +335,23 @@ public class BundleHost extends AbstractBundle {
 			Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
+		if ((options & LAZY_TRIGGER) != 0) {
+			if ((state & RESOLVED) != 0) {
+				// Should publish the lazy activation event here before the starting event
+				// This can happen if another bundle in the same start-level causes a class load from the lazy start bundle.
+				state = STARTING;
+				// release the state change lock before sending lazy activation event (bug 258659)
+				completeStateChange();
+				framework.publishBundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+				beginStateChange();
+				if (state != STARTING) {
+					// while firing the LAZY_ACTIVATION event some one else caused the bundle to transition
+					// out of STARTING.  This could have happened because some listener called start on the bundle
+					// or another class load could have caused the start trigger to get fired again.
+					return;
+				}
+			}
+		}
 		state = STARTING;
 		framework.publishBundleEvent(BundleEvent.STARTING, this);
 		context = getContext();
