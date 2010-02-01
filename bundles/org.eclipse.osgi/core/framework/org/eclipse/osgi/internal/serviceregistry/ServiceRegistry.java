@@ -900,7 +900,14 @@ public class ServiceRegistry {
 
 		for (Iterator iter = result.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			if (!filter.match(registration.getReferenceImpl())) {
+			ServiceReferenceImpl reference;
+			try {
+				reference = registration.getReferenceImpl();
+			} catch (IllegalStateException e) {
+				iter.remove(); /* service was unregistered after we left the synchronized block above */
+				continue;
+			}
+			if (!filter.match(reference)) {
 				iter.remove();
 			}
 		}
@@ -941,7 +948,14 @@ public class ServiceRegistry {
 	private static List changeRegistrationsToReferences(List result) {
 		for (ListIterator iter = result.listIterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			iter.set(registration.getReferenceImpl()); /* replace the registration with its reference */
+			ServiceReferenceImpl reference;
+			try {
+				reference = registration.getReferenceImpl();
+			} catch (IllegalStateException e) {
+				iter.remove(); /* service was unregistered after we were called */
+				continue;
+			}
+			iter.set(reference); /* replace the registration with its reference */
 		}
 		return result;
 	}
