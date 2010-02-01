@@ -125,6 +125,7 @@ public class ProxyServlet extends HttpServlet {
 				if (matchingFilterRegistrations.isEmpty()) {
 					registration.service(wrappedRequest, resp);
 				} else {
+					Collections.sort(matchingFilterRegistrations);
 					FilterChain chain = new FilterChainImpl(matchingFilterRegistrations, registration);
 					chain.doFilter(wrappedRequest, resp);
 				}
@@ -230,7 +231,8 @@ public class ProxyServlet extends HttpServlet {
 		if (filterRegistrations.containsKey(filter))
 			throw new ServletException("This filter has already been registered."); //$NON-NLS-1$
 
-		FilterRegistration registration = new FilterRegistration(filter, httpContext, alias);
+		int filterPriority = findFilterPriority(initparams);
+		FilterRegistration registration = new FilterRegistration(filter, httpContext, alias, filterPriority);
 		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
 		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, wrappedServletContext);
 
@@ -244,5 +246,22 @@ public class ProxyServlet extends HttpServlet {
 				proxyContext.destroyContextAttributes(httpContext);
 		}
 		filterRegistrations.put(filter, registration);
+	}
+
+	private int findFilterPriority(Dictionary initparams) {
+		if (initparams == null)
+			return 0;
+		String filterPriority = (String) initparams.get("filter-priority"); //$NON-NLS-1$
+		if (filterPriority == null)
+			return 0;
+
+		try {
+			int result = Integer.parseInt(filterPriority);
+			if (result >= -1000 && result <= 1000)
+				return result;
+		} catch (NumberFormatException e) {
+			// fall through
+		}
+		throw new IllegalArgumentException("filter-priority must be an integer between -1000 and 1000 but was: " + filterPriority); //$NON-NLS-1$
 	}
 }
