@@ -153,7 +153,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction {
 	protected Enumeration findResources(String arg0) throws IOException {
 		//Shortcut cycle
 		if (startLoading(arg0) == false)
-			return null;
+			return Collections.enumeration(Collections.EMPTY_LIST);
 		try {
 			ArrayList toConsult = findClassLoaders();
 			for (Iterator loaders = toConsult.iterator(); loaders.hasNext();) {
