@@ -34,6 +34,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener {
 		if (event.getType() != BundleEvent.LAZY_ACTIVATION)
 			return;
 		Class clazz = BMultiChain1.class;
+		System.out.println(clazz.getName());
 	}
 
 }
