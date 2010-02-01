@@ -11,6 +11,7 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -1537,6 +1538,28 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			fail("Failed to get resources", e);
 		}
 		assertNull("Resources is not null", resources);
+	}
+
+	public void testBug299921() {
+		ClassLoader cl = this.getClass().getClassLoader();
+		Enumeration resources = null;
+		try {
+			Method findMethod = ClassLoader.class.getDeclaredMethod("findResources", new Class[] {String.class});
+			findMethod.setAccessible(true);
+
+			resources = (Enumeration) findMethod.invoke(cl, new Object[] {"test/doesnotexist.txt"});
+		} catch (Exception e) {
+			fail("Unexpected error calling getResources", e);
+		}
+		assertNotNull("Should not be null", resources);
+		assertFalse("Found resources!", resources.hasMoreElements());
+		try {
+			resources = cl.getResources("test/doesnotexist.txt");
+		} catch (IOException e) {
+			fail("Unexpected IOException", e);
+		}
+		assertNotNull("Should not be null", resources);
+		assertFalse("Found resources!", resources.hasMoreElements());
 	}
 
 	private void doTestArrayTypeLoad(String name) {

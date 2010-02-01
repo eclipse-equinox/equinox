@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.util.Collections;
 import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
@@ -44,6 +45,8 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	private final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 	private static final boolean CLASS_CERTIFICATE;
 	private static final boolean PARALLEL_CAPABLE;
+	private static final Enumeration EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
+
 	static {
 		CLASS_CERTIFICATE = Boolean.valueOf(FrameworkProperties.getProperty(CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
 		AllPermission allPerm = new AllPermission();
@@ -156,7 +159,10 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @throws IOException 
 	 */
 	protected Enumeration findResources(String name) throws IOException {
-		return (delegate.findResources(name));
+		Enumeration result = delegate.findResources(name);
+		if (result == null)
+			return EMPTY_ENUMERATION;
+		return result;
 	}
 
 	/**
