@@ -1,0 +1,4 @@
+# Debugging options for the org.eclipse.equinox.bidi plugin
+
+# Turn on general debugging for the org.eclipse.equinox.bidi plugin.
+org.eclipse.equinox.bidi/debug=false
