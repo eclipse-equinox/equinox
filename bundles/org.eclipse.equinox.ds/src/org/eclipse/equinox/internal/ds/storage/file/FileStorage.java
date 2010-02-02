@@ -39,18 +39,19 @@ public class FileStorage extends ComponentStorage {
 	public static final String PROP_CHECK_CONFIG = "osgi.checkConfiguration"; //$NON-NLS-1$
 
 	private static String CUSTOM_DB_NAME = "SCR"; //$NON-NLS-1$
-	private File file;
+	private BundleContext bc = null;
 	private ExternalizableDictionary data = new ExternalizableDictionary();
 	private StringBuffer pathBuffer = new StringBuffer();
 	private String separator;
 	private boolean isDirty = false;
 
 	public FileStorage(BundleContext bc) {
+		this.bc = bc;
 		separator = bc.getProperty("path.separator"); //$NON-NLS-1$
-		file = bc.getDataFile(CUSTOM_DB_NAME);
+		File file = bc.getDataFile(CUSTOM_DB_NAME);
 		FileInputStream fis = null;
 		try {
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				data.readObject(new BufferedInputStream(fis = new FileInputStream(file)));
 			}
 		} catch (IOException e) {
@@ -147,7 +148,8 @@ public class FileStorage extends ComponentStorage {
 		String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
 		dbCompPath[0] = String.valueOf(bundleID);
 		data.remove(getPath(dbCompPath));
-		if (file.exists()) {
+		File file = bc.getDataFile(CUSTOM_DB_NAME);
+		if (file != null && file.exists()) {
 			//delete the file to prevent leaving old information in it
 			file.delete();
 		}
@@ -181,6 +183,11 @@ public class FileStorage extends ComponentStorage {
 	private void saveFile() {
 		FileOutputStream fos = null;
 		try {
+			File file = bc.getDataFile(CUSTOM_DB_NAME);
+			if (file == null) {
+				//save operation is not possible
+				return;
+			}
 			fos = new FileOutputStream(file);
 			try {
 				data.writeObject(fos);
