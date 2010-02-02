@@ -9,8 +9,9 @@
         IBM Corporation - initial API and implementation
  -->
 <project name="Launcher Build" basedir="." default="build">
-	
-	<property name="cvsRoot" value=":pserver:anonymous@dev.eclipse.org:/cvsroot/rt" />
+	<property name="cvsLogin" value=":pserver:anonymous" />
+	<property name="cvsRoot" value="${cvsLogin}@dev.eclipse.org:/cvsroot/rt" />
+	<property name="cvsrsh" value="ssh" />
 	<property name="cvsExecutablePath" value="org.eclipse.equinox/framework/bundles/org.eclipse.equinox.executable" />
 	<property name="cvsTag" value="HEAD" />
 	
@@ -79,7 +80,7 @@
 		<!-- fetch the source and put it in a folder unique to this platform so we don't interfere with other
 		     compiles if the working folder is shared accross multiple machines -->
 		<delete dir="${basedir}/${os}.${ws}.${arch}/library" failonerror="false"/> 
-		<cvs command="export -d ${os}.${ws}.${arch}/library" tag="${cvsTag}" package="${cvsExecutablePath}/library" cvsRoot="${cvsRoot}" dest="${basedir}" quiet="true" failonerror="true"/>
+		<cvs command="export -d ${os}.${ws}.${arch}/library" tag="${cvsTag}" cvsrsh="${cvsRsh}" package="${cvsExecutablePath}/library" cvsRoot="${cvsRoot}" dest="${basedir}" quiet="true" failonerror="true"/>
 	</target>
 	
 	<target name="buildNix" if="buildNix">
