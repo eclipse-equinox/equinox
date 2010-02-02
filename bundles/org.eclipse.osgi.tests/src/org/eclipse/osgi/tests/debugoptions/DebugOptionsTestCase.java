@@ -221,6 +221,77 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	}
 
+	public void testSetOptionsWhenDisabled() {
+
+		// enable tracing initially.
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		// create a new key to add.
+		String testKey = getName() + "/debug/disableCheck";
+		// set its value to 'ok'
+		debugOptions.setOption(testKey, "ok");
+		// make sure the right value is added
+		String actualValue = debugOptions.getOption(testKey, "not ok");
+		assertEquals("The correct option value was not returned from the debug option: " + testKey, "ok", actualValue);
+		// disable tracing
+		debugOptions.setDebugEnabled(false);
+		// check for the value
+		actualValue = debugOptions.getOption(testKey, "not ok");
+		assertEquals("The 'default' value supplied was not returned when tracing is disabled.", "not ok", actualValue);
+		// try setting the value to "ok" (this should be a no-op and return the 'default' value)
+		debugOptions.setOption(testKey, "ok");
+		actualValue = debugOptions.getOption(testKey, "not ok");
+		assertEquals("The 'default' value supplied was not returned when tracing is disabled.", "not ok", actualValue);
+		// remove the option and check for the value (it should still exist after re-enabling tracing)
+		debugOptions.removeOption(testKey);
+		// re-enable tracing
+		debugOptions.setDebugEnabled(true);
+		// check that the value is still the initial "ok"
+		actualValue = debugOptions.getOption(testKey, "not ok");
+		assertEquals("The value after re-enabling tracing is invalid.", "ok", actualValue);
+	}
+
+	public void testStringValues() {
+
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		// create a new key to add.
+		String testKey = getName() + "/debug/stringValue";
+		// set its value to 'test'
+		debugOptions.setOption(testKey, "test");
+		// check to make sure the value returned is correct
+		String actualValue = debugOptions.getOption(testKey, "default");
+		assertEquals("The correct option value was not returned from the debug option: " + testKey, "test", actualValue);
+		// remove the option and check for the value (it should not exist so the default value should be returned)
+		debugOptions.removeOption(testKey);
+		actualValue = debugOptions.getOption(testKey, "default");
+		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", "default", actualValue);
+	}
+
+	public void testIntegerValues() {
+
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		// create a new key to add.
+		String testKey = getName() + "/debug/intValue";
+		// set its value to 42.
+		debugOptions.setOption(testKey, "42");
+		// check to make sure the value returned is correct
+		int actualValue = debugOptions.getIntegerOption(testKey, 0);
+		assertEquals("The correct option value was not returned from the debug option: " + testKey, 42, actualValue);
+		// set the value of this key so that a NumberFormatException will occur
+		debugOptions.setOption(testKey, "test");
+		actualValue = debugOptions.getIntegerOption(testKey, 0);
+		assertEquals("The 'default' value supplied was not returned when a NumberFormatException occurs.", 0, actualValue);
+		// remove the option and check for the value (it should not exist so the default value should be returned)
+		debugOptions.removeOption(testKey);
+		actualValue = debugOptions.getIntegerOption(testKey, 0);
+		assertEquals("The 'default' value supplied was not returned when the key does not exist in the DebugOptions.", 0, actualValue);
+	}
+
 	public void testBooleanValues() {
 		if (!debugOptions.isDebugEnabled()) {
 			debugOptions.setDebugEnabled(true);
