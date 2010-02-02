@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,10 +31,13 @@ public interface DebugOptions {
 
 	/**
 	 * Returns the identified option as a boolean value.  The specified
-	 * defaultValue is returned if no such option is found.   Options are specified
-	 * in the general form <i>&lt;Bundle-SymbolicName&gt;/&lt;option-path&gt;</i>.  
+	 * defaultValue is returned if no such option is found or if debug is not enabled.   
+	 * 
+	 * <p>
+	 * Options are specified in the general form <i>&lt;Bundle-SymbolicName&gt;/&lt;option-path&gt;</i>.  
 	 * For example, <code>org.eclipse.core.runtime/debug</code>
-	 *
+	 * </p>
+	 * 
 	 * @param option the name of the option to lookup
 	 * @param defaultValue the value to return if no such option is found
 	 * @return the value of the requested debug option or the
@@ -43,11 +46,15 @@ public interface DebugOptions {
 	public abstract boolean getBooleanOption(String option, boolean defaultValue);
 
 	/**
-	 * Returns the identified option.  <code>null</code>
-	 * is returned if no such option is found.   Options are specified
+	 * Returns the identified option.  A <code>null</code> value
+	 * is returned if no such option is found or if debug is not enabled.
+	 * 
+	 * <p>
+	 * Options are specified
 	 * in the general form <i>&lt;Bundle-SymbolicName&gt;/&lt;option-path&gt;</i>.  
 	 * For example, <code>org.eclipse.core.runtime/debug</code>
-	 *
+	 *</p>
+	 * 
 	 * @param option the name of the option to lookup
 	 * @return the value of the requested debug option or <code>null</code>
 	 */
@@ -55,11 +62,14 @@ public interface DebugOptions {
 
 	/**
 	 * Returns the identified option.  The specified defaultValue is 
-	 * returned if no such option is found or if a NumberFormatException is thrown 
-	 * while converting the option value to an integer.   Options are specified
+	 * returned if no such option is found or if debug is not enabled.
+	 * 
+	 * <p>
+	 * Options are specified
 	 * in the general form <i>&lt;Bundle-SymbolicName&gt;/&lt;option-path&gt;</i>.  
 	 * For example, <code>org.eclipse.core.runtime/debug</code>
-	 *
+	 * </p>
+	 * 
 	 * @param option the name of the option to lookup
 	 * @param defaultValue the value to return if no such option is found
 	 * @return the value of the requested debug option or the
@@ -69,10 +79,16 @@ public interface DebugOptions {
 
 	/**
 	 * Returns the identified option as an int value.  The specified
-	 * defaultValue is returned if no such option is found.   Options are specified
+	 * defaultValue is returned if no such option is found or if a 
+	 * NumberFormatException is thrown while converting the option value 
+	 * to an integer or if debug is not enabled.
+	 * 
+	 * <p>
+	 * Options are specified
 	 * in the general form <i>&lt;Bundle-SymbolicName&gt;/&lt;option-path&gt;</i>.  
 	 * For example, <code>org.eclipse.core.runtime/debug</code>
-	 *
+	 * </p>
+	 * 
 	 * @param option the name of the option to lookup
 	 * @param defaultValue the value to return if no such option is found
 	 * @return the value of the requested debug option or the
@@ -81,30 +97,40 @@ public interface DebugOptions {
 	public abstract int getIntegerOption(String option, int defaultValue);
 
 	/**
-	 * Sets the identified option to the identified value.
+	 * Sets the identified option to the identified value.  If debug is 
+	 * not enabled then the specified option is not changed.
 	 * @param option the name of the option to set
 	 * @param value the value of the option to set
 	 */
 	public abstract void setOption(String option, String value);
 
 	/**
-	 * Removes the identified option
+	 * Removes the identified option.  If debug is not enabled then
+	 * the specified option is not removed.
 	 * @param option the name of the option to remove
 	 * @since 3.5
 	 */
 	public abstract void removeOption(String option);
 
 	/**
-	 * Accessor to determine if debugging/tracing is enabled for the product.
-	 * @return true if debugging/tracing is enabled;  Otherwise false is returned.
+	 * Returns true if debugging/tracing is currently enabled.
+	 * @return true if debugging/tracing is currently enabled;  Otherwise false is returned.
 	 * @since 3.5
 	 */
 	public abstract boolean isDebugEnabled();
 
 	/**
-	 * Enables or disables debug tracing for the entire application.
-	 * @param value If <code>true</code>, debugging is enabled, otherwise
-	 * debugging is disabled
+	 * Enables or disables debugging/tracing.
+	 * <p>
+	 * When debug is disabled all debug options are unset.
+	 * When disabling debug the current debug option values are
+	 * stored in memory as disabled values.  If debug is re-enabled the
+	 * disabled values will be set back and enabled.  The disabled values 
+	 * are only stored in memory and if the framework is restarted then 
+	 * the disabled option values will be lost.
+	 * </p>
+	 * @param value If <code>true</code>, debug is enabled, otherwise
+	 * debug is disabled.
 	 * @since 3.5
 	 */
 	public abstract void setDebugEnabled(boolean value);

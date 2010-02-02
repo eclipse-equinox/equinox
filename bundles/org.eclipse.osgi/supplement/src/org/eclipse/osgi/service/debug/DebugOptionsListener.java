@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,9 @@ import java.util.EventListener;
  * <p>
  * The {@link DebugOptionsListener#optionsChanged(DebugOptions)} method will automatically 
  * be called upon registration of the debug options listener service.  This allows the 
- * listener to obtain the initial debug options.
+ * listener to obtain the initial debug options.  This initial call to the listener 
+ * will happen even if debug is not enabled at the time of registration 
+ * ({@link DebugOptions#isDebugEnabled()} will return false in this case).
  * </p>
  * A debug options listener allows a bundle to cache trace option values in boolean fields for performance
  * and code cleanliness. For example:
@@ -55,7 +57,7 @@ public interface DebugOptionsListener extends EventListener {
 	 * Notifies this listener that an option-path for its plug-in has changed.
 	 * This method is also called initially by the DebugOptions implementation 
 	 * when the listener is registered as a service.  This allows the listener
-	 * to obtain the initial set of debug options with out the need to 
+	 * to obtain the initial set of debug options without the need to 
 	 * acquire the debug options service.
 	 * @param options a reference to the DebugOptions
 	 */

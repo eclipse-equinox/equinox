@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,12 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 
 	private static final String OSGI_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	public static final String PROP_TRACEFILE = "osgi.tracefile"; //$NON-NLS-1$
-	/** A map of all the options specified for the product */
+	/** monitor used to lock the options maps */
+	private final Object lock = new Object();
+	/** A current map of all the options with values set */
 	private Properties options = null;
+	/** A map of all the disabled options with values set at the time debug was disabled */
+	private Properties disabledOptions = null;
 	/** The singleton object of this class */
 	private static FrameworkDebugOptions singleton = null;
 	/** The default name of the .options file if loading when the -debug command-line argument is used */
@@ -48,8 +52,48 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * Internal constructor to create a <code>FrameworkDebugOptions</code> singleton object. 
 	 */
 	private FrameworkDebugOptions() {
-		super();
-		loadOptions();
+		// if no debug option was specified, don't even bother to try.
+		// Must ensure that the options slot is null as this is the signal to the
+		// platform that debugging is not enabled.
+		String debugOptionsFilename = FrameworkProperties.getProperty(OSGI_DEBUG);
+		if (debugOptionsFilename == null)
+			return;
+		options = new Properties();
+		URL optionsFile;
+		if (debugOptionsFilename.length() == 0) {
+			// default options location is user.dir (install location may be r/o so
+			// is not a good candidate for a trace options that need to be updatable by
+			// by the user)
+			String userDir = FrameworkProperties.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
+			if (!userDir.endsWith("/")) //$NON-NLS-1$
+				userDir += "/"; //$NON-NLS-1$
+			debugOptionsFilename = new File(userDir, OPTIONS).toString();
+		}
+		optionsFile = buildURL(debugOptionsFilename, false);
+		if (optionsFile == null) {
+			System.out.println("Unable to construct URL for options file: " + debugOptionsFilename); //$NON-NLS-1$
+			return;
+		}
+		System.out.print("Debug options:\n    " + optionsFile.toExternalForm()); //$NON-NLS-1$
+		try {
+			InputStream input = optionsFile.openStream();
+			try {
+				options.load(input);
+				System.out.println(" loaded"); //$NON-NLS-1$
+			} finally {
+				input.close();
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println(" not found"); //$NON-NLS-1$
+		} catch (IOException e) {
+			System.out.println(" did not parse"); //$NON-NLS-1$
+			e.printStackTrace(System.out);
+		}
+		// trim off all the blanks since properties files don't do that.
+		for (Iterator i = options.keySet().iterator(); i.hasNext();) {
+			Object key = i.next();
+			options.put(key, ((String) options.get(key)).trim());
+		}
 	}
 
 	public void start(BundleContext bc) {
@@ -110,47 +154,26 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 */
 	public boolean getBooleanOption(String option, boolean defaultValue) {
 		String optionValue = getOption(option);
-		return (optionValue != null && optionValue.equalsIgnoreCase("true")) || defaultValue; //$NON-NLS-1$
-	}
-
-	public String[] getOptionsForBundle(String bundleName) {
-
-		List optionsList = null;
-		if (options != null) {
-			optionsList = new ArrayList();
-			final Iterator entrySetIterator = options.entrySet().iterator();
-			int i = 0;
-			String key = null;
-			while (entrySetIterator.hasNext()) {
-				Map.Entry entry = (Map.Entry) entrySetIterator.next();
-				key = (String) entry.getKey();
-				int firstOptionPathIndex = key.indexOf("/"); //$NON-NLS-1$
-				if (key.substring(0, firstOptionPathIndex).equals(bundleName)) {
-					optionsList.add(((String) entry.getKey()) + "=" + ((String) entry.getValue())); //$NON-NLS-1$
-					i++;
-				}
-			}
-		}
-		if (optionsList == null) {
-			optionsList = Collections.EMPTY_LIST;
-		}
-		// convert the list to an array
-		final String[] optionsArray = (String[]) optionsList.toArray(new String[optionsList.size()]);
-		return optionsArray;
+		return optionValue != null ? optionValue.equalsIgnoreCase("true") : defaultValue; //$NON-NLS-1$
 	}
 
 	/**
 	 * @see DebugOptions#getOption(String)
 	 */
 	public String getOption(String option) {
-		return options != null ? options.getProperty(option) : null;
+		return getOption(option, null);
 	}
 
 	/**
 	 * @see DebugOptions#getOption(String, String)
 	 */
 	public String getOption(String option, String defaultValue) {
-		return options != null ? options.getProperty(option, defaultValue) : defaultValue;
+		synchronized (lock) {
+			if (options != null) {
+				return options.getProperty(option, defaultValue);
+			}
+		}
+		return defaultValue;
 	}
 
 	/**
@@ -172,18 +195,20 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	String[] getAllOptions() {
 
 		String[] optionsArray = null;
-		if (options != null) {
-			optionsArray = new String[options.size()];
-			final Iterator entrySetIterator = options.entrySet().iterator();
-			int i = 0;
-			while (entrySetIterator.hasNext()) {
-				Map.Entry entry = (Map.Entry) entrySetIterator.next();
-				optionsArray[i] = ((String) entry.getKey()) + "=" + ((String) entry.getValue()); //$NON-NLS-1$
-				i++;
+		synchronized (lock) {
+			if (options != null) {
+				optionsArray = new String[options.size()];
+				final Iterator entrySetIterator = options.entrySet().iterator();
+				int i = 0;
+				while (entrySetIterator.hasNext()) {
+					Map.Entry entry = (Map.Entry) entrySetIterator.next();
+					optionsArray[i] = ((String) entry.getKey()) + "=" + ((String) entry.getValue()); //$NON-NLS-1$
+					i++;
+				}
 			}
 		}
 		if (optionsArray == null) {
-			optionsArray = new String[1];
+			optionsArray = new String[1]; // TODO this is strange; null is the only element so we can print null in writeSession
 		}
 		return optionsArray;
 	}
@@ -193,12 +218,21 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#removeOption(java.lang.String)
 	 */
 	public void removeOption(String option) {
-
-		if (option != null) {
-			this.options.remove(option);
-			final int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
-			final String symbolicName = option.substring(0, firstSlashIndex);
-			this.optionsChanged(symbolicName);
+		if (option == null)
+			return;
+		boolean fireChangedEvent = false;
+		synchronized (lock) {
+			if (options != null) {
+				fireChangedEvent = options.remove(option) != null;
+			}
+		}
+		// Send the options change event outside the sync block
+		if (fireChangedEvent) {
+			int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
+			if (firstSlashIndex > 0) {
+				String symbolicName = option.substring(0, firstSlashIndex);
+				optionsChanged(symbolicName);
+			}
 		}
 	}
 
@@ -207,71 +241,33 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setOption(java.lang.String, java.lang.String)
 	 */
 	public void setOption(String option, String value) {
-		if (options != null) {
-			// get the current value
-			String currentValue = options.getProperty(option);
-			boolean optionValueHasChanged = false;
-			if (currentValue != null) {
-				if (!currentValue.equals(value)) {
-					optionValueHasChanged = true;
-				}
-			} else {
-				if (value != null) {
-					optionValueHasChanged = true;
-				}
-			}
-			if (optionValueHasChanged) {
-				options.put(option, value.trim());
-				final int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
-				final String symbolicName = option.substring(0, firstSlashIndex);
-				this.optionsChanged(symbolicName);
-			}
-		}
+		boolean fireChangedEvent = false;
+		synchronized (lock) {
+			if (options != null) {
+				// get the current value
+				String currentValue = options.getProperty(option);
 
-	}
-
-	private void loadOptions() {
-		// if no debug option was specified, don't even bother to try.
-		// Must ensure that the options slot is null as this is the signal to the
-		// platform that debugging is not enabled.
-		String debugOptionsFilename = FrameworkProperties.getProperty(OSGI_DEBUG);
-		if (debugOptionsFilename == null)
-			return;
-		options = new Properties();
-		URL optionsFile;
-		if (debugOptionsFilename.length() == 0) {
-			// default options location is user.dir (install location may be r/o so
-			// is not a good candidate for a trace options that need to be updatable by
-			// by the user)
-			String userDir = FrameworkProperties.getProperty("user.dir").replace(File.separatorChar, '/'); //$NON-NLS-1$
-			if (!userDir.endsWith("/")) //$NON-NLS-1$
-				userDir += "/"; //$NON-NLS-1$
-			debugOptionsFilename = new File(userDir, OPTIONS).toString();
-		}
-		optionsFile = buildURL(debugOptionsFilename, false);
-		if (optionsFile == null) {
-			System.out.println("Unable to construct URL for options file: " + debugOptionsFilename); //$NON-NLS-1$
-			return;
-		}
-		System.out.print("Debug options:\n    " + optionsFile.toExternalForm()); //$NON-NLS-1$
-		try {
-			InputStream input = optionsFile.openStream();
-			try {
-				options.load(input);
-				System.out.println(" loaded"); //$NON-NLS-1$
-			} finally {
-				input.close();
+				if (currentValue != null) {
+					if (!currentValue.equals(value)) {
+						fireChangedEvent = true;
+					}
+				} else {
+					if (value != null) {
+						fireChangedEvent = true;
+					}
+				}
+				if (fireChangedEvent) {
+					options.put(option, value.trim());
+				}
 			}
-		} catch (FileNotFoundException e) {
-			System.out.println(" not found"); //$NON-NLS-1$
-		} catch (IOException e) {
-			System.out.println(" did not parse"); //$NON-NLS-1$
-			e.printStackTrace(System.out);
 		}
-		// trim off all the blanks since properties files don't do that.
-		for (Iterator i = options.keySet().iterator(); i.hasNext();) {
-			Object key = i.next();
-			options.put(key, ((String) options.get(key)).trim());
+		// Send the options change event outside the sync block
+		if (fireChangedEvent) {
+			int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
+			if (firstSlashIndex > 0) {
+				String symbolicName = option.substring(0, firstSlashIndex);
+				optionsChanged(symbolicName);
+			}
 		}
 	}
 
@@ -280,9 +276,9 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#isDebugEnabled()
 	 */
 	public boolean isDebugEnabled() {
-
-		//return options != null;
-		return (FrameworkProperties.getProperty(OSGI_DEBUG) != null);
+		synchronized (lock) {
+			return options != null;
+		}
 	}
 
 	/*
@@ -290,18 +286,41 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setDebugEnabled()
 	 */
 	public void setDebugEnabled(boolean enabled) {
-		if (enabled) {
-			if (!this.isDebugEnabled()) {
+		boolean fireChangedEvent = false;
+		synchronized (lock) {
+			if (enabled) {
+				if (options != null)
+					return;
 				// notify the trace that a new session is started
 				EclipseDebugTrace.newSession = true;
+
+				// enable platform debugging - there is no .options file
+				FrameworkProperties.setProperty(OSGI_DEBUG, ""); //$NON-NLS-1$
+				if (disabledOptions != null) {
+					options = disabledOptions;
+					disabledOptions = null;
+					// fire changed event to indicate some options were re-enabled
+					fireChangedEvent = true;
+				} else {
+					options = new Properties();
+				}
+			} else {
+				if (options == null)
+					return;
+				// disable platform debugging.
+				FrameworkProperties.clearProperty(OSGI_DEBUG);
+				if (options.size() > 0) {
+					// Save the current options off in case debug is re-enabled
+					disabledOptions = options;
+					// fire changed event to indicate some options were disabled
+					fireChangedEvent = true;
+				}
+				options = null;
 			}
-			// enable platform debugging - there is no .options file
-			FrameworkProperties.setProperty(OSGI_DEBUG, ""); //$NON-NLS-1$
-			if (this.options == null)
-				this.options = new Properties();
-		} else {
-			// disable platform debugging.
-			FrameworkProperties.clearProperty(OSGI_DEBUG);
+		}
+		if (fireChangedEvent) {
+			// (Bug 300911) need to fire event to listeners that options have been disabled
+			optionsChanged("*"); //$NON-NLS-1$
 		}
 	}
 

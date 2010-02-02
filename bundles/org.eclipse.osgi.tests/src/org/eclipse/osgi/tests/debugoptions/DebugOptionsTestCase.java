@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,11 +123,11 @@ public class DebugOptionsTestCase extends CoreTest {
 	}
 
 	public void testDyanmicEnablement01() {
-		listener.clear();
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
 		debugOptions.setDebugEnabled(true);
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		listener.clear();
 		Map checkValues = new HashMap();
 		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		listener.setCheckValues(checkValues);
@@ -137,11 +137,11 @@ public class DebugOptionsTestCase extends CoreTest {
 	}
 
 	public void testDyanmicEnablement02() {
-		listener.clear();
 		if (debugOptions.isDebugEnabled())
 			return; // cannot test
 		debugOptions.setDebugEnabled(true);
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		listener.clear();
 		Map checkValues = new HashMap();
 		checkValues.put(getName() + "/debug", "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		listener.setCheckValues(checkValues);
@@ -159,10 +159,12 @@ public class DebugOptionsTestCase extends CoreTest {
 		anotherProps.put(DebugOptions.LISTENER_SYMBOLICNAME, "anotherListener"); //$NON-NLS-1$
 		ServiceRegistration anotherReg = OSGiTestsActivator.getContext().registerService(DebugOptionsListener.class.getName(), anotherListener, anotherProps);
 		assertTrue("Not called", anotherListener.gotCalled()); //$NON-NLS-1$
-		anotherListener.clear();
 
 		debugOptions.setDebugEnabled(true);
 		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+
+		listener.clear();
+		anotherListener.clear();
 
 		Map checkValues = new HashMap();
 		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -186,6 +188,55 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertTrue("Another listener did not get called", anotherListener.gotCalled()); //$NON-NLS-1$
 
 		anotherReg.unregister();
+	}
+
+	public void testDyanmicEnablement04() {
+		if (debugOptions.isDebugEnabled())
+			return; // cannot test
+		debugOptions.setDebugEnabled(true);
+		listener.clear();
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		Map checkValues = new HashMap();
+		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		listener.setCheckValues(checkValues);
+		debugOptions.setOption(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
+		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
+
+		listener.clear();
+		checkValues.put(getName() + "/debug", null); //$NON-NLS-1$ 
+		listener.setCheckValues(checkValues);
+		debugOptions.setDebugEnabled(false);
+		assertFalse("Debug is enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
+		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
+
+		listener.clear();
+		checkValues.put(getName() + "/debug", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		listener.setCheckValues(checkValues);
+		debugOptions.setDebugEnabled(true);
+		assertTrue("Debug is not enabled", debugOptions.isDebugEnabled()); //$NON-NLS-1$
+		assertTrue("Listener did not get called", listener.gotCalled()); //$NON-NLS-1$
+		assertNull("Found bad value: " + listener.getIncorrectValue(), listener.getIncorrectValue()); //$NON-NLS-1$
+
+	}
+
+	public void testBooleanValues() {
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		String testKey = getName() + "/debug";
+		boolean testValue = debugOptions.getBooleanOption(testKey, false);
+		assertFalse(testKey + " is true", testValue);
+		debugOptions.setOption(testKey, "false");
+		testValue = debugOptions.getBooleanOption(testKey, true);
+		assertFalse(testKey + " is true", testValue);
+
+		debugOptions.setOption(testKey, "true");
+		testValue = debugOptions.getBooleanOption(testKey, false);
+		assertTrue(testKey + " is false", testValue);
+		testValue = debugOptions.getBooleanOption(testKey, true);
+		assertTrue(testKey + " is false", testValue);
 	}
 
 	private TestDebugTrace createDebugTrace(final File traceFile) {
@@ -853,7 +904,7 @@ public class DebugOptionsTestCase extends CoreTest {
 			for (Iterator entries = checkValues.entrySet().iterator(); entries.hasNext();) {
 				Map.Entry entry = (Entry) entries.next();
 				String debugValue = options.getOption((String) entry.getKey());
-				String error = "Value is inccorect for key: " + entry.getKey() + " " + debugValue; //$NON-NLS-1$//$NON-NLS-2$
+				String error = "Value is incorrect for key: " + entry.getKey() + " " + debugValue; //$NON-NLS-1$//$NON-NLS-2$
 				if (debugValue == null) {
 					if (entry.getValue() != null) {
 						incorrectValue = error;
