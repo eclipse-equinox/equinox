@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -212,7 +212,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, framework.systemBundle, be);
-			throw new RuntimeException(be.getMessage());
+			throw new RuntimeException(be.getMessage(), be);
 		}
 
 	}
