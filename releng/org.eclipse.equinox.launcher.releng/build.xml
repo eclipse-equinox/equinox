@@ -235,7 +235,7 @@
 			<arg line="${sshUser} ${machine}" />
 			<arg line="sh ${workspace}/remote.sh" />
 			<arg line="${javaArg}" />
-			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch}" />
+			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DcvsLogin=${cvsLogin}" />
 			<arg value="-DresultsBaseFolder=${resultsBaseFolder}" />
 		</exec>
 	</target>
