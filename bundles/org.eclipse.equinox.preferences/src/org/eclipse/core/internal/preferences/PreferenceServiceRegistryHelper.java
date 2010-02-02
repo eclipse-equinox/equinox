@@ -71,7 +71,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		initializeScopes();
 		registry.addRegistryChangeListener(this);
 	}
-	
+
 	void stop() {
 		registry.removeRegistryChangeListener(this);
 	}
@@ -270,10 +270,18 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	 * Run the preference initializer as specified by the given configuration element.
 	 */
 	private void runInitializer(IConfigurationElement element) {
-		AbstractPreferenceInitializer initializer = null;
 		try {
-			initializer = (AbstractPreferenceInitializer) element.createExecutableExtension(ATTRIBUTE_CLASS);
-			initializer.initializeDefaultPreferences();
+			final AbstractPreferenceInitializer initializer = (AbstractPreferenceInitializer) element.createExecutableExtension(ATTRIBUTE_CLASS);
+			ISafeRunnable job = new ISafeRunnable() {
+				public void handleException(Throwable exception) {
+					// already logged in Platform#run()
+				}
+
+				public void run() throws Exception {
+					initializer.initializeDefaultPreferences();
+				}
+			};
+			SafeRunner.run(job);
 		} catch (ClassCastException e) {
 			IStatus status = new Status(IStatus.ERROR, PrefsMessages.OWNER_NAME, IStatus.ERROR, PrefsMessages.preferences_invalidExtensionSuperclass, e);
 			log(status);
