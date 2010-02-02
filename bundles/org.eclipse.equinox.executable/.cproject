@@ -56,6 +56,7 @@
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry kind="mac" name="JNIEXPORT" path="" value=""/>
 <pathentry include="/usr/X11R6/include" kind="inc" path="" system="true"/>
 <pathentry include="/opt/gnome/include/gtk-2.0" kind="inc" path="" system="true"/>
 <pathentry include="/opt/gnome/include/glib-2.0" kind="inc" path="" system="true"/>
