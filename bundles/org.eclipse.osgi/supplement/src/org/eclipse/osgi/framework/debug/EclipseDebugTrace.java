@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -408,6 +408,7 @@ class EclipseDebugTrace implements DebugTrace {
 					try {
 						traceWriter = openWriter(traceFile);
 						writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
+						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
 						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(System.currentTimeMillis())));
 						traceWriter.flush();
 					} catch (IOException ioEx) {
