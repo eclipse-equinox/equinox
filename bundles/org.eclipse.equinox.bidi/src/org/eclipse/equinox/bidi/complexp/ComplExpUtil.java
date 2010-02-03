@@ -11,6 +11,7 @@
 package org.eclipse.equinox.bidi.complexp;
 
 import java.util.Locale;
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
 
 /**
  *  This class provides a number of convenience functions facilitating the
@@ -40,225 +41,6 @@ import java.util.Locale;
  *  @author Matitiahu Allouche
  */
 final public class ComplExpUtil {
-	/**
-	 *  Constant indicating a default type of complex expression processor.
-	 *  This type does not add any directional formatting character, it is
-	 *  a "transparent" processor.
-	 *
-	 *  @see #create
-	 */
-	public static final int DEFAULT = 0;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing property file statements.
-	 *  This type covers expression of the form<br>
-	 *  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>name=value</code>
-	 *
-	 *  @see #create
-	 */
-	public static final int PROPERTY = 1;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing compound names.
-	 *  This type covers names made of one or more parts, each one connected
-	 *  to the previous one by one underscore, as below:<br>
-	 *  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>part1_part2_part3</code>
-	 *
-	 *  @see #create
-	 */
-	public static final int COMPOUND_NAME = 2;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing comma-delimited lists.
-	 *  This types covers expressions made of one or more parts, each one
-	 *  separated from the previous one by a comma, as below:<br>
-	 *  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>part1,part2,part3</code>
-	 *
-	 *  @see #create
-	 */
-	public static final int COMMA_DELIMITED = 3;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing <q>system(user)</q> constructs.
-	 *  This type covers expression of the form<br>
-	 *  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>system(user)</code><br>
-	 *  with a system name immediately followed by a user name within
-	 *  parentheses.
-	 *
-	 *  @see #create
-	 */
-	public static final int SYSTEM_USER = 4;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing directory and file paths.
-	 *
-	 *  @see #create
-	 */
-	public static final int PATH = 5;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing e-mail addresses.
-	 *
-	 *  @see #create
-	 */
-	public static final int EMAIL = 6;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing URLs.
-	 *
-	 *  @see #create
-	 */
-	public static final int URL = 7;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing regular expressions, possibly spanning more than one
-	 *  line.
-	 *
-	 *  @see #create
-	 */
-	public static final int REGEXP = 8;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing Xpath expressions.
-	 *
-	 *  @see #create
-	 */
-	public static final int XPATH = 9;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing Java code, possibly spanning more than one line.
-	 *
-	 *  @see #create
-	 */
-	public static final int JAVA = 10;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing SQL statements, possibly spanning more than one line.
-	 *
-	 *  @see #create
-	 */
-	public static final int SQL = 11;
-
-	/**
-	 *  Constant indicating a type of complex expression processor adapted
-	 *  to processing arithmetic expressions with a RTL base direction.
-	 *
-	 *  @see #create
-	 */
-	public static final int RTL_ARITHMETIC = 12;
-
-	/** Constant indicating the highest value used in this package for
-	 *  types of complex expressions.
-	 *  @see #create
-	 */
-	public static final int HIGHEST = 12;
-
-	/** Constant indicating the base direction of a string representing
-	 *  a left-to-right complex expression.
-	 *  @see #insertMarks
-	 */
-	public static final int DIRECTION_LTR = IComplExpProcessor.DIRECTION_LTR;
-
-	/** Constant indicating the base direction of a string representing
-	 *  a right-to-left complex expression.
-	 *  @see #insertMarks
-	 */
-	public static final int DIRECTION_RTL = IComplExpProcessor.DIRECTION_RTL;
-
-	/**
-	 *  prevent instantiation
-	 */
-	private ComplExpUtil() {
-		// empty
-	}
-
-	/**
-	 *  Factory method to create specialized implementations
-	 *  of <code>IComplExpProcessor</code> adapted to specific types of
-	 *  complex expressions.
-	 *
-	 *  @param type specifies the type of complex expression to process.
-	 *  This must be one of the values
-	 *  {@link #DEFAULT},
-	 *  {@link #PROPERTY},
-	 *  {@link #COMPOUND_NAME},
-	 *  {@link #COMMA_DELIMITED},
-	 *  {@link #SYSTEM_USER},
-	 *  {@link #PATH},
-	 *  {@link #EMAIL},
-	 *  {@link #URL},
-	 *  {@link #REGEXP},
-	 *  {@link #XPATH},
-	 *  {@link #JAVA},
-	 *  {@link #SQL},
-	 *  {@link #RTL_ARITHMETIC}
-	 *
-	 *  @return a <code>IComplExpProcessor</code> instance capable of
-	 *          handling the type of complex expression specified.
-	 *          If the <code>type</code> is not a valid value,
-	 *          <code>null</code> is returned.
-	 *
-	 */
-	public static IComplExpProcessor create(int type) {
-		IComplExpProcessor complexp;
-		if (type == DEFAULT) {
-			return new ComplExpDoNothing();
-		}
-		switch (type) {
-			case PROPERTY :
-				complexp = new ComplExpSingle("=");
-				break;
-			case COMPOUND_NAME :
-				complexp = new ComplExpBasic("_");
-				break;
-			case COMMA_DELIMITED :
-				complexp = new ComplExpBasic(",");
-				break;
-			case SYSTEM_USER :
-				complexp = new ComplExpSingle("(");
-				break;
-			case PATH :
-				complexp = new ComplExpBasic(":/\\.");
-				break;
-			case EMAIL :
-				complexp = new ComplExpDelimsEsc("<>.:,;@", "()\"\"");
-				break;
-			case URL :
-				complexp = new ComplExpBasic(":?#/@.[]");
-				break;
-			case REGEXP :
-				complexp = new ComplExpRegex();
-				break;
-			case XPATH :
-				complexp = new ComplExpDelims(" /[]<>=!:@.|()+-*", "''\"\"");
-				break;
-			case JAVA :
-				complexp = new ComplExpJava();
-				break;
-			case SQL :
-				complexp = new ComplExpSql();
-				break;
-			case RTL_ARITHMETIC :
-				complexp = new ComplExpBasic("+-/*()=");
-				complexp.setDirection(IComplExpProcessor.DIRECTION_RTL);
-				break;
-			default :
-				return null;
-		}
-		((ComplExpBasic) complexp).type = type;
-		return complexp;
-	}
 
 	/**
 	 *  Flag specifying that all complex expressions should by default assume
@@ -270,6 +52,13 @@ final public class ComplExpUtil {
 	 *  @see ComplExpBasic#mirrored
 	 */
 	static boolean mirroredDefault;
+
+	/**
+	 *  prevents instantiation
+	 */
+	private ComplExpUtil() {
+		// empty
+	}
 
 	/** Specify whether the GUI where the complex expression will be displayed
 	 *  is mirrored (is laid out from right to left). The value specified in
@@ -320,8 +109,8 @@ final public class ComplExpUtil {
 	 *          This argument may be null if there are no marks to add.
 	 *
 	 *  @param  direction specifies the base direction of the complex expression.
-	 *          It must be one of the values {@link #DIRECTION_LTR} or
-	 *          {@link #DIRECTION_RTL}.
+	 *          It must be one of the values {@link IComplExpProcessor#DIRECTION_LTR} or
+	 *          {@link IComplExpProcessor#DIRECTION_RTL}.
 	 *
 	 *  @param  affix specifies if a prefix and a suffix should be added to
 	 *          the result to make sure that the <code>direction</code>
@@ -342,7 +131,7 @@ final public class ComplExpUtil {
 		String curPrefix, curSuffix, full;
 		char curMark, c;
 		char[] fullChars;
-		if (direction == DIRECTION_LTR) {
+		if (direction == IComplExpProcessor.DIRECTION_LTR) {
 			curMark = LRM;
 			curPrefix = "\u202a\u200e";
 			curSuffix = "\u200e\u202c";
@@ -526,7 +315,7 @@ final public class ComplExpUtil {
 	 *
 	 *  @return the processed string
 	 */
-	public static String process(String str, int type) {
+	public static String processTyped(String str, String type) {
 		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
 			return str;
 
@@ -535,7 +324,7 @@ final public class ComplExpUtil {
 		if (((c == LRE) || (c == RLE)) && str.charAt(str.length() - 1) == PDF)
 			return str;
 
-		IComplExpProcessor processor = create(type);
+		IComplExpProcessor processor = ComplExpFactory.create(type);
 		if (processor == null) // invalid type
 			return str;
 
@@ -588,11 +377,11 @@ final public class ComplExpUtil {
 	 *  @return string with no directional formatting characters
 	 *
 	 */
-	public static String deprocess(String str, int type) {
+	public static String deprocess(String str, String type) {
 		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
 			return str;
 
-		IComplExpProcessor processor = create(type);
+		IComplExpProcessor processor = ComplExpFactory.create(type);
 		if (processor == null) // invalid type
 			return str;
 

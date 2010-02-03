@@ -8,7 +8,13 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: J2SE-1.4,
  CDC-1.1/Foundation-1.1
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.equinox.bidi.complexp;version="1.0.0";x-internal:=true
+Export-Package: org.eclipse.equinox.bidi.complexp,
+ org.eclipse.equinox.bidi.internal.complexp;x-internal:=true,
+ org.eclipse.equinox.bidi.internal.complexp.consumable;x-internal:=true
 Require-Bundle: org.eclipse.equinox.common;bundle-version="3.6.0",
  org.eclipse.equinox.registry;bundle-version="3.5.0"
-Import-Package: org.eclipse.osgi.util;version="1.1.0"
+Import-Package: org.eclipse.osgi.framework.log;version="1.0.0",
+ org.eclipse.osgi.util;version="1.1.0",
+ org.osgi.framework;version="1.5.0",
+ org.osgi.util.tracker;version="1.4.0"
+Bundle-Activator: org.eclipse.equinox.bidi.internal.complexp.BiDiActivator

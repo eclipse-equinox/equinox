@@ -3,12 +3,11 @@
 <schema targetNamespace="org.eclipse.equinox.bidi" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.equinox.bidi" id="bidiType" name="Add new complex expression type"/>
+         <meta.schema plugin="org.eclipse.equinox.bidi" id="org.eclipse.equinox.bidi.bidiTypes" name="String types that need special bi-directinal handling"/>
       </appInfo>
       <documentation>
-         This extension point provides guidelines about adding a new type of complex expression.  Basically, such a new type is an extension of the ComplExpBasic class which specifies specific operators and, optionally, a number of special cases to handle.
-&lt;br&gt;
-See the javadoc for ComplExpBasic for explanations about constructors of ComplExpBasic and methods that an extension might override.
+         Use this extension point to describe processing for strings that need special Bi-directional handling, such as file paths, SQL expressions, or Java code.
+
       </documentation>
    </annotation>
 
@@ -19,6 +18,9 @@ See the javadoc for ComplExpBasic for explanations about constructors of ComplEx
          </appInfo>
       </annotation>
       <complexType>
+         <sequence>
+            <element ref="typeDescription" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -26,10 +28,10 @@ See the javadoc for ComplExpBasic for explanations about constructors of ComplEx
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="id" type="string">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Unique identifier of this extension
                </documentation>
             </annotation>
          </attribute>
@@ -46,12 +48,44 @@ See the javadoc for ComplExpBasic for explanations about constructors of ComplEx
       </complexType>
    </element>
 
+   <element name="typeDescription">
+      <complexType>
+         <attribute name="type" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Type of the expression that this processor will work on.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string">
+            <annotation>
+               <documentation>
+                  The processor that provides specialized bi-directional handling for this type of strings.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.equinox.bidi.complexp.IComplExpProcessor"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="description" type="string">
+            <annotation>
+               <documentation>
+                  The description of the string type.
+               </documentation>
+               <appInfo>
+                  <meta.attribute translatable="true"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
    <annotation>
       <appInfo>
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         3.6
+         1.0
       </documentation>
    </annotation>
 
@@ -60,39 +94,18 @@ See the javadoc for ComplExpBasic for explanations about constructors of ComplEx
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         Here is a most basic example.
-&lt;p&gt;
+         A processor for the complex expressions that support &quot;minus&quot; delimiters can be described as:
+
 &lt;pre&gt;
-/*
-* ComplExpSepMinus
-*/
-
-package example.complexpType;
-
-import org.eclipse.equinox.bidi.*;
-
-/**
- *  &lt;code&gt;ComplExpSepMinus&lt;/code&gt; is a processor for complex expressions
- *  composed of text segments separated by minus signs.
- *
- */
 public class ComplExpSepMinus extends ComplExpBasic
 {
-    /**
-     *  Constructor for a complex expressions processor with support for
-     *  minus delimiters.
-     *
-     */
     public ComplExpSepMinus()
     {
         super(&quot;-&quot;);
     }
 }
 &lt;/pre&gt;
-&lt;p&gt;
-In the plug-in org.eclipse.equinox.bidi, the classes CompExpDelims, ComplExpDelimsEsc, ComplExpJava, ComplExpRegex, ComplExpSingle, ComplExpSql may be used as examples of extensions for ComplExpBasic.
-&lt;p&gt;
-Start with the very simple ComplExpSingle, then ComplExpDelims, ComplExpDelimsEsc, then all the rest.
+
       </documentation>
    </annotation>
 

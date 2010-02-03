@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.complexp;
 
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
+
 /**
  *  This interface provides a generic mechanism to handle
  *  complex expressions, with as main purpose to ensure that they are

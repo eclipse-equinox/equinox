@@ -8,7 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.complexp;
+package org.eclipse.equinox.bidi.internal.complexp;
+
+import org.eclipse.equinox.bidi.complexp.ComplExpUtil;
+import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 
 /**
  *  <code>ComplExpBasic</code> is a
@@ -37,7 +40,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *  @see #isMirrored
 	 *  @see ComplExpUtil#mirroredDefault
 	 */
-	protected boolean mirrored = ComplExpUtil.mirroredDefault;
+	protected boolean mirrored = ComplExpUtil.isMirroredDefault();
 
 	/**
 	 *  Orientation that should be assumed for the text component where the
@@ -125,23 +128,24 @@ public class ComplExpBasic implements IComplExpProcessor {
 
 	private boolean ignoreArabic, ignoreHebrew;
 
-	static final byte B = Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR;
-	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
-	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
-	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
-	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
-	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-	static final char LRM = 0x200E;
-	static final char RLM = 0x200F;
-	static final char LRE = 0x202A;
-	static final char RLE = 0x202B;
-	static final char PDF = 0x202C;
-	static final char[] MARKS = {LRM, RLM};
-	static final char[] EMBEDS = {LRE, RLE};
-	static final byte[] STRONGS = {L, R};
-	static final int PREFIX_LENGTH = 2;
-	static final int SUFFIX_LENGTH = 2;
-	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
+	public static final byte B = Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR;
+	public static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
+	public static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+	public static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
+	public static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
+	public static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+	public static final char LRM = 0x200E;
+	public static final char RLM = 0x200F;
+	public static final char LRE = 0x202A;
+	public static final char RLE = 0x202B;
+	public static final char PDF = 0x202C;
+	public static final char[] MARKS = {LRM, RLM};
+	public static final char[] EMBEDS = {LRE, RLE};
+	public static final byte[] STRONGS = {L, R};
+	public static final int PREFIX_LENGTH = 2;
+	public static final int SUFFIX_LENGTH = 2;
+	public static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
+
 	private byte curStrong = -1;
 	private char curMark;
 	private char curEmbed;
@@ -181,6 +185,10 @@ public class ComplExpBasic implements IComplExpProcessor {
 		this.operators = operators.toCharArray();
 		operCount = this.operators.length;
 		locations = new int[operCount];
+	}
+
+	public void setType(int expressionType) {
+		type = expressionType;
 	}
 
 	/**

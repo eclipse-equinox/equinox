@@ -8,7 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.complexp;
+package org.eclipse.equinox.bidi.internal.complexp.consumable;
+
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
+
+import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 
 /**
  *  <code>ComplExpRegex</code> is a processor for regular expressions.

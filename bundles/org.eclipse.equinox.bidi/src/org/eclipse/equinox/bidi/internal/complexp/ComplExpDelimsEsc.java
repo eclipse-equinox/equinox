@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.complexp;
+package org.eclipse.equinox.bidi.internal.complexp;
+
+import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 
 /**
  *  <code>ComplExpDelims</code> is a processor for complex expressions

@@ -8,11 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.complexp;
+package org.eclipse.equinox.bidi.internal.complexp.consumable;
+
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
+
+import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 
 /**
- *  <code>ComplExpJava</code> is a processor for complex expressions
- *  composed of Java statements. Such a complex expression may span
+ *  <code>ComplExpSql</code> is a processor for complex expressions
+ *  composed of SQL statements. Such a complex expression may span
  *  multiple lines.
  *  <p>
  *  In applications like an editor where parts of the text might be modified
@@ -29,17 +33,17 @@ package org.eclipse.equinox.bidi.complexp;
  *
  *  @author Matitiahu Allouche
  */
-public class ComplExpJava extends ComplExpBasic {
+public class ComplExpSql extends ComplExpBasic {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String operators = "[](){}.+-<>=~!&*/%^|?:,;\t";
+	static final String operators = "\t!#%&()*+,-./:;<=>?|[]{}";
 	static String lineSep;
 
 	/**
 	 *  Constructor for a complex expressions processor with support for
-	 *  Java statements.
+	 *  SQL statements.
 	 */
-	public ComplExpJava() {
-		super(operators, 4);
+	public ComplExpSql() {
+		super(operators, 5);
 		// TBD use bundle properties
 		if (lineSep == null)
 			lineSep = System.getProperty("line.separator", "\n");
@@ -52,13 +56,15 @@ public class ComplExpJava extends ComplExpBasic {
 	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
 		switch (whichSpecial) {
 			case 0 : /* space */
-				return leanText.indexOf(' ', fromIndex);
+				return leanText.indexOf(" ", fromIndex);
 			case 1 : /* literal */
+				return leanText.indexOf('\'', fromIndex);
+			case 2 : /* delimited identifier */
 				return leanText.indexOf('"', fromIndex);
-			case 2 : /* slash-aster comment */
+			case 3 : /* slash-aster comment */
 				return leanText.indexOf("/*", fromIndex);
-			case 3 : /* slash-slash comment */
-				return leanText.indexOf("//", fromIndex);
+			case 4 : /* hyphen-hyphen comment */
+				return leanText.indexOf("--", fromIndex);
 		}
 		// we should never get here
 		return -1;
@@ -69,7 +75,7 @@ public class ComplExpJava extends ComplExpBasic {
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
 	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
-		int loc, cnt, i;
+		int loc;
 
 		processOperator(operLocation);
 		switch (whichSpecial) {
@@ -83,34 +89,51 @@ public class ComplExpJava extends ComplExpBasic {
 			case 1 : /* literal */
 				loc = operLocation + 1;
 				while (true) {
+					loc = leanText.indexOf('\'', loc);
+					if (loc < 0) {
+						state = whichSpecial;
+						return leanText.length();
+					}
+					if ((loc + 1) < leanText.length() && leanText.charAt(loc + 1) == '\'') {
+						loc += 2;
+						continue;
+					}
+					return loc + 1;
+				}
+			case 2 : /* delimited identifier */
+				loc = operLocation + 1;
+				while (true) {
 					loc = leanText.indexOf('"', loc);
 					if (loc < 0)
 						return leanText.length();
-					for (cnt = 0, i = loc - 1; leanText.charAt(i) == '\\'; i--) {
-						cnt++;
+
+					if ((loc + 1) < leanText.length() && leanText.charAt(loc + 1) == '"') {
+						loc += 2;
+						continue;
 					}
-					loc++;
-					if ((cnt & 1) == 0)
-						return loc;
+					return loc + 1;
 				}
-			case 2 : /* slash-aster comment */
+			case 3 : /* slash-aster comment */
 				if (operLocation < 0)
 					loc = 0; // initial state from previous line
 				else
 					loc = operLocation + 2; // skip the opening slash-aster
 				loc = leanText.indexOf("*/", loc);
 				if (loc < 0) {
-					state = 2;
+					state = whichSpecial;
 					return leanText.length();
 				}
+				// we need to call processOperator since text may follow the
+				//  end of comment immediately without even a space
+				processOperator(loc);
 				return loc + 2;
-			case 3 : /* slash-slash comment */
+			case 4 : /* hyphen-hyphen comment */
 				loc = leanText.indexOf(lineSep, operLocation + 2);
 				if (loc < 0)
 					return leanText.length();
 				return loc + lineSep.length();
 		}
 		// we should never get here
-		return operLocation + 1;
+		return leanText.length();
 	}
 }

@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi.complexp;
+package org.eclipse.equinox.bidi.internal.complexp;
+
+import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 
 /**
  *  This class is a minimal processor which implements the
@@ -20,7 +22,7 @@ package org.eclipse.equinox.bidi.complexp;
  *
  *  @author Matitiahu Allouche
  */
-
+// TBD is this needed?
 public class ComplExpDoNothing implements IComplExpProcessor {
 
 	private static final int[] EMPTY_INT_ARRAY = new int[0];
