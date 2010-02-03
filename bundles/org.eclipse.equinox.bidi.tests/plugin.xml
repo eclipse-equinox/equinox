@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="id2"
+         point="org.eclipse.equinox.bidi.bidiTypes">
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.ComplExpTest"
+            description="Test"
+            type="test">
+      </typeDescription>
+   </extension>
+
+</plugin>
