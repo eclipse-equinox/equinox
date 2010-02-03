@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -337,10 +337,9 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 			else
 				appLauncher.launch(appHandle, appHandle.getArguments().get(IApplicationContext.APPLICATION_ARGS));
 		} else {
-			AnyThreadAppLauncher.launchEclipseApplication(appHandle);
-			DefaultApplicationListener curDefaultApplicationListener = null;
-			MainApplicationLauncher curMissingAppLauncher = null;
 			if (isDefault) {
+				DefaultApplicationListener curDefaultApplicationListener = null;
+				MainApplicationLauncher curMissingAppLauncher = null;
 				ApplicationLauncher appLauncher = null;
 				synchronized (this) {
 					appLauncher = (ApplicationLauncher) launcherTracker.getService();
@@ -359,6 +358,8 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 					curMissingAppLauncher.launch(curDefaultApplicationListener);
 				else
 					appLauncher.launch(curDefaultApplicationListener, null);
+			} else {
+				AnyThreadAppLauncher.launchEclipseApplication(appHandle);
 			}
 		}
 	}

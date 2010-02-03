@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -58,6 +58,10 @@ public class DefaultApplicationListener implements ApplicationRunnable, ServiceT
 	public Object run(Object context) {
 		if (handleTracker == null)
 			return getResult(); // app has ended, return the result
+		EclipseAppHandle anyThreadedDefaultApp = (EclipseAppHandle) handleTracker.getService();
+		if (anyThreadedDefaultApp != null)
+			// We now need to actual launch the application; this will run the application on another thread.
+			AnyThreadAppLauncher.launchEclipseApplication(anyThreadedDefaultApp);
 		try {
 			while (waitOnRunning()) {
 				EclipseAppHandle mainHandle = getMainHandle();
