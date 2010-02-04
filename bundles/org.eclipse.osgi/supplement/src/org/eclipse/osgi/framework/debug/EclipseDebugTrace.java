@@ -311,11 +311,11 @@ class EclipseDebugTrace implements DebugTrace {
 				Writer traceWriter = null;
 				try {
 					// check to see if the file should be rotated
-					checkTraceFileSize(tracingFile);
+					checkTraceFileSize(tracingFile, entry.getTimestamp());
 					// open the trace file
 					traceWriter = openWriter(tracingFile);
 					if (EclipseDebugTrace.newSession) {
-						writeSession(traceWriter);
+						writeSession(traceWriter, entry.getTimestamp());
 						EclipseDebugTrace.newSession = false;
 					}
 					writeMessage(traceWriter, entry);
@@ -364,9 +364,10 @@ class EclipseDebugTrace implements DebugTrace {
 	 * Checks the trace file size.  If the file size reaches the limit then the trace file is rotated. 
 	 * 
 	 * @param traceFile The tracing file
+	 * @param timestamp the timestamp for the session; this is the same timestamp as the first entry
 	 * @return false if an error occurred trying to rotate the trace file
 	 */
-	private boolean checkTraceFileSize(final File traceFile) {
+	private boolean checkTraceFileSize(final File traceFile, long timestamp) {
 
 		// 0 file size means there is no size limit
 		boolean isBackupOK = true;
@@ -411,7 +412,7 @@ class EclipseDebugTrace implements DebugTrace {
 						traceWriter = openWriter(traceFile);
 						writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
 						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
-						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + EclipseDebugTrace.TRACE_FILE_DATE_FORMATTER.format(new Date(System.currentTimeMillis())));
+						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + getFormattedDate(timestamp));
 						traceWriter.flush();
 					} catch (IOException ioEx) {
 						ioEx.printStackTrace();
@@ -441,16 +442,6 @@ class EclipseDebugTrace implements DebugTrace {
 		commentText.append(comment);
 		commentText.append(EclipseDebugTrace.LINE_SEPARATOR);
 		traceWriter.write(commentText.toString());
-	}
-
-	/**
-	 * Accessor to retrieve the current date and time in a formatted manner.
-	 * 
-	 * @return A formatted time stamp based on the {@link EclipseDebugTrace#TRACE_FILE_DATE_FORMATTER} formatter
-	 */
-	private final String getFormattedDate() {
-
-		return this.getFormattedDate(System.currentTimeMillis());
 	}
 
 	/**
@@ -493,11 +484,12 @@ class EclipseDebugTrace implements DebugTrace {
 	 * Writes header information to a new trace file
 	 * 
 	 * @param traceWriter the trace writer
+	 * @param timestamp the timestamp for the session; this is the same timestamp as the first entry
 	 * @throws IOException If an error occurs while writing this session information 
 	 */
-	private void writeSession(final Writer traceWriter) throws IOException {
+	private void writeSession(final Writer traceWriter, long timestamp) throws IOException {
 
-		writeComment(traceWriter, EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate());
+		writeComment(traceWriter, EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate(timestamp));
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
 		writeComment(traceWriter, "The following option strings are specified for this debug session:"); //$NON-NLS-1$ 
 		final String[] allOptions = FrameworkDebugOptions.getDefault().getAllOptions();
