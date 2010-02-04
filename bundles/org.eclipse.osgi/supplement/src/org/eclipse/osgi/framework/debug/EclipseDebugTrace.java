@@ -51,6 +51,8 @@ class EclipseDebugTrace implements DebugTrace {
 	private final static String TRACE_COMMENT = "#"; //$NON-NLS-1$
 	/** The delimiter used to separate trace elements such as the time stamp, message, etc */
 	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$
+	/** The string written in place of the {@link EclipseDebugTrace#TRACE_TRACE_ELEMENT_DELIMITER} in entries */
+	private final static String TRACE_ELEMENT_DELIMITER_ENCODED = "&#124;"; //$NON-NLS-1$
 	/** OS-specific line separator */
 	private static final String LINE_SEPARATOR;
 	static {
@@ -477,7 +479,7 @@ class EclipseDebugTrace implements DebugTrace {
 				ByteArrayOutputStream throwableByteOutputStream = new ByteArrayOutputStream();
 				throwableStream = new PrintStream(throwableByteOutputStream, false);
 				error.printStackTrace(throwableStream);
-				result = throwableByteOutputStream.toString();
+				result = encodeText(throwableByteOutputStream.toString());
 			} finally {
 				if (throwableStream != null) {
 					throwableStream.close();
@@ -518,7 +520,7 @@ class EclipseDebugTrace implements DebugTrace {
 		// format the trace entry
 		StringBuffer message = new StringBuffer(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getThreadName());
+		message.append(encodeText(entry.getThreadName()));
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
@@ -530,7 +532,7 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getOptionPath());
+		message.append(encodeText(entry.getOptionPath()));
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
@@ -546,7 +548,7 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getMessage());
+		message.append(encodeText(entry.getMessage()));
 		if (entry.getThrowable() != null) {
 			message.append(" "); //$NON-NLS-1$
 			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
@@ -560,6 +562,30 @@ class EclipseDebugTrace implements DebugTrace {
 		if ((traceWriter != null) && (message != null)) {
 			traceWriter.write(message.toString());
 		}
+	}
+
+	/**
+	 * Encodes the specified string to replace any occurrence of the {@link EclipseDebugTrace#TRACE_ELEMENT_DELIMITER}
+	 * string with the {@link EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED}
+	 * string.  This can be used to ensure that the delimiter character does not break parsing when
+	 * the entry text contains the delimiter character. 
+	 * 
+	 * @param inputString The original string to be written to the trace file. 
+	 * @return The original input string with all occurrences of
+	 * {@link EclipseDebugTrace#TRACE_ELEMENT_DELIMITER} replaced with 
+	 * {@link EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED}. A <code>null</code> value will be
+	 * returned if the input string is <code>null</code>.
+	 */
+	private static String encodeText(final String inputString) {
+		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER) < 0)
+			return inputString;
+		final StringBuffer tempBuffer = new StringBuffer(inputString);
+		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER);
+		while (currentIndex >= 0) {
+			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER.length(), TRACE_ELEMENT_DELIMITER_ENCODED);
+			currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER);
+		}
+		return tempBuffer.toString();
 	}
 
 	/**

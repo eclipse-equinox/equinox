@@ -35,7 +35,8 @@ public class DebugOptionsTestCase extends CoreTest {
 	Dictionary props = null;
 	TestDebugOptionsListener listener = null;
 	ServiceRegistration reg = null;
-	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$
+	private final static String TRACE_ELEMENT_DELIMITER = "|"; //$NON-NLS-1$ // this value needs to match EclipseDebugTrace#TRACE_ELEMENT_DELIMITER
+	private final static String TRACE_ELEMENT_DELIMITER_ENCODED = "&#124;"; //$NON-NLS-1$ // this value needs to match EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED
 	private final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 	private final static String LINE_SEPARATOR;
 	static {
@@ -666,6 +667,47 @@ public class DebugOptionsTestCase extends CoreTest {
 		assertNull("throwable should be null", traceOutput[1].getThrowableText()); //$NON-NLS-1$
 		// delete the trace file
 		traceFile.delete();
+	}
+
+	/**
+	 * tests DebugTrace.trace(option, message) where the 'option' and 'message contain a '|' character (the delimiter).
+	*/
+	public void testTraceFile09() {
+
+		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
+		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
+		debugOptions.setOption(getName() + "/debug|path", "true");
+		TraceEntry[] traceOutput = null;
+		try {
+			debugTrace.trace("/debug|path", "A message with a | character.");
+			debugTrace.trace("/debug|path", "|A message with | multiple || characters.|");
+			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
+		} catch (InvalidTraceEntry invalidEx) {
+			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		assertEquals("Wrong number of entries", 2, traceOutput.length);
+		String optionPath = this.decodeString(traceOutput[0].getOptionPath());
+		String message = this.decodeString(traceOutput[0].getMessage());
+		assertEquals("option-path value is incorrect", "/debug|path", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "A message with a | character.", message); //$NON-NLS-1$ //$NON-NLS-2$
+		optionPath = this.decodeString(traceOutput[1].getOptionPath());
+		message = this.decodeString(traceOutput[1].getMessage());
+		assertEquals("option-path value is incorrect", "/debug|path", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Trace message is not correct", "|A message with | multiple || characters.|", message); //$NON-NLS-1$ //$NON-NLS-2$
+		// delete the trace file
+		traceFile.delete();
+	}
+
+	private static String decodeString(final String inputString) {
+		if (inputString == null || inputString.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED) < 0)
+			return inputString;
+		final StringBuffer tempBuffer = new StringBuffer(inputString);
+		int currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
+		while (currentIndex >= 0) {
+			tempBuffer.replace(currentIndex, currentIndex + TRACE_ELEMENT_DELIMITER_ENCODED.length(), TRACE_ELEMENT_DELIMITER);
+			currentIndex = tempBuffer.indexOf(TRACE_ELEMENT_DELIMITER_ENCODED);
+		}
+		return tempBuffer.toString();
 	}
 
 	private TraceEntry[] readTraceFile(File traceFile) throws InvalidTraceEntry {
