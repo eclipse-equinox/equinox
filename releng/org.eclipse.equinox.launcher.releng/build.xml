@@ -50,7 +50,6 @@
 				<equals arg1="s390x" arg2="${arch}" />
 				<equals arg1="motif.sparc" arg2="${ws}.${arch}" />
 				<equals arg1="win32.ia64" arg2="${ws}.${arch}" />
-				<equals arg1="gtk.ppc64" arg2="${ws}.${arch}" />  <!-- linux.gtk.ppc64 is contributed until M5 -->
 			</or>
 		</condition>
 	</target>

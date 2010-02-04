@@ -149,6 +149,8 @@
 	<target name="rootFileslinux_gtk_ppc64">
 		<mkdir dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/gtk/linux/ppc64" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="launcher" /> 
 	</target>
