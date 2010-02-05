@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,7 +185,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			adaptor.initializeStorage();
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "adapter storage initialized"); //$NON-NLS-1$//$NON-NLS-2$
@@ -201,7 +201,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			securityAdmin = new SecurityAdmin(null, this, adaptor.getPermissionStorage());
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done init props & new PermissionAdminImpl"); //$NON-NLS-1$//$NON-NLS-2$
@@ -281,7 +281,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			systemBundle.getBundleData().setBundle(systemBundle);
 		} catch (BundleException e) { // fatal error
 			e.printStackTrace();
-			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()));
+			throw new RuntimeException(NLS.bind(Msg.OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION, e.getMessage()), e);
 		}
 	}
 

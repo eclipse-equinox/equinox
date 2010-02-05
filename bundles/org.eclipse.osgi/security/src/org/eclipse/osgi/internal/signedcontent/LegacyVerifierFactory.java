@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -54,9 +54,9 @@ public class LegacyVerifierFactory implements CertificateVerifierFactory {
 				try {
 					entries[i].verify();
 				} catch (InvalidContentException e) {
-					throw new SecurityException(e.getMessage());
+					throw (SecurityException) new SecurityException(e.getMessage()).initCause(e);
 				} catch (IOException e) {
-					throw new SecurityException(e.getMessage());
+					throw (SecurityException) new SecurityException(e.getMessage()).initCause(e);
 				}
 			}
 			SignerInfo[] infos = signedContent.getSignerInfos();

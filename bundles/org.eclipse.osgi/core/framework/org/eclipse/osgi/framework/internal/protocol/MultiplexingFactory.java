@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public abstract class MultiplexingFactory {
 			setParentFactory.invoke(factory, new Object[] {getParentFactory()});
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "register", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 		factories.add(factory);
 	}
@@ -80,7 +80,7 @@ public abstract class MultiplexingFactory {
 			closeTracker.invoke(factory, null);
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "unregister", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
 
@@ -98,7 +98,7 @@ public abstract class MultiplexingFactory {
 			}
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "designateSuccessor", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-			throw new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage(), e);
 		}
 		factories = null;
 		closePackageAdminTracker(); // close tracker
@@ -128,7 +128,7 @@ public abstract class MultiplexingFactory {
 					}
 				} catch (Exception e) {
 					adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedURLStreamHandler-loop", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-					throw new RuntimeException(e.getMessage());
+					throw new RuntimeException(e.getMessage(), e);
 				}
 			}
 		}

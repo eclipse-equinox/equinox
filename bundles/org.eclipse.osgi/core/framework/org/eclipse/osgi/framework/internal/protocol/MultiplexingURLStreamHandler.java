@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,7 +97,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "openConnection", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new MalformedURLException();
@@ -112,7 +112,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "equals", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -127,7 +127,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "getDefaultPort", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -142,7 +142,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -157,7 +157,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -172,7 +172,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hostsEqual", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -190,7 +190,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "parseURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -205,7 +205,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "sameFile", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -223,7 +223,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "setURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();
@@ -238,7 +238,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
 				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "toExternalForm", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
-				throw new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
 		throw new IllegalStateException();

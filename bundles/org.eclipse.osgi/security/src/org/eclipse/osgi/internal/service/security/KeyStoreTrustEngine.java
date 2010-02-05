@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -150,7 +150,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException e) {
-			throw new IOException(e.getMessage());
+			throw (IOException) new IOException(e.getMessage()).initCause(e);
 		} catch (GeneralSecurityException e) {
 			SignedBundleHook.log(e.getMessage(), FrameworkLogEntry.WARNING, e);
 			return null;
@@ -182,7 +182,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw new CertificateException(ke.getMessage());
+			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
 		return alias;
 	}
@@ -203,7 +203,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				removeTrustAnchor(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw new CertificateException(ke.getMessage());
+			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
 	}
 
@@ -227,7 +227,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw new CertificateException(ke.getMessage());
+			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
 	}
 
@@ -243,7 +243,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				return store.getCertificate(alias);
 			}
 		} catch (KeyStoreException ke) {
-			throw new CertificateException(ke.getMessage());
+			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
 	}
 
@@ -261,7 +261,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 				}
 			}
 		} catch (KeyStoreException ke) {
-			throw new CertificateException(ke.getMessage());
+			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
 		return (String[]) returnList.toArray(new String[] {});
 	}

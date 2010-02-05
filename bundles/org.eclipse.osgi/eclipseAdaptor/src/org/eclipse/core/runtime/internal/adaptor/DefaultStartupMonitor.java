@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,10 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		try {
 			updateMethod = splashHandler.getClass().getMethod("updateSplash", null); //$NON-NLS-1$
 		} catch (SecurityException e) {
-			throw new IllegalStateException(e.getMessage());
+			throw (IllegalStateException) new IllegalStateException(e.getMessage()).initCause(e);
 		} catch (NoSuchMethodException e) {
 			//TODO maybe we could do something else in the update method in this case, like print something to the console?
-			throw new IllegalStateException(e.getMessage());
+			throw (IllegalStateException) new IllegalStateException(e.getMessage()).initCause(e);
 		}
 	}
 

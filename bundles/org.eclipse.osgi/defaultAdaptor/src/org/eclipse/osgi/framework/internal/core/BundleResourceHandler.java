@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -160,7 +160,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		try {
 			bundleID = getBundleID(host);
 		} catch (NumberFormatException nfe) {
-			throw new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host));
+			throw (MalformedURLException) new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
 		}
 		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getContext().getBundle(bundleID);
 		if (bundle == null)

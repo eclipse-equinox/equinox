@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -388,7 +388,7 @@ class StateBuilder {
 					} catch (Exception e) { // got some reflection exception
 						if (e instanceof RuntimeException)
 							throw (RuntimeException) e;
-						throw new RuntimeException(e.getMessage());
+						throw new RuntimeException(e.getMessage(), e);
 					}
 				else if (ATTR_TYPE_VERSION.equals(type))
 					putValue = new Version(value);

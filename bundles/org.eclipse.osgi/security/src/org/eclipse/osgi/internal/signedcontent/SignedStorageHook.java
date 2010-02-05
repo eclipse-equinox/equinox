@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -152,7 +152,7 @@ public class SignedStorageHook implements StorageHook {
 				try {
 					certBytes = certs[i].getEncoded();
 				} catch (CertificateEncodingException e) {
-					throw new IOException(e.getMessage());
+					throw (IOException) new IOException(e.getMessage()).initCause(e);
 				}
 				os.writeInt(certBytes.length);
 				os.write(certBytes);
@@ -175,7 +175,7 @@ public class SignedStorageHook implements StorageHook {
 			try {
 				certs[i] = PKCS7Processor.certFact.generateCertificate(new ByteArrayInputStream(certBytes));
 			} catch (CertificateException e) {
-				throw new IOException(e.getMessage());
+				throw (IOException) new IOException(e.getMessage()).initCause(e);
 			}
 		}
 		int anchorIdx = is.readInt();

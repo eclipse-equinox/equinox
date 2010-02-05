@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class URLStreamHandlerFactoryProxyFor15 extends URLStreamHandlerProxy {
 			throw (RuntimeException) e.getTargetException();
 		} catch (Exception e) {
 			// expected on JRE < 1.5
-			throw new UnsupportedOperationException();
+			throw (UnsupportedOperationException) new UnsupportedOperationException().initCause(e);
 		}
 	}
 }

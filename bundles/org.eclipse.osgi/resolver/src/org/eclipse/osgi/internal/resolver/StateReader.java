@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -421,7 +421,7 @@ final class StateReader {
 				} catch (Exception e) { // got some reflection exception
 					if (e instanceof RuntimeException)
 						throw (RuntimeException) e;
-					throw new RuntimeException(e.getMessage());
+					throw new RuntimeException(e.getMessage(), e);
 				}
 			}
 			result.put(key, value);
@@ -652,7 +652,7 @@ final class StateReader {
 			for (int i = 0; i < numBundles; i++)
 				readBundleDescriptionLazyData(in, 0);
 		} catch (IOException ioe) {
-			throw new RuntimeException(); // TODO need error message here
+			throw new RuntimeException(ioe.getMessage(), ioe); // TODO need error message here
 		} finally {
 			if (in != null)
 				try {

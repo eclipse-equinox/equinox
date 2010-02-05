@@ -222,7 +222,7 @@ public class BundleHost extends AbstractBundle {
 			try {
 				framework.checkAdminPermission(this, AdminPermission.CLASS);
 			} catch (SecurityException e) {
-				throw new ClassNotFoundException();
+				throw new ClassNotFoundException(name, e);
 			}
 		}
 		BundleLoader loader = checkLoader();
