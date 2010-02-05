@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	 * List&lt;BundleContextImpl&gt;.
 	 * */
 	/* @GuardedBy("registrationLock") */
-	private List contextsUsing;
+	private final List contextsUsing;
 
 	/** properties for this registration. */
 	/* @GuardedBy("registrationLock") */
@@ -78,7 +78,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 
 	/** The registration state */
 	/* @GuardedBy("registrationLock") */
-	private int state = REGISTERED;
+	private int state;
 	private static final int REGISTERED = 0x00;
 	private static final int UNREGISTERING = 0x01;
 	private static final int UNREGISTERED = 0x02;
@@ -96,9 +96,10 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		this.clazzes = clazzes; /* must be set before calling createProperties. */
 		this.service = service;
 		this.serviceid = registry.getNextServiceId(); /* must be set before calling createProperties. */
+		this.contextsUsing = new ArrayList(10);
 
 		synchronized (registrationLock) {
-			this.contextsUsing = null;
+			this.state = REGISTERED;
 			/* We leak this from the constructor here, but it is ok
 			 * because the ServiceReferenceImpl constructor only
 			 * stores the value in a final field without
@@ -156,7 +157,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		final ServiceProperties previousProperties;
 		synchronized (registry) {
 			synchronized (registrationLock) {
-				if (state != REGISTERED) { /* in the process of unregistering */
+				if (state != REGISTERED) { /* in the process of unregisterING */
 					throw new IllegalStateException(Msg.SERVICE_ALREADY_UNREGISTERED_EXCEPTION);
 				}
 
@@ -230,15 +231,12 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 			/* we have published the ServiceEvent, now mark the service fully unregistered */
 			state = UNREGISTERED;
 
-			if (contextsUsing != null) {
-				size = contextsUsing.size();
-
-				if (size > 0) {
-					if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
-						Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
-					}
-					users = (BundleContextImpl[]) contextsUsing.toArray(new BundleContextImpl[size]);
+			size = contextsUsing.size();
+			if (size > 0) {
+				if (Debug.DEBUG && Debug.DEBUG_SERVICES) {
+					Debug.println("unregisterService: releasing users"); //$NON-NLS-1$
 				}
+				users = (BundleContextImpl[]) contextsUsing.toArray(new BundleContextImpl[size]);
 			}
 		}
 
@@ -248,7 +246,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 
 		synchronized (registrationLock) {
-			contextsUsing = null;
+			contextsUsing.clear();
 
 			reference = null; /* mark registration dead */
 		}
@@ -427,10 +425,10 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 					use = new ServiceUse(user, this);
 					added = true;
 					synchronized (registrationLock) {
-						servicesInUse.put(this, use);
-						if (contextsUsing == null) {
-							contextsUsing = new ArrayList(10);
+						if (state == UNREGISTERED) { /* service unregistered */
+							return null;
 						}
+						servicesInUse.put(this, use);
 						contextsUsing.add(user);
 					}
 				}
@@ -536,10 +534,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 				if (use == null) {
 					return;
 				}
-				// contextsUsing may have been nulled out by use.releaseService() if the registrant bundle
-				// is listening for events and unregisters the service
-				if (contextsUsing != null)
-					contextsUsing.remove(user);
+				contextsUsing.remove(user);
 			}
 		}
 		synchronized (use) {
@@ -555,9 +550,6 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 	Bundle[] getUsingBundles() {
 		synchronized (registrationLock) {
 			if (state == UNREGISTERED) /* service unregistered */
-				return null;
-
-			if (contextsUsing == null)
 				return null;
 
 			int size = contextsUsing.size();
