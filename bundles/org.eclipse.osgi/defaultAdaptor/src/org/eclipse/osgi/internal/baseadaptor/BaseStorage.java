@@ -1234,13 +1234,14 @@ public class BaseStorage implements SynchronousBundleListener {
 				systemState.notifyAll(); // To wakeup sleeping thread.
 			}
 			try {
-				if (joinWith != null)
+				if (joinWith != null) {
 					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 						Debug.println("About to join saving thread"); //$NON-NLS-1$
-				// There should be no deadlock when 'shutdown' is true.
-				joinWith.join();
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
-					Debug.println("Joined with saving thread"); //$NON-NLS-1$
+					// There should be no deadlock when 'shutdown' is true.
+					joinWith.join();
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+						Debug.println("Joined with saving thread"); //$NON-NLS-1$
+				}
 			} catch (InterruptedException ie) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Error shutdowning StateSaver: " + ie.getMessage()); //$NON-NLS-1$
