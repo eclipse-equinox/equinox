@@ -418,9 +418,9 @@ final class StateReader {
 					value = constructor.newInstance(new Object[] {value});
 				} catch (ClassNotFoundException e) {
 					// oh well cannot support; just use the string
-				} catch (Exception e) { // got some reflection exception
-					if (e instanceof RuntimeException)
-						throw (RuntimeException) e;
+				} catch (RuntimeException e) { // got some reflection exception
+					throw e;
+				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 			}

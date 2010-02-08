@@ -385,9 +385,9 @@ class StateBuilder {
 					} catch (ClassNotFoundException e) {
 						// oh well cannot support; just use string
 						putValue = value;
-					} catch (Exception e) { // got some reflection exception
-						if (e instanceof RuntimeException)
-							throw (RuntimeException) e;
+					} catch (RuntimeException e) { // got some reflection exception
+						throw e;
+					} catch (Exception e) {
 						throw new RuntimeException(e.getMessage(), e);
 					}
 				else if (ATTR_TYPE_VERSION.equals(type))
