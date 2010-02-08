@@ -34,7 +34,7 @@ ifeq ($(DEFAULT_JAVA),)
 endif
 
 # Define the object modules to be compiled and flags.
-CC=gcc
+CC?=gcc
 MAIN_OBJS = eclipseMain.o
 COMMON_OBJS = eclipseConfig.o eclipseCommon.o eclipseMotifCommon.o eclipseMotifInit.o
 DLL_OBJS	= eclipse.o eclipseMotif.o eclipseUtil.o eclipseJNI.o eclipseMozilla.o eclipseShm.o eclipseNix.o \
