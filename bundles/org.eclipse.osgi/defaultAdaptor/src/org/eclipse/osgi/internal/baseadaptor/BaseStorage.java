@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -421,6 +421,8 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void saveAllData(boolean shutdown) {
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			Debug.println("Saving framework data ..."); //$NON-NLS-1$
 		if (storageManagerClosed)
 			try {
 				storageManager.open(!LocationManager.getConfigurationLocation().isReadOnly());
@@ -485,6 +487,8 @@ public class BaseStorage implements SynchronousBundleListener {
 	private void savePermissionStorage() {
 		if (permissionStorage == null || isReadOnly() || !permissionStorage.isDirty())
 			return;
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			Debug.println("About to save permission data ..."); //$NON-NLS-1$
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(PERM_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
@@ -536,6 +540,8 @@ public class BaseStorage implements SynchronousBundleListener {
 		// the cache and the state match
 		if (stateManager == null || isReadOnly() || (timeStamp == stateManager.getSystemState().getTimeStamp() && !stateManager.saveNeeded()))
 			return;
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			Debug.println("Saving bundle data ..."); //$NON-NLS-1$
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
@@ -589,6 +595,8 @@ public class BaseStorage implements SynchronousBundleListener {
 			stateManager.getSystemState().setTimeStamp(stateManager.getSystemState().getTimeStamp() + 1);
 		if (stateManager == null || isReadOnly() || !stateManager.saveNeeded())
 			return;
+		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			Debug.println("Saving resolver state data ..."); //$NON-NLS-1$
 		File stateTmpFile = null;
 		File lazyTmpFile = null;
 		try {
@@ -1148,25 +1156,33 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private class StateSaver implements Runnable {
-		private long delay_interval = 30000; // 30 seconds.
-		private long max_total_delay_interval = 1800000; // 30 minutes.
+		private final long delay_interval;
+		private final long max_total_delay_interval;
 		private boolean shutdown = false;
 		private long lastSaveTime = 0;
 		private Thread runningThread = null;
+		private Thread shutdownHook = null;
 
 		StateSaver() {
 			String prop = FrameworkProperties.getProperty("eclipse.stateSaveDelayInterval"); //$NON-NLS-1$
+			long delayValue = 30000; // 30 seconds.
+			long maxDelayValue = 1800000; // 30 minutes.
 			if (prop != null) {
 				try {
 					long val = Long.parseLong(prop);
 					if (val >= 1000 && val <= 1800000) {
-						delay_interval = val;
-						max_total_delay_interval = val * 60;
+						delayValue = val;
+						maxDelayValue = val * 60;
+					} else if (val == 0) {
+						delayValue = 0;
+						maxDelayValue = 0;
 					}
 				} catch (NumberFormatException e) {
 					// ignore
 				}
 			}
+			delay_interval = delayValue;
+			max_total_delay_interval = maxDelayValue;
 		}
 
 		public void run() {
@@ -1200,6 +1216,12 @@ public class BaseStorage implements SynchronousBundleListener {
 					// Continue the loop if Saver is asked again during saving State data to file.
 				} while (!shutdown && curSaveTime < lastSaveTime);
 				runningThread = null; // clear runningThread
+				try {
+					Runtime.getRuntime().removeShutdownHook(shutdownHook);
+				} catch (IllegalStateException e) {
+					// avoid exception if shutdown is in progress
+				}
+				shutdownHook = null;
 			}
 		}
 
@@ -1213,8 +1235,12 @@ public class BaseStorage implements SynchronousBundleListener {
 			}
 			try {
 				if (joinWith != null)
-					// There should be no deadlock when 'shutdown' is true.
-					joinWith.join();
+					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+						Debug.println("About to join saving thread"); //$NON-NLS-1$
+				// There should be no deadlock when 'shutdown' is true.
+				joinWith.join();
+				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+					Debug.println("Joined with saving thread"); //$NON-NLS-1$
 			} catch (InterruptedException ie) {
 				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
 					Debug.println("Error shutdowning StateSaver: " + ie.getMessage()); //$NON-NLS-1$
@@ -1224,12 +1250,22 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 
 		void requestSave() {
-			State systemState = adaptor.getState();
+			final State systemState = adaptor.getState();
 			synchronized (systemState) {
 				if (shutdown)
 					return; // do not start another thread if we have already shutdown
+				if (delay_interval == 0) // all saves are atomic
+					saveAllData(false);
 				lastSaveTime = System.currentTimeMillis();
 				if (runningThread == null) {
+					shutdownHook = new Thread(new Runnable() {
+						public void run() {
+							synchronized (systemState) {
+								saveAllData(false);
+							}
+						}
+					});
+					Runtime.getRuntime().addShutdownHook(shutdownHook);
 					runningThread = new Thread(this, "State Saver"); //$NON-NLS-1$
 					runningThread.start();
 				}
