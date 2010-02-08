@@ -228,6 +228,7 @@ home directory.");
 #define JAR 		 _T_ECLIPSE("-jar")
 
 #define OPENFILE	  _T_ECLIPSE("--launcher.openFile")
+#define DEFAULTACTION _T_ECLIPSE("--launcher.defaultAction")
 #define TIMEOUT		  _T_ECLIPSE("--launcher.timeout")
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
@@ -236,6 +237,7 @@ home directory.");
 #define PERM_GEN	  _T_ECLIPSE("--launcher.XXMaxPermSize")
 
 #define XXPERMGEN	  _T_ECLIPSE("-XX:MaxPermSize=")
+#define ACTION_OPENFILE _T_ECLIPSE("openFile")
 
 /* constants for ee options file */
 #define EE_EXECUTABLE 			_T_ECLIPSE("-Dee.executable=")
@@ -259,8 +261,9 @@ static _TCHAR * startupArg    = NULL;			/* path of the startup.jar the user want
 static _TCHAR*  vmName        = NULL;     		/* Java VM that the user wants to run */
 static _TCHAR*  name          = NULL;			/* program name */	
 static _TCHAR*  permGen  	  = NULL;			/* perm gen size for sun */
-static _TCHAR*  filePath	  = NULL;			/* file to open */
+static _TCHAR**  filePath	  = NULL;			/* list of files to open */
 static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
+static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command line arguments */ 
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -277,17 +280,15 @@ typedef struct
 	void*  value;		/* the variable where the option value is saved */
 						/* value is a _TCHAR** or int* depending on if VALUE_IS_FLAG is set */
 	int    flag;		/* flags */
-	int    remove;		/* the number of argments to remove from the list */
+	int    remove;		/* the number of argments to remove from the list, -1 can be used with VALUE_IS_LIST */
 } Option;
 
 /* flags for the Option struct */
-#define VALUE_IS_FLAG 	1   /* value is an int*, if not set, value is a _TCHAR** */
+#define VALUE_IS_FLAG 	1   /* value is an int*, if not set, value is a _TCHAR** or _TCHAR*** (VALUE_IS_LIST) */
 #define OPTIONAL_VALUE  2  	/* value is optional, if next arg does not start with '-', */
 							/* don't assign it and only remove (remove - 1) arguments  */
-
-/* flags being used by EE options */
-#define EE_ADJUST_PATH	4   /* value is a path, do processing on relative paths to try and make them absolute */
-#define EE_PATH_LIST	8   /* value is a list of paths */
+#define ADJUST_PATH		4  	/* value is a path, do processing on relative paths to try and make them absolute */
+#define VALUE_IS_LIST	8  	/* value is a pointer to a tokenized _TCHAR* string for EE files, or a _TCHAR** list for the command line */
 
 static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
@@ -305,16 +306,17 @@ static Option options[] = {
     { VM,           &vmName,		0,			2 },
     { NAME,         &name,			0,			2 },
     { PERM_GEN,		&permGen,		0,			2 },
-    { OPENFILE,		&filePath,		0,			2 },
+    { OPENFILE,		&filePath,		ADJUST_PATH | VALUE_IS_LIST, -1 },
     { TIMEOUT,		&timeoutString, 0,          2 },
+    { DEFAULTACTION,&defaultAction, 0,			2 },
     { WS,			&wsArg,			0,			2 } };
 static int optionsSize = (sizeof(options) / sizeof(options[0]));
 
 static Option eeOptions[] = {
-	{ EE_EXECUTABLE,	&eeExecutable, 	EE_ADJUST_PATH, 0 },
-	{ EE_CONSOLE,	 	&eeConsole,		EE_ADJUST_PATH, 0 },
-	{ EE_VM_LIBRARY, 	&eeLibrary,		EE_ADJUST_PATH, 0 },
-	{ EE_LIBRARY_PATH,	&eeLibPath, 	EE_ADJUST_PATH | EE_PATH_LIST, 0 }
+	{ EE_EXECUTABLE,	&eeExecutable, 	ADJUST_PATH, 0 },
+	{ EE_CONSOLE,	 	&eeConsole,		ADJUST_PATH, 0 },
+	{ EE_VM_LIBRARY, 	&eeLibrary,		ADJUST_PATH, 0 },
+	{ EE_LIBRARY_PATH,	&eeLibPath, 	ADJUST_PATH | VALUE_IS_LIST, 0 }
 };
 static int eeOptionsSize = (sizeof(eeOptions) / sizeof(eeOptions[0]));
 
@@ -328,6 +330,7 @@ static int nEEargs = 0;
 
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
+static void 	processDefaultAction(int argc, _TCHAR* argv[]);
 static void     getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static int 		determineVM(_TCHAR** msg);
 static int 		vmEEProps(_TCHAR* eeFile, _TCHAR** msg);
@@ -377,10 +380,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 	/* Initialize official program name */
    	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName();
     
+   	if (defaultAction != NULL) {
+   		processDefaultAction(initialArgc, initialArgv);
+   	}
+   	
    	/* try to open the specified file in an already running eclipse */
    	/* on Mac we are only registering an event handler here, always do this */
 #ifndef MACOSX
-	if (filePath != NULL)
+	if (filePath != NULL && filePath[0] != NULL)
 #endif
 	{
 		int timeout = 60;
@@ -658,67 +665,109 @@ static _TCHAR** buildLaunchCommand( _TCHAR* program, _TCHAR** vmArgs, _TCHAR** p
 	memcpy(result + 1 + nVM, progArgs, nProg * sizeof(_TCHAR*));
 	return result;
 }
+
+static void processDefaultAction(int argc, _TCHAR* argv[]) {
+	/* scan the arg list, no default if any start with '-' */
+	int i = 0;
+	for (i = 0; i < argc; i++) {
+		if (argv[i][0] == _T_ECLIPSE('-'))
+			return;
+	}
+	/* argv[0] is the program (eclipse),  we process the default actions by inserting
+	 * the appropriate -argument at argv[1]
+	 */
+	if (argc <= 1)
+		return;
+
+	if (_tcsicmp(defaultAction, ACTION_OPENFILE) == 0) {
+		int newArgc = argc + 1;
+		_TCHAR ** newArgv = malloc(newArgc * sizeof(_TCHAR*));
+		newArgv[0] = argv[0];
+		newArgv[1] = OPENFILE;
+		memcpy(&newArgv[2], &argv[1], argc * sizeof(_TCHAR*));
+		parseArgs(&newArgc, newArgv);
+		free(newArgv);
+	}
+}
+
 /*
  * Parse arguments of the command.
  */
-static void parseArgs( int* pArgc, _TCHAR* argv[] )
-{
+static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 	Option* option;
-    int     remArgs;
-    int     index;
-    int     i;
-
-    /* Ensure the list of user argument is NULL terminated. */
-    /*argv[ *pArgc ] = NULL;*/
+	int remArgs;
+	int index;
+	int i;
+	_TCHAR * c;
 
 	/* For each user defined argument (excluding the program) */
-    for (index = 1; index < *pArgc; index++){
-        remArgs = 0;
+	for (index = 1; index < *pArgc; index++) {
+		remArgs = 0;
 
-        /* Find the corresponding argument is a option supported by the launcher */
-        option = NULL;
-        for (i = 0; option == NULL && i < optionsSize; i++)
-        {
-        	if (_tcsicmp( argv[ index ], options[ i ].name ) == 0) {
-        	    option = &options[ i ];
-        	    break;
-        	}
-       	}
+		/* Find the corresponding argument is a option supported by the launcher */
+		option = NULL;
+		for (i = 0; option == NULL && i < optionsSize; i++) {
+			if (_tcsicmp(argv[index], options[i].name) == 0) {
+				option = &options[i];
+				break;
+			}
+		}
 
-       	/* If the option is recognized by the launcher */
-       	if (option != NULL)
-       	{
-       		int optional = 0;
-       		/* If the option requires a value and there is one, extract the value. */
-       		if (option->value != NULL) {
-       			if (option->flag & VALUE_IS_FLAG)
-       				*((int *)option->value) = 1;
-       			else if((index + 1) < *pArgc) {
-       				_TCHAR * next = argv[index + 1];
-       				if(!((option->flag & OPTIONAL_VALUE) && next[0] == _T_ECLIPSE('-'))) {
-       					*((_TCHAR**)option->value) = next;
-       				} else {
-       					/* value was optional, and the next arg starts with '-' */
-       					optional = 1;
-       				}
-       			}
-       		}
+		/* If the option is recognized by the launcher */
+		if (option != NULL) {
+			int optional = 0;
+			c = option->name;
+			/* If the option requires a value and there is one, extract the value. */
+			if (option->value != NULL) {
+				if (option->flag & VALUE_IS_FLAG)
+					*((int *) option->value) = 1;
+				else {
+					int count = 1;
+					if (option->flag & VALUE_IS_LIST) {
+						/* count how many args, this is the -argument itself + following the non'-' args */
+						while(count + index < *pArgc && argv[count + index][0] != _T_ECLIPSE('-'))
+							count++;
+						
+						/* allocate memory for a _TCHAR* list and initialize it with NULLs*/
+						*((void**) option->value) = malloc(count * sizeof(_TCHAR *));
+						memset(*((void **) option->value), 0, count * sizeof(_TCHAR *));
+						
+						if (option->remove != 0)
+							option->remove = count;
+					}
 
-       		/* If the option requires a flag to be set, set it. */
-       		remArgs = option->remove - optional;
-       	}
+					for (i = 0; i < count; i++) {
+						if ((index + i + 1) < *pArgc) {
+							_TCHAR * next = argv[index + i + 1];
+							if (option->flag & ADJUST_PATH)
+								next = checkPath(next, getProgramDir(), 0);
+							if (next[0] != _T_ECLIPSE('-')) {
+								if (option->flag & VALUE_IS_LIST)
+									(*((_TCHAR***) option->value))[i] = next;
+								else
+									*((_TCHAR**) option->value) = next;
+							} else if (option->flag & OPTIONAL_VALUE){
+								/* value was optional, and the next arg starts with '-' */
+								optional = 1;
+							}
+						}
+					}
+				}
+			}
+
+			/* If the option requires a flag to be set, set it. */
+			remArgs = option->remove - optional;
+		}
 
 		/* Remove any matched arguments from the list. */
-        if (remArgs > 0)
-        {
-            for (i = (index + remArgs); i <= *pArgc; i++)
-            {
-                argv[ i - remArgs ] = argv[ i ];
-            }
-            index--;
-            *pArgc -= remArgs;
-        }
-    }
+		if (remArgs > 0) {
+			for (i = (index + remArgs); i <= *pArgc; i++) {
+				argv[i - remArgs] = argv[i];
+			}
+			index--;
+			*pArgc -= remArgs;
+		}
+	}
 }
 
 /*
@@ -1519,11 +1568,11 @@ static int processEEProps(_TCHAR* eeFile)
         	else {
         		c1 = malloc( (_tcslen(argv[index]) - _tcslen(option->name) + 1) *sizeof(_TCHAR));
             	_tcscpy(c1, argv[index] + _tcslen(option->name));
-        		if (option->flag & EE_ADJUST_PATH && option->flag & EE_PATH_LIST) {
+        		if (option->flag & ADJUST_PATH && option->flag & VALUE_IS_LIST) {
         			c2 = checkPathList(c1, eeDir, 1);
        				free(c1);
     				c1 = c2;
-        		} else if (option->flag & EE_ADJUST_PATH) {
+        		} else if (option->flag & ADJUST_PATH) {
         			c2 = checkPath(c1, eeDir, 1);
         			if (c2 != c1) {
         				free(c1);

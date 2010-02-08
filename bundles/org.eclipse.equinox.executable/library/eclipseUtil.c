@@ -133,20 +133,27 @@ _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverseOrder) 
     return result;
 }
 
-_TCHAR * concatStrings(_TCHAR** strs) {
+_TCHAR * concatStrings(_TCHAR**strs) {
+	return concatPaths(strs, 0);
+}
+
+_TCHAR * concatPaths(_TCHAR** strs, _TCHAR separator) {
+	_TCHAR separatorString[] = { separator, 0 };
 	_TCHAR * result;
 	int i = -1;
 	size_t length = 0;
 	/* first count how large a buffer we need */
-	while( strs[++i] != NULL) {
-		length += _tcslen(strs[i]);
+	while (strs[++i] != NULL) {
+		length += _tcslen(strs[i]) + (separator != 0 ? 1 : 0);
 	}
-	
+
 	result = malloc((length + 1) * sizeof(_TCHAR));
 	result[0] = 0;
 	i = -1;
-	while(strs[++i] != NULL) {
+	while (strs[++i] != NULL) {
 		result = _tcscat(result, strs[i]);
+		if (separator != 0)
+			result = _tcscat(result, separatorString);
 	}
 	return result;
 }

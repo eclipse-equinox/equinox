@@ -169,7 +169,7 @@ int main() {
 
 void installAppleEventHandler();
 
-int reuseWorkbench(_TCHAR* filePath, int timeout) {
+int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	installAppleEventHandler();
 	return 0;
 }

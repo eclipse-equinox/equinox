@@ -51,7 +51,7 @@ static GtkWidget*   image = 0;
 
 static sem_t* mutex;
 static Atom appWindowAtom, launcherWindowAtom;
-static char* openFilePath = NULL; /* the file we want to open */
+static _TCHAR** openFilePath = NULL; /* the files we want to open */
 static int openFileTimeout = 60; /* number of seconds to wait before timeout */
 
 static struct sigaction quitAction;
@@ -129,7 +129,7 @@ static int setAppWindowPropertyFn() {
 	Window appWindow;
 	GdkWindow *propWindow;
 	GdkAtom propAtom;
-	char *propVal;
+	_TCHAR *propVal;
 
 	//Look for the SWT window. If it's there, set a property on it.
 	appWindow = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, appWindowAtom);
@@ -137,15 +137,14 @@ static int setAppWindowPropertyFn() {
 	if (appWindow) {
 		propAtom = gtk.gdk_atom_intern("org.eclipse.swt.filePath.message", FALSE);
 		//append a colon delimiter in case more than one file gets appended to the app windows property.
-		propVal = malloc((_tcslen(openFilePath) + 2) * sizeof(char));
-		_stprintf(propVal, _T_ECLIPSE("%s%s"), openFilePath, ":");
-
+		propVal = concatPaths(openFilePath, _T_ECLIPSE(':'));
 		propWindow = gtk.gdk_window_foreign_new(appWindow);
 		if (propWindow != NULL) {
 			gtk.gdk_property_change(propWindow, propAtom, propAtom, 8, GDK_PROP_MODE_APPEND, (guchar *) propVal, _tcslen(propVal));
 			free(propVal);
 			return 1;
 		} //else the window got destroyed between XGetSelectionOwner and here (?)
+		free(propVal);
 	}
 	return 0;
 }
@@ -185,7 +184,7 @@ int createLauncherWindow() {
 	return 1;
 }
 
-int reuseWorkbench(char* filePath, int timeout) {
+int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	char *appName, *launcherName;
 	int result = 0;
 

@@ -115,7 +115,7 @@ extern int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib );
 /* an array of paths that will need to be on the search path to load the vm shared library */
 extern _TCHAR ** getVMLibrarySearchPath(_TCHAR * vmLibrary);
 
-extern int reuseWorkbench(_TCHAR* filePath, int timeout);
+extern int reuseWorkbench(_TCHAR** filePath, int timeout);
 
 #endif /* ECLIPSE_OS_H */
 

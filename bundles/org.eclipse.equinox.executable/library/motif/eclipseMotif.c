@@ -330,7 +330,7 @@ JavaResults* launchJavaVM( char* args[] )
 	return jvmResults;
 }
 
-int reuseWorkbench(_TCHAR* filePath, int timeout) {
+int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	/* not yet implemented on motif */
 	return -1;
 }

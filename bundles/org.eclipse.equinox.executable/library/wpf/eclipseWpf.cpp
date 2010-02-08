@@ -554,7 +554,7 @@ int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 	return result;
 }
 
-int reuseWorkbench(_TCHAR* filePath, int timeout) {
+int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	/* not implemented for WPF */
 	return -1;
 }

@@ -42,7 +42,7 @@ static UINT		findWindowTimeout = 1000;
 static UINT_PTR findWindowTimerId = 97;
 static UINT		timerCount = 0;
 static UINT		openFileTimeout = 60;
-static _TCHAR*	openFilePath;
+static _TCHAR**	openFilePath;
 
 /* Define the window system arguments for the Java VM. */
 static _TCHAR*  argVM[] = { NULL };
@@ -82,20 +82,32 @@ typedef struct {
 static void sendOpenFileMessage(HWND window) {
 	_TCHAR* id;
 	UINT msg;
-	int size = (_tcslen(openFilePath) + 1) * sizeof(_TCHAR);
+	int index = 0;
+	int size = 0;
 	DWORD wParam;
 #ifdef WIN64
 	DWORDLONG lParam;
 #else
 	DWORD lParam;
 #endif
-	createSharedData(&id, size);
-	setSharedData(id, openFilePath);
-	msg = RegisterWindowMessage(_T("SWT_OPENDOC"));
+
+	/* what's the longest path? */
+	while (openFilePath[index] != NULL) {
+		int length = _tcslen(openFilePath[index++]);
+		if (size <= length)
+			size = length + 1;
+	}
+
+	createSharedData(&id, size * sizeof(_TCHAR));
 	_stscanf(id, _T_ECLIPSE("%lx_%lx"), &wParam, &lParam);
-	
-	/* SendMessage does not return until the message has been processed */
-	SendMessage(window, msg, wParam, lParam);
+	msg = RegisterWindowMessage(_T("SWT_OPENDOC"));
+
+	index = 0;
+	for(index = 0; openFilePath[index] != NULL; index++) {
+		/* SendMessage does not return until the message has been processed */
+		setSharedData(id, openFilePath[index]);
+		SendMessage(window, msg, wParam, lParam);
+	}
 	destroySharedData(id);
 }
 
@@ -131,7 +143,7 @@ static void CALLBACK findWindowProc(HWND hwnd, UINT message, UINT idTimer, DWORD
 }
 
 /* return > 0 if we successfully send a message to another eclipse instance */
-int reuseWorkbench(_TCHAR* filePath, int timeout) {
+int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	_TCHAR*   mutexPrefix = _T("SWT_Mutex_");
 	_TCHAR*   mutexName, *name;
 	DWORD 	  lock;

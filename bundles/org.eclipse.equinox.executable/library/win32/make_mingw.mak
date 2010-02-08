@@ -37,7 +37,7 @@ OSTYPE	?= $(shell if uname -s | grep -iq cygwin ; then echo cygwin; else echo li
 
 ifeq ($(OSTYPE),cygwin)
 CCVER   = i686
-CC      = i686-pc-cygwin-gcc
+CC      = i686-pc-cygwin-gcc-3
 RC      = windres
 else
 CCVER   = i586

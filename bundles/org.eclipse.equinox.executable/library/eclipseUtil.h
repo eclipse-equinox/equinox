@@ -37,6 +37,9 @@ extern _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverse
 /* take a NULL terminated array of strings and concatenate them together into one string */
 extern _TCHAR * concatStrings(_TCHAR** strs);
 
+/* take a NULL terminated array of strings and concatenate them together using the give pathSeparator */
+extern _TCHAR* concatPaths(_TCHAR** paths, _TCHAR pathSeparator);
+
 /* check that the buffer contains all the given paths */
 extern int containsPaths(_TCHAR * str, _TCHAR** paths);
 
