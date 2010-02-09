@@ -686,12 +686,12 @@ public class DebugOptionsTestCase extends CoreTest {
 			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		assertEquals("Wrong number of entries", 2, traceOutput.length);
-		String optionPath = this.decodeString(traceOutput[0].getOptionPath());
-		String message = this.decodeString(traceOutput[0].getMessage());
+		String optionPath = decodeString(traceOutput[0].getOptionPath());
+		String message = decodeString(traceOutput[0].getMessage());
 		assertEquals("option-path value is incorrect", "/debug|path", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "A message with a | character.", message); //$NON-NLS-1$ //$NON-NLS-2$
-		optionPath = this.decodeString(traceOutput[1].getOptionPath());
-		message = this.decodeString(traceOutput[1].getMessage());
+		optionPath = decodeString(traceOutput[1].getOptionPath());
+		message = decodeString(traceOutput[1].getMessage());
 		assertEquals("option-path value is incorrect", "/debug|path", optionPath); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("Trace message is not correct", "|A message with | multiple || characters.|", message); //$NON-NLS-1$ //$NON-NLS-2$
 		// delete the trace file
