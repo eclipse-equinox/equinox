@@ -25,6 +25,7 @@ import org.osgi.framework.Version;
  */
 public class CachedManifest extends Dictionary {
 	static final String SERVICE_COMPONENT = "Service-Component"; //$NON-NLS-1$
+	static boolean DEBUG = false;
 	private Dictionary manifest = null;
 	private EclipseStorageHook storageHook;
 
@@ -35,6 +36,8 @@ public class CachedManifest extends Dictionary {
 	public Dictionary getManifest() {
 		if (manifest == null)
 			try {
+				if (DEBUG)
+					System.out.println("Reading manifest for: " + storageHook.getBaseData()); //$NON-NLS-1$
 				manifest = storageHook.createCachedManifest(true);
 			} catch (BundleException e) {
 				final String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION, storageHook.getBaseData().getLocation());
@@ -133,6 +136,8 @@ public class CachedManifest extends Dictionary {
 		if (SERVICE_COMPONENT.equals(keyString))
 			return storageHook.getServiceComponent();
 		Dictionary result = getManifest();
+		if (DEBUG)
+			System.out.println("Manifest read because of header: " + key); //$NON-NLS-1$
 		return result == null ? null : result.get(key);
 	}
 

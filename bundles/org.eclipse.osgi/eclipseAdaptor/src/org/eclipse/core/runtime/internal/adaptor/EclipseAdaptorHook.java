@@ -42,6 +42,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	private static final String RUNTIME_ADAPTOR = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/eclipseadaptor"; //$NON-NLS-1$
 	private static final String OPTION_CONVERTER = RUNTIME_ADAPTOR + "/converter/debug"; //$NON-NLS-1$
 	private static final String OPTION_LOCATION = RUNTIME_ADAPTOR + "/debug/location"; //$NON-NLS-1$
+	private static final String OPTION_CACHEDMANIFEST = RUNTIME_ADAPTOR + "/debug/cachedmanifest"; //$NON-NLS-1$
 	static final boolean SET_TCCL_XMLFACTORY = "true".equals(FrameworkProperties.getProperty("eclipse.parsers.setTCCL", "true"));//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 	private BaseAdaptor adaptor;
@@ -213,6 +214,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			return;
 		PluginConverterImpl.DEBUG = options.getBooleanOption(OPTION_CONVERTER, false);
 		BasicLocation.DEBUG = options.getBooleanOption(OPTION_LOCATION, false);
+		CachedManifest.DEBUG = options.getBooleanOption(OPTION_CACHEDMANIFEST, false);
 	}
 
 	public void addHooks(HookRegistry hookRegistry) {

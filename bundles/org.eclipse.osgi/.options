@@ -30,6 +30,7 @@ org.eclipse.osgi/debug/objectPool/dups=false
 # Eclipse adaptor options
 org.eclipse.osgi/eclipseadaptor/debug = false
 org.eclipse.osgi/eclipseadaptor/debug/location = false
+org.eclipse.osgi/eclipseadaptor/debug/cachedmanifest = false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin=false
 org.eclipse.osgi/eclipseadaptor/debug/platformadmin/resolver=false
 org.eclipse.osgi/eclipseadaptor/converter/debug = false
