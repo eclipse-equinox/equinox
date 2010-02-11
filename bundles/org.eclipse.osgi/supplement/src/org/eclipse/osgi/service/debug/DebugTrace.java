@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,11 @@ package org.eclipse.osgi.service.debug;
  * if your bundle symbolic name is "com.acme.bundle", and you provide an option argument
  * of "/debug/parser", the trace will only be printed if the option "com.acme.bundle/debug/parser"
  * has a value of "true".
+ * </p>
+ * <p>
+ * Note that the pipe character ("&#124;") is reserved for internal use. If this character 
+ * happens to occur in any of the thread name, the option, the message or an Exception
+ * message, it will be escaped to the corresponding HTML representation ("&amp&#35;124&#59;").   
  * </p>
  *  
  * @since 3.5
