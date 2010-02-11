@@ -14,6 +14,7 @@
 package org.eclipse.equinox.internal.ds;
 
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
@@ -137,6 +138,7 @@ public final class Resolver implements WorkPerformer {
 			if (serviceComponents != null) {
 				for (int i = 0; i < serviceComponents.size(); i++) {
 					ServiceComponent current = (ServiceComponent) serviceComponents.elementAt(i);
+
 					// don't enable components which are not marked enabled
 					// this is done here, not in the activator just because it
 					// saves a little memory
@@ -146,6 +148,8 @@ public final class Resolver implements WorkPerformer {
 						}
 						continue;
 					}
+
+					current.setState(Component.STATE_UNSATISFIED);
 
 					if (current.getConfigurationPolicy() == ServiceComponent.CONF_POLICY_IGNORE) {
 						//skip looking for configurations 
@@ -432,7 +436,7 @@ public final class Resolver implements WorkPerformer {
 		ServiceComponentProp scp;
 		for (int i = resolvedComponents.size() - 1; i >= 0; i--) {
 			scp = (ServiceComponentProp) resolvedComponents.elementAt(i);
-			if (scp.getState() != ServiceComponentProp.SATISFIED) {
+			if (scp.getState() != Component.STATE_UNSATISFIED) {
 				resolvedComponents.removeElementAt(i);
 			}
 		}
@@ -508,13 +512,13 @@ public final class Resolver implements WorkPerformer {
 					}
 					if (!hasPermission) {
 						Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_LACKS_APPROPRIATE_PERMISSIONS, scp.name, provides[i]), null);
-						scpEnabled.removeElementAt(k);
+						removeEnabledSCP(scp);
 						enabledSCPs.removeElementAt(k);
 						continue;
 					}
 				}
-				if (scp.getState() < ServiceComponentProp.SATISFIED) {
-					scp.setState(ServiceComponentProp.SATISFIED);
+				if (!scp.isBuilt()) {
+					scp.setState(Component.STATE_UNSATISFIED);
 				}
 			}
 
@@ -543,7 +547,7 @@ public final class Resolver implements WorkPerformer {
 					if (reference != null) {
 						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(null);
 
-						if (!resolved && scp.getState() > ServiceComponentProp.SATISFIED) {
+						if (!resolved && scp.isBuilt()) {
 							if (Activator.DEBUG) {
 								Activator.log.debug("Resolver.selectNewlyUnsatisfied(): reference '" + reference.reference.name + "' of component '" + scp.name + "' is not resolved", null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}
@@ -593,6 +597,7 @@ public final class Resolver implements WorkPerformer {
 				// get the first CD
 				component = (ServiceComponent) componentDescriptions.elementAt(i);
 				component.enabled = false;
+				component.setState(Component.STATE_DISABLED);
 				if (Activator.DEBUG) {
 					Activator.log.debug("Resolver.disableComponents() " + component.name, null); //$NON-NLS-1$
 				}
@@ -613,6 +618,10 @@ public final class Resolver implements WorkPerformer {
 					removeList.removeAllElements();
 				}
 				if (component.componentProps != null) {
+					for (int j = 0; j < component.componentProps.size(); j++) {
+						scp = (ServiceComponentProp) component.componentProps.elementAt(j);
+						scp.setState(Component.STATE_DISPOSED);
+					}
 					component.componentProps.removeAllElements();
 				}
 			}
@@ -653,7 +662,7 @@ public final class Resolver implements WorkPerformer {
 							// remove unsatisfied configs
 							for (int i = toBind.size() - 1; i >= 0; i--) {
 								Reference ref = (Reference) toBind.elementAt(i);
-								if (ref.scp.getState() < ServiceComponentProp.SATISFIED) {
+								if (ref.scp.isUnsatisfied()) {
 									//System.out.println("--BIND: removing "+ref.scp);
 									toBind.removeElementAt(i);
 								}
@@ -681,7 +690,7 @@ public final class Resolver implements WorkPerformer {
 			Vector toBind = null;
 			for (int i = 0, size = scps.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
-				if (scp.getState() < ServiceComponentProp.SATISFIED) {
+				if (scp.isUnsatisfied()) {
 					//do not check disposed components
 					continue;
 				}
@@ -717,8 +726,8 @@ public final class Resolver implements WorkPerformer {
 			Vector toUnbind = null;
 			for (int i = 0, size = scpsToCheck.size(); i < size; i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scpsToCheck.elementAt(i);
-				if (scp.getState() < ServiceComponentProp.DISPOSING) {
-					//the scp is already disposed
+				if (scp.isUnsatisfied()) {
+					//the scp is already deactivated
 					continue;
 				}
 				// if it is not already eligible it will bind with the static scps
@@ -771,8 +780,8 @@ public final class Resolver implements WorkPerformer {
 				Hashtable unbindSubTable = null; // scp:sr
 				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
 
-				if (scp.getState() < ServiceComponentProp.DISPOSING) {
-					//do not check disposed components
+				if (scp.isUnsatisfied()) {
+					//do not check deactivated components
 					continue;
 				}
 				Vector references = scp.references;
@@ -832,7 +841,7 @@ public final class Resolver implements WorkPerformer {
 			// satisfied
 			Vector eligibleSCPs = resolveEligible();
 			if (!eligibleSCPs.contains(newSCP)) {
-				scpEnabled.removeElement(newSCP);
+				removeEnabledSCP(newSCP);
 				throw new ComponentException(NLS.bind(Messages.CANT_RESOLVE_COMPONENT_INSTANCE, newSCP, configProperties));
 			}
 			return newSCP;
@@ -896,7 +905,7 @@ public final class Resolver implements WorkPerformer {
 		} catch (CircularityException e) {
 			Activator.log(e.getCausingComponent().serviceComponent.bc, LogService.LOG_ERROR, NLS.bind(Messages.CIRCULARITY_EXCEPTION_FOUND, e.getCausingComponent().serviceComponent), e);
 			// disable offending SCP
-			scpEnabled.removeElement(e.getCausingComponent());
+			removeEnabledSCP(e.getCausingComponent());
 			// try again
 			findDependencyCycles();
 		}
@@ -994,6 +1003,12 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
+	private void removeEnabledSCP(ServiceComponentProp scp) {
+		scpEnabled.removeElement(scp);
+		scp.serviceComponent.componentProps.remove(scp);
+		scp.setState(Component.STATE_DISPOSED);
+	}
+
 	public void removeFromSatisfiedList(ServiceComponentProp scp) {
 		Vector tmp = new Vector();
 		tmp.addElement(scp);
@@ -1016,6 +1031,18 @@ public final class Resolver implements WorkPerformer {
 		public String toString() {
 			return "Reference : " + ref + " ::: SCP : " + producer; //$NON-NLS-1$ //$NON-NLS-2$
 		}
+	}
+
+	public Component getComponent(long componentId) {
+		synchronized (scpEnabled) {
+			for (int i = 0; i < scpEnabled.size(); i++) {
+				ServiceComponentProp scp = (ServiceComponentProp) scpEnabled.elementAt(i);
+				if (scp.getId() == componentId) {
+					return scp;
+				}
+			}
+		}
+		return null;
 	}
 
 }

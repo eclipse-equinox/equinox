@@ -14,6 +14,7 @@ package org.eclipse.equinox.internal.ds.model;
 
 import java.security.*;
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentContextImpl;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
@@ -38,12 +39,7 @@ import org.osgi.service.log.LogService;
  * @author Pavlin Dobrev
  */
 
-public class ServiceComponentProp implements PrivilegedExceptionAction {
-	public static final int DISPOSED = 0;
-	public static final int DISPOSING = 1;
-	public static final int SATISFIED = 2;
-	public static final int BUILDING = 3;
-	public static final int BUILT = 4;
+public class ServiceComponentProp implements Component, PrivilegedExceptionAction {
 
 	public ServiceRegistration registration;
 	public String name;
@@ -62,7 +58,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	protected boolean isComponentFactory = false;
 
 	//Holds the component's state
-	private int state = SATISFIED;
+	private int state = STATE_UNSATISFIED;
 
 	/**
 	 * List of names (Strings) of Component Configurations we should not
@@ -100,11 +96,14 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		if (Activator.DEBUG) {
 			Activator.log.debug("ServiceComponentProp.dispose(): " + name, null); //$NON-NLS-1$
 		}
-		setState(DISPOSED);
-		while (!instances.isEmpty()) {
-			ComponentInstanceImpl current = (ComponentInstanceImpl) instances.firstElement();
-			dispose(current, deactivateReason);
-			current.dispose();
+		try {
+			while (!instances.isEmpty()) {
+				ComponentInstanceImpl current = (ComponentInstanceImpl) instances.firstElement();
+				dispose(current, deactivateReason);
+				current.dispose();
+			}
+		} finally {
+			setState(STATE_UNSATISFIED);
 		}
 	}
 
@@ -113,7 +112,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	 * 
 	 * @return Dictionary properties
 	 */
-	public Hashtable getProperties() {
+	public Dictionary getProperties() {
 		return properties != null ? properties : serviceComponent.properties;
 	}
 
@@ -285,14 +284,14 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	public Object run() throws Exception {
-		Bundle bundle = this.bundle;
+		Bundle b = this.bundle;
 		Object instance = inst;
 		unlock();
-		return build(bundle, instance, false);
+		return build(b, instance, false);
 	}
 
 	public ComponentInstanceImpl build(Bundle usingBundle, Object instance, boolean security) throws Exception {
-		if (getState() == DISPOSED) {
+		if (getState() == STATE_DISPOSED) {
 			if (Activator.DEBUG) {
 				Activator.log.debug("Cannot build component, because it is already disposed: " + this, null); //$NON-NLS-1$
 			}
@@ -343,7 +342,7 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 				throw new ComponentException(NLS.bind(Messages.COMPONENT_WAS_NOT_BUILT, serviceComponent));
 			}
 		}
-
+		setState(Component.STATE_ACTIVE);
 		return componentInstance;
 	}
 
@@ -369,9 +368,13 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 		if (!instances.removeElement(componentInstance)) {
 			return; //the instance is already disposed  
 		}
-
+		setState(Component.STATE_DEACTIVATING);
 		deactivate(componentInstance, deactivateReason);
 		unbind(componentInstance);
+		if (instances.isEmpty()) {
+			//there are no active instances. The component is lazy enabled now
+			setState(Component.STATE_REGISTERED);
+		}
 	}
 
 	/**
@@ -684,7 +687,26 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 	}
 
 	public String toString() {
-		return name;
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("ServiceComponentProp["); //$NON-NLS-1$
+		buffer.append("\n\tname = ").append(name); //$NON-NLS-1$
+		buffer.append("\n\tstate = ").append(SCRUtil.getStateStringRepresentation(state)); //$NON-NLS-1$
+		StringBuffer buf = new StringBuffer(200);
+		if (properties != null) {
+			buf.append('{');
+			Enumeration keys = properties.keys();
+			while (keys.hasMoreElements()) {
+				Object key = keys.nextElement();
+				buf.append(key).append('=').append(SCRUtil.getStringRepresentation(properties.get(key)));
+				if (keys.hasMoreElements()) {
+					buf.append(", "); //$NON-NLS-1$
+				}
+			}
+			buf.append('}');
+		}
+		buffer.append("\n\tproperties = ").append(buf.toString()); //$NON-NLS-1$
+		buffer.append("]"); //$NON-NLS-1$
+		return buffer.toString();
 	}
 
 	public void setRegistration(ServiceRegistration reg) {
@@ -756,6 +778,118 @@ public class ServiceComponentProp implements PrivilegedExceptionAction {
 
 	public synchronized void setState(int state) {
 		this.state = state;
+	}
+
+	public void disable() {
+		if (getState() == STATE_DISPOSED) {
+			throw new IllegalStateException(Messages.COMPONENT_DISPOSED);
+		} else if (getState() != STATE_DISABLED) {
+			mgr.disableComponent(serviceComponent.name, serviceComponent.bundle);
+		}
+	}
+
+	public void enable() {
+		if (getState() == STATE_DISPOSED) {
+			throw new IllegalStateException(Messages.COMPONENT_DISPOSED);
+		} else if (getState() == STATE_DISABLED) {
+			mgr.enableComponent(serviceComponent.name, serviceComponent.bundle);
+		}
+	}
+
+	public String getActivate() {
+		return serviceComponent.activateMethodName;
+	}
+
+	public Bundle getBundle() {
+		return serviceComponent.bundle;
+	}
+
+	public String getClassName() {
+		return serviceComponent.implementation;
+	}
+
+	public ComponentInstance getComponentInstance() {
+		if (!instances.isEmpty()) {
+			//TODO we have multiple instances when the component is service factory
+			//Perhaps we have to list in ScrService Component for each instance
+			return (ComponentInstance) instances.firstElement();
+		}
+		return null;
+	}
+
+	public String getConfigurationPolicy() {
+		return serviceComponent.configurationPolicy;
+	}
+
+	public String getDeactivate() {
+		return serviceComponent.deactivateMethodName;
+	}
+
+	public String getFactory() {
+		return serviceComponent.factory;
+	}
+
+	public long getId() {
+		return ((Long) properties.get(ComponentConstants.COMPONENT_ID)).longValue();
+	}
+
+	public String getModified() {
+		if (!serviceComponent.namespace11) {
+			return null;
+		}
+		return serviceComponent.modifyMethodName;
+	}
+
+	public String getName() {
+		return serviceComponent.name;
+	}
+
+	public org.apache.felix.scr.Reference[] getReferences() {
+		if (references != null && !references.isEmpty()) {
+			org.apache.felix.scr.Reference[] res = new org.apache.felix.scr.Reference[references.size()];
+			references.copyInto(res);
+			return res;
+		}
+		return null;
+	}
+
+	public String[] getServices() {
+		return serviceComponent.provides;
+	}
+
+	public boolean isActivateDeclared() {
+		if (!serviceComponent.namespace11) {
+			return false;
+		}
+		return serviceComponent.activateMethodDeclared;
+	}
+
+	public boolean isDeactivateDeclared() {
+		if (!serviceComponent.namespace11) {
+			return false;
+		}
+		return serviceComponent.deactivateMethodDeclared;
+	}
+
+	public boolean isDefaultEnabled() {
+		return serviceComponent.autoenable;
+	}
+
+	public boolean isImmediate() {
+		return serviceComponent.isImmediate();
+	}
+
+	public boolean isServiceFactory() {
+		return serviceComponent.serviceFactory;
+	}
+
+	//Some helper methods according to the component's state
+	public boolean isBuilt() {
+		return state == STATE_ACTIVATING || state == STATE_ACTIVE || state == STATE_FACTORY || state == STATE_REGISTERED;
+	}
+
+	public boolean isUnsatisfied() {
+		return state == STATE_UNSATISFIED || state == STATE_DEACTIVATING || state == STATE_DISABLED || state == STATE_DISPOSING || state == STATE_DISPOSED;
 	}
 
 }

@@ -12,8 +12,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.impl;
 
-import java.util.Dictionary;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.util.NLS;
@@ -52,7 +51,7 @@ public class ComponentContextImpl implements ComponentContext {
 	 * @see org.osgi.service.component.ComponentContext#getProperties()
 	 */
 	public Dictionary getProperties() {
-		return (Dictionary) scp.getProperties().clone();
+		return (Dictionary) ((Hashtable) scp.getProperties()).clone();
 	}
 
 	/*

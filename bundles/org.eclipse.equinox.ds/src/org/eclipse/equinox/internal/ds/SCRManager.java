@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.equinox.internal.util.event.Queue;
 import org.eclipse.equinox.internal.util.ref.Log;
@@ -356,7 +357,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					if (sc.namespace11) {
 						if (sc.componentProps != null && sc.modifyMethodName != "") { //$NON-NLS-1$
 							ServiceComponentProp scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
-							if (scp.getState() > ServiceComponentProp.SATISFIED) {
+							if (scp.isBuilt()) {
 								//process only built components
 								requiresRestart = processConfigurationChange(scp, config[0]);
 							}
@@ -386,7 +387,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					}
 					boolean requiresRestart = true;
 					if (sc.namespace11 && sc.modifyMethodName != "" && scp != null) { //$NON-NLS-1$
-						if (scp.getState() > ServiceComponentProp.SATISFIED) {
+						if (scp.isBuilt()) {
 							//process only built components
 							requiresRestart = processConfigurationChange(scp, config[0]);
 						}
@@ -399,6 +400,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							Vector components = new Vector();
 							components.addElement(scp);
 							resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_MODIFIED);
+							scp.setState(Component.STATE_DISPOSED);
 						}
 
 						// create a new scp (adds to resolver enabledSCPs list)
@@ -440,6 +442,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						// now re-enable the SC - the resolver will create SCP
 						// with no configAdmin properties
 						sc.enabled = true;
+						sc.setState(Component.STATE_UNSATISFIED);
 						resolver.enableComponents(components);
 					} else {
 						// we can just dispose this SCP
@@ -447,6 +450,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						Vector components = new Vector();
 						components.addElement(scp);
 						resolver.disposeComponentConfigs(components, ComponentConstants.DEACTIVATION_REASON_CONFIGURATION_DELETED);
+						scp.setState(Component.STATE_DISPOSED);
 					}
 				}
 				break;
@@ -555,6 +559,12 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					log.debug("SCRManager.stoppingBundle : " + bundleName, null); //$NON-NLS-1$
 				}
 				resolver.disableComponents(components, ComponentConstants.DEACTIVATION_REASON_BUNDLE_STOPPED);
+
+				//set disposed state to all components since some of them might be still referenced by the ScrService
+				for (int i = 0; i < components.size(); i++) {
+					ServiceComponent sc = (ServiceComponent) components.elementAt(i);
+					sc.setState(Component.STATE_DISPOSED);
+				}
 				if (bundleToServiceComponents.size() == 0) {
 					hasRegisteredServiceListener = false;
 					bc.removeServiceListener(this);
@@ -690,6 +700,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							found = true;
 							if (component.enabled != enable) {
 								component.enabled = enable;
+								component.setState(enable ? Component.STATE_ENABLING : Component.STATE_DISABLING);
 								componentsToProcess = new Vector(2);
 								componentsToProcess.addElement(component);
 								break;
@@ -710,6 +721,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							if (!sc.enabled) {
 								componentsToProcess.addElement(sc);
 								sc.enabled = enable;
+								sc.setState(Component.STATE_ENABLING);
 							}
 						}
 					}
@@ -856,5 +868,53 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		if (toProcess.size() > 0) {
 			resolver.enableComponents(toProcess);
 		}
+	}
+
+	public Component[] getComponents() {
+		Vector result = new Vector();
+		Enumeration en = bundleToServiceComponents.keys();
+		while (en.hasMoreElements()) {
+			Bundle b = (Bundle) en.nextElement();
+			Vector serviceComponents = (Vector) bundleToServiceComponents.get(b);
+			for (int i = 0; i < serviceComponents.size(); i++) {
+				ServiceComponent sc = (ServiceComponent) serviceComponents.elementAt(i);
+				if (sc.componentProps != null && !sc.componentProps.isEmpty()) {
+					//add the created runtime components props
+					result.addAll(sc.componentProps);
+				} else {
+					//add the declared component itself
+					result.add(sc);
+				}
+			}
+		}
+		if (!result.isEmpty()) {
+			Component[] res = new Component[result.size()];
+			result.copyInto(res);
+			return res;
+		}
+		return null;
+	}
+
+	public Component[] getComponent(Bundle bundle) {
+		Vector serviceComponents = (Vector) bundleToServiceComponents.get(bundle);
+		if (serviceComponents != null) {
+			Vector result = new Vector();
+			for (int i = 0; i < serviceComponents.size(); i++) {
+				ServiceComponent sc = (ServiceComponent) serviceComponents.elementAt(i);
+				if (sc.componentProps != null && !sc.componentProps.isEmpty()) {
+					//add the created runtime components props
+					result.addAll(sc.componentProps);
+				} else {
+					//add the declared component itself
+					result.add(sc);
+				}
+			}
+			if (!result.isEmpty()) {
+				Component[] res = new Component[result.size()];
+				result.copyInto(res);
+				return res;
+			}
+		}
+		return null;
 	}
 }

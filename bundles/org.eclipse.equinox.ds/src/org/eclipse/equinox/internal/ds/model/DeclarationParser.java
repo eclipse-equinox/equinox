@@ -503,6 +503,7 @@ public class DeclarationParser implements ExTagListener {
 			}
 			if (tmp != null) {
 				currentComponent.activateMethodName = tmp;
+				currentComponent.activateMethodDeclared = true;
 			}
 			//processing attribute deactivate
 			tmp = tag.getAttribute(ATTR_DEACTIVATE);
@@ -511,6 +512,7 @@ public class DeclarationParser implements ExTagListener {
 			}
 			if (tmp != null) {
 				currentComponent.deactivateMethodName = tmp;
+				currentComponent.deactivateMethodDeclared = true;
 			}
 			//processing attribute modified
 			tmp = tag.getAttribute(ATTR_MODIFIED);

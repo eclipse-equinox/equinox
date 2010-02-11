@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.ds.impl;
 
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.Activator;
 import org.eclipse.equinox.internal.ds.InstanceProcess;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
@@ -61,7 +62,10 @@ public class ComponentInstanceImpl implements ComponentInstance {
 			Vector toDispose = new Vector(1);
 			toDispose.addElement(scp);
 			InstanceProcess.resolver.disposeComponentConfigs(toDispose, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
-			scp = null;
+			if (scp != null) {
+				scp.setState(Component.STATE_DISPOSED);
+				scp = null;
+			}
 		} else {
 			scp.dispose(this, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
 		}

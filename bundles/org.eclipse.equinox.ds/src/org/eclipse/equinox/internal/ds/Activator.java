@@ -14,8 +14,8 @@ package org.eclipse.equinox.internal.ds;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.apache.felix.scr.ScrService;
 import org.eclipse.equinox.internal.util.ref.Log;
-import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -44,8 +44,9 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 
 	private ServiceRegistration configListenerReg;
 	private SCRManager scrManager = null;
+	public ScrServiceImpl scrService = null;
+	private ServiceRegistration scrServiceReg;
 	private ServiceRegistration scrCommandProviderReg;
-	private SCRCommandProvider scrCommandProvider;
 	private static FrameworkLog fwLog;
 	private boolean inited = false;
 
@@ -110,12 +111,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		if (Activator.startup)
 			Activator.timeLog("startIt() method took "); //$NON-NLS-1$
 
-		if (scrCommandProvider == null) {
-			scrCommandProvider = new SCRCommandProvider(scrManager);
-			Hashtable reg_props = new Hashtable(1, 1);
-			reg_props.put(org.osgi.framework.Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
-			scrCommandProviderReg = bc.registerService(CommandProvider.class.getName(), scrCommandProvider, reg_props);
-		}
+		installCommandProvider();
 
 		if (startup && lazyIniting) {
 			log.debug("[END - lazy SCR init] Activator.initSCR() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
@@ -186,6 +182,10 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		} else {
 			System.setProperty("equinox.use.ds", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+
+		scrService = new ScrServiceImpl();
+		scrServiceReg = bc.registerService(ScrService.class.getName(), scrService, null);
+
 		if (startup) {
 			log.debug("[END - start method] Activator.start() method executed for " + String.valueOf(time[0] - time[2]), null); //$NON-NLS-1$
 			time = null;
@@ -206,10 +206,13 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		if (configListenerReg != null) {
 			configListenerReg.unregister();
 		}
+		if (scrService != null) {
+			scrService.dispose();
+			scrServiceReg.unregister();
+		}
 
 		if (scrCommandProviderReg != null)
 			scrCommandProviderReg.unregister();
-		scrCommandProvider = null;
 
 		if (scrManager != null) {
 			bundleContext.removeBundleListener(scrManager);
@@ -292,6 +295,20 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 				return value.equalsIgnoreCase("true"); //$NON-NLS-1$
 		}
 		return defaultValue;
+	}
+
+	private void installCommandProvider() {
+		try {
+			SCRCommandProvider scrCommandProvider = new SCRCommandProvider(scrManager);
+			Hashtable reg_props = new Hashtable(1, 1);
+			reg_props.put(org.osgi.framework.Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
+			scrCommandProviderReg = bc.registerService(org.eclipse.osgi.framework.console.CommandProvider.class.getName(), scrCommandProvider, reg_props);
+		} catch (NoClassDefFoundError e) {
+			//the org.eclipse.osgi.framework.console package is optional 
+			if (Activator.DEBUG) {
+				log.debug("Cannot register SCR CommandProvider!", e); //$NON-NLS-1$
+			}
+		}
 	}
 
 	public static void log(BundleContext bundleContext, int level, String message, Throwable t) {

@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.ds;
 
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.impl.ComponentFactoryImpl;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.ds.model.*;
@@ -163,7 +164,7 @@ public class InstanceProcess {
 				scp = (ServiceComponentProp) list.elementAt(i);
 				getLock(scp);
 				int componentState = scp.getState();
-				if (componentState <= ServiceComponentProp.DISPOSING || componentState > ServiceComponentProp.SATISFIED) {
+				if (componentState != Component.STATE_UNSATISFIED) {
 					//no need to build the component:
 					// 1) it is disposed or about to be disposed
 					// 2) it is already built or being built
@@ -177,7 +178,7 @@ public class InstanceProcess {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start building component " + scp); //$NON-NLS-1$
 					}
-					scp.setState(ServiceComponentProp.BUILDING);
+					scp.setState(Component.STATE_ACTIVATING);
 					sc = scp.serviceComponent;
 					if (sc.immediate || (sc.factory == null && Activator.INSTANTIATE_ALL)) {
 						if (Activator.DEBUG) {
@@ -203,6 +204,7 @@ public class InstanceProcess {
 							// or a service factory registration
 							registerService(scp, sc.serviceFactory, null);
 						}
+						scp.setState(Component.STATE_ACTIVE);
 					} else {
 
 						// ComponentFactory
@@ -233,6 +235,7 @@ public class InstanceProcess {
 									successfullyBuilt = false;
 									throw new org.osgi.service.component.ComponentException(Messages.INCOMPATIBLE_COMBINATION);
 								}
+								scp.setState(Component.STATE_FACTORY);
 								registerComponentFactory(scp);
 								// when registering a ComponentFactory we must not
 								// register the component configuration as service
@@ -244,13 +247,16 @@ public class InstanceProcess {
 						if (sc.provides != null) {
 							// this will create either plain service component
 							// registration or a service factory registration
+							scp.setState(Component.STATE_REGISTERED);
 							registerService(scp, sc.serviceFactory, null);
 						}
 					}
 				} catch (Throwable t) {
 					Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.EXCEPTION_BUILDING_COMPONENT, scp.serviceComponent), t);
 				} finally {
-					scp.setState(successfullyBuilt ? ServiceComponentProp.BUILT : ServiceComponentProp.DISPOSED);
+					if (!successfullyBuilt) {
+						scp.setState(Component.STATE_UNSATISFIED);
+					}
 					freeLock(scp);
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
@@ -276,14 +282,14 @@ public class InstanceProcess {
 			for (int i = 0; i < scpList.size(); i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scpList.elementAt(i);
 				getLock(scp);
-				if (scp.getState() <= ServiceComponentProp.DISPOSING) {
-					//it is already disposed
+				if (scp.isUnsatisfied()) {
+					//it is already deactivated
 					freeLock(scp);
 					continue;
 				}
 				long start = 0l;
 				try {
-					scp.setState(ServiceComponentProp.DISPOSING);
+					scp.setState(Component.STATE_DEACTIVATING);
 					if (Activator.PERF) {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start disposing component " + scp); //$NON-NLS-1$
@@ -484,7 +490,7 @@ public class InstanceProcess {
 		if (Activator.DEBUG) {
 			Activator.log.debug("InstanceProcess.registerService(): " + scp.name + " registered as " + ((factory) ? "*factory*" : "*service*"), null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
-		if (scp.getState() <= ServiceComponentProp.DISPOSING) {
+		if (scp.isUnsatisfied()) {
 			//must unregister the service because it was not able to unregister when the component was disposed
 			try {
 				reg.unregister();

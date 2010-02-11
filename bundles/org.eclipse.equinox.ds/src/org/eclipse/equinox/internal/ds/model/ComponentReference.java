@@ -21,6 +21,7 @@ import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.log.LogService;
@@ -29,7 +30,7 @@ import org.osgi.service.log.LogService;
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
  */
-public class ComponentReference implements Externalizable {
+public class ComponentReference implements Externalizable, org.apache.felix.scr.Reference {
 
 	public static final int CARDINALITY_0_1 = 0;
 	public static final int CARDINALITY_0_N = 1;
@@ -594,6 +595,72 @@ public class ComponentReference implements Externalizable {
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_READING_OBJECT, e);
 		}
+	}
+
+	public String getBindMethodName() {
+		return bind;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getServiceName() {
+		return interfaceName;
+	}
+
+	public ServiceReference[] getServiceReferences() {
+		Vector result = null;
+		if (bind != null) {
+			if (!serviceReferences.isEmpty()) {
+				result = new Vector(2);
+				Enumeration keys = serviceReferences.keys();
+				while (keys.hasMoreElements()) {
+					result.add(keys.nextElement());
+				}
+			}
+		}
+		if (result != null && !result.isEmpty()) {
+			ServiceReference[] finalResult = new ServiceReference[result.size()];
+			result.copyInto(finalResult);
+			return finalResult;
+		}
+		return null;
+	}
+
+	public String getTarget() {
+		return target;
+	}
+
+	public String getUnbindMethodName() {
+		return unbind;
+	}
+
+	public boolean isMultiple() {
+		return cardinality == ComponentReference.CARDINALITY_0_N || cardinality == ComponentReference.CARDINALITY_1_N;
+	}
+
+	public boolean isOptional() {
+		return cardinality == ComponentReference.CARDINALITY_0_1 || cardinality == ComponentReference.CARDINALITY_0_N;
+	}
+
+	public boolean isSatisfied() {
+		if (isOptional()) {
+			return true;
+		}
+		try {
+			ServiceReference[] _serviceReferences = component.bc.getServiceReferences(interfaceName, target);
+			if (_serviceReferences != null) {
+				return true;
+			}
+		} catch (InvalidSyntaxException e) {
+			// do nothing
+		}
+		return false;
+	}
+
+	public boolean isStatic() {
+		return policy == ComponentReference.POLICY_STATIC;
 	}
 
 }

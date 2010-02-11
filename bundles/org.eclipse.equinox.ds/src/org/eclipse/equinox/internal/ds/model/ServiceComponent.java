@@ -13,17 +13,20 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
+import org.eclipse.equinox.internal.ds.Messages;
+
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import org.apache.felix.scr.Component;
+import org.apache.felix.scr.Reference;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.*;
 import org.osgi.service.log.LogService;
 
 /**
@@ -34,7 +37,7 @@ import org.osgi.service.log.LogService;
  * @author Pavlin Dobrev
  * @author Stoyan Boshev
  */
-public class ServiceComponent implements Externalizable {
+public class ServiceComponent implements Externalizable, Component {
 
 	public static String CONF_POLICY_OPTIONAL = "optional"; //$NON-NLS-1$
 	public static String CONF_POLICY_REQUIRE = "require"; //$NON-NLS-1$
@@ -77,6 +80,9 @@ public class ServiceComponent implements Externalizable {
 	public boolean enabled;
 	public Bundle bundle;
 	public BundleContext bc;
+	boolean activateMethodDeclared = false;
+	boolean deactivateMethodDeclared = false;
+	int state = Component.STATE_UNSATISFIED;
 	// --- end: model
 
 	private static final Class ACTIVATE_METHODS_PARAMETERS[] = new Class[] {ComponentContext.class};
@@ -513,6 +519,7 @@ public class ServiceComponent implements Externalizable {
 		buffer.append("\n\timmediate = ").append(immediate); //$NON-NLS-1$
 
 		buffer.append("\n\timplementation = ").append(implementation); //$NON-NLS-1$
+		buffer.append("\n\tstate = ").append(SCRUtil.getStateStringRepresentation(state)); //$NON-NLS-1$
 		StringBuffer buf = new StringBuffer(200);
 		if (properties != null) {
 			buf.append('{');
@@ -598,14 +605,14 @@ public class ServiceComponent implements Externalizable {
 					out.writeBoolean(true);
 					out.writeUTF(configurationPolicy);
 				}
-				if (activateMethodName == "activate") { //$NON-NLS-1$
+				if (!activateMethodDeclared) {
 					//this is the default value. Do not write it. Just add a mark
 					out.writeBoolean(false);
 				} else {
 					out.writeBoolean(true);
 					out.writeUTF(activateMethodName);
 				}
-				if (deactivateMethodName == "deactivate") { //$NON-NLS-1$
+				if (!deactivateMethodDeclared) {
 					//this is the default value. Do not write it. Just add a mark
 					out.writeBoolean(false);
 				} else {
@@ -697,11 +704,15 @@ public class ServiceComponent implements Externalizable {
 					}
 				}
 				flag = in.readBoolean();
-				if (flag)
+				if (flag) {
 					activateMethodName = in.readUTF();
+					activateMethodDeclared = true;
+				}
 				flag = in.readBoolean();
-				if (flag)
+				if (flag) {
 					deactivateMethodName = in.readUTF();
+					deactivateMethodDeclared = true;
+				}
 				flag = in.readBoolean();
 				if (flag)
 					modifyMethodName = in.readUTF();
@@ -742,5 +753,126 @@ public class ServiceComponent implements Externalizable {
 
 	public String getConfigurationPolicy() {
 		return configurationPolicy;
+	}
+
+	public void disable() {
+		if (getState() == STATE_DISPOSED) {
+			throw new IllegalStateException(Messages.COMPONENT_DISPOSED);
+		} else if (getState() != STATE_DISABLED) {
+			InstanceProcess.resolver.mgr.disableComponent(name, bundle);
+		}
+	}
+
+	public void enable() {
+		if (getState() == STATE_DISPOSED) {
+			throw new IllegalStateException(Messages.COMPONENT_DISPOSED);
+		} else if (getState() == STATE_DISABLED) {
+			InstanceProcess.resolver.mgr.enableComponent(name, bundle);
+		}
+	}
+
+	public String getActivate() {
+		return activateMethodName;
+	}
+
+	public Bundle getBundle() {
+		return bundle;
+	}
+
+	public String getClassName() {
+		return implementation;
+	}
+
+	public ComponentInstance getComponentInstance() {
+		if (componentProps != null && !componentProps.isEmpty()) {
+			//get the first built compoent's instance 
+			Vector instances = ((ServiceComponentProp) componentProps.elementAt(0)).instances;
+			if (!instances.isEmpty()) {
+				return (ComponentInstance) instances.elementAt(0);
+			}
+		}
+		//The component is not yet built
+		return null;
+	}
+
+	public String getDeactivate() {
+		return deactivateMethodName;
+	}
+
+	public String getFactory() {
+		return factory;
+	}
+
+	public long getId() {
+		if (componentProps != null && !componentProps.isEmpty()) {
+			//get the first built compoent's ID 
+			return ((Long) ((ServiceComponentProp) componentProps.elementAt(0)).properties.get(ComponentConstants.COMPONENT_ID)).longValue();
+		}
+		//The component is not yet given an ID by the SRC because it is not active
+		return -1;
+	}
+
+	public String getModified() {
+		if (!namespace11) {
+			return null;
+		}
+		return modifyMethodName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public Dictionary getProperties() {
+		return properties;
+	}
+
+	public Reference[] getReferences() {
+		if (references != null && !references.isEmpty()) {
+			org.apache.felix.scr.Reference[] res = new org.apache.felix.scr.Reference[references.size()];
+			references.copyInto(res);
+			return res;
+		}
+		return null;
+	}
+
+	public String[] getServices() {
+		return provides;
+	}
+
+	public int getState() {
+		//check if there is at least one SCP created and return its state
+		if (componentProps != null && !componentProps.isEmpty()) {
+			//get the first compoent's state
+			return ((ServiceComponentProp) componentProps.elementAt(0)).getState();
+		}
+		//return the current state of the component
+		return state;
+	}
+
+	public boolean isActivateDeclared() {
+		if (!namespace11) {
+			return false;
+		}
+		return activateMethodDeclared;
+	}
+
+	public boolean isDeactivateDeclared() {
+		if (!namespace11) {
+			return false;
+		}
+		return deactivateMethodDeclared;
+	}
+
+	public boolean isDefaultEnabled() {
+		return autoenable;
+	}
+
+	public boolean isServiceFactory() {
+		return serviceFactory;
+	}
+
+	public void setState(int newState) {
+		state = newState;
 	}
 }

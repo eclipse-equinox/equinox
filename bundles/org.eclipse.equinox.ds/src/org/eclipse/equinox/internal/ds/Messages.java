@@ -32,6 +32,7 @@ public class Messages extends NLS {
 	public static String CANT_OPEN_STREAM_TO_COMPONENT_XML;
 	public static String CANT_RESOLVE_COMPONENT_INSTANCE;
 	public static String CIRCULARITY_EXCEPTION_FOUND;
+	public static String COMPONENT_DISPOSED;
 	public static String COMPONENT_CONFIGURATIONS;
 	public static String COMPONENT_DETAILS;
 	public static String COMPONENT_HAS_ILLEGAL_REFERENCE;

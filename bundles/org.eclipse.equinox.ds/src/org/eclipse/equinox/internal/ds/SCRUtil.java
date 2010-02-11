@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.util.pool.ObjectCreator;
 import org.eclipse.equinox.internal.util.pool.ObjectPool;
 
@@ -231,5 +232,48 @@ public final class SCRUtil implements ObjectCreator {
 			return value.toString();
 		}
 		return res.toString();
+	}
+
+	/**
+	 * Gets the string presentation of a state defined by the interface org.apache.felix.scr.Component
+	 * @param state the specified state
+	 * @return the string representation of the specified state
+	 */
+	public static String getStateStringRepresentation(int state) {
+		String result = "Unknown"; //$NON-NLS-1$
+		switch (state) {
+			case Component.STATE_ACTIVATING :
+				result = "Activating"; //$NON-NLS-1$
+				break;
+			case Component.STATE_ACTIVE :
+				result = "Active"; //$NON-NLS-1$
+				break;
+			case Component.STATE_DEACTIVATING :
+				result = "Deactivating"; //$NON-NLS-1$
+				break;
+			case Component.STATE_DISABLED :
+				result = "Disabled"; //$NON-NLS-1$
+				break;
+			case Component.STATE_DISPOSED :
+				result = "Disposed"; //$NON-NLS-1$
+				break;
+			case Component.STATE_DISPOSING :
+				result = "Disposing"; //$NON-NLS-1$
+				break;
+			case Component.STATE_ENABLING :
+				result = "Enabling"; //$NON-NLS-1$
+				break;
+			case Component.STATE_FACTORY :
+				result = "Factory"; //$NON-NLS-1$
+				break;
+			case Component.STATE_REGISTERED :
+				result = "Registered"; //$NON-NLS-1$
+				break;
+			case Component.STATE_UNSATISFIED :
+				result = "Unsatisfied"; //$NON-NLS-1$
+				break;
+
+		}
+		return result;
 	}
 }

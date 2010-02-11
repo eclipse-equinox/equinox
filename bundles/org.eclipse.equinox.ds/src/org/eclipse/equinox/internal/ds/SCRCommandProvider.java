@@ -360,20 +360,6 @@ public class SCRCommandProvider implements CommandProvider {
 		}
 	}
 
-	private boolean isResolved(ServiceComponent sc) {
-		Vector unresulvedReferences = getUnresolvedReferences(sc);
-		boolean resolved = true;
-		if (unresulvedReferences != null) {
-			for (int i = 0; i < unresulvedReferences.size(); i++) {
-				if (isMandatory((ComponentReference) unresulvedReferences.elementAt(i))) {
-					resolved = false;
-					break;
-				}
-			}
-		}
-		return resolved;
-	}
-
 	private Vector getUnresolvedReferences(ServiceComponent sc) {
 		Vector unresolved = new Vector();
 		if (sc.references != null) {
@@ -562,15 +548,14 @@ public class SCRCommandProvider implements CommandProvider {
 						} else {
 							////print short info
 							intp.print("" + ref.id); //$NON-NLS-1$
-							boolean resolved = isResolved(sc);
-							String stateStr = sc.enabled ? (resolved ? "\tSatisfied" : "\tUnsatisfied") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							intp.print(stateStr);
+							intp.print("\t" + SCRUtil.getStateStringRepresentation(sc.getState())); //$NON-NLS-1$
 							intp.print("\t\t" + sc.name); //$NON-NLS-1$
 							intp.println("\t\t\t" + getBundleRepresentationName(b) + "(bid=" + b.getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
 					}
 				}
 			}
+
 		} else {
 			if (scrManager.bundleToServiceComponents != null) {
 				Bundle[] allBundles = scrManager.bc.getBundles();
@@ -593,9 +578,7 @@ public class SCRCommandProvider implements CommandProvider {
 							} else {
 								////print short info
 								intp.print("" + ref.id); //$NON-NLS-1$
-								boolean resolved = isResolved(sc);
-								String stateStr = sc.enabled ? (resolved ? "\tSatisfied" : "\tUnsatisfied") : "\tDisabled"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-								intp.print(stateStr);
+								intp.print("\t" + SCRUtil.getStateStringRepresentation(sc.getState())); //$NON-NLS-1$
 								intp.print("\t\t" + sc.name); //$NON-NLS-1$
 								intp.println("\t\t\t" + getBundleRepresentationName(allBundles[j]) + "(bid=" + allBundles[j].getBundleId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}

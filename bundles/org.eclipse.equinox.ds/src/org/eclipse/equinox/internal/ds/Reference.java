@@ -30,7 +30,7 @@ import org.osgi.service.log.LogService;
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
  */
-public final class Reference {
+public final class Reference implements org.apache.felix.scr.Reference {
 
 	public ComponentReference reference;
 	ServiceComponentProp scp;
@@ -387,6 +387,73 @@ public final class Reference {
 
 	public Vector getBoundServiceReferences() {
 		return boundServiceReferences;
+	}
+
+	public String getBindMethodName() {
+		return reference.bind;
+	}
+
+	public String getName() {
+		return reference.name;
+	}
+
+	public String getServiceName() {
+		return reference.interfaceName;
+	}
+
+	public ServiceReference[] getServiceReferences() {
+		Vector result = null;
+		if (this.reference.bind != null) {
+			if (!reference.serviceReferences.isEmpty()) {
+				result = new Vector(2);
+				Enumeration keys = reference.serviceReferences.keys();
+				while (keys.hasMoreElements()) {
+					result.add(keys.nextElement());
+				}
+			}
+		} else {
+			//no bind method
+			if (!boundServiceReferences.isEmpty()) {
+				result = (Vector) boundServiceReferences.clone();
+			}
+		}
+		if (result != null && !result.isEmpty()) {
+			ServiceReference[] finalResult = new ServiceReference[result.size()];
+			result.copyInto(finalResult);
+			return finalResult;
+		}
+		return null;
+	}
+
+	public String getUnbindMethodName() {
+		return reference.unbind;
+	}
+
+	public boolean isMultiple() {
+		return cardinalityHigh > 1;
+	}
+
+	public boolean isOptional() {
+		return cardinalityLow == 0;
+	}
+
+	public boolean isSatisfied() {
+		if (cardinalityLow == 0) {
+			return true;
+		}
+		try {
+			ServiceReference[] serviceReferences = reference.component.bc.getServiceReferences(interfaceName, target);
+			if (serviceReferences != null) {
+				return true;
+			}
+		} catch (InvalidSyntaxException e) {
+			// do nothing
+		}
+		return false;
+	}
+
+	public boolean isStatic() {
+		return policy == ComponentReference.POLICY_STATIC;
 	}
 
 }

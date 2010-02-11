@@ -47,7 +47,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	 * Create a new instance of the component. Additional properties may be
 	 * provided for the component instance.
 	 * 
-	 * @param properties
+	 * @param additionalProps
 	 *            Additional properties for the component instance.
 	 * @return A ComponentInstance object encapsulating the component instance.
 	 *         The returned component instance has been activated.
@@ -60,7 +60,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			}
 
 			// merge properties
-			Hashtable props = (Hashtable) sci.getProperties().clone();
+			Hashtable props = (Hashtable) ((Hashtable) sci.getProperties()).clone();
 			SCRUtil.copyTo(props, additionalProps);
 
 			// create a new SCP (adds to resolver scpEnabled list)
