@@ -363,7 +363,7 @@ public class XMLParserImpl {
 			String attrValue = sb.toString();
 
 			if (fInternAttributes) {
-				attrValue.intern();
+				attrValue = attrValue.intern();
 			}
 
 			aParent.addAttribute(attrName, attrValue);
