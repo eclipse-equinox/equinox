@@ -256,7 +256,7 @@ public class SCRCommandProvider implements CommandProvider {
 			intp.println(NLS.bind(Messages.WRONG_PARAMETER2, bidString));
 			return null;
 		}
-		Bundle b = scrManager.bc.getBundle(bid);
+		Bundle b = Activator.bc.getBundle(bid);
 		if (b == null) {
 			intp.println(NLS.bind(Messages.BUNDLE_NOT_FOUND, bidString));
 		}
@@ -283,7 +283,7 @@ public class SCRCommandProvider implements CommandProvider {
 			return;
 		}
 
-		Bundle b = scrManager.bc.getBundle(cRef.bid);
+		Bundle b = Activator.bc.getBundle(cRef.bid);
 		if (b != null) {
 			Vector components = (Vector) scrManager.bundleToServiceComponents.get(b);
 			if (components != null) {
@@ -421,7 +421,7 @@ public class SCRCommandProvider implements CommandProvider {
 			}
 		} else {
 			if (scrManager.bundleToServiceComponents != null) {
-				Bundle[] allBundles = scrManager.bc.getBundles();
+				Bundle[] allBundles = Activator.bc.getBundles();
 				for (int j = 0; j < allBundles.length; j++) {
 					Vector components = (Vector) scrManager.bundleToServiceComponents.get(allBundles[j]);
 					if (components != null) {
@@ -466,7 +466,7 @@ public class SCRCommandProvider implements CommandProvider {
 			}
 		} else {
 			if (scrManager.bundleToServiceComponents != null) {
-				Bundle[] allBundles = scrManager.bc.getBundles();
+				Bundle[] allBundles = Activator.bc.getBundles();
 				for (int j = 0; j < allBundles.length; j++) {
 					Vector components = (Vector) scrManager.bundleToServiceComponents.get(allBundles[j]);
 					if (components != null) {
@@ -492,7 +492,7 @@ public class SCRCommandProvider implements CommandProvider {
 			intp.println(Messages.INVALID_COMPONENT_ID);
 			return;
 		}
-		scrManager.enableComponent(cRef.name, scrManager.bc.getBundle(cRef.bid));
+		scrManager.enableComponent(cRef.name, Activator.bc.getBundle(cRef.bid));
 		intp.println(NLS.bind(Messages.SENT_ENABLING_REQUEST, cRef.name));
 	}
 
@@ -502,7 +502,7 @@ public class SCRCommandProvider implements CommandProvider {
 			intp.println(Messages.INVALID_COMPONENT_ID);
 			return;
 		}
-		scrManager.disableComponent(cRef.name, scrManager.bc.getBundle(cRef.bid));
+		scrManager.disableComponent(cRef.name, Activator.bc.getBundle(cRef.bid));
 		intp.println(NLS.bind(Messages.SENT_DISABLING_REQUEST, cRef.name));
 	}
 
@@ -558,7 +558,7 @@ public class SCRCommandProvider implements CommandProvider {
 
 		} else {
 			if (scrManager.bundleToServiceComponents != null) {
-				Bundle[] allBundles = scrManager.bc.getBundles();
+				Bundle[] allBundles = Activator.bc.getBundles();
 				for (int j = 0; j < allBundles.length; j++) {
 					Vector components = (Vector) scrManager.bundleToServiceComponents.get(allBundles[j]);
 					if (components != null) {
@@ -591,7 +591,7 @@ public class SCRCommandProvider implements CommandProvider {
 
 	private void initComponentRefs() {
 		if (scrManager.bundleToServiceComponents != null) {
-			Bundle[] allBundles = scrManager.bc.getBundles();
+			Bundle[] allBundles = Activator.bc.getBundles();
 			for (int j = 0; j < allBundles.length; j++) {
 				Vector components = (Vector) scrManager.bundleToServiceComponents.get(allBundles[j]);
 				if (components != null) {
@@ -622,7 +622,7 @@ public class SCRCommandProvider implements CommandProvider {
 		return curID++;
 	}
 
-	public class ComponentRef {
+	private static class ComponentRef {
 		////the ID of the bundle holding this service component
 		long bid;
 		////the name of the service component

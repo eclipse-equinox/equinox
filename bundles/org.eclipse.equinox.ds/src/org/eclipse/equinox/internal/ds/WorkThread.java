@@ -25,8 +25,6 @@ import org.osgi.service.log.LogService;
 
 public class WorkThread implements Runnable, TimerListener {
 
-	boolean processBundle = false;
-
 	public static int IDLE_TIMEOUT = 1000;
 	public static int BLOCK_TIMEOUT = 30000;
 	private SCRManager mgr;

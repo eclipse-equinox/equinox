@@ -29,10 +29,8 @@ import org.osgi.service.component.*;
 
 public class ComponentInstanceImpl implements ComponentInstance {
 
-	public Object instance;
-	ServiceComponentProp scp;
-	ComponentFactoryImpl factory;
-
+	private Object instance;
+	private ServiceComponentProp scp;
 	private ComponentContext componentContext;
 
 	// ServiceReference to service objects which are binded to this instance

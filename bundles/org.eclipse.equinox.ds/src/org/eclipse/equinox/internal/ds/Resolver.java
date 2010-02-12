@@ -88,7 +88,7 @@ public final class Resolver implements WorkPerformer {
 	void synchronizeServiceReferences() {
 		synchronized (syncLock) {
 			try {
-				ServiceReference[] references = mgr.bc.getAllServiceReferences(null, null);
+				ServiceReference[] references = Activator.bc.getAllServiceReferences(null, null);
 				serviceReferenceTable.clear();
 				if (references != null) {
 					for (int i = 0; i < references.length; i++) {
@@ -96,7 +96,7 @@ public final class Resolver implements WorkPerformer {
 					}
 				}
 			} catch (InvalidSyntaxException e) {
-				Activator.log(mgr.bc, LogService.LOG_WARNING, "Resolver(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, ""), e); //$NON-NLS-1$ //$NON-NLS-2$
+				Activator.log(Activator.bc, LogService.LOG_WARNING, "Resolver(): " + NLS.bind(Messages.INVALID_TARGET_FILTER, ""), e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -1019,7 +1019,7 @@ public final class Resolver implements WorkPerformer {
 	 * Used to traverse the dependency tree in order to find cycles.
 	 * 
 	 */
-	private class ReferenceSCPWrapper {
+	private static class ReferenceSCPWrapper {
 		public Reference ref;
 		public ServiceComponentProp producer;
 

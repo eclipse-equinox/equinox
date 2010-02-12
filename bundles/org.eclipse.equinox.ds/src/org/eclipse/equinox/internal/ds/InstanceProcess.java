@@ -761,11 +761,11 @@ public class InstanceProcess {
 	 * {@link InstanceProcess#buildComponent(Bundle, ServiceComponentProp, Object)} method. 
 	 * This is used to handle circular dependencies.
 	 */
-	class Counter {
+	static class Counter {
 		int count = 0;
 	}
 
-	class SCPLock {
+	static class SCPLock {
 		//a flag used for synchronization of build/dispose operations
 		boolean busyBuilding = false;
 		//the working thread that performs the current build/dispose operation

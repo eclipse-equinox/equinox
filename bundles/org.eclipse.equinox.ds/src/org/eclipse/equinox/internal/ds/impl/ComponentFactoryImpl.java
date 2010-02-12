@@ -14,7 +14,6 @@ package org.eclipse.equinox.internal.ds.impl;
 import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
-import org.eclipse.equinox.internal.util.ref.Log;
 import org.osgi.service.component.*;
 import org.osgi.service.log.LogService;
 
@@ -28,8 +27,6 @@ import org.osgi.service.log.LogService;
 
 public class ComponentFactoryImpl implements ComponentFactory {
 
-	static boolean security = false;
-
 	private ServiceComponentProp sci;
 
 	/**
@@ -39,7 +36,6 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	 *            the ComponentDescription Object with Properties
 	 */
 	public ComponentFactoryImpl(ServiceComponentProp component) {
-		security = Log.security();
 		this.sci = component;
 	}
 
@@ -69,7 +65,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			// register the component and make instance if immediate
 			Vector toBuild = new Vector(1);
 			toBuild.addElement(newSCP);
-			InstanceProcess.staticRef.buildComponents(toBuild, security);
+			InstanceProcess.staticRef.buildComponents(toBuild, Activator.security);
 			if (!newSCP.instances.isEmpty()) {
 				// an instance was built because the component is either
 				// immediate
@@ -78,9 +74,8 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			}
 			if (instance == null) {
 				// finally build an instance if not done yet
-				instance = InstanceProcess.staticRef.buildComponent(null, newSCP, null, security);
+				instance = InstanceProcess.staticRef.buildComponent(null, newSCP, null, Activator.security);
 			}
-			instance.factory = this;
 		} catch (Throwable e) {
 			if (e instanceof ComponentException) {
 				throw (ComponentException) e;

@@ -41,6 +41,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 
 	public static BundleContext bc = null;
 	public static ConfigurationAdmin configAdmin = null;
+	public static boolean security = false;
 
 	private ServiceRegistration configListenerReg;
 	private SCRManager scrManager = null;
@@ -96,7 +97,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		if (startup)
 			timeLog("ConfigurationAdmin service getting took "); //$NON-NLS-1$
 
-		scrManager = new SCRManager(bc, log);
+		scrManager = new SCRManager();
 		if (startup)
 			timeLog("SCRManager instantiation took "); //$NON-NLS-1$
 
@@ -154,6 +155,7 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 		if (startup)
 			timeLog("[BEGIN - start method] Creating Log instance and initializing log system took "); //$NON-NLS-1$
 
+		security = Log.security();
 		boolean hasHeaders = false;
 		Bundle[] allBundles = bundleContext.getBundles();
 		for (int i = 0; i < allBundles.length; i++) {
