@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.debug.*;
 import org.osgi.framework.*;
@@ -188,6 +189,17 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		}
 	}
 
+	public Map getOptions() {
+		Properties snapShot = new Properties();
+		synchronized (lock) {
+			if (options != null)
+				snapShot.putAll(options);
+			else if (disabledOptions != null)
+				snapShot.putAll(disabledOptions);
+		}
+		return snapShot;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#getAllOptions()
@@ -220,19 +232,15 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	public void removeOption(String option) {
 		if (option == null)
 			return;
-		boolean fireChangedEvent = false;
+		String fireChangedEvent = null;
 		synchronized (lock) {
-			if (options != null) {
-				fireChangedEvent = options.remove(option) != null;
+			if (options != null && options.remove(option) != null) {
+				fireChangedEvent = getSymbolicName(option);
 			}
 		}
 		// Send the options change event outside the sync block
-		if (fireChangedEvent) {
-			int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
-			if (firstSlashIndex > 0) {
-				String symbolicName = option.substring(0, firstSlashIndex);
-				optionsChanged(symbolicName);
-			}
+		if (fireChangedEvent != null) {
+			optionsChanged(fireChangedEvent);
 		}
 	}
 
@@ -241,7 +249,12 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#setOption(java.lang.String, java.lang.String)
 	 */
 	public void setOption(String option, String value) {
-		boolean fireChangedEvent = false;
+
+		if (option == null || value == null) {
+			throw new IllegalArgumentException("The option and value must not be null."); //$NON-NLS-1$
+		}
+		String fireChangedEvent = null;
+		value = value != null ? value.trim() : null;
 		synchronized (lock) {
 			if (options != null) {
 				// get the current value
@@ -249,26 +262,75 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 
 				if (currentValue != null) {
 					if (!currentValue.equals(value)) {
-						fireChangedEvent = true;
+						fireChangedEvent = getSymbolicName(option);
 					}
 				} else {
 					if (value != null) {
-						fireChangedEvent = true;
+						fireChangedEvent = getSymbolicName(option);
 					}
 				}
-				if (fireChangedEvent) {
-					options.put(option, value.trim());
+				if (fireChangedEvent != null) {
+					options.put(option, value);
 				}
 			}
 		}
 		// Send the options change event outside the sync block
-		if (fireChangedEvent) {
-			int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
-			if (firstSlashIndex > 0) {
-				String symbolicName = option.substring(0, firstSlashIndex);
-				optionsChanged(symbolicName);
-			}
+		if (fireChangedEvent != null) {
+			optionsChanged(fireChangedEvent);
 		}
+	}
+
+	private String getSymbolicName(String option) {
+		int firstSlashIndex = option.indexOf("/"); //$NON-NLS-1$
+		if (firstSlashIndex > 0)
+			return option.substring(0, firstSlashIndex);
+		return null;
+	}
+
+	public void setOptions(Map ops) {
+		if (ops == null)
+			throw new IllegalArgumentException("The options must not be null."); //$NON-NLS-1$
+		Properties newOptions = new Properties();
+		for (Iterator entries = ops.entrySet().iterator(); entries.hasNext();) {
+			Entry entry = (Entry) entries.next();
+			if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String))
+				throw new IllegalArgumentException("Option keys and values must be of type String: " + entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+			newOptions.put(entry.getKey(), ((String) entry.getValue()).trim());
+		}
+		Set fireChangesTo = null;
+
+		synchronized (lock) {
+			if (options == null) {
+				disabledOptions = newOptions;
+				// no events to fire
+				return;
+			}
+			fireChangesTo = new HashSet();
+			// first check for removals
+			for (Iterator keys = options.keySet().iterator(); keys.hasNext();) {
+				String key = (String) keys.next();
+				if (!newOptions.containsKey(key)) {
+					String symbolicName = getSymbolicName(key);
+					if (symbolicName != null)
+						fireChangesTo.add(symbolicName);
+				}
+			}
+			// now check for changes to existing values
+			for (Iterator newEntries = newOptions.entrySet().iterator(); newEntries.hasNext();) {
+				Entry entry = (Entry) newEntries.next();
+				String existingValue = (String) options.get(entry.getKey());
+				if (!entry.getValue().equals(existingValue)) {
+					String symbolicName = getSymbolicName((String) entry.getKey());
+					if (symbolicName != null)
+						fireChangesTo.add(symbolicName);
+				}
+			}
+			// finally set the actual options
+			options = newOptions;
+		}
+		if (fireChangesTo != null)
+			for (Iterator iChanges = fireChangesTo.iterator(); iChanges.hasNext();)
+				optionsChanged((String) iChanges.next());
 	}
 
 	/*

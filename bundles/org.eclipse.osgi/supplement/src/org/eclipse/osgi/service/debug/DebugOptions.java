@@ -11,6 +11,7 @@
 package org.eclipse.osgi.service.debug;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Used to get debug options settings and creating a new {@link DebugTrace} instance for
@@ -97,12 +98,43 @@ public interface DebugOptions {
 	public abstract int getIntegerOption(String option, int defaultValue);
 
 	/**
+	 * Returns a snapshot of the current options.  All 
+	 * keys and values are of type <code>String</code>.  If no
+	 * options are set then an empty map is returned.
+	 * <p>
+	 * If debug is not enabled then the snapshot of the current disabled 
+	 * values is returned. See {@link DebugOptions#setDebugEnabled(boolean)}.
+	 * </p>
+	 * @return a snapshot of the current options.
+	 * @since 3.6
+	 */
+	public Map /*<String, String>*/getOptions();
+
+	/**
 	 * Sets the identified option to the identified value.  If debug is 
 	 * not enabled then the specified option is not changed.
 	 * @param option the name of the option to set
 	 * @param value the value of the option to set
 	 */
 	public abstract void setOption(String option, String value);
+
+	/**
+	 * Sets the current option key/value pairs to the specified options.
+	 * The specified map replaces all keys and values of the current debug options.
+	 * An <code>IllegalArgumentException</code> is thrown if any key or value 
+	 * in the specified map is not of type <code>String</code>.
+	 * <p>
+	 * If debug is not enabled then the specified options are saved as
+	 * the disabled values and no notifications will be sent. 
+	 * See {@link DebugOptions#setDebugEnabled(boolean)}.
+	 * If debug is enabled then notifications will be sent to the 
+	 * listeners which have options that have been changed, added or removed.
+	 * </p>
+
+	 * @param options the new set of options
+	 * @since 3.6
+	 */
+	public abstract void setOptions(Map /*<String, String>*/options);
 
 	/**
 	 * Removes the identified option.  If debug is not enabled then

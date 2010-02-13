@@ -222,6 +222,172 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	}
 
+	public void testBatchSetOptionsWhenEnabled() {
+
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		String key1 = getName() + "/debug/disableCheck1";
+		String key2 = getName() + "/debug/disableCheck2";
+		String key3 = getName() + "/debug/disableCheck3";
+		Map /* <String, String> */newOptions = new HashMap();
+		newOptions.put(key1, "ok1");
+		newOptions.put(key2, "ok2");
+		newOptions.put(key3, "ok3");
+		// create the new set of options
+		listener.clear();
+		// create the new set of options
+		debugOptions.setOptions(newOptions);
+		// make sure the listener got called
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		// get all of the options
+		Map/* <String, String> */currentOptions = debugOptions.getOptions();
+		// make sure the Map object returned is not the same Map object that was set
+		assertNotSame("The Map object set is the exact same Map object returned", newOptions, currentOptions);
+		// make sure the size is correct (it should be the same as the original Map)
+		assertEquals("The amount of options retrieved is not correct", newOptions.size(), currentOptions.size());
+		// make sure the values are correct
+		String actualValue = (String) currentOptions.get(key1);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok1", actualValue);
+		actualValue = (String) currentOptions.get(key2);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok2", actualValue);
+		actualValue = (String) currentOptions.get(key3);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is enabled", "ok3", actualValue);
+		// add a new batch of options
+		String key4 = getName() + "/debug/disableCheck4";
+		String key5 = getName() + "/debug/disableCheck5";
+		String key6 = getName() + "/debug/disableCheck6";
+		Map /* <String, String> */newOptions2 = new HashMap();
+		newOptions2.put(key4, "ok4");
+		newOptions2.put(key5, "ok5");
+		newOptions2.put(key6, "ok6");
+		listener.clear();
+		// create the new set of options
+		debugOptions.setOptions(newOptions2);
+		// make sure the listener got called
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		// make sure the Map object returned is not the same Map object that was set
+		Map currentOptions2 = debugOptions.getOptions();
+		assertNotSame("The Map object set is the exact same Map object returned", newOptions, currentOptions2);
+		// make sure the size is correct (it should be the same as the original Map)
+		assertEquals("The amount of options retrieved is not correct", newOptions.size(), currentOptions2.size());
+		// make sure the old values do not exist
+		actualValue = (String) currentOptions2.get(key1);
+		assertNull("The original option for key1 is in the returned options (it should not be there)", actualValue);
+		actualValue = (String) currentOptions2.get(key2);
+		assertNull("The original option for key2 is in the returned options (it should not be there)", actualValue);
+		actualValue = (String) currentOptions2.get(key3);
+		assertNull("The original option for key3 is in the returned options (it should not be there)", actualValue);
+		// make sure the new values are correct
+		actualValue = (String) currentOptions2.get(key4);
+		assertEquals("The new option for key4 does not match the retrieved option when tracing is enabled", "ok4", actualValue);
+		actualValue = (String) currentOptions2.get(key5);
+		assertEquals("The new option for key5 does not match the retrieved option when tracing is enabled", "ok5", actualValue);
+		actualValue = (String) currentOptions2.get(key6);
+		assertEquals("The new option for key6 does not match the retrieved option when tracing is enabled", "ok6", actualValue);
+	}
+
+	public void testSetNullOptions() {
+
+		// make sure setOptions() doesn't like an empty Map
+		boolean exceptionThrown = false;
+		try {
+			debugOptions.setOptions(null);
+		} catch (Exception ex) {
+			exceptionThrown = true;
+		}
+		assertTrue("An exception was not thrown when calling setOptions() with a null parameter", exceptionThrown);
+		// make sure setOption(key,value) doesn't like a null key or value
+		exceptionThrown = false;
+		try {
+			debugOptions.setOption("key", null);
+		} catch (Exception ex) {
+			exceptionThrown = true;
+		}
+		assertTrue("An exception was not thrown when calling setOption() with a null value", exceptionThrown);
+		exceptionThrown = false;
+		try {
+			debugOptions.setOption(null, "value");
+		} catch (Exception ex) {
+			exceptionThrown = true;
+		}
+		assertTrue("An exception was not thrown when calling setOption() with a null key", exceptionThrown);
+	}
+
+	public void testBatchSetOptionsWhenDisabled() {
+
+		// enable tracing initially.
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+
+		String key1 = getName() + "/debug/disableCheck1";
+		String key2 = getName() + "/debug/disableCheck2";
+		String key3 = getName() + "/debug/disableCheck3";
+		Map /* <String, String> */newOptions = new HashMap();
+		newOptions.put(key1, "ok1");
+		newOptions.put(key2, "ok2");
+		newOptions.put(key3, "ok3");
+		listener.clear();
+		// create the new set of options
+		debugOptions.setOptions(newOptions);
+		// make sure the listener got called
+		assertTrue("Listener did not get called when setting batch options when tracing is enabled", listener.gotCalled()); //$NON-NLS-1$
+		// disable tracing
+		debugOptions.setDebugEnabled(false);
+		// get all of the options (should be the disabled option set - which should contain only the recently set options)
+		Map currentOptions = debugOptions.getOptions();
+		// make sure the Map returned is not the same Map object that was set
+		assertNotSame("The Map object retrieved is the exact same Map object returned when tracing is disabled.", newOptions, currentOptions);
+		// make sure the size is correct (it should be the same as the original Map)
+		assertEquals("The amount of options retrieved is not the same after tracing is disabled", newOptions.size(), currentOptions.size());
+		// make sure the values are correct - check key1
+		String actualValue = (String) currentOptions.get(key1);
+		assertNotNull("The value for key1 is null", actualValue);
+		assertEquals("The original option for key1 does not match the retrieved option when tracing is disabled", "ok1", actualValue);
+		// check key2
+		actualValue = (String) currentOptions.get(key2);
+		assertNotNull("The value for key2 is null", actualValue);
+		assertEquals("The original option for key2 does not match the retrieved option when tracing is disabled", "ok2", actualValue);
+		// check key3
+		actualValue = (String) currentOptions.get(key3);
+		assertNotNull("The value for key3 is null", actualValue);
+		assertEquals("The original option for key3 does not match the retrieved option when tracing is disabled", "ok3", actualValue);
+		// add a new batch of options when tracing is disabled
+		String key4 = getName() + "/debug/disableCheck4";
+		String key5 = getName() + "/debug/disableCheck5";
+		String key6 = getName() + "/debug/disableCheck6";
+		Map /* <String, String> */newOptions2 = new HashMap();
+		newOptions2.put(key4, "ok4");
+		newOptions2.put(key5, "ok5");
+		newOptions2.put(key6, "ok6");
+		listener.clear();
+		// create the new set of options
+		debugOptions.setOptions(newOptions2);
+		// make sure the listener did not get called
+		assertFalse("Listener got called when settings batch options with tracing disabled", listener.gotCalled()); //$NON-NLS-1$
+		// make sure the Map object returned is not the same Map object that was set
+		Map currentOptions2 = debugOptions.getOptions();
+		assertNotSame("The Map object set is the exact same Map object returned", newOptions, currentOptions2);
+		// make sure the size is correct (it should be the same as the original Map)
+		assertEquals("The amount of options retrieved is not correct", newOptions.size(), currentOptions2.size());
+		// make sure the old values do not exist
+		actualValue = (String) currentOptions2.get(key1);
+		assertNull("The original option for key1 is in the returned options (it should not be there)", actualValue);
+		actualValue = (String) currentOptions2.get(key2);
+		assertNull("The original option for key2 is in the returned options (it should not be there)", actualValue);
+		actualValue = (String) currentOptions2.get(key3);
+		assertNull("The original option for key3 is in the returned options (it should not be there)", actualValue);
+		// make sure the new values are correct
+		actualValue = (String) currentOptions2.get(key4);
+		assertEquals("The new option for key4 does not match the retrieved option when tracing is disabled", "ok4", actualValue);
+		actualValue = (String) currentOptions2.get(key5);
+		assertEquals("The new option for key5 does not match the retrieved option when tracing is disabled", "ok5", actualValue);
+		actualValue = (String) currentOptions2.get(key6);
+		assertEquals("The new option for key6 does not match the retrieved option when tracing is disabled", "ok6", actualValue);
+		// testing of options when tracing is re-enabled is done in testSetOptionsWhenDisabled so it is not needed here
+	}
+
 	public void testSetOptionsWhenDisabled() {
 
 		// enable tracing initially.
