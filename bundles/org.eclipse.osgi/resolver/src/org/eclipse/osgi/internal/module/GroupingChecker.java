@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -159,7 +159,7 @@ public class GroupingChecker {
 			if (supplier.getExport(packageName) != null) {
 				// the required bundle exports the package; get the package roots from it
 				PackageRoots requiredRoots = getPackageRoots(supplier, packageName, visited);
-				if (requiredRoots != null)
+				if (requiredRoots != nullPackageRoots)
 					roots.add(requiredRoots);
 			} else {
 				// the bundle does not export the package; but it may reexport another bundle that does
@@ -171,7 +171,7 @@ public class GroupingChecker {
 					if (reexported.getExport(packageName) != null) {
 						// the reexported bundle exports the package; get the package roots from it
 						PackageRoots reExportedRoots = getPackageRoots(reexported, packageName, visited);
-						if (reexported != null)
+						if (reExportedRoots != nullPackageRoots)
 							roots.add(reExportedRoots);
 					}
 				}
