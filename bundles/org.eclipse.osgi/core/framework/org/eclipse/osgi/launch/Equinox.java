@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.util.Headers;
+import org.eclipse.osgi.internal.baseadaptor.DevClassPathHelper;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 
@@ -74,9 +76,94 @@ public class Equinox implements Framework {
 		ClassLoader thisCL = this.getClass().getClassLoader();
 		if (!(useSeparateCL && (thisCL instanceof URLClassLoader)))
 			return Class.forName(implName);
-		URL[] cp = ((URLClassLoader) thisCL).getURLs();
+		URL[] cp = getFrameworkURLs((URLClassLoader) thisCL);
 		EquinoxFWClassLoader fwCL = new EquinoxFWClassLoader(cp, thisCL);
 		return fwCL.loadClass(implName);
+	}
+
+	private URL[] getFrameworkURLs(URLClassLoader frameworkLoader) {
+		// use the classpath of the framework class loader
+		URL[] cp = frameworkLoader.getURLs();
+		ArrayList result = new ArrayList(cp.length);
+		for (int i = 0; i < cp.length; i++) {
+			// need to add only the urls for the framework and any framework fragments
+			InputStream manifest = null;
+			try {
+				if (cp[i].getFile().endsWith("/")) { //$NON-NLS-1$
+					manifest = new URL(cp[i], org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST).openStream();
+				} else {
+					manifest = new URL("jar:" + cp[i].toExternalForm() + "!/" + org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST).openStream(); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				Map headers = ManifestElement.parseBundleManifest(manifest, new Headers(10));
+				String bsnSpec = getValue(headers, Constants.BUNDLE_SYMBOLICNAME);
+				if (bsnSpec == null)
+					continue;
+				String internalBSN = org.eclipse.osgi.framework.internal.core.Constants.getInternalSymbolicName();
+				if (internalBSN.equals(bsnSpec)) {
+					// this is the framework
+					addDevClassPaths(cp[i], bsnSpec, result);
+					result.add(cp[i]);
+				} else {
+					if (!isFrameworkFragment(headers, internalBSN))
+						continue;
+					// this is for a framework extension
+					addDevClassPaths(cp[i], bsnSpec, result);
+					result.add(cp[i]);
+				}
+			} catch (IOException e) {
+				continue; // no manifest;
+			} catch (BundleException e) {
+				continue; // bad manifest;
+			} finally {
+				if (manifest != null)
+					try {
+						manifest.close();
+					} catch (IOException e) {
+						// ignore
+					}
+			}
+		}
+		return (URL[]) result.toArray(new URL[result.size()]);
+	}
+
+	private void addDevClassPaths(URL cp, String bsn, ArrayList result) {
+		if (!cp.getPath().endsWith("/")) //$NON-NLS-1$
+			return;
+		String[] devPaths = DevClassPathHelper.getDevClassPath(bsn);
+		if (devPaths == null)
+			return;
+		for (int i = 0; i < devPaths.length; i++)
+			try {
+				char lastChar = devPaths[i].charAt(devPaths[i].length() - 1);
+				URL url;
+				if ((devPaths[i].endsWith(".jar") || (lastChar == '/' || lastChar == '\\'))) //$NON-NLS-1$
+					url = new URL(cp, devPaths[i]);
+				else
+					url = new URL(cp, devPaths[i] + "/"); //$NON-NLS-1$
+				result.add(url);
+			} catch (MalformedURLException e) {
+				continue;
+			}
+	}
+
+	private boolean isFrameworkFragment(Map headers, String internalBSN) {
+		String hostBSN = getValue(headers, Constants.FRAGMENT_HOST);
+		return internalBSN.equals(hostBSN) || Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(hostBSN);
+	}
+
+	private String getValue(Map headers, String key) {
+		String headerSpec = (String) headers.get(key);
+		if (headerSpec == null)
+			return null;
+		ManifestElement[] elements;
+		try {
+			elements = ManifestElement.parseHeader(key, headerSpec);
+		} catch (BundleException e) {
+			return null;
+		}
+		if (elements == null)
+			return null;
+		return elements[0].getValue();
 	}
 
 	private synchronized Framework getImpl() {
