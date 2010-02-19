@@ -60,7 +60,7 @@ public class ExtensibilityTest extends TestCase {
 	
 	private boolean isTypePresent(String[] types, String type) {
 		for(int i = 0; i < types.length; i++) {
-			if ("regex".equalsIgnoreCase(types[i]))
+			if (type.equalsIgnoreCase(types[i]))
 				return true;
 		}
 		return false;
