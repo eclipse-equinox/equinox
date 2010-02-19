@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -214,8 +214,10 @@ public class EclipseStarter {
 			}
 		}
 		// we only get here if an error happened
-		FrameworkProperties.setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
-		FrameworkProperties.setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+		if (FrameworkProperties.getProperty(PROP_EXITCODE) == null) {
+			FrameworkProperties.setProperty(PROP_EXITCODE, "13"); //$NON-NLS-1$
+			FrameworkProperties.setProperty(PROP_EXITDATA, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_CHECK_LOG, log == null ? null : log.getFile().getPath()));
+		}
 		return null;
 	}
 

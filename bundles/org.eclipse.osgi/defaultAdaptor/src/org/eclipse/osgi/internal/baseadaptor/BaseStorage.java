@@ -207,7 +207,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER = options.getBooleanOption(OPTION_PLATFORM_ADMIN_RESOLVER, false);
 	}
 
-	protected StorageManager initFileManager(File baseDir, String lockMode, boolean readOnly) {
+	protected StorageManager initFileManager(File baseDir, String lockMode, boolean readOnly) throws IOException {
 		StorageManager sManager = new StorageManager(baseDir, lockMode, readOnly);
 		try {
 			sManager.open(!readOnly);
@@ -219,6 +219,12 @@ public class BaseStorage implements SynchronousBundleListener {
 			String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_FILEMANAGER_OPEN_ERROR, ex.getMessage());
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, ex, null);
 			adaptor.getFrameworkLog().log(logEntry);
+			FrameworkProperties.setProperty(EclipseStarter.PROP_EXITCODE, "15"); //$NON-NLS-1$
+			FrameworkProperties.setProperty(EclipseStarter.PROP_EXITDATA, "<title>Invalid Configuration Location</title>Locking in directory '" + baseDir + //$NON-NLS-1$
+					"' is not possible. A common reason is that the file system or Runtime Environment does not support file locking for that location. " + //$NON-NLS-1$
+					"Please choose a different location, or disable file locking passing \"-Dosgi.locking=none\" as a VM argument.\n" + //$NON-NLS-1$
+					ex.getMessage());
+			throw ex;
 		}
 		return sManager;
 	}

@@ -184,7 +184,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		try {
 			adaptor.initializeStorage();
 		} catch (IOException e) /* fatal error */{
-			e.printStackTrace();
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		if (Profile.PROFILE && Profile.STARTUP)

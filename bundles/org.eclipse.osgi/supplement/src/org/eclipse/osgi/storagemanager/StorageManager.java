@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,12 +87,13 @@ public final class StorageManager {
 	private static final int FILETYPE_STANDARD = 0;
 	private static final int FILETYPE_RELIABLEFILE = 1;
 	private static final SecureAction secure = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
-	private static boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private static boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+	private static final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
+	private static final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
 	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
 	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
+	private static final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;
@@ -130,24 +131,23 @@ public final class StorageManager {
 		}
 	}
 
-	private File base; //The folder managed
-	private File managerRoot; //The folder that will contain all the file related to the functionning of the manager (typically a subdir of base)
+	private final File base; //The folder managed
+	private final File managerRoot; //The folder that will contain all the file related to the functionning of the manager (typically a subdir of base)
 
-	private String lockMode = null;
-	private File tableFile = null;
-	private File lockFile; // The lock file for the table (this file is the same for all the instances)
+	private final String lockMode;
+	private final File tableFile;
+	private final File lockFile; // The lock file for the table (this file is the same for all the instances)
 	private Locker locker; // The locker for the lock
 
-	private File instanceFile = null; //The file reprensenting the running instance. It is created when the table file is read.
+	private File instanceFile; //The file representing the running instance. It is created when the table file is read.
 	private Locker instanceLocker = null; //The locker for the instance file.
-	private boolean readOnly; // Whether this storage manager is in read-only mode
+	private final boolean readOnly; // Whether this storage manager is in read-only mode
 	private boolean open; // Whether this storage manager is open for use
 
 	// locking related fields
 	private int tableStamp = -1;
 
-	private Properties table = new Properties();
-	private boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
+	private final Properties table = new Properties();
 
 	/**
 	 * Returns a new storage manager for the area identified by the given base
@@ -174,8 +174,6 @@ public final class StorageManager {
 		this.base = base;
 		this.lockMode = lockMode;
 		this.managerRoot = new File(base, MANAGER_FOLDER);
-		if (!readOnly)
-			this.managerRoot.mkdirs();
 		this.tableFile = new File(managerRoot, TABLE_FILE);
 		this.lockFile = new File(managerRoot, LOCK_FILE);
 		this.readOnly = readOnly;
@@ -677,12 +675,15 @@ public final class StorageManager {
 	 * This methods opens the storage manager. 
 	 * This method must be called before any operation on the storage manager.
 	 * @param wait indicates if the open operation must wait in case of contention on the lock file.
-	 * @throws IOException if an error occured opening the storage manager
+	 * @throws IOException if an error occurred opening the storage manager
 	 */
 	public void open(boolean wait) throws IOException {
 		if (openCleanup)
 			cleanup();
 		if (!readOnly) {
+			managerRoot.mkdirs();
+			if (!managerRoot.exists())
+				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 			boolean locked = lock(wait);
 			if (!locked && wait)
 				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
