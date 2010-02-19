@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
 import org.eclipse.core.tests.session.SetupManager.SetupException;
+import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.tests.OSGiTest;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
@@ -32,7 +33,8 @@ public class ApplicationAdminTest extends OSGiTest {
 	public static final String MODIFIED = "modified"; //$NON-NLS-1$
 	public static final String REMOVED = "removed"; //$NON-NLS-1$
 	public static final String simpleResults = "test.simpleResults"; //$NON-NLS-1$
-	public static final String[] tests = new String[] {"testSimpleApp", "testInvalidArgs", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", "testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$ //$NON-NLS-21$ //$NON-NLS-22$ //$NON-NLS-23$ //$NON-NLS-24$ //$NON-NLS-25$ //$NON-NLS-26$ //$NON-NLS-27$ //$NON-NLS-28$ //$NON-NLS-29$
+	public static final String[] tests = new String[] {
+			"testSimpleApp", "testInvalidArgs", "testExitValue01", "testExitValue02", "testExitValue03", "testExitValue04", "testExitValue05", "testExitValue06", "testExitValue07", "testExitValue08", "testExitValue09", "testExitValue10", "testGlobalSingleton", "testCardinality01", "testCardinality02", "testMainThreaded01", "testMainThreaded02", "testHandleEvents01", "testDescriptorEvents01", "testPersistentLock01", "testPersistentLock02", "testPersistentLock03", "testPersistentSchedule01", "testPersistentSchedule02", "testPersistentSchedule03", "testPersistentSchedule04", "testPersistentSchedule05", "testPersistentSchedule06", "testPersistentSchedule07", "testPersistentSchedule08", "testFailedApplication01", "testDestroyBeforeStart01", "testDestroyBeforeStart02"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$ //$NON-NLS-21$ //$NON-NLS-22$ //$NON-NLS-23$ //$NON-NLS-24$ //$NON-NLS-25$ //$NON-NLS-26$ //$NON-NLS-27$ //$NON-NLS-28$ //$NON-NLS-29$
 	private static final String PI_OSGI_SERVICES = "org.eclipse.osgi.services"; //$NON-NLS-1$
 
 	public static Test suite() {
@@ -383,6 +385,106 @@ public class ApplicationAdminTest extends OSGiTest {
 		} catch (InterruptedException e) {
 			fail("Unexpected interrupted exception waiting for exit value", e); //$NON-NLS-1$
 		}
+	}
+
+	public void testExitValue07() {
+		//getExitValue test; called with timeout 0
+		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
+		ApplicationHandle handle = null;
+		try {
+			handle = app.launch(null);
+		} catch (ApplicationException e) {
+			fail("failed to launcher simpleApp", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("app handle is null", handle); //$NON-NLS-1$
+
+		String value = null;
+		try {
+			value = (String) handle.getExitValue(0);
+		} catch (Exception e) {
+			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("value is null", value); //$NON-NLS-1$
+		assertEquals("exit value is incorrect", ExitValueApp.exitValue, value); //$NON-NLS-1$
+	}
+
+	public void testExitValue08() {
+		//getExitValue test; called with timeout -1
+		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
+		ApplicationHandle handle = null;
+		try {
+			handle = app.launch(null);
+		} catch (ApplicationException e) {
+			fail("failed to launcher simpleApp", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("app handle is null", handle); //$NON-NLS-1$
+
+		try {
+			handle.getExitValue(-1);
+			fail("Expected an ApplicationException for exit value not available"); //$NON-NLS-1$
+		} catch (ApplicationException e) {
+			assertEquals("Unexpected error type", ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE, e.getErrorCode()); //$NON-NLS-1$
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception waiting for exit value", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testExitValue09() {
+		//getExitValue test; application returns null
+		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
+		ApplicationHandle handle = null;
+
+		HashMap args = getArguments();
+		args.put(IApplicationContext.APPLICATION_ARGS, new String[] {ExitValueApp.returnNullResult});
+
+		try {
+			handle = app.launch(args);
+		} catch (ApplicationException e) {
+			fail("failed to launcher simpleApp", e); //$NON-NLS-1$
+		}
+
+		assertNotNull("app handle is null", handle); //$NON-NLS-1$
+
+		try {
+			assertNull("expected null return value", handle.getExitValue(0));
+		} catch (Exception e) {
+			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
+		}
+	}
+
+	public void testExitValue10() {
+		//getExitValue test; called with timeout 0 after the result is available
+		ApplicationDescriptor app = getApplication(PI_OSGI_TESTS + ".exitValueApp"); //$NON-NLS-1$
+		ApplicationHandle handle = null;
+		try {
+			handle = app.launch(null);
+		} catch (ApplicationException e) {
+			fail("failed to launch simpleApp", e); //$NON-NLS-1$
+		}
+		assertNotNull("app handle is null", handle); //$NON-NLS-1$
+		String value = null;
+		try {
+			// waiting for app to exit
+			handle.getExitValue(10000);
+			// app exited now get the result with 0 timeout
+			value = (String) handle.getExitValue(0);
+		} catch (Exception e) {
+			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
+		}
+		assertNotNull("value is null", value); //$NON-NLS-1$
+		assertEquals("exit value is incorrect", ExitValueApp.exitValue, value); //$NON-NLS-1$
+
+		try {
+			// app exited now get the result with -1 timeout; we know the value is ready from above
+			value = (String) handle.getExitValue(-1);
+		} catch (Exception e) {
+			fail("unexpected exception waiting for exit value", e); //$NON-NLS-1$
+		}
+		assertNotNull("value is null", value); //$NON-NLS-1$
+		assertEquals("exit value is incorrect", ExitValueApp.exitValue, value); //$NON-NLS-1$
 	}
 
 	public void testGlobalSingleton() {
