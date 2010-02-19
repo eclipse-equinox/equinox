@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private static final String STARTING = "org.eclipse.equinox.app.starting"; //$NON-NLS-1$
 	private static final String STOPPED = "org.eclipse.equinox.app.stopped"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSE_EXITCODE = "eclipse.exitcode"; //$NON-NLS-1$
+	private static final Object NULL_RESULT = new Object();
 
 	private volatile ServiceRegistration handleRegistration;
 	private int status = EclipseAppHandle.FLAG_STARTING;
@@ -194,6 +195,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				tempResult = ((IApplication) app).start(this);
 			else
 				tempResult = EclipseAppContainer.callMethodWithException(app, "run", new Class[] {Object.class}, new Object[] {context}); //$NON-NLS-1$
+			if (tempResult == null)
+				tempResult = NULL_RESULT;
 		} finally {
 			synchronized (this) {
 				result = tempResult;
@@ -359,12 +362,15 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			return result;
 		long startTime = System.currentTimeMillis();
 		long delay = timeout;
-		while (!setResult && delay > 0) {
+		while (!setResult && (delay > 0 || timeout == 0)) {
 			wait(delay); // only wait for the specified amount of time
-			delay -= (System.currentTimeMillis() - startTime);
+			if (timeout > 0)
+				delay -= (System.currentTimeMillis() - startTime);
 		}
 		if (result == null)
 			throw new ApplicationException(ApplicationException.APPLICATION_EXITVALUE_NOT_AVAILABLE);
+		if (result == NULL_RESULT)
+			return null;
 		return result;
 	}
 }
