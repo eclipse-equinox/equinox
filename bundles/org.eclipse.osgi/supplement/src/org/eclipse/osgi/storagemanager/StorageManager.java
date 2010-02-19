@@ -93,7 +93,8 @@ public final class StorageManager {
 	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
 	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
-	private static final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
+	// this should be static but the tests expect to be able to create new managers after changing this setting dynamically
+	private final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;
