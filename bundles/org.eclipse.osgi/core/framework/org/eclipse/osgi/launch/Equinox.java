@@ -41,7 +41,7 @@ public class Equinox implements Framework {
 		if (sm != null)
 			sm.checkPermission(new AllPermission());
 		useSeparateCL = FrameworkProperties.inUse();
-		this.configuration = configuration;
+		this.configuration = configuration == null ? Collections.EMPTY_MAP : new HashMap(configuration);
 	}
 
 	private Framework createImpl() {
