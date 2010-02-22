@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,8 @@ public class AdaptorMsg extends NLS {
 	public static String ADAPTOR_EXTENSION_NATIVECODE_ERROR;
 	public static String ADAPTOR_EXTENSION_REQUIRE_ERROR;
 	public static String ADAPTOR_STORAGE_EXCEPTION;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_MSG;
+	public static String ADAPTOR_STORAGE_INIT_FAILED_TITLE;
 	public static String ADAPTOR_URL_CREATE_EXCEPTION;
 
 	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;

@@ -220,10 +220,8 @@ public class BaseStorage implements SynchronousBundleListener {
 			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, ex, null);
 			adaptor.getFrameworkLog().log(logEntry);
 			FrameworkProperties.setProperty(EclipseStarter.PROP_EXITCODE, "15"); //$NON-NLS-1$
-			FrameworkProperties.setProperty(EclipseStarter.PROP_EXITDATA, "<title>Invalid Configuration Location</title>Locking in directory '" + baseDir + //$NON-NLS-1$
-					"' is not possible. A common reason is that the file system or Runtime Environment does not support file locking for that location. " + //$NON-NLS-1$
-					"Please choose a different location, or disable file locking passing \"-Dosgi.locking=none\" as a VM argument.\n" + //$NON-NLS-1$
-					ex.getMessage());
+			String errorDialog = "<title>" + AdaptorMsg.ADAPTOR_STORAGE_INIT_FAILED_TITLE + "</title>" + NLS.bind(AdaptorMsg.ADAPTOR_STORAGE_INIT_FAILED_MSG, baseDir) + "\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			FrameworkProperties.setProperty(EclipseStarter.PROP_EXITDATA, errorDialog);
 			throw ex;
 		}
 		return sManager;
