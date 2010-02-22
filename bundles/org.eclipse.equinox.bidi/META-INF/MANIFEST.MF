@@ -5,8 +5,7 @@ Bundle-Vendor: %providerName
 Bundle-SymbolicName: org.eclipse.equinox.bidi;singleton:=true
 Bundle-Version: 0.9.0.qualifier
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: J2SE-1.4,
- CDC-1.1/Foundation-1.1
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.equinox.bidi.complexp,
  org.eclipse.equinox.bidi.internal.complexp;x-internal:=true,
