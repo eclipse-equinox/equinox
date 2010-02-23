@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -338,7 +338,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 			return null;
 		String namespace = extensionId.substring(0, lastdot);
 
-		ExtensionHandle[] extensions = registryObjects.getExtensionsFromNamespace(namespace);
+		ExtensionHandle[] extensions;
+		access.enterRead();
+		try {
+			extensions = registryObjects.getExtensionsFromNamespace(namespace);
+		} finally {
+			access.exitRead();
+		}
 		for (int i = 0; i < extensions.length; i++) {
 			ExtensionHandle suspect = extensions[i];
 			if (extensionId.equals(suspect.getUniqueIdentifier()))
@@ -376,7 +382,12 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	 * @see org.eclipse.core.runtime.IExtensionRegistry#getExtensionPoint(java.lang.String)
 	 */
 	public IExtensionPoint getExtensionPoint(String xptUniqueId) {
-		return registryObjects.getExtensionPointHandle(xptUniqueId);
+		access.enterRead();
+		try {
+			return registryObjects.getExtensionPointHandle(xptUniqueId);
+		} finally {
+			access.exitRead();
+		}
 	}
 
 	/*
@@ -1341,8 +1352,13 @@ public class ExtensionRegistry implements IExtensionRegistry, IDynamicExtensionR
 	}
 
 	public IContributor[] getAllContributors() {
-		Collection contributors = registryObjects.getContributors().values();
-		return (IContributor[]) contributors.toArray(new IContributor[contributors.size()]);
+		access.enterRead();
+		try {
+			Collection contributors = registryObjects.getContributors().values();
+			return (IContributor[]) contributors.toArray(new IContributor[contributors.size()]);
+		} finally {
+			access.exitRead();
+		}
 	}
 
 	/**
