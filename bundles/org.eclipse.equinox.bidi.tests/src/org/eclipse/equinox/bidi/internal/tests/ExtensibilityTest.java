@@ -11,9 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 import org.eclipse.equinox.bidi.complexp.StringProcessor;
@@ -22,17 +20,6 @@ import org.eclipse.equinox.bidi.complexp.StringProcessor;
  * Tests contribution of BiDi processors.
  */
 public class ExtensibilityTest extends TestCase {
-	public static Test suite() {
-		return new TestSuite(ExtensibilityTest.class);
-	}
-
-	public ExtensibilityTest() {
-		super();
-	}
-
-	public ExtensibilityTest(String name) {
-		super(name);
-	}
 
 	public void testBaseContributions() {
 		String[] types = StringProcessor.getKnownTypes();

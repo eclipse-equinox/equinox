@@ -11,60 +11,44 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
+import org.eclipse.equinox.bidi.complexp.IBiDiProcessor;
 import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 import org.eclipse.equinox.bidi.complexp.StringProcessor;
-import org.eclipse.equinox.bidi.complexp.IBiDiProcessor;
 
 /**
  * Tests RTL arithmetic
  */
-public class ComplExpMathTest extends TestCase {
-    public static Test suite() {
-        return new TestSuite(ComplExpMathTest.class);
-    }
+public class ComplExpMathTest extends ComplExpTestBase {
+	
+	private IComplExpProcessor processor;
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		processor = StringProcessor.getProcessor(IBiDiProcessor.RTL_ARITHMETIC);
+	}
 
-    public ComplExpMathTest() {
-        super();
-    }
-
-    public ComplExpMathTest(String name) {
-        super(name);
-    }
-
-    static void test1(IComplExpProcessor complexp, String data,
-                      String resLTR, String resRTL)
+    private void verifyOneLine(String data, String resLTR, String resRTL)
     {
-        String full, lean;
-
-        System.out.println();
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
-        full = complexp.leanToFullText(lean);
-        Tools.verify("LTR full", full, resLTR);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
-        full = complexp.leanToFullText(lean);
-        Tools.verify("RTL full", full, resRTL);
+        String lean = toUT16(data);
+        processor.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
+        String fullLTR = processor.leanToFullText(lean);
+        assertEquals(resLTR, toPseudo(fullLTR));
+        
+        processor.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
+        String fullRTL = processor.leanToFullText(lean);
+        assertEquals(resRTL, toPseudo(fullRTL));
     }
-
-    public static void testRTLarithmetic() {
-        Tools.separ("ComplExpMathTest");
-        IComplExpProcessor complexp = StringProcessor.getProcessor(IBiDiProcessor.RTL_ARITHMETIC);
-        test1(complexp, "", "", "");
-        test1(complexp, "1+abc", "<&1+abc&^", "1+abc");
-        test1(complexp, "2+abc-def", "<&2+abc&-def&^", "2+abc&-def");
-        test1(complexp, "a+3*bc/def", "<&a&+3*bc&/def&^", "a&+3*bc&/def");
-        test1(complexp, "4+abc/def", "<&4+abc&/def&^", "4+abc&/def");
-        test1(complexp, "13ABC", "<&13ABC&^", "13ABC");
-        test1(complexp, "14ABC-DE", "<&14ABC-DE&^", "14ABC-DE");
-        test1(complexp, "15ABC+DE", "<&15ABC+DE&^", "15ABC+DE");
-        test1(complexp, "16ABC*DE", "<&16ABC*DE&^", "16ABC*DE");
-        test1(complexp, "17ABC/DE", "<&17ABC/DE&^", "17ABC/DE");
-
-        Tools.printStepErrorCount();
+    
+    public void testRTLarithmetic() {
+        verifyOneLine("", "", "");
+        verifyOneLine("1+abc", "<&1+abc&^", "1+abc");
+        verifyOneLine("2+abc-def", "<&2+abc&-def&^", "2+abc&-def");
+        verifyOneLine("a+3*bc/def", "<&a&+3*bc&/def&^", "a&+3*bc&/def");
+        verifyOneLine("4+abc/def", "<&4+abc&/def&^", "4+abc&/def");
+        verifyOneLine("13ABC", "<&13ABC&^", "13ABC");
+        verifyOneLine("14ABC-DE", "<&14ABC-DE&^", "14ABC-DE");
+        verifyOneLine("15ABC+DE", "<&15ABC+DE&^", "15ABC+DE");
+        verifyOneLine("16ABC*DE", "<&16ABC*DE&^", "16ABC*DE");
+        verifyOneLine("17ABC/DE", "<&17ABC/DE&^", "17ABC/DE");
     }
 }
