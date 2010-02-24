@@ -137,7 +137,8 @@ public class StateManager implements PlatformAdmin, Runnable {
 			state.resolve(false);
 		}
 		writeState(state, stateFile, lazyFile);
-		lastTimeStamp = state.getTimeStamp();
+		// Need to use the timestamp of the original state here
+		lastTimeStamp = systemState.getTimeStamp();
 		// TODO consider updating the state files for lazy loading
 	}
 
