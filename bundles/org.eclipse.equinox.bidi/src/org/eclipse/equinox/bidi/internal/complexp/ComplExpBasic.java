@@ -69,7 +69,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *  Type of the complex expression processor specified when calling
 	 *  {@link ComplExpUtil#create}
 	 */
-	protected int type;
+	protected String type;
 
 	/**
 	 *  Base direction of the complex expression. This is an array such that
@@ -187,8 +187,14 @@ public class ComplExpBasic implements IComplExpProcessor {
 		locations = new int[operCount];
 	}
 
-	public void setType(int expressionType) {
-		type = expressionType;
+	public void setOperators(String operators) {
+		this.operators = operators.toCharArray();
+		operCount = this.operators.length;
+		locations = new int[operCount + specialsCount];
+	}
+
+	public String getOperators() {
+		return new String(operators);
 	}
 
 	/**
@@ -285,7 +291,8 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *          of this number is internal to the class implementing
 	 *          <code>indexOfSpecial</code>.
 	 *
-	 *  @param  text text of the complex expression.
+	 *  @param  leanText text of the complex expression before addition of any
+	 *          directional formatting characters.
 	 *
 	 *  @param  fromIndex the index within <code>leanText</code> to start
 	 *          the search from.
@@ -302,7 +309,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *          In <code>ComplExpBasic</code> this method always returns -1.
 	 *
 	 */
-	protected int indexOfSpecial(int whichSpecial, String text, int fromIndex) {
+	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
 		// This method must be overridden by all subclasses with special cases.
 		return -1;
 	}
@@ -866,7 +873,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 		if (dirProp == L || dirProp == R || dirProp == AL || dirProp == EN || dirProp == AN)
 			index = offset - 1;
 		else
-			// if the current char is a neutral, we change its own dirProp 
+			// if the current char is a neutral, we change its own dirProp
 			index = offset;
 		setMarkAndFixes();
 		setDirProp(index, curStrong);
@@ -931,10 +938,11 @@ public class ComplExpBasic implements IComplExpProcessor {
 		return mirrored;
 	}
 
-	public void assumeOrientation(int desiredOrientation) {
-		if (desiredOrientation < ORIENT_LTR || desiredOrientation > ORIENT_IGNORE)
+	public void assumeOrientation(int componentOrientation) {
+		if (componentOrientation < ORIENT_LTR || componentOrientation > ORIENT_IGNORE)
 			orientation = ORIENT_UNKNOWN; // TBD should throw new IllegalArgumentException()?
-		orientation = desiredOrientation;
+		else
+			orientation = componentOrientation;
 	}
 
 	public int recallOrientation() {

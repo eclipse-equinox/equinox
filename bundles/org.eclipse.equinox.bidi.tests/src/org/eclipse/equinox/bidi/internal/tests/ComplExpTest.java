@@ -21,6 +21,14 @@ public class ComplExpTest implements IComplExpProcessor {
 		return;
 	}
 
+	public void setOperators(String operators) {
+        // empty
+	}
+	
+	public String getOperators() {
+	    return "";
+	}
+	
 	public void selectBidiScript(boolean arabic, boolean hebrew) {
 		// empty
 	}

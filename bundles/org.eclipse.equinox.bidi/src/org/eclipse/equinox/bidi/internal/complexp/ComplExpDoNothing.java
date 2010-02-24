@@ -25,6 +25,7 @@ import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 // TBD is this needed?
 public class ComplExpDoNothing implements IComplExpProcessor {
 
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	private static final int[] EMPTY_INT_ARRAY = new int[0];
 	private static final int[][] ALL_LTR = new int[][] { {DIRECTION_LTR, DIRECTION_LTR}, {DIRECTION_LTR, DIRECTION_LTR}};
 
@@ -36,6 +37,22 @@ public class ComplExpDoNothing implements IComplExpProcessor {
 	 */
 	public ComplExpDoNothing() {
 		return;
+	}
+
+	/**
+	 *  For class <code>ComplExpDoNothing</code>
+	 *  this method does nothing.
+	 */
+	public void setOperators(String operators) {
+		// empty
+	}
+
+	/**
+	 *  For class <code>ComplExpDoNothing</code>
+	 *  this method returns a zero-length string.
+	 */
+	public String getOperators() {
+		return EMPTY_STRING;
 	}
 
 	/**

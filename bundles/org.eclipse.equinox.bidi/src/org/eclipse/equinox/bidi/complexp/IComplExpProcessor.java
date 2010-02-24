@@ -366,6 +366,22 @@ public interface IComplExpProcessor {
 	 */
 	public int fullToLeanPos(int pos);
 
+	/** Set the operators which separate a complex expression into tokens.
+	 *
+	 *  @param  operators is a string where each character is an operator.
+	 *  
+	 *  @see #getOperators
+	 */
+	public void setOperators(String operators);
+
+	/** Get the operators which separate a complex expression into tokens.
+	 *
+	 *  @return a string where each character is an operator.
+	 *
+	 *  @see #getOperators
+	 */
+	public String getOperators();
+
 	/** Specify whether the GUI where the complex expression will be displayed
 	 *  is mirrored (is laid out from right to left). The value specified in
 	 *  this method overrides the default assumed for all complex expressions
@@ -430,7 +446,7 @@ public interface IComplExpProcessor {
 	 *  {@link #leanToFullText leanToFullText} does not add any directional
 	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
 	 *
-	 *  @param desiredOrientation orientation of the GUI component where the
+	 *  @param componentOrientation orientation of the GUI component where the
 	 *         complex expression will be displayed. It must be one of the
 	 *         values {@link #ORIENT_LTR}, {@link #ORIENT_RTL},
 	 *         {@link #ORIENT_CONTEXTUAL_LTR}, {@link #ORIENT_CONTEXTUAL_RTL},
@@ -438,7 +454,7 @@ public interface IComplExpProcessor {
 	 *
 	 *  @see #recallOrientation
 	 */
-	public void assumeOrientation(int desiredOrientation);
+	public void assumeOrientation(int componentOrientation);
 
 	/** Retrieve the value currently assumed for the orientation.
 	 *

@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.tests;
 
-import org.eclipse.equinox.bidi.internal.tests.ExtensibilityTest;
+import org.eclipse.equinox.bidi.internal.tests.*;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -23,5 +23,13 @@ public class BiDiTestSuite extends TestSuite {
 
 	public BiDiTestSuite() {
 		addTestSuite(ExtensibilityTest.class);
+        addTestSuite(Tools.class);
+//        addTestSuite(TestDoNothing.class);
+        addTestSuite(FullToLeanTest.class);
+        addTestSuite(MethodsTest.class);
+        addTestSuite(ComplExpMathTest.class);
+// TBD: TestSubclass        
+        addTestSuite(ExtensionsTest.class);
+        addTestSuite(ComplExpUtilTest.class);
 	}
 }
