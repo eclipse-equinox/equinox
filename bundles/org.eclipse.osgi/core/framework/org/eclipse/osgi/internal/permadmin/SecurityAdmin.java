@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -291,23 +291,22 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
 		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
 		List rows = update.getConditionalPermissionInfos();
-		ConditionalPermissionInfo infoBase = newConditionalPermissionInfo(name, conds, perms, ConditionalPermissionInfo.ALLOW);
+		ConditionalPermissionInfo newInfo = newConditionalPermissionInfo(name, conds, perms, ConditionalPermissionInfo.ALLOW);
 		int index = -1;
-		if (name == null) {
-			rows.add(infoBase);
-			index = rows.size() - 1;
-		} else {
+		if (name != null) {
 			for (int i = 0; i < rows.size() && index < 0; i++) {
 				ConditionalPermissionInfo info = (ConditionalPermissionInfo) rows.get(i);
 				if (name.equals(info.getName())) {
-					rows.set(i, infoBase);
 					index = i;
 				}
 			}
-			if (index < 0) {
-				rows.add(infoBase);
-				index = rows.size() - 1;
-			}
+		}
+		if (index < 0) {
+			// must always add to the beginning (bug 303930)
+			rows.add(0, newInfo);
+			index = 0;
+		} else {
+			rows.set(index, newInfo);
 		}
 		synchronized (lock) {
 			if (!update.commit()) {
