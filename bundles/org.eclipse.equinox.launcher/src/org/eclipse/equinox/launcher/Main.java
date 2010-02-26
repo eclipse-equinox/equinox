@@ -306,7 +306,7 @@ public class Main {
 		if (osName.equals(Constants.OS_LINUX))
 			return Constants.WS_GTK;
 		if (osName.equals(Constants.OS_MACOSX))
-			return Constants.WS_CARBON;
+			return Constants.WS_COCOA;
 		if (osName.equals(Constants.OS_HPUX))
 			return Constants.WS_MOTIF;
 		if (osName.equals(Constants.OS_AIX))
