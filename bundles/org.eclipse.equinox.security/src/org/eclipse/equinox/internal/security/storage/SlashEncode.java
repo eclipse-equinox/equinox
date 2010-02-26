@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,6 @@ final public class SlashEncode {
 	final private static String ENCODED_BACK_SLASH = "\\5c"; //$NON-NLS-1$
 
 	static public String decode(String str) {
-		if (str == null)
-			return null;
 		if (str == null)
 			return null;
 		int size = str.length();
