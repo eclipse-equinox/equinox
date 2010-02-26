@@ -50,6 +50,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	}
 	private Hashtable proxies;
 	private URLStreamHandlerFactory parentFactory;
+	private ThreadLocal creatingProtocols = new ThreadLocal();
 
 	/**
 	 * Create the factory.
@@ -97,26 +98,49 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	 * @return a URLStreamHandler for the specific protocol.
 	 */
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-		//first check for built in handlers
-		String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
-		Class clazz = getBuiltIn(protocol, builtInHandlers, false);
-		if (clazz != null)
-			return null; // let the VM handle it
-		URLStreamHandler result = null;
-		if (isMultiplexing()) {
-			if (findAuthorizedURLStreamHandler(protocol) != null)
-				result = new MultiplexingURLStreamHandler(protocol, this);
-		} else {
-			result = createInternalURLStreamHandler(protocol);
+		// Check if we are recursing
+		if (isRecursive(protocol))
+			return null;
+		try {
+			//first check for built in handlers
+			String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
+			Class clazz = getBuiltIn(protocol, builtInHandlers, false);
+			if (clazz != null)
+				return null; // let the VM handle it
+			URLStreamHandler result = null;
+			if (isMultiplexing()) {
+				if (findAuthorizedURLStreamHandler(protocol) != null)
+					result = new MultiplexingURLStreamHandler(protocol, this);
+			} else {
+				result = createInternalURLStreamHandler(protocol);
+			}
+			// if parent is present do parent lookup
+			if (result == null && parentFactory != null)
+				result = parentFactory.createURLStreamHandler(protocol);
+			return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
+		} finally {
+			releaseRecursive(protocol);
 		}
-		// if parent is present do parent lookup
-		if (result == null && parentFactory != null)
-			result = parentFactory.createURLStreamHandler(protocol);
-		return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
+	}
+
+	private boolean isRecursive(String protocol) {
+		List protocols = (List) creatingProtocols.get();
+		if (protocols == null) {
+			protocols = new ArrayList(1);
+			creatingProtocols.set(protocols);
+		}
+		if (protocols.contains(protocol))
+			return true;
+		protocols.add(protocol);
+		return false;
+	}
+
+	private void releaseRecursive(String protocol) {
+		List protocols = (List) creatingProtocols.get();
+		protocols.remove(protocol);
 	}
 
 	public URLStreamHandler createInternalURLStreamHandler(String protocol) {
-
 		//internal protocol handlers
 		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
 		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
