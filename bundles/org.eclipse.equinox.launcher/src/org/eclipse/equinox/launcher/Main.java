@@ -321,8 +321,8 @@ public class Main {
 	private String getAlternateWS(String defaultWS) {
 		// We'll have already tried the default, so we only need to map
 		// in one direction. (default -> alternate)
-		if (Constants.WS_CARBON.equals(defaultWS))
-			return Constants.WS_COCOA;
+		if (Constants.WS_COCOA.equals(defaultWS))
+			return Constants.WS_CARBON;
 		if (Constants.WS_GTK.equals(defaultWS))
 			return Constants.WS_MOTIF;
 		if (Constants.WS_WIN32.equals(defaultWS))
