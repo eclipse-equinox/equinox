@@ -70,7 +70,7 @@ public class EclipseLog implements FrameworkLog {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
 	}
-	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());;
+	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	/** Indicates if the console messages should be printed to the console (System.out) */
 	protected boolean consoleLog = false;
