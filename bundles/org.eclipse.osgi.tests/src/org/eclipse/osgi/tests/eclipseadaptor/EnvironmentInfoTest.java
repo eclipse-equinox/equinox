@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ public class EnvironmentInfoTest extends TestCase {
 		assertEquals("1.0", Constants.OS_MACOSX, EclipseEnvironmentInfo.guessOS("Mac OS"));
 		assertEquals("1.1", Constants.OS_MACOSX, EclipseEnvironmentInfo.guessOS("Mac OS X"));
 		assertEquals("1.2", Constants.OS_MACOSX, EclipseEnvironmentInfo.guessOS("mac os x"));
-		assertEquals("2.0", Constants.WS_CARBON, EclipseEnvironmentInfo.guessWS(Constants.OS_MACOSX));
+		assertEquals("2.0", Constants.WS_COCOA, EclipseEnvironmentInfo.guessWS(Constants.OS_MACOSX));
 	}
 
 	public void testQNX() {
