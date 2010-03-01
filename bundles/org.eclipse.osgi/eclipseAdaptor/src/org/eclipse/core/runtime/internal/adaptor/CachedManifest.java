@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -45,11 +46,16 @@ public class CachedManifest extends Dictionary {
 				storageHook.getAdaptor().getFrameworkLog().log(entry);
 				return null;
 			}
+		if (manifest == null) {
+			Headers empty = new Headers(0);
+			empty.setReadOnly();
+			manifest = empty;
+			return empty;
+		}
 		return manifest;
 	}
 
 	public int size() {
-		//TODO: getManifest may return null
 		return getManifest().size();
 	}
 
@@ -58,12 +64,10 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Enumeration elements() {
-		//TODO: getManifest may return null		
 		return getManifest().elements();
 	}
 
 	public Enumeration keys() {
-		//TODO: getManifest may return null		
 		return getManifest().keys();
 	}
 
@@ -142,12 +146,10 @@ public class CachedManifest extends Dictionary {
 	}
 
 	public Object remove(Object key) {
-		//TODO: getManifest may return null		
 		return getManifest().remove(key);
 	}
 
 	public Object put(Object key, Object value) {
-		//TODO: getManifest may return null		
 		return getManifest().put(key, value);
 	}
 
