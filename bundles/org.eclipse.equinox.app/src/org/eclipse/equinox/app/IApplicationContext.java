@@ -62,6 +62,15 @@ public interface IApplicationContext {
 	public static final String APPLICATION_ARGS = "application.args"; //$NON-NLS-1$
 
 	/**
+	 * Exit object that indicates the application result will be delivered asynchronously.
+	 * This object must be returned by the method {@link IApplication#start(IApplicationContext)}
+	 * for applications which deliver a result asynchronously with the method
+	 * {@link IApplicationContext#setResult(Object)}.
+	 * @since 1.3
+	 */
+	public static final Object EXIT_ASYNC_RESULT = new Object();
+
+	/**
 	 * The arguments used for the application.  The arguments from 
 	 * {@link ApplicationDescriptor#launch(Map)} are used as the arguments
 	 * for this context when an application is launched.
@@ -124,4 +133,30 @@ public interface IApplicationContext {
 	 * @return the bundle which defines the product or <code>null</code> if none
 	 */
 	public Bundle getBrandingBundle();
+
+	/**
+	 * Sets the result of the application asynchronously.  This method can only be used
+	 * after the application's {@link IApplication#start(IApplicationContext) start} 
+	 * method has returned the value of {@link IApplicationContext#EXIT_ASYNC_RESULT}.
+	 * <p>
+	 * The specified application must be the same application instance which is 
+	 * associated with this application context.  In other word the application instance
+	 * for which {@link IApplication#start(IApplicationContext)} was called with this 
+	 * application context; otherwise an <code>IllegalArgumentException</code> is
+	 * thrown.
+	 * </p>
+	 * 
+	 * @param result the result value for the application.  May be null.
+	 * @param application the application instance associated with this application context
+	 * @throws IllegalStateException if {@link IApplicationContext#EXIT_ASYNC_RESULT} was
+	 *   not returned by the application's {@link IApplication#start(IApplicationContext) start}
+	 *   method or if the result has already been set for this application context.
+	 * @throws IllegalArgumentException if the specified application is not the same 
+	 *   application instance associated with this application context.
+	 *   
+	 * 
+	 * @since 1.3
+	 */
+	public void setResult(Object result, IApplication application);
+
 }

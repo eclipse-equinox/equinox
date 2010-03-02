@@ -47,6 +47,7 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 	private final Boolean defaultAppInstance;
 	private Object result;
 	private boolean setResult = false;
+	private boolean setAsyncResult = false;
 	private final boolean[] registrationLock = new boolean[] {true};
 
 	/*
@@ -198,25 +199,43 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 			if (tempResult == null)
 				tempResult = NULL_RESULT;
 		} finally {
-			synchronized (this) {
-				result = tempResult;
-				setResult = true;
-				application = null;
-				notifyAll();
-				// The application exited itself; notify the app context
-				setAppStatus(EclipseAppHandle.FLAG_STOPPING); // must ensure the STOPPING event is fired
-				setAppStatus(EclipseAppHandle.FLAG_STOPPED);
-			}
+			tempResult = setInternalResult(tempResult, false, null);
+
 		}
-		// only set the exit code property if this is the default application
-		if (isDefault()) {
-			int exitCode = tempResult instanceof Integer ? ((Integer) tempResult).intValue() : 0;
-			// Use the EnvironmentInfo Service to set properties
-			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
-		}
+
 		if (Activator.DEBUG)
 			System.out.println(NLS.bind(Messages.application_returned, (new String[] {getApplicationDescriptor().getApplicationId(), tempResult == null ? "null" : tempResult.toString()}))); //$NON-NLS-1$
 		return tempResult;
+	}
+
+	private synchronized Object setInternalResult(Object result, boolean isAsync, IApplication tokenApp) {
+		if (setResult)
+			throw new IllegalStateException("The result of the application is already set."); //$NON-NLS-1$
+		if (isAsync) {
+			if (!setAsyncResult)
+				throw new IllegalStateException("The application must return IApplicationContext.EXIT_ASYNC_RESULT to set asynchronous results."); //$NON-NLS-1$
+			if (application != tokenApp)
+				throw new IllegalArgumentException("The application is not the correct instance for this application context."); //$NON-NLS-1$
+		} else {
+			if (result == IApplicationContext.EXIT_ASYNC_RESULT) {
+				setAsyncResult = true;
+				return NULL_RESULT; // the result well be set with setResult
+			}
+		}
+		this.result = result;
+		setResult = true;
+		application = null;
+		notifyAll();
+		// The application exited itself; notify the app context
+		setAppStatus(EclipseAppHandle.FLAG_STOPPING); // must ensure the STOPPING event is fired
+		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
+		// only set the exit code property if this is the default application
+		if (isDefault()) {
+			int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
+			// Use the EnvironmentInfo Service to set properties
+			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
+		}
+		return result;
 	}
 
 	public void stop() {
@@ -372,5 +391,9 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		if (result == NULL_RESULT)
 			return null;
 		return result;
+	}
+
+	public void setResult(Object result, IApplication application) {
+		setInternalResult(result == null ? NULL_RESULT : result, true, application);
 	}
 }

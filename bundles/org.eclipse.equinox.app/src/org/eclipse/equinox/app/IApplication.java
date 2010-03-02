@@ -43,13 +43,16 @@ public interface IApplication {
 	public static final Integer EXIT_RELAUNCH = new Integer(24);
 
 	/**
-	 * Starts this application with the given context and returns a result.  This 
-	 * method must not exit until the application is finished and is ready to exit.
-	 * The content of the context is unchecked and should conform to the expectations of
-	 * the application being invoked.<p>
-	 * 
+	 * Starts this application with the given context and returns a result.  The content of 
+	 * the context is unchecked and should conform to the expectations of the application being 
+	 * invoked.  This method can return the value {@link IApplicationContext#EXIT_ASYNC_RESULT} if 
+	 * the application will deliver its results asynchronously with the 
+	 * {@link IApplicationContext#setResult(Object)} method; otherwise this method must not exit 
+	 * until the application is finished and is ready to exit.
+	 * <p>
 	 * Applications can return any object they like.  If an <code>Integer</code> is returned
 	 * it is treated as the program exit code if Eclipse is exiting.
+	 * </p>
 	 * <p>
 	 * Note: This method is called by the platform; it is not intended
 	 * to be called directly by clients.
@@ -58,6 +61,7 @@ public interface IApplication {
 	 * @see #EXIT_OK
 	 * @see #EXIT_RESTART
 	 * @see #EXIT_RELAUNCH
+	 * @see IApplicationContext#EXIT_ASYNC_RESULT
 	 * @param context the application context to pass to the application
 	 * @exception Exception if there is a problem running this application.
 	 */
