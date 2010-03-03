@@ -47,7 +47,7 @@ public interface IApplication {
 	 * the context is unchecked and should conform to the expectations of the application being 
 	 * invoked.  This method can return the value {@link IApplicationContext#EXIT_ASYNC_RESULT} if 
 	 * the application will deliver its results asynchronously with the 
-	 * {@link IApplicationContext#setResult(Object)} method; otherwise this method must not exit 
+	 * {@link IApplicationContext#setResult(Object, IApplication)} method; otherwise this method must not exit 
 	 * until the application is finished and is ready to exit.
 	 * <p>
 	 * Applications can return any object they like.  If an <code>Integer</code> is returned

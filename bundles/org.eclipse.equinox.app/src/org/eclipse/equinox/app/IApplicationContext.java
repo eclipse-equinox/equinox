@@ -65,7 +65,7 @@ public interface IApplicationContext {
 	 * Exit object that indicates the application result will be delivered asynchronously.
 	 * This object must be returned by the method {@link IApplication#start(IApplicationContext)}
 	 * for applications which deliver a result asynchronously with the method
-	 * {@link IApplicationContext#setResult(Object)}.
+	 * {@link IApplicationContext#setResult(Object, IApplication)}.
 	 * @since 1.3
 	 */
 	public static final Object EXIT_ASYNC_RESULT = new Object();
