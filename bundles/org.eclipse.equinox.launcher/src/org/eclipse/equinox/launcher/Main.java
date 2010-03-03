@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Anton Leherbauer (Wind River Systems) - bug 301226
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -201,6 +202,9 @@ public class Main {
 	private static final String PROP_VMARGS = "eclipse.vmargs"; //$NON-NLS-1$
 	private static final String PROP_COMMANDS = "eclipse.commands"; //$NON-NLS-1$
 	private static final String PROP_ECLIPSESECURITY = "eclipse.security"; //$NON-NLS-1$
+
+	// Suffix for location properties - see LocationManager.
+	private static final String READ_ONLY_AREA_SUFFIX = ".readOnly"; //$NON-NLS-1$
 
 	// Data mode constants for user, configuration and data locations.
 	private static final String NONE = "@none"; //$NON-NLS-1$
@@ -557,6 +561,10 @@ public class Main {
 		if (!checkVersion(System.getProperty("java.version"), System.getProperty(PROP_REQUIRED_JAVA_VERSION))) //$NON-NLS-1$
 			return;
 
+		// verify configuration location is writable
+		if (!checkConfigurationLocation(configurationLocation))
+			return;
+
 		setSecurityPolicy(bootPath);
 		// splash handling is done here, because the default case needs to know
 		// the location of the boot plugin we are going to use
@@ -649,6 +657,41 @@ public class Main {
 			// let things fail later on their own if necessary.
 			return true;
 		}
+	}
+
+	/**
+	 * Checks whether the given location can be created and is writable.
+	 * If the system property "osgi.configuration.area.readOnly" is set
+	 * the check always succeeds.
+	 * <p>Will set PROP_EXITCODE/PROP_EXITDATA accordingly if check fails.</p>
+	 * 
+	 * @param locationUrl  configuration area URL, may be <code>null</code>
+	 * @return a boolean indicating whether the checking passed 
+	 */
+	private boolean checkConfigurationLocation(URL locationUrl) {
+		if (locationUrl == null || !"file".equals(locationUrl.getProtocol())) //$NON-NLS-1$
+			return true;
+		if (Boolean.valueOf(System.getProperty(PROP_CONFIG_AREA + READ_ONLY_AREA_SUFFIX)).booleanValue()) {
+			// user wants readonly config area
+			return true;
+		}
+		File configDir = new File(locationUrl.getFile()).getAbsoluteFile();
+		if (!configDir.exists()) {
+			configDir.mkdirs();
+			if (!configDir.exists()) {
+				System.getProperties().put(PROP_EXITCODE, "15"); //$NON-NLS-1$
+				System.getProperties().put(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
+						"' could not be created.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
+				return false;
+			}
+		}
+		if (!canWrite(configDir)) {
+			System.getProperties().put(PROP_EXITCODE, "15"); //$NON-NLS-1$
+			System.getProperties().put(PROP_EXITDATA, "<title>Invalid Configuration Location</title>The configuration area at '" + configDir + //$NON-NLS-1$
+					"' is not writable.  Please choose a writable location using the '-configuration' command line option."); //$NON-NLS-1$
+			return false;
+		}
+		return true;
 	}
 
 	/**
