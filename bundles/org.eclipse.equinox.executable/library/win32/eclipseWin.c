@@ -109,6 +109,7 @@ static void sendOpenFileMessage(HWND window) {
 		SendMessage(window, msg, wParam, lParam);
 	}
 	destroySharedData(id);
+	free(id);
 }
 
 static HWND findSWTMessageWindow() {
