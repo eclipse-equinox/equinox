@@ -115,8 +115,10 @@ public class HttpRegistryManager {
 	}
 
 	public synchronized boolean addResourcesContribution(String alias, String baseName, String httpContextId, IContributor contributor) {
-		if (resources.containsKey(alias) || servlets.containsKey(alias))
-			return false; // TODO: should log this
+		if (resources.containsKey(alias) || servlets.containsKey(alias)) {
+			System.err.println("ERROR: Duplicate alias. Failed to register resource for [alias=\"" + alias + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return false;
+		}
 
 		ResourcesContribution contribution = new ResourcesContribution(alias, baseName, httpContextId, contributor);
 		resources.put(alias, contribution);
@@ -127,8 +129,10 @@ public class HttpRegistryManager {
 	}
 
 	public synchronized boolean addServletContribution(String alias, Servlet servlet, Dictionary initparams, String httpContextId, IContributor contributor) {
-		if (resources.containsKey(alias) || servlets.containsKey(alias))
-			return false; // TODO: should log this
+		if (resources.containsKey(alias) || servlets.containsKey(alias)) {
+			System.err.println("ERROR: Duplicate alias. Failed to register servlet for [alias=\"" + alias + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return false;
+		}
 
 		ServletContribution contribution = new ServletContribution(alias, servlet, initparams, httpContextId, contributor);
 		servlets.put(alias, contribution);
@@ -168,8 +172,10 @@ public class HttpRegistryManager {
 	}
 
 	public synchronized boolean addHttpContextContribution(String httpContextId, HttpContext context, IContributor contributor) {
-		if (contexts.containsKey(httpContextId))
-			return false; // TODO: should log this
+		if (contexts.containsKey(httpContextId)) {
+			System.err.println("ERROR: Duplicate HttpContextId. Failed to register HttpContext for [httpContextId=\"" + httpContextId + "\", contributor=\"" + contributor + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return false;
+		}
 
 		contexts.put(httpContextId, new HttpContextContribution(context, contributor));
 		for (Iterator it = filters.values().iterator(); it.hasNext();) {
