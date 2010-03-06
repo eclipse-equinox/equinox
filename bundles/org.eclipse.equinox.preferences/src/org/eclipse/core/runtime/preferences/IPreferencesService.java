@@ -79,6 +79,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
 	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
+	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
 	 * order, the array of contexts is consulted and if one matching the 
@@ -128,6 +133,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
+	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
 	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
@@ -179,6 +189,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
 	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
+	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
 	 * order, the array of contexts is consulted and if one matching the 
@@ -228,6 +243,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
+	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
 	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
@@ -279,6 +299,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
 	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
+	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
 	 * order, the array of contexts is consulted and if one matching the 
@@ -329,6 +354,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
 	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
+	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
 	 * order, the array of contexts is consulted and if one matching the 
@@ -378,6 +408,11 @@ public interface IPreferencesService {
 	 * <li>"/a/b//c/d" - look in the child node "a/b" for the property "c/d"
 	 * <li>"/a/b//c//d" - look in the child node "a/b" for the property "c//d"
 	 * </ul>
+	 * </p><p>
+	 * The scope look-up order is determined by the preference service default 
+	 * lookup order, not by the order of the scope contexts that are being passed in.
+	 * The context objects are only consulted to help determine which nodes to 
+	 * look in, not the order of the nodes.
 	 * </p><p>
 	 * Callers may specify an array of scope context objects to aid in the 
 	 * determination of the correct nodes. For each entry in the lookup 
