@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     David Green - fix factories with non-standard class loading (bug 200068) 
+ *     Filip Hrbek - fix thread safety problem described in bug 305863
  *******************************************************************************/
 package org.eclipse.core.internal.runtime;
 
@@ -418,9 +419,6 @@ public final class AdapterManager implements IAdapterManager {
 	}
 
 	public HashMap getFactories() {
-		// avoid the synchronize if we don't have to call it
-		if (lazyFactoryProviders.size() == 0)
-			return factories;
 		synchronized (lazyFactoryProviders) {
 			while (lazyFactoryProviders.size() > 0) {
 				IAdapterManagerProvider provider = (IAdapterManagerProvider) lazyFactoryProviders.remove(0);
