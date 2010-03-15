@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
-import org.eclipse.equinox.internal.ds.Messages;
-
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -743,6 +741,22 @@ public class ServiceComponent implements Externalizable, Component {
 		componentProps.addElement(scp);
 	}
 
+	/**
+	 * Return the ServiceComponentProp object created for this component. Note there might be more than one SCP objects. 
+	 * This method will return always the first one
+	 * @return the ServiceComponentProp object created for this component 
+	 */
+	public ServiceComponentProp getServiceComponentProp() {
+		if (componentProps != null) {
+			synchronized (componentProps) {
+				if (!componentProps.isEmpty()) {
+					return (ServiceComponentProp) componentProps.elementAt(0);
+				}
+			}
+		}
+		return null;
+	}
+
 	public boolean isImmediate() {
 		return immediate;
 	}
@@ -805,7 +819,7 @@ public class ServiceComponent implements Externalizable, Component {
 
 	public long getId() {
 		if (componentProps != null && !componentProps.isEmpty()) {
-			//get the first built compoent's ID 
+			//get the first built component's ID 
 			return ((Long) ((ServiceComponentProp) componentProps.elementAt(0)).properties.get(ComponentConstants.COMPONENT_ID)).longValue();
 		}
 		//The component is not yet given an ID by the SRC because it is not active
@@ -843,7 +857,7 @@ public class ServiceComponent implements Externalizable, Component {
 	public int getState() {
 		//check if there is at least one SCP created and return its state
 		if (componentProps != null && !componentProps.isEmpty()) {
-			//get the first compoent's state
+			//get the first component's state
 			return ((ServiceComponentProp) componentProps.elementAt(0)).getState();
 		}
 		//return the current state of the component

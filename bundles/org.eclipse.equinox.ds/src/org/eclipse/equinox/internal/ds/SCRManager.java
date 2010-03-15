@@ -344,13 +344,11 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				if (fpid == null) {
 					// there is only one SCP for this SC
 					boolean requiresRestart = true;
-					if (sc.namespace11) {
-						if (sc.componentProps != null && sc.modifyMethodName != "") { //$NON-NLS-1$
-							ServiceComponentProp scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
-							if (scp.isBuilt()) {
-								//process only built components
-								requiresRestart = processConfigurationChange(scp, config[0]);
-							}
+					if (sc.namespace11 && sc.modifyMethodName != "") { //$NON-NLS-1$
+						ServiceComponentProp scp = sc.getServiceComponentProp();
+						if (scp != null && scp.isBuilt()) {
+							//process only built components
+							requiresRestart = processConfigurationChange(scp, config[0]);
 						}
 					}
 					if (requiresRestart) {
@@ -372,8 +370,12 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 					ServiceComponentProp scp = sc.getComponentPropByPID(pid);
 
 					// if only the no-props scp exists, replace it
-					if (scp == null && sc.componentProps != null && sc.componentProps.size() == 1 && (((ServiceComponentProp) sc.componentProps.elementAt(0)).getProperties().get(Constants.SERVICE_PID) == null)) {
-						scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
+					if (scp == null && sc.componentProps != null) {
+						synchronized (sc.componentProps) {
+							if (sc.componentProps.size() == 1 && (((ServiceComponentProp) sc.componentProps.elementAt(0)).getProperties().get(Constants.SERVICE_PID) == null)) {
+								scp = (ServiceComponentProp) sc.componentProps.elementAt(0);
+							}
+						}
 					}
 					boolean requiresRestart = true;
 					if (sc.namespace11 && sc.modifyMethodName != "" && scp != null) { //$NON-NLS-1$
