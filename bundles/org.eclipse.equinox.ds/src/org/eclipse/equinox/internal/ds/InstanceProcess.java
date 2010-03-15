@@ -614,6 +614,9 @@ public class InstanceProcess {
 		getLock(scp);
 		long start = 0l;
 		try {
+			if (!scp.isBuilt()) {
+				return;
+			}
 			if (Activator.PERF) {
 				start = System.currentTimeMillis();
 				Activator.log.info("[DS perf] Modifying component " + scp.name); //$NON-NLS-1$
