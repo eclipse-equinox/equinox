@@ -1018,7 +1018,7 @@ public class Main {
 				matches.add(candidates[i]);
 		}
 		String[] names = (String[]) matches.toArray(new String[matches.size()]);
-		int result = findMax(names);
+		int result = findMax(target, names);
 		if (result == -1)
 			return null;
 		File candidate = new File(start, names[result]);
@@ -1076,15 +1076,16 @@ public class Main {
 		return searchFor(target, start);
 	}
 
-	protected int findMax(String[] candidates) {
+	protected int findMax(String prefix, String[] candidates) {
 		int result = -1;
 		Object maxVersion = null;
 		for (int i = 0; i < candidates.length; i++) {
 			String name = (candidates[i] != null) ? candidates[i] : ""; //$NON-NLS-1$
 			String version = ""; //$NON-NLS-1$ // Note: directory with version suffix is always > than directory without version suffix
-			int index = name.indexOf('_');
-			if (index != -1)
-				version = name.substring(index + 1);
+			if (prefix == null)
+				version = name; //webstart just passes in versions
+			else if (name.startsWith(prefix + "_")) //$NON-NLS-1$
+				version = name.substring(prefix.length() + 1); //prefix_version
 			Object currentVersion = getVersionElements(version);
 			if (maxVersion == null) {
 				result = i;
