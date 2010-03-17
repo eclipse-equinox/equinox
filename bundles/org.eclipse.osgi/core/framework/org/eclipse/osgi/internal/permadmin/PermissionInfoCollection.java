@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,20 +53,28 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	public boolean implies(Permission perm) {
 		if (hasAllPermission)
 			return true;
+		Class permClass = perm.getClass();
 		PermissionCollection collection;
 		synchronized (cachedPermissionCollections) {
-			Class permClass = perm.getClass();
 			collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
-			if (collection == null) {
-				collection = perm.newPermissionCollection();
-				if (collection == null)
-					collection = new PermissionsHash();
-				try {
-					addPermissions(collection, permClass);
-				} catch (Exception e) {
-					throw (SecurityException) new SecurityException("Exception creating permissions: " + e.getClass().getName() + ": " + e.getMessage()).initCause(e); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				cachedPermissionCollections.put(permClass, collection);
+		}
+		// must populate the collection outside of the lock to prevent class loader deadlock
+		if (collection == null) {
+			collection = perm.newPermissionCollection();
+			if (collection == null)
+				collection = new PermissionsHash();
+			try {
+				addPermissions(collection, permClass);
+			} catch (Exception e) {
+				throw (SecurityException) new SecurityException("Exception creating permissions: " + e.getClass().getName() + ": " + e.getMessage()).initCause(e); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			synchronized (cachedPermissionCollections) {
+				// check to see if another thread beat this thread at adding the collection
+				PermissionCollection exists = (PermissionCollection) cachedPermissionCollections.get(permClass);
+				if (exists != null)
+					collection = exists;
+				else
+					cachedPermissionCollections.put(permClass, collection);
 			}
 		}
 		return collection.implies(perm);
