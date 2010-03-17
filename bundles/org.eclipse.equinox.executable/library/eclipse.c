@@ -681,7 +681,7 @@ static void processDefaultAction(int argc, _TCHAR* argv[]) {
 
 	if (_tcsicmp(defaultAction, ACTION_OPENFILE) == 0) {
 		int newArgc = argc + 1;
-		_TCHAR ** newArgv = malloc(newArgc * sizeof(_TCHAR*));
+		_TCHAR ** newArgv = malloc((newArgc + 1) * sizeof(_TCHAR*));
 		newArgv[0] = argv[0];
 		newArgv[1] = OPENFILE;
 		memcpy(&newArgv[2], &argv[1], argc * sizeof(_TCHAR*));
