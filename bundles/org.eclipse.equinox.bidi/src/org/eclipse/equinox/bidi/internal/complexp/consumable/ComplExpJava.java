@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.complexp.consumable;
 
-import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
-
 import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
 
 /**
  *  <code>ComplExpJava</code> is a processor for complex expressions
@@ -35,7 +34,7 @@ import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
  */
 public class ComplExpJava extends ComplExpBasic {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String operators = "[](){}.+-<>=~!&*/%^|?:,;\t";
+	static final String operators = "[](){}.+-<>=~!&*/%^|?:,;\t"; //$NON-NLS-1$
 	static String lineSep;
 
 	/**
@@ -46,23 +45,23 @@ public class ComplExpJava extends ComplExpBasic {
 		super(operators, 4);
 		// TBD use bundle properties
 		if (lineSep == null)
-			lineSep = System.getProperty("line.separator", "\n");
+			lineSep = System.getProperty("line.separator", "\n"); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	/**
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
+	protected int indexOfSpecial(int whichSpecial, String srcText, int fromIndex) {
 		switch (whichSpecial) {
 			case 0 : /* space */
-				return leanText.indexOf(' ', fromIndex);
+				return srcText.indexOf(' ', fromIndex);
 			case 1 : /* literal */
-				return leanText.indexOf('"', fromIndex);
+				return srcText.indexOf('"', fromIndex);
 			case 2 : /* slash-aster comment */
-				return leanText.indexOf("/*", fromIndex);
+				return srcText.indexOf("/*", fromIndex); //$NON-NLS-1$
 			case 3 : /* slash-slash comment */
-				return leanText.indexOf("//", fromIndex);
+				return srcText.indexOf("//", fromIndex); //$NON-NLS-1$
 		}
 		// we should never get here
 		return -1;
@@ -72,14 +71,14 @@ public class ComplExpJava extends ComplExpBasic {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		int loc, cnt, i;
 
 		processOperator(operLocation);
 		switch (whichSpecial) {
 			case 0 : /* space */
 				operLocation++;
-				while (operLocation < leanText.length() && leanText.charAt(operLocation) == ' ') {
+				while (operLocation < srcText.length() && srcText.charAt(operLocation) == ' ') {
 					setDirProp(operLocation, WS);
 					operLocation++;
 				}
@@ -87,10 +86,10 @@ public class ComplExpJava extends ComplExpBasic {
 			case 1 : /* literal */
 				loc = operLocation + 1;
 				while (true) {
-					loc = leanText.indexOf('"', loc);
+					loc = srcText.indexOf('"', loc);
 					if (loc < 0)
-						return leanText.length();
-					for (cnt = 0, i = loc - 1; leanText.charAt(i) == '\\'; i--) {
+						return srcText.length();
+					for (cnt = 0, i = loc - 1; srcText.charAt(i) == '\\'; i--) {
 						cnt++;
 					}
 					loc++;
@@ -102,16 +101,16 @@ public class ComplExpJava extends ComplExpBasic {
 					loc = 0; // initial state from previous line
 				else
 					loc = operLocation + 2; // skip the opening slash-aster
-				loc = leanText.indexOf("*/", loc);
+				loc = srcText.indexOf("*/", loc); //$NON-NLS-1$
 				if (loc < 0) {
 					state = 2;
-					return leanText.length();
+					return srcText.length();
 				}
 				return loc + 2;
 			case 3 : /* slash-slash comment */
-				loc = leanText.indexOf(lineSep, operLocation + 2);
+				loc = srcText.indexOf(lineSep, operLocation + 2);
 				if (loc < 0)
-					return leanText.length();
+					return srcText.length();
 				return loc + lineSep.length();
 		}
 		// we should never get here

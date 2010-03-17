@@ -62,16 +62,16 @@ public class ComplExpDelimsEsc extends ComplExpDelims {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		processOperator(operLocation);
 		int loc = operLocation + 1;
 		char delim = delims[(whichSpecial * 2) + 1];
 		while (true) {
-			loc = leanText.indexOf(delim, loc);
+			loc = srcText.indexOf(delim, loc);
 			if (loc < 0)
-				return leanText.length();
+				return srcText.length();
 			int cnt = 0;
-			for (int i = loc - 1; leanText.charAt(i) == '\\'; i--) {
+			for (int i = loc - 1; srcText.charAt(i) == '\\'; i--) {
 				cnt++;
 			}
 			loc++;

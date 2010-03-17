@@ -11,10 +11,6 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 import org.eclipse.equinox.bidi.complexp.IBiDiProcessor;
 import org.eclipse.equinox.bidi.complexp.StringProcessor;
@@ -24,414 +20,419 @@ import org.eclipse.equinox.bidi.complexp.ComplExpUtil;
  * Tests most public methods of ComplExpBasic
  */
 
-public class MethodsTest extends TestCase {
-    public static Test suite() {
-        return new TestSuite(MethodsTest.class);
-    }
+public class MethodsTest extends ComplExpTestBase {
 
-    public MethodsTest() {
-        super();
-    }
+	final static int LTR = IComplExpProcessor.DIRECTION_LTR;
+	final static int RTL = IComplExpProcessor.DIRECTION_RTL;
 
-    public MethodsTest(String name) {
-        super(name);
-    }
+	IComplExpProcessor processor;
 
-    final static int LTR = IComplExpProcessor.DIRECTION_LTR;
-    final static int RTL = IComplExpProcessor.DIRECTION_RTL;
+	private void doTestTools() {
 
-    static void doTestState(IComplExpProcessor complexp)
-    {
-        String data, lean, full, model;
-        int state;
+		// This method tests utility methods used by the JUnits
+		String data = "56789ABCDEFGHIJKLMNOPQRSTUVWXYZ~#@&><^|`";
+		String text = toUT16(data);
+		String dat2 = toPseudo(text);
+		assertEquals(data, dat2);
 
-        data = "A=B+C;/* D=E+F;";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "A@=B@+C@;/* D=E+F;";
-        Tools.verify("full1", full, model);
-        state = complexp.getFinalState();
-        System.out.println("    state=" + state);
-        data = "A=B+C; D=E+F;";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean, state);
-        model = "A=B+C; D=E+F;";
-        Tools.verify("full2", full, model);
-        state = complexp.getFinalState();
-        System.out.println("    state=" + state);
-        data = "A=B+C;*/ D=E+F;";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean, state);
-        model = "A=B+C;*/@ D@=E@+F;";
-        Tools.verify("full3", full, model);
-    }
+		text = toPseudo(data);
+		assertEquals("56789abcdefghijklmnopqrstuvwxyz~#@&><^|`", text);
 
-    static void doTestOrientation()
-    {
-        IComplExpProcessor complexp;
-        int orient;
+		int[] arA = new int[] { 1, 2 };
+		int[] arB = new int[] { 3, 4, 5 };
+		assertFalse(arrays_equal(arA, arB));
 
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        orient = complexp.recallOrientation();
-// TBD: the following test cannot succeed with the current implementation.
-//      it will need allocating separate data for each processor use.
-//        Tools.verify("orient #1", orient, IComplExpProcessor.ORIENT_LTR);
+		assertTrue(arrays_equal(arA, arA));
 
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_IGNORE);
-        orient = complexp.recallOrientation();
-        Tools.verify("orient #2", orient, IComplExpProcessor.ORIENT_IGNORE);
+		arB = new int[] { 3, 4 };
+		assertFalse(arrays_equal(arA, arB));
 
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_RTL);
-        orient = complexp.recallOrientation();
-        complexp.leanToFullText("--!**");
-        Tools.verify("orient #3", orient, IComplExpProcessor.ORIENT_CONTEXTUAL_RTL);
+		int[][] ar2A = new int[][] { { 1 }, { 1, 2 }, { 1, 2, 3 } };
+		int[][] ar2B = new int[][] { { 1 }, { 1, 2 } };
+		assertTrue(arrays2_equal(ar2A, ar2A));
 
-        complexp.assumeOrientation(9999);
-        orient = complexp.recallOrientation();
-        complexp.leanToFullText("--!**");
-        Tools.verify("orient #4", orient, IComplExpProcessor.ORIENT_UNKNOWN);
-    }
+		assertFalse(arrays2_equal(ar2A, ar2B));
 
-    static void doTestOrient(IComplExpProcessor complexp, String data,
-                             String resLTR, String resRTL, String resCon)
-    {
-        String full, lean;
+		ar2B = new int[][] { { 1 }, { 1, 2 }, { 1, 2, 3, 4 } };
+		assertFalse(arrays2_equal(ar2A, ar2B));
 
-        System.out.println();
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
-        full = complexp.leanToFullText(lean);
-        Tools.verify("LTR full", full, resLTR);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
-        full = complexp.leanToFullText(lean);
-        Tools.verify("RTL full", full, resRTL);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_RTL);
-        full = complexp.leanToFullText(lean);
-        Tools.verify("CON full", full, resCon);
-    }
+		ar2B = new int[][] { { 1 }, { 1, 2 }, { 1, 2, 4 } };
+		assertFalse(arrays2_equal(ar2A, ar2B));
 
-    static void doTestScripts(IComplExpProcessor complexp)
-    {
-        boolean flag;
-        flag = complexp.handlesArabicScript();
-        Tools.verify("Handles Arabic 1", flag, true);
-        flag = complexp.handlesHebrewScript();
-        Tools.verify("Handles Hebrew 1", flag, true);
+		text = array_display(null);
+		assertEquals("null", text);
 
-        complexp.selectBidiScript(false, false);
-        flag = complexp.handlesArabicScript();
-        Tools.verify("Handles Arabic 2", flag, false);
-        flag = complexp.handlesHebrewScript();
-        Tools.verify("Handles Hebrew 2", flag, false);
-        doTestOrient(complexp, "BCD,EF", "BCD,EF", ">@BCD,EF@^", "@BCD,EF");
-        complexp.selectBidiScript(true, false);
-        flag = complexp.handlesArabicScript();
-        Tools.verify("Handles Arabic 3", flag, true);
-        flag = complexp.handlesHebrewScript();
-        Tools.verify("Handles Hebrew 3", flag, false);
-        doTestOrient(complexp, "d,EF", "d,EF", ">@d,EF@^", "d,EF");
-        doTestOrient(complexp, "#,eF", "#,eF", ">@#,eF@^", "@#,eF");
-        doTestOrient(complexp, "#,12", "#@,12", ">@#@,12@^", "@#@,12");
-        doTestOrient(complexp, "#,##", "#@,##", ">@#@,##@^", "@#@,##");
-        doTestOrient(complexp, "#,89", "#@,89", ">@#@,89@^", "@#@,89");
-        doTestOrient(complexp, "#,ef", "#,ef", ">@#,ef@^", "@#,ef");
-        doTestOrient(complexp, "#,", "#,", ">@#,@^", "@#,");
-        doTestOrient(complexp, "9,ef", "9,ef", ">@9,ef@^", "9,ef");
-        doTestOrient(complexp, "9,##", "9@,##", ">@9@,##@^", "9@,##");
-        doTestOrient(complexp, "7,89", "7@,89", ">@7@,89@^", "7@,89");
-        doTestOrient(complexp, "7,EF", "7,EF", ">@7,EF@^", "@7,EF");
-        doTestOrient(complexp, "BCD,EF", "BCD,EF", ">@BCD,EF@^", "@BCD,EF");
+		text = array2_display(null);
+		assertEquals("null", text);
+	}
 
-        complexp.selectBidiScript(false, true);
-        flag = complexp.handlesArabicScript();
-        Tools.verify("Handles Arabic 4", flag, false);
-        flag = complexp.handlesHebrewScript();
-        Tools.verify("Handles Hebrew 4", flag, true);
-        doTestOrient(complexp, "BCd,EF", "BCd,EF", ">@BCd,EF@^", "@BCd,EF");
-        doTestOrient(complexp, "BCD,eF", "BCD,eF", ">@BCD,eF@^", "@BCD,eF");
-        doTestOrient(complexp, "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
-        doTestOrient(complexp, "BCD,12", "BCD@,12", ">@BCD@,12@^", "@BCD@,12");
-        doTestOrient(complexp, "BCD,", "BCD,", ">@BCD,@^", "@BCD,");
+	private void doTestState() {
+		String data, lean, full, model;
+		int state;
 
-        complexp.selectBidiScript(true, true);
-        doTestOrient(complexp, "123,45|67", "123,45|67", ">@123,45|67@^", "@123,45|67");
-        doTestOrient(complexp, "5,e", "5,e", ">@5,e@^", "5,e");
-        doTestOrient(complexp, "5,#", "5@,#", ">@5@,#@^", "5@,#");
-        doTestOrient(complexp, "5,6", "5@,6", ">@5@,6@^", "5@,6");
-        doTestOrient(complexp, "5,D", "5@,D", ">@5@,D@^", "5@,D");
-        doTestOrient(complexp, "5,--", "5,--", ">@5,--@^", "@5,--");
-    }
+		data = "A=B+C;/* D=E+F;";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "A@=B@+C@;/* D=E+F;";
+		assertEquals("full1", model, toPseudo(full));
+		state = processor.getFinalState();
+		data = "A=B+C; D=E+F;";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean, state);
+		model = "A=B+C; D=E+F;";
+		assertEquals("full2", model, toPseudo(full));
+		state = processor.getFinalState();
+		data = "A=B+C;*/ D=E+F;";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean, state);
+		model = "A=B+C;*/@ D@=E@+F;";
+		assertEquals("full3", model, toPseudo(full));
+	}
 
-    static void doTestLeanOffsets(IComplExpProcessor complexp)
-    {
-        String lean, data;
-        int state;
-        int[] offsets;
-        int[] model;
+	private void doTestOrientation() {
+		int orient;
 
-        data = "A=B+C;/* D=E+F;";
-        System.out.println(">>> text1=" + data);
-        lean = Tools.toUT16(data);
-        offsets = complexp.leanBidiCharOffsets(lean);
-        model = new int[]{1, 3, 5};
-        Tools.verify("leanBidiCharOffsets()", offsets, model);
-        state = complexp.getFinalState();
-        System.out.println("    state=" + state);
-        data = "A=B+C;*/ D=E+F;";
-        System.out.println(">>> text2=" + data);
-        lean = Tools.toUT16(data);
-        offsets = complexp.leanBidiCharOffsets(lean, state);
-        model = new int[]{8, 10, 12};
-        Tools.verify("leanBidiCharOffsets() #2", offsets, model);
-        System.out.println(">>> text3=" + data);
-        offsets = complexp.leanBidiCharOffsets();
-        model = new int[]{8, 10, 12};
-        Tools.verify("leanBidiCharOffsets() #3", offsets, model);
-    }
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		orient = processor.recallOrientation();
+		// TBD: the following test cannot succeed with the current
+		// implementation.
+		// it will need allocating separate data for each processor use.
+		// assertEquals("orient #1", IComplExpProcessor.ORIENT_LTR, orient);
 
-    static void doTestFullOffsets(IComplExpProcessor complexp, String data,
-                                  int[] resLTR, int[] resRTL, int[] resCon)
-    {
-        String full, lean;
-        int[] offsets;
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_IGNORE);
+		orient = processor.recallOrientation();
+		assertEquals("orient #2", IComplExpProcessor.ORIENT_IGNORE, orient);
 
-        System.out.println();
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
-        full = complexp.leanToFullText(lean);
-        System.out.println("LTR full=" + Tools.toPseudo(full));
-        offsets = complexp.fullBidiCharOffsets();
-        Tools.verify("fullBidiCharOffsets() LTR", offsets, resLTR);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
-        full = complexp.leanToFullText(lean);
-        System.out.println("RTL full=" + Tools.toPseudo(full));
-        offsets = complexp.fullBidiCharOffsets();
-        Tools.verify("fullBidiCharOffsets() RTL", offsets, resRTL);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_LTR);
-        full = complexp.leanToFullText(lean);
-        System.out.println("CON full=" + Tools.toPseudo(full));
-        offsets = complexp.fullBidiCharOffsets();
-        Tools.verify("fullBidiCharOffsets() CON", offsets, resCon);
-    }
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_RTL);
+		orient = processor.recallOrientation();
+		processor.leanToFullText("--!**");
+		assertEquals("orient #3", IComplExpProcessor.ORIENT_CONTEXTUAL_RTL,
+				orient);
 
-    static void doTestMirrored()
-    {
-        IComplExpProcessor complexp;
-        boolean mirrored;
+		processor.assumeOrientation(9999);
+		orient = processor.recallOrientation();
+		processor.leanToFullText("--!**");
+		assertEquals("orient #4", IComplExpProcessor.ORIENT_UNKNOWN, orient);
+	}
 
-        mirrored = ComplExpUtil.isMirroredDefault();
-        Tools.verify("mirrored #1", mirrored, false);
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        mirrored = complexp.isMirrored();
-        Tools.verify("mirrored #2", mirrored, false);
-        ComplExpUtil.assumeMirroredDefault(true);
-        mirrored = ComplExpUtil.isMirroredDefault();
-        Tools.verify("mirrored #3", mirrored, true);
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        mirrored = complexp.isMirrored();
-// TBD: the following test cannot succeed with the current implementation.
-//      it will need allocating separate data for each processor use.
-//        Tools.verify("mirrored #4", mirrored, true);
-        complexp.assumeMirrored(false);
-        mirrored = complexp.isMirrored();
-        Tools.verify("mirrored #5", mirrored, false);
-    }
+	private void doTestOrient(String label, String data, String resLTR,
+			String resRTL, String resCon) {
+		String full, lean;
 
-    static void doTestDirection()
-    {
-        IComplExpProcessor complexp;
-        int[][] dir;
-        int[][] modir;
-        String data, lean, full, model;
+		lean = toUT16(data);
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
+		full = processor.leanToFullText(lean);
+		assertEquals(label + "LTR full", resLTR, toPseudo(full));
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
+		full = processor.leanToFullText(lean);
+		assertEquals("label + RTL full", resRTL, toPseudo(full));
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_RTL);
+		full = processor.leanToFullText(lean);
+		assertEquals(label + "CON full", resCon, toPseudo(full));
+	}
 
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        dir = complexp.getDirection();
-        modir = new int[][]{{LTR,LTR},{LTR,LTR}};
-        Tools.verify("direction #1", dir, modir);
+	private void doTestScripts() {
+		boolean flag;
+		flag = processor.handlesArabicScript();
+		assertTrue("Handles Arabic 1", flag);
+		flag = processor.handlesHebrewScript();
+		assertTrue("Handles Hebrew 1", flag);
 
-        complexp.setDirection(RTL);
-        dir = complexp.getDirection();
-        modir = new int[][]{{RTL,RTL},{RTL,RTL}};
-        Tools.verify("direction #2", dir, modir);
+		processor.selectBidiScript(false, false);
+		flag = processor.handlesArabicScript();
+		assertFalse("Handles Arabic 2", flag);
+		flag = processor.handlesHebrewScript();
+		assertFalse("Handles Hebrew 2", flag);
+		doTestOrient("Scripts #1 ", "BCD,EF", "BCD,EF", ">@BCD,EF@^", "@BCD,EF");
+		processor.selectBidiScript(true, false);
+		flag = processor.handlesArabicScript();
+		assertTrue("Handles Arabic 3", flag);
+		flag = processor.handlesHebrewScript();
+		assertFalse("Handles Hebrew 3", flag);
+		doTestOrient("Scripts #2 ", "d,EF", "d,EF", ">@d,EF@^", "d,EF");
+		doTestOrient("Scripts #3 ", "#,eF", "#,eF", ">@#,eF@^", "@#,eF");
+		doTestOrient("Scripts #4 ", "#,12", "#@,12", ">@#@,12@^", "@#@,12");
+		doTestOrient("Scripts #5 ", "#,##", "#@,##", ">@#@,##@^", "@#@,##");
+		doTestOrient("Scripts #6 ", "#,89", "#@,89", ">@#@,89@^", "@#@,89");
+		doTestOrient("Scripts #7 ", "#,ef", "#,ef", ">@#,ef@^", "@#,ef");
+		doTestOrient("Scripts #8 ", "#,", "#,", ">@#,@^", "@#,");
+		doTestOrient("Scripts #9 ", "9,ef", "9,ef", ">@9,ef@^", "9,ef");
+		doTestOrient("Scripts #10 ", "9,##", "9@,##", ">@9@,##@^", "9@,##");
+		doTestOrient("Scripts #11 ", "7,89", "7@,89", ">@7@,89@^", "7@,89");
+		doTestOrient("Scripts #12 ", "7,EF", "7,EF", ">@7,EF@^", "@7,EF");
+		doTestOrient("Scripts #13 ", "BCD,EF", "BCD,EF", ">@BCD,EF@^",
+				"@BCD,EF");
 
-        complexp.setDirection(LTR, RTL);
-        dir = complexp.getDirection();
-        modir = new int[][]{{LTR,RTL},{LTR,RTL}};
-        Tools.verify("direction #3", dir, modir);
+		processor.selectBidiScript(false, true);
+		flag = processor.handlesArabicScript();
+		assertFalse("Handles Arabic 4", flag);
+		flag = processor.handlesHebrewScript();
+		assertTrue("Handles Hebrew 4", flag);
+		doTestOrient("Scripts #14 ", "BCd,EF", "BCd,EF", ">@BCd,EF@^",
+				"@BCd,EF");
+		doTestOrient("Scripts #15 ", "BCD,eF", "BCD,eF", ">@BCD,eF@^",
+				"@BCD,eF");
+		doTestOrient("Scripts #16 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^",
+				"@BCD@,EF");
+		doTestOrient("Scripts #17 ", "BCD,12", "BCD@,12", ">@BCD@,12@^",
+				"@BCD@,12");
+		doTestOrient("Scripts #18 ", "BCD,", "BCD,", ">@BCD,@^", "@BCD,");
 
-        complexp.setArabicDirection(RTL);
-        dir = complexp.getDirection();
-        modir = new int[][]{{RTL,RTL},{LTR,RTL}};
-        Tools.verify("direction #4", dir, modir);
+		processor.selectBidiScript(true, true);
+		doTestOrient("Scripts #19 ", "123,45|67", "123,45|67", ">@123,45|67@^",
+				"@123,45|67");
+		doTestOrient("Scripts #20 ", "5,e", "5,e", ">@5,e@^", "5,e");
+		doTestOrient("Scripts #21 ", "5,#", "5@,#", ">@5@,#@^", "5@,#");
+		doTestOrient("Scripts #22 ", "5,6", "5@,6", ">@5@,6@^", "5@,6");
+		doTestOrient("Scripts #23 ", "5,D", "5@,D", ">@5@,D@^", "5@,D");
+		doTestOrient("Scripts #24 ", "5,--", "5,--", ">@5,--@^", "@5,--");
+	}
 
-        complexp.setArabicDirection(RTL,LTR);
-        dir = complexp.getDirection();
-        modir = new int[][]{{RTL,LTR},{LTR,RTL}};
-        Tools.verify("direction #5", dir, modir);
+	private void doTestLeanOffsets() {
+		String lean, data, label;
+		int state;
+		int[] offsets;
+		int[] model;
 
-        complexp.setHebrewDirection(RTL);
-        dir = complexp.getDirection();
-        modir = new int[][]{{RTL,LTR},{RTL,RTL}};
-        Tools.verify("direction #6", dir, modir);
+		data = "A=B+C;/* D=E+F;";
+		lean = toUT16(data);
+		offsets = processor.leanBidiCharOffsets(lean);
+		model = new int[] { 1, 3, 5 };
+		label = "leanBidiCharOffsets() #1 expected=" + array_display(model)
+				+ " result=" + array_display(offsets);
+		assertTrue(label, arrays_equal(model, offsets));
+		state = processor.getFinalState();
+		data = "A=B+C;*/ D=E+F;";
+		lean = toUT16(data);
+		offsets = processor.leanBidiCharOffsets(lean, state);
+		model = new int[] { 8, 10, 12 };
+		label = "leanBidiCharOffsets() #2 expected=" + array_display(model)
+				+ " result=" + array_display(offsets);
+		assertTrue(label, arrays_equal(model, offsets));
+		offsets = processor.leanBidiCharOffsets();
+		model = new int[] { 8, 10, 12 };
+		label = "leanBidiCharOffsets() #3 expected=" + array_display(model)
+				+ " result=" + array_display(offsets);
+		assertTrue(label, arrays_equal(model, offsets));
+	}
 
-        complexp.setHebrewDirection(RTL, LTR);
-        dir = complexp.getDirection();
-        modir = new int[][]{{RTL,LTR},{RTL,LTR}};
-        Tools.verify("direction #7", dir, modir);
+	private void doTestFullOffsets(String label, String data, int[] resLTR,
+			int[] resRTL, int[] resCon) {
+		String full, lean, msg;
+		int[] offsets;
 
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.EMAIL);
-        complexp.assumeMirrored(false);
-        complexp.setArabicDirection(LTR,RTL);
-        complexp.setHebrewDirection(LTR, LTR);
-        data = "#ABC.#DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "#ABC@.#DEF@:HOST.com";
-        Tools.verify("full", full, model);
+		lean = toUT16(data);
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
+		full = processor.leanToFullText(lean);
+		// the following line avoids a compiler warning about full never being
+		// read
+		full += "";
+		offsets = processor.fullBidiCharOffsets();
+		msg = label + "LTR expected=" + array_display(resLTR) + " result="
+				+ array_display(offsets);
+		assertTrue(msg, arrays_equal(resLTR, offsets));
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
+		full = processor.leanToFullText(lean);
+		offsets = processor.fullBidiCharOffsets();
+		msg = label + "RTL expected=" + array_display(resRTL) + " result="
+				+ array_display(offsets);
+		assertTrue(msg, arrays_equal(resRTL, offsets));
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_CONTEXTUAL_LTR);
+		full = processor.leanToFullText(lean);
+		offsets = processor.fullBidiCharOffsets();
+		msg = label + "CON expected=" + array_display(resCon) + " result="
+				+ array_display(offsets);
+		assertTrue(msg, arrays_equal(resCon, offsets));
+	}
 
-        data = "ABC.DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "ABC@.DEF@:HOST.com";
-        Tools.verify("full", full, model);
+	private void doTestMirrored() {
+		boolean mirrored;
 
-        complexp.assumeMirrored(true);
-        data = "#ABC.#DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "<&#ABC.#DEF:HOST.com&^";
-        Tools.verify("full", full, model);
+		mirrored = ComplExpUtil.isMirroredDefault();
+		assertFalse("mirrored #1", mirrored);
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		mirrored = processor.isMirrored();
+		assertFalse("mirrored #2", mirrored);
+		ComplExpUtil.assumeMirroredDefault(true);
+		mirrored = ComplExpUtil.isMirroredDefault();
+		assertTrue("mirrored #3", mirrored);
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		mirrored = processor.isMirrored();
+		// TBD: the following test cannot succeed with the current
+		// implementation.
+		// it will need allocating separate data for each processor use.
+		// assertTrue("mirrored #4", mirrored);
+		processor.assumeMirrored(false);
+		mirrored = processor.isMirrored();
+		assertFalse("mirrored #5", mirrored);
+	}
 
-        data = "#ABc.#DEF:HOSt.COM";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "<&#ABc.#DEF:HOSt.COM&^";
-        Tools.verify("full", full, model);
+	private void doTestDirection() {
+		int[][] dir;
+		int[][] modir;
+		String data, lean, full, model, msg;
 
-        data = "#ABc.#DEF:HOSt.";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "<&#ABc.#DEF:HOSt.&^";
-        Tools.verify("full", full, model);
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		dir = processor.getDirection();
+		modir = new int[][] { { LTR, LTR }, { LTR, LTR } };
+		msg = "TestDirection #1 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        data = "ABC.DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "ABC@.DEF@:HOST.com";
-        Tools.verify("full", full, model);
+		processor.setDirection(RTL);
+		dir = processor.getDirection();
+		modir = new int[][] { { RTL, RTL }, { RTL, RTL } };
+		msg = "TestDirection #2 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        data = "--.---:----";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "--.---:----";
-        Tools.verify("full", full, model);
+		processor.setDirection(LTR, RTL);
+		dir = processor.getDirection();
+		modir = new int[][] { { LTR, RTL }, { LTR, RTL } };
+		msg = "TestDirection #3 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        data = "ABC.|DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "ABC.|DEF@:HOST.com";
-        Tools.verify("full", full, model);
+		processor.setArabicDirection(RTL);
+		dir = processor.getDirection();
+		modir = new int[][] { { RTL, RTL }, { LTR, RTL } };
+		msg = "TestDirection #4 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
-        data = "#ABc.|#DEF:HOST.com";
-        System.out.println(">>> text=" + data);
-        lean = Tools.toUT16(data);
-        full = complexp.leanToFullText(lean);
-        model = "#ABc.|#DEF:HOST.com";
-        Tools.verify("full", full, model);
-    }
+		processor.setArabicDirection(RTL, LTR);
+		dir = processor.getDirection();
+		modir = new int[][] { { RTL, LTR }, { LTR, RTL } };
+		msg = "TestDirection #5 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-    public static void testMethods() {
-        IComplExpProcessor complexp;
+		processor.setHebrewDirection(RTL);
+		dir = processor.getDirection();
+		modir = new int[][] { { RTL, LTR }, { RTL, RTL } };
+		msg = "TestDirection #6 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        Tools.separ("MethodsTest");
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test leanToFullText with initial state  <<<<<<<<<<");
-        System.out.println();
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.JAVA);
-        doTestState(complexp);
+		processor.setHebrewDirection(RTL, LTR);
+		dir = processor.getDirection();
+		modir = new int[][] { { RTL, LTR }, { RTL, LTR } };
+		msg = "TestDirection #7 expected=" + array2_display(modir) + " result="
+				+ array2_display(dir);
+		assertTrue(msg, arrays2_equal(modir, dir));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test Orientation  <<<<<<<<<<");
-        System.out.println();
-        doTestOrientation();
+		processor = StringProcessor.getProcessor(IBiDiProcessor.EMAIL);
+		processor.assumeMirrored(false);
+		processor.setArabicDirection(LTR, RTL);
+		processor.setHebrewDirection(LTR, LTR);
+		data = "#ABC.#DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "#ABC@.#DEF@:HOST.com";
+		assertEquals("TestDirection #9 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test Orient  <<<<<<<<<<");
-        System.out.println();
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        doTestOrient(complexp, "", "", "", "");
-        doTestOrient(complexp, "abc", "abc", ">@abc@^", "abc");
-        doTestOrient(complexp, "ABC", "ABC", ">@ABC@^", "@ABC");
-        doTestOrient(complexp, "bcd,ef", "bcd,ef", ">@bcd,ef@^", "bcd,ef");
-        doTestOrient(complexp, "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
-        doTestOrient(complexp, "cde,FG", "cde,FG", ">@cde,FG@^", "cde,FG");
-        doTestOrient(complexp, "CDE,fg", "CDE,fg", ">@CDE,fg@^", "@CDE,fg");
-        doTestOrient(complexp, "12..def,GH", "12..def,GH", ">@12..def,GH@^", "12..def,GH");
-        doTestOrient(complexp, "34..DEF,gh", "34..DEF,gh", ">@34..DEF,gh@^", "@34..DEF,gh");
+		data = "ABC.DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "ABC@.DEF@:HOST.com";
+		assertEquals("TestDirection #10 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test Scripts  <<<<<<<<<<");
-        System.out.println();
-        doTestScripts(complexp);
+		processor.assumeMirrored(true);
+		data = "#ABC.#DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "<&#ABC.#DEF:HOST.com&^";
+		assertEquals("TestDirection #11 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test leanBidiCharOffsets()  <<<<<<<<<<");
-        System.out.println();
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.JAVA);
-        doTestLeanOffsets(complexp);
+		data = "#ABc.#DEF:HOSt.COM";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "<&#ABc.#DEF:HOSt.COM&^";
+		assertEquals("TestDirection #12 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test fullBidiCharOffsets()  <<<<<<<<<<");
-        System.out.println();
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        doTestFullOffsets(complexp, "BCD,EF,G", new int[]{3,7},
-                          new int[]{0,1,5,9,12,13}, new int[]{0,4,8});
+		data = "#ABc.#DEF:HOSt.";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "<&#ABc.#DEF:HOSt.&^";
+		assertEquals("TestDirection #13 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test mirrored  <<<<<<<<<<");
-        System.out.println();
-        doTestMirrored();
+		data = "ABC.DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "ABC@.DEF@:HOST.com";
+		assertEquals("TestDirection #14 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test Direction  <<<<<<<<<<");
-        System.out.println();
-        doTestDirection();
+		data = "--.---:----";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "--.---:----";
+		assertEquals("TestDirection #15 full", model, toPseudo(full));
 
-        System.out.println();
-        System.out.println();
-        System.out.println(">>>>>>>>>>  Test Many Inserts  <<<<<<<<<<");
-        System.out.println();
-        complexp = StringProcessor.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
-        complexp.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
-        complexp.setDirection(LTR);
-        String data = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
-        String lean = Tools.toUT16(data);
-        String full = complexp.leanToFullText(lean);
-        String model = "A@,B@,C@,D@,E@,F@,G@,H@,I@,J@,K@,L@,M@,N@,O@,P@,Q@,R@,S@,T@,U@,V@,W@,X@,Y@,Z";
-        Tools.verify("many inserts", full, model);
+		data = "ABC.|DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "ABC.|DEF@:HOST.com";
+		assertEquals("TestDirection #16 full", model, toPseudo(full));
 
-        Tools.printStepErrorCount();
-    }
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_RTL);
+		data = "#ABc.|#DEF:HOST.com";
+		lean = toUT16(data);
+		full = processor.leanToFullText(lean);
+		model = "#ABc.|#DEF:HOST.com";
+		assertEquals("TestDirection #17 full", model, toPseudo(full));
+	}
+
+	public void testMethods() {
+
+		doTestTools();
+
+		processor = StringProcessor.getProcessor(IBiDiProcessor.JAVA);
+		doTestState();
+
+		doTestOrientation();
+
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		doTestOrient("Methods #1 ", "", "", "", "");
+		doTestOrient("Methods #2 ", "abc", "abc", ">@abc@^", "abc");
+		doTestOrient("Methods #3 ", "ABC", "ABC", ">@ABC@^", "@ABC");
+		doTestOrient("Methods #4 ", "bcd,ef", "bcd,ef", ">@bcd,ef@^", "bcd,ef");
+		doTestOrient("Methods #5 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^",
+				"@BCD@,EF");
+		doTestOrient("Methods #6 ", "cde,FG", "cde,FG", ">@cde,FG@^", "cde,FG");
+		doTestOrient("Methods #7 ", "CDE,fg", "CDE,fg", ">@CDE,fg@^", "@CDE,fg");
+		doTestOrient("Methods #8 ", "12..def,GH", "12..def,GH",
+				">@12..def,GH@^", "12..def,GH");
+		doTestOrient("Methods #9 ", "34..DEF,gh", "34..DEF,gh",
+				">@34..DEF,gh@^", "@34..DEF,gh");
+
+		doTestScripts();
+
+		processor = StringProcessor.getProcessor(IBiDiProcessor.JAVA);
+		doTestLeanOffsets();
+
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		doTestFullOffsets("TestFullOffsets ", "BCD,EF,G", new int[] { 3, 7 },
+				new int[] { 0, 1, 5, 9, 12, 13 }, new int[] { 0, 4, 8 });
+
+		doTestMirrored();
+
+		doTestDirection();
+
+		processor = StringProcessor
+				.getProcessor(IBiDiProcessor.COMMA_DELIMITED);
+		processor.assumeOrientation(IComplExpProcessor.ORIENT_LTR);
+		processor.setDirection(LTR);
+		String data = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
+		String lean = toUT16(data);
+		String full = processor.leanToFullText(lean);
+		String model = "A@,B@,C@,D@,E@,F@,G@,H@,I@,J@,K@,L@,M@,N@,O@,P@,Q@,R@,S@,T@,U@,V@,W@,X@,Y@,Z";
+		assertEquals("many inserts", model, toPseudo(full));
+
+	}
 }

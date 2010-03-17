@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.complexp.consumable;
 
-import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
-
 import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
+import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
 
 /**
  *  <code>ComplExpRegex</code> is a processor for regular expressions.
@@ -33,24 +32,24 @@ import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
  *  @author Matitiahu Allouche
  */
 public class ComplExpRegex extends ComplExpBasic {
-	static final String operators = "";
-	static final String[] startStrings = {"(?#", /*  0 *//* comment (?#...) */
-	"(?<", /*  1 *//* named group (?<name> */
-	"(?'", /*  2 *//* named group (?'name' */
-	"(?(<", /*  3 *//* conditional named back reference (?(<name>) */
-	"(?('", /*  4 *//* conditional named back reference (?('name') */
-	"(?(", /*  5 *//* conditional named back reference (?(name) */
-	"(?&", /*  6 *//* named parentheses reference (?&name) */
-	"(?P<", /*  7 *//* named group (?P<name> */
-	"\\k<", /*  8 *//* named back reference \k<name> */
-	"\\k'", /*  9 *//* named back reference \k'name' */
-	"\\k{", /* 10 *//* named back reference \k{name} */
-	"(?P=", /* 11 *//* named back reference (?P=name) */
-	"\\g{", /* 12 *//* named back reference \g{name} */
-	"\\g<", /* 13 *//* subroutine call \g<name> */
-	"\\g'", /* 14 *//* subroutine call \g'name' */
-	"(?(R&", /* 15 *//* named back reference recursion (?(R&name) */
-	"\\Q" /* 16 *//* quoted sequence \Q...\E */
+	static final String operators = ""; //$NON-NLS-1$
+	static final String[] startStrings = {"(?#", /*  0 *//* comment (?#...) *///$NON-NLS-1$
+			"(?<", /*  1 *//* named group (?<name> *///$NON-NLS-1$
+			"(?'", /*  2 *//* named group (?'name' *///$NON-NLS-1$
+			"(?(<", /*  3 *//* conditional named back reference (?(<name>) *///$NON-NLS-1$
+			"(?('", /*  4 *//* conditional named back reference (?('name') *///$NON-NLS-1$
+			"(?(", /*  5 *//* conditional named back reference (?(name) *///$NON-NLS-1$
+			"(?&", /*  6 *//* named parentheses reference (?&name) *///$NON-NLS-1$
+			"(?P<", /*  7 *//* named group (?P<name> *///$NON-NLS-1$
+			"\\k<", /*  8 *//* named back reference \k<name> *///$NON-NLS-1$
+			"\\k'", /*  9 *//* named back reference \k'name' *///$NON-NLS-1$
+			"\\k{", /* 10 *//* named back reference \k{name} *///$NON-NLS-1$
+			"(?P=", /* 11 *//* named back reference (?P=name) *///$NON-NLS-1$
+			"\\g{", /* 12 *//* named back reference \g{name} *///$NON-NLS-1$
+			"\\g<", /* 13 *//* subroutine call \g<name> *///$NON-NLS-1$
+			"\\g'", /* 14 *//* subroutine call \g'name' *///$NON-NLS-1$
+			"(?(R&", /* 15 *//* named back reference recursion (?(R&name) *///$NON-NLS-1$
+			"\\Q" /* 16 *//* quoted sequence \Q...\E *///$NON-NLS-1$
 	};
 	static final char[] endChars = {
 			// 0    1     2    3    4    5    6    7    8     9   10   11   12   13    14   15
@@ -70,7 +69,7 @@ public class ComplExpRegex extends ComplExpBasic {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
+	protected int indexOfSpecial(int whichSpecial, String srcText, int fromIndex) {
 		byte dirProp;
 
 		if (whichSpecial < numberOfStrings) {
@@ -91,10 +90,10 @@ public class ComplExpRegex extends ComplExpBasic {
 			/* 14 *//* subroutine call \g'name' */
 			/* 15 *//* named back reference recursion (?(R&name) */
 			/* 16 *//* quoted sequence \Q...\E */
-			return leanText.indexOf(startStrings[whichSpecial], fromIndex);
+			return srcText.indexOf(startStrings[whichSpecial], fromIndex);
 		}
 		// look for R, AL, AN, EN which are potentially needing a mark
-		for (; fromIndex < leanText.length(); fromIndex++) {
+		for (; fromIndex < srcText.length(); fromIndex++) {
 			// there never is a need for a mark before the first char
 			if (fromIndex <= 0)
 				continue;
@@ -132,7 +131,7 @@ public class ComplExpRegex extends ComplExpBasic {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		int loc;
 
 		switch (whichSpecial) {
@@ -145,10 +144,10 @@ public class ComplExpRegex extends ComplExpBasic {
 					// skip the opening "(?#"
 					loc = operLocation + 3;
 				}
-				loc = leanText.indexOf(')', loc);
+				loc = srcText.indexOf(')', loc);
 				if (loc < 0) {
 					state = whichSpecial;
-					return leanText.length();
+					return srcText.length();
 				}
 				return loc + 1;
 			case 1 : /* named group (?<name> */
@@ -172,9 +171,9 @@ public class ComplExpRegex extends ComplExpBasic {
 				// skip the opening string
 				loc = operLocation + startStrings[whichSpecial].length();
 				// look for ending character
-				loc = leanText.indexOf(endChars[whichSpecial], loc);
+				loc = srcText.indexOf(endChars[whichSpecial], loc);
 				if (loc < 0)
-					return leanText.length();
+					return srcText.length();
 				return loc + 1;
 			case 16 : /* quoted sequence \Q...\E */
 				if (operLocation < 0) {
@@ -185,10 +184,10 @@ public class ComplExpRegex extends ComplExpBasic {
 					// skip the opening "\Q"
 					loc = operLocation + 2;
 				}
-				loc = leanText.indexOf("\\E", loc);
+				loc = srcText.indexOf("\\E", loc); //$NON-NLS-1$
 				if (loc < 0) {
 					state = whichSpecial;
-					return leanText.length();
+					return srcText.length();
 				}
 				// set the dirProp for the "E"
 				setDirProp(loc + 1, L);
@@ -199,6 +198,6 @@ public class ComplExpRegex extends ComplExpBasic {
 
 		}
 		// we should never get here
-		return leanText.length();
+		return srcText.length();
 	}
 }

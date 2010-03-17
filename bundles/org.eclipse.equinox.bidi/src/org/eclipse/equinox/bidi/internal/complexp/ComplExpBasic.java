@@ -291,10 +291,10 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *          of this number is internal to the class implementing
 	 *          <code>indexOfSpecial</code>.
 	 *
-	 *  @param  leanText text of the complex expression before addition of any
+	 *  @param  srcText text of the complex expression before addition of any
 	 *          directional formatting characters.
 	 *
-	 *  @param  fromIndex the index within <code>leanText</code> to start
+	 *  @param  fromIndex the index within <code>srcText</code> to start
 	 *          the search from.
 	 *
 	 *  @return the position where the start of the special case was located.
@@ -309,7 +309,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *          In <code>ComplExpBasic</code> this method always returns -1.
 	 *
 	 */
-	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
+	protected int indexOfSpecial(int whichSpecial, String srcText, int fromIndex) {
 		// This method must be overridden by all subclasses with special cases.
 		return -1;
 	}
@@ -338,7 +338,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *
 	 *  @param  whichSpecial number of the special case to handle.
 	 *
-	 *  @param  text text of the complex expression.
+	 *  @param  srcText text of the complex expression.
 	 *
 	 *  @param  operLocation the position returned by <code>indexOfSpecial</code>.
 	 *          In calls to <code>leanToFullText</code> or
@@ -356,7 +356,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *          <code>operLocation + 1</code> (but it should never be called).
 	 *
 	 */
-	protected int processSpecial(int whichSpecial, String text, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		// This method must be overridden by all subclasses with any special case.
 		return operLocation + 1;
 	}
@@ -614,8 +614,11 @@ public class ComplExpBasic implements IComplExpProcessor {
 	}
 
 	public String leanToFullText(String text, int initState) {
-		if (text.length() == 0)
+		if (text.length() == 0) {
+			prefixLength = 0;
+			count = 0;
 			return text;
+		}
 		leanToFullTextNofix(text, initState);
 		return addMarks(true);
 	}
@@ -719,6 +722,8 @@ public class ComplExpBasic implements IComplExpProcessor {
 		if (i < 0) {
 			leanText = EMPTY_STRING;
 			len = 0;
+			prefixLength = 0;
+			count = 0;
 			return leanText;
 		}
 		if (i < (lenText - 1)) {

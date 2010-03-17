@@ -50,16 +50,16 @@ public class ComplExpSingle extends ComplExpBasic {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
-		return leanText.indexOf(separator, fromIndex);
+	protected int indexOfSpecial(int whichSpecial, String srcText, int fromIndex) {
+		return srcText.indexOf(separator, fromIndex);
 	}
 
 	/**
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		processOperator(operLocation);
-		return leanText.length();
+		return srcText.length();
 	}
 }

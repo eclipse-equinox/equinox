@@ -126,19 +126,19 @@ final public class ComplExpUtil {
 	public static String insertMarks(String text, int[] offsets, int direction, boolean affix) {
 		int textLen = text.length();
 		if (textLen == 0)
-			return "";
+			return ""; //$NON-NLS-1$
 
 		String curPrefix, curSuffix, full;
 		char curMark, c;
 		char[] fullChars;
 		if (direction == IComplExpProcessor.DIRECTION_LTR) {
 			curMark = LRM;
-			curPrefix = "\u202a\u200e";
-			curSuffix = "\u200e\u202c";
+			curPrefix = "\u202a\u200e"; /* LRE+LRM *///$NON-NLS-1$
+			curSuffix = "\u200e\u202c"; /* LRM+PDF *///$NON-NLS-1$
 		} else {
 			curMark = RLM;
-			curPrefix = "\u202b\u200f";
-			curSuffix = "\u200f\u202c";
+			curPrefix = "\u202b\u200f"; /* RLE+RLM *///$NON-NLS-1$
+			curSuffix = "\u200f\u202c"; /* RLM+PDF *///$NON-NLS-1$
 		}
 		// add marks at offsets
 		if ((offsets != null) && (offsets.length > 0)) {
@@ -170,7 +170,7 @@ final public class ComplExpUtil {
 	/*************************************************************************/
 
 	//  The default set of delimiters to use to segment a string.
-	private static final String defaultDelimiters = ".:/\\";
+	private static final String defaultDelimiters = ".:/\\"; //$NON-NLS-1$
 	// left to right mark
 	private static final char LRM = '\u200e';
 	// left to right mark
@@ -181,27 +181,22 @@ final public class ComplExpUtil {
 	private static final char RLE = '\u202b';
 	// pop directional format
 	private static final char PDF = '\u202c';
-	// whether or not processing is needed
-	private static int PROCESSING_NEEDED_SCORE = -1;
+	// TBD use bundle properties
+	private static String osName = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$	private static String
+	private static boolean flagOS = osName.startsWith("windows") || osName.startsWith("linux"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static String lastLanguage;
+	private static boolean lastGoodLang;
 
-	static int getProcessingNeededScore() {
-		if (PROCESSING_NEEDED_SCORE >= 0)
-			return PROCESSING_NEEDED_SCORE;
-
-		PROCESSING_NEEDED_SCORE = 0;
-
+	static boolean isProcessingNeeded() {
+		if (!flagOS)
+			return false;
 		// TBD use OSGi service
-		Locale locale = Locale.getDefault();
-		String lang = locale.getLanguage();
-		if ("iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang))
-			PROCESSING_NEEDED_SCORE++;
-
-		// TBD use bundle properties
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (osName.startsWith("windows") || osName.startsWith("linux"))
-			PROCESSING_NEEDED_SCORE += 2;
-
-		return PROCESSING_NEEDED_SCORE;
+		String lang = Locale.getDefault().getLanguage();
+		if (lang.equals(lastLanguage))
+			return lastGoodLang;
+		lastLanguage = lang;
+		lastGoodLang = "iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		return lastGoodLang;
 	}
 
 	/**
@@ -248,7 +243,7 @@ final public class ComplExpUtil {
 	 *  @return the processed string
 	 */
 	public static String process(String str, String delimiters) {
-		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
+		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
 		// do not process a string that has already been processed.
@@ -316,7 +311,7 @@ final public class ComplExpUtil {
 	 *  @return the processed string
 	 */
 	public static String processTyped(String str, String type) {
-		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
+		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
 		// do not process a string that has already been processed.
@@ -344,7 +339,7 @@ final public class ComplExpUtil {
 	 *
 	 */
 	public static String deprocess(String str) {
-		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
+		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
 		StringBuffer buf = new StringBuffer();
@@ -378,7 +373,7 @@ final public class ComplExpUtil {
 	 *
 	 */
 	public static String deprocess(String str, String type) {
-		if ((str == null) || (str.length() <= 1) || (getProcessingNeededScore() != 3))
+		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
 		IComplExpProcessor processor = ComplExpFactory.create(type);

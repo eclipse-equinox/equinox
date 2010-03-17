@@ -53,23 +53,23 @@ public class ComplExpDelims extends ComplExpBasic {
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int indexOfSpecial(int whichSpecial, String leanText, int fromIndex) {
+	protected int indexOfSpecial(int whichSpecial, String srcText, int fromIndex) {
 		char delim = delims[whichSpecial * 2];
 
-		return leanText.indexOf(delim, fromIndex);
+		return srcText.indexOf(delim, fromIndex);
 	}
 
 	/**
 	 *  This method is not supposed to be invoked directly by users of this
 	 *  class. It may  be overridden by subclasses of this class.
 	 */
-	protected int processSpecial(int whichSpecial, String leanText, int operLocation) {
+	protected int processSpecial(int whichSpecial, String srcText, int operLocation) {
 		processOperator(operLocation);
 		int loc = operLocation + 1;
 		char delim = delims[(whichSpecial * 2) + 1];
-		loc = leanText.indexOf(delim, loc);
+		loc = srcText.indexOf(delim, loc);
 		if (loc < 0)
-			return leanText.length();
+			return srcText.length();
 		return loc + 1;
 	}
 }

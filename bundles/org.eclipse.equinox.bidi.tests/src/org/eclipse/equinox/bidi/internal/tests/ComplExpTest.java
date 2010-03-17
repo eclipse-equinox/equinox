@@ -15,20 +15,21 @@ import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
 public class ComplExpTest implements IComplExpProcessor {
 
 	private static final int[] EMPTY_INT_ARRAY = new int[0];
-	private static final int[][] ALL_LTR = new int[][] { {DIRECTION_LTR, DIRECTION_LTR}, {DIRECTION_LTR, DIRECTION_LTR}};
+	private static final int[][] ALL_LTR = new int[][] {
+			{ DIRECTION_LTR, DIRECTION_LTR }, { DIRECTION_LTR, DIRECTION_LTR } };
 
 	public ComplExpTest() {
 		return;
 	}
 
 	public void setOperators(String operators) {
-        // empty
+		// empty
 	}
-	
+
 	public String getOperators() {
-	    return "";
+		return "";
 	}
-	
+
 	public void selectBidiScript(boolean arabic, boolean hebrew) {
 		// empty
 	}

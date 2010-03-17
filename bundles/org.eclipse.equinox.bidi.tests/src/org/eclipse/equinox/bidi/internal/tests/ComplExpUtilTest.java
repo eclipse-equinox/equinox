@@ -11,113 +11,121 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.equinox.bidi.complexp.*;
+import java.util.Locale;
 
 /**
  * Tests methods in ComplExpUtil
  */
 
-public class ComplExpUtilTest extends TestCase {
-    public static Test suite() {
-        return new TestSuite(ComplExpUtilTest.class);
-    }
+public class ComplExpUtilTest extends ComplExpTestBase {
 
-    public ComplExpUtilTest() {
-        super();
-    }
+	private static final String HEBREW = "iw";
+	private static final String HEBREW2 = "he";
+	private static final String ARABIC = "ar";
+	private static final String FARSI = "fa";
+	private static final String URDU = "ur";
+	private Locale locale;
 
-    public ComplExpUtilTest(String name) {
-        super(name);
-    }
+	protected void setUp() throws Exception {
+		super.setUp();
+		locale = Locale.getDefault();
+	}
 
-    static void doTest1(String data, String result)
-    {
-        String full = ComplExpUtil.process(Tools.toUT16(data));
-        String ful2 = ComplExpUtil.process(Tools.toUT16(data), null);
-        System.out.println();
-        System.out.println(">>> process() text=" + data);
-        Tools.verify("full", full, result);
-        Tools.verify("ful2", ful2, result);
-        String lean = ComplExpUtil.deprocess(full);
-        Tools.verify("lean", lean, data);
-    }
+	protected void tearDown() {
+		Locale.setDefault(locale);
+	}
 
-    static void doTest2(String data, String result)
-    {
-        doTest2(data, result, data);
-    }
+	private void doTest1(String data, String result) {
+		Locale.setDefault(Locale.ENGLISH);
+		String full = ComplExpUtil.process(toUT16(data));
+		assertEquals("Util #1 full EN - ", data, toPseudo(full));
+		Locale.setDefault(new Locale(HEBREW2));
+		full = ComplExpUtil.process(toUT16(data));
+		assertEquals("Util #1 full HE - ", result, toPseudo(full));
+		Locale.setDefault(new Locale(ARABIC));
+		full = ComplExpUtil.process(toUT16(data));
+		assertEquals("Util #1 full AR - ", result, toPseudo(full));
+		Locale.setDefault(new Locale(FARSI));
+		full = ComplExpUtil.process(toUT16(data));
+		assertEquals("Util #1 full FA - ", result, toPseudo(full));
+		Locale.setDefault(new Locale(URDU));
+		full = ComplExpUtil.process(toUT16(data));
+		assertEquals("Util #1 full UR - ", result, toPseudo(full));
+		Locale.setDefault(new Locale(HEBREW));
+		full = ComplExpUtil.process(toUT16(data));
+		String ful2 = ComplExpUtil.process(toUT16(data), null);
+		assertEquals("Util #1 full - ", result, toPseudo(full));
+		assertEquals("Util #1 ful2 - ", result, toPseudo(ful2));
+		String lean = ComplExpUtil.deprocess(full);
+		assertEquals("Util #1 lean - ", data, toPseudo(lean));
+	}
 
-    static void doTest2(String data, String result, String resLean)
-    {
-        String full = ComplExpUtil.process(Tools.toUT16(data), "*");
-        System.out.println();
-        System.out.println(">>> process() ASTERISK text=" + data);
-        Tools.verify("full", full, result);
-        String lean = ComplExpUtil.deprocess(full);
-        Tools.verify("lean", lean, resLean);
-    }
+	private void doTest2(String msg, String data, String result) {
+		doTest2(msg, data, result, data);
+	}
 
-    static void doTest3(String data, String result)
-    {
-        doTest3(data, result, data);
-    }
+	private void doTest2(String msg, String data, String result, String resLean) {
+		String full = ComplExpUtil.process(toUT16(data), "*");
+		assertEquals(msg + "full", result, toPseudo(full));
+		String lean = ComplExpUtil.deprocess(full);
+		assertEquals(msg + "lean", resLean, toPseudo(lean));
+	}
 
-    static void doTest3(String data, String result, String resLean)
-    {
-        String full = ComplExpUtil.processTyped(Tools.toUT16(data), IBiDiProcessor.COMMA_DELIMITED);
-        System.out.println();
-        System.out.println(">>> process() COMMA text=" + data);
-        Tools.verify("full", full, result);
-        String lean = ComplExpUtil.deprocess(full, IBiDiProcessor.COMMA_DELIMITED);
-        Tools.verify("lean", lean, resLean);
-    }
+	private void doTest3(String msg, String data, String result) {
+		doTest3(msg, data, result, data);
+	}
 
-    static void doTest4(String data, int[] offsets, int direction, boolean affix,
-                      String result)
-    {
-        System.out.println();
-        System.out.println(">>> insertMarks() text=" + data);
-        System.out.println("    offsets=" + Tools.array_display(offsets));
-        System.out.print  ("    direction=" + direction);
-        System.out.println("  affix=" + affix);
-        String lean = Tools.toUT16(data);
-        String full = ComplExpUtil.insertMarks(lean, offsets, direction, affix);
-        Tools.verify("full", full, result);
-    }
+	private void doTest3(String msg, String data, String result, String resLean) {
+		String full = ComplExpUtil.processTyped(toUT16(data),
+				IBiDiProcessor.COMMA_DELIMITED);
+		assertEquals(msg + "full", result, toPseudo(full));
+		String lean = ComplExpUtil.deprocess(full,
+				IBiDiProcessor.COMMA_DELIMITED);
+		assertEquals(msg + "lean", resLean, toPseudo(lean));
+	}
 
-    public static void testComplExpUtil() {
-        Tools.separ("ComplExpUtilTest");
+	private void doTest4(String msg, String data, int[] offsets, int direction,
+			boolean affix, String result) {
+		String txt = msg + "text=" + data + "\n    offsets="
+				+ array_display(offsets) + "\n    direction=" + direction
+				+ "\n    affix=" + affix;
+		String lean = toUT16(data);
+		String full = ComplExpUtil.insertMarks(lean, offsets, direction, affix);
+		assertEquals(txt, result, toPseudo(full));
+	}
 
-        // Test process() and deprocess() with default delimiters
-        doTest1("ABC/DEF/G", ">@ABC@/DEF@/G@^");
-        // Test process() and deprocess() with specified delimiters
-        doTest2("", "");
-        doTest2(">@ABC@^", ">@ABC@^", "ABC");
-        doTest2("abc", "abc");
-        doTest2("!abc", ">@!abc@^");
-        doTest2("abc!", ">@abc!@^");
-        doTest2("ABC*DEF*G", ">@ABC@*DEF@*G@^");
-        // Test process() and deprocess() with specified expression type
-        doTest3("ABC,DEF,G", ">@ABC@,DEF@,G@^");
-        doTest3("", "");
-        doTest3(">@DEF@^", ">@DEF@^", "DEF");
-        String str = ComplExpUtil.deprocess(Tools.toUT16("ABC,DE"), "wrong_type");
-        Tools.verify("deprocess(9999)", str, "ABC,DE");
-        Tools.verify("invalid type", ComplExpUtil.process("abc", "wrong_type"), "abc");
-        // Test insertMarks()
-        doTest4("ABCDEFG", new int[]{3, 6}, 0, false, "ABC@DEF@G");
-        doTest4("ABCDEFG", new int[]{3, 6}, 0, true, ">@ABC@DEF@G@^");
-        doTest4("ABCDEFG", new int[]{3, 6}, 1, false, "ABC&DEF&G");
-        doTest4("ABCDEFG", new int[]{3, 6}, 1, true, "<&ABC&DEF&G&^");
-        doTest4("", new int[]{3, 6}, 0, false, "");
-        doTest4("", new int[]{3, 6}, 0, true, "");
-        doTest4("ABCDEFG", null, 1, false, "ABCDEFG");
-        doTest4("ABCDEFG", null, 1, true, "<&ABCDEFG&^");
+	public void testComplExpUtil() {
 
-        Tools.printStepErrorCount();
-    }
+		// Test process() and deprocess() with default delimiters
+		doTest1("ABC/DEF/G", ">@ABC@/DEF@/G@^");
+		// Test process() and deprocess() with specified delimiters
+		doTest2("Util #2.1 - ", "", "");
+		doTest2("Util #2.2 - ", ">@ABC@^", ">@ABC@^", "ABC");
+		doTest2("Util #2.3 - ", "abc", "abc");
+		doTest2("Util #2.4 - ", "!abc", ">@!abc@^");
+		doTest2("Util #2.5 - ", "abc!", ">@abc!@^");
+		doTest2("Util #2.6 - ", "ABC*DEF*G", ">@ABC@*DEF@*G@^");
+		// Test process() and deprocess() with specified expression type
+		doTest3("Util #3.1 - ", "ABC,DEF,G", ">@ABC@,DEF@,G@^");
+		doTest3("Util #3.2 - ", "", "");
+		doTest3("Util #3.3 - ", ">@DEF@^", ">@DEF@^", "DEF");
+		String str = ComplExpUtil.deprocess(toUT16("ABC,DE"), "wrong_type");
+		assertEquals("deprocess(9999)", "ABC,DE", toPseudo(str));
+		str = ComplExpUtil.process("abc", "wrong_type");
+		assertEquals("invalid type", "abc", toPseudo(str));
+		// Test insertMarks()
+		doTest4("Util #4.1 - ", "ABCDEFG", new int[] { 3, 6 }, 0, false,
+				"ABC@DEF@G");
+		doTest4("Util #4.2 - ", "ABCDEFG", new int[] { 3, 6 }, 0, true,
+				">@ABC@DEF@G@^");
+		doTest4("Util #4.3 - ", "ABCDEFG", new int[] { 3, 6 }, 1, false,
+				"ABC&DEF&G");
+		doTest4("Util #4.4 - ", "ABCDEFG", new int[] { 3, 6 }, 1, true,
+				"<&ABC&DEF&G&^");
+		doTest4("Util #4.5 - ", "", new int[] { 3, 6 }, 0, false, "");
+		doTest4("Util #4.6 - ", "", new int[] { 3, 6 }, 0, true, "");
+		doTest4("Util #4.7 - ", "ABCDEFG", null, 1, false, "ABCDEFG");
+		doTest4("Util #4.8 - ", "ABCDEFG", null, 1, true, "<&ABCDEFG&^");
+	}
 }

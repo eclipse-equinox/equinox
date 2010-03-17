@@ -25,28 +25,28 @@ public class ExtensibilityTest extends TestCase {
 		String[] types = StringProcessor.getKnownTypes();
 		assertNotNull(types);
 		assertTrue(types.length > 0);
-		
+
 		// check one of the types that we know should be there
 		assertTrue(isTypePresent(types, "regex"));
-		
+
 		IComplExpProcessor processor = StringProcessor.getProcessor("regex");
 		assertNotNull(processor);
 	}
-	
+
 	public void testOtherContributions() {
 		String[] types = StringProcessor.getKnownTypes();
 		assertNotNull(types);
 		assertTrue(types.length > 0);
-		
+
 		// check the type added by the test bundle
 		assertTrue(isTypePresent(types, "test"));
-		
+
 		IComplExpProcessor processor = StringProcessor.getProcessor("test");
 		assertNotNull(processor);
 	}
-	
+
 	private boolean isTypePresent(String[] types, String type) {
-		for(int i = 0; i < types.length; i++) {
+		for (int i = 0; i < types.length; i++) {
 			if (type.equalsIgnoreCase(types[i]))
 				return true;
 		}
