@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -193,6 +193,11 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 */
 	protected boolean isActive() {
 		return ((state & (ACTIVE | STARTING)) != 0);
+	}
+
+	boolean isLazyStart() {
+		int status = bundledata.getStatus();
+		return (status & Constants.BUNDLE_ACTIVATION_POLICY) != 0 && (status & Constants.BUNDLE_LAZY_START) != 0;
 	}
 
 	/**

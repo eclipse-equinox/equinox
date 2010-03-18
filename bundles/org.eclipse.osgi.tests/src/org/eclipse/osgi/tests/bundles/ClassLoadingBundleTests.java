@@ -203,17 +203,17 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 			expectedEvents = new Object[14];
 			int i = 0;
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
@@ -269,17 +269,18 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 
 			expectedEvents = new Object[14];
 			int i = 0;
-			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
+
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestB);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
+			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTest);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestB);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestB);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestC);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestC);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestA);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestA);
-			expectedEvents[i++] = new BundleEvent(BundleEvent.LAZY_ACTIVATION, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTING, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTestD);
 			expectedEvents[i++] = new BundleEvent(BundleEvent.STARTED, chainTest);
@@ -1560,6 +1561,44 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		}
 		assertNotNull("Should not be null", resources);
 		assertFalse("Found resources!", resources.hasMoreElements());
+	}
+
+	public void testBug306181() throws BundleException {
+		StartLevel sl = installer.getStartLevel();
+		int origSL = sl.getStartLevel();
+		int origBundleSL = sl.getInitialBundleStartLevel();
+		int newSL = origSL + 1;
+		sl.setInitialBundleStartLevel(newSL);
+		try {
+			Bundle a = installer.installBundle("test.bug306181a");
+			Bundle b = installer.installBundle("test.bug306181b");
+
+			sl.setBundleStartLevel(a, newSL);
+			sl.setBundleStartLevel(b, newSL);
+			installer.resolveBundles(new Bundle[] {a, b});
+			a.start();
+			b.start(Bundle.START_ACTIVATION_POLICY);
+
+			sl.setStartLevel(newSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+
+			assertEquals("Bundle A is not active", Bundle.ACTIVE, a.getState());
+			assertEquals("Bundle B is not active", Bundle.STARTING, b.getState());
+			ServiceReference[] regs = a.getRegisteredServices();
+			if (regs != null && regs.length > 0) {
+				fail(OSGiTestsActivator.getContext().getService(regs[0]).toString());
+			}
+		} finally {
+			sl.setInitialBundleStartLevel(origBundleSL);
+			sl.setStartLevel(origSL);
+			Object[] expectedFrameworkEvents = new Object[1];
+			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
+			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
+			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+		}
 	}
 
 	private void doTestArrayTypeLoad(String name) {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.osgi.tests">
+   <implementation class="test.bug306181b.Component"/>
+   <property name="test" type="String" value="bug306181"/>
+   <service>
+      <provide interface="java.lang.Runnable"/>
+   </service>
+   
+</scr:component>

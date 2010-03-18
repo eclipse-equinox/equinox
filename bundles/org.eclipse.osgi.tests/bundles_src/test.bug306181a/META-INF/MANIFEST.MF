@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug306181a
+Bundle-SymbolicName: test.bug306181a
+Bundle-Version: 1.0.0
+Bundle-Activator: test.bug306181a.Activator
+Import-Package: org.osgi.framework

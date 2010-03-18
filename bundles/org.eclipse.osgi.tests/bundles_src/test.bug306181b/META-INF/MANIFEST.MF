@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: test.bug306181b
+Bundle-SymbolicName: test.bug306181b
+Bundle-Version: 1.0.0
+Service-Component: component.xml
+Bundle-ActivationPolicy: lazy

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -243,6 +243,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 							Debug.println("sync - incrementing Startlevel from " + tempSL); //$NON-NLS-1$
 						}
 						tempSL++;
+						// Note that we must get a new list of installed bundles each time;
+						// this is because additional bundles could have been installed from the previous start-level
 						incFWSL(i + 1, getInstalledBundles(framework.bundles, false));
 					}
 					if (launching) {
@@ -458,7 +460,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		// save the startlevel
 		saveActiveStartLevel(incToSL);
 		// resume all bundles at the startlevel
-		resumeBundles(launchBundles);
+		resumeBundles(launchBundles, incToSL);
 	}
 
 	/**
@@ -536,22 +538,31 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	}
 
 	/**
-	 *  Resume all bundles in the launch list
+	 *  Resume all bundles in the launch list at the specified start-level
 	 * @param launch a list of Bundle Objects to launch
+	 * @param currentSL the current start-level that the bundles must meet to be resumed
 	 */
-	private void resumeBundles(AbstractBundle[] launch) {
-		/* Resume all bundles that were previously started and whose startlevel is <= the active startlevel */
-		int fwsl = getStartLevel();
+	private void resumeBundles(AbstractBundle[] launch, int currentSL) {
+		// Resume all bundles that were previously started and whose startlevel is <= the active startlevel
+		// first resume the lazy activated bundles
+		resumeBundles(launch, true, currentSL);
+		// now resume all non lazy bundles
+		resumeBundles(launch, false, currentSL);
+	}
+
+	private void resumeBundles(AbstractBundle[] launch, boolean lazyOnly, int currentSL) {
 		for (int i = 0; i < launch.length && !framework.isForcedRestart(); i++) {
 			int bsl = launch[i].getStartLevel();
-			if (bsl < fwsl) {
+			if (bsl < currentSL) {
 				// skip bundles who should have already been started
 				continue;
-			} else if (bsl == fwsl) {
+			} else if (bsl == currentSL) {
 				if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
-					Debug.println("SLL: Active sl = " + fwsl + "; Bundle " + launch[i].getBundleId() + " sl = " + bsl); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					Debug.println("SLL: Active sl = " + currentSL + "; Bundle " + launch[i].getBundleId() + " sl = " + bsl); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
-				framework.resumeBundle(launch[i]);
+				boolean isLazyStart = launch[i].isLazyStart();
+				if (lazyOnly ? isLazyStart : !isLazyStart)
+					framework.resumeBundle(launch[i]);
 			} else {
 				// can stop resuming bundles since any remaining bundles have a greater startlevel than the framework active startlevel
 				break;
