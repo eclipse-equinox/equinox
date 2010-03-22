@@ -357,22 +357,22 @@ public class Activator implements BundleActivator, SynchronousBundleListener, Se
 						dumpOnConsole("ERROR ", bundleContext, message, t, true); //$NON-NLS-1$
 					}
 				}
-			} else {
-				//using the SCR log
-				switch (level) {
-					case LogService.LOG_ERROR :
-						log.error(message, t);
-						break;
-					case LogService.LOG_WARNING :
-						log.warning(message, t);
-						break;
-					case LogService.LOG_INFO :
-						log.info(message);
-						break;
-					default :
-						log.debug(message, t);
-						break;
-				}
+			}
+
+			//using the SCR log
+			switch (level) {
+				case LogService.LOG_ERROR :
+					log.error(message, t);
+					break;
+				case LogService.LOG_WARNING :
+					log.warning(message, t);
+					break;
+				case LogService.LOG_INFO :
+					log.info(message);
+					break;
+				default :
+					log.debug(message, t);
+					break;
 			}
 		}
 		if (fwLog != null) {
