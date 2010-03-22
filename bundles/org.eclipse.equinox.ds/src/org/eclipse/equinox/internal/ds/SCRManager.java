@@ -809,6 +809,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	protected void configAdminRegistered(ConfigurationAdmin configAdmin, ServiceReference caReference) {
+		if (bundleToServiceComponents == null || bundleToServiceComponents.isEmpty()) {
+			// no components found till now
+			return;
+		}
 		Vector toProcess = new Vector(1);
 		Configuration[] configs = null;
 		try {
@@ -863,6 +867,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	public Component[] getComponents() {
+		if (bundleToServiceComponents == null || bundleToServiceComponents.isEmpty()) {
+			// no components found till now
+			return null;
+		}
 		Vector result = new Vector();
 		Enumeration en = bundleToServiceComponents.keys();
 		while (en.hasMoreElements()) {
@@ -888,6 +896,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	public Component[] getComponent(Bundle bundle) {
+		if (bundleToServiceComponents == null || bundleToServiceComponents.isEmpty()) {
+			// no components found till now
+			return null;
+		}
 		Vector serviceComponents = (Vector) bundleToServiceComponents.get(bundle);
 		if (serviceComponents != null) {
 			Vector result = new Vector();
