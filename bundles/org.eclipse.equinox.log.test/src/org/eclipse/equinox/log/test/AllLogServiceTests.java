@@ -8,6 +8,7 @@ public class AllLogServiceTests {
 		TestSuite suite = new TestSuite("Test log service"); //$NON-NLS-1$
 		suite.addTestSuite(LogServiceTest.class);
 		suite.addTestSuite(LogReaderServiceTest.class);
+		suite.addTestSuite(LogPermissionCollectionTest.class);
 		return suite;
 	}
 }
