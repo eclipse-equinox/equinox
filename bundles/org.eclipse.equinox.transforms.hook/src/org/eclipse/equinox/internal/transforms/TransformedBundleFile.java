@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -163,10 +163,7 @@ public class TransformedBundleFile extends BundleFile {
 						// 182585)
 						extractDirectory(path);
 				} else {
-					File original = originalFile;
-					if (original == null)
-						return null;
-					if (original.isDirectory()) {
+					if (originalFile.isDirectory()) {
 						if (!nested.mkdirs()) {
 							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
