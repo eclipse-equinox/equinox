@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.equinox.server.p2"
-      label="p2 Server Feature"
+      label="%featureName"
       version="1.0.0.qualifier"
-      provider-name="Eclipse Foundation">
-
-   <description url="%descriptionURL">
-      %description
-   </description>
+      provider-name="%providerName">
 
    <copyright url="%copyrightURL">
       %copyright

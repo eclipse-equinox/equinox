@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.equinox.server.core"
-      label="Core Server Feature"
+      label="%featureName"
       version="1.0.0.qualifier"
-      provider-name="Eclipse Foundation">
+      provider-name="%providerName">
 
-   <description url="%descriptionURL">
-      %description
-   </description>
-
-   <copyright url="%copyrightURL">
+   <copyright>
       %copyright
    </copyright>
 
