@@ -260,11 +260,14 @@ public class SecureAction {
 					throw (IOException) e.getException();
 				throw (RuntimeException) e.getException();
 			}
+		} catch (ZipException e) {
+			ZipException zipNameException = new ZipException("Exception in opening zip file: " + file.getPath()); //$NON-NLS-1$
+			zipNameException.initCause(e);
+			throw zipNameException;
 		} catch (IOException e) {
-			IOException fileNameEx = new ZipException("Exception in opening zip file: " + file.getPath()); //$NON-NLS-1$
-			fileNameEx.initCause(e);
-			throw fileNameEx;
-
+			IOException fileNameException = new IOException("Exception in opening zip file: " + file.getPath()); //$NON-NLS-1$
+			fileNameException.initCause(e);
+			throw fileNameException;
 		}
 	}
 
