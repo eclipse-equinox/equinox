@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.tests.harness.CoreTest;
+import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.debug.FrameworkDebugTraceEntry;
 import org.eclipse.osgi.service.debug.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -39,6 +40,7 @@ public class DebugOptionsTestCase extends CoreTest {
 	private final static String TRACE_ELEMENT_DELIMITER_ENCODED = "&#124;"; //$NON-NLS-1$ // this value needs to match EclipseDebugTrace#TRACE_ELEMENT_DELIMITER_ENCODED
 	private final static SimpleDateFormat TRACE_FILE_DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"); //$NON-NLS-1$
 	private final static String LINE_SEPARATOR;
+	private boolean verboseDebug = true; // default is true
 	static {
 		String s = System.getProperty("line.separator"); //$NON-NLS-1$
 		LINE_SEPARATOR = s == null ? "\n" : s; //$NON-NLS-1$
@@ -493,6 +495,101 @@ public class DebugOptionsTestCase extends CoreTest {
 	}
 
 	/**
+	 * Test all DebugTrace.trace*() API when verbose debugging is disabled
+	 */
+	public void testVerboseDebugging() {
+
+		// TODO: Convert this back to {@link DebugOptions} once is/setVerbose becomes API
+		FrameworkDebugOptions fwDebugOptions = (FrameworkDebugOptions) debugOptions;
+		if (!debugOptions.isDebugEnabled()) {
+			debugOptions.setDebugEnabled(true);
+		}
+		// create a tracing record
+		final File traceFile = OSGiTestsActivator.getContext().getDataFile(getName() + ".trace"); //$NON-NLS-1$
+		TestDebugTrace debugTrace = this.createDebugTrace(traceFile);
+		TraceEntry[] traceOutput = null;
+		final String exceptionMessage1 = "An error 1"; //$NON-NLS-1$
+		try {
+			fwDebugOptions.setVerbose(false);
+			debugTrace.trace("/debug", "testing 1", new Exception(exceptionMessage1)); //$NON-NLS-1$ //$NON-NLS-2$
+			fwDebugOptions.setVerbose(true);
+			debugTrace.trace("/debug", "testing 2"); //$NON-NLS-1$ //$NON-NLS-2$
+			fwDebugOptions.setVerbose(false);
+			debugTrace.trace("/debug", "testing 3"); //$NON-NLS-1$ //$NON-NLS-2$
+			debugTrace.traceEntry("/debug"); //$NON-NLS-1$ //$NON-NLS-2$
+			debugTrace.traceEntry("/debug", "arg"); //$NON-NLS-1$ //$NON-NLS-2$
+			debugTrace.traceEntry("/debug", new String[] {"arg1", "arg2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			debugTrace.traceExit("/debug"); //$NON-NLS-1$
+			debugTrace.traceExit("/debug", "returnValue"); //$NON-NLS-1$ //$NON-NLS-2$
+			traceOutput = readTraceFile(traceFile); // Note: this call will also delete the trace file
+		} catch (InvalidTraceEntry invalidEx) {
+			fail("Failed 'DebugTrace.trace(option, message)' test as an invalid trace entry was found.  Actual Value: '" + invalidEx.getActualValue() + "'.", invalidEx); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		// make sure all 3 entries exist
+		assertEquals("Wrong number of trace entries", 8, traceOutput.length); //$NON-NLS-1$
+		// validate the trace("/debug", "testing 1", new Exception(exceptionMessage1)) call when verbose tracing is disabled
+		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[0].getThreadName()); //$NON-NLS-1$
+		assertNull("A bundle was found when it should be null", traceOutput[0].getBundleSymbolicName()); //$NON-NLS-1$
+		assertNull("A class name was found when it should be null", traceOutput[0].getClassName()); //$NON-NLS-1$
+		assertNull("A method name was found when it should be null", traceOutput[0].getMethodName()); //$NON-NLS-1$
+		assertTrue("A line number other than -1 was read in", traceOutput[0].getLineNumber() == -1); //$NON-NLS-1$
+		assertEquals("trace message is incorrect", "testing 1", traceOutput[0].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		final StringBuffer expectedThrowableText1 = new StringBuffer("java.lang.Exception: "); //$NON-NLS-1$
+		expectedThrowableText1.append(exceptionMessage1);
+		expectedThrowableText1.append(DebugOptionsTestCase.LINE_SEPARATOR);
+		expectedThrowableText1.append(DebugOptionsTestCase.TAB_CHARACTER);
+		expectedThrowableText1.append("at org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase.testVerboseDebugging(DebugOptionsTestCase.java:"); //$NON-NLS-1$		
+		if (!traceOutput[0].getThrowableText().startsWith(expectedThrowableText1.toString())) {
+			final StringBuffer errorMessage = new StringBuffer("The expected throwable text does not start with the actual throwable text."); //$NON-NLS-1$
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append("Expected"); //$NON-NLS-1$
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append("--------"); //$NON-NLS-1$
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append(expectedThrowableText1.toString());
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append("Actual"); //$NON-NLS-1$
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append("--------"); //$NON-NLS-1$
+			errorMessage.append(DebugOptionsTestCase.LINE_SEPARATOR);
+			errorMessage.append(traceOutput[0].getThrowableText());
+			fail(errorMessage.toString());
+		}
+		// validate the trace("/debug", "testing 2") call when verbose tracing is re-enabled
+		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[1].getThreadName()); //$NON-NLS-1$
+		assertEquals("Bundle name is incorrect", getName(), traceOutput[1].getBundleSymbolicName()); //$NON-NLS-1$
+		assertEquals("option-path value is incorrect", "/debug", traceOutput[1].getOptionPath()); //$NON-NLS-1$//$NON-NLS-2$
+		assertEquals("class name value is incorrect", DebugOptionsTestCase.class.getName(), traceOutput[1].getClassName()); //$NON-NLS-1$
+		assertEquals("method name value is incorrect", "testVerboseDebugging", traceOutput[1].getMethodName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("trace message is incorrect", "testing 2", traceOutput[1].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertNull("The throwable text was found when it should be null", traceOutput[1].getThrowableText());
+		// validate the trace("/debug", "testing 3") call when verbose is disabled
+		assertEquals("Thread name is incorrect", Thread.currentThread().getName(), traceOutput[2].getThreadName()); //$NON-NLS-1$
+		assertNull("A bundle was found when it should be null", traceOutput[2].getBundleSymbolicName()); //$NON-NLS-1$
+		assertNull("A class name was found when it should be null", traceOutput[2].getClassName()); //$NON-NLS-1$
+		assertNull("A method name was found when it should be null", traceOutput[2].getMethodName()); //$NON-NLS-1$
+		assertTrue("A line number other than -1 was read in", traceOutput[2].getLineNumber() == -1); //$NON-NLS-1$
+		assertEquals("trace message is incorrect", "testing 3", traceOutput[2].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertNull("The throwable text was found when it should be null", traceOutput[2].getThrowableText());
+		// validate the traceEntry("/debug") call when verbose is disabled
+		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with no parameters", traceOutput[3].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		// validate the traceEntry("/debug", "arg") call when verbose is disabled
+		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg)", traceOutput[4].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		// validate the traceEntry("/debug", new String[] {"arg1", "arg2"}) call when verbose is disabled
+		assertEquals("trace message is incorrect", "Entering method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with parameters: (arg1 arg2)", traceOutput[5].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		// validate the traceExit("/debug") call when verbose is disabled
+		assertEquals("trace message is incorrect", "Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with a void return", traceOutput[6].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		// validate the traceExit("/debug", "returnValue") call when verbose is disabled
+		assertEquals("trace message is incorrect", "Exiting method org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase#testVerboseDebugging with result: returnValue", traceOutput[7].getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+		// make sure the file is deleted
+		traceFile.delete();
+		// reset verbose debugging to the default (true)
+		fwDebugOptions.setVerbose(true);
+	}
+
+	/**
 	 * test DebugTrace.trace(option, message);
 	*/
 	public void testTraceFile01() {
@@ -878,8 +975,9 @@ public class DebugOptionsTestCase extends CoreTest {
 
 	private TraceEntry[] readTraceFile(File traceFile) throws InvalidTraceEntry {
 
-		Reader traceReader = null;
+		BufferedReader traceReader = null;
 		List traceEntries = new ArrayList();
+		this.verboseDebug = true; // default is true
 		try {
 			traceReader = new BufferedReader(new InputStreamReader(new FileInputStream(traceFile), "UTF-8")); //$NON-NLS-1$
 			TraceEntry entry = null;
@@ -900,25 +998,30 @@ public class DebugOptionsTestCase extends CoreTest {
 		return (TraceEntry[]) traceEntries.toArray(new TraceEntry[traceEntries.size()]);
 	}
 
-	private TraceEntry readMessage(final Reader traceReader) throws IOException, InvalidTraceEntry {
+	private TraceEntry readMessage(final BufferedReader traceReader) throws IOException, InvalidTraceEntry {
 
 		TraceEntry result = null;
 		int input = traceReader.read();
 		while (input != -1) {
 			char inputChar = (char) input;
 			if (inputChar == '#') {
-				while ((inputChar != '\n') && (inputChar != '\r')) {
-					// do nothing
-					inputChar = (char) traceReader.read();
+				String comment = traceReader.readLine();
+				if (comment != null) {
+					comment = comment.trim();
+				}
+				if (comment.startsWith("verbose")) {
+					int splitIndex = comment.indexOf(':');
+					String verboseValue = comment.substring(splitIndex + 1, comment.length()).trim();
+					this.verboseDebug = Boolean.valueOf(verboseValue).booleanValue();
 				}
 			}
 			if (inputChar == DebugOptionsTestCase.TRACE_ELEMENT_DELIMITER.charAt(0)) {
-				// first entry - thread name
+				// first entry - thread name (valid if verbose debugging is off)
 				final String threadName = this.readEntry(traceReader);
 				if ((threadName == null) || (threadName.length() == 0)) {
 					throw new InvalidTraceEntry("The thread name in a trace entry is null or empty", threadName); //$NON-NLS-1$
 				}
-				// read the next character
+				// second entry - timestamp (valid if verbose debugging is off)
 				final String date = this.readEntry(traceReader);
 				if ((date == null) || (date.length() == 0)) {
 					throw new InvalidTraceEntry("The timestamp in a trace entry is null or empty", date); //$NON-NLS-1$
@@ -929,35 +1032,42 @@ public class DebugOptionsTestCase extends CoreTest {
 				} catch (ParseException parseEx) {
 					throw new InvalidTraceEntry("The date in a trace entry '" + date + "' could not be parsed.", date); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				// third entry - bundle symbolic name
-				final String symbolicName = this.readEntry(traceReader);
-				if ((symbolicName == null) || (symbolicName.length() == 0)) {
-					throw new InvalidTraceEntry("The bundle symbolic name in a trace entry is null or empty", symbolicName); //$NON-NLS-1$
+				String symbolicName = null;
+				String optionPath = null;
+				String className = null;
+				String methodName = null;
+				int lineNumber = -1;
+				if (this.verboseDebug) {
+					// third entry - bundle symbolic name
+					symbolicName = this.readEntry(traceReader);
+					if ((symbolicName == null) || (symbolicName.length() == 0)) {
+						throw new InvalidTraceEntry("The bundle symbolic name in a trace entry is null or empty", symbolicName); //$NON-NLS-1$
+					}
+					// fourth entry - option path
+					optionPath = this.readEntry(traceReader);
+					if ((optionPath == null) || (optionPath.length() == 0)) {
+						throw new InvalidTraceEntry("The option-path in a trace entry is null or empty", optionPath); //$NON-NLS-1$
+					}
+					// fifth entry - class name
+					className = this.readEntry(traceReader);
+					if ((className == null) || (className.length() == 0)) {
+						throw new InvalidTraceEntry("The class name in a trace entry is null or empty", className); //$NON-NLS-1$
+					}
+					// sixth entry - method name
+					methodName = this.readEntry(traceReader);
+					if ((methodName == null) || (methodName.length() == 0)) {
+						throw new InvalidTraceEntry("The method name in a trace entry is null or empty", methodName); //$NON-NLS-1$
+					}
+					// seventh entry - line number
+					final String lineNumberString = this.readEntry(traceReader);
+					if ((lineNumberString == null) || (lineNumberString.length() == 0)) {
+						throw new InvalidTraceEntry("The line number in a trace entry is null or empty", lineNumberString); //$NON-NLS-1$
+					}
+					lineNumber = Integer.valueOf(lineNumberString).intValue();
 				}
-				// fourth entry - option path
-				final String optionPath = this.readEntry(traceReader);
-				if ((optionPath == null) || (optionPath.length() == 0)) {
-					throw new InvalidTraceEntry("The option-path in a trace entry is null or empty", optionPath); //$NON-NLS-1$
-				}
-				// fifth entry - class name
-				final String className = this.readEntry(traceReader);
-				if ((className == null) || (className.length() == 0)) {
-					throw new InvalidTraceEntry("The class name in a trace entry is null or empty", className); //$NON-NLS-1$
-				}
-				// sixth entry - method name
-				final String methodName = this.readEntry(traceReader);
-				if ((methodName == null) || (methodName.length() == 0)) {
-					throw new InvalidTraceEntry("The method name in a trace entry is null or empty", methodName); //$NON-NLS-1$
-				}
-				// seventh entry - line number
-				final String lineNumberString = this.readEntry(traceReader);
-				if ((lineNumberString == null) || (lineNumberString.length() == 0)) {
-					throw new InvalidTraceEntry("The line number in a trace entry is null or empty", lineNumberString); //$NON-NLS-1$
-				}
-				final int lineNumber = Integer.valueOf(lineNumberString).intValue();
-				// eighth entry - message
+				// eighth entry - message  (valid if verbose debugging is off)
 				final String message = this.readEntry(traceReader);
-				// read in the next character. if it is \r or \n then the throwable was not supplied
+				// read in the next character. if it is \r or \n then the throwable was not supplied  (valid if verbose debugging is off)
 				traceReader.mark(1);
 				inputChar = (char) traceReader.read();
 				String throwable = null;

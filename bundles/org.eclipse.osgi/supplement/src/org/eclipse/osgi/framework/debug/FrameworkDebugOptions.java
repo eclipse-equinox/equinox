@@ -31,6 +31,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustomizer {
 
 	private static final String OSGI_DEBUG = "osgi.debug"; //$NON-NLS-1$
+	private static final String OSGI_DEBUG_VERBOSE = "osgi.debug.verbose"; //$NON-NLS-1$
 	public static final String PROP_TRACEFILE = "osgi.tracefile"; //$NON-NLS-1$
 	/** monitor used to lock the options maps */
 	private final Object lock = new Object();
@@ -46,6 +47,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	protected final static Map debugTraceCache = new HashMap();
 	/** The File object to store messages.  This value may be null. */
 	protected File outFile = null;
+	/** Is verbose debugging enabled?  Changing this value causes a new tracing session to start. */
+	protected boolean verboseDebug = true;
 	private volatile BundleContext context;
 	private volatile ServiceTracker listenerTracker;
 
@@ -53,6 +56,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * Internal constructor to create a <code>FrameworkDebugOptions</code> singleton object. 
 	 */
 	private FrameworkDebugOptions() {
+		// check if verbose debugging was set during initialization.  This needs to be set even if debugging is disabled
+		this.verboseDebug = Boolean.valueOf(FrameworkProperties.getProperty(OSGI_DEBUG_VERBOSE, Boolean.TRUE.toString())).booleanValue();
 		// if no debug option was specified, don't even bother to try.
 		// Must ensure that the options slot is null as this is the signal to the
 		// platform that debugging is not enabled.
@@ -430,6 +435,26 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		this.outFile = traceFile;
 		FrameworkProperties.setProperty(PROP_TRACEFILE, this.outFile.getAbsolutePath());
 		// the file changed so start a new session
+		EclipseDebugTrace.newSession = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.osgi.service.debug.DebugOptions#getVerbose()
+	 */
+	boolean isVerbose() {
+
+		return this.verboseDebug;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.osgi.service.debug.DebugOptions#setVerbose(boolean)
+	 */
+	public synchronized void setVerbose(final boolean verbose) {
+
+		this.verboseDebug = verbose;
+		// the verbose flag changed so start a new session
 		EclipseDebugTrace.newSession = true;
 	}
 

@@ -12,10 +12,10 @@ package org.eclipse.osgi.framework.debug;
 
 import java.io.*;
 import java.security.AccessController;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.eclipse.osgi.framework.util.SecureAction;
-import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugTrace;
 
 /**
@@ -30,16 +30,18 @@ class EclipseDebugTrace implements DebugTrace {
 	/** The trace message for a thread stack dump */
 	private final static String MESSAGE_THREAD_DUMP = "Thread Stack dump: "; //$NON-NLS-1$
 	/** The trace message for a method completing with a return value */
-	private final static String MESSAGE_EXIT_METHOD_WITH_RESULTS = "Exiting method with result: "; //$NON-NLS-1$
+	private final static String MESSAGE_EXIT_METHOD_WITH_RESULTS = "Exiting method {0}with result: "; //$NON-NLS-1$
 	/** The trace message for a method completing with no return value */
-	private final static String MESSAGE_EXIT_METHOD_NO_RESULTS = "Exiting method with a void return"; //$NON-NLS-1$
+	private final static String MESSAGE_EXIT_METHOD_NO_RESULTS = "Exiting method {0}with a void return"; //$NON-NLS-1$
 	/** The trace message for a method starting with a set of arguments */
-	private final static String MESSAGE_ENTER_METHOD_WITH_PARAMS = "Entering method with parameters: ("; //$NON-NLS-1$
+	private final static String MESSAGE_ENTER_METHOD_WITH_PARAMS = "Entering method {0}with parameters: ("; //$NON-NLS-1$
 	/** The trace message for a method starting with no arguments */
-	private final static String MESSAGE_ENTER_METHOD_NO_PARAMS = "Entering method with no parameters"; //$NON-NLS-1$
-	/** The version attribute written to the header of the trace file */
+	private final static String MESSAGE_ENTER_METHOD_NO_PARAMS = "Entering method {0}with no parameters"; //$NON-NLS-1$
+	/** The version attribute written in the header of a new session */
 	private final static String TRACE_FILE_VERSION_COMMENT = "version: "; //$NON-NLS-1$
-	/** The version value written to the header of the trace file */
+	/** The verbose attribute written in the header of a new session */
+	private final static String TRACE_FILE_VERBOSE_COMMENT = "verbose: "; //$NON-NLS-1$
+	/** The version value written in the header of a new session */
 	private final static String TRACE_FILE_VERSION = "1.1"; //$NON-NLS-1$
 	/** The new session identifier to be written whenever a new session starts */
 	private final static String TRACE_NEW_SESSION = "!SESSION "; //$NON-NLS-1$
@@ -93,7 +95,7 @@ class EclipseDebugTrace implements DebugTrace {
 	/** A flag to determine if the message being written is done to a new file (i.e. should the header information be written) */
 	static boolean newSession = true;
 	/** DebugOptions are used to determine if the specified bundle symbolic name + option-path has debugging enabled */
-	private DebugOptions debugOptions = null;
+	private FrameworkDebugOptions debugOptions = null;
 
 	/**
 	 * Construct a new EclipseDebugTrace for the specified bundle symbolic name and write messages to the specified
@@ -102,7 +104,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @param bundleSymbolicName The symbolic name of the bundle being traced
 	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
 	 */
-	public EclipseDebugTrace(final String bundleSymbolicName, final DebugOptions debugOptions) {
+	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions) {
 
 		this(bundleSymbolicName, debugOptions, null);
 	}
@@ -115,7 +117,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
 	 * @param traceClass The class that the client is using to perform trace API calls
 	 */
-	public EclipseDebugTrace(final String bundleSymbolicName, final DebugOptions debugOptions, final Class traceClass) {
+	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions, final Class traceClass) {
 
 		this.traceClass = traceClass != null ? traceClass.getName() : null;
 		this.debugOptions = debugOptions;
@@ -171,7 +173,8 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceEntry(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, EclipseDebugTrace.MESSAGE_ENTER_METHOD_NO_PARAMS, traceClass);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
+			setMessage(record, EclipseDebugTrace.MESSAGE_ENTER_METHOD_NO_PARAMS);
 			writeRecord(record);
 		}
 	}
@@ -210,7 +213,8 @@ class EclipseDebugTrace implements DebugTrace {
 				}
 				messageBuffer.append(")"); //$NON-NLS-1$
 			}
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, messageBuffer.toString(), traceClass);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
+			setMessage(record, messageBuffer.toString());
 			writeRecord(record);
 		}
 	}
@@ -222,7 +226,8 @@ class EclipseDebugTrace implements DebugTrace {
 	public void traceExit(final String optionPath) {
 
 		if (isDebuggingEnabled(optionPath)) {
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, EclipseDebugTrace.MESSAGE_EXIT_METHOD_NO_RESULTS, traceClass);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
+			setMessage(record, EclipseDebugTrace.MESSAGE_EXIT_METHOD_NO_RESULTS);
 			writeRecord(record);
 		}
 	}
@@ -240,7 +245,8 @@ class EclipseDebugTrace implements DebugTrace {
 			} else {
 				messageBuffer.append(result.toString());
 			}
-			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, messageBuffer.toString(), traceClass);
+			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, null, traceClass);
+			setMessage(record, messageBuffer.toString());
 			writeRecord(record);
 		}
 	}
@@ -270,6 +276,29 @@ class EclipseDebugTrace implements DebugTrace {
 			final FrameworkDebugTraceEntry record = new FrameworkDebugTraceEntry(bundleSymbolicName, optionPath, messageBuffer.toString(), traceClass);
 			writeRecord(record);
 		}
+	}
+
+	/**
+	 * Set the trace message for the specified record to include class and method information
+	 * if verbose debugging is disabled.
+	 *  
+	 * @param record The {@link FrameworkDebugTraceEntry} containing the information to persist to the trace file.
+	 * @param originalMessage The original tracing message
+	 */
+	private final void setMessage(final FrameworkDebugTraceEntry record, final String originalMessage) {
+
+		String argument = null;
+		if (!debugOptions.isVerbose()) {
+			final StringBuffer classMethodName = new StringBuffer(record.getClassName());
+			classMethodName.append("#"); //$NON-NLS-1$
+			classMethodName.append(record.getMethodName());
+			classMethodName.append(" "); //$NON-NLS-1$
+			argument = classMethodName.toString();
+		} else {
+			argument = ""; //$NON-NLS-1$
+		}
+		String newMessage = MessageFormat.format(originalMessage, new Object[] {argument});
+		record.setMessage(newMessage);
 	}
 
 	/**
@@ -412,6 +441,7 @@ class EclipseDebugTrace implements DebugTrace {
 						traceWriter = openWriter(traceFile);
 						writeComment(traceWriter, "This is a continuation of trace file " + backupFile.getAbsolutePath()); //$NON-NLS-1$
 						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
+						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERBOSE_COMMENT + debugOptions.isVerbose());
 						writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_DATE + getFormattedDate(timestamp));
 						traceWriter.flush();
 					} catch (IOException ioEx) {
@@ -491,6 +521,7 @@ class EclipseDebugTrace implements DebugTrace {
 
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_NEW_SESSION + this.getFormattedDate(timestamp));
 		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERSION_COMMENT + EclipseDebugTrace.TRACE_FILE_VERSION);
+		writeComment(traceWriter, EclipseDebugTrace.TRACE_FILE_VERBOSE_COMMENT + debugOptions.isVerbose());
 		writeComment(traceWriter, "The following option strings are specified for this debug session:"); //$NON-NLS-1$ 
 		final String[] allOptions = FrameworkDebugOptions.getDefault().getAllOptions();
 		for (int i = 0; i < allOptions.length; i++) {
@@ -509,8 +540,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 */
 	private void writeMessage(final Writer traceWriter, final FrameworkDebugTraceEntry entry) throws IOException {
 
-		// format the trace entry
-		StringBuffer message = new StringBuffer(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+		final StringBuffer message = new StringBuffer(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
 		message.append(encodeText(entry.getThreadName()));
 		message.append(" "); //$NON-NLS-1$
@@ -520,27 +550,33 @@ class EclipseDebugTrace implements DebugTrace {
 		message.append(" "); //$NON-NLS-1$
 		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
 		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getBundleSymbolicName());
-		message.append(" "); //$NON-NLS-1$
-		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
-		message.append(" "); //$NON-NLS-1$
-		message.append(encodeText(entry.getOptionPath()));
-		message.append(" "); //$NON-NLS-1$
-		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
-		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getClassName());
-		message.append(" "); //$NON-NLS-1$
-		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
-		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getMethodName());
-		message.append(" "); //$NON-NLS-1$
-		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
-		message.append(" "); //$NON-NLS-1$
-		message.append(entry.getLineNumber());
-		message.append(" "); //$NON-NLS-1$
-		message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
-		message.append(" "); //$NON-NLS-1$
-		message.append(encodeText(entry.getMessage()));
+		if (!debugOptions.isVerbose()) {
+			// format the trace entry for quiet tracing: only the thread name, timestamp, trace message, and exception (if necessary)
+			message.append(encodeText(entry.getMessage()));
+		} else {
+			// format the trace entry for verbose tracing
+			message.append(entry.getBundleSymbolicName());
+			message.append(" "); //$NON-NLS-1$
+			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+			message.append(" "); //$NON-NLS-1$
+			message.append(encodeText(entry.getOptionPath()));
+			message.append(" "); //$NON-NLS-1$
+			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+			message.append(" "); //$NON-NLS-1$
+			message.append(entry.getClassName());
+			message.append(" "); //$NON-NLS-1$
+			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+			message.append(" "); //$NON-NLS-1$
+			message.append(entry.getMethodName());
+			message.append(" "); //$NON-NLS-1$
+			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+			message.append(" "); //$NON-NLS-1$
+			message.append(entry.getLineNumber());
+			message.append(" "); //$NON-NLS-1$
+			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
+			message.append(" "); //$NON-NLS-1$
+			message.append(encodeText(entry.getMessage()));
+		}
 		if (entry.getThrowable() != null) {
 			message.append(" "); //$NON-NLS-1$
 			message.append(EclipseDebugTrace.TRACE_ELEMENT_DELIMITER);
