@@ -356,7 +356,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 * <tt>AdminPermission</tt> and the Java runtime environment supports
 	 * permissions.
 	 */
-	public void setBundleStartLevel(Bundle bundle, int newSL) {
+	public void setBundleStartLevel(org.osgi.framework.Bundle bundle, int newSL) {
 
 		String exceptionText = null;
 		if (bundle.getBundleId() == 0) { // system bundle has id=0
@@ -372,8 +372,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		framework.checkAdminPermission(bundle, AdminPermission.EXECUTE);
 		try {
 			// if the bundle's startlevel is not already at the requested startlevel
-			int oldSL = ((AbstractBundle) bundle).getStartLevel();
-			if (newSL != oldSL) {
+			if (newSL != ((org.eclipse.osgi.framework.internal.core.AbstractBundle) bundle).getStartLevel()) {
 				final AbstractBundle b = (AbstractBundle) bundle;
 				b.getBundleData().setStartLevel(newSL);
 				try {
@@ -390,9 +389,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 					throw (RuntimeException) e.getException();
 				}
 				// handle starting or stopping the bundle asynchronously
-				if (newSL > oldSL || !((AbstractBundle) bundle).isActive())
-					// only need to do this if the newSL > oldSL (stopping) or the bundle is not active (could activate)
-					issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_BUNDLE_SL, newSL, (AbstractBundle) bundle));
+				issueEvent(new StartLevelEvent(StartLevelEvent.CHANGE_BUNDLE_SL, newSL, (AbstractBundle) bundle));
 			}
 		} catch (IOException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, bundle, e);
