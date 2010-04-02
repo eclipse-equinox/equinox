@@ -222,6 +222,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			BundleEvent[] expectedEvents = new BundleEvent[] {new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
 					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a)};
 			testListener.setExpectedEvents(expectedEvents);
+			// add a small delay to ensure the async bundle start-level changes above are done (bug 300820)
+			Thread.sleep(500);
 			installer.refreshPackages(new Bundle[] {bug259903a});
 			Throwable[] results = testListener.getFailures();
 			if (results.length > 0)
@@ -233,6 +235,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			installer.getStartLevel().setBundleStartLevel(bug259903c, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903b, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
+			// add a small delay to ensure the async bundle start-level changes above are done (bug 300820)
+			Thread.sleep(500);
 			installer.refreshPackages(new Bundle[] {bug259903a});
 			results = testListener.getFailures();
 			if (results.length > 0)
