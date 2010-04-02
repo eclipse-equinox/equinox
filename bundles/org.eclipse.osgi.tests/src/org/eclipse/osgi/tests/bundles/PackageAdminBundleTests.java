@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.bundles;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
@@ -32,6 +35,37 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			} finally {
 				events.clear();
 			}
+		}
+	}
+
+	public class Bug289719Listener implements SynchronousBundleListener {
+
+		ArrayList expectedEvents = new ArrayList();
+		ArrayList failures = new ArrayList();
+		int i = 0;
+
+		public synchronized void setExpectedEvents(BundleEvent[] events) {
+			i = 0;
+			failures.clear();
+			expectedEvents.clear();
+			expectedEvents.addAll(Arrays.asList(events));
+		}
+
+		public synchronized void bundleChanged(BundleEvent event) {
+			BundleEvent expected = expectedEvents.size() == 0 ? null : (BundleEvent) expectedEvents.remove(0);
+			try {
+				assertEquals("Compare results: " + i, expected, event);
+			} catch (Throwable t) {
+				failures.add(t);
+			} finally {
+				i++;
+			}
+		}
+
+		public synchronized Throwable[] getFailures() {
+			Throwable[] results = (Throwable[]) failures.toArray(new Throwable[failures.size()]);
+			setExpectedEvents(new BundleEvent[0]);
+			return results;
 		}
 	}
 
@@ -174,8 +208,8 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 		Bundle bug259903a = installer.installBundle("test.bug259903.a"); //$NON-NLS-1$
 		Bundle bug259903b = installer.installBundle("test.bug259903.b"); //$NON-NLS-1$
 		Bundle bug259903c = installer.installBundle("test.bug259903.c"); //$NON-NLS-1$
-		TestListener testListener = new TestListener();
-		OSGiTestsActivator.getContext().addBundleListener(testListener);
+		Bug289719Listener testListener = new Bug289719Listener();
+
 		try {
 			installer.resolveBundles(new Bundle[] {bug259903a, bug259903b, bug259903c});
 			bug259903a.start();
@@ -184,27 +218,38 @@ public class PackageAdminBundleTests extends AbstractBundleTests {
 			installer.getStartLevel().setBundleStartLevel(bug259903c, 2);
 			installer.getStartLevel().setBundleStartLevel(bug259903b, 3);
 			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
-
-			testListener.getEvents(); // clear events
+			OSGiTestsActivator.getContext().addBundleListener(testListener);
+			BundleEvent[] expectedEvents = new BundleEvent[] {new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a)};
+			testListener.setExpectedEvents(expectedEvents);
 			installer.refreshPackages(new Bundle[] {bug259903a});
-			Object[] expectedEvents = new Object[] {new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),
-					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),};
-			Object[] actualEvents = testListener.getEvents();
-			compareResults(expectedEvents, actualEvents);
+			Throwable[] results = testListener.getFailures();
+			if (results.length > 0)
+				fail(getMessage(results));
 
+			expectedEvents = new BundleEvent[] {new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),
+					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c)};
+			testListener.setExpectedEvents(expectedEvents);
 			installer.getStartLevel().setBundleStartLevel(bug259903c, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903b, 4);
 			installer.getStartLevel().setBundleStartLevel(bug259903a, 4);
 			installer.refreshPackages(new Bundle[] {bug259903a});
-			expectedEvents = new Object[] {new BundleEvent(BundleEvent.STOPPING, bug259903c), new BundleEvent(BundleEvent.STOPPED, bug259903c), new BundleEvent(BundleEvent.STOPPING, bug259903b), new BundleEvent(BundleEvent.STOPPED, bug259903b), new BundleEvent(BundleEvent.STOPPING, bug259903a), new BundleEvent(BundleEvent.STOPPED, bug259903a), new BundleEvent(BundleEvent.UNRESOLVED, bug259903c), new BundleEvent(BundleEvent.UNRESOLVED, bug259903b), new BundleEvent(BundleEvent.UNRESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903a), new BundleEvent(BundleEvent.RESOLVED, bug259903b), new BundleEvent(BundleEvent.RESOLVED, bug259903c), new BundleEvent(BundleEvent.STARTING, bug259903a), new BundleEvent(BundleEvent.STARTED, bug259903a),
-					new BundleEvent(BundleEvent.STARTING, bug259903b), new BundleEvent(BundleEvent.STARTED, bug259903b), new BundleEvent(BundleEvent.STARTING, bug259903c), new BundleEvent(BundleEvent.STARTED, bug259903c),};
-			actualEvents = testListener.getEvents();
-			compareResults(expectedEvents, actualEvents);
+			results = testListener.getFailures();
+			if (results.length > 0)
+				fail(getMessage(results));
 
 		} catch (Exception e) {
 			fail("Unexpected exception", e); //$NON-NLS-1$
 		} finally {
 			OSGiTestsActivator.getContext().removeBundleListener(testListener);
 		}
+	}
+
+	private String getMessage(Throwable[] results) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		for (int i = 0; i < results.length; i++)
+			results[i].printStackTrace(pw);
+		return sw.toString();
 	}
 }
