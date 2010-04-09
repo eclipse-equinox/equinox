@@ -56,7 +56,7 @@ import java.util.Map;
  * which is deprecated, implies the <code>import</code> action.
  * 
  * @ThreadSafe
- * @version $Revision: 7318 $
+ * @version $Revision: 7189 $
  */
 
 public final class PackagePermission extends BasicPermission {
@@ -166,8 +166,8 @@ public final class PackagePermission extends BasicPermission {
 	 * @param actions <code>exportonly</code>,<code>import</code> (canonical
 	 *        order).
 	 * @throws IllegalArgumentException If the specified name is a filter
-	 *        expression and either the specified action is not
-	 *        <code>import</code> or the filter has an invalid syntax.
+	 *         expression and either the specified action is not
+	 *         <code>import</code> or the filter has an invalid syntax.
 	 */
 	public PackagePermission(String name, String actions) {
 		this(name, parseActions(actions));
@@ -189,7 +189,7 @@ public final class PackagePermission extends BasicPermission {
 	 * @param exportingBundle The bundle exporting the requested package.
 	 * @param actions The action <code>import</code>.
 	 * @throws IllegalArgumentException If the specified action is not
-	 *        <code>import</code> or the name is a filter expression.
+	 *         <code>import</code> or the name is a filter expression.
 	 * @since 1.5
 	 */
 	public PackagePermission(String name, Bundle exportingBundle, String actions) {

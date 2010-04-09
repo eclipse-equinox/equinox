@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * (get service references) operations.
  * 
  * @ThreadSafe
- * @version $Revision: 7318 $
+ * @version $Revision: 6967 $
  */
 
 public interface FindHook {
