@@ -151,16 +151,11 @@ public class ComplExpBasic implements IComplExpProcessor {
 	private char curEmbed;
 	private int prefixLength;
 	char[] operators;
-	int operCount;
 	int[] locations;
 	int specialsCount;
-	int nextLocation;
-	int len;
 	private String leanText;
-	private int idxLocation;
 	private int[] offsets;
-	private int count, countLimit;
-	private int curPos;
+	private int count;
 	// For positions where it has been looked up, the entry will receive
 	// the Character directionality + 2 (so that 0 indicates that the
 	// the directionality has not been looked up yet.
@@ -183,14 +178,12 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 */
 	public ComplExpBasic(String operators) {
 		this.operators = operators.toCharArray();
-		operCount = this.operators.length;
-		locations = new int[operCount];
+		locations = new int[this.operators.length];
 	}
 
 	public void setOperators(String operators) {
 		this.operators = operators.toCharArray();
-		operCount = this.operators.length;
-		locations = new int[operCount + specialsCount];
+		locations = new int[this.operators.length + specialsCount];
 	}
 
 	public String getOperators() {
@@ -225,9 +218,8 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 */
 	public ComplExpBasic(String operators, int specialsCount) {
 		this.operators = operators.toCharArray();
-		operCount = this.operators.length;
 		this.specialsCount = specialsCount;
-		locations = new int[operCount + specialsCount];
+		locations = new int[this.operators.length + specialsCount];
 	}
 
 	public void selectBidiScript(boolean arabic, boolean hebrew) {
@@ -243,8 +235,11 @@ public class ComplExpBasic implements IComplExpProcessor {
 		return !ignoreHebrew;
 	}
 
-	void computeNextLocation() {
-		nextLocation = len;
+	long computeNextLocation(int curPos) {
+		int operCount = operators.length;
+		int len = leanText.length();
+		int nextLocation = len;
+		int idxLocation = 0;
 		// Start with special sequences to give them precedence over simple
 		// operators. This may apply to cases like slash+asterisk versus slash.
 		for (int i = 0; i < specialsCount; i++) {
@@ -273,6 +268,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 				idxLocation = i;
 			}
 		}
+		return nextLocation + (((long) idxLocation) << 32);
 	}
 
 	/**
@@ -371,6 +367,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 			return curOrient;
 		}
 		// contextual orientation
+		int len = leanText.length();
 		byte dirProp;
 		for (int i = 0; i < len; i++) {
 			dirProp = dirProps[i];
@@ -407,6 +404,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 			return curDirection;
 		}
 		// check if Arabic or Hebrew letter comes first
+		int len = leanText.length();
 		byte dirProp;
 		for (int i = 0; i < len; i++) {
 			dirProp = getDirProp(i);
@@ -493,6 +491,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *
 	 */
 	protected void processOperator(int operLocation) {
+		int len = leanText.length();
 		boolean doneAN = false;
 
 		if (getCurDirection() == DIRECTION_RTL) {
@@ -624,29 +623,31 @@ public class ComplExpBasic implements IComplExpProcessor {
 	}
 
 	void leanToFullTextNofix(String text, int initState) {
+		int operCount = operators.length;
+		int curPos = 0;
+		int len = text.length();
+		int nextLocation, idxLocation;
 		leanText = text;
-		len = leanText.length();
 		offsets = new int[20];
 		count = 0;
-		countLimit = offsets.length - 1;
 		dirProps = new byte[len];
 		curOrient = -1;
 		curDirection = -1;
-		curPos = 0;
 		// initialize locations
 		int k = locations.length;
 		for (int i = 0; i < k; i++) {
 			locations[i] = -1;
 		}
 		state = STATE_NOTHING_GOING;
-		nextLocation = -1;
 		if (initState != STATE_NOTHING_GOING)
 			curPos = processSpecial(initState, leanText, -1);
 
 		while (true) {
-			computeNextLocation();
+			long res = computeNextLocation(curPos);
+			nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
 			if (nextLocation >= len)
 				break;
+			idxLocation = (int) (res >> 32); /* high word */
 			if (idxLocation < operCount) {
 				processOperator(nextLocation);
 				curPos = nextLocation + 1;
@@ -689,6 +690,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 			added++;
 		}
 		if (prefixLength > 1) {
+			int len = leanText.length();
 			fullOffsets[lim - 2] = len + lim - 2;
 			fullOffsets[lim - 1] = len + lim - 1;
 		}
@@ -721,7 +723,6 @@ public class ComplExpBasic implements IComplExpProcessor {
 		}
 		if (i < 0) {
 			leanText = EMPTY_STRING;
-			len = 0;
 			prefixLength = 0;
 			count = 0;
 			return leanText;
@@ -792,7 +793,6 @@ public class ComplExpBasic implements IComplExpProcessor {
 		}
 		lean = new String(newChars, 0, newCharsPos);
 		leanText = lean;
-		len = leanText.length();
 		return lean;
 	}
 
@@ -808,8 +808,9 @@ public class ComplExpBasic implements IComplExpProcessor {
 	}
 
 	public int fullToLeanPos(int pos) {
-		pos -= prefixLength;
+		int len = leanText.length();
 		int added = 0;
+		pos -= prefixLength;
 		for (int i = 0; i < count; i++) {
 			if ((offsets[i] + added) < pos)
 				added++;
@@ -855,11 +856,10 @@ public class ComplExpBasic implements IComplExpProcessor {
 		}
 		index++; // index now points at where to insert
 		// check if we have an available slot for new member
-		if (count >= countLimit) {
+		if (count >= (offsets.length - 1)) {
 			int[] newOffsets = new int[offsets.length * 2];
 			System.arraycopy(offsets, 0, newOffsets, 0, count);
 			offsets = newOffsets;
-			countLimit = offsets.length - 1;
 		}
 
 		int length = count - index; // number of members to move up
@@ -890,6 +890,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 			prefixLength = 0;
 			return leanText;
 		}
+		int len = leanText.length();
 		int newLen = len + count;
 		if (addFixes && ((getCurOrient() != getCurDirection()) || (curOrient == ORIENT_UNKNOWN))) {
 			if ((orientation & ORIENT_CONTEXTUAL_LTR) == 0) {
