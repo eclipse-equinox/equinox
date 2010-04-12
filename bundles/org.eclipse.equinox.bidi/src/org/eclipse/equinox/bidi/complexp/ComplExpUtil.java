@@ -17,24 +17,6 @@ import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
  *  This class provides a number of convenience functions facilitating the
  *  processing of complex expressions.
  *
- *  <p>&nbsp;</p>
- *
- *  <h2>Code Sample</h2>
- *
- *  <p>The following code shows how to instantiate a processor adapted for a
- *  certain type of complex expression (directory and file paths), and how
- *  to obtain the <i>full</i> text corresponding to the <i>lean</i> text
- *  of such an expression.
- *
- *  <pre>
- *
- *    IComplExpProcessor processor = ComplExpUtil.create(ComplExpUtil.PATH);
- *    String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
- *    String fullText = processor.leanToFullText(leanText);
- *    System.out.println("full text = " + fullText);
- *  </pre>
- *  <p>&nbsp;</p>
- *  
  *  @noextend This class is not intended to be subclassed by clients.
  *  @noinstantiate This class is not intended to be instantiated by clients.
  *
@@ -44,12 +26,11 @@ final public class ComplExpUtil {
 
 	/**
 	 *  Flag specifying that all complex expressions should by default assume
-	 *  that the GUI is mirrored (gobally going from right to left).
+	 *  that the GUI is mirrored (globally going from right to left).
 	 *  The default can be overridden for specific instances of complex
 	 *  expressions.
 	 *  @see #assumeMirroredDefault
 	 *  @see #isMirroredDefault
-	 *  @see ComplExpBasic#mirrored
 	 */
 	static boolean mirroredDefault;
 
@@ -306,7 +287,7 @@ final public class ComplExpUtil {
 	 *
 	 *  @param  type specifies the type of the complex expression. It must
 	 *          be one of the values allowed as argument for method
-	 *          {@link #create}.
+	 *          {@link ComplExpFactory#create}.
 	 *
 	 *  @return the processed string
 	 */
@@ -362,7 +343,7 @@ final public class ComplExpUtil {
 
 	/**
 	 *  Removes directional marker characters in the given string that were inserted
-	 *  by the {@link #process(String, int)} method.
+	 *  by the {@link #process(String, String)} method.
 	 *
 	 *  @param  str string with directional markers to remove
 	 *

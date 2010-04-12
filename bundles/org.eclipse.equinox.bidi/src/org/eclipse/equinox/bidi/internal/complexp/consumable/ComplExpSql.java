@@ -28,8 +28,6 @@ import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
  *  the last <i>full</i> text computed for this line has not changed either.
  *
  *  @see IComplExpProcessor
- *  @see ComplExpBasic#state
- *
  *  @author Matitiahu Allouche
  */
 public class ComplExpSql extends ComplExpBasic {

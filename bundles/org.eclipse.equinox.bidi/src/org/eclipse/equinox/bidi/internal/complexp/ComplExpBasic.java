@@ -10,8 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.complexp;
 
-import org.eclipse.equinox.bidi.complexp.ComplExpUtil;
-import org.eclipse.equinox.bidi.complexp.IComplExpProcessor;
+import org.eclipse.equinox.bidi.complexp.*;
 
 /**
  *  <code>ComplExpBasic</code> is a
@@ -38,7 +37,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 	 *  for the parent complex expression instance.
 	 *  @see #assumeMirrored
 	 *  @see #isMirrored
-	 *  @see ComplExpUtil#mirroredDefault
+	 *  @see ComplExpUtil#isMirroredDefault()
 	 */
 	protected boolean mirrored = ComplExpUtil.isMirroredDefault();
 
@@ -67,7 +66,7 @@ public class ComplExpBasic implements IComplExpProcessor {
 
 	/**
 	 *  Type of the complex expression processor specified when calling
-	 *  {@link ComplExpUtil#create}
+	 *  {@link ComplExpFactory#create(String)}.
 	 */
 	protected String type;
 

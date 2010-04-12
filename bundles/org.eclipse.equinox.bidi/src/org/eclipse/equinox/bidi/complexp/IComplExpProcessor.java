@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.complexp;
 
-import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
 
 /**
  *  This interface provides a generic mechanism to handle
@@ -28,7 +27,7 @@ import org.eclipse.equinox.bidi.internal.complexp.ComplExpBasic;
  *
  *  <pre>
  *
- *    IComplExpProcessor processor = ComplExpUtil.create(ComplExpUtil.PATH);
+ *    IComplExpProcessor processor = ComplExpFactory.create(IBiDiProcessor.FILE);
  *    String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
  *    String fullText = processor.leanToFullText(leanText);
  *    System.out.println("full text = " + fullText);
@@ -46,8 +45,6 @@ public interface IComplExpProcessor {
 	 *  {@link #fullToLeanText(java.lang.String, int) fullToLeanText}
 	 *  to indicate that there is no context of previous lines which
 	 *  should be initialized before performing the operation.
-	 *
-	 *  @see ComplExpBasic#state
 	 */
 	public static final int STATE_NOTHING_GOING = -1;
 
@@ -116,7 +113,7 @@ public interface IComplExpProcessor {
 	 *  This constant can appear as argument for {@link #setDirection(int) setDirection}
 	 *  or return value for {@link #getDirection getDirection}.
 	 *
-	 *  @see ComplExpBasic#mirrored
+	 *  @see ComplExpUtil#isMirroredDefault()
 	 */
 	public static final int DIRECTION_LTR = 0;
 
@@ -127,7 +124,7 @@ public interface IComplExpProcessor {
 	 *  This constant can appear as argument for {@link #setDirection(int) setDirection}
 	 *  or return value for {@link #getDirection getDirection}.
 	 *
-	 *  @see ComplExpBasic#mirrored
+	 *  @see ComplExpUtil#isMirroredDefault()
 	 */
 	public static final int DIRECTION_RTL = 1;
 
