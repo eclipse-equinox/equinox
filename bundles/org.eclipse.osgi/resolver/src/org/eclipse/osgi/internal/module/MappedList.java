@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,18 +22,17 @@ public class MappedList {
 	protected HashMap internal = new HashMap();
 
 	public void put(Object key, Object value) {
-		Object[] existing = (Object[]) internal.get(key);
+		Object existing = internal.get(key);
 		if (existing == null) {
-			existing = new Object[1]; // be optimistic; start small
-			existing[0] = value;
-			internal.put(key, existing);
+			internal.put(key, value);
 		} else {
+			Object[] existingValues = existing.getClass().isArray() ? (Object[]) existing : new Object[] {existing};
 			// insert the new value
-			int index = insertionIndex(existing, value);
-			Object[] newValues = new Object[existing.length + 1];
-			System.arraycopy(existing, 0, newValues, 0, index);
+			int index = insertionIndex(existingValues, value);
+			Object[] newValues = new Object[existingValues.length + 1];
+			System.arraycopy(existingValues, 0, newValues, 0, index);
 			newValues[index] = value;
-			System.arraycopy(existing, index, newValues, index + 1, existing.length - index);
+			System.arraycopy(existingValues, index, newValues, index + 1, existingValues.length - index);
 			internal.put(key, newValues); // overwrite the old values in the map
 		}
 	}
@@ -56,8 +55,10 @@ public class MappedList {
 
 	// gets all values with the specified and optionally removes them
 	private Object[] get(Object key, boolean remove) {
-		Object[] result = (Object[]) (remove ? internal.remove(key) : internal.get(key));
-		return result == null ? new Object[0] : result;
+		Object result = remove ? internal.remove(key) : internal.get(key);
+		if (result != null && result.getClass().isArray())
+			return (Object[]) result;
+		return result == null ? new Object[0] : new Object[] {result};
 	}
 
 	// returns the number of keyed lists
@@ -72,9 +73,13 @@ public class MappedList {
 		ArrayList results = new ArrayList(getSize());
 		Iterator iter = internal.values().iterator();
 		while (iter.hasNext()) {
-			Object[] values = (Object[]) iter.next();
-			for (int i = 0; i < values.length; i++)
-				results.add(values[i]);
+			Object value = iter.next();
+			if (value.getClass().isArray()) {
+				Object[] values = (Object[]) iter.next();
+				for (int i = 0; i < values.length; i++)
+					results.add(values[i]);
+			} else
+				results.add(value);
 		}
 		return results.toArray();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,20 +42,28 @@ public class VersionHashMap extends MappedList implements Comparator {
 	}
 
 	private VersionSupplier contains(VersionSupplier vs, boolean remove) {
-		Object[] existing = (Object[]) internal.get(vs.getName());
+		Object existing = internal.get(vs.getName());
 		if (existing == null)
 			return null;
-		for (int i = 0; i < existing.length; i++)
-			if (existing[i] == vs) {
+		if (existing == vs) {
+			if (remove)
+				internal.remove(vs.getName());
+			return vs;
+		}
+		if (!existing.getClass().isArray())
+			return null;
+		Object[] existingValues = (Object[]) existing;
+		for (int i = 0; i < existingValues.length; i++)
+			if (existingValues[i] == vs) {
 				if (remove) {
-					if (existing.length == 1) {
-						internal.remove(vs.getName());
+					if (existingValues.length == 2) {
+						internal.put(vs.getName(), existingValues[i == 0 ? 1 : 0]);
 						return vs;
 					}
-					Object[] newExisting = new Object[existing.length - 1];
-					System.arraycopy(existing, 0, newExisting, 0, i);
-					if (i + 1 < existing.length)
-						System.arraycopy(existing, i + 1, newExisting, i, existing.length - i - 1);
+					Object[] newExisting = new Object[existingValues.length - 1];
+					System.arraycopy(existingValues, 0, newExisting, 0, i);
+					if (i + 1 < existingValues.length)
+						System.arraycopy(existingValues, i + 1, newExisting, i, existingValues.length - i - 1);
 					internal.put(vs.getName(), newExisting);
 				}
 				return vs;
@@ -76,10 +84,10 @@ public class VersionHashMap extends MappedList implements Comparator {
 	// from the resolved bundles are ahead of those from unresolved bundles
 	void reorder() {
 		for (Iterator it = internal.values().iterator(); it.hasNext();) {
-			Object[] existing = (Object[]) it.next();
-			if (existing.length <= 1)
+			Object existing = it.next();
+			if (!existing.getClass().isArray())
 				continue;
-			Arrays.sort(existing, this);
+			Arrays.sort((Object[]) existing, this);
 		}
 	}
 
