@@ -357,7 +357,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				} catch (NoSuchElementException e) {
 					// ignore, use the values parsed so far
 				}
-				value = new Version(major, minor, micro, qualifier).toString();
+				try {
+					value = new Version(major, minor, micro, qualifier).toString();
+				} catch (IllegalArgumentException e) {
+					// must be an invalid qualifier; just ignore it
+					value = new Version(major, minor, micro).toString();
+				}
 				properties.put(Constants.FRAMEWORK_OS_VERSION, value);
 			}
 		}
