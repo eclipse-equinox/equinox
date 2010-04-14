@@ -171,7 +171,9 @@ public final class Resolver implements WorkPerformer {
 							map(current, (Dictionary) null);
 						} else {
 							String customReason = Activator.configAdmin != null ? "" : Messages.CONFIG_ADMIN_SERVICE_NOT_AVAILABLE; //$NON-NLS-1$
-							Activator.log(current.bc, LogService.LOG_WARNING, NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name) + customReason, null);
+							if (Activator.DEBUG) {
+								Activator.log.debug(NLS.bind(Messages.COMPONENT_REQURES_CONFIGURATION_ACTIVATION, current.name) + customReason, null);
+							}
 						}
 					} else {
 						// if ManagedServiceFactory
