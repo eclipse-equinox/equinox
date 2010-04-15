@@ -20,7 +20,6 @@ import java.net.URL;
 import java.security.*;
 import java.util.*;
 import java.util.jar.*;
-import java.util.jar.Attributes.Name;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
@@ -273,7 +272,7 @@ public class FrameworkLauncher {
 			if (mf == null)
 				return;
 			Attributes attributes = mf.getMainAttributes();
-			String exportPackage = (String) attributes.remove(new Name("X-Deploy-Export-Package")); //$NON-NLS-1$
+			String exportPackage = (String) attributes.remove(new Attributes.Name("X-Deploy-Export-Package")); //$NON-NLS-1$
 			if (exportPackage != null) {
 				attributes.putValue("Export-Package", exportPackage); //$NON-NLS-1$
 				writeJarFile(extensionBundleFile, mf);
@@ -353,6 +352,19 @@ public class FrameworkLauncher {
 
 		Map initialPropertyMap = buildInitialPropertyMap();
 		String[] args = buildCommandLineArguments();
+
+		// Handle commandline -D properties
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
+			if (arg.startsWith("-D")) { //$NON-NLS-1$
+				int equalsIndex = arg.indexOf('=');
+				if (equalsIndex == -1) {
+					initialPropertyMap.put(arg.substring(2), ""); //$NON-NLS-1$
+				} else {
+					initialPropertyMap.put(arg.substring(2, equalsIndex), arg.substring(equalsIndex + 1));
+				}
+			}
+		}
 
 		ClassLoader original = Thread.currentThread().getContextClassLoader();
 		try {
