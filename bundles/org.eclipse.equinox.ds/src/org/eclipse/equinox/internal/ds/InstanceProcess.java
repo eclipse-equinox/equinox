@@ -194,17 +194,17 @@ public class InstanceProcess {
 								}
 							}
 						}
+						if (successfullyBuilt) {
+							if (sc.serviceInterfaces != null) {
+								// this component registers service
+								//the service will be registered only if the component was successfully built
 
-						if (sc.serviceInterfaces != null && successfullyBuilt) {
-							// this component registers service
-							//the service will be registered only if the component was successfully built
-
-							// this will create either plain service component
-							// registration
-							// or a service factory registration
-							registerService(scp, sc.serviceFactory, null);
+								// this will create either plain service component registration
+								// or a service factory registration
+								registerService(scp, sc.serviceFactory, null);
+							}
+							scp.setState(Component.STATE_ACTIVE);
 						}
-						scp.setState(Component.STATE_ACTIVE);
 					} else {
 
 						// ComponentFactory
