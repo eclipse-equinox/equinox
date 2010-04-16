@@ -233,11 +233,6 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 				int tempSL = activeSL;
 				if (newSL > tempSL) {
 					boolean launching = tempSL == 0;
-					if (launching) {
-						// TODO this technically should be done just before firing the STARTED event for the system bundle; 
-						// TODO State is set to ACTIVE here because some depend on the the system bundle being in the ACTIVE state when they are starting 
-						framework.systemBundle.state = Bundle.ACTIVE;
-					}
 					for (int i = tempSL; i < newSL; i++) {
 						if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
 							Debug.println("sync - incrementing Startlevel from " + tempSL); //$NON-NLS-1$
@@ -248,6 +243,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 						incFWSL(i + 1, getInstalledBundles(framework.bundles, false));
 					}
 					if (launching) {
+						framework.systemBundle.state = Bundle.ACTIVE;
 						framework.publishBundleEvent(BundleEvent.STARTED, framework.systemBundle);
 						framework.publishFrameworkEvent(FrameworkEvent.STARTED, framework.systemBundle, null);
 					}
