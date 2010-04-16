@@ -361,7 +361,13 @@ public class FrameworkLauncher {
 				if (equalsIndex == -1) {
 					initialPropertyMap.put(arg.substring(2), ""); //$NON-NLS-1$
 				} else {
-					initialPropertyMap.put(arg.substring(2, equalsIndex), arg.substring(equalsIndex + 1));
+					String key = arg.substring(2, equalsIndex);
+					String value = arg.substring(equalsIndex + 1);
+					if (value.startsWith("\"") && value.endsWith("\"")) //$NON-NLS-1$//$NON-NLS-2$
+						value = value.substring(1, value.length() - 1);
+					if (value.equals(NULL_IDENTIFIER))
+						value = null;
+					initialPropertyMap.put(key, value);
 				}
 			}
 		}
@@ -670,6 +676,15 @@ public class FrameworkLauncher {
 						arg = arg.substring(1) + remainingArg;
 						// skip to next whitespace separated token
 						tokenizer.nextToken(WS_DELIM);
+					}
+				} else if (arg.startsWith("-D")) { //$NON-NLS-1$
+					int matchIndex = arg.indexOf("=\""); //$NON-NLS-1$
+					if (matchIndex != -1) {
+						if (!arg.substring(matchIndex + 2).endsWith("\"") && tokenizer.hasMoreTokens()) { //$NON-NLS-1$
+							arg += tokenizer.nextToken("\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+							// skip to next whitespace separated token
+							tokenizer.nextToken(WS_DELIM);
+						}
 					}
 				}
 				args.add(arg);
