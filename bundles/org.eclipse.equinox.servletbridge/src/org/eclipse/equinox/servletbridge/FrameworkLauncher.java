@@ -365,9 +365,7 @@ public class FrameworkLauncher {
 					String value = arg.substring(equalsIndex + 1);
 					if (value.startsWith("\"") && value.endsWith("\"")) //$NON-NLS-1$//$NON-NLS-2$
 						value = value.substring(1, value.length() - 1);
-					if (value.equals(NULL_IDENTIFIER))
-						value = null;
-					initialPropertyMap.put(key, value);
+					setInitialProperty(initialPropertyMap, key, value);
 				}
 			}
 		}
@@ -533,14 +531,7 @@ public class FrameworkLauncher {
 			Map.Entry entry = (Map.Entry) it.next();
 			String key = (String) entry.getKey();
 			String value = (String) entry.getValue();
-			if (key.endsWith("*")) { //$NON-NLS-1$
-				if (value.equals(NULL_IDENTIFIER)) {
-					clearPrefixedSystemProperties(key.substring(0, key.length() - 1), initialPropertyMap);
-				}
-			} else if (value.equals(NULL_IDENTIFIER))
-				initialPropertyMap.put(key, null);
-			else
-				initialPropertyMap.put(entry.getKey(), entry.getValue());
+			setInitialProperty(initialPropertyMap, key, value);
 		}
 
 		try {
@@ -588,6 +579,17 @@ public class FrameworkLauncher {
 		}
 
 		return initialPropertyMap;
+	}
+
+	private void setInitialProperty(Map initialPropertyMap, String key, String value) {
+		if (key.endsWith("*")) { //$NON-NLS-1$
+			if (value.equals(NULL_IDENTIFIER)) {
+				clearPrefixedSystemProperties(key.substring(0, key.length() - 1), initialPropertyMap);
+			}
+		} else if (value.equals(NULL_IDENTIFIER))
+			initialPropertyMap.put(key, null);
+		else
+			initialPropertyMap.put(key, value);
 	}
 
 	private Properties loadConfigurationFile(Map initialPropertyMap) {
