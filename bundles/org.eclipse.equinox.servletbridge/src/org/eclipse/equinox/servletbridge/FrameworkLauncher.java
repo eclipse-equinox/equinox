@@ -38,8 +38,8 @@ import javax.servlet.ServletContext;
  */
 public class FrameworkLauncher {
 
-	private static final String REFERENCE_SCHEME = "reference:";
-	private static final String CONFIG_INI = "config.ini";
+	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
+	private static final String CONFIG_INI = "config.ini"; //$NON-NLS-1$
 	private static final String DOT_JAR = ".jar"; //$NON-NLS-1$
 	private static final String WS_DELIM = " \t\n\r\f"; //$NON-NLS-1$
 	protected static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
