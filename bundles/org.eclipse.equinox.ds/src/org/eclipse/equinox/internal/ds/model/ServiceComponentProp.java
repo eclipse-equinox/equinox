@@ -368,7 +368,6 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 		if (!instances.removeElement(componentInstance)) {
 			return; //the instance is already disposed  
 		}
-		setState(Component.STATE_DEACTIVATING);
 		deactivate(componentInstance, deactivateReason);
 		unbind(componentInstance);
 		if (instances.isEmpty()) {
