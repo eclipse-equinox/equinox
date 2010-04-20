@@ -53,8 +53,14 @@ public class InstanceProcess {
 	//specifies the maximum time that a thread must wait for the building thread to complete the building of the SCP
 	static int waitTime = Activator.getInteger("equinox.scr.waitTimeOnBlock", 10000); //$NON-NLS-1$
 
-	//key - the SPC;   value - the SCPLock object
-	Hashtable scpLocks = new Hashtable(5);
+	//a flag used for synchronization of build/dispose operations
+	boolean busyBuilding = false;
+	//the working thread that performs the current build/dispose operation
+	Thread workingThread;
+	//an object used for synchronization when changing the status of busyBuilding flag
+	Object lock = new Object();
+	//used to count the number of times a lock is held when required recursively 
+	int lockCounter = 0;
 
 	/**
 	 * Handle Instance processing building and disposing.
@@ -76,40 +82,31 @@ public class InstanceProcess {
 		factoryRegistrations = null;
 	}
 
-	// gets the SCP synch lock to perform some build/release work
-	void getLock(ServiceComponentProp scp) {
-		SCPLock scpLock;
-		synchronized (scp) {
-			scpLock = (SCPLock) scpLocks.get(scp);
-			if (scpLock == null) {
-				scpLock = new SCPLock();
-				scpLocks.put(scp, scpLock);
-			}
-		}
-		synchronized (scpLock.lock) {
+	// gets the synch lock to perform some build/release work
+	void getLock() {
+		synchronized (lock) {
 			Thread currentThread = Thread.currentThread();
-			if (!scpLock.busyBuilding) {
-				scpLock.busyBuilding = true;
-				scpLock.lockCounter++;
-				scpLock.workingThread = currentThread;
-			} else if (scpLock.workingThread == currentThread) {
+			if (!busyBuilding) {
+				busyBuilding = true;
+				lockCounter++;
+				workingThread = currentThread;
+			} else if (workingThread == currentThread) {
 				//increase the lock counter - the lock is required recursively
-				scpLock.lockCounter++;
-			} else if (scpLock.workingThread != currentThread) {
+				lockCounter++;
+			} else if (workingThread != currentThread) {
 				long start = System.currentTimeMillis();
 				long timeToWait = waitTime;
 				boolean lockSucceeded = false;
 				do {
 					try {
-						scpLock.lock.wait(timeToWait);
+						lock.wait(timeToWait);
 					} catch (InterruptedException e) {
 						// do nothing
 					}
-					if (!scpLock.busyBuilding) {
-						scpLock.busyBuilding = true;
-						scpLock.lockCounter++;
-						scpLock.workingThread = currentThread;
-						scpLocks.put(scp, scpLock);
+					if (!busyBuilding) {
+						busyBuilding = true;
+						lockCounter++;
+						workingThread = currentThread;
 						lockSucceeded = true;
 						break;
 					}
@@ -125,21 +122,19 @@ public class InstanceProcess {
 		}
 	}
 
-	// free the SCP synch lock 
-	void freeLock(ServiceComponentProp scp) {
-		SCPLock scpLock = (SCPLock) scpLocks.get(scp);
-		synchronized (scpLock.lock) {
-			if (scpLock.busyBuilding) {
-				if (scpLock.workingThread == Thread.currentThread()) {
+	// free the synch lock 
+	void freeLock() {
+		synchronized (lock) {
+			if (busyBuilding) {
+				if (workingThread == Thread.currentThread()) {
 					//only the thread holding the lock can release it
-					scpLock.lockCounter--;
+					lockCounter--;
 				}
 				// release the lock in case the lock counter has decreased to 0
-				if (scpLock.lockCounter == 0) {
-					scpLock.busyBuilding = false;
-					scpLock.workingThread = null;
-					scpLock.lock.notify();
-					scpLocks.remove(scp);
+				if (lockCounter == 0) {
+					busyBuilding = false;
+					workingThread = null;
+					lock.notify();
 				}
 			}
 		}
@@ -162,13 +157,13 @@ public class InstanceProcess {
 		if (list != null) {
 			for (int i = 0; i < list.size(); i++) {
 				scp = (ServiceComponentProp) list.elementAt(i);
-				getLock(scp);
+				getLock();
 				int componentState = scp.getState();
 				if (componentState != Component.STATE_UNSATISFIED) {
 					//no need to build the component:
 					// 1) it is disposed or about to be disposed
 					// 2) it is already built or being built
-					freeLock(scp);
+					freeLock();
 					continue;
 				}
 				long start = 0l;
@@ -257,7 +252,7 @@ public class InstanceProcess {
 					if (!successfullyBuilt) {
 						scp.setState(Component.STATE_UNSATISFIED);
 					}
-					freeLock(scp);
+					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
 						Activator.log.info("[DS perf] The component " + scp + " is built for " + Long.toString(start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
@@ -281,10 +276,10 @@ public class InstanceProcess {
 		if (scpList != null) {
 			for (int i = 0; i < scpList.size(); i++) {
 				ServiceComponentProp scp = (ServiceComponentProp) scpList.elementAt(i);
-				getLock(scp);
+				getLock();
 				if (scp.isUnsatisfied()) {
 					//it is already deactivated
-					freeLock(scp);
+					freeLock();
 					continue;
 				}
 				long start = 0l;
@@ -299,7 +294,7 @@ public class InstanceProcess {
 					Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_DISPOSING_INSTANCES, scp), t);
 				} finally {
 					resolver.componentDisposed(scp);
-					freeLock(scp);
+					freeLock();
 					if (Activator.PERF) {
 						start = System.currentTimeMillis() - start;
 						Activator.log.info("[DS perf] The component " + scp + " is disposed for " + Long.toString(start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -509,7 +504,7 @@ public class InstanceProcess {
 		if (Activator.DEBUG) {
 			Activator.log.debug("InstanceProcess.buildComponent(): building component " + scp.name, null); //$NON-NLS-1$
 		}
-		getLock(scp);
+		getLock();
 		Counter counter;
 		Thread curThread = Thread.currentThread();
 		synchronized (scp) {
@@ -536,7 +531,7 @@ public class InstanceProcess {
 
 					//check if the timeout has passed or the scp is actually built	
 					if (buildingThreads.get(scp) != null) {
-						freeLock(scp);
+						freeLock();
 						// The SCP is not yet built
 						// We have two options here:
 						// 1 - Return the instance (if already created) nevertheless it is not finished its binding and activation phase
@@ -603,7 +598,7 @@ public class InstanceProcess {
 				buildingThreads.remove(scp);
 				scp.notify();
 			}
-			freeLock(scp);
+			freeLock();
 		}
 	}
 
@@ -611,7 +606,7 @@ public class InstanceProcess {
 		if (Activator.DEBUG) {
 			Activator.log.debug("Modifying component " + scp.name, null); //$NON-NLS-1$
 		}
-		getLock(scp);
+		getLock();
 		long start = 0l;
 		try {
 			if (!scp.isBuilt()) {
@@ -637,7 +632,7 @@ public class InstanceProcess {
 				}
 			}
 		} finally {
-			freeLock(scp);
+			freeLock();
 		}
 	}
 
@@ -766,17 +761,6 @@ public class InstanceProcess {
 	 */
 	static class Counter {
 		int count = 0;
-	}
-
-	static class SCPLock {
-		//a flag used for synchronization of build/dispose operations
-		boolean busyBuilding = false;
-		//the working thread that performs the current build/dispose operation
-		Thread workingThread;
-		//an object used for synchronization when changing the status of busyBuilding flag
-		Object lock = new Object();
-		//used to count the number of times a lock is held when required recursively 
-		int lockCounter = 0;
 	}
 
 }
