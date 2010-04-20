@@ -353,7 +353,7 @@ public final class Resolver implements WorkPerformer {
 					// do we need to unbind
 					target = selectDynamicUnBind(scpEnabled, event.getServiceReference(), false);
 
-					if (componentsToDispose != null) {
+					if (componentsToDispose != null || !newlyUnsatisfiedSCPs.isEmpty()) {
 						// some components with static references were disposed. Try to build them again
 						// get list of newly satisfied SCPs and build them
 						resolvedComponents = getComponentsToBuild();
@@ -519,7 +519,7 @@ public final class Resolver implements WorkPerformer {
 						continue;
 					}
 				}
-				if (!scp.isBuilt()) {
+				if (!scp.isBuilt() && !(scp.getState() == Component.STATE_DEACTIVATING)) {
 					scp.setState(Component.STATE_UNSATISFIED);
 				}
 			}
@@ -565,7 +565,7 @@ public final class Resolver implements WorkPerformer {
 			return result;
 		} catch (Throwable e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
-			return null;
+			return new Vector(1);
 		}
 	}
 
