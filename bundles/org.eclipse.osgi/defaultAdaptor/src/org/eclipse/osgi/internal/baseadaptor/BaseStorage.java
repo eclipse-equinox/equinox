@@ -1265,14 +1265,18 @@ public class BaseStorage implements SynchronousBundleListener {
 				if (runningThread == null) {
 					shutdownHook = new Thread(new Runnable() {
 						public void run() {
-							synchronized (systemState) {
-								saveAllData(false);
-							}
+							// Synchronize with JVM shutdown hook, because
+							// saveAllData creates a temp file with delete on 
+							// exit is true. The temp file will be removed in the
+							// shutdown hook. This prevents that the remove temp files
+							// in the shutdown hook is earlier handled then adding new
+							// temp file in saveAllData.
+							shutdown();
 						}
 					});
-					Runtime.getRuntime().addShutdownHook(shutdownHook);
 					runningThread = new Thread(this, "State Saver"); //$NON-NLS-1$
 					runningThread.start();
+					Runtime.getRuntime().addShutdownHook(shutdownHook);
 				}
 			}
 		}
