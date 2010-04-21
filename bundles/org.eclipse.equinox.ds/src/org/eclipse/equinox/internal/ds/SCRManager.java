@@ -679,7 +679,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			Vector componentsToProcess = null;
 
 			if (Activator.DEBUG) {
-				String message = (enable ? "SCRManager.enableComponent(): " : "SCRManager.disableComponent(): ").concat(name != null ? name : "*all*") + " from bundle " + bundle.getSymbolicName(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String message = (enable ? "SCRManager.enableComponent(): " : "SCRManager.disableComponent(): ").concat(name != null ? name : "*all*") + " from bundle " + getBundleName(bundle); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				Activator.log.debug(message, null);
 			}
 			Vector bundleComponents = (Vector) bundleToServiceComponents.get(bundle);
