@@ -80,7 +80,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private String findExtensionAlias(String alias) {
 		String lastSegment = alias.substring(alias.lastIndexOf('/') + 1);
-		int dot = lastSegment.indexOf('.');
+		int dot = lastSegment.lastIndexOf('.');
 		if (dot == -1)
 			return null;
 		String extension = lastSegment.substring(dot + 1);
