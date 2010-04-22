@@ -1314,7 +1314,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 			if (i < errors.length - 1)
 				message.append(", "); //$NON-NLS-1$
 		}
-		return new BundleException(NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, message.toString()), errorType);
+		return new BundleException(NLS.bind(Msg.BUNDLE_UNRESOLVED_UNSATISFIED_CONSTRAINT_EXCEPTION, this.toString(), message.toString()), errorType);
 	}
 
 	public int getKeyHashCode() {
