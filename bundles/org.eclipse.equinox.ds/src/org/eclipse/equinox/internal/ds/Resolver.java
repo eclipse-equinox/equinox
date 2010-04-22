@@ -325,19 +325,6 @@ public final class Resolver implements WorkPerformer {
 
 				break;
 			case ServiceEvent.UNREGISTERING :
-				Vector newlyUnsatisfiedSCPs;
-				synchronized (syncLock) {
-					serviceReferenceTable.remove(event.getServiceReference());
-					if (scpEnabled.isEmpty())
-						return; // check for any enabled configurations
-
-					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
-				}
-				if (!newlyUnsatisfiedSCPs.isEmpty()) {
-					// synchronously dispose newly unsatisfied components
-					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
-				}
-
 				Vector componentsToDispose;
 				synchronized (syncLock) {
 					//check for components with static reference to this service
@@ -345,7 +332,20 @@ public final class Resolver implements WorkPerformer {
 				}
 				//dispose instances from staticUnbind
 				if (componentsToDispose != null) {
-					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
+				}
+
+				Vector newlyUnsatisfiedSCPs;
+				synchronized (syncLock) {
+					serviceReferenceTable.remove(event.getServiceReference());
+					if (scpEnabled.isEmpty())
+						return; // check for any enabled configurations
+
+					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied(event.getServiceReference());
+				}
+				if (!newlyUnsatisfiedSCPs.isEmpty()) {
+					// synchronously dispose newly unsatisfied components
+					instanceProcess.disposeInstances(newlyUnsatisfiedSCPs, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
 				}
 
 				synchronized (syncLock) {
@@ -375,7 +375,7 @@ public final class Resolver implements WorkPerformer {
 
 					// check for newly unsatisfied components and synchronously
 					// dispose them
-					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied();
+					newlyUnsatisfiedSCPs = selectNewlyUnsatisfied(event.getServiceReference());
 				}
 
 				if (!newlyUnsatisfiedSCPs.isEmpty()) {
@@ -534,7 +534,7 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
-	private Vector selectNewlyUnsatisfied() {
+	private Vector selectNewlyUnsatisfied(ServiceReference serviceRef) {
 		try {
 			Vector result = (Vector) scpEnabled.clone();
 			for (int k = result.size() - 1; k >= 0; k--) {
@@ -547,7 +547,15 @@ public final class Resolver implements WorkPerformer {
 					// scp and re-run the algorithm
 					Reference reference = (Reference) refs.elementAt(i);
 					if (reference != null) {
-						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(null);
+						if (serviceRef != null && reference.reference.bind != null && scp.getState() == Component.STATE_ACTIVE && !(reference.dynamicUnbindReference(serviceRef) || reference.staticUnbindReference(serviceRef))) {
+							//make quick test - the service reference is not bound to the current component reference
+							continue;
+						}
+						if (serviceRef != null && !isPossibleMatch(reference, serviceRef)) {
+							// the service reference is not a possible match. Skipping further checks 
+							continue;
+						}
+						boolean resolved = !reference.isRequiredFor(scp.serviceComponent) || reference.hasProviders(this.serviceReferenceTable);
 
 						if (!resolved && scp.isBuilt()) {
 							if (Activator.DEBUG) {
@@ -567,6 +575,30 @@ public final class Resolver implements WorkPerformer {
 			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, e);
 			return new Vector(1);
 		}
+	}
+
+	private boolean isPossibleMatch(Reference reference, ServiceReference serviceRef) {
+		String[] serviceNames = (String[]) serviceRef.getProperty(Constants.OBJECTCLASS);
+		boolean hasName = false;
+		for (int i = 0; i < serviceNames.length; i++) {
+			if (serviceNames[i].equals(reference.interfaceName)) {
+				hasName = true;
+				break;
+			}
+		}
+		if (!hasName) {
+			return false;
+		}
+		// check target filter
+		try {
+			Filter filter = FrameworkUtil.createFilter(reference.target);
+			if (!filter.match(serviceRef)) {
+				return false;
+			}
+		} catch (InvalidSyntaxException e) {
+			return false;
+		}
+		return true;
 	}
 
 	// -- begin *disable* component routines
