@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others
+ * Copyright (c) 2007, 2010 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,6 +125,18 @@ public class ManagedServiceTest extends TestCase {
 				fail("should have updated");
 			assertEquals(2, updateCount);
 		}
+
+		String location = config.getBundleLocation();
+		config.setBundleLocation("bogus");
+		synchronized (lock) {
+			config.update();
+			locked = true;
+			lock.wait(100);
+			assertTrue(locked);
+			assertEquals(2, updateCount);
+			locked = false;
+		}
+		config.setBundleLocation(location);
 
 		dict.remove(Constants.SERVICE_PID);
 		synchronized (lock) {
