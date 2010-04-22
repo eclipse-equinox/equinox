@@ -1294,7 +1294,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	public BundleException getResolutionFailureException() {
 		BundleDescription bundleDescription = getBundleDescription();
 		if (bundleDescription == null)
-			return new BundleException(Msg.BUNDLE_UNRESOLVED_EXCEPTION, BundleException.RESOLVE_ERROR);
+			return new BundleException(NLS.bind(Msg.BUNDLE_UNRESOLVED_EXCEPTION, this.toString()), BundleException.RESOLVE_ERROR);
 		// just a sanity check - this would be an inconsistency between the framework and the state
 		if (bundleDescription.isResolved())
 			return new BundleException(Msg.BUNDLE_UNRESOLVED_STATE_CONFLICT, BundleException.RESOLVE_ERROR);
@@ -1304,7 +1304,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	private BundleException getResolverError(BundleDescription bundleDesc) {
 		ResolverError[] errors = framework.adaptor.getState().getResolverErrors(bundleDesc);
 		if (errors == null || errors.length == 0)
-			return new BundleException(Msg.BUNDLE_UNRESOLVED_EXCEPTION, BundleException.RESOLVE_ERROR);
+			return new BundleException(NLS.bind(Msg.BUNDLE_UNRESOLVED_EXCEPTION, this.toString()), BundleException.RESOLVE_ERROR);
 		StringBuffer message = new StringBuffer();
 		int errorType = BundleException.RESOLVE_ERROR;
 		for (int i = 0; i < errors.length; i++) {
