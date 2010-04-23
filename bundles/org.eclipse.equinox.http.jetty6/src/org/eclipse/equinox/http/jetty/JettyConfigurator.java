@@ -31,7 +31,8 @@ public class JettyConfigurator {
 	private static Permission configurationPermission = new ConfigurationPermission("*", ConfigurationPermission.CONFIGURE); //$NON-NLS-1$
 
 	/**
-	 * Creates an instance of Jetty parameterized with a dictionary of settings
+	 * Creates an instance of Jetty parameterized with a dictionary of settings. If a server with this
+	 * id already exists that server is instead restarted and updated with the new settings
 	 * @param id The identifier for the server instance
 	 * @param settings The dictionary of settings used to configure the server instance
 	 * @throws Exception If the server failed to start for any reason
