@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.osgi.service.security.TrustEngine;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.Constants;
 import org.osgi.util.tracker.ServiceTracker;
@@ -242,7 +243,19 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		else
 			contentBundleFile = new ZipBundleFile(content, null);
 		SignedBundleFile result = new SignedBundleFile(null, VERIFY_ALL);
-		result.setBundleFile(contentBundleFile);
+		try {
+			result.setBundleFile(contentBundleFile);
+		} catch (InvalidKeyException e) {
+			throw (InvalidKeyException) new InvalidKeyException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+		} catch (SignatureException e) {
+			throw (SignatureException) new SignatureException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+		} catch (CertificateException e) {
+			throw (CertificateException) new CertificateException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+		} catch (NoSuchAlgorithmException e) {
+			throw (NoSuchAlgorithmException) new NoSuchAlgorithmException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+		} catch (NoSuchProviderException e) {
+			throw (NoSuchProviderException) new NoSuchProviderException(NLS.bind(SignedContentMessages.Factory_SignedContent_Error, content)).initCause(e);
+		}
 		return new SignedContentFile(result.getSignedContent());
 	}
 
