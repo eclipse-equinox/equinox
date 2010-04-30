@@ -399,7 +399,15 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 		for (Iterator rejected = rejectedSingletons.iterator(); rejected.hasNext();) {
 			BundleDescription reject = (BundleDescription) rejected.next();
-			BundleDescription sameName = state.getBundle(reject.getSymbolicName(), null);
+			// need to do a bit of work to figure out which bundle got selected
+			BundleDescription[] sameNames = state.getBundles(reject.getSymbolicName());
+			BundleDescription sameName = reject;
+			for (int i = 0; i < sameNames.length; i++) {
+				if (sameNames[i] != reject && sameNames[i].isSingleton() && !rejectedSingletons.contains(sameNames[i])) {
+					sameName = sameNames[i]; // we know this one got selected
+					break;
+				}
+			}
 			state.addResolverError(reject, ResolverError.SINGLETON_SELECTION, sameName.toString(), null);
 		}
 		if (resolveOptional)
