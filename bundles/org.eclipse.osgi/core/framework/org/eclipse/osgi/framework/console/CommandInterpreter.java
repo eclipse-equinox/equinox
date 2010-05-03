@@ -37,7 +37,7 @@ public interface CommandInterpreter {
 	/**
 	 * Execute a command line as if it came from the end user
 	 * and return the result.
-	 * @param The command line to execute.
+	 * @param cmd The command line to execute.
 	 * @return the result of the command.
 	 */
 	public Object execute(String cmd);
