@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -119,7 +119,6 @@ public interface ClassLoaderDelegateHook {
 	 * @param classLoader the bundle class loader
 	 * @param data the bundle data
 	 * @return the library found by this hook or null if normal delegation should continue
-	 * @throws FileNotFoundException to terminate the delegation
 	 */
 	public String postFindLibrary(String name, BundleClassLoader classLoader, BundleData data);
 }

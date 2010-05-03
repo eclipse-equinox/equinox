@@ -817,12 +817,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	/**
 	 * Install a bundle from an InputStream.
 	 * 
-	 * <p>
-	 * This method performs all the steps listed in
-	 * {@link #installBundle(java.lang.String)}, except the bundle's content
-	 * will be read from the InputStream. The location identifier specified
-	 * will be used as the identity of the bundle.
-	 * 
 	 * @param location
 	 *            The location identifier of the bundle to install.
 	 * @param in

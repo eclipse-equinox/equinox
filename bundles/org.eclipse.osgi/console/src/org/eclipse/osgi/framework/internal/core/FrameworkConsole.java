@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,7 +99,6 @@ public class FrameworkConsole implements Runnable {
 	 * Command output is written to the console PrintStream. The method will
 	 * loop reading commands from the console InputStream until end-of-file
 	 * is reached. This method will then return.
-	 * @throws IOException
 	 */
 	public void run() {
 		try {
