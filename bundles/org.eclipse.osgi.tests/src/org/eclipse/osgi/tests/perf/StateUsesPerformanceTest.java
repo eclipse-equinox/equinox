@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,29 +28,35 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 		super(name);
 	}
 
-	private void doUsesResolution(int stateSize, int repetitions, String localName) throws BundleException {
+	private void doUsesResolution(int stateSize, int repetitions, String localName, String degradation) throws BundleException {
 		final State originalState = buildRandomState(stateSize);
 		addUsesBundles(originalState);
-		new PerformanceTestRunner() {
+		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
 				originalState.resolve(false);
 			}
-		}.run(this, localName, 10, repetitions);
+		};
+		runner.setRegressionReason(degradation);
+		runner.run(this, localName, 10, repetitions);
+
 	}
 
 	public void testUsesResolution00100() throws BundleException {
-		doUsesResolution(100, 100, null);
+		doUsesResolution(100, 100, null, StatePerformanceTest.PERFORMANCE_BUG311546_EXPLANATION);
 	}
+
 	public void testUsesResolution00500() throws BundleException {
-		doUsesResolution(500, 10, null);
+		doUsesResolution(500, 10, null, StatePerformanceTest.PERFORMANCE_BUG311546_EXPLANATION);
 	}
+
 	public void testUsesResolution01000() throws BundleException {
-		doUsesResolution(1000, 10, null);
+		doUsesResolution(1000, 10, null, null);
 	}
+
 	public void testUsesResolution05000() throws BundleException {
-		doUsesResolution(5000, 1, null);
+		doUsesResolution(5000, 1, null, null);
 	}
-	
+
 	private void addUsesBundles(State state) throws BundleException {
 		int id = state.getBundles().length + 500;
 		Hashtable manifest = new Hashtable();

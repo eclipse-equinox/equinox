@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,9 @@ import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.osgi.service.resolver.State;
 
 public class StatePerformanceTest extends BasePerformanceTest {
+
+	// TODO this should be removed in 3.7
+	public final static String PERFORMANCE_BUG311546_EXPLANATION = "Performance decrease caused improvements in memory usage. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=269185 for details."; //$NON-NLS-1$
 
 	public static Test suite() {
 		return new TestSuite(StatePerformanceTest.class);
@@ -55,7 +58,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testResolution100() throws IOException {
-		testResolution(100, 500, null, null);
+		testResolution(100, 500, null, PERFORMANCE_BUG311546_EXPLANATION);
 	}
 
 	public void testResolution1000() throws IOException {
@@ -63,7 +66,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testResolution500() throws IOException {
-		testResolution(500, 50, null, null);
+		testResolution(500, 50, null, PERFORMANCE_BUG311546_EXPLANATION);
 	}
 
 	public void testResolution5000() throws IOException {
