@@ -1043,6 +1043,18 @@ public final class Resolver implements WorkPerformer {
 		scp.setState(Component.STATE_DISPOSED);
 	}
 
+	/**
+	 * Reorder the specified SCP and place it at the end of the enabledSCPs list
+	 * @param scp the SCP to reorder
+	 */
+	protected void reorderSCP(ServiceComponentProp scp) {
+		synchronized (syncLock) {
+			if (scpEnabled.removeElement(scp)) {
+				scpEnabled.addElement(scp);
+			}
+		}
+	}
+
 	public void removeFromSatisfiedList(ServiceComponentProp scp) {
 		Vector tmp = new Vector();
 		tmp.addElement(scp);

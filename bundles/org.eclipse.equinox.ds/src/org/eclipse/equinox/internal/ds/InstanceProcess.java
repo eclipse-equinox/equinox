@@ -155,11 +155,24 @@ public class InstanceProcess {
 
 		// loop through SCP list of enabled
 		if (list != null) {
+			getLock();
+			Vector listToBuild = new Vector();
 			for (int i = 0; i < list.size(); i++) {
 				scp = (ServiceComponentProp) list.elementAt(i);
+				if (scp.getState() != Component.STATE_UNSATISFIED) {
+					//no need to build the component:
+					// 1) it is disposed or about to be disposed
+					// 2) it is already built or being built
+					continue;
+				}
+				scp.setState(Component.STATE_ACTIVATING);
+				listToBuild.addElement(scp);
+			}
+			freeLock();
+			for (int i = 0; i < listToBuild.size(); i++) {
+				scp = (ServiceComponentProp) listToBuild.elementAt(i);
 				getLock();
-				int componentState = scp.getState();
-				if (componentState != Component.STATE_UNSATISFIED) {
+				if (scp.getState() != Component.STATE_ACTIVATING) {
 					//no need to build the component:
 					// 1) it is disposed or about to be disposed
 					// 2) it is already built or being built
@@ -173,7 +186,6 @@ public class InstanceProcess {
 						start = System.currentTimeMillis();
 						Activator.log.info("[DS perf] Start building component " + scp); //$NON-NLS-1$
 					}
-					scp.setState(Component.STATE_ACTIVATING);
 					sc = scp.serviceComponent;
 					if (sc.immediate || (sc.factory == null && Activator.INSTANTIATE_ALL)) {
 						if (Activator.DEBUG) {
@@ -182,7 +194,8 @@ public class InstanceProcess {
 						if (scp.instances.isEmpty()) {
 							try {
 								buildComponent(null, scp, null, security);
-							} catch (Exception e) {
+							} catch (Throwable e) {
+								resolver.reorderSCP(scp);
 								successfullyBuilt = false;
 								if (!(e instanceof ComponentException)) {
 									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_BUILD_COMPONENT, scp), e);
@@ -399,8 +412,8 @@ public class InstanceProcess {
 					if (compInstance != null) {
 						try {
 							scp.bindReference(ref, compInstance);
-						} catch (Exception ex) {
-							// ex.printStackTrace();
+						} catch (Throwable t) {
+							Activator.log(scp.bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BINDING_REFERENCE, ref.reference), t);
 						}
 					}
 				}
