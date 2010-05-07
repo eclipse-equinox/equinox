@@ -169,6 +169,22 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ia64/${collectingFolder}" includes="launcher" /> 
 	</target>
+	<target name="rootFileslinux_gtk_s390x">
+		<mkdir dir="${feature.base}/linux.gtk.s390x/${collectingFolder}"/>
+		<copy todir="${feature.base}/linux.gtk.s390x/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/contributed/gtk/linux/s390x" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/linux.gtk.s390x/${collectingFolder}" includes="launcher" /> 
+	</target>
+	<target name="rootFileslinux_gtk_s390">
+		<mkdir dir="${feature.base}/linux.gtk.s390/${collectingFolder}"/>
+		<copy todir="${feature.base}/linux.gtk.s390/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/contributed/gtk/linux/s390" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/linux.gtk.s390/${collectingFolder}" includes="launcher" /> 
+	</target>
 	<target name="rootFileslinux_motif_x86">
 		<mkdir dir="${feature.base}/linux.motif.x86/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.motif.x86/${collectingFolder}" failonerror="true" overwrite="true">
@@ -247,6 +263,7 @@
 		<antcall target="rootFileslinux_gtk_ppc64"/>
 		<antcall target="rootFileslinux_gtk_x86_64"/>
 		<antcall target="rootFileslinux_gtk_ia64"/>
+		<antcall target="rootFileslinux_gtk_s390x"/>
 		<antcall target="rootFileslinux_motif_x86"/>
 		<antcall target="rootFilessolaris_gtk_sparc"/>
 		<antcall target="rootFilessolaris_gtk_x86"/>

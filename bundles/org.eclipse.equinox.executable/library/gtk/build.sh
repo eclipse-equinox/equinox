@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2000, 2005 IBM Corporation and others.
+# Copyright (c) 2000, 2010 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at 
@@ -162,6 +162,9 @@ fi
 
 if [ "$defaultOSArch" = "ppc64" ];  then
 	M_ARCH=-m64
+	export M_ARCH
+elif [ "$defaultOSArch" = "s390" ];  then
+	M_ARCH=-m31
 	export M_ARCH
 fi
 

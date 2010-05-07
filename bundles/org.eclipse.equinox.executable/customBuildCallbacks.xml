@@ -72,6 +72,10 @@
 			<fileset dir="${feature.directory}/bin" />
 			<regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
 		</move>
+		<move todir="${feature.directory}/contributed" verbose="true">
+			<fileset dir="${feature.directory}/contributed" />
+			<regexpmapper from="^(.*[/\\])eclipse(.exe)?$" to="\1launcher\2"/>
+		</move>
 	</target>
 	
 	<!-- ===================================================================== -->
