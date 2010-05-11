@@ -325,7 +325,7 @@ public class EclipseAppContainer implements IRegistryEventListener, SynchronousB
 						defaultMainThreadAppHandle = appHandle;
 						return;
 					}
-					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR);
+					throw new ApplicationException(ApplicationException.APPLICATION_INTERNAL_ERROR, NLS.bind(Messages.application_error_noMainThread, appHandle.getInstanceId()));
 				}
 				curDefaultApplicationListener = defaultAppListener;
 				curMissingAppLauncher = missingAppLauncher;
