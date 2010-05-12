@@ -110,27 +110,19 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 		try {
 			Certificate rootCert = null;
-
 			KeyStore store = getKeyStore();
 			for (int i = 0; i < certChain.length; i++) {
 				if (certChain[i] instanceof X509Certificate) {
-					if (i == certChain.length - 1) { //this is the last certificate in the chain
+					if (i == certChain.length - 1) {
+						// this is the last certificate in the chain
+						// determine if we have a valid root
 						X509Certificate cert = (X509Certificate) certChain[i];
 						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
-							certChain[i].verify(certChain[i].getPublicKey());
-							rootCert = certChain[i]; // this is a self-signed certificate
+							cert.verify(cert.getPublicKey());
+							rootCert = cert; // this is a self-signed certificate
 						} else {
 							// try to find a parent, we have an incomplete chain
-							synchronized (store) {
-								for (Enumeration e = store.aliases(); e.hasMoreElements();) {
-									Certificate nextCert = store.getCertificate((String) e.nextElement());
-									if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
-										cert.verify(nextCert.getPublicKey());
-										rootCert = nextCert;
-										break;
-									}
-								}
-							}
+							return findAlternativeRoot(cert, store);
 						}
 					} else {
 						X509Certificate nextX509Cert = (X509Certificate) certChain[i + 1];
@@ -147,6 +139,10 @@ public class KeyStoreTrustEngine extends TrustEngine {
 						if (alias != null)
 							return store.getCertificate(alias);
 					}
+					// if we have reached the end and the last cert is not found to be a valid root CA
+					// then we need to back off the root CA and try to find an alternative
+					if (certChain.length > 1 && i == certChain.length - 1 && certChain[i - 1] instanceof X509Certificate)
+						return findAlternativeRoot((X509Certificate) certChain[i - 1], store);
 				}
 			}
 		} catch (KeyStoreException e) {
@@ -156,6 +152,19 @@ public class KeyStoreTrustEngine extends TrustEngine {
 			return null;
 		}
 		return null;
+	}
+
+	private Certificate findAlternativeRoot(X509Certificate cert, KeyStore store) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException, CertificateException {
+		synchronized (store) {
+			for (Enumeration e = store.aliases(); e.hasMoreElements();) {
+				Certificate nextCert = store.getCertificate((String) e.nextElement());
+				if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+					cert.verify(nextCert.getPublicKey());
+					return nextCert;
+				}
+			}
+			return null;
+		}
 	}
 
 	protected String doAddTrustAnchor(Certificate cert, String alias) throws IOException, GeneralSecurityException {
