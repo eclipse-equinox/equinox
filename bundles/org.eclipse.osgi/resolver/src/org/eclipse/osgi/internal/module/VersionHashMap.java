@@ -14,10 +14,12 @@ package org.eclipse.osgi.internal.module;
 import java.util.*;
 
 public class VersionHashMap extends MappedList implements Comparator {
-	private ResolverImpl resolver;
+	private final ResolverImpl resolver;
+	private final boolean preferSystemPackages;
 
 	public VersionHashMap(ResolverImpl resolver) {
 		this.resolver = resolver;
+		preferSystemPackages = Boolean.valueOf(ResolverImpl.secureAction.getProperty("osgi.resolver.preferSystemPackages", "true")).booleanValue(); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	// assumes existing array is sorted
@@ -104,11 +106,13 @@ public class VersionHashMap extends MappedList implements Comparator {
 		// if the selection policy is set then use that
 		if (resolver.getSelectionPolicy() != null)
 			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());
-		String systemBundle = resolver.getSystemBundle();
-		if (systemBundle.equals(vs1.getBundle().getSymbolicName()) && !systemBundle.equals(vs2.getBundle().getSymbolicName()))
-			return -1;
-		else if (!systemBundle.equals(vs1.getBundle().getSymbolicName()) && systemBundle.equals(vs2.getBundle().getSymbolicName()))
-			return 1;
+		if (preferSystemPackages) {
+			String systemBundle = resolver.getSystemBundle();
+			if (systemBundle.equals(vs1.getBundle().getSymbolicName()) && !systemBundle.equals(vs2.getBundle().getSymbolicName()))
+				return -1;
+			else if (!systemBundle.equals(vs1.getBundle().getSymbolicName()) && systemBundle.equals(vs2.getBundle().getSymbolicName()))
+				return 1;
+		}
 		if (vs1.getBundle().isResolved() != vs2.getBundle().isResolved())
 			return vs1.getBundle().isResolved() ? -1 : 1;
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));

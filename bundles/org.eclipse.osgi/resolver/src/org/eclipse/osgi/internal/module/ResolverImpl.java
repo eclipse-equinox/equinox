@@ -46,7 +46,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 	private static int MAX_MULTIPLE_SUPPLIERS_MERGE = 10;
 	private static int MAX_USES_TIME_BASE = 30000; // 30 seconds
 	private static int MAX_USES_TIME_LIMIT = 90000; // 90 seconds
-	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	private String[][] CURRENT_EES;
 
