@@ -40,8 +40,16 @@ public abstract class ConsoleSession implements ServiceFactory {
 	public final void close() {
 		doClose();
 		ServiceRegistration current = sessionRegistration;
-		if (current != null)
-			current.unregister();
+		if (current != null) {
+			sessionRegistration = null;
+			try {
+				current.unregister();
+			} catch (IllegalStateException e) {
+				// This can happen if the service is in the process of being 
+				// unregistered or if another thread unregistered the service.
+				// Ignoring the exception.
+			}
+		}
 	}
 
 	/**
