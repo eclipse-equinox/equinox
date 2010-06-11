@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@
  *******************************************************************************/
 
 package org.eclipse.equinox.weaving.aspectj;
-
-import java.util.Properties;
 
 import org.eclipse.equinox.service.weaving.IWeavingServiceFactory;
 import org.eclipse.equinox.weaving.aspectj.loadtime.AspectAdminImpl;
@@ -79,8 +77,7 @@ public class AspectJWeavingStarter implements BundleActivator {
         final String serviceName = IWeavingServiceFactory.class.getName();
         final IWeavingServiceFactory weavingServiceFactory = new AspectJWeavingServiceFactory(
                 aspectDefinitionRegistry);
-        final Properties props = new Properties();
-        context.registerService(serviceName, weavingServiceFactory, props);
+        context.registerService(serviceName, weavingServiceFactory, null);
     }
 
     /**
