@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -54,12 +54,10 @@ struct GTK_PTRS {
 	int			(*gdk_pixbuf_get_width)		(const GdkPixbuf*);
 	int			(*gdk_pixbuf_get_height)	(const GdkPixbuf*);
 	void		(*gdk_set_program_class)	(const char*);
-	GdkWindow*  (*gdk_window_foreign_new)   (GdkNativeWindow);
-	void        (*gdk_property_change)		(GdkWindow*, GdkAtom, GdkAtom, gint, GdkPropMode, const guchar*, gint);
-	GdkAtom     (*gdk_atom_intern)			(const gchar*, gboolean);
 	
 	Window 		(*XGetSelectionOwner)		(Display*, Atom);
 	void		(*XSetSelectionOwner)		(Display*, Atom, Window, Time);
+	void 		(*XChangeProperty)			(Display*, Window, Atom, Atom, int, int, unsigned char *, int);
 	Window 		(*XCreateWindow)			(Display*, Window, int, int, unsigned int, unsigned int, unsigned int, int, unsigned int, Visual*, unsigned long, XSetWindowAttributes*);
 	void		(*XSync)					(Display*, Bool);
 	int			(*XDefaultScreen)			(Display*);

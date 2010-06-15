@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -44,9 +44,6 @@ static FN_TABLE gtkFunctions[] = { 	FN_TABLE_ENTRY(gtk_adjustment_new),
 								 };
 /* functions from libgdk-x11-2.0 */
 static FN_TABLE gdkFunctions[] = {	FN_TABLE_ENTRY(gdk_set_program_class), 
-									FN_TABLE_ENTRY(gdk_property_change),
-									FN_TABLE_ENTRY(gdk_atom_intern),
-									FN_TABLE_ENTRY(gdk_window_foreign_new),
 									FN_TABLE_ENTRY(gdk_display), /* not a function */
 									{ NULL, NULL } 
 						  		 };
@@ -72,6 +69,7 @@ static FN_TABLE gobjFunctions[] = {	FN_TABLE_ENTRY(g_log_set_handler),
 static FN_TABLE x11Functions[] = {	FN_TABLE_ENTRY(XGetSelectionOwner),
 									FN_TABLE_ENTRY(XSetSelectionOwner),
 									FN_TABLE_ENTRY(XCreateWindow),
+									FN_TABLE_ENTRY(XChangeProperty),
 									FN_TABLE_ENTRY(XSync),
 									FN_TABLE_ENTRY(XRootWindow),
 									FN_TABLE_ENTRY(XDefaultScreen),

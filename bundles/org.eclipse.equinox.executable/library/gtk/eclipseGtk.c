@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -134,24 +134,18 @@ static char * createSWTWindowString(char * suffix, int semaphore) {
 
 static int setAppWindowPropertyFn() {
 	Window appWindow;
-	GdkWindow *propWindow;
-	GdkAtom propAtom;
+	Atom propAtom;
 	_TCHAR *propVal;
 
 	//Look for the SWT window. If it's there, set a property on it.
 	appWindow = gtk.XGetSelectionOwner(gtk_GDK_DISPLAY, appWindowAtom);
-	//appWindow = XGetSelectionOwner(GDK_DISPLAY(), appWindowAtom);
 	if (appWindow) {
-		propAtom = gtk.gdk_atom_intern("org.eclipse.swt.filePath.message", FALSE);
+		propAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, "org.eclipse.swt.filePath.message", FALSE);
 		//append a colon delimiter in case more than one file gets appended to the app windows property.
 		propVal = concatPaths(openFilePath, _T_ECLIPSE(':'));
-		propWindow = gtk.gdk_window_foreign_new(appWindow);
-		if (propWindow != NULL) {
-			gtk.gdk_property_change(propWindow, propAtom, propAtom, 8, GDK_PROP_MODE_APPEND, (guchar *) propVal, _tcslen(propVal));
-			free(propVal);
-			return 1;
-		} //else the window got destroyed between XGetSelectionOwner and here (?)
+		gtk.XChangeProperty(gtk_GDK_DISPLAY, appWindow, propAtom, propAtom, 8, PropModeAppend, (unsigned char *)propVal, _tcslen(propVal));
 		free(propVal);
+		return 1;
 	}
 	return 0;
 }
