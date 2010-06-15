@@ -114,9 +114,16 @@ static void log_handler(const gchar* domain, GLogLevelFlags flags,	const gchar* 
 	/* nothing */
 }
 
-/* Create the mutex name string, with optional suffix.  Caller should free the memory when finished */
-static char * createMutexName(char * suffix) {
+/* Create a "SWT_Window_" + APP_NAME string with optional suffix.
+ * Caller should free the memory when finished */
+static char * createSWTWindowString(char * suffix, int semaphore) {
+#ifdef SOLARIS
+	/* solaris requires semaphore names to start with '/' */
+	char * prefix = semaphore != 0 ? _T_ECLIPSE("/SWT_Window_") : _T_ECLIPSE("SWT_Window_");
+#else
 	char * prefix = _T_ECLIPSE("SWT_Window_");
+#endif
+	
 	char * result = malloc((_tcslen(prefix) + _tcslen(getOfficialName()) + (suffix != NULL ? _tcslen(suffix) : 0) + 1) * sizeof(char));
 	if (suffix != NULL)
 		_stprintf(result, _T_ECLIPSE("%s%s%s"), prefix, getOfficialName(), suffix);
@@ -152,7 +159,7 @@ static int setAppWindowPropertyFn() {
 /* set the Application window property by executing _setWindowPropertyFn within a semaphore */
 int setAppWindowProperty() {
 	int result;
-	char * mutexName = createMutexName(NULL);
+	char * mutexName = createSWTWindowString(NULL, 1);
 	result = executeWithLock(mutexName, setAppWindowPropertyFn);
 	gtk.XSync(gtk_GDK_DISPLAY, False);
 	free(mutexName);
@@ -195,16 +202,16 @@ int reuseWorkbench(_TCHAR** filePath, int timeout) {
 	openFilePath = filePath;
 	
 	//App name is defined in SWT as well. Values must be consistent.
-	appName = createMutexName(NULL);
+	appName = createSWTWindowString(NULL, 0);
 	appWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, appName, FALSE);
 	free(appName);
 
 	//check if app is already running. Just set property if it is.
-	if (setAppWindowProperty())
+	if (setAppWindowProperty() > 0)
 		return 1;
 
 	/* app is not running, create a launcher window to act as a mutex so we don't need to keep the semaphore locked */
-	launcherName = createMutexName(_T_ECLIPSE("_Launcher"));
+	launcherName = createSWTWindowString(_T_ECLIPSE("_Launcher"), 1);
 	launcherWindowAtom = gtk.XInternAtom(gtk_GDK_DISPLAY, launcherName, FALSE);
 	result = executeWithLock(launcherName, createLauncherWindow);
 	free(launcherName);
