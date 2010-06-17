@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *	   Martin Oberhuber (Wind River) - [316975] memory leak on failure reading .ini file
  *******************************************************************************/
 
 #include "eclipseOS.h"
@@ -84,9 +85,6 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	size_t bufferSize = 1024;
 	size_t length;
 	
-	/* allocate buffers */
-	buffer =  (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
-	argument = (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
 	
 	/* Open the config file as a text file 
 	 * Note that carriage return-linefeed combination \r\n are automatically
@@ -96,6 +94,9 @@ int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
 	file = _tfopen(config_file, _T_ECLIPSE("rt"));	
 	if (file == NULL) return -3;
 
+	/* allocate buffers */
+	buffer =  (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
+	argument = (_TCHAR*)malloc(bufferSize * sizeof(_TCHAR));
 	*argv = (_TCHAR **)malloc((1 + maxArgs) * sizeof(_TCHAR*));
 	
 	index = 0;
