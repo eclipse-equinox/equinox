@@ -159,7 +159,11 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 	 */
 	public void stopConsole() {
 		if (builtinSession != null)
-			builtinSession.unregister();
+			try {
+				builtinSession.unregister();
+			} catch (IllegalStateException e) {
+				// ignore; this can happen if the session was closed manually (bug 314343)
+			}
 		sessions.close();
 		cpTracker.close();
 		if (scsg != null)
