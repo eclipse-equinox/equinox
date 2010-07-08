@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 				// try to set the socket re-use property, it isn't a problem if it can't be set
 			}
 			Thread t = new Thread(this, "ConsoleSocketGetter"); //$NON-NLS-1$
-			t.setDaemon(true);
+			t.setDaemon(false);
 			t.start();
 		}
 
