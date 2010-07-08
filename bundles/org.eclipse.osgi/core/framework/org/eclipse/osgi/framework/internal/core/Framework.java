@@ -642,7 +642,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		/* mark framework as started */
 		active = true;
 		shutdownEvent = new FrameworkEvent[1];
-		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD))) {
+		if (THREAD_NORMAL.equals(FrameworkProperties.getProperty(PROP_FRAMEWORK_THREAD, THREAD_NORMAL))) {
 			Thread fwkThread = new Thread(this, "Framework Active Thread"); //$NON-NLS-1$
 			fwkThread.setDaemon(false);
 			fwkThread.start();
