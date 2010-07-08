@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.ds.impl;
 
 import java.util.*;
+import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.ServiceComponentProp;
 import org.osgi.service.component.*;
@@ -50,6 +51,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 	 */
 	public ComponentInstance newInstance(Dictionary additionalProps) {
 		ComponentInstanceImpl instance = null;
+		ServiceComponentProp newSCP = null;
 		try {
 			if (Activator.DEBUG) {
 				Activator.log.debug("ComponentFactoryImpl.newInstance(): " + sci.name, null); //$NON-NLS-1$
@@ -60,7 +62,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			SCRUtil.copyTo(props, additionalProps);
 
 			// create a new SCP (adds to resolver scpEnabled list)
-			ServiceComponentProp newSCP = InstanceProcess.resolver.mapNewFactoryComponent(sci.serviceComponent, props);
+			newSCP = InstanceProcess.resolver.mapNewFactoryComponent(sci.serviceComponent, props);
 
 			// register the component and make instance if immediate
 			Vector toBuild = new Vector(1);
@@ -72,11 +74,20 @@ public class ComponentFactoryImpl implements ComponentFactory {
 				// or someone has got it as service (if provides one)
 				instance = (ComponentInstanceImpl) newSCP.instances.firstElement();
 			}
-			if (instance == null) {
+			if (instance == null && !newSCP.isImmediate()) {
 				// finally build an instance if not done yet
 				instance = InstanceProcess.staticRef.buildComponent(null, newSCP, null, Activator.security);
 			}
+			if (instance == null) {
+				//the instance could not be build because the component cannot be activated
+				//throw exception to notify the user
+				throw new ComponentException(Messages.COULD_NOT_CREATE_NEW_INSTANCE);
+			}
 		} catch (Throwable e) {
+			//remove the component configuration
+			if (newSCP != null) {
+				disposeSCP(newSCP);
+			}
 			if (e instanceof ComponentException) {
 				throw (ComponentException) e;
 			}
@@ -84,6 +95,14 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			throw new ComponentException(Messages.COULD_NOT_CREATE_NEW_INSTANCE, e);
 		}
 		return instance;
+	}
+
+	private void disposeSCP(ServiceComponentProp scp) {
+		scp.serviceComponent.componentProps.removeElement(scp);
+		Vector toDispose = new Vector(1);
+		toDispose.addElement(scp);
+		InstanceProcess.resolver.disposeComponentConfigs(toDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+		scp.setState(Component.STATE_DISPOSED);
 	}
 
 	/*
