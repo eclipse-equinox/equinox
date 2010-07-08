@@ -117,19 +117,32 @@ public abstract class NLS {
 	}
 
 	/**
-	 * Initialize the given class with the values from the specified message bundle.
+	 * Initialize the given class with the values from the message properties specified by the
+	 * base name.  The base name specifies a fully qualified base name to a message properties file,
+	 * including the package the message properties file is located.  The class loader of the 
+	 * specified class will be used to load the message properties resources.
+	 * <p>
+	 * For example, if the locale is set to en_US and <code>org.eclipse.example.nls.messages</code>
+	 * is used as the base name then the following resources will be searched using the class
+	 * loader of the specified class:
+	 * <pre>
+	 *   org/eclipse/example/nls/messages_en_US.properties
+	 *   org/eclipse/example/nls/messages_en.properties
+	 *   org/eclipse/example/nls/messages.properties
+	 * </pre>
+	 * </p>
 	 * 
-	 * @param bundleName fully qualified path of the class name
+	 * @param baseName the base name of a fully qualified message properties file.
 	 * @param clazz the class where the constants will exist
 	 */
-	public static void initializeMessages(final String bundleName, final Class clazz) {
+	public static void initializeMessages(final String baseName, final Class clazz) {
 		if (System.getSecurityManager() == null) {
-			load(bundleName, clazz);
+			load(baseName, clazz);
 			return;
 		}
 		AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
-				load(bundleName, clazz);
+				load(baseName, clazz);
 				return null;
 			}
 		});
