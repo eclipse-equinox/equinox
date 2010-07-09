@@ -119,7 +119,7 @@ public abstract class NLS {
 	/**
 	 * Initialize the given class with the values from the message properties specified by the
 	 * base name.  The base name specifies a fully qualified base name to a message properties file,
-	 * including the package the message properties file is located.  The class loader of the 
+	 * including the package where the message properties file is located.  The class loader of the 
 	 * specified class will be used to load the message properties resources.
 	 * <p>
 	 * For example, if the locale is set to en_US and <code>org.eclipse.example.nls.messages</code>
