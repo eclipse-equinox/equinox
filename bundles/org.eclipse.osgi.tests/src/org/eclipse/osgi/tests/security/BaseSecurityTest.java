@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import java.util.Hashtable;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.tests.harness.CoreTest;
 import org.eclipse.core.tests.session.ConfigurationSessionTestSuite;
-import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.provisional.service.security.AuthorizationEngine;
 import org.eclipse.osgi.internal.service.security.KeyStoreTrustEngine;
 import org.eclipse.osgi.service.security.TrustEngine;
@@ -226,11 +225,6 @@ public class BaseSecurityTest extends CoreTest {
 				} catch (IOException ee) {
 					// nothing to do here
 				}
-			}
-
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
-				Debug.println("Unable to read file"); //$NON-NLS-1$
-				Debug.printStackTrace(e);
 			}
 
 			throw e;
