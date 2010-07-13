@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,9 @@ import org.osgi.framework.*;
 /**
  * Bundle's execution context.
  *
- * This object is given out to bundles and wraps the internal
- * BundleContext object. It is destroyed when a bundle is stopped.
+ * This object is given out to bundles and provides the
+ * implementation to the BundleContext for a host bundle.
+ * It is destroyed when a bundle is stopped.
  */
 
 public class BundleContextImpl implements BundleContext, EventDispatcher {
