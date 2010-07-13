@@ -21,11 +21,6 @@ import java.lang.reflect.*;
  */
 public class Debug {
 	/**
-	 * DEBUG flag.  If set to false then the debug statements will be optimized out during compilation.
-	 */
-	public static final boolean DEBUG = true;
-
-	/**
 	 * Indicates if tracing is enabled
 	 */
 	public static boolean DEBUG_ENABLED = false;

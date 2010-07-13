@@ -102,7 +102,7 @@ public class BundleInstall implements BundleOperation {
 			try {
 				data.close();
 			} catch (IOException e) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+				if (Debug.DEBUG_GENERAL)
 					Debug.println("Unable to close " + data + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}

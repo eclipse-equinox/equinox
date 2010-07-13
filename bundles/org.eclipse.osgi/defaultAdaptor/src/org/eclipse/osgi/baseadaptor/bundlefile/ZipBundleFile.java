@@ -168,7 +168,7 @@ public class ZipBundleFile extends BundleFile {
 			if (nested != null) {
 				if (nested.exists()) {
 					/* the entry is already cached */
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL)
 						Debug.println("File already present: " + nested.getPath()); //$NON-NLS-1$
 					if (nested.isDirectory())
 						// must ensure the complete directory is extracted (bug 182585)
@@ -176,7 +176,7 @@ public class ZipBundleFile extends BundleFile {
 				} else {
 					if (zipEntry.getName().endsWith("/")) { //$NON-NLS-1$
 						if (!nested.mkdirs()) {
-							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+							if (Debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + nested.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, nested.getAbsolutePath()));
 						}
@@ -186,12 +186,12 @@ public class ZipBundleFile extends BundleFile {
 						if (in == null)
 							return null;
 						/* the entry has not been cached */
-						if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+						if (Debug.DEBUG_GENERAL)
 							Debug.println("Creating file: " + nested.getPath()); //$NON-NLS-1$
 						/* create the necessary directories */
 						File dir = new File(nested.getParent());
 						if (!dir.exists() && !dir.mkdirs()) {
-							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+							if (Debug.DEBUG_GENERAL)
 								Debug.println("Unable to create directory: " + dir.getPath()); //$NON-NLS-1$
 							throw new IOException(NLS.bind(AdaptorMsg.ADAPTOR_DIRECTORY_CREATE_EXCEPTION, dir.getAbsolutePath()));
 						}
@@ -205,7 +205,7 @@ public class ZipBundleFile extends BundleFile {
 				return nested;
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL)
 				Debug.printStackTrace(e);
 		}
 		return null;

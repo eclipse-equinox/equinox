@@ -55,7 +55,7 @@ public class BaseClassLoadingHook implements ClassLoadingHook {
 	public String findLibrary(BaseData data, String libName) {
 		String mappedName = System.mapLibraryName(libName);
 		String path = null;
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("  mapped library name: " + mappedName); //$NON-NLS-1$
 		path = findNativePath(data, mappedName);
 		if (path == null) {
@@ -64,11 +64,11 @@ public class BaseClassLoadingHook implements ClassLoadingHook {
 				path = findNativePath(data, mappedNames[i]);
 		}
 		if (path == null) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			if (Debug.DEBUG_LOADER)
 				Debug.println("  library does not exist: " + mappedName); //$NON-NLS-1$
 			path = findNativePath(data, libName);
 		}
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("  returning library: " + path); //$NON-NLS-1$
 		return path;
 	}

@@ -86,7 +86,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		if (!ServiceRegistry.hasListenServicePermission(event, context))
 			return;
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+		if (Debug.DEBUG_EVENTS) {
 			String listenerName = this.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(this)); //$NON-NLS-1$
 			Debug.println("filterServiceEvent(" + listenerName + ", \"" + getFilter() + "\", " + reference.getRegistration().getProperties() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -96,7 +96,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 			return;
 		}
 		if (allservices || ServiceRegistry.isAssignableTo(context, reference)) {
-			if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+			if (Debug.DEBUG_EVENTS) {
 				String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 				Debug.println("dispatchFilteredServiceEvent(" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}

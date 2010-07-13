@@ -102,7 +102,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			registrations.add(bc.registerService(DOMFACTORYNAME, new ParsingService(false), null));
 		} catch (ClassNotFoundException e) {
 			noXML = true;
-			if (Debug.DEBUG && Debug.DEBUG_ENABLED) {
+			if (Debug.DEBUG_ENABLED) {
 				String message = EclipseAdaptorMsg.ECLIPSE_ADAPTOR_ERROR_XML_SERVICE;
 				adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null));
 			}

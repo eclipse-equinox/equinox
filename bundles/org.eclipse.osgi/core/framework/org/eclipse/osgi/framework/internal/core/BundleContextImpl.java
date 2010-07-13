@@ -255,7 +255,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		try {
 			addServiceListener(listener, null);
 		} catch (InvalidSyntaxException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("InvalidSyntaxException w/ null filter" + e.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
@@ -304,7 +304,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+		if (Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -352,7 +352,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+		if (Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -393,7 +393,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+		if (Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -428,7 +428,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			throw new IllegalArgumentException();
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+		if (Debug.DEBUG_EVENTS) {
 			String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -796,7 +796,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				t = ((PrivilegedActionException) t).getException();
 			}
 
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.printStackTrace(t);
 			}
 
@@ -854,7 +854,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				t = ((PrivilegedActionException) t).getException();
 			}
 
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.printStackTrace(t);
 			}
 
@@ -898,7 +898,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 					case Framework.BUNDLEEVENTSYNC : {
 						BundleListener listener = (BundleListener) l;
 
-						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+						if (Debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchBundleEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
@@ -926,7 +926,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 						ServiceEvent event = (ServiceEvent) object;
 
 						ServiceListener listener = (ServiceListener) l;
-						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+						if (Debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchServiceEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
@@ -938,7 +938,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 					case Framework.FRAMEWORKEVENT : {
 						FrameworkListener listener = (FrameworkListener) l;
 
-						if (Debug.DEBUG && Debug.DEBUG_EVENTS) {
+						if (Debug.DEBUG_EVENTS) {
 							String listenerName = listener.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(listener)); //$NON-NLS-1$
 							Debug.println("dispatchFrameworkEvent[" + tmpBundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						}
@@ -952,7 +952,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 				}
 			}
 		} catch (Throwable t) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Exception in bottom level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}

@@ -261,7 +261,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		if (dataStore == null)
 			dataStore = new File(getBundleStore(), BaseStorage.DATA_DIR_NAME);
 		if (path != null && !dataStore.exists() && (storage.isReadOnly() || !dataStore.mkdirs()))
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL)
 				Debug.println("Unable to create bundle data directory: " + dataStore.getPath()); //$NON-NLS-1$
 		return path == null ? dataStore : new File(dataStore, path);
 	}
@@ -298,7 +298,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 	File createGenerationDir() {
 		File generationDir = getGenerationDir();
 		if (!generationDir.exists() && (storage.isReadOnly() || !generationDir.mkdirs()))
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL)
 				Debug.println("Unable to create bundle generation directory: " + generationDir.getPath()); //$NON-NLS-1$
 		return generationDir;
 	}

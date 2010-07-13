@@ -212,7 +212,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		try {
 			sManager.open(!readOnly);
 		} catch (IOException ex) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
@@ -237,7 +237,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void compact(File directory) {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			Debug.println("compact(" + directory.getPath() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		String list[] = directory.list();
 		if (list == null)
@@ -261,7 +261,7 @@ public class BaseStorage implements SynchronousBundleListener {
 						FileOutputStream out = new FileOutputStream(delete);
 						out.close();
 					} catch (IOException e) {
-						if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+						if (Debug.DEBUG_GENERAL)
 							Debug.println("Unable to write " + delete.getPath() + ": " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
@@ -383,7 +383,7 @@ public class BaseStorage implements SynchronousBundleListener {
 							StorageHook[] dataStorageHooks = data.getStorageHooks();
 							for (int j = 0; j < dataStorageHooks.length; j++)
 								dataStorageHooks[j].validate();
-							if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+							if (Debug.DEBUG_GENERAL)
 								Debug.println("BundleData created: " + data); //$NON-NLS-1$
 							processExtension(data, EXTENSION_INITIALIZE);
 							result.add(data);
@@ -399,7 +399,7 @@ public class BaseStorage implements SynchronousBundleListener {
 					} catch (IOException e) {
 						bundleDiscarded = true;
 						error = true;
-						if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+						if (Debug.DEBUG_GENERAL) {
 							Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 							Debug.printStackTrace(e);
 						}
@@ -416,7 +416,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				in.close();
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + e.getMessage()); //$NON-NLS-1$ 
 				Debug.printStackTrace(e);
 			}
@@ -425,7 +425,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private void saveAllData(boolean shutdown) {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving framework data ..."); //$NON-NLS-1$
 		if (storageManagerClosed)
 			try {
@@ -491,7 +491,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private void savePermissionStorage() {
 		if (permissionStorage == null || isReadOnly() || !permissionStorage.isDirty())
 			return;
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			Debug.println("About to save permission data ..."); //$NON-NLS-1$
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(PERM_DATA_FILE);
@@ -544,7 +544,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		// the cache and the state match
 		if (stateManager == null || isReadOnly() || (timeStamp == stateManager.getSystemState().getTimeStamp() && !stateManager.saveNeeded()))
 			return;
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving bundle data ..."); //$NON-NLS-1$
 		try {
 			ManagedOutputStream fmos = storageManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
@@ -599,7 +599,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			stateManager.getSystemState().setTimeStamp(stateManager.getSystemState().getTimeStamp() + 1);
 		if (stateManager == null || isReadOnly() || !stateManager.saveNeeded())
 			return;
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving resolver state data ..."); //$NON-NLS-1$
 		File stateTmpFile = null;
 		File lazyTmpFile = null;
@@ -786,7 +786,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			for (int i = 0; i < storageFiles.length; i++)
 				storageFiles[i] = storageManager.lookup(fileNames[i], false);
 		} catch (IOException ex) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
@@ -810,7 +810,7 @@ public class BaseStorage implements SynchronousBundleListener {
 					storageFiles[i] = newFileManager.lookup(fileNames[i], false);
 				newFileManager.close();
 			} catch (IOException ex) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				if (Debug.DEBUG_GENERAL) {
 					Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(ex);
 				}
@@ -823,7 +823,7 @@ public class BaseStorage implements SynchronousBundleListener {
 						storageFiles[i] = storageManager.lookup(fileNames[i], true);
 				}
 			} catch (IOException ex) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				if (Debug.DEBUG_GENERAL) {
 					Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(ex);
 				}
@@ -868,7 +868,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		try {
 			storageStream = storageManager.getInputStream(fileName);
 		} catch (IOException ex) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(ex);
 			}
@@ -1239,15 +1239,15 @@ public class BaseStorage implements SynchronousBundleListener {
 			}
 			try {
 				if (joinWith != null) {
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL)
 						Debug.println("About to join saving thread"); //$NON-NLS-1$
 					// There should be no deadlock when 'shutdown' is true.
 					joinWith.join();
-					if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+					if (Debug.DEBUG_GENERAL)
 						Debug.println("Joined with saving thread"); //$NON-NLS-1$
 				}
 			} catch (InterruptedException ie) {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+				if (Debug.DEBUG_GENERAL) {
 					Debug.println("Error shutdowning StateSaver: " + ie.getMessage()); //$NON-NLS-1$
 					Debug.printStackTrace(ie);
 				}

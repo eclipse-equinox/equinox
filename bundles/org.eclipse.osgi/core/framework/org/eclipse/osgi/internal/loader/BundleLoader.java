@@ -387,11 +387,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @throws ClassNotFoundException 
 	 */
 	Class findLocalClass(String name) throws ClassNotFoundException {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
 			Class clazz = createClassLoader().findLocalClass(name);
-			if (Debug.DEBUG && Debug.DEBUG_LOADER && clazz != null)
+			if (Debug.DEBUG_LOADER && clazz != null)
 				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			return clazz;
 		} catch (ClassNotFoundException e) {
@@ -427,7 +427,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	}
 
 	private Class findClassInternal(String name, boolean checkParent, ClassLoader parentCL) throws ClassNotFoundException {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
 		boolean bootDelegation = false;

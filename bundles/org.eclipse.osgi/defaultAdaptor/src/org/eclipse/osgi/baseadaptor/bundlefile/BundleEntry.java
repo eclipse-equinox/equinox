@@ -92,7 +92,7 @@ public abstract class BundleEntry {
 		byte[] classbytes;
 		int bytesread = 0;
 		int readcount;
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("  about to read " + length + " bytes from " + getName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 		try {

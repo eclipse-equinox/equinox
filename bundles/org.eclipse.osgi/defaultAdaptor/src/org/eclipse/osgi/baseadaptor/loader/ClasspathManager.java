@@ -525,7 +525,7 @@ public class ClasspathManager {
 	}
 
 	private Class findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
@@ -536,12 +536,12 @@ public class ClasspathManager {
 		try {
 			classbytes = entry.getBytes();
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			if (Debug.DEBUG_LOADER)
 				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
 
-		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+		if (Debug.DEBUG_LOADER) {
 			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
@@ -549,7 +549,7 @@ public class ClasspathManager {
 		try {
 			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			if (Debug.DEBUG_LOADER)
 				Debug.println("  error defining class " + name); //$NON-NLS-1$
 			throw e;
 		}

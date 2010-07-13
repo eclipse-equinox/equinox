@@ -78,7 +78,7 @@ public class SystemBundleData extends BaseData {
 		// This allows an adaptor to package the SYSTEMBUNDLE.MF file in a jar.
 		if (in == null)
 			in = getManifestAsResource();
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			if (in == null)
 				Debug.println("Unable to find system bundle manifest " + Constants.OSGI_BUNDLE_MANIFEST); //$NON-NLS-1$
 

@@ -170,7 +170,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		delegateHooks = adaptor instanceof BaseAdaptor ? ((BaseAdaptor) adaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
 		active = false;
 		installSecurityManager();
-		if (Debug.DEBUG && Debug.DEBUG_SECURITY) {
+		if (Debug.DEBUG_SECURITY) {
 			Debug.println("SecurityManager: " + System.getSecurityManager()); //$NON-NLS-1$
 			Debug.println("ProtectionDomain of Framework.class: \n" + this.getClass().getProtectionDomain()); //$NON-NLS-1$
 		}
@@ -246,7 +246,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				}
 			}
 		}
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+		if (Debug.DEBUG_GENERAL)
 			System.out.println("Initialize the framework: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logExit("Framework.initialize()"); //$NON-NLS-1$
@@ -648,7 +648,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			fwkThread.start();
 		}
 		/* Resume systembundle */
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("Trying to launch framework"); //$NON-NLS-1$
 		}
 		systemBundle.resume();
@@ -684,7 +684,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			publishFrameworkEvent(FrameworkEvent.ERROR, systemBundle, t);
 		}
 		/* Suspend systembundle */
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("Trying to shutdown Framework"); //$NON-NLS-1$
 		}
 		systemBundle.suspend();
@@ -825,7 +825,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * @return The Bundle of the installed bundle.
 	 */
 	protected AbstractBundle installBundle(final String location, final InputStream in) throws BundleException {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		final AccessControlContext callerContext = AccessController.getContext();
@@ -920,11 +920,11 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		try {
 			BundleData bundledata = storage.begin();
 			bundle = createAndVerifyBundle(bundledata, true);
-			if (Debug.DEBUG) {
-				BundleWatcher bundleStats = adaptor.getBundleWatcher();
-				if (bundleStats != null)
-					bundleStats.watchBundle(bundle, BundleWatcher.START_INSTALLING);
-			}
+
+			BundleWatcher bundleStats = adaptor.getBundleWatcher();
+			if (bundleStats != null)
+				bundleStats.watchBundle(bundle, BundleWatcher.START_INSTALLING);
+
 			try {
 				bundle.load();
 				if (System.getSecurityManager() != null) {
@@ -953,11 +953,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				bundle.close();
 				throw error;
 			} finally {
-				if (Debug.DEBUG) {
-					BundleWatcher bundleStats = adaptor.getBundleWatcher();
-					if (bundleStats != null)
-						bundleStats.watchBundle(bundle, BundleWatcher.END_INSTALLING);
-				}
+				if (bundleStats != null)
+					bundleStats.watchBundle(bundle, BundleWatcher.END_INSTALLING);
 			}
 			/* bundle has been successfully installed */
 			bundles.add(bundle);
@@ -1061,12 +1058,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			return;
 		}
 		try {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Trying to resume bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.resume();
 		} catch (BundleException be) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
@@ -1091,12 +1088,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			return changed;
 		}
 		try {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Trying to suspend bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.suspend(lock);
 		} catch (BundleException be) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Bundle suspend exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
@@ -1226,7 +1223,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				}
 				if (sm == null)
 					throw new NoClassDefFoundError(securityManager);
-				if (Debug.DEBUG && Debug.DEBUG_SECURITY)
+				if (Debug.DEBUG_SECURITY)
 					Debug.println("Setting SecurityManager to: " + sm); //$NON-NLS-1$
 				System.setSecurityManager(sm);
 				return;
@@ -1394,7 +1391,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 				}
 			}
 		} catch (Throwable t) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Exception in Top level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(t);
 			}

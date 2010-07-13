@@ -100,7 +100,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
 	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER)
+		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
@@ -110,7 +110,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 				resolveClass(clazz);
 			return (clazz);
 		} catch (Error e) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			if (Debug.DEBUG_LOADER) {
 				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
@@ -118,7 +118,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		} catch (ClassNotFoundException e) {
 			// If the class is not found do not try to look for it locally.
 			// The delegate would have already done that for us.
-			if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+			if (Debug.DEBUG_LOADER) {
 				Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Debug.printStackTrace(e);
 			}
@@ -136,7 +136,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @return The URL of the resource or null if it does not exist.
 	 */
 	public URL getResource(String name) {
-		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+		if (Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
@@ -144,7 +144,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		if (url != null)
 			return (url);
 
-		if (Debug.DEBUG && Debug.DEBUG_LOADER) {
+		if (Debug.DEBUG_LOADER) {
 			Debug.println("BundleClassLoader[" + delegate + "].getResource(" + name + ") failed."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 

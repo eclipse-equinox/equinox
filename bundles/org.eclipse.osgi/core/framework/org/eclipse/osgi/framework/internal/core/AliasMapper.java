@@ -139,7 +139,7 @@ public class AliasMapper {
 				}
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.printStackTrace(e);
 			}
 		}

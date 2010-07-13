@@ -400,7 +400,7 @@ public class BaseData implements BundleData {
 
 	private static String[] getClassPath(ManifestElement[] classpath) {
 		if (classpath == null) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			if (Debug.DEBUG_LOADER)
 				Debug.println("  no classpath"); //$NON-NLS-1$
 			/* create default BundleClassPath */
 			return new String[] {"."}; //$NON-NLS-1$
@@ -408,7 +408,7 @@ public class BaseData implements BundleData {
 
 		ArrayList result = new ArrayList(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
-			if (Debug.DEBUG && Debug.DEBUG_LOADER)
+			if (Debug.DEBUG_LOADER)
 				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
 			String[] paths = classpath[i].getValueComponents();
 			for (int j = 0; j < paths.length; j++) {

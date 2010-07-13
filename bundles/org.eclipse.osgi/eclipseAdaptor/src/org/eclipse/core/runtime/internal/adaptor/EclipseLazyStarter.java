@@ -208,7 +208,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	}
 
 	public void frameworkStopping(BundleContext context) {
-		if (!Debug.DEBUG || !Debug.DEBUG_ENABLED)
+		if (!Debug.DEBUG_ENABLED)
 			return;
 
 		BundleDescription[] allBundles = adaptor.getState().getResolvedBundles();

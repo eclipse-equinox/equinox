@@ -39,7 +39,7 @@ public class BundleFragment extends AbstractBundle {
 	 * Load the bundle.
 	 */
 	protected void load() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED)) == 0) {
 				Debug.println("Bundle.load called when state != INSTALLED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
@@ -62,7 +62,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 */
 	protected boolean reload(AbstractBundle newBundle) {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			if ((state & (INSTALLED | RESOLVED)) == 0) {
 				Debug.println("Bundle.reload called when state != INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
@@ -112,7 +112,7 @@ public class BundleFragment extends AbstractBundle {
 	 * this method!
 	 */
 	protected void refresh() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
 				Debug.println("Bundle.refresh called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$
@@ -135,7 +135,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @return  true if an exported package is "in use". i.e. it has been imported by a bundle
 	 */
 	protected boolean unload() {
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			if ((state & (UNINSTALLED | INSTALLED | RESOLVED)) == 0) {
 				Debug.println("Bundle.unload called when state != UNINSTALLED | INSTALLED | RESOLVED: " + this); //$NON-NLS-1$
 				Debug.printStackTrace(new Exception("Stack trace")); //$NON-NLS-1$

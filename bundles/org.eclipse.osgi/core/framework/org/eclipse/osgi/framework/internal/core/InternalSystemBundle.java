@@ -207,7 +207,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 			framework.systemBundle.context.start();
 			framework.publishBundleEvent(BundleEvent.STARTING, framework.systemBundle);
 		} catch (BundleException be) {
-			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+			if (Debug.DEBUG_STARTLEVEL) {
 				Debug.println("SLL: Bundle resume exception: " + be.getMessage()); //$NON-NLS-1$
 				Debug.printStackTrace(be.getNestedException() == null ? be : be.getNestedException());
 			}
@@ -221,7 +221,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 
 		for (int i = 0; i < installedBundles.length; i++) {
 			AbstractBundle bundle = installedBundles[i];
-			if (Debug.DEBUG && Debug.DEBUG_STARTLEVEL) {
+			if (Debug.DEBUG_STARTLEVEL) {
 				Debug.println("SLL: Trying to load bundle " + bundle); //$NON-NLS-1$
 			}
 			bundle.load();
@@ -269,7 +269,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		/* clean up the exporting loaders */
 		framework.packageAdmin.cleanup();
 
-		if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+		if (Debug.DEBUG_GENERAL) {
 			Debug.println("->Framework shutdown"); //$NON-NLS-1$
 		}
 		// fire the STOPPED event here.

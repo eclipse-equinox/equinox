@@ -146,11 +146,11 @@ public class BaseAdaptor implements FrameworkAdaptor {
 					}
 				}
 			} else {
-				if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+				if (Debug.DEBUG_GENERAL)
 					Debug.println("Skipping osgi.properties: " + resource); //$NON-NLS-1$
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL)
+			if (Debug.DEBUG_GENERAL)
 				Debug.println("Unable to load osgi.properties: " + e.getMessage()); //$NON-NLS-1$
 		}
 		// add the storage properties

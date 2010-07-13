@@ -351,7 +351,7 @@ public class ManifestElement {
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
 
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
+			if (Debug.DEBUG_MANIFEST)
 				Debug.print("parseHeader: " + next); //$NON-NLS-1$
 			boolean directive = false;
 			char c = tokenizer.getChar();
@@ -375,7 +375,7 @@ public class ManifestElement {
 				if (c == ';' || c == ',' || c == '\0') /* more */{
 					headerValues.add(next);
 					headerValue.append(";").append(next); //$NON-NLS-1$
-					if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
+					if (Debug.DEBUG_MANIFEST)
 						Debug.print(";" + next); //$NON-NLS-1$
 				}
 			}
@@ -401,7 +401,7 @@ public class ManifestElement {
 				if (val == null)
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 
-				if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
+				if (Debug.DEBUG_MANIFEST)
 					Debug.print(";" + next + "=" + val); //$NON-NLS-1$ //$NON-NLS-2$
 				try {
 					if (directive)
@@ -421,7 +421,7 @@ public class ManifestElement {
 				}
 			}
 			headerElements.add(manifestElement);
-			if (Debug.DEBUG && Debug.DEBUG_MANIFEST)
+			if (Debug.DEBUG_MANIFEST)
 				Debug.println(""); //$NON-NLS-1$
 			if (c == ',') /* another manifest element */
 				continue parseloop;

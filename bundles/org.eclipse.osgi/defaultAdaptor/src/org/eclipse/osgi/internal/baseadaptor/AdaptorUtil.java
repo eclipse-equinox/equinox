@@ -77,7 +77,7 @@ public class AdaptorUtil {
 				fos.write(buffer, 0, count);
 			}
 		} catch (IOException e) {
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Unable to read file"); //$NON-NLS-1$
 				Debug.printStackTrace(e);
 			}
@@ -120,7 +120,7 @@ public class AdaptorUtil {
 					}
 				}
 			}
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				if (file.isDirectory()) {
 					Debug.println("rmdir " + file.getPath()); //$NON-NLS-1$
 				} else {
@@ -130,7 +130,7 @@ public class AdaptorUtil {
 
 			boolean success = file.delete();
 
-			if (Debug.DEBUG && Debug.DEBUG_GENERAL) {
+			if (Debug.DEBUG_GENERAL) {
 				if (!success) {
 					Debug.println("  rm failed!!"); //$NON-NLS-1$
 				}
