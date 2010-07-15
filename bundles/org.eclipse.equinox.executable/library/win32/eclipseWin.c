@@ -78,6 +78,7 @@ typedef struct {
 
 #define COMPANY_NAME_KEY _T_ECLIPSE("\\StringFileInfo\\%04x%04x\\CompanyName")
 #define SUN_MICROSYSTEMS _T_ECLIPSE("Sun Microsystems")
+#define ORACLE 			 _T_ECLIPSE("Oracle")
 
 static void sendOpenFileMessage(HWND window) {
 	_TCHAR* id;
@@ -593,6 +594,9 @@ int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
 				
 				VerQueryValue(info, key, (void *)&value, &valueSize);
 				if (_tcsncmp(value, SUN_MICROSYSTEMS, _tcslen(SUN_MICROSYSTEMS)) == 0) {
+					result = 1;
+					break;
+				} else if (_tcsncmp(value, ORACLE, _tcslen(ORACLE)) == 0) {
 					result = 1;
 					break;
 				}
