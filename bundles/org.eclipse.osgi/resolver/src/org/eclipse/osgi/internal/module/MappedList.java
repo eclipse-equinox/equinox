@@ -75,7 +75,7 @@ public class MappedList {
 		while (iter.hasNext()) {
 			Object value = iter.next();
 			if (value.getClass().isArray()) {
-				Object[] values = (Object[]) iter.next();
+				Object[] values = (Object[]) value;
 				for (int i = 0; i < values.length; i++)
 					results.add(values[i]);
 			} else
