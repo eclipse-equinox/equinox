@@ -391,6 +391,15 @@ public class ServiceRegistrationImpl implements ServiceRegistration, Comparable 
 		}
 	}
 
+	Object getSafeService(BundleContextImpl user) {
+		try {
+			return getService(user);
+		} catch (IllegalStateException e) {
+			// can happen if the user is stopped on another thread
+			return null;
+		}
+	}
+
 	/**
 	 * Get a service object for the using BundleContext.
 	 *

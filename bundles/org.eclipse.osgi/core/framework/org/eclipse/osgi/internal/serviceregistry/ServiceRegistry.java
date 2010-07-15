@@ -1087,7 +1087,7 @@ public class ServiceRegistry {
 
 		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			Object findHook = registration.getService(systemBundleContext);
+			Object findHook = registration.getSafeService(systemBundleContext);
 			if (findHook == null) { // if the hook is null
 				continue;
 			}
@@ -1134,7 +1134,7 @@ public class ServiceRegistry {
 
 		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			Object eventHook = registration.getService(systemBundleContext);
+			Object eventHook = registration.getSafeService(systemBundleContext);
 			if (eventHook == null) { // if the hook is null
 				continue;
 			}
@@ -1198,7 +1198,7 @@ public class ServiceRegistry {
 		}
 		addedListeners = Collections.unmodifiableCollection(addedListeners);
 
-		Object listenerHook = registration.getService(systemBundleContext);
+		Object listenerHook = registration.getSafeService(systemBundleContext);
 		if (listenerHook == null) { // if the hook is null
 			return;
 		}
@@ -1259,7 +1259,7 @@ public class ServiceRegistry {
 
 		for (Iterator iter = hooks.iterator(); iter.hasNext();) {
 			ServiceRegistrationImpl registration = (ServiceRegistrationImpl) iter.next();
-			Object listenerHook = registration.getService(systemBundleContext);
+			Object listenerHook = registration.getSafeService(systemBundleContext);
 			if (listenerHook == null) { // if the hook is null
 				continue;
 			}
