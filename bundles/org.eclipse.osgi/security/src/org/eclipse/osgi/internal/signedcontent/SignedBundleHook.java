@@ -75,6 +75,9 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		SignedBundleHook.ADAPTOR = adaptor;
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		// check if load time authority is enabled
 		if ((supportSignedBundles & VERIFY_AUTHORITY) != 0) {
@@ -127,6 +130,9 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		legacyFactoryReg = context.registerService(CertificateVerifierFactory.class.getName(), new LegacyVerifierFactory(this), null);
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		if (legacyFactoryReg != null) {
 			legacyFactoryReg.unregister();
@@ -171,6 +177,9 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		// do nothing
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
 		return null;
 	}

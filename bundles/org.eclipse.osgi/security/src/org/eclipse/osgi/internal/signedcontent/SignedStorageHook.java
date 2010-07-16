@@ -37,12 +37,18 @@ public class SignedStorageHook implements StorageHook {
 		return STORAGE_VERSION;
 	}
 
-	public StorageHook create(BaseData bundledata) throws BundleException {
+	/**
+	 * @throws BundleException  
+	 */
+	public StorageHook create(BaseData data) throws BundleException {
 		SignedStorageHook hook = new SignedStorageHook();
-		hook.bundledata = bundledata;
+		hook.bundledata = data;
 		return hook;
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void initialize(Dictionary manifest) throws BundleException {
 		// do nothing
 	}
@@ -202,6 +208,9 @@ public class SignedStorageHook implements StorageHook {
 		// do nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public Dictionary getManifest(boolean firstLoad) throws BundleException {
 		// do nothing
 		return null;

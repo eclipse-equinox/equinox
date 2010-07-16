@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,10 +199,16 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		return null;
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		// nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		// nothing
 	}
@@ -226,6 +232,9 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		this.adaptor = baseAdaptor;
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
 		// do nothing
 		return null;

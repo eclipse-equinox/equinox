@@ -162,12 +162,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 * by the Framework constructor.
 	 *  
 	 */
-	protected void initialize(FrameworkAdaptor adaptor) {
+	protected void initialize(FrameworkAdaptor initAdaptor) {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("Framework.initialze()", null); //$NON-NLS-1$
 		long start = System.currentTimeMillis();
-		this.adaptor = adaptor;
-		delegateHooks = adaptor instanceof BaseAdaptor ? ((BaseAdaptor) adaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
+		this.adaptor = initAdaptor;
+		delegateHooks = initAdaptor instanceof BaseAdaptor ? ((BaseAdaptor) initAdaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
 		active = false;
 		installSecurityManager();
 		if (Debug.DEBUG_SECURITY) {
@@ -178,11 +178,11 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		// initialize ContextFinder
 		initializeContextFinder();
 		/* initialize the adaptor */
-		adaptor.initialize(this);
+		initAdaptor.initialize(this);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "adapter initialized"); //$NON-NLS-1$//$NON-NLS-2$
 		try {
-			adaptor.initializeStorage();
+			initAdaptor.initializeStorage();
 		} catch (IOException e) /* fatal error */{
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -192,12 +192,12 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		 * This must be done before calling any of the framework getProperty
 		 * methods.
 		 */
-		initializeProperties(adaptor.getProperties());
+		initializeProperties(initAdaptor.getProperties());
 		/* initialize admin objects */
 		packageAdmin = new PackageAdminImpl(this);
 		try {
 			// always create security admin even with security off
-			securityAdmin = new SecurityAdmin(null, this, adaptor.getPermissionStorage());
+			securityAdmin = new SecurityAdmin(null, this, initAdaptor.getPermissionStorage());
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage(), e);
@@ -225,13 +225,13 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done createSystemBundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* install URLStreamHandlerFactory */
-		installURLStreamHandlerFactory(systemBundle.context, adaptor);
+		installURLStreamHandlerFactory(systemBundle.context, initAdaptor);
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
-		installContentHandlerFactory(systemBundle.context, adaptor);
+		installContentHandlerFactory(systemBundle.context, initAdaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
-		BundleData[] bundleDatas = adaptor.getInstalledBundles();
+		BundleData[] bundleDatas = initAdaptor.getInstalledBundles();
 		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1);
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
@@ -675,7 +675,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		 * set the state of the System Bundle to STOPPING.
 		 * this must be done first according to section 4.19.2 from the OSGi R3 spec.  
 		 */
-		systemBundle.state = AbstractBundle.STOPPING;
+		systemBundle.state = Bundle.STOPPING;
 		publishBundleEvent(BundleEvent.STOPPING, systemBundle); // need to send system bundle stopping event 
 		/* call the FrameworkAdaptor.frameworkStopping method first */
 		try {
@@ -880,6 +880,8 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 					/* wait for the reservation to be released */
 					installLock.wait();
 				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new BundleException("Thread has been interrupted while waiting for the location lock.", e); //$NON-NLS-1$
 				}
 			}
 		}

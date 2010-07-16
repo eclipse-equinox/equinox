@@ -86,7 +86,7 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	private final MRUBundleFileList mruList = new MRUBundleFileList();
 
-	private BaseAdaptor adaptor;
+	BaseAdaptor adaptor;
 	// assume a file: installURL
 	private String installPath;
 	private StorageManager storageManager;
@@ -129,8 +129,8 @@ public class BaseStorage implements SynchronousBundleListener {
 		addExtURLMethod = findAddURLMethod(getExtClassLoader(), "addURL"); //$NON-NLS-1$
 	}
 
-	public void initialize(BaseAdaptor adaptor) throws IOException {
-		this.adaptor = adaptor;
+	public void initialize(BaseAdaptor initAdaptor) throws IOException {
+		this.adaptor = initAdaptor;
 		setDebugOptions();
 		if (Boolean.valueOf(FrameworkProperties.getProperty(BaseStorage.PROP_CLEAN)).booleanValue())
 			cleanOSGiCache();
@@ -147,7 +147,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		storageManager = initFileManager(LocationManager.getOSGiConfigurationDir(), readOnlyConfiguration ? "none" : null, readOnlyConfiguration); //$NON-NLS-1$
 		storageManagerClosed = false;
 		// initialize the storageHooks
-		StorageHook[] hooks = adaptor.getHookRegistry().getStorageHooks();
+		StorageHook[] hooks = initAdaptor.getHookRegistry().getStorageHooks();
 		for (int i = 0; i < hooks.length; i++)
 			storageHooks.add(hooks[i]);
 	}
@@ -231,7 +231,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		return storageManager.isReadOnly();
 	}
 
-	public void compact() throws IOException {
+	public void compact() {
 		if (!isReadOnly())
 			compact(getBundleStoreRoot());
 	}
@@ -271,6 +271,9 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public long getFreeSpace() throws IOException {
 		// cannot implement this without native code!
 		return -1;
@@ -358,12 +361,12 @@ public class BaseStorage implements SynchronousBundleListener {
 				nextId = in.readLong();
 
 				int numStorageHooks = in.readInt();
-				StorageHook[] storageHooks = adaptor.getHookRegistry().getStorageHooks();
-				if (numStorageHooks != storageHooks.length)
+				StorageHook[] hooks = adaptor.getHookRegistry().getStorageHooks();
+				if (numStorageHooks != hooks.length)
 					return null; // must have the same number of storagehooks to properly read the data
 				for (int i = 0; i < numStorageHooks; i++) {
-					Object storageKey = storageHooks[i].getKey();
-					int storageVersion = storageHooks[i].getStorageVersion();
+					Object storageKey = hooks[i].getKey();
+					int storageVersion = hooks[i].getStorageVersion();
 					if (!storageKey.equals(in.readUTF()) || storageVersion != in.readInt())
 						return null; // some storage hooks have changed must throw the data away.
 				}
@@ -424,7 +427,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		return null;
 	}
 
-	private void saveAllData(boolean shutdown) {
+	void saveAllData(boolean shutdown) {
 		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving framework data ..."); //$NON-NLS-1$
 		if (storageManagerClosed)
@@ -556,11 +559,11 @@ public class BaseStorage implements SynchronousBundleListener {
 				out.writeInt(initialBundleStartLevel);
 				out.writeLong(nextId);
 
-				StorageHook[] storageHooks = adaptor.getHookRegistry().getStorageHooks();
-				out.writeInt(storageHooks.length);
-				for (int i = 0; i < storageHooks.length; i++) {
-					out.writeUTF((String) storageHooks[i].getKey());
-					out.writeInt(storageHooks[i].getStorageVersion());
+				StorageHook[] hooks = adaptor.getHookRegistry().getStorageHooks();
+				out.writeInt(hooks.length);
+				for (int i = 0; i < hooks.length; i++) {
+					out.writeUTF((String) hooks[i].getKey());
+					out.writeInt(hooks[i].getStorageVersion());
 				}
 
 				Bundle[] bundles = context.getBundles();
@@ -625,7 +628,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 	}
 
-	public PermissionStorage getPermissionStorage() throws IOException {
+	public PermissionStorage getPermissionStorage() {
 		if (permissionStorage == null)
 			permissionStorage = readPermissionData();
 		return permissionStorage;
@@ -640,7 +643,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		requestSave();
 	}
 
-	public void save(BaseData data) throws IOException {
+	public void save(BaseData data) {
 		if (data.isDirty()) {
 			timeStamp--; // Change the value of the timeStamp, as a marker that something changed.
 			requestSave();
@@ -661,7 +664,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		return new BundleUninstall(data, this);
 	}
 
-	protected Object getBundleContent(BaseData bundledata) throws IOException {
+	protected Object getBundleContent(BaseData bundledata) {
 		BaseStorageHook storageHook = (BaseStorageHook) bundledata.getStorageHook(BaseStorageHook.KEY);
 		if (storageHook == null)
 			throw new IllegalStateException();
@@ -832,7 +835,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		return storageFiles;
 	}
 
-	public void frameworkStart(BundleContext fwContext) throws BundleException {
+	public void frameworkStart(BundleContext fwContext) {
 		this.context = fwContext;
 		// System property can be set to enable state saver or not.
 		if (Boolean.valueOf(FrameworkProperties.getProperty(BaseStorage.PROP_ENABLE_STATE_SAVER, "true")).booleanValue()) //$NON-NLS-1$
@@ -840,7 +843,7 @@ public class BaseStorage implements SynchronousBundleListener {
 
 	}
 
-	public void frameworkStop(BundleContext fwContext) throws BundleException {
+	public void frameworkStop(BundleContext fwContext) {
 		if (stateSaver != null)
 			stateSaver.shutdown();
 		saveAllData(true);
@@ -986,7 +989,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		addExtensionContent(bundleData, type, getExtClassLoader(), addExtURLMethod);
 	}
 
-	private void addExtensionContent(BaseData bundleData, byte type, ClassLoader addToLoader, Method addToMethod) throws BundleException {
+	private void addExtensionContent(BaseData bundleData, byte type, ClassLoader addToLoader, Method addToMethod) {
 		if ((type & (EXTENSION_UNINSTALLED | EXTENSION_UPDATED)) != 0)
 			// if uninstalled or updated then do nothing framework must be restarted.
 			return;

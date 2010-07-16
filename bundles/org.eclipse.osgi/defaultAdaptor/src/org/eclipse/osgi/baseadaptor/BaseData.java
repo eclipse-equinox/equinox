@@ -267,6 +267,9 @@ public class BaseData implements BundleData {
 		return value;
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public void save() throws IOException {
 		adaptor.getStorage().save(this);
 	}

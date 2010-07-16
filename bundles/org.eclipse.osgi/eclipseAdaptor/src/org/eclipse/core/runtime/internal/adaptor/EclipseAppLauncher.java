@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,12 +118,12 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 		}
 	}
 
-	public void launch(ParameterizedRunnable app, Object appContext) {
+	public void launch(ParameterizedRunnable app, Object applicationContext) {
 		waitForAppLock.acquire(-1); // clear out any pending apps notifications
 		if (!runningLock.acquire(-1)) // check to see if an application is currently running
 			throw new IllegalStateException("An application is aready running."); //$NON-NLS-1$
 		this.runnable = app;
-		this.appContext = appContext;
+		this.appContext = applicationContext;
 		waitForAppLock.release(); // notify the main thread to launch an application.
 		runningLock.release(); // release the running lock
 	}

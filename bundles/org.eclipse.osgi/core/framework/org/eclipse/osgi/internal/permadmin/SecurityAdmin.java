@@ -841,7 +841,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 				endIndex++;
 			}
 			if (endIndex > dnChain.length()) {
-				throw new IllegalArgumentException("unterminated escape");
+				throw new IllegalArgumentException("unterminated escape"); //$NON-NLS-1$
 			}
 			parsed.add(dnChain.substring(startIndex, endIndex));
 			startIndex = endIndex + 1;

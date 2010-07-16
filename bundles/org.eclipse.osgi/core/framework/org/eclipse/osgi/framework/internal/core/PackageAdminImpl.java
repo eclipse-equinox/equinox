@@ -126,9 +126,8 @@ public class PackageAdminImpl implements PackageAdmin {
 				if (result == null) {
 					result = allExports[i];
 				} else {
-					// TODO not efficient but this is not called very often
-					Version curVersion = Version.parseVersion(result.getSpecificationVersion());
-					Version newVersion = Version.parseVersion(allExports[i].getSpecificationVersion());
+					Version curVersion = result.getVersion();
+					Version newVersion = allExports[i].getVersion();
 					if (newVersion.compareTo(curVersion) >= 0)
 						result = allExports[i];
 				}

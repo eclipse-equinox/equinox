@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,15 +34,21 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 		hookRegistry.addAdaptorHook(this);
 	}
 
-	public void initialize(BaseAdaptor adaptor) {
-		this.adaptor = adaptor;
+	public void initialize(BaseAdaptor initAdaptor) {
+		this.adaptor = initAdaptor;
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		AdaptorUtil.register(FrameworkLog.class.getName(), adaptor.getFrameworkLog(), context);
 		registerPerformanceLog(context);
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		// TODO should unregister service registered a frameworkStart
 	}
@@ -56,6 +62,9 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 		// do nothing
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
 		// do nothing
 		return null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,10 +28,16 @@ public class EclipseErrorHandler implements AdaptorHook, HookConfigurator {
 	private static final String PROP_EXITONERROR = "eclipse.exitOnError"; //$NON-NLS-1$
 	private BaseAdaptor adaptor;
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		// do nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		// do nothing
 	}
@@ -44,6 +50,9 @@ public class EclipseErrorHandler implements AdaptorHook, HookConfigurator {
 		// do nothing
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
 		// do nothing
 		return null;
@@ -98,7 +107,7 @@ public class EclipseErrorHandler implements AdaptorHook, HookConfigurator {
 		return null;
 	}
 
-	public void initialize(BaseAdaptor adaptor) {
-		this.adaptor = adaptor;
+	public void initialize(BaseAdaptor initAdaptor) {
+		this.adaptor = initAdaptor;
 	}
 }

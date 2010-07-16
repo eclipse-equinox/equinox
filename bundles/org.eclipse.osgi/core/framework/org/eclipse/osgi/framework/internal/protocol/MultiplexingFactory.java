@@ -29,7 +29,7 @@ public abstract class MultiplexingFactory {
 	private ServiceTracker packageAdminTracker;
 
 	// used to get access to the protected SecurityManager#getClassContext method
-	private static class InternalSecurityManager extends SecurityManager {
+	static class InternalSecurityManager extends SecurityManager {
 		public Class[] getClassContext() {
 			return super.getClassContext();
 		}

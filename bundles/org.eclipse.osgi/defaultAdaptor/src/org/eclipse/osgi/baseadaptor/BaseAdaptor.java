@@ -115,6 +115,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	}
 
 	/**
+	 * @throws IOException 
 	 * @see FrameworkAdaptor#compactStorage()
 	 */
 	public void compactStorage() throws IOException {
@@ -222,6 +223,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	}
 
 	/**
+	 * @throws IOException 
 	 * @see FrameworkAdaptor#getPermissionStorage()
 	 */
 	public PermissionStorage getPermissionStorage() throws IOException {
@@ -314,6 +316,9 @@ public class BaseAdaptor implements FrameworkAdaptor {
 				// do nothing
 			}
 
+			/**
+			 * @throws IOException  
+			 */
 			public void setFile(File newFile, boolean append) throws IOException {
 				// do nothing
 			}

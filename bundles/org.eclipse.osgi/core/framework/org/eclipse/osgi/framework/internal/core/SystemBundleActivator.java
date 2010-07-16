@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,12 +31,9 @@ public class SystemBundleActivator implements BundleActivator {
 	private ServiceRegistration debugOptions;
 	private ServiceRegistration contextFinder;
 
-	public SystemBundleActivator() {
-	}
-
-	public void start(BundleContext context) throws Exception {
-		this.context = context;
-		bundle = (InternalSystemBundle) context.getBundle();
+	public void start(BundleContext bc) throws Exception {
+		this.context = bc;
+		bundle = (InternalSystemBundle) bc.getBundle();
 		framework = bundle.framework;
 
 		if (framework.packageAdmin != null)
@@ -47,7 +44,7 @@ public class SystemBundleActivator implements BundleActivator {
 			startLevel = register(new String[] {Constants.OSGI_STARTLEVEL_NAME}, framework.startLevelManager, null);
 		FrameworkDebugOptions dbgOptions = null;
 		if ((dbgOptions = FrameworkDebugOptions.getDefault()) != null) {
-			dbgOptions.start(context);
+			dbgOptions.start(bc);
 			debugOptions = register(new String[] {org.eclipse.osgi.service.debug.DebugOptions.class.getName()}, dbgOptions, null);
 		}
 		ClassLoader tccl = framework.getContextFinder();
@@ -58,7 +55,7 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
-		framework.adaptor.frameworkStart(context);
+		framework.adaptor.frameworkStart(bc);
 		// attempt to resolve all bundles
 		// this is done after the adaptor.frameworkStart has been called
 		// this should be the first time the resolver State is accessed
@@ -67,9 +64,9 @@ public class SystemBundleActivator implements BundleActivator {
 		framework.systemBundle.manifestLocalization = null;
 	}
 
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext bc) throws Exception {
 		// Always call the adaptor.frameworkStop() at the begining of this method.
-		framework.adaptor.frameworkStop(context);
+		framework.adaptor.frameworkStop(bc);
 
 		if (packageAdmin != null)
 			packageAdmin.unregister();
@@ -80,7 +77,7 @@ public class SystemBundleActivator implements BundleActivator {
 		if (debugOptions != null) {
 			FrameworkDebugOptions dbgOptions = FrameworkDebugOptions.getDefault();
 			if (dbgOptions != null)
-				dbgOptions.stop(context);
+				dbgOptions.stop(bc);
 			debugOptions.unregister();
 		}
 		if (contextFinder != null)

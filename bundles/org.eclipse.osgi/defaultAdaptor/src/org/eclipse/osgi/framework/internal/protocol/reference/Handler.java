@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,9 +27,10 @@ import java.net.*;
  * </pre>
  */
 public class Handler extends URLStreamHandler {
-	public Handler() {
-	}
 
+	/**
+	 * @throws IOException  
+	 */
 	protected URLConnection openConnection(URL url) throws IOException {
 		return new ReferenceURLConnection(url);
 	}

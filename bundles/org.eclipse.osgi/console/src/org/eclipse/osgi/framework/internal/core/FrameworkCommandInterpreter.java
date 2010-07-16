@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -284,7 +284,9 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 						printStackTrace(nested);
 					}
 				} catch (IllegalAccessException e) {
+					// nothing
 				} catch (InvocationTargetException e) {
+					// nothing
 				}
 			}
 		}
@@ -364,6 +366,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 						try {
 							in.close();
 						} catch (IOException e) {
+							// nothing
 						}
 					}
 				}
@@ -512,6 +515,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 					return answer;
 				}
 			} catch (NumberFormatException e) {
+				// nothing
 			}
 			println(ConsoleMsg.CONSOLE_INVALID_INPUT);
 		}

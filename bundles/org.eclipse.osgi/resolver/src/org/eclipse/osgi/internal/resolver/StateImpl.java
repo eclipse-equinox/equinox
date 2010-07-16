@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -293,6 +293,9 @@ public abstract class StateImpl implements State {
 		((VersionConstraintImpl) constraint).setSupplier(supplier);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
 		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
 	}
@@ -752,7 +755,7 @@ public abstract class StateImpl implements State {
 			}
 	}
 
-	private void addSystemExports(ArrayList exports, ManifestElement[] elements, int index) throws BundleException {
+	private void addSystemExports(ArrayList exports, ManifestElement[] elements, int index) {
 		if (elements == null)
 			return;
 		ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, 2, false);

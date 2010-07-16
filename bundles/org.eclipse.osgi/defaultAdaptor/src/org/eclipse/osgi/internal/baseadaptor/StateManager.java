@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -99,14 +99,14 @@ public class StateManager implements PlatformAdmin, Runnable {
 
 	/**
 	 * Shutsdown the state manager.  If the timestamp of the system state has changed
-	 * @param stateFile
-	 * @param lazyFile
+	 * @param saveStateFile
+	 * @param saveLazyFile
 	 * @throws IOException
 	 */
-	public void shutdown(File stateFile, File lazyFile) throws IOException {
+	public void shutdown(File saveStateFile, File saveLazyFile) throws IOException {
 		BundleDescription[] removalPendings = systemState.getRemovalPendings();
 		cleanRemovalPendings(removalPendings);
-		writeState(systemState, stateFile, lazyFile);
+		writeState(systemState, saveStateFile, saveLazyFile);
 		stopDataManager();
 	}
 
@@ -123,11 +123,11 @@ public class StateManager implements PlatformAdmin, Runnable {
 
 	/**
 	 * Update the given target files with the state data in memory.
-	 * @param stateFile
-	 * @param lazyFile
+	 * @param updateStateFile
+	 * @param updateLazyFile
 	 * @throws IOException
 	 */
-	public void update(File stateFile, File lazyFile) throws IOException {
+	public void update(File updateStateFile, File updateLazyFile) throws IOException {
 		BundleDescription[] removalPendings = systemState.getRemovalPendings();
 		StateImpl state = systemState;
 		if (removalPendings.length > 0) {
@@ -136,13 +136,13 @@ public class StateManager implements PlatformAdmin, Runnable {
 			state.setPlatformProperties(FrameworkProperties.getProperties());
 			state.resolve(false);
 		}
-		writeState(state, stateFile, lazyFile);
+		writeState(state, updateStateFile, updateLazyFile);
 		// Need to use the timestamp of the original state here
 		lastTimeStamp = systemState.getTimeStamp();
 		// TODO consider updating the state files for lazy loading
 	}
 
-	private void readSystemState(File stateFile, File lazyFile, long expectedTimeStamp) {
+	private void internalReadSystemState() {
 		if (stateFile == null || !stateFile.isFile())
 			return;
 		if (DEBUG_READER)
@@ -192,13 +192,13 @@ public class StateManager implements PlatformAdmin, Runnable {
 		dataManagerThread = null;
 	}
 
-	private void writeState(StateImpl state, File stateFile, File lazyFile) throws IOException {
+	private void writeState(StateImpl state, File saveStateFile, File saveLazyFile) throws IOException {
 		if (state == null)
 			return;
 		if (cachedState && !saveNeeded())
 			return;
 		state.fullyLoad(); // make sure we are fully loaded before saving
-		factory.writeState(state, stateFile, lazyFile);
+		factory.writeState(state, saveStateFile, saveLazyFile);
 	}
 
 	private boolean initializeSystemState() {
@@ -229,7 +229,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 */
 	public synchronized State readSystemState() {
 		if (systemState == null)
-			readSystemState(stateFile, lazyFile, expectedTimeStamp);
+			internalReadSystemState();
 		return systemState;
 	}
 
@@ -280,6 +280,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	}
 
 	/**
+	 * @throws BundleException 
 	 * @see PlatformAdmin#commit(State)
 	 */
 	public synchronized void commit(State state) throws BundleException {

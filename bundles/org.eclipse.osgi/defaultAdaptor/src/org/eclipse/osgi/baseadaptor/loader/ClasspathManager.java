@@ -260,12 +260,12 @@ public class ClasspathManager {
 		return null;
 	}
 
-	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain, BaseData data) {
+	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain, BaseData cpData) {
 		ClasspathEntry entry = classloader.createClassPathEntry(bundlefile, cpDomain);
-		entry.setBaseData(data);
+		entry.setBaseData(cpData);
 		Object domain = entry.getDomain();
 		if (domain instanceof BundleProtectionDomain)
-			((BundleProtectionDomain) domain).setBundle(data.getBundle());
+			((BundleProtectionDomain) domain).setBundle(cpData.getBundle());
 		return entry;
 	}
 

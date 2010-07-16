@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,11 @@ import java.security.*;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 /**
- * PermissionStorage privileged action class.
+ * PermissionStorage privileged action class.  This class is not thread safe.  Callers
+ * must ensure multiple threads do not call methods on this class at the same time.
  */
-
 public class SecurePermissionStorage implements PermissionStorage, PrivilegedExceptionAction {
-	private PermissionStorage storage;
+	private final PermissionStorage storage;
 	private String location;
 	private String[] data;
 	private String[] infos;
@@ -54,8 +54,8 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		throw new UnsupportedOperationException();
 	}
 
-	public String[] getPermissionData(String location) throws IOException {
-		this.location = location;
+	public String[] getPermissionData(String loc) throws IOException {
+		this.location = loc;
 		this.action = GET;
 
 		try {
@@ -87,9 +87,9 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		}
 	}
 
-	public void saveConditionalPermissionInfos(String[] infos) throws IOException {
+	public void saveConditionalPermissionInfos(String[] updatedInfos) throws IOException {
 		this.action = SAVE_INFOS;
-		this.infos = infos;
+		this.infos = updatedInfos;
 		try {
 			AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {

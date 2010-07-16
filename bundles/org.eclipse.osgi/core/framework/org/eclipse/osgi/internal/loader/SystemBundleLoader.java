@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.osgi.framework.BundleException;
  */
 public class SystemBundleLoader extends BundleLoader {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
-	private final ClassLoader classLoader;
+	final ClassLoader classLoader;
 	private final HashSet eePackages;
 	private final HashSet extPackages;
 	private final ClassLoader extClassLoader;
@@ -175,6 +175,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 * This method never gets called because there is no BundleClassLoader for the framework.
+	 * @throws IOException 
 	 */
 	public Enumeration findResources(String name) throws IOException {
 		return findLocalResources(name);
@@ -206,6 +207,9 @@ public class SystemBundleLoader extends BundleLoader {
 				// nothing
 			}
 
+			/**
+			 * @throws IOException  
+			 */
 			public Enumeration getResources(String name) throws IOException {
 				return findLocalResources(name);
 			}
@@ -230,6 +234,9 @@ public class SystemBundleLoader extends BundleLoader {
 				return getResource(resource);
 			}
 
+			/**
+			 * @throws ClassNotFoundException  
+			 */
 			public Class findLocalClass(String classname) throws ClassNotFoundException {
 				return SystemBundleLoader.this.findLocalClass(classname);
 			}

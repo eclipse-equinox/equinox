@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,9 @@ public class BasePermissionStorage implements PermissionStorage {
 		this.storage = storage;
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public String[] getLocations() throws IOException {
 		synchronized (locations) {
 			String[] result = new String[locations.size()];
@@ -38,6 +41,9 @@ public class BasePermissionStorage implements PermissionStorage {
 		}
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public String[] getPermissionData(String location) throws IOException {
 		if (location == null)
 			return defaultInfos;
@@ -48,6 +54,9 @@ public class BasePermissionStorage implements PermissionStorage {
 		}
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public void setPermissionData(String location, String[] data) throws IOException {
 		if (location == null) {
 			defaultInfos = data;
@@ -63,12 +72,18 @@ public class BasePermissionStorage implements PermissionStorage {
 		storage.requestSave();
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public void saveConditionalPermissionInfos(String[] infos) throws IOException {
 		condPermInfos = infos;
 		setDirty(true);
 		storage.requestSave();
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public String[] getConditionalPermissionInfos() throws IOException {
 		return condPermInfos;
 	}

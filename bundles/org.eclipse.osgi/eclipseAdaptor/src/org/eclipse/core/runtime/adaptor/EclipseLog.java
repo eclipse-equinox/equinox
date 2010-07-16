@@ -328,6 +328,9 @@ public class EclipseLog implements FrameworkLog {
 		setOutput(null, newWriter, append);
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public synchronized void setFile(File newFile, boolean append) throws IOException {
 		if (newFile != null && !newFile.equals(this.outFile)) {
 			// If it's a new file, then reset.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import org.eclipse.osgi.internal.loader.*;
-
 import java.util.ArrayList;
+import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.*;
@@ -74,6 +73,9 @@ public class ExportedPackageImpl implements ExportedPackage {
 		return (Bundle[]) importers.toArray(new Bundle[importers.size()]);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public String getSpecificationVersion() {
 		return specVersion;
 	}

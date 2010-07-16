@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,6 +196,9 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 		return (BundleStats) bundles.get(new Long(id));
 	}
 
+	/**
+	 * @throws ClassNotFoundException  
+	 */
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
 		if (StatsManager.MONITOR_CLASSES) //Support for performance analysis
 			ClassloaderStats.startLoadingClass(getClassloaderId(manager), name);

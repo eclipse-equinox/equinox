@@ -660,7 +660,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			lazyData = new LazyData();
 	}
 
-	private final class LazyData {
+	final class LazyData {
 		String location;
 		String platformFilter;
 

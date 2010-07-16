@@ -69,6 +69,9 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		return STORAGE_VERSION;
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public StorageHook create(BaseData bundledata) throws BundleException {
 		BaseStorageHook storageHook = new BaseStorageHook(storage);
 		storageHook.bundleData = bundledata;
@@ -230,19 +233,19 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		this.nativePaths = installPaths;
 	}
 
-	public void validateNativePaths(String[] nativePaths) throws BundleException {
-		for (int i = 0; i < nativePaths.length; i++) {
-			if (nativePaths[i].startsWith(EXTERNAL_LIB_PREFIX)) {
-				String path = substituteVars(nativePaths[i].substring(EXTERNAL_LIB_PREFIX.length()));
+	public void validateNativePaths(String[] paths) throws BundleException {
+		for (int i = 0; i < paths.length; i++) {
+			if (paths[i].startsWith(EXTERNAL_LIB_PREFIX)) {
+				String path = substituteVars(paths[i].substring(EXTERNAL_LIB_PREFIX.length()));
 				File nativeFile = new File(path);
 				if (!nativeFile.exists())
 					throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativeFile.getAbsolutePath()), BundleException.NATIVECODE_ERROR);
 				continue; // continue to next path
 			}
 			// ensure the file exists in the bundle; it will get extracted later on demand
-			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(nativePaths[i]);
+			BundleEntry nativeEntry = bundleData.getBundleFile().getEntry(paths[i]);
 			if (nativeEntry == null)
-				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, nativePaths[i]), BundleException.NATIVECODE_ERROR);
+				throw new BundleException(NLS.bind(AdaptorMsg.BUNDLE_NATIVECODE_EXCEPTION, paths[i]), BundleException.NATIVECODE_ERROR);
 		}
 	}
 
@@ -327,6 +330,9 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		// do nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public Dictionary getManifest(boolean firstLoad) throws BundleException {
 		// do nothing
 		return null;
@@ -346,10 +352,16 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		// do nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		// do nothing
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		// do nothing
 	}

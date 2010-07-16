@@ -22,6 +22,9 @@ import org.eclipse.osgi.util.NLS;
  */
 public class BasicLocation implements Location {
 	static class MockLocker implements Locker {
+		/**
+		 * @throws IOException  
+		 */
 		public boolean lock() throws IOException {
 			// locking always successful
 			return true;
@@ -119,6 +122,9 @@ public class BasicLocation implements Location {
 		return isReadOnly;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public boolean setURL(URL value, boolean lock) throws IllegalStateException {
 		try {
 			return set(value, lock);

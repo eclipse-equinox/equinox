@@ -186,21 +186,21 @@ public class EclipseEnvironmentInfo implements EnvironmentInfo {
 		EclipseEnvironmentInfo.frameworkArgs = frameworkArgs;
 	}
 
-	public static String guessWS(String os) {
+	public static String guessWS(String osName) {
 		// setup default values for known OSes if nothing was specified
-		if (os.equals(Constants.OS_WIN32))
+		if (osName.equals(Constants.OS_WIN32))
 			return Constants.WS_WIN32;
-		if (os.equals(Constants.OS_LINUX))
+		if (osName.equals(Constants.OS_LINUX))
 			return Constants.WS_GTK;
-		if (os.equals(Constants.OS_MACOSX))
+		if (osName.equals(Constants.OS_MACOSX))
 			return Constants.WS_COCOA;
-		if (os.equals(Constants.OS_HPUX))
+		if (osName.equals(Constants.OS_HPUX))
 			return Constants.WS_MOTIF;
-		if (os.equals(Constants.OS_AIX))
+		if (osName.equals(Constants.OS_AIX))
 			return Constants.WS_MOTIF;
-		if (os.equals(Constants.OS_SOLARIS))
+		if (osName.equals(Constants.OS_SOLARIS))
 			return Constants.WS_GTK;
-		if (os.equals(Constants.OS_QNX))
+		if (osName.equals(Constants.OS_QNX))
 			return Constants.WS_PHOTON;
 		return Constants.WS_UNKNOWN;
 	}

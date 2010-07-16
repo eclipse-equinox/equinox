@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,34 +31,34 @@ public class PluginParser extends DefaultHandler implements IModel {
 	private PluginInfo manifestInfo = new PluginInfo();
 	private BundleContext context;
 	private FrameworkAdaptor adaptor;
-	private Version target; // The targeted platform for the given manifest
-	private static final Version TARGET21 = new Version(2, 1, 0);
+	Version target; // The targeted platform for the given manifest
+	static final Version TARGET21 = new Version(2, 1, 0);
 
 	public class PluginInfo implements IPluginInfo {
-		private String schemaVersion;
-		private String pluginId;
-		private String version;
-		private String vendor;
+		String schemaVersion;
+		String pluginId;
+		String version;
+		String vendor;
 
 		// an ordered list of library path names.
-		private ArrayList libraryPaths;
+		ArrayList libraryPaths;
 		// TODO Should get rid of the libraries map and just have a
 		// list of library export statements instead.  Library paths must
 		// preserve order.
-		private Map libraries; //represent the libraries and their export statement
-		private ArrayList requires;
+		Map libraries; //represent the libraries and their export statement
+		ArrayList requires;
 		private boolean requiresExpanded = false; //indicates if the requires have been processed.
-		private boolean compatibilityFound = false; //set to true is the requirement list contain compatilibity 
-		private String pluginClass;
-		private String masterPluginId;
-		private String masterVersion;
-		private String masterMatch;
+		boolean compatibilityFound = false; //set to true is the requirement list contain compatilibity 
+		String pluginClass;
+		String masterPluginId;
+		String masterVersion;
+		String masterMatch;
 		private Set filters;
-		private String pluginName;
-		private boolean singleton;
-		private boolean fragment;
+		String pluginName;
+		boolean singleton;
+		boolean fragment;
 		private final static String TARGET21_STRING = "2.1"; //$NON-NLS-1$
-		private boolean hasExtensionExtensionPoints = false;
+		boolean hasExtensionExtensionPoints = false;
 
 		public boolean isFragment() {
 			return fragment;
@@ -231,6 +231,7 @@ public class PluginParser extends DefaultHandler implements IModel {
 	}
 
 	public void endDocument() {
+		// nothing
 	}
 
 	public void endElement(String uri, String elementName, String qName) {
@@ -678,13 +679,16 @@ public class PluginParser extends DefaultHandler implements IModel {
 		adaptor.getFrameworkLog().log(error);
 	}
 
-	public void processingInstruction(String target, String data) throws SAXException {
+	/**
+	 * @throws SAXException  
+	 */
+	public void processingInstruction(String instructionTarget, String data) throws SAXException {
 		// Since 3.0, a processing instruction of the form <?eclipse version="3.0"?> at
 		// the start of the manifest file is used to indicate the plug-in manifest
 		// schema version in effect. Pre-3.0 (i.e., 2.1) plug-in manifest files do not
 		// have one of these, and this is how we can distinguish the manifest of a
 		// pre-3.0 plug-in from a post-3.0 one (for compatibility tranformations).
-		if (target.equalsIgnoreCase("eclipse")) { //$NON-NLS-1$ 
+		if (instructionTarget.equalsIgnoreCase("eclipse")) { //$NON-NLS-1$ 
 			// just the presence of this processing instruction indicates that this
 			// plug-in is at least 3.0
 			manifestInfo.schemaVersion = "3.0"; //$NON-NLS-1$ 

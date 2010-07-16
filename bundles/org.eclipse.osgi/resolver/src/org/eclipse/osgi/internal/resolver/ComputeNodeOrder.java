@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -388,10 +388,9 @@ public class ComputeNodeOrder {
 							vertex = nextVertex;
 							state = START_DFS_VISIT;
 							continue nextStateLoop;
-						} else {
-							state = NEXT_VERTEX;
-							continue nextStateLoop;
 						}
+						state = NEXT_VERTEX;
+						continue nextStateLoop;
 					case START_DFS_VISIT :
 						// on entry, "vertex" contains the vertex to be visited
 						// top of stack is return code
@@ -421,14 +420,13 @@ public class ComputeNodeOrder {
 							}
 							state = NEXT_ADJACENT;
 							continue nextStateLoop;
-						} else {
-							// done exploring vertex
-							vertex.color = Vertex.BLACK;
-							time++;
-							vertex.finishTime = time;
-							state = ((Integer) stack.remove(stack.size() - 1)).intValue();
-							continue nextStateLoop;
 						}
+						// done exploring vertex
+						vertex.color = Vertex.BLACK;
+						time++;
+						vertex.finishTime = time;
+						state = ((Integer) stack.remove(stack.size() - 1)).intValue();
+						continue nextStateLoop;
 					case AFTER_NEXTED_DFS_VISIT :
 						// on entry, stack contains "vertex" and "allAjacent"
 						vertex = (Vertex) stack.remove(stack.size() - 1);

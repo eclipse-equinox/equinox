@@ -86,7 +86,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	private final Framework framework;
+	final Framework framework;
 	private final ServiceTracker cpTracker;
 	private final ServiceTracker sessions;
 	private final String consolePort;
@@ -125,11 +125,17 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 		}
 		if (port < 0) {
 			InputStream in = new FilterInputStream(System.in) {
+				/**
+				 * @throws IOException  
+				 */
 				public void close() throws IOException {
 					// We don't want to close System.in
 				}
 			};
 			OutputStream out = new FilterOutputStream(System.out) {
+				/**
+				 * @throws IOException  
+				 */
 				public void close() throws IOException {
 					// We don't want to close System.out
 				}

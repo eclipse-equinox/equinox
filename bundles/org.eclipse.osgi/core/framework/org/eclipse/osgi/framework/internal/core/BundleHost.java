@@ -37,7 +37,7 @@ public class BundleHost extends AbstractBundle {
 	/** The List of BundleFragments */
 	protected BundleFragment[] fragments;
 
-	public BundleHost(BundleData bundledata, Framework framework) throws BundleException {
+	public BundleHost(BundleData bundledata, Framework framework) {
 		super(bundledata, framework);
 		context = null;
 		fragments = null;

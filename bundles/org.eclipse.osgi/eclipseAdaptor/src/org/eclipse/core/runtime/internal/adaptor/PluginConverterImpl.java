@@ -701,13 +701,13 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
+	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String targetVersion, boolean analyseJars, Dictionary devProps) throws PluginConversionException {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
 		init();
-		this.target = target == null ? TARGET32 : new Version(target);
-		this.devProperties = devProperties;
+		this.target = targetVersion == null ? TARGET32 : new Version(targetVersion);
+		this.devProperties = devProps;
 		fillPluginInfo(pluginBaseLocation);
 		fillManifest(compatibility, analyseJars);
 		if (DEBUG)
@@ -715,8 +715,8 @@ public class PluginConverterImpl implements PluginConverter {
 		return generatedManifest;
 	}
 
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException {
-		convertManifest(pluginBaseLocation, compatibilityManifest, target, analyseJars, devProperties);
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String targetVersion, boolean analyseJars, Dictionary devProps) throws PluginConversionException {
+		convertManifest(pluginBaseLocation, compatibilityManifest, targetVersion, analyseJars, devProps);
 		if (bundleManifestLocation == null) {
 			String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
 			bundleManifestLocation = new File(cacheLocation, pluginInfo.getUniqueId() + '_' + pluginInfo.getVersion() + ".MF"); //$NON-NLS-1$

@@ -220,7 +220,7 @@ class StateBuilder {
 		return result;
 	}
 
-	private static ImportPackageSpecification[] createImportPackages(ExportPackageDescription[] exported, ArrayList providedExports, ManifestElement[] imported, ManifestElement[] dynamicImported, int manifestVersion) throws BundleException {
+	private static ImportPackageSpecification[] createImportPackages(ExportPackageDescription[] exported, ArrayList providedExports, ManifestElement[] imported, ManifestElement[] dynamicImported, int manifestVersion) {
 		ArrayList allImports = null;
 		if (manifestVersion < 2) {
 			// add implicit imports for each exported package if manifest verions is less than 2.
@@ -251,7 +251,7 @@ class StateBuilder {
 		return (ImportPackageSpecification[]) allImports.toArray(new ImportPackageSpecification[allImports.size()]);
 	}
 
-	private static void addImportPackages(ManifestElement importPackage, ArrayList allImports, int manifestVersion, boolean dynamic) throws BundleException {
+	private static void addImportPackages(ManifestElement importPackage, ArrayList allImports, int manifestVersion, boolean dynamic) {
 		String[] importNames = importPackage.getValueComponents();
 		for (int i = 0; i < importNames.length; i++) {
 			// do not allow for multiple imports of same package of manifest version < 2
@@ -291,7 +291,7 @@ class StateBuilder {
 		return result;
 	}
 
-	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] provides, ArrayList providedExports, int manifestVersion, boolean strict) throws BundleException {
+	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] provides, ArrayList providedExports, int manifestVersion, boolean strict) {
 		int numExports = (exported == null ? 0 : exported.length) + (provides == null ? 0 : provides.length);
 		if (numExports == 0)
 			return null;
@@ -304,7 +304,7 @@ class StateBuilder {
 		return (ExportPackageDescription[]) allExports.toArray(new ExportPackageDescription[allExports.size()]);
 	}
 
-	private static void addExportPackages(ManifestElement exportPackage, ArrayList allExports, int manifestVersion, boolean strict) throws BundleException {
+	private static void addExportPackages(ManifestElement exportPackage, ArrayList allExports, int manifestVersion, boolean strict) {
 		String[] exportNames = exportPackage.getValueComponents();
 		for (int i = 0; i < exportNames.length; i++) {
 			// if we are in strict mode and the package is marked as internal, skip it.
@@ -328,7 +328,7 @@ class StateBuilder {
 		}
 	}
 
-	private static void addProvidePackages(ManifestElement[] provides, ArrayList allExports, ArrayList providedExports) throws BundleException {
+	private static void addProvidePackages(ManifestElement[] provides, ArrayList allExports, ArrayList providedExports) {
 		ExportPackageDescription[] currentExports = (ExportPackageDescription[]) allExports.toArray(new ExportPackageDescription[allExports.size()]);
 		for (int i = 0; i < provides.length; i++) {
 			boolean duplicate = false;

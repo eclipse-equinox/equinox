@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,6 +49,9 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	private boolean noXML = false;
 	private ArrayList registrations = new ArrayList(10);
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStart(BundleContext context) throws BundleException {
 		registrations.clear();
 		registerEndorsedXMLParser(context);
@@ -153,6 +156,9 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		}
 	}
 
+	/**
+	 * @throws BundleException  
+	 */
 	public void frameworkStop(BundleContext context) throws BundleException {
 		printStats();
 		if (!noXML)
@@ -186,6 +192,9 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		// do nothing
 	}
 
+	/**
+	 * @throws IOException  
+	 */
 	public URLConnection mapLocationToURLConnection(String location) throws IOException {
 		// do nothing
 		return null;
@@ -200,8 +209,8 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		return null;
 	}
 
-	public void initialize(BaseAdaptor adaptor) {
-		this.adaptor = adaptor;
+	public void initialize(BaseAdaptor initAdaptor) {
+		this.adaptor = initAdaptor;
 		// EnvironmentInfo has to be initialized first to compute defaults for system context (see bug 88925)
 		EclipseEnvironmentInfo.getDefault();
 		setDebugOptions();

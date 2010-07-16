@@ -470,7 +470,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	protected void setStatus(final int mask, final boolean state) {
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BundleException, IOException {
+				public Object run() throws IOException {
 					int status = bundledata.getStatus();
 					boolean test = ((status & mask) != 0);
 					if (test != state) {

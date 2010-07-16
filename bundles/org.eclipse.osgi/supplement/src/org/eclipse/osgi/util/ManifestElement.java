@@ -86,28 +86,29 @@ public class ManifestElement {
 	/**
 	 * The value of the manifest element.
 	 */
-	protected String value;
+	private final String mainValue;
 
 	/**
 	 * The value components of the manifest element.
 	 */
-	protected String[] valueComponents;
+	private final String[] valueComponents;
 
 	/**
 	 * The table of attributes for the manifest element.
 	 */
-	protected Hashtable attributes;
+	private Hashtable attributes;
 
 	/**
 	 * The table of directives for the manifest element.
 	 */
-	protected Hashtable directives;
+	private Hashtable directives;
 
 	/**
 	 * Constructs an empty manifest element with no value or attributes.
 	 */
-	protected ManifestElement() {
-		super();
+	private ManifestElement(String value, String[] valueComponents) {
+		this.mainValue = value;
+		this.valueComponents = valueComponents;
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class ManifestElement {
 	 * @return the value of the manifest element.
 	 */
 	public String getValue() {
-		return value;
+		return mainValue;
 	}
 
 	/**
@@ -201,7 +202,7 @@ public class ManifestElement {
 	 * @param key the key of the attribute
 	 * @param value the value of the attribute
 	 */
-	protected void addAttribute(String key, String value) {
+	private void addAttribute(String key, String value) {
 		attributes = addTableValue(attributes, key, value);
 	}
 
@@ -254,7 +255,7 @@ public class ManifestElement {
 	 * @param key the key of the attribute
 	 * @param value the value of the attribute
 	 */
-	protected void addDirective(String key, String value) {
+	private void addDirective(String key, String value) {
 		directives = addTableValue(directives, key, value);
 	}
 
@@ -380,9 +381,7 @@ public class ManifestElement {
 				}
 			}
 			// found the header value create a manifestElement for it.
-			ManifestElement manifestElement = new ManifestElement();
-			manifestElement.value = headerValue.toString();
-			manifestElement.valueComponents = (String[]) headerValues.toArray(new String[headerValues.size()]);
+			ManifestElement manifestElement = new ManifestElement(headerValue.toString(), (String[]) headerValues.toArray(new String[headerValues.size()]));
 
 			// now add any attributes/directives for the manifestElement.
 			while (c == '=' || c == ':') {
@@ -555,8 +554,8 @@ public class ManifestElement {
 		Enumeration attrKeys = getKeys();
 		Enumeration directiveKeys = getDirectiveKeys();
 		if (attrKeys == null && directiveKeys == null)
-			return value;
-		StringBuffer result = new StringBuffer(value);
+			return mainValue;
+		StringBuffer result = new StringBuffer(mainValue);
 		if (attrKeys != null) {
 			while (attrKeys.hasMoreElements()) {
 				String key = (String) attrKeys.nextElement();
