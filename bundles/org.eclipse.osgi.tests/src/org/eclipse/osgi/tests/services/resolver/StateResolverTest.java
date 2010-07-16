@@ -3738,6 +3738,64 @@ public class StateResolverTest extends AbstractStateTest {
 		state.resolve(new BundleDescription[] {a});
 	}
 
+	public void testBug320124() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "a"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "d"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "c"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "a"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "e"); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "d"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "d"); //$NON-NLS-1$
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "e"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "e"); //$NON-NLS-1$
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
+		state.addBundle(e);
+
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertTrue("C is not resolved", c.isResolved()); //$NON-NLS-1$
+		assertTrue("D is not resolved", d.isResolved()); //$NON-NLS-1$
+
+		ExportPackageDescription[] visible = state.getStateHelper().getVisiblePackages(a, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
+
+		assertEquals("Wrong number of visible", 2, visible.length);
+	}
+
 	public static class CatchAllValue {
 		public CatchAllValue(String s) {
 			//do nothing

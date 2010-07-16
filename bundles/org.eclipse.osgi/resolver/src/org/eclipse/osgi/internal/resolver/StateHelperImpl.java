@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -559,9 +559,9 @@ class RequiresHolder {
 			for (int i = 0; i < fragments.length; i++) {
 				BundleSpecification[] fragmentRequiredBundles = fragments[i].getRequiredBundles();
 				for (int j = 0; j < fragmentRequiredBundles.length; j++) {
-					if (resolved.contains(fragmentRequiredBundles[i].getSupplier())) {
-						resolvedBundlesExported.put(fragmentRequiredBundles[i].getSupplier(), new Boolean(fragmentRequiredBundles[i].isExported()));
-						resolved.remove(fragmentRequiredBundles[i].getSupplier());
+					if (resolved.contains(fragmentRequiredBundles[j].getSupplier())) {
+						resolvedBundlesExported.put(fragmentRequiredBundles[j].getSupplier(), new Boolean(fragmentRequiredBundles[j].isExported()));
+						resolved.remove(fragmentRequiredBundles[j].getSupplier());
 					}
 				}
 				if (resolved.size() == 0) {
