@@ -15,10 +15,10 @@ import org.eclipse.osgi.service.resolver.BundleSpecification;
  * The GroupingChecker checks the 'uses' directive on exported packages for consistency
  */
 public class GroupingChecker {
-	final PackageRoots nullPackageRoots = new PackageRoots(null, null);
+	final PackageRoots nullPackageRoots = new PackageRoots(null);
 	// a mapping of bundles to their package roots; keyed by
 	// ResolverBundle -> HashMap of packages; keyed by
-	// package name -> PackageRoots[]
+	// package name -> PackageRoots
 	private HashMap bundles = new HashMap();
 
 	/*
@@ -110,7 +110,7 @@ public class GroupingChecker {
 			for (Iterator allImportingPackages = importingPackages.values().iterator(); allImportingPackages.hasNext();) {
 				PackageRoots roots = (PackageRoots) allImportingPackages.next();
 				if (roots != importingRoots)
-					results = roots.isConsistentClassSpace(exportingRoots, null, results);
+					results = roots.isConsistentClassSpace(exportingRoots, matchingExport.getExporter(), null, results);
 			}
 		return results;
 	}
@@ -193,7 +193,7 @@ public class GroupingChecker {
 					return superSet;
 			}
 			// in this case we cannot share the package roots object; must create one specific for this bundle
-			PackageRoots result = new PackageRoots(packageName, bundle);
+			PackageRoots result = new PackageRoots(packageName);
 			// first merge all the roots from required bundles
 			for (int i = 0; i < requiredRoots.length; i++)
 				result.merge(requiredRoots[i]);
@@ -215,12 +215,10 @@ public class GroupingChecker {
 
 	class PackageRoots {
 		private String name;
-		private ResolverBundle bundle;
 		private ResolverExport[] roots;
 
-		PackageRoots(String name, ResolverBundle bundle) {
+		PackageRoots(String name) {
 			this.name = name;
-			this.bundle = bundle;
 		}
 
 		public boolean hasRoots() {
@@ -298,7 +296,7 @@ public class GroupingChecker {
 			return results;
 		}
 
-		public ArrayList isConsistentClassSpace(PackageRoots exportingRoots, ArrayList visited, ArrayList results) {
+		public ArrayList isConsistentClassSpace(PackageRoots exportingRoots, ResolverBundle exporter, ArrayList visited, ArrayList results) {
 			if (roots == null)
 				return results;
 			int size = roots.length;
@@ -316,7 +314,7 @@ public class GroupingChecker {
 					if (uses[j].equals(root.getName()) || !uses[j].equals(exportingRoots.name))
 						continue;
 					PackageRoots thisUsedRoots = getPackageRoots(root.getExporter(), uses[j], null);
-					PackageRoots exportingUsedRoots = getPackageRoots(exportingRoots.bundle, uses[j], null);
+					PackageRoots exportingUsedRoots = getPackageRoots(exporter, uses[j], null);
 					if (thisUsedRoots == exportingRoots)
 						return results;
 					if (thisUsedRoots != nullPackageRoots && exportingUsedRoots != nullPackageRoots)
@@ -326,7 +324,7 @@ public class GroupingChecker {
 							results.add(new PackageRoots[] {this, exportingUsedRoots});
 						}
 					// need to check the usedRoots consistency for transitive closure
-					results = thisUsedRoots.isConsistentClassSpace(exportingRoots, visited, results);
+					results = thisUsedRoots.isConsistentClassSpace(exportingRoots, exporter, visited, results);
 				}
 			}
 			return results;
