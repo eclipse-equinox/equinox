@@ -175,6 +175,29 @@ public class SecureAction {
 	}
 
 	/**
+	 * Returns the canonical path of a file.  Same as calling
+	 * file.getCanonicalPath().
+	 * @param file a file object
+	 * @return the canonical path of a file.
+	 * @throws IOException on error
+	 */
+	public String getCanonicalPath(final File file) throws IOException {
+		if (System.getSecurityManager() == null)
+			return file.getCanonicalPath();
+		try {
+			return (String) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				public Object run() throws IOException {
+					return file.getCanonicalPath();
+				}
+			}, controlContext);
+		} catch (PrivilegedActionException e) {
+			if (e.getException() instanceof IOException)
+				throw (IOException) e.getException();
+			throw (RuntimeException) e.getException();
+		}
+	}
+
+	/**
 	 * Returns true if a file exists, otherwise false is returned.  Same as calling
 	 * file.exists().
 	 * @param file a file object

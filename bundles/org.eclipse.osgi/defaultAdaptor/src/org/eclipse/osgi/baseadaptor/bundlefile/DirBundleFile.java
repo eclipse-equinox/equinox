@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,33 +37,40 @@ public class DirBundleFile extends BundleFile {
 	}
 
 	public File getFile(String path, boolean nativeCode) {
-		File filePath = new File(this.basefile, path);
-		if (BundleFile.secureAction.exists(filePath)) {
-			return filePath;
+		boolean checkInBundle = path != null && path.indexOf("..") >= 0; //$NON-NLS-1$
+		File file = new File(basefile, path);
+		if (!BundleFile.secureAction.exists(file)) {
+			return null;
 		}
-		return null;
+		// must do an extra check to make sure file is within the bundle (bug 320546)
+		if (checkInBundle) {
+			try {
+				if (!BundleFile.secureAction.getCanonicalPath(file).startsWith(BundleFile.secureAction.getCanonicalPath(basefile)))
+					return null;
+			} catch (IOException e) {
+				return null;
+			}
+		}
+		return file;
 	}
 
 	public BundleEntry getEntry(String path) {
-		File filePath = new File(this.basefile, path);
-		if (!BundleFile.secureAction.exists(filePath)) {
+		File filePath = getFile(path, false);
+		if (filePath == null)
 			return null;
-		}
 		return new FileBundleEntry(filePath, path);
 	}
 
 	public boolean containsDir(String dir) {
-		File dirPath = new File(this.basefile, dir);
-		return BundleFile.secureAction.exists(dirPath) && BundleFile.secureAction.isDirectory(dirPath);
+		File dirPath = getFile(dir, false);
+		return dirPath != null && BundleFile.secureAction.isDirectory(dirPath);
 	}
 
 	public Enumeration getEntryPaths(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
-		final java.io.File pathFile = new java.io.File(basefile, path);
-		if (!BundleFile.secureAction.exists(pathFile))
-			return null;
-		if (!BundleFile.secureAction.isDirectory(pathFile))
+		final File pathFile = getFile(path, false);
+		if (pathFile == null || !BundleFile.secureAction.isDirectory(pathFile))
 			return null;
 		final String[] fileList = BundleFile.secureAction.list(pathFile);
 		if (fileList == null || fileList.length == 0)
