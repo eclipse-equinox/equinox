@@ -48,14 +48,11 @@ public abstract class MultiplexingFactory {
 
 	abstract public Object getParentFactory();
 
-	public synchronized boolean isMultiplexing() {
-		return factories != null;
+	public boolean isMultiplexing() {
+		return getFactories() != null;
 	}
 
-	public synchronized void register(Object factory) {
-		if (factories == null)
-			factories = new LinkedList();
-
+	public void register(Object factory) {
 		// set parent for each factory so they can do proper delegation
 		try {
 			Class clazz = factory.getClass();
@@ -65,13 +62,11 @@ public abstract class MultiplexingFactory {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "register", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
-		factories.add(factory);
+		addFactory(factory);
 	}
 
-	public synchronized void unregister(Object factory) {
-		factories.remove(factory);
-		if (factories.isEmpty())
-			factories = null;
+	public void unregister(Object factory) {
+		removeFactory(factory);
 		// close the service tracker
 		try {
 			// this is brittle; if class does not directly extend MultplexingFactory then this method will not exist, but we do not want a public method here
@@ -84,23 +79,29 @@ public abstract class MultiplexingFactory {
 		}
 	}
 
-	public synchronized Object designateSuccessor() {
-		Object parentFactory = getParentFactory();
-		if (factories == null || factories.isEmpty())
-			return parentFactory;
-
-		Object successor = factories.remove(0);
+	public Object designateSuccessor() {
+		List released = releaseFactories();
+		// Note that we do this outside of the sync block above.
+		// This is only possible because we do additional locking outside of
+		// this class to ensure no other threads are trying to manipulate the
+		// list of registered factories.  See Framework class the following methods:
+		// Framework.installURLStreamHandlerFactory(BundleContext, FrameworkAdaptor)
+		// Framework.installContentHandlerFactory(BundleContext, FrameworkAdaptor)
+		// Framework.uninstallURLStreamHandlerFactory
+		// Framework.uninstallContentHandlerFactory()
+		if (released == null || released.isEmpty())
+			return getParentFactory();
+		Object successor = released.remove(0);
 		try {
 			Class clazz = successor.getClass();
 			Method register = clazz.getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$		
-			for (Iterator it = factories.iterator(); it.hasNext();) {
+			for (Iterator it = released.iterator(); it.hasNext();) {
 				register.invoke(successor, new Object[] {it.next()});
 			}
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "designateSuccessor", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
-		factories = null;
 		closePackageAdminTracker(); // close tracker
 		return successor;
 	}
@@ -109,7 +110,8 @@ public abstract class MultiplexingFactory {
 		packageAdminTracker.close();
 	}
 
-	public synchronized Object findAuthorizedFactory(List ignoredClasses) {
+	public Object findAuthorizedFactory(List ignoredClasses) {
+		List current = getFactories();
 		Class[] classStack = internalSecurityManager.getClassContext();
 		for (int i = 0; i < classStack.length; i++) {
 			Class clazz = classStack[i];
@@ -117,9 +119,9 @@ public abstract class MultiplexingFactory {
 				continue;
 			if (hasAuthority(clazz))
 				return this;
-			if (factories == null)
+			if (current == null)
 				continue;
-			for (Iterator it = factories.iterator(); it.hasNext();) {
+			for (Iterator it = current.iterator(); it.hasNext();) {
 				Object factory = it.next();
 				try {
 					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", new Class[] {Class.class}); //$NON-NLS-1$
@@ -141,5 +143,30 @@ public abstract class MultiplexingFactory {
 			return packageAdminService.getBundle(clazz) != null;
 		}
 		return false;
+	}
+
+	private synchronized List getFactories() {
+		return factories;
+	}
+
+	private synchronized List releaseFactories() {
+		if (factories == null)
+			return null;
+
+		List released = new LinkedList(factories);
+		factories = null;
+		return released;
+	}
+
+	private synchronized void addFactory(Object factory) {
+		List updated = (factories == null) ? new LinkedList() : new LinkedList(factories);
+		updated.add(factory);
+		factories = updated;
+	}
+
+	private synchronized void removeFactory(Object factory) {
+		List updated = new LinkedList(factories);
+		updated.remove(factory);
+		factories = updated.isEmpty() ? null : updated;
 	}
 }
