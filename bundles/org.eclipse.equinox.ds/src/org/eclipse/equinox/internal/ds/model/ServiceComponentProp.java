@@ -205,9 +205,15 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 		if (references != null) {
 			for (int i = 0; i < references.size(); i++) {
 				Reference ref = (Reference) references.elementAt(i);
+				ClassCircularityError ccError = null;
 				if (ref.reference.bind != null) {
-					bindReference(ref, componentInstance);
-					if (ref.reference.bindMethod == null || !ref.isBound()) {
+					try {
+						bindReference(ref, componentInstance);
+					} catch (ClassCircularityError cce) {
+						ccError = cce;
+						Activator.log(bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BINDING_REFERENCE, ref.reference), cce);
+					}
+					if (ref.reference.bindMethod == null || ccError != null || !ref.isBound()) {
 						//the bind method is not found and called for some reason or it has thrown exception
 						if (ref.reference.cardinality == ComponentReference.CARDINALITY_1_1 || ref.reference.cardinality == ComponentReference.CARDINALITY_1_N) {
 							//unbind the already bound references
@@ -216,6 +222,10 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 								if (ref.reference.unbind != null) {
 									unbindReference(ref, componentInstance);
 								}
+							}
+							if (ccError != null) {
+								//rethrow the error so it is further processed according to the use case
+								throw ccError;
 							}
 							return false;
 						}

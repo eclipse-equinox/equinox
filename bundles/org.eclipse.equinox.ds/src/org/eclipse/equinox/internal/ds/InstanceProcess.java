@@ -391,16 +391,17 @@ public class InstanceProcess {
 	}
 
 	/**
-	 * Called by dispatcher ( Resolver) when work available on queue
+	 * Called by Resolver when there is a need of dynamic binding of references
 	 * 
-	 * @param refList
-	 *            Map of ReferenceDescription:subtable Subtable Maps scp:service
-	 *            object
+	 * @param refList the references to be bound
+	 * @return a Vector containing the Reference objects that are still not bound due to ClassCircularityError. 
+	 * 			The returned value may be null if all of the passed references are successfully bound 
 	 */
-	final void dynamicBind(Vector refList) {
+	final Vector dynamicBind(Vector refList) {
 		if (refList == null || refList.isEmpty()) {
-			return;
+			return null;
 		}
+		Vector unboundRefs = null;
 		for (int i = 0; i < refList.size(); i++) {
 			Reference ref = (Reference) refList.elementAt(i);
 			ServiceComponentProp scp = ref.scp;
@@ -412,6 +413,12 @@ public class InstanceProcess {
 					if (compInstance != null) {
 						try {
 							scp.bindReference(ref, compInstance);
+						} catch (ClassCircularityError cce) {
+							if (unboundRefs == null) {
+								unboundRefs = new Vector(1);
+							}
+							unboundRefs.add(ref);
+							Activator.log(scp.bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BINDING_REFERENCE, ref.reference), cce);
 						} catch (Throwable t) {
 							Activator.log(scp.bc, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BINDING_REFERENCE, ref.reference), t);
 						}
@@ -425,6 +432,7 @@ public class InstanceProcess {
 				}
 			}
 		}
+		return unboundRefs;
 	}
 
 	/**
@@ -578,6 +586,11 @@ public class InstanceProcess {
 			ComponentInstanceImpl componentInstance = null;
 			try {
 				componentInstance = scp.build(usingBundle, instance, security);
+			} catch (ClassCircularityError e) {
+				Vector component = new Vector(1);
+				component.add(scp.serviceComponent);
+				resolver.mgr.enqueueWork(resolver.mgr, resolver.mgr.ENABLE_COMPONENTS, component, false);
+				throw new ComponentException(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), e);
 			} catch (ComponentException e) {
 				Activator.log(null, LogService.LOG_ERROR, e.getMessage(), e.getCause());
 				throw e;

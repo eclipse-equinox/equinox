@@ -316,7 +316,12 @@ public final class Resolver implements WorkPerformer {
 
 				//do synchronous bind
 				if (target != null) {
-					instanceProcess.dynamicBind((Vector) target);
+					Vector unboundRefs = instanceProcess.dynamicBind((Vector) target);
+					if (unboundRefs != null) {
+						// put delayed dynamic binds on the queue
+						// (this is used to handle class circularity errors)
+						mgr.enqueueWork(this, Resolver.DYNAMICBIND, unboundRefs, false);
+					}
 				}
 
 				if (!resolvedComponents.isEmpty()) {
@@ -410,7 +415,12 @@ public final class Resolver implements WorkPerformer {
 				}
 
 				if (target != null) {
-					instanceProcess.dynamicBind((Vector) target);
+					Vector unboundRefs = instanceProcess.dynamicBind((Vector) target);
+					if (unboundRefs != null) {
+						// put delayed dynamic binds on the queue
+						// (this is used to handle class circularity errors)
+						mgr.enqueueWork(this, Resolver.DYNAMICBIND, unboundRefs, false);
+					}
 				}
 				if (!resolvedComponents.isEmpty()) {
 					instanceProcess.buildComponents(resolvedComponents, false);
