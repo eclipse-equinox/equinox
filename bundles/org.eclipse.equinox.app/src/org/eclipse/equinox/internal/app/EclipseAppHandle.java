@@ -200,7 +200,6 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 				tempResult = NULL_RESULT;
 		} finally {
 			tempResult = setInternalResult(tempResult, false, null);
-
 		}
 
 		if (Activator.DEBUG)
@@ -230,7 +229,8 @@ public class EclipseAppHandle extends ApplicationHandle implements ApplicationRu
 		setAppStatus(EclipseAppHandle.FLAG_STOPPING); // must ensure the STOPPING event is fired
 		setAppStatus(EclipseAppHandle.FLAG_STOPPED);
 		// only set the exit code property if this is the default application
-		if (isDefault()) {
+		// (bug 321386) only set the exit code if the result != null; when result == null we assume an exception was thrown
+		if (isDefault() && result != null) {
 			int exitCode = result instanceof Integer ? ((Integer) result).intValue() : 0;
 			// Use the EnvironmentInfo Service to set properties
 			Activator.setProperty(PROP_ECLIPSE_EXITCODE, Integer.toString(exitCode));
