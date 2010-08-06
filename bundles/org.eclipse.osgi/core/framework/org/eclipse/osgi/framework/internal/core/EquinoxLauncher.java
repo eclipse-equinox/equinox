@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.security.*;
 import java.util.*;
@@ -327,7 +326,27 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 	public Version getVersion() {
 		Bundle current = systemBundle;
 		if (current != null)
-			current.getVersion();
+			return current.getVersion();
 		return Version.emptyVersion;
+	}
+
+	public <A> A adapt(Class<A> adapterType) {
+		Bundle current = systemBundle;
+		if (current != null) {
+			return current.adapt(adapterType);
+		}
+		return null;
+	}
+
+	public int compareTo(Bundle o) {
+		// TODO need to implement
+		throw new UnsupportedOperationException("need to implement");
+	}
+
+	public File getDataFile(String filename) {
+		Bundle current = systemBundle;
+		if (current != null)
+			return current.getDataFile(filename);
+		return null;
 	}
 }

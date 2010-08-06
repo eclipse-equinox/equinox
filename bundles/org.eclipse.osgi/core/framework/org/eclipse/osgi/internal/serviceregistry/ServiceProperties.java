@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,20 +21,20 @@ import org.osgi.framework.Constants;
  * 
  * Supports case-insensitive key lookup.
  */
-class ServiceProperties extends Headers {
+class ServiceProperties extends Headers<String, Object> {
 	/**
 	 * Create a properties object for the service.
 	 *
 	 * @param props The properties for this service.
 	 */
-	private ServiceProperties(int size, Dictionary props) {
+	private ServiceProperties(int size, Dictionary<String, ?> props) {
 		super(size);
 
 		if (props == null) {
 			return;
 		}
 		synchronized (props) {
-			Enumeration keysEnum = props.keys();
+			Enumeration<?> keysEnum = props.keys();
 
 			while (keysEnum.hasMoreElements()) {
 				Object key = keysEnum.nextElement();
@@ -53,7 +53,7 @@ class ServiceProperties extends Headers {
 	 *
 	 * @param props The properties for this service.
 	 */
-	ServiceProperties(Dictionary props) {
+	ServiceProperties(Dictionary<String, ?> props) {
 		this((props == null) ? 2 : props.size() + 2, props);
 	}
 
@@ -78,10 +78,10 @@ class ServiceProperties extends Headers {
 
 		String[] keynames = new String[size];
 
-		Enumeration keysEnum = keys();
+		Enumeration<String> keysEnum = keys();
 
 		for (int i = 0; i < size; i++) {
-			keynames[i] = (String) keysEnum.nextElement();
+			keynames[i] = keysEnum.nextElement();
 		}
 
 		return keynames;
@@ -120,10 +120,10 @@ class ServiceProperties extends Headers {
 		if (value instanceof Boolean) /* shortcut Boolean */
 			return value;
 
-		Class clazz = value.getClass();
+		Class<?> clazz = value.getClass();
 		if (clazz.isArray()) {
 			// Do an array copy
-			Class type = clazz.getComponentType();
+			Class<?> type = clazz.getComponentType();
 			int len = Array.getLength(value);
 			Object clonedArray = Array.newInstance(type, len);
 			System.arraycopy(value, 0, clonedArray, 0, len);
@@ -131,15 +131,15 @@ class ServiceProperties extends Headers {
 		}
 		// must use reflection because Object clone method is protected!!
 		try {
-			return clazz.getMethod("clone", null).invoke(value, null); //$NON-NLS-1$
+			return clazz.getMethod("clone", (Class<?>[]) null).invoke(value, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
 			/* clone is not a public method on value's class */
 		} catch (Error e) {
 			/* JCL does not support reflection; try some well known types */
-			if (value instanceof Vector)
-				return ((Vector) value).clone();
-			if (value instanceof Hashtable)
-				return ((Hashtable) value).clone();
+			if (value instanceof Vector<?>)
+				return ((Vector<?>) value).clone();
+			if (value instanceof Hashtable<?, ?>)
+				return ((Hashtable<?, ?>) value).clone();
 		}
 		return value;
 	}

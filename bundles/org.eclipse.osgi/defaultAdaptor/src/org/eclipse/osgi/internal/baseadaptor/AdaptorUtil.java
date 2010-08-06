@@ -218,10 +218,10 @@ public class AdaptorUtil {
 
 	public static URL encodeFileURL(File file) throws MalformedURLException {
 		try {
-			Method toURI = File.class.getMethod("toURI", null); //$NON-NLS-1$
-			Object uri = toURI.invoke(file, null);
-			Method toURL = uri.getClass().getMethod("toURL", null); //$NON-NLS-1$
-			return (URL) toURL.invoke(uri, null);
+			Method toURI = File.class.getMethod("toURI", (Class[]) null); //$NON-NLS-1$
+			Object uri = toURI.invoke(file, (Object[]) null);
+			Method toURL = uri.getClass().getMethod("toURL", (Class[]) null); //$NON-NLS-1$
+			return (URL) toURL.invoke(uri, (Object[]) null);
 		} catch (NoSuchMethodException e) {
 			// use toURL.
 		} catch (IllegalAccessException e) {

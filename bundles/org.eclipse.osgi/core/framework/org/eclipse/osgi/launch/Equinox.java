@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.launch;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.*;
@@ -283,4 +282,17 @@ public class Equinox implements Framework {
 	public Version getVersion() {
 		return getImpl().getVersion();
 	}
+
+	public <A> A adapt(Class<A> adapterType) {
+		return getImpl().adapt(adapterType);
+	}
+
+	public int compareTo(Bundle o) {
+		return getImpl().compareTo(o);
+	}
+
+	public File getDataFile(String filename) {
+		return getImpl().getDataFile(filename);
+	}
+
 }

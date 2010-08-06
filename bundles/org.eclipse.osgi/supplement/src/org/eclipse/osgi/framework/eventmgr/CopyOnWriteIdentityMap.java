@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,24 +23,25 @@ import java.util.*;
  * 
  * @since 3.5
  */
-public class CopyOnWriteIdentityMap implements Map {
+public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	/**
 	 * The empty array singleton instance.
 	 */
+	@SuppressWarnings("unchecked")
 	private static final Entry[] emptyArray = new Entry[0];
 
 	/**
 	 * The array of entries. This field is volatile so it can be 
 	 * accessed from unsynchronized reader methods.
 	 */
-	private volatile Entry[] entries;
+	private volatile Entry<K, V>[] entries;
 
 	/**
 	 * Creates an empty map.
 	 *
 	 */
 	public CopyOnWriteIdentityMap() {
-		entries = emptyArray;
+		entries = empty();
 	}
 
 	/**
@@ -48,8 +49,10 @@ public class CopyOnWriteIdentityMap implements Map {
 	 *
 	 * @param source The CopyOnWriteMap to copy.
 	 */
-	public CopyOnWriteIdentityMap(CopyOnWriteIdentityMap source) {
-		this.entries = source.entries();
+	public CopyOnWriteIdentityMap(CopyOnWriteIdentityMap<? extends K, ? extends V> source) {
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] toCopy = (Entry<K, V>[]) source.entries();
+		this.entries = toCopy;
 	}
 
 	/* These methods modify the map and are synchronized. */
@@ -66,7 +69,7 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * Otherwise the previous value of the key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
-	public synchronized Object put(Object key, Object value) {
+	public synchronized V put(K key, V value) {
 		if (key == null) {
 			throw new IllegalArgumentException();
 		}
@@ -74,23 +77,25 @@ public class CopyOnWriteIdentityMap implements Map {
 		int size = entries.length;
 		for (int i = 0; i < size; i++) {
 			if (entries[i].key == key) {
-				Object v = entries[i].value;
+				V v = entries[i].value;
 				if (v == value) {
 					return v;
 				}
-				Entry[] newEntries = new Entry[size];
+				@SuppressWarnings("unchecked")
+				Entry<K, V>[] newEntries = new Entry[size];
 				System.arraycopy(entries, 0, newEntries, 0, size);
-				newEntries[i] = new Entry(key, value);
+				newEntries[i] = new Entry<K, V>(key, value);
 				entries = newEntries;
 				return v;
 			}
 		}
 
-		Entry[] newEntries = new Entry[size + 1];
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] newEntries = new Entry[size + 1];
 		if (size > 0) {
 			System.arraycopy(entries, 0, newEntries, 0, size);
 		}
-		newEntries[size] = new Entry(key, value);
+		newEntries[size] = new Entry<K, V>(key, value);
 		entries = newEntries;
 		return null;
 	}
@@ -100,21 +105,22 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * 
 	 * @param source The map whose entries are to be added to this map.
 	 */
-	public void putAll(Map source) {
+	public void putAll(Map<? extends K, ? extends V> source) {
 		int sourceSize = source.size();
 		if (sourceSize == 0) {
 			return;
 		}
-		if (source instanceof CopyOnWriteIdentityMap) {
-			putAll(((CopyOnWriteIdentityMap) source).entries());
+		if (source instanceof CopyOnWriteIdentityMap<?, ?>) {
+			putAll(((CopyOnWriteIdentityMap<? extends K, ? extends V>) source).entries());
 			return;
 		}
 
-		Entry[] toCopy = new Entry[sourceSize];
-		Iterator iter = source.entrySet().iterator();
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] toCopy = new Entry[sourceSize];
+		Iterator<? extends Map.Entry<? extends K, ? extends V>> iter = source.entrySet().iterator();
 		for (int i = 0; i < sourceSize; i++) {
-			Map.Entry mapEntry = (Map.Entry) iter.next();
-			toCopy[i] = new Entry(mapEntry.getKey(), mapEntry.getValue());
+			Map.Entry<? extends K, ? extends V> mapEntry = iter.next();
+			toCopy[i] = new Entry<K, V>(mapEntry.getKey(), mapEntry.getValue());
 		}
 		putAll(toCopy);
 	}
@@ -125,14 +131,15 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * 
 	 * @param keys The array of keys to be added to this map.
 	 */
-	public void putAll(Object[] keys) {
+	public <L extends K> void putAll(L[] keys) {
 		int sourceSize = keys.length;
 		if (sourceSize == 0) {
 			return;
 		}
-		Entry[] toCopy = new Entry[sourceSize];
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] toCopy = new Entry[sourceSize];
 		for (int i = 0; i < sourceSize; i++) {
-			toCopy[i] = new Entry(keys[i], null);
+			toCopy[i] = new Entry<K, V>(keys[i], null);
 		}
 		putAll(toCopy);
 	}
@@ -142,13 +149,15 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * 
 	 * @param toCopy Array of entries to add to this map.
 	 */
-	private synchronized void putAll(Entry[] toCopy) {
+	private synchronized void putAll(Entry<? extends K, ? extends V>[] toCopy) {
 		int sourceSize = toCopy.length;
 		int size = entries.length;
-		Entry[] newEntries = new Entry[size + sourceSize];
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] newEntries = new Entry[size + sourceSize];
 		System.arraycopy(entries, 0, newEntries, 0, size);
 		copy: for (int n = 0; n < sourceSize; n++) {
-			Entry copy = toCopy[n];
+			@SuppressWarnings("unchecked")
+			Entry<K, V> copy = (Entry<K, V>) toCopy[n];
 			for (int i = 0; i < size; i++) {
 				if (newEntries[i].key == copy.key) {
 					newEntries[i] = copy;
@@ -162,7 +171,8 @@ public class CopyOnWriteIdentityMap implements Map {
 			entries = newEntries;
 			return;
 		}
-		Entry[] e = new Entry[size];
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] e = new Entry[size];
 		System.arraycopy(newEntries, 0, e, 0, size);
 		entries = e;
 	}
@@ -176,7 +186,7 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * Otherwise, the value associated with the key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
-	public synchronized Object remove(Object key) {
+	public synchronized V remove(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();
 		}
@@ -184,12 +194,13 @@ public class CopyOnWriteIdentityMap implements Map {
 		int size = entries.length;
 		for (int i = 0; i < size; i++) {
 			if (entries[i].key == key) {
-				Object v = entries[i].value;
+				V v = entries[i].value;
 				if (size == 1) {
-					entries = emptyArray;
+					entries = empty();
 					return v;
 				}
-				Entry[] newEntries = new Entry[size - 1];
+				@SuppressWarnings("unchecked")
+				Entry<K, V>[] newEntries = new Entry[size - 1];
 				if (i > 0) {
 					System.arraycopy(entries, 0, newEntries, 0, i);
 				}
@@ -209,7 +220,7 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * 
 	 */
 	public synchronized void clear() {
-		entries = emptyArray;
+		entries = empty();
 	}
 
 	/* These methods only read the map and are not synchronized. */
@@ -219,8 +230,17 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return The array of entries. Callers to this method MUST NOT
 	 * modify the returned array.
 	 */
-	private Entry[] entries() {
+	private Entry<K, V>[] entries() {
 		return entries;
+	}
+
+	/**
+	 * Return the static empty array generically type safe.
+	 * @return The empty array of entries.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <K, V> Entry<K, V>[] empty() {
+		return emptyArray;
 	}
 
 	/**
@@ -249,12 +269,12 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return The value object for the specified key.
 	 * @throws IllegalArgumentException If key is null.
 	 */
-	public Object get(Object key) {
+	public V get(Object key) {
 		if (key == null) {
 			throw new IllegalArgumentException();
 		}
 
-		Entry[] e = entries();
+		Entry<K, V>[] e = entries();
 		for (int i = 0; i < e.length; i++) {
 			if (e[i].key == key) {
 				return e[i].value;
@@ -276,7 +296,7 @@ public class CopyOnWriteIdentityMap implements Map {
 			throw new IllegalArgumentException();
 		}
 
-		Entry[] e = entries();
+		Entry<K, V>[] e = entries();
 		for (int i = 0; i < e.length; i++) {
 			if (e[i].key == key) {
 				return true;
@@ -293,7 +313,7 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return <code>true</code> if the specified value is in the map.
 	 */
 	public boolean containsValue(Object value) {
-		Entry[] e = entries();
+		Entry<K, V>[] e = entries();
 		for (int i = 0; i < e.length; i++) {
 			if (e[i].value == value) {
 				return true;
@@ -309,8 +329,8 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return A Set of Map.Entry for each entry in this map.
 	 * The set and the entries returned by the set cannot be modified.
 	 */
-	public Set entrySet() {
-		return new EntrySet(entries(), EntrySet.ENTRY);
+	public Set<Map.Entry<K, V>> entrySet() {
+		return new EntrySet<Map.Entry<K, V>>(entries(), EntrySet.ENTRY);
 	}
 
 	/**
@@ -320,8 +340,8 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return A Set of the key objects in this map
 	 * The set cannot be modified.
 	 */
-	public Set keySet() {
-		return new EntrySet(entries(), EntrySet.KEY);
+	public Set<K> keySet() {
+		return new EntrySet<K>(entries(), EntrySet.KEY);
 	}
 
 	/**
@@ -331,44 +351,44 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * @return A Collection of the value objects in this map.
 	 * The collection cannot be modified.
 	 */
-	public Collection values() {
-		return new EntrySet(entries(), EntrySet.VALUE);
+	public Collection<V> values() {
+		return new EntrySet<V>(entries(), EntrySet.VALUE);
 	}
 
 	/**
 	 * This class represents the entry in this Map.
 	 * Entry is immutable.
 	 */
-	private static class Entry implements Map.Entry {
+	private static class Entry<K, V> implements Map.Entry<K, V> {
 		/**
 		 * Key object.
 		 */
-		final Object key;
+		final K key;
 
 		/**
 		 * Value object.
 		 */
-		final Object value;
+		final V value;
 
 		/**
 		 * Constructor for map entry.
 		 * @param key Key object in entry. Used for uniqueness.
 		 * @param value Value object stored with key object.
 		 */
-		Entry(final Object key, final Object value) {
+		Entry(final K key, final V value) {
 			this.key = key;
 			this.value = value;
 		}
 
-		public Object getKey() {
+		public K getKey() {
 			return key;
 		}
 
-		public Object getValue() {
+		public V getValue() {
 			return value;
 		}
 
-		public Object setValue(Object value) {
+		public V setValue(V value) {
 			throw new UnsupportedOperationException(); // entries cannot be modified.
 		}
 	}
@@ -378,20 +398,20 @@ public class CopyOnWriteIdentityMap implements Map {
 	 *
 	 * This class is immutable.
 	 */
-	private static class EntrySet extends AbstractSet {
-		private final Entry[] entries;
+	private static class EntrySet<E> extends AbstractSet<E> {
+		private final Entry<?, ?>[] entries;
 		private final int returnType;
 		final static int ENTRY = 1;
 		final static int KEY = 2;
 		final static int VALUE = 3;
 
-		EntrySet(Entry[] entries, int returnType) {
+		EntrySet(Entry<?, ?>[] entries, int returnType) {
 			this.entries = entries;
 			this.returnType = returnType;
 		}
 
-		public Iterator iterator() {
-			return new EntryIterator(entries, returnType);
+		public Iterator<E> iterator() {
+			return new EntryIterator<E>(entries, returnType);
 		}
 
 		public int size() {
@@ -403,12 +423,12 @@ public class CopyOnWriteIdentityMap implements Map {
 	 * Iterator class used for entry and key sets and values collections.
 	 *
 	 */
-	private static class EntryIterator implements Iterator {
-		private final Entry[] entries;
+	private static class EntryIterator<E> implements Iterator<E> {
+		private final Entry<?, ?>[] entries;
 		private final int returnType;
 		private int cursor = 0;
 
-		EntryIterator(Entry[] entries, int returnType) {
+		EntryIterator(Entry<?, ?>[] entries, int returnType) {
 			this.entries = entries;
 			this.returnType = returnType;
 		}
@@ -417,17 +437,23 @@ public class CopyOnWriteIdentityMap implements Map {
 			return cursor < entries.length;
 		}
 
-		public Object next() {
+		public E next() {
 			if (cursor == entries.length) {
 				throw new NoSuchElementException();
 			}
 			switch (returnType) {
 				case EntrySet.ENTRY :
-					return entries[cursor++];
+					@SuppressWarnings("unchecked")
+					E entry = (E) entries[cursor++];
+					return entry;
 				case EntrySet.KEY :
-					return entries[cursor++].key;
+					@SuppressWarnings("unchecked")
+					E key = (E) entries[cursor++].key;
+					return key;
 				case EntrySet.VALUE :
-					return entries[cursor++].value;
+					@SuppressWarnings("unchecked")
+					E value = (E) entries[cursor++].value;
+					return value;
 			}
 			throw new InternalError();
 		}

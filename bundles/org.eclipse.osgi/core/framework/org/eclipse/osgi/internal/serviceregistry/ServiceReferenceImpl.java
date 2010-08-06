@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,15 +42,15 @@ import org.osgi.framework.*;
  * @see BundleContext#getService
  * @ThreadSafe
  */
-public class ServiceReferenceImpl implements ServiceReference, Comparable {
+public class ServiceReferenceImpl<S> implements ServiceReference<S> {
 	/** Registered Service object. */
-	private final ServiceRegistrationImpl registration;
+	private final ServiceRegistrationImpl<S> registration;
 
 	/**
 	 * Construct a reference.
 	 *
 	 */
-	ServiceReferenceImpl(ServiceRegistrationImpl registration) {
+	ServiceReferenceImpl(ServiceRegistrationImpl<S> registration) {
 		this.registration = registration;
 		/* We must not dereference registration in the constructor
 		 * since it is "leaked" to us in the ServiceRegistrationImpl
@@ -195,7 +195,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 * @since 1.4
 	 */
 	public int compareTo(Object object) {
-		ServiceRegistrationImpl other = ((ServiceReferenceImpl) object).registration;
+		ServiceRegistrationImpl<?> other = ((ServiceReferenceImpl<?>) object).registration;
 
 		final int thisRanking = registration.getRanking();
 		final int otherRanking = other.getRanking();
@@ -237,11 +237,11 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 			return true;
 		}
 
-		if (!(obj instanceof ServiceReferenceImpl)) {
+		if (!(obj instanceof ServiceReferenceImpl<?>)) {
 			return false;
 		}
 
-		ServiceReferenceImpl other = (ServiceReferenceImpl) obj;
+		ServiceReferenceImpl<?> other = (ServiceReferenceImpl<?>) obj;
 
 		return registration == other.registration;
 	}
@@ -260,7 +260,7 @@ public class ServiceReferenceImpl implements ServiceReference, Comparable {
 	 * 
 	 * @return The ServiceRegistrationImpl for this ServiceReferenceImpl.
 	 */
-	public ServiceRegistrationImpl getRegistration() {
+	public ServiceRegistrationImpl<S> getRegistration() {
 		return registration;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package org.osgi.framework;
 
+import org.osgi.framework.launch.Framework;
+
 /**
  * Defines standard names for the OSGi environment system properties, service
  * properties, and Manifest header attribute keys.
  * 
  * <p>
- * The values associated with these keys are of type
- * <code>String</code>, unless otherwise indicated.
+ * The values associated with these keys are of type {@code String}, unless
+ * otherwise indicated.
  * 
  * @since 1.1
- * @version $Revision: 6552 $
+ * @version $Id: 6f6f34684262125c9feaefbaf534155572cb9524 $
  */
 
 public interface Constants {
@@ -46,8 +48,8 @@ public interface Constants {
 	/**
 	 * Manifest header identifying the bundle's category.
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_CATEGORY							= "Bundle-Category";
 
@@ -56,16 +58,16 @@ public interface Constants {
 	 * which are bundle resources used to extend the bundle's classpath.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_CLASSPATH						= "Bundle-ClassPath";
 
 	/**
 	 * Manifest header identifying the bundle's copyright information.
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_COPYRIGHT						= "Bundle-Copyright";
 
@@ -73,16 +75,16 @@ public interface Constants {
 	 * Manifest header containing a brief description of the bundle's
 	 * functionality.
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_DESCRIPTION						= "Bundle-Description";
 
 	/**
 	 * Manifest header identifying the bundle's name.
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_NAME								= "Bundle-Name";
 
@@ -92,8 +94,8 @@ public interface Constants {
 	 * these environments.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_NATIVECODE						= "Bundle-NativeCode";
 
@@ -102,8 +104,8 @@ public interface Constants {
 	 * Framework for export.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	EXPORT_PACKAGE							= "Export-Package";
 
@@ -113,8 +115,8 @@ public interface Constants {
 	 * only).
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @deprecated As of 1.2.
 	 */
@@ -124,8 +126,8 @@ public interface Constants {
 	 * Manifest header identifying the packages on which the bundle depends.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	IMPORT_PACKAGE							= "Import-Package";
 
@@ -134,8 +136,8 @@ public interface Constants {
 	 * import during execution.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.2
 	 */
@@ -146,8 +148,8 @@ public interface Constants {
 	 * services that the bundle requires (used for informational purposes only).
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @deprecated As of 1.2.
 	 */
@@ -157,8 +159,8 @@ public interface Constants {
 	 * Manifest header identifying the bundle's vendor.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_VENDOR							= "Bundle-Vendor";
 
@@ -166,8 +168,8 @@ public interface Constants {
 	 * Manifest header identifying the bundle's version.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_VERSION							= "Bundle-Version";
 
@@ -176,8 +178,8 @@ public interface Constants {
 	 * further information about the bundle may be obtained.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_DOCURL							= "Bundle-DocURL";
 
@@ -186,8 +188,8 @@ public interface Constants {
 	 * bundle may be reported; for example, an email address.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_CONTACTADDRESS					= "Bundle-ContactAddress";
 
@@ -196,13 +198,13 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * If present, this header specifies the name of the bundle resource class
-	 * that implements the <code>BundleActivator</code> interface and whose
-	 * <code>start</code> and <code>stop</code> methods are called by the
+	 * that implements the {@code BundleActivator} interface and whose
+	 * {@code start} and {@code stop} methods are called by the
 	 * Framework when the bundle is started and stopped, respectively.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_ACTIVATOR						= "Bundle-Activator";
 
@@ -211,8 +213,8 @@ public interface Constants {
 	 * is obtained during a bundle update operation.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 */
 	public static final String	BUNDLE_UPDATELOCATION					= "Bundle-UpdateLocation";
 
@@ -296,8 +298,8 @@ public interface Constants {
 	 * environments it implements.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.2
 	 */
@@ -307,8 +309,8 @@ public interface Constants {
 	 * Manifest header identifying the bundle's symbolic name.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -316,7 +318,7 @@ public interface Constants {
 
 	/**
 	 * Manifest header directive identifying whether a bundle is a singleton.
-	 * The default value is <code>false</code>.
+	 * The default value is {@code false}.
 	 * 
 	 * <p>
 	 * The directive value is encoded in the Bundle-SymbolicName manifest header
@@ -327,8 +329,8 @@ public interface Constants {
 	 * </pre>
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @see #BUNDLE_SYMBOLICNAME
 	 * @since 1.3
@@ -417,8 +419,8 @@ public interface Constants {
 	 * entries.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @see #BUNDLE_LOCALIZATION_DEFAULT_BASENAME
 	 * @since 1.3
@@ -426,7 +428,7 @@ public interface Constants {
 	public final static String	BUNDLE_LOCALIZATION						= "Bundle-Localization";
 
 	/**
-	 * Default value for the <code>Bundle-Localization</code> manifest header.
+	 * Default value for the {@code Bundle-Localization} manifest header.
 	 * 
 	 * @see #BUNDLE_LOCALIZATION
 	 * @since 1.3
@@ -438,8 +440,8 @@ public interface Constants {
 	 * by the bundle.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -447,9 +449,9 @@ public interface Constants {
 
 	/**
 	 * Manifest header attribute identifying a range of versions for a bundle
-	 * specified in the <code>Require-Bundle</code> or
-	 * <code>Fragment-Host</code> manifest headers. The default value is
-	 * <code>0.0.0</code>.
+	 * specified in the {@code Require-Bundle} or
+	 * {@code Fragment-Host} manifest headers. The default value is
+	 * {@code 0.0.0}.
 	 * 
 	 * <p>
 	 * The attribute value is encoded in the Require-Bundle manifest header
@@ -476,8 +478,8 @@ public interface Constants {
 	 * that the bundle is a fragment.
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -509,8 +511,8 @@ public interface Constants {
 	 * specifically, by version 1.3 of the OSGi Core Specification is "2".
 	 * 
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -525,7 +527,7 @@ public interface Constants {
 	 * manifest header like:
 	 * 
 	 * <pre>
-	 *     Import-Package: org.osgi.framework; version=&quot;1.1&quot;
+	 *     Export-Package: org.osgi.framework; version=&quot;1.1&quot;
 	 * </pre>
 	 * 
 	 * @see #EXPORT_PACKAGE
@@ -822,8 +824,8 @@ public interface Constants {
 	/**
 	 * Manifest header identifying the bundle's activation policy.
 	 * <p>
-	 * The attribute value may be retrieved from the <code>Dictionary</code>
-	 * object returned by the <code>Bundle.getHeaders</code> method.
+	 * The attribute value may be retrieved from the {@code Dictionary}
+	 * object returned by the {@code Bundle.getHeaders} method.
 	 * 
 	 * @since 1.4
 	 * @see #ACTIVATION_LAZY
@@ -861,7 +863,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_VERSION						= "org.osgi.framework.version";
 
@@ -871,7 +873,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_VENDOR						= "org.osgi.framework.vendor";
 
@@ -881,7 +883,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_LANGUAGE						= "org.osgi.framework.language";
 
@@ -891,7 +893,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_OS_NAME						= "org.osgi.framework.os.name";
 
@@ -901,7 +903,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_OS_VERSION					= "org.osgi.framework.os.version";
 
@@ -911,7 +913,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 */
 	public static final String	FRAMEWORK_PROCESSOR						= "org.osgi.framework.processor";
 
@@ -921,7 +923,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.2
 	 */
@@ -934,7 +936,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @see #FRAMEWORK_BUNDLE_PARENT
 	 * @since 1.3
@@ -951,7 +953,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -967,7 +969,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @see #FRAMEWORK_SYSTEMPACKAGES
 	 * @since 1.5
@@ -979,12 +981,12 @@ public interface Constants {
 	 * framework extension bundles.
 	 * 
 	 * <p>
-	 * As of version 1.4, the value of this property must be <code>true</code>.
+	 * As of version 1.4, the value of this property must be {@code true}.
 	 * The Framework must support framework extension bundles.
 	 * 
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -995,12 +997,12 @@ public interface Constants {
 	 * bootclasspath extension bundles.
 	 * 
 	 * <p>
-	 * If the value of this property is <code>true</code>, then the Framework
+	 * If the value of this property is {@code true}, then the Framework
 	 * supports bootclasspath extension bundles. The default value is
-	 * <code>false</code>.
+	 * {@code false}.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -1011,11 +1013,11 @@ public interface Constants {
 	 * fragment bundles.
 	 * 
 	 * <p>
-	 * As of version 1.4, the value of this property must be <code>true</code>.
+	 * As of version 1.4, the value of this property must be {@code true}.
 	 * The Framework must support fragment bundles.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -1026,12 +1028,12 @@ public interface Constants {
 	 * the {@link #REQUIRE_BUNDLE Require-Bundle} manifest header.
 	 * 
 	 * <p>
-	 * As of version 1.4, the value of this property must be <code>true</code>.
-	 * The Framework must support the <code>Require-Bundle</code> manifest
+	 * As of version 1.4, the value of this property must be {@code true}.
+	 * The Framework must support the {@code Require-Bundle} manifest
 	 * header.
 	 * <p>
 	 * The value of this property may be retrieved by calling the
-	 * <code>BundleContext.getProperty</code> method.
+	 * {@code BundleContext.getProperty} method.
 	 * 
 	 * @since 1.3
 	 */
@@ -1053,7 +1055,7 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * If this value is specified and there is a security manager already
-	 * installed, then a <code>SecurityException</code> must be thrown when the
+	 * installed, then a {@code SecurityException} must be thrown when the
 	 * Framework is initialized.
 	 * 
 	 * @see #FRAMEWORK_SECURITY
@@ -1095,18 +1097,18 @@ public interface Constants {
 	 * 
 	 * @since 1.5
 	 */
-	public final static String  FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT			= "onFirstInit";
+	public final static String	FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT		= "onFirstInit";
 
 	/**
 	 * Specifies a comma separated list of additional library file extensions
 	 * that must be used when a bundle's class loader is searching for native
 	 * libraries. If this property is not set, then only the library name
-	 * returned by <code>System.mapLibraryName(String)</code> will be used to
+	 * returned by {@code System.mapLibraryName(String)} will be used to
 	 * search. This is needed for certain operating systems which allow more
 	 * than one extension for a library. For example, AIX allows library
-	 * extensions of <code>.a</code> and <code>.so</code>, but
-	 * <code>System.mapLibraryName(String)</code> will only return names with
-	 * the <code>.a</code> extension.
+	 * extensions of {@code .a} and {@code .so}, but
+	 * {@code System.mapLibraryName(String)} will only return names with
+	 * the {@code .a} extension.
 	 * 
 	 * @since 1.5
 	 */
@@ -1131,9 +1133,17 @@ public interface Constants {
 	public final static String	FRAMEWORK_EXECPERMISSION				= "org.osgi.framework.command.execpermission";
 
 	/**
+	 * Specified the substitution string for the absolute path of a file.
+	 * 
+	 * @see #FRAMEWORK_EXECPERMISSION
+	 * @since 1.6
+	 */
+	public final static String	FRAMEWORK_COMMAND_ABSPATH				= "abspath";
+
+	/**
 	 * Specifies the trust repositories used by the framework. The value is a
-	 * <code>java.io.File.pathSeparator</code> separated list of valid file
-	 * paths to files that contain key stores of type <code>JKS</code>. The
+	 * {@code java.io.File.pathSeparator} separated list of valid file
+	 * paths to files that contain key stores of type {@code JKS}. The
 	 * framework will use the key stores as trust repositories to authenticate
 	 * certificates of trusted signers. The key stores are only used as
 	 * read-only trust repositories to access public keys. No passwords are
@@ -1174,7 +1184,7 @@ public interface Constants {
 	 * @see #FRAMEWORK_BUNDLE_PARENT_FRAMEWORK
 	 * @since 1.5
 	 */
-	public final static String FRAMEWORK_BUNDLE_PARENT 					= "org.osgi.framework.bundle.parent";
+	public final static String	FRAMEWORK_BUNDLE_PARENT					= "org.osgi.framework.bundle.parent";
 
 	/**
 	 * Specifies to use of the boot class loader as the parent class loader for
@@ -1196,8 +1206,8 @@ public interface Constants {
 
 	/**
 	 * Specifies to use the application class loader as the parent class loader
-	 * for all bundle class loaders.  Depending on how the framework is 
-	 * launched, this may refer to the same class loader as 
+	 * for all bundle class loaders. Depending on how the framework is launched,
+	 * this may refer to the same class loader as
 	 * {@link #FRAMEWORK_BUNDLE_PARENT_FRAMEWORK}.
 	 * 
 	 * @since 1.5
@@ -1208,8 +1218,8 @@ public interface Constants {
 	/**
 	 * Specifies to use the framework class loader as the parent class loader
 	 * for all bundle class loaders. The framework class loader is the class
-	 * loader used to load the framework implementation.  Depending on how the 
-	 * framework is launched, this may refer to the same class loader as 
+	 * loader used to load the framework implementation. Depending on how the
+	 * framework is launched, this may refer to the same class loader as
 	 * {@link #FRAMEWORK_BUNDLE_PARENT_APP}.
 	 * 
 	 * @since 1.5
@@ -1220,11 +1230,11 @@ public interface Constants {
 	/*
 	 * Service properties.
 	 */
-	
+
 	/**
 	 * Service property identifying all of the class names under which a service
 	 * was registered in the Framework. The value of this property must be of
-	 * type <code>String[]</code>.
+	 * type {@code String[]}.
 	 * 
 	 * <p>
 	 * This property is set by the Framework when a service is registered.
@@ -1233,7 +1243,7 @@ public interface Constants {
 
 	/**
 	 * Service property identifying a service's registration number. The value
-	 * of this property must be of type <code>Long</code>.
+	 * of this property must be of type {@code Long}.
 	 * 
 	 * <p>
 	 * The value of this property is assigned by the Framework when a service is
@@ -1247,11 +1257,11 @@ public interface Constants {
 	 * Service property identifying a service's persistent identifier.
 	 * 
 	 * <p>
-	 * This property may be supplied in the <code>properties</code>
-	 * <code>Dictionary</code> object passed to the
-	 * <code>BundleContext.registerService</code> method. The value of this
-	 * property must be of type <code>String</code>, <code>String[]</code>, or
-	 * <code>Collection</code> of <code>String</code>.
+	 * This property may be supplied in the {@code properties}
+	 * {@code Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code String}, {@code String[]}, or
+	 * {@code Collection} of {@code String}.
 	 * 
 	 * <p>
 	 * A service's persistent identifier uniquely identifies the service and
@@ -1269,25 +1279,25 @@ public interface Constants {
 	 * Service property identifying a service's ranking number.
 	 * 
 	 * <p>
-	 * This property may be supplied in the <code>properties
-	 * Dictionary</code> object passed to the
-	 * <code>BundleContext.registerService</code> method. The value of this
-	 * property must be of type <code>Integer</code>.
+	 * This property may be supplied in the {@code properties
+	 * Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code Integer}.
 	 * 
 	 * <p>
 	 * The service ranking is used by the Framework to determine the <i>natural
-	 * order</i> of services, see {@link ServiceReference#compareTo(Object)},
-	 * and the <i>default</i> service to be returned from a call to the
+	 * order</i> of services, see {@link ServiceReference#compareTo}, and the
+	 * <i>default</i> service to be returned from a call to the
 	 * {@link BundleContext#getServiceReference} method.
 	 * 
 	 * <p>
 	 * The default ranking is zero (0). A service with a ranking of
-	 * <code>Integer.MAX_VALUE</code> is very likely to be returned as the
+	 * {@code Integer.MAX_VALUE} is very likely to be returned as the
 	 * default service, whereas a service with a ranking of
-	 * <code>Integer.MIN_VALUE</code> is very unlikely to be returned.
+	 * {@code Integer.MIN_VALUE} is very unlikely to be returned.
 	 * 
 	 * <p>
-	 * If the supplied property value is not of type <code>Integer</code>, it is
+	 * If the supplied property value is not of type {@code Integer}, it is
 	 * deemed to have a ranking value of zero.
 	 */
 	public static final String	SERVICE_RANKING							= "service.ranking";
@@ -1296,8 +1306,8 @@ public interface Constants {
 	 * Service property identifying a service's vendor.
 	 * 
 	 * <p>
-	 * This property may be supplied in the properties <code>Dictionary</code>
-	 * object passed to the <code>BundleContext.registerService</code> method.
+	 * This property may be supplied in the properties {@code Dictionary}
+	 * object passed to the {@code BundleContext.registerService} method.
 	 */
 	public static final String	SERVICE_VENDOR							= "service.vendor";
 
@@ -1305,8 +1315,207 @@ public interface Constants {
 	 * Service property identifying a service's description.
 	 * 
 	 * <p>
-	 * This property may be supplied in the properties <code>Dictionary</code>
-	 * object passed to the <code>BundleContext.registerService</code> method.
+	 * This property may be supplied in the properties {@code Dictionary}
+	 * object passed to the {@code BundleContext.registerService} method.
 	 */
-	public static final String	SERVICE_DESCRIPTION						= "service.description"; 
+	public static final String	SERVICE_DESCRIPTION						= "service.description";
+
+	/**
+	 * Framework environment property identifying the Framework's universally
+	 * unique identifier (UUID). A UUID represents a 128-bit value. A new UUID
+	 * is generated by the {@link Framework#init()} method each time a framework
+	 * is initialized. See the {@code toString} method of
+	 * {@code java.util.UUID} for the format of this string.
+	 * 
+	 * <p>
+	 * The value of this property may be retrieved by calling the
+	 * {@code BundleContext.getProperty} method.
+	 * 
+	 * @since 1.6
+	 */
+	public static final String	FRAMEWORK_UUID							= "org.osgi.framework.uuid";
+
+	/**
+	 * Specifies that an returned URLs from bundle class loaders must be a jar:
+	 * or file: URL if set to any value. This property must be set in the
+	 * launching parameters of the framework. If a Framework cannot support this
+	 * property it must throw an Illegal Argument Exception during its
+	 * initialization. URLs obtained through the OSGi API do not have this
+	 * guarantee, these URLs must follow the existing rules for resource URLs.
+	 * 
+	 * @since 1.6
+	 */
+	public final static String	FRAMEWORK_JARURLS						= "org.osgi.framework.jarurls";
+
+	/**
+	 * Service property identifying the configuration types supported by a
+	 * distribution provider. Registered by the distribution provider on one of
+	 * its services to indicate the supported configuration types.
+	 * 
+	 * <p>
+	 * The value of this property must be of type {@code String},
+	 * {@code String[]}, or {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	REMOTE_CONFIGS_SUPPORTED				= "remote.configs.supported";
+
+	/**
+	 * Service property identifying the intents supported by a distribution
+	 * provider. Registered by the distribution provider on one of its services
+	 * to indicate the vocabulary of implemented intents.
+	 * 
+	 * <p>
+	 * The value of this property must be of type {@code String},
+	 * {@code String[]}, or {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	REMOTE_INTENTS_SUPPORTED				= "remote.intents.supported";
+
+	/**
+	 * Service property identifying the configuration types that should be used
+	 * to export the service. Each configuration type represents the
+	 * configuration parameters for an endpoint. A distribution provider should
+	 * create an endpoint for each configuration type that it supports.
+	 * 
+	 * <p>
+	 * This property may be supplied in the {@code properties}
+	 * {@code Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code String}, {@code String[]}, or
+	 * {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_EXPORTED_CONFIGS				= "service.exported.configs";
+
+	/**
+	 * Service property identifying the intents that the distribution provider
+	 * must implement to distribute the service. Intents listed in this property
+	 * are reserved for intents that are critical for the code to function
+	 * correctly, for example, ordering of messages. These intents should not be
+	 * configurable.
+	 * 
+	 * <p>
+	 * This property may be supplied in the {@code properties}
+	 * {@code Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code String}, {@code String[]}, or
+	 * {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_EXPORTED_INTENTS				= "service.exported.intents";
+
+	/**
+	 * Service property identifying the extra intents that the distribution
+	 * provider must implement to distribute the service. This property is
+	 * merged with the {@code service.exported.intents} property before the
+	 * distribution provider interprets the listed intents; it has therefore the
+	 * same semantics but the property should be configurable so the
+	 * administrator can choose the intents based on the topology. Bundles
+	 * should therefore make this property configurable, for example through the
+	 * Configuration Admin service.
+	 * 
+	 * <p>
+	 * This property may be supplied in the {@code properties}
+	 * {@code Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code String}, {@code String[]}, or
+	 * {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_EXPORTED_INTENTS_EXTRA			= "service.exported.intents.extra";
+
+	/**
+	 * Service property marking the service for export. It defines the
+	 * interfaces under which this service can be exported. This list must be a
+	 * subset of the types under which the service was registered. The single
+	 * value of an asterisk (&quot;*&quot;, &#92;u002A) indicates all the
+	 * interface types under which the service was registered excluding the
+	 * non-interface types. It is strongly recommended to only export interface
+	 * types and not concrete classes due to the complexity of creating proxies
+	 * for some type of concrete classes.
+	 * 
+	 * <p>
+	 * This property may be supplied in the {@code properties}
+	 * {@code Dictionary} object passed to the
+	 * {@code BundleContext.registerService} method. The value of this
+	 * property must be of type {@code String}, {@code String[]}, or
+	 * {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_EXPORTED_INTERFACES				= "service.exported.interfaces";
+
+	/**
+	 * Service property identifying the service as imported. This service
+	 * property must be set by a distribution provider to any value when it
+	 * registers the endpoint proxy as an imported service. A bundle can use
+	 * this property to filter out imported services.
+	 * 
+	 * <p>
+	 * The value of this property may be of any type.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_IMPORTED						= "service.imported";
+
+	/**
+	 * Service property identifying the configuration types used to import the
+	 * service. Any associated properties for this configuration types must be
+	 * properly mapped to the importing system. For example, a URL in these
+	 * properties must point to a valid resource when used in the importing
+	 * framework. If multiple configuration types are listed in this property,
+	 * then they must be synonyms for exactly the same remote endpoint that is
+	 * used to export this service.
+	 * 
+	 * <p>
+	 * The value of this property must be of type {@code String},
+	 * {@code String[]}, or {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 * @see #SERVICE_EXPORTED_CONFIGS
+	 */
+	public static final String	SERVICE_IMPORTED_CONFIGS				= "service.imported.configs";
+
+	/**
+	 * Service property identifying the intents that this service implement.
+	 * This property has a dual purpose:
+	 * <ul>
+	 * <li>A bundle can use this service property to notify the distribution
+	 * provider that these intents are already implemented by the exported
+	 * service object.</li>
+	 * <li>A distribution provider must use this property to convey the combined
+	 * intents of:</li>
+	 * <ul>
+	 * <li>The exporting service, and</li>
+	 * <li>the intents that the exporting distribution provider adds, and</li>
+	 * <li>the intents that the importing distribution provider adds.</li>
+	 * </ul>
+	 * <i></i>
+	 * 
+	 * </ul>
+	 * To export a service, a distribution provider must expand any qualified
+	 * intents. Both the exporting and importing distribution providers must
+	 * recognize all intents before a service can be distributed.
+	 * 
+	 * <p>
+	 * The value of this property must be of type {@code String},
+	 * {@code String[]}, or {@code Collection} of {@code String}.
+	 * 
+	 * @since 1.6
+	 * @see "Remote Services Specification"
+	 */
+	public static final String	SERVICE_INTENTS							= "service.intents";
 }

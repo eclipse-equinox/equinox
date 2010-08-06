@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2009). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.security.BasicPermission;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -33,6 +34,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,8 +73,8 @@ import java.util.Map;
  * 
  * <p>
  * The special action &quot;*&quot; will represent all actions. The
- * <code>resolve</code> action is implied by the <code>class</code>,
- * <code>execute</code> and <code>resource</code> actions.
+ * {@code resolve} action is implied by the {@code class},
+ * {@code execute} and {@code resource} actions.
  * <p>
  * The name of this permission is a filter expression. The filter gives access
  * to the following attributes:
@@ -87,74 +89,74 @@ import java.util.Map;
  * Filter attribute names are processed in a case sensitive manner.
  * 
  * @ThreadSafe
- * @version $Revision: 7743 $
+ * @version $Id: 997d856b65726b4ed3c6a626300aa8797e89bc80 $
  */
 
 public final class AdminPermission extends BasicPermission {
 	static final long						serialVersionUID			= 307051004521261705L;
 
 	/**
-	 * The action string <code>class</code>. The <code>class</code> action
-	 * implies the <code>resolve</code> action.
+	 * The action string {@code class}. The {@code class} action
+	 * implies the {@code resolve} action.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	CLASS						= "class";
 	/**
-	 * The action string <code>execute</code>. The <code>execute</code> action
-	 * implies the <code>resolve</code> action.
+	 * The action string {@code execute}. The {@code execute} action
+	 * implies the {@code resolve} action.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	EXECUTE						= "execute";
 	/**
-	 * The action string <code>extensionLifecycle</code>.
+	 * The action string {@code extensionLifecycle}.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	EXTENSIONLIFECYCLE			= "extensionLifecycle";
 	/**
-	 * The action string <code>lifecycle</code>.
+	 * The action string {@code lifecycle}.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	LIFECYCLE					= "lifecycle";
 	/**
-	 * The action string <code>listener</code>.
+	 * The action string {@code listener}.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	LISTENER					= "listener";
 	/**
-	 * The action string <code>metadata</code>.
+	 * The action string {@code metadata}.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	METADATA					= "metadata";
 	/**
-	 * The action string <code>resolve</code>. The <code>resolve</code> action
-	 * is implied by the <code>class</code>, <code>execute</code> and
-	 * <code>resource</code> actions.
+	 * The action string {@code resolve}. The {@code resolve} action
+	 * is implied by the {@code class}, {@code execute} and
+	 * {@code resource} actions.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	RESOLVE						= "resolve";
 	/**
-	 * The action string <code>resource</code>. The <code>resource</code> action
-	 * implies the <code>resolve</code> action.
+	 * The action string {@code resource}. The {@code resource} action
+	 * implies the {@code resolve} action.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	RESOURCE					= "resource";
 	/**
-	 * The action string <code>startlevel</code>.
+	 * The action string {@code startlevel}.
 	 * 
 	 * @since 1.3
 	 */
 	public final static String	STARTLEVEL					= "startlevel";
 
 	/**
-	 * The action string <code>context</code>.
+	 * The action string {@code context}.
 	 * 
 	 * @since 1.4
 	 */
@@ -210,16 +212,16 @@ public final class AdminPermission extends BasicPermission {
 	 * filter in implies. This is not initialized until necessary, and then
 	 * cached in this object.
 	 */
-	private transient volatile Dictionary	properties;
+	private transient volatile Dictionary<String, Object>	properties;
 
 	/**
 	 * ThreadLocal used to determine if we have recursively called
 	 * getProperties.
 	 */
-	private static final ThreadLocal		recurse						= new ThreadLocal();
+	private static final ThreadLocal<Bundle>	recurse						= new ThreadLocal<Bundle>();
 
 	/**
-	 * Creates a new <code>AdminPermission</code> object that matches all
+	 * Creates a new {@code AdminPermission} object that matches all
 	 * bundles and has all actions. Equivalent to AdminPermission("*","*");
 	 */
 	public AdminPermission() {
@@ -247,14 +249,14 @@ public final class AdminPermission extends BasicPermission {
 	 * Null arguments are equivalent to "*".
 	 * 
 	 * @param filter A filter expression that can use signer, location, id, and
-	 *        name keys. A value of &quot;*&quot; or <code>null</code> matches
+	 *        name keys. A value of &quot;*&quot; or {@code null} matches
 	 *        all bundle. Filter attribute names are processed in a case
 	 *        sensitive manner.
-	 * @param actions <code>class</code>, <code>execute</code>,
-	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
-	 *        <code>listener</code>, <code>metadata</code>, <code>resolve</code>
-	 *        , <code>resource</code>, <code>startlevel</code> or
-	 *        <code>context</code>. A value of "*" or <code>null</code>
+	 * @param actions {@code class}, {@code execute},
+	 *        {@code extensionLifecycle}, {@code lifecycle},
+	 *        {@code listener}, {@code metadata}, {@code resolve}
+	 *        , {@code resource}, {@code startlevel} or
+	 *        {@code context}. A value of "*" or {@code null}
 	 *        indicates all actions.
 	 * @throws IllegalArgumentException If the filter has an invalid syntax.
 	 */
@@ -265,17 +267,17 @@ public final class AdminPermission extends BasicPermission {
 	}
 
 	/**
-	 * Creates a new requested <code>AdminPermission</code> object to be used by
-	 * the code that must perform <code>checkPermission</code>.
-	 * <code>AdminPermission</code> objects created with this constructor cannot
-	 * be added to an <code>AdminPermission</code> permission collection.
+	 * Creates a new requested {@code AdminPermission} object to be used by
+	 * the code that must perform {@code checkPermission}.
+	 * {@code AdminPermission} objects created with this constructor cannot
+	 * be added to an {@code AdminPermission} permission collection.
 	 * 
 	 * @param bundle A bundle.
-	 * @param actions <code>class</code>, <code>execute</code>,
-	 *        <code>extensionLifecycle</code>, <code>lifecycle</code>,
-	 *        <code>listener</code>, <code>metadata</code>, <code>resolve</code>
-	 *        , <code>resource</code>, <code>startlevel</code>,
-	 *        <code>context</code>. A value of "*" or <code>null</code>
+	 * @param actions {@code class}, {@code execute},
+	 *        {@code extensionLifecycle}, {@code lifecycle},
+	 *        {@code listener}, {@code metadata}, {@code resolve}
+	 *        , {@code resource}, {@code startlevel},
+	 *        {@code context}. A value of "*" or {@code null}
 	 *        indicates all actions.
 	 * @since 1.3
 	 */
@@ -304,7 +306,7 @@ public final class AdminPermission extends BasicPermission {
 	/**
 	 * Package private constructor used by AdminPermissionCollection.
 	 * 
-	 * @param filter name filter or <code>null</code> for wildcard.
+	 * @param filter name filter or {@code null} for wildcard.
 	 * @param mask action mask
 	 */
 	AdminPermission(Filter filter, int mask) {
@@ -316,7 +318,7 @@ public final class AdminPermission extends BasicPermission {
 	/**
 	 * Called by constructors and when deserialized.
 	 * 
-	 * @param filter Permission's filter or <code>null</code> for wildcard.
+	 * @param filter Permission's filter or {@code null} for wildcard.
 	 * @param mask action mask
 	 */
 	private void setTransients(Filter filter, int mask) {
@@ -341,11 +343,7 @@ public final class AdminPermission extends BasicPermission {
 		boolean seencomma = false;
 	
 		int mask = ACTION_NONE;
-	
-		if (actions == null) {
-			return mask;
-		}
-	
+
 		char[] a = actions.toCharArray();
 	
 		int i = a.length - 1;
@@ -559,7 +557,7 @@ public final class AdminPermission extends BasicPermission {
 	 * 
 	 * @param filterString The filter string to parse.
 	 * @return a Filter for this bundle. If the specified filterString is
-	 *         <code>null</code> or equals "*", then <code>null</code> is
+	 *         {@code null} or equals "*", then {@code null} is
 	 *         returned to indicate a wildcard.
 	 * @throws IllegalArgumentException If the filter syntax is invalid.
 	 */
@@ -589,7 +587,7 @@ public final class AdminPermission extends BasicPermission {
 	 * constructed with a bundle.
 	 * 
 	 * <p>
-	 * This method returns <code>true</code> if the specified permission is an
+	 * This method returns {@code true} if the specified permission is an
 	 * AdminPermission AND
 	 * <ul>
 	 * <li>this object's filter matches the specified permission's bundle ID,
@@ -601,13 +599,13 @@ public final class AdminPermission extends BasicPermission {
 	 * actions.
 	 * <p>
 	 * Special case: if the specified permission was constructed with "*"
-	 * filter, then this method returns <code>true</code> if this object's
+	 * filter, then this method returns {@code true} if this object's
 	 * filter is "*" and this object's actions include all of the specified
 	 * permission's actions
 	 * 
 	 * @param p The requested permission.
-	 * @return <code>true</code> if the specified permission is implied by this
-	 *         object; <code>false</code> otherwise.
+	 * @return {@code true} if the specified permission is implied by this
+	 *         object; {@code false} otherwise.
 	 */
 	public boolean implies(Permission p) {
 		if (!(p instanceof AdminPermission)) {
@@ -632,8 +630,8 @@ public final class AdminPermission extends BasicPermission {
 	 *        validated as a proper argument. The requested AdminPermission must
 	 *        not have a filter expression.
 	 * @param effective The effective actions with which to start.
-	 * @return <code>true</code> if the specified permission is implied by this
-	 *         object; <code>false</code> otherwise.
+	 * @return {@code true} if the specified permission is implied by this
+	 *         object; {@code false} otherwise.
 	 */
 	boolean implies0(AdminPermission requested, int effective) {
 		/* check actions first - much faster */
@@ -653,7 +651,8 @@ public final class AdminPermission extends BasicPermission {
 		if (requested.bundle == null) {
 			return false;
 		}
-		Dictionary requestedProperties = requested.getProperties();
+		Dictionary<String, Object> requestedProperties = requested
+				.getProperties();
 		if (requestedProperties == null) {
 			/*
 			 * If the requested properties are null, then we have detected a
@@ -668,17 +667,17 @@ public final class AdminPermission extends BasicPermission {
 
 	/**
 	 * Returns the canonical string representation of the
-	 * <code>AdminPermission</code> actions.
+	 * {@code AdminPermission} actions.
 	 * 
 	 * <p>
-	 * Always returns present <code>AdminPermission</code> actions in the
-	 * following order: <code>class</code>, <code>execute</code>,
-	 * <code>extensionLifecycle</code>, <code>lifecycle</code>,
-	 * <code>listener</code>, <code>metadata</code>, <code>resolve</code>,
-	 * <code>resource</code>, <code>startlevel</code>, <code>context</code>.
+	 * Always returns present {@code AdminPermission} actions in the
+	 * following order: {@code class}, {@code execute},
+	 * {@code extensionLifecycle}, {@code lifecycle},
+	 * {@code listener}, {@code metadata}, {@code resolve},
+	 * {@code resource}, {@code startlevel}, {@code context}.
 	 * 
 	 * @return Canonical string representation of the
-	 *         <code>AdminPermission</code> actions.
+	 *         {@code AdminPermission} actions.
 	 */
 	public String getActions() {
 		String result = actions;
@@ -747,21 +746,21 @@ public final class AdminPermission extends BasicPermission {
 	}
 
 	/**
-	 * Returns a new <code>PermissionCollection</code> object suitable for
-	 * storing <code>AdminPermission</code>s.
+	 * Returns a new {@code PermissionCollection} object suitable for
+	 * storing {@code AdminPermission}s.
 	 * 
-	 * @return A new <code>PermissionCollection</code> object.
+	 * @return A new {@code PermissionCollection} object.
 	 */
 	public PermissionCollection newPermissionCollection() {
 		return new AdminPermissionCollection();
 	}
 
 	/**
-	 * Determines the equality of two <code>AdminPermission</code> objects.
+	 * Determines the equality of two {@code AdminPermission} objects.
 	 * 
 	 * @param obj The object being compared for equality with this object.
-	 * @return <code>true</code> if <code>obj</code> is equivalent to this
-	 *         <code>AdminPermission</code>; <code>false</code> otherwise.
+	 * @return {@code true} if {@code obj} is equivalent to this
+	 *         {@code AdminPermission}; {@code false} otherwise.
 	 */
 	public boolean equals(Object obj) {
 		if (obj == this) {
@@ -824,7 +823,7 @@ public final class AdminPermission extends BasicPermission {
 	}
 
 	/**
-	 * Called by <code>implies0</code> on an AdminPermission which was
+	 * Called by {@code implies0} on an AdminPermission which was
 	 * constructed with a Bundle. This method loads a dictionary with the
 	 * filter-matchable properties of this bundle. The dictionary is cached so
 	 * this lookup only happens once.
@@ -834,8 +833,8 @@ public final class AdminPermission extends BasicPermission {
 	 * 
 	 * @return a dictionary of properties for this bundle
 	 */
-	private Dictionary getProperties() {
-		Dictionary result = properties;
+	private Dictionary<String, Object> getProperties() {
+		Dictionary<String, Object> result = properties;
 		if (result != null) {
 			return result;
 		}
@@ -850,8 +849,9 @@ public final class AdminPermission extends BasicPermission {
 		}
 		recurse.set(bundle);
 		try {
-			final Dictionary dict = new Hashtable(4);
-			AccessController.doPrivileged(new PrivilegedAction() {
+			final Dictionary<String, Object> dict = new Hashtable<String, Object>(
+					4);
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
 					dict.put("id", new Long(bundle.getBundleId()));
 					dict.put("location", bundle.getLocation());
@@ -875,7 +875,7 @@ public final class AdminPermission extends BasicPermission {
 }
 
 /**
- * Stores a collection of <code>AdminPermission</code>s.
+ * Stores a collection of {@code AdminPermission}s.
  */
 final class AdminPermissionCollection extends PermissionCollection {
 	private static final long	serialVersionUID	= 3906372644575328048L;
@@ -884,7 +884,7 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 * @GuardedBy this
 	 */
-	private transient Map		permissions;
+	private transient Map<String, AdminPermission>	permissions;
 
 	/**
 	 * Boolean saying if "*" is in the collection.
@@ -899,17 +899,17 @@ final class AdminPermissionCollection extends PermissionCollection {
 	 * 
 	 */
 	public AdminPermissionCollection() {
-		permissions = new HashMap();
+		permissions = new HashMap<String, AdminPermission>();
 	}
 
 	/**
 	 * Adds a permission to this permission collection.
 	 * 
-	 * @param permission The <code>AdminPermission</code> object to add.
+	 * @param permission The {@code AdminPermission} object to add.
 	 * @throws IllegalArgumentException If the specified permission is not an
-	 *         <code>AdminPermission</code> instance or was constructed with a
+	 *         {@code AdminPermission} instance or was constructed with a
 	 *         Bundle object.
-	 * @throws SecurityException If this <code>AdminPermissionCollection</code>
+	 * @throws SecurityException If this {@code AdminPermissionCollection}
 	 *         object has been marked read-only.
 	 */
 	public void add(Permission permission) {
@@ -928,8 +928,8 @@ final class AdminPermissionCollection extends PermissionCollection {
 		}
 		final String name = ap.getName();
 		synchronized (this) {
-			Map pc = permissions;
-			AdminPermission existing = (AdminPermission) pc.get(name);
+			Map<String, AdminPermission> pc = permissions;
+			AdminPermission existing = pc.get(name);
 			if (existing != null) {
 				int oldMask = existing.action_mask;
 				int newMask = ap.action_mask;
@@ -952,13 +952,13 @@ final class AdminPermissionCollection extends PermissionCollection {
 
 	/**
 	 * Determines if the specified permissions implies the permissions expressed
-	 * in <code>permission</code>.
+	 * in {@code permission}.
 	 * 
 	 * @param permission The Permission object to compare with the
-	 *        <code>AdminPermission</code> objects in this collection.
-	 * @return <code>true</code> if <code>permission</code> is implied by an
-	 *         <code>AdminPermission</code> in this collection,
-	 *         <code>false</code> otherwise.
+	 *        {@code AdminPermission} objects in this collection.
+	 * @return {@code true} if {@code permission} is implied by an
+	 *         {@code AdminPermission} in this collection,
+	 *         {@code false} otherwise.
 	 */
 	public boolean implies(Permission permission) {
 		if (!(permission instanceof AdminPermission)) {
@@ -971,12 +971,12 @@ final class AdminPermissionCollection extends PermissionCollection {
 			return false;
 		}
 		int effective = AdminPermission.ACTION_NONE;
-		Collection perms;
+		Collection<AdminPermission> perms;
 		synchronized (this) {
-			Map pc = permissions;
+			Map<String, AdminPermission> pc = permissions;
 			// short circuit if the "*" Permission was added
 			if (all_allowed) {
-				AdminPermission ap = (AdminPermission) pc.get("*");
+				AdminPermission ap = pc.get("*");
 				if (ap != null) {
 					effective |= ap.action_mask;
 					final int desired = requested.action_mask;
@@ -989,8 +989,8 @@ final class AdminPermissionCollection extends PermissionCollection {
 		}
 
 		// just iterate one by one
-		for (Iterator iter = perms.iterator(); iter.hasNext();) {
-			if (((AdminPermission) iter.next()).implies0(requested, effective)) {
+		for (Iterator<AdminPermission> iter = perms.iterator(); iter.hasNext();) {
+			if (iter.next().implies0(requested, effective)) {
 				return true;
 			}
 		}
@@ -998,13 +998,14 @@ final class AdminPermissionCollection extends PermissionCollection {
 	}
 
 	/**
-	 * Returns an enumeration of all <code>AdminPermission</code> objects in the
+	 * Returns an enumeration of all {@code AdminPermission} objects in the
 	 * container.
 	 * 
-	 * @return Enumeration of all <code>AdminPermission</code> objects.
+	 * @return Enumeration of all {@code AdminPermission} objects.
 	 */
-	public synchronized Enumeration elements() {
-		return Collections.enumeration(permissions.values());
+	public synchronized Enumeration<Permission> elements() {
+		List<Permission> all = new ArrayList<Permission>(permissions.values());
+		return Collections.enumeration(all);
 	}
 	
 	/* serialization logic */
@@ -1014,19 +1015,21 @@ final class AdminPermissionCollection extends PermissionCollection {
     
     private synchronized void writeObject(ObjectOutputStream out)
 			throws IOException {
-		Hashtable hashtable = new Hashtable(permissions);
+		Hashtable<String, AdminPermission> hashtable = new Hashtable<String, AdminPermission>(
+				permissions);
 		ObjectOutputStream.PutField pfields = out.putFields();
 		pfields.put("permissions", hashtable);
 		pfields.put("all_allowed", all_allowed);
 		out.writeFields();
 	}
     
-    private synchronized void readObject(java.io.ObjectInputStream in)
+	private synchronized void readObject(java.io.ObjectInputStream in)
 			throws IOException,
 			ClassNotFoundException {
 		ObjectInputStream.GetField gfields = in.readFields();
-		Hashtable hashtable = (Hashtable) gfields.get("permissions", null);
-		permissions = new HashMap(hashtable);
+		Hashtable<String, AdminPermission> hashtable = (Hashtable<String, AdminPermission>) gfields
+				.get("permissions", null);
+		permissions = new HashMap<String, AdminPermission>(hashtable);
 		all_allowed = gfields.get("all_allowed", false);
 	}
 }

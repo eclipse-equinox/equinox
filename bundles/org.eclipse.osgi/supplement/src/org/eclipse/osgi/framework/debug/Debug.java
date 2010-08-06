@@ -335,7 +335,7 @@ public class Debug {
 
 			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
 				try {
-					Throwable nested = (Throwable) method.invoke(t, null);
+					Throwable nested = (Throwable) method.invoke(t, (Object[]) null);
 
 					if ((nested != null) && (nested != t)) {
 						out.println("Nested Exception:"); //$NON-NLS-1$

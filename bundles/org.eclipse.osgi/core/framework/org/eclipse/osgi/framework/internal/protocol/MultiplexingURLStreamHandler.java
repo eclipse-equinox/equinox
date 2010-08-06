@@ -41,7 +41,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			equalsMethod = URLStreamHandler.class.getDeclaredMethod("equals", new Class[] {URL.class, URL.class}); //$NON-NLS-1$
 			equalsMethod.setAccessible(true);
 
-			getDefaultPortMethod = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", null); //$NON-NLS-1$
+			getDefaultPortMethod = URLStreamHandler.class.getDeclaredMethod("getDefaultPort", (Class[]) null); //$NON-NLS-1$
 			getDefaultPortMethod.setAccessible(true);
 
 			getHostAddressMethod = URLStreamHandler.class.getDeclaredMethod("getHostAddress", new Class[] {URL.class}); //$NON-NLS-1$
@@ -122,7 +122,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 		URLStreamHandler handler = factory.findAuthorizedURLStreamHandler(protocol);
 		if (handler != null) {
 			try {
-				return ((Integer) getDefaultPortMethod.invoke(handler, null)).intValue();
+				return ((Integer) getDefaultPortMethod.invoke(handler, (Object[]) null)).intValue();
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {

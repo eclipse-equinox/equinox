@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.framework.BundleException;
 
 /**
  * Headers classes. This class implements a Dictionary that has
- * the following behaviour:
+ * the following behavior:
  * <ul>
  * <li>put and remove clear throw UnsupportedOperationException.
  * The Dictionary is thus read-only to others.
@@ -30,10 +30,10 @@ import org.osgi.framework.BundleException;
  * </ul>
  * @since 3.1
  */
-public class Headers extends Dictionary implements Map {
+public class Headers<K, V> extends Dictionary<K, V> implements Map<K, V> {
 	private boolean readOnly = false;
-	private Object[] headers;
-	private Object[] values;
+	private K[] headers;
+	private V[] values;
 	private int size = 0;
 
 	/**
@@ -43,8 +43,12 @@ public class Headers extends Dictionary implements Map {
 	 */
 	public Headers(int initialCapacity) {
 		super();
-		headers = new Object[initialCapacity];
-		values = new Object[initialCapacity];
+		@SuppressWarnings("unchecked")
+		K[] k = (K[]) new Object[initialCapacity];
+		headers = k;
+		@SuppressWarnings("unchecked")
+		V[] v = (V[]) new Object[initialCapacity];
+		values = v;
 	}
 
 	/**
@@ -54,12 +58,12 @@ public class Headers extends Dictionary implements Map {
 	 * @exception IllegalArgumentException If a case-variant of the key is
 	 * in the dictionary parameter.
 	 */
-	public Headers(Dictionary values) {
+	public Headers(Dictionary<? extends K, ? extends V> values) {
 		this(values.size());
 		/* initialize the headers and values */
-		Enumeration keys = values.keys();
+		Enumeration<? extends K> keys = values.keys();
 		while (keys.hasMoreElements()) {
-			Object key = keys.nextElement();
+			K key = keys.nextElement();
 			set(key, values.get(key));
 		}
 	}
@@ -67,15 +71,15 @@ public class Headers extends Dictionary implements Map {
 	/**
 	 * Case-preserved keys.
 	 */
-	public synchronized Enumeration keys() {
-		return new ArrayEnumeration(headers, size);
+	public synchronized Enumeration<K> keys() {
+		return new ArrayEnumeration<K>(headers, size);
 	}
 
 	/**
 	 * Values.
 	 */
-	public synchronized Enumeration elements() {
-		return new ArrayEnumeration(values, size);
+	public synchronized Enumeration<V> elements() {
+		return new ArrayEnumeration<V>(values, size);
 	}
 
 	private int getIndex(Object key) {
@@ -92,8 +96,8 @@ public class Headers extends Dictionary implements Map {
 		return -1;
 	}
 
-	private Object remove(int remove) {
-		Object removed = values[remove];
+	private V remove(int remove) {
+		V removed = values[remove];
 		for (int i = remove; i < size; i++) {
 			if (i == headers.length - 1) {
 				headers[i] = null;
@@ -108,11 +112,15 @@ public class Headers extends Dictionary implements Map {
 		return removed;
 	}
 
-	private void add(Object header, Object value) {
+	private void add(K header, V value) {
 		if (size == headers.length) {
 			// grow the arrays
-			Object[] newHeaders = new Object[headers.length + 10];
-			Object[] newValues = new Object[values.length + 10];
+			@SuppressWarnings("unchecked")
+			K[] nh = (K[]) new Object[headers.length + 10];
+			K[] newHeaders = nh;
+			@SuppressWarnings("unchecked")
+			V[] nv = (V[]) new Object[values.length + 10];
+			V[] newValues = nv;
 			System.arraycopy(headers, 0, newHeaders, 0, headers.length);
 			System.arraycopy(values, 0, newValues, 0, values.length);
 			headers = newHeaders;
@@ -128,7 +136,7 @@ public class Headers extends Dictionary implements Map {
 	 *
 	 * @param key name.
 	 */
-	public synchronized Object get(Object key) {
+	public synchronized V get(Object key) {
 		int i = -1;
 		if ((i = getIndex(key)) != -1)
 			return values[i];
@@ -151,11 +159,14 @@ public class Headers extends Dictionary implements Map {
 	 * already present.
 	 * @since 3.2
 	 */
-	public synchronized Object set(Object key, Object value, boolean replace) {
+	public synchronized V set(K key, V value, boolean replace) {
 		if (readOnly)
 			throw new UnsupportedOperationException();
-		if (key instanceof String)
-			key = ((String) key).intern();
+		if (key instanceof String) {
+			@SuppressWarnings("unchecked")
+			K k = (K) ((String) key).intern();
+			key = k;
+		}
 		int i = getIndex(key);
 		if (value == null) { /* remove */
 			if (i != -1)
@@ -164,7 +175,7 @@ public class Headers extends Dictionary implements Map {
 			if (i != -1) { /* duplicate key */
 				if (!replace)
 					throw new IllegalArgumentException(NLS.bind(Msg.HEADER_DUPLICATE_KEY_EXCEPTION, key));
-				Object oldVal = values[i];
+				V oldVal = values[i];
 				values[i] = value;
 				return oldVal;
 			}
@@ -184,7 +195,7 @@ public class Headers extends Dictionary implements Map {
 	 * @exception IllegalArgumentException If a case-variant of the key is
 	 * already present.
 	 */
-	public synchronized Object set(Object key, Object value) {
+	public synchronized V set(K key, V value) {
 		return set(key, value, false);
 	}
 
@@ -220,7 +231,7 @@ public class Headers extends Dictionary implements Map {
 	 * @param value header value.
 	 * @throws UnsupportedOperationException
 	 */
-	public synchronized Object put(Object key, Object value) {
+	public synchronized V put(K key, V value) {
 		if (readOnly)
 			throw new UnsupportedOperationException();
 		return set(key, value, true);
@@ -232,16 +243,16 @@ public class Headers extends Dictionary implements Map {
 	 * @param key header name.
 	 * @throws UnsupportedOperationException
 	 */
-	public Object remove(Object key) {
+	public V remove(Object key) {
 		throw new UnsupportedOperationException();
 	}
 
 	public String toString() {
-		return (values.toString());
+		return values.toString();
 	}
 
-	public static Headers parseManifest(InputStream in) throws BundleException {
-		Headers headers = new Headers(10);
+	public static Headers<String, String> parseManifest(InputStream in) throws BundleException {
+		Headers<String, String> headers = new Headers<String, String>(10);
 		try {
 			ManifestElement.parseBundleManifest(in, headers);
 		} catch (IOException e) {
@@ -251,12 +262,14 @@ public class Headers extends Dictionary implements Map {
 		return headers;
 	}
 
-	class ArrayEnumeration implements Enumeration {
-		private Object[] array;
+	private static class ArrayEnumeration<E> implements Enumeration<E> {
+		private E[] array;
 		int cur = 0;
 
-		public ArrayEnumeration(Object[] array, int size) {
-			this.array = new Object[size];
+		public ArrayEnumeration(E[] array, int size) {
+			@SuppressWarnings("unchecked")
+			E[] a = (E[]) new Object[size];
+			this.array = a;
 			System.arraycopy(array, 0, this.array, 0, this.array.length);
 		}
 
@@ -264,7 +277,7 @@ public class Headers extends Dictionary implements Map {
 			return cur < array.length;
 		}
 
-		public Object nextElement() {
+		public E nextElement() {
 			return array[cur++];
 		}
 	}
@@ -278,23 +291,23 @@ public class Headers extends Dictionary implements Map {
 		return getIndex(key) >= 0;
 	}
 
-	public boolean containsValue(Object var0) {
+	public boolean containsValue(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Set entrySet() {
+	public Set<Map.Entry<K, V>> entrySet() {
 		throw new UnsupportedOperationException();
 	}
 
-	public Set keySet() {
+	public Set<K> keySet() {
 		throw new UnsupportedOperationException();
 	}
 
-	public void putAll(Map var0) {
+	public void putAll(Map<? extends K, ? extends V> c) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Collection values() {
+	public Collection<V> values() {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -57,9 +57,9 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		boolean parallelCapable = false;
 		try {
 			if (typeParallel) {
-				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", null); //$NON-NLS-1$
+				Method parallelCapableMetod = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable", (Class[]) null); //$NON-NLS-1$
 				parallelCapableMetod.setAccessible(true);
-				parallelCapable = ((Boolean) parallelCapableMetod.invoke(null, null)).booleanValue();
+				parallelCapable = ((Boolean) parallelCapableMetod.invoke(null, (Object[]) null)).booleanValue();
 			}
 		} catch (Throwable e) {
 			// must do everything to avoid failing in clinit

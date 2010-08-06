@@ -1,165 +1,472 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component id="org.eclipse.osgi" version="2">
+<resource path="core/framework/org/eclipse/osgi/framework/internal/protocol/URLStreamHandlerFactoryProxyFor15.java" type="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15">
+<filter comment="We protect in code when Proxy is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15.openConnection(URL, Proxy)"/>
+<message_argument value="Proxy"/>
+<message_argument value="J2SE-1.4"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="core/framework/org/eclipse/osgi/launch/Equinox.java" type="org.eclipse.osgi.launch.Equinox">
+<filter id="1143996420">
+<message_arguments>
+<message_argument value="adapt(Class&lt;A&gt;)"/>
+</message_arguments>
+</filter>
+<filter id="1143996420">
+<message_arguments>
+<message_argument value="compareTo(Bundle)"/>
+</message_arguments>
+</filter>
+<filter id="1143996420">
+<message_arguments>
+<message_argument value="getDataFile(String)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/EclipseAdaptorHook.java" type="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook$ParsingService">
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
+<message_argument value="DocumentBuilderFactory"/>
+<message_argument value="newInstance()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="newInstance()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/PluginParser.java" type="org.eclipse.core.runtime.internal.adaptor.PluginParser">
+<filter comment="We protect in code when jaxp is not present." id="579862564">
+<message_arguments>
+<message_argument value="PluginParser"/>
+<message_argument value="DefaultHandler"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="630194212">
+<message_arguments>
+<message_argument value="PluginParser.locator"/>
+<message_argument value="Locator"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.error(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
+<message_argument value="SAXException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionPointState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleInitialState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryExportState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handlePluginState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresImportState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRuntimeState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseRequiresAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.processingInstruction(String, String)"/>
+<message_argument value="SAXException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.setDocumentLocator(Locator)"/>
+<message_argument value="Locator"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.startElement(String, String, String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.warning(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647000098">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.PluginParser(FrameworkAdaptor, BundleContext, Version)"/>
+<message_argument value="DefaultHandler()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="newInstance()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getValue(String, String)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="getColumnNumber()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="getLineNumber()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="getMessage()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+<message_argument value="SAXParseException"/>
+<message_argument value="getSystemId()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getLength()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getLocalName(int)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getValue(int)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getValue(String, String)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParser"/>
+<message_argument value="parse(InputStream, DefaultHandler)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="newSAXParser()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="setFeature(String, boolean)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="setNamespaceAware(boolean)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="setValidating(boolean)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getLength()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getLocalName(int)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getValue(int)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code when jaxp is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
+<message_argument value="Attributes"/>
+<message_argument value="getValue(String, String)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
-<filter id="403767336">
+<filter id="403804204">
 <message_arguments>
 <message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="SIGNERS_ALL"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="SIGNERS_TRUSTED"/>
+<message_argument value="adapt(Class&lt;A&gt;)"/>
 </message_arguments>
 </filter>
 <filter id="403804204">
 <message_arguments>
 <message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getSignerCertificates(int)"/>
+<message_argument value="getDataFile(String)"/>
+</message_arguments>
+</filter>
+<filter id="403984517">
+<message_arguments>
+<message_argument value="org.osgi.framework.Bundle"/>
+<message_argument value="java.lang.Comparable"/>
+<message_argument value="compareTo(T)"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="adapt(Class&lt;A&gt;)"/>
+</message_arguments>
+</filter>
+<filter id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="getDataFile(String)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/BundleContext.java" type="org.osgi.framework.BundleContext">
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.BundleContext"/>
+<message_argument value="getServiceReference(Class&lt;S&gt;)"/>
 </message_arguments>
 </filter>
 <filter id="403804204">
 <message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getVersion()"/>
+<message_argument value="org.osgi.framework.BundleContext"/>
+<message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
+</message_arguments>
+</filter>
+<filter id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.BundleContext"/>
+<message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SIGNERS_ALL"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="getServiceReference(Class&lt;S&gt;)"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SIGNERS_TRUSTED"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getSignerCertificates(int)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getVersion()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleException.java" type="org.osgi.framework.BundleException">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="ACTIVATOR_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="BundleException(String, int)"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="BundleException(String, int, Throwable)"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="DUPLICATE_BUNDLE_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="INVALID_OPERATION"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="MANIFEST_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="NATIVECODE_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="RESOLVE_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SECURITY_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="START_TRANSIENT_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="STATECHANGE_ERROR"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="UNSPECIFIED"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="UNSUPPORTED_OPERATION"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getType()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
-<filter id="1108344834">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="org.osgi.framework.BundleReference"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
 </message_arguments>
 </filter>
 </resource>
@@ -167,507 +474,274 @@
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
+<message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT"/>
+<message_argument value="FRAMEWORK_JARURLS"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_APP"/>
+<message_argument value="FRAMEWORK_UUID"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_BOOT"/>
+<message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_EXT"/>
+<message_argument value="REMOTE_INTENTS_SUPPORTED"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_FRAMEWORK"/>
+<message_argument value="SERVICE_EXPORTED_CONFIGS"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_EXECPERMISSION"/>
+<message_argument value="SERVICE_EXPORTED_INTENTS"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+<message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_SECURITY"/>
+<message_argument value="SERVICE_EXPORTED_INTERFACES"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_SECURITY_OSGI"/>
+<message_argument value="SERVICE_IMPORTED"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE"/>
+<message_argument value="SERVICE_IMPORTED_CONFIGS"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_SYSTEMPACKAGES_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_TYPE"/>
+<message_argument value="SERVICE_INTENTS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BEGINNING_STARTLEVEL"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_JARURLS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_APP"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_UUID"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_BOOT"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_EXT"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="REMOTE_INTENTS_SUPPORTED"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_BUNDLE_PARENT_FRAMEWORK"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_EXPORTED_CONFIGS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_EXECPERMISSION"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_EXPORTED_INTENTS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_LIBRARY_EXTENSIONS"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SECURITY"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_EXPORTED_INTERFACES"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SECURITY_OSGI"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_IMPORTED"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_STORAGE"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_IMPORTED_CONFIGS"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_SYSTEMPACKAGES_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_TRUST_REPOSITORIES"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="FRAMEWORK_WINDOWSYSTEM"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="SERVICE_TYPE"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="SERVICE_INTENTS"/>
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/FrameworkEvent.java" type="org.osgi.framework.FrameworkEvent">
-<filter id="1141899266">
+<resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
+<filter id="1143996420">
 <message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="STOPPED"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="STOPPED_BOOTCLASSPATH_MODIFIED"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="STOPPED_UPDATE"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="WAIT_TIMEDOUT"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/FrameworkUtil.java" type="org.osgi.framework.FrameworkUtil">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="getBundle(Class)"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="matchDistinguishedNameChain(String, List)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/PackagePermission.java" type="org.osgi.framework.PackagePermission">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="EXPORTONLY"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="PackagePermission(String, Bundle, String)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServiceEvent.java" type="org.osgi.framework.ServiceEvent">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="MODIFIED_ENDMATCH"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServiceException.java" type="org.osgi.framework.ServiceException">
-<filter id="1108344834">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="org.osgi.framework.ServiceException"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServicePermission.java" type="org.osgi.framework.ServicePermission">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.5"/>
-<message_argument value="ServicePermission(ServiceReference, String)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/EventHook.java" type="org.osgi.framework.hooks.service.EventHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.EventHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/FindHook.java" type="org.osgi.framework.hooks.service.FindHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.FindHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.ListenerHook"/>
+<message_argument value="compareTo(Version)"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
-<filter id="1110441988">
+<filter id="403984517">
 <message_arguments>
 <message_argument value="org.osgi.framework.launch.Framework"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
-<filter id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.launch.FrameworkFactory"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="newConditionalPermissionInfo(String)"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="newConditionalPermissionInfo(String, ConditionInfo[], PermissionInfo[], String)"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-<message_argument value="newConditionalPermissionUpdate()"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="newConditionalPermissionInfo(String)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="newConditionalPermissionInfo(String, ConditionInfo[], PermissionInfo[], String)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="newConditionalPermissionUpdate()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfo">
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="ALLOW"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="DENY"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="equals(Object)"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="getAccessDecision()"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="getEncoded()"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="hashCode()"/>
-</message_arguments>
-</filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-<message_argument value="toString()"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="ALLOW"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="DENY"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="equals(Object)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="getAccessDecision()"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="getEncoded()"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="hashCode()"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="toString()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionUpdate.java" type="org.osgi.service.condpermadmin.ConditionalPermissionUpdate">
-<filter id="1108344834">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.5"/>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionUpdate"/>
+<message_argument value="java.lang.Comparable"/>
+<message_argument value="compareTo(T)"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/util/tracker/BundleTracker.java" type="org.osgi.util.tracker.BundleTracker">
-<filter id="1108344834">
+<filter id="1141899266">
 <message_arguments>
-<message_argument value="1.4"/>
-<message_argument value="3.5"/>
-<message_argument value="org.osgi.util.tracker.BundleTracker"/>
+<message_argument value="1.5"/>
+<message_argument value="3.7"/>
+<message_argument value="getTracked()"/>
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/util/tracker/BundleTrackerCustomizer.java" type="org.osgi.util.tracker.BundleTrackerCustomizer">
-<filter id="1108344834">
+<resource path="osgi/src/org/osgi/util/tracker/ServiceTracker.java" type="org.osgi.util.tracker.ServiceTracker">
+<filter id="1141899266">
 <message_arguments>
-<message_argument value="1.4"/>
-<message_argument value="3.5"/>
-<message_argument value="org.osgi.util.tracker.BundleTrackerCustomizer"/>
+<message_argument value="1.5"/>
+<message_argument value="3.7"/>
+<message_argument value="getTracked()"/>
+</message_arguments>
+</filter>
+<filter id="1143996420">
+<message_arguments>
+<message_argument value="ServiceTracker(BundleContext, Class&lt;S&gt;, ServiceTrackerCustomizer&lt;S,T&gt;)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
+<filter comment="We protect in code for when nio is not present." id="630194212">
+<message_arguments>
+<message_argument value="Locker_JavaNio.fileLock"/>
+<message_argument value="FileLock"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+<message_argument value="FileLock"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+<message_argument value="OverlappingFileLockException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="646971428">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+<message_argument value="OverlappingFileLockException"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+<message_argument value="FileChannel"/>
+<message_argument value="tryLock(long, long, boolean)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+<message_argument value="FileLock"/>
+<message_argument value="release()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+<message_argument value="RandomAccessFile"/>
+<message_argument value="getChannel()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+<message_argument value="FileChannel"/>
+<message_argument value="tryLock(long, long, boolean)"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+<message_argument value="RandomAccessFile"/>
+<message_argument value="getChannel()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
+</message_arguments>
+</filter>
+<filter comment="We protect in code for when nio is not present." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.release()"/>
+<message_argument value="FileLock"/>
+<message_argument value="release()"/>
+<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 </resource>

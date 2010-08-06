@@ -6,3 +6,4 @@ core.jar
 defaultAdaptor.jar
 eclipseAdaptor.jar
 resolver.jar
+generated

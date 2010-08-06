@@ -32,7 +32,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 		this.splashHandler = splashHandler;
 
 		try {
-			updateMethod = splashHandler.getClass().getMethod("updateSplash", null); //$NON-NLS-1$
+			updateMethod = splashHandler.getClass().getMethod("updateSplash", (Class[]) null); //$NON-NLS-1$
 		} catch (SecurityException e) {
 			throw (IllegalStateException) new IllegalStateException(e.getMessage()).initCause(e);
 		} catch (NoSuchMethodException e) {
@@ -47,7 +47,7 @@ public class DefaultStartupMonitor implements StartupMonitor {
 	public void update() {
 		if (updateMethod != null) {
 			try {
-				updateMethod.invoke(splashHandler, null);
+				updateMethod.invoke(splashHandler, (Object[]) null);
 			} catch (Throwable e) {
 				// ignore, this is best effort
 			}

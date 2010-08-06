@@ -498,7 +498,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			intp.println(bundle.bundledata);
 		}
 
-		ServiceReference[] services = context.getServiceReferences(null, null);
+		ServiceReference[] services = context.getServiceReferences((String) null, (String) null);
 		if (services != null) {
 			intp.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
 			size = services.length;
@@ -536,7 +536,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			filter = buf.toString();
 		}
 
-		ServiceReference[] services = context.getServiceReferences(null, filter);
+		ServiceReference[] services = context.getServiceReferences((String) null, filter);
 		if (services != null) {
 			int size = services.length;
 			if (size > 0) {

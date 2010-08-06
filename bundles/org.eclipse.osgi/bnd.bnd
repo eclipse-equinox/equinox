@@ -1,0 +1,35 @@
+javac.source            = 1.5
+javac.target            = jsr14
+# We don't want bnd to make the manifest
+-nomanifest=true
+# We export packages which are not in this project
+-failok=true
+# We don't want bnd to put the source code in the jar
+-sources=false
+# We don't want bnd to try and figure out what classes to put in the jar
+-resourceonly
+# The following line prevents bnd from complaining about no folder named "src"
+src=osgi
+# The following line prevents bnd from complaining about no packages
+Private-Package: org.*
+# We tell bnd what resources to put in the jar. We rely upon Eclipse to populate the bin folder
+Include-Resource= bin, \
+				.options,\
+               META-INF=META-INF,\
+               systembundle.properties,\
+ JavaSE-1.7.profile,\
+ JavaSE-1.6.profile,\
+ J2SE-1.5.profile,\
+ J2SE-1.4.profile,\
+ J2SE-1.3.profile,\
+ J2SE-1.2.profile,\
+ JRE-1.1.profile,\
+ CDC-1.1_Foundation-1.1.profile,\
+ CDC-1.0_Foundation-1.0.profile,\
+ OSGi_Minimum-1.0.profile,\
+ OSGi_Minimum-1.1.profile,\
+ OSGi_Minimum-1.2.profile, \
+                profile.list,\
+               hookconfigurators.properties
+               
+-runpath =

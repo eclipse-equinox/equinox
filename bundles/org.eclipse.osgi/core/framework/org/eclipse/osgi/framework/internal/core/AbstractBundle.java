@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.framework.internal.core;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
@@ -35,9 +34,9 @@ import org.osgi.framework.*;
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement {
+public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement {
 	/** The Framework this bundle is part of */
-	protected Framework framework;
+	protected final Framework framework;
 	/** The state of the bundle. */
 	protected volatile int state;
 	/** A flag to denote whether a bundle state change is in progress */
@@ -45,7 +44,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	/** Bundle's BundleData object */
 	protected BundleData bundledata;
 	/** Internal object used for state change synchronization */
-	protected Object statechangeLock = new Object();
+	protected final Object statechangeLock = new Object();
 	/** ProtectionDomain for the bundle */
 	protected BundleProtectionDomain domain;
 
@@ -1138,7 +1137,7 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 	 *                if the argument can not be converted into something
 	 *                comparable with the receiver.
 	 */
-	public int compareTo(Object obj) {
+	public int compareTo(Bundle obj) {
 		int slcomp = getStartLevel() - ((AbstractBundle) obj).getStartLevel();
 		if (slcomp != 0) {
 			return slcomp;
@@ -1531,5 +1530,23 @@ public abstract class AbstractBundle implements Bundle, Comparable, KeyedElement
 		} catch (Exception e) {
 			return Collections.EMPTY_MAP;
 		}
+	}
+
+	public <A> A adapt(Class<A> adapterType) {
+		if (adapterType.isInstance(this))
+			return (A) this;
+		if (BundleContext.class.equals(adapterType)) {
+			try {
+				return (A) getBundleContext();
+			} catch (SecurityException e) {
+				return null;
+			}
+		}
+		// TODO need to handle BundleWiring, BundlePackageAdmin
+		return null;
+	}
+
+	public File getDataFile(String filename) {
+		return framework.getDataFile(this, filename);
 	}
 }

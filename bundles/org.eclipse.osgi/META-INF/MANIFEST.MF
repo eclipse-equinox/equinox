@@ -17,7 +17,7 @@ Export-Package: org.eclipse.osgi.event;version="1.0",
  org.eclipse.osgi.signedcontent; version="1.0",
  org.eclipse.osgi.storagemanager;version="1.0",
  org.eclipse.osgi.util;version="1.1",
- org.osgi.framework;version="1.5",
+ org.osgi.framework;version="1.6",
  org.osgi.framework.launch; version="1.0",
  org.osgi.framework.hooks.service; version="1.0",
  org.osgi.service.condpermadmin;version="1.1",
@@ -26,8 +26,7 @@ Export-Package: org.eclipse.osgi.event;version="1.0",
  org.osgi.service.permissionadmin;version="1.2",
  org.osgi.service.startlevel;version="1.1",
  org.osgi.service.url;version="1.0",
- org.osgi.util.tracker;version="1.4.0",
- org.osgi.util.tracker;version="1.4.2",
+ org.osgi.util.tracker;version="1.5.0",
  org.eclipse.core.runtime.adaptor;x-friends:="org.eclipse.core.runtime",
  org.eclipse.core.runtime.internal.adaptor;x-internal:=true,
  org.eclipse.core.runtime.internal.stats;x-friends:="org.eclipse.core.runtime",
@@ -68,12 +67,13 @@ Bundle-Activator: org.eclipse.osgi.framework.internal.core.SystemBundleActivator
 Bundle-Description: %systemBundle
 Bundle-Copyright: %copyright
 Bundle-Vendor: %eclipse.org
-Bundle-Version: 3.6.100.qualifier
+Bundle-Version: 3.7.0.qualifier
 Bundle-Localization: systembundle
 Bundle-DocUrl: http://www.eclipse.org
 Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
- OSGi/Minimum-1.2
+ J2SE-1.4,
+ CDC-1.1/Foundation-1.1
 Eclipse-BundleShape: jar

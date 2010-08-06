@@ -1482,7 +1482,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 
 			if (factory != null) {
 				try {
-					factory.getClass().getMethod("isMultiplexing", null); //$NON-NLS-1$
+					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
 					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
 					register.invoke(factory, new Object[] {chf});
 				} catch (NoSuchMethodException e) {
@@ -1570,7 +1570,7 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			// because we failed to set the factory normally!!
 			if (factory != null) {
 				try {
-					factory.getClass().getMethod("isMultiplexing", null); //$NON-NLS-1$
+					factory.getClass().getMethod("isMultiplexing", (Class[]) null); //$NON-NLS-1$
 					Method register = factory.getClass().getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$
 					register.invoke(factory, new Object[] {shf});
 				} catch (NoSuchMethodException e) {

@@ -70,9 +70,9 @@ public abstract class MultiplexingFactory {
 		// close the service tracker
 		try {
 			// this is brittle; if class does not directly extend MultplexingFactory then this method will not exist, but we do not want a public method here
-			Method closeTracker = factory.getClass().getSuperclass().getDeclaredMethod("closePackageAdminTracker", null); //$NON-NLS-1$
+			Method closeTracker = factory.getClass().getSuperclass().getDeclaredMethod("closePackageAdminTracker", (Class[]) null); //$NON-NLS-1$
 			closeTracker.setAccessible(true); // its a private method
-			closeTracker.invoke(factory, null);
+			closeTracker.invoke(factory, (Object[]) null);
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "unregister", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);

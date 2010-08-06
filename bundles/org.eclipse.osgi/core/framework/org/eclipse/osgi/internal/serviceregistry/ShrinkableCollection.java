@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,21 +26,21 @@ import java.util.Iterator;
  *
  */
 
-public class ShrinkableCollection implements Collection {
-	private final Collection collection;
+public class ShrinkableCollection<E> implements Collection<E> {
+	private final Collection<? extends E> collection;
 
-	ShrinkableCollection(Collection c) {
+	ShrinkableCollection(Collection<? extends E> c) {
 		if (c == null) {
 			throw new NullPointerException();
 		}
 		collection = c;
 	}
 
-	public boolean add(Object var0) {
+	public boolean add(E e) {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean addAll(Collection var0) {
+	public boolean addAll(Collection<? extends E> c) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -48,32 +48,33 @@ public class ShrinkableCollection implements Collection {
 		collection.clear();
 	}
 
-	public boolean contains(Object var0) {
-		return collection.contains(var0);
+	public boolean contains(Object o) {
+		return collection.contains(o);
 	}
 
-	public boolean containsAll(Collection var0) {
-		return collection.containsAll(var0);
+	public boolean containsAll(Collection<?> c) {
+		return collection.containsAll(c);
 	}
 
 	public boolean isEmpty() {
 		return collection.isEmpty();
 	}
 
-	public Iterator iterator() {
-		return collection.iterator();
+	@SuppressWarnings("unchecked")
+	public Iterator<E> iterator() {
+		return (Iterator<E>) collection.iterator();
 	}
 
-	public boolean remove(Object var0) {
-		return collection.remove(var0);
+	public boolean remove(Object o) {
+		return collection.remove(o);
 	}
 
-	public boolean removeAll(Collection var0) {
-		return collection.removeAll(var0);
+	public boolean removeAll(Collection<?> c) {
+		return collection.removeAll(c);
 	}
 
-	public boolean retainAll(Collection var0) {
-		return collection.retainAll(var0);
+	public boolean retainAll(Collection<?> c) {
+		return collection.retainAll(c);
 	}
 
 	public int size() {
@@ -84,7 +85,7 @@ public class ShrinkableCollection implements Collection {
 		return collection.toArray();
 	}
 
-	public Object[] toArray(Object[] var0) {
+	public <T> T[] toArray(T[] var0) {
 		return collection.toArray(var0);
 	}
 }

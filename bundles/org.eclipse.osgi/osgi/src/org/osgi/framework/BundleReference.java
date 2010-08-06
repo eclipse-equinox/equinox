@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2009). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2009, 2010). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ package org.osgi.framework;
  * 
  * @since 1.5
  * @ThreadSafe
- * @version $Revision: 6860 $
+ * @version $Id: adbba3dfc5ac9af0b534c3008ffab1b29984c4bb $
  */
 public interface BundleReference {
 	/**
-	 * Returns the <code>Bundle</code> object associated with this
-	 * <code>BundleReference</code>.
+	 * Returns the {@code Bundle} object associated with this
+	 * {@code BundleReference}.
 	 * 
-	 * @return The <code>Bundle</code> object associated with this
-	 *         <code>BundleReference</code>.
+	 * @return The {@code Bundle} object associated with this
+	 *         {@code BundleReference}.
 	 */
 	public Bundle getBundle();
 }

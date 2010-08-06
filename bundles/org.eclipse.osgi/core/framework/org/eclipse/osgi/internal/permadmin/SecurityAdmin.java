@@ -629,6 +629,18 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		public void update(InputStream in) throws BundleException {
 			throw new IllegalStateException();
 		}
+
+		public int compareTo(Bundle o) {
+			return 0;
+		}
+
+		public <A> A adapt(Class<A> type) {
+			throw new IllegalStateException();
+		}
+
+		public File getDataFile(String filename) {
+			return null;
+		}
 	}
 
 	private static class MockX509Certificate extends X509Certificate {
