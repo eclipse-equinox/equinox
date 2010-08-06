@@ -154,9 +154,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return <code>true</code> if the service's properties match this
 	 *         filter; <code>false</code> otherwise.
 	 */
-	public boolean match(ServiceReference reference) {
+	public boolean match(ServiceReference<?> reference) {
 		if (reference instanceof ServiceReferenceImpl) {
-			return match0(((ServiceReferenceImpl) reference).getRegistration().getProperties());
+			return match0(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
 		}
 		return match0(new ServiceReferenceDictionary(reference));
 	}
@@ -174,9 +174,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @throws IllegalArgumentException If <code>dictionary</code> contains
 	 *         case variants of the same key name.
 	 */
-	public boolean match(Dictionary dictionary) {
+	public boolean match(Dictionary<String, ?> dictionary) {
 		if (dictionary != null) {
-			dictionary = new Headers(dictionary);
+			dictionary = new Headers<String, Object>(dictionary);
 		}
 
 		return match0(dictionary);
@@ -195,7 +195,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 *         otherwise.
 	 * @since 1.3
 	 */
-	public boolean matchCase(Dictionary dictionary) {
+	public boolean matchCase(Dictionary<String, ?> dictionary) {
 		return match0(dictionary);
 	}
 
@@ -233,8 +233,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				sb.append('&');
 
 				FilterImpl[] filters = (FilterImpl[]) value;
-				for (int i = 0, size = filters.length; i < size; i++) {
-					sb.append(filters[i].normalize());
+				for (FilterImpl f : filters) {
+					sb.append(f.normalize());
 				}
 
 				break;
@@ -244,8 +244,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				sb.append('|');
 
 				FilterImpl[] filters = (FilterImpl[]) value;
-				for (int i = 0, size = filters.length; i < size; i++) {
-					sb.append(filters[i].normalize());
+				for (FilterImpl f : filters) {
+					sb.append(f.normalize());
 				}
 
 				break;
@@ -265,9 +265,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 				String[] substrings = (String[]) value;
 
-				for (int i = 0, size = substrings.length; i < size; i++) {
-					String substr = substrings[i];
-
+				for (String substr : substrings) {
 					if (substr == null) /* * */{
 						sb.append('*');
 					} else /* xxx */{
@@ -387,12 +385,12 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return If the Dictionary's keys match the filter,
 	 * return <code>true</code>. Otherwise, return <code>false</code>.
 	 */
-	private boolean match0(Dictionary properties) {
+	private boolean match0(Dictionary<String, ?> properties) {
 		switch (op) {
 			case AND : {
 				FilterImpl[] filters = (FilterImpl[]) value;
-				for (int i = 0, size = filters.length; i < size; i++) {
-					if (!filters[i].match0(properties)) {
+				for (FilterImpl f : filters) {
+					if (!f.match0(properties)) {
 						return false;
 					}
 				}
@@ -402,8 +400,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 			case OR : {
 				FilterImpl[] filters = (FilterImpl[]) value;
-				for (int i = 0, size = filters.length; i < size; i++) {
-					if (filters[i].match0(properties)) {
+				for (FilterImpl f : filters) {
+					if (f.match0(properties)) {
 						return true;
 					}
 				}
@@ -493,19 +491,16 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return compare_String(operation, (String) value1, value2);
 		}
 
-		Class clazz = value1.getClass();
-
+		Class<?> clazz = value1.getClass();
 		if (clazz.isArray()) {
-			Class type = clazz.getComponentType();
-
+			Class<?> type = clazz.getComponentType();
 			if (type.isPrimitive()) {
 				return compare_PrimitiveArray(operation, type, value1, value2);
 			}
 			return compare_ObjectArray(operation, (Object[]) value1, value2);
 		}
-
-		if (value1 instanceof Collection) {
-			return compare_Collection(operation, (Collection) value1, value2);
+		if (value1 instanceof Collection<?>) {
+			return compare_Collection(operation, (Collection<?>) value1, value2);
 		}
 
 		if (value1 instanceof Integer) {
@@ -539,17 +534,17 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		if (value1 instanceof Boolean) {
 			return compare_Boolean(operation, ((Boolean) value1).booleanValue(), value2);
 		}
-
-		if (value1 instanceof Comparable) {
-			return compare_Comparable(operation, (Comparable) value1, value2);
+		if (value1 instanceof Comparable<?>) {
+			Comparable<Object> comparable = (Comparable<Object>) value1;
+			return compare_Comparable(operation, comparable, value2);
 		}
 
 		return compare_Unknown(operation, value1, value2); // RFC 59
 	}
 
-	private boolean compare_Collection(int operation, Collection collection, Object value2) {
-		for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
-			if (compare(operation, iterator.next(), value2)) {
+	private boolean compare_Collection(int operation, Collection<?> collection, Object value2) {
+		for (Object value1 : collection) {
+			if (compare(operation, value1, value2)) {
 				return true;
 			}
 		}
@@ -558,8 +553,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	}
 
 	private boolean compare_ObjectArray(int operation, Object[] array, Object value2) {
-		for (int i = 0, size = array.length; i < size; i++) {
-			if (compare(operation, array[i], value2)) {
+		for (Object value1 : array) {
+			if (compare(operation, value1, value2)) {
 				return true;
 			}
 		}
@@ -567,11 +562,11 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	private boolean compare_PrimitiveArray(int operation, Class type, Object primarray, Object value2) {
+	private boolean compare_PrimitiveArray(int operation, Class<?> type, Object primarray, Object value2) {
 		if (Integer.TYPE.isAssignableFrom(type)) {
 			int[] array = (int[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Integer(operation, array[i], value2)) {
+			for (int value1 : array) {
+				if (compare_Integer(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -581,8 +576,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Long.TYPE.isAssignableFrom(type)) {
 			long[] array = (long[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Long(operation, array[i], value2)) {
+			for (long value1 : array) {
+				if (compare_Long(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -592,8 +587,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Byte.TYPE.isAssignableFrom(type)) {
 			byte[] array = (byte[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Byte(operation, array[i], value2)) {
+			for (byte value1 : array) {
+				if (compare_Byte(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -603,8 +598,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Short.TYPE.isAssignableFrom(type)) {
 			short[] array = (short[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Short(operation, array[i], value2)) {
+			for (short value1 : array) {
+				if (compare_Short(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -614,8 +609,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Character.TYPE.isAssignableFrom(type)) {
 			char[] array = (char[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Character(operation, array[i], value2)) {
+			for (char value1 : array) {
+				if (compare_Character(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -625,8 +620,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Float.TYPE.isAssignableFrom(type)) {
 			float[] array = (float[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Float(operation, array[i], value2)) {
+			for (float value1 : array) {
+				if (compare_Float(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -636,8 +631,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Double.TYPE.isAssignableFrom(type)) {
 			double[] array = (double[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Double(operation, array[i], value2)) {
+			for (double value1 : array) {
+				if (compare_Double(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -647,8 +642,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		if (Boolean.TYPE.isAssignableFrom(type)) {
 			boolean[] array = (boolean[]) primarray;
-			for (int i = 0, size = array.length; i < size; i++) {
-				if (compare_Boolean(operation, array[i], value2)) {
+			for (boolean value1 : array) {
+				if (compare_Boolean(operation, value1, value2)) {
 					return true;
 				}
 			}
@@ -1095,17 +1090,16 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	private static final Class[] constructorType = new Class[] {String.class};
+	private static final Class<?>[] constructorType = new Class[] {String.class};
 
-	private boolean compare_Comparable(int operation, Comparable value1, Object value2) {
+	private boolean compare_Comparable(int operation, Comparable<Object> value1, Object value2) {
 		if (operation == SUBSTRING) {
 			if (Debug.DEBUG_FILTER) {
 				Debug.println("SUBSTRING(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return false;
 		}
-
-		Constructor constructor;
+		Constructor<?> constructor;
 		try {
 			constructor = value1.getClass().getConstructor(constructorType);
 		} catch (NoSuchMethodException e) {
@@ -1123,33 +1117,37 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		switch (operation) {
-			case EQUAL : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		try {
+			switch (operation) {
+				case EQUAL : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(value2) == 0;
 				}
-				return value1.compareTo(value2) == 0;
-			}
-			case APPROX : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case APPROX : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(value2) == 0;
 				}
-				return value1.compareTo(value2) == 0;
-			}
-			case GREATER : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case GREATER : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(value2) >= 0;
 				}
-				return value1.compareTo(value2) >= 0;
-			}
-			case LESS : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case LESS : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.compareTo(value2) <= 0;
 				}
-				return value1.compareTo(value2) <= 0;
 			}
+		} catch (Exception e) {
+			// if the compareTo method throws an exception; return false
+			return false;
 		}
-
 		return false;
 	}
 
@@ -1160,8 +1158,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 			return false;
 		}
-
-		Constructor constructor;
+		Constructor<?> constructor;
 		try {
 			constructor = value1.getClass().getConstructor(constructorType);
 		} catch (NoSuchMethodException e) {
@@ -1182,31 +1179,36 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return false;
 		}
 
-		switch (operation) {
-			case EQUAL : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		try {
+			switch (operation) {
+				case EQUAL : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("EQUAL(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(value2);
 				}
-				return value1.equals(value2);
-			}
-			case APPROX : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case APPROX : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("APPROX(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(value2);
 				}
-				return value1.equals(value2);
-			}
-			case GREATER : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case GREATER : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("GREATER(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(value2);
 				}
-				return value1.equals(value2);
-			}
-			case LESS : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				case LESS : {
+					if (Debug.DEBUG_FILTER) {
+						Debug.println("LESS(" + value1 + "," + value2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
+					return value1.equals(value2);
 				}
-				return value1.equals(value2);
 			}
+		} catch (Exception e) {
+			// if the equals method throws an exception; return false
+			return false;
 		}
 
 		return false;
@@ -1226,9 +1228,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		boolean changed = false;
 		char[] output = input.toCharArray();
 		int cursor = 0;
-		for (int i = 0, length = output.length; i < length; i++) {
-			char c = output[i];
-
+		for (char c : output) {
 			if (Character.isWhitespace(c)) {
 				changed = true;
 				continue;
@@ -1260,9 +1260,9 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				break;
 			case AND :
 				FilterImpl[] clauses = (FilterImpl[]) value;
-				for (int i = 0; i < clauses.length; i++)
-					if (clauses[i].op == EQUAL) {
-						String result = clauses[i].getRequiredObjectClass();
+				for (FilterImpl clause : clauses)
+					if (clause.op == EQUAL) {
+						String result = clause.getRequiredObjectClass();
 						if (result != null)
 							return result;
 					}
@@ -1276,20 +1276,21 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return all the attributes contained within this filter
 	 */
 	public String[] getAttributes() {
-		ArrayList results = new ArrayList();
+		List<String> results = new ArrayList<String>();
 		getAttributesInternal(results);
-		return (String[]) results.toArray(new String[results.size()]);
+		return results.toArray(new String[results.size()]);
 	}
 
-	private void getAttributesInternal(ArrayList results) {
+	private void getAttributesInternal(List<String> results) {
 		if (value instanceof FilterImpl[]) {
 			FilterImpl[] children = (FilterImpl[]) value;
-			for (int i = 0; i < children.length; i++)
-				children[i].getAttributesInternal(results);
+			for (FilterImpl child : children)
+				child.getAttributesInternal(results);
 			return;
 		} else if (value instanceof FilterImpl) {
 			// The NOT operation only has one child filter (bug 188075)
-			((FilterImpl) value).getAttributesInternal(results);
+			FilterImpl child = ((FilterImpl) value);
+			child.getAttributesInternal(results);
 			return;
 		}
 		if (attr != null)
@@ -1382,7 +1383,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				return parse_item();
 			}
 
-			List operands = new ArrayList(10);
+			List<FilterImpl> operands = new ArrayList<FilterImpl>(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter();
@@ -1401,7 +1402,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				return parse_item();
 			}
 
-			List operands = new ArrayList(10);
+			List<FilterImpl> operands = new ArrayList<FilterImpl>(10);
 
 			while (filterChars[pos] == '(') {
 				FilterImpl child = parse_filter();
@@ -1542,7 +1543,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		private Object parse_substring() throws InvalidSyntaxException {
 			StringBuffer sb = new StringBuffer(filterChars.length - pos);
 
-			List operands = new ArrayList(10);
+			List<String> operands = new ArrayList<String>(10);
 
 			parseloop: while (true) {
 				char c = filterChars[pos];
@@ -1618,10 +1619,10 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * Filter implementation.
 	 * 
 	 */
-	private static class ServiceReferenceDictionary extends Dictionary {
-		private final ServiceReference reference;
+	private static class ServiceReferenceDictionary extends Dictionary<String, Object> {
+		private final ServiceReference<?> reference;
 
-		ServiceReferenceDictionary(ServiceReference reference) {
+		ServiceReferenceDictionary(ServiceReference<?> reference) {
 			this.reference = reference;
 		}
 
@@ -1636,15 +1637,15 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			throw new UnsupportedOperationException();
 		}
 
-		public Enumeration keys() {
+		public Enumeration<String> keys() {
 			throw new UnsupportedOperationException();
 		}
 
-		public Enumeration elements() {
+		public Enumeration<Object> elements() {
 			throw new UnsupportedOperationException();
 		}
 
-		public Object put(Object key, Object value) {
+		public Object put(String key, Object value) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -1657,7 +1658,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		}
 	}
 
-	private static class SetAccessibleAction implements PrivilegedAction {
+	private static class SetAccessibleAction implements PrivilegedAction<Object> {
 		private final AccessibleObject accessible;
 
 		SetAccessibleAction(AccessibleObject accessible) {
