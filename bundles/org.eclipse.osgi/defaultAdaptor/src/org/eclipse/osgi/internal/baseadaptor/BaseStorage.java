@@ -343,7 +343,15 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	public BaseData[] getInstalledBundles() {
-		return readBundleDatas();
+		try {
+			return readBundleDatas();
+		} catch (Throwable t) {
+			// be safe here and throw out the results and start over
+			// otherwise this would result in a failed launch
+			FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, "Error loading bundle datas.  Recalculating cache.", 0, t, null); //$NON-NLS-1$
+			adaptor.getFrameworkLog().log(logEntry);
+			return null;
+		}
 	}
 
 	private BaseData[] readBundleDatas() {
