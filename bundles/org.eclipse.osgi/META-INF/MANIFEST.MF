@@ -74,6 +74,5 @@ Eclipse-ExtensibleAPI: true
 Eclipse-SystemBundle: true
 Main-Class: org.eclipse.core.runtime.adaptor.EclipseStarter
 Bundle-RequiredExecutionEnvironment: J2SE-1.5,
- J2SE-1.4,
- CDC-1.1/Foundation-1.1
+ OSGi/Minimum-1.2
 Eclipse-BundleShape: jar
