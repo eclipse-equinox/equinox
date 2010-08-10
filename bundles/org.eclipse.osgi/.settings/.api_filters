@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component id="org.eclipse.osgi" version="2">
 <resource path="core/framework/org/eclipse/osgi/framework/internal/protocol/URLStreamHandlerFactoryProxyFor15.java" type="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15">
-<filter comment="We protect in code when Proxy is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15.openConnection(URL, Proxy)"/>
-<message_argument value="Proxy"/>
-<message_argument value="J2SE-1.4"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15.openConnection(URL, Proxy)"/>
@@ -34,28 +27,12 @@
 </filter>
 </resource>
 <resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/EclipseAdaptorHook.java" type="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook$ParsingService">
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
-<message_argument value="DocumentBuilderFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
 <message_argument value="DocumentBuilderFactory"/>
 <message_argument value="newInstance()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -68,25 +45,11 @@
 </filter>
 </resource>
 <resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/PluginParser.java" type="org.eclipse.core.runtime.internal.adaptor.PluginParser">
-<filter comment="We protect in code when jaxp is not present." id="579862564">
-<message_arguments>
-<message_argument value="PluginParser"/>
-<message_argument value="DefaultHandler"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="579862564">
 <message_arguments>
 <message_argument value="PluginParser"/>
 <message_argument value="DefaultHandler"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="630194212">
-<message_arguments>
-<message_argument value="PluginParser.locator"/>
-<message_argument value="Locator"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="630194212">
@@ -96,25 +59,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
 <message_argument value="SAXParserFactory"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.error(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -124,13 +73,6 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
-<message_argument value="SAXException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
@@ -138,25 +80,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
 <message_argument value="SAXParseException"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionPointState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -166,25 +94,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionState(String, Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleInitialState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -194,25 +108,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryExportState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryExportState(String, Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -222,25 +122,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handlePluginState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handlePluginState(String, Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresImportState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -250,25 +136,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresState(String, Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRuntimeState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -278,25 +150,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
 <message_argument value="SAXParseException"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -306,13 +164,6 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
@@ -320,25 +171,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
 <message_argument value="SAXException"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -348,25 +185,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -376,25 +199,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseRequiresAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseRequiresAttributes(Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.processingInstruction(String, String)"/>
-<message_argument value="SAXException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -404,25 +213,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.setDocumentLocator(Locator)"/>
-<message_argument value="Locator"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.setDocumentLocator(Locator)"/>
 <message_argument value="Locator"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.startElement(String, String, String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
@@ -432,25 +227,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.warning(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.warning(SAXParseException)"/>
 <message_argument value="SAXParseException"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647000098">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.PluginParser(FrameworkAdaptor, BundleContext, Version)"/>
-<message_argument value="DefaultHandler()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647000098">
@@ -460,28 +241,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
 <message_argument value="SAXParserFactory"/>
 <message_argument value="newInstance()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -492,28 +257,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getColumnNumber()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
 <message_argument value="SAXParseException"/>
 <message_argument value="getColumnNumber()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getLineNumber()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -524,28 +273,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getMessage()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
 <message_argument value="SAXParseException"/>
 <message_argument value="getMessage()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getSystemId()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -556,28 +289,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLength()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="getLength()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLocalName(int)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -588,28 +305,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(int)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="getValue(int)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -620,28 +321,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParser"/>
-<message_argument value="parse(InputStream, DefaultHandler)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
 <message_argument value="SAXParser"/>
 <message_argument value="parse(InputStream, DefaultHandler)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newSAXParser()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -652,28 +337,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setFeature(String, boolean)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
 <message_argument value="SAXParserFactory"/>
 <message_argument value="setFeature(String, boolean)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setNamespaceAware(boolean)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -684,28 +353,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setValidating(boolean)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
 <message_argument value="SAXParserFactory"/>
 <message_argument value="setValidating(boolean)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLength()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -716,14 +369,6 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLocalName(int)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
@@ -732,28 +377,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(int)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
 <message_argument value="Attributes"/>
 <message_argument value="getValue(int)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code when jaxp is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -1039,13 +668,6 @@
 </filter>
 </resource>
 <resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
-<filter comment="We protect in code for when nio is not present." id="630194212">
-<message_arguments>
-<message_argument value="Locker_JavaNio.fileLock"/>
-<message_argument value="FileLock"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="630194212">
 <message_arguments>
 <message_argument value="Locker_JavaNio.fileLock"/>
@@ -1053,13 +675,6 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code for when nio is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileLock"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
@@ -1067,13 +682,6 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code for when nio is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="OverlappingFileLockException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
@@ -1081,26 +689,11 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code for when nio is not present." id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="OverlappingFileLockException"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
 <message_argument value="OverlappingFileLockException"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileChannel"/>
-<message_argument value="tryLock(long, long, boolean)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -1109,14 +702,6 @@
 <message_argument value="FileChannel"/>
 <message_argument value="tryLock(long, long, boolean)"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileLock"/>
-<message_argument value="release()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -1127,28 +712,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="RandomAccessFile"/>
-<message_argument value="getChannel()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
 <message_argument value="RandomAccessFile"/>
 <message_argument value="getChannel()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="FileChannel"/>
-<message_argument value="tryLock(long, long, boolean)"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
@@ -1159,28 +728,12 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="RandomAccessFile"/>
-<message_argument value="getChannel()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
-</message_arguments>
-</filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
 <message_argument value="RandomAccessFile"/>
 <message_argument value="getChannel()"/>
 <message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="We protect in code for when nio is not present." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.release()"/>
-<message_argument value="FileLock"/>
-<message_argument value="release()"/>
-<message_argument value="CDC-1.1/Foundation-1.1"/>
 </message_arguments>
 </filter>
 <filter comment="Code is protected when running on a limited environment" id="647004193">
