@@ -39,7 +39,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Core OSGi Framework class.
  */
-public class Framework implements EventDispatcher, EventPublisher, Runnable {
+public class Framework implements EventPublisher, Runnable {
 	// System property used to set the context classloader parent classloader type (ccl is the default)
 	private static final String PROP_CONTEXTCLASSLOADER_PARENT = "osgi.contextClassLoaderParent"; //$NON-NLS-1$
 	private static final String CONTEXTCLASSLOADER_PARENT_APP = "app"; //$NON-NLS-1$
@@ -78,21 +78,21 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	private ServiceRegistry serviceRegistry;
 
 	/*
-	 * The following EventListeners objects keep track of event listeners
-	 * by BundleContext.  Each element is a EventListeners that is the list
+	 * The following maps objects keep track of event listeners
+	 * by BundleContext.  Each element is a Map that is the set
 	 * of event listeners for a particular BundleContext.  The max number of
-	 * elements each of the following lists will have is the number of bundles
+	 * elements each of the following maps will have is the number of bundles
 	 * installed in the Framework.
 	 */
-	/** List of BundleContexts for bundle's BundleListeners. */
-	protected Map bundleEvent;
+	// Map of BundleContexts for bundle's BundleListeners.
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new HashMap();
 	protected static final int BUNDLEEVENT = 1;
-	/** List of BundleContexts for bundle's SynchronousBundleListeners. */
-	protected Map bundleEventSync;
+	// Map of BundleContexts for bundle's SynchronousBundleListeners.
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> allSyncBundleListeners = new HashMap();
 	protected static final int BUNDLEEVENTSYNC = 2;
 	/* SERVICEEVENT(3) is now handled by ServiceRegistry */
-	/** List of BundleContexts for bundle's FrameworkListeners. */
-	protected Map frameworkEvent;
+	// Map of BundleContexts for bundle's FrameworkListeners.
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> allFrameworkListeners = new HashMap();
 	protected static final int FRAMEWORKEVENT = 4;
 	protected static final int BATCHEVENT_BEGIN = Integer.MIN_VALUE + 1;
 	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
@@ -207,9 +207,6 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		startLevelManager = new StartLevelManager(this);
 		/* create the event manager and top level event dispatchers */
 		eventManager = new EventManager("Framework Event Dispatcher"); //$NON-NLS-1$
-		bundleEvent = new CopyOnWriteIdentityMap();
-		bundleEventSync = new CopyOnWriteIdentityMap();
-		frameworkEvent = new CopyOnWriteIdentityMap();
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new EventManager"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* create the service registry */
@@ -597,18 +594,9 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			bundles.removeAllBundles();
 		}
 		serviceRegistry = null;
-		if (bundleEvent != null) {
-			bundleEvent.clear();
-			bundleEvent = null;
-		}
-		if (bundleEventSync != null) {
-			bundleEventSync.clear();
-			bundleEventSync = null;
-		}
-		if (frameworkEvent != null) {
-			frameworkEvent.clear();
-			frameworkEvent = null;
-		}
+		allBundleListeners.clear();
+		allSyncBundleListeners.clear();
+		allFrameworkListeners.clear();
 		if (eventManager != null) {
 			eventManager.close();
 			eventManager = null;
@@ -1048,6 +1036,16 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 	}
 
+	AbstractBundle[] getBundles(BundleContextImpl context) {
+		List<AbstractBundle> allBundles;
+		synchronized (bundles) {
+			allBundles = new ArrayList<AbstractBundle>(bundles.getBundles());
+		}
+		// TODO call bundle find hooks
+
+		return allBundles.toArray(new AbstractBundle[allBundles.size()]);
+	}
+
 	/**
 	 * Resume a bundle.
 	 * 
@@ -1233,6 +1231,37 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		}
 	}
 
+	void addFrameworkListener(FrameworkListener listener, BundleContextImpl context) {
+		synchronized (allFrameworkListeners) {
+			CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = allFrameworkListeners.get(context);
+			if (listeners == null) {
+				listeners = new CopyOnWriteIdentityMap();
+				allFrameworkListeners.put(context, listeners);
+			}
+			listeners.put(listener, listener);
+		}
+	}
+
+	void removeFrameworkListener(FrameworkListener listener, BundleContextImpl context) {
+		synchronized (allFrameworkListeners) {
+			CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = allFrameworkListeners.get(context);
+			if (listeners != null)
+				listeners.remove(listener);
+		}
+	}
+
+	void removeAllListeners(BundleContextImpl context) {
+		synchronized (allBundleListeners) {
+			allBundleListeners.remove(context);
+		}
+		synchronized (allSyncBundleListeners) {
+			allSyncBundleListeners.remove(context);
+		}
+		synchronized (allFrameworkListeners) {
+			allFrameworkListeners.remove(context);
+		}
+	}
+
 	/**
 	 * Deliver a FrameworkEvent.
 	 * 
@@ -1244,20 +1273,18 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 *            Related exception or null.
 	 */
 	public void publishFrameworkEvent(int type, org.osgi.framework.Bundle bundle, Throwable throwable) {
-		if (frameworkEvent != null) {
-			if (bundle == null)
-				bundle = systemBundle;
-			final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
-			if (System.getSecurityManager() == null) {
-				publishFrameworkEventPrivileged(event);
-			} else {
-				AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						publishFrameworkEventPrivileged(event);
-						return null;
-					}
-				});
-			}
+		if (bundle == null)
+			bundle = systemBundle;
+		final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
+		if (System.getSecurityManager() == null) {
+			publishFrameworkEventPrivileged(event);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					publishFrameworkEventPrivileged(event);
+					return null;
+				}
+			});
 		}
 	}
 
@@ -1268,19 +1295,65 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 			if (frameworkLog != null)
 				frameworkLog.log(event);
 		}
-		/* queue to hold set of listeners */
-		ListenerQueue listeners = new ListenerQueue(eventManager);
-		/* queue to hold set of BundleContexts w/ listeners */
-		ListenerQueue contexts = new ListenerQueue(eventManager);
-		/* synchronize while building the listener list */
-		synchronized (frameworkEvent) {
-			/* add set of BundleContexts w/ listeners to queue */
-			contexts.queueListeners(frameworkEvent.entrySet(), this);
-			/* synchronously dispatch to populate listeners queue */
-			contexts.dispatchEventSynchronous(FRAMEWORKEVENT, listeners);
+		/* Build the listener snapshot */
+		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
+		synchronized (allFrameworkListeners) {
+			listenerSnapshot = new HashMap<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>>(allFrameworkListeners.size());
+			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> entry : allFrameworkListeners.entrySet()) {
+				CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = entry.getValue();
+				if (!listeners.isEmpty()) {
+					listenerSnapshot.put(entry.getKey(), listeners.entrySet());
+				}
+			}
 		}
-		/* dispatch event to set of listeners */
-		listeners.dispatchEventAsynchronous(FRAMEWORKEVENT, event);
+		// If framework event hook were defined they would be called here
+
+		/* deliver the event to the snapshot */
+		ListenerQueue queue = newListenerQueue();
+		for (Map.Entry<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> entry : listenerSnapshot.entrySet()) {
+			EventDispatcher dispatcher = entry.getKey();
+			Set<Map.Entry<FrameworkListener, FrameworkListener>> listeners = entry.getValue();
+			queue.queueListeners(listeners, dispatcher);
+		}
+		queue.dispatchEventAsynchronous(FRAMEWORKEVENT, event);
+	}
+
+	void addBundleListener(BundleListener listener, BundleContextImpl context) {
+		if (listener instanceof SynchronousBundleListener) {
+			synchronized (allSyncBundleListeners) {
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
+				if (listeners == null) {
+					listeners = new CopyOnWriteIdentityMap();
+					allSyncBundleListeners.put(context, listeners);
+				}
+				listeners.put((SynchronousBundleListener) listener, (SynchronousBundleListener) listener);
+			}
+		} else {
+			synchronized (allBundleListeners) {
+				CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = allBundleListeners.get(context);
+				if (listeners == null) {
+					listeners = new CopyOnWriteIdentityMap();
+					allBundleListeners.put(context, listeners);
+				}
+				listeners.put(listener, listener);
+			}
+		}
+	}
+
+	void removeBundleListener(BundleListener listener, BundleContextImpl context) {
+		if (listener instanceof SynchronousBundleListener) {
+			synchronized (allSyncBundleListeners) {
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
+				if (listeners != null)
+					listeners.remove(listener);
+			}
+		} else {
+			synchronized (allBundleListeners) {
+				CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = allBundleListeners.get(context);
+				if (listeners != null)
+					listeners.remove(listener);
+			}
+		}
 	}
 
 	/**
@@ -1293,18 +1366,16 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 	 *            Affected bundle or null.
 	 */
 	public void publishBundleEvent(int type, org.osgi.framework.Bundle bundle) {
-		if ((bundleEventSync != null) || (bundleEvent != null)) {
-			final BundleEvent event = new BundleEvent(type, bundle);
-			if (System.getSecurityManager() == null) {
-				publishBundleEventPrivileged(event);
-			} else {
-				AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						publishBundleEventPrivileged(event);
-						return null;
-					}
-				});
-			}
+		final BundleEvent event = new BundleEvent(type, bundle);
+		if (System.getSecurityManager() == null) {
+			publishBundleEventPrivileged(event);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction() {
+				public Object run() {
+					publishBundleEventPrivileged(event);
+					return null;
+				}
+			});
 		}
 	}
 
@@ -1314,102 +1385,57 @@ public class Framework implements EventDispatcher, EventPublisher, Runnable {
 		 * BEFORE we dispatch the event.
 		 */
 		/* Collect snapshot of SynchronousBundleListeners */
-		ListenerQueue listenersSync = null;
-		if (bundleEventSync != null) {
-			/* queue to hold set of listeners */
-			listenersSync = new ListenerQueue(eventManager);
-			/* queue to hold set of BundleContexts w/ listeners */
-			ListenerQueue contexts = new ListenerQueue(eventManager);
-			/* synchronize while building the listener list */
-			synchronized (bundleEventSync) {
-				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEventSync.entrySet(), this);
-				/* synchronously dispatch to populate listeners queue */
-				contexts.dispatchEventSynchronous(BUNDLEEVENTSYNC, listenersSync);
+		/* Build the listener snapshot */
+		Map<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> listenersSync;
+		synchronized (allSyncBundleListeners) {
+			listenersSync = new HashMap<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>>(allSyncBundleListeners.size());
+			for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> entry : allSyncBundleListeners.entrySet()) {
+				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = entry.getValue();
+				if (!listeners.isEmpty()) {
+					listenersSync.put(entry.getKey(), listeners.entrySet());
+				}
 			}
 		}
 		/* Collect snapshot of BundleListeners; only if the event is NOT STARTING or STOPPING or LAZY_ACTIVATION */
-		ListenerQueue listenersAsync = null;
-		if (bundleEvent != null && (event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
-			/* queue to hold set of listeners */
-			listenersAsync = new ListenerQueue(eventManager);
-			/* queue to hold set of BundleContexts w/ listeners */
-			ListenerQueue contexts = new ListenerQueue(eventManager);
-			/* synchronize while building the listener list */
-			synchronized (bundleEvent) {
-				/* add set of BundleContexts w/ listeners to queue */
-				contexts.queueListeners(bundleEvent.entrySet(), this);
-				/* synchronously dispatch to populate listeners queue */
-				contexts.dispatchEventSynchronous(BUNDLEEVENT, listenersAsync);
+		Map<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> listenersAsync = null;
+		if ((event.getType() & (BundleEvent.STARTING | BundleEvent.STOPPING | BundleEvent.LAZY_ACTIVATION)) == 0) {
+			synchronized (allBundleListeners) {
+				listenersAsync = new HashMap<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>>(allBundleListeners.size());
+				for (Map.Entry<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> entry : allBundleListeners.entrySet()) {
+					CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = entry.getValue();
+					if (!listeners.isEmpty()) {
+						listenersAsync.put(entry.getKey(), listeners.entrySet());
+					}
+				}
 			}
 		}
-		/* Dispatch BundleEvent to SynchronousBundleListeners */
-		if (listenersSync != null) {
-			listenersSync.dispatchEventSynchronous(BUNDLEEVENTSYNC, event);
+		// TODO call bundle event hooks
+
+		/* Dispatch the event to the snapshot for sync listeners */
+		if (listenersSync != null && listenersSync.size() > 0) {
+			ListenerQueue queue = newListenerQueue();
+			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync.entrySet()) {
+				EventDispatcher dispatcher = entry.getKey();
+				Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listeners = entry.getValue();
+				queue.queueListeners(listeners, dispatcher);
+			}
+			queue.dispatchEventSynchronous(BUNDLEEVENTSYNC, event);
 		}
-		/* Dispatch BundleEvent to BundleListeners */
-		if (listenersAsync != null) {
-			listenersAsync.dispatchEventAsynchronous(BUNDLEEVENT, event);
+
+		/* Dispatch the event to the snapshot for async listeners */
+		if (listenersAsync != null && listenersAsync.size() > 0) {
+			ListenerQueue queue = newListenerQueue();
+			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
+				EventDispatcher dispatcher = entry.getKey();
+				Set<Map.Entry<BundleListener, BundleListener>> listeners = entry.getValue();
+				queue.queueListeners(listeners, dispatcher);
+			}
+			queue.dispatchEventAsynchronous(BUNDLEEVENT, event);
 		}
 	}
 
 	public ListenerQueue newListenerQueue() {
 		return new ListenerQueue(eventManager);
-	}
-
-	/**
-	 * Top level event dispatcher for the framework.
-	 * 
-	 * @param l
-	 *            BundleContext for receiving bundle
-	 * @param lo
-	 *            BundleContext for receiving bundle
-	 * @param action
-	 *            Event class type
-	 * @param object
-	 *            ListenerQueue to populate
-	 */
-	public void dispatchEvent(Object l, Object lo, int action, Object object) {
-		try {
-			BundleContextImpl context = (BundleContextImpl) l;
-			if (context.isValid()) /* if context still valid */{
-				ListenerQueue queue = (ListenerQueue) object;
-				switch (action) {
-					case BUNDLEEVENT : {
-						queue.queueListeners(context.bundleEvent.entrySet(), context);
-						break;
-					}
-					case BUNDLEEVENTSYNC : {
-						queue.queueListeners(context.bundleEventSync.entrySet(), context);
-						break;
-					}
-					case FRAMEWORKEVENT : {
-						queue.queueListeners(context.frameworkEvent.entrySet(), context);
-						break;
-					}
-					default : {
-						throw new InternalError();
-					}
-				}
-			}
-		} catch (Throwable t) {
-			if (Debug.DEBUG_GENERAL) {
-				Debug.println("Exception in Top level event dispatcher: " + t.getMessage()); //$NON-NLS-1$
-				Debug.printStackTrace(t);
-			}
-			// allow the adaptor to handle this unexpected error
-			adaptor.handleRuntimeError(t);
-			publisherror: {
-				if (action == FRAMEWORKEVENT) {
-					FrameworkEvent event = (FrameworkEvent) object;
-					if (event.getType() == FrameworkEvent.ERROR) {
-						break publisherror; /* avoid infinite loop */
-					}
-				}
-				BundleContextImpl context = (BundleContextImpl) l;
-				publishFrameworkEvent(FrameworkEvent.ERROR, context.bundle, t);
-			}
-		}
 	}
 
 	private void initializeContextFinder() {

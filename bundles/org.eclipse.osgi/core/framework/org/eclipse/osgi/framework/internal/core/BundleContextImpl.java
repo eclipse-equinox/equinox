@@ -17,7 +17,6 @@ import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.event.BatchBundleListener;
 import org.eclipse.osgi.framework.debug.Debug;
-import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
 import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.internal.serviceregistry.*;
@@ -51,15 +50,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	/* @GuardedBy("contextLock") */
 	private HashMap<ServiceRegistrationImpl<?>, ServiceUse<?>> servicesInUse;
 
-	/** Listener list for bundle's BundleListeners */
-	protected Map<BundleListener, BundleListener> bundleEvent;
-
-	/** Listener list for bundle's SynchronousBundleListeners */
-	protected Map<BundleListener, BundleListener> bundleEventSync;
-
-	/** Listener list for bundle's FrameworkListeners */
-	protected Map<FrameworkListener, FrameworkListener> frameworkEvent;
-
 	/** The current instantiation of the activator. */
 	protected BundleActivator activator;
 
@@ -76,9 +66,6 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		this.bundle = bundle;
 		valid = true;
 		framework = bundle.framework;
-		bundleEvent = null;
-		bundleEventSync = null;
-		frameworkEvent = null;
 		synchronized (contextLock) {
 			servicesInUse = null;
 		}
@@ -95,24 +82,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		final ServiceRegistry registry = framework.getServiceRegistry();
 
 		registry.removeAllServiceListeners(this);
-		synchronized (framework.frameworkEvent) {
-			if (frameworkEvent != null) {
-				framework.frameworkEvent.remove(this);
-				frameworkEvent = null;
-			}
-		}
-		synchronized (framework.bundleEvent) {
-			if (bundleEvent != null) {
-				framework.bundleEvent.remove(this);
-				bundleEvent = null;
-			}
-		}
-		synchronized (framework.bundleEventSync) {
-			if (bundleEventSync != null) {
-				framework.bundleEventSync.remove(this);
-				bundleEventSync = null;
-			}
-		}
+		framework.removeAllListeners(this);
 
 		/* service's registered by the bundle, if any, are unregistered. */
 		registry.unregisterServices(this);
@@ -199,7 +169,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 	 * object per installed bundle.
 	 */
 	public Bundle[] getBundles() {
-		return framework.getAllBundles();
+		return framework.getBundles(this);
 	}
 
 	/**
@@ -309,28 +279,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("addBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
-			synchronized (framework.bundleEventSync) {
-				checkValid();
-				if (bundleEventSync == null) {
-					bundleEventSync = new CopyOnWriteIdentityMap<BundleListener, BundleListener>();
-					framework.bundleEventSync.put(this, this);
-				}
-
-				bundleEventSync.put(listener, listener);
-			}
-		} else {
-			synchronized (framework.bundleEvent) {
-				checkValid();
-				if (bundleEvent == null) {
-					bundleEvent = new CopyOnWriteIdentityMap<BundleListener, BundleListener>();
-					framework.bundleEvent.put(this, this);
-				}
-
-				bundleEvent.put(listener, listener);
-			}
-		}
+		framework.addBundleListener(listener, this);
 	}
 
 	/**
@@ -357,21 +306,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("removeBundleListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		if (listener instanceof SynchronousBundleListener) {
-			framework.checkAdminPermission(getBundle(), AdminPermission.LISTENER);
-
-			synchronized (framework.bundleEventSync) {
-				if (bundleEventSync != null) {
-					bundleEventSync.remove(listener);
-				}
-			}
-		} else {
-			synchronized (framework.bundleEvent) {
-				if (bundleEvent != null) {
-					bundleEvent.remove(listener);
-				}
-			}
-		}
+		framework.removeBundleListener(listener, this);
 	}
 
 	/**
@@ -398,15 +333,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("addFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		synchronized (framework.frameworkEvent) {
-			checkValid();
-			if (frameworkEvent == null) {
-				frameworkEvent = new CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>();
-				framework.frameworkEvent.put(this, this);
-			}
-
-			frameworkEvent.put(listener, listener);
-		}
+		framework.addFrameworkListener(listener, this);
 	}
 
 	/**
@@ -433,11 +360,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 			Debug.println("removeFrameworkListener[" + bundle + "](" + listenerName + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
-		synchronized (framework.frameworkEvent) {
-			if (frameworkEvent != null) {
-				frameworkEvent.remove(listener);
-			}
-		}
+		framework.removeFrameworkListener(listener, this);
 	}
 
 	/**
