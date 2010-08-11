@@ -1320,6 +1320,7 @@ public class Framework implements EventPublisher, Runnable {
 
 	void addBundleListener(BundleListener listener, BundleContextImpl context) {
 		if (listener instanceof SynchronousBundleListener) {
+			checkAdminPermission(context.getBundle(), AdminPermission.LISTENER);
 			synchronized (allSyncBundleListeners) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
 				if (listeners == null) {
@@ -1342,6 +1343,7 @@ public class Framework implements EventPublisher, Runnable {
 
 	void removeBundleListener(BundleListener listener, BundleContextImpl context) {
 		if (listener instanceof SynchronousBundleListener) {
+			checkAdminPermission(context.getBundle(), AdminPermission.LISTENER);
 			synchronized (allSyncBundleListeners) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
 				if (listeners != null)
