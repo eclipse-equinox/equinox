@@ -55,15 +55,6 @@
 			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-			<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-				<pathentry kind="mac" name="JNIEXPORT" path="" value=""/>
-				<pathentry include="/usr/X11R6/include" kind="inc" path="" system="true"/>
-				<pathentry include="/opt/gnome/include/gtk-2.0" kind="inc" path="" system="true"/>
-				<pathentry include="/opt/gnome/include/glib-2.0" kind="inc" path="" system="true"/>
-				<pathentry kind="src" path=""/>
-				<pathentry kind="out" path=""/>
-				<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 				<buildTargets>
 					<target name="linux-all" path="library/gtk" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
@@ -131,6 +122,16 @@
 						<runAllBuilders>true</runAllBuilders>
 					</target>
 				</buildTargets>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+				<pathentry kind="mac" name="JNIEXPORT" path="" value=""/>
+				<pathentry kind="mac" name="JNICALL" path="" value=""/>
+				<pathentry include="/usr/X11R6/include" kind="inc" path="" system="true"/>
+				<pathentry include="/opt/gnome/include/gtk-2.0" kind="inc" path="" system="true"/>
+				<pathentry include="/opt/gnome/include/glib-2.0" kind="inc" path="" system="true"/>
+				<pathentry kind="src" path=""/>
+				<pathentry kind="out" path=""/>
+				<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
 			</storageModule>
 		</cconfiguration>
 	</storageModule>
