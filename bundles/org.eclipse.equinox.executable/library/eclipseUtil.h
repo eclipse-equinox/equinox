@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
+ *	   Martin Oberhuber (Wind River) - [149994] Add --launcher.appendVmargs
  *******************************************************************************/
 
 #ifndef ECLIPSE_UTIL_H
@@ -36,6 +37,12 @@ extern _TCHAR * checkPathList( _TCHAR* pathList, _TCHAR* programDir, int reverse
 
 /* take a NULL terminated array of strings and concatenate them together into one string */
 extern _TCHAR * concatStrings(_TCHAR** strs);
+
+/* Concatenates two NULL-terminated arrays of strings into a new array of strings */
+extern _TCHAR** concatArgs(_TCHAR** l1, _TCHAR** l2);
+
+/* Returns the relative position of arg in the NULL-terminated list of args, or -1 */
+extern int indexOf(_TCHAR *arg, _TCHAR **args);
 
 /* take a NULL terminated array of strings and concatenate them together using the give pathSeparator */
 extern _TCHAR* concatPaths(_TCHAR** paths, _TCHAR pathSeparator);

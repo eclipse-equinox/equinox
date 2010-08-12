@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at 
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
+ *	   Martin Oberhuber (Wind River) - [149994] Add --launcher.appendVmargs
  *******************************************************************************/
 
 /* Eclipse Launcher Utility Methods */
@@ -156,6 +157,48 @@ _TCHAR * concatPaths(_TCHAR** strs, _TCHAR separator) {
 			result = _tcscat(result, separatorString);
 	}
 	return result;
+}
+
+/*
+ * Concatenates two NULL-terminated arrays of Strings,
+ * returning a new NULL-terminated array.
+ * The returned array must be freed with the regular free().
+ */
+_TCHAR** concatArgs(_TCHAR** l1, _TCHAR** l2) {
+	_TCHAR** newArray = NULL;
+	int size1 = 0;
+	int size2 = 0;
+
+	if (l1 != NULL)
+		while (l1[size1] != NULL) size1++;
+	if (l2 != NULL)
+		while (l2[size2] != NULL) size2++;
+
+	newArray = (_TCHAR **) malloc((size1 + size2 + 1) * sizeof(_TCHAR *));
+	if (size1 > 0) {
+		memcpy(newArray, l1, size1 * sizeof(_TCHAR *));
+	}
+	if (size2 > 0) {
+		memcpy(newArray + size1, l2, size2 * sizeof(_TCHAR *));
+	}
+	newArray[size1 + size2] = NULL;
+	return newArray;
+}
+
+/*
+ * returns the relative position of arg in the NULL-terminated list of args,
+ * or -1 if args does not contain arg.
+ */
+int indexOf(_TCHAR *arg, _TCHAR **args) {
+	int i = -1;
+	if (arg != NULL && args != NULL) {
+		while (args[++i] != NULL) {
+			if (_tcsicmp(arg, args[i]) == 0) {
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 /*

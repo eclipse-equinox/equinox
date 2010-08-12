@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Kevin Cornell (Rational Software Corporation)
  *	   Markus Schorn (Wind River Systems), bug 193340
+ *	   Martin Oberhuber (Wind River) - [149994] Add --launcher.appendVmargs
  *******************************************************************************/
 
 /* Eclipse Program Launcher
@@ -233,6 +234,8 @@ home directory.");
 #define LIBRARY		  _T_ECLIPSE("--launcher.library")
 #define SUPRESSERRORS _T_ECLIPSE("--launcher.suppressErrors")
 #define INI			  _T_ECLIPSE("--launcher.ini")
+#define APPEND_VMARGS _T_ECLIPSE("--launcher.appendVmargs")
+#define OVERRIDE_VMARGS _T_ECLIPSE("--launcher.overrideVmargs")
 #define SECOND_THREAD _T_ECLIPSE("--launcher.secondThread")
 #define PERM_GEN	  _T_ECLIPSE("--launcher.XXMaxPermSize")
 
@@ -254,6 +257,7 @@ static int     debug         = 0;				/* True: output debugging info	*/
 static int     noSplash      = 0;				/* True: do not show splash win	*/
 static int	   suppressErrors = 0;				/* True: do not display errors dialogs */
        int     secondThread  = 0;				/* True: start the VM on a second thread */
+static int     appendVmargs = 0;                /* True: append cmdline vmargs to launcher.ini vmargs */
        
 static _TCHAR*  showSplashArg = NULL;			/* showsplash data (main launcher window) */
 static _TCHAR*  splashBitmap  = NULL;			/* the actual splash bitmap */
@@ -289,6 +293,7 @@ typedef struct
 							/* don't assign it and only remove (remove - 1) arguments  */
 #define ADJUST_PATH		4  	/* value is a path, do processing on relative paths to try and make them absolute */
 #define VALUE_IS_LIST	8  	/* value is a pointer to a tokenized _TCHAR* string for EE files, or a _TCHAR** list for the command line */
+#define INVERT_FLAG    16   /* invert the meaning of a flag, i.e. reset it */
 
 static Option options[] = {
     { CONSOLE,		&needConsole,	VALUE_IS_FLAG,	0 },
@@ -297,6 +302,8 @@ static Option options[] = {
     { NOSPLASH,     &noSplash,      VALUE_IS_FLAG,	1 },
     { SUPRESSERRORS, &suppressErrors, VALUE_IS_FLAG, 1},
     { SECOND_THREAD, &secondThread, VALUE_IS_FLAG,  1 },
+    { APPEND_VMARGS, &appendVmargs,	VALUE_IS_FLAG, 1 },
+    { OVERRIDE_VMARGS, &appendVmargs, VALUE_IS_FLAG | INVERT_FLAG, 1 },
     { LIBRARY,		NULL,			0,			2 }, /* library was parsed by exe, just remove it */
     { INI,			NULL, 			0,			2 }, /* same with ini */
     { OS,			&osArg,			0,			2 },
@@ -331,6 +338,7 @@ static int nEEargs = 0;
 /* Local methods */
 static void     parseArgs( int* argc, _TCHAR* argv[] );
 static void 	processDefaultAction(int argc, _TCHAR* argv[]);
+static void 	mergeUserVMArgs( _TCHAR **vmArgs[] );
 static void     getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmArgv[], _TCHAR **progArgv[] );
 static int 		determineVM(_TCHAR** msg);
 static int 		vmEEProps(_TCHAR* eeFile, _TCHAR** msg);
@@ -422,8 +430,14 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     	exit( 1 );
     }
 
-    /* platform specific processing of user's vmargs */
-    processVMArgs(&vmArgs);
+    if (vmArgs != NULL) {
+    	/* reconcile VM Args from commandline with launcher.ini (append or override),
+    	 * this always allocates new memory */
+    	mergeUserVMArgs(&vmArgs);
+    	/* platform specific processing of user's vmargs */
+    	processVMArgs(&vmArgs);
+    }
+    
     launchMode = determineVM(&msg);
     if (launchMode == -1) {
     	/* problem */
@@ -636,11 +650,12 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
     free( programDir );
     free( program );
     free( officialName );
-    if ( vmCommand != NULL )	 free( vmCommand );
-    if ( launchMode == LAUNCH_JNI ) free( cp );
-    if ( cpValue != NULL)		 free( cpValue );
-    if ( exitData != NULL )		 free( exitData );
-    if ( splashBitmap != NULL )  free( splashBitmap );
+    if(vmCommand != NULL)	 	 free(vmCommand);
+    if(launchMode == LAUNCH_JNI) free(cp);
+    if(cpValue != NULL)		 	 free(cpValue);
+    if(exitData != NULL)		 free(exitData);
+    if(splashBitmap != NULL)  	 free(splashBitmap);
+    if(vmArgs != NULL)			 free(vmArgs);
 
     if (javaResults == NULL)
     	return -1;
@@ -720,18 +735,18 @@ static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 			/* If the option requires a value and there is one, extract the value. */
 			if (option->value != NULL) {
 				if (option->flag & VALUE_IS_FLAG)
-					*((int *) option->value) = 1;
+					*((int *) option->value) = (option->flag & INVERT_FLAG) ? 0 : 1;
 				else {
 					int count = 1;
 					if (option->flag & VALUE_IS_LIST) {
 						/* count how many args, this is the -argument itself + following the non'-' args */
-						while(count + index < *pArgc && argv[count + index][0] != _T_ECLIPSE('-'))
+						while (count + index < *pArgc && argv[count + index][0] != _T_ECLIPSE('-'))
 							count++;
-						
+
 						/* allocate memory for a _TCHAR* list and initialize it with NULLs*/
 						*((void**) option->value) = malloc(count * sizeof(_TCHAR *));
 						memset(*((void **) option->value), 0, count * sizeof(_TCHAR *));
-						
+
 						if (option->remove != 0)
 							option->remove = count;
 					}
@@ -746,7 +761,7 @@ static void parseArgs(int* pArgc, _TCHAR* argv[]) {
 									(*((_TCHAR***) option->value))[i] = next;
 								else
 									*((_TCHAR**) option->value) = next;
-							} else if (option->flag & OPTIONAL_VALUE){
+							} else if (option->flag & OPTIONAL_VALUE) {
 								/* value was optional, and the next arg starts with '-' */
 								optional = 1;
 							}
@@ -796,24 +811,70 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
     return execArg;
 }
 
-static void adjustVMArgs( _TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[] ) {
+/* Return the list of args from the launcher ini file (if it exists). Caller is responsible to free(). */
+static _TCHAR** getConfigArgs() {
+	_TCHAR* iniFile = NULL;
+	_TCHAR** configArgv = NULL;
+	int configArgc = 0;
+	int ret = 0;
+	int iniArg;
+
+	/* Parse configuration file arguments */
+	iniArg = indexOf(INI, initialArgv);
+	if (iniArg > 0) {
+		iniFile = initialArgv[iniArg + 1];
+		ret = readConfigFile(iniFile, &configArgc, &configArgv);
+	} else {
+		ret = readIniFile(program, &configArgc, &configArgv);
+	}
+	if (ret == 0) {
+		return configArgv;
+	}
+	return NULL;
+}
+
+/** Append Commandline VM Args to VM Args that came from the launcher.ini
+ *  Always returns new memory even if no new arguments were appended */
+static void mergeUserVMArgs(_TCHAR **vmArgs[]) {
+	_TCHAR** configVMArgs = NULL;
+	_TCHAR** configArgs = NULL;
+
+	if (appendVmargs != 0 && indexOf(VMARGS, initialArgv) > 0) {
+		/* Get vmargs from the launcher.ini, if any */
+		configArgs = getConfigArgs();
+		if (configArgs != NULL) {
+			int vmArg = indexOf(VMARGS, configArgs);
+			if (vmArg >= 0)
+				configVMArgs = configArgs + vmArg + 1;
+		}
+	}
+
+	/* This always allocates new memory so we don't need to guess if it is safe
+	 * to free later  */
+	*vmArgs = concatArgs(configVMArgs, *vmArgs);
+	if (configArgs != NULL)
+		free(configArgs);
+}
+
+static void adjustVMArgs(_TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[]) {
 	/* Sun VMs need some extra perm gen space */
-	if (permGen != NULL && isSunVM(javaVM, jniLib)) {
+	/* Detecting Sun VM is expensive - only do so if necessary */
+	if (permGen != NULL) {
 		int specified = 0, i = -1;
-		
+
 		/* first check to see if it is already specified */
-		while ( (*vmArgv)[++i] != NULL) {
+		while ((*vmArgv)[++i] != NULL) {
 			/* we are also counting the number of args here */
 			if (!specified && _tcsncmp((*vmArgv)[i], XXPERMGEN, _tcslen(XXPERMGEN)) == 0) {
 				specified = 1;
 			}
 		}
-		
-		if (!specified) {
+
+		if (!specified && isSunVM(javaVM, jniLib)) {
 			_TCHAR ** oldArgs = *vmArgv;
 			_TCHAR *newArg = malloc((_tcslen(XXPERMGEN) + _tcslen(permGen) + 1) * sizeof(_TCHAR));
 			_stprintf(newArg, _T_ECLIPSE("%s%s"), XXPERMGEN, permGen);
-			
+
 			*vmArgv = malloc((i + 2) * sizeof(_TCHAR *));
 			memcpy(*vmArgv, oldArgs, i * sizeof(_TCHAR *));
 			(*vmArgv)[i] = newArg;
@@ -821,6 +882,7 @@ static void adjustVMArgs( _TCHAR *javaVM, _TCHAR *jniLib, _TCHAR **vmArgv[] ) {
 		}
 	}
 }
+
 /*
  * Get the command and arguments to start the Java VM.
  *
