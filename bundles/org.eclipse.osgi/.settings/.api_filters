@@ -635,6 +635,20 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/bundle/EventHook.java" type="org.osgi.framework.hooks.bundle.EventHook">
+<filter comment="Ingore OSGi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.bundle.EventHook"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/hooks/bundle/FindHook.java" type="org.osgi.framework.hooks.bundle.FindHook">
+<filter comment="Ingore OSGi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.bundle.FindHook"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
 <filter id="403984517">
 <message_arguments>
