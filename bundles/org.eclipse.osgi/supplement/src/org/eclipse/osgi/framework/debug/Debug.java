@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,11 @@ public class Debug {
 	 * Services debug flag.
 	 */
 	public static boolean DEBUG_SERVICES = false; // "debug.services"
+
+	/**
+	 * Hooks debug flag.
+	 */
+	public static boolean DEBUG_HOOKS = false; // "debug.hooks"
 	/**
 	 * Packages debug flag.
 	 */
@@ -110,6 +115,10 @@ public class Debug {
 	 */
 	public static final String OPTION_DEBUG_SERVICES = ECLIPSE_OSGI + "/debug/services"; //$NON-NLS-1$
 	/**
+	 * Services Debug option key.
+	 */
+	public static final String OPTION_DEBUG_HOOKS = ECLIPSE_OSGI + "/debug/hooks"; //$NON-NLS-1$
+	/**
 	 * Packages Debug option key.
 	 */
 	public static final String OPTION_DEBUG_PACKAGES = ECLIPSE_OSGI + "/debug/packages"; //$NON-NLS-1$
@@ -155,6 +164,7 @@ public class Debug {
 			DEBUG_LOADER = dbgOptions.getBooleanOption(OPTION_DEBUG_LOADER, false);
 			DEBUG_EVENTS = dbgOptions.getBooleanOption(OPTION_DEBUG_EVENTS, false);
 			DEBUG_SERVICES = dbgOptions.getBooleanOption(OPTION_DEBUG_SERVICES, false);
+			DEBUG_HOOKS = dbgOptions.getBooleanOption(OPTION_DEBUG_HOOKS, false);
 			DEBUG_PACKAGES = dbgOptions.getBooleanOption(OPTION_DEBUG_PACKAGES, false);
 			DEBUG_MANIFEST = dbgOptions.getBooleanOption(OPTION_DEBUG_MANIFEST, false);
 			DEBUG_FILTER = dbgOptions.getBooleanOption(OPTION_DEBUG_FILTER, false);

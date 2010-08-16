@@ -118,7 +118,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 		if (filter == null) {
 			return event;
 		}
-		ServiceReference reference = event.getServiceReference();
+		ServiceReference<?> reference = event.getServiceReference();
 		if (filter.match(reference)) {
 			return event;
 		}

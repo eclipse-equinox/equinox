@@ -11,13 +11,16 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 /**
- * A Shrinkable Collection. This class provides a wrapper for a collection
- * that allows items to be removed from the wrapped collection (shrinking) but
- * does not allow items to be added to the wrapped collection. 
+ * A Shrinkable Collection. This class provides a wrapper for a list of collections
+ * that allows items to be removed from the wrapped collections (shrinking) but
+ * does not allow items to be added to the wrapped collections. 
+ * 
+ * <p>
+ * The collections must act as sets in that each collection in the list
+ * must not have two entries which are equal.
  * 
  * <p>
  * All the optional <code>Collection</code> operations except
@@ -28,12 +31,42 @@ import java.util.Iterator;
 
 public class ShrinkableCollection<E> implements Collection<E> {
 	private final Collection<? extends E> collection;
+	private final List<Collection<? extends E>> list;
 
-	ShrinkableCollection(Collection<? extends E> c) {
+	public ShrinkableCollection(Collection<? extends E> c) {
 		if (c == null) {
 			throw new NullPointerException();
 		}
+		list = Collections.EMPTY_LIST;
 		collection = c;
+	}
+
+	public ShrinkableCollection(Collection<? extends E> c1, Collection<? extends E> c2) {
+		list = new ArrayList<Collection<? extends E>>(2);
+		list.add(c1);
+		list.add(c2);
+		collection = initComposite(list);
+	}
+
+	public ShrinkableCollection(List<Collection<? extends E>> l) {
+		list = new ArrayList<Collection<? extends E>>(l);
+		collection = initComposite(list);
+	}
+
+	private static <E> Collection<? extends E> initComposite(List<Collection<? extends E>> collections) {
+		int size = 0;
+		for (Collection<? extends E> c : collections) {
+			size += c.size();
+		}
+		Collection<E> result = new ArrayList<E>(size);
+		for (Collection<? extends E> c : collections) {
+			for (E e : c) {
+				if (!result.contains(e)) {
+					result.add(e);
+				}
+			}
+		}
+		return result;
 	}
 
 	public boolean add(E e) {
@@ -46,6 +79,9 @@ public class ShrinkableCollection<E> implements Collection<E> {
 
 	public void clear() {
 		collection.clear();
+		for (Collection<? extends E> c : list) {
+			c.clear();
+		}
 	}
 
 	public boolean contains(Object o) {
@@ -60,21 +96,62 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		return collection.isEmpty();
 	}
 
-	@SuppressWarnings("unchecked")
 	public Iterator<E> iterator() {
-		return (Iterator<E>) collection.iterator();
+		@SuppressWarnings("unchecked")
+		final Iterator<E> iter = (Iterator<E>) collection.iterator();
+		final List<Collection<? extends E>> collections = list;
+		if (collections.isEmpty()) {
+			return iter;
+		}
+		return new Iterator<E>() {
+			private E last;
+
+			public boolean hasNext() {
+				return iter.hasNext();
+			}
+
+			public E next() {
+				last = iter.next();
+				return last;
+			}
+
+			public void remove() {
+				iter.remove();
+				for (Collection<? extends E> c : collections) {
+					c.remove(last);
+				}
+			}
+		};
 	}
 
 	public boolean remove(Object o) {
-		return collection.remove(o);
+		final boolean result = collection.remove(o);
+		if (result) {
+			for (Collection<? extends E> c : list) {
+				c.remove(o);
+			}
+		}
+		return result;
 	}
 
 	public boolean removeAll(Collection<?> c) {
-		return collection.removeAll(c);
+		final boolean result = collection.removeAll(c);
+		if (result) {
+			for (Collection<? extends E> cc : list) {
+				cc.removeAll(c);
+			}
+		}
+		return result;
 	}
 
 	public boolean retainAll(Collection<?> c) {
-		return collection.retainAll(c);
+		final boolean result = collection.retainAll(c);
+		if (result) {
+			for (Collection<? extends E> cc : list) {
+				cc.retainAll(c);
+			}
+		}
+		return result;
 	}
 
 	public int size() {
@@ -87,5 +164,9 @@ public class ShrinkableCollection<E> implements Collection<E> {
 
 	public <T> T[] toArray(T[] var0) {
 		return collection.toArray(var0);
+	}
+
+	public String toString() {
+		return collection.toString();
 	}
 }

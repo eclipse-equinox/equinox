@@ -29,7 +29,7 @@ class ModifiedServiceEvent extends ServiceEvent {
 	 * @param reference Reference to service with modified properties.
 	 * @param previousProperties Service properties prior to modification.
 	 */
-	ModifiedServiceEvent(ServiceReference reference, ServiceProperties previousProperties) {
+	ModifiedServiceEvent(ServiceReference<?> reference, ServiceProperties previousProperties) {
 		super(ServiceEvent.MODIFIED, reference);
 		this.modified = new ServiceEvent(ServiceEvent.MODIFIED, reference);
 		this.modifiedEndMatch = new ServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, reference);

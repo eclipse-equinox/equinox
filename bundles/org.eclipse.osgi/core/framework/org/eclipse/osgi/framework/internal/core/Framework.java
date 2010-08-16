@@ -29,11 +29,13 @@ import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.internal.permadmin.EquinoxSecurityManager;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
 import org.eclipse.osgi.internal.profile.Profile;
-import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
+import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.EventHook;
+import org.osgi.framework.hooks.bundle.FindHook;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -96,6 +98,8 @@ public class Framework implements EventPublisher, Runnable {
 	protected static final int FRAMEWORKEVENT = 4;
 	protected static final int BATCHEVENT_BEGIN = Integer.MIN_VALUE + 1;
 	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
+	static final String eventHookName = EventHook.class.getName();
+	static final String findHookName = FindHook.class.getName();
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 	/* Reservation object for install synchronization */
@@ -411,9 +415,9 @@ public class Framework implements EventPublisher, Runnable {
 				exactMatch.add(bootPackages[i]);
 			}
 		}
-		if (exactMatch.size() > 0)
+		if (!exactMatch.isEmpty())
 			bootDelegation = (String[]) exactMatch.toArray(new String[exactMatch.size()]);
-		if (stemMatch.size() > 0)
+		if (!stemMatch.isEmpty())
 			bootDelegationStems = (String[]) stemMatch.toArray(new String[stemMatch.size()]);
 	}
 
@@ -1036,14 +1040,46 @@ public class Framework implements EventPublisher, Runnable {
 		}
 	}
 
-	AbstractBundle[] getBundles(BundleContextImpl context) {
+	AbstractBundle[] getBundles(final BundleContextImpl context) {
 		List<AbstractBundle> allBundles;
 		synchronized (bundles) {
 			allBundles = new ArrayList<AbstractBundle>(bundles.getBundles());
 		}
-		// TODO call bundle find hooks
+
+		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(allBundles);
+		if (System.getSecurityManager() == null) {
+			notifyFindHooksPriviledged(context, shrinkable);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				public Object run() {
+					notifyFindHooksPriviledged(context, shrinkable);
+					return null;
+				}
+			});
+		}
 
 		return allBundles.toArray(new AbstractBundle[allBundles.size()]);
+	}
+
+	void notifyFindHooksPriviledged(final BundleContextImpl context, final Collection<Bundle> allBundles) {
+		if (Debug.DEBUG_HOOKS) {
+			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		}
+		getServiceRegistry().notifyHooksPrivileged(new HookContext() {
+			public void call(Object hook) throws Exception {
+				if (hook instanceof FindHook) {
+					((FindHook) hook).find(context, allBundles);
+				}
+			}
+
+			public String getHookClassName() {
+				return findHookName;
+			}
+
+			public String getHookMethodName() {
+				return "find"; //$NON-NLS-1$ 
+			}
+		});
 	}
 
 	/**
@@ -1411,10 +1447,22 @@ public class Framework implements EventPublisher, Runnable {
 				}
 			}
 		}
-		// TODO call bundle event hooks
+
+		/* shrink the snapshot.
+		 * keySet returns a Collection which cannot be added to and
+		 * removals from that collection will result in removals of the
+		 * entry from the snapshot.
+		 */
+		Collection<BundleContext> shrinkable;
+		if (listenersAsync == null) {
+			shrinkable = asBundleContexts(listenersSync.keySet());
+		} else {
+			shrinkable = new ShrinkableCollection<BundleContext>(asBundleContexts(listenersSync.keySet()), asBundleContexts(listenersAsync.keySet()));
+		}
+		notifyEventHooksPrivileged(event, shrinkable);
 
 		/* Dispatch the event to the snapshot for sync listeners */
-		if (listenersSync != null && listenersSync.size() > 0) {
+		if (!listenersSync.isEmpty()) {
 			ListenerQueue queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync.entrySet()) {
 				EventDispatcher dispatcher = entry.getKey();
@@ -1425,7 +1473,7 @@ public class Framework implements EventPublisher, Runnable {
 		}
 
 		/* Dispatch the event to the snapshot for async listeners */
-		if (listenersAsync != null && listenersAsync.size() > 0) {
+		if ((listenersAsync != null) && !listenersAsync.isEmpty()) {
 			ListenerQueue queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
 				EventDispatcher dispatcher = entry.getKey();
@@ -1434,6 +1482,41 @@ public class Framework implements EventPublisher, Runnable {
 			}
 			queue.dispatchEventAsynchronous(BUNDLEEVENT, event);
 		}
+	}
+
+	/**
+	 * Coerce the generic type of a collection from Collection<BundleContextImpl>
+	 * to Collection<BundleContext>
+	 * @param c Collection to be coerced.
+	 * @return c coerced to Collection<BundleContext>
+	 */
+	@SuppressWarnings("unchecked")
+	public static Collection<BundleContext> asBundleContexts(Collection<? extends BundleContext> c) {
+		return (Collection<BundleContext>) c;
+	}
+
+	private void notifyEventHooksPrivileged(final BundleEvent event, final Collection<BundleContext> result) {
+		if (event.getType() == Framework.BATCHEVENT_BEGIN || event.getType() == Framework.BATCHEVENT_END)
+			return; // we don't need to send this event; it is used to book case special listeners
+		if (Debug.DEBUG_HOOKS) {
+			Debug.println("notifyBundleEventHooks(" + event.getType() + ":" + event.getBundle() + ", " + result + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$  
+		}
+
+		getServiceRegistry().notifyHooksPrivileged(new HookContext() {
+			public void call(Object hook) throws Exception {
+				if (hook instanceof EventHook) {
+					((EventHook) hook).event(event, result);
+				}
+			}
+
+			public String getHookClassName() {
+				return eventHookName;
+			}
+
+			public String getHookMethodName() {
+				return "event"; //$NON-NLS-1$
+			}
+		});
 	}
 
 	public ListenerQueue newListenerQueue() {
