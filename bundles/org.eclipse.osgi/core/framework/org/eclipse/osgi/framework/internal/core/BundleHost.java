@@ -304,7 +304,7 @@ public class BundleHost extends AbstractBundle {
 		}
 		if (!framework.active || (state & ACTIVE) != 0)
 			return;
-		if (getStartLevel() > framework.startLevelManager.getStartLevel()) {
+		if (getInternalStartLevel() > framework.startLevelManager.getStartLevel()) {
 			if ((options & LAZY_TRIGGER) == 0 && (options & START_TRANSIENT) != 0) {
 				// throw exception if this is a transient start
 				String msg = NLS.bind(Msg.BUNDLE_TRANSIENT_START_ERROR, this);
@@ -332,7 +332,7 @@ public class BundleHost extends AbstractBundle {
 		}
 
 		if (Debug.DEBUG_GENERAL) {
-			Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			Debug.println("Bundle: Active sl = " + framework.startLevelManager.getStartLevel() + "; Bundle " + getBundleId() + " sl = " + getInternalStartLevel()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		if ((options & LAZY_TRIGGER) != 0) {
@@ -418,7 +418,7 @@ public class BundleHost extends AbstractBundle {
 
 	protected boolean readyToResume() {
 		// Return false if the bundle is not at the correct start-level
-		if (getStartLevel() > framework.startLevelManager.getStartLevel())
+		if (getInternalStartLevel() > framework.startLevelManager.getStartLevel())
 			return false;
 		int status = bundledata.getStatus();
 		// Return false if the bundle is not persistently marked for start

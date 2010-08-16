@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.EventObject;
+import org.osgi.framework.FrameworkListener;
 
 /**
  * StartLevel Event for the OSGi framework.
@@ -27,7 +28,7 @@ class StartLevelEvent extends EventObject {
 	/**
 	 * Event Type
 	 */
-	private transient int type;
+	private final transient int type;
 
 	/**
 	 * StartLevel - value depends on event type: 
@@ -35,13 +36,18 @@ class StartLevelEvent extends EventObject {
 	 *  CHANGE_FW_SL - value is the new framework startlevel
 	 * 
 	 */
-	private transient int newSl;
+	private final transient int newSl;
 
 	/**
 	 * For a change in bundle startlevel, this is the bundle to be changed.
 	 * For a change in framework startlevel, this is the bundle requesting the change.
 	 */
-	private transient AbstractBundle bundle;
+	private final transient AbstractBundle bundle;
+
+	/**
+	 * A list of framework listeners that must be called at the end of the operation.
+	 */
+	private final transient FrameworkListener[] listeners;
 
 	/**
 	 * Creates a StartLevel event regarding the specified bundle.
@@ -50,11 +56,12 @@ class StartLevelEvent extends EventObject {
 	 * @param newSl the ultimate requested startlevel we are on our way to
 	 * @param bundle The affected bundle, or system bundle if it is for the framework
 	 */
-	public StartLevelEvent(int type, int newSl, AbstractBundle bundle) {
+	public StartLevelEvent(int type, int newSl, AbstractBundle bundle, FrameworkListener... listeners) {
 		super(bundle);
 		this.type = type;
 		this.newSl = newSl;
 		this.bundle = bundle;
+		this.listeners = listeners;
 	}
 
 	public int getType() {
@@ -69,4 +76,7 @@ class StartLevelEvent extends EventObject {
 		return this.bundle;
 	}
 
+	public FrameworkListener[] getListeners() {
+		return listeners;
+	}
 }

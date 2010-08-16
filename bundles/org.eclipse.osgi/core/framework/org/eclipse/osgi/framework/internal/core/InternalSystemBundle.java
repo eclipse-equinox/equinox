@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -75,6 +76,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 
 	}
 
+	private final FrameworkStartLevel fsl;
 	ProtectionDomain systemDomain;
 
 	/**
@@ -90,6 +92,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		Constants.setInternalSymbolicName(bundledata.getSymbolicName());
 		state = Bundle.RESOLVED;
 		context = createContext();
+		fsl = new EquinoxStartLevel();
 	}
 
 	/**
@@ -379,5 +382,34 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 
 	public ClassLoader getClassLoader() {
 		return getClass().getClassLoader();
+	}
+
+	@Override
+	public <A> A adapt(Class<A> adapterType) {
+		if (FrameworkStartLevel.class.equals(adapterType))
+			return (A) fsl;
+		return super.adapt(adapterType);
+	}
+
+	class EquinoxStartLevel implements FrameworkStartLevel {
+		public void setStartLevel(int startlevel, FrameworkListener... listeners) {
+			framework.startLevelManager.setStartLevel(startlevel, InternalSystemBundle.this, listeners);
+		}
+
+		public int getInitialBundleStartLevel() {
+			return framework.startLevelManager.getInitialBundleStartLevel();
+		}
+
+		public void setInitialBundleStartLevel(int startlevel) {
+			framework.startLevelManager.setInitialBundleStartLevel(startlevel);
+		}
+
+		public Bundle getBundle() {
+			return InternalSystemBundle.this;
+		}
+
+		public int getStartLevel() {
+			return framework.startLevelManager.getStartLevel();
+		}
 	}
 }

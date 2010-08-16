@@ -1308,30 +1308,34 @@ public class Framework implements EventPublisher, Runnable {
 	 * @param throwable
 	 *            Related exception or null.
 	 */
-	public void publishFrameworkEvent(int type, org.osgi.framework.Bundle bundle, Throwable throwable) {
+	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable) {
+		publishFrameworkEvent(type, bundle, throwable, (FrameworkListener[]) null);
+	}
+
+	public void publishFrameworkEvent(int type, org.osgi.framework.Bundle bundle, Throwable throwable, final FrameworkListener... listeners) {
 		if (bundle == null)
 			bundle = systemBundle;
 		final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
 		if (System.getSecurityManager() == null) {
-			publishFrameworkEventPrivileged(event);
+			publishFrameworkEventPrivileged(event, listeners);
 		} else {
 			AccessController.doPrivileged(new PrivilegedAction() {
 				public Object run() {
-					publishFrameworkEventPrivileged(event);
+					publishFrameworkEventPrivileged(event, listeners);
 					return null;
 				}
 			});
 		}
 	}
 
-	public void publishFrameworkEventPrivileged(FrameworkEvent event) {
-		/* if the event is an error then it should be logged */
+	public void publishFrameworkEventPrivileged(FrameworkEvent event, FrameworkListener... callerListeners) {
+		// if the event is an error then it should be logged
 		if (event.getType() == FrameworkEvent.ERROR) {
 			FrameworkLog frameworkLog = adaptor.getFrameworkLog();
 			if (frameworkLog != null)
 				frameworkLog.log(event);
 		}
-		/* Build the listener snapshot */
+		// Build the listener snapshot
 		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
 		synchronized (allFrameworkListeners) {
 			listenerSnapshot = new HashMap<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>>(allFrameworkListeners.size());
@@ -1344,13 +1348,27 @@ public class Framework implements EventPublisher, Runnable {
 		}
 		// If framework event hook were defined they would be called here
 
-		/* deliver the event to the snapshot */
+		// deliver the event to the snapshot
 		ListenerQueue queue = newListenerQueue();
+
+		// add the listeners specified by the caller first
+		if (callerListeners != null && callerListeners.length > 0) {
+			Map<FrameworkListener, FrameworkListener> listeners = new HashMap();
+			for (FrameworkListener listener : callerListeners) {
+				if (listener != null)
+					listeners.put(listener, listener);
+			}
+			// We use the system bundle context as the dispatcher
+			if (listeners.size() > 0)
+				queue.queueListeners(listeners.entrySet(), getSystemBundleContext());
+		}
+
 		for (Map.Entry<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> entry : listenerSnapshot.entrySet()) {
 			EventDispatcher dispatcher = entry.getKey();
 			Set<Map.Entry<FrameworkListener, FrameworkListener>> listeners = entry.getValue();
 			queue.queueListeners(listeners, dispatcher);
 		}
+
 		queue.dispatchEventAsynchronous(FRAMEWORKEVENT, event);
 	}
 

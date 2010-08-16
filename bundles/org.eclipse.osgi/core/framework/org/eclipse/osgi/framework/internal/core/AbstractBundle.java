@@ -28,13 +28,14 @@ import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.startlevel.BundleStartLevel;
 
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement {
+public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement, BundleStartLevel {
 	/** The Framework this bundle is part of */
 	protected final Framework framework;
 	/** The state of the bundle. */
@@ -1138,7 +1139,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 *                comparable with the receiver.
 	 */
 	public int compareTo(Bundle obj) {
-		int slcomp = getStartLevel() - ((AbstractBundle) obj).getStartLevel();
+		int slcomp = getInternalStartLevel() - ((AbstractBundle) obj).getInternalStartLevel();
 		if (slcomp != 0) {
 			return slcomp;
 		}
@@ -1250,7 +1251,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		return framework.adaptor.getState().getBundle(getBundleId());
 	}
 
-	protected int getStartLevel() {
+	int getInternalStartLevel() {
 		return bundledata.getStartLevel();
 	}
 
@@ -1542,6 +1543,9 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 				return null;
 			}
 		}
+		if (BundleStartLevel.class.equals(adapterType))
+			return (A) this;
+
 		// TODO need to handle BundleWiring, BundlePackageAdmin
 		return null;
 	}
@@ -1549,4 +1553,31 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	public File getDataFile(String filename) {
 		return framework.getDataFile(this, filename);
 	}
+
+	public Bundle getBundle() {
+		return this;
+	}
+
+	public int getStartLevel() {
+		if (getState() == Bundle.UNINSTALLED)
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
+		return getInternalStartLevel();
+	}
+
+	public void setStartLevel(int startlevel) {
+		framework.startLevelManager.setBundleStartLevel(this, startlevel);
+	}
+
+	public boolean isPersistentlyStarted() {
+		if (getState() == Bundle.UNINSTALLED)
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
+		return (getBundleData().getStatus() & Constants.BUNDLE_STARTED) != 0;
+	}
+
+	public boolean isActivationPolicyUsed() {
+		if (getState() == Bundle.UNINSTALLED)
+			throw new IllegalArgumentException(NLS.bind(Msg.BUNDLE_UNINSTALLED_EXCEPTION, getBundleData().getLocation()));
+		return (getBundleData().getStatus() & Constants.BUNDLE_ACTIVATION_POLICY) != 0;
+	}
+
 }
