@@ -56,6 +56,7 @@ public class ShrinkableCollection<E> implements Collection<E> {
 	private static <E> Collection<? extends E> initComposite(List<Collection<? extends E>> collections) {
 		int size = 0;
 		for (Collection<? extends E> c : collections) {
+			assert verifyNoDuplicates(c);
 			size += c.size();
 		}
 		Collection<E> result = new ArrayList<E>(size);
@@ -67,6 +68,27 @@ public class ShrinkableCollection<E> implements Collection<E> {
 			}
 		}
 		return result;
+	}
+
+	private static <E> boolean verifyNoDuplicates(Collection<? extends E> c) {
+		for (E e : c) {
+			int count = 0;
+			for (E f : c) {
+				if (e == null) {
+					if (f == null) {
+						count++;
+					}
+				} else {
+					if (e.equals(f)) {
+						count++;
+					}
+				}
+			}
+			if (count != 1) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public boolean add(E e) {
