@@ -138,6 +138,8 @@ public class Main {
 	private static final String NAME = "-name"; //$NON-NLS-1$
 	private static final String LAUNCHER = "-launcher"; //$NON-NLS-1$
 	private static final String LIBRARY = "--launcher.library"; //$NON-NLS-1$
+	private static final String APPEND_VMARGS = "--launcher.appendVmargs";
+	private static final String OVERRIDE_VMARGS = "--launcher.overrideVmargs";
 	private static final String NL = "-nl"; //$NON-NLS-1$
 	private static final String ENDSPLASH = "-endsplash"; //$NON-NLS-1$
 	private static final String SPLASH_IMAGE = "splash.bmp"; //$NON-NLS-1$
@@ -1618,6 +1620,11 @@ public class Main {
 				//not doing anything with this right now, but still consume it
 				//launcher = arg;
 				System.getProperties().put(PROP_LAUNCHER, arg);
+				found = true;
+			}
+
+			//just consume the --launcher.overrideVmargs and --launcher.appendVmargs
+			if (args[i - 1].equalsIgnoreCase(APPEND_VMARGS) || args[i - 1].equalsIgnoreCase(OVERRIDE_VMARGS)) {
 				found = true;
 			}
 

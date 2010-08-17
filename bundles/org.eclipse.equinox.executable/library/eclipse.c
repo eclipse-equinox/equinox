@@ -268,6 +268,7 @@ static _TCHAR*  permGen  	  = NULL;			/* perm gen size for sun */
 static _TCHAR**  filePath	  = NULL;			/* list of files to open */
 static _TCHAR*  timeoutString = NULL;			/* timeout value for opening a file */
 static _TCHAR*  defaultAction = NULL;			/* default action for non '-' command line arguments */ 
+static _TCHAR*  iniFile       = NULL;			/* the launcher.ini file set if  --launcher.ini was specified */
 
 /* variables for ee options */
 static _TCHAR* eeExecutable = NULL;
@@ -305,7 +306,7 @@ static Option options[] = {
     { APPEND_VMARGS, &appendVmargs,	VALUE_IS_FLAG, 1 },
     { OVERRIDE_VMARGS, &appendVmargs, VALUE_IS_FLAG | INVERT_FLAG, 1 },
     { LIBRARY,		NULL,			0,			2 }, /* library was parsed by exe, just remove it */
-    { INI,			NULL, 			0,			2 }, /* same with ini */
+    { INI,			&iniFile, 		0,			2 },
     { OS,			&osArg,			0,			2 },
     { OSARCH,		&osArchArg,		0,			2 },
     { SHOWSPLASH,   &showSplashArg,	OPTIONAL_VALUE,	2 },
@@ -813,23 +814,15 @@ static _TCHAR** parseArgList( _TCHAR* data ) {
 
 /* Return the list of args from the launcher ini file (if it exists). Caller is responsible to free(). */
 static _TCHAR** getConfigArgs() {
-	_TCHAR* iniFile = NULL;
 	_TCHAR** configArgv = NULL;
+	_TCHAR * configFile = NULL;
 	int configArgc = 0;
 	int ret = 0;
-	int iniArg;
 
-	/* Parse configuration file arguments */
-	iniArg = indexOf(INI, initialArgv);
-	if (iniArg > 0) {
-		iniFile = initialArgv[iniArg + 1];
-		ret = readConfigFile(iniFile, &configArgc, &configArgv);
-	} else {
-		ret = readIniFile(program, &configArgc, &configArgv);
-	}
-	if (ret == 0) {
+	configFile = (iniFile != NULL) ? iniFile : getIniFile(program, consoleLauncher);
+	ret = readConfigFile(configFile, &configArgc, &configArgv);
+	if (ret == 0)
 		return configArgv;
-	}
 	return NULL;
 }
 
@@ -946,11 +939,11 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	
 	/* Program arguments */
     /*  OS <os> + WS <ws> + ARCH <arch> + LAUNCHER <launcher> + NAME <officialName> +
-     *  + LIBRARY <library> + SHOWSPLASH <cmd> + EXITDATA <cmd> + STARTUP <jar> + argv[] + VM + <vm> + 
+     *  + LIBRARY <library> + SHOWSPLASH <cmd> + EXITDATA <cmd> + STARTUP <jar> + OVERRIDE/APPEND + argv[] + VM + <vm> +
      * VMARGS + vmArg + requiredVMargs
      *  + NULL)
      */
-    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
+    totalProgArgs  = 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 1 + argc + 2 + 1 + nVMarg + nEEargs + nReqVMarg + 1;
 	*progArgv = malloc( totalProgArgs * sizeof( _TCHAR* ) );
     dst = 0;
     
@@ -990,6 +983,9 @@ static void getVMCommand( int launchMode, int argc, _TCHAR* argv[], _TCHAR **vmA
 	(*progArgv)[ dst++ ] = STARTUP;
 	(*progArgv)[ dst++ ] = jarFile;
     
+	/* override or append vm args */
+	(*progArgv)[ dst++ ] = appendVmargs ? APPEND_VMARGS : OVERRIDE_VMARGS;
+
 	/* Append the exit data command. */
 	if (sharedID) {
 		(*progArgv)[ dst++ ] = EXITDATA;

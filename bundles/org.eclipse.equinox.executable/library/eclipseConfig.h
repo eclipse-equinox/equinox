@@ -24,9 +24,22 @@
  *
  * This method will call readConfigFile to read the actual ini file
  *
+ * This method will use getIniFile with a value for consoleLauncher that
+ * is determined at compile time.  Clients who are not the actual
+ * win32 console executable should instead use getIniFile and readConfigFile.
+ *
  * Returns 0 if success.
  */
 extern int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv);
+
+/**
+ * Return the path to the launcher ini file for the corresponding program 
+ * argument. On win32, an "eclipsec.exe' console launcher can use the "eclipse.ini"
+ * ini file.
+ * consoleLauncher : whether or not we are using the win32 "eclipsec" console launcher
+ *                   has no affect on other platforms 
+ */
+extern _TCHAR* getIniFile(_TCHAR* program, int consoleLauncher);
 
 /**
  * Reads the given configuration file 

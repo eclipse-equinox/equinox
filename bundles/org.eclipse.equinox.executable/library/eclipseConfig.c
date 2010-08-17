@@ -38,6 +38,20 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 	int result;
 	
 	if (program == NULL || argc == NULL || argv == NULL) return -1;
+	
+#if defined(_WIN32) && defined(_WIN32_CONSOLE)	
+	config_file = getIniFile(program, 1);
+#else
+	config_file = getIniFile(program, 0);
+#endif
+	
+	result = readConfigFile(config_file, argc, argv);
+	free(config_file);
+	return result;
+}
+
+_TCHAR* getIniFile(_TCHAR* program, int consoleLauncher){
+	_TCHAR* config_file = NULL;
 
 	/* Get a copy with room for .ini at the end */
 	config_file = malloc( (_tcslen(program) + 5) * sizeof(_TCHAR));
@@ -53,8 +67,7 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 			extension = config_file + _tcslen(config_file);
 		}
 		_tcscpy(extension, _T_ECLIPSE(".ini"));
-#ifdef _WIN32_CONSOLE
-		{
+		if(consoleLauncher){
 			/* We are the console version, if the ini file does not exist, try
 			 * removing the 'c' from the end of the program name */
 			struct _stat stats; 
@@ -62,16 +75,12 @@ int readIniFile(_TCHAR* program, int *argc, _TCHAR ***argv)
 				_tcscpy(extension - 1, extension);
 			}
 		}
-#endif
 	}
 #else
 	/* Append the extension */
 	strcat(config_file, ".ini");
 #endif
-	
-	result = readConfigFile(config_file, argc, argv);
-	free(config_file);
-	return result;
+	return config_file;
 }
 
 int readConfigFile( _TCHAR * config_file, int *argc, _TCHAR ***argv )
