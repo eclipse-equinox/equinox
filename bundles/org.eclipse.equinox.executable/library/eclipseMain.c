@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 	* Run the UNICODE version, convert the arguments from MBCS to UNICODE
 	*/
 	int i, result;
-	wchar_t **newArgv = malloc(argc * sizeof(wchar_t *));
+	wchar_t **newArgv = malloc((argc + 1) * sizeof(wchar_t *));
 	for (i=0; i<argc; i++) {
 		char *oldArg = argv[i];
 		int numChars = MultiByteToWideChar(CP_ACP, 0, oldArg, -1, NULL, 0);
@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 		MultiByteToWideChar(CP_ACP, 0, oldArg, -1, newArg, numChars);
 		newArgv[i] = newArg;
 	}
+	newArgv[i] = NULL;
 	result = mainW(argc, newArgv);
 	for (i=0; i<argc; i++) {
 		free(newArgv[i]);
