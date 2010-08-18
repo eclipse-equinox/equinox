@@ -12,6 +12,8 @@
 package org.eclipse.equinox.ds.tests.tb15;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Properties;
 
 import org.eclipse.equinox.ds.tests.tbc.PropertiesProvider;
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
@@ -26,11 +28,23 @@ public class Component1 implements PropertiesProvider, ComponentContextProvider 
 
   protected void activate(ComponentContext ctxt) {
     this.ctxt = ctxt;
-    properties = ctxt.getProperties();
+    properties = getProperties(ctxt.getProperties());
   }
+  
+  Properties getProperties(Dictionary dict) {
+    Properties result = new Properties();
+    Enumeration keys = dict.keys();
+    while (keys.hasMoreElements()) {
+      Object key = keys.nextElement();
+      result.put(key, dict.get(key));
+    }
+    return result;
+  }
+
 
   protected void deactivate(ComponentContext ctxt) {
     deactPos = deactCount++;
+    
     properties.put("config.base.data", new Integer(deactPos));
   }
 

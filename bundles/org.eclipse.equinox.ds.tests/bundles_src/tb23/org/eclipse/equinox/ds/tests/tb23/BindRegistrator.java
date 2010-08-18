@@ -1,6 +1,8 @@
 package org.eclipse.equinox.ds.tests.tb23;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Properties;
 
 import org.eclipse.equinox.ds.tests.tbc.ComponentContextProvider;
 import org.osgi.framework.ServiceReference;
@@ -16,9 +18,20 @@ public class BindRegistrator implements ComponentContextProvider {
 
 	protected void activate(ComponentContext ctxt) {
 		this.ctxt = ctxt;
-		properties = ctxt.getProperties();
+		properties = getProperties(ctxt.getProperties());
 		setDataBits(ACTIVATE);
 	}
+	
+  Properties getProperties(Dictionary dict) {
+    Properties result = new Properties();
+    Enumeration keys = dict.keys();
+    while (keys.hasMoreElements()) {
+      Object key = keys.nextElement();
+      result.put(key, dict.get(key));
+    }
+    return result;
+  }
+
 
 	protected void deactivate(ComponentContext ctxt) {
 		setDataBits(DEACTIVATE);

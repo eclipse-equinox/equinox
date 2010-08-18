@@ -12,6 +12,7 @@
 package org.eclipse.equinox.ds.tests.tb12;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -42,8 +43,18 @@ public class CallRegistrator implements ComponentContextProvider {
 
   protected void activate(ComponentContext ctxt) {
     this.ctxt = ctxt;
-    properties = ctxt.getProperties();
+    properties = getProperties(ctxt.getProperties());
     setDataBits(ACTIVATE_CC);
+  }
+  
+  Properties getProperties(Dictionary dict) {
+    Properties result = new Properties();
+    Enumeration keys = dict.keys();
+    while (keys.hasMoreElements()) {
+      Object key = keys.nextElement();
+      result.put(key, dict.get(key));
+    }
+    return result;
   }
 
   protected void deactivate(ComponentContext ctxt) {
@@ -62,7 +73,7 @@ public class CallRegistrator implements ComponentContextProvider {
 
   protected void actCc(ComponentContext ctxt) {
     this.ctxt = ctxt;
-    properties = ctxt.getProperties();
+    properties = getProperties(ctxt.getProperties());
     setDataBits(ACT_CC);
   }
 
@@ -96,7 +107,7 @@ public class CallRegistrator implements ComponentContextProvider {
 
   protected void actCcBcMap(ComponentContext ctxt, BundleContext bc, Map props) {
     this.ctxt = ctxt;
-    properties = ctxt.getProperties();
+    properties = getProperties(ctxt.getProperties());
     setDataBits(ACT_CC_BC_MAP);
   }
 
