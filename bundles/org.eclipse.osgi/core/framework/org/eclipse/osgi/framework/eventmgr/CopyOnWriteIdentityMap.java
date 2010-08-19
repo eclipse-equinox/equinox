@@ -391,6 +391,41 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		public V setValue(V value) {
 			throw new UnsupportedOperationException(); // entries cannot be modified.
 		}
+
+		public String toString() {
+			return key + "=" + value; //$NON-NLS-1$
+		}
+
+		public int hashCode() {
+			int h = 17;
+			if (key != null) {
+				h = 31 * h + key.hashCode();
+			}
+			if (value != null) {
+				h = 31 * h + value.hashCode();
+			}
+			return h;
+		}
+
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+
+			if (!(obj instanceof Map.Entry)) {
+				return false;
+			}
+
+			Map.Entry<?, ?> e = (Map.Entry<?, ?>) obj;
+			final Object k = e.getKey();
+			if ((key == k) || ((key != null) && key.equals(k))) {
+				final Object v = e.getValue();
+				if ((value == v) || ((value != null) && value.equals(v))) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/**
