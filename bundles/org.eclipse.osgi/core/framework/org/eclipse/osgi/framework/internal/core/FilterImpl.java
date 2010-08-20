@@ -1247,15 +1247,25 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * @return The leftmost required objectClass value or null if none could be determined.
 	 */
 	public String getRequiredObjectClass() {
-		// just checking for simple filters here where objectClass is the only attr or it is one attr of a base '&' clause
-		// (objectClass=org.acme.BrickService) OK
-		// (&(objectClass=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
-		// (objectClass=org.acme.*) NOT OK
-		// (|(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) NOT OK
-		// (&(objectClass=org.acme.BrickService)(objectClass=org.acme.CementService)) OK but only the first objectClass is returned
+		return getPrimaryKeyValue(Constants.OBJECTCLASS);
+	}
+
+	/**
+	 * Returns the leftmost required primary key value for the filter to evaluate to true.
+	 * This is useful for indexing candidates to match against this filter.
+	 * @param primaryKey the primary key
+	 * @return The leftmost required primary key value or null if none could be determined.
+	 */
+	public String getPrimaryKeyValue(String primaryKey) {
+		// just checking for simple filters here where primaryKey is the only attr or it is one attr of a base '&' clause
+		// (primaryKey=org.acme.BrickService) OK
+		// (&(primaryKey=org.acme.BrickService)(|(vendor=IBM)(vendor=SUN))) OK
+		// (primaryKey=org.acme.*) NOT OK
+		// (|(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) NOT OK
+		// (&(primaryKey=org.acme.BrickService)(primaryKey=org.acme.CementService)) OK but only the first objectClass is returned
 		switch (op) {
 			case EQUAL :
-				if (attr.equalsIgnoreCase(org.osgi.framework.Constants.OBJECTCLASS) && (value instanceof String))
+				if (attr.equalsIgnoreCase(primaryKey) && (value instanceof String))
 					return (String) value;
 				break;
 			case AND :

@@ -11,20 +11,22 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
-public class VersionHashMap extends MappedList implements Comparator {
+public class VersionHashMap<V extends VersionSupplier> extends MappedList<String, V> implements Comparator {
 	private final ResolverImpl resolver;
 	private final boolean preferSystemPackages;
 
-	public VersionHashMap(ResolverImpl resolver) {
+	public VersionHashMap(ResolverImpl resolver, Class<V> valueClass) {
+		super(valueClass);
 		this.resolver = resolver;
 		preferSystemPackages = Boolean.valueOf(ResolverImpl.secureAction.getProperty("osgi.resolver.preferSystemPackages", "true")).booleanValue(); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	// assumes existing array is sorted
 	// finds the index where to insert the new value
-	protected int insertionIndex(Object[] existing, Object value) {
+	protected int insertionIndex(V[] existing, V value) {
 		int index = existing.length;
 		if (compare(existing[existing.length - 1], value) > 0) {
 			index = Arrays.binarySearch(existing, value, this);
@@ -34,16 +36,16 @@ public class VersionHashMap extends MappedList implements Comparator {
 		return index;
 	}
 
-	public void put(VersionSupplier[] versionSuppliers) {
+	public void put(V[] versionSuppliers) {
 		for (int i = 0; i < versionSuppliers.length; i++)
 			put(versionSuppliers[i].getName(), versionSuppliers[i]);
 	}
 
-	public boolean contains(VersionSupplier vs) {
+	public boolean contains(V vs) {
 		return contains(vs, false) != null;
 	}
 
-	private VersionSupplier contains(VersionSupplier vs, boolean remove) {
+	private V contains(V vs, boolean remove) {
 		Object existing = internal.get(vs.getName());
 		if (existing == null)
 			return null;
@@ -62,7 +64,7 @@ public class VersionHashMap extends MappedList implements Comparator {
 						internal.put(vs.getName(), existingValues[i == 0 ? 1 : 0]);
 						return vs;
 					}
-					Object[] newExisting = new Object[existingValues.length - 1];
+					V[] newExisting = (V[]) Array.newInstance(valueClass, existingValues.length - 1);
 					System.arraycopy(existingValues, 0, newExisting, 0, i);
 					if (i + 1 < existingValues.length)
 						System.arraycopy(existingValues, i + 1, newExisting, i, existingValues.length - i - 1);
@@ -73,11 +75,11 @@ public class VersionHashMap extends MappedList implements Comparator {
 		return null;
 	}
 
-	public Object remove(VersionSupplier toBeRemoved) {
+	public V remove(V toBeRemoved) {
 		return contains(toBeRemoved, true);
 	}
 
-	public void remove(VersionSupplier[] versionSuppliers) {
+	public void remove(V[] versionSuppliers) {
 		for (int i = 0; i < versionSuppliers.length; i++)
 			remove(versionSuppliers[i]);
 	}
@@ -108,16 +110,16 @@ public class VersionHashMap extends MappedList implements Comparator {
 			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());
 		if (preferSystemPackages) {
 			String systemBundle = resolver.getSystemBundle();
-			if (systemBundle.equals(vs1.getBundle().getSymbolicName()) && !systemBundle.equals(vs2.getBundle().getSymbolicName()))
+			if (systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && !systemBundle.equals(vs2.getBundleDescription().getSymbolicName()))
 				return -1;
-			else if (!systemBundle.equals(vs1.getBundle().getSymbolicName()) && systemBundle.equals(vs2.getBundle().getSymbolicName()))
+			else if (!systemBundle.equals(vs1.getBundleDescription().getSymbolicName()) && systemBundle.equals(vs2.getBundleDescription().getSymbolicName()))
 				return 1;
 		}
-		if (vs1.getBundle().isResolved() != vs2.getBundle().isResolved())
-			return vs1.getBundle().isResolved() ? -1 : 1;
+		if (vs1.getBundleDescription().isResolved() != vs2.getBundleDescription().isResolved())
+			return vs1.getBundleDescription().isResolved() ? -1 : 1;
 		int versionCompare = -(vs1.getVersion().compareTo(vs2.getVersion()));
 		if (versionCompare != 0)
 			return versionCompare;
-		return vs1.getBundle().getBundleId() <= vs2.getBundle().getBundleId() ? -1 : 1;
+		return vs1.getBundleDescription().getBundleId() <= vs2.getBundleDescription().getBundleId() ? -1 : 1;
 	}
 }

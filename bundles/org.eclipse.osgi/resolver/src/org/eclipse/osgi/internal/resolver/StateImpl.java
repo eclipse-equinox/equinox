@@ -24,6 +24,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
 
 public abstract class StateImpl implements State {
 	private static final String OSGI_OS = "osgi.os"; //$NON-NLS-1$
@@ -52,6 +53,7 @@ public abstract class StateImpl implements State {
 	private Dictionary[] platformProperties = {new Hashtable(PROPS.length)}; // Dictionary here because of Filter API
 	private long highestBundleId = -1;
 	private final HashSet platformPropertyKeys = new HashSet(PROPS.length);
+	private ResolverHook hook;
 
 	private static long cumulativeTime;
 
@@ -425,10 +427,15 @@ public abstract class StateImpl implements State {
 
 	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
 		synchronized (this.monitor) {
+			if (resolver == null)
+				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+			if (resolving == true)
+				throw new IllegalStateException("An attempt to start a nested resolve process has been detected."); //$NON-NLS-1$
+			ResolverHook currentHook = getResolverHook();
 			try {
 				resolving = true;
-				if (resolver == null)
-					throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
+				if (currentHook != null)
+					currentHook.begin();
 				fullyLoad();
 				long start = 0;
 				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
@@ -474,6 +481,8 @@ public abstract class StateImpl implements State {
 					updateTimeStamp();
 				return savedChanges;
 			} finally {
+				if (currentHook != null)
+					currentHook.end();
 				resolving = false;
 			}
 		}
@@ -528,6 +537,18 @@ public abstract class StateImpl implements State {
 
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
+	}
+
+	public void setResolverHook(ResolverHook hook) {
+		synchronized (this.monitor) {
+			this.hook = hook;
+		}
+	}
+
+	public ResolverHook getResolverHook() {
+		synchronized (this.monitor) {
+			return this.hook;
+		}
 	}
 
 	public BundleDescription[] getResolvedBundles() {
@@ -832,8 +853,11 @@ public abstract class StateImpl implements State {
 			return null;
 		fullyLoad();
 		synchronized (this.monitor) {
+			ResolverHook currentHook = getResolverHook();
 			try {
 				resolving = true;
+				if (currentHook != null)
+					currentHook.begin();
 				// ask the resolver to resolve our dynamic import
 				ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
 				if (result == null)
@@ -847,6 +871,8 @@ public abstract class StateImpl implements State {
 				return result;
 			} finally {
 				resolving = false;
+				if (currentHook != null)
+					currentHook.end();
 			}
 		}
 

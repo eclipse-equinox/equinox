@@ -66,7 +66,7 @@ public abstract class CompositeBase extends BundleHost implements CompositeResol
 	public void refreshContent() {
 		resolving.set(Boolean.TRUE);
 		try {
-			framework.getPackageAdmin().refreshPackages(new Bundle[] {this}, true);
+			framework.getPackageAdmin().refreshPackages(new Bundle[] {this}, true, null);
 		} finally {
 			resolving.set(null);
 		}

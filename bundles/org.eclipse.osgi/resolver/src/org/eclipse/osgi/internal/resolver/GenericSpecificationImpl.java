@@ -38,9 +38,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		if (!(supplier instanceof GenericDescription))
 			return false;
 		GenericDescription candidate = (GenericDescription) supplier;
-		if (getName() == null || !getName().equals(candidate.getName()))
+		if (getName() != null && !getName().equals(candidate.getName()))
 			return false;
-		if (getType() == null || !getType().equals(candidate.getType()))
+		if (!getType().equals(candidate.getType()))
 			return false;
 		// Note that versions are only matched by including them in the filter
 		return matchingFilter == null || matchingFilter.match(candidate.getAttributes());

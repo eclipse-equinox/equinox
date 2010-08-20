@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Dictionary;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.osgi.framework.Constants;
@@ -60,5 +60,27 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 			this.type = GenericDescription.DEFAULT_TYPE;
 		else
 			this.type = type;
+	}
+
+	public Map<String, String> getDeclaredDirectives() {
+		// TODO need to allow directives
+		return Collections.EMPTY_MAP;
+	}
+
+	public Map<String, Object> getDeclaredAttributes() {
+		synchronized (this.monitor) {
+			Map<String, Object> result = new HashMap(5);
+
+			String name = getName();
+			String nameSpace = getType();
+			if (name != GenericDescription.DEFAULT_TYPE)
+				result.put(nameSpace, name);
+			if (attributes != null)
+				for (Enumeration keys = attributes.keys(); keys.hasMoreElements();) {
+					String key = (String) keys.nextElement();
+					result.put(key, attributes.get(key));
+				}
+			return Collections.unmodifiableMap(result);
+		}
 	}
 }

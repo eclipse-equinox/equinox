@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Dictionary;
+import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
@@ -209,4 +209,13 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 	void setSupplier(BundleDescription supplier) {
 		this.supplier = supplier;
 	}
+
+	public Map<String, String> getDeclaredDirectives() {
+		return Collections.EMPTY_MAP;
+	}
+
+	public Map<String, Object> getDeclaredAttributes() {
+		return Collections.EMPTY_MAP;
+	}
+
 }

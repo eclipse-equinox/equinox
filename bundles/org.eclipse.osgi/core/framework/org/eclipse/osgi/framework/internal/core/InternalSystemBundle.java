@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 /**
  * This class subclasses Bundle to provide a system Bundle
@@ -388,6 +389,8 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 	public <A> A adapt(Class<A> adapterType) {
 		if (FrameworkStartLevel.class.equals(adapterType))
 			return (A) fsl;
+		else if (FrameworkWiring.class.equals(adapterType))
+			return (A) framework.getPackageAdmin();
 		return super.adapt(adapterType);
 	}
 

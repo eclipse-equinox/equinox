@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
  * keeps track of the depedencies between the bundles installed in the 
  * Framework.
  */
-public class BundleLoaderProxy implements RequiredBundle {
+public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 	static SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
 	// The BundleLoader that this BundleLoaderProxy is managing
 	private BundleLoader loader;

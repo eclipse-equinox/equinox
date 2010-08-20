@@ -1125,7 +1125,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	 * @param type the type of modification
 	 * @throws BundleException
 	 */
-	public void updateState(BundleData bundleData, int type) throws BundleException {
+	public void updateState(BaseData bundleData, int type) throws BundleException {
 		if (stateManager == null) {
 			invalidState = true;
 			return;
@@ -1140,6 +1140,11 @@ public class BaseStorage implements SynchronousBundleListener {
 				if (type == BundleEvent.UPDATED)
 					oldDescription = systemState.getBundle(bundleData.getBundleID());
 				newDescription = stateManager.getFactory().createBundleDescription(systemState, bundleData.getManifest(), bundleData.getLocation(), bundleData.getBundleID());
+				// For the install case we need to set the bundle before adding to the state
+				// because the bundle is not available in the context yet.
+				// We go ahead and set it for the update case for simplicity; 
+				// but this is not strictly necessary
+				newDescription.setUserObject(bundleData.getBundle());
 				if (oldDescription == null)
 					systemState.addBundle(newDescription);
 				else

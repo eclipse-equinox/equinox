@@ -35,7 +35,7 @@ import org.osgi.framework.startlevel.BundleStartLevel;
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement, BundleStartLevel {
+public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement, BundleStartLevel, BundleReference {
 	/** The Framework this bundle is part of */
 	protected final Framework framework;
 	/** The state of the bundle. */

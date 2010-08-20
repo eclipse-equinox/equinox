@@ -287,8 +287,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return result;
 	}
 
-	public SystemState createSystemState() {
-		SystemState state = new SystemState();
+	public SystemState createSystemState(BundleContext context) {
+		SystemState state = new SystemState(context);
 		state.setFactory(this);
 		return state;
 	}
@@ -329,9 +329,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return state;
 	}
 
-	public SystemState readSystemState(File stateFile, File lazyFile, boolean lazyLoad, long expectedTimeStamp) throws IOException {
+	public SystemState readSystemState(BundleContext context, File stateFile, File lazyFile, boolean lazyLoad, long expectedTimeStamp) throws IOException {
 		StateReader reader = new StateReader(stateFile, lazyFile, lazyLoad);
-		SystemState restoredState = new SystemState();
+		SystemState restoredState = new SystemState(context);
 		restoredState.setReader(reader);
 		restoredState.setFactory(this);
 		if (!reader.loadState(restoredState, expectedTimeStamp))

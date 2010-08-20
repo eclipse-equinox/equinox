@@ -32,7 +32,7 @@ public abstract class ResolverConstraint {
 
 	// returns the BundleDescription requiring the ResolverConstraint
 	BundleDescription getBundleDescription() {
-		return bundle.getBundle();
+		return bundle.getBundleDescription();
 	}
 
 	// returns whether this constraint is from an attached fragment

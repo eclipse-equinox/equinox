@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import org.eclipse.osgi.service.resolver.BaseDescription;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import java.util.Map;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class GenericCapability extends VersionSupplier {
 	ResolverBundle resolverBundle;
@@ -21,8 +22,12 @@ public class GenericCapability extends VersionSupplier {
 		this.resolverBundle = resolverBundle;
 	}
 
-	public BundleDescription getBundle() {
+	public BundleDescription getBundleDescription() {
 		return getBaseDescription().getSupplier();
+	}
+
+	GenericDescription getGenericDescription() {
+		return (GenericDescription) getBaseDescription();
 	}
 
 	public boolean isFromFragment() {
@@ -30,6 +35,22 @@ public class GenericCapability extends VersionSupplier {
 	}
 
 	public ResolverBundle getResolverBundle() {
+		return resolverBundle;
+	}
+
+	public String getNamespace() {
+		return getGenericDescription().getType();
+	}
+
+	public Map<String, String> getDirectives() {
+		return getGenericDescription().getDeclaredDirectives();
+	}
+
+	public Map<String, Object> getAttributes() {
+		return getGenericDescription().getDeclaredAttributes();
+	}
+
+	public BundleRevision getProviderRevision() {
 		return resolverBundle;
 	}
 }

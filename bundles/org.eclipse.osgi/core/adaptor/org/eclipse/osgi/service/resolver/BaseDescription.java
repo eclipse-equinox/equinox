@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Map;
 import org.osgi.framework.Version;
 
 /**
@@ -41,4 +42,18 @@ public interface BaseDescription {
 	 * @since 3.2
 	 */
 	public BundleDescription getSupplier();
+
+	/**
+	 * Returns the directives declared with the description
+	 * @return the directives declared with the description
+	 * @since 3.7
+	 */
+	public Map<String, String> getDeclaredDirectives();
+
+	/**
+	 * Returns the attributes declared with the description
+	 * @return the attributes declared with the description
+	 * @since 3.7
+	 */
+	public Map<String, Object> getDeclaredAttributes();
 }

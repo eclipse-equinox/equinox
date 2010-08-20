@@ -11,12 +11,27 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.service.resolver.State;
-import org.eclipse.osgi.service.resolver.StateDelta;
+import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 // this class provides synchronous access to resolve and add/remove/update bundle for the framework
 public class SystemState extends StateImpl {
+	private final BundleContext context;
+
+	public SystemState(BundleContext context) {
+		this.context = context;
+	}
+
+	@Override
+	boolean basicAddBundle(BundleDescription description) {
+		if (context != null && description.getUserObject() == null)
+			// We always set the user object to a BundleReference object;
+			// This allows the resolver to implement BundleRevisions for 
+			// the resolver hooks.
+			description.setUserObject(context.getBundle(description.getBundleId()));
+		return super.basicAddBundle(description);
+	}
 
 	/**
 	 * @throws BundleException  

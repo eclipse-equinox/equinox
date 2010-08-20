@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -294,16 +294,16 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * get the loader proxy for a bundle description
 	 */
 	public final BundleLoaderProxy getLoaderProxy(BundleDescription source) {
-		BundleLoaderProxy sourceProxy = (BundleLoaderProxy) source.getUserObject();
-		if (sourceProxy == null) {
+		Object userObject = source.getUserObject();
+		if (!(userObject instanceof BundleLoaderProxy)) {
 			// may need to force the proxy to be created
 			long exportingID = source.getBundleId();
 			BundleHost exportingBundle = (BundleHost) bundle.getFramework().getBundle(exportingID);
 			if (exportingBundle == null)
 				return null;
-			sourceProxy = exportingBundle.getLoaderProxy();
+			userObject = exportingBundle.getLoaderProxy();
 		}
-		return sourceProxy;
+		return (BundleLoaderProxy) userObject;
 	}
 
 	/*
@@ -1251,6 +1251,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// if proxy is not null then make sure to unset user object
 		// associated with the proxy in the state
 		BundleDescription description = proxy.getBundleDescription();
-		description.setUserObject(null);
+		// must set it back to the bundle object; not null
+		// need to make sure the user object is a BundleReference
+		description.setUserObject(proxy.getBundleHost());
 	}
 }

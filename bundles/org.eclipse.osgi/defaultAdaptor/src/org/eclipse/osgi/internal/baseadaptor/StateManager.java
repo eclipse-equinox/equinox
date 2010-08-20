@@ -149,7 +149,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 			readStartupTime = System.currentTimeMillis();
 		try {
 			boolean lazyLoad = !Boolean.valueOf(FrameworkProperties.getProperty(PROP_NO_LAZY_LOADING)).booleanValue();
-			systemState = factory.readSystemState(stateFile, lazyFile, lazyLoad, expectedTimeStamp);
+			systemState = factory.readSystemState(context, stateFile, lazyFile, lazyLoad, expectedTimeStamp);
 			// problems in the cache (corrupted/stale), don't create a state object
 			if (systemState == null || !initializeSystemState()) {
 				systemState = null;
@@ -214,7 +214,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 */
 	public synchronized State createSystemState() {
 		if (systemState == null) {
-			systemState = factory.createSystemState();
+			systemState = factory.createSystemState(context);
 			initializeSystemState();
 		}
 		return systemState;

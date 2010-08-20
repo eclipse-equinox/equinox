@@ -315,8 +315,14 @@ public class BundleHost extends AbstractBundle {
 		}
 
 		if (state == INSTALLED) {
-			if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
-				throw getResolutionFailureException();
+			try {
+				if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
+					throw getResolutionFailureException();
+			} catch (IllegalStateException e) {
+				// Can happen if the resolver detects a nested resolve process
+				throw new BundleException("Unexpected resolution exception.", BundleException.RESOLVE_ERROR, e); //$NON-NLS-1$
+			}
+
 		}
 
 		if ((options & START_ACTIVATION_POLICY) != 0 && (bundledata.getStatus() & Constants.BUNDLE_LAZY_START) != 0) {
@@ -646,6 +652,9 @@ public class BundleHost extends AbstractBundle {
 		if (bundleDescription == null)
 			return null;
 		proxy = new BundleLoaderProxy(this, bundleDescription);
+		// Note that BundleLoaderProxy is a BundleReference
+		// this is necessary to ensure the resolver can continue
+		// to provide BundleRevision objects to resolver hooks.
 		bundleDescription.setUserObject(proxy);
 		return proxy;
 	}

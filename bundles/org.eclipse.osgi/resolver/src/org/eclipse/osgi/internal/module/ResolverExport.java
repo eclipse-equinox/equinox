@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import java.util.Map;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.Capability;
 
 /*
  * A companion to ExportPackageDescription from the state used while resolving.
@@ -29,7 +32,7 @@ public class ResolverExport extends VersionSupplier {
 		return (ExportPackageDescription) base;
 	}
 
-	public BundleDescription getBundle() {
+	public BundleDescription getBundleDescription() {
 		return getExportPackageDescription().getExporter();
 	}
 
@@ -43,5 +46,21 @@ public class ResolverExport extends VersionSupplier {
 
 	String[] getUsesDirective() {
 		return (String[]) getExportPackageDescription().getDirective(Constants.USES_DIRECTIVE);
+	}
+
+	public String getNamespace() {
+		return Capability.PACKAGE_CAPABILITY;
+	}
+
+	public Map<String, String> getDirectives() {
+		return getExportPackageDescription().getDeclaredDirectives();
+	}
+
+	public Map<String, Object> getAttributes() {
+		return getExportPackageDescription().getDeclaredAttributes();
+	}
+
+	public BundleRevision getProviderRevision() {
+		return resolverBundle;
 	}
 }

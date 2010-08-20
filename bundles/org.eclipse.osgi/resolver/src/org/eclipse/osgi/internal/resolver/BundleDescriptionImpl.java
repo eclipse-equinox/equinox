@@ -17,6 +17,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.wiring.Capability;
 
 public final class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
 	static final String[] EMPTY_STRING = new String[0];
@@ -678,5 +679,27 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		String[] executionEnvironments;
 
 		HashMap dynamicStamps;
+	}
+
+	public Map<String, String> getDeclaredDirectives() {
+		Map<String, String> result = new HashMap(2);
+		if (!attachFragments()) {
+			result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_NEVER);
+		} else {
+			if (dynamicFragments())
+				result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_ALWAYS);
+			else
+				result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_RESOLVETIME);
+		}
+		if (isSingleton())
+			result.put(Constants.SINGLETON_DIRECTIVE, Boolean.TRUE.toString());
+		return Collections.unmodifiableMap(result);
+	}
+
+	public Map<String, Object> getDeclaredAttributes() {
+		Map<String, Object> result = new HashMap(1);
+		result.put(Capability.BUNDLE_CAPABILITY, getName());
+		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
+		return Collections.unmodifiableMap(result);
 	}
 }

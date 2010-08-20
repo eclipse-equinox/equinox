@@ -23,6 +23,7 @@ import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.packageadmin.*;
 
 /**
@@ -48,7 +49,7 @@ import org.osgi.service.packageadmin.*;
  * old values, isRemovalPending() returns true, and getExportingBundle()
  * and getImportingBundles() return null.
  */
-public class PackageAdminImpl implements PackageAdmin {
+public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	/** framework object */
 	protected Framework framework;
 	private Map removalPendings = new HashMap();
@@ -106,14 +107,14 @@ public class PackageAdminImpl implements PackageAdmin {
 		BundleDescription exporter = description.getExporter();
 		if (exporter == null || exporter.getHost() != null)
 			return null;
-		BundleLoaderProxy proxy = (BundleLoaderProxy) exporter.getUserObject();
-		if (proxy == null) {
+		Object userObject = exporter.getUserObject();
+		if (!(userObject instanceof BundleLoaderProxy)) {
 			BundleHost bundle = (BundleHost) framework.getBundle(exporter.getBundleId());
 			if (bundle == null)
 				return null;
-			proxy = bundle.getLoaderProxy();
+			userObject = bundle.getLoaderProxy();
 		}
-		return new ExportedPackageImpl(description, proxy);
+		return new ExportedPackageImpl(description, (BundleLoaderProxy) userObject);
 	}
 
 	public ExportedPackage getExportedPackage(String name) {
@@ -148,10 +149,10 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	public void refreshPackages(Bundle[] input) {
-		refreshPackages(input, false);
+		refreshPackages(input, false, null);
 	}
 
-	public void refreshPackages(Bundle[] input, boolean synchronously) {
+	public void refreshPackages(Bundle[] input, boolean synchronously, final FrameworkListener[] listeners) {
 		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
 
 		final AbstractBundle[] copy;
@@ -164,13 +165,13 @@ public class PackageAdminImpl implements PackageAdmin {
 			copy = null;
 
 		if (synchronously) {
-			doResolveBundles(copy, true);
+			doResolveBundles(copy, true, listeners);
 			if (framework.isForcedRestart())
 				framework.systemBundle.stop();
 		} else {
 			Thread refresh = framework.secureAction.createThread(new Runnable() {
 				public void run() {
-					doResolveBundles(copy, true);
+					doResolveBundles(copy, true, listeners);
 					if (framework.isForcedRestart())
 						framework.shutdown(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
 				}
@@ -181,7 +182,7 @@ public class PackageAdminImpl implements PackageAdmin {
 
 	public boolean resolveBundles(Bundle[] bundles) {
 		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
-		doResolveBundles(null, false);
+		doResolveBundles(null, false, null);
 		if (bundles == null)
 			bundles = framework.getAllBundles();
 		for (int i = 0; i < bundles.length; i++)
@@ -192,7 +193,7 @@ public class PackageAdminImpl implements PackageAdmin {
 	}
 
 	// This method is protected to enable a work around to bug 245251
-	synchronized protected void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages) {
+	synchronized protected void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages, FrameworkListener[] listeners) {
 		try {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
@@ -251,7 +252,7 @@ public class PackageAdminImpl implements PackageAdmin {
 			if (framework.isActive()) {
 				framework.publishBundleEvent(Framework.BATCHEVENT_END, framework.systemBundle);
 				if (refreshPackages)
-					framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null);
+					framework.publishFrameworkEvent(FrameworkEvent.PACKAGES_REFRESHED, framework.systemBundle, null, listeners);
 			}
 		}
 	}
@@ -347,11 +348,11 @@ public class PackageAdminImpl implements PackageAdmin {
 							// ignore
 						}
 			}
-			BundleLoaderProxy proxy = (BundleLoaderProxy) bundle.getUserObject();
-			if (proxy != null) {
-				BundleLoader.closeBundleLoader(proxy);
+			Object userObject = bundle.getUserObject();
+			if (userObject instanceof BundleLoaderProxy) {
+				BundleLoader.closeBundleLoader((BundleLoaderProxy) userObject);
 				try {
-					proxy.getBundleHost().getBundleData().close();
+					((BundleLoaderProxy) userObject).getBundleHost().getBundleData().close();
 				} catch (IOException e) {
 					// ignore
 				}
@@ -723,5 +724,27 @@ public class PackageAdminImpl implements PackageAdmin {
 			}
 			removals.add(bundledata);
 		}
+	}
+
+	public Bundle getBundle() {
+		return framework.getBundle(0);
+	}
+
+	public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
+		refreshPackages(bundles == null ? null : bundles.toArray(new Bundle[bundles.size()]), false, listeners);
+	}
+
+	public boolean resolveBundles(Collection<Bundle> bundles) {
+		return resolveBundles(bundles == null ? null : bundles.toArray(new Bundle[bundles.size()]));
+	}
+
+	public Collection<Bundle> getRemovalPendingBundles() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
+	}
+
+	public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 }

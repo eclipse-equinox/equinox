@@ -649,6 +649,13 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHook.java" type="org.osgi.framework.hooks.resolver.ResolverHook">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.resolver.ResolverHook"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
 <filter id="403984517">
 <message_arguments>
@@ -669,6 +676,48 @@
 <filter comment="Ignore OSGi API." id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.startlevel.FrameworkStartLevel"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleRevision.java" type="org.osgi.framework.wiring.BundleRevision">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleRevision"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleWiring"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleWirings.java" type="org.osgi.framework.wiring.BundleWirings">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleWirings"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/Capability.java" type="org.osgi.framework.wiring.Capability">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.Capability"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/FrameworkWiring.java" type="org.osgi.framework.wiring.FrameworkWiring">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.FrameworkWiring"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/WiredCapability.java" type="org.osgi.framework.wiring.WiredCapability">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.WiredCapability"/>
 </message_arguments>
 </filter>
 </resource>

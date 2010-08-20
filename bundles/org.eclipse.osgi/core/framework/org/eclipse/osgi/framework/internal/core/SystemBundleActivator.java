@@ -14,6 +14,8 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
+import org.eclipse.osgi.internal.resolver.StateImpl;
+import org.eclipse.osgi.service.resolver.State;
 import org.osgi.framework.*;
 import org.osgi.service.condpermadmin.ConditionalPermissionAdmin;
 
@@ -56,6 +58,9 @@ public class SystemBundleActivator implements BundleActivator {
 
 		// Always call the adaptor.frameworkStart() at the end of this method.
 		framework.adaptor.frameworkStart(bc);
+		State state = framework.adaptor.getState();
+		if (state instanceof StateImpl)
+			((StateImpl) state).setResolverHook(new CoreResolverHook((BundleContextImpl) context, framework.getServiceRegistry()));
 		// attempt to resolve all bundles
 		// this is done after the adaptor.frameworkStart has been called
 		// this should be the first time the resolver State is accessed

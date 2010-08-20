@@ -12,11 +12,12 @@
 
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.osgi.framework.Version;
+import org.osgi.framework.wiring.Capability;
 
 public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements ExportPackageDescription {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
@@ -34,7 +35,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 
 	public Map getDirectives() {
 		synchronized (this.monitor) {
-			Map result = new HashMap(5);
+			Map result = new HashMap(7);
 			if (uses != null)
 				result.put(Constants.USES_DIRECTIVE, uses);
 			if (exclude != null)
@@ -49,6 +50,51 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			result.put(EQUINOX_EE, equinox_ee == -1 ? EQUINOX_EE_DEFAULT : new Integer(equinox_ee));
 			return result;
 		}
+	}
+
+	public Map<String, String> getDeclaredDirectives() {
+		Map<String, String> result = new HashMap(6);
+		synchronized (this.monitor) {
+			if (uses != null)
+				result.put(Constants.USES_DIRECTIVE, toString(uses));
+			if (exclude != null)
+				result.put(Constants.EXCLUDE_DIRECTIVE, exclude);
+			if (include != null)
+				result.put(Constants.INCLUDE_DIRECTIVE, include);
+			if (mandatory != null)
+				result.put(Constants.MANDATORY_DIRECTIVE, toString(mandatory));
+			if (friends != null)
+				result.put(Constants.FRIENDS_DIRECTIVE, toString(friends));
+			if (internal != null)
+				result.put(Constants.INTERNAL_DIRECTIVE, internal.toString());
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	public Map<String, Object> getDeclaredAttributes() {
+		Map<String, Object> result = new HashMap(2);
+		synchronized (this.monitor) {
+			if (attributes != null)
+				result.putAll(attributes);
+			result.put(Capability.PACKAGE_CAPABILITY, getName());
+			result.put(Constants.VERSION_ATTRIBUTE, getVersion());
+			Version bundleVersion = getSupplier().getVersion();
+			if (bundleVersion != null)
+				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion);
+			String symbolicName = getSupplier().getSymbolicName();
+			if (symbolicName != null)
+				result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	private static String toString(String[] list) {
+		StringBuffer buffer = new StringBuffer();
+		for (String string : list)
+			buffer.append(string).append(',');
+		if (buffer.length() > 0)
+			buffer.setLength(buffer.length() - 1);
+		return buffer.toString();
 	}
 
 	public Object getDirective(String key) {

@@ -11,12 +11,12 @@
 package org.eclipse.osgi.internal.module;
 
 import java.util.ArrayList;
-import org.eclipse.osgi.service.resolver.VersionConstraint;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
 
 public class GenericConstraint extends ResolverConstraint {
 	private ArrayList matchingCapability;
 
-	GenericConstraint(ResolverBundle bundle, VersionConstraint constraint) {
+	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint) {
 		super(bundle, constraint);
 	}
 
@@ -26,6 +26,10 @@ public class GenericConstraint extends ResolverConstraint {
 
 	boolean isSatisfiedBy(VersionSupplier vs) {
 		return !vs.getResolverBundle().isUninstalled() && getVersionConstraint().isSatisfiedBy(vs.getBaseDescription());
+	}
+
+	public String getNameSpace() {
+		return ((GenericSpecification) getVersionConstraint()).getType();
 	}
 
 	public void setMatchingCapability(GenericCapability capability) {

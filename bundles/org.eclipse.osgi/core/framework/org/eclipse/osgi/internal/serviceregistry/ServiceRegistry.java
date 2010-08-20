@@ -281,6 +281,7 @@ public class ServiceRegistry {
 	 *        <code>null</code> for all services.
 	 * @param filterstring The filter criteria.
 	 * @param allservices True if the bundle called getAllServiceReferences.
+	 * @param callHooks True if the references should be filtered using service find hooks.
 	 * @return An array of <code>ServiceReferenceImpl</code> objects or
 	 *         <code>null</code> if no services are registered which satisfy
 	 *         the search.
@@ -289,7 +290,7 @@ public class ServiceRegistry {
 	 * @throws java.lang.IllegalStateException If this BundleContext is no
 	 *         longer valid.
 	 */
-	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices) throws InvalidSyntaxException {
+	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices, boolean callHooks) throws InvalidSyntaxException {
 		if (Debug.DEBUG_SERVICES) {
 			Debug.println((allservices ? "getAllServiceReferences(" : "getServiceReferences(") + clazz + ", \"" + filterstring + "\")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -315,14 +316,36 @@ public class ServiceRegistry {
 			references.add(reference);
 		}
 
-		final Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<ServiceReference<?>>(references);
-		notifyFindHooks(context, clazz, filterstring, allservices, shrinkable);
-
+		if (callHooks) {
+			Collection<ServiceReference<?>> shrinkable = new ShrinkableCollection<ServiceReference<?>>(references);
+			notifyFindHooks(context, clazz, filterstring, allservices, shrinkable);
+		}
 		int size = references.size();
 		if (size == 0) {
 			return null;
 		}
 		return references.toArray(new ServiceReferenceImpl[size]);
+	}
+
+	/**
+	 * This method performs the same function as calling
+	 * {@link #getServiceReferences(BundleContextImpl, String, String, boolean, boolean)} with a 
+	 * {@code true} callHooks value.
+	 * @param context The BundleContext of the requesting bundle.
+	 * @param clazz The class name with which the service was registered or
+	 *        <code>null</code> for all services.
+	 * @param filterstring The filter criteria.
+	 * @param allservices True if the bundle called getAllServiceReferences.
+	 * @return An array of <code>ServiceReferenceImpl</code> objects or
+	 *         <code>null</code> if no services are registered which satisfy
+	 *         the search.
+	 * @throws InvalidSyntaxException If <code>filter</code> contains an
+	 *         invalid filter string that cannot be parsed.
+	 * @throws java.lang.IllegalStateException If this BundleContext is no
+	 *         longer valid.
+	 */
+	public ServiceReferenceImpl<?>[] getServiceReferences(final BundleContextImpl context, final String clazz, final String filterstring, final boolean allservices) throws InvalidSyntaxException {
+		return getServiceReferences(context, clazz, filterstring, allservices, true);
 	}
 
 	/**
