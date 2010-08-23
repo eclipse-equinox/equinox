@@ -43,7 +43,6 @@ public class CoreResolverHook implements ResolverHook {
 	private final BundleContextImpl context;
 	private final ServiceRegistry registry;
 	private final List<HookReference> hooks = new ArrayList<HookReference>(0);
-	private ResolverHook current = null;
 
 	public CoreResolverHook(BundleContextImpl context, ServiceRegistry registry) {
 		this.context = context;
@@ -82,12 +81,9 @@ public class CoreResolverHook implements ResolverHook {
 			if (hook != null) {
 				hooks.add(new HookReference(hookRef, hook));
 				try {
-					current = hook;
 					hook.begin();
 				} catch (Throwable t) {
 					handleHookException(t, hook, "begin", hookRef.getBundle()); //$NON-NLS-1$
-				} finally {
-					current = null;
 				}
 			}
 		}
@@ -106,12 +102,9 @@ public class CoreResolverHook implements ResolverHook {
 				iHooks.remove();
 			} else {
 				try {
-					current = hookRef.hook;
 					hookRef.hook.filterResolvable(candidates);
 				} catch (Throwable t) {
 					handleHookException(t, hookRef.hook, "filterResolvable", hookRef.reference.getBundle()); //$NON-NLS-1$
-				} finally {
-					current = null;
 				}
 			}
 		}
@@ -130,12 +123,9 @@ public class CoreResolverHook implements ResolverHook {
 				iHooks.remove();
 			} else {
 				try {
-					current = hookRef.hook;
 					hookRef.hook.filterSingletonCollisions(singleton, collisionCandidates);
 				} catch (Throwable t) {
 					handleHookException(t, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle()); //$NON-NLS-1$
-				} finally {
-					current = null;
 				}
 			}
 		}
@@ -154,12 +144,9 @@ public class CoreResolverHook implements ResolverHook {
 				iHooks.remove();
 			} else {
 				try {
-					current = hookRef.hook;
 					hookRef.hook.filterMatches(requirer, candidates);
 				} catch (Throwable t) {
 					handleHookException(t, hookRef.hook, "filterMatches", hookRef.reference.getBundle()); //$NON-NLS-1$
-				} finally {
-					current = null;
 				}
 			}
 		}
@@ -176,12 +163,9 @@ public class CoreResolverHook implements ResolverHook {
 			// We do not remove unregistered services here because we are going to remove of of them at the end
 			if (hookRef.reference.getBundle() != null) {
 				try {
-					current = hookRef.hook;
 					hookRef.hook.end();
 				} catch (Throwable t) {
 					handleHookException(t, hookRef.hook, "end", hookRef.reference.getBundle()); //$NON-NLS-1$
-				} finally {
-					current = null;
 				}
 				context.ungetService(hookRef.reference);
 			}
