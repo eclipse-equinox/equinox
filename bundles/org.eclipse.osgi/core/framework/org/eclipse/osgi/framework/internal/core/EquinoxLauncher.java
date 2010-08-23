@@ -339,8 +339,10 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 	}
 
 	public int compareTo(Bundle o) {
-		// TODO need to implement
-		throw new UnsupportedOperationException("need to implement");
+		Bundle current = systemBundle;
+		if (current != null)
+			return current.compareTo(o);
+		throw new IllegalStateException();
 	}
 
 	public File getDataFile(String filename) {
