@@ -71,8 +71,7 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	}
 
 	public void handleRuntimeError(Throwable error) {
-		// TODO Auto-generated method stub
-
+		// do nothing
 	}
 
 	public FrameworkLog createFrameworkLog() {
