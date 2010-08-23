@@ -203,4 +203,8 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
+	public BundleDescription[] getRemovalPending() {
+		throw new UnsupportedOperationException();
+	}
+
 }

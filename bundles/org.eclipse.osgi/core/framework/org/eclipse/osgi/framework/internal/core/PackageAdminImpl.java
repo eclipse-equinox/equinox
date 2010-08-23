@@ -52,7 +52,7 @@ import org.osgi.service.packageadmin.*;
 public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	/** framework object */
 	protected Framework framework;
-	private Map removalPendings = new HashMap();
+	private Map<Long, List<BundleData>> removalPendings = new HashMap();
 
 	/* 
 	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
@@ -339,14 +339,15 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			}
 			synchronized (removalPendings) {
 				// ensure that the bundle datas are closed, (fix for bug 259399)
-				List removals = (List) removalPendings.remove(new Long(bundle.getBundleId()));
+				List<BundleData> removals = removalPendings.remove(new Long(bundle.getBundleId()));
 				if (removals != null)
-					for (Iterator iRemovals = removals.iterator(); iRemovals.hasNext();)
+					for (BundleData bundleData : removals) {
 						try {
-							((BundleData) iRemovals.next()).close();
+							bundleData.close();
 						} catch (IOException e) {
 							// ignore
 						}
+					}
 			}
 			Object userObject = bundle.getUserObject();
 			if (userObject instanceof BundleLoaderProxy) {
@@ -717,7 +718,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	void addRemovalPending(BundleData bundledata) {
 		synchronized (removalPendings) {
 			Long id = new Long(bundledata.getBundleID());
-			List removals = (List) removalPendings.get(id);
+			List<BundleData> removals = removalPendings.get(id);
 			if (removals == null) {
 				removals = new ArrayList(1);
 				removalPendings.put(id, removals);
@@ -739,12 +740,51 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	public Collection<Bundle> getRemovalPendingBundles() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		// TODO need to consolidate our removal pending tracking.
+		// We currently have three places this is kept (PackageAdminImpl, StateImpl and ResolverImpl)
+		// Using the state's because it has easy access to the uninstalled Bundle objects
+		BundleDescription[] removals = framework.adaptor.getState().getRemovalPending();
+		Collection<Bundle> result = new HashSet<Bundle>();
+		for (int i = 0; i < removals.length; i++) {
+			Object ref = removals[i].getUserObject();
+			if (ref instanceof BundleReference)
+				result.add(((BundleReference) ref).getBundle());
+		}
+		return result;
 	}
 
 	public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		State state = framework.adaptor.getState();
+		BundleDescription[] removals = state.getRemovalPending();
+		Set<Bundle> result = new HashSet<Bundle>();
+		for (Bundle bundle : bundles) {
+			addDependents(bundle, result, removals, state);
+		}
+		return result;
+	}
+
+	private static void addDependents(Bundle bundle, Set<Bundle> result, BundleDescription[] removals, State state) {
+		if (result.contains(bundle))
+			return; // avoid cycles
+		result.add(bundle);
+		BundleDescription description = state.getBundle(bundle.getBundleId());
+		addDependents(description, result, removals, state);
+		// check if this is a removal pending
+		for (BundleDescription removed : removals) {
+			if (removed.getBundleId() == bundle.getBundleId())
+				addDependents(removed, result, removals, state);
+		}
+
+	}
+
+	private static void addDependents(BundleDescription description, Set<Bundle> result, BundleDescription[] removals, State state) {
+		if (description == null)
+			return;
+		BundleDescription[] dependents = description.getDependents();
+		for (BundleDescription dependent : dependents) {
+			Object ref = dependent.getUserObject();
+			if (ref instanceof BundleReference)
+				addDependents(((BundleReference) ref).getBundle(), result, removals, state);
+		}
 	}
 }

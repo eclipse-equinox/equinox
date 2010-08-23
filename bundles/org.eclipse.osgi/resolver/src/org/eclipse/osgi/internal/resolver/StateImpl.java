@@ -445,7 +445,7 @@ public abstract class StateImpl implements State {
 					reResolve = getBundles();
 					// need to get any removal pendings before flushing
 					if (removalPendings.size() > 0) {
-						BundleDescription[] removed = getRemovalPendings();
+						BundleDescription[] removed = getRemovalPending();
 						reResolve = mergeBundles(reResolve, removed);
 					}
 					flush(reResolve);
@@ -453,7 +453,7 @@ public abstract class StateImpl implements State {
 				if (resolved && reResolve == null)
 					return new StateDeltaImpl(this);
 				if (removalPendings.size() > 0) {
-					BundleDescription[] removed = getRemovalPendings();
+					BundleDescription[] removed = getRemovalPending();
 					reResolve = mergeBundles(reResolve, removed);
 				}
 				// use the Headers class to handle ignoring case while matching keys (bug 180817)
@@ -833,7 +833,7 @@ public abstract class StateImpl implements State {
 	 * Returns the latest versions BundleDescriptions which have old removal pending versions.
 	 * @return the BundleDescriptions that have removal pending versions.
 	 */
-	public BundleDescription[] getRemovalPendings() {
+	public BundleDescription[] getRemovalPending() {
 		synchronized (this.monitor) {
 			Iterator removed = removalPendings.iterator();
 			BundleDescription[] result = new BundleDescription[removalPendings.size()];

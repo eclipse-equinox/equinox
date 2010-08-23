@@ -356,6 +356,13 @@ public interface State {
 	public BundleDescription[] getResolvedBundles();
 
 	/**
+	 * Returns descriptions for all bundles in a removal pending state.
+	 * @return the descriptions for all bundles in a removal pending state.
+	 * @since 3.7
+	 */
+	public BundleDescription[] getRemovalPending();
+
+	/**
 	 * Returns whether this state is empty.
 	 * @return <code>true</code> if this state is empty, <code>false</code> 
 	 * 	otherwise

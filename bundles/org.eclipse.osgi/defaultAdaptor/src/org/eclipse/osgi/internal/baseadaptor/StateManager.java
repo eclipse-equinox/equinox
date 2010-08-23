@@ -104,7 +104,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 * @throws IOException
 	 */
 	public void shutdown(File saveStateFile, File saveLazyFile) throws IOException {
-		BundleDescription[] removalPendings = systemState.getRemovalPendings();
+		BundleDescription[] removalPendings = systemState.getRemovalPending();
 		cleanRemovalPendings(removalPendings);
 		writeState(systemState, saveStateFile, saveLazyFile);
 		stopDataManager();
@@ -128,7 +128,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 * @throws IOException
 	 */
 	public void update(File updateStateFile, File updateLazyFile) throws IOException {
-		BundleDescription[] removalPendings = systemState.getRemovalPendings();
+		BundleDescription[] removalPendings = systemState.getRemovalPending();
 		StateImpl state = systemState;
 		if (removalPendings.length > 0) {
 			state = (StateImpl) state.getFactory().createState(systemState);
