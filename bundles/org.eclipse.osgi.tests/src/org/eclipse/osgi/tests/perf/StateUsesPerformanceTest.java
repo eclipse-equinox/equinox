@@ -42,11 +42,11 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testUsesResolution00100() throws BundleException {
-		doUsesResolution(100, 100, null, StatePerformanceTest.PERFORMANCE_BUG311546_EXPLANATION);
+		doUsesResolution(100, 100, null, null);
 	}
 
 	public void testUsesResolution00500() throws BundleException {
-		doUsesResolution(500, 10, null, StatePerformanceTest.PERFORMANCE_BUG311546_EXPLANATION);
+		doUsesResolution(500, 10, null, null);
 	}
 
 	public void testUsesResolution01000() throws BundleException {
