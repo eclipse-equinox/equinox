@@ -1493,7 +1493,7 @@ public class Main {
 			}
 
 			//just consume the --launcher.overrideVmargs and --launcher.appendVmargs
-			if (args[i - 1].equalsIgnoreCase(APPEND_VMARGS) || args[i - 1].equalsIgnoreCase(OVERRIDE_VMARGS)) {
+			if (args[i].equalsIgnoreCase(APPEND_VMARGS) || args[i].equalsIgnoreCase(OVERRIDE_VMARGS)) {
 				found = true;
 			}
 
