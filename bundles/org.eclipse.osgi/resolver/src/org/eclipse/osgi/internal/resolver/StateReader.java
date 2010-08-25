@@ -47,7 +47,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 30;
+	public static final byte STATE_CACHE_VERSION = 31;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -491,7 +491,7 @@ final class StateReader {
 				attrs.put(key, mapAttrs.get(key));
 			}
 		}
-		result.setAttributes(attrs);
+		result.setAttributes(attrs, false);
 		return result;
 	}
 
@@ -506,7 +506,7 @@ final class StateReader {
 		result.setSupplers(suppliers);
 		result.setResolution(in.readInt());
 		try {
-			result.setMatchingFilter(readString(in, false));
+			result.setMatchingFilter(readString(in, false), false);
 		} catch (InvalidSyntaxException e) {
 			// do nothing this filter was tested before
 		}

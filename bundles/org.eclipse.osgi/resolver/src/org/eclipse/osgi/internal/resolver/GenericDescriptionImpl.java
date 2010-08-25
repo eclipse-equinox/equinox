@@ -31,11 +31,16 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		return supplier;
 	}
 
-	void setAttributes(Dictionary attributes) {
+	void setAttributes(Dictionary attributes, boolean addImplied) {
 		synchronized (this.monitor) {
 			this.attributes = attributes;
-			// always add/replace the version attribute with the actual Version object
-			attributes.put(Constants.VERSION_ATTRIBUTE, getVersion());
+			if (addImplied) {
+				// always add/replace the version attribute with the actual Version object
+				attributes.put(Constants.VERSION_ATTRIBUTE, getVersion());
+				// always add the name
+				if (getName() != null)
+					attributes.put(getType(), getName());
+			}
 		}
 	}
 
@@ -70,16 +75,15 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	public Map<String, Object> getDeclaredAttributes() {
 		synchronized (this.monitor) {
 			Map<String, Object> result = new HashMap(5);
-
-			String name = getName();
-			String nameSpace = getType();
-			if (name != GenericDescription.DEFAULT_TYPE)
-				result.put(nameSpace, name);
 			if (attributes != null)
 				for (Enumeration keys = attributes.keys(); keys.hasMoreElements();) {
 					String key = (String) keys.nextElement();
 					result.put(key, attributes.get(key));
 				}
+			String name = getName();
+			String nameSpace = getType();
+			if (result.get(nameSpace) == null && name != null)
+				result.put(nameSpace, name);
 			return Collections.unmodifiableMap(result);
 		}
 	}

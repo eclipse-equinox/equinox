@@ -142,8 +142,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		for (int i = 0; i < genericCapabilities.length; i++) {
 			GenericDescriptionImpl cap = new GenericDescriptionImpl();
 			cap.setName(genericCapabilities[i].getName());
+			cap.setType(genericCapabilities[i].getType());
 			cap.setVersion(genericCapabilities[i].getVersion());
-			cap.setAttributes(genericCapabilities[i].getAttributes());
+			cap.setAttributes(genericCapabilities[i].getAttributes(), true);
 			result[i] = cap;
 		}
 		return result;
@@ -156,10 +157,12 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		for (int i = 0; i < genericRequires.length; i++) {
 			GenericSpecificationImpl req = new GenericSpecificationImpl();
 			req.setName(genericRequires[i].getName());
+			req.setType(genericRequires[i].getType());
+			req.setResolution(req.getResolution());
 			try {
-				req.setMatchingFilter(genericRequires[i].getMatchingFilter());
+				req.setMatchingFilter(genericRequires[i].getMatchingFilter(), true);
 			} catch (InvalidSyntaxException e) {
-				// do nothing; this filter should aready have been tested
+				// do nothing; this filter should already have been tested
 			}
 			result[i] = req;
 		}
@@ -249,7 +252,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				Object key = keys.next();
 				attrs.put(key, attributes.get(key));
 			}
-		result.setAttributes(attrs);
+		result.setAttributes(attrs, true);
 		return result;
 	}
 
@@ -257,7 +260,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		GenericSpecificationImpl result = new GenericSpecificationImpl();
 		result.setName(name);
 		result.setType(type);
-		result.setMatchingFilter(matchingFilter);
+		result.setMatchingFilter(matchingFilter, true);
 		int resolution = 0;
 		if (optional)
 			resolution |= GenericSpecification.RESOLUTION_OPTIONAL;

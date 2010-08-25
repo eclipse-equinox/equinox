@@ -34,6 +34,7 @@ public class AllTests extends TestCase {
 		suite.addTest(R4ResolverTest.suite());
 		suite.addTest(XFriendsInternalResolverTest.suite());
 		suite.addTest(GenericCapabilityTest.suite());
+		suite.addTest(OSGiCapabilityTest.suite());
 		suite.addTest(DevModeTest.suite());
 		return suite;
 	}

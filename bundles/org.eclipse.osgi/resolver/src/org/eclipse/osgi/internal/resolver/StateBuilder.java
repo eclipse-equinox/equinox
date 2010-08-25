@@ -13,8 +13,8 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
@@ -28,6 +28,11 @@ class StateBuilder {
 	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
+	static final String OSGI_PROVIDE_CAPABILITY = "Provide-Capability"; //$NON-NLS-1$
+	static final String OSGI_REQUIRE_CAPABILITY = "Require-Capability"; //$NON-NLS-1$
+	static final String OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE = "effective"; //$NON-NLS-1$
+	static final String OSGI_RESOLVE_EFFECTIVE_CAPABILITY = "resolve"; //$NON-NLS-1$
+	static final String OSGI_ACTIVE_EFFECTIVE_CAPABILITY = "active"; //$NON-NLS-1$
 
 	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$
@@ -90,7 +95,7 @@ class StateBuilder {
 		if (host != null)
 			result.setHost(createHostSpecification(host[0], state));
 		ManifestElement[] exports = ManifestElement.parseHeader(Constants.EXPORT_PACKAGE, (String) manifest.get(Constants.EXPORT_PACKAGE));
-		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, (String) manifest.get(Constants.PROVIDE_PACKAGE)); // TODO this is null for now until the framwork is updated to handle the new re-export semantics
+		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, (String) manifest.get(Constants.PROVIDE_PACKAGE));
 		boolean strict = state != null && state.inStrictMode();
 		ArrayList providedExports = new ArrayList(provides == null ? 0 : provides.length);
 		result.setExportPackages(createExportPackages(exports, provides, providedExports, manifestVersion, strict));
@@ -101,9 +106,11 @@ class StateBuilder {
 		result.setRequiredBundles(createRequiredBundles(requires));
 		String[][] genericAliases = getGenericAliases(state);
 		ManifestElement[] genericRequires = getGenericRequires(manifest, genericAliases);
-		result.setGenericRequires(createGenericRequires(genericRequires));
+		ManifestElement[] osgiRequires = ManifestElement.parseHeader(OSGI_REQUIRE_CAPABILITY, (String) manifest.get(OSGI_REQUIRE_CAPABILITY));
+		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires));
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
-		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities));
+		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(OSGI_PROVIDE_CAPABILITY, (String) manifest.get(OSGI_PROVIDE_CAPABILITY));
+		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities));
 		ManifestElement[] nativeCode = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, (String) manifest.get(Constants.BUNDLE_NATIVECODE));
 		result.setNativeCodeSpecification(createNativeCode(nativeCode));
 		return result;
@@ -346,8 +353,8 @@ class StateBuilder {
 		}
 	}
 
-	private static Map getAttributes(ManifestElement exportPackage, String[] definedAttrs) {
-		Enumeration keys = exportPackage.getKeys();
+	private static Map getAttributes(ManifestElement element, String[] definedAttrs) {
+		Enumeration keys = element.getKeys();
 		Map arbitraryAttrs = null;
 		if (keys == null)
 			return null;
@@ -360,7 +367,7 @@ class StateBuilder {
 					break;
 				}
 			}
-			String value = exportPackage.getAttribute(key);
+			String value = element.getAttribute(key);
 			int colonIndex = key.indexOf(':');
 			String type = ATTR_TYPE_STRING;
 			if (colonIndex > 0) {
@@ -371,13 +378,13 @@ class StateBuilder {
 				if (arbitraryAttrs == null)
 					arbitraryAttrs = new HashMap();
 				Object putValue = value;
-				if (ATTR_TYPE_STRING.equals(type))
+				if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
 					putValue = value;
-				else if (ATTR_TYPE_DOUBLE.equals(type))
+				else if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
 					putValue = new Double(value);
-				else if (ATTR_TYPE_LONG.equals(type))
+				else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
 					putValue = new Long(value);
-				else if (ATTR_TYPE_URI.equals(type))
+				else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
 					try {
 						Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
 						Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
@@ -390,9 +397,9 @@ class StateBuilder {
 					} catch (Exception e) {
 						throw new RuntimeException(e.getMessage(), e);
 					}
-				else if (ATTR_TYPE_VERSION.equals(type))
+				else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
 					putValue = new Version(value);
-				else if (ATTR_TYPE_SET.equals(type))
+				else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
 					putValue = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
 				arbitraryAttrs.put(key, putValue);
 			}
@@ -413,12 +420,53 @@ class StateBuilder {
 		return result;
 	}
 
-	private static GenericSpecification[] createGenericRequires(ManifestElement[] genericRequires) throws BundleException {
-		if (genericRequires == null)
+	private static GenericSpecification[] createGenericRequires(ManifestElement[] equinoxRequires, ManifestElement[] osgiRequires) throws BundleException {
+		List<GenericSpecification> result = createEquinoxRequires(equinoxRequires);
+		result = createOSGiRequires(osgiRequires, result);
+		return result == null ? null : result.toArray(new GenericSpecification[result.size()]);
+	}
+
+	private static List<GenericSpecification> createOSGiRequires(ManifestElement[] osgiRequires, List<GenericSpecification> result) throws BundleException {
+		if (osgiRequires == null)
+			return result;
+		if (result == null)
+			result = new ArrayList<GenericSpecification>();
+		for (ManifestElement element : osgiRequires) {
+			String[] namespaces = element.getValueComponents();
+			types: for (String namespace : namespaces) {
+				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
+				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
+					break types;
+				String filterSpec = element.getDirective("filter"); //$NON-NLS-1$
+				if (filterSpec == null)
+					throw new BundleException("Must specify the filter directive for " + OSGI_REQUIRE_CAPABILITY); //$NON-NLS-1$
+				GenericSpecificationImpl spec = new GenericSpecificationImpl();
+				spec.setType(namespace);
+				try {
+					FilterImpl filter = FilterImpl.newInstance(filterSpec);
+					spec.setMatchingFilter(filter);
+					String name = filter.getPrimaryKeyValue(namespace);
+					if (name != null)
+						spec.setName(name);
+				} catch (InvalidSyntaxException e) {
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, OSGI_REQUIRE_CAPABILITY, element.toString());
+					throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
+				}
+				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
+				if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
+					spec.setResolution(GenericSpecification.RESOLUTION_OPTIONAL);
+				result.add(spec);
+			}
+		}
+		return result;
+	}
+
+	private static List<GenericSpecification> createEquinoxRequires(ManifestElement[] equinoxRequires) throws BundleException {
+		if (equinoxRequires == null)
 			return null;
-		ArrayList results = new ArrayList(genericRequires.length);
-		for (int i = 0; i < genericRequires.length; i++) {
-			String[] genericNames = genericRequires[i].getValueComponents();
+		ArrayList<GenericSpecification> results = new ArrayList<GenericSpecification>(equinoxRequires.length);
+		for (int i = 0; i < equinoxRequires.length; i++) {
+			String[] genericNames = equinoxRequires[i].getValueComponents();
 			for (int j = 0; j < genericNames.length; j++) {
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
 				int colonIdx = genericNames[j].indexOf(':');
@@ -428,13 +476,13 @@ class StateBuilder {
 				} else
 					spec.setName(genericNames[j]);
 				try {
-					spec.setMatchingFilter(genericRequires[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE));
+					spec.setMatchingFilter(equinoxRequires[i].getAttribute(Constants.SELECTION_FILTER_ATTRIBUTE), true);
 				} catch (InvalidSyntaxException e) {
-					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, GENERIC_REQUIRE, genericRequires[i].toString());
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, GENERIC_REQUIRE, equinoxRequires[i].toString());
 					throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 				}
-				String optional = genericRequires[i].getAttribute(OPTIONAL_ATTR);
-				String multiple = genericRequires[i].getAttribute(MULTIPLE_ATTR);
+				String optional = equinoxRequires[i].getAttribute(OPTIONAL_ATTR);
+				String multiple = equinoxRequires[i].getAttribute(MULTIPLE_ATTR);
 				int resolution = 0;
 				if (TRUE.equals(optional))
 					resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
@@ -444,15 +492,51 @@ class StateBuilder {
 				results.add(spec);
 			}
 		}
-		return (GenericSpecification[]) results.toArray(new GenericSpecification[results.size()]);
+		return results;
 	}
 
-	private static GenericDescription[] createGenericCapabilities(ManifestElement[] genericCapabilities) {
-		if (genericCapabilities == null)
+	private static GenericDescription[] createGenericCapabilities(ManifestElement[] equinoxCapabilities, ManifestElement[] osgiCapabilities) {
+		List<GenericDescription> result = createEquinoxCapabilities(equinoxCapabilities);
+		result = createOSGiCapabilities(osgiCapabilities, result);
+		return result == null ? null : result.toArray(new GenericDescription[result.size()]);
+	}
+
+	private static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) {
+		if (osgiCapabilities == null)
+			return result;
+		if (result == null)
+			result = new ArrayList<GenericDescription>(osgiCapabilities.length);
+
+		for (ManifestElement element : osgiCapabilities) {
+			String[] namespaces = element.getValueComponents();
+			types: for (String namespace : namespaces) {
+				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
+				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
+					break types;
+				GenericDescriptionImpl desc = new GenericDescriptionImpl();
+				desc.setType(namespace);
+
+				Map mapAttrs = getAttributes(element, new String[0]);
+				Object version = mapAttrs == null ? null : mapAttrs.get(Constants.VERSION_ATTRIBUTE);
+				if (version instanceof Version) // this is just incase someone uses version:version as a key
+					desc.setVersion((Version) version);
+				Object name = mapAttrs == null ? null : mapAttrs.get(namespace);
+				if (name instanceof String)
+					desc.setName((String) name);
+				Dictionary attrs = mapAttrs == null ? new Hashtable() : new Hashtable(mapAttrs);
+				desc.setAttributes(attrs, false);
+				result.add(desc);
+			}
+		}
+		return result;
+	}
+
+	private static List<GenericDescription> createEquinoxCapabilities(ManifestElement[] equinoxCapabilities) {
+		if (equinoxCapabilities == null)
 			return null;
-		ArrayList results = new ArrayList(genericCapabilities.length);
-		for (int i = 0; i < genericCapabilities.length; i++) {
-			String[] genericNames = genericCapabilities[i].getValueComponents();
+		ArrayList<GenericDescription> results = new ArrayList(equinoxCapabilities.length);
+		for (int i = 0; i < equinoxCapabilities.length; i++) {
+			String[] genericNames = equinoxCapabilities[i].getValueComponents();
 			for (int j = 0; j < genericNames.length; j++) {
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				int colonIdx = genericNames[j].indexOf(':');
@@ -461,10 +545,10 @@ class StateBuilder {
 					desc.setType(genericNames[j].substring(colonIdx + 1));
 				} else
 					desc.setName(genericNames[j]);
-				String versionString = genericCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
+				String versionString = equinoxCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
 				if (versionString != null)
 					desc.setVersion(Version.parseVersion(versionString));
-				Map mapAttrs = getAttributes(genericCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
+				Map mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
 				Object version = mapAttrs == null ? null : mapAttrs.remove(Constants.VERSION_ATTRIBUTE);
 				if (version instanceof Version) // this is just incase someone uses version:version as a key
 					desc.setVersion((Version) version);
@@ -475,11 +559,11 @@ class StateBuilder {
 						attrs.put(key, mapAttrs.get(key));
 					}
 				}
-				desc.setAttributes(attrs);
+				desc.setAttributes(attrs, true);
 				results.add(desc);
 			}
 		}
-		return (GenericDescription[]) results.toArray(new GenericDescription[results.size()]);
+		return results;
 	}
 
 	private static NativeCodeSpecification createNativeCode(ManifestElement[] nativeCode) throws BundleException {

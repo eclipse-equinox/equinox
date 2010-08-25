@@ -1272,7 +1272,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 				FilterImpl[] clauses = (FilterImpl[]) value;
 				for (FilterImpl clause : clauses)
 					if (clause.op == EQUAL) {
-						String result = clause.getRequiredObjectClass();
+						String result = clause.getPrimaryKeyValue(primaryKey);
 						if (result != null)
 							return result;
 					}

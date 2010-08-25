@@ -28,9 +28,20 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
-	void setMatchingFilter(String matchingFilter) throws InvalidSyntaxException {
+	void setMatchingFilter(String matchingFilter, boolean matchName) throws InvalidSyntaxException {
 		synchronized (this.monitor) {
+			String name = getName();
+			if (matchName && name != null && !"*".equals(name)) { //$NON-NLS-1$
+				String nameFilter = "(" + getType() + "=" + getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				matchingFilter = matchingFilter == null ? nameFilter : "(&" + nameFilter + matchingFilter + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			this.matchingFilter = matchingFilter == null ? null : FilterImpl.newInstance(matchingFilter);
+		}
+	}
+
+	void setMatchingFilter(Filter matchingFilter) {
+		synchronized (this.monitor) {
+			this.matchingFilter = matchingFilter;
 		}
 	}
 
@@ -38,11 +49,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		if (!(supplier instanceof GenericDescription))
 			return false;
 		GenericDescription candidate = (GenericDescription) supplier;
-		if (getName() != null && !getName().equals(candidate.getName()))
-			return false;
 		if (!getType().equals(candidate.getType()))
 			return false;
-		// Note that versions are only matched by including them in the filter
+		// Note that names and versions are only matched by including them in the filter
 		return matchingFilter == null || matchingFilter.match(candidate.getAttributes());
 	}
 
