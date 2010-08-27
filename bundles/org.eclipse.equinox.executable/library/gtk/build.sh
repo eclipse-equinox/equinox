@@ -36,6 +36,7 @@ defaultOS=""
 defaultOSArch=""
 defaultWS="gtk"
 defaultJava=DEFAULT_JAVA_JNI
+defaultJavaHome=""
 javaHome=""
 makefile=""
 if [ "$OS" = "" ];  then
@@ -57,7 +58,7 @@ case $OS in
 			"x86_64")
 				defaultOSArch="x86_64"
 				defaultJava=DEFAULT_JAVA_EXEC
-				[ -d /usr/java64/1.5 ] && javaHome="/usr/java64/1.5"
+				[ -d /usr/java64/1.5 ] && defaultJavaHome="/usr/java64/1.5"
 				OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 				;;
 			i?86)
@@ -97,7 +98,7 @@ case $OS in
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
-		[ -d /usr/jdk/jdk1.5.0_01 ] && javaHome="/usr/jdk/jdk1.5.0_01"
+		[ -d /usr/jdk/jdk1.5.0_01 ] && defaultJavaHome="/usr/jdk/jdk1.5.0_01"
 		OUTPUT_DIR="../../bin/$defaultWS/$defaultOS/$defaultOSArch"
 		#PATH=/usr/ccs/bin:/opt/SUNWspro/bin:$PATH
 		PATH=/usr/ccs/bin:/export/home/SUNWspro/bin:$PATH
@@ -155,8 +156,12 @@ DEFAULT_OS_ARCH="$defaultOSArch"
 DEFAULT_WS="$defaultWS"
 DEFAULT_JAVA=$defaultJava
 
-if [ -n  $javaHome ]; then
+origJavaHome=$JAVA_HOME
+if [ -n  "$javaHome" ]; then
 	JAVA_HOME=$javaHome
+	export JAVA_HOME
+elif [ -z "$JAVA_HOME" -a -n  "$defaultJavaHome" ]; then
+	JAVA_HOME="$defaultJavaHome"
 	export JAVA_HOME
 fi
 
@@ -188,3 +193,7 @@ if [ "$makefile" != "" ]; then
 else
 	echo "Unknown OS $OS -- build aborted"
 fi
+
+#restore original JAVA_HOME
+JAVA_HOME="$origJavaHome"
+export JAVA_HOME
