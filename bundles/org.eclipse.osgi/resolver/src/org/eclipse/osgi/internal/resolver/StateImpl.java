@@ -302,7 +302,14 @@ public abstract class StateImpl implements State {
 		resolveBundle(bundle, status, hosts, selectedExports, null, resolvedRequires, resolvedImports);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+		resolveBundle(bundle, status, hosts, selectedExports, substitutedExports, null, resolvedRequires, resolvedImports, null);
+	}
+
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities) {
 		synchronized (this.monitor) {
 			if (!resolving)
 				throw new IllegalStateException(); // TODO need error message here!
@@ -326,7 +333,7 @@ public abstract class StateImpl implements State {
 			if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
 				unresolveConstraints(modifiable);
 			else
-				resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, resolvedRequires, resolvedImports);
+				resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, selectedCapabilities, resolvedRequires, resolvedImports, resolveCapabilities);
 		}
 	}
 
@@ -339,7 +346,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
+	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities) {
 		HostSpecificationImpl hostSpec = (HostSpecificationImpl) bundle.getHost();
 		if (hostSpec != null) {
 			if (hosts != null) {
@@ -355,22 +362,13 @@ public abstract class StateImpl implements State {
 		bundle.setResolvedRequires(resolvedRequires);
 		bundle.setResolvedImports(resolvedImports);
 		bundle.setSubstitutedExports(substitutedExports);
+		bundle.setSelectedCapabilities(selectedCapabilities);
+		bundle.setResolvedCapabilities(resolvedCapabilities);
 
 		bundle.addDependencies(hosts, true);
 		bundle.addDependencies(resolvedRequires, true);
 		bundle.addDependencies(resolvedImports, true);
-		// add dependecies for generics
-		GenericSpecification[] genericRequires = bundle.getGenericRequires();
-		if (genericRequires.length > 0) {
-			ArrayList genericSuppliers = new ArrayList(genericRequires.length);
-			for (int i = 0; i < genericRequires.length; i++) {
-				GenericDescription[] suppliers = genericRequires[i].getSuppliers();
-				if (suppliers != null)
-					for (int j = 0; j < suppliers.length; j++)
-						genericSuppliers.add(suppliers[j]);
-			}
-			bundle.addDependencies((BaseDescription[]) genericSuppliers.toArray(new BaseDescription[genericSuppliers.size()]), true);
-		}
+		bundle.addDependencies(resolvedCapabilities, true);
 	}
 
 	private void checkHostForSubstitutedExports(BundleDescriptionImpl host, BundleDescriptionImpl fragment) {
@@ -406,6 +404,8 @@ public abstract class StateImpl implements State {
 		bundle.setResolvedImports(null);
 		bundle.setResolvedRequires(null);
 		bundle.setSubstitutedExports(null);
+		bundle.setSelectedCapabilities(null);
+		bundle.setResolvedCapabilities(null);
 
 		// remove the constraint suppliers
 		NativeCodeSpecificationImpl nativeCode = (NativeCodeSpecificationImpl) bundle.getNativeCodeSpecification();

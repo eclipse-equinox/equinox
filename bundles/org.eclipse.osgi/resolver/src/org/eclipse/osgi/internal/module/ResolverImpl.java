@@ -28,7 +28,7 @@ import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.Capability;
 
-public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver {
+public class ResolverImpl implements Resolver {
 	// Debug fields
 	private static final String RESOLVER = FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME + "/resolver"; //$NON-NLS-1$
 	private static final String OPTION_DEBUG = RESOLVER + "/debug";//$NON-NLS-1$
@@ -378,7 +378,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		// we are left with only candidates that satisfy the host constraint
 		for (ResolverBundle host : candidates) {
 			foundMatch = true;
-			resolverExports.put(host.attachFragment(bundle, true));
+			host.attachFragment(bundle, true);
 		}
 		if (!foundMatch)
 			state.addResolverError(bundle.getBundleDescription(), ResolverError.MISSING_FRAGMENT_HOST, bundle.getHost().getVersionConstraint().toString(), bundle.getHost().getVersionConstraint());
@@ -535,7 +535,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					resolvedOptional = true;
 			}
 		if (resolvedOptional) {
-			state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null);
+			state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null);
 			stateResolveConstraints(bundle);
 			stateResolveBundle(bundle);
 		}
@@ -1151,7 +1151,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
 					if (genericRequires[i].isFromFragment()) {
 						if (!developmentMode) // only detach fragments when not in devmode
-							resolverExports.remove(bundle.detachFragment(bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null));
+							bundle.detachFragment(bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null);
 						continue;
 					}
 					if (!developmentMode) {
@@ -1174,7 +1174,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					// If the require has failed to resolve and it is from a fragment, then remove the fragment from the host
 					if (requires[i].isFromFragment()) {
 						if (!developmentMode) // only detach fragments when not in devmode
-							resolverExports.remove(bundle.detachFragment(bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]));
+							bundle.detachFragment(bundleMapping.get(requires[i].getVersionConstraint().getBundle()), requires[i]);
 						continue;
 					}
 					if (!developmentMode) {
@@ -1198,7 +1198,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 					state.addResolverError(imports[i].getVersionConstraint().getBundle(), ResolverError.MISSING_IMPORT_PACKAGE, imports[i].getVersionConstraint().toString(), imports[i].getVersionConstraint());
 					if (imports[i].isFromFragment()) {
 						if (!developmentMode) // only detach fragments when not in devmode
-							resolverExports.remove(bundle.detachFragment(bundleMapping.get(imports[i].getVersionConstraint().getBundle()), imports[i]));
+							bundle.detachFragment(bundleMapping.get(imports[i].getVersionConstraint().getBundle()), imports[i]);
 						continue;
 					}
 					if (!developmentMode) {
@@ -1243,7 +1243,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			BundleDescription fragment = fragments[i].getBundleDescription();
 			if (bundle.constraintsConflict(fragment, fragment.getImportPackages(), fragment.getRequiredBundles(), fragment.getGenericRequires()) && !developmentMode)
 				// found some conflicts; detach the fragment
-				resolverExports.remove(bundle.detachFragment(fragments[i], null));
+				bundle.detachFragment(fragments[i], null);
 		}
 	}
 
@@ -1589,6 +1589,22 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				bundlesWiredTo.add(requires[i].getSelectedSupplier().getBaseDescription());
 		BundleDescription[] bundlesWiredToArray = (BundleDescription[]) bundlesWiredTo.toArray(new BundleDescription[bundlesWiredTo.size()]);
 
+		GenericCapability[] capabilities = rb.getGenericCapabilities();
+		List<GenericDescription> selectedCapabilities = new ArrayList<GenericDescription>(capabilities.length);
+		for (GenericCapability capability : capabilities)
+			selectedCapabilities.add(capability.getGenericDescription());
+		GenericDescription[] selectedCapabilitiesArray = selectedCapabilities.toArray(new GenericDescription[selectedCapabilities.size()]);
+
+		GenericConstraint[] genericRequires = rb.getGenericRequires();
+		List<GenericDescription> resolvedGenericRequires = new ArrayList<GenericDescription>(genericRequires.length);
+		for (GenericConstraint genericConstraint : genericRequires) {
+			GenericCapability[] matching = genericConstraint.getMatchingCapabilities();
+			if (matching != null)
+				for (GenericCapability capability : matching)
+					resolvedGenericRequires.add(capability.getGenericDescription());
+		}
+		GenericDescription[] capabilitiesWiredToArray = resolvedGenericRequires.toArray(new GenericDescription[resolvedGenericRequires.size()]);
+
 		BundleDescription[] hostBundles = null;
 		if (rb.isFragment()) {
 			VersionSupplier[] matchingBundles = rb.getHost().getPossibleSuppliers();
@@ -1596,20 +1612,37 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 				hostBundles = new BundleDescription[matchingBundles.length];
 				for (int i = 0; i < matchingBundles.length; i++) {
 					hostBundles[i] = matchingBundles[i].getBundleDescription();
-					if (rb.isNewFragmentExports() && hostBundles[i].isResolved()) {
-						// update the host's set of selected exports
-						ResolverExport[] hostExports = ((ResolverBundle) matchingBundles[i]).getSelectedExports();
-						ExportPackageDescription[] hostExportsArray = new ExportPackageDescription[hostExports.length];
-						for (int j = 0; j < hostExports.length; j++)
-							hostExportsArray[j] = hostExports[j].getExportPackageDescription();
-						state.resolveBundle(hostBundles[i], true, null, hostExportsArray, hostBundles[i].getSubstitutedExports(), hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports());
+					if (hostBundles[i].isResolved()) {
+						ExportPackageDescription[] newSelectedExports = null;
+						GenericDescription[] newSelectedCapabilities = null;
+						if (rb.isNewFragmentExports()) {
+							// update the host's set of selected exports
+							ResolverExport[] hostExports = ((ResolverBundle) matchingBundles[i]).getSelectedExports();
+							newSelectedExports = new ExportPackageDescription[hostExports.length];
+							for (int j = 0; j < hostExports.length; j++)
+								newSelectedExports[j] = hostExports[j].getExportPackageDescription();
+						}
+						if (rb.isNewFragmentCapabilities()) {
+							// update the host's set of selected capabilities
+							GenericCapability[] hostCapabilities = ((ResolverBundle) matchingBundles[i]).getGenericCapabilities();
+							newSelectedCapabilities = new GenericDescription[hostCapabilities.length];
+							for (int j = 0; j < hostCapabilities.length; j++)
+								newSelectedCapabilities[j] = hostCapabilities[j].getGenericDescription();
+						}
+						if (newSelectedCapabilities != null || newSelectedExports != null) {
+							if (newSelectedCapabilities == null)
+								newSelectedCapabilities = hostBundles[i].getSelectedGenericCapabilities();
+							if (newSelectedExports == null)
+								newSelectedExports = hostBundles[i].getSelectedExports();
+							state.resolveBundle(hostBundles[i], true, null, newSelectedExports, hostBundles[i].getSubstitutedExports(), newSelectedCapabilities, hostBundles[i].getResolvedRequires(), hostBundles[i].getResolvedImports(), hostBundles[i].getResolvedGenericRequires());
+						}
 					}
 				}
 			}
 		}
 
 		// Resolve the bundle in the state
-		state.resolveBundle(rb.getBundleDescription(), rb.isResolved(), hostBundles, selectedExportsArray, substitutedExportsArray, bundlesWiredToArray, exportsWiredToArray);
+		state.resolveBundle(rb.getBundleDescription(), rb.isResolved(), hostBundles, selectedExportsArray, substitutedExportsArray, selectedCapabilitiesArray, bundlesWiredToArray, exportsWiredToArray, capabilitiesWiredToArray);
 	}
 
 	private static ExportPackageDescription[] getExportsWiredTo(ResolverBundle rb) {
@@ -1781,7 +1814,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		setBundleUnresolved(bundle, removed, false);
 		// Get bundles dependent on 'bundle'
 		BundleDescription[] dependents = bundle.getBundleDescription().getDependents();
-		state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null);
+		state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null);
 		// Unresolve dependents of 'bundle'
 		for (int i = 0; i < dependents.length; i++)
 			unresolveBundle(bundleMapping.get(dependents[i]), false);
@@ -1913,7 +1946,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 			namespace.reorder();
 	}
 
-	private void removeGenerics(GenericCapability[] generics) {
+	void removeGenerics(GenericCapability[] generics) {
 		for (GenericCapability capability : generics) {
 			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getNamespace());
 			if (namespace != null)
@@ -1921,7 +1954,7 @@ public class ResolverImpl implements org.eclipse.osgi.service.resolver.Resolver 
 		}
 	}
 
-	private void addGenerics(GenericCapability[] generics) {
+	void addGenerics(GenericCapability[] generics) {
 		for (GenericCapability capability : generics) {
 			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getNamespace());
 			if (namespace == null) {

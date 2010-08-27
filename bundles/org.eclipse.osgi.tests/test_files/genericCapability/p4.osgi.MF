@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p4.osgi
+Bundle-Version: 1.0
+Provide-Capability: 
+ namespace.4; rank:Long="400"; percent:Double="0.40"; test.version:Version="4.0.0"; test.string="ABC"

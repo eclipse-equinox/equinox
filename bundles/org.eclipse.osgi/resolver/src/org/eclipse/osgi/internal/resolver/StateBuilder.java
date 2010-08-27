@@ -40,6 +40,7 @@ class StateBuilder {
 	private static final String ATTR_TYPE_LONG = "long"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_DOUBLE = "double"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_LIST = "List<"; //$NON-NLS-1$
 	private static final String OPTIONAL_ATTR = "optional"; //$NON-NLS-1$
 	private static final String MULTIPLE_ATTR = "multiple"; //$NON-NLS-1$
 	private static final String TRUE = "true"; //$NON-NLS-1$
@@ -377,34 +378,47 @@ class StateBuilder {
 			if (!definedAttr) {
 				if (arbitraryAttrs == null)
 					arbitraryAttrs = new HashMap();
-				Object putValue = value;
-				if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
-					putValue = value;
-				else if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
-					putValue = new Double(value);
-				else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
-					putValue = new Long(value);
-				else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
-					try {
-						Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
-						Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
-						putValue = constructor.newInstance(new Object[] {value});
-					} catch (ClassNotFoundException e) {
-						// oh well cannot support; just use string
-						putValue = value;
-					} catch (RuntimeException e) { // got some reflection exception
-						throw e;
-					} catch (Exception e) {
-						throw new RuntimeException(e.getMessage(), e);
-					}
-				else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
-					putValue = new Version(value);
-				else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
-					putValue = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
-				arbitraryAttrs.put(key, putValue);
+				arbitraryAttrs.put(key, convertValue(type, value));
 			}
 		}
 		return arbitraryAttrs;
+	}
+
+	private static Object convertValue(String type, String value) {
+		Object convertValue = value;
+		if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
+			convertValue = value;
+		else if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
+			convertValue = new Double(value);
+		else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
+			convertValue = new Long(value);
+		else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
+			try {
+				Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
+				Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
+				convertValue = constructor.newInstance(new Object[] {value});
+			} catch (ClassNotFoundException e) {
+				// oh well cannot support; just use string
+				convertValue = value;
+			} catch (RuntimeException e) { // got some reflection exception
+				throw e;
+			} catch (Exception e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
+			convertValue = new Version(value);
+		else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
+			convertValue = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
+		else if (type.startsWith(ATTR_TYPE_LIST) && type.endsWith(">")) { //$NON-NLS-1$
+			String componentType = type.substring(ATTR_TYPE_LIST.length(), type.length() - 1);
+			String[] list = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
+			List<Object> components = new ArrayList<Object>();
+			for (String component : list) {
+				components.add(convertValue(componentType, component));
+			}
+			convertValue = components;
+		}
+		return convertValue;
 	}
 
 	private static HostSpecification createHostSpecification(ManifestElement spec, StateImpl state) {
@@ -512,19 +526,12 @@ class StateBuilder {
 			types: for (String namespace : namespaces) {
 				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
 				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
-					break types;
+					break types; // ignore any namespace that is not effective at resolve time.
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				desc.setType(namespace);
-
 				Map mapAttrs = getAttributes(element, new String[0]);
-				Object version = mapAttrs == null ? null : mapAttrs.get(Constants.VERSION_ATTRIBUTE);
-				if (version instanceof Version) // this is just incase someone uses version:version as a key
-					desc.setVersion((Version) version);
-				Object name = mapAttrs == null ? null : mapAttrs.get(namespace);
-				if (name instanceof String)
-					desc.setName((String) name);
 				Dictionary attrs = mapAttrs == null ? new Hashtable() : new Hashtable(mapAttrs);
-				desc.setAttributes(attrs, false);
+				desc.setAttributes(attrs);
 				result.add(desc);
 			}
 		}
@@ -539,27 +546,19 @@ class StateBuilder {
 			String[] genericNames = equinoxCapabilities[i].getValueComponents();
 			for (int j = 0; j < genericNames.length; j++) {
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
+				String name = genericNames[j];
 				int colonIdx = genericNames[j].indexOf(':');
 				if (colonIdx > 0) {
-					desc.setName(genericNames[j].substring(0, colonIdx));
+					name = genericNames[j].substring(0, colonIdx);
 					desc.setType(genericNames[j].substring(colonIdx + 1));
-				} else
-					desc.setName(genericNames[j]);
+				}
+				Map mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
+				Dictionary attrs = mapAttrs == null ? new Hashtable() : new Hashtable(mapAttrs);
+				attrs.put(desc.getType(), name);
 				String versionString = equinoxCapabilities[i].getAttribute(Constants.VERSION_ATTRIBUTE);
 				if (versionString != null)
-					desc.setVersion(Version.parseVersion(versionString));
-				Map mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
-				Object version = mapAttrs == null ? null : mapAttrs.remove(Constants.VERSION_ATTRIBUTE);
-				if (version instanceof Version) // this is just incase someone uses version:version as a key
-					desc.setVersion((Version) version);
-				Dictionary attrs = new Hashtable();
-				if (mapAttrs != null) {
-					for (Iterator keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
-						Object key = keys.next();
-						attrs.put(key, mapAttrs.get(key));
-					}
-				}
-				desc.setAttributes(attrs, true);
+					attrs.put(Constants.VERSION_ATTRIBUTE, Version.parseVersion(versionString));
+				desc.setAttributes(attrs);
 				results.add(desc);
 			}
 		}

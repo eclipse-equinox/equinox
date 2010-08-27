@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -104,16 +105,171 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c2", c2.isResolved());
 		assertTrue("c3", c3.isResolved());
 
-		checkGenericBasics(c1.getGenericRequires(), p1.getGenericCapabilities());
-		checkGenericBasics(c2.getGenericRequires(), p2.getGenericCapabilities());
-		checkGenericBasics(c3.getGenericRequires(), p3.getGenericCapabilities());
+		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(3, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
+		checkGenericBasics(3, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
+
+		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		stateDir.mkdirs();
+		try {
+			state.getFactory().writeState(state, stateDir);
+			state = state.getFactory().readState(stateDir);
+		} catch (IOException e) {
+			fail("Error writing/reading state.", e);
+		}
+		p1 = state.getBundle(p1.getBundleId());
+		p2 = state.getBundle(p2.getBundleId());
+		p3 = state.getBundle(p3.getBundleId());
+		c1 = state.getBundle(c1.getBundleId());
+		c2 = state.getBundle(c2.getBundleId());
+		c3 = state.getBundle(c3.getBundleId());
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p2", p2.isResolved());
+		assertTrue("p3", p3.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertTrue("c2", c2.isResolved());
+		assertTrue("c3", c3.isResolved());
+
+		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(3, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
+		checkGenericBasics(3, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
 	}
 
-	private void checkGenericBasics(GenericSpecification[] genSpecs, GenericDescription[] genDescs) {
-		assertEquals("Specs do not match Descs", genSpecs.length, genDescs.length);
-		for (int i = 0; i < genSpecs.length; i++) {
-			assertTrue("Requirement is not resovled: " + genSpecs[i], genSpecs[i].isResolved());
-			assertEquals("Wrong provider for spec: " + genSpecs[i], genDescs[i], genSpecs[i].getSupplier());
+	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided) {
+		assertEquals("Expected number of capabilities do not match", expectedCnt, genRequired.length);
+		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length);
+		for (int i = 0; i < genRequired.length; i++) {
+			assertEquals("Wrong provider for requirement.", genProvided[i], genRequired[i]);
 		}
+	}
+
+	public void testGenericFragments01() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p1.osgi.MF");
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p1.osgi.frag.MF");
+		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c1.osgi.MF");
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c1.osgi.frag.MF");
+		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p4.osgi.MF");
+		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p1);
+		state.addBundle(p1Frag);
+		state.addBundle(c1);
+		state.addBundle(c1Frag);
+		state.addBundle(p4);
+
+		state.resolve();
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertTrue("c1Frag", c1Frag.isResolved());
+		assertTrue("p4", p4.isResolved());
+
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+
+		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
+		stateDir.mkdirs();
+		try {
+			state.getFactory().writeState(state, stateDir);
+			state = state.getFactory().readState(stateDir);
+		} catch (IOException e) {
+			fail("Error writing/reading state.", e);
+		}
+		p1 = state.getBundle(p1.getBundleId());
+		c1 = state.getBundle(c1.getBundleId());
+		assertTrue("p1", p1.isResolved());
+		assertTrue("c1", c1.isResolved());
+
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+	}
+
+	public void testGenericFragments02() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p1.osgi.MF");
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p1.osgi.frag.MF");
+		BundleDescription p1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c1.osgi.MF");
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c1.osgi.frag.MF");
+		BundleDescription c1Frag = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p1);
+		state.addBundle(p1Frag);
+		state.addBundle(c1);
+		state.addBundle(c1Frag);
+
+		state.resolve();
+		assertTrue("p1", p1.isResolved());
+		assertFalse("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertFalse("c1Frag", c1Frag.isResolved());
+
+		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+
+		File stateDir = getContext().getDataFile(getName() + 1); //$NON-NLS-1$
+		stateDir.mkdirs();
+		try {
+			state.getFactory().writeState(state, stateDir);
+			state = state.getFactory().readState(stateDir);
+			state.setResolver(platformAdmin.createResolver());
+		} catch (IOException e) {
+			fail("Error writing/reading state.", e);
+		}
+		p1 = state.getBundle(p1.getBundleId());
+		p1Frag = state.getBundle(p1Frag.getBundleId());
+		c1 = state.getBundle(c1.getBundleId());
+		c1Frag = state.getBundle(c1Frag.getBundleId());
+		assertTrue("p1", p1.isResolved());
+		assertFalse("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertFalse("c1Frag", c1Frag.isResolved());
+
+		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+
+		manifest = loadManifest("p4.osgi.MF");
+		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		state.addBundle(p4);
+
+		// have to force host to re-resolve because we are adding new constraints
+		state.resolve(new BundleDescription[] {p1});
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertTrue("c1Frag", c1Frag.isResolved());
+		assertTrue("p4", p4.isResolved());
+
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+
+		stateDir = getContext().getDataFile(getName() + 2); //$NON-NLS-1$
+		stateDir.mkdirs();
+		try {
+			state.getFactory().writeState(state, stateDir);
+			state = state.getFactory().readState(stateDir);
+		} catch (IOException e) {
+			fail("Error writing/reading state.", e);
+		}
+		p1 = state.getBundle(p1.getBundleId());
+		p1Frag = state.getBundle(p1Frag.getBundleId());
+		c1 = state.getBundle(c1.getBundleId());
+		c1Frag = state.getBundle(c1Frag.getBundleId());
+		p4 = state.getBundle(p4.getBundleId());
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertTrue("c1Frag", c1Frag.isResolved());
+		assertTrue("p4", p4.isResolved());
+
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 	}
 }

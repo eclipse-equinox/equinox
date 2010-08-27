@@ -194,6 +194,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	public GenericDescription[] getSelectedGenericCapabilities() {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			if (currentData.selectedCapabilities == null)
+				return EMPTY_GENERICDESCS;
+			return currentData.selectedCapabilities;
+		}
+	}
+
 	public ExportPackageDescription[] getSubstitutedExports() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -218,6 +227,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (currentData.resolvedImports == null)
 				return EMPTY_EXPORTS;
 			return currentData.resolvedImports;
+		}
+	}
+
+	public GenericDescription[] getResolvedGenericRequires() {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			if (currentData.resolvedCapabilities == null)
+				return EMPTY_GENERICDESCS;
+			return currentData.resolvedCapabilities;
 		}
 	}
 
@@ -379,6 +397,18 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	protected void setSelectedCapabilities(GenericDescription[] selectedCapabilities) {
+		synchronized (this.monitor) {
+			checkLazyData();
+			lazyData.selectedCapabilities = selectedCapabilities;
+			if (selectedCapabilities != null) {
+				for (GenericDescription capability : selectedCapabilities) {
+					((GenericDescriptionImpl) capability).setSupplier(this);
+				}
+			}
+		}
+	}
+
 	protected void setSubstitutedExports(ExportPackageDescription[] substitutedExports) {
 		synchronized (this.monitor) {
 			checkLazyData();
@@ -397,6 +427,13 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.resolvedRequires = resolvedRequires;
+		}
+	}
+
+	protected void setResolvedCapabilities(GenericDescription[] resolvedCapabilities) {
+		synchronized (this.monitor) {
+			checkLazyData();
+			lazyData.resolvedCapabilities = resolvedCapabilities;
 		}
 	}
 
@@ -673,8 +710,10 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		NativeCodeSpecification nativeCode;
 
 		ExportPackageDescription[] selectedExports;
+		GenericDescription[] selectedCapabilities;
 		BundleDescription[] resolvedRequires;
 		ExportPackageDescription[] resolvedImports;
+		GenericDescription[] resolvedCapabilities;
 		ExportPackageDescription[] substitutedExports;
 		String[] executionEnvironments;
 

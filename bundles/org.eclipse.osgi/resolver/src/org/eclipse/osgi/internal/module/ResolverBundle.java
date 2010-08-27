@@ -30,14 +30,15 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	private ResolverImport[] imports;
 	private ResolverExport[] exports;
 	private BundleConstraint[] requires;
-	private GenericCapability[] capabilities;
+	private GenericCapability[] genericCapabilities;
 	private GenericConstraint[] genericReqiures;
 	// Fragment support
-	private ArrayList fragments;
-	private HashMap fragmentExports;
-	private HashMap fragmentImports;
-	private HashMap fragmentRequires;
-	private HashMap fragmentGenericRequires;
+	private ArrayList<ResolverBundle> fragments;
+	private HashMap<Long, List<ResolverExport>> fragmentExports;
+	private HashMap<Long, List<ResolverImport>> fragmentImports;
+	private HashMap<Long, List<BundleConstraint>> fragmentRequires;
+	private HashMap<Long, List<GenericCapability>> fragmentGenericCapabilities;
+	private HashMap<Long, List<GenericConstraint>> fragmentGenericRequires;
 	// Flag specifying whether this bundle is resolvable
 	private boolean resolvable = true;
 	// Internal resolver state for this bundle
@@ -45,6 +46,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	private boolean uninstalled = false;
 	private final ResolverImpl resolver;
 	private boolean newFragmentExports;
+	private boolean newFragmentCapabilities;
 	private ArrayList refs;
 
 	ResolverBundle(BundleDescription bundle, ResolverImpl resolver) {
@@ -57,17 +59,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	void initialize(boolean useSelectedExports) {
 		if (getBundleDescription().isSingleton())
 			refs = new ArrayList();
-		// always add generic capabilities
-		GenericDescription[] actualCapabilities = getBundleDescription().getGenericCapabilities();
-		capabilities = new GenericCapability[actualCapabilities.length];
-		for (int i = 0; i < capabilities.length; i++)
-			capabilities[i] = new GenericCapability(this, actualCapabilities[i]);
 		if (getBundleDescription().getHost() != null) {
 			host = new BundleConstraint(this, getBundleDescription().getHost());
 			exports = new ResolverExport[0];
 			imports = new ResolverImport[0];
 			requires = new BundleConstraint[0];
 			genericReqiures = new GenericConstraint[0];
+			genericCapabilities = new GenericCapability[0];
 			return;
 		}
 
@@ -96,10 +94,16 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		for (int i = 0; i < genericReqiures.length; i++)
 			genericReqiures[i] = new GenericConstraint(this, actualGenericRequires[i]);
 
+		GenericDescription[] actualCapabilities = getBundleDescription().getGenericCapabilities();
+		genericCapabilities = new GenericCapability[actualCapabilities.length];
+		for (int i = 0; i < genericCapabilities.length; i++)
+			genericCapabilities[i] = new GenericCapability(this, actualCapabilities[i]);
+
 		fragments = null;
 		fragmentExports = null;
 		fragmentImports = null;
 		fragmentRequires = null;
+		fragmentGenericCapabilities = null;
 		fragmentGenericRequires = null;
 	}
 
@@ -155,38 +159,30 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		this.state = state;
 	}
 
-	ResolverImport[] getImportPackages() {
-		if (isFragment())
-			return new ResolverImport[0];
-		if (fragments == null || fragments.size() == 0)
-			return imports;
-		ArrayList resultList = new ArrayList(imports.length);
-		for (int i = 0; i < imports.length; i++)
-			resultList.add(imports[i]);
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			ResolverBundle fragment = (ResolverBundle) iter.next();
-			ArrayList fragImports = (ArrayList) fragmentImports.get(fragment.bundleID);
-			if (fragImports != null)
-				resultList.addAll(fragImports);
+	private <T> List<T> getAll(T[] hostEntries, Map<Long, List<T>> fragmentMap) {
+		List<T> result = new ArrayList<T>(hostEntries.length);
+		for (T entry : hostEntries)
+			result.add(entry);
+		for (ResolverBundle fragment : fragments) {
+			List<T> fragEntries = fragmentMap.get(fragment.bundleID);
+			if (fragEntries != null)
+				result.addAll(fragEntries);
 		}
-		return (ResolverImport[]) resultList.toArray(new ResolverImport[resultList.size()]);
+		return result;
+	}
+
+	ResolverImport[] getImportPackages() {
+		if (isFragment() || fragments == null || fragments.size() == 0)
+			return imports;
+		List<ResolverImport> result = getAll(imports, fragmentImports);
+		return result.toArray(new ResolverImport[result.size()]);
 	}
 
 	ResolverExport[] getExportPackages() {
-		if (isFragment())
-			return new ResolverExport[0];
-		if (fragments == null || fragments.size() == 0)
+		if (isFragment() || fragments == null || fragments.size() == 0)
 			return exports;
-		ArrayList resultList = new ArrayList(exports.length);
-		for (int i = 0; i < exports.length; i++)
-			resultList.add(exports[i]);
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			ResolverBundle fragment = (ResolverBundle) iter.next();
-			ArrayList fragExports = (ArrayList) fragmentExports.get(fragment.bundleID);
-			if (fragExports != null)
-				resultList.addAll(fragExports);
-		}
-		return (ResolverExport[]) resultList.toArray(new ResolverExport[resultList.size()]);
+		List<ResolverExport> result = getAll(exports, fragmentExports);
+		return result.toArray(new ResolverExport[result.size()]);
 	}
 
 	ResolverExport[] getSelectedExports() {
@@ -221,39 +217,24 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	}
 
 	GenericCapability[] getGenericCapabilities() {
-		return capabilities;
+		if (isFragment() || fragments == null || fragments.size() == 0)
+			return genericCapabilities;
+		List<GenericCapability> result = getAll(genericCapabilities, fragmentGenericCapabilities);
+		return result.toArray(new GenericCapability[result.size()]);
 	}
 
 	BundleConstraint[] getRequires() {
-		if (isFragment())
-			return new BundleConstraint[0];
-		if (fragments == null || fragments.size() == 0)
+		if (isFragment() || fragments == null || fragments.size() == 0)
 			return requires;
-		ArrayList resultList = new ArrayList(requires.length);
-		for (int i = 0; i < requires.length; i++)
-			resultList.add(requires[i]);
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			ResolverBundle fragment = (ResolverBundle) iter.next();
-			ArrayList fragRequires = (ArrayList) fragmentRequires.get(fragment.bundleID);
-			if (fragRequires != null)
-				resultList.addAll(fragRequires);
-		}
-		return (BundleConstraint[]) resultList.toArray(new BundleConstraint[resultList.size()]);
+		List<BundleConstraint> result = getAll(requires, fragmentRequires);
+		return result.toArray(new BundleConstraint[result.size()]);
 	}
 
 	GenericConstraint[] getGenericRequires() {
 		if (isFragment() || fragments == null || fragments.size() == 0)
 			return genericReqiures;
-		ArrayList resultList = new ArrayList(genericReqiures.length);
-		for (int i = 0; i < genericReqiures.length; i++)
-			resultList.add(genericReqiures[i]);
-		for (Iterator iter = fragments.iterator(); iter.hasNext();) {
-			ResolverBundle fragment = (ResolverBundle) iter.next();
-			ArrayList fragGenericRegs = (ArrayList) fragmentGenericRequires.get(fragment.bundleID);
-			if (fragGenericRegs != null)
-				resultList.addAll(fragGenericRegs);
-		}
-		return (GenericConstraint[]) resultList.toArray(new GenericConstraint[resultList.size()]);
+		List<GenericConstraint> result = getAll(genericReqiures, fragmentGenericRequires);
+		return result.toArray(new GenericConstraint[result.size()]);
 	}
 
 	BundleConstraint getRequire(String name) {
@@ -295,6 +276,8 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			fragmentImports = new HashMap(1);
 		if (fragmentRequires == null)
 			fragmentRequires = new HashMap(1);
+		if (fragmentGenericCapabilities == null)
+			fragmentGenericCapabilities = new HashMap(1);
 		if (fragmentGenericRequires == null)
 			fragmentGenericRequires = new HashMap(1);
 	}
@@ -312,24 +295,27 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		return getRequire(bundleName) != null;
 	}
 
-	ResolverExport[] attachFragment(ResolverBundle fragment, boolean dynamicAttach) {
+	void attachFragment(ResolverBundle fragment, boolean dynamicAttach) {
 		if (isFragment())
-			return new ResolverExport[0]; // cannot attach to fragments;
+			return; // cannot attach to fragments;
 		if (!getBundleDescription().attachFragments() || (isResolved() && !getBundleDescription().dynamicFragments()))
-			return new ResolverExport[0]; // host is restricting attachment
+			return; // host is restricting attachment
 		if (fragment.getHost().getNumPossibleSuppliers() > 0 && !((HostSpecification) fragment.getHost().getVersionConstraint()).isMultiHost())
-			return new ResolverExport[0]; // fragment is restricting attachment
+			return; // fragment is restricting attachment
 
 		ImportPackageSpecification[] newImports = fragment.getBundleDescription().getImportPackages();
 		BundleSpecification[] newRequires = fragment.getBundleDescription().getRequiredBundles();
 		ExportPackageDescription[] newExports = fragment.getBundleDescription().getExportPackages();
+		GenericDescription[] newGenericCapabilities = fragment.getBundleDescription().getGenericCapabilities();
 		GenericSpecification[] newGenericRequires = fragment.getBundleDescription().getGenericRequires();
 
 		// if this is not during initialization then check if constraints conflict
 		if (dynamicAttach && constraintsConflict(fragment.getBundleDescription(), newImports, newRequires, newGenericRequires))
-			return new ResolverExport[0]; // do not allow fragments with conflicting constraints
+			return; // do not allow fragments with conflicting constraints
 		if (isResolved() && newExports.length > 0)
 			fragment.setNewFragmentExports(true);
+		if (isResolved() && newGenericCapabilities.length > 0)
+			fragment.setNewFragmentCapabilities(true);
 
 		initFragments();
 		// need to make sure there is not already another version of this fragment 
@@ -338,15 +324,15 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			ResolverBundle existingFragment = (ResolverBundle) iFragments.next();
 			String bsn = existingFragment.getName();
 			if (bsn != null && bsn.equals(fragment.getName()))
-				return new ResolverExport[0];
+				return;
 		}
 		if (fragments.contains(fragment))
-			return new ResolverExport[0];
+			return;
 		fragments.add(fragment);
 		fragment.getHost().addPossibleSupplier(this);
 
 		if (newImports.length > 0) {
-			ArrayList hostImports = new ArrayList(newImports.length);
+			ArrayList<ResolverImport> hostImports = new ArrayList(newImports.length);
 			for (int i = 0; i < newImports.length; i++)
 				if (!isImported(newImports[i].getName()))
 					hostImports.add(new ResolverImport(this, newImports[i]));
@@ -354,7 +340,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		}
 
 		if (newRequires.length > 0) {
-			ArrayList hostRequires = new ArrayList(newRequires.length);
+			ArrayList<BundleConstraint> hostRequires = new ArrayList(newRequires.length);
 			for (int i = 0; i < newRequires.length; i++)
 				if (!isRequired(newRequires[i].getName()))
 					hostRequires.add(new BundleConstraint(this, newRequires[i]));
@@ -368,7 +354,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			fragmentGenericRequires.put(fragment.bundleID, hostGenericRequires);
 		}
 
-		ArrayList hostExports = new ArrayList(newExports.length);
+		ArrayList<ResolverExport> hostExports = new ArrayList(newExports.length);
 		if (newExports.length > 0 && dynamicAttach) {
 			StateObjectFactory factory = resolver.getState().getFactory();
 			for (int i = 0; i < newExports.length; i++) {
@@ -385,7 +371,28 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			}
 			fragmentExports.put(fragment.bundleID, hostExports);
 		}
-		return (ResolverExport[]) hostExports.toArray(new ResolverExport[hostExports.size()]);
+
+		List<GenericCapability> hostCapabilities = new ArrayList<GenericCapability>(newGenericCapabilities.length);
+		if (newGenericCapabilities.length > 0 && dynamicAttach) {
+			StateObjectFactory factory = resolver.getState().getFactory();
+			for (GenericDescription capability : newGenericCapabilities) {
+				Dictionary origAttrs = capability.getAttributes();
+				Map attrs = new HashMap();
+				if (origAttrs != null) {
+					for (Enumeration keys = origAttrs.keys(); keys.hasMoreElements();) {
+						Object key = keys.nextElement();
+						attrs.put(key, origAttrs.get(key));
+					}
+				}
+				GenericDescription hostCapabililty = factory.createGenericDescription(capability.getType(), attrs, null, getBundleDescription());
+				hostCapabilities.add(new GenericCapability(this, hostCapabililty));
+			}
+			fragmentGenericCapabilities.put(fragment.bundleID, hostCapabilities);
+		}
+		if (dynamicAttach) {
+			resolver.getResolverExports().put(hostExports.toArray(new ResolverExport[hostExports.size()]));
+			resolver.addGenerics(hostCapabilities.toArray(new GenericCapability[hostCapabilities.size()]));
+		}
 	}
 
 	private boolean equivalentExports(ResolverExport existingExport, ExportPackageDescription newDescription) {
@@ -459,9 +466,17 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		return newFragmentExports;
 	}
 
-	ResolverExport[] detachFragment(ResolverBundle fragment, ResolverConstraint reason) {
+	private void setNewFragmentCapabilities(boolean newFragmentCapabilities) {
+		this.newFragmentCapabilities = newFragmentCapabilities;
+	}
+
+	boolean isNewFragmentCapabilities() {
+		return newFragmentCapabilities;
+	}
+
+	void detachFragment(ResolverBundle fragment, ResolverConstraint reason) {
 		if (isFragment())
-			return new ResolverExport[0];
+			return;
 		initFragments();
 
 		// must save off old imports and requires before we remove the fragment;
@@ -469,46 +484,49 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		ResolverImport[] oldImports = getImportPackages();
 		BundleConstraint[] oldRequires = getRequires();
 		if (!fragments.remove(fragment))
-			return new ResolverExport[0];
+			return;
 
 		fragment.setNewFragmentExports(false);
+		fragment.setNewFragmentCapabilities(false);
 		fragment.getHost().removePossibleSupplier(this);
 		fragmentImports.remove(fragment.bundleID);
 		fragmentRequires.remove(fragment.bundleID);
-		ArrayList removedExports = (ArrayList) fragmentExports.remove(fragment.bundleID);
+		List<ResolverExport> removedExports = fragmentExports.remove(fragment.bundleID);
 		fragmentGenericRequires.remove(fragment.bundleID);
+		List<GenericCapability> removedCapabilities = fragmentGenericCapabilities.remove(fragment.bundleID);
 		if (reason != null) {
 			// the fragment is being detached because one of its imports or requires cannot be resolved;
 			// we need to check the remaining fragment constraints to make sure they do not have
 			// the same unresolved constraint.
-			ResolverBundle[] remainingFrags = (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
-			for (int i = 0; i < remainingFrags.length; i++) {
+			for (ResolverBundle remainingFrag : fragments) {
 				ArrayList additionalImports = new ArrayList(0);
 				ArrayList additionalRequires = new ArrayList(0);
-				if (hasUnresolvedConstraint(reason, fragment, remainingFrags[i], oldImports, oldRequires, additionalImports, additionalRequires))
+				if (hasUnresolvedConstraint(reason, fragment, remainingFrag, oldImports, oldRequires, additionalImports, additionalRequires))
 					continue;
 				// merge back the additional imports or requires which the detached fragment has in common with the remaining fragment
 				if (additionalImports.size() > 0) {
-					ArrayList remainingImports = (ArrayList) fragmentImports.get(remainingFrags[i].bundleID);
+					ArrayList remainingImports = (ArrayList) fragmentImports.get(remainingFrag.bundleID);
 					if (remainingImports == null)
-						fragmentImports.put(remainingFrags[i].bundleID, additionalImports);
+						fragmentImports.put(remainingFrag.bundleID, additionalImports);
 					else
 						remainingImports.addAll(additionalImports);
 				}
 				if (additionalRequires.size() > 0) {
-					ArrayList remainingRequires = (ArrayList) fragmentRequires.get(remainingFrags[i].bundleID);
+					ArrayList remainingRequires = (ArrayList) fragmentRequires.get(remainingFrag.bundleID);
 					if (remainingRequires == null)
-						fragmentRequires.put(remainingFrags[i].bundleID, additionalRequires);
+						fragmentRequires.put(remainingFrag.bundleID, additionalRequires);
 					else
 						remainingRequires.addAll(additionalRequires);
 				}
 			}
 		}
-		ResolverExport[] results = removedExports == null ? new ResolverExport[0] : (ResolverExport[]) removedExports.toArray(new ResolverExport[removedExports.size()]);
+		ResolverExport[] results = removedExports == null ? new ResolverExport[0] : removedExports.toArray(new ResolverExport[removedExports.size()]);
 		for (int i = 0; i < results.length; i++)
 			// TODO this is a hack; need to figure out how to indicate that a fragment export is no longer attached
 			results[i].setSubstitute(results[i]);
-		return results;
+		resolver.getResolverExports().remove(results);
+		if (removedCapabilities != null)
+			resolver.removeGenerics(removedCapabilities.toArray(new GenericCapability[removedCapabilities.size()]));
 	}
 
 	private boolean hasUnresolvedConstraint(ResolverConstraint reason, ResolverBundle detachedFragment, ResolverBundle remainingFragment, ResolverImport[] oldImports, BundleConstraint[] oldRequires, ArrayList additionalImports, ArrayList additionalRequires) {
@@ -521,7 +539,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			constraints = remainingFragRequires;
 		for (int i = 0; i < constraints.length; i++)
 			if (reason.getName().equals(constraints[i].getName())) {
-				resolver.getResolverExports().remove(detachFragment(remainingFragment, null));
+				detachFragment(remainingFragment, null);
 				return true;
 			}
 		for (int i = 0; i < oldImports.length; i++) {
@@ -554,9 +572,10 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	void detachAllFragments() {
 		if (fragments == null)
 			return;
-		ResolverBundle[] allFragments = (ResolverBundle[]) fragments.toArray(new ResolverBundle[fragments.size()]);
+		ResolverBundle[] allFragments = fragments.toArray(new ResolverBundle[fragments.size()]);
 		for (int i = 0; i < allFragments.length; i++)
 			detachFragment(allFragments[i], null);
+		fragments = null;
 	}
 
 	boolean isResolvable() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -312,6 +312,24 @@ class StateWriter {
 			out.writeInt(genericRequires.length);
 			for (int i = 0; i < genericRequires.length; i++)
 				writeGenericSpecification(genericRequires[i], out);
+		}
+
+		GenericDescription[] selectedCapabilities = bundle.getSelectedGenericCapabilities();
+		if (selectedCapabilities == null)
+			out.writeInt(0);
+		else {
+			out.writeInt(selectedCapabilities.length);
+			for (int i = 0; i < selectedCapabilities.length; i++)
+				writeGenericDescription(selectedCapabilities[i], out);
+		}
+
+		GenericDescription[] resolvedCapabilities = bundle.getResolvedGenericRequires();
+		if (resolvedCapabilities == null)
+			out.writeInt(0);
+		else {
+			out.writeInt(resolvedCapabilities.length);
+			for (int i = 0; i < resolvedCapabilities.length; i++)
+				writeGenericDescription(resolvedCapabilities[i], out);
 		}
 
 		writeNativeCode(bundle.getNativeCodeSpecification(), out);

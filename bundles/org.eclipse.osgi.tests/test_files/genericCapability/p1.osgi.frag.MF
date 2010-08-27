@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: p1.osgi.frag
+Bundle-Version: 1.0
+Fragment-Host: p1.osgi
+Provide-Capability: 
+ namespace.1.frag; rank:Long="100"; percent:Double="0.10"; test.version:Version="1.0.0"; test.string="ABC"
+Require-Capability: 
+ namespace.4;
+  filter:="(&(rank>=400)(!(rank>=500))
+          (percent>=0.4)(!(percent>=0.5))
+          (test.version>=4.0)(!(test.version>=5.0))
+          (test.string~=abc))"

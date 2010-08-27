@@ -277,8 +277,19 @@ public interface StateObjectFactory {
 	 * @param version the version of the generic description (may be <code>null</code>)
 	 * @param attributes the attributes for the generic description (may be <code>null</code>)
 	 * @return the created generic description
+	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
 	 */
 	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes);
+
+	/**
+	 * Creates a generic description from the given parameters
+	 * @param type the type of the generic description (may be <code>null</code>)
+	 * @param attributes the attributes for the generic description (may be <code>null</code>)
+	 * @param directives the directives for the generic description (may be <code>null</code>)
+	 * @param supplier the supplier of the generic description (may be <code>null</code>)
+	 * @return the created generic description
+	 */
+	public GenericDescription createGenericDescription(String type, Map attributes, Map directives, BundleDescription supplier);
 
 	/**
 	 * Creates a generic specification from the given parameters

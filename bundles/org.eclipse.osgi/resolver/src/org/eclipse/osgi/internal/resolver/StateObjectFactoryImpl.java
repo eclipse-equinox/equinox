@@ -141,10 +141,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		GenericDescription[] result = new GenericDescription[genericCapabilities.length];
 		for (int i = 0; i < genericCapabilities.length; i++) {
 			GenericDescriptionImpl cap = new GenericDescriptionImpl();
-			cap.setName(genericCapabilities[i].getName());
 			cap.setType(genericCapabilities[i].getType());
-			cap.setVersion(genericCapabilities[i].getVersion());
-			cap.setAttributes(genericCapabilities[i].getAttributes(), true);
+			cap.setAttributes(genericCapabilities[i].getAttributes());
 			result[i] = cap;
 		}
 		return result;
@@ -238,21 +236,33 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return exportPackage;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes) {
+		return createGenericDescription(name, type, version, attributes, null, null);
+	}
+
+	public GenericDescription createGenericDescription(String type, Map attributes, Map directives, BundleDescription supplier) {
+		return createGenericDescription(null, type, null, attributes, directives, supplier);
+	}
+
+	private GenericDescription createGenericDescription(String name, String type, Version version, Map attributes, Map directives, BundleDescription supplier) {
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
-		result.setName(name);
 		result.setType(type);
-		result.setVersion(version);
-		Object versionObj = attributes == null ? null : attributes.remove(Constants.VERSION_ATTRIBUTE);
-		if (versionObj instanceof Version) // this is just incase someone uses version:version as a key
-			result.setVersion((Version) versionObj);
-		Dictionary attrs = new Hashtable();
-		if (attributes != null)
-			for (Iterator keys = attributes.keySet().iterator(); keys.hasNext();) {
-				Object key = keys.next();
-				attrs.put(key, attributes.get(key));
-			}
-		result.setAttributes(attrs, true);
+		Dictionary attrs = attributes == null ? new Hashtable() : new Hashtable(attributes);
+		if (version != null) {
+			Object versionObj = attrs.get(Constants.VERSION_ATTRIBUTE);
+			if (!(versionObj instanceof Version) && version != null)
+				attrs.put(Constants.VERSION_ATTRIBUTE, version);
+		}
+		if (name != null) {
+			Object nameObj = attrs.get(result.getType());
+			if (!(nameObj instanceof String))
+				attrs.put(result.getType(), name);
+		}
+		result.setAttributes(attrs);
+		result.setSupplier(supplier);
 		return result;
 	}
 

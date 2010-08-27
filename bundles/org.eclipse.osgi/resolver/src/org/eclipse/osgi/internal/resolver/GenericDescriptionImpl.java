@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
 
 public class GenericDescriptionImpl extends BaseDescriptionImpl implements GenericDescription {
 	private Dictionary attributes;
@@ -31,16 +32,9 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		return supplier;
 	}
 
-	void setAttributes(Dictionary attributes, boolean addImplied) {
+	void setAttributes(Dictionary attributes) {
 		synchronized (this.monitor) {
 			this.attributes = attributes;
-			if (addImplied) {
-				// always add/replace the version attribute with the actual Version object
-				attributes.put(Constants.VERSION_ATTRIBUTE, getVersion());
-				// always add the name
-				if (getName() != null)
-					attributes.put(getType(), getName());
-			}
 		}
 	}
 
@@ -50,10 +44,20 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(StateBuilder.GENERIC_CAPABILITY).append(": ").append(getName()); //$NON-NLS-1$
-		if (getType() != GenericDescription.DEFAULT_TYPE)
-			sb.append(':').append(getType());
+		sb.append(StateBuilder.OSGI_PROVIDE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
+		Map attrs = getDeclaredAttributes();
+		sb.append(toString(attrs, false));
 		return sb.toString();
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public String getName() {
+		synchronized (this.monitor) {
+			Object name = attributes != null ? attributes.get(getType()) : null;
+			return name instanceof String ? (String) name : null;
+		}
 	}
 
 	public String getType() {
@@ -67,6 +71,14 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 			this.type = type;
 	}
 
+	/**
+	 * @deprecated
+	 */
+	public Version getVersion() {
+		Object version = attributes != null ? attributes.get(Constants.VERSION_ATTRIBUTE) : null;
+		return version instanceof Version ? (Version) version : super.getVersion();
+	}
+
 	public Map<String, String> getDeclaredDirectives() {
 		// TODO need to allow directives
 		return Collections.EMPTY_MAP;
@@ -78,12 +90,11 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 			if (attributes != null)
 				for (Enumeration keys = attributes.keys(); keys.hasMoreElements();) {
 					String key = (String) keys.nextElement();
-					result.put(key, attributes.get(key));
+					Object value = attributes.get(key);
+					if (value instanceof List)
+						value = Collections.unmodifiableList((List) value);
+					result.put(key, value);
 				}
-			String name = getName();
-			String nameSpace = getType();
-			if (result.get(nameSpace) == null && name != null)
-				result.put(nameSpace, name);
 			return Collections.unmodifiableMap(result);
 		}
 	}

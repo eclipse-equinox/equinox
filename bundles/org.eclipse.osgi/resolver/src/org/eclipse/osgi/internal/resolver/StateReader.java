@@ -349,6 +349,22 @@ final class StateReader {
 			result.setGenericRequires(reqs);
 		}
 
+		int selectedGenCapCnt = in.readInt();
+		if (selectedGenCapCnt > 0) {
+			GenericDescription[] capabilities = new GenericDescription[selectedGenCapCnt];
+			for (int i = 0; i < capabilities.length; i++)
+				capabilities[i] = readGenericDescription(in);
+			result.setSelectedCapabilities(capabilities);
+		}
+
+		int resolvedGenCapCnt = in.readInt();
+		if (resolvedGenCapCnt > 0) {
+			GenericDescription[] capabilities = new GenericDescription[resolvedGenCapCnt];
+			for (int i = 0; i < capabilities.length; i++)
+				capabilities[i] = readGenericDescription(in);
+			result.setResolvedCapabilities(capabilities);
+		}
+
 		result.setNativeCodeSpecification(readNativeCode(in));
 
 		result.setFullyLoaded(true); // set fully loaded before setting the dependencies
@@ -491,7 +507,7 @@ final class StateReader {
 				attrs.put(key, mapAttrs.get(key));
 			}
 		}
-		result.setAttributes(attrs, false);
+		result.setAttributes(attrs);
 		return result;
 	}
 

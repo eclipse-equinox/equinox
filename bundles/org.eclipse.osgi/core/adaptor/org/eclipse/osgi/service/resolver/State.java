@@ -185,10 +185,10 @@ public interface State {
 	 * @param status whether or not the given bundle is resolved, if false the other parameters are ignored
 	 * @param hosts the host for the resolve fragment, can be <code>null</code>
 	 * @param selectedExports the selected exported packages for this resolved bundle, can be <code>null</code>
-	 * @param resolvedRequires the BundleDescriptions that resolve the required bundles for this bundle, can be <code>null</code>
+	 * @param resolvedRequires the {@link BundleDescription}s that resolve the required bundles for this bundle, can be <code>null</code>
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
-	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], BundleDescription[], ExportPackageDescription[])}
+	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[])}
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
@@ -204,12 +204,34 @@ public interface State {
 	 * @param hosts the host for the resolve fragment, can be <code>null</code>
 	 * @param selectedExports the selected exported packages for this resolved bundle, can be <code>null</code>
 	 * @param substitutedExports the exported packages that resolve imports for this bundle and substitute exports, can be <code>null</code>
-	 * @param resolvedRequires the BundleDescriptions that resolve the required bundles for this bundle, can be <code>null</code>
+	 * @param resolvedRequires the {@link BundleDescription}s that resolve the required bundles for this bundle, can be <code>null</code>
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.4
+	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[])}
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
+
+	/**
+	 * Sets whether or not the given bundle is selected in this state.
+	 * <p>
+	 * This method is intended to be used by resolvers in the process of
+	 * determining which constraints are satisfied by which components.
+	 * </p>
+	 * 
+	 * @param bundle the bundle to update
+	 * @param status whether or not the given bundle is resolved, if false the other parameters are ignored
+	 * @param hosts the host for the resolve fragment, can be <code>null</code>
+	 * @param selectedExports the selected exported packages for this resolved bundle, can be <code>null</code>
+	 * @param substitutedExports the exported packages that resolve imports for this bundle and substitute exports, can be <code>null</code>
+	 * @param selectedCapabilities the selected capabilities for this resolved bundle, can be <code>null</code>
+	 * @param resolvedRequires the {@link BundleDescription}s that resolve the required bundles for this bundle, can be <code>null</code>
+	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
+	 * @param resolveCapabilities the capabilities that resolve the required capabilities for this bundle, can be <code>null</code>
+	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
+	 * @since 3.7
+	 */
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities);
 
 	/**
 	 * Sets the given removal pending bundle to removal complete for this state.

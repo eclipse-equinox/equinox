@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,16 @@ public interface BundleDescription extends BaseDescription {
 	public ExportPackageDescription[] getSelectedExports();
 
 	/**
+	 * Returns all the capabilities provided by ths bundle that have been selected by
+	 * the resolver.  The returned list will include the capabilities
+	 * returned by {@link #getGenericCapabilities()} that have been selected by the 
+	 * resolver and any capabilities provided by fragments attached to this bundle.
+	 * @return the selected capabilities that this bundle provides.  If the bundle is
+	 * unresolved or has no capabilities then an empty array is returned.
+	 */
+	public GenericDescription[] getSelectedGenericCapabilities();
+
+	/**
 	 * Returns all the bundle descriptions that satisfy all the require bundles for this bundle.
 	 * If the bundle is not resolved or the bundle does not require any bundles then an empty array is
 	 * returned.
@@ -104,6 +114,15 @@ public interface BundleDescription extends BaseDescription {
 	 * @return the exported packages that satisfy all the imported packages for this bundle.
 	 */
 	public ExportPackageDescription[] getResolvedImports();
+
+	/**
+	 * Returns all the capabilities that satisfy all the capability requirements for this
+	 * bundle.  This includes any capabilities required by fragments attached to this bundle.
+	 * @return the capabilities that satisfy all the capability requirements for this bundle.
+	 * If the bundle is unresolved or has no capability requirements then an empty array is
+	 * returned.
+	 */
+	public GenericDescription[] getResolvedGenericRequires();
 
 	/**
 	 * Returns true if this bundle is resolved in its host state.

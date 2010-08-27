@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,11 +57,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(StateBuilder.GENERIC_REQUIRE).append(": ").append(getName()); //$NON-NLS-1$
-		if (getType() != GenericDescription.DEFAULT_TYPE)
-			sb.append(':').append(getType());
+		sb.append(StateBuilder.OSGI_REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
 		if (matchingFilter != null)
-			sb.append("; ").append(getMatchingFilter()); //$NON-NLS-1$
+			sb.append("; filter=\"").append(getMatchingFilter()).append('"'); //$NON-NLS-1$
 		return sb.toString();
 	}
 

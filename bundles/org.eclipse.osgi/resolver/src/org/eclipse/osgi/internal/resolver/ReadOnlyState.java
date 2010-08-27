@@ -119,7 +119,14 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] host, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolveImports) {
+		throw new UnsupportedOperationException();
+	}
+
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities) {
 		throw new UnsupportedOperationException();
 	}
 
