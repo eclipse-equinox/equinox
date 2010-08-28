@@ -356,7 +356,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	}
 
 	/**
-	 * This class represents the entry in this Map.
+	 * This class represents the entry in this identity map.
 	 * Entry is immutable.
 	 */
 	private static class Entry<K, V> implements Map.Entry<K, V> {
@@ -397,14 +397,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		}
 
 		public int hashCode() {
-			int h = 17;
-			if (key != null) {
-				h = 31 * h + key.hashCode();
-			}
-			if (value != null) {
-				h = 31 * h + value.hashCode();
-			}
-			return h;
+			return System.identityHashCode(key) ^ System.identityHashCode(value);
 		}
 
 		public boolean equals(Object obj) {
@@ -417,14 +410,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 			}
 
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) obj;
-			final Object k = e.getKey();
-			if ((key == k) || ((key != null) && key.equals(k))) {
-				final Object v = e.getValue();
-				if ((value == v) || ((value != null) && value.equals(v))) {
-					return true;
-				}
-			}
-			return false;
+			return (key == e.getKey()) && (value == e.getValue());
 		}
 	}
 
