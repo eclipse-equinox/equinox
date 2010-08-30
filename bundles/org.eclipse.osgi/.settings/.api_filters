@@ -628,6 +628,21 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/Filter.java" type="org.osgi.framework.Filter">
+<filter comment="Ignore OSGi API." id="403804204">
+<message_arguments>
+<message_argument value="org.osgi.framework.Filter"/>
+<message_argument value="matches(Map&lt;String,?&gt;)"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="matches(Map&lt;String,?&gt;)"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
 <filter id="1143996420">
 <message_arguments>
