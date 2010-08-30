@@ -451,9 +451,9 @@ class StateBuilder {
 				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
 				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
 					break types;
-				String filterSpec = element.getDirective("filter"); //$NON-NLS-1$
+				String filterSpec = element.getAttribute("filter"); //$NON-NLS-1$
 				if (filterSpec == null)
-					throw new BundleException("Must specify the filter directive for " + OSGI_REQUIRE_CAPABILITY); //$NON-NLS-1$
+					throw new BundleException("Must specify the filter attribute for " + OSGI_REQUIRE_CAPABILITY); //$NON-NLS-1$
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
 				spec.setType(namespace);
 				try {
