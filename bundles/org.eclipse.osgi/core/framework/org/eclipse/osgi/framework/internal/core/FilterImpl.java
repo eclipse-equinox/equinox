@@ -145,58 +145,171 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	/**
 	 * Filter using a service's properties.
 	 * <p>
-	 * The filter is executed using the keys and values of the referenced
-	 * service's properties. The keys are case insensitively matched with
-	 * the filter.
-	 *
-	 * @param reference The reference to the service whose properties are
-	 *        used in the match.
-	 * @return <code>true</code> if the service's properties match this
-	 *         filter; <code>false</code> otherwise.
+	 * This {@code Filter} is executed using the keys and values of the
+	 * referenced service's properties. The keys are looked up in a case
+	 * insensitive manner.
+	 * 
+	 * @param reference The reference to the service whose properties are used
+	 *        in the match.
+	 * @return {@code true} if the service's properties match this
+	 *         {@code Filter}; {@code false} otherwise.
 	 */
 	public boolean match(ServiceReference<?> reference) {
 		if (reference instanceof ServiceReferenceImpl) {
-			return match0(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
+			return matchCase(((ServiceReferenceImpl<?>) reference).getRegistration().getProperties());
 		}
-		return match0(new ServiceReferenceDictionary(reference));
+		return matchCase(new ServiceReferenceDictionary(reference));
 	}
 
 	/**
-	 * Filter using a <code>Dictionary</code> object. The Filter is executed
-	 * using the <code>Dictionary</code> object's keys and values. The keys
-	 * are case insensitively matched with the filter.
-	 *
-	 * @param dictionary The <code>Dictionary</code> object whose keys are
-	 *        used in the match.
-	 * @return <code>true</code> if the <code>Dictionary</code> object's
-	 *         keys and values match this filter; <code>false</code>
-	 *         otherwise.
-	 * @throws IllegalArgumentException If <code>dictionary</code> contains
-	 *         case variants of the same key name.
+	 * Filter using a {@code Dictionary} with case insensitive key lookup. This
+	 * {@code Filter} is executed using the specified {@code Dictionary}'s keys
+	 * and values. The keys are looked up in a case insensitive manner.
+	 * 
+	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
+	 *        in the match.
+	 * @return {@code true} if the {@code Dictionary}'s values match this
+	 *         filter; {@code false} otherwise.
+	 * @throws IllegalArgumentException If {@code dictionary} contains case
+	 *         variants of the same key name.
 	 */
 	public boolean match(Dictionary<String, ?> dictionary) {
 		if (dictionary != null) {
 			dictionary = new Headers<String, Object>(dictionary);
 		}
 
-		return match0(dictionary);
+		return matchCase(dictionary);
 	}
 
 	/**
-	 * Filter with case sensitivity using a <code>Dictionary</code> object.
-	 * The Filter is executed using the <code>Dictionary</code> object's
-	 * keys and values. The keys are case sensitively matched with the
-	 * filter.
+	 * Filter using a {@code Dictionary}. This {@code Filter} is executed using
+	 * the specified {@code Dictionary}'s keys and values. The keys are looked
+	 * up in a normal manner respecting case.
 	 * 
-	 * @param dictionary The <code>Dictionary</code> object whose keys are
-	 *        used in the match.
-	 * @return <code>true</code> if the <code>Dictionary</code> object's
-	 *         keys and values match this filter; <code>false</code>
-	 *         otherwise.
+	 * @param dictionary The {@code Dictionary} whose key/value pairs are used
+	 *        in the match.
+	 * @return {@code true} if the {@code Dictionary}'s values match this
+	 *         filter; {@code false} otherwise.
 	 * @since 1.3
 	 */
 	public boolean matchCase(Dictionary<String, ?> dictionary) {
-		return match0(dictionary);
+		switch (op) {
+			case AND : {
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (FilterImpl f : filters) {
+					if (!f.matchCase(dictionary)) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			case OR : {
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (FilterImpl f : filters) {
+					if (f.matchCase(dictionary)) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			case NOT : {
+				FilterImpl filter = (FilterImpl) value;
+
+				return !filter.matchCase(dictionary);
+			}
+
+			case SUBSTRING :
+			case EQUAL :
+			case GREATER :
+			case LESS :
+			case APPROX : {
+				Object prop = (dictionary == null) ? null : dictionary.get(attr);
+
+				return compare(op, prop, value);
+			}
+
+			case PRESENT : {
+				if (Debug.DEBUG_FILTER) {
+					Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+				Object prop = (dictionary == null) ? null : dictionary.get(attr);
+
+				return prop != null;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Filter using a {@code Map}. This {@code Filter} is executed using the
+	 * specified {@code Map}'s keys and values. The keys are looked up in a
+	 * normal manner respecting case.
+	 * 
+	 * @param map The {@code Map} whose key/value pairs are used in the match.
+	 *        Maps with {@code null} key or values are not supported. A
+	 *        {@code null} value is considered not present to the filter.
+	 * @return {@code true} if the {@code Map}'s values match this filter;
+	 *         {@code false} otherwise.
+	 * @since 1.6
+	 */
+	public boolean matches(Map<String, ?> map) {
+		switch (op) {
+			case AND : {
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (FilterImpl f : filters) {
+					if (!f.matches(map)) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			case OR : {
+				FilterImpl[] filters = (FilterImpl[]) value;
+				for (FilterImpl f : filters) {
+					if (f.matches(map)) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			case NOT : {
+				FilterImpl filter = (FilterImpl) value;
+
+				return !filter.matches(map);
+			}
+
+			case SUBSTRING :
+			case EQUAL :
+			case GREATER :
+			case LESS :
+			case APPROX : {
+				Object prop = (map == null) ? null : map.get(attr);
+
+				return compare(op, prop, value);
+			}
+
+			case PRESENT : {
+				if (Debug.DEBUG_FILTER) {
+					Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+				Object prop = (map == null) ? null : map.get(attr);
+
+				return prop != null;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -374,69 +487,6 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		this.op = operation;
 		this.attr = attr;
 		this.value = value;
-	}
-
-	/**
-	 * Internal match routine.
-	 * Dictionary parameter must support case-insensitive get.
-	 *
-	 * @param properties A dictionary whose
-	 * keys are used in the match.
-	 * @return If the Dictionary's keys match the filter,
-	 * return <code>true</code>. Otherwise, return <code>false</code>.
-	 */
-	private boolean match0(Dictionary<String, ?> properties) {
-		switch (op) {
-			case AND : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (!f.match0(properties)) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			case OR : {
-				FilterImpl[] filters = (FilterImpl[]) value;
-				for (FilterImpl f : filters) {
-					if (f.match0(properties)) {
-						return true;
-					}
-				}
-
-				return false;
-			}
-
-			case NOT : {
-				FilterImpl filter = (FilterImpl) value;
-
-				return !filter.match0(properties);
-			}
-
-			case SUBSTRING :
-			case EQUAL :
-			case GREATER :
-			case LESS :
-			case APPROX : {
-				Object prop = (properties == null) ? null : properties.get(attr);
-
-				return compare(op, prop, value);
-			}
-
-			case PRESENT : {
-				if (Debug.DEBUG_FILTER) {
-					Debug.println("PRESENT(" + attr + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-
-				Object prop = (properties == null) ? null : properties.get(attr);
-
-				return prop != null;
-			}
-		}
-
-		return false;
 	}
 
 	/**
