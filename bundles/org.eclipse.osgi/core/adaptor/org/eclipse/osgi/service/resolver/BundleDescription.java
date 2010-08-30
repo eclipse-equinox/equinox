@@ -96,6 +96,7 @@ public interface BundleDescription extends BaseDescription {
 	 * resolver and any capabilities provided by fragments attached to this bundle.
 	 * @return the selected capabilities that this bundle provides.  If the bundle is
 	 * unresolved or has no capabilities then an empty array is returned.
+	 * @since 3.7
 	 */
 	public GenericDescription[] getSelectedGenericCapabilities();
 
@@ -121,6 +122,7 @@ public interface BundleDescription extends BaseDescription {
 	 * @return the capabilities that satisfy all the capability requirements for this bundle.
 	 * If the bundle is unresolved or has no capability requirements then an empty array is
 	 * returned.
+	 * @since 3.7
 	 */
 	public GenericDescription[] getResolvedGenericRequires();
 

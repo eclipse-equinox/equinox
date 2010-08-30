@@ -288,6 +288,7 @@ public interface StateObjectFactory {
 	 * @param directives the directives for the generic description (may be <code>null</code>)
 	 * @param supplier the supplier of the generic description (may be <code>null</code>)
 	 * @return the created generic description
+	 * @since 3.7
 	 */
 	public GenericDescription createGenericDescription(String type, Map attributes, Map directives, BundleDescription supplier);
 
