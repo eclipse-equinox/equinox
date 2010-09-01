@@ -72,7 +72,7 @@ import java.util.Dictionary;
  * Environment supports permissions.
  * 
  * @ThreadSafe
- * @version $Id: 6db49f97510449b2ed2203ef0565c003a6734fa5 $
+ * @version $Id: 89eb063ec09f44477a17c89c31926f7f3b46ab38 $
  */
 
 public interface BundleContext extends BundleReference {
@@ -410,9 +410,8 @@ public interface BundleContext extends BundleReference {
 	 *         unregister the service.
 	 * @throws IllegalArgumentException If one of the following is true:
 	 *         <ul>
-	 *         <li>{@code service} is {@code null}. <li>{@code service
-	 *         } is not
-	 *         a {@code ServiceFactory} object and is not an instance of all the
+	 *         <li>{@code service} is {@code null}. <li>{@code service} is not a
+	 *         {@code ServiceFactory} object and is not an instance of all the
 	 *         named classes in {@code clazzes}. <li> {@code properties}
 	 *         contains case variants of the same key name.
 	 *         </ul>

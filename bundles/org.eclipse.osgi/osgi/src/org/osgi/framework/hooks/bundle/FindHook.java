@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * (get bundles) operations.
  * 
  * @ThreadSafe
- * @version $Id: ade0301a4edaa5d4c756fc785e136756cd8647b5 $ 
+ * @version $Id: 2f5bd0fa306e792eb88f254975e301b20d7f969d $ 
  */
 public interface FindHook {
 	/**

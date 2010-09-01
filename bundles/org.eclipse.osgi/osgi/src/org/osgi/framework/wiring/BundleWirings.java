@@ -24,7 +24,7 @@ import org.osgi.framework.BundleReference;
 /**
  * The {@link BundleWiring#isInUse() in use} bundle wirings for a bundle. Each
  * time a bundle is resolved, a new bundle wiring of the bundle is created. A
- * bundle wiring consists of a bundle and it attached fragments and represents
+ * bundle wiring consists of a bundle and its attached fragments and represents
  * the dependencies with other bundle wirings.
  * 
  * <p>
@@ -33,7 +33,7 @@ import org.osgi.framework.BundleReference;
  * {@link BundleWirings#getWirings() getWirings()}.
  * 
  * @ThreadSafe
- * @version $Id: dc8656f9ab4562e4eda1c461c1b3414e5743515e $
+ * @version $Id: cd84d0276d3d381699b5abb00f0fc5c420ae7e83 $
  */
 public interface BundleWirings extends BundleReference {
 	/**

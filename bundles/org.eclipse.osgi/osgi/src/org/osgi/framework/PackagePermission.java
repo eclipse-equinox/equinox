@@ -29,11 +29,9 @@ import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +54,7 @@ import java.util.Map;
  * which is deprecated, implies the {@code import} action.
  * 
  * @ThreadSafe
- * @version $Id: f0fd0a2d5340eb86d092ed2af6caacbc28205d81 $
+ * @version $Id: bc511e79216fc704b5a18bd6814c7e28740a0cdd $
  */
 
 public final class PackagePermission extends BasicPermission {
@@ -117,7 +115,7 @@ public final class PackagePermission extends BasicPermission {
 	 * filter in implies. This is not initialized until necessary, and then
 	 * cached in this object.
 	 */
-	private transient volatile Dictionary<String, Object>	properties;
+	private transient volatile Map<String, Object>	properties;
 
 	/**
 	 * Creates a new {@code PackagePermission} object.
@@ -426,7 +424,7 @@ public final class PackagePermission extends BasicPermission {
 		if (f == null) {
 			return super.implies(requested);
 		}
-		return f.matchCase(requested.getProperties());
+		return f.matches(requested.getProperties());
 	}
 
 	/**
@@ -551,33 +549,33 @@ public final class PackagePermission extends BasicPermission {
 	 * 
 	 * @return a dictionary of properties for this permission.
 	 */
-	private Dictionary<String, Object> getProperties() {
-		Dictionary<String, Object> result = properties;
+	private Map<String, Object> getProperties() {
+		Map<String, Object> result = properties;
 		if (result != null) {
 			return result;
 		}
-		final Dictionary<String, Object> dict = new Hashtable<String, Object>(5);
+		final Map<String, Object> map = new HashMap<String, Object>(5);
 		if (filter == null) {
-			dict.put("package.name", getName());
+			map.put("package.name", getName());
 		}
 		if (bundle != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
-					dict.put("id", new Long(bundle.getBundleId()));
-					dict.put("location", bundle.getLocation());
+					map.put("id", new Long(bundle.getBundleId()));
+					map.put("location", bundle.getLocation());
 					String name = bundle.getSymbolicName();
 					if (name != null) {
-						dict.put("name", name);
+						map.put("name", name);
 					}
 					SignerProperty signer = new SignerProperty(bundle);
 					if (signer.isBundleSigned()) {
-						dict.put("signer", signer);
+						map.put("signer", signer);
 					}
 					return null;
 				}
 			});
 		}
-		return properties = dict;
+		return properties = map;
 	}
 }
 
@@ -760,9 +758,8 @@ final class PackagePermissionCollection extends PermissionCollection {
 			perms = pc.values();
 		}
 		/* iterate one by one over filteredPermissions */
-		for (Iterator<PackagePermission> iter = perms.iterator(); iter
-				.hasNext();) {
-			if (iter.next().implies0(requested, effective)) {
+		for (PackagePermission perm : perms) {
+			if (perm.implies0(requested, effective)) {
 				return true;
 			}
 		}

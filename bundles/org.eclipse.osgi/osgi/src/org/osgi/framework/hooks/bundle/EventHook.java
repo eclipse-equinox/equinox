@@ -29,7 +29,7 @@ import org.osgi.framework.BundleEvent;
  * (install, start, stop, update, and uninstall bundle) operations.
  * 
  * @ThreadSafe
- * @version $Id: d9e163e0ed32cfe77aecd254a24c910a8882a517 $
+ * @version $Id: 18ea1ec1f14f47410a43e99be4da3b2583149722 $
  */
 public interface EventHook {
 
@@ -38,13 +38,13 @@ public interface EventHook {
 	 * delivery when a bundle is installed, resolved, started, stopped, unresolved, or
 	 * uninstalled.  This method can filter the bundles which receive the event.
 	 * <p>
-	 * Note that this method may be called, at most, two times with the same bundle event.
-	 * For example, it is acceptable for a framework implementation to call this 
-	 * once for all bundle contexts with at least one {@code SynchronousBundleListener} registered 
-	 * and once for all bundle contexts with at least one {@code BundleListener} registered.
-	 * In all cases this event method must be called on the same thread that is performing
-	 * the action which generated the specified event.
-	 * <p>
+	 * This method must be called by the framework one and only one time for each bundle 
+	 * event generated, this included bundle events which are generated when there are no 
+	 * bundle listeners registered.  This method must be called on the same thread that is 
+	 * performing the action which generated the specified event.  The specified 
+	 * collection includes bundle contexts with synchronous and asynchronous bundle 
+	 * listeners registered with them.
+	 * 
 	 * @param event The bundle event to be delivered
 	 * @param contexts A collection of Bundle Contexts for bundles which have
 	 *        listeners to which the specified event will be delivered. The

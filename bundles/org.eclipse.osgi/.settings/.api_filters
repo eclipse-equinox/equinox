@@ -470,7 +470,40 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/CapabilityPermission.java" type="org.osgi.framework.CapabilityPermission">
+<filter comment="Ignore OSGi APIs." id="1108344834">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="org.osgi.framework.CapabilityPermission"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="EFFECTIVE_ACTIVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="EFFECTIVE_DIRECTIVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="EFFECTIVE_RESOLVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FILTER_ATTRIBUTE"/>
+</message_arguments>
+</filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
@@ -483,10 +516,28 @@
 <message_argument value="FRAMEWORK_JARURLS"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
+</message_arguments>
+</filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="FRAMEWORK_UUID"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="PROVIDE_CAPABILITY"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -499,6 +550,12 @@
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="REMOTE_INTENTS_SUPPORTED"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="REQUIRE_CAPABILITY"/>
 </message_arguments>
 </filter>
 <filter id="403767336">
@@ -543,6 +600,34 @@
 <message_argument value="SERVICE_INTENTS"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="EFFECTIVE_ACTIVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="EFFECTIVE_DIRECTIVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="EFFECTIVE_RESOLVE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FILTER_ATTRIBUTE"/>
+</message_arguments>
+</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
@@ -557,11 +642,32 @@
 <message_argument value="FRAMEWORK_JARURLS"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
+</message_arguments>
+</filter>
 <filter id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="FRAMEWORK_UUID"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="PROVIDE_CAPABILITY"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
@@ -576,6 +682,13 @@
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="REMOTE_INTENTS_SUPPORTED"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi APIs." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="REQUIRE_CAPABILITY"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">
