@@ -44,7 +44,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(StateBuilder.OSGI_PROVIDE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
+		sb.append(Constants.PROVIDE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
 		Map attrs = getDeclaredAttributes();
 		sb.append(toString(attrs, false));
 		return sb.toString();

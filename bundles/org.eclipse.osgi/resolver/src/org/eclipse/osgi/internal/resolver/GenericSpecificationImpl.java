@@ -13,8 +13,7 @@ package org.eclipse.osgi.internal.resolver;
 
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 
 public class GenericSpecificationImpl extends VersionConstraintImpl implements GenericSpecification {
 	private Filter matchingFilter;
@@ -57,7 +56,7 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append(StateBuilder.OSGI_REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
+		sb.append(Constants.REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
 		if (matchingFilter != null)
 			sb.append("; filter=\"").append(getMatchingFilter()).append('"'); //$NON-NLS-1$
 		return sb.toString();

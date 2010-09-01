@@ -28,11 +28,6 @@ class StateBuilder {
 	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
-	static final String OSGI_PROVIDE_CAPABILITY = "Provide-Capability"; //$NON-NLS-1$
-	static final String OSGI_REQUIRE_CAPABILITY = "Require-Capability"; //$NON-NLS-1$
-	static final String OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE = "effective"; //$NON-NLS-1$
-	static final String OSGI_RESOLVE_EFFECTIVE_CAPABILITY = "resolve"; //$NON-NLS-1$
-	static final String OSGI_ACTIVE_EFFECTIVE_CAPABILITY = "active"; //$NON-NLS-1$
 
 	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$
@@ -107,10 +102,10 @@ class StateBuilder {
 		result.setRequiredBundles(createRequiredBundles(requires));
 		String[][] genericAliases = getGenericAliases(state);
 		ManifestElement[] genericRequires = getGenericRequires(manifest, genericAliases);
-		ManifestElement[] osgiRequires = ManifestElement.parseHeader(OSGI_REQUIRE_CAPABILITY, (String) manifest.get(OSGI_REQUIRE_CAPABILITY));
+		ManifestElement[] osgiRequires = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, (String) manifest.get(Constants.REQUIRE_CAPABILITY));
 		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires));
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
-		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(OSGI_PROVIDE_CAPABILITY, (String) manifest.get(OSGI_PROVIDE_CAPABILITY));
+		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) manifest.get(Constants.PROVIDE_CAPABILITY));
 		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities));
 		ManifestElement[] nativeCode = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, (String) manifest.get(Constants.BUNDLE_NATIVECODE));
 		result.setNativeCodeSpecification(createNativeCode(nativeCode));
@@ -448,12 +443,12 @@ class StateBuilder {
 		for (ManifestElement element : osgiRequires) {
 			String[] namespaces = element.getValueComponents();
 			types: for (String namespace : namespaces) {
-				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
-				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
+				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
+				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
 					break types;
 				String filterSpec = element.getAttribute("filter"); //$NON-NLS-1$
 				if (filterSpec == null)
-					throw new BundleException("Must specify the filter attribute for " + OSGI_REQUIRE_CAPABILITY); //$NON-NLS-1$
+					throw new BundleException("Must specify the filter attribute for " + Constants.REQUIRE_CAPABILITY); //$NON-NLS-1$
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
 				spec.setType(namespace);
 				try {
@@ -463,7 +458,7 @@ class StateBuilder {
 					if (name != null)
 						spec.setName(name);
 				} catch (InvalidSyntaxException e) {
-					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, OSGI_REQUIRE_CAPABILITY, element.toString());
+					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, Constants.REQUIRE_CAPABILITY, element.toString());
 					throw new BundleException(message + " : filter", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 				}
 				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
@@ -524,8 +519,8 @@ class StateBuilder {
 		for (ManifestElement element : osgiCapabilities) {
 			String[] namespaces = element.getValueComponents();
 			types: for (String namespace : namespaces) {
-				String effective = element.getDirective(OSGI_EFFECTIVE_CAPABILITY_DIRECTIVE);
-				if (effective != null && !OSGI_RESOLVE_EFFECTIVE_CAPABILITY.equals(effective))
+				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
+				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
 					break types; // ignore any namespace that is not effective at resolve time.
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				desc.setType(namespace);
