@@ -13,7 +13,8 @@ package org.eclipse.osgi.internal.module;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.Capability;
 
@@ -642,10 +643,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	}
 
 	public Bundle getBundle() {
-		Object ref = getBundleDescription().getUserObject();
-		if (ref instanceof BundleReference)
-			return ((BundleReference) ref).getBundle();
-		return null;
+		return getBundleDescription().getBundle();
 	}
 
 	public String getSymbolicName() {
@@ -653,12 +651,20 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	}
 
 	public List<Capability> getDeclaredCapabilities(String namespace) {
-		// TODO Auto-generated method stub
-		return null;
+		// This gives a view of the host and attached fragments.
+		Capability[] capabilities = getGenericCapabilities();
+		if (namespace == null)
+			return new ArrayList<Capability>(Arrays.asList(capabilities));
+		List<Capability> result = new ArrayList<Capability>();
+		for (Capability capability : capabilities) {
+			if (namespace.equals(capability.getNamespace()))
+				result.add(capability);
+		}
+		return result;
 	}
 
 	public int getTypes() {
-		return getBundleDescription().getHost() != null ? BundleRevision.TYPE_FRAGMENT : 0;
+		return getBundleDescription().getTypes();
 	}
 
 	public String getNamespace() {

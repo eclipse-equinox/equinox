@@ -13,12 +13,16 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.HostSpecification;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.BundleWirings;
 
 public class BundleFragment extends AbstractBundle {
 
@@ -334,5 +338,44 @@ public class BundleFragment extends AbstractBundle {
 	protected BundleContextImpl getContext() {
 		// Fragments cannot have a BundleContext.
 		return null;
+	}
+
+	public <A> A adapt(Class<A> adapterType) {
+		if (BundleWirings.class.equals(adapterType)) {
+			return (A) new BundleWirings() {
+				public Bundle getBundle() {
+					return BundleFragment.this;
+				}
+
+				public List<BundleWiring> getWirings() {
+					List<BundleWiring> wirings = new ArrayList<BundleWiring>();
+					BundleDescription current = getBundleDescription();
+					BundleDescription[] removed = framework.adaptor.getState().getRemovalPending();
+
+					int i = -1;
+					do {
+						HostSpecification hostSpec = null;
+						if (i == -1) {
+							if (current != null)
+								hostSpec = current.getHost();
+						} else if (removed[i] != current && removed[i].getBundleId() == getBundleId()) {
+							hostSpec = removed[i].getHost();
+						}
+						BundleDescription[] hostDescs = hostSpec == null ? null : hostSpec.getHosts();
+						if (hostDescs != null) {
+							for (BundleDescription host : hostDescs) {
+								BundleWiring wiring = host.getBundleWiring();
+								if (wiring != null)
+									wirings.add(wiring);
+							}
+						}
+						i++;
+					} while (i < removed.length);
+					return wirings;
+				}
+
+			};
+		}
+		return super.adapt(adapterType);
 	}
 }

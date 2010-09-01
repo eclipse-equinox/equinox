@@ -98,4 +98,8 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 			return Collections.unmodifiableMap(result);
 		}
 	}
+
+	String getInternalNameSpace() {
+		return getType();
+	}
 }

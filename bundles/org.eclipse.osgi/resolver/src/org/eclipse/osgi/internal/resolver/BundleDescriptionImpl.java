@@ -13,11 +13,14 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.wiring.Capability;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleReference;
+import org.osgi.framework.wiring.*;
 
 public final class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
 	static final String[] EMPTY_STRING = new String[0];
@@ -54,6 +57,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	private volatile LazyData lazyData;
 	private volatile int equinox_ee = -1;
+
+	private DescriptionWiring bundleWiring;
 
 	public BundleDescriptionImpl() {
 		// 
@@ -345,10 +350,16 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	protected void setStateBit(int stateBit, boolean on) {
 		synchronized (this.monitor) {
-			if (on)
+			if (on) {
 				stateBits |= stateBit;
-			else
+			} else {
 				stateBits &= ~stateBit;
+				if (stateBit == RESOLVED) {
+					if (bundleWiring != null)
+						bundleWiring.invalidate();
+					bundleWiring = null;
+				}
+			}
 		}
 	}
 
@@ -555,6 +566,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	boolean hasDependents() {
+		synchronized (this.monitor) {
+			return dependents == null ? false : dependents.size() > 0;
+		}
+	}
+
 	void setFullyLoaded(boolean fullyLoaded) {
 		synchronized (this.monitor) {
 			if (fullyLoaded) {
@@ -740,5 +757,144 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		result.put(Capability.BUNDLE_CAPABILITY, getName());
 		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
 		return Collections.unmodifiableMap(result);
+	}
+
+	public List<Capability> getDeclaredCapabilities(String namespace) {
+		List<Capability> result = new ArrayList<Capability>();
+		if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
+			result.add(BundleDescriptionImpl.this.getWiredCapability());
+		}
+		if (namespace == null || Capability.PACKAGE_CAPABILITY.equals(namespace)) {
+			ExportPackageDescription[] exports = getExportPackages();
+			for (ExportPackageDescription importPkg : exports)
+				result.add(importPkg.getWiredCapability());
+		}
+		GenericDescription[] genericCapabilities = getGenericCapabilities();
+		for (GenericDescription capabilitiy : genericCapabilities) {
+			if (namespace == null || namespace.equals(capabilitiy.getType()))
+				result.add(capabilitiy.getWiredCapability());
+		}
+		return result;
+	}
+
+	public int getTypes() {
+		return getHost() != null ? BundleRevision.TYPE_FRAGMENT : 0;
+	}
+
+	public Bundle getBundle() {
+		Object ref = getUserObject();
+		if (ref instanceof BundleReference)
+			return ((BundleReference) ref).getBundle();
+		return null;
+	}
+
+	String getInternalNameSpace() {
+		return Capability.BUNDLE_CAPABILITY;
+	}
+
+	public BundleWiring getBundleWiring() {
+		synchronized (this.monitor) {
+			if (bundleWiring != null || !isResolved() || (getTypes() & BundleRevision.TYPE_FRAGMENT) != 0)
+				return bundleWiring;
+			return bundleWiring = new DescriptionWiring();
+		}
+	}
+
+	// Note that description wiring are identity equality based
+	class DescriptionWiring implements BundleWiring {
+		private volatile boolean valid = true;
+
+		public Bundle getBundle() {
+			return BundleDescriptionImpl.this.getBundle();
+		}
+
+		public boolean isInUse() {
+			return valid && (isCurrent() || BundleDescriptionImpl.this.hasDependents());
+		}
+
+		void invalidate() {
+			valid = false;
+		}
+
+		public boolean isCurrent() {
+			return valid && !BundleDescriptionImpl.this.isRemovalPending();
+		}
+
+		public List<WiredCapability> getRequiredCapabilities(String capabilityNamespace) {
+			if (!isInUse())
+				return null;
+			List<WiredCapability> result = new ArrayList<WiredCapability>();
+			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
+				BundleDescription[] requires = getResolvedRequires();
+				for (BundleDescription require : requires)
+					result.add(require.getWiredCapability());
+			}
+			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
+				ExportPackageDescription[] imports = getResolvedImports();
+				for (ExportPackageDescription importPkg : imports)
+					result.add(importPkg.getWiredCapability());
+			}
+			GenericDescription[] genericRequires = getResolvedGenericRequires();
+			for (GenericDescription require : genericRequires) {
+				if (capabilityNamespace == null || capabilityNamespace.equals(require.getType()))
+					result.add(require.getWiredCapability());
+			}
+			return result;
+		}
+
+		public List<WiredCapability> getProvidedCapabilities(String capabilityNamespace) {
+			if (!isInUse())
+				return null;
+			List<WiredCapability> result = new ArrayList<WiredCapability>();
+			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
+				result.add(BundleDescriptionImpl.this.getWiredCapability());
+			}
+			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
+				ExportPackageDescription[] exports = getSelectedExports();
+				for (ExportPackageDescription importPkg : exports)
+					result.add(importPkg.getWiredCapability());
+			}
+			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
+			for (GenericDescription capabilitiy : genericCapabilities) {
+				if (capabilityNamespace == null || capabilityNamespace.equals(capabilitiy.getType()))
+					result.add(capabilitiy.getWiredCapability());
+			}
+			return result;
+		}
+
+		public List<BundleRevision> getFragmentRevisions() {
+			if (!isInUse())
+				return null;
+			return new ArrayList<BundleRevision>(Arrays.asList(getFragments()));
+		}
+
+		public ClassLoader getClassLoader() {
+			if (!isInUse())
+				return null;
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public BundleRevision getBundleRevision() {
+			return BundleDescriptionImpl.this;
+		}
+
+		public List<URL> findEntries(String path, String filePattern, int options) {
+			if (!isInUse())
+				return null;
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public List<String> listResources(String path, String filePattern, int options) {
+			if (!isInUse())
+				return null;
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public String toString() {
+			return BundleDescriptionImpl.this.toString();
+		}
 	}
 }

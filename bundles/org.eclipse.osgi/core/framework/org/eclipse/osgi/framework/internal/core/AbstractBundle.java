@@ -29,6 +29,8 @@ import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
@@ -1546,7 +1548,16 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		if (BundleStartLevel.class.equals(adapterType))
 			return (A) this;
 
-		// TODO need to handle BundleWiring, BundlePackageAdmin
+		if (BundleWiring.class.equals(adapterType)) {
+			if (state == UNINSTALLED || isFragment())
+				return null;
+			BundleDescription description = getBundleDescription();
+			return (A) description.getBundleWiring();
+		}
+
+		if (BundleRevision.class.equals(adapterType)) {
+			return (A) getBundleDescription();
+		}
 		return null;
 	}
 

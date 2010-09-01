@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
+
 /**
  * This class represents a specific version of a bundle in the system.
  * <p>
@@ -19,7 +22,7 @@ package org.eclipse.osgi.service.resolver;
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface BundleDescription extends BaseDescription {
+public interface BundleDescription extends BaseDescription, BundleRevision {
 
 	/**
 	 * Gets the Bundle-SymbolicName of this BundleDescription.
@@ -269,4 +272,14 @@ public interface BundleDescription extends BaseDescription {
 	 * @since 3.4
 	 */
 	public ExportPackageDescription[] getSubstitutedExports();
+
+	/**
+	 * Returns the bundle wiring object associated with this bundle description.
+	 * A bundle description can only have one bundle wiring object associated with
+	 * it which is in use.  A bundle description must be resolved in order 
+	 * to have a bundle wiring object associated with it.  
+	 * @return the bundle wiring object associated with this bundle description.
+	 * @since 3.7
+	 */
+	public BundleWiring getBundleWiring();
 }

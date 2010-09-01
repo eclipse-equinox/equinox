@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.WiredCapability;
 
 public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements NativeCodeDescription {
 	private static final VersionRange[] EMPTY_VERSIONRANGES = new VersionRange[0];
@@ -216,6 +217,11 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 
 	public Map<String, Object> getDeclaredAttributes() {
 		return Collections.EMPTY_MAP;
+	}
+
+	public WiredCapability getWiredCapability() {
+		// not supported for native code
+		return null;
 	}
 
 }

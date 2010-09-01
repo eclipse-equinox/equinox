@@ -195,4 +195,8 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	void setTableIndex(int tableIndex) {
 		this.tableIndex = tableIndex;
 	}
+
+	String getInternalNameSpace() {
+		return Capability.PACKAGE_CAPABILITY;
+	}
 }

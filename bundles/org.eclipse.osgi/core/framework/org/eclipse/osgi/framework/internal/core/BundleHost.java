@@ -13,7 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -22,6 +22,8 @@ import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.BundleWirings;
 
 public class BundleHost extends AbstractBundle {
 	public static final int LAZY_TRIGGER = 0x40000000;
@@ -674,4 +676,33 @@ public class BundleHost extends AbstractBundle {
 		BundleClassLoader bcl = loader == null ? null : loader.createClassLoader();
 		return (bcl instanceof ClassLoader) ? (ClassLoader) bcl : null;
 	}
+
+	public <A> A adapt(Class<A> adapterType) {
+		if (BundleWirings.class.equals(adapterType)) {
+			return (A) new BundleWirings() {
+				public Bundle getBundle() {
+					return BundleHost.this;
+				}
+
+				public List<BundleWiring> getWirings() {
+					List<BundleWiring> wirings = new ArrayList<BundleWiring>();
+					BundleWiring current = adapt(BundleWiring.class);
+					if (current != null)
+						wirings.add(current);
+					BundleDescription[] removals = framework.adaptor.getState().getRemovalPending();
+					for (BundleDescription removed : removals) {
+						if (removed.getBundleId() == getBundleId()) {
+							BundleWiring removedWiring = removed.getBundleWiring();
+							if (removedWiring != null && removedWiring != current)
+								wirings.add(removedWiring);
+						}
+					}
+					return wirings;
+				}
+
+			};
+		}
+		return super.adapt(adapterType);
+	}
+
 }

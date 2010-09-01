@@ -464,7 +464,7 @@ class StateBuilder {
 						spec.setName(name);
 				} catch (InvalidSyntaxException e) {
 					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, OSGI_REQUIRE_CAPABILITY, element.toString());
-					throw new BundleException(message + " : " + Constants.SELECTION_FILTER_ATTRIBUTE, BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
+					throw new BundleException(message + " : filter", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 				}
 				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
 				if (Constants.RESOLUTION_OPTIONAL.equals(resolution))

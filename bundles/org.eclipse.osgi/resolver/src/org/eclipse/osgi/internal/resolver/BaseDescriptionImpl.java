@@ -13,7 +13,9 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.*;
 
 abstract class BaseDescriptionImpl implements BaseDescription {
 
@@ -75,5 +77,88 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			}
 		}
 		return sb.toString();
+	}
+
+	String getInternalNameSpace() {
+		return null;
+	}
+
+	public WiredCapability getWiredCapability() {
+		synchronized (this.monitor) {
+			BundleDescription supplier = getSupplier();
+			BundleWiring wiring = supplier.getBundleWiring();
+			if (wiring == null)
+				return null;
+			return new BaseWiredCapability(wiring);
+		}
+	}
+
+	class BaseWiredCapability implements WiredCapability {
+		private final BundleWiring originalWiring;
+
+		public BaseWiredCapability(BundleWiring originalWiring) {
+			this.originalWiring = originalWiring;
+		}
+
+		public BundleRevision getProviderRevision() {
+			return getSupplier();
+		}
+
+		public String getNamespace() {
+			return getInternalNameSpace();
+		}
+
+		public Map<String, String> getDirectives() {
+			return getDeclaredDirectives();
+		}
+
+		public Map<String, Object> getAttributes() {
+			return getDeclaredAttributes();
+		}
+
+		public Collection<BundleWiring> getRequirerWirings() {
+			BundleWiring wiring = getProviderWiring();
+			if (wiring == null)
+				return null;
+			BundleDescription supplier = getSupplier();
+			BundleDescription[] dependents = supplier.getDependents();
+			Collection<BundleWiring> requirers = new ArrayList<BundleWiring>();
+			for (BundleDescription dependent : dependents) {
+				BundleWiring dependentWiring = dependent.getBundleWiring();
+				if (dependentWiring == null) // fragments have no wiring
+					continue;
+				List<WiredCapability> namespace = dependentWiring.getRequiredCapabilities(getNamespace());
+				if (namespace == null)
+					continue;
+				if (namespace.contains(this))
+					requirers.add(dependentWiring);
+			}
+			return requirers;
+		}
+
+		public BundleWiring getProviderWiring() {
+			return originalWiring.isInUse() ? originalWiring : null;
+		}
+
+		BaseDescriptionImpl getImpl() {
+			return BaseDescriptionImpl.this;
+		}
+
+		public int hashCode() {
+			return System.identityHashCode(BaseDescriptionImpl.this) ^ System.identityHashCode(originalWiring);
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!(obj instanceof BaseWiredCapability))
+				return false;
+			BaseWiredCapability other = (BaseWiredCapability) obj;
+			return (other.originalWiring == this.originalWiring) && (this.getImpl() == other.getImpl());
+		}
+
+		public String toString() {
+			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
+		}
 	}
 }

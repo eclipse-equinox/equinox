@@ -37,7 +37,7 @@ public abstract class StateImpl implements State {
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
 	transient volatile private boolean resolving = false;
-	transient private HashSet removalPendings = new HashSet();
+	transient private LinkedList<BundleDescription> removalPendings = new LinkedList<BundleDescription>();
 
 	private volatile boolean resolved = true;
 	private volatile long timeStamp = System.currentTimeMillis();
@@ -128,13 +128,13 @@ public abstract class StateImpl implements State {
 				resolver.bundleUpdated(newDescription, existing, pending);
 				if (pending) {
 					getDelta().recordBundleRemovalPending(existing);
-					removalPendings.add(existing);
+					addRemovalPending(existing);
 				} else {
 					// an existing bundle has been updated with no dependents it can safely be unresolved now
 					try {
 						resolving = true;
 						resolverErrors.remove(existing);
-						resolveBundle(existing, false, null, null, null, null, null);
+						resolveBundle(existing, false, null, null, null, null, null, null, null);
 					} finally {
 						resolving = false;
 					}
@@ -169,7 +169,7 @@ public abstract class StateImpl implements State {
 				resolver.bundleRemoved(toRemove, pending);
 				if (pending) {
 					getDelta().recordBundleRemovalPending((BundleDescriptionImpl) toRemove);
-					removalPendings.add(toRemove);
+					addRemovalPending(toRemove);
 				} else {
 					// a bundle has been removed with no dependents it can safely be unresolved now
 					try {
@@ -445,7 +445,7 @@ public abstract class StateImpl implements State {
 					reResolve = getBundles();
 					// need to get any removal pendings before flushing
 					if (removalPendings.size() > 0) {
-						BundleDescription[] removed = getRemovalPending();
+						BundleDescription[] removed = internalGetRemovalPending();
 						reResolve = mergeBundles(reResolve, removed);
 					}
 					flush(reResolve);
@@ -453,7 +453,7 @@ public abstract class StateImpl implements State {
 				if (resolved && reResolve == null)
 					return new StateDeltaImpl(this);
 				if (removalPendings.size() > 0) {
-					BundleDescription[] removed = getRemovalPending();
+					BundleDescription[] removed = internalGetRemovalPending();
 					reResolve = mergeBundles(reResolve, removed);
 				}
 				// use the Headers class to handle ignoring case while matching keys (bug 180817)
@@ -835,12 +835,29 @@ public abstract class StateImpl implements State {
 	 */
 	public BundleDescription[] getRemovalPending() {
 		synchronized (this.monitor) {
-			Iterator removed = removalPendings.iterator();
+			return removalPendings.toArray(new BundleDescription[removalPendings.size()]);
+		}
+	}
+
+	private void addRemovalPending(BundleDescription removed) {
+		synchronized (this.monitor) {
+			if (!removalPendings.contains(removed))
+				removalPendings.addFirst(removed);
+		}
+	}
+
+	/**
+	 * Returns the latest versions BundleDescriptions which have old removal pending versions.
+	 * @return the BundleDescriptions that have removal pending versions.
+	 */
+	private BundleDescription[] internalGetRemovalPending() {
+		synchronized (this.monitor) {
+			Iterator<BundleDescription> removed = removalPendings.iterator();
 			BundleDescription[] result = new BundleDescription[removalPendings.size()];
 			int i = 0;
 			while (removed.hasNext())
 				// we return the latest version of the description if it is still contained in the state (bug 287636)
-				result[i++] = getBundle(((BundleDescription) removed.next()).getBundleId());
+				result[i++] = getBundle(removed.next().getBundleId());
 			return result;
 		}
 	}
