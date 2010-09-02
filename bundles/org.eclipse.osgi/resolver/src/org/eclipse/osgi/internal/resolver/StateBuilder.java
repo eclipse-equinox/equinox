@@ -510,7 +510,7 @@ class StateBuilder {
 		return result == null ? null : result.toArray(new GenericDescription[result.size()]);
 	}
 
-	private static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) {
+	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) {
 		if (osgiCapabilities == null)
 			return result;
 		if (result == null)

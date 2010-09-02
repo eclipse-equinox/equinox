@@ -31,7 +31,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_WS = "osgi.ws"; //$NON-NLS-1$
 	private static final String OSGI_NL = "osgi.nl"; //$NON-NLS-1$
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
-	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE}; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE, Constants.FRAMEWORK_SYSTEMCAPABILITIES, Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
 
 	transient private Resolver resolver;
@@ -91,7 +91,7 @@ public abstract class StateImpl implements State {
 			resolved = false;
 			getDelta().recordBundleAdded((BundleDescriptionImpl) description);
 			if (getSystemBundle().equals(description.getSymbolicName()))
-				resetSystemExports();
+				resetAllSystemCapabilities();
 			if (resolver != null)
 				resolver.bundleAdded(description);
 			updateTimeStamp();
@@ -122,7 +122,7 @@ public abstract class StateImpl implements State {
 			resolved = false;
 			getDelta().recordBundleUpdated((BundleDescriptionImpl) newDescription);
 			if (getSystemBundle().equals(newDescription.getSymbolicName()))
-				resetSystemExports();
+				resetAllSystemCapabilities();
 			if (resolver != null) {
 				boolean pending = isInUse(existing);
 				resolver.bundleUpdated(newDescription, existing, pending);
@@ -730,9 +730,11 @@ public abstract class StateImpl implements State {
 		}
 		boolean result = false;
 		boolean performResetSystemExports = false;
+		boolean performResetSystemCapabilities = false;
 		if (this.platformProperties.length != newPlatformProperties.length) {
 			result = true;
 			performResetSystemExports = true;
+			performResetSystemCapabilities = true;
 		} else {
 			// we need to see if any of the existing filter prop keys have changed
 			String[] keys = getPlatformPropertyKeys();
@@ -742,6 +744,8 @@ public abstract class StateImpl implements State {
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES));
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA));
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME), newPlatformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME));
+					performResetSystemCapabilities |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES));
+					performResetSystemCapabilities |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA));
 				}
 			}
 		}
@@ -749,7 +753,14 @@ public abstract class StateImpl implements State {
 		this.platformProperties = newPlatformProperties;
 		if (performResetSystemExports)
 			resetSystemExports();
+		if (performResetSystemCapabilities)
+			resetSystemCapabilities();
 		return result;
+	}
+
+	private void resetAllSystemCapabilities() {
+		resetSystemExports();
+		resetSystemCapabilities();
 	}
 
 	private void resetSystemExports() {
@@ -785,6 +796,36 @@ public abstract class StateImpl implements State {
 			((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);
 			exports.add(systemExports[j]);
 		}
+	}
+
+	private void resetSystemCapabilities() {
+		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
+		Long builtIn = new Long(1);
+		for (BundleDescription systemBundle : systemBundles) {
+			GenericDescription[] capabilities = systemBundle.getGenericCapabilities();
+			List<GenericDescription> newCapabilities = new ArrayList<GenericDescription>(capabilities.length);
+			for (GenericDescription capability : capabilities) {
+				if (builtIn.equals(capability.getDeclaredAttributes().get("equinox.builtin"))) //$NON-NLS-1$
+					newCapabilities.add(capability); // keep the built in ones.
+			}
+			// now add the externally defined ones
+			addSystemCapabilities(newCapabilities);
+			((BundleDescriptionImpl) systemBundle).setGenericCapabilities(newCapabilities.toArray(new GenericDescription[newCapabilities.size()]));
+		}
+	}
+
+	private void addSystemCapabilities(List<GenericDescription> capabilities) {
+		for (int i = 0; i < platformProperties.length; i++)
+			try {
+				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES)));
+				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA)));
+			} catch (BundleException e) {
+				// TODO consider throwing this... 
+			}
+	}
+
+	private void addSystemCapabilities(List<GenericDescription> capabilities, ManifestElement[] elements) {
+		StateBuilder.createOSGiCapabilities(elements, capabilities);
 	}
 
 	public Dictionary[] getPlatformProperties() {

@@ -42,17 +42,31 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		}
 
 		public Object get(Object key) {
-			if (!org.osgi.framework.Constants.EXPORT_PACKAGE.equals(key))
-				return headers.get(key);
-			String systemPackages = FrameworkProperties.getProperty(org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES);
-			String results = (String) headers.get(org.osgi.framework.Constants.EXPORT_PACKAGE);
-			if (systemPackages != null) {
-				if (results != null)
-					results += ", " + systemPackages; //$NON-NLS-1$
-				else
-					results = systemPackages;
+			if (!(key instanceof String))
+				return null;
+			if (org.osgi.framework.Constants.EXPORT_PACKAGE.equalsIgnoreCase((String) key)) {
+				return getExtra(org.osgi.framework.Constants.EXPORT_PACKAGE, org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES, org.osgi.framework.Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA);
+			} else if (org.osgi.framework.Constants.PROVIDE_CAPABILITY.equalsIgnoreCase((String) key)) {
+				return getExtra(org.osgi.framework.Constants.PROVIDE_CAPABILITY, org.osgi.framework.Constants.FRAMEWORK_SYSTEMCAPABILITIES, org.osgi.framework.Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA);
 			}
-			return results;
+			return headers.get(key);
+		}
+
+		private String getExtra(String header, String systemProp, String systemExtraProp) {
+			String systemValue = FrameworkProperties.getProperty(systemProp);
+			String systemExtraValue = FrameworkProperties.getProperty(systemExtraProp);
+			if (systemValue == null)
+				systemValue = systemExtraValue;
+			else if (systemExtraValue != null)
+				systemValue += ", " + systemExtraValue; //$NON-NLS-1$
+			String result = (String) headers.get(header);
+			if (systemValue != null) {
+				if (result != null)
+					result += ", " + systemValue; //$NON-NLS-1$
+				else
+					result = systemValue;
+			}
+			return result;
 		}
 
 		public boolean isEmpty() {

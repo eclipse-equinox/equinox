@@ -447,6 +447,12 @@ public class Framework implements EventPublisher, Runnable {
 			if (ee != null)
 				properties.put(Constants.FRAMEWORK_EXECUTIONENVIRONMENT, ee);
 		}
+		// set the org.osgi.framework.system.capabilities property according to the java profile
+		if (properties.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES) == null) {
+			String systemCapabilities = profileProps.getProperty(Constants.FRAMEWORK_SYSTEMCAPABILITIES);
+			if (systemCapabilities != null)
+				properties.put(Constants.FRAMEWORK_SYSTEMCAPABILITIES, systemCapabilities);
+		}
 	}
 
 	private Properties findVMProfile() {
