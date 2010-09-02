@@ -35,7 +35,7 @@ class StateBuilder {
 	private static final String ATTR_TYPE_LONG = "long"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_DOUBLE = "double"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_SET = "set"; //$NON-NLS-1$
-	private static final String ATTR_TYPE_LIST = "List<"; //$NON-NLS-1$
+	private static final String ATTR_TYPE_LIST = "List"; //$NON-NLS-1$
 	private static final String OPTIONAL_ATTR = "optional"; //$NON-NLS-1$
 	private static final String MULTIPLE_ATTR = "multiple"; //$NON-NLS-1$
 	private static final String TRUE = "true"; //$NON-NLS-1$
@@ -367,8 +367,8 @@ class StateBuilder {
 			int colonIndex = key.indexOf(':');
 			String type = ATTR_TYPE_STRING;
 			if (colonIndex > 0) {
-				type = key.substring(colonIndex + 1);
-				key = key.substring(0, colonIndex);
+				type = key.substring(colonIndex + 1).trim();
+				key = key.substring(0, colonIndex).trim();
 			}
 			if (!definedAttr) {
 				if (arbitraryAttrs == null)
@@ -380,40 +380,51 @@ class StateBuilder {
 	}
 
 	private static Object convertValue(String type, String value) {
-		Object convertValue = value;
+
 		if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
-			convertValue = value;
-		else if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
-			convertValue = new Double(value);
+			return value;
+
+		value = value.trim();
+		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
+			return new Double(value);
 		else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
-			convertValue = new Long(value);
+			return new Long(value);
 		else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
 			try {
 				Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
 				Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
-				convertValue = constructor.newInstance(new Object[] {value});
+				return constructor.newInstance(new Object[] {value});
 			} catch (ClassNotFoundException e) {
 				// oh well cannot support; just use string
-				convertValue = value;
+				return value;
 			} catch (RuntimeException e) { // got some reflection exception
 				throw e;
 			} catch (Exception e) {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
-			convertValue = new Version(value);
+			return new Version(value);
 		else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
-			convertValue = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
-		else if (type.startsWith(ATTR_TYPE_LIST) && type.endsWith(">")) { //$NON-NLS-1$
-			String componentType = type.substring(ATTR_TYPE_LIST.length(), type.length() - 1);
-			String[] list = ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
-			List<Object> components = new ArrayList<Object>();
-			for (String component : list) {
-				components.add(convertValue(componentType, component));
-			}
-			convertValue = components;
+			return ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
+
+		// assume list type, anything else will throw an exception
+		Tokenizer listTokenizer = new Tokenizer(type);
+		String listType = listTokenizer.getToken("<"); //$NON-NLS-1$
+		if (!ATTR_TYPE_LIST.equalsIgnoreCase(listType))
+			throw new RuntimeException("Unsupported type: " + type); //$NON-NLS-1$
+		char c = listTokenizer.getChar();
+		String componentType = ATTR_TYPE_STRING;
+		if (c == '<') {
+			componentType = listTokenizer.getToken(">"); //$NON-NLS-1$
+			if (listTokenizer.getChar() != '>')
+				throw new RuntimeException("Invalid type, missing ending '>' : " + type); //$NON-NLS-1$
 		}
-		return convertValue;
+		List<String> tokens = new Tokenizer(value).getEscapedTokens(","); //$NON-NLS-1$
+		List<Object> components = new ArrayList<Object>();
+		for (String component : tokens) {
+			components.add(convertValue(componentType, component));
+		}
+		return components;
 	}
 
 	private static HostSpecification createHostSpecification(ManifestElement spec, StateImpl state) {

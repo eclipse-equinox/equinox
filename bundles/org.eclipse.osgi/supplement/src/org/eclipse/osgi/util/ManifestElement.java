@@ -396,7 +396,17 @@ public class ManifestElement {
 					} else
 						directive = true;
 				}
-				String val = tokenizer.getString(";,"); //$NON-NLS-1$
+				// determine if the attribute is the form attr:List<type>
+				String preserveEscapes = null;
+				if (!directive && next.indexOf("List") > 0) { //$NON-NLS-1$
+					Tokenizer listTokenizer = new Tokenizer(next);
+					String attrKey = listTokenizer.getToken(":"); //$NON-NLS-1$
+					if (attrKey != null && listTokenizer.getChar() == ':' && "List".equals(listTokenizer.getToken("<"))) { //$NON-NLS-1$//$NON-NLS-2$
+						// we assume we must preserve escapes for , and "
+						preserveEscapes = "\\,"; //$NON-NLS-1$
+					}
+				}
+				String val = tokenizer.getString(";,", preserveEscapes); //$NON-NLS-1$
 				if (val == null)
 					throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
 

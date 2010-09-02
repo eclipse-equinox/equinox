@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2006 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 
 package org.eclipse.osgi.framework.internal.core;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simple tokenizer class. Used to parse data.
@@ -62,7 +65,41 @@ public class Tokenizer {
 		return (null);
 	}
 
-	public String getString(String terminals) {
+	public String getEscapedToken(String terminals) {
+		char[] val = value;
+		int cur = cursor;
+		if (cur >= max)
+			return null;
+		StringBuffer sb = new StringBuffer();
+		char c;
+		for (; cur < max; cur++) {
+			c = val[cur];
+			// this is an escaped char
+			if (c == '\\') {
+				cur++; // skip the escape char
+				if (cur == max)
+					break;
+				c = val[cur]; // include the escaped char
+			} else if (terminals.indexOf(c) != -1) {
+				break;
+			}
+			sb.append(c);
+		}
+
+		cursor = cur;
+		return sb.toString();
+	}
+
+	public List<String> getEscapedTokens(String terminals) {
+		List<String> result = new ArrayList<String>();
+		for (String token = getEscapedToken(terminals); token != null; token = getEscapedToken(terminals)) {
+			result.add(token);
+			getChar(); // consume terminal
+		}
+		return result;
+	}
+
+	public String getString(String terminals, String preserveEscapes) {
 		skipWhiteSpace();
 		char[] val = value;
 		int cur = cursor;
@@ -82,6 +119,8 @@ public class Tokenizer {
 						if (cur == max)
 							break;
 						c = val[cur]; // include the escaped char
+						if (preserveEscapes != null && preserveEscapes.indexOf(c) != -1)
+							sb.append('\\'); // must preserve escapes for c
 					} else if (c == '\"') {
 						break;
 					}
@@ -102,6 +141,10 @@ public class Tokenizer {
 			}
 		}
 		return (null);
+	}
+
+	public String getString(String terminals) {
+		return getString(terminals, null);
 	}
 
 	public char getChar() {
