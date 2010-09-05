@@ -95,7 +95,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		for (int i = 0; i < genericReqiures.length; i++)
 			genericReqiures[i] = new GenericConstraint(this, actualGenericRequires[i]);
 
-		GenericDescription[] actualCapabilities = getBundleDescription().getGenericCapabilities();
+		GenericDescription[] actualCapabilities = useSelectedExports ? getBundleDescription().getSelectedGenericCapabilities() : getBundleDescription().getGenericCapabilities();
 		genericCapabilities = new GenericCapability[actualCapabilities.length];
 		for (int i = 0; i < genericCapabilities.length; i++)
 			genericCapabilities[i] = new GenericCapability(this, actualCapabilities[i]);

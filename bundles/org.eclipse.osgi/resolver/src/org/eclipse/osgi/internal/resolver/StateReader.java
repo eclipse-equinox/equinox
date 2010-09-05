@@ -47,7 +47,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 31;
+	public static final byte STATE_CACHE_VERSION = 32;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;

@@ -179,6 +179,7 @@ public class ResolverImpl implements Resolver {
 		if (namespace == null) {
 			System.err.println("Could not find matching capability for " + constraint.getVersionConstraint()); //$NON-NLS-1$
 			// TODO log error!!
+			return;
 		}
 		String constraintName = constraint.getName();
 		GenericCapability[] matches = constraintName == null ? namespace.get(constraintName) : namespace.getAllValues();

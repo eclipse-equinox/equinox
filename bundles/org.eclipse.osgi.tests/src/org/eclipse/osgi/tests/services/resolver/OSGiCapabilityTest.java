@@ -183,9 +183,27 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 			fail("Error writing/reading state.", e);
 		}
 		p1 = state.getBundle(p1.getBundleId());
+		p1Frag = state.getBundle(p1Frag.getBundleId());
 		c1 = state.getBundle(c1.getBundleId());
+		c1Frag = state.getBundle(c1Frag.getBundleId());
+		p4 = state.getBundle(p4.getBundleId());
+
 		assertTrue("p1", p1.isResolved());
+		assertTrue("p1Frag", p1Frag.isResolved());
 		assertTrue("c1", c1.isResolved());
+		assertTrue("c1Frag", c1Frag.isResolved());
+		assertTrue("p4", p4.isResolved());
+
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+
+		state.setResolver(platformAdmin.createResolver());
+		state.resolve(new BundleDescription[] {p1});
+
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p1Frag", p1Frag.isResolved());
+		assertTrue("c1", c1.isResolved());
+		assertTrue("c1Frag", c1Frag.isResolved());
+		assertTrue("p4", p4.isResolved());
 
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 	}
