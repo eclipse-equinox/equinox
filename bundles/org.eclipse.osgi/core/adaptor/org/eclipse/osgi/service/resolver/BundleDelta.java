@@ -120,6 +120,7 @@ public interface BundleDelta extends Comparable<BundleDelta> {
 	 * @exception ClassCastException
 	 *                if the argument can not be converted into something
 	 *                comparable with the receiver.
+	 * @since 3.7
 	 */
 	public int compareTo(BundleDelta obj);
 }

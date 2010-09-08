@@ -78,6 +78,7 @@ public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
 
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.7
 	 */
 	public final ConsoleSession getService(Bundle bundle, ServiceRegistration<ConsoleSession> registration) {
 		if (sessionRegistration == null)
@@ -87,6 +88,7 @@ public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
 
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
+	 * @since 3.7
 	 */
 	public final void ungetService(Bundle bundle, ServiceRegistration<ConsoleSession> registration, ConsoleSession service) {
 		// do nothing

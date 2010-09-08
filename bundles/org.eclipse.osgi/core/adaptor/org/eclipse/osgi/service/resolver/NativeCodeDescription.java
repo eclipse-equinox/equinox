@@ -71,6 +71,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable<Nativ
 	 * @param other the native code description to be compared
 	 * @return a negative integer, zero, or a positive integer as this natve
 	 * code description is less than, equal to, or greater than the specified object.
+	 * @since 3.7
 	 */
 	public int compareTo(NativeCodeDescription other);
 

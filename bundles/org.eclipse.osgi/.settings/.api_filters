@@ -59,6 +59,13 @@
 <message_argument value="OSGi/Minimum-1.2"/>
 </message_arguments>
 </filter>
+<filter comment="Code is protected when running on a limited environment" id="630194212">
+<message_arguments>
+<message_argument value="PluginParser.xmlTracker"/>
+<message_argument value="SAXParserFactory"/>
+<message_argument value="OSGi/Minimum-1.2"/>
+</message_arguments>
+</filter>
 <filter comment="Code is protected when running on a limited environment" id="646971428">
 <message_arguments>
 <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
