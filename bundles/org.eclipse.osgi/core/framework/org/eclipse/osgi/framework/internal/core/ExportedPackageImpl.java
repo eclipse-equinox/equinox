@@ -11,6 +11,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.osgi.internal.loader.*;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
@@ -58,7 +59,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 		if (bundle == null)
 			return null;
 		AbstractBundle[] bundles = bundle.framework.getAllBundles();
-		ArrayList importers = new ArrayList(10);
+		List<Bundle> importers = new ArrayList<Bundle>(10);
 		PackageSource supplierSource = supplier.createPackageSource(exportedPackage, false);
 		for (int i = 0; i < bundles.length; i++) {
 			if (!(bundles[i] instanceof BundleHost))
@@ -70,7 +71,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 			if (supplierSource != null && supplierSource.hasCommonSource(importerSource))
 				importers.add(bundles[i]);
 		}
-		return (Bundle[]) importers.toArray(new Bundle[importers.size()]);
+		return importers.toArray(new Bundle[importers.size()]);
 	}
 
 	/**

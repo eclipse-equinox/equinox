@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ public class SingleSourcePackage extends PackageSource {
 		return id + " -> " + supplier; //$NON-NLS-1$
 	}
 
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return supplier.getBundleLoader().findLocalClass(name);
 	}
 
@@ -37,7 +37,7 @@ public class SingleSourcePackage extends PackageSource {
 		return supplier.getBundleLoader().findLocalResource(name);
 	}
 
-	public Enumeration getResources(String name) {
+	public Enumeration<URL> getResources(String name) {
 		return supplier.getBundleLoader().findLocalResources(name);
 	}
 

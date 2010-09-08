@@ -87,14 +87,14 @@ public class Framework implements EventPublisher, Runnable {
 	 * installed in the Framework.
 	 */
 	// Map of BundleContexts for bundle's BundleListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new HashMap();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>> allBundleListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<BundleListener, BundleListener>>();
 	protected static final int BUNDLEEVENT = 1;
 	// Map of BundleContexts for bundle's SynchronousBundleListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> allSyncBundleListeners = new HashMap();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>> allSyncBundleListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>>();
 	protected static final int BUNDLEEVENTSYNC = 2;
 	/* SERVICEEVENT(3) is now handled by ServiceRegistry */
 	// Map of BundleContexts for bundle's FrameworkListeners.
-	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> allFrameworkListeners = new HashMap();
+	private final Map<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>> allFrameworkListeners = new HashMap<BundleContextImpl, CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>>();
 	protected static final int FRAMEWORKEVENT = 4;
 	protected static final int BATCHEVENT_BEGIN = Integer.MIN_VALUE + 1;
 	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
@@ -103,7 +103,7 @@ public class Framework implements EventPublisher, Runnable {
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 	/* Reservation object for install synchronization */
-	protected Hashtable installLock;
+	private Map<String, Thread> installLock;
 	/** System Bundle object */
 	protected InternalSystemBundle systemBundle;
 	private String[] bootDelegation;
@@ -117,15 +117,15 @@ public class Framework implements EventPublisher, Runnable {
 	 * The AliasMapper used to alias OS Names.
 	 */
 	protected static AliasMapper aliasMapper = new AliasMapper();
-	SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	// cache of AdminPermissions keyed by Bundle ID
-	private HashMap adminPermissions = new HashMap();
+	private final Map<Long, Map<String, AdminPermission>> adminPermissions = new HashMap<Long, Map<String, AdminPermission>>();
 
 	// we need to hold these so that we can unregister them at shutdown
 	private StreamHandlerFactory streamHandlerFactory;
 	private ContentHandlerFactory contentHandlerFactory;
 
-	private volatile ServiceTracker signedContentFactory;
+	private volatile ServiceTracker<SignedContentFactory, SignedContentFactory> signedContentFactory;
 	private volatile ContextFinder contextFinder;
 
 	/* 
@@ -133,12 +133,12 @@ public class Framework implements EventPublisher, Runnable {
 	 * see bug 161561
 	 */
 	static {
-		Class c;
+		Class<?> c;
 		c = GetDataFileAction.class;
 		c.getName(); // to prevent compiler warnings
 	}
 
-	static class GetDataFileAction implements PrivilegedAction {
+	static class GetDataFileAction implements PrivilegedAction<File> {
 		private AbstractBundle bundle;
 		private String filename;
 
@@ -147,7 +147,7 @@ public class Framework implements EventPublisher, Runnable {
 			this.filename = filename;
 		}
 
-		public Object run() {
+		public File run() {
 			return bundle.getBundleData().getDataFile(filename);
 		}
 	}
@@ -218,7 +218,7 @@ public class Framework implements EventPublisher, Runnable {
 		// Initialize the installLock; there is no way of knowing 
 		// what the initial size should be, at most it will be the number
 		// of threads trying to install a bundle (probably a very low number).
-		installLock = new Hashtable(10);
+		installLock = new HashMap<String, Thread>(10);
 		/* create the system bundle */
 		createSystemBundle();
 		loadVMProfile(); // load VM profile after the system bundle has been created
@@ -292,7 +292,7 @@ public class Framework implements EventPublisher, Runnable {
 	 */
 	protected void initializeProperties(Properties adaptorProperties) {
 		properties = FrameworkProperties.getProperties();
-		Enumeration enumKeys = adaptorProperties.propertyNames();
+		Enumeration<?> enumKeys = adaptorProperties.propertyNames();
 		while (enumKeys.hasMoreElements()) {
 			String key = (String) enumKeys.nextElement();
 			if (properties.getProperty(key) == null) {
@@ -402,8 +402,8 @@ public class Framework implements EventPublisher, Runnable {
 		if (bootDelegationProp.trim().length() == 0)
 			return;
 		String[] bootPackages = ManifestElement.getArrayFromList(bootDelegationProp);
-		ArrayList exactMatch = new ArrayList(bootPackages.length);
-		ArrayList stemMatch = new ArrayList(bootPackages.length);
+		List<String> exactMatch = new ArrayList<String>(bootPackages.length);
+		List<String> stemMatch = new ArrayList<String>(bootPackages.length);
 		for (int i = 0; i < bootPackages.length; i++) {
 			if (bootPackages[i].equals("*")) { //$NON-NLS-1$
 				bootDelegateAll = true;
@@ -416,11 +416,12 @@ public class Framework implements EventPublisher, Runnable {
 			}
 		}
 		if (!exactMatch.isEmpty())
-			bootDelegation = (String[]) exactMatch.toArray(new String[exactMatch.size()]);
+			bootDelegation = exactMatch.toArray(new String[exactMatch.size()]);
 		if (!stemMatch.isEmpty())
-			bootDelegationStems = (String[]) stemMatch.toArray(new String[stemMatch.size()]);
+			bootDelegationStems = stemMatch.toArray(new String[stemMatch.size()]);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void loadVMProfile() {
 		Properties profileProps = findVMProfile();
 		String systemExports = properties.getProperty(Constants.FRAMEWORK_SYSTEMPACKAGES);
@@ -595,10 +596,10 @@ public class Framework implements EventPublisher, Runnable {
 			shutdown(FrameworkEvent.STOPPED);
 
 		synchronized (bundles) {
-			List allBundles = bundles.getBundles();
+			List<AbstractBundle> allBundles = bundles.getBundles();
 			int size = allBundles.size();
 			for (int i = 0; i < size; i++) {
-				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
+				AbstractBundle bundle = allBundles.get(i);
 				bundle.close();
 			}
 			bundles.removeAllBundles();
@@ -650,7 +651,7 @@ public class Framework implements EventPublisher, Runnable {
 			Debug.println("Trying to launch framework"); //$NON-NLS-1$
 		}
 		systemBundle.resume();
-		signedContentFactory = new ServiceTracker(systemBundle.getBundleContext(), SignedContentFactory.class.getName(), null);
+		signedContentFactory = new ServiceTracker<SignedContentFactory, SignedContentFactory>(systemBundle.getBundleContext(), SignedContentFactory.class.getName(), null);
 		signedContentFactory.open();
 	}
 
@@ -827,8 +828,8 @@ public class Framework implements EventPublisher, Runnable {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		final AccessControlContext callerContext = AccessController.getContext();
-		return installWorker(location, new PrivilegedExceptionAction() {
-			public Object run() throws BundleException {
+		return installWorker(location, new PrivilegedExceptionAction<AbstractBundle>() {
+			public AbstractBundle run() throws BundleException {
 				/* Map the InputStream or location to a URLConnection */
 				URLConnection source = in != null ? new BundleSource(in) : adaptor.mapLocationToURLConnection(location);
 				/* call the worker to install the bundle */
@@ -849,7 +850,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * @exception BundleException
 	 *                If the action throws an error.
 	 */
-	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction action) throws BundleException {
+	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction<AbstractBundle> action) throws BundleException {
 		synchronized (installLock) {
 			while (true) {
 				/* Check that the bundle is not already installed. */
@@ -860,7 +861,7 @@ public class Framework implements EventPublisher, Runnable {
 				}
 				Thread current = Thread.currentThread();
 				/* Check for and make reservation */
-				Thread reservation = (Thread) installLock.put(location, current);
+				Thread reservation = installLock.put(location, current);
 				/* if the location is not already reserved */
 				if (reservation == null) {
 					/* we have made the reservation and can continue */
@@ -885,7 +886,7 @@ public class Framework implements EventPublisher, Runnable {
 		}
 		/* Don't call adaptor while holding the install lock */
 		try {
-			AbstractBundle bundle = (AbstractBundle) AccessController.doPrivileged(action);
+			AbstractBundle bundle = AccessController.doPrivileged(action);
 			publishBundleEvent(BundleEvent.INSTALLED, bundle);
 			return bundle;
 		} catch (PrivilegedActionException e) {
@@ -933,7 +934,7 @@ public class Framework implements EventPublisher, Runnable {
 					if (extension && !bundle.hasPermission(new AllPermission()))
 						throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, BundleException.SECURITY_ERROR, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
 					try {
-						AccessController.doPrivileged(new PrivilegedExceptionAction() {
+						AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 							public Object run() throws Exception {
 								checkAdminPermission(bundle, AdminPermission.LIFECYCLE);
 								if (extension) // need special permission to install extension bundles
@@ -1035,7 +1036,7 @@ public class Framework implements EventPublisher, Runnable {
 	 */
 	protected AbstractBundle[] getAllBundles() {
 		synchronized (bundles) {
-			List allBundles = bundles.getBundles();
+			List<AbstractBundle> allBundles = bundles.getBundles();
 			int size = allBundles.size();
 			if (size == 0) {
 				return (null);
@@ -1162,17 +1163,17 @@ public class Framework implements EventPublisher, Runnable {
 			final String finalLocation = location;
 
 			//Bundle.getLocation requires AdminPermission (metadata)
-			return (AbstractBundle) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					List allBundles = bundles.getBundles();
+			return AccessController.doPrivileged(new PrivilegedAction<AbstractBundle>() {
+				public AbstractBundle run() {
+					List<AbstractBundle> allBundles = bundles.getBundles();
 					int size = allBundles.size();
 					for (int i = 0; i < size; i++) {
-						AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
+						AbstractBundle bundle = allBundles.get(i);
 						if (finalLocation.equals(bundle.getLocation())) {
-							return (bundle);
+							return bundle;
 						}
 					}
-					return (null);
+					return null;
 				}
 			});
 		}
@@ -1204,7 +1205,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * parameter.
 	 */
 	protected File getDataFile(final AbstractBundle bundle, final String filename) {
-		return (File) AccessController.doPrivileged(new GetDataFileAction(bundle, filename));
+		return AccessController.doPrivileged(new GetDataFileAction(bundle, filename));
 	}
 
 	/**
@@ -1221,12 +1222,12 @@ public class Framework implements EventPublisher, Runnable {
 	private AdminPermission getAdminPermission(Bundle bundle, String action) {
 		synchronized (adminPermissions) {
 			Long ID = new Long(bundle.getBundleId());
-			HashMap bundlePermissions = (HashMap) adminPermissions.get(ID);
+			Map<String, AdminPermission> bundlePermissions = adminPermissions.get(ID);
 			if (bundlePermissions == null) {
-				bundlePermissions = new HashMap();
+				bundlePermissions = new HashMap<String, AdminPermission>();
 				adminPermissions.put(ID, bundlePermissions);
 			}
-			AdminPermission result = (AdminPermission) bundlePermissions.get(action);
+			AdminPermission result = bundlePermissions.get(action);
 			if (result == null) {
 				result = new AdminPermission(bundle, action);
 				bundlePermissions.put(action, result);
@@ -1251,7 +1252,7 @@ public class Framework implements EventPublisher, Runnable {
 				else {
 					// try to use a specific classloader by classname
 					try {
-						Class clazz = Class.forName(securityManager);
+						Class<?> clazz = Class.forName(securityManager);
 						sm = (SecurityManager) clazz.newInstance();
 					} catch (ClassNotFoundException e) {
 						// do nothing
@@ -1277,7 +1278,7 @@ public class Framework implements EventPublisher, Runnable {
 		synchronized (allFrameworkListeners) {
 			CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener> listeners = allFrameworkListeners.get(context);
 			if (listeners == null) {
-				listeners = new CopyOnWriteIdentityMap();
+				listeners = new CopyOnWriteIdentityMap<FrameworkListener, FrameworkListener>();
 				allFrameworkListeners.put(context, listeners);
 			}
 			listeners.put(listener, listener);
@@ -1318,14 +1319,14 @@ public class Framework implements EventPublisher, Runnable {
 		publishFrameworkEvent(type, bundle, throwable, (FrameworkListener[]) null);
 	}
 
-	public void publishFrameworkEvent(int type, org.osgi.framework.Bundle bundle, Throwable throwable, final FrameworkListener... listeners) {
+	public void publishFrameworkEvent(int type, Bundle bundle, Throwable throwable, final FrameworkListener... listeners) {
 		if (bundle == null)
 			bundle = systemBundle;
 		final FrameworkEvent event = new FrameworkEvent(type, bundle, throwable);
 		if (System.getSecurityManager() == null) {
 			publishFrameworkEventPrivileged(event, listeners);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction() {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
 					publishFrameworkEventPrivileged(event, listeners);
 					return null;
@@ -1355,22 +1356,26 @@ public class Framework implements EventPublisher, Runnable {
 		// If framework event hook were defined they would be called here
 
 		// deliver the event to the snapshot
-		ListenerQueue queue = newListenerQueue();
+		ListenerQueue<FrameworkListener, FrameworkListener, FrameworkEvent> queue = newListenerQueue();
 
 		// add the listeners specified by the caller first
 		if (callerListeners != null && callerListeners.length > 0) {
-			Map<FrameworkListener, FrameworkListener> listeners = new HashMap();
+			Map<FrameworkListener, FrameworkListener> listeners = new HashMap<FrameworkListener, FrameworkListener>();
 			for (FrameworkListener listener : callerListeners) {
 				if (listener != null)
 					listeners.put(listener, listener);
 			}
 			// We use the system bundle context as the dispatcher
-			if (listeners.size() > 0)
-				queue.queueListeners(listeners.entrySet(), getSystemBundleContext());
+			if (listeners.size() > 0) {
+				@SuppressWarnings({"rawtypes", "unchecked"})
+				EventDispatcher<FrameworkListener, FrameworkListener, FrameworkEvent> dispatcher = (EventDispatcher) getSystemBundleContext();
+				queue.queueListeners(listeners.entrySet(), dispatcher);
+			}
 		}
 
 		for (Map.Entry<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> entry : listenerSnapshot.entrySet()) {
-			EventDispatcher dispatcher = entry.getKey();
+			@SuppressWarnings({"rawtypes", "unchecked"})
+			EventDispatcher<FrameworkListener, FrameworkListener, FrameworkEvent> dispatcher = (EventDispatcher) entry.getKey();
 			Set<Map.Entry<FrameworkListener, FrameworkListener>> listeners = entry.getValue();
 			queue.queueListeners(listeners, dispatcher);
 		}
@@ -1384,7 +1389,7 @@ public class Framework implements EventPublisher, Runnable {
 			synchronized (allSyncBundleListeners) {
 				CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener> listeners = allSyncBundleListeners.get(context);
 				if (listeners == null) {
-					listeners = new CopyOnWriteIdentityMap();
+					listeners = new CopyOnWriteIdentityMap<SynchronousBundleListener, SynchronousBundleListener>();
 					allSyncBundleListeners.put(context, listeners);
 				}
 				listeners.put((SynchronousBundleListener) listener, (SynchronousBundleListener) listener);
@@ -1393,7 +1398,7 @@ public class Framework implements EventPublisher, Runnable {
 			synchronized (allBundleListeners) {
 				CopyOnWriteIdentityMap<BundleListener, BundleListener> listeners = allBundleListeners.get(context);
 				if (listeners == null) {
-					listeners = new CopyOnWriteIdentityMap();
+					listeners = new CopyOnWriteIdentityMap<BundleListener, BundleListener>();
 					allBundleListeners.put(context, listeners);
 				}
 				listeners.put(listener, listener);
@@ -1432,7 +1437,7 @@ public class Framework implements EventPublisher, Runnable {
 		if (System.getSecurityManager() == null) {
 			publishBundleEventPrivileged(event);
 		} else {
-			AccessController.doPrivileged(new PrivilegedAction() {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
 					publishBundleEventPrivileged(event);
 					return null;
@@ -1487,9 +1492,10 @@ public class Framework implements EventPublisher, Runnable {
 
 		/* Dispatch the event to the snapshot for sync listeners */
 		if (!listenersSync.isEmpty()) {
-			ListenerQueue queue = newListenerQueue();
+			ListenerQueue<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>>> entry : listenersSync.entrySet()) {
-				EventDispatcher dispatcher = entry.getKey();
+				@SuppressWarnings({"rawtypes", "unchecked"})
+				EventDispatcher<SynchronousBundleListener, SynchronousBundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
 				Set<Map.Entry<SynchronousBundleListener, SynchronousBundleListener>> listeners = entry.getValue();
 				queue.queueListeners(listeners, dispatcher);
 			}
@@ -1498,9 +1504,10 @@ public class Framework implements EventPublisher, Runnable {
 
 		/* Dispatch the event to the snapshot for async listeners */
 		if ((listenersAsync != null) && !listenersAsync.isEmpty()) {
-			ListenerQueue queue = newListenerQueue();
+			ListenerQueue<BundleListener, BundleListener, BundleEvent> queue = newListenerQueue();
 			for (Map.Entry<BundleContextImpl, Set<Map.Entry<BundleListener, BundleListener>>> entry : listenersAsync.entrySet()) {
-				EventDispatcher dispatcher = entry.getKey();
+				@SuppressWarnings({"rawtypes", "unchecked"})
+				EventDispatcher<BundleListener, BundleListener, BundleEvent> dispatcher = (EventDispatcher) entry.getKey();
 				Set<Map.Entry<BundleListener, BundleListener>> listeners = entry.getValue();
 				queue.queueListeners(listeners, dispatcher);
 			}
@@ -1543,8 +1550,8 @@ public class Framework implements EventPublisher, Runnable {
 		});
 	}
 
-	public ListenerQueue newListenerQueue() {
-		return new ListenerQueue(eventManager);
+	public <K, V, E> ListenerQueue<K, V, E> newListenerQueue() {
+		return new ListenerQueue<K, V, E>(eventManager);
 	}
 
 	private void initializeContextFinder() {
@@ -1576,7 +1583,7 @@ public class Framework implements EventPublisher, Runnable {
 
 	}
 
-	public static Field getField(Class clazz, Class type, boolean instance) {
+	public static Field getField(Class<?> clazz, Class<?> type, boolean instance) {
 		Field[] fields = clazz.getDeclaredFields();
 		for (int i = 0; i < fields.length; i++) {
 			boolean isStatic = Modifier.isStatic(fields[i].getModifiers());
@@ -1670,7 +1677,8 @@ public class Framework implements EventPublisher, Runnable {
 	private static void resetContentHandlers() throws IllegalAccessException {
 		Field handlersField = getField(URLConnection.class, Hashtable.class, false);
 		if (handlersField != null) {
-			Hashtable handlers = (Hashtable) handlersField.get(null);
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
 			if (handlers != null)
 				handlers.clear();
 		}
@@ -1767,7 +1775,8 @@ public class Framework implements EventPublisher, Runnable {
 	private static void resetURLStreamHandlers() throws IllegalAccessException {
 		Field handlersField = getField(URL.class, Hashtable.class, false);
 		if (handlersField != null) {
-			Hashtable handlers = (Hashtable) handlersField.get(null);
+			@SuppressWarnings("rawtypes")
+			Hashtable<?, ?> handlers = (Hashtable) handlersField.get(null);
 			if (handlers != null)
 				handlers.clear();
 		}
@@ -1828,7 +1837,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * @param serviceClass class of original service object
 	 * @return true if assignable given package wiring
 	 */
-	public boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className, Class serviceClass) {
+	public boolean isServiceAssignableTo(Bundle registrant, Bundle client, String className, Class<?> serviceClass) {
 		// always return false for fragments
 		AbstractBundle consumer = (AbstractBundle) client;
 		if (consumer.isFragment())
@@ -1869,7 +1878,7 @@ public class Framework implements EventPublisher, Runnable {
 		return producerSource.hasCommonSource(consumerSource);
 	}
 
-	private PackageSource getPackageSource(Class serviceClass, String pkgName) {
+	private PackageSource getPackageSource(Class<?> serviceClass, String pkgName) {
 		if (serviceClass == null)
 			return null;
 		AbstractBundle serviceBundle = (AbstractBundle) packageAdmin.getBundle(serviceClass);
@@ -1882,7 +1891,7 @@ public class Framework implements EventPublisher, Runnable {
 		if (producerSource != null)
 			return producerSource;
 		// try the interfaces
-		Class[] interfaces = serviceClass.getInterfaces();
+		Class<?>[] interfaces = serviceClass.getInterfaces();
 		// note that getInterfaces never returns null
 		for (int i = 0; i < interfaces.length; i++) {
 			producerSource = getPackageSource(interfaces[i], pkgName);
@@ -1908,8 +1917,8 @@ public class Framework implements EventPublisher, Runnable {
 	}
 
 	SignedContentFactory getSignedContentFactory() {
-		ServiceTracker currentTracker = signedContentFactory;
-		return (SignedContentFactory) (currentTracker == null ? null : currentTracker.getService());
+		ServiceTracker<SignedContentFactory, SignedContentFactory> currentTracker = signedContentFactory;
+		return (currentTracker == null ? null : currentTracker.getService());
 	}
 
 	ContextFinder getContextFinder() {

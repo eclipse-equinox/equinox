@@ -102,8 +102,8 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	private void registerPerformanceLog(BundleContext context) {
 		Object service = createPerformanceLog();
 		String serviceName = FrameworkLog.class.getName();
-		Hashtable serviceProperties = new Hashtable(7);
-		Dictionary headers = context.getBundle().getHeaders();
+		Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(7);
+		Dictionary<String, String> headers = context.getBundle().getHeaders();
 
 		serviceProperties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		serviceProperties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));

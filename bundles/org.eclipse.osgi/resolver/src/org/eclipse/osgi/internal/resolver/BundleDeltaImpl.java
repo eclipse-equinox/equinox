@@ -71,8 +71,8 @@ final class BundleDeltaImpl implements BundleDelta {
 		return typeStr.toString();
 	}
 
-	public int compareTo(Object obj) {
-		long idcomp = getBundle().getBundleId() - ((BundleDelta) obj).getBundle().getBundleId();
+	public int compareTo(BundleDelta obj) {
+		long idcomp = getBundle().getBundleId() - obj.getBundle().getBundleId();
 		return (idcomp < 0L) ? -1 : ((idcomp > 0L) ? 1 : 0);
 	}
 }

@@ -14,8 +14,7 @@ import java.io.*;
 import java.security.*;
 import java.security.cert.*;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.signedcontent.SignedBundleHook;
 import org.eclipse.osgi.internal.signedcontent.SignedContentMessages;
@@ -156,8 +155,8 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	private Certificate findAlternativeRoot(X509Certificate cert, KeyStore store) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException, CertificateException {
 		synchronized (store) {
-			for (Enumeration e = store.aliases(); e.hasMoreElements();) {
-				Certificate nextCert = store.getCertificate((String) e.nextElement());
+			for (Enumeration<String> e = store.aliases(); e.hasMoreElements();) {
+				Certificate nextCert = store.getCertificate(e.nextElement());
 				if (nextCert instanceof X509Certificate && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
 					cert.verify(nextCert.getPublicKey());
 					return nextCert;
@@ -258,12 +257,12 @@ public class KeyStoreTrustEngine extends TrustEngine {
 
 	public String[] getAliases() throws IOException, GeneralSecurityException {
 
-		ArrayList returnList = new ArrayList();
+		List<String> returnList = new ArrayList<String>();
 		try {
 			KeyStore store = getKeyStore();
 			synchronized (store) {
-				for (Enumeration aliases = store.aliases(); aliases.hasMoreElements();) {
-					String currentAlias = (String) aliases.nextElement();
+				for (Enumeration<String> aliases = store.aliases(); aliases.hasMoreElements();) {
+					String currentAlias = aliases.nextElement();
 					if (store.isCertificateEntry(currentAlias)) {
 						returnList.add(currentAlias);
 					}
@@ -272,7 +271,7 @@ public class KeyStoreTrustEngine extends TrustEngine {
 		} catch (KeyStoreException ke) {
 			throw (CertificateException) new CertificateException(ke.getMessage()).initCause(ke);
 		}
-		return (String[]) returnList.toArray(new String[] {});
+		return returnList.toArray(new String[] {});
 	}
 
 	/**

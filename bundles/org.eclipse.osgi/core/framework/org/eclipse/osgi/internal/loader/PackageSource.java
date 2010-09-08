@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,11 +49,11 @@ public abstract class PackageSource implements KeyedElement {
 		return true;
 	}
 
-	public abstract Class loadClass(String name) throws ClassNotFoundException;
+	public abstract Class<?> loadClass(String name) throws ClassNotFoundException;
 
 	public abstract URL getResource(String name);
 
-	public abstract Enumeration getResources(String name) throws IOException;
+	public abstract Enumeration<URL> getResources(String name) throws IOException;
 
 	//TODO See how this relates with FilteredSourcePackage. Overwriting or doing a double dispatch might be good.
 	// This is intentionally lenient; we don't force all suppliers to match (only one)

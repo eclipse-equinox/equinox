@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,12 @@
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
-import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import org.eclipse.osgi.baseadaptor.BaseData;
+import org.eclipse.osgi.baseadaptor.hooks.BundleFileWrapperFactoryHook;
 
 /**
  * Used to chain the BundleFile objects returned from {@link BundleFileWrapperFactoryHook}.  
@@ -44,7 +43,7 @@ public class BundleFileWrapperChain extends BundleFile {
 		return wrapped.getEntry(path);
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path) {
 		return wrapped.getEntryPaths(path);
 	}
 

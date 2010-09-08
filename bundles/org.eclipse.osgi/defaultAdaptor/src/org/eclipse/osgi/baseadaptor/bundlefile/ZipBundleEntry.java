@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,7 @@ public class ZipBundleEntry extends BundleEntry {
 		return zipEntry.getTime();
 	}
 
+	@SuppressWarnings("deprecation")
 	public URL getLocalURL() {
 		try {
 			return new URL("jar:" + bundleFile.basefile.toURL() + "!/" + zipEntry.getName()); //$NON-NLS-1$//$NON-NLS-2$
@@ -103,6 +104,7 @@ public class ZipBundleEntry extends BundleEntry {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public URL getFileURL() {
 		try {
 			File file = bundleFile.getFile(zipEntry.getName(), false);

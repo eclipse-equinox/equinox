@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,20 +93,20 @@ public final class HookRegistry {
 	 * @return an array of error log entries that occurred while initializing the hooks
 	 */
 	public FrameworkLogEntry[] initialize() {
-		ArrayList configurators = new ArrayList(5);
-		ArrayList errors = new ArrayList(0); // optimistic that no errors will occur
+		List<String> configurators = new ArrayList<String>(5);
+		List<FrameworkLogEntry> errors = new ArrayList<FrameworkLogEntry>(0); // optimistic that no errors will occur
 		mergeFileHookConfigurators(configurators, errors);
 		mergePropertyHookConfigurators(configurators);
 		loadConfigurators(configurators, errors);
 		// set to read-only
 		readonly = true;
-		return (FrameworkLogEntry[]) errors.toArray(new FrameworkLogEntry[errors.size()]);
+		return errors.toArray(new FrameworkLogEntry[errors.size()]);
 	}
 
-	private void mergeFileHookConfigurators(ArrayList configuratorList, ArrayList errors) {
+	private void mergeFileHookConfigurators(List<String> configuratorList, List<FrameworkLogEntry> errors) {
 		ClassLoader cl = getClass().getClassLoader();
 		// get all hook configurators files in your classloader delegation
-		Enumeration hookConfigurators;
+		Enumeration<URL> hookConfigurators;
 		try {
 			hookConfigurators = cl != null ? cl.getResources(HookRegistry.HOOK_CONFIGURATORS_FILE) : ClassLoader.getSystemResources(HookRegistry.HOOK_CONFIGURATORS_FILE);
 		} catch (IOException e) {
@@ -115,7 +115,7 @@ public final class HookRegistry {
 		}
 		int curBuiltin = 0;
 		while (hookConfigurators.hasMoreElements()) {
-			URL url = (URL) hookConfigurators.nextElement();
+			URL url = hookConfigurators.nextElement();
 			InputStream input = null;
 			try {
 				// check each file for a hook.configurators property
@@ -148,7 +148,7 @@ public final class HookRegistry {
 		}
 	}
 
-	private void mergePropertyHookConfigurators(ArrayList configuratorList) {
+	private void mergePropertyHookConfigurators(List<String> configuratorList) {
 		// see if there is a configurators list
 		String[] configurators = ManifestElement.getArrayFromList(FrameworkProperties.getProperty(HookRegistry.PROP_HOOK_CONFIGURATORS), ","); //$NON-NLS-1$
 		if (configurators.length > 0) {
@@ -169,11 +169,11 @@ public final class HookRegistry {
 			configuratorList.remove(excludeHooks[i]);
 	}
 
-	private void loadConfigurators(ArrayList configurators, ArrayList errors) {
-		for (Iterator iHooks = configurators.iterator(); iHooks.hasNext();) {
-			String hookName = (String) iHooks.next();
+	private void loadConfigurators(List<String> configurators, List<FrameworkLogEntry> errors) {
+		for (Iterator<String> iHooks = configurators.iterator(); iHooks.hasNext();) {
+			String hookName = iHooks.next();
 			try {
-				Class clazz = Class.forName(hookName);
+				Class<?> clazz = Class.forName(hookName);
 				HookConfigurator configurator = (HookConfigurator) clazz.newInstance();
 				configurator.addHooks(this);
 			} catch (Throwable t) {

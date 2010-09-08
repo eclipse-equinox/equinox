@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,17 +11,18 @@
 package org.eclipse.osgi.internal.permadmin;
 
 import java.util.HashMap;
+import java.util.Map;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public class PermissionAdminTable {
-	private final HashMap locations = new HashMap();
+	private final Map<String, PermissionInfoCollection> locations = new HashMap<String, PermissionInfoCollection>();
 
 	String[] getLocations() {
-		return (String[]) locations.keySet().toArray(new String[locations.size()]);
+		return locations.keySet().toArray(new String[locations.size()]);
 	}
 
 	PermissionInfo[] getPermissions(String location) {
-		PermissionInfoCollection collection = (PermissionInfoCollection) locations.get(location);
+		PermissionInfoCollection collection = locations.get(location);
 		if (collection != null)
 			return collection.getPermissionInfos();
 		return null;
@@ -36,7 +37,7 @@ public class PermissionAdminTable {
 	}
 
 	PermissionInfoCollection getCollection(String location) {
-		return (PermissionInfoCollection) locations.get(location);
+		return locations.get(location);
 	}
 
 	PermissionInfoCollection[] getCollections() {

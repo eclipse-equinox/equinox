@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,19 +28,19 @@ import org.osgi.framework.Version;
  */
 public final class BundleRepository {
 	/** bundles by install order */
-	private ArrayList bundlesByInstallOrder;
+	private List<AbstractBundle> bundlesByInstallOrder;
 
 	/** bundles keyed by bundle Id */
 	private KeyedHashSet bundlesById;
 
 	/** bundles keyed by SymbolicName */
-	private HashMap bundlesBySymbolicName;
+	private Map<String, AbstractBundle[]> bundlesBySymbolicName;
 
 	public BundleRepository(int initialCapacity) {
 		synchronized (this) {
-			bundlesByInstallOrder = new ArrayList(initialCapacity);
+			bundlesByInstallOrder = new ArrayList<AbstractBundle>(initialCapacity);
 			bundlesById = new KeyedHashSet(initialCapacity, true);
-			bundlesBySymbolicName = new HashMap(initialCapacity);
+			bundlesBySymbolicName = new HashMap<String, AbstractBundle[]>(initialCapacity);
 		}
 	}
 
@@ -48,7 +48,7 @@ public final class BundleRepository {
 	 * Gets a list of bundles ordered by install order.
 	 * @return List of bundles by install order.
 	 */
-	public synchronized List getBundles() {
+	public synchronized List<AbstractBundle> getBundles() {
 		return bundlesByInstallOrder;
 	}
 
@@ -65,7 +65,7 @@ public final class BundleRepository {
 	public synchronized AbstractBundle[] getBundles(String symbolicName) {
 		if (Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(symbolicName))
 			symbolicName = Constants.getInternalSymbolicName();
-		return (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
+		return bundlesBySymbolicName.get(symbolicName);
 	}
 
 	public synchronized AbstractBundle getBundle(String symbolicName, Version version) {
@@ -92,7 +92,7 @@ public final class BundleRepository {
 		String symbolicName = bundle.getSymbolicName();
 		if (symbolicName == null)
 			return;
-		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
+		AbstractBundle[] bundles = bundlesBySymbolicName.get(symbolicName);
 		if (bundles == null) {
 			// making the initial capacity on this 1 since it
 			// should be rare that multiple version exist
@@ -102,7 +102,7 @@ public final class BundleRepository {
 			return;
 		}
 
-		ArrayList list = new ArrayList(bundles.length + 1);
+		List<AbstractBundle> list = new ArrayList<AbstractBundle>(bundles.length + 1);
 		// find place to insert the bundle
 		Version newVersion = bundle.getVersion();
 		boolean added = false;
@@ -141,7 +141,7 @@ public final class BundleRepository {
 	}
 
 	private void removeSymbolicName(String symbolicName, AbstractBundle bundle) {
-		AbstractBundle[] bundles = (AbstractBundle[]) bundlesBySymbolicName.get(symbolicName);
+		AbstractBundle[] bundles = bundlesBySymbolicName.get(symbolicName);
 		if (bundles == null)
 			return;
 

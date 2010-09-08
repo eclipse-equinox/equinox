@@ -59,9 +59,9 @@ public class EclipseStarter {
 	public static boolean debug = false;
 	private static boolean running = false;
 	private static Framework framework = null;
-	private static ServiceRegistration defaultMonitorRegistration = null;
-	private static ServiceRegistration appLauncherRegistration = null;
-	private static ServiceRegistration splashStreamRegistration = null;
+	private static ServiceRegistration<?> defaultMonitorRegistration = null;
+	private static ServiceRegistration<?> appLauncherRegistration = null;
+	private static ServiceRegistration<?> splashStreamRegistration = null;
 
 	// command line arguments
 	private static final String CLEAN = "-clean"; //$NON-NLS-1$
@@ -129,9 +129,9 @@ public class EclipseStarter {
 
 	private static FrameworkLog log;
 	// directory of serch candidates keyed by directory abs path -> directory listing (bug 122024)
-	private static HashMap searchCandidates = new HashMap(4);
+	private static Map<String, String[]> searchCandidates = new HashMap<String, String[]>(4);
 	private static EclipseAppLauncher appLauncher;
-	private static List shutdownHandlers;
+	private static List<Runnable> shutdownHandlers;
 
 	private static ConsoleManager consoleMgr = null;
 
@@ -419,7 +419,7 @@ public class EclipseStarter {
 	}
 
 	private static void ensureBundlesActive(Bundle[] bundles) {
-		ServiceTracker tracker = null;
+		ServiceTracker<StartLevel, StartLevel> tracker = null;
 		try {
 			for (int i = 0; i < bundles.length; i++) {
 				if (bundles[i].getState() != Bundle.ACTIVE) {
@@ -430,10 +430,10 @@ public class EclipseStarter {
 					}
 					// check that the startlevel allows the bundle to be active (111550)
 					if (tracker == null) {
-						tracker = new ServiceTracker(context, StartLevel.class.getName(), null);
+						tracker = new ServiceTracker<StartLevel, StartLevel>(context, StartLevel.class.getName(), null);
 						tracker.open();
 					}
-					StartLevel sl = (StartLevel) tracker.getService();
+					StartLevel sl = tracker.getService();
 					if (sl != null && (sl.getBundleStartLevel(bundles[i]) <= sl.getStartLevel())) {
 						log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE, bundles[i]), 0, null, null));
 					}
@@ -453,7 +453,7 @@ public class EclipseStarter {
 		// first lets look for missing leaf constraints (bug 114120)
 		VersionConstraint[] leafConstraints = stateHelper.getUnsatisfiedLeaves(state.getBundles());
 		// hash the missing leaf constraints by the declaring bundles
-		Map missing = new HashMap();
+		Map<BundleDescription, List<VersionConstraint>> missing = new HashMap<BundleDescription, List<VersionConstraint>>();
 		for (int i = 0; i < leafConstraints.length; i++) {
 			// only include non-optional and non-dynamic constraint leafs
 			if (leafConstraints[i] instanceof BundleSpecification && ((BundleSpecification) leafConstraints[i]).isOptional())
@@ -465,9 +465,9 @@ public class EclipseStarter {
 					continue;
 			}
 			BundleDescription bundle = leafConstraints[i].getBundle();
-			ArrayList constraints = (ArrayList) missing.get(bundle);
+			List<VersionConstraint> constraints = missing.get(bundle);
 			if (constraints == null) {
-				constraints = new ArrayList();
+				constraints = new ArrayList<VersionConstraint>();
 				missing.put(bundle, constraints);
 			}
 			constraints.add(leafConstraints[i]);
@@ -477,14 +477,14 @@ public class EclipseStarter {
 		if (missing.size() > 0) {
 			FrameworkLogEntry[] rootChildren = new FrameworkLogEntry[missing.size()];
 			int rootIndex = 0;
-			for (Iterator iter = missing.keySet().iterator(); iter.hasNext(); rootIndex++) {
-				BundleDescription description = (BundleDescription) iter.next();
+			for (Iterator<BundleDescription> iter = missing.keySet().iterator(); iter.hasNext(); rootIndex++) {
+				BundleDescription description = iter.next();
 				String symbolicName = description.getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : description.getSymbolicName();
 				String generalMessage = NLS.bind(EclipseAdaptorMsg.ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED, description.getLocation());
-				ArrayList constraints = (ArrayList) missing.get(description);
+				List<VersionConstraint> constraints = missing.get(description);
 				FrameworkLogEntry[] logChildren = new FrameworkLogEntry[constraints.size()];
 				for (int i = 0; i < logChildren.length; i++)
-					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage((VersionConstraint) constraints.get(i)), 0, null, null);
+					logChildren[i] = new FrameworkLogEntry(symbolicName, FrameworkLogEntry.WARNING, 0, MessageHelper.getResolutionFailureMessage(constraints.get(i)), 0, null, null);
 				rootChildren[rootIndex] = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren);
 			}
 			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ROOTS_NOT_RESOLVED, 0, null, rootChildren));
@@ -492,7 +492,7 @@ public class EclipseStarter {
 
 		// There may be some bundles unresolved for other reasons, causing the system to be unresolved
 		// log all unresolved constraints now
-		ArrayList allChildren = new ArrayList();
+		List<FrameworkLogEntry> allChildren = new ArrayList<FrameworkLogEntry>();
 		for (int i = 0; i < bundles.length; i++)
 			if (bundles[i].getState() == Bundle.INSTALLED) {
 				String symbolicName = bundles[i].getSymbolicName() == null ? FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME : bundles[i].getSymbolicName();
@@ -520,7 +520,7 @@ public class EclipseStarter {
 				allChildren.add(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, generalMessage, 0, null, logChildren));
 			}
 		if (allChildren.size() > 0)
-			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, (FrameworkLogEntry[]) allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
+			logService.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, EclipseAdaptorMsg.ECLIPSE_STARTUP_ALL_NOT_RESOLVED, 0, null, allChildren.toArray(new FrameworkLogEntry[allChildren.size()])));
 	}
 
 	private static void publishSplashScreen(final Runnable endSplashHandler) {
@@ -531,7 +531,7 @@ public class EclipseStarter {
 			Method method = endSplashHandler.getClass().getMethod("getOutputStream", new Class[0]); //$NON-NLS-1$
 			Object outputStream = method.invoke(endSplashHandler, new Object[0]);
 			if (outputStream instanceof OutputStream) {
-				Dictionary osProperties = new Hashtable();
+				Dictionary<String, Object> osProperties = new Hashtable<String, Object>();
 				osProperties.put("name", "splashstream"); //$NON-NLS-1$//$NON-NLS-2$
 				splashStreamRegistration = context.registerService(OutputStream.class.getName(), outputStream, osProperties);
 			}
@@ -540,7 +540,7 @@ public class EclipseStarter {
 		}
 		// keep this splash handler as the default startup monitor
 		try {
-			Dictionary monitorProps = new Hashtable();
+			Dictionary<String, Object> monitorProps = new Hashtable<String, Object>();
 			monitorProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 			defaultMonitorRegistration = context.registerService(StartupMonitor.class.getName(), new DefaultStartupMonitor(endSplashHandler), monitorProps);
 		} catch (IllegalStateException e) {
@@ -548,6 +548,7 @@ public class EclipseStarter {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static URL searchForBundle(String name, String parent) throws MalformedURLException {
 		URL url = null;
 		File fileLocation = null;
@@ -626,23 +627,23 @@ public class EclipseStarter {
 		Bundle[] curInitBundles = getCurrentBundles(true);
 
 		// list of bundles to be refreshed
-		List toRefresh = new ArrayList(curInitBundles.length);
+		List<Bundle> toRefresh = new ArrayList<Bundle>(curInitBundles.length);
 		// uninstall any of the currently installed bundles that do not exist in the 
 		// initial bundle list from installEntries.
 		uninstallBundles(curInitBundles, initialBundles, toRefresh);
 
 		// install the initialBundles that are not already installed.
-		ArrayList startBundles = new ArrayList(installEntries.length);
-		ArrayList lazyActivationBundles = new ArrayList(installEntries.length);
+		List<Bundle> startBundles = new ArrayList<Bundle>(installEntries.length);
+		List<Bundle> lazyActivationBundles = new ArrayList<Bundle>(installEntries.length);
 		installBundles(initialBundles, curInitBundles, startBundles, lazyActivationBundles, toRefresh);
 
 		// If we installed/uninstalled something, force a refresh of all installed/uninstalled bundles
-		if (!toRefresh.isEmpty() && refreshPackages((Bundle[]) toRefresh.toArray(new Bundle[toRefresh.size()])))
+		if (!toRefresh.isEmpty() && refreshPackages(toRefresh.toArray(new Bundle[toRefresh.size()])))
 			return null; // cannot continue; refreshPackages shutdown the framework
 
 		// schedule all basic bundles to be started
-		Bundle[] startInitBundles = (Bundle[]) startBundles.toArray(new Bundle[startBundles.size()]);
-		Bundle[] lazyInitBundles = (Bundle[]) lazyActivationBundles.toArray(new Bundle[lazyActivationBundles.size()]);
+		Bundle[] startInitBundles = startBundles.toArray(new Bundle[startBundles.size()]);
+		Bundle[] lazyInitBundles = lazyActivationBundles.toArray(new Bundle[lazyActivationBundles.size()]);
 		startBundles(startInitBundles, lazyInitBundles);
 
 		if (debug)
@@ -652,7 +653,7 @@ public class EclipseStarter {
 
 	private static InitialBundle[] getInitialBundles(String[] installEntries) {
 		searchCandidates.clear();
-		ArrayList result = new ArrayList(installEntries.length);
+		List<InitialBundle> result = new ArrayList<InitialBundle>(installEntries.length);
 		int defaultStartLevel = Integer.parseInt(FrameworkProperties.getProperty(PROP_BUNDLES_STARTLEVEL, DEFAULT_BUNDLES_STARTLEVEL));
 		String syspath = getSysPath();
 		// should canonicalize the syspath.
@@ -698,12 +699,12 @@ public class EclipseStarter {
 				log.log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null));
 			}
 		}
-		return (InitialBundle[]) result.toArray(new InitialBundle[result.size()]);
+		return result.toArray(new InitialBundle[result.size()]);
 	}
 
 	// returns true if the refreshPackages operation caused the framework to shutdown
 	private static boolean refreshPackages(Bundle[] bundles) {
-		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<?> packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin packageAdmin = null;
 		if (packageAdminRef != null)
 			packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
@@ -746,9 +747,9 @@ public class EclipseStarter {
 	 */
 	private static FrameworkAdaptor createAdaptor() throws Exception {
 		String adaptorClassName = FrameworkProperties.getProperty(PROP_ADAPTOR, DEFAULT_ADAPTOR_CLASS);
-		Class adaptorClass = Class.forName(adaptorClassName);
-		Class[] constructorArgs = new Class[] {String[].class};
-		Constructor constructor = adaptorClass.getConstructor(constructorArgs);
+		Class<?> adaptorClass = Class.forName(adaptorClassName);
+		Class<?>[] constructorArgs = new Class[] {String[].class};
+		Constructor<?> constructor = adaptorClass.getConstructor(constructorArgs);
 		return (FrameworkAdaptor) constructor.newInstance(new Object[] {new String[0]});
 	}
 
@@ -993,7 +994,7 @@ public class EclipseStarter {
 
 	private static Bundle[] getCurrentBundles(boolean includeInitial) {
 		Bundle[] installed = context.getBundles();
-		ArrayList initial = new ArrayList();
+		List<Bundle> initial = new ArrayList<Bundle>();
 		for (int i = 0; i < installed.length; i++) {
 			Bundle bundle = installed[i];
 			if (bundle.getLocation().startsWith(INITIAL_LOCATION)) {
@@ -1002,7 +1003,7 @@ public class EclipseStarter {
 			} else if (!includeInitial && bundle.getBundleId() != 0)
 				initial.add(bundle);
 		}
-		return (Bundle[]) initial.toArray(new Bundle[initial.size()]);
+		return initial.toArray(new Bundle[initial.size()]);
 	}
 
 	private static Bundle getBundleByLocation(String location, Bundle[] bundles) {
@@ -1014,7 +1015,7 @@ public class EclipseStarter {
 		return null;
 	}
 
-	private static void uninstallBundles(Bundle[] curInitBundles, InitialBundle[] newInitBundles, List toRefresh) {
+	private static void uninstallBundles(Bundle[] curInitBundles, InitialBundle[] newInitBundles, List<Bundle> toRefresh) {
 		for (int i = 0; i < curInitBundles.length; i++) {
 			boolean found = false;
 			for (int j = 0; j < newInitBundles.length; j++) {
@@ -1034,8 +1035,8 @@ public class EclipseStarter {
 		}
 	}
 
-	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, ArrayList startBundles, ArrayList lazyActivationBundles, List toRefresh) {
-		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+	private static void installBundles(InitialBundle[] initialBundles, Bundle[] curInitBundles, List<Bundle> startBundles, List<Bundle> lazyActivationBundles, List<Bundle> toRefresh) {
+		ServiceReference<?> reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel startService = null;
 		if (reference != null)
 			startService = (StartLevel) context.getService(reference);
@@ -1083,15 +1084,16 @@ public class EclipseStarter {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private static boolean hasLazyActivationPolicy(Bundle target) {
 		// check the bundle manifest to see if it defines a lazy activation policy
-		Dictionary headers = target.getHeaders(""); //$NON-NLS-1$
+		Dictionary<String, String> headers = target.getHeaders(""); //$NON-NLS-1$
 		// first check to see if this is a fragment bundle
-		String fragmentHost = (String) headers.get(Constants.FRAGMENT_HOST);
+		String fragmentHost = headers.get(Constants.FRAGMENT_HOST);
 		if (fragmentHost != null)
 			return false; // do not activate fragment bundles
 		// look for the OSGi defined Bundle-ActivationPolicy header
-		String activationPolicy = (String) headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+		String activationPolicy = headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
 		try {
 			if (activationPolicy != null) {
 				ManifestElement[] elements = ManifestElement.parseHeader(Constants.BUNDLE_ACTIVATIONPOLICY, activationPolicy);
@@ -1102,9 +1104,9 @@ public class EclipseStarter {
 				}
 			} else {
 				// check for Eclipse specific lazy start headers "Eclipse-LazyStart" and "Eclipse-AutoStart"
-				String eclipseLazyStart = (String) headers.get(Constants.ECLIPSE_LAZYSTART);
+				String eclipseLazyStart = headers.get(Constants.ECLIPSE_LAZYSTART);
 				if (eclipseLazyStart == null)
-					eclipseLazyStart = (String) headers.get(Constants.ECLIPSE_AUTOSTART);
+					eclipseLazyStart = headers.get(Constants.ECLIPSE_AUTOSTART);
 				ManifestElement[] elements = ManifestElement.parseHeader(Constants.ECLIPSE_LAZYSTART, eclipseLazyStart);
 				if (elements != null && elements.length > 0) {
 					// if the value is true then it is lazy activated
@@ -1214,16 +1216,16 @@ public class EclipseStarter {
 	}
 
 	private static void mergeProperties(Properties destination, Properties source) {
-		for (Enumeration e = source.keys(); e.hasMoreElements();) {
+		for (Enumeration<?> e = source.keys(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
 			String value = source.getProperty(key);
 			if (destination.getProperty(key) == null)
-				destination.put(key, value);
+				destination.setProperty(key, value);
 		}
 	}
 
 	private static void setStartLevel(final int value) {
-		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
+		ServiceReference<?> reference = context.getServiceReference(StartLevel.class.getName());
 		final StartLevel startLevel = reference != null ? (StartLevel) context.getService(reference) : null;
 		if (startLevel == null)
 			return;
@@ -1258,11 +1260,11 @@ public class EclipseStarter {
 	}
 
 	private static void updateSplash(Semaphore semaphore, StartupEventListener listener) {
-		ServiceTracker monitorTracker = new ServiceTracker(context, StartupMonitor.class.getName(), null);
+		ServiceTracker<StartupMonitor, StartupMonitor> monitorTracker = new ServiceTracker<StartupMonitor, StartupMonitor>(context, StartupMonitor.class.getName(), null);
 		monitorTracker.open();
 		try {
 			while (true) {
-				StartupMonitor monitor = (StartupMonitor) monitorTracker.getService();
+				StartupMonitor monitor = monitorTracker.getService();
 				if (monitor != null) {
 					try {
 						monitor.update();
@@ -1293,7 +1295,7 @@ public class EclipseStarter {
 	 * @param start the location to begin searching
 	 */
 	private static String searchFor(final String target, String start) {
-		String[] candidates = (String[]) searchCandidates.get(start);
+		String[] candidates = searchCandidates.get(start);
 		if (candidates == null) {
 			candidates = new File(start).list();
 			if (candidates != null)
@@ -1424,15 +1426,14 @@ public class EclipseStarter {
 	 * @param initialProperties the initial properties to set for the platform.
 	 * @since 3.2
 	 */
-	public static void setInitialProperties(Map initialProperties) {
+	public static void setInitialProperties(Map<String, String> initialProperties) {
 		if (initialProperties == null || initialProperties.isEmpty())
 			return;
-		for (Iterator it = initialProperties.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry<String, String> entry : initialProperties.entrySet()) {
 			if (entry.getValue() != null)
-				FrameworkProperties.setProperty((String) entry.getKey(), (String) entry.getValue());
+				FrameworkProperties.setProperty(entry.getKey(), entry.getValue());
 			else
-				FrameworkProperties.clearProperty((String) entry.getKey());
+				FrameworkProperties.clearProperty(entry.getKey());
 		}
 	}
 
@@ -1475,7 +1476,7 @@ public class EclipseStarter {
 			throw new IllegalStateException(EclipseAdaptorMsg.ECLIPSE_STARTUP_ALREADY_RUNNING);
 
 		if (shutdownHandlers == null)
-			shutdownHandlers = new ArrayList();
+			shutdownHandlers = new ArrayList<Runnable>();
 
 		shutdownHandlers.add(handler);
 	}
@@ -1501,8 +1502,8 @@ public class EclipseStarter {
 			return;
 
 		final Bundle systemBundle = context.getBundle();
-		for (Iterator it = shutdownHandlers.iterator(); it.hasNext();) {
-			final Runnable handler = (Runnable) it.next();
+		for (Iterator<Runnable> it = shutdownHandlers.iterator(); it.hasNext();) {
+			final Runnable handler = it.next();
 			BundleListener listener = new BundleListener() {
 				public void bundleChanged(BundleEvent event) {
 					if (event.getBundle() == systemBundle && event.getType() == BundleEvent.STOPPED) {

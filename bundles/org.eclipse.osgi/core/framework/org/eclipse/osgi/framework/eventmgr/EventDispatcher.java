@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ package org.eclipse.osgi.framework.eventmgr;
  * </p>
  * @since 3.1
  */
-public interface EventDispatcher {
+public interface EventDispatcher<K, V, E> {
 	/**
 	 * This method is called once for each listener.
 	 * This method must cast the event listener object to the appropriate listener
@@ -45,5 +45,5 @@ public interface EventDispatcher {
 	 * can complete the delivery of the event to the listener.
 	 * This is typically the actual event object.
 	 */
-	public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject);
+	public void dispatchEvent(K eventListener, V listenerObject, int eventAction, E eventObject);
 }

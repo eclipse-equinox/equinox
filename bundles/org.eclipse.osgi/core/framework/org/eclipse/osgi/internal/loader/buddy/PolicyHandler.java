@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,27 +33,27 @@ public class PolicyHandler implements SynchronousBundleListener {
 	private volatile Object[] policies = null;
 
 	//Support to cut class / resource loading cycles in the context of one thread. The contained object is a set of classname
-	private final ThreadLocal beingLoaded;
+	private final ThreadLocal<Set<String>> beingLoaded;
 	private final PackageAdmin packageAdmin;
 
 	public PolicyHandler(BundleLoader loader, String buddyList, PackageAdmin packageAdmin) {
 		policedLoader = loader;
 		policies = getArrayFromList(buddyList);
-		beingLoaded = new ThreadLocal();
+		beingLoaded = new ThreadLocal<Set<String>>();
 		this.packageAdmin = packageAdmin;
 	}
 
 	static Object[] getArrayFromList(String stringList) {
 		if (stringList == null || stringList.trim().equals("")) //$NON-NLS-1$
 			return null;
-		Vector list = new Vector();
+		List<Object> list = new ArrayList<Object>();
 		StringTokenizer tokens = new StringTokenizer(stringList, ","); //$NON-NLS-1$
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (!token.equals("")) //$NON-NLS-1$
-				list.addElement(token);
+				list.add(token);
 		}
-		return list.isEmpty() ? new Object[0] : (Object[]) list.toArray(new Object[list.size()]);
+		return list.isEmpty() ? new Object[0] : list.toArray(new Object[list.size()]);
 	}
 
 	private IBuddyPolicy getPolicyImplementation(Object[] policiesSnapshot, int policyOrder) {
@@ -122,11 +122,11 @@ public class PolicyHandler implements SynchronousBundleListener {
 		}
 	}
 
-	public Class doBuddyClassLoading(String name) {
+	public Class<?> doBuddyClassLoading(String name) {
 		if (startLoading(name) == false)
 			return null;
 
-		Class result = null;
+		Class<?> result = null;
 		Object[] policiesSnapshot = policies;
 		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount && result == null; i++) {
@@ -154,39 +154,39 @@ public class PolicyHandler implements SynchronousBundleListener {
 		return result;
 	}
 
-	public Enumeration doBuddyResourcesLoading(String name) {
+	public Enumeration<URL> doBuddyResourcesLoading(String name) {
 		if (startLoading(name) == false)
 			return null;
 
-		Vector results = null;
+		List<URL> results = null;
 		Object[] policiesSnapshot = policies;
 		int policyCount = (policiesSnapshot == null) ? 0 : policiesSnapshot.length;
 		for (int i = 0; i < policyCount; i++) {
 			IBuddyPolicy policy = getPolicyImplementation(policiesSnapshot, i);
 			if (policy == null)
 				continue;
-			Enumeration result = policy.loadResources(name);
+			Enumeration<URL> result = policy.loadResources(name);
 			if (result != null) {
 				if (results == null)
-					results = new Vector(policyCount);
+					results = new ArrayList<URL>(policyCount);
 				while (result.hasMoreElements()) {
-					Object url = result.nextElement();
+					URL url = result.nextElement();
 					if (!results.contains(url)) //only add if not already added 
 						results.add(url);
 				}
 			}
 		}
 		stopLoading(name);
-		return results == null || results.isEmpty() ? null : results.elements();
+		return results == null || results.isEmpty() ? null : Collections.enumeration(results);
 	}
 
 	private boolean startLoading(String name) {
-		Set classesAndResources = (Set) beingLoaded.get();
+		Set<String> classesAndResources = beingLoaded.get();
 		if (classesAndResources != null && classesAndResources.contains(name))
 			return false;
 
 		if (classesAndResources == null) {
-			classesAndResources = new HashSet(3);
+			classesAndResources = new HashSet<String>(3);
 			beingLoaded.set(classesAndResources);
 		}
 		classesAndResources.add(name);
@@ -194,7 +194,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 	}
 
 	private void stopLoading(String name) {
-		((Set) beingLoaded.get()).remove(name);
+		beingLoaded.get().remove(name);
 	}
 
 	public void open(BundleContext context) {
@@ -210,7 +210,7 @@ public class PolicyHandler implements SynchronousBundleListener {
 			return;
 		// reinitialize the policies
 		try {
-			String list = (String) policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
+			String list = policedLoader.getBundle().getBundleData().getManifest().get(Constants.BUDDY_LOADER);
 			policies = getArrayFromList(list);
 		} catch (BundleException e) {
 			//Ignore

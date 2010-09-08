@@ -29,8 +29,8 @@ import org.osgi.framework.Bundle;
 public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadingStatsHook {
 	// This connect bundles and their info, and so allows to access the info without running through
 	// the bundle registry. This map only contains activated bundles. The key is the bundle Id
-	private Hashtable bundles = new Hashtable(20);
-	private Map activationStacks = new HashMap(5);
+	private Hashtable<Long, BundleStats> bundles = new Hashtable<Long, BundleStats>(20);
+	private Map<Thread, Stack<BundleStats>> activationStacks = new HashMap<Thread, Stack<BundleStats>>(5);
 	private static boolean booting = true; // the state of the platform. This value is changed by the InternalPlatform itself.
 
 	private static StatsManager defaultInstance;
@@ -123,15 +123,15 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 		info.setActivationOrder(bundles.size());
 		info.setDuringStartup(booting);
 
-		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
+		Stack<BundleStats> activationStack = activationStacks.get(Thread.currentThread());
 		if (activationStack == null) {
-			activationStack = new Stack();
+			activationStack = new Stack<BundleStats>();
 			activationStacks.put(Thread.currentThread(), activationStack);
 		}
 
 		// set the parentage of activation
 		if (activationStack.size() != 0) {
-			BundleStats activatedBy = (BundleStats) activationStack.peek();
+			BundleStats activatedBy = activationStack.peek();
 			activatedBy.activated(info);
 			info.setActivatedBy(activatedBy);
 		}
@@ -143,9 +143,9 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 	}
 
 	public void endActivation(Bundle symbolicName) {
-		Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
+		Stack<BundleStats> activationStack = activationStacks.get(Thread.currentThread());
 		// should be called from a synchronized location to protect against concurrent updates
-		BundleStats info = (BundleStats) activationStack.pop();
+		BundleStats info = activationStack.pop();
 		info.endActivation();
 	}
 
@@ -156,13 +156,13 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 				long startPosition = ClassloaderStats.traceFile.length();
 				output.println("Activating bundle: " + bundle.getSymbolicName()); //$NON-NLS-1$
 				output.println("Bundle activation stack:"); //$NON-NLS-1$
-				Stack activationStack = (Stack) activationStacks.get(Thread.currentThread());
+				Stack<BundleStats> activationStack = activationStacks.get(Thread.currentThread());
 				for (int i = activationStack.size() - 1; i >= 0; i--)
-					output.println("\t" + ((BundleStats) activationStack.get(i)).getSymbolicName()); //$NON-NLS-1$
+					output.println("\t" + activationStack.get(i).getSymbolicName()); //$NON-NLS-1$
 				output.println("Class loading stack:"); //$NON-NLS-1$
-				Stack classStack = ClassloaderStats.getClassStack();
+				Stack<ClassStats> classStack = ClassloaderStats.getClassStack();
 				for (int i = classStack.size() - 1; i >= 0; i--)
-					output.println("\t" + ((ClassStats) classStack.get(i)).getClassName()); //$NON-NLS-1$
+					output.println("\t" + classStack.get(i).getClassName()); //$NON-NLS-1$
 				output.println("Stack trace:"); //$NON-NLS-1$
 				new Throwable().printStackTrace(output);
 				info.setTraceStart(startPosition);
@@ -176,7 +176,7 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 	}
 
 	public BundleStats findBundle(String symbolicName, long id) {
-		BundleStats result = (BundleStats) bundles.get(new Long(id));
+		BundleStats result = bundles.get(new Long(id));
 		try {
 			if (result == null) {
 				result = new BundleStats(symbolicName, id);
@@ -189,11 +189,11 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 	}
 
 	public BundleStats[] getBundles() {
-		return (BundleStats[]) bundles.values().toArray(new BundleStats[bundles.size()]);
+		return bundles.values().toArray(new BundleStats[bundles.size()]);
 	}
 
 	public BundleStats getBundle(long id) {
-		return (BundleStats) bundles.get(new Long(id));
+		return bundles.get(new Long(id));
 	}
 
 	/**
@@ -204,7 +204,7 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 			ClassloaderStats.startLoadingClass(getClassloaderId(manager), name);
 	}
 
-	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) {
+	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) {
 		if (StatsManager.MONITOR_CLASSES)
 			ClassloaderStats.endLoadingClass(getClassloaderId(manager), name, clazz != null);
 	}
@@ -220,7 +220,7 @@ public class StatsManager implements BundleWatcher, HookConfigurator, ClassLoadi
 		return;
 	}
 
-	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// do nothing
 	}
 

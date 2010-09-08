@@ -78,9 +78,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		return supplier;
 	}
 
-	public int compareTo(Object other) {
-		if (!(other instanceof NativeCodeDescription))
-			return 1;
+	public int compareTo(NativeCodeDescription otherDesc) {
 		State containingState = getSupplier().getContainingState();
 		if (containingState == null)
 			return 0;
@@ -91,7 +89,6 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		} catch (Exception e) {
 			osversion = Version.emptyVersion;
 		}
-		NativeCodeDescription otherDesc = (NativeCodeDescription) other;
 		VersionRange[] thisRanges = getOSVersions();
 		VersionRange[] otherRanges = otherDesc.getOSVersions();
 		Version thisHighest = getHighestVersionMatch(osversion, thisRanges);

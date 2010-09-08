@@ -32,9 +32,9 @@ import org.osgi.service.startlevel.StartLevel;
  * If present, there will only be a single instance of this service
  * registered in the framework.
  */
-public class StartLevelManager implements EventDispatcher, EventListener, StartLevel {
+public class StartLevelManager implements EventDispatcher<Object, Object, StartLevelEvent>, StartLevel {
 	protected static EventManager eventManager;
-	protected static Map startLevelListeners;
+	protected static Map<Object, Object> startLevelListeners;
 
 	/** The initial bundle start level for newly installed bundles */
 	protected int initialBundleStartLevel = 1;
@@ -58,7 +58,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		// create an event manager and a start level listener
 		// note that we do not pass the ContextFinder because it is set each time doSetStartLevel is called
 		eventManager = new EventManager("Start Level Event Dispatcher"); //$NON-NLS-1$
-		startLevelListeners = new CopyOnWriteIdentityMap();
+		startLevelListeners = new CopyOnWriteIdentityMap<Object, Object>();
 		startLevelListeners.put(this, this);
 	}
 
@@ -370,7 +370,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 				final AbstractBundle b = (AbstractBundle) bundle;
 				b.getBundleData().setStartLevel(newSL);
 				try {
-					AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 						public Object run() throws Exception {
 							b.getBundleData().save();
 							return null;
@@ -399,7 +399,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	private void issueEvent(StartLevelEvent sle) {
 
 		/* queue to hold set of listeners */
-		ListenerQueue queue = new ListenerQueue(eventManager);
+		ListenerQueue<Object, Object, StartLevelEvent> queue = new ListenerQueue<Object, Object, StartLevelEvent>(eventManager);
 
 		/* add set of StartLevelListeners to queue */
 		queue.queueListeners(startLevelListeners.entrySet(), this);
@@ -428,9 +428,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	 * as what event object to pass) so that this method
 	 * can complete the delivery of the event to the listener.
 	 */
-	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, Object eventObject) {
+	public void dispatchEvent(Object listener, Object listenerObject, int eventAction, StartLevelEvent event) {
 		try {
-			StartLevelEvent event = (StartLevelEvent) eventObject;
 			switch (eventAction) {
 				case StartLevelEvent.CHANGE_BUNDLE_SL :
 					setBundleSL(event);
@@ -470,7 +469,7 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		AbstractBundle[] installedBundles;
 
 		synchronized (bundles) {
-			List allBundles = bundles.getBundles();
+			List<AbstractBundle> allBundles = bundles.getBundles();
 			installedBundles = new AbstractBundle[allBundles.size()];
 			allBundles.toArray(installedBundles);
 
@@ -510,8 +509,8 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	private void sortByDependencies(AbstractBundle[] bundles, int start, int end) {
 		if (end - start <= 1)
 			return;
-		List descList = new ArrayList(end - start);
-		List missingDescs = new ArrayList(0);
+		List<BundleDescription> descList = new ArrayList<BundleDescription>(end - start);
+		List<AbstractBundle> missingDescs = new ArrayList<AbstractBundle>(0);
 		for (int i = start; i < end; i++) {
 			BundleDescription desc = bundles[i].getBundleDescription();
 			if (desc != null)
@@ -521,14 +520,14 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 		}
 		if (descList.size() <= 1)
 			return;
-		BundleDescription[] descriptions = (BundleDescription[]) descList.toArray(new BundleDescription[descList.size()]);
+		BundleDescription[] descriptions = descList.toArray(new BundleDescription[descList.size()]);
 		framework.adaptor.getPlatformAdmin().getStateHelper().sortBundles(descriptions);
 		for (int i = start; i < descriptions.length + start; i++)
 			bundles[i] = framework.bundles.getBundle(descriptions[i - start].getBundleId());
 		if (missingDescs.size() > 0) {
-			Iterator missing = missingDescs.iterator();
+			Iterator<AbstractBundle> missing = missingDescs.iterator();
 			for (int i = start + descriptions.length; i < end && missing.hasNext(); i++)
-				bundles[i] = (AbstractBundle) missing.next();
+				bundles[i] = missing.next();
 		}
 	}
 
@@ -644,11 +643,11 @@ public class StartLevelManager implements EventDispatcher, EventListener, StartL
 	private void unloadAllBundles(BundleRepository bundles) {
 		synchronized (bundles) {
 			/* unload all installed bundles */
-			List allBundles = bundles.getBundles();
+			List<AbstractBundle> allBundles = bundles.getBundles();
 			int size = allBundles.size();
 
 			for (int i = 0; i < size; i++) {
-				AbstractBundle bundle = (AbstractBundle) allBundles.get(i);
+				AbstractBundle bundle = allBundles.get(i);
 
 				if (Debug.DEBUG_STARTLEVEL) {
 					Debug.println("SLL: Trying to unload bundle " + bundle); //$NON-NLS-1$

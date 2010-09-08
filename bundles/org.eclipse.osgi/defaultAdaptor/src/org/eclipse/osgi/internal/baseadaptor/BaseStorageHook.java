@@ -78,17 +78,18 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 		return storageHook;
 	}
 
-	public void initialize(Dictionary manifest) throws BundleException {
+	public void initialize(Dictionary<String, String> manifest) throws BundleException {
 		BaseStorageHook.loadManifest(bundleData, manifest);
 	}
 
-	static void loadManifest(BaseData target, Dictionary manifest) throws BundleException {
+	@SuppressWarnings("deprecation")
+	static void loadManifest(BaseData target, Dictionary<String, String> manifest) throws BundleException {
 		try {
-			target.setVersion(Version.parseVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
+			target.setVersion(Version.parseVersion(manifest.get(Constants.BUNDLE_VERSION)));
 		} catch (IllegalArgumentException e) {
-			target.setVersion(new InvalidVersion((String) manifest.get(Constants.BUNDLE_VERSION)));
+			target.setVersion(new InvalidVersion(manifest.get(Constants.BUNDLE_VERSION)));
 		}
-		ManifestElement[] bsnHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME));
+		ManifestElement[] bsnHeader = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, manifest.get(Constants.BUNDLE_SYMBOLICNAME));
 		int bundleType = 0;
 		if (bsnHeader != null) {
 			target.setSymbolicName(bsnHeader[0].getValue());
@@ -99,11 +100,11 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 				bundleType |= BundleData.TYPE_SINGLETON;
 		}
 		// check that the classpath is valid
-		String classpath = (String) manifest.get(Constants.BUNDLE_CLASSPATH);
+		String classpath = manifest.get(Constants.BUNDLE_CLASSPATH);
 		ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, classpath);
 		target.setClassPathString(classpath);
-		target.setActivator((String) manifest.get(Constants.BUNDLE_ACTIVATOR));
-		String host = (String) manifest.get(Constants.FRAGMENT_HOST);
+		target.setActivator(manifest.get(Constants.BUNDLE_ACTIVATOR));
+		String host = manifest.get(Constants.FRAGMENT_HOST);
 		if (host != null) {
 			bundleType |= BundleData.TYPE_FRAGMENT;
 			ManifestElement[] hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, host);
@@ -117,7 +118,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 					bundleType |= BundleData.TYPE_EXTCLASSPATH_EXTENSION;
 			}
 		} else {
-			String composite = (String) manifest.get(COMPOSITE_HEADER);
+			String composite = manifest.get(COMPOSITE_HEADER);
 			if (composite != null) {
 				if (COMPOSITE_BUNDLE.equals(composite))
 					bundleType |= BundleData.TYPE_COMPOSITEBUNDLE;
@@ -126,8 +127,8 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 			}
 		}
 		target.setType(bundleType);
-		target.setExecutionEnvironment((String) manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
-		target.setDynamicImports((String) manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
+		target.setExecutionEnvironment(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
+		target.setDynamicImports(manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 	}
 
 	public StorageHook load(BaseData target, DataInputStream in) throws IOException {
@@ -333,7 +334,7 @@ public class BaseStorageHook implements StorageHook, AdaptorHook {
 	/**
 	 * @throws BundleException  
 	 */
-	public Dictionary getManifest(boolean firstLoad) throws BundleException {
+	public Dictionary<String, String> getManifest(boolean firstLoad) throws BundleException {
 		// do nothing
 		return null;
 	}

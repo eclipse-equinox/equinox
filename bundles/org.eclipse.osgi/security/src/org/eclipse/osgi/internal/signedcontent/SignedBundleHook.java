@@ -57,7 +57,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	//TODO: comes from configuration!;
 	private static String CACERTS_PATH = System.getProperty("java.home") + File.separatorChar + "lib" + File.separatorChar + "security" + File.separatorChar + "cacerts"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$//$NON-NLS-4$
 	private static String CACERTS_TYPE = "JKS"; //$NON-NLS-1$
-	private static ServiceTracker trustEngineTracker;
+	private static ServiceTracker<TrustEngine, TrustEngine> trustEngineTracker;
 	private static BaseAdaptor ADAPTOR;
 	private static String SIGNED_BUNDLE_SUPPORT = "osgi.support.signature.verify"; //$NON-NLS-1$
 	private static String SIGNED_CONTENT_SUPPORT = "osgi.signedcontent.support"; //$NON-NLS-1$
@@ -65,11 +65,11 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 	private static int supportSignedBundles;
 	private TrustEngineListener trustEngineListener;
 	private BundleInstallListener installListener;
-	private ServiceRegistration signedContentFactoryReg;
-	private ServiceRegistration systemTrustEngineReg;
-	private ServiceRegistration defaultAuthEngineReg;
-	private List osgiTrustEngineReg;
-	private ServiceRegistration legacyFactoryReg;
+	private ServiceRegistration<?> signedContentFactoryReg;
+	private ServiceRegistration<?> systemTrustEngineReg;
+	private ServiceRegistration<?> defaultAuthEngineReg;
+	private List<ServiceRegistration<?>> osgiTrustEngineReg;
+	private ServiceRegistration<?> legacyFactoryReg;
 
 	public void initialize(BaseAdaptor adaptor) {
 		SignedBundleHook.ADAPTOR = adaptor;
@@ -85,14 +85,14 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			installListener = new BundleInstallListener();
 			context.addBundleListener(installListener);
 			// register the default authorization engine
-			Hashtable properties = new Hashtable(7);
+			Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
 			properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 			properties.put(SignedContentConstants.AUTHORIZATION_ENGINE, SignedContentConstants.DEFAULT_AUTHORIZATION_ENGINE);
 			defaultAuthEngineReg = context.registerService(AuthorizationEngine.class.getName(), new DefaultAuthorizationEngine(context, ADAPTOR.getState()), properties);
 		}
 
 		// always register the trust engine
-		Hashtable trustEngineProps = new Hashtable(7);
+		Dictionary<String, Object> trustEngineProps = new Hashtable<String, Object>(7);
 		trustEngineProps.put(Constants.SERVICE_RANKING, new Integer(Integer.MIN_VALUE));
 		trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, SignedContentConstants.DEFAULT_TRUST_ENGINE);
 		KeyStoreTrustEngine systemTrustEngine = new KeyStoreTrustEngine(CACERTS_PATH, CACERTS_TYPE, null, "System"); //$NON-NLS-1$
@@ -104,7 +104,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 				if ("file".equals(url.getProtocol())) { //$NON-NLS-1$
 					trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, OSGI_KEYSTORE);
 					String path = url.getPath();
-					osgiTrustEngineReg = new ArrayList(1);
+					osgiTrustEngineReg = new ArrayList<ServiceRegistration<?>>(1);
 					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(path, CACERTS_TYPE, null, OSGI_KEYSTORE), trustEngineProps));
 				}
 			} catch (MalformedURLException e) {
@@ -115,7 +115,7 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			if (osgiTrustRepoPaths != null) {
 				trustEngineProps.put(SignedContentConstants.TRUST_ENGINE, Constants.FRAMEWORK_TRUST_REPOSITORIES);
 				StringTokenizer st = new StringTokenizer(osgiTrustRepoPaths, File.pathSeparator);
-				osgiTrustEngineReg = new ArrayList(1);
+				osgiTrustEngineReg = new ArrayList<ServiceRegistration<?>>(1);
 				while (st.hasMoreTokens()) {
 					String trustRepoPath = st.nextToken();
 					osgiTrustEngineReg.add(context.registerService(TrustEngine.class.getName(), new KeyStoreTrustEngine(trustRepoPath, CACERTS_TYPE, null, OSGI_KEYSTORE), trustEngineProps));
@@ -147,8 +147,8 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 			systemTrustEngineReg = null;
 		}
 		if (osgiTrustEngineReg != null) {
-			for (Iterator it = osgiTrustEngineReg.iterator(); it.hasNext();)
-				((ServiceRegistration) it.next()).unregister();
+			for (Iterator<ServiceRegistration<?>> it = osgiTrustEngineReg.iterator(); it.hasNext();)
+				it.next().unregister();
 			osgiTrustEngineReg = null;
 		}
 		if (defaultAuthEngineReg != null) {
@@ -280,8 +280,8 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 		if (System.getSecurityManager() == null)
 			return getSignedContent(((BaseData) data).getBundleFile().getBaseFile());
 		try {
-			return (SignedContent) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<SignedContent>() {
+				public SignedContent run() throws Exception {
 					return getSignedContent(((BaseData) data).getBundleFile().getBaseFile());
 				}
 			});
@@ -334,9 +334,9 @@ public class SignedBundleHook implements AdaptorHook, BundleFileWrapperFactoryHo
 					SignedBundleHook.log("Invalid trust engine filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 				}
 			if (filter != null) {
-				trustEngineTracker = new ServiceTracker(context, filter, null);
+				trustEngineTracker = new ServiceTracker<TrustEngine, TrustEngine>(context, filter, null);
 			} else
-				trustEngineTracker = new ServiceTracker(context, TrustEngine.class.getName(), null);
+				trustEngineTracker = new ServiceTracker<TrustEngine, TrustEngine>(context, TrustEngine.class.getName(), null);
 			trustEngineTracker.open();
 		}
 		Object[] services = trustEngineTracker.getServices();

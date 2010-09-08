@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class SecurityRow implements ConditionalPermissionInfo {
 	/* Used to find condition constructors getConditions */
-	static final Class[] conditionMethodArgs = new Class[] {Bundle.class, ConditionInfo.class};
+	static final Class<?>[] conditionMethodArgs = new Class[] {Bundle.class, ConditionInfo.class};
 	static Condition[] ABSTAIN_LIST = new Condition[0];
 	static Condition[] SATISFIED_LIST = new Condition[0];
 	static final Decision DECISION_ABSTAIN = new Decision(SecurityTable.ABSTAIN, null, null, null);
@@ -32,7 +32,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 	private final PermissionInfoCollection permissionInfoCollection;
 	private final boolean deny;
 	/* GuardedBy(bundleConditions) */
-	final HashMap bundleConditions;
+	final Map<BundlePermissions, Condition[]> bundleConditions;
 
 	public SecurityRow(SecurityAdmin securityAdmin, String name, ConditionInfo[] conditionInfos, PermissionInfo[] permissionInfos, String decision) {
 		if (permissionInfos == null || permissionInfos.length == 0)
@@ -50,7 +50,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		if (conditionInfos == null || conditionInfos.length == 0)
 			bundleConditions = null;
 		else
-			bundleConditions = new HashMap();
+			bundleConditions = new HashMap<BundlePermissions, Condition[]>();
 	}
 
 	static SecurityRowSnapShot createSecurityRowSnapShot(String encoded) {
@@ -103,8 +103,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		if (decision.length() == 0 || (!ConditionalPermissionInfo.DENY.equalsIgnoreCase(decision) && !ConditionalPermissionInfo.ALLOW.equalsIgnoreCase(decision)))
 			throw new IllegalArgumentException(encoded);
 
-		ArrayList condList = new ArrayList();
-		ArrayList permList = new ArrayList();
+		List<ConditionInfo> condList = new ArrayList<ConditionInfo>();
+		List<PermissionInfo> permList = new ArrayList<PermissionInfo>();
 		int pos = start + 1;
 		while (pos < end) {
 			while (pos < end && chars[pos] != '[' && chars[pos] != '(')
@@ -134,8 +134,8 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 		}
 		if (permList.size() == 0)
 			throw new IllegalArgumentException("No Permission infos: " + encoded); //$NON-NLS-1$
-		ConditionInfo[] conds = (ConditionInfo[]) condList.toArray(new ConditionInfo[condList.size()]);
-		PermissionInfo[] perms = (PermissionInfo[]) permList.toArray(new PermissionInfo[permList.size()]);
+		ConditionInfo[] conds = condList.toArray(new ConditionInfo[condList.size()]);
+		PermissionInfo[] perms = permList.toArray(new PermissionInfo[permList.size()]);
 		if (securityAdmin == null)
 			return new SecurityRowSnapShot(encodedName, conds, perms, decision);
 		return new SecurityRow(securityAdmin, encodedName, conds, perms, decision);
@@ -243,14 +243,14 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			/*
 			 * TODO: Can we pre-get the Constructors in our own constructor
 			 */
-			Class clazz;
+			Class<?> clazz;
 			try {
 				clazz = Class.forName(conditionInfos[i].getType());
 			} catch (ClassNotFoundException e) {
 				/* If the class isn't there, we fail */
 				return null;
 			}
-			Constructor constructor = null;
+			Constructor<?> constructor = null;
 			Method method = null;
 			try {
 				method = clazz.getMethod("getCondition", conditionMethodArgs); //$NON-NLS-1$
@@ -287,7 +287,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			return evaluatePermission(permission);
 		Condition[] conditions;
 		synchronized (bundleConditions) {
-			conditions = (Condition[]) bundleConditions.get(bundlePermissions);
+			conditions = bundleConditions.get(bundlePermissions);
 			if (conditions == null) {
 				conditions = getConditions(bundlePermissions.getBundle());
 				bundleConditions.put(bundlePermissions, conditions);
@@ -299,7 +299,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			return evaluatePermission(permission);
 
 		boolean empty = true;
-		List postponedConditions = null;
+		List<Condition> postponedConditions = null;
 		Decision postponedPermCheck = null;
 		for (int i = 0; i < conditions.length; i++) {
 			Condition condition = conditions[i];
@@ -327,7 +327,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 					return postponedPermCheck; // no need to postpone the condition if the row abstains
 				// this row will deny or allow the permission; must queue the postponed condition
 				if (postponedConditions == null)
-					postponedConditions = new ArrayList(1);
+					postponedConditions = new ArrayList<Condition>(1);
 				postponedConditions.add(condition);
 			}
 			empty &= conditions[i] == null;
@@ -338,7 +338,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 			}
 		}
 		if (postponedPermCheck != null)
-			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED, (Condition[]) postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
+			return new Decision(postponedPermCheck.decision | SecurityTable.POSTPONED, postponedConditions.toArray(new Condition[postponedConditions.size()]), this, bundlePermissions);
 		return evaluatePermission(permission);
 	}
 
@@ -436,7 +436,7 @@ public final class SecurityRow implements ConditionalPermissionInfo {
 				return; // do nothing
 			if (isSatisfied) {
 				synchronized (row.bundleConditions) {
-					Condition[] rowConditions = (Condition[]) row.bundleConditions.get(bundlePermissions);
+					Condition[] rowConditions = row.bundleConditions.get(bundlePermissions);
 					boolean isEmpty = true;
 					for (int i = 0; i < rowConditions.length; i++) {
 						if (rowConditions[i] == condition)

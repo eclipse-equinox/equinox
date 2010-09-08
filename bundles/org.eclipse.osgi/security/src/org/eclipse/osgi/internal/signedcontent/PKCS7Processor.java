@@ -41,10 +41,10 @@ public class PKCS7Processor implements SignedContentConstants {
 	private Certificate[] tsaCertificates;
 
 	// key(object id) = value(structure)
-	private Map signedAttrs;
+	private Map<int[], byte[]> signedAttrs;
 
 	//	key(object id) = value(structure)
-	private Map unsignedAttrs;
+	private Map<int[], byte[]> unsignedAttrs;
 
 	// store the signature of a signerinfo
 	private byte signature[];
@@ -91,7 +91,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		this.signer = signer;
 		this.file = file;
 		// First grab the certificates
-		List certs = null;
+		List<Certificate> certs = null;
 
 		BERProcessor bp = new BERProcessor(pkcs7, pkcs7Offset, pkcs7Length);
 
@@ -136,7 +136,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		certs = constructCertPath(certs, signerCert);
 
 		// initialize the certificates
-		certificates = (Certificate[]) certs.toArray(new Certificate[certs.size()]);
+		certificates = certs.toArray(new Certificate[certs.size()]);
 		verifyCerts();
 		// if this pkcs7process is tsa asn.1 block, the signingTime should already be set
 		if (signingTime == null)
@@ -206,8 +206,8 @@ public class PKCS7Processor implements SignedContentConstants {
 		}
 	}
 
-	private List constructCertPath(List certs, Certificate targetCert) {
-		List certsList = new ArrayList();
+	private List<Certificate> constructCertPath(List<Certificate> certs, Certificate targetCert) {
+		List<Certificate> certsList = new ArrayList<Certificate>();
 		certsList.add(targetCert);
 
 		X509Certificate currentCert = (X509Certificate) targetCert;
@@ -224,7 +224,7 @@ public class PKCS7Processor implements SignedContentConstants {
 			}
 
 			currentCert = null;
-			Iterator itr = certs.iterator();
+			Iterator<Certificate> itr = certs.iterator();
 
 			while (itr.hasNext()) {
 				X509Certificate tempCert = (X509Certificate) itr.next();
@@ -261,7 +261,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		}
 	}
 
-	private Certificate processSignerInfos(BERProcessor bp, List certs) throws CertificateException, NoSuchAlgorithmException, SignatureException {
+	private Certificate processSignerInfos(BERProcessor bp, List<Certificate> certs) throws CertificateException, NoSuchAlgorithmException, SignatureException {
 		// We assume there is only one SingerInfo element 
 
 		// PKCS7: SignerINFOS processing
@@ -286,7 +286,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		// initilize the newSignerCert to the issuer cert of leaf cert
 		Certificate newSignerCert = null;
 
-		Iterator itr = certs.iterator();
+		Iterator<Certificate> itr = certs.iterator();
 		// PKCS7: compuare the issuers in the issuerAndSN BER equals to the issuers in Certs generated at the beginning of this method
 		// it seems like there is no neeed, cause both ways use the same set of bytes
 		while (itr.hasNext()) {
@@ -338,7 +338,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS && bp.tag == 1) {
 
 			// there are some unsignedAttrs are found!!
-			unsignedAttrs = new HashMap();
+			unsignedAttrs = new HashMap<int[], byte[]>();
 
 			// step into a set of unsigned attributes, I believe, when steps 
 			// into here, the 'poiter' is pointing to the first element
@@ -349,14 +349,14 @@ public class PKCS7Processor implements SignedContentConstants {
 				BERProcessor unsignedAttrBER = unsignedAttrsBERS.stepInto();
 
 				// check if it is timestamp attribute type
-				int objID[] = unsignedAttrBER.getObjId();
+				int[] objID = unsignedAttrBER.getObjId();
 				// if(Arrays.equals(TIMESTAMP_OID, objID)) {
 				// System.out.println("This is a timestamp type, to continue");
 				// }
 
 				// get the structure for the attribute type
 				unsignedAttrBER.stepOver();
-				byte structure[] = unsignedAttrBER.getBytes();
+				byte[] structure = unsignedAttrBER.getBytes();
 				unsignedAttrs.put(objID, structure);
 				unsignedAttrsBERS.stepOver();
 			} while (!unsignedAttrsBERS.endOfSequence());
@@ -367,7 +367,7 @@ public class PKCS7Processor implements SignedContentConstants {
 		if (bp.classOfTag == BERProcessor.CONTEXTSPECIFIC_TAGCLASS) {
 
 			// process the signed attributes
-			signedAttrs = new HashMap();
+			signedAttrs = new HashMap<int[], byte[]>();
 
 			BERProcessor signedAttrsBERS = bp.stepInto();
 			do {
@@ -405,7 +405,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	 * 
 	 * @return  map if there is any signed attributes, null otherwise
 	 */
-	public Map getUnsignedAttrs() {
+	public Map<int[], byte[]> getUnsignedAttrs() {
 		return unsignedAttrs;
 	}
 
@@ -414,7 +414,7 @@ public class PKCS7Processor implements SignedContentConstants {
 	 * 
 	 * @return  map if there is any signed attributes, null otherwise
 	 */
-	public Map getSignedAttrs() {
+	public Map<int[], byte[]> getSignedAttrs() {
 		return signedAttrs;
 	}
 
@@ -426,8 +426,8 @@ public class PKCS7Processor implements SignedContentConstants {
 	 * @throws CertificateException
 	 * @throws SignatureException 
 	 */
-	private List processCertificates(BERProcessor bp) throws CertificateException, SignatureException {
-		List rtvList = new ArrayList(3);
+	private List<Certificate> processCertificates(BERProcessor bp) throws CertificateException, SignatureException {
+		List<Certificate> rtvList = new ArrayList<Certificate>(3);
 
 		// Step into the first certificate-element
 		BERProcessor certsBERS = bp.stepInto();

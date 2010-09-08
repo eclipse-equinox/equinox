@@ -37,7 +37,9 @@ public class ShrinkableCollection<E> implements Collection<E> {
 		if (c == null) {
 			throw new NullPointerException();
 		}
-		list = Collections.EMPTY_LIST;
+		@SuppressWarnings("unchecked")
+		List<Collection<? extends E>> empty = Collections.EMPTY_LIST;
+		list = empty;
 		collection = c;
 	}
 

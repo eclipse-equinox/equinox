@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.util.Headers;
@@ -33,21 +34,23 @@ public class Equinox implements Framework {
 	/**@GuardedBy this*/
 	private Framework impl;
 	private final boolean useSeparateCL;
-	private final Map configuration;
+	private final Map<String, Object> configuration;
 
-	public Equinox(Map configuration) {
+	public Equinox(Map<String, ?> configuration) {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm != null)
 			sm.checkPermission(new AllPermission());
 		useSeparateCL = FrameworkProperties.inUse();
-		this.configuration = configuration == null ? Collections.EMPTY_MAP : new HashMap(configuration);
+		@SuppressWarnings("unchecked")
+		final Map<String, Object> empty = Collections.EMPTY_MAP;
+		this.configuration = configuration == null ? empty : new HashMap<String, Object>(configuration);
 	}
 
 	private Framework createImpl() {
 		if (System.getSecurityManager() == null)
 			return createImpl0();
-		return (Framework) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Framework>() {
+			public Framework run() {
 				return createImpl0();
 			}
 		});
@@ -55,8 +58,8 @@ public class Equinox implements Framework {
 
 	Framework createImpl0() {
 		try {
-			Class implClazz = getImplClass();
-			Constructor constructor = implClazz.getConstructor(new Class[] {Map.class});
+			Class<?> implClazz = getImplClass();
+			Constructor<?> constructor = implClazz.getConstructor(new Class[] {Map.class});
 			return (Framework) constructor.newInstance(new Object[] {configuration});
 		} catch (ClassNotFoundException e) {
 			throw new NoClassDefFoundError(implName);
@@ -71,7 +74,7 @@ public class Equinox implements Framework {
 		}
 	}
 
-	private Class getImplClass() throws ClassNotFoundException {
+	private Class<?> getImplClass() throws ClassNotFoundException {
 		ClassLoader thisCL = this.getClass().getClassLoader();
 		if (!(useSeparateCL && (thisCL instanceof URLClassLoader)))
 			return Class.forName(implName);
@@ -83,7 +86,7 @@ public class Equinox implements Framework {
 	private URL[] getFrameworkURLs(URLClassLoader frameworkLoader) {
 		// use the classpath of the framework class loader
 		URL[] cp = frameworkLoader.getURLs();
-		ArrayList result = new ArrayList(cp.length);
+		List<URL> result = new ArrayList<URL>(cp.length);
 		for (int i = 0; i < cp.length; i++) {
 			// need to add only the urls for the framework and any framework fragments
 			InputStream manifest = null;
@@ -93,7 +96,7 @@ public class Equinox implements Framework {
 				} else {
 					manifest = new URL("jar:" + cp[i].toExternalForm() + "!/" + org.eclipse.osgi.framework.internal.core.Constants.OSGI_BUNDLE_MANIFEST).openStream(); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				Map headers = ManifestElement.parseBundleManifest(manifest, new Headers(10));
+				Map<String, String> headers = ManifestElement.parseBundleManifest(manifest, new Headers<String, String>(10));
 				String bsnSpec = getValue(headers, Constants.BUNDLE_SYMBOLICNAME);
 				if (bsnSpec == null)
 					continue;
@@ -122,10 +125,10 @@ public class Equinox implements Framework {
 					}
 			}
 		}
-		return (URL[]) result.toArray(new URL[result.size()]);
+		return result.toArray(new URL[result.size()]);
 	}
 
-	private void addDevClassPaths(URL cp, String bsn, ArrayList result) {
+	private void addDevClassPaths(URL cp, String bsn, List<URL> result) {
 		if (!cp.getPath().endsWith("/")) //$NON-NLS-1$
 			return;
 		String[] devPaths = DevClassPathHelper.getDevClassPath(bsn);
@@ -145,13 +148,13 @@ public class Equinox implements Framework {
 			}
 	}
 
-	private boolean isFrameworkFragment(Map headers, String internalBSN) {
+	private boolean isFrameworkFragment(Map<String, String> headers, String internalBSN) {
 		String hostBSN = getValue(headers, Constants.FRAGMENT_HOST);
 		return internalBSN.equals(hostBSN) || Constants.SYSTEM_BUNDLE_SYMBOLICNAME.equals(hostBSN);
 	}
 
-	private String getValue(Map headers, String key) {
-		String headerSpec = (String) headers.get(key);
+	private String getValue(Map<String, String> headers, String key) {
+		String headerSpec = headers.get(key);
 		if (headerSpec == null)
 			return null;
 		ManifestElement[] elements;
@@ -179,7 +182,7 @@ public class Equinox implements Framework {
 		return getImpl().waitForStop(timeout);
 	}
 
-	public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+	public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 		return getImpl().findEntries(path, filePattern, recurse);
 	}
 
@@ -195,15 +198,15 @@ public class Equinox implements Framework {
 		return getImpl().getEntry(path);
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path) {
 		return getImpl().getEntryPaths(path);
 	}
 
-	public Dictionary getHeaders() {
+	public Dictionary<String, String> getHeaders() {
 		return getImpl().getHeaders();
 	}
 
-	public Dictionary getHeaders(String locale) {
+	public Dictionary<String, String> getHeaders(String locale) {
 		return getImpl().getHeaders(locale);
 	}
 
@@ -215,7 +218,7 @@ public class Equinox implements Framework {
 		return getImpl().getLocation();
 	}
 
-	public ServiceReference[] getRegisteredServices() {
+	public ServiceReference<?>[] getRegisteredServices() {
 		return getImpl().getRegisteredServices();
 	}
 
@@ -223,11 +226,11 @@ public class Equinox implements Framework {
 		return getImpl().getResource(name);
 	}
 
-	public Enumeration getResources(String name) throws IOException {
+	public Enumeration<URL> getResources(String name) throws IOException {
 		return getImpl().getResources(name);
 	}
 
-	public ServiceReference[] getServicesInUse() {
+	public ServiceReference<?>[] getServicesInUse() {
 		return getImpl().getServicesInUse();
 	}
 
@@ -243,7 +246,7 @@ public class Equinox implements Framework {
 		return getImpl().hasPermission(permission);
 	}
 
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		return getImpl().loadClass(name);
 	}
 
@@ -275,7 +278,7 @@ public class Equinox implements Framework {
 		getImpl().update(in);
 	}
 
-	public Map getSignerCertificates(int signersType) {
+	public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
 		return getImpl().getSignerCertificates(signersType);
 	}
 

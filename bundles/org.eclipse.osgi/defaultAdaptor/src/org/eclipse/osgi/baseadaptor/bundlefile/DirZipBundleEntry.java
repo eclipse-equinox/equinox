@@ -57,6 +57,7 @@ public class DirZipBundleEntry extends BundleEntry {
 		return 0;
 	}
 
+	@SuppressWarnings("deprecation")
 	public URL getLocalURL() {
 		try {
 			return new URL("jar:" + bundleFile.basefile.toURL() + "!/" + name); //$NON-NLS-1$ //$NON-NLS-2$
@@ -66,6 +67,7 @@ public class DirZipBundleEntry extends BundleEntry {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public URL getFileURL() {
 		try {
 			return bundleFile.extractDirectory(name).toURL();

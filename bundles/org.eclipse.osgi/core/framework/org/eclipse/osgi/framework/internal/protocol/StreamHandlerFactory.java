@@ -22,25 +22,27 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.url.URLConstants;
+import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * This class contains the URL stream handler factory for the OSGi framework.
  */
 public class StreamHandlerFactory extends MultiplexingFactory implements URLStreamHandlerFactory {
-	static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
-	private ServiceTracker handlerTracker;
+	private ServiceTracker<URLStreamHandlerService, URLStreamHandlerService> handlerTracker;
 
 	protected static final String URLSTREAMHANDLERCLASS = "org.osgi.service.url.URLStreamHandlerService"; //$NON-NLS-1$
 	protected static final String PROTOCOL_HANDLER_PKGS = "java.protocol.handler.pkgs"; //$NON-NLS-1$
 	protected static final String INTERNAL_PROTOCOL_HANDLER_PKG = "org.eclipse.osgi.framework.internal.protocol"; //$NON-NLS-1$
 
-	private static final List ignoredClasses = Arrays.asList(new Class[] {MultiplexingURLStreamHandler.class, StreamHandlerFactory.class, URL.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingURLStreamHandler.class, StreamHandlerFactory.class, URL.class});
 	private static final boolean useNetProxy;
 	static {
-		Class clazz = null;
+		Class<?> clazz = null;
 		try {
 			clazz = Class.forName("java.net.Proxy"); //$NON-NLS-1$
 		} catch (ClassNotFoundException e) {
@@ -48,9 +50,9 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 		}
 		useNetProxy = clazz != null;
 	}
-	private Hashtable proxies;
+	private Map<String, URLStreamHandler> proxies;
 	private URLStreamHandlerFactory parentFactory;
-	private ThreadLocal creatingProtocols = new ThreadLocal();
+	private ThreadLocal<List<String>> creatingProtocols = new ThreadLocal<List<String>>();
 
 	/**
 	 * Create the factory.
@@ -60,15 +62,15 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	public StreamHandlerFactory(BundleContext context, FrameworkAdaptor adaptor) {
 		super(context, adaptor);
 
-		proxies = new Hashtable(15);
-		handlerTracker = new ServiceTracker(context, URLSTREAMHANDLERCLASS, null);
+		proxies = new Hashtable<String, URLStreamHandler>(15);
+		handlerTracker = new ServiceTracker<URLStreamHandlerService, URLStreamHandlerService>(context, URLSTREAMHANDLERCLASS, null);
 		handlerTracker.open();
 	}
 
-	private Class getBuiltIn(String protocol, String builtInHandlers, boolean fromFramework) {
+	private Class<?> getBuiltIn(String protocol, String builtInHandlers, boolean fromFramework) {
 		if (builtInHandlers == null)
 			return null;
-		Class clazz;
+		Class<?> clazz;
 		StringTokenizer tok = new StringTokenizer(builtInHandlers, "|"); //$NON-NLS-1$
 		while (tok.hasMoreElements()) {
 			StringBuffer name = new StringBuffer();
@@ -104,7 +106,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 		try {
 			//first check for built in handlers
 			String builtInHandlers = secureAction.getProperty(PROTOCOL_HANDLER_PKGS);
-			Class clazz = getBuiltIn(protocol, builtInHandlers, false);
+			Class<?> clazz = getBuiltIn(protocol, builtInHandlers, false);
 			if (clazz != null)
 				return null; // let the VM handle it
 			URLStreamHandler result = null;
@@ -124,9 +126,9 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	}
 
 	private boolean isRecursive(String protocol) {
-		List protocols = (List) creatingProtocols.get();
+		List<String> protocols = creatingProtocols.get();
 		if (protocols == null) {
-			protocols = new ArrayList(1);
+			protocols = new ArrayList<String>(1);
 			creatingProtocols.set(protocols);
 		}
 		if (protocols.contains(protocol))
@@ -136,7 +138,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 	}
 
 	private void releaseRecursive(String protocol) {
-		List protocols = (List) creatingProtocols.get();
+		List<String> protocols = creatingProtocols.get();
 		protocols.remove(protocol);
 	}
 
@@ -144,7 +146,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 		//internal protocol handlers
 		String internalHandlerPkgs = secureAction.getProperty(Constants.INTERNAL_HANDLER_PKGS);
 		internalHandlerPkgs = internalHandlerPkgs == null ? INTERNAL_PROTOCOL_HANDLER_PKG : internalHandlerPkgs + '|' + INTERNAL_PROTOCOL_HANDLER_PKG;
-		Class clazz = getBuiltIn(protocol, internalHandlerPkgs, true);
+		Class<?> clazz = getBuiltIn(protocol, internalHandlerPkgs, true);
 
 		if (clazz == null) {
 			//Now we check the service registry
@@ -153,7 +155,7 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 			if (handler != null)
 				return (handler);
 			//look through the service registry for a URLStramHandler registered for this protocol
-			org.osgi.framework.ServiceReference[] serviceReferences = handlerTracker.getServiceReferences();
+			ServiceReference<URLStreamHandlerService>[] serviceReferences = handlerTracker.getServiceReferences();
 			if (serviceReferences == null)
 				return null;
 			for (int i = 0; i < serviceReferences.length; i++) {

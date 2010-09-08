@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,7 +25,7 @@ public class SignedContentFile implements SignedContent {
 
 	private final SignedContentImpl signedContent;
 	// a cache of verification exceptions
-	private HashMap entryExceptions = null;
+	private Map<String, Throwable> entryExceptions = null;
 
 	public SignedContentFile(SignedContentImpl signedContent) {
 		try {
@@ -45,7 +45,7 @@ public class SignedContentFile implements SignedContent {
 		if (signedContent == null)
 			return null;
 		SignedContentEntry[] results = new SignedContentEntry[entries.length];
-		Map exceptions = getEntryExceptions(true);
+		Map<String, Throwable> exceptions = getEntryExceptions(true);
 		for (int i = 0; i < entries.length; i++) {
 			try {
 				entries[i].verify();
@@ -86,9 +86,9 @@ public class SignedContentFile implements SignedContent {
 		return signedContent.isSigned();
 	}
 
-	synchronized Map getEntryExceptions(boolean create) {
+	synchronized Map<String, Throwable> getEntryExceptions(boolean create) {
 		if (create && entryExceptions == null)
-			entryExceptions = new HashMap(5);
+			entryExceptions = new HashMap<String, Throwable>(5);
 		return entryExceptions;
 	}
 
@@ -113,7 +113,7 @@ public class SignedContentFile implements SignedContent {
 
 		public void verify() throws IOException, InvalidContentException {
 			// check the entry exceptions map for the entry name
-			Map exceptions = getEntryExceptions(false);
+			Map<String, Throwable> exceptions = getEntryExceptions(false);
 			Throwable t = exceptions == null ? null : (Throwable) exceptions.get(entry.getName());
 			if (t == null)
 				return;

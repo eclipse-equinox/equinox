@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.protocol.bundleresource.Handler;
@@ -34,7 +33,7 @@ import org.eclipse.osgi.util.ManifestElement;
  */
 abstract public class BundleFile {
 	protected static final String PROP_SETPERMS_CMD = "osgi.filepermissions.command"; //$NON-NLS-1$
-	static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	/**
 	 * The File object for this BundleFile.
 	 */
@@ -91,7 +90,7 @@ abstract public class BundleFile {
 	 * @return an Enumeration of Strings that indicate the paths found or
 	 * null if the path does not exist. 
 	 */
-	abstract public Enumeration getEntryPaths(String path);
+	abstract public Enumeration<String> getEntryPaths(String path);
 
 	/**
 	 * Closes the BundleFile.
@@ -189,7 +188,7 @@ abstract public class BundleFile {
 		if (commandProp == null)
 			return;
 		String[] temp = ManifestElement.getArrayFromList(commandProp, " "); //$NON-NLS-1$
-		ArrayList command = new ArrayList(temp.length + 1);
+		List<String> command = new ArrayList<String>(temp.length + 1);
 		boolean foundFullPath = false;
 		for (int i = 0; i < temp.length; i++) {
 			if ("[fullpath]".equals(temp[i]) || "${abspath}".equals(temp[i])) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -201,7 +200,7 @@ abstract public class BundleFile {
 		if (!foundFullPath)
 			command.add(file.getAbsolutePath());
 		try {
-			Runtime.getRuntime().exec((String[]) command.toArray(new String[command.size()])).waitFor();
+			Runtime.getRuntime().exec(command.toArray(new String[command.size()])).waitFor();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

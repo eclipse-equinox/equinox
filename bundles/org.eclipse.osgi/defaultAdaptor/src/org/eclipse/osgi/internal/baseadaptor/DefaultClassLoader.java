@@ -45,7 +45,8 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	private final static String CLASS_LOADER_TYPE_PARALLEL = "parallel"; //$NON-NLS-1$
 	private static final boolean CLASS_CERTIFICATE;
 	private static final boolean PARALLEL_CAPABLE;
-	private static final Enumeration EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
+	@SuppressWarnings("unchecked")
+	private static final Enumeration<URL> EMPTY_ENUMERATION = Collections.enumeration(Collections.EMPTY_LIST);
 
 	static {
 		CLASS_CERTIFICATE = Boolean.valueOf(FrameworkProperties.getProperty(CLASS_CERTIFICATE_SUPPORT, "true")).booleanValue(); //$NON-NLS-1$
@@ -99,12 +100,12 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @return The Class object.
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + delegate + "].loadClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		try {
 			// Just ask the delegate.  This could result in findLocalClass(name) being called.
-			Class clazz = delegate.findClass(name);
+			Class<?> clazz = delegate.findClass(name);
 			// resolve the class if asked to.
 			if (resolve)
 				resolveClass(clazz);
@@ -158,8 +159,8 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @return An Enumeration of all resources found or null if the resource.
 	 * @throws IOException 
 	 */
-	protected Enumeration findResources(String name) throws IOException {
-		Enumeration result = delegate.findResources(name);
+	protected Enumeration<URL> findResources(String name) throws IOException {
+		Enumeration<URL> result = delegate.findResources(name);
 		if (result == null)
 			return EMPTY_ENUMERATION;
 		return result;
@@ -184,11 +185,11 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		return new ClasspathEntry(bundlefile, createProtectionDomain(bundlefile, cpDomain));
 	}
 
-	public Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry) {
+	public Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry) {
 		return defineClass(name, classbytes, 0, classbytes.length, classpathEntry.getDomain());
 	}
 
-	public Class publicFindLoaded(String classname) {
+	public Class<?> publicFindLoaded(String classname) {
 		return findLoadedClass(classname);
 	}
 
@@ -208,11 +209,11 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		return manager.findLocalResource(resource);
 	}
 
-	public Enumeration findLocalResources(String resource) {
+	public Enumeration<URL> findLocalResources(String resource) {
 		return manager.findLocalResources(resource);
 	}
 
-	public Class findLocalClass(String classname) throws ClassNotFoundException {
+	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
 		return manager.findLocalClass(classname);
 	}
 
@@ -234,6 +235,7 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @param baseDomain The source domain.
 	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
 	 */
+	@SuppressWarnings("deprecation")
 	public static ProtectionDomain createProtectionDomain(BundleFile bundlefile, ProtectionDomain baseDomain) {
 		// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
 		try {

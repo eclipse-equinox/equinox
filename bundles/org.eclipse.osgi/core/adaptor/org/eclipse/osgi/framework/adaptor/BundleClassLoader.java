@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public interface BundleClassLoader /*extends ClassLoader*/extends BundleReferenc
 	 * @return An Enumeration of all resources found or null if the resource.
 	 * does not exist.
 	 */
-	public Enumeration findLocalResources(String resource);
+	public Enumeration<URL> findLocalResources(String resource);
 
 	/**
 	 * Finds a local class in the BundleClassLoader without
@@ -64,7 +64,7 @@ public interface BundleClassLoader /*extends ClassLoader*/extends BundleReferenc
 	 * @return The class object found.
 	 * @throws ClassNotFoundException if the classname does not exist locally.
 	 */
-	public Class findLocalClass(String classname) throws ClassNotFoundException;
+	public Class<?> findLocalClass(String classname) throws ClassNotFoundException;
 
 	/**
 	 * This method will first search the parent class loader for the resource;
@@ -82,7 +82,7 @@ public interface BundleClassLoader /*extends ClassLoader*/extends BundleReferenc
 	 * @param name the resource path to get.
 	 * @return an Enumeration of URL objects for the resource or <code>null</code> if the resource is not found.
 	 */
-	public Enumeration getResources(String name) throws IOException;
+	public Enumeration<URL> getResources(String name) throws IOException;
 
 	/**
 	 * This method will first search the parent class loader for the class;
@@ -92,7 +92,7 @@ public interface BundleClassLoader /*extends ClassLoader*/extends BundleReferenc
 	 * @return the Class.
 	 * @throws ClassNotFoundException
 	 */
-	public Class loadClass(String name) throws ClassNotFoundException;
+	public Class<?> loadClass(String name) throws ClassNotFoundException;
 
 	/**
 	 * Closes this class loader.  After this method is called

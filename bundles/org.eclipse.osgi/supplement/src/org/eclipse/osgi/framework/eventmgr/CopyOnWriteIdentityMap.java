@@ -27,7 +27,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	/**
 	 * The empty array singleton instance.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	private static final Entry[] emptyArray = new Entry[0];
 
 	/**

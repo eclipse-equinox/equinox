@@ -14,20 +14,19 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.*;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.*;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
 public final class PermissionInfoCollection extends PermissionCollection {
 	private static final long serialVersionUID = 3140511562980923957L;
 	/* Used to find permission constructors in addPermissions */
-	static private final Class twoStringClassArray[] = new Class[] {String.class, String.class};
-	static private final Class oneStringClassArray[] = new Class[] {String.class};
-	static private final Class noArgClassArray[] = new Class[] {};
-	static private final Class[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
+	static private final Class<?> twoStringClassArray[] = new Class[] {String.class, String.class};
+	static private final Class<?> oneStringClassArray[] = new Class[] {String.class};
+	static private final Class<?> noArgClassArray[] = new Class[] {};
+	static private final Class<?>[][] permClassArrayArgs = new Class[][] {noArgClassArray, oneStringClassArray, twoStringClassArray};
 
 	/* @GuardedBy(cachedPermisssionCollections) */
-	private final HashMap cachedPermissionCollections = new HashMap();
+	private final Map<Class<? extends Permission>, PermissionCollection> cachedPermissionCollections = new HashMap<Class<? extends Permission>, PermissionCollection>();
 	private final boolean hasAllPermission;
 	private final PermissionInfo[] permInfos;
 
@@ -45,7 +44,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		throw new SecurityException();
 	}
 
-	public Enumeration elements() {
+	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now; 
 		return BundlePermissions.EMPTY_ENUMERATION;
 	}
@@ -53,10 +52,10 @@ public final class PermissionInfoCollection extends PermissionCollection {
 	public boolean implies(Permission perm) {
 		if (hasAllPermission)
 			return true;
-		Class permClass = perm.getClass();
+		Class<? extends Permission> permClass = perm.getClass();
 		PermissionCollection collection;
 		synchronized (cachedPermissionCollections) {
-			collection = (PermissionCollection) cachedPermissionCollections.get(permClass);
+			collection = cachedPermissionCollections.get(permClass);
 		}
 		// must populate the collection outside of the lock to prevent class loader deadlock
 		if (collection == null) {
@@ -70,7 +69,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 			}
 			synchronized (cachedPermissionCollections) {
 				// check to see if another thread beat this thread at adding the collection
-				PermissionCollection exists = (PermissionCollection) cachedPermissionCollections.get(permClass);
+				PermissionCollection exists = cachedPermissionCollections.get(permClass);
 				if (exists != null)
 					collection = exists;
 				else
@@ -84,9 +83,9 @@ public final class PermissionInfoCollection extends PermissionCollection {
 		return permInfos;
 	}
 
-	private void addPermissions(PermissionCollection collection, Class permClass) throws NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
+	private void addPermissions(PermissionCollection collection, Class<? extends Permission> permClass) throws NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
 		String permClassName = permClass.getName();
-		Constructor constructor = null;
+		Constructor<? extends Permission> constructor = null;
 		int numArgs = -1;
 		for (int i = permClassArrayArgs.length - 1; i >= 0; i--) {
 			try {
@@ -120,7 +119,7 @@ public final class PermissionInfoCollection extends PermissionCollection {
 						}
 					}
 				}
-				collection.add((Permission) constructor.newInstance((Object[]) args));
+				collection.add(constructor.newInstance((Object[]) args));
 			}
 		}
 	}

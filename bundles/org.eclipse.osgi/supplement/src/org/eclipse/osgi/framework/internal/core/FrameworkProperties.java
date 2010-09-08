@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,7 @@ public class FrameworkProperties {
 		return properties;
 	}
 
-	public static synchronized void setProperties(Map input) {
+	public static synchronized void setProperties(Map<String, String> input) {
 		if (input == null) {
 			// just use internal props;  note that this will reuse a previous set of properties if they were set
 			internalGetProperties("false"); //$NON-NLS-1$
@@ -93,8 +93,8 @@ public class FrameworkProperties {
 		}
 		properties = null;
 		Properties toSet = internalGetProperties("false"); //$NON-NLS-1$
-		for (Iterator keys = input.keySet().iterator(); keys.hasNext();) {
-			String key = (String) keys.next();
+		for (Iterator<String> keys = input.keySet().iterator(); keys.hasNext();) {
+			String key = keys.next();
 			Object value = input.get(key);
 			if (value instanceof String) {
 				toSet.setProperty(key, (String) value);
@@ -135,7 +135,7 @@ public class FrameworkProperties {
 	public static String decode(String urlString) {
 		//try to use Java 1.4 method if available
 		try {
-			Class clazz = URLDecoder.class;
+			Class<? extends URLDecoder> clazz = URLDecoder.class;
 			Method method = clazz.getDeclaredMethod("decode", new Class[] {String.class, String.class}); //$NON-NLS-1$
 			//first encode '+' characters, because URLDecoder incorrectly converts 
 			//them to spaces on certain class library implementations.

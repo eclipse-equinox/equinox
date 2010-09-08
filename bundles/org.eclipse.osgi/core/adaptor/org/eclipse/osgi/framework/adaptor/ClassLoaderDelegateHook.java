@@ -36,7 +36,7 @@ public interface ClassLoaderDelegateHook {
 	 * @return the class found by this hook or null if normal delegation should continue
 	 * @throws ClassNotFoundException to terminate the delegation and throw an exception
 	 */
-	public Class preFindClass(String name, BundleClassLoader classLoader, BundleData data) throws ClassNotFoundException;
+	public Class<?> preFindClass(String name, BundleClassLoader classLoader, BundleData data) throws ClassNotFoundException;
 
 	/**
 	 * Called by a {@link ClassLoaderDelegate#findClass(String)} method after delegating to the resolved constraints and 
@@ -48,7 +48,7 @@ public interface ClassLoaderDelegateHook {
 	 * @return the class found by this hook or null if normal delegation should continue
 	 * @throws ClassNotFoundException to terminate the delegation and throw an exception
 	 */
-	public Class postFindClass(String name, BundleClassLoader classLoader, BundleData data) throws ClassNotFoundException;
+	public Class<?> postFindClass(String name, BundleClassLoader classLoader, BundleData data) throws ClassNotFoundException;
 
 	/**
 	 * Called by a {@link ClassLoaderDelegate #findResource(String)} before delegating to the resolved constraints and 
@@ -86,7 +86,7 @@ public interface ClassLoaderDelegateHook {
 	 * @return the resources found by this hook or null if normal delegation should continue
 	 * @throws FileNotFoundException to terminate the delegation
 	 */
-	public Enumeration preFindResources(String name, BundleClassLoader classLoader, BundleData data) throws FileNotFoundException;
+	public Enumeration<URL> preFindResources(String name, BundleClassLoader classLoader, BundleData data) throws FileNotFoundException;
 
 	/**
 	 * Called by a {@link ClassLoaderDelegate} after delegating to the resolved constraints and 
@@ -98,7 +98,7 @@ public interface ClassLoaderDelegateHook {
 	 * @return the resources found by this hook or null if normal delegation should continue
 	 * @throws FileNotFoundException to terminate the delegation
 	 */
-	public Enumeration postFindResources(String name, BundleClassLoader classLoader, BundleData data) throws FileNotFoundException;
+	public Enumeration<URL> postFindResources(String name, BundleClassLoader classLoader, BundleData data) throws FileNotFoundException;
 
 	/**
 	 * Called by a {@link ClassLoaderDelegate} before normal delegation.  If this method returns 

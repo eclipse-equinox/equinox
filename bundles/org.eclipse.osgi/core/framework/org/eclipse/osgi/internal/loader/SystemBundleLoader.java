@@ -14,8 +14,7 @@ package org.eclipse.osgi.internal.loader;
 import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.internal.core.BundleFragment;
 import org.eclipse.osgi.framework.internal.core.BundleHost;
@@ -30,8 +29,8 @@ import org.osgi.framework.BundleException;
 public class SystemBundleLoader extends BundleLoader {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
 	final ClassLoader classLoader;
-	private final HashSet eePackages;
-	private final HashSet extPackages;
+	private final Set<String> eePackages;
+	private final Set<String> extPackages;
 	private final ClassLoader extClassLoader;
 
 	/**
@@ -45,13 +44,13 @@ public class SystemBundleLoader extends BundleLoader {
 		if (exports == null || exports.length == 0)
 			eePackages = null;
 		else {
-			eePackages = new HashSet(exports.length);
+			eePackages = new HashSet<String>(exports.length);
 			for (int i = 0; i < exports.length; i++)
 				if (((Integer) exports[i].getDirective(EQUINOX_EE)).intValue() >= 0)
 					eePackages.add(exports[i].getName());
 		}
 		this.classLoader = getClass().getClassLoader();
-		extPackages = new HashSet(0); // not common; start with 0
+		extPackages = new HashSet<String>(0); // not common; start with 0
 		BundleFragment[] fragments = bundle.getFragments();
 		if (fragments != null)
 			for (int i = 0; i < fragments.length; i++)
@@ -94,8 +93,8 @@ public class SystemBundleLoader extends BundleLoader {
 	 * The ClassLoader that loads OSGi framework classes is used to find the class.
 	 * This method never gets called because there is no BundleClassLoader for the framework.
 	 */
-	public Class findClass(String name) throws ClassNotFoundException {
-		Class result = findLocalClass(name);
+	public Class<?> findClass(String name) throws ClassNotFoundException {
+		Class<?> result = findLocalClass(name);
 		if (result == null)
 			throw new ClassNotFoundException(name);
 		return result;
@@ -112,7 +111,7 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the class. 
 	 */
-	Class findLocalClass(String name) {
+	Class<?> findLocalClass(String name) {
 		try {
 			return classLoader.loadClass(name);
 		} catch (ClassNotFoundException e) {
@@ -145,8 +144,8 @@ public class SystemBundleLoader extends BundleLoader {
 	/**
 	 * The ClassLoader that loads OSGi framework classes is used to find the resource.
 	 */
-	Enumeration findLocalResources(String name) {
-		Enumeration result = null;
+	Enumeration<URL> findLocalResources(String name) {
+		Enumeration<URL> result = null;
 		try {
 			result = classLoader.getResources(name);
 		} catch (IOException e) {
@@ -177,7 +176,7 @@ public class SystemBundleLoader extends BundleLoader {
 	 * This method never gets called because there is no BundleClassLoader for the framework.
 	 * @throws IOException 
 	 */
-	public Enumeration findResources(String name) throws IOException {
+	public Enumeration<URL> findResources(String name) throws IOException {
 		return findLocalResources(name);
 	}
 
@@ -199,7 +198,7 @@ public class SystemBundleLoader extends BundleLoader {
 				return SystemBundleLoader.this.getBundle();
 			}
 
-			public Class loadClass(String name) throws ClassNotFoundException {
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
 				return SystemBundleLoader.this.loadClass(name);
 			}
 
@@ -210,7 +209,7 @@ public class SystemBundleLoader extends BundleLoader {
 			/**
 			 * @throws IOException  
 			 */
-			public Enumeration getResources(String name) throws IOException {
+			public Enumeration<URL> getResources(String name) throws IOException {
 				return findLocalResources(name);
 			}
 
@@ -226,7 +225,7 @@ public class SystemBundleLoader extends BundleLoader {
 				return SystemBundleLoader.this;
 			}
 
-			public Enumeration findLocalResources(String resource) {
+			public Enumeration<URL> findLocalResources(String resource) {
 				return SystemBundleLoader.this.findLocalResources(resource);
 			}
 
@@ -237,7 +236,7 @@ public class SystemBundleLoader extends BundleLoader {
 			/**
 			 * @throws ClassNotFoundException  
 			 */
-			public Class findLocalClass(String classname) throws ClassNotFoundException {
+			public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
 				return SystemBundleLoader.this.findLocalClass(classname);
 			}
 

@@ -30,8 +30,8 @@ public class SecureAction {
 	private AccessControlContext controlContext;
 
 	// This ClassLoader is used in loadSystemClass if System.getClassLoader() returns null
-	static final ClassLoader bootClassLoader = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-		public Object run() {
+	static final ClassLoader bootClassLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+		public ClassLoader run() {
 			return new ClassLoader(Object.class.getClassLoader()) { /* boot class loader */};
 		}
 	});
@@ -54,9 +54,9 @@ public class SecureAction {
 	 * </pre>
 	 * @return a privileged action object that can be used to construct a SecureAction object.
 	 */
-	public static PrivilegedAction createSecureAction() {
-		return new PrivilegedAction() {
-			public Object run() {
+	public static PrivilegedAction<SecureAction> createSecureAction() {
+		return new PrivilegedAction<SecureAction>() {
+			public SecureAction run() {
 				return new SecureAction();
 			}
 		};
@@ -71,8 +71,8 @@ public class SecureAction {
 	public String getProperty(final String property) {
 		if (System.getSecurityManager() == null)
 			return FrameworkProperties.getProperty(property);
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			public String run() {
 				return FrameworkProperties.getProperty(property);
 			}
 		}, controlContext);
@@ -89,8 +89,8 @@ public class SecureAction {
 	public String getProperty(final String property, final String def) {
 		if (System.getSecurityManager() == null)
 			return FrameworkProperties.getProperty(property, def);
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			public String run() {
 				return FrameworkProperties.getProperty(property, def);
 			}
 		}, controlContext);
@@ -104,8 +104,8 @@ public class SecureAction {
 	public Properties getProperties() {
 		if (System.getSecurityManager() == null)
 			return FrameworkProperties.getProperties();
-		return (Properties) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Properties>() {
+			public Properties run() {
 				return FrameworkProperties.getProperties();
 			}
 		}, controlContext);
@@ -122,8 +122,8 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return new FileInputStream(file);
 		try {
-			return (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws FileNotFoundException {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileInputStream>() {
+				public FileInputStream run() throws FileNotFoundException {
 					return new FileInputStream(file);
 				}
 			}, controlContext);
@@ -146,8 +146,8 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return new FileOutputStream(file.getAbsolutePath(), append);
 		try {
-			return (FileOutputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws FileNotFoundException {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<FileOutputStream>() {
+				public FileOutputStream run() throws FileNotFoundException {
 					return new FileOutputStream(file.getAbsolutePath(), append);
 				}
 			}, controlContext);
@@ -167,11 +167,11 @@ public class SecureAction {
 	public long length(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.length();
-		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
+			public Long run() {
 				return new Long(file.length());
 			}
-		}, controlContext)).longValue();
+		}, controlContext).longValue();
 	}
 
 	/**
@@ -185,8 +185,8 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return file.getCanonicalPath();
 		try {
-			return (String) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws IOException {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<String>() {
+				public String run() throws IOException {
 					return file.getCanonicalPath();
 				}
 			}, controlContext);
@@ -206,11 +206,11 @@ public class SecureAction {
 	public boolean exists(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.exists();
-		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			public Boolean run() {
 				return file.exists() ? Boolean.TRUE : Boolean.FALSE;
 			}
-		}, controlContext)).booleanValue();
+		}, controlContext).booleanValue();
 	}
 
 	/**
@@ -222,11 +222,11 @@ public class SecureAction {
 	public boolean isDirectory(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.isDirectory();
-		return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+			public Boolean run() {
 				return file.isDirectory() ? Boolean.TRUE : Boolean.FALSE;
 			}
-		}, controlContext)).booleanValue();
+		}, controlContext).booleanValue();
 	}
 
 	/**
@@ -238,11 +238,11 @@ public class SecureAction {
 	public long lastModified(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.lastModified();
-		return ((Long) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Long>() {
+			public Long run() {
 				return new Long(file.lastModified());
 			}
-		}, controlContext)).longValue();
+		}, controlContext).longValue();
 	}
 
 	/**
@@ -254,8 +254,8 @@ public class SecureAction {
 	public String[] list(final File file) {
 		if (System.getSecurityManager() == null)
 			return file.list();
-		return (String[]) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<String[]>() {
+			public String[] run() {
 				return file.list();
 			}
 		}, controlContext);
@@ -273,8 +273,8 @@ public class SecureAction {
 			if (System.getSecurityManager() == null)
 				return new ZipFile(file);
 			try {
-				return (ZipFile) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws IOException {
+				return AccessController.doPrivileged(new PrivilegedExceptionAction<ZipFile>() {
+					public ZipFile run() throws IOException {
 						return new ZipFile(file);
 					}
 				}, controlContext);
@@ -309,8 +309,8 @@ public class SecureAction {
 		if (System.getSecurityManager() == null)
 			return new URL(protocol, host, port, file, handler);
 		try {
-			return (URL) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws MalformedURLException {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<URL>() {
+				public URL run() throws MalformedURLException {
 					return new URL(protocol, host, port, file, handler);
 				}
 			}, controlContext);
@@ -332,8 +332,8 @@ public class SecureAction {
 	public Thread createThread(final Runnable target, final String name, final ClassLoader contextLoader) {
 		if (System.getSecurityManager() == null)
 			return createThread0(target, name, contextLoader);
-		return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Thread>() {
+			public Thread run() {
 				return createThread0(target, name, contextLoader);
 			}
 		}, controlContext);
@@ -353,11 +353,11 @@ public class SecureAction {
 	 * @param context the BundleContext
 	 * @return a service object
 	 */
-	public Object getService(final ServiceReference reference, final BundleContext context) {
+	public <S> S getService(final ServiceReference<S> reference, final BundleContext context) {
 		if (System.getSecurityManager() == null)
 			return context.getService(reference);
-		return AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<S>() {
+			public S run() {
 				return context.getService(reference);
 			}
 		}, controlContext);
@@ -370,12 +370,12 @@ public class SecureAction {
 	 * @return a Class
 	 * @throws ClassNotFoundException
 	 */
-	public Class forName(final String name) throws ClassNotFoundException {
+	public Class<?> forName(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null)
 			return Class.forName(name);
 		try {
-			return (Class) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+				public Class<?> run() throws Exception {
 					return Class.forName(name);
 				}
 			}, controlContext);
@@ -393,14 +393,14 @@ public class SecureAction {
 	 * @return a Class
 	 * @throws ClassNotFoundException
 	 */
-	public Class loadSystemClass(final String name) throws ClassNotFoundException {
+	public Class<?> loadSystemClass(final String name) throws ClassNotFoundException {
 		if (System.getSecurityManager() == null) {
 			ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 			return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 		}
 		try {
-			return (Class) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws Exception {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+				public Class<?> run() throws Exception {
 					ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
 					return (systemClassLoader != null) ? systemClassLoader.loadClass(name) : bootClassLoader.loadClass(name);
 				}
@@ -416,12 +416,12 @@ public class SecureAction {
 	 * Opens a ServiceTracker. Same as calling tracker.open()
 	 * @param tracker the ServiceTracker to open.
 	 */
-	public void open(final ServiceTracker tracker) {
+	public void open(final ServiceTracker<?, ?> tracker) {
 		if (System.getSecurityManager() == null) {
 			tracker.open();
 			return;
 		}
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				tracker.open();
 				return null;
@@ -441,7 +441,7 @@ public class SecureAction {
 			return;
 		}
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws BundleException {
 					bundle.start(options);
 					return null;

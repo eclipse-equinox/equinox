@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,7 @@ package org.eclipse.osgi.service.resolver;
  * @since 3.1
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface BundleDelta extends Comparable {
+public interface BundleDelta extends Comparable<BundleDelta> {
 
 	/**
 	 * Delta type constant (bit mask) indicating that the bundle has been added
@@ -121,5 +121,5 @@ public interface BundleDelta extends Comparable {
 	 *                if the argument can not be converted into something
 	 *                comparable with the receiver.
 	 */
-	public int compareTo(Object obj);
+	public int compareTo(BundleDelta obj);
 }

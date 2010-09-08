@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,16 +174,16 @@ public class AdaptorUtil {
 	 * @param context the registering bundle context
 	 * @return the service registration object
 	 */
-	public static ServiceRegistration register(String name, Object service, BundleContext context) {
-		Hashtable properties = new Hashtable(7);
-		Dictionary headers = context.getBundle().getHeaders();
+	public static ServiceRegistration<?> register(String name, Object service, BundleContext context) {
+		Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
+		Dictionary<String, String> headers = context.getBundle().getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, context.getBundle().getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$
 		return context.registerService(name, service, properties);
 	}
 
-	public static Dictionary loadManifestFrom(BaseData bundledata) throws BundleException {
+	public static Dictionary<String, String> loadManifestFrom(BaseData bundledata) throws BundleException {
 		URL url = bundledata.getEntry(Constants.OSGI_BUNDLE_MANIFEST);
 		if (url == null)
 			return null;
@@ -216,6 +216,7 @@ public class AdaptorUtil {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static URL encodeFileURL(File file) throws MalformedURLException {
 		try {
 			Method toURI = File.class.getMethod("toURI", (Class[]) null); //$NON-NLS-1$

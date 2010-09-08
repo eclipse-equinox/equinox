@@ -20,7 +20,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  */
 public class EquinoxFactory implements FrameworkFactory {
 
-	public Framework newFramework(Map configuration) {
+	public Framework newFramework(Map<String, String> configuration) {
 		return new Equinox(configuration);
 	}
 

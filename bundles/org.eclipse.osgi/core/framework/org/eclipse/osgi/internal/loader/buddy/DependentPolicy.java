@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,27 +26,27 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 public class DependentPolicy implements IBuddyPolicy {
 	BundleLoader buddyRequester;
 	int lastDependentOfAdded = -1; //remember the index of the bundle for which we last added the dependent
-	List allDependents = null; //the list of all dependents known so far
+	List<BundleDescription> allDependents = null; //the list of all dependents known so far
 
 	public DependentPolicy(BundleLoader requester) {
 		buddyRequester = requester;
 
 		//Initialize with the first level of dependent the list
-		allDependents = new ArrayList();
+		allDependents = new ArrayList<BundleDescription>();
 		basicAddImmediateDependents(buddyRequester.getBundle().getBundleDescription());
 		//If there is no dependent, reset to null
 		if (allDependents.size() == 0)
 			allDependents = null;
 	}
 
-	public Class loadClass(String name) {
+	public Class<?> loadClass(String name) {
 		if (allDependents == null)
 			return null;
 
-		Class result = null;
+		Class<?> result = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
-			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
+			BundleDescription searchedBundle = allDependents.get(i);
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 				if (proxy == null)
@@ -74,7 +74,7 @@ public class DependentPolicy implements IBuddyPolicy {
 		URL result = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size() && result == null; i++) {
-			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
+			BundleDescription searchedBundle = allDependents.get(i);
 			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 			if (proxy == null)
 				continue;
@@ -86,14 +86,14 @@ public class DependentPolicy implements IBuddyPolicy {
 		return result;
 	}
 
-	public Enumeration loadResources(String name) {
+	public Enumeration<URL> loadResources(String name) {
 		if (allDependents == null)
 			return null;
 
-		Enumeration results = null;
+		Enumeration<URL> results = null;
 		//size may change, so we must check it every time
 		for (int i = 0; i < allDependents.size(); i++) {
-			BundleDescription searchedBundle = (BundleDescription) allDependents.get(i);
+			BundleDescription searchedBundle = allDependents.get(i);
 			try {
 				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(searchedBundle);
 				if (proxy == null)

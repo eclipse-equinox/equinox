@@ -47,7 +47,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 
 	private BaseAdaptor adaptor;
 	private boolean noXML = false;
-	private ArrayList registrations = new ArrayList(10);
+	private List<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(10);
 
 	/**
 	 * @throws BundleException  
@@ -55,7 +55,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 	public void frameworkStart(BundleContext context) throws BundleException {
 		registrations.clear();
 		registerEndorsedXMLParser(context);
-		Hashtable locationProperties = new Hashtable(1);
+		Dictionary<String, Object> locationProperties = new Hashtable<String, Object>(1);
 		Location location = LocationManager.getUserLocation();
 		if (location != null) {
 			locationProperties.put("type", LocationManager.PROP_USER_AREA); //$NON-NLS-1$
@@ -83,7 +83,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			registrations.add(context.registerService(Location.class.getName(), location, locationProperties));
 		}
 
-		Dictionary urlProperties = new Hashtable();
+		Dictionary<String, Object> urlProperties = new Hashtable<String, Object>();
 		urlProperties.put("protocol", new String[] {"bundleentry", "bundleresource"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		registrations.add(context.registerService(URLConverter.class.getName(), new URLConverterImpl(), urlProperties));
 
@@ -112,14 +112,14 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		}
 	}
 
-	private static class ParsingService implements ServiceFactory {
+	private static class ParsingService implements ServiceFactory<Object> {
 		private final boolean isSax;
 
 		public ParsingService(boolean isSax) {
 			this.isSax = isSax;
 		}
 
-		public Object getService(Bundle bundle, ServiceRegistration registration) {
+		public Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
 			BundleHost host = (bundle instanceof BundleHost) ? (BundleHost) bundle : null;
 			if (!SET_TCCL_XMLFACTORY || bundle == null)
 				return createService();
@@ -151,7 +151,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 			return DocumentBuilderFactory.newInstance();
 		}
 
-		public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+		public void ungetService(Bundle bundle, ServiceRegistration<Object> registration, Object service) {
 			// Do nothing.
 		}
 	}
@@ -164,8 +164,8 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		if (!noXML)
 			PluginParser.releaseXMLParsing();
 		// unregister services
-		for (Iterator iRegistrations = registrations.iterator(); iRegistrations.hasNext();)
-			((ServiceRegistration) iRegistrations.next()).unregister();
+		for (ServiceRegistration<?> registration : registrations)
+			registration.unregister();
 		registrations.clear();
 	}
 

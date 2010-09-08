@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,19 +12,20 @@ package org.eclipse.osgi.internal.permadmin;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 
 public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 
 	private final SecurityAdmin securityAdmin;
-	private final List rows;
+	private final List<ConditionalPermissionInfo> rows;
 	private final long timeStamp;
 
 	public SecurityTableUpdate(SecurityAdmin securityAdmin, SecurityRow[] rows, long timeStamp) {
 		this.securityAdmin = securityAdmin;
 		this.timeStamp = timeStamp;
 		// must make a snap shot of the security rows.
-		this.rows = new ArrayList(rows.length);
+		this.rows = new ArrayList<ConditionalPermissionInfo>(rows.length);
 		for (int i = 0; i < rows.length; i++)
 			// Use SecurityRowSnapShot to prevent modification before commit 
 			// and to throw exceptions from delete
@@ -35,7 +36,7 @@ public class SecurityTableUpdate implements ConditionalPermissionUpdate {
 		return securityAdmin.commit(rows, timeStamp);
 	}
 
-	public List getConditionalPermissionInfos() {
+	public List<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// it is fine to return the internal list; it is a snap shot and we allow clients to modify it.
 		return rows;
 	}

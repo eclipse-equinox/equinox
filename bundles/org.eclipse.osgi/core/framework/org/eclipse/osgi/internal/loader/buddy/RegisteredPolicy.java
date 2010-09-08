@@ -36,13 +36,13 @@ public class RegisteredPolicy extends DependentPolicy {
 		if (allDependents == null)
 			return;
 
-		for (Iterator iter = allDependents.iterator(); iter.hasNext();) {
-			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) iter.next());
+		for (Iterator<BundleDescription> iter = allDependents.iterator(); iter.hasNext();) {
+			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(iter.next());
 			if (proxy == null)
 				iter.remove();
 
 			try {
-				String[] allContributions = ManifestElement.getArrayFromList((String) ((AbstractBundle) proxy.getBundle()).getBundleData().getManifest().get(Constants.REGISTERED_POLICY));
+				String[] allContributions = ManifestElement.getArrayFromList(((AbstractBundle) proxy.getBundle()).getBundleData().getManifest().get(Constants.REGISTERED_POLICY));
 				if (allContributions == null) {
 					iter.remove();
 					continue;
@@ -65,15 +65,15 @@ public class RegisteredPolicy extends DependentPolicy {
 			allDependents = null;
 	}
 
-	public Class loadClass(String name) {
+	public Class<?> loadClass(String name) {
 		if (allDependents == null)
 			return null;
 
-		Class result = null;
+		Class<?> result = null;
 		int size = allDependents.size();
 		for (int i = 0; i < size && result == null; i++) {
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
+				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
 				if (proxy == null)
 					continue;
 				result = proxy.getBundleLoader().findClass(name);
@@ -92,7 +92,7 @@ public class RegisteredPolicy extends DependentPolicy {
 		URL result = null;
 		int size = allDependents.size();
 		for (int i = 0; i < size && result == null; i++) {
-			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
+			BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
 			if (proxy == null)
 				continue;
 			result = proxy.getBundleLoader().findResource(name);
@@ -100,15 +100,15 @@ public class RegisteredPolicy extends DependentPolicy {
 		return result;
 	}
 
-	public Enumeration loadResources(String name) {
+	public Enumeration<URL> loadResources(String name) {
 		if (allDependents == null)
 			return null;
 
-		Enumeration results = null;
+		Enumeration<URL> results = null;
 		int size = allDependents.size();
 		for (int i = 0; i < size; i++) {
 			try {
-				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy((BundleDescription) allDependents.get(i));
+				BundleLoaderProxy proxy = buddyRequester.getLoaderProxy(allDependents.get(i));
 				if (proxy == null)
 					continue;
 				results = BundleLoader.compoundEnumerations(results, proxy.getBundleLoader().findResources(name));

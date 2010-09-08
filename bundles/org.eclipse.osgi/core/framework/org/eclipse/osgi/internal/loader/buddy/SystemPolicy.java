@@ -35,8 +35,8 @@ public class SystemPolicy implements IBuddyPolicy {
 	public static SystemPolicy getInstance(final byte type) {
 		if (instances[type] == null) {
 			instances[type] = new SystemPolicy();
-			instances[type].classLoader = (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
+			instances[type].classLoader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+				public ClassLoader run() {
 					return createClassLoader(type);
 				}
 			});
@@ -70,7 +70,7 @@ public class SystemPolicy implements IBuddyPolicy {
 		return null;
 	}
 
-	public Class loadClass(String name) {
+	public Class<?> loadClass(String name) {
 		try {
 			return classLoader.loadClass(name);
 		} catch (ClassNotFoundException e) {
@@ -82,7 +82,7 @@ public class SystemPolicy implements IBuddyPolicy {
 		return classLoader.getResource(name);
 	}
 
-	public Enumeration loadResources(String name) {
+	public Enumeration<URL> loadResources(String name) {
 		try {
 			return classLoader.getResources(name);
 		} catch (IOException e) {

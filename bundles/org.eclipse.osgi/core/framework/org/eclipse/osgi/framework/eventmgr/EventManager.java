@@ -13,7 +13,8 @@ package org.eclipse.osgi.framework.eventmgr;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is the central class for the Event Manager. Each
@@ -104,7 +105,7 @@ public class EventManager {
 	 * EventThread for asynchronous dispatch of events.
 	 * Access to this field must be protected by a synchronized region.
 	 */
-	private EventThread thread;
+	private EventThread<?, ?, ?> thread;
 
 	/** 
 	 * Once closed, an attempt to create a new EventThread will result in an 
@@ -185,22 +186,25 @@ public class EventManager {
 	 * @return EventThread to use for dispatching events asynchronously for
 	 * this EventManager.
 	 */
-	synchronized EventThread getEventThread() {
+	synchronized <K, V, E> EventThread<K, V, E> getEventThread() {
 		if (closed) {
 			throw new IllegalStateException();
 		}
 		if (thread == null) {
 			/* if there is no thread, then create a new one */
-			thread = (EventThread) AccessController.doPrivileged(new PrivilegedAction() {
-				public Object run() {
-					EventThread t = new EventThread(threadGroup, threadName);
+			thread = AccessController.doPrivileged(new PrivilegedAction<EventThread<K, V, E>>() {
+				public EventThread<K, V, E> run() {
+					EventThread<K, V, E> t = new EventThread<K, V, E>(threadGroup, threadName);
 					return t;
 				}
 			});
 			/* start the new thread */
 			thread.start();
 		}
-		return thread;
+
+		@SuppressWarnings("unchecked")
+		EventThread<K, V, E> result = (EventThread<K, V, E>) thread;
+		return result;
 	}
 
 	/**
@@ -217,18 +221,17 @@ public class EventManager {
 	 * @param eventObject This object was created by the event source and
 	 * is passed to this method. This is passed on to the call back object.
 	 */
-	static void dispatchEvent(Set/*<Map.Entry<Object,Object>>*/listeners, EventDispatcher dispatcher, int eventAction, Object eventObject) {
-		for (Iterator iter = listeners.iterator(); iter.hasNext();) { /* iterate over the list of listeners */
-			Map.Entry listener = (Map.Entry) iter.next();
-			Object eventListener = listener.getKey();
-			Object listenerObject = listener.getValue();
+	static <K, V, E> void dispatchEvent(Set<Map.Entry<K, V>> listeners, EventDispatcher<K, V, E> dispatcher, int eventAction, E eventObject) {
+		for (Map.Entry<K, V> listener : listeners) { /* iterate over the list of listeners */
+			final K eventListener = listener.getKey();
+			final V listenerObject = listener.getValue();
 			try {
 				/* Call the EventDispatcher to complete the delivery of the event. */
 				dispatcher.dispatchEvent(eventListener, listenerObject, eventAction, eventObject);
 			} catch (Throwable t) {
 				/* Consume and ignore any exceptions thrown by the listener */
 				if (DEBUG) {
-					System.out.println("Exception in " + listener.getKey()); //$NON-NLS-1$
+					System.out.println("Exception in " + eventListener); //$NON-NLS-1$
 					t.printStackTrace();
 				}
 			}
@@ -239,7 +242,7 @@ public class EventManager {
 	 * This package private class is used for asynchronously dispatching events.
 	 */
 
-	static class EventThread extends Thread {
+	static class EventThread<K, V, E> extends Thread {
 		private static int nextThreadNumber;
 
 		/**
@@ -247,17 +250,17 @@ public class EventManager {
 		 * represents the items which are placed on the asynch dispatch queue.
 		 * This class is private.
 		 */
-		private static class Queued {
+		private static class Queued<K, V, E> {
 			/** listener list for this event */
-			final Set/*<Map.Entry<Object,Object>>*/listeners;
+			final Set<Map.Entry<K, V>> listeners;
 			/** dispatcher of this event */
-			final EventDispatcher dispatcher;
+			final EventDispatcher<K, V, E> dispatcher;
 			/** action for this event */
 			final int action;
 			/** object for this event */
-			final Object object;
+			final E object;
 			/** next item in event queue */
-			Queued next;
+			Queued<K, V, E> next;
 
 			/**
 			 * Constructor for event queue item
@@ -267,7 +270,7 @@ public class EventManager {
 			 * @param a Action for this event
 			 * @param o Object for this event
 			 */
-			Queued(Set/*<Map.Entry<Object,Object>>*/l, EventDispatcher d, int a, Object o) {
+			Queued(Set<Map.Entry<K, V>> l, EventDispatcher<K, V, E> d, int a, E o) {
 				listeners = l;
 				dispatcher = d;
 				action = a;
@@ -277,9 +280,9 @@ public class EventManager {
 		}
 
 		/** item at the head of the event queue */
-		private Queued head;
+		private Queued<K, V, E> head;
 		/** item at the tail of the event queue */
-		private Queued tail;
+		private Queued<K, V, E> tail;
 		/** if false the thread must terminate */
 		private volatile boolean running;
 
@@ -330,7 +333,7 @@ public class EventManager {
 		public void run() {
 			try {
 				while (true) {
-					Queued item = getNextEvent();
+					Queued<K, V, E> item = getNextEvent();
 					if (item == null) {
 						return;
 					}
@@ -363,12 +366,12 @@ public class EventManager {
 		 * @param a Action for this event
 		 * @param o Object for this event
 		 */
-		synchronized void postEvent(Set/*<Map.Entry<Object,Object>>*/l, EventDispatcher d, int a, Object o) {
+		synchronized void postEvent(Set<Map.Entry<K, V>> l, EventDispatcher<K, V, E> d, int a, E o) {
 			if (!isAlive()) { /* If the thread is not alive, throw an exception */
 				throw new IllegalStateException();
 			}
 
-			Queued item = new Queued(l, d, a, o);
+			Queued<K, V, E> item = new Queued<K, V, E>(l, d, a, o);
 
 			if (head == null) /* if the queue was empty */
 			{
@@ -391,7 +394,7 @@ public class EventManager {
 		 * @return The Queued removed from the top of the queue or null
 		 * if the thread has been requested to stop.
 		 */
-		private synchronized Queued getNextEvent() {
+		private synchronized Queued<K, V, E> getNextEvent() {
 			while (running && (head == null)) {
 				try {
 					wait();
@@ -404,7 +407,7 @@ public class EventManager {
 				return null;
 			}
 
-			Queued item = head;
+			Queued<K, V, E> item = head;
 			head = item.next;
 			if (head == null) {
 				tail = null;

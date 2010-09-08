@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,8 @@ public class MultiSourcePackage extends PackageSource {
 		return suppliers;
 	}
 
-	public Class loadClass(String name) throws ClassNotFoundException {
-		Class result = null;
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		Class<?> result = null;
 		for (int i = 0; i < suppliers.length; i++) {
 			result = suppliers[i].loadClass(name);
 			if (result != null)
@@ -45,8 +45,8 @@ public class MultiSourcePackage extends PackageSource {
 		return result;
 	}
 
-	public Enumeration getResources(String name) {
-		Enumeration results = null;
+	public Enumeration<URL> getResources(String name) {
+		Enumeration<URL> results = null;
 		for (int i = 0; i < suppliers.length; i++)
 			results = BundleLoader.compoundEnumerations(results, suppliers[i].getResources(name));
 		return results;

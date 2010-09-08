@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ public class LocationHelper {
 	 * @param trailingSlash flag to indicate a trailing slash on the spec
 	 * @return a URL
 	 */
+	@SuppressWarnings("deprecation")
 	public static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;

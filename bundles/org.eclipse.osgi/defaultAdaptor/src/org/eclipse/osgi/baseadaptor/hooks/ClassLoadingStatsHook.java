@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public interface ClassLoadingStatsHook {
 	 * @param clazz the loaded class or null if not found
 	 * @param manager the classpath manager used to find and load the requested class
 	 */
-	void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException;
+	void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException;
 
 	/**
 	 * Gets called by a classpath manager during {@link ClasspathManager#findLocalResource(String)} before
@@ -75,6 +75,6 @@ public interface ClassLoadingStatsHook {
 	 * @param entry the BundleEntyr source of the class bytes
 	 * @param manager the classpath manager used to define the class
 	 */
-	void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager);
+	void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager);
 
 }

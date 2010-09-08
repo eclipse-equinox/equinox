@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ public class ObjectPool {
 	private static String OPTION_DEBUG_OBJECTPOOL_DUPS = Debug.ECLIPSE_OSGI + "/debug/objectPool/dups"; //$NON-NLS-1$
 	private static final boolean DEBUG_OBJECTPOOL_ADDS;
 	private static final boolean DEBUG_OBJECTPOOL_DUPS;
-	private static Map objectCache = new WeakHashMap();
+	private static Map<Object, WeakReference<Object>> objectCache = new WeakHashMap<Object, WeakReference<Object>>();
 	static {
 		FrameworkDebugOptions dbgOptions = FrameworkDebugOptions.getDefault();
 		if (dbgOptions != null) {
@@ -35,7 +35,7 @@ public class ObjectPool {
 
 	public static Object intern(Object obj) {
 		synchronized (objectCache) {
-			WeakReference ref = (WeakReference) objectCache.get(obj);
+			WeakReference<Object> ref = objectCache.get(obj);
 			if (ref != null) {
 				Object refValue = ref.get();
 				if (refValue != null) {
@@ -44,7 +44,7 @@ public class ObjectPool {
 						Debug.println("[ObjectPool] Found duplicate object: " + getObjectString(obj)); //$NON-NLS-1$
 				}
 			} else {
-				objectCache.put(obj, new WeakReference(obj));
+				objectCache.put(obj, new WeakReference<Object>(obj));
 				if (DEBUG_OBJECTPOOL_ADDS)
 					Debug.println("[ObjectPool] Added unique object to pool: " + getObjectString(obj) + " Pool size: " + objectCache.size()); //$NON-NLS-1$ //$NON-NLS-2$
 			}

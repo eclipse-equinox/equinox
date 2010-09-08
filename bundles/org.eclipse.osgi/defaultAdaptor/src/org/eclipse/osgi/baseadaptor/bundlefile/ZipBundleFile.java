@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,7 @@
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
 import java.io.*;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.osgi.baseadaptor.BaseData;
@@ -135,9 +134,9 @@ public class ZipBundleFile extends BundleFile {
 	protected synchronized File extractDirectory(String dirName) {
 		if (!checkedOpen())
 			return null;
-		Enumeration entries = zipFile.entries();
+		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		while (entries.hasMoreElements()) {
-			String entryPath = ((ZipEntry) entries.nextElement()).getName();
+			String entryPath = entries.nextElement().getName();
 			if (entryPath.startsWith(dirName) && !entryPath.endsWith("/")) //$NON-NLS-1$
 				getFile(entryPath, false);
 		}
@@ -229,11 +228,11 @@ public class ZipBundleFile extends BundleFile {
 		if (dir.length() > 0 && dir.charAt(dir.length() - 1) != '/')
 			dir = dir + '/';
 
-		Enumeration entries = zipFile.entries();
+		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		ZipEntry zipEntry;
 		String entryPath;
 		while (entries.hasMoreElements()) {
-			zipEntry = (ZipEntry) entries.nextElement();
+			zipEntry = entries.nextElement();
 			entryPath = zipEntry.getName();
 			if (entryPath.startsWith(dir)) {
 				return true;
@@ -259,7 +258,7 @@ public class ZipBundleFile extends BundleFile {
 
 	}
 
-	public synchronized Enumeration getEntryPaths(String path) {
+	public synchronized Enumeration<String> getEntryPaths(String path) {
 		if (!checkedOpen())
 			return null;
 		if (path == null)
@@ -270,10 +269,10 @@ public class ZipBundleFile extends BundleFile {
 		if (path.length() > 0 && path.charAt(path.length() - 1) != '/')
 			path = new StringBuffer(path).append("/").toString(); //$NON-NLS-1$
 
-		Vector vEntries = new Vector();
-		Enumeration entries = zipFile.entries();
+		List<String> vEntries = new ArrayList<String>();
+		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 		while (entries.hasMoreElements()) {
-			ZipEntry zipEntry = (ZipEntry) entries.nextElement();
+			ZipEntry zipEntry = entries.nextElement();
 			String entryPath = zipEntry.getName();
 			if (entryPath.startsWith(path)) {
 				if (path.length() < entryPath.length()) {
@@ -289,7 +288,7 @@ public class ZipBundleFile extends BundleFile {
 				}
 			}
 		}
-		return vEntries.size() == 0 ? null : vEntries.elements();
+		return vEntries.size() == 0 ? null : Collections.enumeration(vEntries);
 	}
 
 	public synchronized void close() throws IOException {

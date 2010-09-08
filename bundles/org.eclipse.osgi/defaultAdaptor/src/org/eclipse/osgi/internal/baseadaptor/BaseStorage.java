@@ -159,7 +159,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	// recursively searches a class and it's superclasses for a (potentially inaccessable) method
-	private static Method findMethod(Class clazz, String name, Class[] args) {
+	private static Method findMethod(Class<?> clazz, String name, Class<?>[] args) {
 		if (clazz == null)
 			return null; // ends the recursion when getSuperClass returns null
 		try {
@@ -298,12 +298,12 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 	}
 
-	public Dictionary loadManifest(BaseData data) throws BundleException {
+	public Dictionary<String, String> loadManifest(BaseData data) throws BundleException {
 		return loadManifest(data, false);
 	}
 
-	public Dictionary loadManifest(BaseData bundleData, boolean firstTime) throws BundleException {
-		Dictionary result = null;
+	public Dictionary<String, String> loadManifest(BaseData bundleData, boolean firstTime) throws BundleException {
+		Dictionary<String, String> result = null;
 		StorageHook[] dataStorageHooks = bundleData.getStorageHooks();
 		for (int i = 0; i < dataStorageHooks.length && result == null; i++)
 			result = dataStorageHooks[i].getManifest(firstTime);
@@ -380,7 +380,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				}
 
 				int bundleCount = in.readInt();
-				ArrayList result = new ArrayList(bundleCount);
+				List<BaseData> result = new ArrayList<BaseData>(bundleCount);
 				long id = -1;
 				boolean bundleDiscarded = false;
 				for (int i = 0; i < bundleCount; i++) {
@@ -422,7 +422,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				}
 				if (bundleDiscarded)
 					FrameworkProperties.setProperty(EclipseStarter.PROP_REFRESH_BUNDLES, "true"); //$NON-NLS-1$
-				return (BaseData[]) result.toArray(new BaseData[result.size()]);
+				return result.toArray(new BaseData[result.size()]);
 			} finally {
 				in.close();
 			}
@@ -777,7 +777,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			AbstractBundle toAdd = (AbstractBundle) installedBundles[i];
 			try {
 				// make sure we get the real manifest as if this is the first time.
-				Dictionary toAddManifest = loadManifest((BaseData) toAdd.getBundleData(), true);
+				Dictionary<String, String> toAddManifest = loadManifest((BaseData) toAdd.getBundleData(), true);
 				BundleDescription newDescription = factory.createBundleDescription(systemState, toAddManifest, toAdd.getLocation(), toAdd.getBundleId());
 				systemState.addBundle(newDescription);
 			} catch (BundleException be) {
@@ -970,7 +970,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	 * @throws BundleException if the extension bundle metadata is invalid
 	 */
 	private void validateExtension(BundleData bundleData) throws BundleException {
-		Dictionary extensionManifest = bundleData.getManifest();
+		Dictionary<String, String> extensionManifest = bundleData.getManifest();
 		if (extensionManifest.get(Constants.IMPORT_PACKAGE) != null)
 			throw new BundleException(NLS.bind(AdaptorMsg.ADAPTOR_EXTENSION_IMPORT_ERROR, bundleData.getLocation()), BundleException.MANIFEST_ERROR);
 		if (extensionManifest.get(Constants.REQUIRE_BUNDLE) != null)
@@ -1095,7 +1095,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				System.arraycopy(origPaths, 0, paths, 0, origPaths.length);
 				System.arraycopy(devPaths, 0, paths, origPaths.length, devPaths.length);
 			}
-			ArrayList results = new ArrayList(paths.length);
+			List<File> results = new ArrayList<File>(paths.length);
 			for (int i = 0; i < paths.length; i++) {
 				if (".".equals(paths[i])) //$NON-NLS-1$
 					results.add(bundleData.getBundleFile().getBaseFile());
@@ -1105,7 +1105,7 @@ public class BaseStorage implements SynchronousBundleListener {
 						results.add(result);
 				}
 			}
-			return (File[]) results.toArray(new File[results.size()]);
+			return results.toArray(new File[results.size()]);
 		} catch (BundleException e) {
 			adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, bundleData.getBundle(), e);
 		}
@@ -1156,7 +1156,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 
 		if (newDescription != null)
-			validateNativeCodePaths(newDescription, (BaseData) bundleData);
+			validateNativeCodePaths(newDescription, bundleData);
 	}
 
 	private void validateNativeCodePaths(BundleDescription newDescription, BaseData data) {

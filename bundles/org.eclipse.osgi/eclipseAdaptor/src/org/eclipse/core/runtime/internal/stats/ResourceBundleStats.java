@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,8 +53,8 @@ public class ResourceBundleStats {
 	 * Compute the size of bundle
 	 */
 	private void initialize(ResourceBundle bundle) {
-		for (Enumeration keys = bundle.getKeys(); keys.hasMoreElements();) {
-			String key = (String) keys.nextElement();
+		for (Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
+			String key = keys.nextElement();
 			keySize += sizeOf(key);
 			valueSize += sizeOf(bundle.getString(key));
 			keyCount++;
@@ -72,7 +72,7 @@ public class ResourceBundleStats {
 				stream = url.openStream();
 				fileSize = stream.available();
 				props.load(stream);
-				for (Iterator iter = props.keySet().iterator(); iter.hasNext();) {
+				for (Iterator<Object> iter = props.keySet().iterator(); iter.hasNext();) {
 					String key = (String) iter.next();
 					keySize += sizeOf(key);
 					valueSize += sizeOf(props.getProperty(key));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
-import org.eclipse.osgi.baseadaptor.*;
+import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
@@ -88,7 +88,7 @@ public class BundleUpdate implements BundleOperation {
 						AdaptorUtil.readFile(in, outFile);
 					}
 				}
-				Dictionary manifest = storage.loadManifest(newData, true);
+				Dictionary<String, String> manifest = storage.loadManifest(newData, true);
 				for (int i = 0; i < instanceHooks.length; i++)
 					instanceHooks[i].initialize(manifest);
 			} finally {

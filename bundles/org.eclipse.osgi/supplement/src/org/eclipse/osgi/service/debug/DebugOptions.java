@@ -108,7 +108,7 @@ public interface DebugOptions {
 	 * @return a snapshot of the current options.
 	 * @since 3.6
 	 */
-	public Map /*<String, String>*/getOptions();
+	public Map<String, String> getOptions();
 
 	/**
 	 * Sets the identified option to the identified value.  If debug is 
@@ -134,7 +134,7 @@ public interface DebugOptions {
 	 * @param options the new set of options
 	 * @since 3.6
 	 */
-	public abstract void setOptions(Map /*<String, String>*/options);
+	public abstract void setOptions(Map<String, String> options);
 
 	/**
 	 * Removes the identified option.  If debug is not enabled then
@@ -215,5 +215,5 @@ public interface DebugOptions {
 	 * @return A new or existing <code>DebugTrace</code> object for the specified plug-in ID
 	 * @since 3.5
 	 */
-	public abstract DebugTrace newDebugTrace(String bundleSymbolicName, Class traceEntryClass);
+	public abstract DebugTrace newDebugTrace(String bundleSymbolicName, Class<?> traceEntryClass);
 }

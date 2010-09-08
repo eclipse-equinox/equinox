@@ -172,7 +172,7 @@ public interface StateObjectFactory {
 	 * @return a bundle description derived from the given information
 	 * @throws BundleException if an error occurs while reading the manifest 
 	 */
-	public BundleDescription createBundleDescription(State state, Dictionary manifest, String location, long id) throws BundleException;
+	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
@@ -186,7 +186,7 @@ public interface StateObjectFactory {
 	 * @throws BundleException if an error occurs while reading the manifest 
 	 * @deprecated use {@link #createBundleDescription(State, Dictionary, String, long)}
 	 */
-	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException;
+	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException;
 
 	/**
 	 * Creates a bundle description that is a copy of the given description.
@@ -246,7 +246,7 @@ public interface StateObjectFactory {
 	 * @param importer the importing bundle (may be <code>null</code>)
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map directives, Map attributes, BundleDescription importer);
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, String> directives, Map<String, String> attributes, BundleDescription importer);
 
 	/**
 	 * Creates an import package specification that is a copy of the given import package
@@ -268,7 +268,7 @@ public interface StateObjectFactory {
 	 * @param exporter the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map directives, Map attributes, boolean root, BundleDescription exporter);
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, String> directives, Map<String, String> attributes, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -279,7 +279,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
 	 */
-	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes);
+	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, String> attributes);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -290,7 +290,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @since 3.7
 	 */
-	public GenericDescription createGenericDescription(String type, Map attributes, Map directives, BundleDescription supplier);
+	public GenericDescription createGenericDescription(String type, Map<String, String> attributes, Map<String, String> directives, BundleDescription supplier);
 
 	/**
 	 * Creates a generic specification from the given parameters

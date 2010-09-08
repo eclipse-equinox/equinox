@@ -96,12 +96,12 @@ public class ManifestElement {
 	/**
 	 * The table of attributes for the manifest element.
 	 */
-	private Hashtable attributes;
+	private Hashtable<String, Object> attributes;
 
 	/**
 	 * The table of directives for the manifest element.
 	 */
-	private Hashtable directives;
+	private Hashtable<String, Object> directives;
 
 	/**
 	 * Constructs an empty manifest element with no value or attributes.
@@ -192,7 +192,7 @@ public class ManifestElement {
 	 * 
 	 * @return the enumeration of attribute keys or null if none exist.
 	 */
-	public Enumeration getKeys() {
+	public Enumeration<String> getKeys() {
 		return getTableKeys(attributes);
 	}
 
@@ -245,7 +245,7 @@ public class ManifestElement {
 	 * 
 	 * @return the enumeration of directive keys or <code>null</code>
 	 */
-	public Enumeration getDirectiveKeys() {
+	public Enumeration<String> getDirectiveKeys() {
 		return getTableKeys(directives);
 	}
 
@@ -262,7 +262,7 @@ public class ManifestElement {
 	/*
 	 * Return the last value associated with the given key in the specified table.
 	 */
-	private String getTableValue(Hashtable table, String key) {
+	private String getTableValue(Hashtable<String, Object> table, String key) {
 		if (table == null)
 			return null;
 		Object result = table.get(key);
@@ -271,15 +271,16 @@ public class ManifestElement {
 		if (result instanceof String)
 			return (String) result;
 
-		ArrayList valueList = (ArrayList) result;
+		@SuppressWarnings("unchecked")
+		List<String> valueList = (List<String>) result;
 		//return the last value
-		return (String) valueList.get(valueList.size() - 1);
+		return valueList.get(valueList.size() - 1);
 	}
 
 	/*
 	 * Return the values associated with the given key in the specified table.
 	 */
-	private String[] getTableValues(Hashtable table, String key) {
+	private String[] getTableValues(Hashtable<String, Object> table, String key) {
 		if (table == null)
 			return null;
 		Object result = table.get(key);
@@ -287,14 +288,15 @@ public class ManifestElement {
 			return null;
 		if (result instanceof String)
 			return new String[] {(String) result};
-		ArrayList valueList = (ArrayList) result;
-		return (String[]) valueList.toArray(new String[valueList.size()]);
+		@SuppressWarnings("unchecked")
+		List<String> valueList = (List<String>) result;
+		return valueList.toArray(new String[valueList.size()]);
 	}
 
 	/*
 	 * Return an enumeration of table keys for the specified table. 
 	 */
-	private Enumeration getTableKeys(Hashtable table) {
+	private Enumeration<String> getTableKeys(Hashtable<String, Object> table) {
 		if (table == null)
 			return null;
 		return table.keys();
@@ -305,19 +307,20 @@ public class ManifestElement {
 	 * for this key, then create an array list from the current value (if necessary) and
 	 * append the new value to the end of the list.
 	 */
-	private Hashtable addTableValue(Hashtable table, String key, String value) {
+	@SuppressWarnings("unchecked")
+	private Hashtable<String, Object> addTableValue(Hashtable<String, Object> table, String key, String value) {
 		if (table == null) {
-			table = new Hashtable(7);
+			table = new Hashtable<String, Object>(7);
 		}
 		Object curValue = table.get(key);
 		if (curValue != null) {
-			ArrayList newList;
+			List<String> newList;
 			// create a list to contain multiple values
-			if (curValue instanceof ArrayList) {
-				newList = (ArrayList) curValue;
+			if (curValue instanceof List) {
+				newList = (List<String>) curValue;
 			} else {
-				newList = new ArrayList(5);
-				newList.add(curValue);
+				newList = new ArrayList<String>(5);
+				newList.add((String) curValue);
 			}
 			newList.add(value);
 			table.put(key, newList);
@@ -342,13 +345,13 @@ public class ManifestElement {
 	public static ManifestElement[] parseHeader(String header, String value) throws BundleException {
 		if (value == null)
 			return (null);
-		ArrayList headerElements = new ArrayList(10);
+		List<ManifestElement> headerElements = new ArrayList<ManifestElement>(10);
 		Tokenizer tokenizer = new Tokenizer(value);
 		parseloop: while (true) {
 			String next = tokenizer.getString(";,"); //$NON-NLS-1$
 			if (next == null)
 				throw new BundleException(NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, header, value), BundleException.MANIFEST_ERROR);
-			ArrayList headerValues = new ArrayList();
+			List<String> headerValues = new ArrayList<String>();
 			StringBuffer headerValue = new StringBuffer(next);
 			headerValues.add(next);
 
@@ -381,7 +384,7 @@ public class ManifestElement {
 				}
 			}
 			// found the header value create a manifestElement for it.
-			ManifestElement manifestElement = new ManifestElement(headerValue.toString(), (String[]) headerValues.toArray(new String[headerValues.size()]));
+			ManifestElement manifestElement = new ManifestElement(headerValue.toString(), headerValues.toArray(new String[headerValues.size()]));
 
 			// now add any attributes/directives for the manifestElement.
 			while (c == '=' || c == ':') {
@@ -442,7 +445,7 @@ public class ManifestElement {
 		if (size == 0)
 			return (null);
 
-		ManifestElement[] result = (ManifestElement[]) headerElements.toArray(new ManifestElement[size]);
+		ManifestElement[] result = headerElements.toArray(new ManifestElement[size]);
 		return (result);
 	}
 
@@ -470,14 +473,14 @@ public class ManifestElement {
 	public static String[] getArrayFromList(String stringList, String separator) {
 		if (stringList == null || stringList.trim().length() == 0)
 			return new String[0];
-		ArrayList list = new ArrayList();
+		List<String> list = new ArrayList<String>();
 		StringTokenizer tokens = new StringTokenizer(stringList, separator);
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken().trim();
 			if (token.length() != 0)
 				list.add(token);
 		}
-		return (String[]) list.toArray(new String[list.size()]);
+		return list.toArray(new String[list.size()]);
 	}
 
 	/**
@@ -495,9 +498,9 @@ public class ManifestElement {
 	 * @throws IOException if an error occurs while reading the manifest
 	 * @return the map with the header/value pairs from the bundle manifest
 	 */
-	public static Map parseBundleManifest(InputStream manifest, Map headers) throws IOException, BundleException {
+	public static Map<String, String> parseBundleManifest(InputStream manifest, Map<String, String> headers) throws IOException, BundleException {
 		if (headers == null)
-			headers = new HashMap();
+			headers = new HashMap<String, String>();
 		BufferedReader br;
 		try {
 			br = new BufferedReader(new InputStreamReader(manifest, "UTF8")); //$NON-NLS-1$
@@ -561,20 +564,20 @@ public class ManifestElement {
 	}
 
 	public String toString() {
-		Enumeration attrKeys = getKeys();
-		Enumeration directiveKeys = getDirectiveKeys();
+		Enumeration<String> attrKeys = getKeys();
+		Enumeration<String> directiveKeys = getDirectiveKeys();
 		if (attrKeys == null && directiveKeys == null)
 			return mainValue;
 		StringBuffer result = new StringBuffer(mainValue);
 		if (attrKeys != null) {
 			while (attrKeys.hasMoreElements()) {
-				String key = (String) attrKeys.nextElement();
+				String key = attrKeys.nextElement();
 				addValues(false, key, getAttributes(key), result);
 			}
 		}
 		if (directiveKeys != null) {
 			while (directiveKeys.hasMoreElements()) {
-				String key = (String) directiveKeys.nextElement();
+				String key = directiveKeys.nextElement();
 				addValues(true, key, getDirectives(key), result);
 			}
 		}

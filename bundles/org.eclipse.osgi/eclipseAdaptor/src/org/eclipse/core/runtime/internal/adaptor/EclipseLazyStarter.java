@@ -37,11 +37,11 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 	private static final boolean throwErrorOnFailedStart = "true".equals(FrameworkProperties.getProperty("osgi.compatibility.errorOnFailedStart", "true")); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	private BaseAdaptor adaptor;
 	// holds the current activation trigger class and the ClasspathManagers that need to be activated
-	private ThreadLocal activationStack = new ThreadLocal();
+	private ThreadLocal<List<Object>> activationStack = new ThreadLocal<List<Object>>();
 	// used to store exceptions that occurred while activating a bundle
 	// keyed by ClasspathManager->Exception
 	// WeakHashMap is used to prevent pinning the ClasspathManager objects.
-	private final Map errors = Collections.synchronizedMap(new WeakHashMap());
+	private final Map<ClasspathManager, TerminatingClassNotFoundException> errors = Collections.synchronizedMap(new WeakHashMap<ClasspathManager, TerminatingClassNotFoundException>());
 
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
 		AbstractBundle bundle = (AbstractBundle) manager.getBaseData().getBundle();
@@ -53,9 +53,9 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		// The bundle is not active and does not require activation, just return the class
 		if (!shouldActivateFor(name, manager.getBaseData(), storageHook, manager))
 			return;
-		ArrayList stack = (ArrayList) activationStack.get();
+		List<Object> stack = activationStack.get();
 		if (stack == null) {
-			stack = new ArrayList(6);
+			stack = new ArrayList<Object>(6);
 			activationStack.set(stack);
 		}
 		// the first element in the stack is the name of the trigger class, 
@@ -76,8 +76,8 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		stack.add(manager);
 	}
 
-	public void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException {
-		ArrayList stack = (ArrayList) activationStack.get();
+	public void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
+		List<Object> stack = activationStack.get();
 		if (stack == null)
 			return;
 		int size = stack.size();
@@ -94,7 +94,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		for (int i = managers.length - 1; i >= 0; i--) {
 			if (errors.get(managers[i]) != null) {
 				if (throwErrorOnFailedStart)
-					throw (TerminatingClassNotFoundException) errors.get(managers[i]);
+					throw errors.get(managers[i]);
 				continue;
 			}
 
@@ -137,7 +137,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		// do nothing
 	}
 
-	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// do nothing
 	}
 
@@ -149,7 +149,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 		// Don't activate non-starting bundles
 		if (bundledata.getBundle().getState() == Bundle.RESOLVED) {
 			if (throwErrorOnFailedStart) {
-				TerminatingClassNotFoundException error = (TerminatingClassNotFoundException) errors.get(manager);
+				TerminatingClassNotFoundException error = errors.get(manager);
 				if (error != null)
 					throw error;
 			}

@@ -86,7 +86,7 @@ import org.eclipse.osgi.framework.util.SecureAction;
 public final class StorageManager {
 	private static final int FILETYPE_STANDARD = 0;
 	private static final int FILETYPE_RELIABLEFILE = 1;
-	private static final SecureAction secure = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	private static final SecureAction secure = AccessController.doPrivileged(SecureAction.createSecureAction());
 	private static final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
 	private static final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
@@ -320,7 +320,8 @@ public final class StorageManager {
 	public String[] getManagedFiles() {
 		if (!open)
 			return null;
-		Set set = table.keySet();
+		Set<Object> set = table.keySet();
+		@SuppressWarnings("cast")
 		String[] keys = (String[]) set.toArray(new String[set.size()]);
 		String[] result = new String[keys.length];
 		for (int i = 0; i < keys.length; i++)
@@ -494,7 +495,7 @@ public final class StorageManager {
 			}
 		}
 		tableStamp = stamp;
-		for (Enumeration e = diskTable.keys(); e.hasMoreElements();) {
+		for (Enumeration<Object> e = diskTable.keys(); e.hasMoreElements();) {
 			String file = (String) e.nextElement();
 			String value = diskTable.getProperty(file);
 			if (value != null) {
@@ -531,7 +532,7 @@ public final class StorageManager {
 		updateTable();
 
 		Properties props = new Properties();
-		for (Enumeration e = table.keys(); e.hasMoreElements();) {
+		for (Enumeration<Object> e = table.keys(); e.hasMoreElements();) {
 			String file = (String) e.nextElement();
 			Entry entry = (Entry) table.get(file);
 			String value;
@@ -610,9 +611,9 @@ public final class StorageManager {
 
 			//If we are here it is because we are the last instance running. After locking the table and getting its latest content, remove all the backup files and change the table
 			updateTable();
-			Collection managedFiles = table.entrySet();
-			for (Iterator iter = managedFiles.iterator(); iter.hasNext();) {
-				Map.Entry fileEntry = (Map.Entry) iter.next();
+			Collection<Map.Entry<Object, Object>> managedFiles = table.entrySet();
+			for (Iterator<Map.Entry<Object, Object>> iter = managedFiles.iterator(); iter.hasNext();) {
+				Map.Entry<Object, Object> fileEntry = iter.next();
 				String fileName = (String) fileEntry.getKey();
 				Entry info = (Entry) fileEntry.getValue();
 				if (info.getFileType() == FILETYPE_RELIABLEFILE) {

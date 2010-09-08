@@ -585,6 +585,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			return compare_Boolean(operation, ((Boolean) value1).booleanValue(), value2);
 		}
 		if (value1 instanceof Comparable<?>) {
+			@SuppressWarnings("unchecked")
 			Comparable<Object> comparable = (Comparable<Object>) value1;
 			return compare_Comparable(operation, comparable, value2);
 		}

@@ -43,8 +43,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final static byte FLAG_CLOSED = 0x08;
 	public final static byte FLAG_LAZYTRIGGER = 0x10;
 
-	public final static ClassContext CLASS_CONTEXT = (ClassContext) AccessController.doPrivileged(new PrivilegedAction() {
-		public Object run() {
+	public final static ClassContext CLASS_CONTEXT = AccessController.doPrivileged(new PrivilegedAction<ClassContext>() {
+		public ClassContext run() {
 			return new ClassContext();
 		}
 	});
@@ -60,7 +60,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private static final int POST_LIBRARY = 8;
 
 	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(BundleLoaderProxy.secureAction.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
-	private static final List waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList(0) : null;
+	private static final List<Object[]> waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList<Object[]>(0) : null;
 	private static Object lockThread;
 	private static int lockCount = 0;
 
@@ -70,8 +70,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	final BundleHost bundle;
 	final private PolicyHandler policy;
 	/* List of package names that are exported by this BundleLoader */
-	final private Collection exportedPackages;
-	final private Collection substitutedPackages;
+	final private Collection<String> exportedPackages;
+	final private Collection<String> substitutedPackages;
 	/* List of required bundle BundleLoaderProxy objects */
 	final BundleLoaderProxy[] requiredBundles;
 	/* List of indexes into the requiredBundles list of reexported bundles */
@@ -149,7 +149,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		BundleDescription[] required = description.getResolvedRequires();
 		if (required.length > 0) {
 			// get a list of re-exported symbolic names
-			HashSet reExportSet = new HashSet(required.length);
+			Set<String> reExportSet = new HashSet<String>(required.length);
 			BundleSpecification[] requiredSpecs = description.getRequiredBundles();
 			if (requiredSpecs != null && requiredSpecs.length > 0)
 				for (int i = 0; i < requiredSpecs.length; i++)
@@ -180,15 +180,15 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// init the provided packages set
 		ExportPackageDescription[] exports = description.getSelectedExports();
 		if (exports != null && exports.length > 0) {
-			exportedPackages = Collections.synchronizedCollection(exports.length > 10 ? (Collection) new HashSet(exports.length) : new ArrayList(exports.length));
+			exportedPackages = Collections.synchronizedCollection(exports.length > 10 ? new HashSet<String>(exports.length) : new ArrayList<String>(exports.length));
 			initializeExports(exports, exportedPackages);
 		} else {
-			exportedPackages = Collections.synchronizedCollection(new ArrayList(0));
+			exportedPackages = Collections.synchronizedCollection(new ArrayList<String>(0));
 		}
 
 		ExportPackageDescription substituted[] = description.getSubstitutedExports();
 		if (substituted.length > 0) {
-			substitutedPackages = substituted.length > 10 ? (Collection) new HashSet(substituted.length) : new ArrayList(substituted.length);
+			substitutedPackages = substituted.length > 10 ? new HashSet<String>(substituted.length) : new ArrayList<String>(substituted.length);
 			for (int i = 0; i < substituted.length; i++)
 				substitutedPackages.add(substituted[i].getName());
 		} else {
@@ -211,7 +211,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		//Initialize the policy handler
 		String buddyList = null;
 		try {
-			buddyList = (String) bundle.getBundleData().getManifest().get(Constants.BUDDY_LOADER);
+			buddyList = bundle.getBundleData().getManifest().get(Constants.BUDDY_LOADER);
 		} catch (BundleException e) {
 			// do nothing; buddyList == null
 		}
@@ -220,7 +220,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			policy.open(bundle.getFramework().getSystemBundleContext());
 	}
 
-	private void initializeExports(ExportPackageDescription[] exports, Collection exportNames) {
+	private void initializeExports(ExportPackageDescription[] exports, Collection<String> exportNames) {
 		for (int i = 0; i < exports.length; i++) {
 			if (proxy.forceSourceCreation(exports[i])) {
 				if (!exportNames.contains(exports[i].getName())) {
@@ -280,14 +280,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private static PackageSource createMultiSource(String packageName, PackageSource[] sources) {
 		if (sources.length == 1)
 			return sources[0];
-		ArrayList sourceList = new ArrayList(sources.length);
+		List<SingleSourcePackage> sourceList = new ArrayList<SingleSourcePackage>(sources.length);
 		for (int i = 0; i < sources.length; i++) {
 			SingleSourcePackage[] innerSources = sources[i].getSuppliers();
 			for (int j = 0; j < innerSources.length; j++)
 				if (!sourceList.contains(innerSources[j]))
 					sourceList.add(innerSources[j]);
 		}
-		return new MultiSourcePackage(packageName, (SingleSourcePackage[]) sourceList.toArray(new SingleSourcePackage[sourceList.size()]));
+		return new MultiSourcePackage(packageName, sourceList.toArray(new SingleSourcePackage[sourceList.size()]));
 	}
 
 	/*
@@ -329,7 +329,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	final public Class loadClass(String name) throws ClassNotFoundException {
+	final public Class<?> loadClass(String name) throws ClassNotFoundException {
 		BundleClassLoader bcl = createClassLoader();
 		// The instanceof check here is just to be safe.  The javadoc contract stated in BundleClassLoader
 		// mandate that BundleClassLoaders be an instance of ClassLoader.
@@ -386,11 +386,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @return The loaded Class or null if the class is not found.
 	 * @throws ClassNotFoundException 
 	 */
-	Class findLocalClass(String name) throws ClassNotFoundException {
+	Class<?> findLocalClass(String name) throws ClassNotFoundException {
 		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].findLocalClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
-			Class clazz = createClassLoader().findLocalClass(name);
+			Class<?> clazz = createClassLoader().findLocalClass(name);
 			if (Debug.DEBUG_LOADER && clazz != null)
 				Debug.println("BundleLoader[" + this + "] found local class " + name); //$NON-NLS-1$ //$NON-NLS-2$
 			return clazz;
@@ -406,11 +406,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Finds the class for a bundle.  This method is used for delegation by the bundle's classloader.
 	 */
-	public Class findClass(String name) throws ClassNotFoundException {
+	public Class<?> findClass(String name) throws ClassNotFoundException {
 		return findClass(name, true);
 	}
 
-	Class findClass(String name, boolean checkParent) throws ClassNotFoundException {
+	Class<?> findClass(String name, boolean checkParent) throws ClassNotFoundException {
 		ClassLoader parentCL = getParentClassLoader();
 		if (checkParent && parentCL != null && name.startsWith(JAVA_PACKAGE))
 			// 1) if startsWith "java." delegate to parent and terminate search
@@ -426,7 +426,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 	}
 
-	private Class findClassInternal(String name, boolean checkParent, ClassLoader parentCL) throws ClassNotFoundException {
+	private Class<?> findClassInternal(String name, boolean checkParent, ClassLoader parentCL) throws ClassNotFoundException {
 		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleLoader[" + this + "].loadBundleClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String pkgName = getPackageName(name);
@@ -440,9 +440,9 @@ public class BundleLoader implements ClassLoaderDelegate {
 				// we want to continue
 				bootDelegation = true;
 			}
-		Class result = null;
+		Class<?> result = null;
 		try {
-			result = (Class) searchHooks(name, PRE_CLASS);
+			result = (Class<?>) searchHooks(name, PRE_CLASS);
 		} catch (ClassNotFoundException e) {
 			throw e;
 		} catch (FileNotFoundException e) {
@@ -483,7 +483,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		if (result == null)
 			try {
-				result = (Class) searchHooks(name, POST_CLASS);
+				result = (Class<?>) searchHooks(name, POST_CLASS);
 			} catch (ClassNotFoundException e) {
 				throw e;
 			} catch (FileNotFoundException e) {
@@ -506,36 +506,37 @@ public class BundleLoader implements ClassLoaderDelegate {
 		throw new ClassNotFoundException(name);
 	}
 
-	private Object searchHooks(String name, int type) throws ClassNotFoundException, FileNotFoundException {
+	@SuppressWarnings("unchecked")
+	private <E> E searchHooks(String name, int type) throws ClassNotFoundException, FileNotFoundException {
 		ClassLoaderDelegateHook[] delegateHooks = bundle.getFramework().getDelegateHooks();
 		if (delegateHooks == null)
 			return null;
-		Object result = null;
+		E result = null;
 		for (int i = 0; i < delegateHooks.length && result == null; i++) {
 			switch (type) {
 				case PRE_CLASS :
-					result = delegateHooks[i].preFindClass(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].preFindClass(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_CLASS :
-					result = delegateHooks[i].postFindClass(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].postFindClass(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_RESOURCE :
-					result = delegateHooks[i].preFindResource(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].preFindResource(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_RESOURCE :
-					result = delegateHooks[i].postFindResource(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].postFindResource(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_RESOURCES :
-					result = delegateHooks[i].preFindResources(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].preFindResources(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_RESOURCES :
-					result = delegateHooks[i].postFindResources(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].postFindResources(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case PRE_LIBRARY :
-					result = delegateHooks[i].preFindLibrary(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].preFindLibrary(name, createClassLoader(), bundle.getBundleData());
 					break;
 				case POST_LIBRARY :
-					result = delegateHooks[i].postFindLibrary(name, createClassLoader(), bundle.getBundleData());
+					result = (E) delegateHooks[i].postFindLibrary(name, createClassLoader(), bundle.getBundleData());
 					break;
 			}
 		}
@@ -546,7 +547,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (bundle.getFramework().isBootDelegationPackage("*") || !bundle.getFramework().contextBootDelegation) //$NON-NLS-1$
 			return false;
 		// works around VM bugs that require all classloaders to have access to parent packages
-		Class[] context = CLASS_CONTEXT.getClassContext();
+		Class<?>[] context = CLASS_CONTEXT.getClassContext();
 		if (context == null || context.length < 2)
 			return false;
 		// skip the first class; it is the ClassContext class
@@ -564,11 +565,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return false;
 	}
 
-	private static ClassLoader getClassLoader(final Class clazz) {
+	private static ClassLoader getClassLoader(final Class<?> clazz) {
 		if (System.getSecurityManager() == null)
 			return clazz.getClassLoader();
-		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			public ClassLoader run() {
 				return clazz.getClassLoader();
 			}
 		});
@@ -660,14 +661,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/**
 	 * Finds the resources for a bundle.  This  method is used for delegation by the bundle's classloader.
 	 */
-	public Enumeration findResources(String name) throws IOException {
+	public Enumeration<URL> findResources(String name) throws IOException {
 		// do not delegate to parent because ClassLoader#getResources already did and it is final!!
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
-		Enumeration result = null;
+		Enumeration<URL> result = null;
 		try {
-			result = (Enumeration) searchHooks(name, PRE_RESOURCES);
+			result = searchHooks(name, PRE_RESOURCES);
 		} catch (ClassNotFoundException e) {
 			// will not happen
 		} catch (FileNotFoundException e) {
@@ -689,7 +690,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		// 5) search the local bundle
 		// compound the required source results with the local ones
-		Enumeration localResults = findLocalResources(name);
+		Enumeration<URL> localResults = findLocalResources(name);
 		result = compoundEnumerations(result, localResults);
 		// 6) attempt to find a dynamic import source; only do this if a required source was not found
 		if (result == null && source == null) {
@@ -699,14 +700,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 		if (result == null)
 			try {
-				result = (Enumeration) searchHooks(name, POST_RESOURCES);
+				result = searchHooks(name, POST_RESOURCES);
 			} catch (ClassNotFoundException e) {
 				// will not happen
 			} catch (FileNotFoundException e) {
 				return null;
 			}
 		if (policy != null) {
-			Enumeration buddyResult = policy.doBuddyResourcesLoading(name);
+			Enumeration<URL> buddyResult = policy.doBuddyResourcesLoading(name);
 			result = compoundEnumerations(result, buddyResult);
 		}
 		return result;
@@ -715,13 +716,13 @@ public class BundleLoader implements ClassLoaderDelegate {
 	/*
 	 * This method is used by Bundle.getResources to do proper parent delegation.
 	 */
-	public Enumeration getResources(String name) throws IOException {
+	public Enumeration<URL> getResources(String name) throws IOException {
 		if ((name.length() > 1) && (name.charAt(0) == '/')) /* if name has a leading slash */
 			name = name.substring(1); /* remove leading slash before search */
 		String pkgName = getResourcePackageName(name);
 		// follow the OSGi delegation model
 		// First check the parent classloader for system resources, if it is a java resource.
-		Enumeration result = null;
+		Enumeration<URL> result = null;
 		if (pkgName.startsWith(JAVA_PACKAGE) || bundle.getFramework().isBootDelegationPackage(pkgName)) {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// 2) if part of the bootdelegation list then delegate to parent and continue of failure
@@ -733,20 +734,20 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return compoundEnumerations(result, findResources(name));
 	}
 
-	public static Enumeration compoundEnumerations(Enumeration list1, Enumeration list2) {
+	public static <E> Enumeration<E> compoundEnumerations(Enumeration<E> list1, Enumeration<E> list2) {
 		if (list2 == null || !list2.hasMoreElements())
 			return list1;
 		if (list1 == null || !list1.hasMoreElements())
 			return list2;
-		Vector compoundResults = new Vector();
+		List<E> compoundResults = new ArrayList<E>();
 		while (list1.hasMoreElements())
 			compoundResults.add(list1.nextElement());
 		while (list2.hasMoreElements()) {
-			Object item = list2.nextElement();
+			E item = list2.nextElement();
 			if (!compoundResults.contains(item)) //don't add duplicates
 				compoundResults.add(item);
 		}
-		return compoundResults.elements();
+		return Collections.enumeration(compoundResults);
 	}
 
 	/**
@@ -765,7 +766,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 	 * @param  name the resource name
 	 * @return an Enumeration of URLs for the resources
 	 */
-	Enumeration findLocalResources(String name) {
+	Enumeration<URL> findLocalResources(String name) {
 		return createClassLoader().findLocalResources(name);
 	}
 
@@ -778,8 +779,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public String findLibrary(final String name) {
 		if (System.getSecurityManager() == null)
 			return findLocalLibrary(name);
-		return (String) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<String>() {
+			public String run() {
 				return findLocalLibrary(name);
 			}
 		});
@@ -830,8 +831,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (System.getSecurityManager() == null)
 			return createBCL(pd, cp);
 
-		return (BundleClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<BundleClassLoader>() {
+			public BundleClassLoader run() {
 				return createBCL(pd, cp);
 			}
 		});
@@ -902,7 +903,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return false;
 	}
 
-	final void addExportedProvidersFor(String symbolicName, String packageName, ArrayList result, KeyedHashSet visited) {
+	final void addExportedProvidersFor(String symbolicName, String packageName, List<PackageSource> result, KeyedHashSet visited) {
 		if (!visited.add(bundle))
 			return;
 
@@ -947,12 +948,12 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private void addDynamicImportPackage(ImportPackageSpecification[] packages) {
 		if (packages == null)
 			return;
-		ArrayList dynamicImports = new ArrayList(packages.length);
+		List<String> dynamicImports = new ArrayList<String>(packages.length);
 		for (int i = 0; i < packages.length; i++)
 			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(packages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 				dynamicImports.add(packages[i].getName());
 		if (dynamicImports.size() > 0)
-			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
+			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
 	/**
@@ -968,21 +969,21 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		loaderFlags |= FLAG_HASDYNAMICIMPORTS;
 		int size = packages.length;
-		ArrayList stems;
+		List<String> stems;
 		if (dynamicImportPackageStems == null) {
-			stems = new ArrayList(size);
+			stems = new ArrayList<String>(size);
 		} else {
-			stems = new ArrayList(size + dynamicImportPackageStems.length);
+			stems = new ArrayList<String>(size + dynamicImportPackageStems.length);
 			for (int i = 0; i < dynamicImportPackageStems.length; i++) {
 				stems.add(dynamicImportPackageStems[i]);
 			}
 		}
 
-		ArrayList names;
+		List<String> names;
 		if (dynamicImportPackages == null) {
-			names = new ArrayList(size);
+			names = new ArrayList<String>(size);
 		} else {
-			names = new ArrayList(size + dynamicImportPackages.length);
+			names = new ArrayList<String>(size + dynamicImportPackages.length);
 			for (int i = 0; i < dynamicImportPackages.length; i++) {
 				names.add(dynamicImportPackages[i]);
 			}
@@ -1005,11 +1006,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 		size = stems.size();
 		if (size > 0)
-			dynamicImportPackageStems = (String[]) stems.toArray(new String[size]);
+			dynamicImportPackageStems = stems.toArray(new String[size]);
 
 		size = names.size();
 		if (size > 0)
-			dynamicImportPackages = (String[]) names.toArray(new String[size]);
+			dynamicImportPackages = names.toArray(new String[size]);
 	}
 
 	/**
@@ -1021,11 +1022,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 	public final synchronized void addDynamicImportPackage(ManifestElement[] packages) {
 		if (packages == null)
 			return;
-		ArrayList dynamicImports = new ArrayList(packages.length);
+		List<String> dynamicImports = new ArrayList<String>(packages.length);
 		for (int i = 0; i < packages.length; i++)
 			dynamicImports.add(packages[i].getValue());
 		if (dynamicImports.size() > 0)
-			addDynamicImportPackage((String[]) dynamicImports.toArray(new String[dynamicImports.size()]));
+			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
 	}
 
 	synchronized public void attachFragment(BundleFragment fragment) throws BundleException {
@@ -1092,7 +1093,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (visited == null)
 			visited = new KeyedHashSet(false);
 		visited.add(bundle); // always add ourselves so we do not recurse back to ourselves
-		ArrayList result = new ArrayList(3);
+		List<PackageSource> result = new ArrayList<PackageSource>(3);
 		for (int i = 0; i < requiredBundles.length; i++) {
 			BundleLoader requiredLoader = requiredBundles[i].getBundleLoader();
 			requiredLoader.addExportedProvidersFor(proxy.getSymbolicName(), pkgName, result, visited);
@@ -1105,10 +1106,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			source = NullPackageSource.getNullPackageSource(pkgName);
 		} else if (result.size() == 1) {
 			// if there is just one source, remember just the single source 
-			source = (PackageSource) result.get(0);
+			source = result.get(0);
 		} else {
 			// if there was more than one source, build a multisource and cache that.
-			PackageSource[] srcs = (PackageSource[]) result.toArray(new PackageSource[result.size()]);
+			PackageSource[] srcs = result.toArray(new PackageSource[result.size()]);
 			source = createMultiSource(pkgName, srcs);
 		}
 		synchronized (requiredSources) {
@@ -1139,8 +1140,8 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (System.getSecurityManager() == null)
 			return bcl.getParent();
 
-		return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+			public ClassLoader run() {
 				return bcl.getParent();
 			}
 		});
@@ -1148,7 +1149,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 
 	static final class ClassContext extends SecurityManager {
 		// need to make this method public
-		public Class[] getClassContext() {
+		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
 	}
@@ -1227,7 +1228,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 				return;
 			}
 
-			Object[] waiting = (Object[]) waitingList.get(0);
+			Object[] waiting = waitingList.get(0);
 			waitingThread = (Thread) waiting[0];
 			loader = waiting[1];
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,8 +25,8 @@ import java.util.Set;
  * @deprecated As of 3.5. Replaced by CopyOnWriteIdentityMap.
  * @noextend This class is not intended to be subclassed by clients.
  */
-public class EventListeners {
-	private final CopyOnWriteIdentityMap list = new CopyOnWriteIdentityMap();
+public class EventListeners<K, V> {
+	private final CopyOnWriteIdentityMap<K, V> list = new CopyOnWriteIdentityMap<K, V>();
 
 	/**
 	 * Creates an empty listener list.
@@ -55,7 +56,7 @@ public class EventListeners {
 	 * when the listener is to be called. This may be null
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public void addListener(Object listener, Object listenerObject) {
+	public void addListener(K listener, V listenerObject) {
 		list.put(listener, listenerObject);
 	}
 
@@ -66,7 +67,7 @@ public class EventListeners {
 	 * @param listener This is the listener object to be removed from the list.
 	 * @throws IllegalArgumentException If listener is null.
 	 */
-	public void removeListener(Object listener) {
+	public void removeListener(V listener) {
 		list.remove(listener);
 	}
 
@@ -83,7 +84,7 @@ public class EventListeners {
 	 * Get the entry Set from the internal CopyOnWriteIdentityMap.
 	 * @return The entry Set.
 	 */
-	Set entrySet() {
+	Set<Map.Entry<K, V>> entrySet() {
 		return list.entrySet();
 	}
 }

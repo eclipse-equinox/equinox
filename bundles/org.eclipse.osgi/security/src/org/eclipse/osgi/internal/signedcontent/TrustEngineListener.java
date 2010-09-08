@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -9,8 +9,7 @@
 package org.eclipse.osgi.internal.signedcontent;
 
 import java.security.cert.Certificate;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -25,7 +24,7 @@ public class TrustEngineListener {
 	// this is a singleton listener; see SignedBundleHook for initialization
 	private volatile static TrustEngineListener instance;
 	private final BundleContext context;
-	private final ServiceTracker authorizationTracker;
+	private final ServiceTracker<AuthorizationEngine, AuthorizationEngine> authorizationTracker;
 
 	TrustEngineListener(BundleContext context) {
 		this.context = context;
@@ -39,9 +38,9 @@ public class TrustEngineListener {
 				SignedBundleHook.log("Invalid authorization filter", FrameworkLogEntry.WARNING, e); //$NON-NLS-1$
 			}
 		if (filter != null)
-			authorizationTracker = new ServiceTracker(context, filter, null);
+			authorizationTracker = new ServiceTracker<AuthorizationEngine, AuthorizationEngine>(context, filter, null);
 		else
-			authorizationTracker = new ServiceTracker(context, AuthorizationEngine.class.getName(), null);
+			authorizationTracker = new ServiceTracker<AuthorizationEngine, AuthorizationEngine>(context, AuthorizationEngine.class.getName(), null);
 		authorizationTracker.open();
 		instance = this;
 	}
@@ -59,7 +58,7 @@ public class TrustEngineListener {
 		// find any SignedContent with SignerInfos that do not have an anchor;
 		// re-evaluate trust and check authorization for these SignedContents
 		Bundle[] bundles = context.getBundles();
-		HashSet unresolved = new HashSet();
+		Set<Bundle> unresolved = new HashSet<Bundle>();
 		for (int i = 0; i < bundles.length; i++) {
 			SignedContentImpl signedContent = getSignedContent(bundles[i]);
 			if (signedContent != null && signedContent.isSigned()) {
@@ -84,7 +83,7 @@ public class TrustEngineListener {
 		}
 		// try to resolve
 		if (unresolved.size() > 0)
-			resolveBundles((Bundle[]) unresolved.toArray(new Bundle[unresolved.size()]), false);
+			resolveBundles(unresolved.toArray(new Bundle[unresolved.size()]), false);
 	}
 
 	private void checkAuthorization(SignedContentImpl signedContent, Bundle bundle) {
@@ -94,11 +93,11 @@ public class TrustEngineListener {
 	}
 
 	AuthorizationEngine getAuthorizationEngine() {
-		return (AuthorizationEngine) authorizationTracker.getService();
+		return authorizationTracker.getService();
 	}
 
 	private void resolveBundles(Bundle[] bundles, boolean refresh) {
-		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<?> ref = context.getServiceReference(PackageAdmin.class.getName());
 		if (ref == null)
 			return;
 		PackageAdmin pa = (PackageAdmin) context.getService(ref);
@@ -118,8 +117,8 @@ public class TrustEngineListener {
 		// find any signed content that has signerinfos with the supplied anchor
 		// re-evaluate trust and check authorization again.
 		Bundle[] bundles = context.getBundles();
-		HashSet usingAnchor = new HashSet();
-		HashSet untrustedSigners = new HashSet();
+		Set<Bundle> usingAnchor = new HashSet<Bundle>();
+		Set<SignerInfo> untrustedSigners = new HashSet<SignerInfo>();
 		for (int i = 0; i < bundles.length; i++) {
 			SignedContentImpl signedContent = getSignedContent(bundles[i]);
 			if (signedContent != null && signedContent.isSigned()) {
@@ -141,11 +140,11 @@ public class TrustEngineListener {
 			}
 		}
 		// remove trust anchors from untrusted signers
-		for (Iterator untrusted = untrustedSigners.iterator(); untrusted.hasNext();)
+		for (Iterator<SignerInfo> untrusted = untrustedSigners.iterator(); untrusted.hasNext();)
 			((SignerInfoImpl) untrusted.next()).setTrustAnchor(null);
 		// re-establish trust and check authorization
-		for (Iterator untrustedBundles = usingAnchor.iterator(); untrustedBundles.hasNext();) {
-			Bundle bundle = (Bundle) untrustedBundles.next();
+		for (Iterator<Bundle> untrustedBundles = usingAnchor.iterator(); untrustedBundles.hasNext();) {
+			Bundle bundle = untrustedBundles.next();
 			SignedContentImpl signedContent = getSignedContent(bundle);
 			// found an signer using the anchor for this bundle re-evaluate trust
 			SignedBundleFile.determineTrust(signedContent, SignedBundleHook.VERIFY_TRUST);
@@ -155,7 +154,7 @@ public class TrustEngineListener {
 		// TODO an optimization here would be to check for real DisabledInfo objects for each bundle
 		// try to refresh
 		if (usingAnchor.size() > 0)
-			resolveBundles((Bundle[]) usingAnchor.toArray(new Bundle[usingAnchor.size()]), true);
+			resolveBundles(usingAnchor.toArray(new Bundle[usingAnchor.size()]), true);
 	}
 
 	private SignedContentImpl getSignedContent(Bundle bundle) {

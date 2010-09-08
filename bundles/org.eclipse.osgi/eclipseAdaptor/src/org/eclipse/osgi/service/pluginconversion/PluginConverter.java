@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public interface PluginConverter {
 	 * 	generated (or already existed), <code>null</code> otherwise.
 	 * @throws PluginConversionException if an error occurs while converting the manifest
 	 */
-	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException;
+	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary<String, String> devProperties) throws PluginConversionException;
 
 	/**
 	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
@@ -59,7 +59,7 @@ public interface PluginConverter {
 	 * 	generated, <code>null</code> otherwise
 	 * @throws PluginConversionException if an error occurs while converting the manifest
 	 */
-	public Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars, Dictionary devProperties) throws PluginConversionException;
+	public Dictionary<String, String> convertManifest(File pluginBaseLocation, boolean compatibility, String target, boolean analyseJars, Dictionary<String, String> devProperties) throws PluginConversionException;
 
 	/**
 	 * Construct a bundle manifest file from the given dictionary and write it out to the 
@@ -76,5 +76,5 @@ public interface PluginConverter {
 	 * 	running in backward compatibility mode
 	 * @throws PluginConversionException if an error occurs while writing the given manifest
 	 */
-	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException;
+	public void writeManifest(File generationLocation, Dictionary<String, String> manifestToWrite, boolean compatibilityManifest) throws PluginConversionException;
 }

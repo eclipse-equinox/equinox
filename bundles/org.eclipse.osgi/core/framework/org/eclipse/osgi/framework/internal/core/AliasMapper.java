@@ -11,27 +11,20 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 
 /**
  * This class maps aliases.
  */
 public class AliasMapper {
-	private static Hashtable processorAliasTable;
-	private static Hashtable osnameAliasTable;
+	private static Map<String, Object> processorAliasTable;
+	private static Map<String, Object> osnameAliasTable;
 
-	/**
-	 * Return the master alias for the processor.
-	 *
-	 * @param processor Input name
-	 * @return aliased name (if any)
-	 */
-	public String aliasProcessor(String processor) {
-		processor = processor.toLowerCase();
+	// Safe lazy initialization
+	private static synchronized Map<String, Object> getProcessorAliasTable() {
 		if (processorAliasTable == null) {
-			InputStream in = getClass().getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
+			InputStream in = AliasMapper.class.getResourceAsStream(Constants.OSGI_PROCESSOR_ALIASES);
 			if (in != null) {
 				try {
 					processorAliasTable = initAliases(in);
@@ -44,25 +37,13 @@ public class AliasMapper {
 				}
 			}
 		}
-		if (processorAliasTable != null) {
-			String alias = (String) processorAliasTable.get(processor);
-			if (alias != null) {
-				processor = alias;
-			}
-		}
-		return (processor);
+		return processorAliasTable;
 	}
 
-	/**
-	 * Return the master alias for the osname.
-	 *
-	 * @param osname Input name
-	 * @return aliased name (if any)
-	 */
-	public Object aliasOSName(String osname) {
-		osname = osname.toLowerCase();
+	// Safe lazy initialization
+	private static synchronized Map<String, Object> getOSNameAliasTable() {
 		if (osnameAliasTable == null) {
-			InputStream in = getClass().getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
+			InputStream in = AliasMapper.class.getResourceAsStream(Constants.OSGI_OSNAME_ALIASES);
 			if (in != null) {
 				try {
 					osnameAliasTable = initAliases(in);
@@ -75,8 +56,38 @@ public class AliasMapper {
 				}
 			}
 		}
-		if (osnameAliasTable != null) {
-			Object aliasObject = osnameAliasTable.get(osname);
+		return osnameAliasTable;
+	}
+
+	/**
+	 * Return the master alias for the processor.
+	 *
+	 * @param processor Input name
+	 * @return aliased name (if any)
+	 */
+	public String aliasProcessor(String processor) {
+		processor = processor.toLowerCase();
+		Map<String, Object> aliases = getProcessorAliasTable();
+		if (aliases != null) {
+			String alias = (String) aliases.get(processor);
+			if (alias != null) {
+				processor = alias;
+			}
+		}
+		return processor;
+	}
+
+	/**
+	 * Return the master alias for the osname.
+	 *
+	 * @param osname Input name
+	 * @return aliased name (if any)
+	 */
+	public Object aliasOSName(String osname) {
+		osname = osname.toLowerCase();
+		Map<String, Object> aliases = getOSNameAliasTable();
+		if (aliases != null) {
+			Object aliasObject = aliases.get(osname);
 			//String alias = (String) osnameAliasTable.get(osname);
 			if (aliasObject != null)
 				if (aliasObject instanceof String) {
@@ -85,17 +96,17 @@ public class AliasMapper {
 					return aliasObject;
 				}
 		}
-		return (osname);
+		return osname;
 	}
 
 	/**
-	 * Read alias data and populate a Hashtable.
+	 * Read alias data and populate a Map.
 	 *
 	 * @param in InputStream from which to read alias data.
-	 * @return Hashtable of aliases.
+	 * @return Map of aliases.
 	 */
-	protected static Hashtable initAliases(InputStream in) {
-		Hashtable aliases = new Hashtable(37);
+	protected static Map<String, Object> initAliases(InputStream in) {
+		Map<String, Object> aliases = new HashMap<String, Object>(37);
 		try {
 			BufferedReader br;
 			try {
@@ -122,13 +133,14 @@ public class AliasMapper {
 						if (storedMaster == null) {
 							aliases.put(lowerCaseAlias, master);
 						} else if (storedMaster instanceof String) {
-							Vector newMaster = new Vector();
-							newMaster.add(storedMaster);
+							List<String> newMaster = new ArrayList<String>();
+							newMaster.add((String) storedMaster);
 							newMaster.add(master);
 							aliases.put(lowerCaseAlias, newMaster);
 						} else {
-							((Vector) storedMaster).add(master);
-							aliases.put(lowerCaseAlias, storedMaster);
+							@SuppressWarnings("unchecked")
+							List<String> newMaster = ((List<String>) storedMaster);
+							newMaster.add(master);
 						}
 					}
 				}
@@ -138,6 +150,6 @@ public class AliasMapper {
 				Debug.printStackTrace(e);
 			}
 		}
-		return (aliases);
+		return aliases;
 	}
 }

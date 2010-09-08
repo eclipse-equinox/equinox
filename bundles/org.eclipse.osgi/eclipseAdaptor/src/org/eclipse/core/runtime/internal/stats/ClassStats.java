@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime.internal.stats;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Maintain statistics about a loaded class.
@@ -26,7 +27,7 @@ public class ClassStats {
 
 	// parentage of classes loaded
 	private ClassStats loadedBy = null; // a reference to the class that loaded this class
-	private ArrayList loaded = new ArrayList(2); // a reference to the classes that this class loaded
+	private List<ClassStats> loaded = new ArrayList<ClassStats>(2); // a reference to the classes that this class loaded
 
 	private boolean duringStartup; // indicate if the class was loaded during platform startup
 
@@ -89,7 +90,7 @@ public class ClassStats {
 		return loadedBy;
 	}
 
-	public ArrayList getLoadedClasses() {
+	public List<ClassStats> getLoadedClasses() {
 		return loaded;
 	}
 

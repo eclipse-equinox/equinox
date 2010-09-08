@@ -79,7 +79,7 @@ public interface CommandInterpreter {
 	 * @param dic	the dictionary to print
 	 * @param title	the header to print above the key/value pairs
 	 */
-	public void printDictionary(Dictionary dic, String title);
+	public void printDictionary(Dictionary<?, ?> dic, String title);
 
 	/**
 	 * Prints the given bundle resource if it exists

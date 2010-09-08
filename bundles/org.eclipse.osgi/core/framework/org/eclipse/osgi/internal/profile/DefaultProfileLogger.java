@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,8 +43,8 @@ public class DefaultProfileLogger implements ProfileLogger {
 	private StringBuffer padsb = new StringBuffer(16); // to prevent creating this over and over
 	protected int indent;
 	protected int timePaddingLength;
-	protected Stack scopeStack;
-	protected Map scopeToAccumPerfDataMap;
+	protected Stack<AccumPerfScope> scopeStack;
+	protected Map<String, AccumPerfData> scopeToAccumPerfDataMap;
 
 	public DefaultProfileLogger() {
 		initProps();
@@ -168,9 +168,9 @@ public class DefaultProfileLogger implements ProfileLogger {
 	public synchronized void accumLogEnter(String scope) {
 		// Initialize our data structures
 		if (scopeStack == null)
-			scopeStack = new Stack();
+			scopeStack = new Stack<AccumPerfScope>();
 		if (scopeToAccumPerfDataMap == null)
-			scopeToAccumPerfDataMap = new TreeMap();
+			scopeToAccumPerfDataMap = new TreeMap<String, AccumPerfData>();
 
 		// We want getTime() to evaluate as late as possible
 		scopeStack.push(new AccumPerfScope(scope, getTime()));
@@ -182,19 +182,19 @@ public class DefaultProfileLogger implements ProfileLogger {
 
 		// Initialize our data structures
 		if (scopeStack == null)
-			scopeStack = new Stack();
+			scopeStack = new Stack<AccumPerfScope>();
 		if (scopeToAccumPerfDataMap == null)
-			scopeToAccumPerfDataMap = new TreeMap();
+			scopeToAccumPerfDataMap = new TreeMap<String, AccumPerfData>();
 
 		// Do our calculations
-		AccumPerfScope then = (AccumPerfScope) scopeStack.pop();
+		AccumPerfScope then = scopeStack.pop();
 		if (then == null)
 			System.err.println("ACCUM PERF ERROR: Scope stack empty: " + scope); //$NON-NLS-1$
 		else {
 			if (!then.scope.equals(scope))
 				System.err.println("ACCUM PERF ERROR: Scope mismatch: then='" + then.scope + "', now='" + scope + "'"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
-			AccumPerfData now = (AccumPerfData) scopeToAccumPerfDataMap.get(scope);
+			AccumPerfData now = scopeToAccumPerfDataMap.get(scope);
 			if (now == null) {
 				now = new AccumPerfData(scope);
 				scopeToAccumPerfDataMap.put(scope, now);
@@ -291,9 +291,7 @@ public class DefaultProfileLogger implements ProfileLogger {
 			return; // No data; nothing to do
 		timelog.append("\r\n"); //$NON-NLS-1$
 		timelog.append("Cumulative Log:\r\n"); //$NON-NLS-1$
-		Iterator iter = scopeToAccumPerfDataMap.values().iterator();
-		while (iter.hasNext()) {
-			AccumPerfData d = (AccumPerfData) iter.next();
+		for (AccumPerfData d : scopeToAccumPerfDataMap.values()) {
 			timelog.append(accumEntryReport(d));
 		}
 		scopeToAccumPerfDataMap.clear();

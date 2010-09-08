@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.framework.Filter;
  * @since 3.4
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface NativeCodeDescription extends BaseDescription, Comparable {
+public interface NativeCodeDescription extends BaseDescription, Comparable<NativeCodeDescription> {
 	/**
 	 * Returns the paths to the native code libraries.
 	 * @return the paths to the native code libraries.
@@ -72,7 +72,7 @@ public interface NativeCodeDescription extends BaseDescription, Comparable {
 	 * @return a negative integer, zero, or a positive integer as this natve
 	 * code description is less than, equal to, or greater than the specified object.
 	 */
-	public int compareTo(Object other);
+	public int compareTo(NativeCodeDescription other);
 
 	/**
 	 * Indicates if this native code description has invalid native code paths.  Native

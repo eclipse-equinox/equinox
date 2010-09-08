@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,7 @@ public class EclipseCommandProvider implements CommandProvider {
 
 	private PlatformAdmin getPlatformAdmin(CommandInterpreter ci) {
 		if (platformAdmin == null) {
-			ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
+			ServiceReference<?> platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
 			if (platformAdminRef == null) {
 				ci.print("  "); //$NON-NLS-1$
 				ci.println(EclipseAdaptorMsg.ECLIPSE_CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE);
@@ -73,7 +73,7 @@ public class EclipseCommandProvider implements CommandProvider {
 	}
 
 	private void ungetPlatformAdmin() {
-		ServiceReference platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
+		ServiceReference<?> platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
 		context.ungetService(platformAdminRef);
 	}
 

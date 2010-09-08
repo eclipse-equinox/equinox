@@ -25,8 +25,8 @@ class EquinoxFWClassLoader extends URLClassLoader {
 		this.parent = parent;
 	}
 
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class clazz = findLoadedClass(name);
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> clazz = findLoadedClass(name);
 		if (clazz != null)
 			return clazz;
 

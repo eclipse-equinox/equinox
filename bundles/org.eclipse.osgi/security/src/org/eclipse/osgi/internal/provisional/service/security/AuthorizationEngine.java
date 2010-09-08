@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.provisional.service.security;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.signedcontent.SignedContent;
 import org.osgi.framework.BundleContext;
@@ -24,11 +26,11 @@ import org.osgi.util.tracker.ServiceTracker;
 public abstract class AuthorizationEngine {
 
 	private EventManager manager = new EventManager();
-	private EventDispatcher dispatcher = new AuthEventDispatcher();
-	private final ServiceTracker listenerTracker;
+	private EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> dispatcher = new AuthEventDispatcher();
+	private final ServiceTracker<AuthorizationListener, AuthorizationListener> listenerTracker;
 
 	public AuthorizationEngine(BundleContext context) {
-		listenerTracker = new ServiceTracker(context, AuthorizationListener.class.getName(), null);
+		listenerTracker = new ServiceTracker<AuthorizationListener, AuthorizationListener>(context, AuthorizationListener.class.getName(), null);
 		listenerTracker.open();
 	}
 
@@ -50,9 +52,11 @@ public abstract class AuthorizationEngine {
 		Object[] services = listenerTracker.getServices();
 		if (services == null)
 			return;
-		CopyOnWriteIdentityMap listeners = new CopyOnWriteIdentityMap();
-		listeners.putAll(services);
-		ListenerQueue queue = new ListenerQueue(manager);
+		Map<AuthorizationListener, Object> listeners = new HashMap<AuthorizationListener, Object>();
+		for (Object service : services) {
+			listeners.put((AuthorizationListener) service, service);
+		}
+		ListenerQueue<AuthorizationListener, Object, AuthorizationEvent> queue = new ListenerQueue<AuthorizationListener, Object, AuthorizationEvent>(manager);
 		queue.queueListeners(listeners.entrySet(), dispatcher);
 		queue.dispatchEventSynchronous(0, event);
 	}
@@ -76,9 +80,9 @@ public abstract class AuthorizationEngine {
 	 */
 	abstract public int getStatus();
 
-	class AuthEventDispatcher implements EventDispatcher {
-		public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
-			((AuthorizationListener) eventListener).authorizationEvent((AuthorizationEvent) eventObject);
+	class AuthEventDispatcher implements EventDispatcher<AuthorizationListener, Object, AuthorizationEvent> {
+		public void dispatchEvent(AuthorizationListener eventListener, Object listenerObject, int eventAction, AuthorizationEvent eventObject) {
+			eventListener.authorizationEvent(eventObject);
 		}
 	}
 }

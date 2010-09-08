@@ -61,7 +61,7 @@ public class SystemBundleData extends BaseData {
 		return null;
 	}
 
-	private Headers createManifest(File osgiBase) throws BundleException {
+	private Headers<String, String> createManifest(File osgiBase) throws BundleException {
 		InputStream in = null;
 
 		if (osgiBase != null && osgiBase.exists())
@@ -91,12 +91,12 @@ public class SystemBundleData extends BaseData {
 		ClassLoader cl = getClass().getClassLoader();
 		try {
 			// get all manifests in your classloader delegation
-			Enumeration manifests = cl != null ? cl.getResources(Constants.OSGI_BUNDLE_MANIFEST) : ClassLoader.getSystemResources(Constants.OSGI_BUNDLE_MANIFEST);
+			Enumeration<URL> manifests = cl != null ? cl.getResources(Constants.OSGI_BUNDLE_MANIFEST) : ClassLoader.getSystemResources(Constants.OSGI_BUNDLE_MANIFEST);
 			while (manifests.hasMoreElements()) {
-				URL url = (URL) manifests.nextElement();
+				URL url = manifests.nextElement();
 				try {
 					// check each manifest until we find one with the Eclipse-SystemBundle: true header
-					Headers headers = Headers.parseManifest(url.openStream());
+					Headers<String, String> headers = Headers.parseManifest(url.openStream());
 					if ("true".equals(headers.get(Constants.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
 						return url.openStream();
 				} catch (BundleException e) {
@@ -126,7 +126,7 @@ public class SystemBundleData extends BaseData {
 					return null;
 				}
 
-				public Enumeration getEntryPaths(String path) {
+				public Enumeration<String> getEntryPaths(String path) {
 					return null;
 				}
 

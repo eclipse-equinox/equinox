@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -450,11 +450,11 @@ public class KeyedHashSet {
 	 * Returns an iterator of elements in this set
 	 * @return an iterator of elements in this set
 	 */
-	public Iterator iterator() {
+	public Iterator<KeyedElement> iterator() {
 		return new EquinoxSetIterator();
 	}
 
-	class EquinoxSetIterator implements Iterator {
+	class EquinoxSetIterator implements Iterator<KeyedElement> {
 		private int currentIndex = -1;
 		private int found;
 
@@ -462,7 +462,7 @@ public class KeyedHashSet {
 			return found < elementCount;
 		}
 
-		public Object next() {
+		public KeyedElement next() {
 			if (!hasNext())
 				throw new NoSuchElementException();
 			while (++currentIndex < elements.length)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ public class EquinoxSecurityManager extends SecurityManager {
 	 * CheckPermissionAction classes load early. Otherwise, we run into problems later.
 	 */
 	static {
-		Class c;
+		Class<?> c;
 		c = CheckPermissionAction.class;
 		c = CheckContext.class;
 		c.getName(); // to prevent compiler warnings
@@ -36,16 +36,16 @@ public class EquinoxSecurityManager extends SecurityManager {
 
 	static class CheckContext {
 		// A non zero depth indicates that we are doing a recursive permission check.
-		ArrayList depthCondSets = new ArrayList(2);
-		ArrayList accs = new ArrayList(2);
-		ArrayList CondClassSet;
+		List<List<Decision[]>> depthCondSets = new ArrayList<List<Decision[]>>(2);
+		List<AccessControlContext> accs = new ArrayList<AccessControlContext>(2);
+		List<Class<?>> CondClassSet;
 
 		public int getDepth() {
 			return depthCondSets.size() - 1;
 		}
 	}
 
-	static class CheckPermissionAction implements PrivilegedAction {
+	static class CheckPermissionAction implements PrivilegedAction<Object> {
 		Permission perm;
 		Object context;
 		EquinoxSecurityManager fsm;
@@ -62,18 +62,18 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 	}
 
-	private final ThreadLocal localCheckContext = new ThreadLocal();
+	private final ThreadLocal<CheckContext> localCheckContext = new ThreadLocal<CheckContext>();
 
-	boolean addConditionsForDomain(Decision results[]) {
-		CheckContext cc = (CheckContext) localCheckContext.get();
+	boolean addConditionsForDomain(Decision[] results) {
+		CheckContext cc = localCheckContext.get();
 		if (cc == null) {
 			// We are being invoked in a weird way. Perhaps the ProtectionDomain is
 			// getting invoked directly.
 			return false;
 		}
-		ArrayList condSets = (ArrayList) cc.depthCondSets.get(cc.getDepth());
+		List<Decision[]> condSets = cc.depthCondSets.get(cc.getDepth());
 		if (condSets == null) {
-			condSets = new ArrayList(1);
+			condSets = new ArrayList<Decision[]>(1);
 			cc.depthCondSets.set(cc.getDepth(), condSets);
 		}
 		condSets.add(results);
@@ -98,15 +98,15 @@ public class EquinoxSecurityManager extends SecurityManager {
 	 * rather than the SecurityManager.
 	 */
 	public AccessControlContext getContextToBeChecked() {
-		CheckContext cc = (CheckContext) localCheckContext.get();
+		CheckContext cc = localCheckContext.get();
 		if (cc != null && cc.accs != null && !cc.accs.isEmpty())
-			return (AccessControlContext) cc.accs.get(cc.accs.size() - 1);
+			return cc.accs.get(cc.accs.size() - 1);
 		return null;
 	}
 
 	void internalCheckPermission(Permission perm, Object context) {
 		AccessControlContext acc = (AccessControlContext) context;
-		CheckContext cc = (CheckContext) localCheckContext.get();
+		CheckContext cc = localCheckContext.get();
 		if (cc == null) {
 			cc = new CheckContext();
 			localCheckContext.set(cc);
@@ -116,13 +116,12 @@ public class EquinoxSecurityManager extends SecurityManager {
 		try {
 			acc.checkPermission(perm);
 			// We want to pop the first set of postponed conditions and process them
-			ArrayList conditionSets = (ArrayList) cc.depthCondSets.get(cc.getDepth());
+			List<Decision[]> conditionSets = cc.depthCondSets.get(cc.getDepth());
 			if (conditionSets == null)
 				return;
 			// TODO the spec seems impossible to implement just doing the simple thing for now
-			HashMap conditionDictionaries = new HashMap();
-			for (Iterator iConditionSets = conditionSets.iterator(); iConditionSets.hasNext();) {
-				Decision[] domainDecisions = (Decision[]) iConditionSets.next();
+			Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries = new HashMap<Class<? extends Condition>, Dictionary<Object, Object>>();
+			for (Decision[] domainDecisions : conditionSets) {
 				boolean grant = false;
 				for (int i = 0; i < domainDecisions.length; i++) {
 					if (domainDecisions[i] == null)
@@ -154,17 +153,17 @@ public class EquinoxSecurityManager extends SecurityManager {
 		}
 	}
 
-	private int getPostponedDecision(Decision decision, HashMap conditionDictionaries, CheckContext cc) {
+	private int getPostponedDecision(Decision decision, Map<Class<? extends Condition>, Dictionary<Object, Object>> conditionDictionaries, CheckContext cc) {
 		Condition[] postponed = decision.postponed;
 		for (int i = 0; i < postponed.length; i++) {
-			Dictionary condContext = (Dictionary) conditionDictionaries.get(postponed[i].getClass());
+			Dictionary<Object, Object> condContext = conditionDictionaries.get(postponed[i].getClass());
 			if (condContext == null) {
-				condContext = new Hashtable();
+				condContext = new Hashtable<Object, Object>();
 				conditionDictionaries.put(postponed[i].getClass(), condContext);
 			}
 			// prevent recursion into Condition
 			if (cc.CondClassSet == null)
-				cc.CondClassSet = new ArrayList(2);
+				cc.CondClassSet = new ArrayList<Class<?>>(2);
 			if (cc.CondClassSet.contains(postponed[i].getClass()))
 				return SecurityTable.ABSTAIN;
 			cc.CondClassSet.add(postponed[i].getClass());

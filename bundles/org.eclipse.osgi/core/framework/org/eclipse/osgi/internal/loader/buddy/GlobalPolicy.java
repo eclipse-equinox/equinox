@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class GlobalPolicy implements IBuddyPolicy {
 		this.admin = admin;
 	}
 
-	public Class loadClass(String name) {
+	public Class<?> loadClass(String name) {
 		ExportedPackage pkg = admin.getExportedPackage(BundleLoader.getPackageName(name));
 		if (pkg == null)
 			return null;
@@ -49,14 +49,14 @@ public class GlobalPolicy implements IBuddyPolicy {
 		return pkg.getExportingBundle().getResource(name);
 	}
 
-	public Enumeration loadResources(String name) {
+	public Enumeration<URL> loadResources(String name) {
 		//get all exported packages that match the resource's package
 		ExportedPackage[] pkgs = admin.getExportedPackages(BundleLoader.getResourcePackageName(name));
 		if (pkgs == null || pkgs.length == 0)
 			return null;
 
 		//get all matching resources for each package
-		Enumeration results = null;
+		Enumeration<URL> results = null;
 		for (int i = 0; i < pkgs.length; i++) {
 			try {
 				results = BundleLoader.compoundEnumerations(results, pkgs[i].getExportingBundle().getResources(name));

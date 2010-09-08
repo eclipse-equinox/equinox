@@ -62,7 +62,9 @@ public class CoreResolverHook implements ResolverHook {
 
 	private ServiceReferenceImpl<ResolverHook>[] getHookReferences() {
 		try {
-			return (ServiceReferenceImpl<ResolverHook>[]) registry.getServiceReferences(context, ResolverHook.class.getName(), null, false, false);
+			@SuppressWarnings("unchecked")
+			ServiceReferenceImpl<ResolverHook>[] result = (ServiceReferenceImpl<ResolverHook>[]) registry.getServiceReferences(context, ResolverHook.class.getName(), null, false, false);
+			return result;
 		} catch (InvalidSyntaxException e) {
 			// cannot happen; no filter
 			return null;

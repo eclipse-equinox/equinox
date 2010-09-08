@@ -30,18 +30,18 @@ import org.osgi.framework.wiring.FrameworkWiring;
  */
 
 public class InternalSystemBundle extends BundleHost implements org.osgi.framework.launch.Framework {
-	class SystemBundleHeaders extends Dictionary {
-		private final Dictionary headers;
+	class SystemBundleHeaders extends Dictionary<String, String> {
+		private final Dictionary<String, String> headers;
 
-		public SystemBundleHeaders(Dictionary headers) {
+		public SystemBundleHeaders(Dictionary<String, String> headers) {
 			this.headers = headers;
 		}
 
-		public Enumeration elements() {
+		public Enumeration<String> elements() {
 			return headers.elements();
 		}
 
-		public Object get(Object key) {
+		public String get(Object key) {
 			if (!(key instanceof String))
 				return null;
 			if (org.osgi.framework.Constants.EXPORT_PACKAGE.equalsIgnoreCase((String) key)) {
@@ -59,7 +59,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 				systemValue = systemExtraValue;
 			else if (systemExtraValue != null)
 				systemValue += ", " + systemExtraValue; //$NON-NLS-1$
-			String result = (String) headers.get(header);
+			String result = headers.get(header);
 			if (systemValue != null) {
 				if (result != null)
 					result += ", " + systemValue; //$NON-NLS-1$
@@ -73,15 +73,15 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 			return headers.isEmpty();
 		}
 
-		public Enumeration keys() {
+		public Enumeration<String> keys() {
 			return headers.keys();
 		}
 
-		public Object put(Object key, Object value) {
+		public String put(String key, String value) {
 			return headers.put(key, value);
 		}
 
-		public Object remove(Object key) {
+		public String remove(Object key) {
 			return headers.remove(key);
 		}
 
@@ -171,7 +171,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
+	protected Class<?> loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			framework.checkAdminPermission(this, AdminPermission.CLASS);
 			checkValid();
@@ -383,7 +383,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		// Do nothing
 	}
 
-	public Dictionary getHeaders(String localeString) {
+	public Dictionary<String, String> getHeaders(String localeString) {
 		return new SystemBundleHeaders(super.getHeaders(localeString));
 	}
 
@@ -399,6 +399,7 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 		return getClass().getClassLoader();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <A> A adapt(Class<A> adapterType) {
 		if (FrameworkStartLevel.class.equals(adapterType))

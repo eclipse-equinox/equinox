@@ -66,7 +66,7 @@ public class DirBundleFile extends BundleFile {
 		return dirPath != null && BundleFile.secureAction.isDirectory(dirPath);
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path) {
 		if (path.length() > 0 && path.charAt(0) == '/')
 			path = path.substring(1);
 		final File pathFile = getFile(path, false);
@@ -76,14 +76,14 @@ public class DirBundleFile extends BundleFile {
 		if (fileList == null || fileList.length == 0)
 			return null;
 		final String dirPath = path.length() == 0 || path.charAt(path.length() - 1) == '/' ? path : path + '/';
-		return new Enumeration() {
+		return new Enumeration<String>() {
 			int cur = 0;
 
 			public boolean hasMoreElements() {
 				return fileList != null && cur < fileList.length;
 			}
 
-			public Object nextElement() {
+			public String nextElement() {
 				if (!hasMoreElements()) {
 					throw new NoSuchElementException();
 				}

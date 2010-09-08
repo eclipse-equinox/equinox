@@ -47,7 +47,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	private void findRunnableService() {
 		// look for a ParameterizedRunnable registered as a service by runtimes (3.0, 3.1)
 		String appClass = ParameterizedRunnable.class.getName();
-		ServiceReference[] runRefs = null;
+		ServiceReference<?>[] runRefs = null;
 		try {
 			runRefs = context.getServiceReferences(ParameterizedRunnable.class.getName(), "(&(objectClass=" + appClass + ")(eclipse.application=*))"); //$NON-NLS-1$//$NON-NLS-2$
 		} catch (InvalidSyntaxException e) {
@@ -146,7 +146,7 @@ public class EclipseAppLauncher implements ApplicationLauncher {
 	 * exists that can be used to relaunch the default application.
 	 */
 	public Object reStart(Object argument) throws Exception {
-		ServiceReference ref[] = null;
+		ServiceReference<?> ref[] = null;
 		ref = context.getServiceReferences("org.osgi.service.application.ApplicationDescriptor", "(eclipse.application.default=true)"); //$NON-NLS-1$//$NON-NLS-2$
 		if (ref != null && ref.length > 0) {
 			Object defaultApp = context.getService(ref[0]);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,11 @@ import java.util.*;
  * <p>Internal class.</p>
  */
 public interface IPluginInfo {
-	public Map getLibraries();
+	public Map<String, List<String>> getLibraries();
 
 	public String[] getLibrariesName();
 
-	public ArrayList getRequires();
+	public ArrayList<PluginParser.Prerequisite> getRequires();
 
 	public String getMasterId();
 
@@ -38,7 +38,7 @@ public interface IPluginInfo {
 
 	public boolean isFragment();
 
-	public Set getPackageFilters();
+	public Set<String> getPackageFilters();
 
 	public String getPluginName();
 

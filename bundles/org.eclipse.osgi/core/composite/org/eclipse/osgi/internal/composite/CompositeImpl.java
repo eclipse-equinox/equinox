@@ -57,7 +57,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 		props.put(PROP_PARENTFRAMEWORK, thisFramework.getSystemBundleContext().getBundle());
 		// TODO leaks "this" out of the constructor
 		props.put(PROP_COMPOSITE, this);
-		Equinox equinox = new Equinox(props);
+		Equinox equinox = new Equinox((Map) props);
 		if (!firstTime)
 			// if not the first time then we are done
 			return equinox;

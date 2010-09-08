@@ -9,10 +9,12 @@
 package org.eclipse.osgi.framework.internal.protocol;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -25,12 +27,12 @@ public abstract class MultiplexingFactory {
 	protected static final String PACKAGEADMINCLASS = "org.osgi.service.packageadmin.PackageAdmin"; //$NON-NLS-1$
 	protected BundleContext context;
 	protected FrameworkAdaptor adaptor;
-	private List factories; // list of multiplexed factories
-	private ServiceTracker packageAdminTracker;
+	private List<Object> factories; // list of multiplexed factories
+	private ServiceTracker<ServiceReference<?>, PackageAdmin> packageAdminTracker;
 
 	// used to get access to the protected SecurityManager#getClassContext method
 	static class InternalSecurityManager extends SecurityManager {
-		public Class[] getClassContext() {
+		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
 	}
@@ -40,7 +42,7 @@ public abstract class MultiplexingFactory {
 	MultiplexingFactory(BundleContext context, FrameworkAdaptor adaptor) {
 		this.context = context;
 		this.adaptor = adaptor;
-		packageAdminTracker = new ServiceTracker(context, PACKAGEADMINCLASS, null);
+		packageAdminTracker = new ServiceTracker<ServiceReference<?>, PackageAdmin>(context, PACKAGEADMINCLASS, null);
 		packageAdminTracker.open();
 	}
 
@@ -55,7 +57,7 @@ public abstract class MultiplexingFactory {
 	public void register(Object factory) {
 		// set parent for each factory so they can do proper delegation
 		try {
-			Class clazz = factory.getClass();
+			Class<?> clazz = factory.getClass();
 			Method setParentFactory = clazz.getMethod("setParentFactory", new Class[] {Object.class}); //$NON-NLS-1$
 			setParentFactory.invoke(factory, new Object[] {getParentFactory()});
 		} catch (Exception e) {
@@ -80,7 +82,7 @@ public abstract class MultiplexingFactory {
 	}
 
 	public Object designateSuccessor() {
-		List released = releaseFactories();
+		List<Object> released = releaseFactories();
 		// Note that we do this outside of the sync block above.
 		// This is only possible because we do additional locking outside of
 		// this class to ensure no other threads are trying to manipulate the
@@ -93,10 +95,10 @@ public abstract class MultiplexingFactory {
 			return getParentFactory();
 		Object successor = released.remove(0);
 		try {
-			Class clazz = successor.getClass();
+			Class<?> clazz = successor.getClass();
 			Method register = clazz.getMethod("register", new Class[] {Object.class}); //$NON-NLS-1$		
-			for (Iterator it = released.iterator(); it.hasNext();) {
-				register.invoke(successor, new Object[] {it.next()});
+			for (Object r : released) {
+				register.invoke(successor, new Object[] {r});
 			}
 		} catch (Exception e) {
 			adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "designateSuccessor", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
@@ -110,19 +112,18 @@ public abstract class MultiplexingFactory {
 		packageAdminTracker.close();
 	}
 
-	public Object findAuthorizedFactory(List ignoredClasses) {
-		List current = getFactories();
-		Class[] classStack = internalSecurityManager.getClassContext();
+	public Object findAuthorizedFactory(List<Class<?>> ignoredClasses) {
+		List<Object> current = getFactories();
+		Class<?>[] classStack = internalSecurityManager.getClassContext();
 		for (int i = 0; i < classStack.length; i++) {
-			Class clazz = classStack[i];
+			Class<?> clazz = classStack[i];
 			if (clazz == InternalSecurityManager.class || clazz == MultiplexingFactory.class || ignoredClasses.contains(clazz))
 				continue;
 			if (hasAuthority(clazz))
 				return this;
 			if (current == null)
 				continue;
-			for (Iterator it = current.iterator(); it.hasNext();) {
-				Object factory = it.next();
+			for (Object factory : current) {
 				try {
 					Method hasAuthorityMethod = factory.getClass().getMethod("hasAuthority", new Class[] {Class.class}); //$NON-NLS-1$
 					if (((Boolean) hasAuthorityMethod.invoke(factory, new Object[] {clazz})).booleanValue()) {
@@ -137,35 +138,35 @@ public abstract class MultiplexingFactory {
 		return null;
 	}
 
-	public boolean hasAuthority(Class clazz) {
-		PackageAdmin packageAdminService = (PackageAdmin) packageAdminTracker.getService();
+	public boolean hasAuthority(Class<?> clazz) {
+		PackageAdmin packageAdminService = packageAdminTracker.getService();
 		if (packageAdminService != null) {
 			return packageAdminService.getBundle(clazz) != null;
 		}
 		return false;
 	}
 
-	private synchronized List getFactories() {
+	private synchronized List<Object> getFactories() {
 		return factories;
 	}
 
-	private synchronized List releaseFactories() {
+	private synchronized List<Object> releaseFactories() {
 		if (factories == null)
 			return null;
 
-		List released = new LinkedList(factories);
+		List<Object> released = new LinkedList<Object>(factories);
 		factories = null;
 		return released;
 	}
 
 	private synchronized void addFactory(Object factory) {
-		List updated = (factories == null) ? new LinkedList() : new LinkedList(factories);
+		List<Object> updated = (factories == null) ? new LinkedList<Object>() : new LinkedList<Object>(factories);
 		updated.add(factory);
 		factories = updated;
 	}
 
 	private synchronized void removeFactory(Object factory) {
-		List updated = new LinkedList(factories);
+		List<Object> updated = new LinkedList<Object>(factories);
 		updated.remove(factory);
 		factories = updated.isEmpty() ? null : updated;
 	}

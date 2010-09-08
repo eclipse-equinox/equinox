@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,13 +33,13 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 		return null;
 	}
 
-	public boolean addClassPathEntry(ArrayList cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
+	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		// first check that we are in devmode for this sourcedata
 		String[] devClassPath = !DevClassPathHelper.inDevelopmentMode() ? null : DevClassPathHelper.getDevClassPath(sourcedata.getSymbolicName());
 		if (devClassPath == null || devClassPath.length == 0)
 			return false; // not in dev mode return
 		// check that dev classpath entries have not already been added; we mark this in the first entry below
-		if (cpEntries.size() > 0 && ((ClasspathEntry) cpEntries.get(0)).getUserObject(KEY) != null)
+		if (cpEntries.size() > 0 && cpEntries.get(0).getUserObject(KEY) != null)
 			return false; // this source has already had its dev classpath entries added.
 		boolean result = false;
 		for (int i = 0; i < devClassPath.length; i++) {
@@ -65,7 +65,7 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 		// mark the first entry of the list.  
 		// This way we can quickly tell that dev classpath entries have been added to the list
 		if (result && cpEntries.size() > 0)
-			((ClasspathEntry) cpEntries.get(0)).addUserObject(this);
+			cpEntries.get(0).addUserObject(this);
 		return result;
 	}
 

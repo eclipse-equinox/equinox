@@ -24,17 +24,17 @@ import org.osgi.framework.Version;
 /**
  * Internal class.
  */
-public class CachedManifest extends Dictionary {
+public class CachedManifest extends Dictionary<String, String> {
 	static final String SERVICE_COMPONENT = "Service-Component"; //$NON-NLS-1$
 	static boolean DEBUG = false;
-	private Dictionary manifest = null;
+	private Dictionary<String, String> manifest = null;
 	private EclipseStorageHook storageHook;
 
 	public CachedManifest(EclipseStorageHook storageHook) {
 		this.storageHook = storageHook;
 	}
 
-	public Dictionary getManifest() {
+	public Dictionary<String, String> getManifest() {
 		if (manifest == null)
 			try {
 				if (DEBUG)
@@ -47,7 +47,7 @@ public class CachedManifest extends Dictionary {
 				return null;
 			}
 		if (manifest == null) {
-			Headers empty = new Headers(0);
+			Headers<String, String> empty = new Headers<String, String>(0);
 			empty.setReadOnly();
 			manifest = empty;
 			return empty;
@@ -63,15 +63,16 @@ public class CachedManifest extends Dictionary {
 		return size() == 0;
 	}
 
-	public Enumeration elements() {
+	public Enumeration<String> elements() {
 		return getManifest().elements();
 	}
 
-	public Enumeration keys() {
+	public Enumeration<String> keys() {
 		return getManifest().keys();
 	}
 
-	public Object get(Object key) {
+	@SuppressWarnings("deprecation")
+	public String get(Object key) {
 		if (manifest != null)
 			return manifest.get(key);
 		String keyString = (String) key;
@@ -139,17 +140,17 @@ public class CachedManifest extends Dictionary {
 			return storageHook.getBundleManifestVersion() == 0 ? null : Integer.toString(storageHook.getBundleManifestVersion());
 		if (SERVICE_COMPONENT.equals(keyString))
 			return storageHook.getServiceComponent();
-		Dictionary result = getManifest();
+		Dictionary<String, String> result = getManifest();
 		if (DEBUG)
 			System.out.println("Manifest read because of header: " + key); //$NON-NLS-1$
 		return result == null ? null : result.get(key);
 	}
 
-	public Object remove(Object key) {
+	public String remove(Object key) {
 		return getManifest().remove(key);
 	}
 
-	public Object put(Object key, Object value) {
+	public String put(String key, String value) {
 		return getManifest().put(key, value);
 	}
 

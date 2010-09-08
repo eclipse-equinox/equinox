@@ -36,7 +36,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	/** The command line in StringTokenizer form */
 	private StringTokenizer tok;
 	/** The active CommandProviders */
-	private Object[] commandProviders;
+	private CommandProvider[] commandProviders;
 	/** The FrameworkConsole */
 	private FrameworkConsole con;
 	/** The stream to send output to */
@@ -60,7 +60,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 *  The constructor.  It turns the cmdline string into a StringTokenizer and remembers
 	 *  the input parms.
 	 */
-	public FrameworkCommandInterpreter(String cmdline, Object[] commandProviders, FrameworkConsole con) {
+	public FrameworkCommandInterpreter(String cmdline, CommandProvider[] commandProviders, FrameworkConsole con) {
 		tok = new StringTokenizer(cmdline);
 		this.commandProviders = commandProviders;
 		this.con = con;
@@ -144,7 +144,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			}
 			return retval;
 		}
-		Class[] parameterTypes = new Class[] {CommandInterpreter.class};
+		Class<?>[] parameterTypes = new Class[] {CommandInterpreter.class};
 		Object[] parameters = new Object[] {this};
 		boolean executed = false;
 		int size = commandProviders.length;
@@ -168,7 +168,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		if (!executed) {
 			for (int i = 0; i < size; i++) {
 				try {
-					CommandProvider commandProvider = (CommandProvider) commandProviders[i];
+					CommandProvider commandProvider = commandProviders[i];
 					out.print(commandProvider.getHelp());
 					out.flush();
 				} catch (Exception ee) {
@@ -270,7 +270,7 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 		Method[] methods = t.getClass().getMethods();
 
 		int size = methods.length;
-		Class throwable = Throwable.class;
+		Class<Throwable> throwable = Throwable.class;
 
 		for (int i = 0; i < size; i++) {
 			Method method = methods[i];
@@ -321,13 +321,13 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 * @param dic	the dictionary to print
 	 * @param title	the header to print above the key/value pairs
 	 */
-	public void printDictionary(Dictionary dic, String title) {
+	public void printDictionary(Dictionary<?, ?> dic, String title) {
 		if (dic == null)
 			return;
 
 		int count = dic.size();
 		String[] keys = new String[count];
-		Enumeration keysEnum = dic.keys();
+		Enumeration<?> keysEnum = dic.keys();
 		int i = 0;
 		while (keysEnum.hasMoreElements()) {
 			keys[i++] = (String) keysEnum.nextElement();

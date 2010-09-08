@@ -12,8 +12,7 @@
 package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.ConsoleSession;
+import org.eclipse.osgi.framework.console.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -32,7 +31,7 @@ public class FrameworkConsole implements Runnable {
 	/** The current bundle context */
 	private final BundleContext context;
 	/** A tracker containing the service object of all registered command providers */
-	private final ServiceTracker cptracker;
+	private final ServiceTracker<CommandProvider, CommandProvider> cptracker;
 	private final ConsoleSession consoleSession;
 	private final boolean isSystemInOut;
 	/** Default code page which must be supported by all JVMs */
@@ -42,7 +41,7 @@ public class FrameworkConsole implements Runnable {
 	private static final boolean blockOnready = FrameworkProperties.getProperty("osgi.dev") != null || FrameworkProperties.getProperty("osgi.console.blockOnReady") != null; //$NON-NLS-1$ //$NON-NLS-2$
 	volatile boolean shutdown = false;
 
-	public FrameworkConsole(BundleContext context, ConsoleSession consoleSession, boolean isSystemInOut, ServiceTracker cptracker) {
+	public FrameworkConsole(BundleContext context, ConsoleSession consoleSession, boolean isSystemInOut, ServiceTracker<CommandProvider, CommandProvider> cptracker) {
 		this.context = context;
 		this.cptracker = cptracker;
 		this.isSystemInOut = isSystemInOut;
@@ -185,13 +184,13 @@ public class FrameworkConsole implements Runnable {
 	 * @return Array of service objects; if no service
 	 * are being tracked then an empty array is returned
 	 */
-	public Object[] getServices() {
-		ServiceReference[] serviceRefs = cptracker.getServiceReferences();
+	public CommandProvider[] getServices() {
+		ServiceReference<CommandProvider>[] serviceRefs = cptracker.getServiceReferences();
 		if (serviceRefs == null)
-			return new Object[0];
+			return new CommandProvider[0];
 		Util.dsort(serviceRefs, 0, serviceRefs.length);
 
-		Object[] serviceObjects = new Object[serviceRefs.length];
+		CommandProvider[] serviceObjects = new CommandProvider[serviceRefs.length];
 		for (int i = 0; i < serviceRefs.length; i++)
 			serviceObjects[i] = FrameworkConsole.this.context.getService(serviceRefs[i]);
 		return serviceObjects;

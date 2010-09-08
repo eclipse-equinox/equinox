@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,22 +29,22 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * and unregistered.
  */
 
-public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer {
+public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTrackerCustomizer<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>> {
 	// TODO lots of type-based names 
 	protected URLStreamHandlerService realHandlerService;
 
 	protected URLStreamHandlerSetter urlSetter;
 
-	protected ServiceTracker urlStreamHandlerServiceTracker;
+	protected ServiceTracker<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>> urlStreamHandlerServiceTracker;
 
 	protected BundleContext context;
-	protected ServiceReference urlStreamServiceReference;
+	protected ServiceReference<URLStreamHandlerService> urlStreamServiceReference;
 
 	protected String protocol;
 
 	protected int ranking = Integer.MIN_VALUE;
 
-	public URLStreamHandlerProxy(String protocol, ServiceReference reference, BundleContext context) {
+	public URLStreamHandlerProxy(String protocol, ServiceReference<URLStreamHandlerService> reference, BundleContext context) {
 		this.context = context;
 		this.protocol = protocol;
 
@@ -53,11 +53,11 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		//set the handler and ranking
 		setNewHandler(reference, getRank(reference));
 
-		urlStreamHandlerServiceTracker = new ServiceTracker(context, StreamHandlerFactory.URLSTREAMHANDLERCLASS, this);
+		urlStreamHandlerServiceTracker = new ServiceTracker<URLStreamHandlerService, ServiceReference<URLStreamHandlerService>>(context, StreamHandlerFactory.URLSTREAMHANDLERCLASS, this);
 		StreamHandlerFactory.secureAction.open(urlStreamHandlerServiceTracker);
 	}
 
-	private void setNewHandler(ServiceReference reference, int rank) {
+	private void setNewHandler(ServiceReference<URLStreamHandlerService> reference, int rank) {
 		if (urlStreamServiceReference != null)
 			context.ungetService(urlStreamServiceReference);
 
@@ -67,7 +67,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		if (reference == null)
 			realHandlerService = new NullURLStreamHandlerService();
 		else
-			realHandlerService = (URLStreamHandlerService) StreamHandlerFactory.secureAction.getService(reference, context);
+			realHandlerService = StreamHandlerFactory.secureAction.getService(reference, context);
 	}
 
 	/**
@@ -140,6 +140,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 		super.setURL(u, protocol, host, port, authority, userInfo, file, query, ref);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void setURL(URL url, String protocol, String host, int port, String file, String ref) {
 
 		//using non-deprecated URLStreamHandler.setURL method. 
@@ -150,7 +151,7 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(ServiceReference)
 	 */
-	public Object addingService(ServiceReference reference) {
+	public ServiceReference<URLStreamHandlerService> addingService(ServiceReference<URLStreamHandlerService> reference) {
 		//check to see if our protocol is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_HANDLER_PROTOCOL);
 		if (!(prop instanceof String[]))
@@ -162,26 +163,26 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 				int newServiceRanking = getRank(reference);
 				if (newServiceRanking > ranking || urlStreamServiceReference == null)
 					setNewHandler(reference, newServiceRanking);
-				return (reference);
+				return reference;
 			}
 		}
 
 		//we don't want to continue hearing events about a URLStreamHandlerService not registered under our protocol
-		return (null);
+		return null;
 	}
 
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
 	// check to see if the ranking has changed.  If so, re-select a new URLHandler
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<URLStreamHandlerService> reference, ServiceReference<URLStreamHandlerService> service) {
 		int newRank = getRank(reference);
 		if (reference == urlStreamServiceReference) {
 			if (newRank < ranking) {
 				// The URLHandler we are currently using has dropped it's ranking below a URLHandler registered 
 				// for the same protocol. We need to swap out URLHandlers.
 				// this should get us the highest ranked service, if available
-				ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
+				ServiceReference<URLStreamHandlerService> newReference = urlStreamHandlerServiceTracker.getServiceReference();
 				if (newReference != urlStreamServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
@@ -196,18 +197,18 @@ public class URLStreamHandlerProxy extends URLStreamHandler implements ServiceTr
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<URLStreamHandlerService> reference, ServiceReference<URLStreamHandlerService> service) {
 		// check to see if our URLStreamHandler was unregistered.
 		if (reference != urlStreamServiceReference)
 			return;
 		// If so, look for a lower ranking URLHandler
 		// this should get us the highest ranking service left, if available
-		ServiceReference newReference = urlStreamHandlerServiceTracker.getServiceReference();
+		ServiceReference<URLStreamHandlerService> newReference = urlStreamHandlerServiceTracker.getServiceReference();
 		// if newReference == null then we will use the NullURLStreamHandlerService here
 		setNewHandler(newReference, getRank(newReference));
 	}
 
-	private int getRank(ServiceReference reference) {
+	private int getRank(ServiceReference<?> reference) {
 		if (reference == null)
 			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);

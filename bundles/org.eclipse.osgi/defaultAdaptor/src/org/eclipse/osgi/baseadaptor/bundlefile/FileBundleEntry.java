@@ -89,6 +89,7 @@ public class FileBundleEntry extends BundleEntry {
 		return getFileURL();
 	}
 
+	@SuppressWarnings("deprecation")
 	public URL getFileURL() {
 		try {
 			return file.toURL();

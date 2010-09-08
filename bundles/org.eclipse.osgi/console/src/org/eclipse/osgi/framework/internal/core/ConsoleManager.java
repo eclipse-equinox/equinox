@@ -14,6 +14,7 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.console.ConsoleSession;
@@ -23,7 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class ConsoleManager implements ServiceTrackerCustomizer {
+public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, FrameworkConsole> {
 	/**
 	 * ConsoleSocketGetter - provides a Thread that listens on the port
 	 * for FrameworkConsole.
@@ -87,18 +88,18 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
 	final Framework framework;
-	private final ServiceTracker cpTracker;
-	private final ServiceTracker sessions;
+	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
+	private final ServiceTracker<ConsoleSession, FrameworkConsole> sessions;
 	private final String consolePort;
 	private FrameworkCommandProvider fwkCommands;
-	private ServiceRegistration builtinSession;
+	private ServiceRegistration<?> builtinSession;
 	private ConsoleSocketGetter scsg;
 
 	public ConsoleManager(Framework framework, String consolePort) {
 		this.framework = framework;
 		this.consolePort = consolePort != null ? consolePort.trim() : consolePort;
-		this.cpTracker = new ServiceTracker(framework.getSystemBundleContext(), CommandProvider.class.getName(), null);
-		this.sessions = new ServiceTracker(framework.getSystemBundleContext(), ConsoleSession.class.getName(), this);
+		this.cpTracker = new ServiceTracker<CommandProvider, CommandProvider>(framework.getSystemBundleContext(), CommandProvider.class.getName(), null);
+		this.sessions = new ServiceTracker<ConsoleSession, FrameworkConsole>(framework.getSystemBundleContext(), ConsoleSession.class.getName(), this);
 	}
 
 	public static ConsoleManager startConsole(Framework framework) {
@@ -146,8 +147,8 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 
 			};
 			FrameworkConsoleSession session = new FrameworkConsoleSession(in, out, null);
-			Hashtable props = null;
-			props = new Hashtable(1);
+			Dictionary<String, Object> props = null;
+			props = new Hashtable<String, Object>(1);
 			props.put(PROP_SYSTEM_IN_OUT, Boolean.TRUE);
 			builtinSession = framework.getSystemBundleContext().registerService(ConsoleSession.class.getName(), session, props);
 		} else {
@@ -178,14 +179,14 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 			fwkCommands.stop();
 	}
 
-	public Object addingService(ServiceReference reference) {
+	public FrameworkConsole addingService(ServiceReference<ConsoleSession> reference) {
 		FrameworkConsole console = null;
 
 		Boolean isSystemInOut = (Boolean) reference.getProperty(PROP_SYSTEM_IN_OUT);
 		if (isSystemInOut == null)
 			isSystemInOut = Boolean.FALSE;
 
-		ConsoleSession session = (ConsoleSession) framework.getSystemBundleContext().getService(reference);
+		ConsoleSession session = framework.getSystemBundleContext().getService(reference);
 		console = new FrameworkConsole(framework.getSystemBundleContext(), session, isSystemInOut.booleanValue(), cpTracker);
 
 		Thread t = new Thread(console, CONSOLE_NAME);
@@ -194,11 +195,11 @@ public class ConsoleManager implements ServiceTrackerCustomizer {
 		return console;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<ConsoleSession> reference, FrameworkConsole service) {
 		// nothing
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
-		((FrameworkConsole) service).shutdown();
+	public void removedService(ServiceReference<ConsoleSession> reference, FrameworkConsole service) {
+		service.shutdown();
 	}
 }

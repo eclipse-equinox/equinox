@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -148,7 +149,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		String activatorClassName = bundledata.getActivator();
 		if (activatorClassName != null) {
 			try {
-				Class activatorClass = loadClass(activatorClassName, false);
+				Class<?> activatorClass = loadClass(activatorClassName, false);
 				/* Create the activator for the bundle */
 				return (BundleActivator) (activatorClass.newInstance());
 			} catch (Throwable t) {
@@ -172,7 +173,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 * @exception java.lang.ClassNotFoundException
 	 *                if the class definition was not found.
 	 */
-	protected abstract Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException;
+	protected abstract Class<?> loadClass(String name, boolean checkPermission) throws ClassNotFoundException;
 
 	/**
 	 * Returns the current state of the bundle.
@@ -471,7 +472,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 */
 	protected void setStatus(final int mask, final boolean state) {
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws IOException {
 					int status = bundledata.getStatus();
 					boolean test = ((status & mask) != 0);
@@ -575,12 +576,12 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		try {
 			final AccessControlContext callerContext = AccessController.getContext();
 			//note AdminPermission is checked again after updated bundle is loaded
-			updateWorker(new PrivilegedExceptionAction() {
+			updateWorker(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws BundleException {
 					/* compute the update location */
 					URLConnection source = null;
 					if (in == null) {
-						String updateLocation = (String) bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
+						String updateLocation = bundledata.getManifest().get(Constants.BUNDLE_UPDATELOCATION);
 						if (updateLocation == null)
 							updateLocation = bundledata.getLocation();
 						if (Debug.DEBUG_GENERAL)
@@ -604,7 +605,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	/**
 	 * Update worker. Assumes the caller has the state change lock.
 	 */
-	protected void updateWorker(PrivilegedExceptionAction action) throws BundleException {
+	protected void updateWorker(PrivilegedExceptionAction<Object> action) throws BundleException {
 		int previousState = 0;
 		if (!isFragment())
 			previousState = state;
@@ -665,7 +666,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 				if (extension && !hasPermission(new AllPermission()))
 					throw new BundleException(Msg.BUNDLE_EXTENSION_PERMISSION, BundleException.SECURITY_ERROR, new SecurityException(Msg.BUNDLE_EXTENSION_PERMISSION));
 				try {
-					AccessController.doPrivileged(new PrivilegedExceptionAction() {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 						public Object run() throws Exception {
 							framework.checkAdminPermission(newBundle, AdminPermission.LIFECYCLE);
 							if (extension) // need special permission to update extension bundles
@@ -767,7 +768,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		checkValid();
 		beginStateChange();
 		try {
-			uninstallWorker(new PrivilegedExceptionAction() {
+			uninstallWorker(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws BundleException {
 					uninstallWorkerPrivileged();
 					return null;
@@ -781,7 +782,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	/**
 	 * Uninstall worker. Assumes the caller has the state change lock.
 	 */
-	protected void uninstallWorker(PrivilegedExceptionAction action) throws BundleException {
+	protected void uninstallWorker(PrivilegedExceptionAction<Object> action) throws BundleException {
 		boolean bundleActive = false;
 		if (!isFragment())
 			bundleActive = (state & (ACTIVE | STARTING)) != 0;
@@ -894,7 +895,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 *                permission and the Java runtime environment supports
 	 *                permissions.
 	 */
-	public Dictionary getHeaders() {
+	public Dictionary<String, String> getHeaders() {
 		return getHeaders(null);
 	}
 
@@ -936,7 +937,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 *                If the caller does not have the <tt>AdminPermission</tt>,
 	 *                and the Java Runtime Environment supports permissions.
 	 */
-	public Dictionary getHeaders(String localeString) {
+	public Dictionary<String, String> getHeaders(String localeString) {
 		framework.checkAdminPermission(this, AdminPermission.METADATA);
 		ManifestLocalization localization;
 		try {
@@ -944,7 +945,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		} catch (BundleException e) {
 			framework.publishFrameworkEvent(FrameworkEvent.ERROR, this, e);
 			// return an empty dictinary.
-			return new Hashtable();
+			return new Hashtable<String, String>();
 		}
 		if (localeString == null)
 			localeString = Locale.getDefault().toString();
@@ -1190,7 +1191,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 * 
 	 * @see org.osgi.framework.Bundle#findClass(java.lang.String)
 	 */
-	public Class loadClass(String classname) throws ClassNotFoundException {
+	public Class<?> loadClass(String classname) throws ClassNotFoundException {
 		return loadClass(classname, true);
 	}
 
@@ -1199,7 +1200,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 * 
 	 * @see org.osgi.framework.Bundle#getResourcePaths(java.lang.String)
 	 */
-	public Enumeration getEntryPaths(final String path) {
+	public Enumeration<String> getEntryPaths(final String path) {
 		try {
 			framework.checkAdminPermission(this, AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
@@ -1207,8 +1208,8 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		}
 		checkValid();
 		// TODO this doPrivileged is probably not needed.  The adaptor isolates callers from disk access
-		return (Enumeration) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<Enumeration<String>>() {
+			public Enumeration<String> run() {
 				return bundledata.getEntryPaths(path);
 			}
 		});
@@ -1348,7 +1349,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	private synchronized ManifestLocalization getManifestLocalization() throws BundleException {
 		ManifestLocalization currentLocalization = manifestLocalization;
 		if (currentLocalization == null) {
-			Dictionary rawHeaders = bundledata.getManifest();
+			Dictionary<String, String> rawHeaders = bundledata.getManifest();
 			manifestLocalization = currentLocalization = new ManifestLocalization(this, rawHeaders);
 		}
 		return currentLocalization;
@@ -1362,7 +1363,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		return stateChanging;
 	}
 
-	public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+	public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 		try {
 			framework.checkAdminPermission(this, AdminPermission.RESOURCE);
 		} catch (SecurityException e) {
@@ -1374,15 +1375,15 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 			framework.packageAdmin.resolveBundles(new Bundle[] {this});
 
 		// a list used to store the results of the search
-		List pathList = new ArrayList();
+		List<String> pathList = new ArrayList<String>();
 		Filter patternFilter = null;
-		Hashtable patternProps = null;
+		Hashtable<String, String> patternProps = null;
 		if (filePattern != null)
 			try {
 				// create a file pattern filter with 'filename' as the key
 				patternFilter = FilterImpl.newInstance("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a single hashtable to be shared during the recursive search
-				patternProps = new Hashtable(2);
+				patternProps = new Hashtable<String, String>(2);
 			} catch (InvalidSyntaxException e) {
 				// cannot happen
 			}
@@ -1397,8 +1398,8 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		if (pathList.size() == 0)
 			return null;
 		// create an enumeration to enumerate the pathList
-		final String[] pathArray = (String[]) pathList.toArray(new String[pathList.size()]);
-		return new Enumeration() {
+		final String[] pathArray = pathList.toArray(new String[pathList.size()]);
+		return new Enumeration<URL>() {
 			int curIndex = 0;
 			int curFragment = -1;
 			URL nextElement = null;
@@ -1410,7 +1411,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 				return nextElement != null;
 			}
 
-			public Object nextElement() {
+			public URL nextElement() {
 				if (!hasMoreElements())
 					throw new NoSuchElementException();
 				URL result;
@@ -1447,12 +1448,12 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		};
 	}
 
-	protected void findLocalEntryPaths(String path, Filter patternFilter, Hashtable patternProps, boolean recurse, List pathList) {
-		Enumeration entryPaths = bundledata.getEntryPaths(path);
+	protected void findLocalEntryPaths(String path, Filter patternFilter, Hashtable<String, String> patternProps, boolean recurse, List<String> pathList) {
+		Enumeration<String> entryPaths = bundledata.getEntryPaths(path);
 		if (entryPaths == null)
 			return;
 		while (entryPaths.hasMoreElements()) {
-			String entry = (String) entryPaths.nextElement();
+			String entry = entryPaths.nextElement();
 			int lastSlash = entry.lastIndexOf('/');
 			if (patternProps != null) {
 				int secondToLastSlash = entry.lastIndexOf('/', lastSlash - 1);
@@ -1504,37 +1505,40 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 
 	}
 
-	public Map/* <X509Certificate, List<X509Certificate>> */getSignerCertificates(int signersType) {
+	public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
+		@SuppressWarnings("unchecked")
+		final Map<X509Certificate, List<X509Certificate>> empty = Collections.EMPTY_MAP;
 		if (signersType != SIGNERS_ALL && signersType != SIGNERS_TRUSTED)
 			throw new IllegalArgumentException("Invalid signers type: " + signersType); //$NON-NLS-1$
 		if (framework == null)
-			return Collections.EMPTY_MAP;
+			return empty;
 		SignedContentFactory factory = framework.getSignedContentFactory();
 		if (factory == null)
-			return Collections.EMPTY_MAP;
+			return empty;
 		try {
 			SignedContent signedContent = factory.getSignedContent(this);
 			SignerInfo[] infos = signedContent.getSignerInfos();
 			if (infos.length == 0)
-				return Collections.EMPTY_MAP;
-			Map/* <X509Certificate, List<X509Certificate>> */results = new HashMap(infos.length);
+				return empty;
+			Map<X509Certificate, List<X509Certificate>> results = new HashMap<X509Certificate, List<X509Certificate>>(infos.length);
 			for (int i = 0; i < infos.length; i++) {
 				if (signersType == SIGNERS_TRUSTED && !infos[i].isTrusted())
 					continue;
 				Certificate[] certs = infos[i].getCertificateChain();
 				if (certs == null || certs.length == 0)
 					continue;
-				List/* <X509Certificate> */certChain = new ArrayList();
+				List<X509Certificate> certChain = new ArrayList<X509Certificate>();
 				for (int j = 0; j < certs.length; j++)
-					certChain.add(certs[j]);
-				results.put(certs[0], certChain);
+					certChain.add((X509Certificate) certs[j]);
+				results.put((X509Certificate) certs[0], certChain);
 			}
 			return results;
 		} catch (Exception e) {
-			return Collections.EMPTY_MAP;
+			return empty;
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <A> A adapt(Class<A> adapterType) {
 		if (adapterType.isInstance(this))
 			return (A) this;

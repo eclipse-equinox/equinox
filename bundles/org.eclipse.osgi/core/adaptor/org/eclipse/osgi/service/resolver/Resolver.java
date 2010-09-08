@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,7 @@ public interface Resolver {
 	 * against.  A <tt>null</tt> value indicates that the system properties should
 	 * be used to match against
 	 */
-	public void resolve(BundleDescription[] discard, Dictionary[] platformProperties);
+	public void resolve(BundleDescription[] discard, Dictionary<String, String>[] platformProperties);
 
 	/**
 	 * Flushes this resolver of any stored/cached data it may be keeping to
@@ -135,12 +135,12 @@ public interface Resolver {
 	 * @param selectionPolicy the selection policy for this resolver
 	 * @since 3.2
 	 */
-	public void setSelectionPolicy(Comparator selectionPolicy);
+	public void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy);
 
 	/**
 	 * Returns the selection policy for this resolver or null if it is not set 
 	 * @return the selection policy for this resolver or null if it is not set
 	 * @since 3.2 
 	 */
-	public Comparator getSelectionPolicy();
+	public Comparator<BaseDescription> getSelectionPolicy();
 }

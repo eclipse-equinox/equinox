@@ -11,7 +11,6 @@ package org.eclipse.osgi.internal.signedcontent;
 import java.io.*;
 import java.security.cert.*;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.framework.util.KeyedElement;
@@ -24,10 +23,10 @@ public class SignedStorageHook implements StorageHook {
 	public static final String KEY = SignedStorageHook.class.getName();
 	public static final int HASHCODE = KEY.hashCode();
 	private static final int STORAGE_VERSION = 3;
-	private static ArrayList savedSignerInfo = new ArrayList(5);
+	private static List<SignerInfo> savedSignerInfo = new ArrayList<SignerInfo>(5);
 	private static long firstIDSaved = -1;
 	private static long lastIDSaved = -1;
-	private static ArrayList loadedSignerInfo = new ArrayList(5);
+	private static List<SignerInfo> loadedSignerInfo = new ArrayList<SignerInfo>(5);
 	private static long lastIDLoaded;
 
 	private BaseData bundledata;
@@ -49,7 +48,7 @@ public class SignedStorageHook implements StorageHook {
 	/**
 	 * @throws BundleException  
 	 */
-	public void initialize(Dictionary manifest) throws BundleException {
+	public void initialize(Dictionary<String, String> manifest) throws BundleException {
 		// do nothing
 	}
 
@@ -68,9 +67,9 @@ public class SignedStorageHook implements StorageHook {
 			signerInfos[i] = readSignerInfo(is);
 
 		int resultsSize = is.readInt();
-		HashMap contentMDResults = null;
+		Map<String, Object> contentMDResults = null;
 		if (resultsSize > 0) {
-			contentMDResults = new HashMap(resultsSize);
+			contentMDResults = new HashMap<String, Object>(resultsSize);
 			for (int i = 0; i < resultsSize; i++) {
 				String path = is.readUTF();
 				int numEntrySigners = is.readInt();
@@ -113,12 +112,11 @@ public class SignedStorageHook implements StorageHook {
 			saveSignerInfo(signerInfos[i], os);
 
 		// keyed by entry path -> {SignerInfo[] infos, byte[][] results)}
-		HashMap contentMDResults = signedContent.getContentMDResults();
+		Map<String, Object> contentMDResults = signedContent.getContentMDResults();
 		os.writeInt(contentMDResults == null ? -1 : contentMDResults.size());
 		if (contentMDResults != null)
-			for (Iterator iResults = contentMDResults.entrySet().iterator(); iResults.hasNext();) {
-				Entry entry = (Entry) iResults.next();
-				String path = (String) entry.getKey();
+			for (Map.Entry<String, Object> entry : contentMDResults.entrySet()) {
+				String path = entry.getKey();
 				os.writeUTF(path);
 				Object[] signerResults = (Object[]) entry.getValue();
 				SignerInfo[] entrySigners = (SignerInfo[]) signerResults[0];
@@ -171,7 +169,7 @@ public class SignedStorageHook implements StorageHook {
 	private SignerInfo readSignerInfo(DataInputStream is) throws IOException {
 		int index = is.readInt();
 		if (index >= 0)
-			return (SignerInfo) loadedSignerInfo.get(index);
+			return loadedSignerInfo.get(index);
 		int numCerts = is.readInt();
 		Certificate[] certs = new Certificate[numCerts];
 		for (int i = 0; i < numCerts; i++) {
@@ -211,7 +209,7 @@ public class SignedStorageHook implements StorageHook {
 	/**
 	 * @throws BundleException  
 	 */
-	public Dictionary getManifest(boolean firstLoad) throws BundleException {
+	public Dictionary<String, String> getManifest(boolean firstLoad) throws BundleException {
 		// do nothing
 		return null;
 	}

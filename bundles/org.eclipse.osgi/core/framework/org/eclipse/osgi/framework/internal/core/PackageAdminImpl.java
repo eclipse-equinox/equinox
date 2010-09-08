@@ -52,28 +52,28 @@ import org.osgi.service.packageadmin.*;
 public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	/** framework object */
 	protected Framework framework;
-	private Map<Long, List<BundleData>> removalPendings = new HashMap();
+	private Map<Long, List<BundleData>> removalPendings = new HashMap<Long, List<BundleData>>();
 
 	/* 
 	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
 	 * See bug 161561
 	 */
 	static {
-		Class c;
+		Class<?> c;
 		c = GetBundleAction.class;
 		c.getName(); // to prevent compiler warnings
 	}
 
-	static class GetBundleAction implements PrivilegedAction {
-		private Class clazz;
+	static class GetBundleAction implements PrivilegedAction<Bundle> {
+		private Class<?> clazz;
 		private PackageAdminImpl impl;
 
-		public GetBundleAction(PackageAdminImpl impl, Class clazz) {
+		public GetBundleAction(PackageAdminImpl impl, Class<?> clazz) {
 			this.impl = impl;
 			this.clazz = clazz;
 		}
 
-		public Object run() {
+		public Bundle run() {
 			return impl.getBundlePriv(clazz);
 		}
 	}
@@ -88,7 +88,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	public ExportedPackage[] getExportedPackages(Bundle bundle) {
-		ArrayList allExports = new ArrayList();
+		List<ExportedPackage> allExports = new ArrayList<ExportedPackage>();
 		FrameworkAdaptor adaptor = framework.adaptor;
 		if (adaptor == null)
 			return null;
@@ -100,7 +100,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			if (bundle == null || exportedPackage.getBundle() == bundle)
 				allExports.add(exportedPackage);
 		}
-		return (ExportedPackage[]) (allExports.size() == 0 ? null : allExports.toArray(new ExportedPackage[allExports.size()]));
+		return (allExports.size() == 0 ? null : allExports.toArray(new ExportedPackage[allExports.size()]));
 	}
 
 	private ExportedPackageImpl createExportedPackage(ExportPackageDescription description) {
@@ -141,11 +141,11 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		ExportedPackage[] allExports = getExportedPackages((Bundle) null);
 		if (allExports == null)
 			return null;
-		ArrayList result = new ArrayList(1); // rare to have more than one
+		List<ExportedPackage> result = new ArrayList<ExportedPackage>(1); // rare to have more than one
 		for (int i = 0; i < allExports.length; i++)
 			if (name.equals(allExports[i].getName()))
 				result.add(allExports[i]);
-		return (ExportedPackage[]) (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
+		return (result.size() == 0 ? null : result.toArray(new ExportedPackage[result.size()]));
 	}
 
 	public void refreshPackages(Bundle[] input) {
@@ -211,7 +211,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 				populateLoaders(framework.getAllBundles());
 				synchronized (framework.bundles) {
 					// now collect the descriptions to refresh
-					ArrayList results = new ArrayList(numBundles);
+					List<BundleDescription> results = new ArrayList<BundleDescription>(numBundles);
 					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
 						BundleDescription description = bundles[i].getBundleDescription();
@@ -232,7 +232,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 								}
 						}
 					}
-					descriptions = (BundleDescription[]) (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
+					descriptions = (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
 			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
@@ -384,9 +384,9 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	private void applyDeltas(BundleDelta[] bundleDeltas) throws BundleException {
-		Arrays.sort(bundleDeltas, new Comparator() {
-			public int compare(Object delta0, Object delta1) {
-				return (int) (((BundleDelta) delta0).getBundle().getBundleId() - ((BundleDelta) delta1).getBundle().getBundleId());
+		Arrays.sort(bundleDeltas, new Comparator<BundleDelta>() {
+			public int compare(BundleDelta delta0, BundleDelta delta1) {
+				return (int) (delta0.getBundle().getBundleId() - delta1.getBundle().getBundleId());
 			}
 		});
 		for (int i = 0; i < bundleDeltas.length; i++) {
@@ -410,7 +410,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	private AbstractBundle[] processDelta(BundleDelta[] bundleDeltas, boolean refreshPackages, State systemState) {
-		ArrayList bundlesList = new ArrayList(bundleDeltas.length);
+		List<AbstractBundle> bundlesList = new ArrayList<AbstractBundle>(bundleDeltas.length);
 		// get all the bundles that are going to be refreshed
 		for (int i = 0; i < bundleDeltas.length; i++) {
 			if ((bundleDeltas[i].getType() & BundleDelta.REMOVAL_COMPLETE) != 0 && (bundleDeltas[i].getType() & BundleDelta.REMOVED) == 0)
@@ -420,7 +420,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			if (changedBundle != null && !bundlesList.contains(changedBundle))
 				bundlesList.add(changedBundle);
 		}
-		AbstractBundle[] refresh = (AbstractBundle[]) bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
+		AbstractBundle[] refresh = bundlesList.toArray(new AbstractBundle[bundlesList.size()]);
 		// first sort by id/start-level order
 		Util.sort(refresh, 0, refresh.length);
 		// then sort by dependency order
@@ -557,14 +557,14 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		if (bundles == null || bundles.length == 0)
 			return null;
 
-		ArrayList result = new ArrayList(bundles.length);
+		List<RequiredBundle> result = new ArrayList<RequiredBundle>(bundles.length);
 		for (int i = 0; i < bundles.length; i++) {
 			if (bundles[i].isFragment() || !bundles[i].isResolved() || bundles[i].getSymbolicName() == null)
 				continue;
 			if (bundles[i].hasPermission(new BundlePermission(bundles[i].getSymbolicName(), BundlePermission.PROVIDE)))
 				result.add(((BundleHost) bundles[i]).getLoaderProxy());
 		}
-		return result.size() == 0 ? null : (RequiredBundle[]) result.toArray(new RequiredBundle[result.size()]);
+		return result.size() == 0 ? null : result.toArray(new RequiredBundle[result.size()]);
 	}
 
 	public Bundle[] getBundles(String symbolicName, String versionRange) {
@@ -583,7 +583,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 
 		// This code depends on the array of bundles being in descending
 		// version order.
-		ArrayList result = new ArrayList(bundles.length);
+		List<AbstractBundle> result = new ArrayList<AbstractBundle>(bundles.length);
 		VersionRange range = new VersionRange(versionRange);
 		for (int i = 0; i < bundles.length; i++) {
 			if (range.isIncluded(bundles[i].getVersion())) {
@@ -593,7 +593,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 
 		if (result.size() == 0)
 			return null;
-		return (AbstractBundle[]) result.toArray(new AbstractBundle[result.size()]);
+		return result.toArray(new AbstractBundle[result.size()]);
 	}
 
 	public Bundle[] getFragments(Bundle bundle) {
@@ -611,7 +611,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		return result;
 	}
 
-	Bundle getBundlePriv(Class clazz) {
+	Bundle getBundlePriv(Class<?> clazz) {
 		ClassLoader cl = clazz.getClassLoader();
 		if (cl instanceof BundleClassLoader) {
 			ClassLoaderDelegate delegate = ((BundleClassLoader) cl).getDelegate();
@@ -623,10 +623,10 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		return null;
 	}
 
-	public Bundle getBundle(final Class clazz) {
+	public Bundle getBundle(@SuppressWarnings("rawtypes") final Class clazz) {
 		if (System.getSecurityManager() == null)
 			return getBundlePriv(clazz);
-		return (Bundle) AccessController.doPrivileged(new GetBundleAction(this, clazz));
+		return AccessController.doPrivileged(new GetBundleAction(this, clazz));
 	}
 
 	public int getBundleType(Bundle bundle) {
@@ -636,11 +636,10 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	protected void cleanup() {
 		//This is only called when the framework is shutting down
 		synchronized (removalPendings) {
-			for (Iterator pendings = removalPendings.values().iterator(); pendings.hasNext();) {
-				List removals = (List) pendings.next();
-				for (Iterator iRemovals = removals.iterator(); iRemovals.hasNext();)
+			for (List<BundleData> removals : removalPendings.values()) {
+				for (BundleData data : removals)
 					try {
-						((BundleData) iRemovals.next()).close();
+						data.close();
 					} catch (IOException e) {
 						// ignore
 					}
@@ -720,7 +719,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			Long id = new Long(bundledata.getBundleID());
 			List<BundleData> removals = removalPendings.get(id);
 			if (removals == null) {
-				removals = new ArrayList(1);
+				removals = new ArrayList<BundleData>(1);
 				removalPendings.put(id, removals);
 			}
 			removals.add(bundledata);

@@ -12,13 +12,12 @@
 package org.eclipse.osgi.internal.baseadaptor;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import org.eclipse.osgi.framework.adaptor.PermissionStorage;
 
 public class BasePermissionStorage implements PermissionStorage {
 
-	private HashMap locations = new HashMap();
+	private Map<String, String[]> locations = new HashMap<String, String[]>();
 	private String[] defaultInfos;
 	private String[] condPermInfos;
 	private BaseStorage storage;
@@ -35,8 +34,8 @@ public class BasePermissionStorage implements PermissionStorage {
 		synchronized (locations) {
 			String[] result = new String[locations.size()];
 			int i = 0;
-			for (Iterator iLocs = locations.keySet().iterator(); iLocs.hasNext(); i++)
-				result[i] = (String) iLocs.next();
+			for (Iterator<String> iLocs = locations.keySet().iterator(); iLocs.hasNext(); i++)
+				result[i] = iLocs.next();
 			return result;
 		}
 	}
@@ -50,7 +49,7 @@ public class BasePermissionStorage implements PermissionStorage {
 		synchronized (locations) {
 			if (locations.size() == 0)
 				return null;
-			return (String[]) locations.get(location);
+			return locations.get(location);
 		}
 	}
 

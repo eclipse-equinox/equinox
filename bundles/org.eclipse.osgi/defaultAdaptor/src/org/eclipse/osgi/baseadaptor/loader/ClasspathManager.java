@@ -55,8 +55,8 @@ public class ClasspathManager {
 	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private FragmentClasspath[] fragments = emptyFragments;
 	// a collection of String[2], each element is {"libname", "libpath"}
-	private Collection loadedLibraries = null;
-	private HashMap classNameLocks = new HashMap(5);
+	private Collection<String[]> loadedLibraries = null;
+	private Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
 	private final boolean isParallelClassLoader;
 
 	/**
@@ -144,11 +144,11 @@ public class ClasspathManager {
 	}
 
 	private static ClasspathEntry[] buildClasspath(String[] cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
-		ArrayList result = new ArrayList(cp.length);
+		ArrayList<ClasspathEntry> result = new ArrayList<ClasspathEntry>(cp.length);
 		// add the regular classpath entries.
 		for (int i = 0; i < cp.length; i++)
 			findClassPathEntry(result, cp[i], hostloader, sourcedata, sourcedomain);
-		return (ClasspathEntry[]) result.toArray(new ClasspathEntry[result.size()]);
+		return result.toArray(new ClasspathEntry[result.size()]);
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class ClasspathManager {
 	 * @param sourcedata the source EquionoxData to search for the classpath
 	 * @param sourcedomain the source domain to used by the new ClasspathEntry
 	 */
-	public static void findClassPathEntry(ArrayList result, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
+	public static void findClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		// look in classpath manager hooks first
 		ClassLoadingHook[] loaderHooks = sourcedata.getAdaptor().getHookRegistry().getClassLoadingHooks();
 		boolean hookAdded = false;
@@ -186,7 +186,7 @@ public class ClasspathManager {
 	 * @param sourcedomain the source domain to used by the new ClasspathEntry
 	 * @return true if a ClasspathEntry was added to the result
 	 */
-	public static boolean addClassPathEntry(ArrayList result, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
+	public static boolean addClassPathEntry(ArrayList<ClasspathEntry> result, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		if (cp.equals(".")) { //$NON-NLS-1$
 			result.add(hostloader.createClassPathEntry(sourcedata.getBundleFile(), sourcedomain, sourcedata));
 			return true;
@@ -321,14 +321,14 @@ public class ClasspathManager {
 	 * @param resource the requested resource name.
 	 * @return an enumeration of the the requested resources or null if the resources do not exist
 	 */
-	public Enumeration findLocalResources(String resource) {
-		Vector resources = new Vector(6); // use a Vector instead of ArrayList because we need an enumeration
+	public Enumeration<URL> findLocalResources(String resource) {
+		List<URL> resources = new ArrayList<URL>(6);
 		int classPathIndex = 0;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				URL url = findResourceImpl(resource, entries[i].getBundleFile(), classPathIndex);
 				if (url != null)
-					resources.addElement(url);
+					resources.add(url);
 			}
 			classPathIndex++;
 		}
@@ -338,12 +338,12 @@ public class ClasspathManager {
 			for (int j = 0; j < fragEntries.length; j++) {
 				URL url = findResourceImpl(resource, fragEntries[j].getBundleFile(), classPathIndex);
 				if (url != null)
-					resources.addElement(url);
+					resources.add(url);
 				classPathIndex++;
 			}
 		}
 		if (resources.size() > 0)
-			return resources.elements();
+			return Collections.enumeration(resources);
 		return null;
 	}
 
@@ -396,13 +396,13 @@ public class ClasspathManager {
 	 * @param path the requested entry path.
 	 * @return an enumeration of the the requested entries or null if the entries do not exist
 	 */
-	public Enumeration findLocalEntries(String path) {
-		Vector objects = new Vector(6); // use a Vector instead of ArrayList because we need an enumeration
+	public Enumeration<BundleEntry> findLocalEntries(String path) {
+		List<BundleEntry> objects = new ArrayList<BundleEntry>(6);
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				BundleEntry result = findEntryImpl(path, entries[i].getBundleFile());
 				if (result != null)
-					objects.addElement(result);
+					objects.add(result);
 			}
 		}
 		// look in fragments
@@ -411,11 +411,11 @@ public class ClasspathManager {
 			for (int j = 0; j < fragEntries.length; j++) {
 				BundleEntry result = findEntryImpl(path, fragEntries[j].getBundleFile());
 				if (result != null)
-					objects.addElement(result);
+					objects.add(result);
 			}
 		}
 		if (objects.size() > 0)
-			return objects.elements();
+			return Collections.enumeration(objects);
 		return null;
 	}
 
@@ -437,8 +437,8 @@ public class ClasspathManager {
 	 * @return the requested class
 	 * @throws ClassNotFoundException if the class does not exist
 	 */
-	public Class findLocalClass(String classname) throws ClassNotFoundException {
-		Class result = null;
+	public Class<?> findLocalClass(String classname) throws ClassNotFoundException {
+		Class<?> result = null;
 		ClassLoadingStatsHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingStatsHooks();
 		try {
 			for (int i = 0; i < hooks.length; i++)
@@ -454,7 +454,7 @@ public class ClasspathManager {
 		}
 	}
 
-	private Class findLocalClass_LockClassName(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
+	private Class<?> findLocalClass_LockClassName(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
 		boolean initialLock = lockClassName(classname);
 		try {
 			return findLocalClassImpl(classname, hooks);
@@ -464,16 +464,16 @@ public class ClasspathManager {
 		}
 	}
 
-	private Class findLocalClass_LockClassLoader(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
+	private Class<?> findLocalClass_LockClassLoader(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
 		synchronized (classloader) {
 			return findLocalClassImpl(classname, hooks);
 		}
 	}
 
-	private Class findLocalClassImpl(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
+	private Class<?> findLocalClassImpl(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
 		// must call findLoadedClass here even if it was called earlier,
 		// the findLoadedClass and defineClass calls must be atomic
-		Class result = classloader.publicFindLoaded(classname);
+		Class<?> result = classloader.publicFindLoaded(classname);
 		if (result != null)
 			return result;
 		for (int i = 0; i < entries.length; i++) {
@@ -524,7 +524,7 @@ public class ClasspathManager {
 		}
 	}
 
-	private Class findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
+	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
 		if (Debug.DEBUG_LOADER)
 			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
@@ -568,7 +568,7 @@ public class ClasspathManager {
 	 * @param statsHooks the class loading stat hooks
 	 * @return the defined class
 	 */
-	private Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClassLoadingStatsHook[] statsHooks) {
+	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClassLoadingStatsHook[] statsHooks) {
 		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
 		byte[] modifiedBytes = classbytes;
 		for (int i = 0; i < hooks.length; i++) {
@@ -577,7 +577,7 @@ public class ClasspathManager {
 				classbytes = modifiedBytes;
 		}
 
-		Class result = classloader.defineClass(name, classbytes, classpathEntry, entry);
+		Class<?> result = classloader.defineClass(name, classbytes, classpathEntry, entry);
 
 		for (int i = 0; i < statsHooks.length; i++)
 			statsHooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
@@ -619,14 +619,14 @@ public class ClasspathManager {
 	public String findLibrary(String libname) {
 		synchronized (this) {
 			if (loadedLibraries == null)
-				loadedLibraries = new ArrayList(1);
+				loadedLibraries = new ArrayList<String[]>(1);
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
 			// instead of wasting space with a map we iterate over our collection of found libraries
 			// each element is a String[2], each array is {"libname", "libpath"}
-			for (Iterator libs = loadedLibraries.iterator(); libs.hasNext();) {
-				String[] libNameResult = (String[]) libs.next();
+			for (Iterator<String[]> libs = loadedLibraries.iterator(); libs.hasNext();) {
+				String[] libNameResult = libs.next();
 				if (libNameResult[0].equals(libname))
 					return libNameResult[1];
 			}

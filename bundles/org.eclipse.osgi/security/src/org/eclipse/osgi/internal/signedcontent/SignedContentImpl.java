@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.*;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.signedcontent.*;
@@ -24,13 +23,13 @@ public class SignedContentImpl implements SignedContent {
 	volatile SignedBundleFile content; // TODO can this be more general?
 	// the content entry md results used for entry content verification
 	// keyed by entry path -> {SignerInfo[] infos, byte[][] results)}
-	private final HashMap contentMDResults;
+	private final Map<String, Object> contentMDResults;
 	private final SignerInfo[] signerInfos;
 	// map of tsa singers keyed by SignerInfo -> {tsa_SignerInfo, signingTime}
-	private HashMap tsaSignerInfos;
+	private Map<SignerInfo, Object[]> tsaSignerInfos;
 	volatile private boolean checkedValid = false;
 
-	public SignedContentImpl(SignerInfo[] signerInfos, HashMap contentMDResults) {
+	public SignedContentImpl(SignerInfo[] signerInfos, Map<String, Object> contentMDResults) {
 		this.signerInfos = signerInfos == null ? EMPTY_SIGNERINFO : signerInfos;
 		this.contentMDResults = contentMDResults;
 	}
@@ -38,14 +37,13 @@ public class SignedContentImpl implements SignedContent {
 	public SignedContentEntry[] getSignedEntries() {
 		if (contentMDResults == null)
 			return new SignedContentEntry[0];
-		ArrayList results = new ArrayList(contentMDResults.size());
-		for (Iterator iMDResults = contentMDResults.entrySet().iterator(); iMDResults.hasNext();) {
-			Entry entry = (Entry) iMDResults.next();
-			String entryName = (String) entry.getKey();
+		List<SignedContentEntry> results = new ArrayList<SignedContentEntry>(contentMDResults.size());
+		for (Map.Entry<String, Object> entry : contentMDResults.entrySet()) {
+			String entryName = entry.getKey();
 			Object[] mdResult = (Object[]) entry.getValue();
 			results.add(new SignedContentEntryImpl(entryName, (SignerInfo[]) mdResult[0]));
 		}
-		return (SignedContentEntry[]) results.toArray(new SignedContentEntry[results.size()]);
+		return results.toArray(new SignedContentEntry[results.size()]);
 	}
 
 	public SignedContentEntry getSignedEntry(String name) {
@@ -62,14 +60,14 @@ public class SignedContentImpl implements SignedContent {
 	public Date getSigningTime(SignerInfo signerInfo) {
 		if (tsaSignerInfos == null)
 			return null;
-		Object[] tsaInfo = (Object[]) tsaSignerInfos.get(signerInfo);
+		Object[] tsaInfo = tsaSignerInfos.get(signerInfo);
 		return tsaInfo == null ? null : (Date) tsaInfo[1];
 	}
 
 	public SignerInfo getTSASignerInfo(SignerInfo signerInfo) {
 		if (tsaSignerInfos == null)
 			return null;
-		Object[] tsaInfo = (Object[]) tsaSignerInfos.get(signerInfo);
+		Object[] tsaInfo = tsaSignerInfos.get(signerInfo);
 		return tsaInfo == null ? null : (SignerInfo) tsaInfo[0];
 	}
 
@@ -97,7 +95,7 @@ public class SignedContentImpl implements SignedContent {
 		this.content = content;
 	}
 
-	void setTSASignerInfos(HashMap tsaSignerInfos) {
+	void setTSASignerInfos(Map<SignerInfo, Object[]> tsaSignerInfos) {
 		this.tsaSignerInfos = tsaSignerInfos;
 	}
 
@@ -106,11 +104,11 @@ public class SignedContentImpl implements SignedContent {
 		if (!containsInfo(baseInfo))
 			throw new IllegalArgumentException("The baseInfo is not found"); //$NON-NLS-1$
 		if (tsaSignerInfos == null)
-			tsaSignerInfos = new HashMap(signerInfos.length);
+			tsaSignerInfos = new HashMap<SignerInfo, Object[]>(signerInfos.length);
 		tsaSignerInfos.put(baseInfo, new Object[] {tsaSignerInfo, signingTime});
 	}
 
-	HashMap getContentMDResults() {
+	Map<String, Object> getContentMDResults() {
 		return contentMDResults;
 	}
 

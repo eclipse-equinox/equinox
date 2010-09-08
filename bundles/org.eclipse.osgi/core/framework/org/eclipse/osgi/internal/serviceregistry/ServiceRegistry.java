@@ -803,9 +803,10 @@ public class ServiceRegistry {
 		}
 
 		/* deliver the event to the snapshot */
-		ListenerQueue queue = framework.newListenerQueue();
+		ListenerQueue<ServiceListener, FilteredServiceListener, ServiceEvent> queue = framework.newListenerQueue();
 		for (Map.Entry<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> entry : listenerSnapshot.entrySet()) {
-			EventDispatcher dispatcher = entry.getKey();
+			@SuppressWarnings({"unchecked", "rawtypes"})
+			EventDispatcher<ServiceListener, FilteredServiceListener, ServiceEvent> dispatcher = (EventDispatcher) entry.getKey();
 			Set<Map.Entry<ServiceListener, FilteredServiceListener>> listeners = entry.getValue();
 			queue.queueListeners(listeners, dispatcher);
 		}

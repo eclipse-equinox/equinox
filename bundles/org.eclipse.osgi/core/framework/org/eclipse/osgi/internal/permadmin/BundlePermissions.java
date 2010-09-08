@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,12 +20,12 @@ public final class BundlePermissions extends PermissionCollection {
 	private static final long serialVersionUID = -5443618108312606612L;
 
 	// Note that this forces the Enumeration inner class to be loaded as soon as possible (see bug 119069)  
-	static final Enumeration EMPTY_ENUMERATION = new Enumeration() {
+	static final Enumeration<Permission> EMPTY_ENUMERATION = new Enumeration<Permission>() {
 		public boolean hasMoreElements() {
 			return false;
 		}
 
-		public Object nextElement() {
+		public Permission nextElement() {
 			throw new NoSuchElementException();
 		}
 	};
@@ -47,7 +47,7 @@ public final class BundlePermissions extends PermissionCollection {
 		throw new SecurityException();
 	}
 
-	public Enumeration elements() {
+	public Enumeration<Permission> elements() {
 		// TODO return an empty enumeration for now; 
 		// It does not seem possible to do this properly with multiple exports and conditional permissions.
 		// When looking to fix this be sure the Enumeration class is loaded as soon as possible (see bug 119069)

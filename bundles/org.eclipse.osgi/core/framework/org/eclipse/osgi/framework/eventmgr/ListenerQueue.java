@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
 
 package org.eclipse.osgi.framework.eventmgr;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
 
 /**
@@ -33,7 +34,7 @@ import org.eclipse.osgi.framework.eventmgr.EventManager.EventThread;
  * added to the list.
  * @since 3.1
  */
-public class ListenerQueue {
+public class ListenerQueue<K, V, E> {
 	/**
 	 * EventManager with which this queue is associated.
 	 */
@@ -41,7 +42,7 @@ public class ListenerQueue {
 	/**
 	 * A list of listener lists.
 	 */
-	private final Map /*<Set<Map.Entry<Object,Object>>,EventDispatcher>*/queue;
+	private final Map<Set<Map.Entry<K, V>>, EventDispatcher<K, V, E>> queue;
 
 	/**
 	 * Once the listener queue has been used to dispatch an event, 
@@ -62,7 +63,7 @@ public class ListenerQueue {
 		}
 
 		this.manager = manager;
-		queue = new CopyOnWriteIdentityMap();
+		queue = new CopyOnWriteIdentityMap<Set<Map.Entry<K, V>>, EventDispatcher<K, V, E>>();
 		readOnly = false;
 	}
 
@@ -79,7 +80,7 @@ public class ListenerQueue {
 	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
 	 * @deprecated As of 3.5. Replaced by {@link #queueListeners(Set, EventDispatcher)}.
 	 */
-	public void queueListeners(EventListeners listeners, EventDispatcher dispatcher) {
+	public void queueListeners(EventListeners<K, V> listeners, EventDispatcher<K, V, E> dispatcher) {
 		queueListeners(listeners.entrySet(), dispatcher);
 	}
 
@@ -97,7 +98,7 @@ public class ListenerQueue {
 	 * @throws IllegalStateException If called after one of the dispatch methods has been called.
 	 * @since 3.5
 	 */
-	public synchronized void queueListeners(Set/*<Map.Entry<Object,Object>>*/listeners, EventDispatcher dispatcher) {
+	public synchronized void queueListeners(Set<Map.Entry<K, V>> listeners, EventDispatcher<K, V, E> dispatcher) {
 		if (readOnly) {
 			throw new IllegalStateException();
 		}
@@ -115,15 +116,14 @@ public class ListenerQueue {
 	 * @param eventAction This value is passed to the EventDispatcher.
 	 * @param eventObject This object is passed to the EventDispatcher.
 	 */
-	public void dispatchEventAsynchronous(int eventAction, Object eventObject) {
+	public void dispatchEventAsynchronous(int eventAction, E eventObject) {
 		synchronized (this) {
 			readOnly = true;
 		}
-		EventThread eventThread = manager.getEventThread();
+		EventThread<K, V, E> eventThread = manager.getEventThread();
 		synchronized (eventThread) { /* synchronize on the EventThread to ensure no interleaving of posting to the event thread */
-			for (Iterator iter = queue.entrySet().iterator(); iter.hasNext();) { /* iterate over the list of listener lists */
-				Map.Entry entry = (Map.Entry) iter.next();
-				eventThread.postEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
+			for (Map.Entry<Set<Map.Entry<K, V>>, EventDispatcher<K, V, E>> entry : queue.entrySet()) { /* iterate over the list of listener lists */
+				eventThread.postEvent(entry.getKey(), entry.getValue(), eventAction, eventObject);
 			}
 		}
 	}
@@ -138,15 +138,14 @@ public class ListenerQueue {
 	 * @param eventAction This value is passed to the EventDispatcher.
 	 * @param eventObject This object is passed to the EventDispatcher.
 	 */
-	public void dispatchEventSynchronous(int eventAction, Object eventObject) {
+	public void dispatchEventSynchronous(int eventAction, E eventObject) {
 		synchronized (this) {
 			readOnly = true;
 		}
 		// We can't guarantee any delivery order for synchronous events.
 		// Attempts to do so result in deadly embraces.
-		for (Iterator iter = queue.entrySet().iterator(); iter.hasNext();) { /* iterate over the list of listener lists */
-			Map.Entry entry = (Map.Entry) iter.next();
-			EventManager.dispatchEvent((Set) entry.getKey(), (EventDispatcher) entry.getValue(), eventAction, eventObject);
+		for (Map.Entry<Set<Map.Entry<K, V>>, EventDispatcher<K, V, E>> entry : queue.entrySet()) { /* iterate over the list of listener lists */
+			EventManager.dispatchEvent(entry.getKey(), entry.getValue(), eventAction, eventObject);
 		}
 	}
 }

@@ -19,7 +19,7 @@ import org.eclipse.osgi.framework.adaptor.PermissionStorage;
  * PermissionStorage privileged action class.  This class is not thread safe.  Callers
  * must ensure multiple threads do not call methods on this class at the same time.
  */
-public class SecurePermissionStorage implements PermissionStorage, PrivilegedExceptionAction {
+public class SecurePermissionStorage implements PermissionStorage, PrivilegedExceptionAction<String[]> {
 	private final PermissionStorage storage;
 	private String location;
 	private String[] data;
@@ -35,7 +35,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		this.storage = storage;
 	}
 
-	public Object run() throws IOException {
+	public String[] run() throws IOException {
 		switch (action) {
 			case GET :
 				return storage.getPermissionData(location);
@@ -59,7 +59,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		this.action = GET;
 
 		try {
-			return (String[]) AccessController.doPrivileged(this);
+			return AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}
@@ -69,7 +69,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 		this.action = LOCATION;
 
 		try {
-			return (String[]) AccessController.doPrivileged(this);
+			return AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}
@@ -101,7 +101,7 @@ public class SecurePermissionStorage implements PermissionStorage, PrivilegedExc
 	public String[] getConditionalPermissionInfos() throws IOException {
 		this.action = GET_INFOS;
 		try {
-			return (String[]) AccessController.doPrivileged(this);
+			return AccessController.doPrivileged(this);
 		} catch (PrivilegedActionException e) {
 			throw (IOException) e.getException();
 		}

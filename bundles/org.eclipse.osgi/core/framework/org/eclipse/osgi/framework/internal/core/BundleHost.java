@@ -219,7 +219,7 @@ public class BundleHost extends AbstractBundle {
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
+	protected Class<?> loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			try {
 				framework.checkAdminPermission(this, AdminPermission.CLASS);
@@ -276,7 +276,7 @@ public class BundleHost extends AbstractBundle {
 		return (loader.findResource(name));
 	}
 
-	public Enumeration getResources(String name) throws IOException {
+	public Enumeration<URL> getResources(String name) throws IOException {
 		BundleLoader loader = null;
 		try {
 			framework.checkAdminPermission(this, AdminPermission.RESOURCE);
@@ -286,7 +286,7 @@ public class BundleHost extends AbstractBundle {
 		loader = checkLoader();
 		if (loader == null)
 			return null;
-		Enumeration result = loader.getResources(name);
+		Enumeration<URL> result = loader.getResources(name);
 		if (result != null && result.hasMoreElements())
 			return result;
 		return null;
@@ -551,7 +551,7 @@ public class BundleHost extends AbstractBundle {
 	 * @see ServiceRegistration
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getRegisteredServices() {
+	public ServiceReference<?>[] getRegisteredServices() {
 		checkValid();
 
 		if (context == null) {
@@ -577,7 +577,7 @@ public class BundleHost extends AbstractBundle {
 	 * bundle has been uninstalled.
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getServicesInUse() {
+	public ServiceReference<?>[] getServicesInUse() {
 		checkValid();
 
 		if (context == null) {
@@ -677,6 +677,7 @@ public class BundleHost extends AbstractBundle {
 		return (bcl instanceof ClassLoader) ? (ClassLoader) bcl : null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <A> A adapt(Class<A> adapterType) {
 		if (BundleWirings.class.equals(adapterType)) {
 			return (A) new BundleWirings() {

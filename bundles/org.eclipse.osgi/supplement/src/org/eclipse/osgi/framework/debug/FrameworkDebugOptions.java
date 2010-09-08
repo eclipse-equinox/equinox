@@ -14,7 +14,6 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.service.debug.*;
 import org.osgi.framework.*;
@@ -28,7 +27,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * 
  * @since 3.1
  */
-public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustomizer {
+public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustomizer<DebugOptionsListener, DebugOptionsListener> {
 
 	private static final String OSGI_DEBUG = "osgi.debug"; //$NON-NLS-1$
 	private static final String OSGI_DEBUG_VERBOSE = "osgi.debug.verbose"; //$NON-NLS-1$
@@ -44,13 +43,13 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	/** The default name of the .options file if loading when the -debug command-line argument is used */
 	private static final String OPTIONS = ".options"; //$NON-NLS-1$
 	/** A cache of all of the bundles <code>DebugTrace</code> in the format <key,value> --> <bundle name, DebugTrace> */
-	protected final static Map debugTraceCache = new HashMap();
+	protected final static Map<String, DebugTrace> debugTraceCache = new HashMap<String, DebugTrace>();
 	/** The File object to store messages.  This value may be null. */
 	protected File outFile = null;
 	/** Is verbose debugging enabled?  Changing this value causes a new tracing session to start. */
 	protected boolean verboseDebug = true;
 	private volatile BundleContext context;
-	private volatile ServiceTracker listenerTracker;
+	private volatile ServiceTracker<DebugOptionsListener, DebugOptionsListener> listenerTracker;
 
 	/**
 	 * Internal constructor to create a <code>FrameworkDebugOptions</code> singleton object. 
@@ -96,15 +95,14 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			e.printStackTrace(System.out);
 		}
 		// trim off all the blanks since properties files don't do that.
-		for (Iterator i = options.keySet().iterator(); i.hasNext();) {
-			Object key = i.next();
+		for (Object key : options.keySet()) {
 			options.put(key, ((String) options.get(key)).trim());
 		}
 	}
 
 	public void start(BundleContext bc) {
 		this.context = bc;
-		listenerTracker = new ServiceTracker(bc, DebugOptionsListener.class.getName(), this);
+		listenerTracker = new ServiceTracker<DebugOptionsListener, DebugOptionsListener>(bc, DebugOptionsListener.class.getName(), this);
 		listenerTracker.open();
 	}
 
@@ -126,6 +124,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		return FrameworkDebugOptions.singleton;
 	}
 
+	@SuppressWarnings("deprecation")
 	private static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
@@ -194,13 +193,14 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		}
 	}
 
-	public Map getOptions() {
-		Properties snapShot = new Properties();
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public Map<String, String> getOptions() {
+		Map<String, String> snapShot = new HashMap<String, String>();
 		synchronized (lock) {
 			if (options != null)
-				snapShot.putAll(options);
+				snapShot.putAll((Map) options);
 			else if (disabledOptions != null)
-				snapShot.putAll(disabledOptions);
+				snapShot.putAll((Map) disabledOptions);
 		}
 		return snapShot;
 	}
@@ -215,10 +215,10 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		synchronized (lock) {
 			if (options != null) {
 				optionsArray = new String[options.size()];
-				final Iterator entrySetIterator = options.entrySet().iterator();
+				final Iterator<Map.Entry<Object, Object>> entrySetIterator = options.entrySet().iterator();
 				int i = 0;
 				while (entrySetIterator.hasNext()) {
-					Map.Entry entry = (Map.Entry) entrySetIterator.next();
+					Map.Entry<Object, Object> entry = entrySetIterator.next();
 					optionsArray[i] = ((String) entry.getKey()) + "=" + ((String) entry.getValue()); //$NON-NLS-1$
 					i++;
 				}
@@ -292,17 +292,18 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		return null;
 	}
 
-	public void setOptions(Map ops) {
+	@SuppressWarnings("cast")
+	public void setOptions(Map<String, String> ops) {
 		if (ops == null)
 			throw new IllegalArgumentException("The options must not be null."); //$NON-NLS-1$
 		Properties newOptions = new Properties();
-		for (Iterator entries = ops.entrySet().iterator(); entries.hasNext();) {
-			Entry entry = (Entry) entries.next();
+		for (Iterator<Map.Entry<String, String>> entries = ops.entrySet().iterator(); entries.hasNext();) {
+			Map.Entry<String, String> entry = entries.next();
 			if (!(entry.getKey() instanceof String) || !(entry.getValue() instanceof String))
 				throw new IllegalArgumentException("Option keys and values must be of type String: " + entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
-			newOptions.put(entry.getKey(), ((String) entry.getValue()).trim());
+			newOptions.put(entry.getKey(), entry.getValue().trim());
 		}
-		Set fireChangesTo = null;
+		Set<String> fireChangesTo = null;
 
 		synchronized (lock) {
 			if (options == null) {
@@ -310,9 +311,9 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				// no events to fire
 				return;
 			}
-			fireChangesTo = new HashSet();
+			fireChangesTo = new HashSet<String>();
 			// first check for removals
-			for (Iterator keys = options.keySet().iterator(); keys.hasNext();) {
+			for (Iterator<Object> keys = options.keySet().iterator(); keys.hasNext();) {
 				String key = (String) keys.next();
 				if (!newOptions.containsKey(key)) {
 					String symbolicName = getSymbolicName(key);
@@ -321,8 +322,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 				}
 			}
 			// now check for changes to existing values
-			for (Iterator newEntries = newOptions.entrySet().iterator(); newEntries.hasNext();) {
-				Entry entry = (Entry) newEntries.next();
+			for (Iterator<Map.Entry<Object, Object>> newEntries = newOptions.entrySet().iterator(); newEntries.hasNext();) {
+				Map.Entry<Object, Object> entry = newEntries.next();
 				String existingValue = (String) options.get(entry.getKey());
 				if (!entry.getValue().equals(existingValue)) {
 					String symbolicName = getSymbolicName((String) entry.getKey());
@@ -334,8 +335,8 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			options = newOptions;
 		}
 		if (fireChangesTo != null)
-			for (Iterator iChanges = fireChangesTo.iterator(); iChanges.hasNext();)
-				optionsChanged((String) iChanges.next());
+			for (Iterator<String> iChanges = fireChangesTo.iterator(); iChanges.hasNext();)
+				optionsChanged(iChanges.next());
 	}
 
 	/*
@@ -404,11 +405,11 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 	 * (non-Javadoc)
 	 * @see org.eclipse.osgi.service.debug.DebugOptions#createTrace(java.lang.String, java.lang.Class)
 	 */
-	public final DebugTrace newDebugTrace(String bundleSymbolicName, Class traceEntryClass) {
+	public final DebugTrace newDebugTrace(String bundleSymbolicName, Class<?> traceEntryClass) {
 
 		DebugTrace debugTrace = null;
 		synchronized (FrameworkDebugOptions.debugTraceCache) {
-			debugTrace = (DebugTrace) FrameworkDebugOptions.debugTraceCache.get(bundleSymbolicName);
+			debugTrace = FrameworkDebugOptions.debugTraceCache.get(bundleSymbolicName);
 			if (debugTrace == null) {
 				debugTrace = new EclipseDebugTrace(bundleSymbolicName, FrameworkDebugOptions.singleton, traceEntryClass);
 				FrameworkDebugOptions.debugTraceCache.put(bundleSymbolicName, debugTrace);
@@ -469,7 +470,7 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 			return;
 		// do not use the service tracker because that is only used to call all listeners initially when they are registered
 		// here we only want the services with the specified name.
-		ServiceReference[] listenerRefs = null;
+		ServiceReference<?>[] listenerRefs = null;
 		try {
 			listenerRefs = bc.getServiceReferences(DebugOptionsListener.class.getName(), "(" + DebugOptions.LISTENER_SYMBOLICNAME + "=" + bundleSymbolicName + ")"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		} catch (InvalidSyntaxException e) {
@@ -491,17 +492,17 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		}
 	}
 
-	public Object addingService(ServiceReference reference) {
-		DebugOptionsListener listener = (DebugOptionsListener) context.getService(reference);
+	public DebugOptionsListener addingService(ServiceReference<DebugOptionsListener> reference) {
+		DebugOptionsListener listener = context.getService(reference);
 		listener.optionsChanged(this);
 		return listener;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<DebugOptionsListener> reference, DebugOptionsListener service) {
 		// nothing
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<DebugOptionsListener> reference, DebugOptionsListener service) {
 		context.ungetService(reference);
 	}
 }

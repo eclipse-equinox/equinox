@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,11 @@ import org.eclipse.osgi.framework.eventmgr.*;
  * file limit.
  * @since 3.2
  */
-public class MRUBundleFileList implements EventDispatcher {
+public class MRUBundleFileList implements EventDispatcher<Object, Object, BundleFile> {
 	private static final String PROP_FILE_LIMIT = "osgi.bundlefile.limit"; //$NON-NLS-1$
 	private static final int MIN = 10;
 	private static final int PROP_FILE_LIMIT_VALUE;
-	private static final ThreadLocal closingBundleFile = new ThreadLocal();
+	private static final ThreadLocal<BundleFile> closingBundleFile = new ThreadLocal<BundleFile>();
 	static {
 		int propValue = 100; // enable to 100 open files by default
 		try {
@@ -45,7 +45,7 @@ public class MRUBundleFileList implements EventDispatcher {
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
 	final private EventManager bundleFileCloserManager;
-	final private Map bundleFileCloser;
+	final private Map<Object, Object> bundleFileCloser;
 	// the current number of open bundle files
 	private int numOpen = 0;
 	// the current use stamp
@@ -64,7 +64,7 @@ public class MRUBundleFileList implements EventDispatcher {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
 			this.bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
-			this.bundleFileCloser = new CopyOnWriteIdentityMap();
+			this.bundleFileCloser = new CopyOnWriteIdentityMap<Object, Object>();
 			this.bundleFileCloser.put(this, this);
 		} else {
 			this.bundleFileList = null;
@@ -172,7 +172,7 @@ public class MRUBundleFileList implements EventDispatcher {
 		useStampList[index] = ++curUseStamp;
 	}
 
-	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
+	public final void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, BundleFile eventObject) {
 		if (firstDispatch) {
 			// used to work around bug 275166; we don't want to leak the TCCL in this thread.
 			Thread.currentThread().setContextClassLoader(null);
@@ -180,7 +180,7 @@ public class MRUBundleFileList implements EventDispatcher {
 		}
 		try {
 			closingBundleFile.set(eventObject);
-			((BundleFile) eventObject).close();
+			eventObject.close();
 		} catch (IOException e) {
 			// TODO should log ??
 		} finally {
@@ -193,7 +193,7 @@ public class MRUBundleFileList implements EventDispatcher {
 			return;
 		try {
 			/* queue to hold set of listeners */
-			ListenerQueue queue = new ListenerQueue(bundleFileCloserManager);
+			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<Object, Object, BundleFile>(bundleFileCloserManager);
 			/* add bundle file closer to the queue */
 			queue.queueListeners(bundleFileCloser.entrySet(), this);
 			/* dispatch event to set of listeners */

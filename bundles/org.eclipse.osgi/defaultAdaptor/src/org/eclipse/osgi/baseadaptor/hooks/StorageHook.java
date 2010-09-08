@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,7 +55,7 @@ public interface StorageHook extends KeyedElement {
 	 * @param manifest the bundle manifest to load into this storage hook
 	 * @throws BundleException if any error occurs
 	 */
-	void initialize(Dictionary manifest) throws BundleException;
+	void initialize(Dictionary<String, String> manifest) throws BundleException;
 
 	/**
 	 * Creates a new storage hook and loads the data from the specified 
@@ -112,7 +112,7 @@ public interface StorageHook extends KeyedElement {
 	 * not provide the manifest
 	 * @throws BundleException 
 	 */
-	Dictionary getManifest(boolean firstLoad) throws BundleException;
+	Dictionary<String, String> getManifest(boolean firstLoad) throws BundleException;
 
 	/**
 	 * Gets called by a base data during {@link BundleData#setStatus(int)}.

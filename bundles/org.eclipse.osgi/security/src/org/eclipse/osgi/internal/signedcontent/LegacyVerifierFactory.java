@@ -12,8 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.cert.*;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import org.eclipse.osgi.internal.provisional.verifier.*;
 import org.eclipse.osgi.signedcontent.*;
 import org.osgi.framework.Bundle;
@@ -77,7 +76,7 @@ public class LegacyVerifierFactory implements CertificateVerifierFactory {
 		}
 
 		public String[] verifyContent() {
-			ArrayList invalidContent = new ArrayList(0);
+			List<String> invalidContent = new ArrayList<String>(0);
 			SignedContentEntry[] entries = signedContent.getSignedEntries();
 			for (int i = 0; i < entries.length; i++) {
 				try {
@@ -88,7 +87,7 @@ public class LegacyVerifierFactory implements CertificateVerifierFactory {
 					invalidContent.add(entries[i].getName());
 				}
 			}
-			return (String[]) invalidContent.toArray(new String[invalidContent.size()]);
+			return invalidContent.toArray(new String[invalidContent.size()]);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,14 +46,14 @@ public interface BaseClassLoader extends BundleClassLoader {
 	 * @param entry the bundle entry used to load the class bytes
 	 * @return a defined Class
 	 */
-	Class defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry);
+	Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry);
 
 	/**
 	 * A public version of the ClassLoader.findLoadedClass(java.lang.String) method.
 	 * @param classname the class name to find.
 	 * @return a loaded class
 	 */
-	Class publicFindLoaded(String classname);
+	Class<?> publicFindLoaded(String classname);
 
 	/**
 	 * A public version of the ClassLoader#getPackage(java.lang.String) method.

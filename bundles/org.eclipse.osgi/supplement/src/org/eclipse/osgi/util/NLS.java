@@ -135,12 +135,12 @@ public abstract class NLS {
 	 * @param baseName the base name of a fully qualified message properties file.
 	 * @param clazz the class where the constants will exist
 	 */
-	public static void initializeMessages(final String baseName, final Class clazz) {
+	public static void initializeMessages(final String baseName, final Class<?> clazz) {
 		if (System.getSecurityManager() == null) {
 			load(baseName, clazz);
 			return;
 		}
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				load(baseName, clazz);
 				return null;
@@ -244,7 +244,7 @@ public abstract class NLS {
 		if (nlSuffixes == null) {
 			//build list of suffixes for loading resource bundles
 			String nl = Locale.getDefault().toString();
-			ArrayList result = new ArrayList(4);
+			List<String> result = new ArrayList<String>(4);
 			int lastSeparator;
 			while (true) {
 				result.add('_' + nl + EXTENSION);
@@ -255,7 +255,7 @@ public abstract class NLS {
 			}
 			//add the empty suffix last (most general)
 			result.add(EXTENSION);
-			nlSuffixes = (String[]) result.toArray(new String[result.size()]);
+			nlSuffixes = result.toArray(new String[result.size()]);
 		}
 		root = root.replace('.', '/');
 		String[] variants = new String[nlSuffixes.length];
@@ -264,7 +264,7 @@ public abstract class NLS {
 		return variants;
 	}
 
-	private static void computeMissingMessages(String bundleName, Class clazz, Map fieldMap, Field[] fieldArray, boolean isAccessible) {
+	private static void computeMissingMessages(String bundleName, Class<?> clazz, Map<Object, Object> fieldMap, Field[] fieldArray, boolean isAccessible) {
 		// iterate over the fields in the class to make sure that there aren't any empty ones
 		final int MOD_EXPECTED = Modifier.PUBLIC | Modifier.STATIC;
 		final int MOD_MASK = MOD_EXPECTED | Modifier.FINAL;
@@ -297,7 +297,7 @@ public abstract class NLS {
 	/*
 	 * Load the given resource bundle using the specified class loader.
 	 */
-	static void load(final String bundleName, Class clazz) {
+	static void load(final String bundleName, Class<?> clazz) {
 		long start = System.currentTimeMillis();
 		final Field[] fieldArray = clazz.getDeclaredFields();
 		ClassLoader loader = clazz.getClassLoader();
@@ -306,7 +306,7 @@ public abstract class NLS {
 
 		//build a map of field names to Field objects
 		final int len = fieldArray.length;
-		Map fields = new HashMap(len * 2);
+		Map<Object, Object> fields = new HashMap<Object, Object>(len * 2);
 		for (int i = 0; i < len; i++)
 			fields.put(fieldArray[i].getName(), fieldArray[i]);
 
@@ -387,10 +387,10 @@ public abstract class NLS {
 		private static final long serialVersionUID = 1L;
 
 		private final String bundleName;
-		private final Map fields;
+		private final Map<Object, Object> fields;
 		private final boolean isAccessible;
 
-		public MessagesProperties(Map fieldMap, String bundleName, boolean isAccessible) {
+		public MessagesProperties(Map<Object, Object> fieldMap, String bundleName, boolean isAccessible) {
 			super();
 			this.fields = fieldMap;
 			this.bundleName = bundleName;

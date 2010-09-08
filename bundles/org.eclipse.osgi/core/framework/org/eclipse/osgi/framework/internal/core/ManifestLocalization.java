@@ -23,16 +23,16 @@ import org.osgi.framework.Constants;
  */
 public class ManifestLocalization {
 	private AbstractBundle bundle = null;
-	private Dictionary rawHeaders = null;
-	private Dictionary defaultLocaleHeaders = null;
-	private Hashtable cache = new Hashtable(5);
+	private Dictionary<String, String> rawHeaders = null;
+	private Dictionary<String, String> defaultLocaleHeaders = null;
+	private Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
 
-	public ManifestLocalization(AbstractBundle bundle, Dictionary rawHeaders) {
+	public ManifestLocalization(AbstractBundle bundle, Dictionary<String, String> rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
 	}
 
-	protected Dictionary getHeaders(String localeString) {
+	protected Dictionary<String, String> getHeaders(String localeString) {
 		if (localeString.length() == 0)
 			return (rawHeaders);
 		boolean isDefaultLocale = false;
@@ -54,11 +54,11 @@ public class ManifestLocalization {
 		if (localeProperties == null && !isDefaultLocale)
 			// could not find the requested locale use the default locale
 			localeProperties = getResourceBundle(defaultLocale);
-		Enumeration e = this.rawHeaders.keys();
-		Headers localeHeaders = new Headers(this.rawHeaders.size());
+		Enumeration<String> e = this.rawHeaders.keys();
+		Headers<String, String> localeHeaders = new Headers<String, String>(this.rawHeaders.size());
 		while (e.hasMoreElements()) {
-			String key = (String) e.nextElement();
-			String value = (String) this.rawHeaders.get(key);
+			String key = e.nextElement();
+			String value = this.rawHeaders.get(key);
 			if (value.startsWith("%") && (value.length() > 1)) { //$NON-NLS-1$
 				String propertiesKey = value.substring(1);
 				try {
@@ -77,14 +77,14 @@ public class ManifestLocalization {
 	}
 
 	private String[] buildNLVariants(String nl) {
-		ArrayList result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		while (nl.length() > 0) {
 			result.add(nl);
 			int i = nl.lastIndexOf('_');
 			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/*
@@ -92,12 +92,12 @@ public class ManifestLocalization {
 	 * bundle. If not found, return null.
 	 */
 	protected ResourceBundle getResourceBundle(String localeString) {
-		String propertiesLocation = (String) rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
+		String propertiesLocation = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
 		if (propertiesLocation == null) {
 			propertiesLocation = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 		}
 
-		BundleResourceBundle result = (BundleResourceBundle) cache.get(localeString);
+		BundleResourceBundle result = cache.get(localeString);
 		if (result != null)
 			return (ResourceBundle) (result.isEmpty() ? null : result);
 		String[] nlVarients = buildNLVariants(localeString);
@@ -106,7 +106,7 @@ public class ManifestLocalization {
 			BundleResourceBundle varientBundle = null;
 			URL varientURL = findResource(propertiesLocation + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (varientURL == null) {
-				varientBundle = (BundleResourceBundle) cache.get(nlVarients[i]);
+				varientBundle = cache.get(nlVarients[i]);
 			} else {
 				InputStream resourceStream = null;
 				try {
@@ -133,7 +133,7 @@ public class ManifestLocalization {
 			cache.put(nlVarients[i], varientBundle);
 			parent = varientBundle;
 		}
-		result = (BundleResourceBundle) cache.get(localeString);
+		result = cache.get(localeString);
 		return (ResourceBundle) (result.isEmpty() ? null : result);
 	}
 
@@ -189,7 +189,7 @@ public class ManifestLocalization {
 	}
 
 	class EmptyResouceBundle extends ResourceBundle implements BundleResourceBundle {
-		public Enumeration getKeys() {
+		public Enumeration<String> getKeys() {
 			return null;
 		}
 

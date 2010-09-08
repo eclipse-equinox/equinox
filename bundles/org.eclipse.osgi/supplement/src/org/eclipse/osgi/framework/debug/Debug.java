@@ -338,7 +338,7 @@ public class Debug {
 		Method[] methods = t.getClass().getMethods();
 
 		int size = methods.length;
-		Class throwable = Throwable.class;
+		Class<?> throwable = Throwable.class;
 
 		for (int i = 0; i < size; i++) {
 			Method method = methods[i];

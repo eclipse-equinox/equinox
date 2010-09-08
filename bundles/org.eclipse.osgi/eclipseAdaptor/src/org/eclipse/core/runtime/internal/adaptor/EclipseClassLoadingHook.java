@@ -14,6 +14,7 @@ package org.eclipse.core.runtime.internal.adaptor;
 import java.io.File;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import org.eclipse.osgi.baseadaptor.*;
@@ -44,7 +45,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 	}
 
 	private static String[] buildLibraryVariants() {
-		ArrayList result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		EclipseEnvironmentInfo info = EclipseEnvironmentInfo.getDefault();
 		result.add("ws/" + info.getWS() + "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		result.add("os/" + info.getOS() + "/" + info.getOSArch() + "/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -57,7 +58,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public byte[] processClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
@@ -127,7 +128,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		return null;
 	}
 
-	public boolean addClassPathEntry(ArrayList cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
+	public boolean addClassPathEntry(ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostmanager, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		String var = hasPrefix(cp);
 		if (var != null)
 			// find internal library using eclipse predefined vars
@@ -144,7 +145,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 		return false;
 	}
 
-	private boolean addInternalClassPath(String var, ArrayList cpEntries, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
+	private boolean addInternalClassPath(String var, ArrayList<ClasspathEntry> cpEntries, String cp, ClasspathManager hostloader, BaseData sourcedata, ProtectionDomain sourcedomain) {
 		if (var.equals("ws")) //$NON-NLS-1$
 			return ClasspathManager.addClassPathEntry(cpEntries, "ws/" + EclipseEnvironmentInfo.getDefault().getWS() + cp.substring(4), hostloader, sourcedata, sourcedomain); //$NON-NLS-1$
 		if (var.equals("os")) //$NON-NLS-1$
@@ -170,7 +171,7 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 	}
 
 	private static String[] buildNLJarVariants(String nl) {
-		ArrayList result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		nl = nl.replace('_', '/');
 		while (nl.length() > 0) {
 			result.add("nl/" + nl + "/"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -178,10 +179,10 @@ public class EclipseClassLoadingHook implements ClassLoadingHook, HookConfigurat
 			nl = (i < 0) ? "" : nl.substring(0, i); //$NON-NLS-1$
 		}
 		result.add(""); //$NON-NLS-1$
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
-	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) {
 		// do nothing
 	}
 

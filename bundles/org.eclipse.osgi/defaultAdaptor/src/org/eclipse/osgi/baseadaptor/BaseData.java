@@ -53,11 +53,11 @@ public class BaseData implements BundleData {
 	private long lastModified;
 	protected BundleFile bundleFile;
 	private boolean dirty = false;
-	protected Dictionary manifest;
+	protected Dictionary<String, String> manifest;
 	// This field is only used by PDE source lookup, and is set by a hook (bug 126517).  It serves no purpose at runtime.
 	protected String fileName;
 	// This is only used to keep track of when the same native library is loaded more than once
-	protected Collection loadedNativeCode;
+	protected Collection<String> loadedNativeCode;
 
 	///////////////////// Begin values from Manifest     /////////////////////
 	private String symbolicName;
@@ -100,8 +100,8 @@ public class BaseData implements BundleData {
 	public final URL getEntry(final String path) {
 		if (System.getSecurityManager() == null)
 			return getEntry0(path);
-		return (URL) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+			public URL run() {
 				return getEntry0(path);
 			}
 		});
@@ -120,7 +120,7 @@ public class BaseData implements BundleData {
 		}
 	}
 
-	public final Enumeration getEntryPaths(String path) {
+	public final Enumeration<String> getEntryPaths(String path) {
 		return getBundleFile().getEntryPaths(path);
 	}
 
@@ -141,7 +141,7 @@ public class BaseData implements BundleData {
 		if (result != null)
 			synchronized (this) {
 				if (loadedNativeCode == null)
-					loadedNativeCode = new ArrayList(1);
+					loadedNativeCode = new ArrayList<String>(1);
 				if (loadedNativeCode.contains(result) || COPY_NATIVES) {
 					// we must copy the library to a temp space to allow another class loader to load the library
 					String temp = copyToTempLibrary(result);
@@ -171,7 +171,7 @@ public class BaseData implements BundleData {
 		return adaptor.getStorage().getDataFile(this, path);
 	}
 
-	public Dictionary getManifest() throws BundleException {
+	public Dictionary<String, String> getManifest() throws BundleException {
 		if (manifest == null)
 			manifest = adaptor.getStorage().loadManifest(this);
 		return manifest;
@@ -409,7 +409,7 @@ public class BaseData implements BundleData {
 			return new String[] {"."}; //$NON-NLS-1$
 		}
 
-		ArrayList result = new ArrayList(classpath.length);
+		List<String> result = new ArrayList<String>(classpath.length);
 		for (int i = 0; i < classpath.length; i++) {
 			if (Debug.DEBUG_LOADER)
 				Debug.println("  found classpath entry " + classpath[i].getValueComponents()); //$NON-NLS-1$
@@ -419,7 +419,7 @@ public class BaseData implements BundleData {
 			}
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**

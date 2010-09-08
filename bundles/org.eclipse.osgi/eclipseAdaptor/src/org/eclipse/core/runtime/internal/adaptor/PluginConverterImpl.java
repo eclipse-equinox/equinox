@@ -54,15 +54,16 @@ public class PluginConverterImpl implements PluginConverter {
 	private IPluginInfo pluginInfo;
 	private File pluginManifestLocation;
 	private ZipFile pluginZip;
-	private Dictionary generatedManifest;
+	private Dictionary<String, String> generatedManifest;
 	private byte manifestType;
 	private Version target;
-	private Dictionary devProperties;
+	private Dictionary<String, String> devProperties;
 	static final Version TARGET31 = new Version(3, 1, 0);
 	static final Version TARGET32 = new Version(3, 2, 0);
 	private static final String MANIFEST_VERSION = "Manifest-Version"; //$NON-NLS-1$
 	private static final String PLUGIN_PROPERTIES_FILENAME = "plugin"; //$NON-NLS-1$
 	private static PluginConverterImpl instance;
+	@SuppressWarnings("deprecation")
 	private static final String[] ARCH_LIST = {org.eclipse.osgi.service.environment.Constants.ARCH_PA_RISC, org.eclipse.osgi.service.environment.Constants.ARCH_PPC, org.eclipse.osgi.service.environment.Constants.ARCH_SPARC, org.eclipse.osgi.service.environment.Constants.ARCH_X86, org.eclipse.osgi.service.environment.Constants.ARCH_AMD64, org.eclipse.osgi.service.environment.Constants.ARCH_IA64};
 	static public final String FRAGMENT_MANIFEST = "fragment.xml"; //$NON-NLS-1$
 	static public final String GENERATED_FROM = "Generated-from"; //$NON-NLS-1$
@@ -92,7 +93,7 @@ public class PluginConverterImpl implements PluginConverter {
 		pluginInfo = null;
 		pluginManifestLocation = null;
 		pluginZip = null;
-		generatedManifest = new Hashtable(10);
+		generatedManifest = new Hashtable<String, String>(10);
 		manifestType = MANIFEST_TYPE_UNKNOWN;
 		target = null;
 		devProperties = null;
@@ -126,14 +127,12 @@ public class PluginConverterImpl implements PluginConverter {
 			throw new PluginConversionException(validation);
 	}
 
-	private Set filterExport(Collection exportToFilter, Collection filter) {
+	private Set<String> filterExport(Set<String> exportToFilter, Collection<String> filter) {
 		if (filter == null || filter.contains("*")) //$NON-NLS-1$
-			return (Set) exportToFilter;
-		Set filteredExport = new HashSet(exportToFilter.size());
-		for (Iterator iter = exportToFilter.iterator(); iter.hasNext();) {
-			String anExport = (String) iter.next();
-			for (Iterator iter2 = filter.iterator(); iter2.hasNext();) {
-				String aFilter = (String) iter2.next();
+			return exportToFilter;
+		Set<String> filteredExport = new HashSet<String>(exportToFilter.size());
+		for (String anExport : exportToFilter) {
+			for (String aFilter : filter) {
 				int dotStar = aFilter.indexOf(".*"); //$NON-NLS-1$
 				if (dotStar != -1)
 					aFilter = aFilter.substring(0, dotStar);
@@ -146,9 +145,9 @@ public class PluginConverterImpl implements PluginConverter {
 		return filteredExport;
 	}
 
-	private ArrayList findOSJars(File pluginRoot, String path, boolean filter) {
+	private List<String> findOSJars(File pluginRoot, String path, boolean filter) {
 		path = path.substring(4);
-		ArrayList found = new ArrayList(0);
+		List<String> found = new ArrayList<String>(0);
 		for (int i = 0; i < OS_LIST.length; i++) {
 			//look for os/osname/path
 			String searchedPath = "os/" + OS_LIST[i] + "/" + path; //$NON-NLS-1$ //$NON-NLS-2$
@@ -210,9 +209,9 @@ public class PluginConverterImpl implements PluginConverter {
 		return null;
 	}
 
-	private ArrayList findWSJars(File pluginRoot, String path, boolean filter) {
+	private List<String> findWSJars(File pluginRoot, String path, boolean filter) {
 		path = path.substring(4);
-		ArrayList found = new ArrayList(0);
+		List<String> found = new ArrayList<String>(0);
 		for (int i = 0; i < WS_LIST.length; i++) {
 			String searchedPath = "ws/" + WS_LIST[i] + path; //$NON-NLS-1$
 			if (new File(pluginRoot, searchedPath).exists()) {
@@ -238,7 +237,8 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 
-	public void writeManifest(File generationLocation, Dictionary manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
+	@SuppressWarnings("deprecation")
+	public void writeManifest(File generationLocation, Dictionary<String, String> manifestToWrite, boolean compatibilityManifest) throws PluginConversionException {
 		long start = System.currentTimeMillis();
 		try {
 			File parentFile = new File(generationLocation.getParent());
@@ -249,30 +249,30 @@ public class PluginConverterImpl implements PluginConverter {
 				throw new PluginConversionException(message);
 			}
 			// replaces any eventual existing file
-			manifestToWrite = new Hashtable((Map) manifestToWrite);
+			manifestToWrite = new Hashtable<String, String>((Hashtable) manifestToWrite);
 			// MANIFEST.MF files must be written using UTF-8
 			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(generationLocation), UTF_8));
-			writeEntry(MANIFEST_VERSION, (String) manifestToWrite.remove(MANIFEST_VERSION));
-			writeEntry(GENERATED_FROM, (String) manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
+			writeEntry(MANIFEST_VERSION, manifestToWrite.remove(MANIFEST_VERSION));
+			writeEntry(GENERATED_FROM, manifestToWrite.remove(GENERATED_FROM)); //Need to do this first uptoDate check expect the generated-from tag to be in the first line
 			// always attempt to write the Bundle-ManifestVersion header if it exists (bug 109863)
-			writeEntry(Constants.BUNDLE_MANIFESTVERSION, (String) manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
-			writeEntry(Constants.BUNDLE_NAME, (String) manifestToWrite.remove(Constants.BUNDLE_NAME));
-			writeEntry(Constants.BUNDLE_SYMBOLICNAME, (String) manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
-			writeEntry(Constants.BUNDLE_VERSION, (String) manifestToWrite.remove(Constants.BUNDLE_VERSION));
-			writeEntry(Constants.BUNDLE_CLASSPATH, (String) manifestToWrite.remove(Constants.BUNDLE_CLASSPATH));
-			writeEntry(Constants.BUNDLE_ACTIVATOR, (String) manifestToWrite.remove(Constants.BUNDLE_ACTIVATOR));
-			writeEntry(Constants.BUNDLE_VENDOR, (String) manifestToWrite.remove(Constants.BUNDLE_VENDOR));
-			writeEntry(Constants.FRAGMENT_HOST, (String) manifestToWrite.remove(Constants.FRAGMENT_HOST));
-			writeEntry(Constants.BUNDLE_LOCALIZATION, (String) manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
+			writeEntry(Constants.BUNDLE_MANIFESTVERSION, manifestToWrite.remove(Constants.BUNDLE_MANIFESTVERSION));
+			writeEntry(Constants.BUNDLE_NAME, manifestToWrite.remove(Constants.BUNDLE_NAME));
+			writeEntry(Constants.BUNDLE_SYMBOLICNAME, manifestToWrite.remove(Constants.BUNDLE_SYMBOLICNAME));
+			writeEntry(Constants.BUNDLE_VERSION, manifestToWrite.remove(Constants.BUNDLE_VERSION));
+			writeEntry(Constants.BUNDLE_CLASSPATH, manifestToWrite.remove(Constants.BUNDLE_CLASSPATH));
+			writeEntry(Constants.BUNDLE_ACTIVATOR, manifestToWrite.remove(Constants.BUNDLE_ACTIVATOR));
+			writeEntry(Constants.BUNDLE_VENDOR, manifestToWrite.remove(Constants.BUNDLE_VENDOR));
+			writeEntry(Constants.FRAGMENT_HOST, manifestToWrite.remove(Constants.FRAGMENT_HOST));
+			writeEntry(Constants.BUNDLE_LOCALIZATION, manifestToWrite.remove(Constants.BUNDLE_LOCALIZATION));
 			// always attempt to write the Export-Package header if it exists (bug 109863)
-			writeEntry(Constants.EXPORT_PACKAGE, (String) manifestToWrite.remove(Constants.EXPORT_PACKAGE));
+			writeEntry(Constants.EXPORT_PACKAGE, manifestToWrite.remove(Constants.EXPORT_PACKAGE));
 			// always attempt to write the Provide-Package header if it exists (bug 109863)
-			writeEntry(Constants.PROVIDE_PACKAGE, (String) manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
-			writeEntry(Constants.REQUIRE_BUNDLE, (String) manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
-			Enumeration keys = manifestToWrite.keys();
+			writeEntry(Constants.PROVIDE_PACKAGE, manifestToWrite.remove(Constants.PROVIDE_PACKAGE));
+			writeEntry(Constants.REQUIRE_BUNDLE, manifestToWrite.remove(Constants.REQUIRE_BUNDLE));
+			Enumeration<String> keys = manifestToWrite.keys();
 			while (keys.hasMoreElements()) {
-				String key = (String) keys.nextElement();
-				writeEntry(key, (String) manifestToWrite.get(key));
+				String key = keys.nextElement();
+				writeEntry(key, manifestToWrite.get(key));
 			}
 			out.flush();
 		} catch (IOException e) {
@@ -299,9 +299,9 @@ public class PluginConverterImpl implements PluginConverter {
 	}
 
 	private boolean requireRuntimeCompatibility() {
-		ArrayList requireList = pluginInfo.getRequires();
-		for (Iterator iter = requireList.iterator(); iter.hasNext();) {
-			if (((PluginParser.Prerequisite) iter.next()).getName().equalsIgnoreCase(PI_RUNTIME_COMPATIBILITY))
+		ArrayList<PluginParser.Prerequisite> requireList = pluginInfo.getRequires();
+		for (Iterator<PluginParser.Prerequisite> iter = requireList.iterator(); iter.hasNext();) {
+			if (iter.next().getName().equalsIgnoreCase(PI_RUNTIME_COMPATIBILITY))
 				return true;
 		}
 		return false;
@@ -367,20 +367,22 @@ public class PluginConverterImpl implements PluginConverter {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void generateProvidePackage() {
-		Set exports = getExports();
+		Set<String> exports = getExports();
 		if (exports != null && exports.size() != 0) {
 			generatedManifest.put(TARGET31.compareTo(target) <= 0 ? Constants.EXPORT_PACKAGE : Constants.PROVIDE_PACKAGE, getStringFromCollection(exports, LIST_SEPARATOR));
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void generateRequireBundle() {
-		ArrayList requiredBundles = pluginInfo.getRequires();
+		ArrayList<PluginParser.Prerequisite> requiredBundles = pluginInfo.getRequires();
 		if (requiredBundles.size() == 0)
 			return;
 		StringBuffer bundleRequire = new StringBuffer();
-		for (Iterator iter = requiredBundles.iterator(); iter.hasNext();) {
-			PluginParser.Prerequisite element = (PluginParser.Prerequisite) iter.next();
+		for (Iterator<PluginParser.Prerequisite> iter = requiredBundles.iterator(); iter.hasNext();) {
+			PluginParser.Prerequisite element = iter.next();
 			StringBuffer modImport = new StringBuffer(element.getName());
 			String versionRange = getVersionRange(element.getVersion(), element.getMatch());
 			if (versionRange != null)
@@ -409,6 +411,7 @@ public class PluginConverterImpl implements PluginConverter {
 		generatedManifest.put(GENERATED_FROM, Long.toString(getTimeStamp(pluginManifestLocation, manifestType)) + ";" + MANIFEST_TYPE_ATTRIBUTE + "=" + manifestType); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@SuppressWarnings("deprecation")
 	private void generateEclipseHeaders() {
 		if (pluginInfo.isFragment())
 			return;
@@ -418,8 +421,8 @@ public class PluginConverterImpl implements PluginConverter {
 			generatedManifest.put(TARGET32.compareTo(target) <= 0 ? Constants.ECLIPSE_LAZYSTART : Constants.ECLIPSE_AUTOSTART, "true"); //$NON-NLS-1$
 	}
 
-	private Set getExports() {
-		Map libs = pluginInfo.getLibraries();
+	private Set<String> getExports() {
+		Map<String, List<String>> libs = pluginInfo.getLibraries();
 		if (libs == null)
 			return null;
 
@@ -427,11 +430,11 @@ public class PluginConverterImpl implements PluginConverter {
 		if (devProperties != null || DevClassPathHelper.inDevelopmentMode()) {
 			String[] devClassPath = DevClassPathHelper.getDevClassPath(pluginInfo.getUniqueId(), devProperties);
 			// collect export clauses
-			List allExportClauses = new ArrayList(libs.size());
-			Set libEntries = libs.entrySet();
-			for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
-				Map.Entry element = (Map.Entry) iter.next();
-				allExportClauses.addAll((List) element.getValue());
+			List<String> allExportClauses = new ArrayList<String>(libs.size());
+			Set<Map.Entry<String, List<String>>> libEntries = libs.entrySet();
+			for (Iterator<Map.Entry<String, List<String>>> iter = libEntries.iterator(); iter.hasNext();) {
+				Map.Entry<String, List<String>> element = iter.next();
+				allExportClauses.addAll(element.getValue());
 			}
 			if (devClassPath != null) {
 				// bug 88498
@@ -445,14 +448,14 @@ public class PluginConverterImpl implements PluginConverter {
 			}
 		}
 
-		Set result = new TreeSet();
-		Set libEntries = libs.entrySet();
-		for (Iterator iter = libEntries.iterator(); iter.hasNext();) {
-			Map.Entry element = (Map.Entry) iter.next();
-			List filter = (List) element.getValue();
+		Set<String> result = new TreeSet<String>();
+		Set<Map.Entry<String, List<String>>> libEntries = libs.entrySet();
+		for (Iterator<Map.Entry<String, List<String>>> iter = libEntries.iterator(); iter.hasNext();) {
+			Map.Entry<String, List<String>> element = iter.next();
+			List<String> filter = element.getValue();
 			if (filter.size() == 0) //If the library is not exported, then ignore it
 				continue;
-			String libEntryText = ((String) element.getKey()).trim();
+			String libEntryText = element.getKey().trim();
 			File libraryLocation;
 			if (libEntryText.equals(DOT))
 				libraryLocation = pluginManifestLocation;
@@ -461,17 +464,17 @@ public class PluginConverterImpl implements PluginConverter {
 				File libEntryAsPath = new File(libEntryText);
 				libraryLocation = libEntryAsPath.isAbsolute() ? libEntryAsPath : new File(pluginManifestLocation, libEntryText);
 			}
-			Set exports = null;
+			Set<String> exports = null;
 			if (libraryLocation.exists()) {
 				if (libraryLocation.isFile())
 					exports = filterExport(getExportsFromJAR(libraryLocation), filter); //TODO Need to handle $xx$ variables
 				else if (libraryLocation.isDirectory())
 					exports = filterExport(getExportsFromDir(libraryLocation), filter);
 			} else {
-				ArrayList expandedLibs = getLibrariesExpandingVariables((String) element.getKey(), false);
-				exports = new HashSet();
-				for (Iterator iterator = expandedLibs.iterator(); iterator.hasNext();) {
-					String libName = (String) iterator.next();
+				List<String> expandedLibs = getLibrariesExpandingVariables(element.getKey(), false);
+				exports = new HashSet<String>();
+				for (Iterator<String> iterator = expandedLibs.iterator(); iterator.hasNext();) {
+					String libName = iterator.next();
 					File libFile = new File(pluginManifestLocation, libName);
 					if (libFile.isFile()) {
 						exports.addAll(filterExport(getExportsFromJAR(libFile), filter));
@@ -484,14 +487,14 @@ public class PluginConverterImpl implements PluginConverter {
 		return result;
 	}
 
-	private Set getExportsFromDir(File location) {
+	private Set<String> getExportsFromDir(File location) {
 		return getExportsFromDir(location, ""); //$NON-NLS-1$
 	}
 
-	private Set getExportsFromDir(File location, String packageName) {
+	private Set<String> getExportsFromDir(File location, String packageName) {
 		String prefix = (packageName.length() > 0) ? (packageName + '.') : ""; //$NON-NLS-1$
 		String[] files = location.list();
-		Set exportedPaths = new HashSet();
+		Set<String> exportedPaths = new HashSet<String>();
 		boolean containsFile = false;
 		if (files != null)
 			for (int i = 0; i < files.length; i++) {
@@ -513,8 +516,8 @@ public class PluginConverterImpl implements PluginConverter {
 		return exportedPaths;
 	}
 
-	private Set getExportsFromJAR(File jarFile) {
-		Set names = new HashSet();
+	private Set<String> getExportsFromJAR(File jarFile) {
+		Set<String> names = new HashSet<String>();
 		ZipFile file = null;
 		try {
 			file = new ZipFile(jarFile);
@@ -524,8 +527,8 @@ public class PluginConverterImpl implements PluginConverter {
 			return names;
 		}
 		//Run through the entries
-		for (Enumeration entriesEnum = file.entries(); entriesEnum.hasMoreElements();) {
-			ZipEntry entry = (ZipEntry) entriesEnum.nextElement();
+		for (Enumeration<? extends ZipEntry> entriesEnum = file.entries(); entriesEnum.hasMoreElements();) {
+			ZipEntry entry = entriesEnum.nextElement();
 			String name = entry.getName();
 			if (!isValidPackageName(name))
 				continue;
@@ -548,10 +551,10 @@ public class PluginConverterImpl implements PluginConverter {
 		return names;
 	}
 
-	private ArrayList getLibrariesExpandingVariables(String libraryPath, boolean filter) {
+	private List<String> getLibrariesExpandingVariables(String libraryPath, boolean filter) {
 		String var = hasPrefix(libraryPath);
 		if (var == null) {
-			ArrayList returnValue = new ArrayList(1);
+			List<String> returnValue = new ArrayList<String>(1);
 			returnValue.add(libraryPath);
 			return returnValue;
 		}
@@ -561,7 +564,7 @@ public class PluginConverterImpl implements PluginConverter {
 		if (var.equals("os")) { //$NON-NLS-1$
 			return findOSJars(pluginManifestLocation, libraryPath, filter);
 		}
-		return new ArrayList(0);
+		return new ArrayList<String>(0);
 	}
 
 	//return a String representing the string found between the $s
@@ -688,10 +691,10 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	private String getStringFromCollection(Collection collection, String separator) {
+	private String getStringFromCollection(Collection<String> collection, String separator) {
 		StringBuffer result = new StringBuffer();
 		boolean first = true;
-		for (Iterator i = collection.iterator(); i.hasNext();) {
+		for (Iterator<String> i = collection.iterator(); i.hasNext();) {
 			if (first)
 				first = false;
 			else
@@ -701,7 +704,7 @@ public class PluginConverterImpl implements PluginConverter {
 		return result.toString();
 	}
 
-	public synchronized Dictionary convertManifest(File pluginBaseLocation, boolean compatibility, String targetVersion, boolean analyseJars, Dictionary devProps) throws PluginConversionException {
+	public synchronized Dictionary<String, String> convertManifest(File pluginBaseLocation, boolean compatibility, String targetVersion, boolean analyseJars, Dictionary<String, String> devProps) throws PluginConversionException {
 		long start = System.currentTimeMillis();
 		if (DEBUG)
 			System.out.println("Convert " + pluginBaseLocation); //$NON-NLS-1$
@@ -715,7 +718,7 @@ public class PluginConverterImpl implements PluginConverter {
 		return generatedManifest;
 	}
 
-	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String targetVersion, boolean analyseJars, Dictionary devProps) throws PluginConversionException {
+	public synchronized File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String targetVersion, boolean analyseJars, Dictionary<String, String> devProps) throws PluginConversionException {
 		convertManifest(pluginBaseLocation, compatibilityManifest, targetVersion, analyseJars, devProps);
 		if (bundleManifestLocation == null) {
 			String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);

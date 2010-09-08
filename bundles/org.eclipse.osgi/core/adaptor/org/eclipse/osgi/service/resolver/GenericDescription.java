@@ -28,7 +28,7 @@ public interface GenericDescription extends BaseDescription {
 	 * Returns the arbitrary attributes for this description
 	 * @return the arbitrary attributes for this description
 	 */
-	public Dictionary getAttributes();
+	public Dictionary<String, String> getAttributes();
 
 	/**
 	 * Returns the type of generic description capability

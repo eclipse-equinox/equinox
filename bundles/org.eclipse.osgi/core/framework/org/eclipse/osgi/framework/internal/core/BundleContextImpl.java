@@ -31,7 +31,7 @@ import org.osgi.framework.*;
  * It is destroyed when a bundle is stopped.
  */
 
-public class BundleContextImpl implements BundleContext, EventDispatcher {
+public class BundleContextImpl implements BundleContext, EventDispatcher<Object, Object, Object> {
 	private static boolean SET_TCCL = "true".equals(FrameworkProperties.getProperty("eclipse.bundle.setTCCL", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	/** true if the bundle context is still valid */
 	private volatile boolean valid;
@@ -957,7 +957,9 @@ public class BundleContextImpl implements BundleContext, EventDispatcher {
 		@SuppressWarnings("unchecked")
 		ServiceReference<S>[] refs = (ServiceReference<S>[]) getServiceReferences(clazz.getName(), filter);
 		if (refs == null) {
-			return Collections.EMPTY_LIST;
+			@SuppressWarnings("unchecked")
+			Collection<ServiceReference<S>> empty = Collections.EMPTY_LIST;
+			return empty;
 		}
 		List<ServiceReference<S>> result = new ArrayList<ServiceReference<S>>(refs.length);
 		for (ServiceReference<S> b : refs) {

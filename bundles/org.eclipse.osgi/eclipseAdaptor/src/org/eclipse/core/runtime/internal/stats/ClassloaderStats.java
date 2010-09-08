@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,20 +24,20 @@ public class ClassloaderStats {
 	/**
 	 * classes loaded by the plugin (key: class name, value: ClassStats) 
 	 */
-	private Map classes = Collections.synchronizedMap(new HashMap(20));
-	private ArrayList bundles = new ArrayList(2); // bundles loaded
+	private Map<String, ClassStats> classes = Collections.synchronizedMap(new HashMap<String, ClassStats>(20));
+	private List<ResourceBundleStats> bundles = new ArrayList<ResourceBundleStats>(2); // bundles loaded
 
 	private boolean keepTraces = false; // indicate whether or not the traces of classes loaded are kept
 
 	// filters to indicate which classes we want to keep the traces
-	private static ArrayList packageFilters = new ArrayList(4); // filters on a package basis 
-	private static Set pluginFilters = new HashSet(5); // filters on a plugin basis
+	private static List<String> packageFilters = new ArrayList<String>(4); // filters on a package basis 
+	private static Set<String> pluginFilters = new HashSet<String>(5); // filters on a plugin basis
 
-	private static Hashtable classStacks = new Hashtable(); // represents the classes that are currently being loaded
+	private static Hashtable<Thread, Stack<ClassStats>> classStacks = new Hashtable<Thread, Stack<ClassStats>>(); // represents the classes that are currently being loaded
 	/**
 	 * a dictionary of the classloaderStats (key: pluginId, value: ClassloaderStats) 
 	 */
-	private static Map loaders = Collections.synchronizedMap(new HashMap(20));
+	private static Map<String, ClassloaderStats> loaders = Collections.synchronizedMap(new HashMap<String, ClassloaderStats>(20));
 	public static File traceFile;
 
 	static {
@@ -95,7 +95,7 @@ public class ClassloaderStats {
 	// get and create if does not exist
 	private static ClassloaderStats findLoader(String id) {
 		synchronized (loaders) {
-			ClassloaderStats result = (ClassloaderStats) loaders.get(id);
+			ClassloaderStats result = loaders.get(id);
 			if (result == null) {
 				result = new ClassloaderStats(id);
 				loaders.put(id, result);
@@ -104,10 +104,10 @@ public class ClassloaderStats {
 		}
 	}
 
-	public static synchronized Stack getClassStack() {
-		Stack result = (Stack) classStacks.get(Thread.currentThread());
+	public static synchronized Stack<ClassStats> getClassStack() {
+		Stack<ClassStats> result = classStacks.get(Thread.currentThread());
 		if (result == null) {
-			result = new Stack();
+			result = new Stack<ClassStats>();
 			classStacks.put(Thread.currentThread(), result);
 		}
 		return result;
@@ -116,7 +116,7 @@ public class ClassloaderStats {
 	public static ClassloaderStats[] getLoaders() {
 		//the parameter to toArray is of size zero for thread safety, otherwise this
 		//could return an array with null entries if the map shrinks concurrently
-		return (ClassloaderStats[]) loaders.values().toArray(new ClassloaderStats[0]);
+		return loaders.values().toArray(new ClassloaderStats[0]);
 	}
 
 	public static void endLoadingClass(String id, String className, boolean success) {
@@ -128,7 +128,7 @@ public class ClassloaderStats {
 	}
 
 	public static ClassloaderStats getLoader(String id) {
-		return (ClassloaderStats) loaders.get(id);
+		return loaders.get(id);
 	}
 
 	public ClassloaderStats(String id) {
@@ -151,7 +151,7 @@ public class ClassloaderStats {
 		bundles.add(bundle);
 	}
 
-	public ArrayList getBundles() {
+	public List<ResourceBundleStats> getBundles() {
 		return bundles;
 	}
 
@@ -161,12 +161,12 @@ public class ClassloaderStats {
 
 	// internal method that return the existing classStats or creates one
 	private ClassStats findClass(String name) {
-		ClassStats result = (ClassStats) classes.get(name);
+		ClassStats result = classes.get(name);
 		return result == null ? new ClassStats(name, this) : result;
 	}
 
 	private synchronized void endLoadClass(String name, boolean success) {
-		ClassStats current = (ClassStats) getClassStack().pop();
+		ClassStats current = getClassStack().pop();
 		if (!success) {
 			failureCount++;
 			return;
@@ -180,10 +180,10 @@ public class ClassloaderStats {
 		traceLoad(name, current);
 
 		// is there something on the load stack. if so, link them together...
-		Stack classStack = getClassStack();
+		Stack<ClassStats> classStack = getClassStack();
 		if (classStack.size() != 0) {
 			// get the time spent loading cli and subtract its load time from the class that requires loading
-			ClassStats previous = ((ClassStats) classStack.peek());
+			ClassStats previous = classStack.peek();
 			previous.addTimeLoadingOthers(current.getTimeLoading());
 			current.setLoadedBy(previous);
 			previous.loaded(current);
@@ -197,7 +197,7 @@ public class ClassloaderStats {
 		if (!keepTraces) {
 			boolean found = false;
 			for (int i = 0; !found && i < packageFilters.size(); i++)
-				if (name.startsWith((String) packageFilters.get(i)))
+				if (name.startsWith(packageFilters.get(i)))
 					found = true;
 			if (!found)
 				return;
@@ -211,9 +211,9 @@ public class ClassloaderStats {
 				output.println("Loading class: " + name); //$NON-NLS-1$
 				output.println("Class loading stack:"); //$NON-NLS-1$
 				output.println("\t" + name); //$NON-NLS-1$
-				Stack classStack = getClassStack();
+				Stack<ClassStats> classStack = getClassStack();
 				for (int i = classStack.size() - 1; i >= 0; i--)
-					output.println("\t" + ((ClassStats) classStack.get(i)).getClassName()); //$NON-NLS-1$
+					output.println("\t" + classStack.get(i).getClassName()); //$NON-NLS-1$
 				output.println("Stack trace:"); //$NON-NLS-1$
 				new Throwable().printStackTrace(output);
 			} finally {
@@ -236,7 +236,7 @@ public class ClassloaderStats {
 	public ClassStats[] getClasses() {
 		//the parameter to toArray is of size zero for thread safety, otherwise this
 		//could return an array with null entries if the map shrinks concurrently
-		return (ClassStats[]) classes.values().toArray(new ClassStats[0]);
+		return classes.values().toArray(new ClassStats[0]);
 	}
 
 	public String getId() {

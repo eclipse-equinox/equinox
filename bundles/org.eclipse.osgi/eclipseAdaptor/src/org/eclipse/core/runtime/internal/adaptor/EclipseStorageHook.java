@@ -83,28 +83,29 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return storageHook;
 	}
 
-	public void initialize(Dictionary manifest) throws BundleException {
-		String activationPolicy = (String) manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+	@SuppressWarnings("deprecation")
+	public void initialize(Dictionary<String, String> manifest) throws BundleException {
+		String activationPolicy = manifest.get(Constants.BUNDLE_ACTIVATIONPOLICY);
 		if (activationPolicy != null) {
 			parseActivationPolicy(this, activationPolicy);
 		} else {
-			String lazyStart = (String) manifest.get(Constants.ECLIPSE_LAZYSTART);
+			String lazyStart = manifest.get(Constants.ECLIPSE_LAZYSTART);
 			if (lazyStart == null)
-				lazyStart = (String) manifest.get(Constants.ECLIPSE_AUTOSTART);
+				lazyStart = manifest.get(Constants.ECLIPSE_AUTOSTART);
 			parseLazyStart(this, lazyStart);
 		}
 		try {
-			String versionString = (String) manifest.get(Constants.BUNDLE_MANIFESTVERSION);
+			String versionString = manifest.get(Constants.BUNDLE_MANIFESTVERSION);
 			bundleManfestVersion = versionString == null ? 0 : Integer.parseInt(versionString);
 		} catch (NumberFormatException nfe) {
 			bundleManfestVersion = 0;
 		}
-		pluginClass = (String) manifest.get(Constants.PLUGIN_CLASS);
-		buddyList = (String) manifest.get(Constants.BUDDY_LOADER);
-		registeredBuddyList = (String) manifest.get(Constants.REGISTERED_POLICY);
+		pluginClass = manifest.get(Constants.PLUGIN_CLASS);
+		buddyList = manifest.get(Constants.BUDDY_LOADER);
+		registeredBuddyList = manifest.get(Constants.REGISTERED_POLICY);
 		if (hasPackageInfo(bundledata.getEntry(Constants.OSGI_BUNDLE_MANIFEST)))
 			flags |= FLAG_HAS_PACKAGE_INFO;
-		String genFrom = (String) manifest.get(PluginConverterImpl.GENERATED_FROM);
+		String genFrom = manifest.get(PluginConverterImpl.GENERATED_FROM);
 		if (genFrom != null) {
 			ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, genFrom)[0];
 			if (generatedFrom != null) {
@@ -117,7 +118,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			if (COMPATIBILITY_LAZYSTART)
 				bundledata.setStatus(bundledata.getStatus() | Constants.BUNDLE_STARTED | Constants.BUNDLE_ACTIVATION_POLICY);
 		}
-		serviceComponent = (String) manifest.get(CachedManifest.SERVICE_COMPONENT);
+		serviceComponent = manifest.get(CachedManifest.SERVICE_COMPONENT);
 	}
 
 	public StorageHook load(BaseData target, DataInputStream in) throws IOException {
@@ -365,8 +366,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return false;
 	}
 
-	private Headers checkManifestAndParent(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
-		Headers result = basicCheckManifest(cacheLocation, symbolicName, version, inputType);
+	private Headers<String, String> checkManifestAndParent(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
+		Headers<String, String> result = basicCheckManifest(cacheLocation, symbolicName, version, inputType);
 		if (result != null)
 			return result;
 		Location parentConfiguration = null;
@@ -375,7 +376,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return result;
 	}
 
-	private Headers basicCheckManifest(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
+	private Headers<String, String> basicCheckManifest(String cacheLocation, String symbolicName, String version, byte inputType) throws BundleException {
 		File currentFile = new File(cacheLocation, symbolicName + '_' + version + ".MF"); //$NON-NLS-1$
 		if (PluginConverterImpl.upToDate(currentFile, bundledata.getBundleFile().getBaseFile(), inputType)) {
 			try {
@@ -387,16 +388,16 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return null;
 	}
 
-	Dictionary createCachedManifest(boolean firstTime) throws BundleException {
+	Dictionary<String, String> createCachedManifest(boolean firstTime) throws BundleException {
 		return firstTime ? getGeneratedManifest() : new CachedManifest(this);
 	}
 
-	public Dictionary getGeneratedManifest() throws BundleException {
+	public Dictionary<String, String> getGeneratedManifest() throws BundleException {
 		if (System.getSecurityManager() == null)
 			return getGeneratedManifest0();
 		try {
-			return (Dictionary) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-				public Object run() throws BundleException {
+			return AccessController.doPrivileged(new PrivilegedExceptionAction<Dictionary<String, String>>() {
+				public Dictionary<String, String> run() throws BundleException {
 					return getGeneratedManifest0();
 				}
 			});
@@ -405,12 +406,12 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		}
 	}
 
-	final Dictionary getGeneratedManifest0() throws BundleException {
-		Dictionary builtIn = AdaptorUtil.loadManifestFrom(bundledata);
+	final Dictionary<String, String> getGeneratedManifest0() throws BundleException {
+		Dictionary<String, String> builtIn = AdaptorUtil.loadManifestFrom(bundledata);
 		if (builtIn != null) {
 			// the bundle has a built-in manifest - we may not have to generate one
 			if (!isComplete(builtIn)) {
-				Dictionary generatedManifest = generateManifest(builtIn);
+				Dictionary<String, String> generatedManifest = generateManifest(builtIn);
 				if (generatedManifest != null)
 					return generatedManifest;
 			}
@@ -423,16 +424,16 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 				manifestTimeStamp = bundledata.getBundleFile().getEntry(Constants.OSGI_BUNDLE_MANIFEST).getTime();
 			return builtIn;
 		}
-		Dictionary result = generateManifest(null);
+		Dictionary<String, String> result = generateManifest(null);
 		if (result == null)
 			throw new BundleException(NLS.bind(EclipseAdaptorMsg.ECLIPSE_DATA_MANIFEST_NOT_FOUND, bundledata.getLocation()));
 		return result;
 	}
 
-	private Dictionary generateManifest(Dictionary builtIn) throws BundleException {
+	private Dictionary<String, String> generateManifest(Dictionary<String, String> builtIn) throws BundleException {
 		String cacheLocation = FrameworkProperties.getProperty(LocationManager.PROP_MANIFEST_CACHE);
 		if (bundledata.getSymbolicName() != null) {
-			Headers existingHeaders = checkManifestAndParent(cacheLocation, bundledata.getSymbolicName(), bundledata.getVersion().toString(), manifestType);
+			Headers<String, String> existingHeaders = checkManifestAndParent(cacheLocation, bundledata.getSymbolicName(), bundledata.getVersion().toString(), manifestType);
 			if (existingHeaders != null)
 				return existingHeaders;
 		}
@@ -441,7 +442,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		if (converter == null)
 			converter = new PluginConverterImpl(bundledata.getAdaptor(), bundledata.getAdaptor().getContext());
 
-		Dictionary generatedManifest;
+		Dictionary<String, String> generatedManifest;
 		try {
 			generatedManifest = converter.convertManifest(bundledata.getBundleFile().getBaseFile(), true, null, true, null);
 		} catch (PluginConversionException pce) {
@@ -450,10 +451,10 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		}
 
 		//Now we know the symbolicId and the version of the bundle, we check to see if don't have a manifest for it already
-		Version version = Version.parseVersion((String) generatedManifest.get(Constants.BUNDLE_VERSION));
-		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, (String) generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
-		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, (String) generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
-		Headers existingHeaders = checkManifestAndParent(cacheLocation, symbolicName, version.toString(), Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
+		Version version = Version.parseVersion(generatedManifest.get(Constants.BUNDLE_VERSION));
+		String symbolicName = ManifestElement.parseHeader(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME, generatedManifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME))[0].getValue();
+		ManifestElement generatedFrom = ManifestElement.parseHeader(PluginConverterImpl.GENERATED_FROM, generatedManifest.get(PluginConverterImpl.GENERATED_FROM))[0];
+		Headers<String, String> existingHeaders = checkManifestAndParent(cacheLocation, symbolicName, version.toString(), Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE)));
 		//We don't have a manifest.
 		manifestTimeStamp = Long.parseLong(generatedFrom.getValue());
 		manifestType = Byte.parseByte(generatedFrom.getAttribute(PluginConverterImpl.MANIFEST_TYPE_ATTRIBUTE));
@@ -462,9 +463,9 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 
 		//merge the original manifest with the generated one
 		if (builtIn != null) {
-			Enumeration keysEnum = builtIn.keys();
+			Enumeration<String> keysEnum = builtIn.keys();
 			while (keysEnum.hasMoreElements()) {
-				Object key = keysEnum.nextElement();
+				String key = keysEnum.nextElement();
 				generatedManifest.put(key, builtIn.get(key));
 			}
 		}
@@ -480,7 +481,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 
 	}
 
-	private boolean isComplete(Dictionary manifest) {
+	private boolean isComplete(Dictionary<String, String> manifest) {
 		// a manifest is complete if it has a Bundle-SymbolicName entry...
 		if (manifest.get(org.osgi.framework.Constants.BUNDLE_SYMBOLICNAME) != null)
 			return true;
@@ -506,7 +507,7 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 		return null;
 	}
 
-	public Dictionary getManifest(boolean firstLoad) throws BundleException {
+	public Dictionary<String, String> getManifest(boolean firstLoad) throws BundleException {
 		return createCachedManifest(firstLoad);
 	}
 

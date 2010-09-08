@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.url.URLConstants;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -32,24 +33,24 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 // TODO rename this class!!!  its really confusing to name the impl the same as the interface
 public class ContentHandlerFactory extends MultiplexingFactory implements java.net.ContentHandlerFactory {
-	private ServiceTracker contentHandlerTracker;
+	private ServiceTracker<ContentHandler, ContentHandler> contentHandlerTracker;
 
 	private static final String contentHandlerClazz = "java.net.ContentHandler"; //$NON-NLS-1$
 	private static final String CONTENT_HANDLER_PKGS = "java.content.handler.pkgs"; //$NON-NLS-1$
 	private static final String DEFAULT_VM_CONTENT_HANDLERS = "sun.net.www.content"; //$NON-NLS-1$
 
-	private static final List ignoredClasses = Arrays.asList(new Class[] {MultiplexingContentHandler.class, ContentHandlerFactory.class, URLConnection.class});
+	private static final List<Class<?>> ignoredClasses = Arrays.asList(new Class<?>[] {MultiplexingContentHandler.class, ContentHandlerFactory.class, URLConnection.class});
 
-	private Hashtable proxies;
+	private Map<String, ContentHandlerProxy> proxies;
 	private java.net.ContentHandlerFactory parentFactory;
 
 	public ContentHandlerFactory(BundleContext context, FrameworkAdaptor adaptor) {
 		super(context, adaptor);
 
-		proxies = new Hashtable(5);
+		proxies = new Hashtable<String, ContentHandlerProxy>(5);
 
 		//We need to track content handler registrations
-		contentHandlerTracker = new ServiceTracker(context, contentHandlerClazz, null);
+		contentHandlerTracker = new ServiceTracker<ContentHandler, ContentHandler>(context, contentHandlerClazz, null);
 		contentHandlerTracker.open();
 	}
 
@@ -62,7 +63,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 		//this content type.  we can not overwrite built in ContentHandlers
 		String builtInHandlers = StreamHandlerFactory.secureAction.getProperty(CONTENT_HANDLER_PKGS);
 		builtInHandlers = builtInHandlers == null ? DEFAULT_VM_CONTENT_HANDLERS : DEFAULT_VM_CONTENT_HANDLERS + '|' + builtInHandlers;
-		Class clazz = null;
+		Class<?> clazz = null;
 		if (builtInHandlers != null) {
 			//replace '/' with a '.' and all characters not allowed in a java class name
 			//with a '_'.
@@ -96,11 +97,11 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 
 	public ContentHandler createInternalContentHandler(String contentType) {
 		//first check to see if the handler is in the cache
-		ContentHandlerProxy proxy = (ContentHandlerProxy) proxies.get(contentType);
+		ContentHandlerProxy proxy = proxies.get(contentType);
 		if (proxy != null) {
 			return (proxy);
 		}
-		org.osgi.framework.ServiceReference[] serviceReferences = contentHandlerTracker.getServiceReferences();
+		ServiceReference<ContentHandler>[] serviceReferences = contentHandlerTracker.getServiceReferences();
 		if (serviceReferences != null) {
 			for (int i = 0; i < serviceReferences.length; i++) {
 				Object prop = serviceReferences[i].getProperty(URLConstants.URL_CONTENT_MIMETYPE);

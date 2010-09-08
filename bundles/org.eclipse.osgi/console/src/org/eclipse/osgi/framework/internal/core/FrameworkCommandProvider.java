@@ -27,6 +27,7 @@ import org.osgi.service.condpermadmin.ConditionalPermissionInfo;
 import org.osgi.service.condpermadmin.ConditionalPermissionUpdate;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
+import org.osgi.service.startlevel.StartLevel;
 
 /**
  * This class provides methods to execute commands from the command line.  It registers
@@ -83,14 +84,14 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	/** The start level implementation */
 	private final StartLevelManager slImpl;
 	private final SecurityAdmin securityAdmin;
-	private ServiceRegistration providerReg;
+	private ServiceRegistration<?> providerReg;
 
 	/** Strings used to format other strings */
 	private final static String tab = "\t"; //$NON-NLS-1$
 	private final static String newline = "\r\n"; //$NON-NLS-1$
 
 	/** this list contains the bundles known to be lazily awaiting activation */
-	private final List lazyActivation = new ArrayList();
+	private final List<Bundle> lazyActivation = new ArrayList<Bundle>();
 
 	/**
 	 *  Constructor.
@@ -113,7 +114,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  Adds this object as a SynchronousBundleListener.
 	 */
 	void start() {
-		Dictionary props = new Hashtable();
+		Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		providerReg = context.registerService(CommandProvider.class.getName(), this, props);
 		context.addBundleListener(this);
@@ -498,7 +499,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			intp.println(bundle.bundledata);
 		}
 
-		ServiceReference[] services = context.getServiceReferences((String) null, (String) null);
+		ServiceReference<?>[] services = context.getServiceReferences((String) null, (String) null);
 		if (services != null) {
 			intp.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
 			size = services.length;
@@ -536,12 +537,12 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			filter = buf.toString();
 		}
 
-		ServiceReference[] services = context.getServiceReferences((String) null, filter);
+		ServiceReference<?>[] services = context.getServiceReferences((String) null, filter);
 		if (services != null) {
 			int size = services.length;
 			if (size > 0) {
 				for (int j = 0; j < size; j++) {
-					ServiceReference service = services[j];
+					ServiceReference<?> service = services[j];
 					intp.println(service);
 					intp.print("  "); //$NON-NLS-1$
 					intp.print(ConsoleMsg.CONSOLE_REGISTERED_BY_BUNDLE_MESSAGE);
@@ -588,9 +589,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			bundle = getBundleFromToken(intp, token, false);
 		}
 
-		org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
+		ServiceReference<?> packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
 		if (packageAdminRef != null) {
-			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
+			PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
 					org.osgi.service.packageadmin.ExportedPackage[] packages = null;
@@ -682,7 +683,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 				intp.println();
 			}
 
-			ServiceReference[] services = bundle.getRegisteredServices();
+			ServiceReference<?>[] services = bundle.getRegisteredServices();
 			if (services != null) {
 				intp.print("  "); //$NON-NLS-1$
 				intp.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
@@ -749,7 +750,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 					intp.println();
 				}
 
-				ServiceReference[] services = bundle.getRegisteredServices();
+				ServiceReference<?>[] services = bundle.getRegisteredServices();
 				if (services != null) {
 					intp.print("  "); //$NON-NLS-1$
 					intp.println(ConsoleMsg.CONSOLE_REGISTERED_SERVICES_MESSAGE);
@@ -775,7 +776,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 					intp.println(ConsoleMsg.CONSOLE_NO_SERVICES_IN_USE_MESSAGE);
 				}
 
-				org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
+				ServiceReference<?> packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
 				if (packageAdminRef != null) {
 					BundleDescription desc = bundle.getBundleDescription();
 					if (desc != null) {
@@ -813,7 +814,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 							}
 							title = true;
 							if (desc != null) {
-								ArrayList fragmentsImportPackages = new ArrayList();
+								List<ImportPackageSpecification> fragmentsImportPackages = new ArrayList<ImportPackageSpecification>();
 
 								// Get bundle' fragments imports
 								BundleDescription[] fragments = desc.getFragments();
@@ -836,7 +837,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 
 									int offset = directImportPackages.length;
 									for (int i = 0; i < fragmentsImportPackages.size(); i++) {
-										importPackages[offset + i] = (ImportPackageSpecification) fragmentsImportPackages.get(i);
+										importPackages[offset + i] = fragmentsImportPackages.get(i);
 									}
 								} else {
 									importPackages = desc.getImportPackages();
@@ -847,7 +848,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 								imports = desc.getContainingState().getStateHelper().getVisiblePackages(desc, StateHelper.VISIBLE_INCLUDE_EE_PACKAGES | StateHelper.VISIBLE_INCLUDE_ALL_HOST_WIRES);
 
 								// Get the unresolved optional and dynamic imports
-								ArrayList unresolvedImports = new ArrayList();
+								List<ImportPackageSpecification> unresolvedImports = new ArrayList<ImportPackageSpecification>();
 
 								for (int i = 0; i < importPackages.length; i++) {
 									if (importPackages[i].getDirective(Constants.RESOLUTION_DIRECTIVE).equals(ImportPackageSpecification.RESOLUTION_OPTIONAL)) {
@@ -1014,9 +1015,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		return title;
 	}
 
-	private void printUnwiredDynamicImports(ArrayList dynamicImports, CommandInterpreter intp) {
+	private void printUnwiredDynamicImports(List<ImportPackageSpecification> dynamicImports, CommandInterpreter intp) {
 		for (int i = 0; i < dynamicImports.size(); i++) {
-			ImportPackageSpecification importPackage = (ImportPackageSpecification) dynamicImports.get(i);
+			ImportPackageSpecification importPackage = dynamicImports.get(i);
 			intp.print("    "); //$NON-NLS-1$
 			intp.print(importPackage.getName());
 			intp.print("; version=\""); //$NON-NLS-1$
@@ -1065,6 +1066,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
+	@SuppressWarnings("deprecation")
 	public void _init(CommandInterpreter intp) throws Exception {
 		if (framework.isActive()) {
 			intp.print(newline);
@@ -1104,8 +1106,8 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		}
 		// clear the permissions from conditional permission admin
 		if (securityAdmin != null)
-			for (Enumeration infos = securityAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
-				((ConditionalPermissionInfo) infos.nextElement()).delete();
+			for (Enumeration<ConditionalPermissionInfo> infos = securityAdmin.getConditionalPermissionInfos(); infos.hasMoreElements();)
+				infos.nextElement().delete();
 	}
 
 	/**
@@ -1134,22 +1136,22 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 *  @param intp A CommandInterpreter object containing the command and it's arguments.
 	 */
 	public void _refresh(CommandInterpreter intp) throws Exception {
-		org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
+		ServiceReference<?> packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
 		if (packageAdminRef != null) {
 			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
-					AbstractBundle[] refresh = null;
+					Bundle[] refresh = null;
 
 					String token = intp.nextArgument();
 					if (token != null) {
-						Vector bundles = new Vector();
+						List<Bundle> bundles = new ArrayList<Bundle>();
 
 						while (token != null) {
 							AbstractBundle bundle = getBundleFromToken(intp, token, true);
 
 							if (bundle != null) {
-								bundles.addElement(bundle);
+								bundles.add(bundle);
 							}
 							token = intp.nextArgument();
 						}
@@ -1161,8 +1163,8 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 							return;
 						}
 
-						refresh = new AbstractBundle[size];
-						bundles.copyInto(refresh);
+						refresh = new Bundle[size];
+						bundles.toArray(refresh);
 					}
 
 					packageAdmin.refreshPackages(refresh);
@@ -1285,7 +1287,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 				Properties newprops = new Properties();
 				newprops.load(in);
 				intp.println(ConsoleMsg.CONSOLE_SETTING_PROPERTIES_TITLE);
-				Enumeration keys = newprops.propertyNames();
+				Enumeration<?> keys = newprops.propertyNames();
 				while (keys.hasMoreElements()) {
 					String key = (String) keys.nextElement();
 					String value = (String) newprops.get(key);
@@ -1549,9 +1551,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 
 		String token = intp.nextArgument();
 
-		org.osgi.framework.ServiceReference packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
+		ServiceReference<?> packageAdminRef = context.getServiceReference("org.osgi.service.packageadmin.PackageAdmin"); //$NON-NLS-1$
 		if (packageAdminRef != null) {
-			org.osgi.service.packageadmin.PackageAdmin packageAdmin = (org.osgi.service.packageadmin.PackageAdmin) context.getService(packageAdminRef);
+			PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
 			if (packageAdmin != null) {
 				try {
 					org.osgi.service.packageadmin.RequiredBundle[] symBundles = null;
@@ -1618,7 +1620,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		if (nextArg == null)
 			return;
 		AbstractBundle bundle = getBundleFromToken(intp, nextArg, true);
-		ServiceReference ref = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin"); //$NON-NLS-1$
+		ServiceReference<?> ref = context.getServiceReference("org.eclipse.osgi.service.resolver.PlatformAdmin"); //$NON-NLS-1$
 		if (ref == null)
 			return;
 		PlatformAdmin platformAdmin = (PlatformAdmin) context.getService(ref);
@@ -1639,9 +1641,9 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 */
 	protected boolean isStartLevelSvcPresent(CommandInterpreter intp) {
 		boolean retval = false;
-		org.osgi.framework.ServiceReference slSvcRef = context.getServiceReference("org.osgi.service.startlevel.StartLevel"); //$NON-NLS-1$
+		ServiceReference<?> slSvcRef = context.getServiceReference("org.osgi.service.startlevel.StartLevel"); //$NON-NLS-1$
 		if (slSvcRef != null) {
-			org.osgi.service.startlevel.StartLevel slSvc = (org.osgi.service.startlevel.StartLevel) context.getService(slSvcRef);
+			StartLevel slSvc = (StartLevel) context.getService(slSvcRef);
 			if (slSvc != null) {
 				retval = true;
 			}
@@ -1768,7 +1770,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 
 	private boolean isDisabled(Bundle bundle) {
 		boolean disabled = false;
-		ServiceReference platformAdminRef = null;
+		ServiceReference<?> platformAdminRef = null;
 		try {
 			platformAdminRef = context.getServiceReference(PlatformAdmin.class.getName());
 			if (platformAdminRef != null) {
@@ -1843,7 +1845,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	public void _getprop(CommandInterpreter ci) throws Exception {
 		Properties allProperties = FrameworkProperties.getProperties();
 		String filter = ci.nextArgument();
-		Iterator propertyNames = new TreeSet(allProperties.keySet()).iterator();
+		Iterator<?> propertyNames = new TreeSet<Object>(allProperties.keySet()).iterator();
 		while (propertyNames.hasNext()) {
 			String prop = (String) propertyNames.next();
 			if (filter == null || prop.startsWith(filter)) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,20 +27,20 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * because the JVM caches ContentHandlers and therefore would not support a dynamic environment of
  * ContentHandlers being registered and unregistered.
  */
-public class ContentHandlerProxy extends ContentHandler implements ServiceTrackerCustomizer {
+public class ContentHandlerProxy extends ContentHandler implements ServiceTrackerCustomizer<ContentHandler, ServiceReference<ContentHandler>> {
 	protected ContentHandler realHandler;
 
 	//TODO avoid type-based names
-	protected ServiceTracker contentHandlerServiceTracker;
+	protected ServiceTracker<ContentHandler, ServiceReference<ContentHandler>> contentHandlerServiceTracker;
 
 	protected BundleContext context;
-	protected ServiceReference contentHandlerServiceReference;
+	protected ServiceReference<ContentHandler> contentHandlerServiceReference;
 
 	protected String contentType;
 
 	protected int ranking = Integer.MIN_VALUE;
 
-	public ContentHandlerProxy(String contentType, ServiceReference reference, BundleContext context) {
+	public ContentHandlerProxy(String contentType, ServiceReference<ContentHandler> reference, BundleContext context) {
 		this.context = context;
 		this.contentType = contentType;
 
@@ -48,11 +48,11 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		// until a real ContentHandler for this mime-type is registered
 		setNewHandler(reference, getRank(reference));
 
-		contentHandlerServiceTracker = new ServiceTracker(context, ContentHandler.class.getName(), this);
+		contentHandlerServiceTracker = new ServiceTracker<ContentHandler, ServiceReference<ContentHandler>>(context, ContentHandler.class.getName(), this);
 		StreamHandlerFactory.secureAction.open(contentHandlerServiceTracker);
 	}
 
-	private void setNewHandler(ServiceReference reference, int rank) {
+	private void setNewHandler(ServiceReference<ContentHandler> reference, int rank) {
 		if (contentHandlerServiceReference != null)
 			context.ungetService(contentHandlerServiceReference);
 
@@ -62,13 +62,13 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		if (reference == null)
 			realHandler = new DefaultContentHandler();
 		else
-			realHandler = (ContentHandler) StreamHandlerFactory.secureAction.getService(reference, context);
+			realHandler = StreamHandlerFactory.secureAction.getService(reference, context);
 	}
 
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(ServiceReference)
 	 */
-	public Object addingService(ServiceReference reference) {
+	public ServiceReference<ContentHandler> addingService(ServiceReference<ContentHandler> reference) {
 		//check to see if our contentType is being registered by another service
 		Object prop = reference.getProperty(URLConstants.URL_CONTENT_MIMETYPE);
 		if (!(prop instanceof String[]))
@@ -92,14 +92,14 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)
 	 */
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
 		int newrank = getRank(reference);
 		if (reference == contentHandlerServiceReference) {
 			if (newrank < ranking) {
 				// The ContentHandler we are currently using has dropped it's ranking below a ContentHandler 
 				// registered for the same protocol.  We need to swap out ContentHandlers.
 				// this should get us the highest ranked service, if available
-				ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
+				ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();
 				if (newReference != contentHandlerServiceReference && newReference != null) {
 					setNewHandler(newReference, ((Integer) newReference.getProperty(Constants.SERVICE_RANKING)).intValue());
 				}
@@ -114,13 +114,13 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 	/**
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(ServiceReference, Object)
 	 */
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(ServiceReference<ContentHandler> reference, ServiceReference<ContentHandler> service) {
 		//check to see if our URLStreamHandler was unregistered.
 		if (reference != contentHandlerServiceReference)
 			return;
 		// If so, look for a lower ranking URLHandler
 		// this should get us the highest ranking service left, if available
-		ServiceReference newReference = contentHandlerServiceTracker.getServiceReference();
+		ServiceReference<ContentHandler> newReference = contentHandlerServiceTracker.getServiceReference();
 		// if newReference == null then we will use the DefaultContentHandler here
 		setNewHandler(newReference, getRank(newReference));
 	}
@@ -133,7 +133,7 @@ public class ContentHandlerProxy extends ContentHandler implements ServiceTracke
 		return realHandler.getContent(uConn);
 	}
 
-	private int getRank(ServiceReference reference) {
+	private int getRank(ServiceReference<?> reference) {
 		if (reference == null)
 			return Integer.MIN_VALUE;
 		Object property = reference.getProperty(Constants.SERVICE_RANKING);

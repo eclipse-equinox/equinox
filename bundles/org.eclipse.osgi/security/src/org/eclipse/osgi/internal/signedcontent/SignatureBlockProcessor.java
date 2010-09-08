@@ -14,7 +14,6 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -23,10 +22,10 @@ import org.eclipse.osgi.util.NLS;
 
 public class SignatureBlockProcessor implements SignedContentConstants {
 	private final SignedBundleFile signedBundle;
-	private ArrayList signerInfos = new ArrayList();
-	private HashMap contentMDResults = new HashMap();
+	private List<SignerInfo> signerInfos = new ArrayList<SignerInfo>();
+	private Map<String, Object> contentMDResults = new HashMap<String, Object>();
 	// map of tsa singers keyed by SignerInfo -> {tsa_SignerInfo, signingTime}
-	private HashMap tsaSignerInfos;
+	private Map<SignerInfo, Object[]> tsaSignerInfos;
 	private final int supportFlags;
 
 	public SignatureBlockProcessor(SignedBundleFile signedContent, int supportFlags) {
@@ -41,10 +40,10 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 			return createUnsignedContent();
 
 		// read all the signature block file names into a list
-		Enumeration en = wrappedBundleFile.getEntryPaths(META_INF);
-		List signers = new ArrayList(2);
+		Enumeration<String> en = wrappedBundleFile.getEntryPaths(META_INF);
+		List<String> signers = new ArrayList<String>(2);
 		while (en.hasMoreElements()) {
-			String name = (String) en.nextElement();
+			String name = en.nextElement();
 			if ((name.endsWith(DOT_DSA) || name.endsWith(DOT_RSA)) && name.indexOf('/') == name.lastIndexOf('/'))
 				signers.add(name);
 		}
@@ -55,17 +54,18 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		byte manifestBytes[] = readIntoArray(be);
 		// process the signers
-		Iterator iSigners = signers.iterator();
+		Iterator<String> iSigners = signers.iterator();
 		for (int i = 0; iSigners.hasNext(); i++)
-			processSigner(wrappedBundleFile, manifestBytes, (String) iSigners.next());
+			processSigner(wrappedBundleFile, manifestBytes, iSigners.next());
 
 		// done processing now create a SingedContent to return
-		SignerInfo[] allSigners = (SignerInfo[]) signerInfos.toArray(new SignerInfo[signerInfos.size()]);
-		for (Iterator iResults = contentMDResults.entrySet().iterator(); iResults.hasNext();) {
-			Entry entry = (Entry) iResults.next();
-			ArrayList[] value = (ArrayList[]) entry.getValue();
-			SignerInfo[] entrySigners = (SignerInfo[]) value[0].toArray(new SignerInfo[value[0].size()]);
-			byte[][] entryResults = (byte[][]) value[1].toArray(new byte[value[1].size()][]);
+		SignerInfo[] allSigners = signerInfos.toArray(new SignerInfo[signerInfos.size()]);
+		for (Iterator<Map.Entry<String, Object>> iResults = contentMDResults.entrySet().iterator(); iResults.hasNext();) {
+			Map.Entry<String, Object> entry = iResults.next();
+			@SuppressWarnings("unchecked")
+			List<Object>[] value = (List<Object>[]) entry.getValue();
+			SignerInfo[] entrySigners = value[0].toArray(new SignerInfo[value[0].size()]);
+			byte[][] entryResults = value[1].toArray(new byte[value[1].size()][]);
 			entry.setValue(new Object[] {entrySigners, entryResults});
 		}
 		SignedContentImpl result = new SignedContentImpl(allSigners, (supportFlags & SignedBundleHook.VERIFY_RUNTIME) != 0 ? contentMDResults : null);
@@ -115,7 +115,7 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 		if (tsaCerts != null && signingTime != null) {
 			SignerInfoImpl tsaSignerInfo = new SignerInfoImpl(tsaCerts, null, digAlg);
 			if (tsaSignerInfos == null)
-				tsaSignerInfos = new HashMap(2);
+				tsaSignerInfos = new HashMap<SignerInfo, Object[]>(2);
 			tsaSignerInfos.put(signerInfo, new Object[] {tsaSignerInfo, signingTime});
 		}
 	}
@@ -213,18 +213,21 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 					//						throw new RuntimeException(
 					//								"Errors occurs when parsing the manifest file stream!"); //$NON-NLS-1$
 					//					}
-					ArrayList[] mdResult = (ArrayList[]) contentMDResults.get(entryName);
+					@SuppressWarnings("unchecked")
+					List<Object>[] mdResult = (List<Object>[]) contentMDResults.get(entryName);
 					if (mdResult == null) {
-						mdResult = new ArrayList[2];
-						mdResult[0] = new ArrayList();
-						mdResult[1] = new ArrayList();
+						@SuppressWarnings("unchecked")
+						List<Object>[] arrayLists = new ArrayList[2];
+						mdResult = arrayLists;
+						mdResult[0] = new ArrayList<Object>();
+						mdResult[1] = new ArrayList<Object>();
 						contentMDResults.put(entryName, mdResult);
 					}
 					mdResult[0].add(signerInfo);
 					mdResult[1].add(digestResult);
 				} // could get lines of digest entries in this MF file entry
 			} // could retrieve entry name
-			// increment the offset to the ending entry...
+				// increment the offset to the ending entry...
 			entryStartOffset = entryEndOffset;
 		}
 	}

@@ -202,9 +202,10 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	void delete(SecurityRow securityRow, boolean firstTry) {
 		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
-		List rows = update.getConditionalPermissionInfos();
-		for (Iterator iRows = rows.iterator(); iRows.hasNext();) {
-			ConditionalPermissionInfo info = (ConditionalPermissionInfo) iRows.next();
+		@SuppressWarnings("unchecked")
+		List<ConditionalPermissionInfo> rows = update.getConditionalPermissionInfos();
+		for (Iterator<ConditionalPermissionInfo> iRows = rows.iterator(); iRows.hasNext();) {
+			ConditionalPermissionInfo info = iRows.next();
 			if (securityRow.getName().equals(info.getName())) {
 				iRows.remove();
 				synchronized (lock) {
@@ -257,14 +258,14 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	/**
 	 * @deprecated
 	 */
-	public Enumeration getConditionalPermissionInfos() {
+	public Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos() {
 		// could implement our own Enumeration, but we don't care about performance here.  Just do something simple:
 		synchronized (lock) {
 			SecurityRow[] rows = condAdminTable.getRows();
-			Vector vRows = new Vector(rows.length);
+			List<ConditionalPermissionInfo> vRows = new ArrayList<ConditionalPermissionInfo>(rows.length);
 			for (int i = 0; i < rows.length; i++)
 				vRows.add(rows[i]);
-			return vRows.elements();
+			return Collections.enumeration(vRows);
 		}
 	}
 
@@ -290,12 +291,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 
 	private ConditionalPermissionInfo setConditionalPermissionInfo(String name, ConditionInfo[] conds, PermissionInfo[] perms, boolean firstTry) {
 		ConditionalPermissionUpdate update = newConditionalPermissionUpdate();
-		List rows = update.getConditionalPermissionInfos();
+		@SuppressWarnings("unchecked")
+		List<ConditionalPermissionInfo> rows = update.getConditionalPermissionInfos();
 		ConditionalPermissionInfo newInfo = newConditionalPermissionInfo(name, conds, perms, ConditionalPermissionInfo.ALLOW);
 		int index = -1;
 		if (name != null) {
 			for (int i = 0; i < rows.size() && index < 0; i++) {
-				ConditionalPermissionInfo info = (ConditionalPermissionInfo) rows.get(i);
+				ConditionalPermissionInfo info = rows.get(i);
 				if (name.equals(info.getName())) {
 					index = i;
 				}
@@ -318,13 +320,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
-	boolean commit(List rows, long updateStamp) {
+	boolean commit(List<ConditionalPermissionInfo> rows, long updateStamp) {
 		checkAllPermission();
 		synchronized (lock) {
 			if (updateStamp != timeStamp)
 				return false;
 			SecurityRow[] newRows = new SecurityRow[rows.size()];
-			Collection names = new ArrayList();
+			Collection<String> names = new ArrayList<String>();
 			for (int i = 0; i < newRows.length; i++) {
 				Object rowObj = rows.get(i);
 				if (!(rowObj instanceof ConditionalPermissionInfo))
@@ -430,7 +432,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		DataInputStream in = null;
 		try {
 			in = new DataInputStream(resource.openStream());
-			ArrayList permissions = new ArrayList();
+			List<PermissionInfo> permissions = new ArrayList<PermissionInfo>();
 			BufferedReader reader;
 			try {
 				reader = new BufferedReader(new InputStreamReader(in, "UTF8")); //$NON-NLS-1$
@@ -456,7 +458,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			}
 			int size = permissions.size();
 			if (size > 0)
-				info = (PermissionInfo[]) permissions.toArray(new PermissionInfo[size]);
+				info = permissions.toArray(new PermissionInfo[size]);
 		} catch (IOException e) {
 			// do nothing
 		} finally {
@@ -471,15 +473,15 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	private static Bundle createMockBundle(String[] signers) {
-		Map /* <X509Certificate, List<X509Certificate>> */signersMap = new HashMap();
+		Map<X509Certificate, List<X509Certificate>> signersMap = new HashMap<X509Certificate, List<X509Certificate>>();
 		for (int i = 0; i < signers.length; i++) {
-			List chain = parseDNchain(signers[i]);
-			List /* <X509Certificate> */signersList = new ArrayList();
+			List<String> chain = parseDNchain(signers[i]);
+			List<X509Certificate> signersList = new ArrayList<X509Certificate>();
 			Principal subject = null, issuer = null;
 			X509Certificate first = null;
-			for (Iterator iChain = chain.iterator(); iChain.hasNext();) {
-				subject = issuer == null ? new MockPrincipal((String) iChain.next()) : issuer;
-				issuer = iChain.hasNext() ? new MockPrincipal((String) iChain.next()) : subject;
+			for (Iterator<String> iChain = chain.iterator(); iChain.hasNext();) {
+				subject = issuer == null ? new MockPrincipal(iChain.next()) : issuer;
+				issuer = iChain.hasNext() ? new MockPrincipal(iChain.next()) : subject;
 				X509Certificate cert = new MockX509Certificate(subject, issuer);
 				if (first == null)
 					first = cert;
@@ -493,13 +495,13 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 	}
 
 	static class MockBundle implements Bundle {
-		private final Map signers;
+		private final Map<X509Certificate, List<X509Certificate>> signers;
 
-		MockBundle(Map signers) {
+		MockBundle(Map<X509Certificate, List<X509Certificate>> signers) {
 			this.signers = signers;
 		}
 
-		public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+		public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 			return null;
 		}
 
@@ -515,15 +517,15 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return null;
 		}
 
-		public Enumeration getEntryPaths(String path) {
+		public Enumeration<String> getEntryPaths(String path) {
 			return null;
 		}
 
-		public Dictionary getHeaders() {
-			return new Hashtable();
+		public Dictionary<String, String> getHeaders() {
+			return new Hashtable<String, String>();
 		}
 
-		public Dictionary getHeaders(String locale) {
+		public Dictionary<String, String> getHeaders(String locale) {
 			return getHeaders();
 		}
 
@@ -535,7 +537,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			return ""; //$NON-NLS-1$
 		}
 
-		public ServiceReference[] getRegisteredServices() {
+		public ServiceReference<?>[] getRegisteredServices() {
 			return null;
 		}
 
@@ -546,16 +548,16 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws IOException  
 		 */
-		public Enumeration getResources(String name) throws IOException {
+		public Enumeration<URL> getResources(String name) throws IOException {
 			return null;
 		}
 
-		public ServiceReference[] getServicesInUse() {
+		public ServiceReference<?>[] getServicesInUse() {
 			return null;
 		}
 
-		public Map getSignerCertificates(int signersType) {
-			return new HashMap(signers);
+		public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
+			return new HashMap<X509Certificate, List<X509Certificate>>(signers);
 		}
 
 		public int getState() {
@@ -577,7 +579,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		/**
 		 * @throws ClassNotFoundException  
 		 */
-		public Class loadClass(String name) throws ClassNotFoundException {
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			throw new IllegalStateException();
 		}
 
@@ -780,7 +782,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		public Set getCriticalExtensionOIDs() {
+		public Set<String> getCriticalExtensionOIDs() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -788,7 +790,7 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 			throw new UnsupportedOperationException();
 		}
 
-		public Set getNonCriticalExtensionOIDs() {
+		public Set<String> getNonCriticalExtensionOIDs() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -827,11 +829,11 @@ public final class SecurityAdmin implements PermissionAdmin, ConditionalPermissi
 		}
 	}
 
-	private static ArrayList parseDNchain(String dnChain) {
+	private static List<String> parseDNchain(String dnChain) {
 		if (dnChain == null) {
 			throw new IllegalArgumentException("The DN chain must not be null."); //$NON-NLS-1$
 		}
-		ArrayList parsed = new ArrayList();
+		List<String> parsed = new ArrayList<String>();
 		int startIndex = 0;
 		startIndex = skipSpaces(dnChain, startIndex);
 		while (startIndex < dnChain.length()) {

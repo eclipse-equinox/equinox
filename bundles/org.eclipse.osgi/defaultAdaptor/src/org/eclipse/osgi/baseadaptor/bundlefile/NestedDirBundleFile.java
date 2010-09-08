@@ -66,7 +66,7 @@ public class NestedDirBundleFile extends BundleFile {
 		return baseBundleFile.containsDir(newdir);
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path) {
 		// getEntryPaths is only valid if this is a root bundle file.
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Properties;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.util.ManifestElement;
 
@@ -25,7 +26,7 @@ import org.eclipse.osgi.util.ManifestElement;
 public final class DevClassPathHelper {
 	static private boolean inDevelopmentMode = false;
 	static private String[] devDefaultClasspath;
-	static private Dictionary devProperties = null;
+	static private Dictionary<String, String> devProperties = null;
 
 	static {
 		// Check the osgi.dev property to see if dev classpath entries have been defined.
@@ -36,17 +37,17 @@ public final class DevClassPathHelper {
 				URL location = new URL(osgiDev);
 				devProperties = load(location);
 				if (devProperties != null)
-					devDefaultClasspath = getArrayFromList((String) devProperties.get("*")); //$NON-NLS-1$
+					devDefaultClasspath = getArrayFromList(devProperties.get("*")); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
 				devDefaultClasspath = getArrayFromList(osgiDev);
 			}
 		}
 	}
 
-	private static String[] getDevClassPath(String id, Dictionary properties, String[] defaultClasspath) {
+	private static String[] getDevClassPath(String id, Dictionary<String, String> properties, String[] defaultClasspath) {
 		String[] result = null;
 		if (id != null && properties != null) {
-			String entry = (String) properties.get(id);
+			String entry = properties.get(id);
 			if (entry != null)
 				result = getArrayFromList(entry);
 		}
@@ -62,10 +63,10 @@ public final class DevClassPathHelper {
 	 * the default develoment classpath properties should be used
 	 * @return a list of development classpath elements
 	 */
-	public static String[] getDevClassPath(String id, Dictionary properties) {
+	public static String[] getDevClassPath(String id, Dictionary<String, String> properties) {
 		if (properties == null)
 			return getDevClassPath(id, devProperties, devDefaultClasspath);
-		return getDevClassPath(id, properties, getArrayFromList((String) properties.get("*"))); //$NON-NLS-1$
+		return getDevClassPath(id, properties, getArrayFromList(properties.get("*"))); //$NON-NLS-1$
 	}
 
 	/**
@@ -98,7 +99,7 @@ public final class DevClassPathHelper {
 	/*
 	 * Load the given properties file
 	 */
-	private static Properties load(URL url) {
+	private static Dictionary<String, String> load(URL url) {
 		Properties props = new Properties();
 		try {
 			InputStream is = null;
@@ -112,6 +113,8 @@ public final class DevClassPathHelper {
 		} catch (IOException e) {
 			// TODO consider logging here
 		}
-		return props;
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		Dictionary<String, String> result = (Dictionary) props;
+		return result;
 	}
 }

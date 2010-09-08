@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ public interface ClassLoaderDelegate {
 	 * @return the Class.
 	 * @throws ClassNotFoundException if the class is not found.
 	 */
-	public Class findClass(String classname) throws ClassNotFoundException;
+	public Class<?> findClass(String classname) throws ClassNotFoundException;
 
 	/**
 	 * Finds a resource for a bundle that may be outside of the actual bundle
@@ -72,7 +72,7 @@ public interface ClassLoaderDelegate {
 	 * @return the enumeration of resources found or null if the resource
 	 * does not exist.
 	 */
-	public Enumeration findResources(String resource) throws IOException;
+	public Enumeration<URL> findResources(String resource) throws IOException;
 
 	/**
 	 * Returns the absolute path name of a native library.  The following is

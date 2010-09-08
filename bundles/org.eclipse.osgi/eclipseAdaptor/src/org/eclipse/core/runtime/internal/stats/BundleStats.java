@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.core.runtime.internal.stats;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains information about activated bundles and acts as the main 
@@ -31,7 +32,7 @@ public class BundleStats {
 	private long traceEnd = -1;
 
 	//To keep bundle parentage
-	private ArrayList bundlesActivated = new ArrayList(3); // TODO create lazily
+	private List<BundleStats> bundlesActivated = new ArrayList<BundleStats>(3); // TODO create lazily
 	private BundleStats activatedBy = null;
 
 	public BundleStats(String name, long id) {
@@ -89,7 +90,7 @@ public class BundleStats {
 		return loader == null ? 0 : loader.getClassLoadTime();
 	}
 
-	public ArrayList getBundlesActivated() {
+	public List<BundleStats> getBundlesActivated() {
 		return bundlesActivated;
 	}
 

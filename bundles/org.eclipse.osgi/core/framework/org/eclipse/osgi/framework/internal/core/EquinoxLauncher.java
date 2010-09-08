@@ -13,6 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.io.*;
 import java.net.URL;
 import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
 import org.eclipse.core.runtime.adaptor.LocationManager;
@@ -24,10 +25,10 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 
 	private volatile Framework framework;
 	private volatile Bundle systemBundle;
-	private final Map configuration;
+	private final Map<String, String> configuration;
 	private volatile ConsoleManager consoleMgr = null;
 
-	public EquinoxLauncher(Map configuration) {
+	public EquinoxLauncher(Map<String, String> configuration) {
 		this.configuration = configuration;
 	}
 
@@ -36,7 +37,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		if (System.getSecurityManager() == null)
 			internalInit();
 		else {
-			AccessController.doPrivileged(new PrivilegedAction() {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run() {
 					internalInit();
 					return null;
@@ -77,7 +78,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return current;
 	}
 
-	private void setEquinoxProperties(Map configuration) {
+	private void setEquinoxProperties(Map<String, String> configuration) {
 		Object threadBehavior = configuration == null ? null : configuration.get(Framework.PROP_FRAMEWORK_THREAD);
 		if (threadBehavior == null) {
 			if (FrameworkProperties.getProperty(Framework.PROP_FRAMEWORK_THREAD) == null)
@@ -127,7 +128,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return current.waitForStop(timeout);
 	}
 
-	public Enumeration findEntries(String path, String filePattern, boolean recurse) {
+	public Enumeration<URL> findEntries(String path, String filePattern, boolean recurse) {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
@@ -152,21 +153,21 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return current.getEntry(path);
 	}
 
-	public Enumeration getEntryPaths(String path) {
+	public Enumeration<String> getEntryPaths(String path) {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
 		return current.getEntryPaths(path);
 	}
 
-	public Dictionary getHeaders() {
+	public Dictionary<String, String> getHeaders() {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
 		return current.getHeaders();
 	}
 
-	public Dictionary getHeaders(String locale) {
+	public Dictionary<String, String> getHeaders(String locale) {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
@@ -184,7 +185,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return Constants.SYSTEM_BUNDLE_LOCATION;
 	}
 
-	public ServiceReference[] getRegisteredServices() {
+	public ServiceReference<?>[] getRegisteredServices() {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
@@ -198,14 +199,14 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return current.getResource(name);
 	}
 
-	public Enumeration getResources(String name) throws IOException {
+	public Enumeration<URL> getResources(String name) throws IOException {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
 		return current.getResources(name);
 	}
 
-	public ServiceReference[] getServicesInUse() {
+	public ServiceReference<?>[] getServicesInUse() {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
@@ -230,7 +231,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		return current.hasPermission(permission);
 	}
 
-	public Class loadClass(String name) throws ClassNotFoundException {
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		Bundle current = systemBundle;
 		if (current == null)
 			return null;
@@ -250,7 +251,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 			internalStart();
 		else
 			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction() {
+				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 					public Object run() {
 						internalStart();
 						return null;
@@ -273,7 +274,7 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		Framework current = internalInit();
 		int level = 1;
 		try {
-			level = Integer.parseInt((String) configuration.get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
+			level = Integer.parseInt(configuration.get(Constants.FRAMEWORK_BEGINNING_STARTLEVEL));
 		} catch (Throwable t) {
 			// do nothing
 		}
@@ -316,11 +317,13 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		update();
 	}
 
-	public Map getSignerCertificates(int signersType) {
+	public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(int signersType) {
 		Bundle current = systemBundle;
 		if (current != null)
 			return current.getSignerCertificates(signersType);
-		return Collections.EMPTY_MAP;
+		@SuppressWarnings("unchecked")
+		final Map<X509Certificate, List<X509Certificate>> empty = Collections.EMPTY_MAP;
+		return empty;
 	}
 
 	public Version getVersion() {

@@ -64,7 +64,7 @@ class EclipseDebugTrace implements DebugTrace {
 	/** The value written to the trace file if a null object is being traced */
 	private final static String NULL_VALUE = "<null>"; //$NON-NLS-1$
 	/**  */
-	private final static SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	private final static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	/** A lock object used to synchronize access to the trace file */
 	private final static Object writeLock = new Object();
 
@@ -117,7 +117,7 @@ class EclipseDebugTrace implements DebugTrace {
 	 * @param debugOptions Used to determine if the specified bundle symbolic name + option-path has tracing enabled
 	 * @param traceClass The class that the client is using to perform trace API calls
 	 */
-	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions, final Class traceClass) {
+	EclipseDebugTrace(final String bundleSymbolicName, final FrameworkDebugOptions debugOptions, final Class<?> traceClass) {
 
 		this.traceClass = traceClass != null ? traceClass.getName() : null;
 		this.debugOptions = debugOptions;

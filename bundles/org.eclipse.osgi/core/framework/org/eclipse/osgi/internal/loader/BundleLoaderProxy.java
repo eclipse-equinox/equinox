@@ -13,6 +13,7 @@ package org.eclipse.osgi.internal.loader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.List;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
@@ -31,7 +32,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
  * Framework.
  */
 public class BundleLoaderProxy implements RequiredBundle, BundleReference {
-	static SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	static SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 	// The BundleLoader that this BundleLoaderProxy is managing
 	private BundleLoader loader;
 	// The Bundle that this BundleLoaderProxy is for
@@ -53,8 +54,8 @@ public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 	public BundleLoader getBundleLoader() {
 		if (System.getSecurityManager() == null)
 			return getBundleLoader0();
-		return (BundleLoader) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
+		return AccessController.doPrivileged(new PrivilegedAction<BundleLoader>() {
+			public BundleLoader run() {
 				return getBundleLoader0();
 			}
 		});
@@ -108,20 +109,20 @@ public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 		return bundle;
 	}
 
-	public org.osgi.framework.Bundle[] getRequiringBundles() {
+	public Bundle[] getRequiringBundles() {
 		if (isStale())
 			return null;
 		// This is VERY slow; but never gets called in regular execution.
 		BundleDescription[] dependents = description.getDependents();
 		if (dependents == null || dependents.length == 0)
 			return new Bundle[0];
-		ArrayList result = new ArrayList(dependents.length);
+		List<Bundle> result = new ArrayList<Bundle>(dependents.length);
 		for (int i = 0; i < dependents.length; i++)
 			addRequirers(dependents[i], result);
-		return (Bundle[]) result.toArray(new org.osgi.framework.Bundle[result.size()]);
+		return result.toArray(new org.osgi.framework.Bundle[result.size()]);
 	}
 
-	void addRequirers(BundleDescription dependent, ArrayList result) {
+	void addRequirers(BundleDescription dependent, List<Bundle> result) {
 		if (dependent.getHost() != null) // don't look in fragments.
 			return;
 		BundleLoaderProxy dependentProxy = getBundleLoader().getLoaderProxy(dependent);

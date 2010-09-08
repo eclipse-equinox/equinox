@@ -84,7 +84,7 @@ public interface BundleData {
 	 * @return An Enumeration of the entry paths or null if the specified path
 	 * does not exist.
 	 */
-	public Enumeration getEntryPaths(String path);
+	public Enumeration<String> getEntryPaths(String path);
 
 	/**
 	 * Returns the absolute path name of a native library. The BundleData
@@ -123,7 +123,7 @@ public interface BundleData {
 	 * @throws BundleException if an error occurred while reading the
 	 * bundle manifest data.
 	 */
-	public Dictionary getManifest() throws BundleException;
+	public Dictionary<String, String> getManifest() throws BundleException;
 
 	/**
 	 * Get the BundleData bundle ID.  This will be used as the bundle

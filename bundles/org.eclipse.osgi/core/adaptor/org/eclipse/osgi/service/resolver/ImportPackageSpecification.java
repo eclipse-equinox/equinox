@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,13 +53,13 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	 * Returns the arbitrary attributes which this import package may be resolved to.
 	 * @return the arbitrary attributes which this import package may be resolved to.
 	 */
-	public Map getAttributes();
+	public Map<String, String> getAttributes();
 
 	/**
 	 * Returns the directives that control this import package.
 	 * @return the directives that control this import package.
 	 */
-	public Map getDirectives();
+	public Map<String, String> getDirectives();
 
 	/**
 	 * Returns the specified directive that control this import package.

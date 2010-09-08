@@ -27,11 +27,11 @@ public class SystemBundleActivator implements BundleActivator {
 	private BundleContext context;
 	private InternalSystemBundle bundle;
 	private Framework framework;
-	private ServiceRegistration packageAdmin;
-	private ServiceRegistration securityAdmin;
-	private ServiceRegistration startLevel;
-	private ServiceRegistration debugOptions;
-	private ServiceRegistration contextFinder;
+	private ServiceRegistration<?> packageAdmin;
+	private ServiceRegistration<?> securityAdmin;
+	private ServiceRegistration<?> startLevel;
+	private ServiceRegistration<?> debugOptions;
+	private ServiceRegistration<?> contextFinder;
 
 	public void start(BundleContext bc) throws Exception {
 		this.context = bc;
@@ -51,7 +51,7 @@ public class SystemBundleActivator implements BundleActivator {
 		}
 		ClassLoader tccl = framework.getContextFinder();
 		if (tccl != null) {
-			Hashtable props = new Hashtable(7);
+			Dictionary<String, Object> props = new Hashtable<String, Object>(7);
 			props.put("equinox.classloader.type", "contextClassLoader"); //$NON-NLS-1$ //$NON-NLS-2$
 			contextFinder = register(new String[] {ClassLoader.class.getName()}, tccl, props);
 		}
@@ -97,10 +97,10 @@ public class SystemBundleActivator implements BundleActivator {
 	 * Register a service object.
 	 *
 	 */
-	private ServiceRegistration register(String[] names, Object service, Hashtable properties) {
+	private ServiceRegistration<?> register(String[] names, Object service, Dictionary<String, Object> properties) {
 		if (properties == null)
-			properties = new Hashtable(7);
-		Dictionary headers = bundle.getHeaders();
+			properties = new Hashtable<String, Object>(7);
+		Dictionary<String, String> headers = bundle.getHeaders();
 		properties.put(Constants.SERVICE_VENDOR, headers.get(Constants.BUNDLE_VENDOR));
 		properties.put(Constants.SERVICE_RANKING, new Integer(Integer.MAX_VALUE));
 		properties.put(Constants.SERVICE_PID, bundle.getBundleId() + "." + service.getClass().getName()); //$NON-NLS-1$

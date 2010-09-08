@@ -177,6 +177,7 @@ public class LocationManager {
 		return launcherParent == null ? null : new File(launcherParent);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static Location buildLocation(String property, URL defaultLocation, String userDefaultAppendage, boolean readOnlyDefault, boolean computeReadOnly, String dataAreaPrefix) {
 		String location = FrameworkProperties.clearProperty(property);
 		// the user/product may specify a non-default readOnly setting   

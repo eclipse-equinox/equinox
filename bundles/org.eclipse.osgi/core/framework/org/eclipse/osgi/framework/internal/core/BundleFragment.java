@@ -177,7 +177,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @return     the resulting Class
 	 * @exception  java.lang.ClassNotFoundException  if the class definition was not found.
 	 */
-	protected Class loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
+	protected Class<?> loadClass(String name, boolean checkPermission) throws ClassNotFoundException {
 		if (checkPermission) {
 			try {
 				framework.checkAdminPermission(this, AdminPermission.CLASS);
@@ -216,7 +216,7 @@ public class BundleFragment extends AbstractBundle {
 
 	}
 
-	public Enumeration getResources(String name) {
+	public Enumeration<URL> getResources(String name) {
 		checkValid();
 		// cannot get a resource for a fragment because there is no classloader
 		// associated with fragments.
@@ -257,7 +257,7 @@ public class BundleFragment extends AbstractBundle {
 	 * @see ServiceRegistration
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getRegisteredServices() {
+	public ServiceReference<?>[] getRegisteredServices() {
 		checkValid();
 		// Fragments cannot have a BundleContext and therefore
 		// cannot have any services registered.
@@ -280,7 +280,7 @@ public class BundleFragment extends AbstractBundle {
 	 * bundle has been uninstalled.
 	 * @see ServiceReference
 	 */
-	public ServiceReference[] getServicesInUse() {
+	public ServiceReference<?>[] getServicesInUse() {
 		checkValid();
 		// Fragments cannot have a BundleContext and therefore
 		// cannot have any services in use.
@@ -340,6 +340,7 @@ public class BundleFragment extends AbstractBundle {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <A> A adapt(Class<A> adapterType) {
 		if (BundleWirings.class.equals(adapterType)) {
 			return (A) new BundleWirings() {

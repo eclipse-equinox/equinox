@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,7 @@ public class Util {
 	 * @exception	ArrayIndexOutOfBoundsException when <code>start < 0</code>
 	 *				or <code>end > array.size()</code>
 	 */
+	@SuppressWarnings("unchecked")
 	public static void sort(Object[] array, int start, int end) {
 		int middle = (start + end) / 2;
 		if (start + 1 < middle)
@@ -100,7 +101,7 @@ public class Util {
 			sort(array, middle, end);
 		if (start + 1 >= end)
 			return; // this case can only happen when this method is called by the user
-		if (((Comparable) array[middle - 1]).compareTo(array[middle]) <= 0)
+		if (((Comparable<Object>) array[middle - 1]).compareTo(array[middle]) <= 0)
 			return;
 		if (start + 2 == end) {
 			Object temp = array[start];
@@ -111,7 +112,7 @@ public class Util {
 		int i1 = start, i2 = middle, i3 = 0;
 		Object[] merge = new Object[end - start];
 		while (i1 < middle && i2 < end) {
-			merge[i3++] = ((Comparable) array[i1]).compareTo(array[i2]) <= 0 ? array[i1++] : array[i2++];
+			merge[i3++] = ((Comparable<Object>) array[i1]).compareTo(array[i2]) <= 0 ? array[i1++] : array[i2++];
 		}
 		if (i1 < middle)
 			System.arraycopy(array, i1, merge, i3, middle - i1);
