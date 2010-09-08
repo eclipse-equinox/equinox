@@ -12,9 +12,11 @@ package org.eclipse.osgi.tests.services.resolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
@@ -3289,6 +3291,20 @@ public class StateResolverTest extends AbstractStateTest {
 		return false;
 	}
 
+	private static final String MANIFEST_ROOT = "test_files/resolverTests/";
+
+	private Dictionary loadManifest(String manifest) {
+		URL url = getContext().getBundle().getEntry(MANIFEST_ROOT + manifest);
+		try {
+			return Headers.parseManifest(url.openStream());
+		} catch (IOException e) {
+			fail("Unexpected error loading manifest: " + manifest, e);
+		} catch (BundleException e) {
+			fail("Unexpected error loading manifest: " + manifest, e);
+		}
+		return null;
+	}
+
 	public void testSelectionPolicy() throws BundleException {
 		State state = buildEmptyState();
 		Resolver resolver = state.getResolver();
@@ -3804,6 +3820,34 @@ public class StateResolverTest extends AbstractStateTest {
 		public boolean equals(Object obj) {
 			return true;
 		}
+	}
+
+	public void testBug324618() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p1.MF");
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p2.MF");
+		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c1.MF");
+		BundleDescription c1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p1);
+		state.addBundle(p2);
+		state.addBundle(c1);
+
+		state.resolve();
+
+		ExportPackageDescription x = state.linkDynamicImport(c1, "x");
+		assertNotNull("x dynamic import is null", x);
+		ExportPackageDescription xSub = state.linkDynamicImport(c1, "x.sub");
+		assertNotNull("x.sub dynamic import is null", xSub);
+		assertEquals("The exporter is not the same for x and x.sub", x.getExporter(), xSub.getExporter());
+
+		ExportPackageDescription xExtra = state.linkDynamicImport(c1, "x.extra");
+		assertNotNull("x.extra dynamic import is null", xExtra);
 	}
 }
 //testFragmentUpdateNoVersionChanged()

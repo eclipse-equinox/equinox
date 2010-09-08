@@ -10,6 +10,7 @@ package org.eclipse.osgi.internal.module;
 
 import java.util.*;
 import org.eclipse.osgi.service.resolver.BundleSpecification;
+import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 
 /*
  * The GroupingChecker checks the 'uses' directive on exported packages for consistency
@@ -36,11 +37,14 @@ public class GroupingChecker {
 				isConsistentInternal(bundle, selectedSupplier, new ArrayList(1), true, null);
 		}
 		// process all imports
-		ResolverImport[] imports = bundle.getImportPackages();
-		for (int j = 0; j < imports.length; j++) {
-			ResolverExport selectedSupplier = (ResolverExport) imports[j].getSelectedSupplier();
-			if (selectedSupplier != null)
-				isConsistentInternal(bundle, selectedSupplier, true, null);
+		// must check resolved imports to get any dynamically resolved imports
+		ExportPackageDescription[] imports = bundle.getBundleDescription().getResolvedImports();
+		for (ExportPackageDescription importPkg : imports) {
+			ResolverExport[] exports = bundle.getResolver().getResolverExports().get(importPkg.getName());
+			for (ResolverExport export : exports) {
+				if (export.getExportPackageDescription() == importPkg)
+					isConsistentInternal(bundle, export, true, null);
+			}
 		}
 	}
 
@@ -137,14 +141,28 @@ public class GroupingChecker {
 			return null;
 		visited.add(bundle); // prevent endless cycles
 		// check imports
-		ResolverImport imported = bundle.getImport(packageName);
-		if (imported != null && imported.getSelectedSupplier() != null) {
-			// make sure we are not resolved to our own import
-			ResolverExport selectedExport = (ResolverExport) imported.getSelectedSupplier();
-			if (selectedExport.getExporter() != bundle) {
-				// found resolved import; get the roots from the resolved exporter;
-				// this is all the roots if the package is imported
-				return getPackageRoots(selectedExport.getExporter(), packageName, visited);
+		if (bundle.getBundleDescription().isResolved()) {
+			// must check resolved imports to get any dynamically resolved imports 
+			ExportPackageDescription[] imports = bundle.getBundleDescription().getResolvedImports();
+			for (ExportPackageDescription importPkg : imports) {
+				if (importPkg.getExporter() == bundle.getBundleDescription() || !importPkg.getName().equals(packageName))
+					continue;
+				ResolverExport[] exports = bundle.getResolver().getResolverExports().get(packageName);
+				for (ResolverExport export : exports) {
+					if (export.getExportPackageDescription() == importPkg)
+						return getPackageRoots(export.getExporter(), packageName, visited);
+				}
+			}
+		} else {
+			ResolverImport imported = bundle.getImport(packageName);
+			if (imported != null && imported.getSelectedSupplier() != null) {
+				// make sure we are not resolved to our own import
+				ResolverExport selectedExport = (ResolverExport) imported.getSelectedSupplier();
+				if (selectedExport.getExporter() != bundle) {
+					// found resolved import; get the roots from the resolved exporter;
+					// this is all the roots if the package is imported
+					return getPackageRoots(selectedExport.getExporter(), packageName, visited);
+				}
 			}
 		}
 		// check if the bundle exports the package

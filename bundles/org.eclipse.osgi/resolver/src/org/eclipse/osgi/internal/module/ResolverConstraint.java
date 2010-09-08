@@ -64,10 +64,6 @@ public abstract class ResolverConstraint {
 	// returns whether this constraint is optional
 	abstract boolean isOptional();
 
-	public void setPossibleSuppliers(VersionSupplier[] possibleSuppliers) {
-		this.possibleSuppliers = possibleSuppliers;
-	}
-
 	void addPossibleSupplier(VersionSupplier supplier) {
 		if (supplier == null)
 			return;
