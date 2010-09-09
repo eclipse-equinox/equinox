@@ -28,8 +28,8 @@ import org.osgi.framework.*;
  * </p>
  * @since 3.6
  */
-public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
-	private volatile ServiceRegistration<ConsoleSession> sessionRegistration;
+public abstract class ConsoleSession implements ServiceFactory<Object> {
+	private volatile ServiceRegistration<Object> sessionRegistration;
 
 	/**
 	 * Called by the console implementation to free resources associated
@@ -39,7 +39,7 @@ public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
 	 */
 	public final void close() {
 		doClose();
-		ServiceRegistration<ConsoleSession> current = sessionRegistration;
+		ServiceRegistration<Object> current = sessionRegistration;
 		if (current != null) {
 			sessionRegistration = null;
 			try {
@@ -78,9 +78,8 @@ public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
 
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
-	 * @since 3.7
 	 */
-	public final ConsoleSession getService(Bundle bundle, ServiceRegistration<ConsoleSession> registration) {
+	public final Object getService(Bundle bundle, ServiceRegistration<Object> registration) {
 		if (sessionRegistration == null)
 			sessionRegistration = registration;
 		return this;
@@ -88,9 +87,8 @@ public abstract class ConsoleSession implements ServiceFactory<ConsoleSession> {
 
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
-	 * @since 3.7
 	 */
-	public final void ungetService(Bundle bundle, ServiceRegistration<ConsoleSession> registration, ConsoleSession service) {
+	public final void ungetService(Bundle bundle, ServiceRegistration<Object> registration, Object service) {
 		// do nothing
 	}
 
