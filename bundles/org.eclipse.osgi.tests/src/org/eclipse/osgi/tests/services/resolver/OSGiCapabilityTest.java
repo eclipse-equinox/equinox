@@ -290,4 +290,99 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 	}
+
+	public void testGenericUses() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p5.v100.osgi.MF");
+		BundleDescription p5v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p5.v110.osgi.MF");
+		BundleDescription p5v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p6.v100.osgi.MF");
+		BundleDescription p6v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p6.v110.osgi.MF");
+		BundleDescription p6v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p7.v100.osgi.MF");
+		BundleDescription p7v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p7.v110.osgi.MF");
+		BundleDescription p7v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c4.v100.osgi.MF");
+		BundleDescription c4v100 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c4.v110.osgi.MF");
+		BundleDescription c4v110 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c4.v120.osgi.MF");
+		BundleDescription c4v120 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c4.v130.osgi.MF");
+		BundleDescription c4v130 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p5v100);
+		state.addBundle(p5v110);
+		state.addBundle(p6v100);
+		state.addBundle(p6v110);
+		state.addBundle(p7v100);
+		state.addBundle(p7v110);
+		state.addBundle(c4v100);
+		state.addBundle(c4v110);
+		state.addBundle(c4v120);
+		state.addBundle(c4v130);
+
+		state.resolve();
+
+		assertTrue("p5v100", p5v100.isResolved());
+		assertTrue("p5v110", p5v110.isResolved());
+		assertTrue("p6v100", p6v100.isResolved());
+		assertTrue("p6v110", p6v110.isResolved());
+		assertTrue("p7v100", p7v100.isResolved());
+		assertTrue("p7v110", p7v110.isResolved());
+		assertTrue("c4v100", c4v100.isResolved());
+		assertTrue("c4v110", c4v110.isResolved());
+		assertTrue("c4v120", c4v120.isResolved());
+		assertTrue("c4v130", c4v130.isResolved());
+
+		state.linkDynamicImport(c4v120, "p6");
+		state.linkDynamicImport(c4v120, "p7");
+
+		GenericDescription[] p5v100Capability = p5v100.getSelectedGenericCapabilities();
+		ExportPackageDescription[] p6v100Exports = p6v100.getSelectedExports();
+		ExportPackageDescription[] p7v100Exports = p7v100.getSelectedExports();
+		ExportPackageDescription[] expectedPackages = new ExportPackageDescription[] {p6v100Exports[0], p7v100Exports[0]};
+
+		checkUsedImports(c4v100, expectedPackages);
+		checkUsedImports(c4v110, expectedPackages);
+		checkUsedImports(c4v120, expectedPackages);
+
+		BundleDescription[] expectedRequired = new BundleDescription[] {p6v100, p7v100};
+		checkUsedRequires(c4v130, expectedRequired);
+
+		checkUsedCapability(c4v100, p5v100Capability);
+		checkUsedCapability(c4v110, p5v100Capability);
+		checkUsedCapability(c4v120, p5v100Capability);
+		checkUsedCapability(c4v130, p5v100Capability);
+	}
+
+	private void checkUsedImports(BundleDescription importer, ExportPackageDescription[] expectedPackages) {
+		ExportPackageDescription[] imported = importer.getResolvedImports();
+		assertEquals("Wrong number of imports for bundle: " + importer, expectedPackages.length, imported.length);
+		for (int i = 0; i < imported.length; i++) {
+			assertEquals("Wrong imported package from bundle: " + importer, expectedPackages[i], imported[i]);
+		}
+	}
+
+	private void checkUsedRequires(BundleDescription requirer, BundleDescription[] expectedRequired) {
+		BundleDescription[] required = requirer.getResolvedRequires();
+		assertEquals("Wrong number of imports for bundle: " + requirer, expectedRequired.length, required.length);
+		for (int i = 0; i < required.length; i++) {
+			assertEquals("Wrong required bundle from bundle: " + requirer, expectedRequired[i], required[i]);
+		}
+	}
+
+	private void checkUsedCapability(BundleDescription requirer, GenericDescription[] expectedCapabilities) {
+		GenericDescription[] required = requirer.getResolvedGenericRequires();
+		assertEquals("Wrong number of capabilities for bundle: " + requirer, expectedCapabilities.length, required.length);
+		for (int i = 0; i < required.length; i++) {
+			assertEquals("Wrong required capability from bundle: " + requirer, expectedCapabilities[i], required[i]);
+		}
+	}
 }

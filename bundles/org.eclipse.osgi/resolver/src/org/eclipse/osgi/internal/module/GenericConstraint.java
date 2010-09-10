@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2007 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,18 +10,23 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.util.ArrayList;
 import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.osgi.framework.Constants;
 
 public class GenericConstraint extends ResolverConstraint {
-	private ArrayList matchingCapability;
+
+	private boolean supplierHasUses;
 
 	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint) {
 		super(bundle, constraint);
 	}
 
 	boolean isOptional() {
-		return false;
+		return (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_OPTIONAL) != 0;
+	}
+
+	boolean isMultiple() {
+		return !supplierHasUses && (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
 	}
 
 	boolean isSatisfiedBy(VersionSupplier vs) {
@@ -32,22 +37,27 @@ public class GenericConstraint extends ResolverConstraint {
 		return ((GenericSpecification) getVersionConstraint()).getType();
 	}
 
-	public void setMatchingCapability(GenericCapability capability) {
-		if (capability == null) {
-			matchingCapability = null;
-			return;
-		}
-		if (matchingCapability == null)
-			matchingCapability = new ArrayList(1);
-		matchingCapability.add(capability);
+	public VersionSupplier[] getMatchingCapabilities() {
+		if (isMultiple())
+			return getPossibleSuppliers();
+		VersionSupplier supplier = getSelectedSupplier();
+		return supplier == null ? null : new VersionSupplier[] {supplier};
 	}
 
-	public GenericCapability[] getMatchingCapabilities() {
-		return matchingCapability == null || matchingCapability.size() == 0 ? null : (GenericCapability[]) matchingCapability.toArray(new GenericCapability[matchingCapability.size()]);
+	@Override
+	void addPossibleSupplier(VersionSupplier supplier) {
+		// if there is a supplier with uses constraints then we no longer allow multiples
+		supplierHasUses |= supplier.getDirectives().get(Constants.USES_DIRECTIVE) != null;
+		super.addPossibleSupplier(supplier);
 	}
 
-	void removeMatchingCapability(GenericCapability capability) {
-		if (matchingCapability != null)
-			matchingCapability.remove(capability);
+	@Override
+	void clearPossibleSuppliers() {
+		super.clearPossibleSuppliers();
+		supplierHasUses = false;
+	}
+
+	boolean supplierHasUses() {
+		return supplierHasUses;
 	}
 }

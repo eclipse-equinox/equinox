@@ -21,6 +21,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	private Dictionary attributes;
 	private volatile BundleDescription supplier;
 	private volatile String type = GenericDescription.DEFAULT_TYPE;
+	private Map<String, String> directives;
 
 	public Dictionary getAttributes() {
 		synchronized (this.monitor) {
@@ -35,6 +36,12 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	void setAttributes(Dictionary attributes) {
 		synchronized (this.monitor) {
 			this.attributes = attributes;
+		}
+	}
+
+	void setDirectives(Map<String, String> directives) {
+		synchronized (this.monitor) {
+			this.directives = directives;
 		}
 	}
 
@@ -80,8 +87,11 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		// TODO need to allow directives
-		return Collections.EMPTY_MAP;
+		synchronized (this.monitor) {
+			if (directives == null)
+				return Collections.EMPTY_MAP;
+			return Collections.unmodifiableMap(directives);
+		}
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {

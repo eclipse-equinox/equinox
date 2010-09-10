@@ -143,6 +143,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			GenericDescriptionImpl cap = new GenericDescriptionImpl();
 			cap.setType(genericCapabilities[i].getType());
 			cap.setAttributes(genericCapabilities[i].getAttributes());
+			cap.setDirectives(genericCapabilities[i].getDeclaredDirectives());
 			result[i] = cap;
 		}
 		return result;
@@ -262,6 +263,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 				attrs.put(result.getType(), name);
 		}
 		result.setAttributes(attrs);
+		result.setDirectives(directives);
 		result.setSupplier(supplier);
 		return result;
 	}

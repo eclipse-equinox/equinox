@@ -72,13 +72,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 
 		ImportPackageSpecification[] actualImports = getBundleDescription().getImportPackages();
 		// Reorder imports so that optionals are at the end so that we wire statics before optionals
-		ArrayList importList = new ArrayList(actualImports.length);
+		List<ResolverImport> importList = new ArrayList<ResolverImport>(actualImports.length);
 		for (int i = actualImports.length - 1; i >= 0; i--)
 			if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(actualImports[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
 				importList.add(new ResolverImport(this, actualImports[i]));
 			else
 				importList.add(0, new ResolverImport(this, actualImports[i]));
-		imports = (ResolverImport[]) importList.toArray(new ResolverImport[importList.size()]);
+		imports = importList.toArray(new ResolverImport[importList.size()]);
 
 		ExportPackageDescription[] actualExports = useSelectedExports ? getBundleDescription().getSelectedExports() : getBundleDescription().getExportPackages();
 		exports = new ResolverExport[actualExports.length];
@@ -137,7 +137,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 
 		GenericConstraint[] allGenericRequires = getGenericRequires();
 		for (int i = 0; i < allGenericRequires.length; i++)
-			allGenericRequires[i].setMatchingCapability(null);
+			allGenericRequires[i].clearPossibleSuppliers();
 
 		ResolverExport[] allExports = getExportPackages();
 		for (int i = 0; i < allExports.length; i++)

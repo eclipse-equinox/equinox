@@ -374,6 +374,8 @@ class StateWriter {
 				mapAttrs.put(key, attrs.get(key));
 		}
 		writeMap(out, mapAttrs);
+		Map directives = description.getDeclaredDirectives();
+		writeMap(out, directives);
 	}
 
 	private void writeGenericSpecification(GenericSpecification specification, DataOutputStream out) throws IOException {

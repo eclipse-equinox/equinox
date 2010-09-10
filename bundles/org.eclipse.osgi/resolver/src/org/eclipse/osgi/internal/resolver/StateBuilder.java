@@ -538,6 +538,14 @@ class StateBuilder {
 				Map mapAttrs = getAttributes(element, new String[0]);
 				Dictionary attrs = mapAttrs == null ? new Hashtable() : new Hashtable(mapAttrs);
 				desc.setAttributes(attrs);
+				Map<String, String> directives = new HashMap();
+				Enumeration keys = element.getDirectiveKeys();
+				if (keys != null)
+					for (keys = element.getDirectiveKeys(); keys.hasMoreElements();) {
+						String key = (String) keys.nextElement();
+						directives.put(key, element.getDirective(key));
+					}
+				desc.setDirectives(directives);
 				result.add(desc);
 			}
 		}

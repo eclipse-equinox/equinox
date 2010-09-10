@@ -20,7 +20,7 @@ public class GroupingChecker {
 	// a mapping of bundles to their package roots; keyed by
 	// ResolverBundle -> HashMap of packages; keyed by
 	// package name -> PackageRoots
-	private HashMap bundles = new HashMap();
+	private Map<ResolverBundle, Map<String, PackageRoots>> bundles = new HashMap<ResolverBundle, Map<String, PackageRoots>>();
 
 	/*
 	 * This method fully populates a bundles package roots for the purpose of resolving
@@ -34,7 +34,7 @@ public class GroupingChecker {
 		for (int j = 0; j < requires.length; j++) {
 			ResolverBundle selectedSupplier = (ResolverBundle) requires[j].getSelectedSupplier();
 			if (selectedSupplier != null)
-				isConsistentInternal(bundle, selectedSupplier, new ArrayList(1), true, null);
+				isConsistentInternal(bundle, selectedSupplier, new ArrayList<ResolverBundle>(1), true, null);
 		}
 		// process all imports
 		// must check resolved imports to get any dynamically resolved imports
@@ -53,11 +53,11 @@ public class GroupingChecker {
 	 * If an inconsistency is found the export inconsistency is returned; otherwise null is returned
 	 */
 	public PackageRoots[][] isConsistent(ResolverBundle requiringBundle, ResolverBundle matchingBundle) {
-		ArrayList results = isConsistentInternal(requiringBundle, matchingBundle, new ArrayList(1), false, null);
-		return results == null ? null : (PackageRoots[][]) results.toArray(new PackageRoots[results.size()][]);
+		List<PackageRoots[]> results = isConsistentInternal(requiringBundle, matchingBundle, new ArrayList<ResolverBundle>(1), false, null);
+		return results == null ? null : results.toArray(new PackageRoots[results.size()][]);
 	}
 
-	private ArrayList isConsistentInternal(ResolverBundle requiringBundle, ResolverBundle matchingBundle, ArrayList visited, boolean dynamicImport, ArrayList results) {
+	private List<PackageRoots[]> isConsistentInternal(ResolverBundle requiringBundle, ResolverBundle matchingBundle, List<ResolverBundle> visited, boolean dynamicImport, List<PackageRoots[]> results) {
 		// needed to prevent endless cycles
 		if (visited.contains(matchingBundle))
 			return results;
@@ -86,8 +86,20 @@ public class GroupingChecker {
 	 * If an inconsistency is found the export returned; otherwise null is returned
 	 */
 	public PackageRoots[][] isConsistent(ResolverBundle importingBundle, ResolverExport matchingExport) {
-		ArrayList results = isConsistentInternal(importingBundle, matchingExport, false, null);
-		return results == null ? null : (PackageRoots[][]) results.toArray(new PackageRoots[results.size()][]);
+		List<PackageRoots[]> results = isConsistentInternal(importingBundle, matchingExport, false, null);
+		return results == null ? null : results.toArray(new PackageRoots[results.size()][]);
+	}
+
+	public PackageRoots[][] isConsistent(ResolverBundle requiringBundle, GenericCapability matchingCapability) {
+		String[] uses = matchingCapability.getUsesDirective();
+		if (uses == null)
+			return null;
+		ArrayList<PackageRoots[]> results = new ArrayList<PackageRoots[]>(0);
+		for (String usedPackage : uses) {
+			PackageRoots providingRoots = getPackageRoots(matchingCapability.getResolverBundle(), usedPackage, null);
+			providingRoots.addConflicts(requiringBundle, usedPackage, null, results);
+		}
+		return results.size() == 0 ? null : results.toArray(new PackageRoots[results.size()][]);
 	}
 
 	/*
@@ -97,11 +109,11 @@ public class GroupingChecker {
 	 * consistent with the possible matching dynamic export.
 	 */
 	public PackageRoots[][] isDynamicConsistent(ResolverBundle importingBundle, ResolverExport matchingExport) {
-		ArrayList results = isConsistentInternal(importingBundle, matchingExport, true, null);
-		return results == null ? null : (PackageRoots[][]) results.toArray(new PackageRoots[results.size()][]);
+		List<PackageRoots[]> results = isConsistentInternal(importingBundle, matchingExport, true, null);
+		return results == null ? null : results.toArray(new PackageRoots[results.size()][]);
 	}
 
-	private ArrayList isConsistentInternal(ResolverBundle importingBundle, ResolverExport matchingExport, boolean dyanamicImport, ArrayList results) {
+	private List<PackageRoots[]> isConsistentInternal(ResolverBundle importingBundle, ResolverExport matchingExport, boolean dyanamicImport, List<PackageRoots[]> results) {
 		PackageRoots exportingRoots = getPackageRoots(matchingExport.getExporter(), matchingExport.getName(), null);
 		// check that the exports uses packages are consistent with existing package roots
 		results = exportingRoots.isConsistentClassSpace(importingBundle, null, results);
@@ -109,34 +121,48 @@ public class GroupingChecker {
 			return results;
 		// for dynamic imports we must check that each existing root is consistent with the possible matching export
 		PackageRoots importingRoots = getPackageRoots(importingBundle, matchingExport.getName(), null);
-		HashMap importingPackages = (HashMap) bundles.get(importingBundle);
+		Map<String, PackageRoots> importingPackages = bundles.get(importingBundle);
 		if (importingPackages != null)
-			for (Iterator allImportingPackages = importingPackages.values().iterator(); allImportingPackages.hasNext();) {
-				PackageRoots roots = (PackageRoots) allImportingPackages.next();
+			for (Iterator<PackageRoots> allImportingPackages = importingPackages.values().iterator(); allImportingPackages.hasNext();) {
+				PackageRoots roots = allImportingPackages.next();
 				if (roots != importingRoots)
 					results = roots.isConsistentClassSpace(exportingRoots, matchingExport.getExporter(), null, results);
 			}
+		// We also must check any generic capabilities are consistent
+		GenericConstraint[] genericRequires = importingBundle.getGenericRequires();
+		for (GenericConstraint constraint : genericRequires) {
+			if (!constraint.supplierHasUses())
+				continue;
+			GenericCapability supplier = (GenericCapability) constraint.getSelectedSupplier();
+			String[] uses = supplier.getUsesDirective();
+			if (uses != null)
+				for (String usedPackage : uses) {
+					if (usedPackage.equals(matchingExport.getName())) {
+						results = exportingRoots.addConflicts(supplier.getResolverBundle(), usedPackage, null, results);
+					}
+				}
+		}
 		return results;
 	}
 
 	/*
 	 * returns package roots for a specific package name for a specific bundle
 	 */
-	PackageRoots getPackageRoots(ResolverBundle bundle, String packageName, ArrayList visited) {
-		HashMap packages = (HashMap) bundles.get(bundle);
+	PackageRoots getPackageRoots(ResolverBundle bundle, String packageName, List<ResolverBundle> visited) {
+		Map<String, PackageRoots> packages = bundles.get(bundle);
 		if (packages == null) {
-			packages = new HashMap(5);
+			packages = new HashMap<String, PackageRoots>(5);
 			bundles.put(bundle, packages);
 		}
-		PackageRoots packageRoots = (PackageRoots) packages.get(packageName);
+		PackageRoots packageRoots = packages.get(packageName);
 		if (packageRoots == null) {
-			packageRoots = createPackageRoots(bundle, packageName, visited == null ? new ArrayList(1) : visited);
+			packageRoots = createPackageRoots(bundle, packageName, visited == null ? new ArrayList<ResolverBundle>(1) : visited);
 			packages.put(packageName, packageRoots);
 		}
 		return packageRoots != null ? packageRoots : nullPackageRoots;
 	}
 
-	private PackageRoots createPackageRoots(ResolverBundle bundle, String packageName, ArrayList visited) {
+	private PackageRoots createPackageRoots(ResolverBundle bundle, String packageName, List<ResolverBundle> visited) {
 		if (visited.contains(bundle))
 			return null;
 		visited.add(bundle); // prevent endless cycles
@@ -167,7 +193,7 @@ public class GroupingChecker {
 		}
 		// check if the bundle exports the package
 		ResolverExport[] exports = bundle.getExports(packageName);
-		ArrayList roots = new ArrayList(0);
+		List<PackageRoots> roots = new ArrayList<PackageRoots>(0);
 		// check roots from required bundles
 		BundleConstraint[] requires = bundle.getRequires();
 		for (int i = 0; i < requires.length; i++) {
@@ -196,7 +222,7 @@ public class GroupingChecker {
 			}
 		}
 		if (exports.length > 0 || roots.size() > 1) {
-			PackageRoots[] requiredRoots = (PackageRoots[]) roots.toArray(new PackageRoots[roots.size()]);
+			PackageRoots[] requiredRoots = roots.toArray(new PackageRoots[roots.size()]);
 			if (exports.length == 0) {
 				PackageRoots superSet = requiredRoots[0];
 				for (int i = 1; i < requiredRoots.length; i++) {
@@ -220,7 +246,7 @@ public class GroupingChecker {
 				result.addRoot(exports[i]);
 			return result;
 		}
-		return (PackageRoots) (roots.size() == 0 ? nullPackageRoots : roots.get(0));
+		return roots.size() == 0 ? nullPackageRoots : roots.get(0);
 	}
 
 	public void clear() {
@@ -280,11 +306,11 @@ public class GroupingChecker {
 				addRoot(packageRoots.roots[i]);
 		}
 
-		public ArrayList isConsistentClassSpace(ResolverBundle importingBundle, ArrayList visited, ArrayList results) {
+		public List<PackageRoots[]> isConsistentClassSpace(ResolverBundle importingBundle, List<PackageRoots> visited, List<PackageRoots[]> results) {
 			if (roots == null)
 				return results;
 			if (visited == null)
-				visited = new ArrayList(1);
+				visited = new ArrayList<PackageRoots>(1);
 			if (visited.contains(this))
 				return results;
 			visited.add(this);
@@ -304,7 +330,7 @@ public class GroupingChecker {
 					if (thisUsedRoots != nullPackageRoots && importingUsedRoots != nullPackageRoots)
 						if (!(subSet(thisUsedRoots.roots, importingUsedRoots.roots) || subSet(importingUsedRoots.roots, thisUsedRoots.roots))) {
 							if (results == null)
-								results = new ArrayList(1);
+								results = new ArrayList<PackageRoots[]>(1);
 							results.add(new PackageRoots[] {this, importingUsedRoots});
 						}
 					// need to check the usedRoots consistency for transitive closure
@@ -314,7 +340,7 @@ public class GroupingChecker {
 			return results;
 		}
 
-		public ArrayList isConsistentClassSpace(PackageRoots exportingRoots, ResolverBundle exporter, ArrayList visited, ArrayList results) {
+		public List<PackageRoots[]> isConsistentClassSpace(PackageRoots exportingRoots, ResolverBundle exporter, List<PackageRoots> visited, List<PackageRoots[]> results) {
 			if (roots == null)
 				return results;
 			int size = roots.length;
@@ -324,7 +350,7 @@ public class GroupingChecker {
 				if (uses == null)
 					continue;
 				if (visited == null)
-					visited = new ArrayList(1);
+					visited = new ArrayList<PackageRoots>(1);
 				if (visited.contains(this))
 					return results;
 				visited.add(this);
@@ -338,7 +364,7 @@ public class GroupingChecker {
 					if (thisUsedRoots != nullPackageRoots && exportingUsedRoots != nullPackageRoots)
 						if (!(subSet(thisUsedRoots.roots, exportingUsedRoots.roots) || subSet(exportingUsedRoots.roots, thisUsedRoots.roots))) {
 							if (results == null)
-								results = new ArrayList(1);
+								results = new ArrayList<PackageRoots[]>(1);
 							results.add(new PackageRoots[] {this, exportingUsedRoots});
 						}
 					// need to check the usedRoots consistency for transitive closure
@@ -346,6 +372,20 @@ public class GroupingChecker {
 				}
 			}
 			return results;
+		}
+
+		List<PackageRoots[]> addConflicts(ResolverBundle bundle, String usedPackage, List<PackageRoots> visited, List<PackageRoots[]> results) {
+			PackageRoots bundleUsedRoots = getPackageRoots(bundle, usedPackage, null);
+			if (this == bundleUsedRoots)
+				return results;
+			if (this != nullPackageRoots && bundleUsedRoots != nullPackageRoots)
+				if (!(subSet(this.roots, bundleUsedRoots.roots) || subSet(bundleUsedRoots.roots, this.roots))) {
+					if (results == null)
+						results = new ArrayList<PackageRoots[]>(1);
+					results.add(new PackageRoots[] {this, bundleUsedRoots});
+				}
+			// need to check the usedRoots consistency for transitive closure
+			return this.isConsistentClassSpace(bundleUsedRoots, bundle, visited, results);
 		}
 
 		// TODO this is a behavioral change; before we only required 1 supplier to match; now roots must be subsets
