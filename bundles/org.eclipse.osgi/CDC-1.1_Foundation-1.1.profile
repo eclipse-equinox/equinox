@@ -22,6 +22,9 @@ org.osgi.framework.executionenvironment = \
  OSGi/Minimum-1.2,\
  CDC-1.0/Foundation-1.0,\
  CDC-1.1/Foundation-1.1
+org.osgi.framework.system.capabilities = \
+ osgi.ee; osgi.ee="OSGi/Minimum"; version:List<Version>="1.0, 1.1, 1.2",\
+ osgi.ee; osgi.ee="CDC/Foundation"; version:List<Version>="1.0, 1.1"
 osgi.java.profile.name = CDC-1.1/Foundation-1.1
 org.eclipse.jdt.core.compiler.compliance=1.4
 org.eclipse.jdt.core.compiler.source=1.3

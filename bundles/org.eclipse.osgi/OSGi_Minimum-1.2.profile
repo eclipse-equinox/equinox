@@ -16,6 +16,8 @@ org.osgi.framework.executionenvironment = \
  OSGi/Minimum-1.0,\
  OSGi/Minimum-1.1,\
  OSGi/Minimum-1.2
+org.osgi.framework.system.capabilities = \
+ osgi.ee; osgi.ee="OSGi/Minimum"; version:List<Version>="1.0, 1.1, 1.2"
 osgi.java.profile.name = OSGi/Minimum-1.2
 org.eclipse.jdt.core.compiler.compliance=1.4
 org.eclipse.jdt.core.compiler.source=1.3

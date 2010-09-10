@@ -190,10 +190,8 @@ org.osgi.framework.executionenvironment = \
  JavaSE-1.6,\
  JavaSE-1.7
 org.osgi.framework.system.capabilities = \
- osgi.ee; osgi.ee="JRE"; version:Version="1.1",\
  osgi.ee; osgi.ee="OSGi/Minimum"; version:List<Version>="1.0, 1.1, 1.2",\
- osgi.ee; osgi.ee="J2SE"; version:List<Version>="1.2, 1.3, 1.4, 1.5",\
- osgi.ee; osgi.ee="JavaSE"; version:List<Version>="1.6, 1.7"
+ osgi.ee; osgi.ee="JavaSE"; version:List<Version>="1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7"
 osgi.java.profile.name = JavaSE-1.7
 org.eclipse.jdt.core.compiler.compliance=1.7
 org.eclipse.jdt.core.compiler.source=1.7

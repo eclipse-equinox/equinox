@@ -40,8 +40,7 @@ org.osgi.framework.executionenvironment = \
  JRE-1.1,\
  J2SE-1.2
 org.osgi.framework.system.capabilities = \
- osgi.ee; osgi.ee="JRE"; version:Version="1.1",\
- osgi.ee; osgi.ee="J2SE"; version:Version="1.2"
+ osgi.ee; osgi.ee="JavaSE"; version:List<Version>="1.0, 1.1, 1.2"
 osgi.java.profile.name = J2SE-1.2
 org.eclipse.jdt.core.compiler.compliance=1.3
 org.eclipse.jdt.core.compiler.source=1.3

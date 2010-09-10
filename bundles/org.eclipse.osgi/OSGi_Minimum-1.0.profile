@@ -14,6 +14,8 @@ org.osgi.framework.bootdelegation = \
  com.sun.*
 org.osgi.framework.executionenvironment = \
  OSGi/Minimum-1.0
+org.osgi.framework.system.capabilities = \
+ osgi.ee; osgi.ee="OSGi/Minimum"; version:Version="1.0"
 osgi.java.profile.name = OSGi/Minimum-1.0
 org.eclipse.jdt.core.compiler.compliance=1.3
 org.eclipse.jdt.core.compiler.source=1.3
