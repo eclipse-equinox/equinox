@@ -124,7 +124,6 @@ public class FrameworkDebugOptions implements DebugOptions, ServiceTrackerCustom
 		return FrameworkDebugOptions.singleton;
 	}
 
-	@SuppressWarnings("deprecation")
 	private static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
