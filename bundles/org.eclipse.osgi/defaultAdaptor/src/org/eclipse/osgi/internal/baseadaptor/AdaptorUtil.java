@@ -216,7 +216,6 @@ public class AdaptorUtil {
 		return true;
 	}
 
-	@SuppressWarnings("deprecation")
 	public static URL encodeFileURL(File file) throws MalformedURLException {
 		try {
 			Method toURI = File.class.getMethod("toURI", (Class[]) null); //$NON-NLS-1$

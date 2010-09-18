@@ -235,7 +235,6 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 	 * @param baseDomain The source domain.
 	 * @return a ProtectionDomain which uses specified BundleFile and the permissions of the baseDomain 
 	 */
-	@SuppressWarnings("deprecation")
 	public static ProtectionDomain createProtectionDomain(BundleFile bundlefile, ProtectionDomain baseDomain) {
 		// create a protection domain which knows about the codesource for this classpath entry (bug 89904)
 		try {
