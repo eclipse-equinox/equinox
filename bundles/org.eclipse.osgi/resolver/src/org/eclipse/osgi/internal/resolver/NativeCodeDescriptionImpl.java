@@ -82,7 +82,7 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		State containingState = getSupplier().getContainingState();
 		if (containingState == null)
 			return 0;
-		Dictionary[] platformProps = containingState.getPlatformProperties();
+		Dictionary<Object, Object>[] platformProps = containingState.getPlatformProperties();
 		Version osversion;
 		try {
 			osversion = Version.parseVersion((String) platformProps[0].get(Constants.FRAMEWORK_OS_VERSION));
@@ -208,10 +208,12 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		this.supplier = supplier;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, String> getDeclaredDirectives() {
 		return Collections.EMPTY_MAP;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> getDeclaredAttributes() {
 		return Collections.EMPTY_MAP;
 	}

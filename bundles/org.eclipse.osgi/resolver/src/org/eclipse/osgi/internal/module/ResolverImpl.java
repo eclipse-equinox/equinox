@@ -58,7 +58,7 @@ public class ResolverImpl implements Resolver {
 	// Used to check permissions for import/export, provide/require, host/fragment
 	private final PermissionChecker permissionChecker;
 	// Set of bundles that are pending removal
-	private MappedList<Long, BundleDescription> removalPending = new MappedList<Long, BundleDescription>(BundleDescription.class);
+	private MappedList<Long, BundleDescription> removalPending = new MappedList<Long, BundleDescription>();
 	// Indicates whether this resolver has been initialized
 	private boolean initialized = false;
 
@@ -73,7 +73,7 @@ public class ResolverImpl implements Resolver {
 	// Keys are BundleDescriptions, values are ResolverBundles
 	private HashMap<BundleDescription, ResolverBundle> bundleMapping = null;
 	private GroupingChecker groupingChecker;
-	private Comparator selectionPolicy;
+	private Comparator<BaseDescription> selectionPolicy;
 	private boolean developmentMode = false;
 	private boolean usesCalculationTimeout = false;
 	private long usesTimeout = -1;
@@ -89,8 +89,8 @@ public class ResolverImpl implements Resolver {
 
 	// Initializes the resolver
 	private void initialize() {
-		resolverExports = new VersionHashMap<ResolverExport>(this, ResolverExport.class);
-		resolverBundles = new VersionHashMap<ResolverBundle>(this, ResolverBundle.class);
+		resolverExports = new VersionHashMap<ResolverExport>(this);
+		resolverBundles = new VersionHashMap<ResolverBundle>(this);
 		resolverGenerics = new HashMap<String, VersionHashMap<GenericCapability>>();
 		unresolvedBundles = new HashSet<ResolverBundle>();
 		bundleMapping = new HashMap<BundleDescription, ResolverBundle>();
@@ -102,9 +102,9 @@ public class ResolverImpl implements Resolver {
 		for (int i = 0; i < bundles.length; i++)
 			initResolverBundle(bundles[i], fragmentBundles, false);
 		// Add each removal pending bundle to the resolver's internal state
-		BundleDescription[] removedBundles = removalPending.getAllValues();
-		for (int i = 0; i < removedBundles.length; i++)
-			initResolverBundle(removedBundles[i], fragmentBundles, true);
+		List<BundleDescription> removedBundles = removalPending.getAllValues();
+		for (BundleDescription removed : removedBundles)
+			initResolverBundle(removed, fragmentBundles, true);
 		// Iterate over the resolved fragments and attach them to their hosts
 		for (Iterator<ResolverBundle> iter = fragmentBundles.iterator(); iter.hasNext();) {
 			ResolverBundle fragment = iter.next();
@@ -182,7 +182,7 @@ public class ResolverImpl implements Resolver {
 			return;
 		}
 		String constraintName = constraint.getName();
-		GenericCapability[] matches = constraintName == null ? namespace.get(constraintName) : namespace.getAllValues();
+		List<GenericCapability> matches = constraintName == null ? namespace.get(constraintName) : namespace.getAllValues();
 		for (GenericCapability match : matches) {
 			for (GenericDescription supplier : suppliers)
 				if (match.getBaseDescription() == supplier)
@@ -215,7 +215,7 @@ public class ResolverImpl implements Resolver {
 		ResolverExport matchingExport = null;
 		ExportPackageDescription importSupplier = (ExportPackageDescription) imp.getVersionConstraint().getSupplier();
 		ResolverBundle exporter = importSupplier == null ? null : (ResolverBundle) bundleMapping.get(importSupplier.getExporter());
-		ResolverExport[] matches = resolverExports.get(imp.getName());
+		List<ResolverExport> matches = resolverExports.get(imp.getName());
 		for (ResolverExport export : matches) {
 			if (export.getExporter() == exporter && importSupplier == export.getExportPackageDescription()) {
 				matchingExport = export;
@@ -235,7 +235,7 @@ public class ResolverImpl implements Resolver {
 
 	// Checks a bundle to make sure it is valid.  If this method returns false for
 	// a given bundle, then that bundle will not even be considered for resolution
-	private boolean isResolvable(ResolverBundle bundle, Dictionary[] platformProperties, ArrayList rejectedSingletons, Collection<ResolverBundle> hookDisabled) {
+	private boolean isResolvable(ResolverBundle bundle, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons, Collection<ResolverBundle> hookDisabled) {
 		BundleDescription bundleDesc = bundle.getBundleDescription();
 		// check if this is a rejected singleton
 		if (rejectedSingletons.contains(bundleDesc))
@@ -260,15 +260,15 @@ public class ResolverImpl implements Resolver {
 		}
 		// Check for singletons
 		if (bundleDesc.isSingleton()) {
-			Object[] sameName = resolverBundles.get(bundleDesc.getName());
-			if (sameName.length > 1) {
+			List<ResolverBundle> sameName = resolverBundles.get(bundleDesc.getName());
+			if (sameName.size() > 1) {
 				// Need to check if one is already resolved
-				Collection<Capability> collisionCandidates = new ArrayList<Capability>(sameName.length - 1);
-				for (Object collision : sameName) {
-					if (collision == bundleDesc || !((ResolverBundle) collision).getBundleDescription().isSingleton())
+				Collection<Capability> collisionCandidates = new ArrayList<Capability>(sameName.size() - 1);
+				for (ResolverBundle collision : sameName) {
+					if (collision == bundleDesc || !collision.getBundleDescription().isSingleton())
 						continue; // Ignore the bundle we are resolving and non-singletons
-					if (((ResolverBundle) collision).getBundleDescription().isResolved())
-						collisionCandidates.add((Capability) collision);
+					if (collision.getBundleDescription().isResolved())
+						collisionCandidates.add(collision);
 				}
 				if (hook != null)
 					hook.filterSingletonCollisions(bundle, collisionCandidates);
@@ -331,10 +331,13 @@ public class ResolverImpl implements Resolver {
 			return false;
 		try {
 			Filter filter = FilterImpl.newInstance(platformFilter);
-			for (int i = 0; i < platformProperties.length; i++)
+			for (int i = 0; i < platformProperties.length; i++) {
 				// using matchCase here in case of duplicate case invarient keys (bug 180817)
-				if (filter.matchCase(platformProperties[i]))
+				@SuppressWarnings("rawtypes")
+				Dictionary props = platformProperties[i];
+				if (filter.matchCase(props))
 					return true;
+			}
 		} catch (InvalidSyntaxException e) {
 			// return false below
 		}
@@ -343,30 +346,29 @@ public class ResolverImpl implements Resolver {
 	}
 
 	// Attach fragment to its host
-	private void attachFragment(ResolverBundle bundle, ArrayList rejectedSingletons, Collection processedFragments) {
+	private void attachFragment(ResolverBundle bundle, List<BundleDescription> rejectedSingletons, Collection<String> processedFragments) {
 		if (processedFragments.contains(bundle.getName()))
 			return;
 		processedFragments.add(bundle.getName());
 		// we want to attach multiple versions of the same fragment
 		// from highest version to lowest to give the higher versions first pick
 		// of the available host bundles.
-		Object[] fragments = resolverBundles.get(bundle.getName());
-		for (int i = 0; i < fragments.length; i++) {
-			ResolverBundle fragment = (ResolverBundle) fragments[i];
+		List<ResolverBundle> fragments = resolverBundles.get(bundle.getName());
+		for (ResolverBundle fragment : fragments) {
 			if (!fragment.isResolved())
 				attachFragment0(fragment, rejectedSingletons);
 		}
 	}
 
-	private void attachFragment0(ResolverBundle bundle, ArrayList rejectedSingletons) {
+	private void attachFragment0(ResolverBundle bundle, List<BundleDescription> rejectedSingletons) {
 		if (!bundle.isFragment() || !bundle.isResolvable() || rejectedSingletons.contains(bundle.getBundleDescription()))
 			return;
 		// no need to select singletons now; it will be done when we select the rest of the singleton bundles (bug 152042)
 		// find all available hosts to attach to.
 		boolean foundMatch = false;
 		BundleConstraint hostConstraint = bundle.getHost();
-		Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-		Collection<ResolverBundle> candidates = new ArrayList(Arrays.asList(hosts));
+		List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
+		Collection<ResolverBundle> candidates = new ArrayList<ResolverBundle>(hosts);
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 			ResolverBundle host = iCandidates.next();
@@ -384,7 +386,7 @@ public class ResolverImpl implements Resolver {
 			state.addResolverError(bundle.getBundleDescription(), ResolverError.MISSING_FRAGMENT_HOST, bundle.getHost().getVersionConstraint().toString(), bundle.getHost().getVersionConstraint());
 	}
 
-	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary[] platformProperties) {
+	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary<Object, Object>[] platformProperties) {
 		if (DEBUG)
 			ResolverImpl.log("*** BEGIN RESOLUTION ***"); //$NON-NLS-1$
 		if (state == null)
@@ -418,7 +420,7 @@ public class ResolverImpl implements Resolver {
 			// always get the latest EEs
 			getCurrentEEs(platformProperties);
 			// keep a list of rejected singletons
-			ArrayList rejectedSingletons = new ArrayList();
+			List<BundleDescription> rejectedSingletons = new ArrayList<BundleDescription>();
 			boolean resolveOptional = platformProperties.length == 0 ? false : "true".equals(platformProperties[0].get("osgi.resolveOptional")); //$NON-NLS-1$//$NON-NLS-2$
 			ResolverBundle[] currentlyResolved = null;
 			if (resolveOptional) {
@@ -428,13 +430,14 @@ public class ResolverImpl implements Resolver {
 					currentlyResolved[i] = bundleMapping.get(resolvedBundles[i]);
 			}
 			// attempt to resolve all unresolved bundles
+			@SuppressWarnings("unchecked")
 			Collection<ResolverBundle> hookDisabled = Collections.EMPTY_LIST;
 			if (hook != null) {
 				Collection<BundleRevision> resolvable = new ArrayList<BundleRevision>(unresolvedBundles);
 				int size = resolvable.size();
 				hook.filterResolvable(resolvable);
 				if (resolvable.size() < size) {
-					hookDisabled = new ArrayList(unresolvedBundles);
+					hookDisabled = new ArrayList<ResolverBundle>(unresolvedBundles);
 					hookDisabled.removeAll(resolvable);
 				}
 			}
@@ -449,8 +452,7 @@ public class ResolverImpl implements Resolver {
 				bundles = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 				resolveBundles(bundles, platformProperties, rejectedSingletons, hookDisabled);
 			}
-			for (Iterator rejected = rejectedSingletons.iterator(); rejected.hasNext();) {
-				BundleDescription reject = (BundleDescription) rejected.next();
+			for (BundleDescription reject : rejectedSingletons) {
 				// need to do a bit of work to figure out which bundle got selected
 				BundleDescription[] sameNames = state.getBundles(reject.getSymbolicName());
 				BundleDescription sameName = reject;
@@ -476,7 +478,7 @@ public class ResolverImpl implements Resolver {
 			return reRefresh; // we don't care about this unless we are in development mode
 		// when in develoment mode we need to reRefresh hosts  of unresolved fragments that add new constraints 
 		// and reRefresh and unresolved bundles that have dependents
-		HashSet additionalRefresh = new HashSet();
+		Set<BundleDescription> additionalRefresh = new HashSet<BundleDescription>();
 		ResolverBundle[] unresolved = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 		for (int i = 0; i < unresolved.length; i++) {
 			addUnresolvedWithDependents(unresolved[i], additionalRefresh);
@@ -488,16 +490,16 @@ public class ResolverImpl implements Resolver {
 		if (reRefresh != null)
 			for (int i = 0; i < reRefresh.length; i++)
 				additionalRefresh.add(reRefresh[i]);
-		return (BundleDescription[]) additionalRefresh.toArray(new BundleDescription[additionalRefresh.size()]);
+		return additionalRefresh.toArray(new BundleDescription[additionalRefresh.size()]);
 	}
 
-	private void addUnresolvedWithDependents(ResolverBundle unresolved, HashSet additionalRefresh) {
+	private void addUnresolvedWithDependents(ResolverBundle unresolved, Set<BundleDescription> additionalRefresh) {
 		BundleDescription[] dependents = unresolved.getBundleDescription().getDependents();
 		if (dependents.length > 0)
 			additionalRefresh.add(unresolved.getBundleDescription());
 	}
 
-	private void addHostsFromFragmentConstraints(ResolverBundle unresolved, Set additionalRefresh) {
+	private void addHostsFromFragmentConstraints(ResolverBundle unresolved, Set<BundleDescription> additionalRefresh) {
 		if (!unresolved.isFragment())
 			return;
 		ImportPackageSpecification[] newImports = unresolved.getBundleDescription().getImportPackages();
@@ -505,12 +507,12 @@ public class ResolverImpl implements Resolver {
 		if (newImports.length == 0 && newRequires.length == 0)
 			return; // the fragment does not have its own constraints
 		BundleConstraint hostConstraint = unresolved.getHost();
-		Object[] hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-		for (int j = 0; j < hosts.length; j++)
-			if (hostConstraint.isSatisfiedBy((ResolverBundle) hosts[j]) && ((ResolverBundle) hosts[j]).isResolved())
+		List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
+		for (ResolverBundle host : hosts)
+			if (hostConstraint.isSatisfiedBy(host) && host.isResolved())
 				// we found a host that is resolved;
 				// add it to the set of bundle to refresh so we can ensure this fragment is allowed to resolve
-				additionalRefresh.add(((ResolverBundle) hosts[j]).getBundleDescription());
+				additionalRefresh.add(host.getBundleDescription());
 
 	}
 
@@ -524,7 +526,7 @@ public class ResolverImpl implements Resolver {
 	// TODO this does not do proper uses constraint verification.
 	private void resolveOptionalConstraints(ResolverBundle bundle) {
 		BundleConstraint[] requires = bundle.getRequires();
-		ArrayList cycle = new ArrayList();
+		List<ResolverBundle> cycle = new ArrayList<ResolverBundle>();
 		boolean resolvedOptional = false;
 		for (int i = 0; i < requires.length; i++)
 			if (requires[i].isOptional() && requires[i].getSelectedSupplier() == null) {
@@ -548,7 +550,7 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
-	private void getCurrentEEs(Dictionary[] platformProperties) {
+	private void getCurrentEEs(Dictionary<Object, Object>[] platformProperties) {
 		CURRENT_EES = new String[platformProperties.length][];
 		for (int i = 0; i < platformProperties.length; i++) {
 			String eeSpecs = (String) platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
@@ -556,7 +558,7 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
-	private void resolveBundles(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons, Collection<ResolverBundle> hookDisabled) {
+	private void resolveBundles(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons, Collection<ResolverBundle> hookDisabled) {
 		// First check that all the meta-data is valid for each unresolved bundle
 		// This will reset the resolvable flag for each bundle
 		for (int i = 0; i < bundles.length; i++) {
@@ -573,12 +575,12 @@ public class ResolverImpl implements Resolver {
 		stateResolveBundles(bundles);
 	}
 
-	private void resolveBundles0(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+	private void resolveBundles0(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons) {
 		if (developmentMode)
 			// need to sort bundles to keep consistent order for fragment attachment (bug 174930)
 			Arrays.sort(bundles);
 		// First attach all fragments to the matching hosts
-		Collection processedFragments = new HashSet(bundles.length);
+		Collection<String> processedFragments = new HashSet<String>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			attachFragment(bundles[i], rejectedSingletons, processedFragments);
 
@@ -604,11 +606,11 @@ public class ResolverImpl implements Resolver {
 		checkComposites(bundles, platformProperties, rejectedSingletons);
 	}
 
-	private void checkComposites(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+	private void checkComposites(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons) {
 		CompositeResolveHelperRegistry helpers = getCompositeHelpers();
 		if (helpers == null)
 			return;
-		Set exclude = null;
+		Set<ResolverBundle> exclude = null;
 		for (int i = 0; i < bundles.length; i++) {
 			CompositeResolveHelper helper = helpers.getCompositeResolveHelper(bundles[i].getBundleDescription());
 			if (helper == null)
@@ -622,14 +624,14 @@ public class ResolverImpl implements Resolver {
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
 				setBundleUnresolved(bundles[i], false, false);
 				if (exclude == null)
-					exclude = new HashSet(1);
+					exclude = new HashSet<ResolverBundle>(1);
 				exclude.add(bundles[i]);
 			}
 		}
 		reResolveBundles(exclude, bundles, platformProperties, rejectedSingletons);
 	}
 
-	private void checkUsesConstraints(ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+	private void checkUsesConstraints(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons) {
 		List<ResolverConstraint> conflictingConstraints = findBestCombination(bundles, platformProperties);
 		if (conflictingConstraints == null)
 			return;
@@ -661,10 +663,10 @@ public class ResolverImpl implements Resolver {
 		reResolveBundles(conflictedBundles, bundles, platformProperties, rejectedSingletons);
 	}
 
-	private void reResolveBundles(Set exclude, ResolverBundle[] bundles, Dictionary[] platformProperties, ArrayList rejectedSingletons) {
+	private void reResolveBundles(Set<ResolverBundle> exclude, ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties, List<BundleDescription> rejectedSingletons) {
 		if (exclude == null || exclude.size() == 0)
 			return;
-		ArrayList remainingUnresolved = new ArrayList();
+		List<ResolverBundle> remainingUnresolved = new ArrayList<ResolverBundle>();
 		for (int i = 0; i < bundles.length; i++) {
 			if (!exclude.contains(bundles[i])) {
 				// We pass false for keepFragmentsAttached because we need to redo the attachments (bug 272561)
@@ -672,10 +674,10 @@ public class ResolverImpl implements Resolver {
 				remainingUnresolved.add(bundles[i]);
 			}
 		}
-		resolveBundles0((ResolverBundle[]) remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, rejectedSingletons);
+		resolveBundles0(remainingUnresolved.toArray(new ResolverBundle[remainingUnresolved.size()]), platformProperties, rejectedSingletons);
 	}
 
-	private List<ResolverConstraint> findBestCombination(ResolverBundle[] bundles, Dictionary[] platformProperties) {
+	private List<ResolverConstraint> findBestCombination(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {
 		Object usesMode = platformProperties.length == 0 ? null : platformProperties[0].get("osgi.resolver.usesMode"); //$NON-NLS-1$
 		if (usesMode == null)
 			usesMode = secureAction.getProperty("osgi.resolver.usesMode"); //$NON-NLS-1$
@@ -979,8 +981,8 @@ public class ResolverImpl implements Resolver {
 	}
 
 	String getSystemBundle() {
-		Dictionary[] platformProperties = state.getPlatformProperties();
-		String systemBundle = (String) (platformProperties.length == 0 ? null : platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE));
+		Dictionary<?, ?>[] platformProperties = state.getPlatformProperties();
+		String systemBundle = platformProperties.length == 0 ? null : (String) platformProperties[0].get(Constants.STATE_SYSTEM_BUNDLE);
 		if (systemBundle == null)
 			systemBundle = Constants.getInternalSymbolicName();
 		return systemBundle;
@@ -1071,7 +1073,7 @@ public class ResolverImpl implements Resolver {
 		}
 	}
 
-	private boolean selectSingletons(ResolverBundle[] bundles, ArrayList rejectedSingletons) {
+	private boolean selectSingletons(ResolverBundle[] bundles, List<BundleDescription> rejectedSingletons) {
 		if (developmentMode)
 			return false; // do no want to unresolve singletons in development mode
 		boolean result = false;
@@ -1079,13 +1081,12 @@ public class ResolverImpl implements Resolver {
 			BundleDescription bundleDesc = bundles[i].getBundleDescription();
 			if (!bundleDesc.isSingleton() || !bundleDesc.isResolved() || rejectedSingletons.contains(bundleDesc))
 				continue;
-			Object[] sameName = resolverBundles.get(bundleDesc.getName());
-			if (sameName.length > 1) { // Need to make a selection based off of num dependents
-				Collection<ResolverBundle> singletonCollisions = new ArrayList();
-				for (int j = 0; j < sameName.length; j++) {
-					BundleDescription sameNameDesc = ((VersionSupplier) sameName[j]).getBundleDescription();
-					ResolverBundle sameNameBundle = (ResolverBundle) sameName[j];
-					if (sameName[j] == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved() || rejectedSingletons.contains(sameNameDesc))
+			List<ResolverBundle> sameName = resolverBundles.get(bundleDesc.getName());
+			if (sameName.size() > 1) { // Need to make a selection based off of num dependents
+				Collection<ResolverBundle> singletonCollisions = new ArrayList<ResolverBundle>();
+				for (ResolverBundle sameNameBundle : sameName) {
+					BundleDescription sameNameDesc = sameNameBundle.getBundleDescription();
+					if (sameNameBundle == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved() || rejectedSingletons.contains(sameNameDesc))
 						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
 					singletonCollisions.add(sameNameBundle);
 				}
@@ -1115,8 +1116,8 @@ public class ResolverImpl implements Resolver {
 		for (int i = 0; i < bundles.length; i++)
 			bundles[i].clearRefs();
 		// unresolve the rejected singletons
-		for (Iterator rejects = rejectedSingletons.iterator(); rejects.hasNext();)
-			unresolveBundle(bundleMapping.get(rejects.next()), false);
+		for (BundleDescription rejected : rejectedSingletons)
+			unresolveBundle(bundleMapping.get(rejected), false);
 		// reorder exports and bundles after unresolving the bundles
 		resolverExports.reorder();
 		resolverBundles.reorder();
@@ -1288,12 +1289,12 @@ public class ResolverImpl implements Resolver {
 		}
 		VersionHashMap<GenericCapability> namespace = resolverGenerics.get(constraint.getNameSpace());
 		String name = constraint.getName();
-		GenericCapability[] capabilities;
+		List<GenericCapability> capabilities;
 		if (namespace == null)
-			capabilities = new GenericCapability[0];
+			capabilities = Collections.EMPTY_LIST;
 		else
 			capabilities = name == null || "*".equals(name) ? namespace.getAllValues() : namespace.get(name); //$NON-NLS-1$
-		Collection<GenericCapability> candidates = new ArrayList<GenericCapability>(Arrays.asList(capabilities));
+		Collection<GenericCapability> candidates = new ArrayList<GenericCapability>(capabilities);
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<GenericCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 			if (!constraint.isSatisfiedBy(iCandidates.next()))
@@ -1347,8 +1348,8 @@ public class ResolverImpl implements Resolver {
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
-		ResolverBundle[] bundles = resolverBundles.get(req.getVersionConstraint().getName());
-		Collection<ResolverBundle> candidates = new ArrayList<ResolverBundle>(Arrays.asList(bundles));
+		List<ResolverBundle> bundles = resolverBundles.get(req.getVersionConstraint().getName());
+		Collection<ResolverBundle> candidates = new ArrayList<ResolverBundle>(bundles);
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 			if (!req.isSatisfiedBy(iCandidates.next()))
@@ -1410,8 +1411,8 @@ public class ResolverImpl implements Resolver {
 		}
 		boolean result = false;
 		ResolverExport[] substitutableExps = imp.getBundle().getExports(imp.getName());
-		ResolverExport[] exports = resolverExports.get(imp.getName());
-		Collection<ResolverExport> candidates = new ArrayList<ResolverExport>(Arrays.asList(exports));
+		List<ResolverExport> exports = resolverExports.get(imp.getName());
+		Collection<ResolverExport> candidates = new ArrayList<ResolverExport>(exports);
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverExport> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 			if (!imp.isSatisfiedBy(iCandidates.next()))
@@ -1575,31 +1576,31 @@ public class ResolverImpl implements Resolver {
 			stateResolveConstraints(rb);
 		// Gather selected exports
 		ResolverExport[] exports = rb.getSelectedExports();
-		ArrayList selectedExports = new ArrayList(exports.length);
+		List<ExportPackageDescription> selectedExports = new ArrayList<ExportPackageDescription>(exports.length);
 		for (int i = 0; i < exports.length; i++) {
 			if (permissionChecker.checkPackagePermission(exports[i].getExportPackageDescription()))
 				selectedExports.add(exports[i].getExportPackageDescription());
 		}
-		ExportPackageDescription[] selectedExportsArray = (ExportPackageDescription[]) selectedExports.toArray(new ExportPackageDescription[selectedExports.size()]);
+		ExportPackageDescription[] selectedExportsArray = selectedExports.toArray(new ExportPackageDescription[selectedExports.size()]);
 
 		// Gather substitute exports
 		ResolverExport[] substituted = rb.getSubstitutedExports();
-		ArrayList substitutedExports = new ArrayList(substituted.length);
+		List<ExportPackageDescription> substitutedExports = new ArrayList<ExportPackageDescription>(substituted.length);
 		for (int i = 0; i < substituted.length; i++) {
 			substitutedExports.add(substituted[i].getExportPackageDescription());
 		}
-		ExportPackageDescription[] substitutedExportsArray = (ExportPackageDescription[]) substitutedExports.toArray(new ExportPackageDescription[substitutedExports.size()]);
+		ExportPackageDescription[] substitutedExportsArray = substitutedExports.toArray(new ExportPackageDescription[substitutedExports.size()]);
 
 		// Gather exports that have been wired to
 		ExportPackageDescription[] exportsWiredToArray = getExportsWiredTo(rb);
 
 		// Gather bundles that have been wired to
 		BundleConstraint[] requires = rb.getRequires();
-		ArrayList bundlesWiredTo = new ArrayList(requires.length);
+		List<BundleDescription> bundlesWiredTo = new ArrayList<BundleDescription>(requires.length);
 		for (int i = 0; i < requires.length; i++)
 			if (requires[i].getSelectedSupplier() != null)
-				bundlesWiredTo.add(requires[i].getSelectedSupplier().getBaseDescription());
-		BundleDescription[] bundlesWiredToArray = (BundleDescription[]) bundlesWiredTo.toArray(new BundleDescription[bundlesWiredTo.size()]);
+				bundlesWiredTo.add((BundleDescription) requires[i].getSelectedSupplier().getBaseDescription());
+		BundleDescription[] bundlesWiredToArray = bundlesWiredTo.toArray(new BundleDescription[bundlesWiredTo.size()]);
 
 		GenericCapability[] capabilities = rb.getGenericCapabilities();
 		List<GenericDescription> selectedCapabilities = new ArrayList<GenericDescription>(capabilities.length);
@@ -1660,11 +1661,11 @@ public class ResolverImpl implements Resolver {
 	private static ExportPackageDescription[] getExportsWiredTo(ResolverBundle rb) {
 		// Gather exports that have been wired to
 		ResolverImport[] imports = rb.getImportPackages();
-		ArrayList exportsWiredTo = new ArrayList(imports.length);
+		List<ExportPackageDescription> exportsWiredTo = new ArrayList<ExportPackageDescription>(imports.length);
 		for (int i = 0; i < imports.length; i++)
 			if (imports[i].getSelectedSupplier() != null)
-				exportsWiredTo.add(imports[i].getSelectedSupplier().getBaseDescription());
-		return (ExportPackageDescription[]) exportsWiredTo.toArray(new ExportPackageDescription[exportsWiredTo.size()]);
+				exportsWiredTo.add((ExportPackageDescription) imports[i].getSelectedSupplier().getBaseDescription());
+		return exportsWiredTo.toArray(new ExportPackageDescription[exportsWiredTo.size()]);
 	}
 
 	// Resolve dynamic import
@@ -1699,7 +1700,7 @@ public class ResolverImpl implements Resolver {
 					found = true;
 					// populate the grouping checker with current imports
 					groupingChecker.populateRoots(resolverImports[j].getBundle());
-					if (resolveImport(resolverImports[j], new ArrayList())) {
+					if (resolveImport(resolverImports[j], new ArrayList<ResolverBundle>())) {
 						found = false;
 						while (!found && resolverImports[j].getSelectedSupplier() != null) {
 							if (groupingChecker.isDynamicConsistent(resolverImports[j].getBundle(), (ResolverExport) resolverImports[j].getSelectedSupplier()) != null)
@@ -1729,11 +1730,11 @@ public class ResolverImpl implements Resolver {
 			}
 			// this is to support adding dynamic imports on the fly.
 			if (!found) {
-				Map directives = new HashMap(1);
+				Map<String, String> directives = new HashMap<String, String>(1, 1);
 				directives.put(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
 				ImportPackageSpecification packageSpec = state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, directives, null, importingBundle);
 				ResolverImport newImport = new ResolverImport(rb, packageSpec);
-				if (resolveImport(newImport, new ArrayList())) {
+				if (resolveImport(newImport, new ArrayList<ResolverBundle>())) {
 					while (newImport.getSelectedSupplier() != null) {
 						if (groupingChecker.isDynamicConsistent(rb, (ResolverExport) newImport.getSelectedSupplier()) != null)
 							newImport.selectNextSupplier();
@@ -1798,18 +1799,18 @@ public class ResolverImpl implements Resolver {
 		if (bundle == null)
 			return;
 		// check the removed list if unresolving then remove from the removed list
-		BundleDescription[] removedBundles = removalPending.remove(new Long(bundle.getBundleDescription().getBundleId()));
-		for (int i = 0; i < removedBundles.length; i++) {
-			ResolverBundle re = bundleMapping.get(removedBundles[i]);
+		List<BundleDescription> removedBundles = removalPending.remove(new Long(bundle.getBundleDescription().getBundleId()));
+		for (BundleDescription removedDesc : removedBundles) {
+			ResolverBundle re = bundleMapping.get(removedDesc);
 			unresolveBundle(re, true);
-			state.removeBundleComplete(removedBundles[i]);
+			state.removeBundleComplete(removedDesc);
 			resolverExports.remove(re.getExportPackages());
 			resolverBundles.remove(re);
 			removeGenerics(re.getGenericCapabilities());
-			bundleMapping.remove(removedBundles[i]);
+			bundleMapping.remove(removedDesc);
 			groupingChecker.clear(re);
 			// the bundle is removed
-			if (removedBundles[i] == bundle.getBundleDescription())
+			if (removedDesc == bundle.getBundleDescription())
 				removed = true;
 		}
 
@@ -1843,9 +1844,9 @@ public class ResolverImpl implements Resolver {
 		resolverGenerics = null;
 		unresolvedBundles = null;
 		bundleMapping = null;
-		BundleDescription[] removed = removalPending.getAllValues();
-		for (int i = 0; i < removed.length; i++)
-			state.removeBundleComplete(removed[i]);
+		List<BundleDescription> removed = removalPending.getAllValues();
+		for (BundleDescription removedDesc : removed)
+			state.removeBundleComplete(removedDesc);
 		removalPending.clear();
 		initialized = false;
 	}
@@ -1879,9 +1880,8 @@ public class ResolverImpl implements Resolver {
 	// LOGGING METHODS
 	private void printWirings() {
 		ResolverImpl.log("****** Result Wirings ******"); //$NON-NLS-1$
-		Object[] bundles = resolverBundles.getAllValues();
-		for (int j = 0; j < bundles.length; j++) {
-			ResolverBundle rb = (ResolverBundle) bundles[j];
+		List<ResolverBundle> bundles = resolverBundles.getAllValues();
+		for (ResolverBundle rb : bundles) {
 			if (rb.getBundleDescription().isResolved()) {
 				continue;
 			}
@@ -1937,11 +1937,11 @@ public class ResolverImpl implements Resolver {
 		return resolverExports;
 	}
 
-	public void setSelectionPolicy(Comparator selectionPolicy) {
+	public void setSelectionPolicy(Comparator<BaseDescription> selectionPolicy) {
 		this.selectionPolicy = selectionPolicy;
 	}
 
-	public Comparator getSelectionPolicy() {
+	public Comparator<BaseDescription> getSelectionPolicy() {
 		return selectionPolicy;
 	}
 
@@ -1970,7 +1970,7 @@ public class ResolverImpl implements Resolver {
 		for (GenericCapability capability : generics) {
 			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getNamespace());
 			if (namespace == null) {
-				namespace = new VersionHashMap<GenericCapability>(this, GenericCapability.class);
+				namespace = new VersionHashMap<GenericCapability>(this);
 				resolverGenerics.put(capability.getNamespace(), namespace);
 			}
 			namespace.put(capability.getName(), capability);

@@ -459,7 +459,7 @@ public interface State {
 	 * supported properties already set.  If any of the supported property values 
 	 * are changed as a result of calling this method then true is returned.
 	 */
-	public boolean setPlatformProperties(Dictionary<String, String> platformProperties);
+	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties);
 
 	/**
 	 * Sets the platform properties of the state to a list of platform properties.  
@@ -470,13 +470,14 @@ public interface State {
 	 * supported properties already set.  If any of the supported property values 
 	 * are changed as a result of calling this method then true is returned.
 	 */
-	public boolean setPlatformProperties(Dictionary<String, String>[] platformProperties);
+	public boolean setPlatformProperties(Dictionary<?, ?>[] platformProperties);
 
 	/**
 	 * Returns the list of platform properties currently set for this state.
 	 * @return the list of platform properties currently set for this state.
 	 */
-	public Dictionary<String, String>[] getPlatformProperties();
+	@SuppressWarnings("rawtypes")
+	public Dictionary[] getPlatformProperties();
 
 	/**
 	 * Returns the list of system packages which are exported by the system bundle.  

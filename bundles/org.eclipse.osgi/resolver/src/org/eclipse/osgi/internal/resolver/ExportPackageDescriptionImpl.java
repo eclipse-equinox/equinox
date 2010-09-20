@@ -23,7 +23,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
 	private static final Integer EQUINOX_EE_DEFAULT = new Integer(-1);
 	private String[] uses;
-	private Map attributes;
+	private Map<String, Object> attributes;
 	private volatile BundleDescription exporter;
 	private String exclude;
 	private String include;
@@ -33,9 +33,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private int equinox_ee = -1;
 	private volatile int tableIndex;
 
-	public Map getDirectives() {
+	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
-			Map result = new HashMap(7);
+			Map<String, Object> result = new HashMap<String, Object>(7);
 			if (uses != null)
 				result.put(Constants.USES_DIRECTIVE, uses);
 			if (exclude != null)
@@ -53,7 +53,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		Map<String, String> result = new HashMap(6);
+		Map<String, String> result = new HashMap<String, String>(6);
 		synchronized (this.monitor) {
 			if (uses != null)
 				result.put(Constants.USES_DIRECTIVE, toString(uses));
@@ -72,7 +72,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
-		Map<String, Object> result = new HashMap(2);
+		Map<String, Object> result = new HashMap<String, Object>(2);
 		synchronized (this.monitor) {
 			if (attributes != null)
 				result.putAll(attributes);
@@ -139,7 +139,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
-	public void setDirectives(Map directives) {
+	public void setDirectives(Map<String, ?> directives) {
 		synchronized (this.monitor) {
 			if (directives == null)
 				return;
@@ -153,7 +153,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
-	public Map getAttributes() {
+	public Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
 		}
@@ -174,9 +174,10 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		return true;
 	}
 
-	protected void setAttributes(Map attributes) {
+	@SuppressWarnings("unchecked")
+	protected void setAttributes(Map<String, ?> attributes) {
 		synchronized (this.monitor) {
-			this.attributes = attributes;
+			this.attributes = (Map<String, Object>) attributes;
 		}
 	}
 

@@ -51,9 +51,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	private volatile int lazyDataOffset = -1;
 	private volatile int lazyDataSize = -1;
 
-	//TODO These could be arrays
-	private ArrayList dependencies;
-	private ArrayList dependents;
+	private List<BundleDescription> dependencies;
+	private List<BundleDescription> dependents;
 
 	private volatile LazyData lazyData;
 	private volatile int equinox_ee = -1;
@@ -481,7 +480,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			if (dependencies == null)
 				return;
-			Iterator iter = dependencies.iterator();
+			Iterator<BundleDescription> iter = dependencies.iterator();
 			while (iter.hasNext()) {
 				((BundleDescriptionImpl) iter.next()).removeDependent(this);
 			}
@@ -494,7 +493,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (newDependencies == null)
 				return;
 			if (!checkDups && dependencies == null)
-				dependencies = new ArrayList(newDependencies.length);
+				dependencies = new ArrayList<BundleDescription>(newDependencies.length);
 			for (int i = 0; i < newDependencies.length; i++) {
 				addDependency((BaseDescriptionImpl) newDependencies[i], checkDups);
 			}
@@ -507,7 +506,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (bundle == this)
 				return;
 			if (dependencies == null)
-				dependencies = new ArrayList(10);
+				dependencies = new ArrayList<BundleDescription>(10);
 			if (!checkDups || !dependencies.contains(bundle)) {
 				bundle.addDependent(this);
 				dependencies.add(bundle);
@@ -519,14 +518,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	 * Gets all the bundle dependencies as a result of import-package or require-bundle.
 	 * Self and fragment bundles are removed.
 	 */
-	List getBundleDependencies() {
+	List<BundleDescription> getBundleDependencies() {
 		synchronized (this.monitor) {
 			if (dependencies == null)
-				return new ArrayList(0);
-			ArrayList required = new ArrayList(dependencies.size());
-			for (Iterator iter = dependencies.iterator(); iter.hasNext();) {
-				Object dep = iter.next();
-				if (dep != this && dep instanceof BundleDescription && ((BundleDescription) dep).getHost() == null)
+				return new ArrayList<BundleDescription>(0);
+			ArrayList<BundleDescription> required = new ArrayList<BundleDescription>(dependencies.size());
+			for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();) {
+				BundleDescription dep = iter.next();
+				if (dep != this && dep.getHost() == null)
 					required.add(dep);
 			}
 			return required;
@@ -544,7 +543,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	protected void addDependent(BundleDescription dependent) {
 		synchronized (this.monitor) {
 			if (dependents == null)
-				dependents = new ArrayList(10);
+				dependents = new ArrayList<BundleDescription>(10);
 			// no need to check for duplicates here; this is only called in addDepenency which already checks for dups.
 			dependents.add(dependent);
 		}
@@ -562,7 +561,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			if (dependents == null)
 				return EMPTY_BUNDLEDESCS;
-			return (BundleDescription[]) dependents.toArray(new BundleDescription[dependents.size()]);
+			return dependents.toArray(new BundleDescription[dependents.size()]);
 		}
 	}
 
@@ -665,7 +664,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
-	void setDynamicStamps(HashMap dynamicStamps) {
+	void setDynamicStamps(Map<String, Long> dynamicStamps) {
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.dynamicStamps = dynamicStamps;
@@ -678,7 +677,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (lazyData.dynamicStamps == null) {
 				if (timestamp == null)
 					return;
-				lazyData.dynamicStamps = new HashMap();
+				lazyData.dynamicStamps = new HashMap<String, Long>();
 			}
 			if (timestamp == null)
 				lazyData.dynamicStamps.remove(requestedPackage);
@@ -695,7 +694,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
-	HashMap getDynamicStamps() {
+	Map<String, Long> getDynamicStamps() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
 			return currentData.dynamicStamps;
@@ -734,11 +733,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		ExportPackageDescription[] substitutedExports;
 		String[] executionEnvironments;
 
-		HashMap dynamicStamps;
+		Map<String, Long> dynamicStamps;
 	}
 
 	public Map<String, String> getDeclaredDirectives() {
-		Map<String, String> result = new HashMap(2);
+		Map<String, String> result = new HashMap<String, String>(2);
 		if (!attachFragments()) {
 			result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_NEVER);
 		} else {
@@ -753,7 +752,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
-		Map<String, Object> result = new HashMap(1);
+		Map<String, Object> result = new HashMap<String, Object>(1);
 		result.put(Capability.BUNDLE_CAPABILITY, getName());
 		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
 		return Collections.unmodifiableMap(result);

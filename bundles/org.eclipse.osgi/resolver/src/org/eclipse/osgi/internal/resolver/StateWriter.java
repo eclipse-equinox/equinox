@@ -14,7 +14,8 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.*;
+import org.osgi.framework.Filter;
+import org.osgi.framework.Version;
 
 /**
  * This class is <strong>not</strong> thread safe. Instances must not be
@@ -26,12 +27,12 @@ class StateWriter {
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	private final Map objectTable = new HashMap();
+	private final Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
 
-	private final ArrayList forcedWrite = new ArrayList();
+	private final List<BundleDescription> forcedWrite = new ArrayList<BundleDescription>();
 
 	private int addToObjectTable(Object object) {
-		Integer cur = (Integer) objectTable.get(object);
+		Integer cur = objectTable.get(object);
 		if (cur != null)
 			return cur.intValue();
 		objectTable.put(object, new Integer(objectTable.size()));
@@ -67,10 +68,10 @@ class StateWriter {
 		// write the platform property keys
 		String[] platformPropKeys = state.getPlatformPropertyKeys();
 		writePlatformProp(platformPropKeys, out);
-		Dictionary[] propSet = state.getPlatformProperties();
+		Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
 		out.writeInt(propSet.length);
 		for (int i = 0; i < propSet.length; i++) {
-			Dictionary props = propSet[i];
+			Dictionary<Object, Object> props = propSet[i];
 			out.writeInt(platformPropKeys.length);
 			for (int j = 0; j < platformPropKeys.length; j++)
 				writePlatformProp(props.get(platformPropKeys[j]), out);
@@ -117,10 +118,10 @@ class StateWriter {
 			String[] platformPropKeys = state.getPlatformPropertyKeys();
 			writePlatformProp(platformPropKeys, outState);
 			// write the platform property values
-			Dictionary[] propSet = state.getPlatformProperties();
+			Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
 			outState.writeInt(propSet.length);
 			for (int i = 0; i < propSet.length; i++) {
-				Dictionary props = propSet[i];
+				Dictionary<Object, Object> props = propSet[i];
 				outState.writeInt(platformPropKeys.length);
 				for (int j = 0; j < platformPropKeys.length; j++)
 					writePlatformProp(props.get(platformPropKeys[j]), outState);
@@ -212,10 +213,10 @@ class StateWriter {
 		out.writeBoolean(bundle.dynamicFragments());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out, force);
 
-		List dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
+		List<BundleDescription> dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
 		out.writeInt(dependencies.size());
-		for (Iterator iter = dependencies.iterator(); iter.hasNext();)
-			writeBundleDescription((BundleDescription) iter.next(), out, force);
+		for (Iterator<BundleDescription> iter = dependencies.iterator(); iter.hasNext();)
+			writeBundleDescription(iter.next(), out, force);
 		// the rest is lazy loaded data
 	}
 
@@ -284,15 +285,15 @@ class StateWriter {
 		for (int i = 0; i < ees.length; i++)
 			writeStringOrNull(ees[i], out);
 
-		HashMap dynamicStamps = ((BundleDescriptionImpl) bundle).getDynamicStamps();
+		Map<String, Long> dynamicStamps = ((BundleDescriptionImpl) bundle).getDynamicStamps();
 		if (dynamicStamps == null)
 			out.writeInt(0);
 		else {
 			out.writeInt(dynamicStamps.size());
-			for (Iterator pkgs = dynamicStamps.keySet().iterator(); pkgs.hasNext();) {
-				String pkg = (String) pkgs.next();
+			for (Iterator<String> pkgs = dynamicStamps.keySet().iterator(); pkgs.hasNext();) {
+				String pkg = pkgs.next();
 				writeStringOrNull(pkg, out);
-				out.writeLong(((Long) dynamicStamps.get(pkg)).longValue());
+				out.writeLong(dynamicStamps.get(pkg).longValue());
 			}
 		}
 
@@ -366,15 +367,14 @@ class StateWriter {
 		writeBaseDescription(description, out);
 		writeBundleDescription(description.getSupplier(), out, false);
 		writeStringOrNull(description.getType() == GenericDescription.DEFAULT_TYPE ? null : description.getType(), out);
-		Dictionary attrs = description.getAttributes();
-		Map mapAttrs = new HashMap(attrs.size());
-		for (Enumeration keys = attrs.keys(); keys.hasMoreElements();) {
-			Object key = keys.nextElement();
-			if (!Constants.VERSION_ATTRIBUTE.equals(key))
-				mapAttrs.put(key, attrs.get(key));
+		Dictionary<String, Object> attrs = description.getAttributes();
+		Map<String, Object> mapAttrs = new HashMap<String, Object>(attrs.size());
+		for (Enumeration<String> keys = attrs.keys(); keys.hasMoreElements();) {
+			String key = keys.nextElement();
+			mapAttrs.put(key, attrs.get(key));
 		}
 		writeMap(out, mapAttrs);
-		Map directives = description.getDeclaredDirectives();
+		Map<String, String> directives = description.getDeclaredDirectives();
 		writeMap(out, directives);
 	}
 
@@ -438,14 +438,14 @@ class StateWriter {
 			writeStringOrNull(strings[i], out);
 	}
 
-	private void writeMap(DataOutputStream out, Map source) throws IOException {
+	private void writeMap(DataOutputStream out, Map<String, ?> source) throws IOException {
 		if (source == null) {
 			out.writeInt(0);
 		} else {
 			out.writeInt(source.size());
-			Iterator iter = source.keySet().iterator();
+			Iterator<String> iter = source.keySet().iterator();
 			while (iter.hasNext()) {
-				String key = (String) iter.next();
+				String key = iter.next();
 				Object value = source.get(key);
 				writeStringOrNull(key, out);
 				if (value instanceof String) {
@@ -472,9 +472,58 @@ class StateWriter {
 				} else if ("java.net.URI".equals(value.getClass().getName())) { //$NON-NLS-1$
 					out.writeByte(7);
 					writeStringOrNull(value.toString(), out);
+				} else if (value instanceof List) {
+					writeList(out, (List<?>) value);
 				}
 			}
 		}
+	}
+
+	private void writeList(DataOutputStream out, List<?> list) throws IOException {
+		byte type = getListType(list);
+		if (type == -2)
+			return; // don't understand the list type
+		out.writeByte(8);
+		out.writeByte(type);
+		out.writeInt(list.size());
+		for (Object value : list) {
+			switch (type) {
+				case 0 :
+					writeStringOrNull((String) value, out);
+					break;
+				case 3 :
+					out.writeInt(((Integer) value).intValue());
+					break;
+				case 4 :
+					out.writeLong(((Long) value).longValue());
+					break;
+				case 5 :
+					out.writeDouble(((Double) value).doubleValue());
+					break;
+				case 6 :
+					writeVersion((Version) value, out);
+					break;
+				default :
+					break;
+			}
+		}
+	}
+
+	private byte getListType(List<?> list) {
+		if (list.size() == 0)
+			return -1;
+		Object type = list.get(0);
+		if (type instanceof String)
+			return 0;
+		if (type instanceof Integer)
+			return 3;
+		if (type instanceof Long)
+			return 4;
+		if (type instanceof Double)
+			return 5;
+		if (type instanceof Version)
+			return 6;
+		return -2;
 	}
 
 	private void writeList(DataOutputStream out, String[] list) throws IOException {

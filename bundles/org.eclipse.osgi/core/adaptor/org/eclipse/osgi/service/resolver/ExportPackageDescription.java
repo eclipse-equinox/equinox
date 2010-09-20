@@ -37,13 +37,13 @@ public interface ExportPackageDescription extends BaseDescription {
 	 * Returns the arbitrary attributes for this package.
 	 * @return the arbitrary attributes for this package
 	 */
-	public Map<String, String> getAttributes();
+	public Map<String, Object> getAttributes();
 
 	/**
 	 * Returns the directives for this package.
 	 * @return the directives for this package
 	 */
-	public Map<String, String> getDirectives();
+	public Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive for this package.

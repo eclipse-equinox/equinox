@@ -246,7 +246,7 @@ public interface StateObjectFactory {
 	 * @param importer the importing bundle (may be <code>null</code>)
 	 * @return the created package specification
 	 */
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, String> directives, Map<String, String> attributes, BundleDescription importer);
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer);
 
 	/**
 	 * Creates an import package specification that is a copy of the given import package
@@ -268,7 +268,7 @@ public interface StateObjectFactory {
 	 * @param exporter the exporter of the package (may be <code>null</code>)
 	 * @return the created package
 	 */
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, String> directives, Map<String, String> attributes, boolean root, BundleDescription exporter);
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -279,7 +279,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @deprecated use {@link #createGenericDescription(String, String, Version, Map)}
 	 */
-	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, String> attributes);
+	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes);
 
 	/**
 	 * Creates a generic description from the given parameters
@@ -290,7 +290,7 @@ public interface StateObjectFactory {
 	 * @return the created generic description
 	 * @since 3.7
 	 */
-	public GenericDescription createGenericDescription(String type, Map<String, String> attributes, Map<String, String> directives, BundleDescription supplier);
+	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier);
 
 	/**
 	 * Creates a generic specification from the given parameters

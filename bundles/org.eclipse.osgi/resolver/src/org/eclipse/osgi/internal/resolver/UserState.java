@@ -20,7 +20,7 @@ import org.osgi.framework.BundleException;
  */
 public class UserState extends StateImpl {
 	// TODO this is not an accurate way to record updates
-	private final Set updated = Collections.synchronizedSet(new HashSet());
+	private final Set<String> updated = Collections.synchronizedSet(new HashSet<String>());
 
 	public boolean removeBundle(BundleDescription description) {
 		if (description.getLocation() != null)

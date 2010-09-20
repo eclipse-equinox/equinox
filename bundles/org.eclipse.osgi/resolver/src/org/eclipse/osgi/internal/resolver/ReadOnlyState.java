@@ -142,15 +142,15 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean setPlatformProperties(Dictionary platformProperties) {
+	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties) {
 		throw new UnsupportedOperationException();
 	}
 
-	public boolean setPlatformProperties(Dictionary platformProperties[]) {
+	public boolean setPlatformProperties(Dictionary<?, ?> platformProperties[]) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Dictionary[] getPlatformProperties() {
+	public Dictionary<Object, Object>[] getPlatformProperties() {
 		return target.getPlatformProperties();
 	}
 

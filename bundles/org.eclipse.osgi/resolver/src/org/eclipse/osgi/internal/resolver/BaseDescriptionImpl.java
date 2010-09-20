@@ -56,7 +56,8 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			String key = entry.getKey();
 			Object value = entry.getValue();
 			if (value instanceof List) {
-				List list = (List) value;
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) value;
 				if (list.size() == 0)
 					continue;
 				Object component = list.get(0);

@@ -46,7 +46,7 @@ public interface Resolver {
 	 * against.  A <tt>null</tt> value indicates that the system properties should
 	 * be used to match against
 	 */
-	public void resolve(BundleDescription[] discard, Dictionary<String, String>[] platformProperties);
+	public void resolve(BundleDescription[] discard, Dictionary<Object, Object>[] platformProperties);
 
 	/**
 	 * Flushes this resolver of any stored/cached data it may be keeping to

@@ -24,11 +24,11 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
-	public BundleDescription createBundleDescription(Dictionary manifest, String location, long id) throws BundleException {
+	public BundleDescription createBundleDescription(Dictionary<String, String> manifest, String location, long id) throws BundleException {
 		return createBundleDescription(null, manifest, location, id);
 	}
 
-	public BundleDescription createBundleDescription(State state, Dictionary manifest, String location, long id) throws BundleException {
+	public BundleDescription createBundleDescription(State state, Dictionary<String, String> manifest, String location, long id) throws BundleException {
 		BundleDescriptionImpl result = (BundleDescriptionImpl) StateBuilder.createBundleDescription((StateImpl) state, manifest, location);
 		result.setBundleId(id);
 		return result;
@@ -200,7 +200,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return hostSpec;
 	}
 
-	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map directives, Map attributes, BundleDescription importer) {
+	public ImportPackageSpecification createImportPackageSpecification(String packageName, VersionRange versionRange, String bundleSymbolicName, VersionRange bundleVersionRange, Map<String, ?> directives, Map<String, ?> attributes, BundleDescription importer) {
 		ImportPackageSpecificationImpl packageSpec = new ImportPackageSpecificationImpl();
 		packageSpec.setName(packageName);
 		packageSpec.setVersionRange(versionRange);
@@ -227,7 +227,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return createExportPackageDescription(original.getName(), original.getVersion(), original.getDirectives(), original.getAttributes(), true, null);
 	}
 
-	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map directives, Map attributes, boolean root, BundleDescription exporter) {
+	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {
 		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
 		exportPackage.setName(packageName);
 		exportPackage.setVersion(version);
@@ -240,18 +240,18 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	/**
 	 * @deprecated
 	 */
-	public GenericDescription createGenericDescription(String name, String type, Version version, Map attributes) {
+	public GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes) {
 		return createGenericDescription(name, type, version, attributes, null, null);
 	}
 
-	public GenericDescription createGenericDescription(String type, Map attributes, Map directives, BundleDescription supplier) {
+	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
 		return createGenericDescription(null, type, null, attributes, directives, supplier);
 	}
 
-	private GenericDescription createGenericDescription(String name, String type, Version version, Map attributes, Map directives, BundleDescription supplier) {
+	private GenericDescription createGenericDescription(String name, String type, Version version, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier) {
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
 		result.setType(type);
-		Dictionary attrs = attributes == null ? new Hashtable() : new Hashtable(attributes);
+		Dictionary<String, Object> attrs = attributes == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(attributes);
 		if (version != null) {
 			Object versionObj = attrs.get(Constants.VERSION_ATTRIBUTE);
 			if (!(versionObj instanceof Version) && version != null)

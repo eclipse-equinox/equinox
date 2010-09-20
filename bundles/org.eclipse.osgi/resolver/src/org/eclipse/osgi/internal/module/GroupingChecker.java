@@ -40,7 +40,7 @@ public class GroupingChecker {
 		// must check resolved imports to get any dynamically resolved imports
 		ExportPackageDescription[] imports = bundle.getBundleDescription().getResolvedImports();
 		for (ExportPackageDescription importPkg : imports) {
-			ResolverExport[] exports = bundle.getResolver().getResolverExports().get(importPkg.getName());
+			List<ResolverExport> exports = bundle.getResolver().getResolverExports().get(importPkg.getName());
 			for (ResolverExport export : exports) {
 				if (export.getExportPackageDescription() == importPkg)
 					isConsistentInternal(bundle, export, true, null);
@@ -173,7 +173,7 @@ public class GroupingChecker {
 			for (ExportPackageDescription importPkg : imports) {
 				if (importPkg.getExporter() == bundle.getBundleDescription() || !importPkg.getName().equals(packageName))
 					continue;
-				ResolverExport[] exports = bundle.getResolver().getResolverExports().get(packageName);
+				List<ResolverExport> exports = bundle.getResolver().getResolverExports().get(packageName);
 				for (ResolverExport export : exports) {
 					if (export.getExportPackageDescription() == importPkg)
 						return getPackageRoots(export.getExporter(), packageName, visited);

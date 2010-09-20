@@ -21,7 +21,7 @@ import org.osgi.framework.wiring.Capability;
 /*
  * A companion to BundleDescription from the state used while resolving.
  */
-public class ResolverBundle extends VersionSupplier implements Comparable, BundleRevision {
+public class ResolverBundle extends VersionSupplier implements Comparable<ResolverBundle>, BundleRevision {
 	public static final int UNRESOLVED = 0;
 	public static final int RESOLVING = 1;
 	public static final int RESOLVED = 2;
@@ -48,7 +48,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	private final ResolverImpl resolver;
 	private boolean newFragmentExports;
 	private boolean newFragmentCapabilities;
-	private ArrayList refs;
+	private List<ResolverBundle> refs;
 
 	ResolverBundle(BundleDescription bundle, ResolverImpl resolver) {
 		super(bundle);
@@ -59,7 +59,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 
 	void initialize(boolean useSelectedExports) {
 		if (getBundleDescription().isSingleton())
-			refs = new ArrayList();
+			refs = new ArrayList<ResolverBundle>();
 		if (getBundleDescription().getHost() != null) {
 			host = new BundleConstraint(this, getBundleDescription().getHost());
 			exports = new ResolverExport[0];
@@ -114,13 +114,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	}
 
 	ResolverExport[] getExports(String name) {
-		ArrayList results = new ArrayList(1); // rare to have more than one
+		List<ResolverExport> results = new ArrayList<ResolverExport>(1); // rare to have more than one
 		// it is faster to ask the VersionHashMap for this package name and then compare the exporter to this
-		ResolverExport[] resolverExports = resolver.getResolverExports().get(name);
+		List<ResolverExport> resolverExports = resolver.getResolverExports().get(name);
 		for (ResolverExport export : resolverExports)
 			if (export.getExporter() == this)
 				results.add(export);
-		return (ResolverExport[]) results.toArray(new ResolverExport[results.size()]);
+		return results.toArray(new ResolverExport[results.size()]);
 	}
 
 	void clearWires() {
@@ -270,17 +270,17 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 
 	private void initFragments() {
 		if (fragments == null)
-			fragments = new ArrayList(1);
+			fragments = new ArrayList<ResolverBundle>(1);
 		if (fragmentExports == null)
-			fragmentExports = new HashMap(1);
+			fragmentExports = new HashMap<Long, List<ResolverExport>>(1);
 		if (fragmentImports == null)
-			fragmentImports = new HashMap(1);
+			fragmentImports = new HashMap<Long, List<ResolverImport>>(1);
 		if (fragmentRequires == null)
-			fragmentRequires = new HashMap(1);
+			fragmentRequires = new HashMap<Long, List<BundleConstraint>>(1);
 		if (fragmentGenericCapabilities == null)
-			fragmentGenericCapabilities = new HashMap(1);
+			fragmentGenericCapabilities = new HashMap<Long, List<GenericCapability>>(1);
 		if (fragmentGenericRequires == null)
-			fragmentGenericRequires = new HashMap(1);
+			fragmentGenericRequires = new HashMap<Long, List<GenericConstraint>>(1);
 	}
 
 	private boolean isImported(String packageName) {
@@ -321,8 +321,8 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		initFragments();
 		// need to make sure there is not already another version of this fragment 
 		// already attached to this host
-		for (Iterator iFragments = fragments.iterator(); iFragments.hasNext();) {
-			ResolverBundle existingFragment = (ResolverBundle) iFragments.next();
+		for (Iterator<ResolverBundle> iFragments = fragments.iterator(); iFragments.hasNext();) {
+			ResolverBundle existingFragment = iFragments.next();
 			String bsn = existingFragment.getName();
 			if (bsn != null && bsn.equals(fragment.getName()))
 				return;
@@ -333,7 +333,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		fragment.getHost().addPossibleSupplier(this);
 
 		if (newImports.length > 0) {
-			ArrayList<ResolverImport> hostImports = new ArrayList(newImports.length);
+			ArrayList<ResolverImport> hostImports = new ArrayList<ResolverImport>(newImports.length);
 			for (int i = 0; i < newImports.length; i++)
 				if (!isImported(newImports[i].getName()))
 					hostImports.add(new ResolverImport(this, newImports[i]));
@@ -341,7 +341,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		}
 
 		if (newRequires.length > 0) {
-			ArrayList<BundleConstraint> hostRequires = new ArrayList(newRequires.length);
+			ArrayList<BundleConstraint> hostRequires = new ArrayList<BundleConstraint>(newRequires.length);
 			for (int i = 0; i < newRequires.length; i++)
 				if (!isRequired(newRequires[i].getName()))
 					hostRequires.add(new BundleConstraint(this, newRequires[i]));
@@ -349,13 +349,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		}
 
 		if (newGenericRequires.length > 0) {
-			ArrayList hostGenericRequires = new ArrayList(newGenericRequires.length);
+			ArrayList<GenericConstraint> hostGenericRequires = new ArrayList<GenericConstraint>(newGenericRequires.length);
 			for (int i = 0; i < newGenericRequires.length; i++)
 				hostGenericRequires.add(new GenericConstraint(this, newGenericRequires[i]));
 			fragmentGenericRequires.put(fragment.bundleID, hostGenericRequires);
 		}
 
-		ArrayList<ResolverExport> hostExports = new ArrayList(newExports.length);
+		ArrayList<ResolverExport> hostExports = new ArrayList<ResolverExport>(newExports.length);
 		if (newExports.length > 0 && dynamicAttach) {
 			StateObjectFactory factory = resolver.getState().getFactory();
 			for (int i = 0; i < newExports.length; i++) {
@@ -377,11 +377,11 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		if (newGenericCapabilities.length > 0 && dynamicAttach) {
 			StateObjectFactory factory = resolver.getState().getFactory();
 			for (GenericDescription capability : newGenericCapabilities) {
-				Dictionary origAttrs = capability.getAttributes();
-				Map attrs = new HashMap();
+				Dictionary<String, Object> origAttrs = capability.getAttributes();
+				Map<String, Object> attrs = new HashMap<String, Object>();
 				if (origAttrs != null) {
-					for (Enumeration keys = origAttrs.keys(); keys.hasMoreElements();) {
-						Object key = keys.nextElement();
+					for (Enumeration<String> keys = origAttrs.keys(); keys.hasMoreElements();) {
+						String key = keys.nextElement();
 						attrs.put(key, origAttrs.get(key));
 					}
 				}
@@ -409,15 +409,15 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 		return true;
 	}
 
-	public static boolean equivalentMaps(Map existingDirectives, Map newDirectives, boolean exactMatch) {
+	public static boolean equivalentMaps(Map<String, Object> existingDirectives, Map<String, Object> newDirectives, boolean exactMatch) {
 		if (existingDirectives == null && newDirectives == null)
 			return true;
 		if (existingDirectives == null ? newDirectives != null : newDirectives == null)
 			return false;
 		if (exactMatch && existingDirectives.size() != newDirectives.size())
 			return false;
-		for (Iterator entries = existingDirectives.entrySet().iterator(); entries.hasNext();) {
-			Entry entry = (Entry) entries.next();
+		for (Iterator<Entry<String, Object>> entries = existingDirectives.entrySet().iterator(); entries.hasNext();) {
+			Entry<String, Object> entry = entries.next();
 			Object newValue = newDirectives.get(entry.getKey());
 			if (newValue == null || entry.getValue().getClass() != newValue.getClass())
 				return false;
@@ -500,20 +500,20 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			// we need to check the remaining fragment constraints to make sure they do not have
 			// the same unresolved constraint.
 			for (ResolverBundle remainingFrag : fragments) {
-				ArrayList additionalImports = new ArrayList(0);
-				ArrayList additionalRequires = new ArrayList(0);
+				List<ResolverImport> additionalImports = new ArrayList<ResolverImport>(0);
+				List<BundleConstraint> additionalRequires = new ArrayList<BundleConstraint>(0);
 				if (hasUnresolvedConstraint(reason, fragment, remainingFrag, oldImports, oldRequires, additionalImports, additionalRequires))
 					continue;
 				// merge back the additional imports or requires which the detached fragment has in common with the remaining fragment
 				if (additionalImports.size() > 0) {
-					ArrayList remainingImports = (ArrayList) fragmentImports.get(remainingFrag.bundleID);
+					List<ResolverImport> remainingImports = fragmentImports.get(remainingFrag.bundleID);
 					if (remainingImports == null)
 						fragmentImports.put(remainingFrag.bundleID, additionalImports);
 					else
 						remainingImports.addAll(additionalImports);
 				}
 				if (additionalRequires.size() > 0) {
-					ArrayList remainingRequires = (ArrayList) fragmentRequires.get(remainingFrag.bundleID);
+					List<BundleConstraint> remainingRequires = fragmentRequires.get(remainingFrag.bundleID);
 					if (remainingRequires == null)
 						fragmentRequires.put(remainingFrag.bundleID, additionalRequires);
 					else
@@ -530,7 +530,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 			resolver.removeGenerics(removedCapabilities.toArray(new GenericCapability[removedCapabilities.size()]));
 	}
 
-	private boolean hasUnresolvedConstraint(ResolverConstraint reason, ResolverBundle detachedFragment, ResolverBundle remainingFragment, ResolverImport[] oldImports, BundleConstraint[] oldRequires, ArrayList additionalImports, ArrayList additionalRequires) {
+	private boolean hasUnresolvedConstraint(ResolverConstraint reason, ResolverBundle detachedFragment, ResolverBundle remainingFragment, ResolverImport[] oldImports, BundleConstraint[] oldRequires, List<ResolverImport> additionalImports, List<BundleConstraint> additionalRequires) {
 		ImportPackageSpecification[] remainingFragImports = remainingFragment.getBundleDescription().getImportPackages();
 		BundleSpecification[] remainingFragRequires = remainingFragment.getBundleDescription().getRequiredBundles();
 		VersionConstraint[] constraints;
@@ -626,9 +626,9 @@ public class ResolverBundle extends VersionSupplier implements Comparable, Bundl
 	 * If the other BSN is null then -1 is returned
 	 * otherwise String.compareTo is used
 	 */
-	public int compareTo(Object o) {
+	public int compareTo(ResolverBundle o) {
 		String bsn = getName();
-		String otherBsn = ((ResolverBundle) o).getName();
+		String otherBsn = o.getName();
 		if (bsn == null)
 			return otherBsn == null ? 0 : 1;
 		return otherBsn == null ? -1 : bsn.compareTo(otherBsn);

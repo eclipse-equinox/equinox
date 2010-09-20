@@ -18,12 +18,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 public class GenericDescriptionImpl extends BaseDescriptionImpl implements GenericDescription {
-	private Dictionary attributes;
+	private Dictionary<String, Object> attributes;
 	private volatile BundleDescription supplier;
 	private volatile String type = GenericDescription.DEFAULT_TYPE;
 	private Map<String, String> directives;
 
-	public Dictionary getAttributes() {
+	public Dictionary<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
 		}
@@ -33,7 +33,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		return supplier;
 	}
 
-	void setAttributes(Dictionary attributes) {
+	void setAttributes(Dictionary<String, Object> attributes) {
 		synchronized (this.monitor) {
 			this.attributes = attributes;
 		}
@@ -52,7 +52,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(Constants.PROVIDE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$
-		Map attrs = getDeclaredAttributes();
+		Map<String, Object> attrs = getDeclaredAttributes();
 		sb.append(toString(attrs, false));
 		return sb.toString();
 	}
@@ -86,6 +86,7 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 		return version instanceof Version ? (Version) version : super.getVersion();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, String> getDeclaredDirectives() {
 		synchronized (this.monitor) {
 			if (directives == null)
@@ -96,13 +97,13 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	public Map<String, Object> getDeclaredAttributes() {
 		synchronized (this.monitor) {
-			Map<String, Object> result = new HashMap(5);
+			Map<String, Object> result = new HashMap<String, Object>(5);
 			if (attributes != null)
-				for (Enumeration keys = attributes.keys(); keys.hasMoreElements();) {
-					String key = (String) keys.nextElement();
+				for (Enumeration<String> keys = attributes.keys(); keys.hasMoreElements();) {
+					String key = keys.nextElement();
 					Object value = attributes.get(key);
 					if (value instanceof List)
-						value = Collections.unmodifiableList((List) value);
+						value = Collections.unmodifiableList((List<Object>) value);
 					result.put(key, value);
 				}
 			return Collections.unmodifiableMap(result);

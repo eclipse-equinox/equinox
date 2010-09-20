@@ -56,12 +56,14 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		State containingState = getBundle().getContainingState();
 		if (containingState == null)
 			return false;
-		Dictionary[] platformProps = containingState.getPlatformProperties();
+		Dictionary<Object, Object>[] platformProps = containingState.getPlatformProperties();
 		NativeCodeDescription nativeSupplier = (NativeCodeDescription) supplier;
 		Filter filter = nativeSupplier.getFilter();
 		boolean match = false;
 		for (int i = 0; i < platformProps.length && !match; i++) {
-			if (filter != null && !filter.matchCase(platformProps[i]))
+			@SuppressWarnings("rawtypes")
+			Dictionary props = platformProps[i];
+			if (filter != null && !filter.matchCase(props))
 				continue;
 			String[] osNames = nativeSupplier.getOSNames();
 			if (osNames.length == 0)
@@ -71,7 +73,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 				Object aliasedPlatformOS = platformOS == null || !(platformOS instanceof String) ? platformOS : aliasMapper.aliasOSName((String) platformOS);
 				Object[] platformOSes;
 				if (aliasedPlatformOS instanceof Collection)
-					platformOSes = ((Collection) aliasedPlatformOS).toArray();
+					platformOSes = ((Collection<?>) aliasedPlatformOS).toArray();
 				else
 					platformOSes = aliasedPlatformOS == null ? new Object[0] : new Object[] {aliasedPlatformOS};
 				for (int j = 0; j < osNames.length && !match; j++) {
@@ -81,7 +83,7 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 							if (platformOSes[k].equals(aliasedName))
 								match = true;
 						} else {
-							for (Iterator iAliases = ((Collection) aliasedName).iterator(); iAliases.hasNext() && !match;)
+							for (Iterator<?> iAliases = ((Collection<?>) aliasedName).iterator(); iAliases.hasNext() && !match;)
 								if (platformOSes[k].equals(iAliases.next()))
 									match = true;
 						}

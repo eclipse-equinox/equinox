@@ -20,11 +20,11 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	private String resolution = ImportPackageSpecification.RESOLUTION_STATIC; // the default is static
 	private String symbolicName;
 	private VersionRange bundleVersionRange;
-	private Map attributes;
+	private Map<String, Object> attributes;
 
-	public Map getDirectives() {
+	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
-			Map result = new HashMap(5);
+			Map<String, Object> result = new HashMap<String, Object>(5);
 			if (resolution != null)
 				result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
 			return result;
@@ -47,7 +47,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
-	public void setDirectives(Map directives) {
+	public void setDirectives(Map<String, ?> directives) {
 		synchronized (this.monitor) {
 			if (directives == null)
 				return;
@@ -73,7 +73,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
-	public Map getAttributes() {
+	public Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
 			return attributes;
 		}
@@ -120,13 +120,13 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		if (getVersionRange() != null && !getVersionRange().isIncluded(pkgDes.getVersion()))
 			return false;
 
-		Map importAttrs = getAttributes();
+		Map<String, ?> importAttrs = getAttributes();
 		if (importAttrs != null) {
-			Map exportAttrs = pkgDes.getAttributes();
+			Map<String, ?> exportAttrs = pkgDes.getAttributes();
 			if (exportAttrs == null)
 				return false;
-			for (Iterator i = importAttrs.keySet().iterator(); i.hasNext();) {
-				String importKey = (String) i.next();
+			for (Iterator<String> i = importAttrs.keySet().iterator(); i.hasNext();) {
+				String importKey = i.next();
 				Object importValue = importAttrs.get(importKey);
 				Object exportValue = exportAttrs.get(importKey);
 				if (exportValue == null || !importValue.equals(exportValue))
@@ -172,9 +172,10 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
-	protected void setAttributes(Map attributes) {
+	@SuppressWarnings("unchecked")
+	protected void setAttributes(Map<String, ?> attributes) {
 		synchronized (this.monitor) {
-			this.attributes = attributes;
+			this.attributes = (Map<String, Object>) attributes;
 		}
 	}
 

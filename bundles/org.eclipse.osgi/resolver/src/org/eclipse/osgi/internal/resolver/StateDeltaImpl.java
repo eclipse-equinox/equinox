@@ -22,7 +22,7 @@ final class StateDeltaImpl implements StateDelta {
 
 	private final State state;
 
-	private final Map changes = new HashMap();
+	private final Map<BundleDescription, BundleDelta> changes = new HashMap<BundleDescription, BundleDelta>();
 
 	public StateDeltaImpl(State state) {
 		this.state = state;
@@ -30,19 +30,19 @@ final class StateDeltaImpl implements StateDelta {
 
 	public BundleDelta[] getChanges() {
 		synchronized (this.changes) {
-			return (BundleDelta[]) changes.values().toArray(new BundleDelta[changes.size()]);
+			return changes.values().toArray(new BundleDelta[changes.size()]);
 		}
 	}
 
 	public BundleDelta[] getChanges(int mask, boolean exact) {
 		synchronized (this.changes) {
-			List result = new ArrayList();
-			for (Iterator changesIter = changes.values().iterator(); changesIter.hasNext();) {
-				BundleDelta change = (BundleDelta) changesIter.next();
+			List<BundleDelta> result = new ArrayList<BundleDelta>();
+			for (Iterator<BundleDelta> changesIter = changes.values().iterator(); changesIter.hasNext();) {
+				BundleDelta change = changesIter.next();
 				if (mask == change.getType() || (!exact && (change.getType() & mask) != 0))
 					result.add(change);
 			}
-			return (BundleDelta[]) result.toArray(new BundleDelta[result.size()]);
+			return result.toArray(new BundleDelta[result.size()]);
 		}
 	}
 

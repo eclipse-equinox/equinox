@@ -53,13 +53,13 @@ public interface ImportPackageSpecification extends VersionConstraint {
 	 * Returns the arbitrary attributes which this import package may be resolved to.
 	 * @return the arbitrary attributes which this import package may be resolved to.
 	 */
-	public Map<String, String> getAttributes();
+	public Map<String, Object> getAttributes();
 
 	/**
 	 * Returns the directives that control this import package.
 	 * @return the directives that control this import package.
 	 */
-	public Map<String, String> getDirectives();
+	public Map<String, Object> getDirectives();
 
 	/**
 	 * Returns the specified directive that control this import package.

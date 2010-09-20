@@ -32,13 +32,13 @@ final class StateReader {
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE_LAZY = 4096;
 	private static final int BUFFER_SIZE_FULLYREAD = 16384;
-	private static final SecureAction secureAction = (SecureAction) AccessController.doPrivileged(SecureAction.createSecureAction());
+	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	// objectTable will be a hashmap of objects. The objects will be things
 	// like BundleDescription, ExportPackageDescription, Version etc.. The integer
 	// index value will be used in the cache to allow cross-references in the
 	// cached state.
-	final Map objectTable = Collections.synchronizedMap(new HashMap());
+	final Map<Integer, Object> objectTable = Collections.synchronizedMap(new HashMap<Integer, Object>());
 
 	private volatile File stateFile;
 	private volatile File lazyFile;
@@ -47,7 +47,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 33;
+	public static final byte STATE_CACHE_VERSION = 34;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -97,9 +97,9 @@ final class StateReader {
 			String[] platformPropKeys = (String[]) readPlatformProp(in);
 			state.addPlatformPropertyKeys(platformPropKeys);
 			int numSets = in.readInt();
-			Dictionary[] platformProps = new Dictionary[numSets];
+			Dictionary<?, ?>[] platformProps = new Dictionary[numSets];
 			for (int i = 0; i < numSets; i++) {
-				Hashtable props = new Hashtable(platformPropKeys.length);
+				Hashtable<Object, Object> props = new Hashtable<Object, Object>(platformPropKeys.length);
 				int numProps = in.readInt();
 				for (int j = 0; j < numProps; j++) {
 					Object value = readPlatformProp(in);
@@ -157,9 +157,9 @@ final class StateReader {
 		String[] platformPropKeys = (String[]) readPlatformProp(in);
 		state.addPlatformPropertyKeys(platformPropKeys);
 		int numSets = in.readInt();
-		Dictionary[] platformProps = new Dictionary[numSets];
+		Dictionary<?, ?>[] platformProps = new Dictionary[numSets];
 		for (int i = 0; i < numSets; i++) {
-			Hashtable props = new Hashtable(platformPropKeys.length);
+			Hashtable<Object, Object> props = new Hashtable<Object, Object>(platformPropKeys.length);
 			int numProps = in.readInt();
 			for (int j = 0; j < numProps; j++) {
 				Object value = readPlatformProp(in);
@@ -324,7 +324,7 @@ final class StateReader {
 
 		int dynamicPkgCnt = in.readInt();
 		if (dynamicPkgCnt > 0) {
-			HashMap dynamicStamps = new HashMap(dynamicPkgCnt);
+			HashMap<String, Long> dynamicStamps = new HashMap<String, Long>(dynamicPkgCnt);
 			for (int i = 0; i < dynamicPkgCnt; i++) {
 				String pkg = readString(in, false);
 				Long stamp = new Long(in.readLong());
@@ -403,11 +403,11 @@ final class StateReader {
 		return new DisabledInfo(readString(in, false), readString(in, false), readBundleDescription(in));
 	}
 
-	private Map readMap(DataInputStream in) throws IOException {
+	private Map<String, Object> readMap(DataInputStream in) throws IOException {
 		int count = in.readInt();
 		if (count == 0)
 			return null;
-		HashMap result = new HashMap(count);
+		HashMap<String, Object> result = new HashMap<String, Object>(count);
 		for (int i = 0; i < count; i++) {
 			String key = readString(in, false);
 			Object value = null;
@@ -429,8 +429,8 @@ final class StateReader {
 			else if (type == 7) {
 				value = readString(in, false);
 				try {
-					Class uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
-					Constructor constructor = uriClazz.getConstructor(new Class[] {String.class});
+					Class<?> uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
+					Constructor<?> constructor = uriClazz.getConstructor(new Class[] {String.class});
 					value = constructor.newInstance(new Object[] {value});
 				} catch (ClassNotFoundException e) {
 					// oh well cannot support; just use the string
@@ -439,6 +439,32 @@ final class StateReader {
 				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
+			} else if (type == 8) {
+				int listType = in.readByte();
+				int size = in.readInt();
+				List<Object> list = new ArrayList<Object>(size);
+				for (int j = 0; j < size; j++) {
+					switch (listType) {
+						case 0 :
+							list.add(readString(in, false));
+							break;
+						case 3 :
+							list.add(new Integer(in.readInt()));
+							break;
+						case 4 :
+							list.add(new Long(in.readLong()));
+							break;
+						case 5 :
+							list.add(new Double(in.readDouble()));
+							break;
+						case 6 :
+							list.add(readVersion(in));
+							break;
+						default :
+							throw new IOException("Invalid type: " + listType); //$NON-NLS-1$
+					}
+				}
+				value = list;
 			}
 			result.put(key, value);
 		}
@@ -499,11 +525,11 @@ final class StateReader {
 		readBaseDescription(result, in);
 		result.setSupplier(readBundleDescription(in));
 		result.setType(readString(in, false));
-		Map mapAttrs = readMap(in);
-		Dictionary attrs = new Hashtable();
+		Map<String, Object> mapAttrs = readMap(in);
+		Dictionary<String, Object> attrs = new Hashtable<String, Object>();
 		if (mapAttrs != null) {
-			for (Iterator keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
-				Object key = keys.next();
+			for (Iterator<String> keys = mapAttrs.keySet().iterator(); keys.hasNext();) {
+				String key = keys.next();
 				attrs.put(key, mapAttrs.get(key));
 			}
 		}
@@ -688,7 +714,7 @@ final class StateReader {
 		try {
 			in = openLazyFile();
 			// get the set of bundles that must be loaded according to dependencies
-			ArrayList toLoad = new ArrayList();
+			List<BundleDescriptionImpl> toLoad = new ArrayList<BundleDescriptionImpl>();
 			addDependencies(target, toLoad);
 			int skipBytes[] = getSkipBytes(toLoad);
 			// look for the lazy data of the toLoad list
@@ -700,14 +726,14 @@ final class StateReader {
 		}
 	}
 
-	private void addDependencies(BundleDescriptionImpl target, List toLoad) {
+	private void addDependencies(BundleDescriptionImpl target, List<BundleDescriptionImpl> toLoad) {
 		if (toLoad.contains(target) || target.isFullyLoaded())
 			return;
-		Iterator load = toLoad.iterator();
+		Iterator<BundleDescriptionImpl> load = toLoad.iterator();
 		int i = 0;
 		while (load.hasNext()) {
 			// insert the target into the list sorted by lazy data offsets
-			BundleDescriptionImpl bundle = (BundleDescriptionImpl) load.next();
+			BundleDescriptionImpl bundle = load.next();
 			if (target.getLazyDataOffset() < bundle.getLazyDataOffset())
 				break;
 			i++;
@@ -716,28 +742,28 @@ final class StateReader {
 			toLoad.add(target);
 		else
 			toLoad.add(i, target);
-		List deps = target.getBundleDependencies();
-		for (Iterator iter = deps.iterator(); iter.hasNext();)
+		List<BundleDescription> deps = target.getBundleDependencies();
+		for (Iterator<BundleDescription> iter = deps.iterator(); iter.hasNext();)
 			addDependencies((BundleDescriptionImpl) iter.next(), toLoad);
 	}
 
-	private int[] getSkipBytes(ArrayList toLoad) {
+	private int[] getSkipBytes(List<BundleDescriptionImpl> toLoad) {
 		int[] skipBytes = new int[toLoad.size()];
 		for (int i = 0; i < skipBytes.length; i++) {
-			BundleDescriptionImpl current = (BundleDescriptionImpl) toLoad.get(i);
+			BundleDescriptionImpl current = toLoad.get(i);
 			if (i == 0) {
 				skipBytes[i] = current.getLazyDataOffset();
 				continue;
 			}
-			BundleDescriptionImpl previous = (BundleDescriptionImpl) toLoad.get(i - 1);
+			BundleDescriptionImpl previous = toLoad.get(i - 1);
 			skipBytes[i] = current.getLazyDataOffset() - previous.getLazyDataOffset() - previous.getLazyDataSize();
 		}
 		return skipBytes;
 	}
 
 	void flushLazyObjectCache() {
-		for (Iterator entries = objectTable.entrySet().iterator(); entries.hasNext();) {
-			Map.Entry entry = (Entry) entries.next();
+		for (Iterator<Entry<Integer, Object>> entries = objectTable.entrySet().iterator(); entries.hasNext();) {
+			Map.Entry<Integer, Object> entry = entries.next();
 			if (entry.getValue() instanceof ExportPackageDescription || entry.getValue() instanceof GenericDescription)
 				entries.remove();
 		}

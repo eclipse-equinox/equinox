@@ -11,25 +11,24 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
-public class VersionHashMap<V extends VersionSupplier> extends MappedList<String, V> implements Comparator {
+public class VersionHashMap<V extends VersionSupplier> extends MappedList<String, V> implements Comparator<V> {
 	private final ResolverImpl resolver;
 	private final boolean preferSystemPackages;
 
-	public VersionHashMap(ResolverImpl resolver, Class<V> valueClass) {
-		super(valueClass);
+	public VersionHashMap(ResolverImpl resolver) {
 		this.resolver = resolver;
 		preferSystemPackages = Boolean.valueOf(ResolverImpl.secureAction.getProperty("osgi.resolver.preferSystemPackages", "true")).booleanValue(); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	// assumes existing array is sorted
 	// finds the index where to insert the new value
-	protected int insertionIndex(V[] existing, V value) {
-		int index = existing.length;
-		if (compare(existing[existing.length - 1], value) > 0) {
-			index = Arrays.binarySearch(existing, value, this);
+	protected int insertionIndex(List<V> existing, V value) {
+		int index = existing.size();
+		if (compare(existing.get(existing.size() - 1), value) > 0) {
+			index = Collections.binarySearch(existing, value, this);
+
 			if (index < 0)
 				index = -index - 1;
 		}
@@ -46,32 +45,18 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	}
 
 	private V contains(V vs, boolean remove) {
-		Object existing = internal.get(vs.getName());
+		List<V> existing = internal.get(vs.getName());
 		if (existing == null)
 			return null;
-		if (existing == vs) {
-			if (remove)
-				internal.remove(vs.getName());
+		int index = existing.indexOf(vs);
+		if (index >= 0) {
+			if (remove) {
+				existing.remove(index);
+				if (existing.size() == 0)
+					internal.remove(vs.getName());
+			}
 			return vs;
 		}
-		if (!existing.getClass().isArray())
-			return null;
-		Object[] existingValues = (Object[]) existing;
-		for (int i = 0; i < existingValues.length; i++)
-			if (existingValues[i] == vs) {
-				if (remove) {
-					if (existingValues.length == 2) {
-						internal.put(vs.getName(), existingValues[i == 0 ? 1 : 0]);
-						return vs;
-					}
-					V[] newExisting = (V[]) Array.newInstance(valueClass, existingValues.length - 1);
-					System.arraycopy(existingValues, 0, newExisting, 0, i);
-					if (i + 1 < existingValues.length)
-						System.arraycopy(existingValues, i + 1, newExisting, i, existingValues.length - i - 1);
-					internal.put(vs.getName(), newExisting);
-				}
-				return vs;
-			}
 		return null;
 	}
 
@@ -87,11 +72,10 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	// Once we have resolved bundles, we need to make sure that version suppliers
 	// from the resolved bundles are ahead of those from unresolved bundles
 	void reorder() {
-		for (Iterator it = internal.values().iterator(); it.hasNext();) {
-			Object existing = it.next();
-			if (!existing.getClass().isArray())
-				continue;
-			Arrays.sort((Object[]) existing, this);
+		for (Iterator<List<V>> it = internal.values().iterator(); it.hasNext();) {
+			List<V> existing = it.next();
+			if (existing.size() > 0)
+				Collections.sort(existing, this);
 		}
 	}
 
@@ -100,11 +84,7 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	// First the resolution status of the supplying bundle.
 	// Second is the supplier version.
 	// Third is the bundle id of the supplying bundle.
-	public int compare(Object o1, Object o2) {
-		if (!(o1 instanceof VersionSupplier) || !(o2 instanceof VersionSupplier))
-			throw new IllegalArgumentException();
-		VersionSupplier vs1 = (VersionSupplier) o1;
-		VersionSupplier vs2 = (VersionSupplier) o2;
+	public int compare(V vs1, V vs2) {
 		// if the selection policy is set then use that
 		if (resolver.getSelectionPolicy() != null)
 			return resolver.getSelectionPolicy().compare(vs1.getBaseDescription(), vs2.getBaseDescription());

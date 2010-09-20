@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /*
@@ -20,63 +19,43 @@ import java.util.*;
  */
 public class MappedList<K, V> {
 	// the mapping with key -> Object[] mapping
-	protected final HashMap<K, Object> internal = new HashMap();
-	protected final Class<V> valueClass;
-	protected final V[] empty;
-
-	public MappedList(Class<V> valueClass) {
-		this.valueClass = valueClass;
-		empty = (V[]) Array.newInstance(valueClass, 0);
-	}
+	protected final HashMap<K, List<V>> internal = new HashMap<K, List<V>>();
+	@SuppressWarnings("unchecked")
+	protected final List<V> empty = Collections.EMPTY_LIST;
 
 	public void put(K key, V value) {
-		Object existing = internal.get(key);
+		List<V> existing = internal.get(key);
 		if (existing == null) {
-			internal.put(key, value);
-		} else {
-			V[] existingValues;
-			if (existing.getClass().isArray()) {
-				existingValues = (V[]) existing;
-			} else {
-				existingValues = (V[]) Array.newInstance(valueClass, 1);
-				existingValues[0] = (V) existing;
-			}
-			// insert the new value
-			int index = insertionIndex(existingValues, value);
-			V[] newValues = (V[]) Array.newInstance(valueClass, existingValues.length + 1);
-			System.arraycopy(existingValues, 0, newValues, 0, index);
-			newValues[index] = value;
-			System.arraycopy(existingValues, index, newValues, index + 1, existingValues.length - index);
-			internal.put(key, newValues); // overwrite the old values in the map
+			existing = new ArrayList<V>(1);
+			existing.add(value);
+			internal.put(key, existing);
+			return;
 		}
+		// insert the new value
+		int index = insertionIndex(existing, value);
+		existing.add(index, value);
 	}
 
-	protected int insertionIndex(V[] existing, V value) {
+	protected int insertionIndex(List<V> existing, V value) {
 		// a MappedList is by default not sorted so just insert at the end
 		// extending classes may override this method to provide an index that retains sorted order
-		return existing.length;
+		return existing.size();
 	}
 
 	// removes all values with the specified key
-	public V[] remove(K key) {
+	public List<V> remove(K key) {
 		return get(key, true);
 	}
 
 	// gets all values with the specified key
-	public V[] get(K key) {
+	public List<V> get(K key) {
 		return get(key, false);
 	}
 
 	// gets all values with the specified and optionally removes them
-	private V[] get(K key, boolean remove) {
-		Object result = remove ? internal.remove(key) : internal.get(key);
-		if (result != null && result.getClass().isArray())
-			return (V[]) result;
-		if (result == null)
-			return empty;
-		V[] singleValue = (V[]) Array.newInstance(valueClass, 1);
-		singleValue[0] = (V) result;
-		return singleValue;
+	private List<V> get(K key, boolean remove) {
+		List<V> result = remove ? internal.remove(key) : internal.get(key);
+		return result == null ? empty : result;
 	}
 
 	// returns the number of keyed lists
@@ -85,21 +64,14 @@ public class MappedList<K, V> {
 	}
 
 	// returns all values of all keys
-	public V[] getAllValues() {
+	public List<V> getAllValues() {
 		if (getSize() == 0)
 			return empty;
-		ArrayList<V> results = new ArrayList(getSize());
-		Iterator iter = internal.values().iterator();
-		while (iter.hasNext()) {
-			Object value = iter.next();
-			if (value.getClass().isArray()) {
-				Object[] values = (Object[]) value;
-				for (int i = 0; i < values.length; i++)
-					results.add((V) values[i]);
-			} else
-				results.add((V) value);
-		}
-		return results.toArray(empty);
+		ArrayList<V> results = new ArrayList<V>(getSize());
+		Iterator<List<V>> iter = internal.values().iterator();
+		while (iter.hasNext())
+			results.addAll(iter.next());
+		return results;
 	}
 
 	// removes all keys from the map
