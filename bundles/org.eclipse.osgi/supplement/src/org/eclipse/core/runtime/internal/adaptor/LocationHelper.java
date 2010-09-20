@@ -24,6 +24,7 @@ public class LocationHelper {
 	 * @param trailingSlash flag to indicate a trailing slash on the spec
 	 * @return a URL
 	 */
+	@SuppressWarnings("deprecation")
 	public static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
