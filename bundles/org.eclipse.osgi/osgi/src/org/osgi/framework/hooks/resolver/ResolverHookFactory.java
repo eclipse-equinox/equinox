@@ -32,7 +32,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @ThreadSafe
  * @see ResolverHook
- * @version $Id: 18ea1ec1f14f47410a43e99be4da3b2583149722 $
+ * @version $Id: a84725caa3af079a556ac042e926dac6da0366ee $
  */
 public interface ResolverHookFactory {
 	/**
@@ -78,6 +78,8 @@ public interface ResolverHookFactory {
 	 * This collection may be empty if the collection of trigger bundles cannot be
 	 * determined.
 	 * @return a resolver hook instance to be used for the duration of the resolve process.
+	 * A {@code null} value may be returned which indicates this resolver hook factory abstains from
+	 * the resolve process.
 	 */
 	ResolverHook begin(Collection<BundleRevision> triggers);
 }

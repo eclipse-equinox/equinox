@@ -32,7 +32,7 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Id: ad1058a00e2bcb6e6c39b1acc2c657eacc972f84 $
+ * @version $Id: dd5f95820ef8e87bd521e13dec86ff36da33456e $
  */
 
 public class BundleException extends Exception {
@@ -102,8 +102,12 @@ public class BundleException extends Exception {
 	public static final int	NATIVECODE_ERROR		= 8;
 
 	/**
-	 * The install or update operation failed because another 
-	 * already installed bundle has the same symbolic name and version.
+	 * The install or update operation failed because another already installed
+	 * bundle has the same symbolic name and version. This exception type will
+	 * only occur if the framework is configured to only allow a single bundle
+	 * to be installed for a given symbolic name and version.
+	 * 
+	 * @see Constants#FRAMEWORK_BSNVERSION
 	 * @since 1.5
 	 */
 	public static final int	DUPLICATE_BUNDLE_ERROR	= 9;

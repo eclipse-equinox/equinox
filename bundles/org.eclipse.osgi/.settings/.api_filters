@@ -511,6 +511,24 @@
 <message_argument value="FILTER_ATTRIBUTE"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore OSGi API" id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_BSNVERSION"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="403767336">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
+<message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
+</message_arguments>
+</filter>
 <filter id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
@@ -633,6 +651,27 @@
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="FILTER_ATTRIBUTE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_BSNVERSION"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
 </message_arguments>
 </filter>
 <filter id="1209008130">

@@ -105,7 +105,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @see ResolverHookFactory
  * @ThreadSafe
- * @version $Id: e896c443a68b3ea287735c9c19f0b1c62bd4755d $
+ * @version $Id: 49bcead9ff37ad2c864c0b0f2ca510f0be04f835 $
  */
 public interface ResolverHook {
 	/**
