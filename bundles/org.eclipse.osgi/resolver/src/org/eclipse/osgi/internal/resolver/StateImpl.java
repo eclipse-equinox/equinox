@@ -25,6 +25,8 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.BundleRevision;
 
 public abstract class StateImpl implements State {
 	private static final String OSGI_OS = "osgi.os"; //$NON-NLS-1$
@@ -54,6 +56,7 @@ public abstract class StateImpl implements State {
 	private Dictionary<Object, Object>[] platformProperties = new Dictionary[] {new Hashtable<String, String>(PROPS.length)}; // Dictionary here because of Filter API
 	private long highestBundleId = -1;
 	private final Set<String> platformPropertyKeys = new HashSet<String>(PROPS.length);
+	private ResolverHookFactory hookFactory;
 	private ResolverHook hook;
 
 	private static long cumulativeTime;
@@ -426,17 +429,15 @@ public abstract class StateImpl implements State {
 		bundle.removeDependencies();
 	}
 
-	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve) {
+	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve, BundleDescription[] triggers) {
 		synchronized (this.monitor) {
 			if (resolver == null)
 				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
 			if (resolving == true)
 				throw new IllegalStateException("An attempt to start a nested resolve process has been detected."); //$NON-NLS-1$
-			ResolverHook currentHook = getResolverHook();
+			ResolverHook currentHook = null;
 			try {
 				resolving = true;
-				if (currentHook != null)
-					currentHook.begin();
 				fullyLoad();
 				long start = 0;
 				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
@@ -450,12 +451,21 @@ public abstract class StateImpl implements State {
 						reResolve = mergeBundles(reResolve, removed);
 					}
 					flush(reResolve);
-				}
-				if (resolved && reResolve == null)
-					return new StateDeltaImpl(this);
-				if (removalPendings.size() > 0) {
-					BundleDescription[] removed = internalGetRemovalPending();
-					reResolve = mergeBundles(reResolve, removed);
+				} else {
+					if (resolved && reResolve == null)
+						return new StateDeltaImpl(this);
+					if (reResolve == null)
+						reResolve = internalGetRemovalPending();
+					if (triggers == null) {
+						Set<BundleDescription> triggerSet = new HashSet<BundleDescription>();
+						Collection<BundleDescription> closure = getDependencyClosure(Arrays.asList(reResolve));
+						for (BundleDescription toRefresh : closure) {
+							Bundle bundle = toRefresh.getBundle();
+							if (bundle != null && (bundle.getState() & (Bundle.INSTALLED | Bundle.UNINSTALLED | Bundle.RESOLVED)) == 0)
+								triggerSet.add(toRefresh);
+						}
+						triggers = triggerSet.toArray(new BundleDescription[triggerSet.size()]);
+					}
 				}
 				// use the Headers class to handle ignoring case while matching keys (bug 180817)
 				@SuppressWarnings("unchecked")
@@ -466,6 +476,13 @@ public abstract class StateImpl implements State {
 						Object key = keys.nextElement();
 						tmpPlatformProperties[i].put(key, platformProperties[i].get(key));
 					}
+				}
+
+				ResolverHookFactory currentFactory = hookFactory;
+				if (currentFactory != null) {
+					@SuppressWarnings("unchecked")
+					Collection<BundleRevision> triggerRevisions = Collections.unmodifiableCollection(triggers == null ? Collections.EMPTY_LIST : Arrays.asList((BundleRevision[]) triggers));
+					currentHook = begin(triggerRevisions);
 				}
 				resolver.resolve(reResolve, tmpPlatformProperties);
 				resolved = removalPendings.size() == 0;
@@ -526,25 +543,44 @@ public abstract class StateImpl implements State {
 	}
 
 	public StateDelta resolve() {
-		return resolve(true, null);
+		return resolve(true, null, null);
 	}
 
 	public StateDelta resolve(boolean incremental) {
-		return resolve(incremental, null);
+		return resolve(incremental, null, null);
 	}
 
 	public StateDelta resolve(BundleDescription[] reResolve) {
-		return resolve(true, reResolve);
+		return resolve(true, reResolve, null);
 	}
 
+	public StateDelta resolve(BundleDescription[] resolve, boolean discard) {
+		BundleDescription[] reResolve = discard ? resolve : new BundleDescription[0];
+		BundleDescription[] triggers = discard ? null : resolve;
+		return resolve(true, reResolve, triggers);
+	}
+
+	@SuppressWarnings("deprecation")
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setResolverHook(ResolverHook hook) {
+	public void setResolverHookFactory(ResolverHookFactory hookFactory) {
 		synchronized (this.monitor) {
-			this.hook = hook;
+			this.hookFactory = hookFactory;
 		}
+	}
+
+	private ResolverHook begin(Collection<BundleRevision> triggers) {
+		ResolverHookFactory current;
+		synchronized (this.monitor) {
+			current = this.hookFactory;
+		}
+		ResolverHook newHook = current.begin(triggers);
+		synchronized (this.monitor) {
+			this.hook = newHook;
+		}
+		return newHook;
 	}
 
 	public ResolverHook getResolverHook() {
@@ -874,10 +910,6 @@ public abstract class StateImpl implements State {
 		return symbolicName != null ? symbolicName : Constants.getInternalSymbolicName();
 	}
 
-	/**
-	 * Returns the latest versions BundleDescriptions which have old removal pending versions.
-	 * @return the BundleDescriptions that have removal pending versions.
-	 */
 	public BundleDescription[] getRemovalPending() {
 		synchronized (this.monitor) {
 			return removalPendings.toArray(new BundleDescription[removalPendings.size()]);
@@ -888,6 +920,29 @@ public abstract class StateImpl implements State {
 		synchronized (this.monitor) {
 			if (!removalPendings.contains(removed))
 				removalPendings.addFirst(removed);
+		}
+	}
+
+	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles) {
+		BundleDescription[] removals = getRemovalPending();
+		Set<BundleDescription> result = new HashSet<BundleDescription>();
+		for (BundleDescription bundle : bundles) {
+			addDependents(bundle, result, removals);
+		}
+		return result;
+	}
+
+	private static void addDependents(BundleDescription bundle, Set<BundleDescription> result, BundleDescription[] removals) {
+		if (result.contains(bundle))
+			return; // avoid cycles
+		result.add(bundle);
+		BundleDescription[] dependents = bundle.getDependents();
+		for (BundleDescription dependent : dependents)
+			addDependents(dependent, result, removals);
+		// check if this is a removal pending
+		for (BundleDescription removed : removals) {
+			if (removed.getBundleId() == bundle.getBundleId())
+				addDependents(removed, result, removals);
 		}
 	}
 
@@ -915,11 +970,16 @@ public abstract class StateImpl implements State {
 			return null;
 		fullyLoad();
 		synchronized (this.monitor) {
-			ResolverHook currentHook = getResolverHook();
+			ResolverHook currentHook = null;
 			try {
 				resolving = true;
-				if (currentHook != null)
-					currentHook.begin();
+				ResolverHookFactory currentFactory = hookFactory;
+				if (currentFactory != null) {
+					Collection<BundleRevision> triggers = new ArrayList<BundleRevision>(1);
+					triggers.add(importingBundle);
+					triggers = Collections.unmodifiableCollection(triggers);
+					currentHook = begin(triggers);
+				}
 				// ask the resolver to resolve our dynamic import
 				ExportPackageDescriptionImpl result = (ExportPackageDescriptionImpl) resolver.resolveDynamicImport(importingBundle, requestedPackage);
 				if (result == null)

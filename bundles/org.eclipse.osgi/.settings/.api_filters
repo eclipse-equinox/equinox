@@ -791,6 +791,13 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHookFactory.java" type="org.osgi.framework.hooks.resolver.ResolverHookFactory">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.resolver.ResolverHookFactory"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
 <filter id="403984517">
 <message_arguments>

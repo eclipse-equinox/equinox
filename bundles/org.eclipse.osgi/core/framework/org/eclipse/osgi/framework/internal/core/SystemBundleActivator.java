@@ -60,7 +60,7 @@ public class SystemBundleActivator implements BundleActivator {
 		framework.adaptor.frameworkStart(bc);
 		State state = framework.adaptor.getState();
 		if (state instanceof StateImpl)
-			((StateImpl) state).setResolverHook(new CoreResolverHook((BundleContextImpl) context, framework.getServiceRegistry()));
+			((StateImpl) state).setResolverHookFactory(new CoreResolverHookFactory((BundleContextImpl) context, framework.getServiceRegistry()));
 		// attempt to resolve all bundles
 		// this is done after the adaptor.frameworkStart has been called
 		// this should be the first time the resolver State is accessed

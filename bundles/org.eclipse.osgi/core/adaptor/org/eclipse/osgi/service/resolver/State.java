@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -346,7 +347,7 @@ public interface State {
 
 	/**
 	 * Resolves the constraints contained in this state using the resolver
-	 * currently associated with the state in a incremental, "least-perturbing" 
+	 * currently associated with the state in an incremental, "least-perturbing" 
 	 * mode, and returns a delta describing the changes in resolved states and 
 	 * dependencies in the state.
 	 * 
@@ -359,14 +360,35 @@ public interface State {
 	public StateDelta resolve(BundleDescription[] discard);
 
 	/**
+	 * Resolves the constraints contained in this state using the resolver
+	 * currently associated with the state in an incremental, "least-perturbing"
+	 * mode, and returns a delta describing the changes in resolved states and
+	 * dependencies in the state.  If discard is set to true the 
+	 * the descriptions contained in the resolve array will have their 
+	 * current resolution state discarded and will be re-resolved.
+	 * This method will attempt to resolve the supplied descriptions
+	 * and may attempt to resolve any other unresolved descriptions contained
+	 * in this state.
+	 * 
+	 * @param resolve an array containing descriptions for bundles to resolve.
+	 * @param discard a value of true indicates the resolve descriptions
+	 * should have their current resolution state discarded and re-resolved.
+	 * @return a delta describing the changes in the resolved state and
+	 * interconnections.
+	 * @since 3.7
+	 */
+	public StateDelta resolve(BundleDescription[] resolve, boolean discard);
+
+	/**
 	 * Sets the version overrides which are to be applied during the resolutoin
 	 * of this state. Version overrides allow external forces to
 	 * refine/override the version constraints setup by the components in the
 	 * state.
 	 * 
 	 * @param value
+	 * @deprecated The exact form of this has never been defined.  There is
+	 * no alternative method available.
 	 */
-	// TODO the exact form of this is not defined as yet.
 	public void setOverrides(Object value);
 
 	/**
@@ -383,6 +405,26 @@ public interface State {
 	 * @since 3.7
 	 */
 	public BundleDescription[] getRemovalPending();
+
+	/**
+	 * Returns the dependency closure for the specified bundles.
+	 * 
+	 * <p>
+	 * A graph of bundles is computed starting with the specified bundles. The
+	 * graph is expanded by adding any bundle that is either wired to a package
+	 * that is currently exported by a bundle in the graph or requires a bundle
+	 * in the graph. The graph is fully constructed when there is no bundle
+	 * outside the graph that is wired to a bundle in the graph. The graph may
+	 * contain removal pending bundles.
+	 * 
+	 * @param bundles The initial bundles for which to generate the dependency
+	 *        closure.
+	 * @return A collection containing a snapshot of the dependency closure of
+	 *         the specified bundles, or an empty collection if there were no
+	 *         specified bundles.
+	 * @since 3.7
+	 */
+	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles);
 
 	/**
 	 * Returns whether this state is empty.

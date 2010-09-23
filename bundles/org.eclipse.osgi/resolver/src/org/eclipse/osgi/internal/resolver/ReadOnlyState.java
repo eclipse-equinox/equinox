@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
@@ -100,6 +101,11 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
+	public StateDelta resolve(BundleDescription[] resolve, boolean discard) {
+		throw new UnsupportedOperationException();
+	}
+
+	@SuppressWarnings("deprecation")
 	public void setOverrides(Object value) {
 		throw new UnsupportedOperationException();
 	}
@@ -150,7 +156,8 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public Dictionary<Object, Object>[] getPlatformProperties() {
+	@SuppressWarnings("rawtypes")
+	public Dictionary[] getPlatformProperties() {
 		return target.getPlatformProperties();
 	}
 
@@ -212,6 +219,10 @@ public final class ReadOnlyState implements State {
 
 	public BundleDescription[] getRemovalPending() {
 		throw new UnsupportedOperationException();
+	}
+
+	public Collection<BundleDescription> getDependencyClosure(Collection<BundleDescription> bundles) {
+		return target.getDependencyClosure(bundles);
 	}
 
 }

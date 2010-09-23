@@ -182,9 +182,9 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 
 	public boolean resolveBundles(Bundle[] bundles) {
 		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
-		doResolveBundles(null, false, null);
 		if (bundles == null)
 			bundles = framework.getAllBundles();
+		doResolveBundles(bundles, false, null);
 		for (int i = 0; i < bundles.length; i++)
 			if (!((AbstractBundle) bundles[i]).isResolved())
 				return false;
@@ -193,7 +193,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	// This method is protected to enable a work around to bug 245251
-	synchronized protected void doResolveBundles(AbstractBundle[] bundles, boolean refreshPackages, FrameworkListener[] listeners) {
+	synchronized protected void doResolveBundles(Bundle[] bundles, boolean refreshPackages, FrameworkListener[] listeners) {
 		try {
 			if (Profile.PROFILE && Profile.STARTUP)
 				Profile.logEnter("resolve bundles"); //$NON-NLS-1$
@@ -201,12 +201,15 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 			State systemState = framework.adaptor.getState();
 			BundleDescription[] descriptions = null;
 			int numBundles = bundles == null ? 0 : bundles.length;
-			if (!refreshPackages)
-				// in this case we must make descriptions non-null so we do
-				// not force the removal pendings to be processed when resolving
-				// the state.
-				descriptions = new BundleDescription[0];
-			else if (numBundles > 0) {
+			if (!refreshPackages) {
+				List<BundleDescription> resolving = new ArrayList<BundleDescription>();
+				for (Bundle bundle : bundles) {
+					BundleDescription description = ((AbstractBundle) bundle).getBundleDescription();
+					if (((bundle.getState() & Bundle.UNINSTALLED) == 0) && description != null)
+						resolving.add(description);
+				}
+				descriptions = resolving.toArray(new BundleDescription[resolving.size()]);
+			} else if (numBundles > 0) {
 				// populate the resolved hosts package sources first (do this outside sync block: bug 280929)
 				populateLoaders(framework.getAllBundles());
 				synchronized (framework.bundles) {
@@ -214,7 +217,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 					List<BundleDescription> results = new ArrayList<BundleDescription>(numBundles);
 					BundleDelta[] addDeltas = null;
 					for (int i = 0; i < numBundles; i++) {
-						BundleDescription description = bundles[i].getBundleDescription();
+						BundleDescription description = ((AbstractBundle) bundles[i]).getBundleDescription();
 						if (description != null && description.getBundleId() != 0 && !results.contains(description))
 							results.add(description);
 						// add in any bundles that have the same symbolic name see bug (169593)
@@ -235,7 +238,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 					descriptions = (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
-			BundleDelta[] delta = systemState.resolve(descriptions).getChanges();
+			BundleDelta[] delta = systemState.resolve(descriptions, refreshPackages).getChanges();
 			processDelta(delta, refreshPackages, systemState);
 		} catch (Throwable t) {
 			if (Debug.DEBUG_PACKAGEADMIN) {
@@ -743,7 +746,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 		// We currently have three places this is kept (PackageAdminImpl, StateImpl and ResolverImpl)
 		// Using the state's because it has easy access to the uninstalled Bundle objects
 		BundleDescription[] removals = framework.adaptor.getState().getRemovalPending();
-		Collection<Bundle> result = new HashSet<Bundle>();
+		Set<Bundle> result = new HashSet<Bundle>();
 		for (int i = 0; i < removals.length; i++) {
 			Object ref = removals[i].getUserObject();
 			if (ref instanceof BundleReference)
@@ -753,37 +756,28 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
-		State state = framework.adaptor.getState();
-		BundleDescription[] removals = state.getRemovalPending();
+		Collection<BundleDescription> descriptions = getDescriptionClosure(bundles);
 		Set<Bundle> result = new HashSet<Bundle>();
-		for (Bundle bundle : bundles) {
-			addDependents(bundle, result, removals, state);
+		for (BundleDescription description : descriptions) {
+			Object userObject = description.getUserObject();
+			if (userObject instanceof BundleReference) {
+				Bundle bundle = ((BundleReference) userObject).getBundle();
+				if (bundle != null)
+					result.add(bundle);
+			}
 		}
 		return result;
 	}
 
-	private static void addDependents(Bundle bundle, Set<Bundle> result, BundleDescription[] removals, State state) {
-		if (result.contains(bundle))
-			return; // avoid cycles
-		result.add(bundle);
-		BundleDescription description = state.getBundle(bundle.getBundleId());
-		addDependents(description, result, removals, state);
-		// check if this is a removal pending
-		for (BundleDescription removed : removals) {
-			if (removed.getBundleId() == bundle.getBundleId())
-				addDependents(removed, result, removals, state);
+	private Collection<BundleDescription> getDescriptionClosure(Collection<Bundle> bundles) {
+		State state = framework.adaptor.getState();
+		Collection<BundleDescription> descriptions = new ArrayList<BundleDescription>();
+		for (Bundle bundle : bundles) {
+			BundleDescription description = state.getBundle(bundle.getBundleId());
+			if (description != null)
+				descriptions.add(description);
 		}
-
+		return state.getDependencyClosure(descriptions);
 	}
 
-	private static void addDependents(BundleDescription description, Set<Bundle> result, BundleDescription[] removals, State state) {
-		if (description == null)
-			return;
-		BundleDescription[] dependents = description.getDependents();
-		for (BundleDescription dependent : dependents) {
-			Object ref = dependent.getUserObject();
-			if (ref instanceof BundleReference)
-				addDependents(((BundleReference) ref).getBundle(), result, removals, state);
-		}
-	}
 }
