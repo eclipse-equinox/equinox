@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.compendium.sdk"
       label="%featureName"
-      version="3.6.0.qualifier"
+      version="3.6.100.qualifier"
       provider-name="%providerName">
 
    <description>
