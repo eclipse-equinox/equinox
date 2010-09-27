@@ -72,7 +72,7 @@ public class PasswordProviderSelector implements IRegistryEventListener {
 	public void stop() {
 		if (instance != null) {
 			IExtensionRegistry registry = RegistryFactory.getRegistry();
-			registry.addListener(instance, EXTENSION_POINT);
+			registry.removeListener(instance);
 			instance = null;
 		}
 	}
