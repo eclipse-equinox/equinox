@@ -17,8 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.util.Collections;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.*;
 import org.eclipse.osgi.baseadaptor.loader.*;
@@ -168,9 +167,9 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 
 	/**
 	 * Finds a library for this bundle.  Simply calls 
-	 * delegate.findLibrary(libname) to find the library.
+	 * manager.findLibrary(libname) to find the library.
 	 * @param libname The library to find.
-	 * @return The URL of the resource or null if it does not exist.
+	 * @return The absolution path to the library or null if not found
 	 */
 	protected String findLibrary(String libname) {
 		// let the manager find the library for us
@@ -277,5 +276,17 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 
 	public boolean isParallelCapable() {
 		return PARALLEL_CAPABLE;
+	}
+
+	public List<URL> findEntries(String path, String filePattern, int options) {
+		return manager.findEntries(path, filePattern, options);
+	}
+
+	public List<String> listResources(String path, String filePattern, int options) {
+		return delegate.listResources(path, filePattern, options);
+	}
+
+	public List<String> listLocalResources(String path, String filePattern, int options) {
+		return manager.listLocalResources(path, filePattern, options);
 	}
 }

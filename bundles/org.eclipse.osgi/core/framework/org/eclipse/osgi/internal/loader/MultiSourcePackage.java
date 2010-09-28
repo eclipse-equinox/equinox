@@ -11,7 +11,7 @@
 package org.eclipse.osgi.internal.loader;
 
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 
 public class MultiSourcePackage extends PackageSource {
 	SingleSourcePackage[] suppliers;
@@ -50,5 +50,18 @@ public class MultiSourcePackage extends PackageSource {
 		for (int i = 0; i < suppliers.length; i++)
 			results = BundleLoader.compoundEnumerations(results, suppliers[i].getResources(name));
 		return results;
+	}
+
+	@Override
+	public List<String> listResources(String path, String filePattern) {
+		List<String> result = new ArrayList<String>();
+		for (SingleSourcePackage source : suppliers) {
+			List<String> sourceResources = source.listResources(path, filePattern);
+			for (String resource : sourceResources) {
+				if (!result.contains(resource))
+					result.add(resource);
+			}
+		}
+		return result;
 	}
 }

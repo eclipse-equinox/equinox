@@ -11,7 +11,7 @@
 package org.eclipse.osgi.internal.loader;
 
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 
 /**
@@ -60,5 +60,11 @@ public class NullPackageSource extends PackageSource {
 		result = new NullPackageSource(name);
 		sources.add(result);
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> listResources(String path, String filePattern) {
+		return Collections.EMPTY_LIST;
 	}
 }

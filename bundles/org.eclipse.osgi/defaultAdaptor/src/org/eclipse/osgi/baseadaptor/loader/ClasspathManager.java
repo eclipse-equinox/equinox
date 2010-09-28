@@ -16,13 +16,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
+import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
-import org.eclipse.osgi.framework.adaptor.BundleData;
-import org.eclipse.osgi.framework.adaptor.BundleProtectionDomain;
+import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
@@ -616,6 +616,11 @@ public class ClasspathManager {
 		return classloader;
 	}
 
+	/**
+	 * Finds a library for the bundle represented by this class path managert
+	 * @param libname the library name
+	 * @return The absolution path to the library or null if not found
+	 */
 	public String findLibrary(String libname) {
 		synchronized (this) {
 			if (loadedLibraries == null)
@@ -638,4 +643,48 @@ public class ClasspathManager {
 		}
 	}
 
+	/**
+	 * @see {@link BundleClassLoader#findEntries(String, String, int)}
+	 */
+	public List<URL> findEntries(String path, String filePattern, int options) {
+		BaseAdaptor adaptor = getBaseData().getAdaptor();
+		List<BundleData> datas = new ArrayList<BundleData>();
+		// first get the host bundle file
+		datas.add(getBaseData());
+		// next get the attached fragments bundle files
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (FragmentClasspath fragmentClasspath : currentFragments)
+			datas.add(fragmentClasspath.getBundleData());
+
+		@SuppressWarnings("unchecked")
+		List<URL> result = Collections.EMPTY_LIST;
+		// now search over all the bundle files
+		Enumeration<URL> eURLs = adaptor.findEntries(datas, path, filePattern, options);
+		if (eURLs == null)
+			return result;
+		result = new ArrayList<URL>();
+		while (eURLs.hasMoreElements())
+			result.add(eURLs.nextElement());
+		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * @see {@link BundleClassLoader#listLocalResources(String, String, int)}
+	 */
+	public List<String> listLocalResources(String path, String filePattern, int options) {
+		List<BundleFile> bundleFiles = new ArrayList<BundleFile>();
+
+		ClasspathEntry[] cpEntries = getHostClasspathEntries();
+		for (ClasspathEntry cpEntry : cpEntries)
+			bundleFiles.add(cpEntry.getBundleFile());
+
+		FragmentClasspath[] currentFragments = getFragmentClasspaths();
+		for (FragmentClasspath fragmentClasspath : currentFragments) {
+			ClasspathEntry[] fragEntries = fragmentClasspath.getEntries();
+			for (ClasspathEntry cpEntry : fragEntries)
+				bundleFiles.add(cpEntry.getBundleFile());
+		}
+
+		return getBaseData().getAdaptor().listEntryPaths(bundleFiles, path, filePattern, options);
+	}
 }

@@ -14,14 +14,14 @@ package org.eclipse.osgi.baseadaptor;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Properties;
+import java.util.*;
 import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.*;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.*;
@@ -29,6 +29,7 @@ import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * A Framework adaptor implementation that allows additional functionality to be
@@ -488,4 +489,132 @@ public class BaseAdaptor implements FrameworkAdaptor {
 				storage = ((BaseStorageHook) hooks[i]).getStorage();
 		return storage;
 	}
+
+	/**
+	 * @see FrameworkAdaptor#findEntries(List, String, String, int)
+	 */
+	public Enumeration<URL> findEntries(List<BundleData> datas, String path, String filePattern, int options) {
+		List<BundleFile> bundleFiles = new ArrayList<BundleFile>(datas.size());
+		for (BundleData data : datas)
+			bundleFiles.add(((BaseData) data).getBundleFile());
+		// search all the bundle files
+		List<String> pathList = listEntryPaths(bundleFiles, path, filePattern, options);
+		// return null if no entries found
+		if (pathList.size() == 0)
+			return null;
+		// create an enumeration to enumerate the pathList
+		final String[] pathArray = pathList.toArray(new String[pathList.size()]);
+		final BundleData[] dataArray = datas.toArray(new BundleData[datas.size()]);
+		return new Enumeration<URL>() {
+			private int curPathIndex = 0;
+			private int curDataIndex = 0;
+			private URL nextElement = null;
+
+			public boolean hasMoreElements() {
+				if (nextElement != null)
+					return true;
+				getNextElement();
+				return nextElement != null;
+			}
+
+			public URL nextElement() {
+				if (!hasMoreElements())
+					throw new NoSuchElementException();
+				URL result = nextElement;
+				// force the next element search
+				getNextElement();
+				return result;
+			}
+
+			private void getNextElement() {
+				nextElement = null;
+				if (curPathIndex >= pathArray.length)
+					// reached the end of the pathArray; no more elements
+					return;
+				while (nextElement == null && curPathIndex < pathArray.length) {
+					String curPath = pathArray[curPathIndex];
+					// search the datas until we have searched them all
+					while (nextElement == null && curDataIndex < dataArray.length)
+						nextElement = dataArray[curDataIndex++].getEntry(curPath);
+					// we have searched all datas then advance to the next path 
+					if (curDataIndex >= dataArray.length) {
+						curPathIndex++;
+						curDataIndex = 0;
+					}
+				}
+			}
+		};
+	}
+
+	/**
+	 * Returns the names of resources available from a list of bundle files.
+	 * No duplicate resource names are returned, each name is unique.
+	 * @param bundleFiles the list of bundle files to search in
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource names.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link BundleWiring#listResources(String, String, int)}
+	 */
+	public List<String> listEntryPaths(List<BundleFile> bundleFiles, String path, String filePattern, int options) {
+		// a list used to store the results of the search
+		List<String> pathList = new ArrayList<String>();
+		Filter patternFilter = null;
+		Hashtable<String, String> patternProps = null;
+		if (filePattern != null)
+			try {
+				// create a file pattern filter with 'filename' as the key
+				patternFilter = FilterImpl.newInstance("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				// create a single hashtable to be shared during the recursive search
+				patternProps = new Hashtable<String, String>(2);
+			} catch (InvalidSyntaxException e) {
+				// cannot happen
+			}
+		// find the entry paths for the datas
+		for (BundleFile bundleFile : bundleFiles) {
+			listEntryPaths(bundleFile, path, patternFilter, patternProps, options, pathList);
+		}
+		return pathList;
+	}
+
+	private List<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, List<String> pathList) {
+		if (pathList == null)
+			pathList = new ArrayList<String>();
+		Enumeration<String> entryPaths = bundleFile.getEntryPaths(path);
+		if (entryPaths == null)
+			return pathList;
+		while (entryPaths.hasMoreElements()) {
+			String entry = entryPaths.nextElement();
+			int lastSlash = entry.lastIndexOf('/');
+			if (patternProps != null) {
+				int secondToLastSlash = entry.lastIndexOf('/', lastSlash - 1);
+				int fileStart;
+				int fileEnd = entry.length();
+				if (lastSlash < 0)
+					fileStart = 0;
+				else if (lastSlash != entry.length() - 1)
+					fileStart = lastSlash + 1;
+				else {
+					fileEnd = lastSlash; // leave the lastSlash out
+					if (secondToLastSlash < 0)
+						fileStart = 0;
+					else
+						fileStart = secondToLastSlash + 1;
+				}
+				String fileName = entry.substring(fileStart, fileEnd);
+				// set the filename to the current entry
+				patternProps.put("filename", fileName); //$NON-NLS-1$
+			}
+			// prevent duplicates and match on the patterFilter
+			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps)))
+				pathList.add(entry);
+			// recurse only into entries that are directories
+			if (((options & BundleWiring.FINDENTRIES_RECURSE) != 0) && !entry.equals(path) && entry.length() > 0 && lastSlash == (entry.length() - 1))
+				listEntryPaths(bundleFile, entry, patternFilter, patternProps, options, pathList);
+		}
+		return pathList;
+	}
+
 }

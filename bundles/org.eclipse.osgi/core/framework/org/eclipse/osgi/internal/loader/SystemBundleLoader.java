@@ -21,6 +21,7 @@ import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * The System Bundle's BundleLoader.  This BundleLoader is used by ImportClassLoaders
@@ -246,6 +247,30 @@ public class SystemBundleLoader extends BundleLoader {
 
 			public void attachFragment(BundleData bundledata, ProtectionDomain domain, String[] classpath) {
 				// nothing
+			}
+
+			public List<URL> findEntries(String path, String filePattern, int options) {
+				Bundle systemBundle = SystemBundleLoader.this.getBundle();
+				boolean recurse = (options & BundleWiring.FINDENTRIES_RECURSE) != 0;
+				@SuppressWarnings("unchecked")
+				List<URL> result = Collections.EMPTY_LIST;
+				Enumeration<URL> entries = systemBundle.findEntries(path, filePattern, recurse);
+				if (entries != null) {
+					result = new ArrayList<URL>();
+					while (entries.hasMoreElements())
+						result.add(entries.nextElement());
+				}
+				return Collections.unmodifiableList(result);
+			}
+
+			@SuppressWarnings("unchecked")
+			public List<String> listResources(String path, String filePattern, int options) {
+				return Collections.EMPTY_LIST;
+			}
+
+			@SuppressWarnings("unchecked")
+			public List<String> listLocalResources(String path, String filePattern, int options) {
+				return Collections.EMPTY_LIST;
 			}
 		};
 	}

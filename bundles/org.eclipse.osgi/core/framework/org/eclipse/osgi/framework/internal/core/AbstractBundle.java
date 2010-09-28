@@ -1374,114 +1374,15 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		if (!isResolved())
 			framework.packageAdmin.resolveBundles(new Bundle[] {this});
 
-		// a list used to store the results of the search
-		List<String> pathList = new ArrayList<String>();
-		Filter patternFilter = null;
-		Hashtable<String, String> patternProps = null;
-		if (filePattern != null)
-			try {
-				// create a file pattern filter with 'filename' as the key
-				patternFilter = FilterImpl.newInstance("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				// create a single hashtable to be shared during the recursive search
-				patternProps = new Hashtable<String, String>(2);
-			} catch (InvalidSyntaxException e) {
-				// cannot happen
-			}
-		// find the local entries of this bundle
-		findLocalEntryPaths(path, patternFilter, patternProps, recurse, pathList);
 		// if this bundle is a host to fragments then search the fragments
-		final BundleFragment[] fragments = getFragments();
-		final int numFragments = fragments == null ? -1 : fragments.length;
-		for (int i = 0; i < numFragments; i++)
-			((AbstractBundle) fragments[i]).findLocalEntryPaths(path, patternFilter, patternProps, recurse, pathList);
-		// return null if no entries found
-		if (pathList.size() == 0)
-			return null;
-		// create an enumeration to enumerate the pathList
-		final String[] pathArray = pathList.toArray(new String[pathList.size()]);
-		return new Enumeration<URL>() {
-			int curIndex = 0;
-			int curFragment = -1;
-			URL nextElement = null;
-
-			public boolean hasMoreElements() {
-				if (nextElement != null)
-					return true;
-				getNextElement();
-				return nextElement != null;
-			}
-
-			public URL nextElement() {
-				if (!hasMoreElements())
-					throw new NoSuchElementException();
-				URL result;
-				result = nextElement;
-				// force the next element search
-				getNextElement();
-				return result;
-			}
-
-			private void getNextElement() {
-				nextElement = null;
-				if (curIndex >= pathArray.length)
-					// reached the end of the pathArray; no more elements
-					return;
-				String curPath = pathArray[curIndex];
-				if (curFragment == -1) {
-					// need to search ourselves first
-					nextElement = getEntry0(curPath);
-					curFragment++;
-				}
-				// if the element is not in the host look in the fragments until we have searched them all
-				while (nextElement == null && curFragment < numFragments)
-					nextElement = fragments[curFragment++].getEntry0(curPath);
-				// if we have no fragments or we have searched all fragments then advance to the next path 
-				if (numFragments == -1 || curFragment >= numFragments) {
-					curIndex++;
-					curFragment = -1;
-				}
-				// searched all fragments for the current path, move to the next one
-				if (nextElement == null)
-					getNextElement();
-			}
-
-		};
-	}
-
-	protected void findLocalEntryPaths(String path, Filter patternFilter, Hashtable<String, String> patternProps, boolean recurse, List<String> pathList) {
-		Enumeration<String> entryPaths = bundledata.getEntryPaths(path);
-		if (entryPaths == null)
-			return;
-		while (entryPaths.hasMoreElements()) {
-			String entry = entryPaths.nextElement();
-			int lastSlash = entry.lastIndexOf('/');
-			if (patternProps != null) {
-				int secondToLastSlash = entry.lastIndexOf('/', lastSlash - 1);
-				int fileStart;
-				int fileEnd = entry.length();
-				if (lastSlash < 0)
-					fileStart = 0;
-				else if (lastSlash != entry.length() - 1)
-					fileStart = lastSlash + 1;
-				else {
-					fileEnd = lastSlash; // leave the lastSlash out
-					if (secondToLastSlash < 0)
-						fileStart = 0;
-					else
-						fileStart = secondToLastSlash + 1;
-				}
-				String fileName = entry.substring(fileStart, fileEnd);
-				// set the filename to the current entry
-				patternProps.put("filename", fileName); //$NON-NLS-1$
-			}
-			// prevent duplicates and match on the patterFilter
-			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps)))
-				pathList.add(entry);
-			// rescurse only into entries that are directories
-			if (recurse && !entry.equals(path) && entry.length() > 0 && lastSlash == (entry.length() - 1))
-				findLocalEntryPaths(entry, patternFilter, patternProps, recurse, pathList);
-		}
-		return;
+		BundleFragment[] fragments = getFragments();
+		List<BundleData> datas = new ArrayList<BundleData>((fragments == null ? 0 : fragments.length) + 1);
+		datas.add(getBundleData());
+		if (fragments != null)
+			for (BundleFragment fragment : fragments)
+				datas.add(fragment.getBundleData());
+		int options = recurse ? BundleWiring.FINDENTRIES_RECURSE : 0;
+		return framework.getAdaptor().findEntries(datas, path, filePattern, options);
 	}
 
 	class BundleStatusException extends Throwable implements StatusException {

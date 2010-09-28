@@ -11,7 +11,7 @@
 package org.eclipse.osgi.internal.loader;
 
 import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 import org.eclipse.osgi.util.ManifestElement;
 
 public class FilteredSourcePackage extends SingleSourcePackage {
@@ -95,4 +95,18 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 		}
 		return false;
 	}
+
+	@Override
+	public List<String> listResources(String path, String filePattern) {
+		List<String> result = super.listResources(path, filePattern);
+		for (Iterator<String> resources = result.iterator(); resources.hasNext();) {
+			String resource = resources.next();
+			int lastSlash = resource.lastIndexOf('/');
+			String fileName = lastSlash >= 0 ? resource.substring(lastSlash + 1) : resource;
+			if (!isIncluded(fileName) || isExcluded(fileName))
+				resources.remove();
+		}
+		return result;
+	}
+
 }

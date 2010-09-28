@@ -14,7 +14,9 @@ package org.eclipse.osgi.framework.adaptor;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.List;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * A ClassLoaderDelegate is used by the BundleClassLoader in a similar
@@ -109,4 +111,24 @@ public interface ClassLoaderDelegate {
 	 * @since 3.6
 	 */
 	public void setLazyTrigger() throws BundleException;
+
+	/**
+	 * Returns the names of resources visible to this delegate.
+	 * This is used to answer a call to the 
+	 * {@link BundleWiring#listResources(String, String, int)} method.
+	 * First a search is done on the packages imported by the bundle associated
+	 * with this delegate.  Next a search is done on the the bundles required by 
+	 * the bundle associated with this delegate.  Finally a local search of 
+	 * the bundle associated with this delegate is done by calling
+	 * {@link BundleClassLoader#listLocalResources(String, String, int)}.  Note
+	 * that for imported packages the search stops at the source for the import.
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource names.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link BundleWiring#listResources(String, String, int)}
+	 */
+	public List<String> listResources(String path, String filePattern, int options);
 }

@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import java.util.List;
 import org.osgi.framework.BundleReference;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * The BundleClassLoader interface is used by the Framework to load local 
@@ -129,4 +131,49 @@ public interface BundleClassLoader /*extends ClassLoader*/extends BundleReferenc
 	 * @return the parent classloader used by this BundleClassLoader
 	 */
 	public ClassLoader getParent();
+
+	/**
+	 * Returns resource entries for the bundle associated with this class loader.  
+	 * This is used to answer a call to the 
+	 * {@link BundleWiring#findEntries(String, String, int)} method.
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource URLs.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link BundleWiring#findEntries(String, String, int)}
+	 */
+	List<URL> findEntries(String path, String filePattern, int options);
+
+	/**
+	 * Returns the names of resources visible to this bundle class loader.
+	 * This is used to answer a call to the 
+	 * {@link BundleWiring#listResources(String, String, int)} method.
+	 * This method should simply return the result of calling
+	 * {@link ClassLoaderDelegate#listResources(String, String, int)}
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource names.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link BundleWiring#listResources(String, String, int)}
+	 * @see {@link ClassLoaderDelegate#listResources(String, String, int)}
+	 */
+	List<String> listResources(String path, String filePattern, int options);
+
+	/**
+	 * Returns the names of local resources visible to this bundle class loader.
+	 * Only the resources available on the local class path of this bundle 
+	 * class loader are searched.
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource names.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link ClassLoaderDelegate#listResources(String, String, int)}
+	 */
+	List<String> listLocalResources(String path, String filePattern, int options);
 }

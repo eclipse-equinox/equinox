@@ -21,11 +21,13 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * This object is responsible for all classloader delegation for a bundle.
@@ -713,6 +715,67 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return result;
 	}
 
+	public List<String> listResources(String path, String filePattern, int options) {
+		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
+		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
+			path = path.substring(1); /* remove leading slash before search */
+		boolean subPackages = (options & BundleWiring.LISTRESOURCES_RECURSE) != 0;
+		List<String> packages = new ArrayList<String>();
+		// search imported package names
+		KeyedHashSet importSources = getImportedSources(null);
+		if (importSources != null) {
+			KeyedElement[] imports = importSources.elements();
+			for (KeyedElement keyedElement : imports) {
+				String id = ((PackageSource) keyedElement).getId();
+				if (id.equals(pkgName) || (subPackages && id.startsWith(pkgName + '.')))
+					packages.add(id);
+			}
+		}
+
+		// now add package names from required bundles
+		if (requiredBundles != null) {
+			KeyedHashSet visited = new KeyedHashSet(false);
+			visited.add(bundle); // always add ourselves so we do not recurse back to ourselves
+			for (BundleLoaderProxy requiredProxy : requiredBundles) {
+				BundleLoader requiredLoader = requiredProxy.getBundleLoader();
+				requiredLoader.addProvidedPackageNames(requiredProxy.getSymbolicName(), pkgName, packages, subPackages, visited);
+			}
+		}
+
+		boolean localSearch = (options & BundleWiring.LISTRESOURCES_LOCAL) != 0;
+		List<String> result = new ArrayList<String>();
+		Set<String> importedPackages = new HashSet<String>(0);
+		for (String name : packages) {
+			// look for import source
+			PackageSource externalSource = findImportedSource(name, null);
+			if (externalSource != null) {
+				// record this package is imported
+				importedPackages.add(name);
+			} else {
+				// look for require bundle source
+				externalSource = findRequiredSource(name, null);
+			}
+			// only add the content of the external source if this is not a localSearch
+			if (externalSource != null && !localSearch) {
+				String packagePath = name.replace('.', '/');
+				List<String> externalResources = externalSource.listResources(packagePath, filePattern);
+				for (String resource : externalResources) {
+					if (!result.contains(resource)) // prevent duplicates; could happen if the package is split or exporter has fragments/multiple jars
+						result.add(resource);
+				}
+			}
+		}
+
+		// now search locally
+		List<String> localResources = createClassLoader().listLocalResources(path, filePattern, options);
+		for (String resource : localResources) {
+			String resourcePkg = getResourcePackageName(resource);
+			if (!importedPackages.contains(resourcePkg) && !result.contains(resource))
+				result.add(resource);
+		}
+		return result;
+	}
+
 	/*
 	 * This method is used by Bundle.getResources to do proper parent delegation.
 	 */
@@ -935,6 +998,34 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// now add the locally provided package.
 		if (local != null && local.isFriend(symbolicName))
 			result.add(local);
+	}
+
+	final void addProvidedPackageNames(String symbolicName, String packageName, List<String> result, boolean subPackages, KeyedHashSet visitied) {
+		if (!visitied.add(bundle))
+			return;
+		for (String exported : exportedPackages) {
+			if (exported.equals(packageName) || (subPackages && exported.startsWith(packageName + '.'))) {
+				if (!result.contains(exported))
+					result.add(exported);
+			}
+		}
+		if (substitutedPackages != null)
+			for (String substituted : substitutedPackages) {
+				if (substituted.equals(packageName) || (subPackages && substituted.startsWith(packageName + '.'))) {
+					if (!result.contains(substituted))
+						result.add(substituted);
+				}
+			}
+		if (requiredBundles != null) {
+			int size = reexportTable == null ? 0 : reexportTable.length;
+			int reexportIndex = 0;
+			for (int i = 0; i < requiredBundles.length; i++) {
+				if (reexportIndex < size && reexportTable[reexportIndex] == i) {
+					reexportIndex++;
+					requiredBundles[i].getBundleLoader().addProvidedPackageNames(symbolicName, packageName, result, subPackages, visitied);
+				}
+			}
+		}
 	}
 
 	final boolean isExportedPackage(String name) {

@@ -15,8 +15,11 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
+import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
@@ -30,6 +33,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	static final BundleDescription[] EMPTY_BUNDLEDESCS = new BundleDescription[0];
 	static final GenericSpecification[] EMPTY_GENERICSPECS = new GenericSpecification[0];
 	static final GenericDescription[] EMPTY_GENERICDESCS = new GenericDescription[0];
+	static final RuntimePermission GET_CLASSLOADER_PERM = new RuntimePermission("getClassLoader"); //$NON-NLS-1$
 
 	static final int RESOLVED = 0x01;
 	static final int SINGLETON = 0x02;
@@ -870,7 +874,19 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public ClassLoader getClassLoader() {
 			if (!isInUse())
 				return null;
-			// TODO Auto-generated method stub
+			SecurityManager sm = System.getSecurityManager();
+			if (sm != null) {
+				sm.checkPermission(GET_CLASSLOADER_PERM);
+			}
+			return (ClassLoader) getBundleClassLoader();
+		}
+
+		private BundleClassLoader getBundleClassLoader() {
+			Object proxy = BundleDescriptionImpl.this.getUserObject();
+			if (proxy instanceof BundleHost)
+				proxy = ((BundleHost) proxy).getLoaderProxy();
+			if (proxy instanceof BundleLoaderProxy)
+				return ((BundleLoaderProxy) proxy).getBundleLoader().createClassLoader();
 			return null;
 		}
 
@@ -881,15 +897,23 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<URL> findEntries(String path, String filePattern, int options) {
 			if (!isInUse())
 				return null;
-			// TODO Auto-generated method stub
-			return null;
+			@SuppressWarnings("unchecked")
+			List<URL> result = Collections.EMPTY_LIST;
+			BundleClassLoader bcl = getBundleClassLoader();
+			if (bcl != null)
+				result = bcl.findEntries(path, filePattern, options);
+			return Collections.unmodifiableList(result);
 		}
 
 		public List<String> listResources(String path, String filePattern, int options) {
 			if (!isInUse())
 				return null;
-			// TODO Auto-generated method stub
-			return null;
+			@SuppressWarnings("unchecked")
+			List<String> result = Collections.EMPTY_LIST;
+			BundleClassLoader bcl = getBundleClassLoader();
+			if (bcl != null)
+				result = bcl.listResources(path, filePattern, options);
+			return Collections.unmodifiableList(result);
 		}
 
 		public String toString() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,5 +143,20 @@ public class CompositeClassLoader extends ClassLoader implements BaseClassLoader
 
 	public Bundle getBundle() {
 		return manager.getBaseData().getBundle();
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<URL> findEntries(String path, String filePattern, int options) {
+		return Collections.EMPTY_LIST;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> listResources(String path, String filePattern, int options) {
+		return Collections.EMPTY_LIST;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> listLocalResources(String path, String filePattern, int options) {
+		return Collections.EMPTY_LIST;
 	}
 }

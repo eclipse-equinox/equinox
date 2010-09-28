@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,13 +12,13 @@
 package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
+import java.net.URL;
 import java.net.URLConnection;
-import java.util.Properties;
+import java.util.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
 import org.eclipse.osgi.service.resolver.State;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
 
 /**
  * FrameworkAdaptor interface to the osgi framework. This class is used to provide
@@ -279,4 +279,18 @@ public interface FrameworkAdaptor {
 	 * @param error The Throwable for the runtime error that is to be handled.
 	 */
 	public void handleRuntimeError(Throwable error);
+
+	/**
+	 * Returns resources entries for the specified bundle datas.
+	 * @param datas the list of bundle datas to search in
+	 * @param path The path name in which to look.
+	 * @param filePattern The file name pattern for selecting resource names in
+	 *        the specified path.
+	 * @param options The options for listing resource names.
+	 * @return a list of resource URLs.  If no resources are found then
+	 * the empty list is returned.
+	 * @see {@link BundleClassLoader#findEntries(String, String, int)}
+	 * @see {@link Bundle#findEntries(String, String, boolean)}
+	 */
+	public Enumeration<URL> findEntries(List<BundleData> datas, String path, String filePattern, int options);
 }
