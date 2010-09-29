@@ -21,8 +21,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleReference;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.*;
 
 public final class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
@@ -872,12 +871,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 
 		public ClassLoader getClassLoader() {
+			SecurityManager sm = System.getSecurityManager();
+			if (sm != null)
+				sm.checkPermission(GET_CLASSLOADER_PERM);
 			if (!isInUse())
 				return null;
-			SecurityManager sm = System.getSecurityManager();
-			if (sm != null) {
-				sm.checkPermission(GET_CLASSLOADER_PERM);
-			}
 			return (ClassLoader) getBundleClassLoader();
 		}
 
@@ -894,8 +892,20 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return BundleDescriptionImpl.this;
 		}
 
+		private boolean hasResourcePermission() {
+			SecurityManager sm = System.getSecurityManager();
+			if (sm != null) {
+				try {
+					sm.checkPermission(new AdminPermission(getBundle(), AdminPermission.RESOURCE));
+				} catch (SecurityException e) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public List<URL> findEntries(String path, String filePattern, int options) {
-			if (!isInUse())
+			if (!hasResourcePermission() || !isInUse())
 				return null;
 			@SuppressWarnings("unchecked")
 			List<URL> result = Collections.EMPTY_LIST;
@@ -906,7 +916,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 
 		public List<String> listResources(String path, String filePattern, int options) {
-			if (!isInUse())
+			if (!hasResourcePermission() || !isInUse())
 				return null;
 			@SuppressWarnings("unchecked")
 			List<String> result = Collections.EMPTY_LIST;
