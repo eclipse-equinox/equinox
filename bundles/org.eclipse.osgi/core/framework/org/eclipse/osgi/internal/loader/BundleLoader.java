@@ -715,6 +715,11 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return result;
 	}
 
+	private boolean isSubPackage(String parentPackage, String subPackage) {
+		String prefix = (parentPackage.length() == 0 || parentPackage.equals(DEFAULT_PACKAGE)) ? "" : parentPackage + '.'; //$NON-NLS-1$
+		return subPackage.startsWith(prefix);
+	}
+
 	public List<String> listResources(String path, String filePattern, int options) {
 		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
 		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
@@ -727,7 +732,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			KeyedElement[] imports = importSources.elements();
 			for (KeyedElement keyedElement : imports) {
 				String id = ((PackageSource) keyedElement).getId();
-				if (id.equals(pkgName) || (subPackages && id.startsWith(pkgName + '.')))
+				if (id.equals(pkgName) || (subPackages && isSubPackage(pkgName, id)))
 					packages.add(id);
 			}
 		}
@@ -1004,14 +1009,14 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (!visitied.add(bundle))
 			return;
 		for (String exported : exportedPackages) {
-			if (exported.equals(packageName) || (subPackages && exported.startsWith(packageName + '.'))) {
+			if (exported.equals(packageName) || (subPackages && isSubPackage(packageName, exported))) {
 				if (!result.contains(exported))
 					result.add(exported);
 			}
 		}
 		if (substitutedPackages != null)
 			for (String substituted : substitutedPackages) {
-				if (substituted.equals(packageName) || (subPackages && substituted.startsWith(packageName + '.'))) {
+				if (substituted.equals(packageName) || (subPackages && isSubPackage(packageName, substituted))) {
 					if (!result.contains(substituted))
 						result.add(substituted);
 				}
