@@ -39,6 +39,8 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		});
 	}
 
+	private static Class<ContextFinder> THIS = ContextFinder.class;
+
 	private final ClassLoader parentContextClassLoader;
 
 	public ContextFinder(ClassLoader contextClassLoader) {
@@ -56,7 +58,7 @@ public class ContextFinder extends ClassLoader implements PrivilegedAction<List<
 		ClassLoader previousLoader = null;
 		for (int i = 1; i < stack.length; i++) {
 			ClassLoader tmp = stack[i].getClassLoader();
-			if (stack[i] != ContextFinder.class && tmp != null && tmp != this) {
+			if (stack[i] != THIS && tmp != null && tmp != this) {
 				if (checkClassLoader(tmp)) {
 					if (previousLoader != tmp) {
 						result.add(tmp);
