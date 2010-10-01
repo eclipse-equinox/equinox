@@ -92,11 +92,17 @@ static int loadGtkSymbols( void * library, FN_TABLE * table) {
 }
 
 int loadGtk() {
-	void * objLib = dlopen(GOBJ_LIB, RTLD_LAZY);
-	void * gdkLib = dlopen(GDK_LIB, RTLD_LAZY);
-	void * pixLib = dlopen(PIXBUF_LIB, RTLD_LAZY);
-	void * gtkLib = dlopen(GTK_LIB, RTLD_LAZY);
-	void * x11Lib = dlopen(X11_LIB, RTLD_LAZY);
+#ifdef AIX 
+#define DLFLAGS RTLD_LAZY | RTLD_MEMBER
+#else
+#define DLFLAGS RTLD_LAZY
+#endif
+
+	void * objLib = dlopen(GOBJ_LIB, DLFLAGS);
+	void * gdkLib = dlopen(GDK_LIB, DLFLAGS);
+	void * pixLib = dlopen(PIXBUF_LIB, DLFLAGS);
+	void * gtkLib = dlopen(GTK_LIB, DLFLAGS);
+	void * x11Lib = dlopen(X11_LIB, DLFLAGS);
 	
 	/* initialize ptr struct to 0's */
 	memset(&gtk, 0, sizeof(struct GTK_PTRS));

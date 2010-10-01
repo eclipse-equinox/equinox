@@ -154,6 +154,14 @@
 		</copy>
 		<chmod perm="755" dir="${feature.base}/linux.gtk.ppc64/${collectingFolder}" includes="launcher" /> 
 	</target>
+	<target name="rootFilesaix_gtk_ppc64">
+		<mkdir dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}"/>
+		<copy todir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}/bin/gtk/aix/ppc64" includes="**"			/>
+			<fileset dir="${basedir}/gtk_root" includes="**"			/>
+		</copy>
+		<chmod perm="755" dir="${feature.base}/aix.gtk.ppc64/${collectingFolder}" includes="launcher" /> 
+	</target>
 	<target name="rootFileslinux_gtk_x86_64">
 		<mkdir dir="${feature.base}/linux.gtk.x86_64/${collectingFolder}"/>
 		<copy todir="${feature.base}/linux.gtk.x86_64/${collectingFolder}" failonerror="true" overwrite="true">
@@ -269,6 +277,7 @@
 		<antcall target="rootFilessolaris_gtk_x86"/>
 		<antcall target="rootFilessolaris_motif_sparc"/>
 		<antcall target="rootFilesaix_motif_ppc"/>
+		<antcall target="rootFilesaix_gtk_ppc64"/>
 		<antcall target="rootFileshpux_motif_PA_RISC"/>
 		<antcall target="rootFileshpux_motif_ia64"/>
 		<antcall target="rootFileshpux_motif_ia64_32"/>

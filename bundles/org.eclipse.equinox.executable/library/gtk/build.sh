@@ -95,6 +95,12 @@ case $OS in
 				;;
 		esac
 		;;
+	"AIX")
+		makefile="make_aix.mak"
+		defaultOS="aix"
+		defaultOSArch="ppc64"
+		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
+	;;
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
@@ -166,7 +172,11 @@ elif [ -z "$JAVA_HOME" -a -n  "$defaultJavaHome" ]; then
 fi
 
 if [ "$defaultOSArch" = "ppc64" ];  then
-	M_ARCH=-m64
+	if [ "$defaultOS" = "aix" ];  then
+		M_ARCH=-maix64
+	else
+		M_ARCH=-m64
+	fi
 	export M_ARCH
 elif [ "$defaultOSArch" = "s390" ];  then
 	M_ARCH=-m31
