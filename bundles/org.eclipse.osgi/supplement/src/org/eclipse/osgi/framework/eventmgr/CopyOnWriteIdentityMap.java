@@ -330,7 +330,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * The set and the entries returned by the set cannot be modified.
 	 */
 	public Set<Map.Entry<K, V>> entrySet() {
-		return new EntrySet<Map.Entry<K, V>>(entries(), EntrySet.ENTRY);
+		return new EntrySet<K, V>(entries());
 	}
 
 	/**
@@ -341,7 +341,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * The set cannot be modified.
 	 */
 	public Set<K> keySet() {
-		return new EntrySet<K>(entries(), EntrySet.KEY);
+		return new KeySet<K>(entries());
 	}
 
 	/**
@@ -352,7 +352,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * The collection cannot be modified.
 	 */
 	public Collection<V> values() {
-		return new EntrySet<V>(entries(), EntrySet.VALUE);
+		return new ValueCollection<V>(entries());
 	}
 
 	/**
@@ -415,24 +415,61 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	}
 
 	/**
-	 * Set class used for entry and key sets and values collections.
+	 * Set class used for entry sets.
 	 *
 	 * This class is immutable.
 	 */
-	private static class EntrySet<E> extends AbstractSet<E> {
-		private final Entry<?, ?>[] entries;
-		private final int returnType;
-		final static int ENTRY = 1;
-		final static int KEY = 2;
-		final static int VALUE = 3;
+	private static class EntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
+		private final Entry<K, V>[] entries;
 
-		EntrySet(Entry<?, ?>[] entries, int returnType) {
+		EntrySet(Entry<K, V>[] entries) {
 			this.entries = entries;
-			this.returnType = returnType;
 		}
 
-		public Iterator<E> iterator() {
-			return new EntryIterator<E>(entries, returnType);
+		public Iterator<Map.Entry<K, V>> iterator() {
+			return new EntryIterator<K, V>(entries);
+		}
+
+		public int size() {
+			return entries.length;
+		}
+	}
+
+	/**
+	 * Set class used for key sets.
+	 *
+	 * This class is immutable.
+	 */
+	private static class KeySet<K> extends AbstractSet<K> {
+		private final Entry<K, ?>[] entries;
+
+		KeySet(Entry<K, ?>[] entries) {
+			this.entries = entries;
+		}
+
+		public Iterator<K> iterator() {
+			return new KeyIterator<K>(entries);
+		}
+
+		public int size() {
+			return entries.length;
+		}
+	}
+
+	/**
+	 * Collection class used for value collections.
+	 *
+	 * This class is immutable.
+	 */
+	private static class ValueCollection<V> extends AbstractCollection<V> {
+		private final Entry<?, V>[] entries;
+
+		ValueCollection(Entry<?, V>[] entries) {
+			this.entries = entries;
+		}
+
+		public Iterator<V> iterator() {
+			return new ValueIterator<V>(entries);
 		}
 
 		public int size() {
@@ -441,42 +478,85 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	}
 
 	/** 
-	 * Iterator class used for entry and key sets and values collections.
-	 *
+	 * Iterator class used for entry sets.
 	 */
-	private static class EntryIterator<E> implements Iterator<E> {
-		private final Entry<?, ?>[] entries;
-		private final int returnType;
+	private static class EntryIterator<K, V> implements Iterator<Map.Entry<K, V>> {
+		private final Entry<K, V>[] entries;
+		private final int length;
 		private int cursor = 0;
 
-		EntryIterator(Entry<?, ?>[] entries, int returnType) {
+		EntryIterator(Entry<K, V>[] entries) {
 			this.entries = entries;
-			this.returnType = returnType;
+			this.length = entries.length;
 		}
 
 		public boolean hasNext() {
-			return cursor < entries.length;
+			return cursor < length;
 		}
 
-		public E next() {
-			if (cursor == entries.length) {
+		public Map.Entry<K, V> next() {
+			if (cursor == length) {
 				throw new NoSuchElementException();
 			}
-			switch (returnType) {
-				case EntrySet.ENTRY :
-					@SuppressWarnings("unchecked")
-					E entry = (E) entries[cursor++];
-					return entry;
-				case EntrySet.KEY :
-					@SuppressWarnings("unchecked")
-					E key = (E) entries[cursor++].key;
-					return key;
-				case EntrySet.VALUE :
-					@SuppressWarnings("unchecked")
-					E value = (E) entries[cursor++].value;
-					return value;
+			return entries[cursor++];
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException(); // the collection cannot be modified.
+		}
+	}
+
+	/** 
+	 * Iterator class used for key sets.
+	 */
+	private static class KeyIterator<K> implements Iterator<K> {
+		private final Entry<K, ?>[] entries;
+		private final int length;
+		private int cursor = 0;
+
+		KeyIterator(Entry<K, ?>[] entries) {
+			this.entries = entries;
+			this.length = entries.length;
+		}
+
+		public boolean hasNext() {
+			return cursor < length;
+		}
+
+		public K next() {
+			if (cursor == length) {
+				throw new NoSuchElementException();
 			}
-			throw new InternalError();
+			return entries[cursor++].key;
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException(); // the collection cannot be modified.
+		}
+	}
+
+	/** 
+	 * Iterator class used for value collections.
+	 */
+	private static class ValueIterator<V> implements Iterator<V> {
+		private final Entry<?, V>[] entries;
+		private final int length;
+		private int cursor = 0;
+
+		ValueIterator(Entry<?, V>[] entries) {
+			this.entries = entries;
+			this.length = entries.length;
+		}
+
+		public boolean hasNext() {
+			return cursor < length;
+		}
+
+		public V next() {
+			if (cursor == length) {
+				throw new NoSuchElementException();
+			}
+			return entries[cursor++].value;
 		}
 
 		public void remove() {
