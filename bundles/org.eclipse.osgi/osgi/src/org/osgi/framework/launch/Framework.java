@@ -34,7 +34,8 @@ import org.osgi.framework.FrameworkEvent;
  * instance.
  * 
  * @ThreadSafe
- * @version $Id: 48f87dc5fbb8157a0bf2e9c4504917b62ca9fe66 $
+ * @noimplement
+ * @version $Id: 5469358035ad9d90e6dcc561093f56ec34b0ff84 $
  */
 public interface Framework extends Bundle {
 

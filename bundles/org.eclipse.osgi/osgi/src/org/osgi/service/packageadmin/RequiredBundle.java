@@ -43,9 +43,10 @@ import org.osgi.framework.Version;
  * 
  * @since 1.2
  * @ThreadSafe
+ * @noimplement
  * @deprecated The PackageAdmin service has been replaced by the
  *             <code>org.osgi.framework.wiring</code> package.
- * @version $Id: 769158c321ee50007e96ca25a7114cb6857286ca $
+ * @version $Id: 1606b0422cae6769b7eedc2d565df61841da1e22 $
  */
 public interface RequiredBundle {
 	/**

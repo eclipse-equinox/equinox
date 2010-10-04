@@ -25,7 +25,8 @@ import java.util.List;
  * commit will fail and this object should be discarded.
  * 
  * @ThreadSafe
- * @version $Id: eca03d784c7f4a4bf8a7b1119f98c425159e5de2 $
+ * @noimplement
+ * @version $Id: 3b16b47db71fa449d60d5acdcc9f7dddc7679a25 $
  * @since 1.1
  */
 public interface ConditionalPermissionUpdate {
@@ -50,7 +51,7 @@ public interface ConditionalPermissionUpdate {
 	 *         list may be empty if the Conditional Permission Table was empty
 	 *         when this update was created.
 	 */
-	List /* <ConditionalPermissionInfo> */getConditionalPermissionInfos();
+	List<ConditionalPermissionInfo> getConditionalPermissionInfos();
 
 	/**
 	 * Commit this update. If no changes have been made to the Conditional

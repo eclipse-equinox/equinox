@@ -402,33 +402,19 @@
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
-<filter id="403804204">
+<filter id="403853384">
 <message_arguments>
 <message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="adapt(Class&lt;A&gt;)"/>
 </message_arguments>
 </filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="getDataFile(String)"/>
-</message_arguments>
-</filter>
-<filter id="403984517">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-<message_argument value="java.lang.Comparable"/>
-<message_argument value="compareTo(T)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
+<filter comment="Ignore OSGi API." id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="adapt(Class&lt;A&gt;)"/>
 </message_arguments>
 </filter>
-<filter id="1209008130">
+<filter comment="Ignore OSGi API." id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
@@ -437,43 +423,44 @@
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/BundleContext.java" type="org.osgi.framework.BundleContext">
-<filter id="403804204">
+<filter comment="ignore OSGi API" id="403853384">
 <message_arguments>
 <message_argument value="org.osgi.framework.BundleContext"/>
-<message_argument value="getServiceReference(Class&lt;S&gt;)"/>
 </message_arguments>
 </filter>
-<filter id="403804204">
+<filter comment="ignore OSGi API" id="1209008130">
 <message_arguments>
-<message_argument value="org.osgi.framework.BundleContext"/>
-<message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="getBundle(String)"/>
 </message_arguments>
 </filter>
-<filter id="403804204">
-<message_arguments>
-<message_argument value="org.osgi.framework.BundleContext"/>
-<message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
+<filter comment="ignore OSGi API" id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="getServiceReference(Class&lt;S&gt;)"/>
 </message_arguments>
 </filter>
-<filter id="1209008130">
+<filter comment="ignore OSGi API" id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
 </message_arguments>
 </filter>
-<filter id="1209008130">
+<filter comment="ignore OSGi API" id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.BundleReference"/>
 </message_arguments>
 </filter>
 </resource>
@@ -623,6 +610,11 @@
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
 <message_argument value="SERVICE_INTENTS"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.Constants"/>
 </message_arguments>
 </filter>
 <filter comment="Ignore OSGi APIs." id="1209008130">
@@ -788,17 +780,30 @@
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/Filter.java" type="org.osgi.framework.Filter">
-<filter comment="Ignore OSGi API." id="403804204">
+<filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>
 <message_argument value="org.osgi.framework.Filter"/>
-<message_argument value="matches(Map&lt;String,?&gt;)"/>
 </message_arguments>
 </filter>
-<filter comment="Ignore OSGi API." id="1209008130">
+<filter comment="Ignore OSGi API" id="1209008130">
 <message_arguments>
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="matches(Map&lt;String,?&gt;)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/ServiceReference.java" type="org.osgi.framework.ServiceReference">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.ServiceReference"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/ServiceRegistration.java" type="org.osgi.framework.ServiceRegistration">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.ServiceRegistration"/>
 </message_arguments>
 </filter>
 </resource>
@@ -838,23 +843,28 @@
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
-<filter id="403984517">
+<filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>
 <message_argument value="org.osgi.framework.launch.Framework"/>
-<message_argument value="java.lang.Comparable"/>
-<message_argument value="compareTo(T)"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.launch.FrameworkFactory"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/startlevel/BundleStartLevel.java" type="org.osgi.framework.startlevel.BundleStartLevel">
-<filter comment="Ignore OSGi API." id="1110441988">
+<filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.startlevel.BundleStartLevel"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/startlevel/FrameworkStartLevel.java" type="org.osgi.framework.startlevel.FrameworkStartLevel">
-<filter comment="Ignore OSGi API." id="1110441988">
+<filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.startlevel.FrameworkStartLevel"/>
 </message_arguments>
@@ -899,6 +909,69 @@
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.wiring.WiredCapability"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfo">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionUpdate.java" type="org.osgi.service.condpermadmin.ConditionalPermissionUpdate">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionUpdate"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/packageadmin/ExportedPackage.java" type="org.osgi.service.packageadmin.ExportedPackage">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.packageadmin.ExportedPackage"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/packageadmin/PackageAdmin.java" type="org.osgi.service.packageadmin.PackageAdmin">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.packageadmin.PackageAdmin"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/packageadmin/RequiredBundle.java" type="org.osgi.service.packageadmin.RequiredBundle">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.packageadmin.RequiredBundle"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/permissionadmin/PermissionAdmin.java" type="org.osgi.service.permissionadmin.PermissionAdmin">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.permissionadmin.PermissionAdmin"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/startlevel/StartLevel.java" type="org.osgi.service.startlevel.StartLevel">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.startlevel.StartLevel"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/url/URLConstants.java" type="org.osgi.service.url.URLConstants">
+<filter comment="Ignore OSGi API" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.url.URLConstants"/>
 </message_arguments>
 </filter>
 </resource>

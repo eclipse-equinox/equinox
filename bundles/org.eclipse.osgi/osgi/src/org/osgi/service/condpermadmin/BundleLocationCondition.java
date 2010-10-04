@@ -18,6 +18,7 @@ package org.osgi.service.condpermadmin;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.osgi.framework.Bundle;
@@ -34,7 +35,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * Pattern matching is done according to the filter string matching rules.
  * 
  * @ThreadSafe
- * @version $Id: 182ec2cce5d4c4bf25d18a2b27c07e62fe38835b $
+ * @version $Id: 7b466c7103a708833c6ff1fa2a4c5cf21f757179 $
  */
 public class BundleLocationCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleLocationCondition";
@@ -68,8 +69,9 @@ public class BundleLocationCondition {
 		String[] args = info.getArgs();
 		if (args.length != 1 && args.length != 2)
 			throw new IllegalArgumentException("Illegal number of args: " + args.length);
-		String bundleLocation = (String) AccessController.doPrivileged(new PrivilegedAction() {
-					public Object run() {
+		String bundleLocation = AccessController
+				.doPrivileged(new PrivilegedAction<String>() {
+					public String run() {
 						return bundle.getLocation();
 					}
 				});
@@ -82,7 +84,7 @@ public class BundleLocationCondition {
 			// this should never happen, but just in case
 			throw new RuntimeException("Invalid filter: " + e.getFilter(), e);
 		}
-		Hashtable matchProps = new Hashtable(2);
+		Dictionary<String, String> matchProps = new Hashtable<String, String>(2);
 		matchProps.put("location", bundleLocation);
 		boolean negate = (args.length == 2) ? "!".equals(args[1]) : false;
 		return (negate ^ filter.match(matchProps)) ? Condition.TRUE

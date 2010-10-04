@@ -21,7 +21,8 @@ package org.osgi.framework;
  * 
  * @since 1.5
  * @ThreadSafe
- * @version $Id: adbba3dfc5ac9af0b534c3008ffab1b29984c4bb $
+ * @noimplement
+ * @version $Id: e61bd3e020264b04022a430fe09a85ee3aabf1a3 $
  */
 public interface BundleReference {
 	/**

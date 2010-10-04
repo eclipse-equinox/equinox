@@ -72,7 +72,8 @@ import java.util.Dictionary;
  * Environment supports permissions.
  * 
  * @ThreadSafe
- * @version $Id: 89eb063ec09f44477a17c89c31926f7f3b46ab38 $
+ * @noimplement
+ * @version $Id: a061ad715b1f8033cdfef0e75a154fbd7c35f61f $
  */
 
 public interface BundleContext extends BundleReference {
@@ -848,4 +849,14 @@ public interface BundleContext extends BundleReference {
 	 * @since 1.1
 	 */
 	Filter createFilter(String filter) throws InvalidSyntaxException;
+
+	/**
+	 * Returns the bundle with the specified location.
+	 * 
+	 * @param location The location of the bundle to retrieve.
+	 * @return A {@code Bundle} object or {@code null} if the location does not
+	 *         match any installed bundle.
+	 * @since 1.6
+	 */
+	Bundle getBundle(String location);
 }

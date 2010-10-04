@@ -28,7 +28,8 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * the Conditional Permission Table.
  * 
  * @ThreadSafe
- * @version $Id: 0592821da6203bfc81d993f6f88ab7317ec09265 $
+ * @noimplement
+ * @version $Id: 887450b65e453145d57197e2db75db0bb2918ef4 $
  */
 public interface ConditionalPermissionAdmin {
 	/**
@@ -117,7 +118,7 @@ public interface ConditionalPermissionAdmin {
 	 * @deprecated Since 1.1. Use {@link #newConditionalPermissionUpdate()}
 	 *             instead.
 	 */
-	Enumeration/* <ConditionalPermissionInfo> */getConditionalPermissionInfos();
+	Enumeration<ConditionalPermissionInfo> getConditionalPermissionInfos();
 
 	/**
 	 * Return the Conditional Permission Info with the specified name.

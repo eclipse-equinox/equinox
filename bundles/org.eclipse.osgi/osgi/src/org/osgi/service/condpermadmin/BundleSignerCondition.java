@@ -18,7 +18,6 @@ package org.osgi.service.condpermadmin;
 
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ import org.osgi.framework.FrameworkUtil;
  * RDNs).
  * 
  * @ThreadSafe
- * @version $Id: 2a96e3266b8e3208fa1edfcf3302ba6e82bb1b11 $
+ * @version $Id: 6e10febd6a8cfc31973ece0af29c352ed972b105 $
  */
 public class BundleSignerCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleSignerCondition";
@@ -83,16 +82,13 @@ public class BundleSignerCondition {
 			throw new IllegalArgumentException("Illegal number of args: "
 					+ args.length);
 
-		Map/* <X509Certificate, List<X509Certificate>> */signers = bundle
+		Map<X509Certificate, List<X509Certificate>> signers = bundle
 				.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
 		boolean match = false;
-		for (Iterator iSigners = signers.values().iterator(); iSigners
-				.hasNext();) {
-			List/* <X509Certificate> */signerCerts = (List) iSigners.next();
-			List/* <String> */dnChain = new ArrayList(signerCerts.size());
-			for (Iterator iCerts = signerCerts.iterator(); iCerts.hasNext();) {
-				dnChain.add(((X509Certificate) iCerts.next()).getSubjectDN()
-						.getName());
+		for (List<X509Certificate> signerCerts : signers.values()) {
+			List<String> dnChain = new ArrayList<String>(signerCerts.size());
+			for (X509Certificate signer : signerCerts) {
+				dnChain.add(signer.getSubjectDN().getName());
 			}
 			if (FrameworkUtil.matchDistinguishedNameChain(args[0], dnChain)) {
 				match = true;

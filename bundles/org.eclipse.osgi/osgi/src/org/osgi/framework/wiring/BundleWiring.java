@@ -52,7 +52,8 @@ import org.osgi.framework.BundleReference;
  * must return {@code null}.
  * 
  * @ThreadSafe
- * @version $Id: 7617df23db6f4e30dc9cfd0c88ba2cb80be01397 $
+ * @noimplement
+ * @version $Id: 6787c55f83f520429d63e93024ccf9f22821c4c8 $
  */
 public interface BundleWiring extends BundleReference {
 	/**
