@@ -56,7 +56,7 @@ static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
 static int initialArgc;
 static _TCHAR** initialArgv;
 
-_TCHAR* eclipseLibrary; /* path to the eclipse shared library */
+_TCHAR* eclipseLibrary = NULL; /* path to the eclipse shared library */
 
 #ifdef UNICODE
 extern int main(int, char**);
@@ -397,7 +397,7 @@ static _TCHAR* findLibrary(_TCHAR* library, _TCHAR* program)
 	struct _stat stats;
 	
 	if (library != NULL) {
-		path = checkPath(library, programDir, 0);
+		path = checkPath(library, programDir, 1);
 		if (_tstat(path, &stats) == 0 && (stats.st_mode & S_IFDIR) != 0) 
         {
             /* directory, find the highest version eclipse_* library */
