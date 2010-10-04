@@ -58,6 +58,7 @@ public abstract class StateImpl implements State {
 	private final Set<String> platformPropertyKeys = new HashSet<String>(PROPS.length);
 	private ResolverHookFactory hookFactory;
 	private ResolverHook hook;
+	private boolean developmentMode = false;
 
 	private static long cumulativeTime;
 
@@ -454,6 +455,13 @@ public abstract class StateImpl implements State {
 				} else {
 					if (resolved && reResolve == null)
 						return new StateDeltaImpl(this);
+					if (developmentMode) {
+						// in dev mode we need to aggressively flush removal pendings 
+						if (removalPendings.size() > 0) {
+							BundleDescription[] removed = internalGetRemovalPending();
+							reResolve = mergeBundles(reResolve, removed);
+						}
+					}
 					if (reResolve == null)
 						reResolve = internalGetRemovalPending();
 					if (triggers == null) {
@@ -794,6 +802,7 @@ public abstract class StateImpl implements State {
 			resetSystemExports();
 		if (performResetSystemCapabilities)
 			resetSystemCapabilities();
+		developmentMode = this.platformProperties.length == 0 ? false : org.eclipse.osgi.framework.internal.core.Constants.DEVELOPMENT_MODE.equals(this.platformProperties[0].get(org.eclipse.osgi.framework.internal.core.Constants.OSGI_RESOLVER_MODE));
 		return result;
 	}
 
