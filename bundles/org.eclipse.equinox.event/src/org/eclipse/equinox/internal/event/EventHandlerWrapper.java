@@ -23,7 +23,7 @@ import org.osgi.service.log.LogService;
  *
  */
 public class EventHandlerWrapper {
-	private final ServiceReference reference;
+	private final ServiceReference<EventHandler> reference;
 	private final LogService log;
 	private final BundleContext context;
 	private EventHandler handler;
@@ -37,7 +37,7 @@ public class EventHandlerWrapper {
 	 * @param context Bundle Context of the Event Admin bundle
 	 * @param log LogService object for logging
 	 */
-	public EventHandlerWrapper(ServiceReference reference, BundleContext context, LogService log) {
+	public EventHandlerWrapper(ServiceReference<EventHandler> reference, BundleContext context, LogService log) {
 		this.reference = reference;
 		this.context = context;
 		this.log = log;
@@ -119,7 +119,7 @@ public class EventHandlerWrapper {
 		// we don't have the handler, so lets get it outside the sync region
 		EventHandler tempHandler = null;
 		try {
-			tempHandler = (EventHandler) context.getService(reference);
+			tempHandler = context.getService(reference);
 		} catch (IllegalStateException e) {
 			// ignore; event admin may have stopped
 		}

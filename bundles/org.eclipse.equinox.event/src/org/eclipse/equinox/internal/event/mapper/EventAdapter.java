@@ -11,14 +11,14 @@
 
 package org.eclipse.equinox.internal.event.mapper;
 
-import java.util.Hashtable;
+import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class EventAdapter {
 	final EventAdmin eventAdmin;
@@ -50,7 +50,7 @@ public abstract class EventAdapter {
 		eventAdmin.postEvent(converted);
 	}
 
-	public void putBundleProperties(Hashtable properties, Bundle bundle) {
+	public void putBundleProperties(Map<String, Object> properties, Bundle bundle) {
 		// assertion bundle != null
 		properties.put(Constants.BUNDLE_ID, new Long(bundle.getBundleId()));
 		String symbolicName = bundle.getSymbolicName();
@@ -60,7 +60,7 @@ public abstract class EventAdapter {
 		properties.put(Constants.BUNDLE, bundle);
 	}
 
-	public void putExceptionProperties(Hashtable properties, Throwable t) {
+	public void putExceptionProperties(Map<String, Object> properties, Throwable t) {
 		// assertion t != null
 		properties.put(Constants.EXCEPTION, t);
 		properties.put(Constants.EXCEPTION_CLASS, t.getClass().getName());
@@ -70,7 +70,7 @@ public abstract class EventAdapter {
 		}
 	}
 
-	public void putServiceReferenceProperties(Hashtable properties, ServiceReference ref) {
+	public void putServiceReferenceProperties(Map<String, Object> properties, ServiceReference<?> ref) {
 		// assertion ref != null
 		properties.put(Constants.SERVICE, ref);
 		properties.put(Constants.SERVICE_ID, ref.getProperty(org.osgi.framework.Constants.SERVICE_ID));
@@ -87,7 +87,7 @@ public abstract class EventAdapter {
 	/*
 	 * Utility function for converting classes into strings
 	 */
-	public String[] classes2strings(Class classes[]) {
+	public String[] classes2strings(Class<?>[] classes) {
 		if ((classes == null) || (classes.length == 0))
 			return null;
 		String[] strings = new String[classes.length];

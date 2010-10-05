@@ -12,7 +12,7 @@
 package org.eclipse.equinox.internal.event;
 
 import java.security.Permission;
-import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.util.NLS;
@@ -22,13 +22,13 @@ import org.osgi.service.log.LogService;
 
 /**
  * Implementation of org.osgi.service.event.EventAdmin. EventAdminImpl uses
- * org.eclipse.osgi.framework.eventmgr.EventManager. It is assumeed
+ * org.eclipse.osgi.framework.eventmgr.EventManager. It is assumed
  * org.eclipse.osgi.framework.eventmgr package is exported by some other bundle.
  */
 public class EventAdminImpl implements EventAdmin {
 	private final LogTracker log;
 	private final EventHandlerTracker handlers;
-	private volatile EventManager		eventManager;
+	private volatile EventManager eventManager;
 
 	/**
 	 * Constructor for EventAdminImpl.
@@ -40,7 +40,7 @@ public class EventAdminImpl implements EventAdmin {
 		log = new LogTracker(context, System.out);
 		handlers = new EventHandlerTracker(context, log);
 	}
-	
+
 	/**
 	 * This method should be called before registering EventAdmin service
 	 */
@@ -58,7 +58,7 @@ public class EventAdminImpl implements EventAdmin {
 	void stop() {
 		handlers.close();
 		eventManager.close();
-		eventManager = null;	// signify we have stopped
+		eventManager = null; // signify we have stopped
 		log.close();
 	}
 
@@ -84,8 +84,8 @@ public class EventAdminImpl implements EventAdmin {
 	 * LogEntry.
 	 * 
 	 * @param event to be delivered
-	 * @param isAsync must be set to true for syncronous event delivery, false
-	 *        for asyncronous delivery.
+	 * @param isAsync must be set to true for synchronous event delivery, false
+	 *        for asynchronous delivery.
 	 */
 	private void dispatchEvent(Event event, boolean isAsync) {
 		// keep a local copy in case we are stopped in the middle of dispatching
@@ -98,9 +98,9 @@ public class EventAdminImpl implements EventAdmin {
 			log.log(LogService.LOG_ERROR, EventAdminMsg.EVENT_NULL_EVENT);
 			// continue from here will result in an NPE below; the spec for EventAdmin does not allow for null here
 		}
-		
+
 		String topic = event.getTopic();
-		
+
 		try {
 			checkTopicPermissionPublish(topic);
 		} catch (SecurityException e) {
@@ -109,33 +109,29 @@ public class EventAdminImpl implements EventAdmin {
 			// must throw a security exception here according to the EventAdmin spec
 			throw e;
 		}
-		
-		Set eventHandlers = handlers.getHandlers(topic);
+
+		Set<EventHandlerWrapper> eventHandlers = handlers.getHandlers(topic);
 		// If there are no handlers, then we are done
-		if (eventHandlers.size() == 0) {
+		if (eventHandlers.isEmpty()) {
 			return;
 		}
-		
+
 		SecurityManager sm = System.getSecurityManager();
 		Permission perm = (sm == null) ? null : new TopicPermission(topic, TopicPermission.SUBSCRIBE);
-		
-		EventListeners listeners = new EventListeners();
-		Iterator iter = eventHandlers.iterator();
-		while (iter.hasNext()) {
-			EventHandlerWrapper wrapper = (EventHandlerWrapper) iter.next();
-			listeners.addListener(wrapper, perm);
-		}
-		
+
+		Map<EventHandlerWrapper, Permission> listeners = new CopyOnWriteIdentityMap<EventHandlerWrapper, Permission>();
+		for (EventHandlerWrapper wrapper : eventHandlers)
+			listeners.put(wrapper, perm);
+
 		// Create the listener queue for this event delivery
-		ListenerQueue listenerQueue = new ListenerQueue(currentManager);
+		ListenerQueue<EventHandlerWrapper, Permission, Event> listenerQueue = new ListenerQueue<EventHandlerWrapper, Permission, Event>(currentManager);
 		// Add the listeners to the queue and associate them with the event
 		// dispatcher
-		listenerQueue.queueListeners(listeners, handlers);
+		listenerQueue.queueListeners(listeners.entrySet(), handlers);
 		// Deliver the event to the listeners.
 		if (isAsync) {
 			listenerQueue.dispatchEventAsynchronous(0, event);
-		}
-		else {
+		} else {
 			listenerQueue.dispatchEventSynchronous(0, event);
 		}
 	}
@@ -146,7 +142,7 @@ public class EventAdminImpl implements EventAdmin {
 	 * @param topic
 	 * @throws SecurityException if the caller does not have the right to PUBLISH TopicPermission
 	 */
-	private void checkTopicPermissionPublish(String topic) throws SecurityException{
+	private void checkTopicPermissionPublish(String topic) throws SecurityException {
 		SecurityManager sm = System.getSecurityManager();
 		if (sm == null)
 			return;

@@ -11,15 +11,15 @@
 
 package org.eclipse.equinox.internal.event.mapper;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ServiceEventAdapter extends EventAdapter {
 	// constants for Event topic substring
@@ -53,13 +53,13 @@ public class ServiceEventAdapter extends EventAdapter {
 				return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
-		Hashtable properties = new Hashtable();
-		ServiceReference ref = event.getServiceReference();
+		Map<String, Object> properties = new HashMap<String, Object>();
+		ServiceReference<?> ref = event.getServiceReference();
 		if (ref != null) {
 			putServiceReferenceProperties(properties, ref);
 		}
 		properties.put(Constants.EVENT, event);
-		Event converted = new Event(topic, (Dictionary) properties);
+		Event converted = new Event(topic, properties);
 		return converted;
 	}
 }

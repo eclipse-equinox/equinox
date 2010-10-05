@@ -18,16 +18,16 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * Main class for redeliver special events like FrameworkEvents via EventAdmin.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class EventRedeliverer implements FrameworkListener, BundleListener, ServiceListener {
-	private final ServiceTracker eventAdminTracker;
+	private final ServiceTracker<EventAdmin, EventAdmin> eventAdminTracker;
 	private final static boolean DEBUG = false;
 	private BundleContext bc;
 
 	public EventRedeliverer(BundleContext bc) {
 		this.bc = bc;
-		this.eventAdminTracker = new ServiceTracker(bc, EventAdmin.class.getName(), null);
+		this.eventAdminTracker = new ServiceTracker<EventAdmin, EventAdmin>(bc, EventAdmin.class.getName(), null);
 	}
 
 	public void close() {
@@ -52,7 +52,7 @@ public class EventRedeliverer implements FrameworkListener, BundleListener, Serv
 	}
 
 	private EventAdmin getEventAdmin() {
-		return (EventAdmin) eventAdminTracker.getService();
+		return eventAdminTracker.getService();
 	}
 
 	/**

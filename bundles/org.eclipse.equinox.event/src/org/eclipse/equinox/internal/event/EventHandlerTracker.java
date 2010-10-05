@@ -21,24 +21,25 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class EventHandlerTracker extends ServiceTracker implements EventDispatcher {
+public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandlerWrapper> implements EventDispatcher<EventHandlerWrapper, Permission, Event> {
+
 	private final LogService log;
 	//* List<EventHandlerWrapper> of all handlers with topic of "*"
-	private final List globalWildcard;
+	private final List<EventHandlerWrapper> globalWildcard;
 	// Map<String,List<EventHandlerWrapper>> key is topic prefix of partial wildcard
-	private final Map partialWildcard;
+	private final Map<String, List<EventHandlerWrapper>> partialWildcard;
 	// Map<String,List<EventHandlerWrapper>> key is topic name
-	private final Map topicName;
+	private final Map<String, List<EventHandlerWrapper>> topicName;
 
 	public EventHandlerTracker(BundleContext context, LogService log) {
 		super(context, EventHandler.class.getName(), null);
 		this.log = log;
-		globalWildcard = new ArrayList();
-		partialWildcard = new HashMap();
-		topicName = new HashMap();
+		globalWildcard = new ArrayList<EventHandlerWrapper>();
+		partialWildcard = new HashMap<String, List<EventHandlerWrapper>>();
+		topicName = new HashMap<String, List<EventHandlerWrapper>>();
 	}
 
-	public Object addingService(ServiceReference reference) {
+	public EventHandlerWrapper addingService(ServiceReference<EventHandler> reference) {
 		EventHandlerWrapper wrapper = new EventHandlerWrapper(reference, context, log);
 		synchronized (this) {
 			if (wrapper.init()) {
@@ -48,25 +49,23 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 		return wrapper;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
-		EventHandlerWrapper wrapper = (EventHandlerWrapper) service;
+	public void modifiedService(ServiceReference<EventHandler> reference, EventHandlerWrapper service) {
 		synchronized (this) {
-			unbucket(wrapper);
-			if (wrapper.init()) {
-				bucket(wrapper);
+			unbucket(service);
+			if (service.init()) {
+				bucket(service);
 				return;
 			}
 		}
 
-		wrapper.flush(); // needs to be called outside sync region
+		service.flush(); // needs to be called outside sync region
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
-		EventHandlerWrapper wrapper = (EventHandlerWrapper) service;
+	public void removedService(ServiceReference<EventHandler> reference, EventHandlerWrapper service) {
 		synchronized (this) {
-			unbucket(wrapper);
+			unbucket(service);
 		}
-		wrapper.flush(); // needs to be called outside sync region
+		service.flush(); // needs to be called outside sync region
 	}
 
 	/**
@@ -88,18 +87,18 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 			// partial wildcard
 			else if (topic.endsWith("/*")) { //$NON-NLS-1$
 				String key = topic.substring(0, topic.length() - 2); // Strip off "/*" from the end
-				List wrappers = (List) partialWildcard.get(key);
+				List<EventHandlerWrapper> wrappers = partialWildcard.get(key);
 				if (wrappers == null) {
-					wrappers = new ArrayList();
+					wrappers = new ArrayList<EventHandlerWrapper>();
 					partialWildcard.put(key, wrappers);
 				}
 				wrappers.add(wrapper);
 			}
 			// simple topic name
 			else {
-				List wrappers = (List) topicName.get(topic);
+				List<EventHandlerWrapper> wrappers = topicName.get(topic);
 				if (wrappers == null) {
-					wrappers = new ArrayList();
+					wrappers = new ArrayList<EventHandlerWrapper>();
 					topicName.put(topic, wrappers);
 				}
 				wrappers.add(wrapper);
@@ -125,20 +124,20 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 			// partial wildcard
 			else if (topic.endsWith("/*")) { //$NON-NLS-1$
 				String key = topic.substring(0, topic.length() - 2); // Strip off "/*" from the end
-				List wrappers = (List) partialWildcard.get(key);
+				List<EventHandlerWrapper> wrappers = partialWildcard.get(key);
 				if (wrappers != null) {
 					wrappers.remove(wrapper);
-					if (wrappers.size() == 0) {
+					if (wrappers.isEmpty()) {
 						partialWildcard.remove(key);
 					}
 				}
 			}
 			// simple topic name
 			else {
-				List wrappers = (List) topicName.get(topic);
+				List<EventHandlerWrapper> wrappers = topicName.get(topic);
 				if (wrappers != null) {
 					wrappers.remove(wrapper);
-					if (wrappers.size() == 0) {
+					if (wrappers.isEmpty()) {
 						topicName.remove(topic);
 					}
 				}
@@ -153,9 +152,9 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 	 * @param topic
 	 * @return a set of handlers
 	 */
-	public synchronized Set getHandlers(final String topic) {
+	public synchronized Set<EventHandlerWrapper> getHandlers(final String topic) {
 		// Use a set to remove duplicates
-		Set handlers = new HashSet();
+		Set<EventHandlerWrapper> handlers = new HashSet<EventHandlerWrapper>();
 
 		// Add the "*" handlers
 		handlers.addAll(globalWildcard);
@@ -165,7 +164,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 			int index = topic.length();
 			while (index >= 0) {
 				String subTopic = topic.substring(0, index); // First subtopic is the complete topic.
-				List wrappers = (List) partialWildcard.get(subTopic);
+				List<EventHandlerWrapper> wrappers = partialWildcard.get(subTopic);
 				if (wrappers != null) {
 					handlers.addAll(wrappers);
 				}
@@ -176,7 +175,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 		}
 
 		// Add the handlers for matching topic names
-		List wrappers = (List) topicName.get(topic);
+		List<EventHandlerWrapper> wrappers = topicName.get(topic);
 		if (wrappers != null) {
 			handlers.addAll(wrappers);
 		}
@@ -194,7 +193,7 @@ public class EventHandlerTracker extends ServiceTracker implements EventDispatch
 	 * @see org.eclipse.osgi.framework.eventmgr.EventDispatcher#dispatchEvent(java.lang.Object,
 	 *      java.lang.Object, int, java.lang.Object)
 	 */
-	public void dispatchEvent(Object eventListener, Object listenerObject, int eventAction, Object eventObject) {
-		((EventHandlerWrapper) eventListener).handleEvent((Event) eventObject, (Permission) listenerObject);
+	public void dispatchEvent(EventHandlerWrapper eventListener, Permission listenerObject, int eventAction, Event eventObject) {
+		eventListener.handleEvent(eventObject, listenerObject);
 	}
 }

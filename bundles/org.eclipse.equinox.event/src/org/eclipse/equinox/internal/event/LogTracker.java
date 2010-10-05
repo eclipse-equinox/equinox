@@ -13,7 +13,6 @@ package org.eclipse.equinox.internal.event;
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
@@ -24,7 +23,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * and handles all issues such as the service coming and going.
  */
 
-public class LogTracker extends ServiceTracker implements LogService {
+public class LogTracker extends ServiceTracker<LogService, LogService> implements LogService {
 	/** LogService interface class name */
 	protected final static String clazz = "org.osgi.service.log.LogService"; //$NON-NLS-1$
 
@@ -61,13 +60,13 @@ public class LogTracker extends ServiceTracker implements LogService {
 	}
 
 	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
-		ServiceReference[] references = getServiceReferences();
+		ServiceReference<LogService>[] references = getServiceReferences();
 
 		if (references != null) {
 			int size = references.length;
 
 			for (int i = 0; i < size; i++) {
-				LogService service = (LogService) getService(references[i]);
+				LogService service = getService(references[i]);
 				if (service != null) {
 					try {
 						service.log(reference, level, message, exception);
@@ -91,7 +90,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 	 * @param throwable Log exception or null if none.
 	 * @param reference ServiceReference associated with message or null if none.
 	 */
-	protected void noLogService(int level, String message, Throwable throwable, ServiceReference reference) {
+	protected void noLogService(int level, String message, Throwable throwable, ServiceReference<?> reference) {
 		if (out != null) {
 			synchronized (out) {
 				// Bug #113286.  If no log service present and messages are being
@@ -106,7 +105,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 						break;
 					}
 					case LOG_INFO : {
-						out.print(LogTrackerMsg.Info); 
+						out.print(LogTrackerMsg.Info);
 
 						break;
 					}
@@ -122,7 +121,7 @@ public class LogTracker extends ServiceTracker implements LogService {
 					}
 					default : {
 						out.print("["); //$NON-NLS-1$
-						out.print(LogTrackerMsg.Unknown_Log_level);         
+						out.print(LogTrackerMsg.Unknown_Log_level);
 						out.print("]: "); //$NON-NLS-1$
 
 						break;
@@ -141,20 +140,20 @@ public class LogTracker extends ServiceTracker implements LogService {
 			}
 		}
 	}
-	
+
 	// from EclipseLog to avoid using DateFormat -- see bug 149892#c10
 	private String getDate(Date date) {
-			Calendar c = Calendar.getInstance();
-			c.setTime(date);
-			StringBuffer sb = new StringBuffer();
-			appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
-			appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
-			appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
-			appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
-			appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
-			appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
-			return sb.toString();
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		StringBuffer sb = new StringBuffer();
+		appendPaddedInt(c.get(Calendar.YEAR), 4, sb).append('-');
+		appendPaddedInt(c.get(Calendar.MONTH) + 1, 2, sb).append('-');
+		appendPaddedInt(c.get(Calendar.DAY_OF_MONTH), 2, sb).append(' ');
+		appendPaddedInt(c.get(Calendar.HOUR_OF_DAY), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.MINUTE), 2, sb).append(':');
+		appendPaddedInt(c.get(Calendar.SECOND), 2, sb).append('.');
+		appendPaddedInt(c.get(Calendar.MILLISECOND), 3, sb);
+		return sb.toString();
 	}
 
 	private StringBuffer appendPaddedInt(int value, int pad, StringBuffer buffer) {

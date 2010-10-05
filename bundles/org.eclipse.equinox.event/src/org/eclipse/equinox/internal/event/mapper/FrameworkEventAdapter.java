@@ -11,15 +11,15 @@
 
 package org.eclipse.equinox.internal.event.mapper;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
 /**
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FrameworkEventAdapter extends EventAdapter {
 	// constants for Event topic substring
@@ -57,7 +57,7 @@ public class FrameworkEventAdapter extends EventAdapter {
 				return null;
 		}
 		String topic = HEADER + Constants.TOPIC_SEPARATOR + typename;
-		Hashtable properties = new Hashtable();
+		Map<String, Object> properties = new HashMap<String, Object>();
 		Bundle bundle = event.getBundle();
 		if (bundle != null) {
 			putBundleProperties(properties, bundle);
@@ -67,7 +67,7 @@ public class FrameworkEventAdapter extends EventAdapter {
 			putExceptionProperties(properties, t);
 		}
 		properties.put(Constants.EVENT, event);
-		Event converted = new Event(topic, (Dictionary) properties);
+		Event converted = new Event(topic, properties);
 		return converted;
 	}
 }

@@ -16,7 +16,7 @@ import org.osgi.service.event.EventAdmin;
 
 public class Activator implements BundleActivator {
 	private static final String PROP_USE_DS = "equinox.use.ds"; //$NON-NLS-1$
-	private ServiceRegistration eventAdminService;
+	private ServiceRegistration<EventAdmin> eventAdminService;
 	private EventComponent eventAdmin;
 
 	public void start(BundleContext bundleContext) throws InvalidSyntaxException {
@@ -25,7 +25,7 @@ public class Activator implements BundleActivator {
 		String serviceName = EventAdmin.class.getName();
 		Filter serviceFilter = bundleContext.createFilter("(objectclass=" + serviceName + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		//don't register the service if this bundle has already registered it declaratively
-		ServiceReference[] refs = bundleContext.getBundle().getRegisteredServices();
+		ServiceReference<?>[] refs = bundleContext.getBundle().getRegisteredServices();
 		if (refs != null) {
 			for (int i = 0; i < refs.length; i++)
 				if (serviceFilter.match(refs[i]))
@@ -34,7 +34,7 @@ public class Activator implements BundleActivator {
 
 		eventAdmin = new EventComponent();
 		eventAdmin.activate(bundleContext);
-		eventAdminService = bundleContext.registerService(serviceName, eventAdmin, null);
+		eventAdminService = bundleContext.registerService(EventAdmin.class, eventAdmin, null);
 	}
 
 	public void stop(BundleContext bundleContext) {
