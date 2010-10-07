@@ -205,7 +205,7 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 				List<BundleDescription> resolving = new ArrayList<BundleDescription>();
 				for (Bundle bundle : bundles) {
 					BundleDescription description = ((AbstractBundle) bundle).getBundleDescription();
-					if (((bundle.getState() & Bundle.UNINSTALLED) == 0) && description != null)
+					if (((bundle.getState() & Bundle.INSTALLED) != 0) && description != null)
 						resolving.add(description);
 				}
 				descriptions = resolving.toArray(new BundleDescription[resolving.size()]);
