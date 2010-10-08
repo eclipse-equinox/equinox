@@ -27,12 +27,15 @@
 int filter(const struct dirent *dir)
 {
 	char* prefixes[] = {
-		"xulrunner-",
-		"mozilla-seamonkey-",
-		"seamonkey-",
-		"mozilla-",
-		"mozilla-firefox-",
-		"firefox-",
+		"xulrunner\0",
+		"xulrunner-1",
+		"mozilla-seamonkey-1",
+		"seamonkey-1",
+		"mozilla-1",
+		"mozilla-firefox-2",
+		"firefox-2",
+		"mozilla-firefox-3",
+		"firefox-3",
 		NULL
 	};
 	int XULRUNNER_INDEX = 0;
@@ -63,29 +66,21 @@ int filter(const struct dirent *dir)
 		int prefixLength = strlen(prefix);
 		if (strncmp(dirname, prefix, prefixLength) == 0)
 		{
+			/* If a xulrunner install is found then success is immediate since
+			 * xulrunner always provides an embeddable GRE.
+			 */
 			if (index == XULRUNNER_INDEX) return 1;	/* include in scandir result */
 
-			/* Check if the first character following the prefix is a numeric digit.
-			 * This ensures that the suffix represents a version number like
-			 * "mozilla-1.7.3", and not a different product like "mozilla-thunderbird".
-			 */
 			int dirLength = strlen(dirname);
-			if ('0' <= dirname[prefixLength] && dirname[prefixLength] <= '9') {
-				/* If a xulrunner install is found then success is immediate since
-				 * xulrunner always provides an embeddable GRE.
-				 */				
-				if (index == XULRUNNER_INDEX) return 1;	/* include in scandir result */
-				
-				char* testpath = malloc (strlen(root) + dirLength + strlen(testlib) + 1);
-				strcpy(testpath, root);
-				strcat(testpath, dirname);
-				strcat(testpath, testlib);
-				int success = stat(testpath, &buf) == 0;
-				free(testpath);
-				if (success)
-				{
-					return 1;	/* include in scandir result */
-				}
+			char* testpath = malloc (strlen(root) + dirLength + strlen(testlib) + 1);
+			strcpy(testpath, root);
+			strcat(testpath, dirname);
+			strcat(testpath, testlib);
+			int success = stat(testpath, &buf) == 0;
+			free(testpath);
+			if (success)
+			{
+				return 1;	/* include in scandir result */
 			}
 		}
 		prefix = prefixes [++index];
@@ -202,7 +197,7 @@ void fixEnvForMozilla() {
 		/* Try some common installation locations. */
 		if (grePath == NULL)
 		{
-			/* try xulrunner-*, mozilla-*, firefox-* directories in /usr/lib/ */
+			/* try xulrunner-1*, mozilla-1*, firefox-2/3*, seamonkey-1* directories in /usr/lib/ */
 #if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
 			char* dir = "/usr/lib64/";
 #else
@@ -217,8 +212,8 @@ void fixEnvForMozilla() {
 			int count = scandir(dir, &namelist, filter, alphasort);
 			if (count > 0)
 			{
-				/* count-1 is used below in an attempt to get the matched directory
-				 * with the latest version number.
+				/* count-1 is used below in an attempt to choose XULRunner
+				 * any time one is found
 				 */
 				char* name = namelist [count - 1]->d_name;
 #endif
@@ -310,11 +305,20 @@ void fixEnvForMozilla() {
 
 		if (grePath != NULL)
 		{
-			ldPath = (char*)realloc(ldPath, strlen(ldPath) + strlen(grePath) + 2);
-			if (strlen(ldPath) > 0) strcat(ldPath, ":");
-			strcat(ldPath, grePath);
-			setenv("LD_LIBRARY_PATH", ldPath, 1);
-			
+			/* If grePath contains "xul" then do not change the LD_LIBRARY_PATH,
+			 * since it is likely that a xulrunner (not a mozilla or firefox)
+			 * will be found at runtime.  Note that MOZILLA_FIVE_HOME is still
+			 * updated if grePath contains "xul" since this variable can act as
+			 * a backup GRE to try if an initially-detected one fails to load.
+			 */
+			char* current = strrchr(grePath, 'x');
+			if (current == NULL || strncmp(current, "xul", 3) != 0) {
+				ldPath = (char*)realloc(ldPath, strlen(ldPath) + strlen(grePath) + 2);
+				if (strlen(ldPath) > 0) strcat(ldPath, ":");
+				strcat(ldPath, grePath);
+				setenv("LD_LIBRARY_PATH", ldPath, 1);
+			}
+
 			if (mozillaFiveHome == NULL) setenv("MOZILLA_FIVE_HOME", grePath, 1);
 			free(grePath);
 		}
