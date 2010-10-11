@@ -12,8 +12,8 @@ package org.eclipse.osgi.internal.loader;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import org.eclipse.osgi.framework.util.KeyedElement;
 
 public abstract class PackageSource implements KeyedElement {
@@ -77,5 +77,5 @@ public abstract class PackageSource implements KeyedElement {
 		return false;
 	}
 
-	public abstract List<String> listResources(String path, String filePattern);
+	public abstract Collection<String> listResources(String path, String filePattern);
 }

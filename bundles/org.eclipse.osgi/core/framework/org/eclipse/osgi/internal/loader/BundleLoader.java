@@ -720,7 +720,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		return subPackage.startsWith(prefix);
 	}
 
-	public List<String> listResources(String path, String filePattern, int options) {
+	public Collection<String> listResources(String path, String filePattern, int options) {
 		String pkgName = getResourcePackageName(path.endsWith("/") ? path : path + '/'); //$NON-NLS-1$
 		if ((path.length() > 1) && (path.charAt(0) == '/')) /* if name has a leading slash */
 			path = path.substring(1); /* remove leading slash before search */
@@ -763,7 +763,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			// only add the content of the external source if this is not a localSearch
 			if (externalSource != null && !localSearch) {
 				String packagePath = name.replace('.', '/');
-				List<String> externalResources = externalSource.listResources(packagePath, filePattern);
+				Collection<String> externalResources = externalSource.listResources(packagePath, filePattern);
 				for (String resource : externalResources) {
 					if (!result.contains(resource)) // prevent duplicates; could happen if the package is split or exporter has fragments/multiple jars
 						result.add(resource);
@@ -772,7 +772,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 		}
 
 		// now search locally
-		List<String> localResources = createClassLoader().listLocalResources(path, filePattern, options);
+		Collection<String> localResources = createClassLoader().listLocalResources(path, filePattern, options);
 		for (String resource : localResources) {
 			String resourcePkg = getResourcePackageName(resource);
 			if (!importedPackages.contains(resourcePkg) && !result.contains(resource))

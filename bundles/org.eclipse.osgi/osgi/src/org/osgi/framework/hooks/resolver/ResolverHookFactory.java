@@ -32,7 +32,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @ThreadSafe
  * @see ResolverHook
- * @version $Id: a84725caa3af079a556ac042e926dac6da0366ee $
+ * @version $Id: 08a6fba0f95499d08047282124b88256d33e1ce4 $
  */
 public interface ResolverHookFactory {
 	/**
@@ -61,7 +61,8 @@ public interface ResolverHookFactory {
 	 * framework is trying to resolve.  Other cases will cause multiple bundles to be
 	 * included in the trigger bundles collection.  When {@link FrameworkWiring#resolveBundles(Collection)
 	 * resolveBundles} is called the collection of triggers must include all the current bundle 
-	 * revisions for bundles passed to resolveBundles which have not been uninstalled.
+	 * revisions for bundles passed to resolveBundles which are in the {@link Bundle#INSTALLED INSTALLED}
+	 * state.
 	 * <p>
 	 * When {@link FrameworkWiring#refreshBundles(Collection, org.osgi.framework.FrameworkListener...)}
 	 * is called the collection of triggers is determined with the following steps:

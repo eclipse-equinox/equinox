@@ -97,8 +97,8 @@ public class FilteredSourcePackage extends SingleSourcePackage {
 	}
 
 	@Override
-	public List<String> listResources(String path, String filePattern) {
-		List<String> result = super.listResources(path, filePattern);
+	public Collection<String> listResources(String path, String filePattern) {
+		Collection<String> result = super.listResources(path, filePattern);
 		for (Iterator<String> resources = result.iterator(); resources.hasNext();) {
 			String resource = resources.next();
 			int lastSlash = resource.lastIndexOf('/');

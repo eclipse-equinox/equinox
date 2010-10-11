@@ -282,11 +282,11 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 		return manager.findEntries(path, filePattern, options);
 	}
 
-	public List<String> listResources(String path, String filePattern, int options) {
+	public Collection<String> listResources(String path, String filePattern, int options) {
 		return delegate.listResources(path, filePattern, options);
 	}
 
-	public List<String> listLocalResources(String path, String filePattern, int options) {
+	public Collection<String> listLocalResources(String path, String filePattern, int options) {
 		return manager.listLocalResources(path, filePattern, options);
 	}
 }

@@ -264,12 +264,12 @@ public class SystemBundleLoader extends BundleLoader {
 			}
 
 			@SuppressWarnings("unchecked")
-			public List<String> listResources(String path, String filePattern, int options) {
+			public Collection<String> listResources(String path, String filePattern, int options) {
 				return Collections.EMPTY_LIST;
 			}
 
 			@SuppressWarnings("unchecked")
-			public List<String> listLocalResources(String path, String filePattern, int options) {
+			public Collection<String> listLocalResources(String path, String filePattern, int options) {
 				return Collections.EMPTY_LIST;
 			}
 		};

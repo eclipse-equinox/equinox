@@ -53,10 +53,10 @@ public class MultiSourcePackage extends PackageSource {
 	}
 
 	@Override
-	public List<String> listResources(String path, String filePattern) {
+	public Collection<String> listResources(String path, String filePattern) {
 		List<String> result = new ArrayList<String>();
 		for (SingleSourcePackage source : suppliers) {
-			List<String> sourceResources = source.listResources(path, filePattern);
+			Collection<String> sourceResources = source.listResources(path, filePattern);
 			for (String resource : sourceResources) {
 				if (!result.contains(resource))
 					result.add(resource);

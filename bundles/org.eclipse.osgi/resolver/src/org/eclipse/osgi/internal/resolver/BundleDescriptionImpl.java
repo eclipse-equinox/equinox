@@ -915,15 +915,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return Collections.unmodifiableList(result);
 		}
 
-		public List<String> listResources(String path, String filePattern, int options) {
+		public Collection<String> listResources(String path, String filePattern, int options) {
 			if (!hasResourcePermission() || !isInUse())
 				return null;
 			@SuppressWarnings("unchecked")
-			List<String> result = Collections.EMPTY_LIST;
+			Collection<String> result = Collections.EMPTY_LIST;
 			BundleClassLoader bcl = getBundleClassLoader();
 			if (bcl != null)
 				result = bcl.listResources(path, filePattern, options);
-			return Collections.unmodifiableList(result);
+			return Collections.unmodifiableCollection(result);
 		}
 
 		public String toString() {

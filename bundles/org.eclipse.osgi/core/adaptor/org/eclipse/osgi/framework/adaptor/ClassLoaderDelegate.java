@@ -13,8 +13,8 @@ package org.eclipse.osgi.framework.adaptor;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -126,9 +126,9 @@ public interface ClassLoaderDelegate {
 	 * @param filePattern The file name pattern for selecting resource names in
 	 *        the specified path.
 	 * @param options The options for listing resource names.
-	 * @return a list of resource names.  If no resources are found then
-	 * the empty list is returned.
+	 * @return a collection of resource names.  If no resources are found then
+	 * the empty collection is returned.
 	 * @see {@link BundleWiring#listResources(String, String, int)}
 	 */
-	public List<String> listResources(String path, String filePattern, int options);
+	public Collection<String> listResources(String path, String filePattern, int options);
 }

@@ -671,7 +671,7 @@ public class ClasspathManager {
 	/**
 	 * @see {@link BundleClassLoader#listLocalResources(String, String, int)}
 	 */
-	public List<String> listLocalResources(String path, String filePattern, int options) {
+	public Collection<String> listLocalResources(String path, String filePattern, int options) {
 		List<BundleFile> bundleFiles = new ArrayList<BundleFile>();
 
 		ClasspathEntry[] cpEntries = getHostClasspathEntries();

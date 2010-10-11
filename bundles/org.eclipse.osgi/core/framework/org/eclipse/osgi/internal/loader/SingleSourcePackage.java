@@ -11,8 +11,8 @@
 package org.eclipse.osgi.internal.loader;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import org.eclipse.osgi.framework.adaptor.BundleClassLoader;
 
 public class SingleSourcePackage extends PackageSource {
@@ -62,7 +62,7 @@ public class SingleSourcePackage extends PackageSource {
 	}
 
 	@Override
-	public List<String> listResources(String path, String filePattern) {
+	public Collection<String> listResources(String path, String filePattern) {
 		BundleClassLoader bcl = supplier.getBundleLoader().createClassLoader();
 		return bcl.listLocalResources(path, filePattern, 0);
 	}
