@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.xml.parsers.SAXParserFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeInformation;
 
 /**
@@ -31,8 +32,8 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 	/**
 	 * Constructor of class MetaTypeInformationImpl.
 	 */
-	MetaTypeInformationImpl(Bundle bundle, SAXParserFactory parserFactory) throws java.io.IOException {
-		super(bundle, parserFactory);
+	MetaTypeInformationImpl(Bundle bundle, SAXParserFactory parserFactory, LogService logger) throws java.io.IOException {
+		super(bundle, parserFactory, logger);
 	}
 
 	/*

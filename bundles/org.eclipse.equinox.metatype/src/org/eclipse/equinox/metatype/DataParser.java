@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.*;
 import javax.xml.parsers.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
@@ -81,15 +82,19 @@ public class DataParser {
 	// Localization in DataParser class
 	String _dp_localization;
 
+	// Default visibility to avoid a plethora of synthetic accessor method warnings.
+	final LogService logger;
+
 	/*
 	 * Constructor of class DataParser.
 	 */
-	public DataParser(Bundle bundle, URL url, SAXParserFactory parserFactory) {
+	public DataParser(Bundle bundle, URL url, SAXParserFactory parserFactory, LogService logger) {
 
 		this._dp_bundle = bundle;
 		this._dp_url = url;
 		this._dp_parserFactory = parserFactory;
 		parserFactory.setValidating(false);
+		this.logger = logger;
 	}
 
 	/*
@@ -104,7 +109,7 @@ public class DataParser {
 			_dp_xmlReader.setErrorHandler(new MyErrorHandler(System.err));
 			InputStream is = _dp_url.openStream();
 			InputSource isource = new InputSource(is);
-			Logging.log(Logging.DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
+			logger.log(LogService.LOG_DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
 			_dp_xmlReader.parse(isource);
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
@@ -262,13 +267,13 @@ public class DataParser {
 
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is AbstractHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is AbstractHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(METADATA)) {
 				new MetaDataHandler(this).init(name, attributes);
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
@@ -288,7 +293,7 @@ public class DataParser {
 
 		public void init(String name, Attributes attributes) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is MetaDataHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler():init()"); //$NON-NLS-1$
 			_dp_localization = attributes.getValue(LOCALIZATION);
 			if (_dp_localization == null) {
 				// Not a problem, because LOCALIZATION is an optional attribute.
@@ -299,7 +304,7 @@ public class DataParser {
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is MetaDataHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			String name = getName(localName, qName);
 			if (name.equalsIgnoreCase(DESIGNATE)) {
@@ -312,18 +317,17 @@ public class DataParser {
 				OcdHandler ocdHandler = new OcdHandler(this);
 				ocdHandler.init(name, atts, _dp_OCDs);
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
 		protected void finished() throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is MetaDataHandler():finished()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler():finished()"); //$NON-NLS-1$
 			if (_dp_designateHandlers.size() == 0) {
 				// Schema defines at least one DESIGNATE is required.
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE));
+				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE)); //$NON-NLS-1$
 				return;
 			}
 			Enumeration designateHandlerKeys = _dp_designateHandlers.elements();
@@ -340,8 +344,8 @@ public class DataParser {
 						_dp_pid_to_OCDs_.put(designateHandler._factory_val, ocd);
 					}
 				} else {
-					Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
-							NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, designateHandler._ocdref));
+					logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, designateHandler._ocdref)); //$NON-NLS-1$
+
 				}
 			}
 		}
@@ -365,14 +369,13 @@ public class DataParser {
 
 		public void init(String name, Attributes atts, Hashtable ocds_hashtable) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is OcdHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():init()"); //$NON-NLS-1$
 			_parent_OCDs_hashtable = ocds_hashtable;
 
 			String ocd_name_val = atts.getValue(NAME);
 			if (ocd_name_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes, Hashtable)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, NAME, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Hashtable) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, NAME, name)); //$NON-NLS-1$
 				return;
 			}
 
@@ -384,8 +387,7 @@ public class DataParser {
 			_refID = atts.getValue(ID);
 			if (_refID == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes, Hashtable)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Hashtable) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name)); //$NON-NLS-1$
 				return;
 			}
 
@@ -394,7 +396,7 @@ public class DataParser {
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is OcdHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			if (!_isParsedDataValid)
 				return;
@@ -413,21 +415,20 @@ public class DataParser {
 					_ocd.setIcon(iconHandler._icon);
 				}
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
 		protected void finished() throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is OcdHandler():finished()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
 
 			if (_ad_vector.size() == 0) {
 				// Schema defines at least one AD is required.
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ELEMENT, AD, _refID));
+				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, AD, _refID)); //$NON-NLS-1$
 				return;
 			}
 			// OCD gets all parsed ADs.
@@ -454,12 +455,11 @@ public class DataParser {
 
 		public void init(String name, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is IconHandler:init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is IconHandler:init()"); //$NON-NLS-1$
 			String icon_resource_val = atts.getValue(RESOURCE);
 			if (icon_resource_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, RESOURCE, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, RESOURCE, name)); //$NON-NLS-1$
 				return;
 			}
 
@@ -493,7 +493,7 @@ public class DataParser {
 
 		public void init(String name, Attributes atts, Vector ad_vector) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is AttributeDefinitionHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():init()"); //$NON-NLS-1$
 			_parent_ADs_vector = ad_vector;
 
 			String ad_name_val = atts.getValue(NAME);
@@ -509,8 +509,7 @@ public class DataParser {
 			String ad_id_val = atts.getValue(ID);
 			if (ad_id_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes, Vector)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ID, name)); //$NON-NLS-1$
 				return;
 			}
 
@@ -535,8 +534,7 @@ public class DataParser {
 				_dataType = AttributeDefinition.SHORT;
 			} else {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes, Vector)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name)); //$NON-NLS-1$
 				return;
 
 			}
@@ -566,8 +564,8 @@ public class DataParser {
 				if (ad_cardinality_val == 0) {
 					// But when it is not assigned, CARDINALITY cannot be '0'.
 					_isParsedDataValid = false;
-					Logging.log(Logging.ERROR, this, "init(String, Attributes, Vector)", //$NON-NLS-1$
-							MetaTypeMsg.NULL_DEFAULTS);
+					logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + MetaTypeMsg.NULL_DEFAULTS); //$NON-NLS-1$
+
 					return;
 				}
 			}
@@ -579,7 +577,7 @@ public class DataParser {
 				ad_required_val = Boolean.TRUE.toString();
 			}
 
-			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization);
+			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger);
 
 			if (ad_cardinality_val == 0) {
 				// Attribute DEFAULT has one and only one occurance.
@@ -592,7 +590,7 @@ public class DataParser {
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is AttributeDefinitionHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			if (!_isParsedDataValid)
 				return;
@@ -607,13 +605,13 @@ public class DataParser {
 					_optionValue_vector.addElement(optionHandler._value_val);
 				}
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
 		protected void finished() throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
 
@@ -636,20 +634,18 @@ public class DataParser {
 
 		public void init(String name, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is OptionHandler:init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is OptionHandler:init()"); //$NON-NLS-1$
 			_label_val = atts.getValue(LABEL);
 			if (_label_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, LABEL, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, LABEL, name)); //$NON-NLS-1$
 				return;
 			}
 
 			_value_val = atts.getValue(VALUE);
 			if (_value_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, VALUE, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, VALUE, name)); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -671,7 +667,7 @@ public class DataParser {
 	//		public void init(String name, Attributes atts, Vector value_vector)
 	//				throws SAXException {
 	//
-	//			Logging.log(Logging.TRACE,
+	//			Logging.log(LogService.LOG_DEBUG,
 	//					"Here is SimpleValueHandler():init()"); //$NON-NLS-1$
 	//			_elementName = name;
 	//			_parent_value_vector = value_vector;
@@ -679,7 +675,7 @@ public class DataParser {
 	//
 	//		protected void finished() throws SAXException {
 	//
-	//			Logging.log(Logging.TRACE,
+	//			Logging.log(LogService.LOG_DEBUG,
 	//					"Here is SimpleValueHandler():finished()"); //$NON-NLS-1$
 	//			if (_parent_value_vector != null) {
 	//				_parent_value_vector.addElement(_buffer.toString());
@@ -689,7 +685,7 @@ public class DataParser {
 	//		public void characters(char buf[], int offset, int len)
 	//				throws SAXException {
 	//
-	//			Logging.log(Logging.TRACE,
+	//			Logging.log(LogService.LOG_DEBUG,
 	//					"Here is SimpleValueHandler(" //$NON-NLS-1$
 	//					+ _elementName
 	//					+ "):characters():[" //$NON-NLS-1$
@@ -719,12 +715,11 @@ public class DataParser {
 
 		public void init(String name, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is DesignateHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():init()"); //$NON-NLS-1$
 			_pid_val = atts.getValue(PID);
 			if (_pid_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, PID, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, PID, name)); //$NON-NLS-1$
 				return;
 			}
 			_factory_val = atts.getValue(FACTORY);
@@ -755,7 +750,7 @@ public class DataParser {
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is DesignateHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			if (!_isParsedDataValid)
 				return;
@@ -768,21 +763,20 @@ public class DataParser {
 					_ocdref = objectHandler._ocdref;
 				}
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
 		protected void finished() throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is DesignateHandler():finished()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
 
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
 				// Schema defines at least one OBJECT is required.
-				Logging.log(Logging.ERROR, this, "finished()", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ELEMENT, OBJECT, _pid_val));
+				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, OBJECT, _pid_val)); //$NON-NLS-1$
 				return;
 
 			}
@@ -802,19 +796,18 @@ public class DataParser {
 
 		public void init(String name, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is ObjectHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is ObjectHandler():init()"); //$NON-NLS-1$
 			_ocdref = atts.getValue(OCDREF);
 			if (_ocdref == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, OCDREF, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, OCDREF, name)); //$NON-NLS-1$
 				return;
 			}
 		}
 
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is ObjectHandler:startElement():" //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is ObjectHandler:startElement():" //$NON-NLS-1$
 					+ qName);
 			if (!_isParsedDataValid)
 				return;
@@ -825,7 +818,7 @@ public class DataParser {
 				attributeHandler.init(name, atts);
 				// The ATTRIBUTE element is only used by RFC94, do nothing for it here.
 			} else {
-				Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
+				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 	}
@@ -846,20 +839,18 @@ public class DataParser {
 
 		public void init(String name, Attributes atts) throws SAXException {
 
-			Logging.log(Logging.TRACE, "Here is AttributeHandler():init()"); //$NON-NLS-1$
+			logger.log(LogService.LOG_DEBUG, "Here is AttributeHandler():init()"); //$NON-NLS-1$
 			_adref_val = atts.getValue(ADREF);
 			if (_adref_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ADREF, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, ADREF, name)); //$NON-NLS-1$
 				return;
 			}
 
 			_content_val = atts.getValue(CONTENT);
 			if (_content_val == null) {
 				_isParsedDataValid = false;
-				Logging.log(Logging.ERROR, this, "init(String, Attributes)", //$NON-NLS-1$
-						NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, CONTENT, name));
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, CONTENT, name)); //$NON-NLS-1$
 				return;
 			}
 		}

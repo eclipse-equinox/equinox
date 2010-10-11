@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.security.PrivilegedAction;
 import java.util.Hashtable;
 import javax.xml.parsers.SAXParserFactory;
 import org.osgi.framework.*;
+import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -33,6 +34,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	ServiceRegistration _mtsReg;
 	MetaTypeServiceImpl _mts = null;
 
+	// This field may be accessed by different threads.
+	private volatile LogTracker logger;
+
 	/**
 	 * The current SaxParserFactory being used by the WebContainer
 	 */
@@ -50,12 +54,16 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void start(BundleContext context) throws Exception {
 
+		// Do this first to make logging available as early as possible, also to ensure a
+		// null logger is not passed to other objects.
+		logger = new LogTracker(context, System.out);
+		logger.open();
 		this._context = context;
 		_parserTracker = new ServiceTracker(context, saxFactoryClazz, this);
 		_parserTracker.open();
 		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
 		FragmentUtils.packageAdmin = ref == null ? null : (PackageAdmin) context.getService(ref);
-		Logging.debug("====== Meta Type Service starting ! ====="); //$NON-NLS-1$
+		logger.log(LogService.LOG_DEBUG, "====== Meta Type Service starting ! ====="); //$NON-NLS-1$
 	}
 
 	/*
@@ -65,9 +73,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	public void stop(BundleContext context) throws Exception {
 
-		Logging.debug("====== Meta Type Service stoping ! ====="); //$NON-NLS-1$
+		logger.log(LogService.LOG_DEBUG, "====== Meta Type Service stoping ! ====="); //$NON-NLS-1$
+		// No null checks required because this method will not be called unless the start method completed successfully.
 		_parserTracker.close();
 		_parserTracker = null;
+		// Do this last to leave logging available as long as possible.
+		logger.close();
+		logger = null;
 		FragmentUtils.packageAdmin = null;
 		context = null;
 	}
@@ -144,8 +156,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		properties.put(Constants.SERVICE_VENDOR, "IBM"); //$NON-NLS-1$
 		properties.put(Constants.SERVICE_DESCRIPTION, MetaTypeMsg.SERVICE_DESCRIPTION);
 		properties.put(Constants.SERVICE_PID, mtsPid);
-
-		_mts = new MetaTypeServiceImpl(_context, _currentParserFactory);
+		// The intent is that logger can never be null here, but is that really the case?
+		_mts = new MetaTypeServiceImpl(_context, _currentParserFactory, logger);
 		AccessController.doPrivileged(new PrivilegedAction() {
 			public Object run() {
 				_context.addBundleListener(_mts);

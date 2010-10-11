@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.*;
 
 /**
@@ -40,18 +41,22 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	String[] _locales;
 	boolean _isThereMeta = false;
 
+	// Give access to subclasses.
+	protected final LogService logger;
+
 	/**
 	 * Constructor of class MetaTypeProviderImpl.
 	 */
-	MetaTypeProviderImpl(Bundle bundle, SAXParserFactory parserFactory) throws IOException {
+	MetaTypeProviderImpl(Bundle bundle, SAXParserFactory parserFactory, LogService logger) throws IOException {
 
 		this._bundle = bundle;
+		this.logger = logger;
 
 		// read all bundle's metadata files and build internal data structures
 		_isThereMeta = readMetaFiles(bundle, parserFactory);
 
 		if (!_isThereMeta) {
-			Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, new Long(bundle.getBundleId()), bundle.getSymbolicName()));
+			logger.log(LogService.LOG_DEBUG, NLS.bind(MetaTypeMsg.METADATA_NOT_FOUND, new Long(bundle.getBundleId()), bundle.getSymbolicName()));
 		}
 	}
 
@@ -95,7 +100,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					try {
 						// Assume all XML files are what we want by default.
 						_isMetaDataFile = true;
-						DataParser parser = new DataParser(bundle, urls[i], parserFactory);
+						DataParser parser = new DataParser(bundle, urls[i], parserFactory, logger);
 						pidToOCD = parser.doParse();
 						if (pidToOCD == null) {
 							_isMetaDataFile = false;
@@ -106,11 +111,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					}
 
 					if ((_isMetaDataFile) && (pidToOCD != null)) {
-						
+
 						// We got some OCDs now.
 						Enumeration pids = pidToOCD.keys();
 						while (pids.hasMoreElements()) {
-							String pid = (String)pids.nextElement();
+							String pid = (String) pids.nextElement();
 							ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) pidToOCD.get(pid);
 
 							if (ocd.getType() == ObjectClassDefinitionImpl.PID) {

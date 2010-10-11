@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.equinox.metatype;
 
 import java.util.Vector;
+import org.osgi.service.log.LogService;
 
 public class ValueTokenizer {
 
@@ -22,8 +23,7 @@ public class ValueTokenizer {
 	/*
 	 * Constructor of class ValueTokenizer
 	 */
-	public ValueTokenizer(String values_str) {
-
+	public ValueTokenizer(String values_str, LogService logger) {
 		if (values_str != null) {
 
 			StringBuffer buffer = new StringBuffer(""); //$NON-NLS-1$
@@ -34,8 +34,7 @@ public class ValueTokenizer {
 						continue;
 					}
 					// CONTROL char should not occur in last char.
-					Logging.log(Logging.ERROR, this, "ValueTokenizer(String)", //$NON-NLS-1$
-							MetaTypeMsg.TOKENIZER_GOT_INVALID_DATA);
+					logger.log(LogService.LOG_ERROR, "ValueTokenizer.ValueTokenizer(String) " + MetaTypeMsg.TOKENIZER_GOT_INVALID_DATA); //$NON-NLS-1$
 					// It's an invalid char, but since it's the last one,
 					// just ignore it.
 					continue;

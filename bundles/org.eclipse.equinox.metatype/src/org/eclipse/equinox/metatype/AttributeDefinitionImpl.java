@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.eclipse.osgi.util.NLS;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.AttributeDefinition;
 
 /**
@@ -36,10 +37,12 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 	Vector _values = new Vector(7);
 	Vector _labels = new Vector(7);
 
+	private final LogService logger;
+
 	/**
 	 * Constructor of class AttributeDefinitionImpl.
 	 */
-	public AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min, Object max, boolean isRequired, String localization) {
+	public AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min, Object max, boolean isRequired, String localization, LogService logger) {
 
 		this._id = id;
 		this._name = name;
@@ -50,6 +53,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		this._maxValue = max;
 		this._isRequired = isRequired;
 		this._localization = localization;
+		this.logger = logger;
 	}
 
 	/*
@@ -57,7 +61,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 	 */
 	public synchronized Object clone() {
 
-		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, _localization);
+		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, _localization, logger);
 
 		if (_defaults != null) {
 			ad.setDefaultValue((String[]) _defaults.clone(), false);
@@ -205,14 +209,12 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 	void setOption(Vector labels, Vector values, boolean needValidation) {
 
 		if ((labels == null) || (values == null)) {
-			Logging.log(Logging.ERROR, this, "setOption(Vector, Vector, boolean)", //$NON-NLS-1$
-					MetaTypeMsg.NULL_OPTIONS);
+			logger.log(LogService.LOG_ERROR, "AttributeDefinitionImpl.setOption(Vector, Vector, boolean) " + MetaTypeMsg.NULL_OPTIONS); //$NON-NLS-1$
 			return;
 		}
 
 		if (labels.size() != values.size()) {
-			Logging.log(Logging.ERROR, this, "setOption(Vector, Vector, boolean)", //$NON-NLS-1$
-					MetaTypeMsg.INCONSISTENT_OPTIONS);
+			logger.log(LogService.LOG_ERROR, "AttributeDefinitionImpl.setOption(Vector, Vector, boolean) " + MetaTypeMsg.INCONSISTENT_OPTIONS); //$NON-NLS-1$
 			return;
 		}
 
@@ -223,7 +225,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			for (int index = 0; index < _labels.size(); index++) {
 				String reason = validate((String) _values.get(index));
 				if ((reason != null) && reason.length() > 0) {
-					Logging.log(Logging.WARN, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, _values.get(index), reason));
+					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, _values.get(index), reason));
 					_labels.remove(index);
 					_values.remove(index);
 					index--; // Because this one has been removed.
@@ -247,7 +249,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 	 */
 	void setDefaultValue(String defaults_str, boolean needValidation) {
 
-		ValueTokenizer vt = new ValueTokenizer(defaults_str);
+		ValueTokenizer vt = new ValueTokenizer(defaults_str, logger);
 		setDefaultValue(vt.getValuesAsArray(), needValidation);
 	}
 
@@ -302,7 +304,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 
 		try {
 			if (_cardinality != 0) {
-				ValueTokenizer vt = new ValueTokenizer(value);
+				ValueTokenizer vt = new ValueTokenizer(value, logger);
 				Vector value_vector = vt.getValuesAsVector();
 
 				if (value_vector.size() > Math.abs(_cardinality)) {
