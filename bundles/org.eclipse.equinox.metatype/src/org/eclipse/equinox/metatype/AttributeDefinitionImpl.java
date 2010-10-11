@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,15 +196,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			return null;
 		}
 
-		String[] returnedValues = new String[_values.size()];
-		Enumeration valueKeys = _values.elements();
-		int i = 0;
-		while (valueKeys.hasMoreElements()) {
-			String valueKey = (String) valueKeys.nextElement();
-			returnedValues[i] = getLocalized(valueKey);
-			i++;
-		}
-		return returnedValues;
+		return (String[]) _values.toArray(new String[_values.size()]);
 	}
 
 	/**

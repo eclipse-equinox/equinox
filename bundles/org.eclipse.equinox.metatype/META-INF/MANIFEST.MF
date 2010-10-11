@@ -1,6 +1,6 @@
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Version: 1.0.100.qualifier
+Bundle-Version: 1.0.200.qualifier
 Bundle-SymbolicName: org.eclipse.equinox.metatype
 Bundle-Activator: org.eclipse.equinox.metatype.Activator
 Import-Package: org.eclipse.osgi.util,
