@@ -1869,6 +1869,14 @@ public class Framework implements EventPublisher, Runnable {
 		// 4) For the registrant bundle, find the wiring for the package.
 		PackageSource producerSource = producerBL.getPackageSource(pkgName);
 		if (producerSource == null) {
+			if (serviceClass != null && ServiceFactory.class.isAssignableFrom(serviceClass)) {
+				Bundle bundle = packageAdmin.getBundle(serviceClass);
+				if (bundle != null && bundle != registrant)
+					// in this case we have a wacky ServiceFactory that is doing something we cannot 
+					// verify if it is correct.  Instead of failing we allow the assignment and hope for the best
+					// bug 326918
+					return true;
+			}
 			// 5) If no wiring is found for the registrant bundle then find the wiring for the classloader of the service object.  If no wiring is found return false.
 			producerSource = getPackageSource(serviceClass, pkgName);
 			if (producerSource == null)
