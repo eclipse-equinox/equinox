@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
 import org.eclipse.osgi.internal.loader.buddy.PolicyHandler;
+import org.eclipse.osgi.internal.resolver.StateBuilder;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -306,6 +307,10 @@ public class BundleLoader implements ClassLoaderDelegate {
 			userObject = exportingBundle.getLoaderProxy();
 		}
 		return (BundleLoaderProxy) userObject;
+	}
+
+	public BundleLoaderProxy getLoaderProxy() {
+		return proxy;
 	}
 
 	/*
@@ -1119,10 +1124,19 @@ public class BundleLoader implements ClassLoaderDelegate {
 		if (packages == null)
 			return;
 		List<String> dynamicImports = new ArrayList<String>(packages.length);
-		for (int i = 0; i < packages.length; i++)
-			dynamicImports.add(packages[i].getValue());
-		if (dynamicImports.size() > 0)
+		List<ImportPackageSpecification> dynamicImportSpecs = new ArrayList<ImportPackageSpecification>(packages.length);
+		for (ManifestElement dynamicImportElement : packages) {
+			String[] names = dynamicImportElement.getValueComponents();
+			for (String name : names)
+				dynamicImports.add(name);
+			StateBuilder.addImportPackages(dynamicImportElement, dynamicImportSpecs, 2, true);
+		}
+		if (dynamicImports.size() > 0) {
 			addDynamicImportPackage(dynamicImports.toArray(new String[dynamicImports.size()]));
+			BundleDescription revision = getLoaderProxy().getBundleDescription();
+			State state = revision.getContainingState();
+			state.addDynamicImportPackages(revision, dynamicImportSpecs.toArray(new ImportPackageSpecification[dynamicImportSpecs.size()]));
+		}
 	}
 
 	synchronized public void attachFragment(BundleFragment fragment) throws BundleException {

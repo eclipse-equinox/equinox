@@ -571,16 +571,19 @@ public class ClasspathManager {
 	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClassLoadingStatsHook[] statsHooks) {
 		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
 		byte[] modifiedBytes = classbytes;
-		for (int i = 0; i < hooks.length; i++) {
-			modifiedBytes = hooks[i].processClass(name, classbytes, classpathEntry, entry, this);
-			if (modifiedBytes != null)
-				classbytes = modifiedBytes;
+		Class<?> result = null;
+		try {
+			for (int i = 0; i < hooks.length; i++) {
+				modifiedBytes = hooks[i].processClass(name, classbytes, classpathEntry, entry, this);
+				if (modifiedBytes != null)
+					classbytes = modifiedBytes;
+			}
+
+			result = classloader.defineClass(name, classbytes, classpathEntry, entry);
+		} finally {
+			for (int i = 0; i < statsHooks.length; i++)
+				statsHooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
 		}
-
-		Class<?> result = classloader.defineClass(name, classbytes, classpathEntry, entry);
-
-		for (int i = 0; i < statsHooks.length; i++)
-			statsHooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
 		return result;
 	}
 

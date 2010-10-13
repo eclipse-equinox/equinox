@@ -842,6 +842,27 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
+<filter comment="Ignore OSGi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.weaving.WeavingException"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingHook.java" type="org.osgi.framework.hooks.weaving.WeavingHook">
+<filter comment="Ignore OSGi API&#10;WovenClass.java" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.weaving.WeavingHook"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
+<filter comment="Ignore OSGi API&#10;WovenClass.java" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.weaving.WovenClass"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
 <filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>

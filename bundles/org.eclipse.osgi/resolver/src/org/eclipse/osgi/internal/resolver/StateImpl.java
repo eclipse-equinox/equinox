@@ -411,6 +411,7 @@ public abstract class StateImpl implements State {
 		bundle.setSubstitutedExports(null);
 		bundle.setSelectedCapabilities(null);
 		bundle.setResolvedCapabilities(null);
+		bundle.clearAddedDynamicImportPackages();
 
 		// remove the constraint suppliers
 		NativeCodeSpecificationImpl nativeCode = (NativeCodeSpecificationImpl) bundle.getNativeCodeSpecification();
@@ -1007,6 +1008,10 @@ public abstract class StateImpl implements State {
 			}
 		}
 
+	}
+
+	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
+		((BundleDescriptionImpl) importingBundle).addDynamicImportPackages(dynamicImports);
 	}
 
 	void setReader(StateReader reader) {

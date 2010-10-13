@@ -1684,72 +1684,68 @@ public class ResolverImpl implements Resolver {
 			ResolverImport[] resolverImports = rb.getImportPackages();
 			// Check through the ResolverImports of this bundle.
 			// If there is a matching one then pass it into resolveImport()
-			boolean found = false;
 			for (int j = 0; j < resolverImports.length; j++) {
 				// Make sure it is a dynamic import
 				if (!resolverImports[j].isDynamic())
 					continue;
-				String importName = resolverImports[j].getName();
-				// If the import uses a wildcard, then temporarily replace this with the requested package
-				if (importName.equals("*") || //$NON-NLS-1$
-						(importName.endsWith(".*") && requestedPackage.startsWith(importName.substring(0, importName.length() - 1)))) { //$NON-NLS-1$
-					resolverImports[j].setName(requestedPackage);
-				}
 				// Resolve the import
-				if (requestedPackage.equals(resolverImports[j].getName())) {
-					found = true;
-					// populate the grouping checker with current imports
-					groupingChecker.populateRoots(resolverImports[j].getBundle());
-					if (resolveImport(resolverImports[j], new ArrayList<ResolverBundle>())) {
-						found = false;
-						while (!found && resolverImports[j].getSelectedSupplier() != null) {
-							if (groupingChecker.isDynamicConsistent(resolverImports[j].getBundle(), (ResolverExport) resolverImports[j].getSelectedSupplier()) != null)
-								resolverImports[j].selectNextSupplier(); // not consistent; try the next
-							else
-								found = true; // found a valid wire
-						}
-						resolverImports[j].setName(null);
-						if (!found) {
-							// not found or there was a conflict; reset the suppliers and return null
-							resolverImports[j].clearPossibleSuppliers();
-							return null;
-						}
-						// If the import resolved then return it's matching export
-						if (DEBUG_IMPORTS)
-							ResolverImpl.log("Resolved dynamic import: " + rb + ":" + resolverImports[j].getName() + " -> " + ((ResolverExport) resolverImports[j].getSelectedSupplier()).getExporter() + ":" + requestedPackage); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-						ExportPackageDescription matchingExport = ((ResolverExport) resolverImports[j].getSelectedSupplier()).getExportPackageDescription();
-						// If it is a wildcard import then clear the wire, so other
-						// exported packages can be found for it
-						if (importName.endsWith("*")) //$NON-NLS-1$
-							resolverImports[j].clearPossibleSuppliers();
-						return matchingExport;
-					}
-				}
-				// Reset the import package name
-				resolverImports[j].setName(null);
+				ExportPackageDescription supplier = resolveDynamicImport(resolverImports[j], requestedPackage);
+				if (supplier != null)
+					return supplier;
 			}
-			// this is to support adding dynamic imports on the fly.
-			if (!found) {
-				Map<String, String> directives = new HashMap<String, String>(1, 1);
-				directives.put(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
-				ImportPackageSpecification packageSpec = state.getFactory().createImportPackageSpecification(requestedPackage, null, null, null, directives, null, importingBundle);
-				ResolverImport newImport = new ResolverImport(rb, packageSpec);
-				if (resolveImport(newImport, new ArrayList<ResolverBundle>())) {
-					while (newImport.getSelectedSupplier() != null) {
-						if (groupingChecker.isDynamicConsistent(rb, (ResolverExport) newImport.getSelectedSupplier()) != null)
-							newImport.selectNextSupplier();
-						else
-							break;
-					}
-					return ((ResolverExport) newImport.getSelectedSupplier()).getExportPackageDescription();
-				}
+			// look for packages added dynamically
+			ImportPackageSpecification[] addedDynamicImports = importingBundle.getAddedDynamicImportPackages();
+			for (ImportPackageSpecification addedDynamicImport : addedDynamicImports) {
+				ResolverImport newImport = new ResolverImport(rb, addedDynamicImport);
+				ExportPackageDescription supplier = resolveDynamicImport(newImport, requestedPackage);
+				if (supplier != null)
+					return supplier;
 			}
+
 			if (DEBUG || DEBUG_IMPORTS)
 				ResolverImpl.log("Failed to resolve dynamic import: " + requestedPackage); //$NON-NLS-1$
 			return null; // Couldn't resolve the import, so return null
 		} finally {
 			hook = null;
 		}
+	}
+
+	private ExportPackageDescription resolveDynamicImport(ResolverImport dynamicImport, String requestedPackage) {
+		String importName = dynamicImport.getName();
+		// If the import uses a wildcard, then temporarily replace this with the requested package
+		if (importName.equals("*") || //$NON-NLS-1$
+				(importName.endsWith(".*") && requestedPackage.startsWith(importName.substring(0, importName.length() - 1)))) { //$NON-NLS-1$
+			dynamicImport.setName(requestedPackage);
+		}
+		try {
+			// Resolve the import
+			if (!requestedPackage.equals(dynamicImport.getName()))
+				return null;
+
+			if (resolveImport(dynamicImport, new ArrayList<ResolverBundle>())) {
+				// populate the grouping checker with current imports
+				groupingChecker.populateRoots(dynamicImport.getBundle());
+				while (dynamicImport.getSelectedSupplier() != null) {
+					if (groupingChecker.isDynamicConsistent(dynamicImport.getBundle(), (ResolverExport) dynamicImport.getSelectedSupplier()) != null) {
+						dynamicImport.selectNextSupplier(); // not consistent; try the next
+					} else {
+						// If the import resolved then return it's matching export
+						if (DEBUG_IMPORTS)
+							ResolverImpl.log("Resolved dynamic import: " + dynamicImport.getBundle() + ":" + dynamicImport.getName() + " -> " + ((ResolverExport) dynamicImport.getSelectedSupplier()).getExporter() + ":" + requestedPackage); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						return ((ResolverExport) dynamicImport.getSelectedSupplier()).getExportPackageDescription();
+					}
+				}
+				dynamicImport.clearPossibleSuppliers();
+			}
+		} finally {
+			// If it is a wildcard import then clear the wire, so other
+			// exported packages can be found for it
+			if (importName.endsWith("*")) //$NON-NLS-1$
+				dynamicImport.clearPossibleSuppliers();
+			// Reset the import package name
+			dynamicImport.setName(null);
+		}
+		return null;
 	}
 
 	public void bundleAdded(BundleDescription bundle) {

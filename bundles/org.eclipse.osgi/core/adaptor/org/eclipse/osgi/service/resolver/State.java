@@ -466,6 +466,17 @@ public interface State {
 	public ExportPackageDescription linkDynamicImport(BundleDescription importingBundle, String requestedPackage);
 
 	/**
+	 * Adds the specified dynamic imports to the specified importingBundle.  The added 
+	 * dynamic imports are only valid for the instance of this state and will be 
+	 * forgotten if this state is read from a persistent cache.
+	 * @param importingBundle the bundle to add the imports to.
+	 * @param dynamicImport the dynamic imports to add.
+	 * @since 3.7
+	 * @see BundleDescription#getAddedDynamicImportPackages()
+	 */
+	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports);
+
+	/**
 	 * Sets the platform properties of the state.  The platform properties
 	 * are used to resolve the following constraints:
 	 * <ul>

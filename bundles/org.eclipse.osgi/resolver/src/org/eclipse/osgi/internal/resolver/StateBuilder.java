@@ -23,7 +23,7 @@ import org.osgi.framework.*;
 /**
  * This class builds bundle description objects from manifests
  */
-class StateBuilder {
+public class StateBuilder {
 	static final String[] DEFINED_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
 	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
@@ -254,7 +254,7 @@ class StateBuilder {
 		return allImports.toArray(new ImportPackageSpecification[allImports.size()]);
 	}
 
-	private static void addImportPackages(ManifestElement importPackage, List<ImportPackageSpecification> allImports, int manifestVersion, boolean dynamic) {
+	public static void addImportPackages(ManifestElement importPackage, List<ImportPackageSpecification> allImports, int manifestVersion, boolean dynamic) {
 		String[] importNames = importPackage.getValueComponents();
 		for (int i = 0; i < importNames.length; i++) {
 			// do not allow for multiple imports of same package of manifest version < 2
@@ -274,7 +274,7 @@ class StateBuilder {
 			result.setVersionRange(getVersionRange(versionString));
 			result.setBundleSymbolicName(importPackage.getAttribute(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE));
 			result.setBundleVersionRange(getVersionRange(importPackage.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
-			// only set the matching attributes if manfest version >= 2
+			// only set the matching attributes if manifest version >= 2
 			if (manifestVersion >= 2)
 				result.setAttributes(getAttributes(importPackage, DEFINED_MATCHING_ATTRS));
 
@@ -629,7 +629,7 @@ class StateBuilder {
 		return new VersionRange(versionRange);
 	}
 
-	private static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic, boolean jreBundle) throws BundleException {
+	public static void checkImportExportSyntax(String headerKey, ManifestElement[] elements, boolean export, boolean dynamic, boolean jreBundle) throws BundleException {
 		if (elements == null)
 			return;
 		int length = elements.length;

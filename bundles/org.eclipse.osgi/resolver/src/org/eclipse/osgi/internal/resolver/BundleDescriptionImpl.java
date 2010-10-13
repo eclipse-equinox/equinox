@@ -110,6 +110,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	public ImportPackageSpecification[] getAddedDynamicImportPackages() {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			if (currentData.addedDynamicImports == null)
+				return EMPTY_IMPORTS;
+			return currentData.addedDynamicImports.toArray(new ImportPackageSpecification[currentData.addedDynamicImports.size()]);
+		}
+	}
+
 	public BundleSpecification[] getRequiredBundles() {
 		LazyData currentData = loadLazyData();
 		synchronized (this.monitor) {
@@ -450,6 +459,13 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	void clearAddedDynamicImportPackages() {
+		synchronized (this.monitor) {
+			checkLazyData();
+			lazyData.addedDynamicImports = null;
+		}
+	}
+
 	public String toString() {
 		if (getSymbolicName() == null)
 			return "[" + getBundleId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -650,6 +666,43 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		setLazyLoaded(false);
 	}
 
+	void addDynamicImportPackages(ImportPackageSpecification[] dynamicImport) {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			if (currentData.addedDynamicImports == null)
+				currentData.addedDynamicImports = new ArrayList<ImportPackageSpecification>();
+			for (ImportPackageSpecification addImport : dynamicImport) {
+				if (!ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(addImport.getDirective(Constants.RESOLUTION_DIRECTIVE)))
+					throw new IllegalArgumentException("Import must be a dynamic import."); //$NON-NLS-1$
+			}
+			adding: for (ImportPackageSpecification addImport : dynamicImport) {
+				for (ImportPackageSpecification currentImport : currentData.addedDynamicImports) {
+					if (equalImports(addImport, currentImport))
+						continue adding;
+				}
+				((ImportPackageSpecificationImpl) addImport).setBundle(this);
+				currentData.addedDynamicImports.add(addImport);
+			}
+		}
+		setLazyLoaded(false);
+	}
+
+	private boolean equalImports(ImportPackageSpecification addImport, ImportPackageSpecification currentImport) {
+		if (!isEqual(addImport.getName(), currentImport.getName()))
+			return false;
+		if (!isEqual(addImport.getVersionRange(), currentImport.getVersionRange()))
+			return false;
+		if (!isEqual(addImport.getBundleSymbolicName(), currentImport.getBundleSymbolicName()))
+			return false;
+		if (!isEqual(addImport.getBundleVersionRange(), currentImport.getBundleVersionRange()))
+			return false;
+		return isEqual(addImport.getAttributes(), currentImport.getAttributes());
+	}
+
+	private boolean isEqual(Object o1, Object o2) {
+		return (o1 == null) ? o2 == null : o1.equals(o2);
+	}
+
 	void unload() {
 		StateImpl currentState = (StateImpl) getContainingState();
 		StateReader reader = currentState == null ? null : currentState.getReader();
@@ -737,6 +790,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		String[] executionEnvironments;
 
 		Map<String, Long> dynamicStamps;
+		// Note that this is not persisted in the state cache
+		List<ImportPackageSpecification> addedDynamicImports;
 	}
 
 	public Map<String, String> getDeclaredDirectives() {

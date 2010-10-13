@@ -225,4 +225,8 @@ public final class ReadOnlyState implements State {
 		return target.getDependencyClosure(bundles);
 	}
 
+	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
+		throw new UnsupportedOperationException();
+	}
+
 }

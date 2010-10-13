@@ -1073,7 +1073,7 @@ public class Framework implements EventPublisher, Runnable {
 			Debug.println("notifyBundleFindHooks(" + allBundles + ")"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 		getServiceRegistry().notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof FindHook) {
 					((FindHook) hook).find(context, allBundles);
 				}
@@ -1534,7 +1534,7 @@ public class Framework implements EventPublisher, Runnable {
 		}
 
 		getServiceRegistry().notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof EventHook) {
 					((EventHook) hook).event(event, result);
 				}

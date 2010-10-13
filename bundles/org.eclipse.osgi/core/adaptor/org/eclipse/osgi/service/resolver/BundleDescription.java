@@ -63,6 +63,15 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	public ImportPackageSpecification[] getImportPackages();
 
 	/**
+	 * Returns an array of dynamic import package specifications that have been added
+	 * dynamically to this bundle description.
+	 * @return an array of dynamic import package specifications
+	 * @see State#addDynamicImportPackages(BundleDescription, ImportPackageSpecification[])
+	 * @since 3.7
+	 */
+	public ImportPackageSpecification[] getAddedDynamicImportPackages();
+
+	/**
 	 * Returns an array of generic specifications constraints required by this bundle.
 	 * @return an array of generic specifications
 	 * @since 3.2

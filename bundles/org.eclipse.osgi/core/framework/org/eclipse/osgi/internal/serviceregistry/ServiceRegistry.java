@@ -11,6 +11,8 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
+import org.osgi.framework.ServiceRegistration;
+
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -1123,7 +1125,7 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceFindHooks(" + context.getBundleImpl() + "," + clazz + "," + filterstring + "," + allservices + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 		}
 		notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof FindHook) {
 					((FindHook) hook).find(context, clazz, filterstring, allservices, result);
 				}
@@ -1152,7 +1154,7 @@ public class ServiceRegistry {
 			Debug.println("notifyServiceEventHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 		}
 		notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof EventHook) {
 					((EventHook) hook).event(event, result);
 				}
@@ -1201,7 +1203,7 @@ public class ServiceRegistry {
 			return;
 		}
 		try {
-			hookContext.call(hook);
+			hookContext.call(hook, registration);
 		} catch (Throwable t) {
 			if (Debug.DEBUG_HOOKS) {
 				Debug.println(hook.getClass().getName() + "." + hookContext.getHookMethodName() + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1258,7 +1260,7 @@ public class ServiceRegistry {
 
 		final Collection<ListenerInfo> listeners = Collections.unmodifiableCollection(addedListeners);
 		notifyHookPrivileged(systemBundleContext, registration, new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof ListenerHook) {
 					((ListenerHook) hook).added(listeners);
 				}
@@ -1305,7 +1307,7 @@ public class ServiceRegistry {
 		}
 
 		notifyHooksPrivileged(new HookContext() {
-			public void call(Object hook) throws Exception {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
 				if (hook instanceof ListenerHook) {
 					if (added) {
 						((ListenerHook) hook).added(listeners);
