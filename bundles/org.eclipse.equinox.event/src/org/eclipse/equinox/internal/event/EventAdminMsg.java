@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1999, 2008 IBM Corporation and others.
+ * Copyright (c) 1999, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ public class EventAdminMsg extends NLS {
 	public static String EVENT_NO_TOPICPERMISSION_PUBLISH;
 	public static String EVENT_DISPATCH_HANDLER_EXCEPTION;
 	public static String EVENT_INVALID_HANDLER_FILTER;
+	public static String EVENT_INVALID_HANDLER_TOPICS;
 
 	static {
 		// initialize resource bundles
