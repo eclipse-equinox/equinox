@@ -470,7 +470,7 @@ public interface State {
 	 * dynamic imports are only valid for the instance of this state and will be 
 	 * forgotten if this state is read from a persistent cache.
 	 * @param importingBundle the bundle to add the imports to.
-	 * @param dynamicImport the dynamic imports to add.
+	 * @param dynamicImports the dynamic imports to add.
 	 * @since 3.7
 	 * @see BundleDescription#getAddedDynamicImportPackages()
 	 */
