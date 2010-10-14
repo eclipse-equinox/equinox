@@ -457,6 +457,22 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/BundleEvent.java" type="org.osgi.framework.BundleEvent">
+<filter comment="Ignore OSGi API" id="1141899266">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="BundleEvent(int, Bundle, Bundle)"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGi API" id="1141899266">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="getOrigin()"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
 <filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>
@@ -843,21 +859,21 @@
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
-<filter comment="Ignore OSGi API." id="1110441988">
+<filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.hooks.weaving.WeavingException"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingHook.java" type="org.osgi.framework.hooks.weaving.WeavingHook">
-<filter comment="Ignore OSGi API&#10;WovenClass.java" id="1110441988">
+<filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.hooks.weaving.WeavingHook"/>
 </message_arguments>
 </filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
-<filter comment="Ignore OSGi API&#10;WovenClass.java" id="1110441988">
+<filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.hooks.weaving.WovenClass"/>
 </message_arguments>

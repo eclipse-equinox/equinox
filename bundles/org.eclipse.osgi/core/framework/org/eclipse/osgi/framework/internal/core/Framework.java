@@ -824,7 +824,7 @@ public class Framework implements EventPublisher, Runnable {
 	 *            then the location is used to get the bundle content.
 	 * @return The Bundle of the installed bundle.
 	 */
-	protected AbstractBundle installBundle(final String location, final InputStream in) throws BundleException {
+	AbstractBundle installBundle(final String location, final InputStream in, Bundle origin) throws BundleException {
 		if (Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -836,7 +836,7 @@ public class Framework implements EventPublisher, Runnable {
 				/* call the worker to install the bundle */
 				return installWorkerPrivileged(location, source, callerContext);
 			}
-		});
+		}, origin);
 	}
 
 	/**
@@ -851,7 +851,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * @exception BundleException
 	 *                If the action throws an error.
 	 */
-	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction<AbstractBundle> action) throws BundleException {
+	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction<AbstractBundle> action, Bundle origin) throws BundleException {
 		synchronized (installLock) {
 			while (true) {
 				/* Check that the bundle is not already installed. */
@@ -888,7 +888,7 @@ public class Framework implements EventPublisher, Runnable {
 		/* Don't call adaptor while holding the install lock */
 		try {
 			AbstractBundle bundle = AccessController.doPrivileged(action);
-			publishBundleEvent(BundleEvent.INSTALLED, bundle);
+			publishBundleEvent(new BundleEvent(BundleEvent.INSTALLED, bundle, origin));
 			return bundle;
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof RuntimeException)
@@ -1433,8 +1433,11 @@ public class Framework implements EventPublisher, Runnable {
 	 * @param bundle
 	 *            Affected bundle or null.
 	 */
-	public void publishBundleEvent(int type, org.osgi.framework.Bundle bundle) {
-		final BundleEvent event = new BundleEvent(type, bundle);
+	public void publishBundleEvent(int type, Bundle bundle) {
+		publishBundleEvent(new BundleEvent(type, bundle));
+	}
+
+	private void publishBundleEvent(final BundleEvent event) {
 		if (System.getSecurityManager() == null) {
 			publishBundleEventPrivileged(event);
 		} else {
