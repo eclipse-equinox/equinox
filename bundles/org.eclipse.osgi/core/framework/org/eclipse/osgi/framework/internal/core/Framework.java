@@ -111,6 +111,7 @@ public class Framework implements EventPublisher, Runnable {
 	private boolean bootDelegateAll = false;
 	public final boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
+	private final boolean allowDuplicateBSNVersion = Constants.FRAMEWORK_BSNVERSION_MULTIPLE.equals(FrameworkProperties.getProperty(Constants.FRAMEWORK_BSNVERSION));
 	ClassLoaderDelegateHook[] delegateHooks;
 	private volatile boolean forcedRestart = false;
 	/**
@@ -706,7 +707,7 @@ public class Framework implements EventPublisher, Runnable {
 	 */
 	AbstractBundle createAndVerifyBundle(BundleData bundledata, boolean setBundle) throws BundleException {
 		// Check for a bundle already installed with the same symbolic name and version.
-		if (bundledata.getSymbolicName() != null) {
+		if (!allowDuplicateBSNVersion && bundledata.getSymbolicName() != null) {
 			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
 			if (installedBundle != null && installedBundle.getBundleId() != bundledata.getBundleID()) {
 				String msg = NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()});
