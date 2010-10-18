@@ -26,7 +26,7 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 
 	BundleContext _context;
 	SAXParserFactory _parserFactory;
-	private Hashtable _mtps = new Hashtable(7);
+	private Hashtable<Long, MetaTypeInformation> _mtps = new Hashtable<Long, MetaTypeInformation>(7);
 
 	private final LogService logger;
 
@@ -66,11 +66,11 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 			Long bID = new Long(b.getBundleId());
 			synchronized (_mtps) {
 				if (_mtps.containsKey(bID))
-					return (MetaTypeInformation) _mtps.get(bID);
+					return _mtps.get(bID);
 				// Avoid synthetic accessor method warning.
 				final LogService loggerTemp = this.logger;
-				MetaTypeInformation mti = (MetaTypeInformation) AccessController.doPrivileged(new PrivilegedExceptionAction() {
-					public Object run() throws IOException {
+				MetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedExceptionAction<MetaTypeInformation>() {
+					public MetaTypeInformation run() throws IOException {
 						MetaTypeInformationImpl impl = new MetaTypeInformationImpl(b, _parserFactory, loggerTemp);
 						if (!impl._isThereMeta)
 							return new MetaTypeProviderTracker(_context, b);

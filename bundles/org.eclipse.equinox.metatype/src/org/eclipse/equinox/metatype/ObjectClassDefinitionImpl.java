@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,8 +33,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	String _description;
 
 	int _type;
-	Vector _required = new Vector(7);
-	Vector _optional = new Vector(7);
+	Vector<AttributeDefinitionImpl> _required = new Vector<AttributeDefinitionImpl>(7);
+	Vector<AttributeDefinitionImpl> _optional = new Vector<AttributeDefinitionImpl>(7);
 	Icon _icon;
 
 	/*
@@ -67,11 +67,11 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 
 		ObjectClassDefinitionImpl ocd = new ObjectClassDefinitionImpl(_name, _description, _id, _type, _localization);
 		for (int i = 0; i < _required.size(); i++) {
-			AttributeDefinitionImpl ad = (AttributeDefinitionImpl) _required.elementAt(i);
+			AttributeDefinitionImpl ad = _required.elementAt(i);
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), true);
 		}
 		for (int i = 0; i < _optional.size(); i++) {
-			AttributeDefinitionImpl ad = (AttributeDefinitionImpl) _optional.elementAt(i);
+			AttributeDefinitionImpl ad = _optional.elementAt(i);
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), false);
 		}
 		if (_icon != null) {
@@ -141,15 +141,15 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 			case ALL :
 			default :
 				atts = new AttributeDefinition[_required.size() + _optional.size()];
-				Enumeration e = _required.elements();
+				Enumeration<AttributeDefinitionImpl> e = _required.elements();
 				int i = 0;
 				while (e.hasMoreElements()) {
-					atts[i] = (AttributeDefinition) e.nextElement();
+					atts[i] = e.nextElement();
 					i++;
 				}
 				e = _optional.elements();
 				while (e.hasMoreElements()) {
-					atts[i] = (AttributeDefinition) e.nextElement();
+					atts[i] = e.nextElement();
 					i++;
 				}
 				return atts;
@@ -159,7 +159,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	/*
 	 * Method to add one new AD to ObjectClassDefinition.
 	 */
-	public void addAttributeDefinition(AttributeDefinition ad, boolean isRequired) {
+	void addAttributeDefinition(AttributeDefinitionImpl ad, boolean isRequired) {
 
 		if (isRequired) {
 			_required.addElement(ad);
@@ -189,7 +189,7 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	/**
 	 * Method to set the icon of ObjectClassDefinition.
 	 */
-	public void setIcon(Icon icon) {
+	void setIcon(Icon icon) {
 		this._icon = icon;
 	}
 
@@ -214,15 +214,15 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 
 		_rb = getResourceBundle(assignedLocale, bundle);
 
-		Enumeration allADReqs = _required.elements();
+		Enumeration<AttributeDefinitionImpl> allADReqs = _required.elements();
 		while (allADReqs.hasMoreElements()) {
-			AttributeDefinitionImpl ad = (AttributeDefinitionImpl) allADReqs.nextElement();
+			AttributeDefinitionImpl ad = allADReqs.nextElement();
 			ad.setResourceBundle(_rb);
 		}
 
-		Enumeration allADOpts = _optional.elements();
+		Enumeration<AttributeDefinitionImpl> allADOpts = _optional.elements();
 		while (allADOpts.hasMoreElements()) {
-			AttributeDefinitionImpl ad = (AttributeDefinitionImpl) allADOpts.nextElement();
+			AttributeDefinitionImpl ad = allADOpts.nextElement();
 			ad.setResourceBundle(_rb);
 		}
 	}

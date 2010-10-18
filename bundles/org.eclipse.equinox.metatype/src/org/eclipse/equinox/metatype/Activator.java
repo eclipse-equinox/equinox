@@ -12,26 +12,27 @@ package org.eclipse.equinox.metatype;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.xml.parsers.SAXParserFactory;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * MetaType Activator
  */
-public class Activator implements BundleActivator, ServiceTrackerCustomizer {
+public class Activator implements BundleActivator, ServiceTrackerCustomizer<SAXParserFactory, SAXParserFactory> {
 
 	protected final String mtsClazz = "org.osgi.service.metatype.MetaTypeService"; //$NON-NLS-1$
 	protected final String mtsPid = "org.osgi.impl.service.metatype.MetaTypeService"; //$NON-NLS-1$
 	protected final static String saxFactoryClazz = "javax.xml.parsers.SAXParserFactory"; //$NON-NLS-1$
 
-	private ServiceTracker _parserTracker;
+	private ServiceTracker<SAXParserFactory, SAXParserFactory> _parserTracker;
 	BundleContext _context;
-	ServiceRegistration _mtsReg;
+	ServiceRegistration<MetaTypeService> _mtsReg;
 	MetaTypeServiceImpl _mts = null;
 
 	// This field may be accessed by different threads.
@@ -59,10 +60,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		logger = new LogTracker(context, System.out);
 		logger.open();
 		this._context = context;
-		_parserTracker = new ServiceTracker(context, saxFactoryClazz, this);
+		_parserTracker = new ServiceTracker<SAXParserFactory, SAXParserFactory>(context, saxFactoryClazz, this);
 		_parserTracker.open();
-		ServiceReference ref = context.getServiceReference(PackageAdmin.class.getName());
-		FragmentUtils.packageAdmin = ref == null ? null : (PackageAdmin) context.getService(ref);
 		logger.log(LogService.LOG_DEBUG, "====== Meta Type Service starting ! ====="); //$NON-NLS-1$
 	}
 
@@ -80,7 +79,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// Do this last to leave logging available as long as possible.
 		logger.close();
 		logger = null;
-		FragmentUtils.packageAdmin = null;
 		context = null;
 	}
 
@@ -89,9 +87,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * 
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
-	public Object addingService(ServiceReference ref) {
+	public SAXParserFactory addingService(ServiceReference<SAXParserFactory> ref) {
 
-		SAXParserFactory parserFactory = (SAXParserFactory) _context.getService(ref);
+		SAXParserFactory parserFactory = _context.getService(ref);
 		synchronized (lock) {
 			if (_mts == null) {
 				// Save this parserFactory as the currently used parserFactory
@@ -108,7 +106,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
 	 *      java.lang.Object)
 	 */
-	public void modifiedService(ServiceReference ref, Object object) {
+	public void modifiedService(ServiceReference<SAXParserFactory> ref, SAXParserFactory object) {
 		// do nothing
 	}
 
@@ -118,7 +116,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
 	 *      java.lang.Object)
 	 */
-	public void removedService(ServiceReference ref, Object object) {
+	public void removedService(ServiceReference<SAXParserFactory> ref, SAXParserFactory object) {
 
 		if (object == _currentParserFactory) {
 			// This means that this SAXParserFactory was used to start the
@@ -133,9 +131,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 					_mts = null;
 				}
 				// See if another factory is available
-				Object[] parsers = _parserTracker.getServices();
+				SAXParserFactory[] parsers = _parserTracker.getServices(new SAXParserFactory[0]);
 				if (parsers != null && parsers.length > 0) {
-					_currentParserFactory = (SAXParserFactory) parsers[0];
+					_currentParserFactory = parsers[0];
 					// We have another parser so lets restart the MetaType
 					// Service
 					registerMetaTypeService();
@@ -151,17 +149,17 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 */
 	private void registerMetaTypeService() {
 
-		final Hashtable properties = new Hashtable(7);
+		final Dictionary<String, Object> properties = new Hashtable<String, Object>(7);
 
 		properties.put(Constants.SERVICE_VENDOR, "IBM"); //$NON-NLS-1$
 		properties.put(Constants.SERVICE_DESCRIPTION, MetaTypeMsg.SERVICE_DESCRIPTION);
 		properties.put(Constants.SERVICE_PID, mtsPid);
 		// The intent is that logger can never be null here, but is that really the case?
 		_mts = new MetaTypeServiceImpl(_context, _currentParserFactory, logger);
-		AccessController.doPrivileged(new PrivilegedAction() {
+		AccessController.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				_context.addBundleListener(_mts);
-				_mtsReg = _context.registerService(mtsClazz, _mts, properties);
+				_mtsReg = _context.registerService(MetaTypeService.class, _mts, properties);
 				return null;
 			}
 		});

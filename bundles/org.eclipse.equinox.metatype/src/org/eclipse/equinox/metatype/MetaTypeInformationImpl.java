@@ -47,8 +47,8 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 			return new String[0];
 		}
 
-		Vector pids = new Vector(7);
-		Enumeration e = _allPidOCDs.keys();
+		Vector<String> pids = new Vector<String>(7);
+		Enumeration<String> e = _allPidOCDs.keys();
 		while (e.hasMoreElements()) {
 			pids.addElement(e.nextElement());
 		}
@@ -67,8 +67,8 @@ public class MetaTypeInformationImpl extends MetaTypeProviderImpl implements Met
 		if (_allFPidOCDs.size() == 0) {
 			return new String[0];
 		}
-		Vector fpids = new Vector(7);
-		Enumeration e = _allFPidOCDs.keys();
+		Vector<String> fpids = new Vector<String>(7);
+		Enumeration<String> e = _allFPidOCDs.keys();
 		while (e.hasMoreElements()) {
 			fpids.addElement(e.nextElement());
 		}

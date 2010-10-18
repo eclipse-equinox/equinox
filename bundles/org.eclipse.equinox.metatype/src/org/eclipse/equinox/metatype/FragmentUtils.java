@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2010 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,36 +13,36 @@ package org.eclipse.equinox.metatype;
 import java.net.URL;
 import java.util.*;
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 
 /*
  * Fragment Utilities
  */
 public class FragmentUtils {
-	static PackageAdmin packageAdmin;
 
 	/*
 	 * 
 	 */
 	public static boolean isFragment(Bundle bundle) {
-
-		if (packageAdmin == null)
-			return false;
-		return (packageAdmin.getBundleType(bundle) & PackageAdmin.BUNDLE_TYPE_FRAGMENT) != 0;
+		return (bundle.adapt(BundleRevision.class).getTypes() & BundleRevision.TYPE_FRAGMENT) != 0;
 	}
 
 	/*
 	 * Find all the paths to entries for the bundle and its fragments.
 	 * Returned data is got by Bundle.getEntryPaths().
 	 */
-	public static Enumeration findEntryPaths(Bundle bundle, String path) {
+	public static Enumeration<String> findEntryPaths(Bundle bundle, String path) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null)
+			return null;
 
-		Bundle[] fragments = packageAdmin == null ? null : packageAdmin.getFragments(bundle);
-		Vector result = new Vector();
+		Vector<String> result = new Vector<String>();
 		addEntryPaths(bundle.getEntryPaths(path), result);
+		List<BundleRevision> fragments = wiring.getFragmentRevisions();
 		if (fragments != null) {
-			for (int i = 0; i < fragments.length; i++)
-				addEntryPaths(fragments[i].getEntryPaths(path), result);
+			for (BundleRevision fragment : fragments)
+				addEntryPaths(fragment.getBundle().getEntryPaths(path), result);
 		}
 		return result.size() == 0 ? null : result.elements();
 	}
@@ -50,12 +50,12 @@ public class FragmentUtils {
 	/*
 	 * Internal method - add an path to vector, and check for duplucate.
 	 */
-	private static void addEntryPaths(Enumeration ePaths, Vector pathList) {
+	private static void addEntryPaths(Enumeration<String> ePaths, Vector<String> pathList) {
 
 		if (ePaths == null)
 			return;
 		while (ePaths.hasMoreElements()) {
-			Object path = ePaths.nextElement();
+			String path = ePaths.nextElement();
 			if (!pathList.contains(path))
 				pathList.add(path);
 		}
@@ -66,20 +66,23 @@ public class FragmentUtils {
 	 * Returned data is got by Bundle.getEntry().
 	 */
 	public static URL[] findEntries(Bundle bundle, String path) {
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null)
+			return null;
 
-		Bundle[] fragments = packageAdmin == null ? null : packageAdmin.getFragments(bundle);
 		URL url = bundle.getEntry(path);
-		if (fragments == null || fragments.length == 0)
+		List<BundleRevision> fragments = wiring.getFragmentRevisions();
+		if (fragments == null || fragments.size() == 0)
 			return url == null ? null : new URL[] {url};
-		ArrayList result = new ArrayList();
+		ArrayList<URL> result = new ArrayList<URL>();
 		if (url != null)
 			result.add(url);
 
-		for (int i = 0; i < fragments.length; i++) {
-			URL fragUrl = fragments[i].getEntry(path);
+		for (BundleRevision fragment : fragments) {
+			URL fragUrl = fragment.getBundle().getEntry(path);
 			if (fragUrl != null)
 				result.add(fragUrl);
 		}
-		return result.size() == 0 ? null : (URL[]) result.toArray(new URL[result.size()]);
+		return result.size() == 0 ? null : result.toArray(new URL[result.size()]);
 	}
 }

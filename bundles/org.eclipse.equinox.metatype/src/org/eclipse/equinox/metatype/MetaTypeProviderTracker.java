@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,8 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 
 	Bundle _bundle;
 	BundleContext _context;
-	ServiceTracker _tracker;
+	// Could be ManagedService, ManagedServiceFactory, or MetaTypeProvider.
+	ServiceTracker<?, ?> _tracker;
 
 	/**
 	 * Constructs a MetaTypeProviderTracker which tracks all MetaTypeProviders
@@ -38,7 +39,7 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 		try {
 			Filter filter = context.createFilter(FILTER_STRING);
 			// create a service tracker and open it.
-			this._tracker = new ServiceTracker(context, filter, null);
+			this._tracker = new ServiceTracker<Object, Object>(context, filter, null);
 			// we never close this, but it is no big deal because we
 			// really want to track the services until we are stopped
 			// at that point the framework will remove our listeners.
@@ -54,13 +55,13 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return new String[0]; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
-		ArrayList results = new ArrayList();
+		ArrayList<String> results = new ArrayList<String>();
 		for (int i = 0; i < wrappers.length; i++) {
 			// return only the correct type of pids (regular or factory)
 			if (factory == wrappers[i].factory)
 				results.add(wrappers[i].pid);
 		}
-		return (String[]) results.toArray(new String[results.size()]);
+		return results.toArray(new String[results.size()]);
 	}
 
 	public String[] getPids() {
@@ -91,7 +92,7 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 		if (_bundle.getState() != Bundle.ACTIVE)
 			return new String[0]; // return none if not active
 		MetaTypeProviderWrapper[] wrappers = getMetaTypeProviders();
-		ArrayList locales = new ArrayList();
+		ArrayList<String> locales = new ArrayList<String>();
 		// collect all the unique locales from all providers we found
 		for (int i = 0; i < wrappers.length; i++) {
 			String[] wrappedLocales = wrappers[i].provider.getLocales();
@@ -101,14 +102,14 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 				if (!locales.contains(wrappedLocales[j]))
 					locales.add(wrappedLocales[j]);
 		}
-		return (String[]) locales.toArray(new String[locales.size()]);
+		return locales.toArray(new String[locales.size()]);
 	}
 
 	private MetaTypeProviderWrapper[] getMetaTypeProviders() {
-		ServiceReference[] refs = _tracker.getServiceReferences();
+		ServiceReference<?>[] refs = _tracker.getServiceReferences();
 		if (refs == null)
 			return new MetaTypeProviderWrapper[0];
-		ArrayList results = new ArrayList();
+		ArrayList<MetaTypeProviderWrapper> results = new ArrayList<MetaTypeProviderWrapper>();
 		for (int i = 0; i < refs.length; i++)
 			// search for services registered by the bundle
 			if (refs[i].getBundle() == _bundle) {
@@ -125,7 +126,7 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 				// we only use the service for a short period of time.
 				_context.ungetService(refs[i]);
 			}
-		return (MetaTypeProviderWrapper[]) results.toArray(new MetaTypeProviderWrapper[results.size()]);
+		return results.toArray(new MetaTypeProviderWrapper[results.size()]);
 	}
 
 	// this is a simple class just used to temporarily store information about a provider

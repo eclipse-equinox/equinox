@@ -18,7 +18,7 @@ public class ValueTokenizer {
 	private static final char SEPARATE = ',';
 	private static final char CONTROL = '\\';
 
-	Vector _value_vector = new Vector(7);
+	Vector<String> _value_vector = new Vector<String>(7);
 
 	/*
 	 * Constructor of class ValueTokenizer
@@ -54,7 +54,7 @@ public class ValueTokenizer {
 	/*
 	 * Method to return values as Vector.
 	 */
-	public Vector getValuesAsVector() {
+	public Vector<String> getValuesAsVector() {
 		return _value_vector;
 	}
 

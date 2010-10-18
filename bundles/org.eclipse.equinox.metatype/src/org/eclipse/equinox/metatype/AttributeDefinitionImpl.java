@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Vector;
 import org.eclipse.osgi.util.NLS;
@@ -33,9 +33,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 	boolean _isRequired = true;
 
 	String[] _defaults = null;
-	Vector _dfts_vector = new Vector(7);
-	Vector _values = new Vector(7);
-	Vector _labels = new Vector(7);
+	Vector<String> _values = new Vector<String>(7);
+	Vector<String> _labels = new Vector<String>(7);
 
 	private final LogService logger;
 
@@ -64,10 +63,14 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, _localization, logger);
 
 		if (_defaults != null) {
-			ad.setDefaultValue((String[]) _defaults.clone(), false);
+			ad.setDefaultValue(_defaults.clone(), false);
 		}
 		if ((_labels != null) && (_values != null)) {
-			ad.setOption((Vector) _labels.clone(), (Vector) _values.clone(), false);
+			@SuppressWarnings("unchecked")
+			Vector<String> labels = (Vector<String>) _labels.clone();
+			@SuppressWarnings("unchecked")
+			Vector<String> values = (Vector<String>) _values.clone();
+			ad.setOption(labels, values, false);
 		}
 
 		return ad;
@@ -179,10 +182,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		}
 
 		String[] returnedLabels = new String[_labels.size()];
-		Enumeration labelKeys = _labels.elements();
+		Enumeration<String> labelKeys = _labels.elements();
 		int i = 0;
 		while (labelKeys.hasMoreElements()) {
-			String labelKey = (String) labelKeys.nextElement();
+			String labelKey = labelKeys.nextElement();
 			returnedLabels[i] = getLocalized(labelKey);
 			i++;
 		}
@@ -200,13 +203,13 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			return null;
 		}
 
-		return (String[]) _values.toArray(new String[_values.size()]);
+		return _values.toArray(new String[_values.size()]);
 	}
 
 	/**
 	 * Method to set the Option values of AttributeDefinition.
 	 */
-	void setOption(Vector labels, Vector values, boolean needValidation) {
+	void setOption(Vector<String> labels, Vector<String> values, boolean needValidation) {
 
 		if ((labels == null) || (values == null)) {
 			logger.log(LogService.LOG_ERROR, "AttributeDefinitionImpl.setOption(Vector, Vector, boolean) " + MetaTypeMsg.NULL_OPTIONS); //$NON-NLS-1$
@@ -223,7 +226,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 
 		if (needValidation) {
 			for (int index = 0; index < _labels.size(); index++) {
-				String reason = validate((String) _values.get(index));
+				String reason = validate(_values.get(index));
 				if ((reason != null) && reason.length() > 0) {
 					logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_OPTIONS, _values.get(index), reason));
 					_labels.remove(index);
@@ -305,13 +308,13 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		try {
 			if (_cardinality != 0) {
 				ValueTokenizer vt = new ValueTokenizer(value, logger);
-				Vector value_vector = vt.getValuesAsVector();
+				Vector<String> value_vector = vt.getValuesAsVector();
 
 				if (value_vector.size() > Math.abs(_cardinality)) {
 					return NLS.bind(MetaTypeMsg.TOO_MANY_VALUES, value, new Integer(Math.abs(_cardinality)));
 				}
 				for (int i = 0; i < value_vector.size(); i++) {
-					String return_msg = validateRange((String) value_vector.get(i));
+					String return_msg = validateRange(value_vector.get(i));
 					if (!"".equals(return_msg)) { //$NON-NLS-1$
 						// Returned String states why the value is invalid.
 						return return_msg;
@@ -400,69 +403,19 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 				}
 				break;
 			case BIGINTEGER :
-				try {
-					Class bigIntClazz = Class.forName("java.math.BigInteger"); //$NON-NLS-1$
-					Constructor bigIntConstructor = bigIntClazz.getConstructor(new Class[] {String.class});
-					Comparable bigIntObject = (Comparable) bigIntConstructor.newInstance(new Object[] {value});
-					if (_minValue != null && bigIntObject.compareTo(_minValue) < 0) {
-						rangeError = true;
-					} else if (_maxValue != null && bigIntObject.compareTo(_maxValue) > 0) {
-						rangeError = true;
-					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-					return null;
+				BigInteger bigIntVal = new BigInteger(value);
+				if (_minValue != null && bigIntVal.compareTo((BigInteger) _minValue) < 0) {
+					rangeError = true;
+				} else if (_maxValue != null && bigIntVal.compareTo((BigInteger) _maxValue) > 0) {
+					rangeError = true;
 				}
 				break;
 			case BIGDECIMAL :
-				try {
-					Class bigDecimalClazz = Class.forName("java.math.BigDecimal"); //$NON-NLS-1$
-					Constructor bigDecimalConstructor = bigDecimalClazz.getConstructor(new Class[] {String.class});
-					Comparable bigDecimalObject = (Comparable) bigDecimalConstructor.newInstance(new Object[] {value});
-					if (_minValue != null && bigDecimalObject.compareTo(_minValue) < 0) {
-						rangeError = true;
-					} else if (_maxValue != null && bigDecimalObject.compareTo(_maxValue) > 0) {
-						rangeError = true;
-					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-					return null;
+				BigDecimal bigDecVal = new BigDecimal(value);
+				if (_minValue != null && bigDecVal.compareTo((BigDecimal) _minValue) < 0) {
+					rangeError = true;
+				} else if (_maxValue != null && bigDecVal.compareTo((BigDecimal) _maxValue) > 0) {
+					rangeError = true;
 				}
 				break;
 			case BOOLEAN :

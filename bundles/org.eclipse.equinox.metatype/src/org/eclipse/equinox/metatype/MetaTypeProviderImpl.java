@@ -35,8 +35,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 	Bundle _bundle;
 
-	Hashtable _allPidOCDs = new Hashtable(7);
-	Hashtable _allFPidOCDs = new Hashtable(7);
+	Hashtable<String, ObjectClassDefinitionImpl> _allPidOCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
+	Hashtable<String, ObjectClassDefinitionImpl> _allFPidOCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
 
 	String[] _locales;
 	boolean _isThereMeta = false;
@@ -85,15 +85,15 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 		boolean isThereMetaHere = false;
 
-		Enumeration allFileKeys = FragmentUtils.findEntryPaths(bundle, MetaTypeService.METATYPE_DOCUMENTS_LOCATION);
+		Enumeration<String> allFileKeys = FragmentUtils.findEntryPaths(bundle, MetaTypeService.METATYPE_DOCUMENTS_LOCATION);
 		if (allFileKeys == null)
 			return isThereMetaHere;
 
 		while (allFileKeys.hasMoreElements()) {
 			boolean _isMetaDataFile;
-			String fileName = (String) allFileKeys.nextElement();
+			String fileName = allFileKeys.nextElement();
 
-			Hashtable pidToOCD = null;
+			Hashtable<String, ObjectClassDefinitionImpl> pidToOCD = null;
 			java.net.URL[] urls = FragmentUtils.findEntries(bundle, fileName);
 			if (urls != null) {
 				for (int i = 0; i < urls.length; i++) {
@@ -113,10 +113,10 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 					if ((_isMetaDataFile) && (pidToOCD != null)) {
 
 						// We got some OCDs now.
-						Enumeration pids = pidToOCD.keys();
+						Enumeration<String> pids = pidToOCD.keys();
 						while (pids.hasMoreElements()) {
-							String pid = (String) pids.nextElement();
-							ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) pidToOCD.get(pid);
+							String pid = pids.nextElement();
+							ObjectClassDefinitionImpl ocd = pidToOCD.get(pid);
 
 							if (ocd.getType() == ObjectClassDefinitionImpl.PID) {
 								isThereMetaHere = true;
@@ -148,11 +148,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 		ObjectClassDefinitionImpl ocd;
 		if (_allPidOCDs.containsKey(pid)) {
-			ocd = (ObjectClassDefinitionImpl) ((ObjectClassDefinitionImpl) _allPidOCDs.get(pid)).clone();
+			ocd = (ObjectClassDefinitionImpl) (_allPidOCDs.get(pid)).clone();
 			ocd.setResourceBundle(locale, _bundle);
 			return ocd;
 		} else if (_allFPidOCDs.containsKey(pid)) {
-			ocd = (ObjectClassDefinitionImpl) ((ObjectClassDefinitionImpl) _allFPidOCDs.get(pid)).clone();
+			ocd = (ObjectClassDefinitionImpl) (_allFPidOCDs.get(pid)).clone();
 			ocd.setResourceBundle(locale, _bundle);
 			return ocd;
 		} else {
@@ -190,27 +190,27 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		if (_locales != null)
 			return checkForDefault(_locales);
 
-		Vector localizationFiles = new Vector(7);
+		Vector<String> localizationFiles = new Vector<String>(7);
 		// get all the localization resources for PIDS
-		Enumeration ocds = _allPidOCDs.elements();
+		Enumeration<ObjectClassDefinitionImpl> ocds = _allPidOCDs.elements();
 		while (ocds.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) ocds.nextElement();
+			ObjectClassDefinitionImpl ocd = ocds.nextElement();
 			if (ocd._localization != null && !localizationFiles.contains(ocd._localization))
 				localizationFiles.add(ocd._localization);
 		}
 		// get all the localization resources for FPIDS
 		ocds = _allFPidOCDs.elements();
 		while (ocds.hasMoreElements()) {
-			ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) ocds.nextElement();
+			ObjectClassDefinitionImpl ocd = ocds.nextElement();
 			if (ocd._localization != null && !localizationFiles.contains(ocd._localization))
 				localizationFiles.add(ocd._localization);
 		}
 		if (localizationFiles.size() == 0)
 			localizationFiles.add(Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME);
-		Vector locales = new Vector(7);
-		Enumeration eLocalizationFiles = localizationFiles.elements();
+		Vector<String> locales = new Vector<String>(7);
+		Enumeration<String> eLocalizationFiles = localizationFiles.elements();
 		while (eLocalizationFiles.hasMoreElements()) {
-			String localizationFile = (String) eLocalizationFiles.nextElement();
+			String localizationFile = eLocalizationFiles.nextElement();
 			int iSlash = localizationFile.lastIndexOf(DIRECTORY_SEP);
 			String baseDir;
 			String baseFileName;
@@ -220,16 +220,16 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 				baseDir = localizationFile.substring(0, iSlash);
 			}
 			baseFileName = localizationFile + RESOURCE_FILE_CONN;
-			Enumeration resources = FragmentUtils.findEntryPaths(this._bundle, baseDir);
+			Enumeration<String> resources = FragmentUtils.findEntryPaths(this._bundle, baseDir);
 			if (resources != null) {
 				while (resources.hasMoreElements()) {
-					String resource = (String) resources.nextElement();
+					String resource = resources.nextElement();
 					if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
 						locales.add(resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
 				}
 			}
 		}
-		_locales = (String[]) locales.toArray(new String[locales.size()]);
+		_locales = locales.toArray(new String[locales.size()]);
 		return checkForDefault(_locales);
 	}
 

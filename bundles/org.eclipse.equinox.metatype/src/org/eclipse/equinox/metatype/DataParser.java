@@ -11,8 +11,8 @@
 package org.eclipse.equinox.metatype;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.*;
@@ -74,11 +74,11 @@ public class DataParser {
 	protected XMLReader _dp_xmlReader;
 
 	// DesignateHanders in DataParser class
-	Vector _dp_designateHandlers = new Vector(7);
+	Vector<DesignateHandler> _dp_designateHandlers = new Vector<DesignateHandler>(7);
 	// ObjectClassDefinitions in DataParser class w/ corresponding reference keys
-	Hashtable _dp_OCDs = new Hashtable(7);
+	Hashtable<String, ObjectClassDefinitionImpl> _dp_OCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
 	// pid to ObjectClassDefinitions in DataParser class as a Hashtable
-	Hashtable _dp_pid_to_OCDs_ = new Hashtable(7);
+	Hashtable<String, ObjectClassDefinitionImpl> _dp_pid_to_OCDs_ = new Hashtable<String, ObjectClassDefinitionImpl>(7);
 	// Localization in DataParser class
 	String _dp_localization;
 
@@ -100,7 +100,7 @@ public class DataParser {
 	/*
 	 * Main method to parse specific MetaData file.
 	 */
-	public Hashtable doParse() {
+	public Hashtable<String, ObjectClassDefinitionImpl> doParse() {
 
 		try {
 			SAXParser saxParser = _dp_parserFactory.newSAXParser();
@@ -152,59 +152,9 @@ public class DataParser {
 			case AttributeDefinition.FLOAT :
 				return new Float(value);
 			case AttributeDefinition.BIGINTEGER :
-				try {
-					Class bigIntClazz = Class.forName("java.math.BigInteger");//$NON-NLS-1$
-					Constructor bigIntConstructor = bigIntClazz.getConstructor(new Class[] {String.class});
-					return bigIntConstructor.newInstance(new Object[] {value});
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-					return null;
-				}
+				return new BigInteger(value);
 			case AttributeDefinition.BIGDECIMAL :
-				try {
-					Class bigDecimalClazz = Class.forName("java.math.BigDecimal");//$NON-NLS-1$
-					Constructor bigDecimalConstructor = bigDecimalClazz.getConstructor(new Class[] {String.class});
-					return bigDecimalConstructor.newInstance(new Object[] {value});
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-					return null;
-				} catch (SecurityException e) {
-					e.printStackTrace();
-					return null;
-				} catch (NoSuchMethodException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-					return null;
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-					return null;
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-					return null;
-				}
+				return new BigDecimal(value);
 			case AttributeDefinition.BOOLEAN :
 				return new Boolean(value);
 			default :
@@ -244,11 +194,11 @@ public class DataParser {
 		 * Called when this element and all elements nested into it have been
 		 * handled.
 		 */
-		protected void finished() throws SAXException {
+		protected void finished() {
 			// do nothing by default
 		}
 
-		public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
+		public void endElement(String namespaceURI, String localName, String qName) {
 
 			finished();
 			// Let parent resume handling SAX events
@@ -265,7 +215,7 @@ public class DataParser {
 			super();
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AbstractHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -291,7 +241,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes attributes) throws SAXException {
+		public void init(String name, Attributes attributes) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler():init()"); //$NON-NLS-1$
 			_dp_localization = attributes.getValue(LOCALIZATION);
@@ -302,7 +252,7 @@ public class DataParser {
 			// OcdHandler and AttributeDefinitionHandler later.
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -321,7 +271,7 @@ public class DataParser {
 			}
 		}
 
-		protected void finished() throws SAXException {
+		protected void finished() {
 
 			logger.log(LogService.LOG_DEBUG, "Here is MetaDataHandler():finished()"); //$NON-NLS-1$
 			if (_dp_designateHandlers.size() == 0) {
@@ -330,11 +280,11 @@ public class DataParser {
 				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE)); //$NON-NLS-1$
 				return;
 			}
-			Enumeration designateHandlerKeys = _dp_designateHandlers.elements();
+			Enumeration<DesignateHandler> designateHandlerKeys = _dp_designateHandlers.elements();
 			while (designateHandlerKeys.hasMoreElements()) {
-				DesignateHandler designateHandler = (DesignateHandler) designateHandlerKeys.nextElement();
+				DesignateHandler designateHandler = designateHandlerKeys.nextElement();
 
-				ObjectClassDefinitionImpl ocd = (ObjectClassDefinitionImpl) _dp_OCDs.get(designateHandler._ocdref);
+				ObjectClassDefinitionImpl ocd = _dp_OCDs.get(designateHandler._ocdref);
 				if (ocd != null) {
 					if (designateHandler._factory_val == null) {
 						ocd.setType(ObjectClassDefinitionImpl.PID);
@@ -356,18 +306,18 @@ public class DataParser {
 	 */
 	private class OcdHandler extends AbstractHandler {
 
-		Hashtable _parent_OCDs_hashtable;
+		Hashtable<String, ObjectClassDefinitionImpl> _parent_OCDs_hashtable;
 		// This ID "_refID" is only used for reference by Designate element,
 		// not the PID or FPID of this OCD.
 		String _refID;
 		ObjectClassDefinitionImpl _ocd;
-		Vector _ad_vector = new Vector(7);
+		Vector<AttributeDefinitionImpl> _ad_vector = new Vector<AttributeDefinitionImpl>(7);
 
 		public OcdHandler(ContentHandler handler) {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts, Hashtable ocds_hashtable) throws SAXException {
+		public void init(String name, Attributes atts, Hashtable<String, ObjectClassDefinitionImpl> ocds_hashtable) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():init()"); //$NON-NLS-1$
 			_parent_OCDs_hashtable = ocds_hashtable;
@@ -394,7 +344,7 @@ public class DataParser {
 			_ocd = new ObjectClassDefinitionImpl(ocd_name_val, ocd_description_val, _refID, _dp_localization);
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -419,7 +369,7 @@ public class DataParser {
 			}
 		}
 
-		protected void finished() throws SAXException {
+		protected void finished() {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
@@ -432,9 +382,9 @@ public class DataParser {
 				return;
 			}
 			// OCD gets all parsed ADs.
-			Enumeration adKey = _ad_vector.elements();
+			Enumeration<AttributeDefinitionImpl> adKey = _ad_vector.elements();
 			while (adKey.hasMoreElements()) {
-				AttributeDefinitionImpl ad = (AttributeDefinitionImpl) adKey.nextElement();
+				AttributeDefinitionImpl ad = adKey.nextElement();
 				_ocd.addAttributeDefinition(ad, ad._isRequired);
 			}
 
@@ -453,7 +403,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts) throws SAXException {
+		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is IconHandler:init()"); //$NON-NLS-1$
 			String icon_resource_val = atts.getValue(RESOURCE);
@@ -483,15 +433,15 @@ public class DataParser {
 		AttributeDefinitionImpl _ad;
 		int _dataType;
 
-		Vector _parent_ADs_vector;
-		Vector _optionLabel_vector = new Vector(7);
-		Vector _optionValue_vector = new Vector(7);
+		Vector<AttributeDefinitionImpl> _parent_ADs_vector;
+		Vector<String> _optionLabel_vector = new Vector<String>(7);
+		Vector<String> _optionValue_vector = new Vector<String>(7);
 
 		public AttributeDefinitionHandler(ContentHandler handler) {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts, Vector ad_vector) throws SAXException {
+		public void init(String name, Attributes atts, Vector<AttributeDefinitionImpl> ad_vector) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():init()"); //$NON-NLS-1$
 			_parent_ADs_vector = ad_vector;
@@ -588,7 +538,7 @@ public class DataParser {
 			}
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -609,7 +559,7 @@ public class DataParser {
 			}
 		}
 
-		protected void finished() throws SAXException {
+		protected void finished() {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeDefinitionHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
@@ -632,7 +582,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts) throws SAXException {
+		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is OptionHandler:init()"); //$NON-NLS-1$
 			_label_val = atts.getValue(LABEL);
@@ -713,7 +663,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts) throws SAXException {
+		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():init()"); //$NON-NLS-1$
 			_pid_val = atts.getValue(PID);
@@ -748,7 +698,7 @@ public class DataParser {
 			}
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -767,7 +717,7 @@ public class DataParser {
 			}
 		}
 
-		protected void finished() throws SAXException {
+		protected void finished() {
 
 			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
@@ -794,7 +744,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts) throws SAXException {
+		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is ObjectHandler():init()"); //$NON-NLS-1$
 			_ocdref = atts.getValue(OCDREF);
@@ -805,7 +755,7 @@ public class DataParser {
 			}
 		}
 
-		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is ObjectHandler:startElement():" //$NON-NLS-1$
 					+ qName);
@@ -837,7 +787,7 @@ public class DataParser {
 			super(handler);
 		}
 
-		public void init(String name, Attributes atts) throws SAXException {
+		public void init(String name, Attributes atts) {
 
 			logger.log(LogService.LOG_DEBUG, "Here is AttributeHandler():init()"); //$NON-NLS-1$
 			_adref_val = atts.getValue(ADREF);
@@ -886,7 +836,7 @@ public class DataParser {
 		// The following methods are standard SAX ErrorHandler methods.
 		// See SAX documentation for more info.
 
-		public void warning(SAXParseException spe) throws SAXException {
+		public void warning(SAXParseException spe) {
 			_out.println("Warning: " + getParseExceptionInfo(spe)); //$NON-NLS-1$
 		}
 
