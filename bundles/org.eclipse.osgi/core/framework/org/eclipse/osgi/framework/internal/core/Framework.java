@@ -375,6 +375,7 @@ public class Framework implements EventPublisher, Runnable {
 		// set the support properties for fragments and require-bundle (bug 173090)
 		properties.put(Constants.SUPPORTS_FRAMEWORK_FRAGMENT, "true"); //$NON-NLS-1$
 		properties.put(Constants.SUPPORTS_FRAMEWORK_REQUIREBUNDLE, "true"); //$NON-NLS-1$
+		properties.put(Constants.FRAMEWORK_UUID, new UniversalUniqueIdentifier().toString());
 	}
 
 	private int parseVersionInt(String value) {

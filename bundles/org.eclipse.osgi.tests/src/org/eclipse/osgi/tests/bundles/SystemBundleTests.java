@@ -12,7 +12,7 @@ package org.eclipse.osgi.tests.bundles;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -1090,6 +1090,66 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox2.getState()); //$NON-NLS-1$
+	}
+
+	public void testUUID() {
+		File config1 = OSGiTestsActivator.getContext().getDataFile(getName() + "_1"); //$NON-NLS-1$
+		Map configuration1 = new HashMap();
+		configuration1.put(Constants.FRAMEWORK_STORAGE, config1.getAbsolutePath());
+		Equinox equinox1 = new Equinox(configuration1);
+		try {
+			equinox1.init();
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		}
+		String uuid1_1 = equinox1.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		assertNotNull(uuid1_1);
+
+		File config2 = OSGiTestsActivator.getContext().getDataFile(getName() + "_2"); //$NON-NLS-1$
+		Map configuration2 = new HashMap();
+		configuration2.put(Constants.FRAMEWORK_STORAGE, config2.getAbsolutePath());
+		Equinox equinox2 = new Equinox(configuration1);
+		try {
+			equinox2.init();
+		} catch (BundleException e) {
+			fail("Failed init", e);
+		}
+		String uuid2_1 = equinox2.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		assertNotNull(uuid2_1);
+
+		assertFalse("UUIDs are the same: " + uuid1_1, uuid1_1.equals(uuid2_1));
+
+		try {
+			equinox1.stop();
+			equinox2.stop();
+			equinox1.waitForStop(1000);
+			equinox2.waitForStop(1000);
+			equinox1.init();
+			equinox2.init();
+		} catch (BundleException e) {
+			fail("Failed to re-init frameworks.", e);
+		} catch (InterruptedException e) {
+			fail("Failed to stop frameworks.", e);
+		}
+
+		String uuid1_2 = equinox1.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		assertNotNull(uuid1_2);
+		String uuid2_2 = equinox2.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
+		assertNotNull(uuid2_2);
+		assertFalse("UUIDs are the same: " + uuid1_1, uuid1_1.equals(uuid1_2));
+		assertFalse("UUIDs are the same: " + uuid1_2, uuid1_2.equals(uuid2_2));
+		assertFalse("UUIDs are the same: " + uuid2_1, uuid2_1.equals(uuid2_2));
+
+		try {
+			equinox1.stop();
+			equinox2.stop();
+			equinox1.waitForStop(1000);
+			equinox2.waitForStop(1000);
+		} catch (BundleException e) {
+			fail("Failed to re-init frameworks.", e);
+		} catch (InterruptedException e) {
+			fail("Failed to stop frameworks.", e);
+		}
 	}
 
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
