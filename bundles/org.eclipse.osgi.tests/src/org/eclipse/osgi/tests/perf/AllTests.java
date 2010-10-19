@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllTests extends TestSuite {
+	public static final String DEGRADATION_RESOLUTION = "Performance decrease caused by additional fuctionality required for ResovlerHooks in OSGi R4.3 specification. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=324753 for details.";
 
 	public AllTests() {
 		super();

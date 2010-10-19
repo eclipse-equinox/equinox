@@ -42,19 +42,19 @@ public class StateUsesPerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testUsesResolution00100() throws BundleException {
-		doUsesResolution(100, 100, null, null);
+		doUsesResolution(100, 100, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	public void testUsesResolution00500() throws BundleException {
-		doUsesResolution(500, 10, null, null);
+		doUsesResolution(500, 10, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	public void testUsesResolution01000() throws BundleException {
-		doUsesResolution(1000, 10, null, null);
+		doUsesResolution(1000, 10, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	public void testUsesResolution05000() throws BundleException {
-		doUsesResolution(5000, 1, null, null);
+		doUsesResolution(5000, 1, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	private void addUsesBundles(State state) throws BundleException {

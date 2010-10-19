@@ -55,7 +55,7 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testResolution100() throws IOException {
-		testResolution(100, 500, null, null);
+		testResolution(100, 500, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	public void testResolution1000() throws IOException {
@@ -63,17 +63,19 @@ public class StatePerformanceTest extends BasePerformanceTest {
 	}
 
 	public void testResolution500() throws IOException {
-		testResolution(500, 50, null, null);
+		testResolution(500, 50, null, AllTests.DEGRADATION_RESOLUTION);
 	}
 
 	public void testResolution5000() throws IOException {
-		testResolution(5000, 1, null, null);
+		testResolution(5000, 1, null, AllTests.DEGRADATION_RESOLUTION);
 	}
+
+	private static final String DEGREDATION_STORE_RETRIEVE = "Performance decrease caused by additional fuctionality required for generic capabilities/requirements in OSGi R4.3 specification. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=324753 for details.";
 
 	public void testStoreAndRetrieve() {
 		int stateSize = 5000;
 		final State originalState = buildRandomState(stateSize);
-		new PerformanceTestRunner() {
+		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
 				try {
 					storeAndRetrieve(originalState);
@@ -81,7 +83,8 @@ public class StatePerformanceTest extends BasePerformanceTest {
 					CoreTest.fail("", e);
 				}
 			}
-		}.run(this, 10, 10);
+		};
+		runner.setRegressionReason(DEGREDATION_STORE_RETRIEVE);
+		runner.run(this, 10, 10);
 	}
-
 }
