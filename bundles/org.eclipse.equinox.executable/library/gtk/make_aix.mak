@@ -38,7 +38,16 @@ EXEC = $(PROGRAM_OUTPUT)
 DLL = $(PROGRAM_LIBRARY)
 #LIBS = `pkg-config --libs-only-L gtk+-2.0` -lgtk-x11-2.0 -lgdk_pixbuf-2.0 -lgobject-2.0 -lgdk-x11-2.0 -lpthread -ldl -lX11
 LIBS = -lpthread -ldl
-GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.a(libgtk-x11-2.0.so.0)\"" -DGDK_LIB="\"libgdk-x11-2.0.a(libgdk-x11-2.0.so.0)\"" -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.a(libgdk_pixbuf-2.0.so.0)\"" -DGOBJ_LIB="\"libgobject-2.0.a(libgobject-2.0.so.0)\"" -DX11_LIB="\"libX11.a(shr_64.o)\""
+
+X11_LIB_ppc = shr4.o
+X11_LIB_ppc64 = shr_64.so
+X11_LIB = -DX11_LIB="\"libX11.a($(X11_LIB_$(DEFAULT_OS_ARCH)))\""
+GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.a(libgtk-x11-2.0.so.0)\"" \
+		   -DGDK_LIB="\"libgdk-x11-2.0.a(libgdk-x11-2.0.so.0)\"" \
+		   -DPIXBUF_LIB="\"libgdk_pixbuf-2.0.a(libgdk_pixbuf-2.0.so.0)\"" \
+		   -DGOBJ_LIB="\"libgobject-2.0.a(libgobject-2.0.so.0)\"" \
+		   $(X11_LIB)
+		   
 LFLAGS = ${M_ARCH} -shared
 CFLAGS = ${M_ARCH} -g -s -Wall\
 	-fpic \
