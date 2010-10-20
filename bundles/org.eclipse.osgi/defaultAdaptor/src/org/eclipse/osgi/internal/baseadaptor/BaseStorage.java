@@ -75,6 +75,11 @@ public class BaseStorage implements SynchronousBundleListener {
 	 */
 	public static final byte EXTENSION_UPDATED = 0x08;
 
+	/** The BundleData is for a bundle exploded in a directory */
+	public static final int TYPE_DIRECTORYBUNDLE = 0x10000000;
+	/** The BundleData is for a bundle contained in a file (typically jar) */
+	public static final int TYPE_FILEBUNDLE = 0x20000000;
+
 	/**
 	 * the file name for the delete flag.  If this file exists in one a directory 
 	 * under the bundle store area then it will be removed during the 
@@ -696,7 +701,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		// No factories configured or they declined to create the bundle file; do default
 		if (result == null && content instanceof File) {
 			File file = (File) content;
-			if (file.isDirectory())
+			if (isDirectory(data, base, file))
 				result = new DirBundleFile(file);
 			else
 				result = new ZipBundleFile(file, data, this.mruList);
@@ -719,6 +724,24 @@ public class BaseStorage implements SynchronousBundleListener {
 				result = wrapped = new BundleFileWrapperChain(wrapperBundle, wrapped);
 		}
 		return result;
+	}
+
+	private boolean isDirectory(BaseData data, boolean base, File file) {
+		if (!base)
+			// there is no other place to check this; just consult the file directly
+			return file.isDirectory();
+		boolean isDirectory = false;
+		// first check if the type bits have been set
+		int type = data.getType();
+		if ((type & (TYPE_DIRECTORYBUNDLE | TYPE_FILEBUNDLE)) == 0) {
+			// no type bits set; consult the file and save the result
+			isDirectory = file.isDirectory();
+			data.setType(type | (isDirectory ? TYPE_DIRECTORYBUNDLE : TYPE_FILEBUNDLE));
+		} else {
+			// type bits have been set check to see if this is a directory bundle.
+			isDirectory = (type & TYPE_DIRECTORYBUNDLE) != 0;
+		}
+		return isDirectory;
 	}
 
 	public synchronized StateManager getStateManager() {
