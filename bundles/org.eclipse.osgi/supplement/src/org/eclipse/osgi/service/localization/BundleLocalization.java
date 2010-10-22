@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,13 +25,14 @@ import org.osgi.framework.Bundle;
 public interface BundleLocalization {
 
 	/**
-	 * The getLocalization method gets a ResourceBundle object for the given
-	 * locale and bundle.
+	 * Returns a <code>ResourceBundle</code> object for the given bundle and locale.
 	 * @param bundle the bundle to get localization for
-	 * @param locale the name of the locale to get
+	 * @param locale the name of the locale to get, or <code>null</code> if
+	 * the default locale is to be used
 	 * 
-	 * @return A <code>ResourceBundle</code> object for the given bundle and locale.
-	 * 		If <code>null</code> is passed for the locale parameter, the default locale is used.
+	 * @return A <code>ResourceBundle</code> object for the given bundle and locale,
+	 * or <code>null</code> is returned if no ResourceBundle object can
+	 * be loaded.
 	 */
 	public ResourceBundle getLocalization(Bundle bundle, String locale);
 }
