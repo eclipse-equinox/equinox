@@ -18,25 +18,26 @@ import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Implementation of MetaTypeService
  */
 public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleListener {
 
-	BundleContext _context;
 	SAXParserFactory _parserFactory;
 	private Hashtable<Long, MetaTypeInformation> _mtps = new Hashtable<Long, MetaTypeInformation>(7);
 
 	private final LogService logger;
+	private final ServiceTracker<Object, Object> metaTypeProviderTracker;
 
 	/**
 	 * Constructor of class MetaTypeServiceImpl.
 	 */
-	public MetaTypeServiceImpl(BundleContext context, SAXParserFactory parserFactory, LogService logger) {
-		this._context = context;
+	public MetaTypeServiceImpl(SAXParserFactory parserFactory, LogService logger, ServiceTracker<Object, Object> metaTypeProviderTracker) {
 		this._parserFactory = parserFactory;
 		this.logger = logger;
+		this.metaTypeProviderTracker = metaTypeProviderTracker;
 	}
 
 	/*
@@ -67,13 +68,14 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 			synchronized (_mtps) {
 				if (_mtps.containsKey(bID))
 					return _mtps.get(bID);
-				// Avoid synthetic accessor method warning.
+				// Avoid synthetic accessor method warnings.
 				final LogService loggerTemp = this.logger;
+				final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
 				MetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedExceptionAction<MetaTypeInformation>() {
 					public MetaTypeInformation run() throws IOException {
 						MetaTypeInformationImpl impl = new MetaTypeInformationImpl(b, _parserFactory, loggerTemp);
 						if (!impl._isThereMeta)
-							return new MetaTypeProviderTracker(_context, b);
+							return new MetaTypeProviderTracker(b, loggerTemp, tracker);
 						return impl;
 					}
 				});

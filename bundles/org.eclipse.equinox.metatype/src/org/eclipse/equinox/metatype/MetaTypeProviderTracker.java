@@ -10,45 +10,31 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype;
 
-import java.util.ArrayList;
+import java.util.*;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.cm.ManagedServiceFactory;
+import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class MetaTypeProviderTracker implements MetaTypeInformation {
-	public static final String MANAGED_SERVICE = "org.osgi.service.cm.ManagedService"; //$NON-NLS-1$
-	public static final String MANAGED_SERVICE_FACTORY = "org.osgi.service.cm.ManagedServiceFactory"; //$NON-NLS-1$
-	public static final String FILTER_STRING = "(|(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE + ")(" + Constants.OBJECTCLASS + '=' + MANAGED_SERVICE_FACTORY + "))"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-
-	Bundle _bundle;
-	BundleContext _context;
-	// Could be ManagedService, ManagedServiceFactory, or MetaTypeProvider.
-	ServiceTracker<?, ?> _tracker;
+	private final Bundle _bundle;
+	private final LogService log;
+	private final ServiceTracker<Object, Object> _tracker;
 
 	/**
 	 * Constructs a MetaTypeProviderTracker which tracks all MetaTypeProviders
 	 * registered by the specified bundle.
 	 * @param context The BundleContext of the MetaTypeService implementation
 	 * @param bundle The bundle to track all MetaTypeProviders for.
+	 * @param log The {@code LogService} to use for logging messages.
 	 */
-	public MetaTypeProviderTracker(BundleContext context, Bundle bundle) {
-		this._context = context;
+	public MetaTypeProviderTracker(Bundle bundle, LogService log, ServiceTracker<Object, Object> tracker) {
 		this._bundle = bundle;
-		// create a filter for ManagedService and ManagedServiceFactory services 
-		try {
-			Filter filter = context.createFilter(FILTER_STRING);
-			// create a service tracker and open it.
-			this._tracker = new ServiceTracker<Object, Object>(context, filter, null);
-			// we never close this, but it is no big deal because we
-			// really want to track the services until we are stopped
-			// at that point the framework will remove our listeners.
-			this._tracker.open();
-		} catch (InvalidSyntaxException e) {
-			// This should never happen; it means we have a bug in the filterString
-			e.printStackTrace();
-			throw new IllegalArgumentException(FILTER_STRING);
-		}
+		this._tracker = tracker;
+		this.log = log;
 	}
 
 	private String[] getPids(boolean factory) {
@@ -106,27 +92,67 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 	}
 
 	private MetaTypeProviderWrapper[] getMetaTypeProviders() {
-		ServiceReference<?>[] refs = _tracker.getServiceReferences();
-		if (refs == null)
+		Map<ServiceReference<Object>, Object> services = _tracker.getTracked();
+		if (services.isEmpty())
 			return new MetaTypeProviderWrapper[0];
-		ArrayList<MetaTypeProviderWrapper> results = new ArrayList<MetaTypeProviderWrapper>();
-		for (int i = 0; i < refs.length; i++)
-			// search for services registered by the bundle
-			if (refs[i].getBundle() == _bundle) {
-				Object service = _context.getService(refs[i]);
+		Set<ServiceReference<Object>> serviceReferences = services.keySet();
+		Set<MetaTypeProviderWrapper> result = new HashSet<MetaTypeProviderWrapper>();
+		for (ServiceReference<Object> serviceReference : serviceReferences) {
+			if (serviceReference.getBundle() == _bundle) {
+				Object service = services.get(serviceReference);
+				// If the service is not a MetaTypeProvider, we're not interested in it.
 				if (service instanceof MetaTypeProvider) {
-					// found one that implements MetaTypeProvider
-					// wrap its information in a MetaTypeProviderWrapper
-					String pid = (String) refs[i].getProperty(Constants.SERVICE_PID);
-					boolean factory = service instanceof ManagedServiceFactory;
-					results.add(new MetaTypeProviderWrapper((MetaTypeProvider) service, pid, factory));
+					// Include the METATYPE_PID, if present, to return as part of getPids(). Also, include the 
+					// METATYPE_FACTORY_PID, if present, to return as part of getFactoryPids().
+					// The filter ensures at least one of these properties was set for a standalone MetaTypeProvider.
+					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_PID, serviceReference, (MetaTypeProvider) service, false, result);
+					addMetaTypeProviderWrappers(MetaTypeProvider.METATYPE_FACTORY_PID, serviceReference, (MetaTypeProvider) service, true, result);
+					// If the service is a ManagedService, include the SERVICE_PID to return as part of getPids().
+					// The filter ensures the SERVICE_PID property was set.
+					if (service instanceof ManagedService) {
+						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service, false, result);
+					}
+					// If the service is a ManagedServiceFactory, include the SERVICE_PID to return as part of getFactoryPids().
+					// The filter ensures the SERVICE_PID property was set.
+					else if (service instanceof ManagedServiceFactory) {
+						addMetaTypeProviderWrappers(Constants.SERVICE_PID, serviceReference, (MetaTypeProvider) service, true, result);
+					}
 				}
-				// always unget a service.
-				// this leaves us open for the the service going away but who cares.
-				// we only use the service for a short period of time.
-				_context.ungetService(refs[i]);
 			}
-		return results.toArray(new MetaTypeProviderWrapper[results.size()]);
+		}
+		return result.toArray(new MetaTypeProviderWrapper[result.size()]);
+	}
+
+	private void addMetaTypeProviderWrappers(String servicePropertyName, ServiceReference<Object> serviceReference, MetaTypeProvider service, boolean factory, Set<MetaTypeProviderWrapper> wrappers) {
+		String[] pids = getStringProperty(servicePropertyName, serviceReference.getProperty(servicePropertyName));
+		for (String pid : pids) {
+			wrappers.add(new MetaTypeProviderWrapper(service, pid, factory));
+		}
+	}
+
+	private String[] getStringProperty(String name, Object value) {
+		// Don't log a warning if the value is null. The filter guarantees at least one of the necessary properties
+		// is there. If others are not, this method will get called with value equal to null.
+		if (value == null)
+			return new String[0];
+		if (value instanceof String) {
+			return new String[] {(String) value};
+		}
+		if (value instanceof String[]) {
+			return (String[]) value;
+		}
+		Exception e = null;
+		if (value instanceof Collection) {
+			@SuppressWarnings("unchecked")
+			Collection<String> temp = (Collection<String>) value;
+			try {
+				return temp.toArray(new String[temp.size()]);
+			} catch (ArrayStoreException ase) {
+				e = ase;
+			}
+		}
+		log.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_PID_METATYPE_PROVIDER_IGNORED, new Object[] {_bundle.getSymbolicName(), _bundle.getBundleId(), name, value}), e);
+		return new String[0];
 	}
 
 	// this is a simple class just used to temporarily store information about a provider
@@ -139,6 +165,25 @@ public class MetaTypeProviderTracker implements MetaTypeInformation {
 			this.provider = provider;
 			this.pid = pid;
 			this.factory = factory;
+		}
+
+		@Override
+		public boolean equals(Object object) {
+			if (object == this)
+				return true;
+			if (!(object instanceof MetaTypeProviderWrapper))
+				return false;
+			MetaTypeProviderWrapper that = (MetaTypeProviderWrapper) object;
+			return this.provider.equals(that.provider) && this.pid.equals(that.pid) && this.factory == that.factory;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = 17;
+			result = 31 * result + provider.hashCode();
+			result = 31 * result + pid.hashCode();
+			result = 31 * result + (factory ? 1 : 0);
+			return result;
 		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation.
+ * Copyright (c) 2005, 2010 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ public class MetaTypeMsg extends NLS {
 	public static String METADATA_NOT_FOUND;
 	public static String ASK_INVALID_LOCALE;
 	public static String TOKENIZER_GOT_INVALID_DATA;
+	public static String INVALID_PID_METATYPE_PROVIDER_IGNORED;
 
 	static {
 		// initialize resource bundles
