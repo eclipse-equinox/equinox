@@ -1,6 +1,6 @@
 /**
  *  Copyright 2001-2004 The Apache Software Foundation
- *  Portions (modifications) Copyright 2004-2005 IBM Corp.
+ *  Portions (modifications) Copyright 2004-2010 IBM Corp.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -170,8 +170,6 @@ public class ReferenceMap {
 	 */
 	final public static int SOFT = 1;
 
-	private int entryCount;
-
 	/**
 	 *  The threshold variable is calculated by multiplying
 	 *  table.length and loadFactor.  
@@ -307,7 +305,6 @@ public class ReferenceMap {
 	 * @return The new table entry
 	 */
 	private IEntry newEntry(int key, Object value, IEntry next) {
-		entryCount++;
 		switch (valueType) {
 			case HARD :
 				return new HardRef(key, value, next);
