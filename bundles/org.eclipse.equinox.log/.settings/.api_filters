@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component id="org.eclipse.equinox.log" version="2">
+<resource path="src/org/eclipse/equinox/log/internal/ExtendedLogEntryImpl.java" type="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl">
+<filter comment="Only called if method is available." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
+<message_argument value="Thread"/>
+<message_argument value="getId()"/>
+<message_argument value="J2SE-1.4"/>
+</message_arguments>
+</filter>
+</resource>
+</component>
