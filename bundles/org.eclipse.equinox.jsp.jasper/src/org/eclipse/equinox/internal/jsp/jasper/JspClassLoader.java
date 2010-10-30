@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -61,8 +63,11 @@ public class JspClassLoader extends URLClassLoader {
 		}
 	};
 
-	public JspClassLoader(Bundle bundle) {
+	private PermissionCollection permissions;
+
+	public JspClassLoader(Bundle bundle, PermissionCollection permissions) {
 		super(new URL[0], new BundleProxyClassLoader(bundle, new BundleProxyClassLoader(JASPERBUNDLE, new JSPContextFinder(EMPTY_CLASSLOADER))));
+		this.permissions = permissions;
 		addBundleClassPathJars(bundle);
 		Bundle[] fragments = Activator.getFragments(bundle);
 		if (fragments != null) {
@@ -104,5 +109,9 @@ public class JspClassLoader extends URLClassLoader {
 	// Classes should "not" be loaded by this classloader from the URLs - it is just used for TLD resource discovery.
 	protected Class findClass(String name) throws ClassNotFoundException {
 		throw new ClassNotFoundException(name);
+	}
+
+	protected PermissionCollection getPermissions(CodeSource codesource) {
+		return permissions;
 	}
 }
