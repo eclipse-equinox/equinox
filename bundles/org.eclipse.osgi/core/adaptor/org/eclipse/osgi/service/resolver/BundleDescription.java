@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import java.util.Map;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -31,6 +32,13 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * does not have a symbolic name.
 	 */
 	public String getSymbolicName();
+
+	/**
+	 * Returns the arbitrary attributes for this bundle description.
+	 * @return the arbitrary attributes for this bundle description
+	 * @since 3.7
+	 */
+	public Map<String, Object> getAttributes();
 
 	/**
 	 * The location string for this bundle.

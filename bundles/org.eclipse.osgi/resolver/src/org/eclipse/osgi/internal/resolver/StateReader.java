@@ -19,8 +19,7 @@ import java.util.Map.Entry;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 /**
  * This class is internally threadsafe and supports client locking. Clients must <strong>not</strong> hold the monitor for
@@ -47,7 +46,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 34;
+	public static final byte STATE_CACHE_VERSION = 35;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -220,6 +219,10 @@ final class StateReader {
 		result.setStateBit(BundleDescriptionImpl.HAS_DYNAMICIMPORT, in.readBoolean());
 		result.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, in.readBoolean());
 		result.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, in.readBoolean());
+		String[] mandatory = readList(in);
+		if (mandatory != null)
+			result.setDirective(Constants.MANDATORY_DIRECTIVE, mandatory);
+		result.setAttributes(readMap(in));
 		result.setHost(readHostSpec(in));
 
 		// set the bundle dependencies from imports and requires and hosts.
@@ -379,6 +382,7 @@ final class StateReader {
 		result.setSupplier(readBundleDescription(in));
 		result.setExported(in.readBoolean());
 		result.setOptional(in.readBoolean());
+		result.setAttributes(readMap(in));
 		return result;
 	}
 
@@ -510,6 +514,7 @@ final class StateReader {
 				hosts[i] = readBundleDescription(in);
 			result.setHosts(hosts);
 		}
+		result.setAttributes(readMap(in));
 		return result;
 	}
 

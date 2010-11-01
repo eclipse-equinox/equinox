@@ -45,14 +45,18 @@ public interface BaseDescription {
 	public BundleDescription getSupplier();
 
 	/**
-	 * Returns the directives declared with the description
-	 * @return the directives declared with the description
+	 * Returns the directives declared with the description.
+	 * This will return all known directives for the type of description.
+	 * The set of directives differs for each description type.
+	 * @return the known directives declared with the description
 	 * @since 3.7
 	 */
 	public Map<String, String> getDeclaredDirectives();
 
 	/**
-	 * Returns the attributes declared with the description
+	 * Returns the attributes declared with the description.
+	 * This will return all known attributes for the type of description.
+	 * The set of attributes differs for each description type.
 	 * @return the attributes declared with the description
 	 * @since 3.7
 	 */

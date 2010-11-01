@@ -106,6 +106,9 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setGenericCapabilities(createGenericCapabilities(original.getGenericCapabilities()));
 		bundle.setGenericRequires(createGenericRequires(original.getGenericRequires()));
 		bundle.setNativeCodeSpecification(createNativeCodeSpecification(original.getNativeCodeSpecification()));
+		bundle.setAttributes(original.getAttributes());
+		if (original instanceof BundleDescriptionImpl)
+			bundle.setDirective(Constants.MANDATORY_DIRECTIVE, ((BundleDescriptionImpl) original).getDirective(Constants.MANDATORY_DIRECTIVE));
 		return bundle;
 	}
 
@@ -183,6 +186,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundleSpec.setVersionRange(original.getVersionRange());
 		bundleSpec.setExported(original.isExported());
 		bundleSpec.setOptional(original.isOptional());
+		if (original instanceof BundleSpecificationImpl)
+			bundleSpec.setAttributes(((BundleSpecificationImpl) original).getAttributes());
 		return bundleSpec;
 	}
 
@@ -197,6 +202,8 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
 		hostSpec.setVersionRange(original.getVersionRange());
+		if (original instanceof HostSpecificationImpl)
+			hostSpec.setAttributes(((HostSpecificationImpl) original).getAttributes());
 		return hostSpec;
 	}
 

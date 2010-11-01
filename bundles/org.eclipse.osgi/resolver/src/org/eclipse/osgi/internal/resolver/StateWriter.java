@@ -14,8 +14,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.io.*;
 import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Filter;
-import org.osgi.framework.Version;
+import org.osgi.framework.*;
 
 /**
  * This class is <strong>not</strong> thread safe. Instances must not be
@@ -211,6 +210,8 @@ class StateWriter {
 		out.writeBoolean(bundle.hasDynamicImports());
 		out.writeBoolean(bundle.attachFragments());
 		out.writeBoolean(bundle.dynamicFragments());
+		writeList(out, (String[]) ((BundleDescriptionImpl) bundle).getDirective(Constants.MANDATORY_DIRECTIVE));
+		writeMap(out, bundle.getAttributes());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out, force);
 
 		List<BundleDescription> dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
@@ -350,6 +351,7 @@ class StateWriter {
 		writeBundleDescription((BundleDescription) bundle.getSupplier(), out, false);
 		out.writeBoolean(bundle.isExported());
 		out.writeBoolean(bundle.isOptional());
+		writeMap(out, bundle.getAttributes());
 	}
 
 	private void writeExportPackageDesc(ExportPackageDescriptionImpl exportPackageDesc, DataOutputStream out) throws IOException {
@@ -571,6 +573,7 @@ class StateWriter {
 		out.writeInt(hosts.length);
 		for (int i = 0; i < hosts.length; i++)
 			writeBundleDescription(hosts[i], out, force);
+		writeMap(out, host.getAttributes());
 	}
 
 	// called by writers for VersionConstraintImpl subclasses

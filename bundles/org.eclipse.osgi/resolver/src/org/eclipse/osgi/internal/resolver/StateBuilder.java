@@ -24,7 +24,8 @@ import org.osgi.framework.*;
  * This class builds bundle description objects from manifests
  */
 public class StateBuilder {
-	static final String[] DEFINED_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
+	static final String[] DEFINED_PACKAGE_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
+	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
 	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
@@ -55,12 +56,13 @@ public class StateBuilder {
 		if (symbolicNameHeader != null) {
 			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicNameHeader);
 			if (symbolicNameElements.length > 0) {
-				result.setSymbolicName(symbolicNameElements[0].getValue());
-				String singleton = symbolicNameElements[0].getDirective(Constants.SINGLETON_DIRECTIVE);
+				ManifestElement bsnElement = symbolicNameElements[0];
+				result.setSymbolicName(bsnElement.getValue());
+				String singleton = bsnElement.getDirective(Constants.SINGLETON_DIRECTIVE);
 				if (singleton == null) // TODO this is for backward compatibility; need to check manifest version < 2 to allow this after everyone has converted to new syntax
-					singleton = symbolicNameElements[0].getAttribute(Constants.SINGLETON_DIRECTIVE);
+					singleton = bsnElement.getAttribute(Constants.SINGLETON_DIRECTIVE);
 				result.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(singleton)); //$NON-NLS-1$
-				String fragmentAttachment = symbolicNameElements[0].getDirective(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
+				String fragmentAttachment = bsnElement.getDirective(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
 				if (fragmentAttachment != null) {
 					if (fragmentAttachment.equals(Constants.FRAGMENT_ATTACHMENT_RESOLVETIME)) {
 						result.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, true);
@@ -70,6 +72,8 @@ public class StateBuilder {
 						result.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, false);
 					}
 				}
+				result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(bsnElement.getDirective(Constants.MANDATORY_DIRECTIVE)));
+				result.setAttributes(getAttributes(bsnElement, DEFINED_BSN_MATCHING_ATTRS));
 			}
 		}
 		// retrieve other headers
@@ -220,6 +224,7 @@ public class StateBuilder {
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
 		result.setExported(Constants.VISIBILITY_REEXPORT.equals(spec.getDirective(Constants.VISIBILITY_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE))); //$NON-NLS-1$
 		result.setOptional(Constants.RESOLUTION_OPTIONAL.equals(spec.getDirective(Constants.RESOLUTION_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.OPTIONAL_ATTRIBUTE))); //$NON-NLS-1$
+		result.setAttributes(getAttributes(spec, DEFINED_BSN_MATCHING_ATTRS));
 		return result;
 	}
 
@@ -276,7 +281,7 @@ public class StateBuilder {
 			result.setBundleVersionRange(getVersionRange(importPackage.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
 			// only set the matching attributes if manifest version >= 2
 			if (manifestVersion >= 2)
-				result.setAttributes(getAttributes(importPackage, DEFINED_MATCHING_ATTRS));
+				result.setAttributes(getAttributes(importPackage, DEFINED_PACKAGE_MATCHING_ATTRS));
 
 			if (dynamic)
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
@@ -326,7 +331,7 @@ public class StateBuilder {
 			result.setDirective(Constants.FRIENDS_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.FRIENDS_DIRECTIVE)));
 			result.setDirective(Constants.INTERNAL_DIRECTIVE, Boolean.valueOf(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE)));
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.MANDATORY_DIRECTIVE)));
-			result.setAttributes(getAttributes(exportPackage, DEFINED_MATCHING_ATTRS));
+			result.setAttributes(getAttributes(exportPackage, DEFINED_PACKAGE_MATCHING_ATTRS));
 			allExports.add(result);
 		}
 	}
@@ -437,6 +442,7 @@ public class StateBuilder {
 		if (multiple == null)
 			multiple = getPlatformProperty(state, "osgi.support.multipleHosts"); //$NON-NLS-1$
 		result.setIsMultiHost("true".equals(multiple)); //$NON-NLS-1$
+		result.setAttributes(getAttributes(spec, DEFINED_BSN_MATCHING_ATTRS));
 		return result;
 	}
 

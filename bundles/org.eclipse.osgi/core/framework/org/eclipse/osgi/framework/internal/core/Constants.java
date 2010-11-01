@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,29 +202,6 @@ public class Constants implements org.osgi.framework.Constants {
 	 * @deprecated
 	 */
 	public final static String OPTIONAL_ATTRIBUTE = "optional"; //$NON-NLS-1$
-
-	/**
-	 * Manifest header attribute (named &quot;require-packages&quot;)
-	 * for Require-Bundle
-	 * specifying the subset of packages that are accessible from
-	 * the required bundle.  If the require-packages parameter
-	 * is not specified then all packages provided by the required bundle
-	 * are accessible.  The value of this parameter must be a quoted
-	 * string.  The syntax of the quoted string value is the same as
-	 * that of the Provide-Package manifest header value.
-	 *
-	 * <p> The attribute value is encoded in the Require-Bundle
-	 * manifest header like:
-	 * <pre>
-	 * Require-Bundle: org.osgi.test;
-	 *  require-packages="org.osgi.test.pkg1,org.osgi.test.pkg2"
-	 * </pre>
-	 * <p>
-	 * NOTE: this is only used for backwards compatibility, bundles manifest using
-	 * syntax version 2 will not recognize this attribute.
-	 * @deprecated
-	 */
-	public final static String REQUIRE_PACKAGES_ATTRIBUTE = "require-packages"; //$NON-NLS-1$
 
 	/**
 	* The key used to designate the buddy loader associated with a given bundle.

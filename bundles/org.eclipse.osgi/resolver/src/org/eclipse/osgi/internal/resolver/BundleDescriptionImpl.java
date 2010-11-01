@@ -56,6 +56,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	private List<BundleDescription> dependencies;
 	private List<BundleDescription> dependents;
+	private String[] mandatory;
+	private Map<String, Object> attributes;
 
 	private volatile LazyData lazyData;
 	private volatile int equinox_ee = -1;
@@ -794,6 +796,42 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		List<ImportPackageSpecification> addedDynamicImports;
 	}
 
+	public Map<String, Object> getAttributes() {
+		synchronized (this.monitor) {
+			return attributes;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setAttributes(Map<String, ?> attributes) {
+		synchronized (this.monitor) {
+			this.attributes = (Map<String, Object>) attributes;
+		}
+	}
+
+	Object getDirective(String key) {
+		synchronized (this.monitor) {
+			if (Constants.MANDATORY_DIRECTIVE.equals(key))
+				return mandatory;
+			if (Constants.SINGLETON_DIRECTIVE.equals(key))
+				return isSingleton() ? Boolean.TRUE : Boolean.FALSE;
+			if (Constants.FRAGMENT_ATTACHMENT_DIRECTIVE.equals(key)) {
+				if (!attachFragments())
+					return Constants.FRAGMENT_ATTACHMENT_NEVER;
+				if (dynamicFragments())
+					return Constants.FRAGMENT_ATTACHMENT_ALWAYS;
+				return Constants.FRAGMENT_ATTACHMENT_RESOLVETIME;
+			}
+		}
+		return null;
+	}
+
+	void setDirective(String key, Object value) {
+		// only pay attention to mandatory directive for now; others are set with setState method
+		if (Constants.MANDATORY_DIRECTIVE.equals(key))
+			mandatory = (String[]) value;
+	}
+
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<String, String>(2);
 		if (!attachFragments()) {
@@ -806,11 +844,18 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 		if (isSingleton())
 			result.put(Constants.SINGLETON_DIRECTIVE, Boolean.TRUE.toString());
+		String[] mandatoryDirective = (String[]) getDirective(Constants.MANDATORY_DIRECTIVE);
+		if (mandatoryDirective != null)
+			result.put(Constants.MANDATORY_DIRECTIVE, ExportPackageDescriptionImpl.toString(mandatoryDirective));
 		return Collections.unmodifiableMap(result);
 	}
 
 	public Map<String, Object> getDeclaredAttributes() {
 		Map<String, Object> result = new HashMap<String, Object>(1);
+		synchronized (this.monitor) {
+			if (attributes != null)
+				result.putAll(attributes);
+		}
 		result.put(Capability.BUNDLE_CAPABILITY, getName());
 		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
 		return Collections.unmodifiableMap(result);

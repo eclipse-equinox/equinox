@@ -88,7 +88,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		}
 	}
 
-	private static String toString(String[] list) {
+	static String toString(String[] list) {
 		StringBuffer buffer = new StringBuffer();
 		for (String string : list)
 			buffer.append(string).append(',');

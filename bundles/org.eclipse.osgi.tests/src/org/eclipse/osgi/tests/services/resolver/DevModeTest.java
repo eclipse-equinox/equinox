@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -221,7 +221,7 @@ public class DevModeTest extends AbstractStateTest {
 		assertTrue("3.1", aExports.length == 2);
 		assertTrue("3.2", bImports.length == 2);
 		assertTrue("3.3", aExports[0] == bImports[0]);
-		assertTrue("3.4", aExports[1] == bImports[1]);		
+		assertTrue("3.4", aExports[1] == bImports[1]);
 		assertTrue("3.5", aFrag.getHost().getSupplier() == a);
 	}
 
@@ -249,7 +249,7 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, "A; version=2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=2.0");
 		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
 		manifest.clear();
@@ -304,7 +304,7 @@ public class DevModeTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0");
-		manifest.put(Constants.REQUIRE_BUNDLE, "A; version=2.0");
+		manifest.put(Constants.REQUIRE_BUNDLE, "A; bundle-version=2.0");
 		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + "_" + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
 		manifest.clear();
