@@ -91,7 +91,6 @@ public class JspServlet extends HttpServlet {
 	private static final long serialVersionUID = -4110476909131707652L;
 	private Servlet jspServlet = new org.apache.jasper.servlet.JspServlet();
 	Bundle bundle;
-	BundlePermissionCollection bundlePermissions;
 	private URLClassLoader jspLoader;
 	String bundleResourcePath;
 	String alias;
@@ -100,10 +99,7 @@ public class JspServlet extends HttpServlet {
 		this.bundle = bundle;
 		this.bundleResourcePath = (bundleResourcePath == null || bundleResourcePath.equals("/")) ? "" : bundleResourcePath; //$NON-NLS-1$ //$NON-NLS-2$
 		this.alias = (alias == null || alias.equals("/")) ? null : alias; //$NON-NLS-1$
-		if (System.getSecurityManager() != null) {
-			bundlePermissions = new BundlePermissionCollection(bundle);
-		}
-		jspLoader = new JspClassLoader(bundle, bundlePermissions);
+		jspLoader = new JspClassLoader(bundle);
 	}
 
 	public JspServlet(Bundle bundle, String bundleResourcePath) {
@@ -124,7 +120,7 @@ public class JspServlet extends HttpServlet {
 					Object jspRuntimeContext = jspRuntimeContextField.get(jspServlet);
 					Field permissionCollectionField = jspRuntimeContext.getClass().getDeclaredField("permissionCollection"); //$NON-NLS-1$
 					permissionCollectionField.setAccessible(true);
-					permissionCollectionField.set(jspRuntimeContext, bundlePermissions);
+					permissionCollectionField.set(jspRuntimeContext, new BundlePermissionCollection(bundle));
 				} catch (Exception e) {
 					throw new ServletException("Cannot initialize JSPServlet. Failed to set JSPRuntimeContext permission collection."); //$NON-NLS-1$
 				}
