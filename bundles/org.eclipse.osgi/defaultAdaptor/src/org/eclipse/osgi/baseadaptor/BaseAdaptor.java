@@ -583,36 +583,43 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	}
 
 	private String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
-		if (filePattern.indexOf('\\') < 0 && filePattern.indexOf('(') < 0 && filePattern.indexOf(')') < 0)
-			return filePattern;
-		StringBuffer buffer = new StringBuffer(filePattern);
+		StringBuffer buffer = null;
 		boolean foundEscape = false;
-		for (int i = 0; i < buffer.length(); i++) {
-			char c = buffer.charAt(i);
+		for (int i = 0; i < filePattern.length(); i++) {
+			char c = filePattern.charAt(i);
 			switch (c) {
 				case '\\' :
 					// we either used the escape found or found a new escape.
 					foundEscape = foundEscape ? false : true;
+					if (buffer != null)
+						buffer.append(c);
 					break;
 				case '(' :
 				case ')' :
 					if (!foundEscape) {
+						if (buffer == null) {
+							buffer = new StringBuffer(filePattern.length() + 16);
+							buffer.append(filePattern.substring(0, i));
+						}
 						// must escape with '\'
-						buffer.insert(i, '\\');
-						i++;
+						buffer.append('\\');
 					} else {
 						foundEscape = false; // used the escape found
 					}
+					if (buffer != null)
+						buffer.append(c);
 					break;
 				default :
 					// if we found an escape it has been used
 					foundEscape = false;
+					if (buffer != null)
+						buffer.append(c);
 					break;
 			}
 		}
 		if (foundEscape)
 			throw new InvalidSyntaxException("Trailing escape characters must be escaped.", filePattern); //$NON-NLS-1$
-		return buffer.toString();
+		return buffer == null ? filePattern : buffer.toString();
 	}
 
 	private List<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, List<String> pathList) {
