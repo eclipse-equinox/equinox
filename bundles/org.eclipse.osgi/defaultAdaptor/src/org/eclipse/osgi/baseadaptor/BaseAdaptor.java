@@ -566,17 +566,53 @@ public class BaseAdaptor implements FrameworkAdaptor {
 		if (filePattern != null)
 			try {
 				// create a file pattern filter with 'filename' as the key
-				patternFilter = FilterImpl.newInstance("(filename=" + filePattern + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				patternFilter = FilterImpl.newInstance("(filename=" + sanitizeFilterInput(filePattern) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a single hashtable to be shared during the recursive search
 				patternProps = new Hashtable<String, String>(2);
 			} catch (InvalidSyntaxException e) {
-				// cannot happen
+				// something unexpected happened; log error and return nothing
+				Bundle b = context == null ? null : context.getBundle();
+				eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
+				return pathList;
 			}
 		// find the entry paths for the datas
 		for (BundleFile bundleFile : bundleFiles) {
 			listEntryPaths(bundleFile, path, patternFilter, patternProps, options, pathList);
 		}
 		return pathList;
+	}
+
+	private String sanitizeFilterInput(String filePattern) throws InvalidSyntaxException {
+		if (filePattern.indexOf('\\') < 0 && filePattern.indexOf('(') < 0 && filePattern.indexOf(')') < 0)
+			return filePattern;
+		StringBuffer buffer = new StringBuffer(filePattern);
+		boolean foundEscape = false;
+		for (int i = 0; i < buffer.length(); i++) {
+			char c = buffer.charAt(i);
+			switch (c) {
+				case '\\' :
+					// we either used the escape found or found a new escape.
+					foundEscape = foundEscape ? false : true;
+					break;
+				case '(' :
+				case ')' :
+					if (!foundEscape) {
+						// must escape with '\'
+						buffer.insert(i, '\\');
+						i++;
+					} else {
+						foundEscape = false; // used the escape found
+					}
+					break;
+				default :
+					// if we found an escape it has been used
+					foundEscape = false;
+					break;
+			}
+		}
+		if (foundEscape)
+			throw new InvalidSyntaxException("Trailing escape characters must be escaped.", filePattern); //$NON-NLS-1$
+		return buffer.toString();
 	}
 
 	private List<String> listEntryPaths(BundleFile bundleFile, String path, Filter patternFilter, Hashtable<String, String> patternProps, int options, List<String> pathList) {
