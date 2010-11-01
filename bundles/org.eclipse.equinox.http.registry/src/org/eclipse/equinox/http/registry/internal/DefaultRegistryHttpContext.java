@@ -115,13 +115,36 @@ public class DefaultRegistryHttpContext implements HttpContext {
 			String path = resourceName.substring(0, lastSlash);
 			if (path.length() == 0)
 				path = "/"; //$NON-NLS-1$
-			String file = resourceName.substring(lastSlash + 1);
+			String file = sanitizeEntryName(resourceName.substring(lastSlash + 1));
 			Enumeration entryPaths = bundle.findEntries(path, file, false);
 
 			if (entryPaths != null && entryPaths.hasMoreElements())
 				return (URL) entryPaths.nextElement();
 
 			return null;
+		}
+
+		private String sanitizeEntryName(String name) {
+			StringBuffer buffer = null;
+			for (int i = 0; i < name.length(); i++) {
+				char c = name.charAt(i);
+				switch (c) {
+					case '*' :
+					case '\\' :
+						// we need to escape '*' and '\'
+						if (buffer == null) {
+							buffer = new StringBuffer(name.length() + 16);
+							buffer.append(name.substring(0, i));
+						}
+						buffer.append('\\').append(c);
+						break;
+					default :
+						if (buffer != null)
+							buffer.append(c);
+						break;
+				}
+			}
+			return (buffer == null) ? name : buffer.toString();
 		}
 
 		public Set getResourcePaths(String path) {
