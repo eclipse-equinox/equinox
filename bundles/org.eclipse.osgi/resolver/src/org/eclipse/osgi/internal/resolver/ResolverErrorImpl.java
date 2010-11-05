@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,8 @@ public final class ResolverErrorImpl implements ResolverError {
 			case ResolverError.PROVIDE_BUNDLE_PERMISSION :
 			case ResolverError.FRAGMENT_BUNDLE_PERMISSION :
 			case ResolverError.HOST_BUNDLE_PERMISSION :
+			case ResolverError.REQUIRE_CAPABILITY_PERMISSION :
+			case ResolverError.PROVIDE_CAPABILITY_PERMISSION :
 				return NLS.bind(StateMsg.RES_ERROR_MISSING_PERMISSION, getData());
 			case ResolverError.MISSING_IMPORT_PACKAGE :
 			case ResolverError.MISSING_REQUIRE_BUNDLE :

@@ -1605,7 +1605,8 @@ public class ResolverImpl implements Resolver {
 		GenericCapability[] capabilities = rb.getGenericCapabilities();
 		List<GenericDescription> selectedCapabilities = new ArrayList<GenericDescription>(capabilities.length);
 		for (GenericCapability capability : capabilities)
-			selectedCapabilities.add(capability.getGenericDescription());
+			if (permissionChecker.checkCapabilityPermission(capability.getGenericDescription()))
+				selectedCapabilities.add(capability.getGenericDescription());
 		GenericDescription[] selectedCapabilitiesArray = selectedCapabilities.toArray(new GenericDescription[selectedCapabilities.size()]);
 
 		GenericConstraint[] genericRequires = rb.getGenericRequires();

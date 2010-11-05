@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,7 +86,7 @@ public interface ResolverError {
 	/**
 	 * Error type constant (bit mask) indicating that a Require-Bundle could
 	 * not be resolved because no bundle with the required symbolic name has 
-	 * the correct permissions to provied the required symbolic name.
+	 * the correct permissions to provide the required symbolic name.
 	 * @see ResolverError#getType()
 	 */
 	public static final int PROVIDE_BUNDLE_PERMISSION = 0x0400;
@@ -145,6 +145,24 @@ public interface ResolverError {
 	 * @since 3.4
 	 */
 	public static final int DISABLED_BUNDLE = 0x40000;
+
+	/**
+	 * Error type constant (bit mask) indicating that a Require-Capability could
+	 * not be resolved because the requiring bundle does not have the correct
+	 * permissions to require the capability.
+	 * @see ResolverError#getType()
+	 * @since 3.7
+	 */
+	public static final int REQUIRE_CAPABILITY_PERMISSION = 0x80000;
+
+	/**
+	 * Error type constant (bit mask) indicating that a Require-Bundle could
+	 * not be resolved because no bundle with the required symbolic name has 
+	 * the correct permissions to provide the required symbolic name.
+	 * @see ResolverError#getType()
+	 * @since 3.7
+	 */
+	public static final int PROVIDE_CAPABILITY_PERMISSION = 0x100000;
 
 	/**
 	 * Returns the bundle which this ResolverError is for

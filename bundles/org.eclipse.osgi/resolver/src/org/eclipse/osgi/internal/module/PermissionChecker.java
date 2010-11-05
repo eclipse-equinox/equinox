@@ -35,19 +35,23 @@ public class PermissionChecker {
 		// TODO could optimize out the producer permission check on export package
 		boolean success = false;
 		Permission producerPermission = null, consumerPermission = null;
-		Bundle producer = null, consumer = null;
+		Bundle consumer = null;
+		Bundle producer = context.getBundle(bd.getSupplier().getBundleId());
 		int errorType = 0;
 		if (vc instanceof ImportPackageSpecification) {
 			errorType = ResolverError.IMPORT_PACKAGE_PERMISSION;
-			producer = context.getBundle(((ExportPackageDescription) bd).getExporter().getBundleId());
 			producerPermission = new PackagePermission(bd.getName(), PackagePermission.EXPORTONLY);
 			consumerPermission = producer != null ? new PackagePermission(vc.getName(), producer, PackagePermission.IMPORT) : new PackagePermission(vc.getName(), PackagePermission.IMPORT);
-		} else {
+		} else if (vc instanceof BundleSpecification || vc instanceof HostSpecification) {
 			boolean requireBundle = vc instanceof BundleSpecification;
 			errorType = requireBundle ? ResolverError.REQUIRE_BUNDLE_PERMISSION : ResolverError.FRAGMENT_BUNDLE_PERMISSION;
 			producerPermission = new BundlePermission(bd.getName(), requireBundle ? BundlePermission.PROVIDE : BundlePermission.HOST);
 			consumerPermission = new BundlePermission(vc.getName(), requireBundle ? BundlePermission.REQUIRE : BundlePermission.FRAGMENT);
-			producer = context.getBundle(((BundleDescription) bd).getBundleId());
+		} else if (vc instanceof GenericSpecification) {
+			errorType = ResolverError.REQUIRE_CAPABILITY_PERMISSION;
+			GenericDescription gd = (GenericDescription) bd;
+			producerPermission = new CapabilityPermission(gd.getType(), CapabilityPermission.PROVIDE);
+			consumerPermission = new CapabilityPermission(gd.getType(), gd.getDeclaredAttributes(), producer, CapabilityPermission.REQUIRE);
 		}
 		consumer = context.getBundle(vc.getBundle().getBundleId());
 		if (producer != null && (producer.getState() & Bundle.UNINSTALLED) == 0) {
@@ -60,6 +64,9 @@ public class PermissionChecker {
 					case ResolverError.REQUIRE_BUNDLE_PERMISSION :
 					case ResolverError.FRAGMENT_BUNDLE_PERMISSION :
 						errorType = errorType == ResolverError.REQUIRE_BUNDLE_PERMISSION ? ResolverError.PROVIDE_BUNDLE_PERMISSION : ResolverError.HOST_BUNDLE_PERMISSION;
+						break;
+					case ResolverError.REQUIRE_CAPABILITY_PERMISSION :
+						errorType = ResolverError.PROVIDE_BUNDLE_PERMISSION;
 						break;
 				}
 				resolver.getState().addResolverError(vc.getBundle(), errorType, producerPermission.toString(), vc);
@@ -79,5 +86,12 @@ public class PermissionChecker {
 			return true;
 		Bundle bundle = context.getBundle(export.getExporter().getBundleId());
 		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORTONLY));
+	}
+
+	boolean checkCapabilityPermission(GenericDescription capability) {
+		if (!checkPermissions)
+			return true;
+		Bundle bundle = context.getBundle(capability.getSupplier().getBundleId());
+		return bundle == null ? false : bundle.hasPermission(new CapabilityPermission(capability.getType(), CapabilityPermission.PROVIDE));
 	}
 }

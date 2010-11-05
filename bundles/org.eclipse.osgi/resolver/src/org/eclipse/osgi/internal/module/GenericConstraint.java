@@ -29,10 +29,6 @@ public class GenericConstraint extends ResolverConstraint {
 		return !supplierHasUses && (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
 	}
 
-	boolean isSatisfiedBy(VersionSupplier vs) {
-		return !vs.getResolverBundle().isUninstalled() && getVersionConstraint().isSatisfiedBy(vs.getBaseDescription());
-	}
-
 	public String getNameSpace() {
 		return ((GenericSpecification) getVersionConstraint()).getType();
 	}
