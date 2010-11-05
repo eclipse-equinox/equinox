@@ -19,7 +19,11 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 
 	public VersionHashMap(ResolverImpl resolver) {
 		this.resolver = resolver;
-		preferSystemPackages = Boolean.valueOf(ResolverImpl.secureAction.getProperty("osgi.resolver.preferSystemPackages", "true")).booleanValue(); //$NON-NLS-1$//$NON-NLS-2$
+		Dictionary<?, ?>[] allProperties = resolver.getState().getPlatformProperties();
+		Object preferSystem = allProperties.length == 0 ? "true" : allProperties[0].get("osgi.resolver.preferSystemPackages"); //$NON-NLS-1$//$NON-NLS-2$
+		if (preferSystem == null)
+			preferSystem = "true"; //$NON-NLS-1$
+		preferSystemPackages = Boolean.valueOf(preferSystem.toString()).booleanValue();
 	}
 
 	// assumes existing array is sorted
