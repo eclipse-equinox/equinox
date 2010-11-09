@@ -20,7 +20,6 @@ import java.util.*;
 public class ClassloaderStats {
 	private String id;
 	private long loadingTime; // time spent loading classes
-	private int failureCount = 0; // number of classes requested but that we fail to provide
 	/**
 	 * classes loaded by the plugin (key: class name, value: ClassStats) 
 	 */
@@ -167,10 +166,8 @@ public class ClassloaderStats {
 
 	private synchronized void endLoadClass(String name, boolean success) {
 		ClassStats current = getClassStack().pop();
-		if (!success) {
-			failureCount++;
+		if (!success)
 			return;
-		}
 		if (current.getLoadOrder() >= 0)
 			return;
 

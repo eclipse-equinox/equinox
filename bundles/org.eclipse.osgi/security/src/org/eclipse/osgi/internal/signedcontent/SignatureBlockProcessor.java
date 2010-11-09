@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2010 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -54,8 +54,8 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 
 		byte manifestBytes[] = readIntoArray(be);
 		// process the signers
-		Iterator<String> iSigners = signers.iterator();
-		for (int i = 0; iSigners.hasNext(); i++)
+
+		for (Iterator<String> iSigners = signers.iterator(); iSigners.hasNext();)
 			processSigner(wrappedBundleFile, manifestBytes, iSigners.next());
 
 		// done processing now create a SingedContent to return
