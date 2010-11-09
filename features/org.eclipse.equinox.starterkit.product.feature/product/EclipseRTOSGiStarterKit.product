@@ -7,7 +7,8 @@
    </configIni>
 
    <launcherArgs>
-      <programArgs>-console -nosplash</programArgs>
+      <programArgs>-console -nosplash -consolelog -noexit</programArgs>
+      <vmArgs>-Declipse.ignoreApp=true</vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
@@ -34,11 +35,8 @@
 
    <configurations>
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.frameworkadmin.equinox" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.equinox.p2.console" autoStart="true" startLevel="3" />
-      <plugin id="org.eclipse.equinox.p2.reconciler.dropins" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <plugin id="org.eclipse.equinox.simpleconfigurator.manipulator" autoStart="true" startLevel="3" />
       <property name="eclipse.ignoreApp" value="true" />
       <property name="osgi.noShutdown" value="true" />
