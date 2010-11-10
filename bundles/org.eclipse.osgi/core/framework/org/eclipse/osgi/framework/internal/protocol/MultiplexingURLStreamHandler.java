@@ -74,7 +74,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			}
 			handlerField.setAccessible(true);
 		} catch (Exception e) {
-			factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "initializeMethods", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "initializeMethods", 0, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		methodsInitialized = true;
@@ -96,7 +96,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 					throw (IOException) e.getTargetException();
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "openConnection", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "openConnection", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -111,7 +111,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "equals", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "equals", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -126,7 +126,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "getDefaultPort", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "getDefaultPort", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -141,7 +141,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "hashCode", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -156,7 +156,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hashCode", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "hashCode", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -171,7 +171,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "hostsEqual", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "hostsEqual", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -189,7 +189,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "parseURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "parseURL", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -204,7 +204,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "sameFile", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "sameFile", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -222,7 +222,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "setURL", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "setURL", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}
@@ -237,7 +237,7 @@ public class MultiplexingURLStreamHandler extends URLStreamHandler {
 			} catch (InvocationTargetException e) {
 				throw (RuntimeException) e.getTargetException();
 			} catch (Exception e) {
-				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), "toExternalForm", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+				factory.adaptor.getFrameworkLog().log(new FrameworkLogEntry(MultiplexingURLStreamHandler.class.getName(), FrameworkLogEntry.ERROR, 0, "toExternalForm", 0, e, null)); //$NON-NLS-1$
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		}

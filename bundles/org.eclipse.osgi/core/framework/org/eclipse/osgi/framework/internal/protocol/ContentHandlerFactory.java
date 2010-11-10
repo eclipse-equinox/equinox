@@ -147,7 +147,7 @@ public class ContentHandlerFactory extends MultiplexingFactory implements java.n
 			Method createInternalContentHandlerMethod = factory.getClass().getMethod("createInternalContentHandler", new Class[] {String.class}); //$NON-NLS-1$
 			return (ContentHandler) createInternalContentHandlerMethod.invoke(factory, new Object[] {contentType});
 		} catch (Exception e) {
-			adaptor.getFrameworkLog().log(new FrameworkLogEntry(ContentHandlerFactory.class.getName(), "findAuthorizedContentHandler-loop", FrameworkLogEntry.ERROR, e, null)); //$NON-NLS-1$
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(ContentHandlerFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "findAuthorizedContentHandler-loop", 0, e, null)); //$NON-NLS-1$
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
