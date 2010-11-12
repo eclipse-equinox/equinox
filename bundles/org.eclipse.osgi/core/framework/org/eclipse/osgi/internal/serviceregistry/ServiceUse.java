@@ -43,6 +43,9 @@ public class ServiceUse<S> {
 	/** bundle's use count for this service */
 	/* @GuardedBy("this") */
 	private int useCount;
+	/** true if we are calling the factory getService method. Used to detect recursion. */
+	/* @GuardedBy("this") */
+	private boolean factoryInUse;
 
 	/** Internal framework object. */
 
@@ -56,6 +59,7 @@ public class ServiceUse<S> {
 	 */
 	ServiceUse(BundleContextImpl context, ServiceRegistrationImpl<S> registration) {
 		this.useCount = 0;
+		this.factoryInUse = false;
 		S service = registration.getServiceObject();
 		if (service instanceof ServiceFactory<?>) {
 			@SuppressWarnings("unchecked")
@@ -116,6 +120,17 @@ public class ServiceUse<S> {
 		if (Debug.DEBUG_SERVICES) {
 			Debug.println("getService[factory=" + registration.getBundle() + "](" + context.getBundleImpl() + "," + registration + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
+		// check for recursive call
+		if (factoryInUse == true) {
+			if (Debug.DEBUG_SERVICES) {
+				Debug.println(factory + ".getService() recursively called."); //$NON-NLS-1$
+			}
+
+			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_RECURSION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_RECURSION); //$NON-NLS-1$
+			context.getFramework().publishFrameworkEvent(FrameworkEvent.WARNING, registration.getBundle(), se);
+			return null;
+		}
+		factoryInUse = true;
 		final S service;
 		try {
 			service = AccessController.doPrivileged(new PrivilegedAction<S>() {
@@ -133,6 +148,8 @@ public class ServiceUse<S> {
 			ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, factory.getClass().getName(), "getService"), ServiceException.FACTORY_EXCEPTION, t); //$NON-NLS-1$ 
 			context.getFramework().publishFrameworkEvent(FrameworkEvent.ERROR, registration.getBundle(), se);
 			return null;
+		} finally {
+			factoryInUse = false;
 		}
 
 		if (service == null) {

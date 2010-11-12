@@ -809,6 +809,15 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/ServiceException.java" type="org.osgi.framework.ServiceException">
+<filter comment="Ignore OSGi API" id="1141899266">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FACTORY_RECURSION"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/ServiceReference.java" type="org.osgi.framework.ServiceReference">
 <filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>
