@@ -67,6 +67,7 @@ public class DataParser {
 	private static final String CHAR = "Char"; //$NON-NLS-1$
 	private static final String BOOLEAN = "Boolean"; //$NON-NLS-1$
 	private static final String SHORT = "Short"; //$NON-NLS-1$
+	private static final String PASSWORD = "Password"; //$NON-NLS-1$
 
 	protected Bundle _dp_bundle;
 	protected URL _dp_url;
@@ -134,6 +135,8 @@ public class DataParser {
 		}
 
 		switch (type) {
+			// PASSWORD should be treated like STRING.
+			case AttributeDefinition.PASSWORD :
 			case AttributeDefinition.STRING :
 				// Both the min and max of STRING are Integers.
 				return new Integer(value);
@@ -482,6 +485,8 @@ public class DataParser {
 				_dataType = AttributeDefinition.BOOLEAN;
 			} else if (ad_type_val.equalsIgnoreCase(SHORT)) {
 				_dataType = AttributeDefinition.SHORT;
+			} else if (ad_type_val.equalsIgnoreCase(PASSWORD)) {
+				_dataType = AttributeDefinition.PASSWORD;
 			} else {
 				_isParsedDataValid = false;
 				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name)); //$NON-NLS-1$

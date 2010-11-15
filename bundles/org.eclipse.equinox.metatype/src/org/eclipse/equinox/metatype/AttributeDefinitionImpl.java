@@ -291,7 +291,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			return MetaTypeMsg.NULL_IS_INVALID;
 		}
 		if ((_minValue == null) && (_maxValue == null)) {
-			if (_dataType != STRING) {
+			// PASSWORD is treated like STRING.
+			if (_dataType != STRING && _dataType != PASSWORD) {
 				// No validation present
 				return null;
 			}
@@ -301,7 +302,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		}
 
 		// Addtional validation for STRING.
-		if (_dataType == STRING && _values.size() > 0 && !_values.contains(value)) {
+		// PASSWORD is treated like STRING.
+		if ((_dataType == STRING || _dataType == PASSWORD) && _values.size() > 0 && !_values.contains(value)) {
 			return NLS.bind(MetaTypeMsg.VALUE_OUT_OF_OPTION, value);
 		}
 
@@ -339,6 +341,8 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 		boolean rangeError = false;
 
 		switch (_dataType) {
+			// PASSWORD is treated like STRING.
+			case PASSWORD :
 			case STRING :
 				if ((_minValue != null) && (_maxValue != null)) {
 					if (value.length() > ((Integer) _maxValue).intValue() || value.length() < ((Integer) _minValue).intValue()) {
