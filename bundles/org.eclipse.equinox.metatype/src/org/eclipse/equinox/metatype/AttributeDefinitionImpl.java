@@ -344,10 +344,10 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Attr
 			// PASSWORD is treated like STRING.
 			case PASSWORD :
 			case STRING :
-				if ((_minValue != null) && (_maxValue != null)) {
-					if (value.length() > ((Integer) _maxValue).intValue() || value.length() < ((Integer) _minValue).intValue()) {
-						rangeError = true;
-					}
+				if (_minValue != null && value.length() < (Integer) _minValue) {
+					rangeError = true;
+				} else if (_maxValue != null && value.length() > (Integer) _maxValue) {
+					rangeError = true;
 				}
 				break;
 			case LONG :
