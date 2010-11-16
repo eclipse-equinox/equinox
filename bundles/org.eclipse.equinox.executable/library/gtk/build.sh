@@ -105,6 +105,8 @@ case $OS in
 		makefile="make_hpux.mak"
 		defaultOS="hpux"
 		defaultOSArch="ia64_32"
+		PATH=$PATH:/opt/hp-gcc/bin:/opt/gtk2.6/bin:/opt/gtk2.6/lib/pkgconfig
+		export PATH
 		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
 	;;
 	"SunOS")
