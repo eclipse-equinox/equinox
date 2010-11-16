@@ -35,6 +35,10 @@
 #include <semaphore.h>
 #include <fcntl.h>
 
+#ifdef HPUX
+#define SEM_FAILED (void *)-1
+#endif
+
 /* Global Variables */
 char*  defaultVM     = "java";
 char*  vmLibrary 	 = "libjvm.so";

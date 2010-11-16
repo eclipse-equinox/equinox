@@ -101,6 +101,12 @@ case $OS in
 		defaultOSArch="ppc64"
 		[ -d /bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk ] && defaultJavaHome="/bluebird/teamswt/swt-builddir/JDKs/AIX/PPC64/j564/sdk"
 	;;
+	"HP-UX")
+		makefile="make_hpux.mak"
+		defaultOS="hpux"
+		defaultOSArch="ia64_32"
+		[ -d /opt/java1.5 ] && defaultJavaHome="/opt/java1.5"
+	;;
 	"SunOS")
 		makefile="make_solaris.mak"
 		defaultOS="solaris"
