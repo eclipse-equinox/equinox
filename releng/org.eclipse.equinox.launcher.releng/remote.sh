@@ -37,6 +37,9 @@ case $OS in
 	"AIX")
 		PATH=/bluebird/teamswt/swt-builddir/build/cvs_bin/AIX:$PATH
 		;;
+	"HP-UX")
+		PATH=$PATH:/opt/gtk2.6/bin:/opt/gtk2.6/lib/pkgconfig
+		;;
 esac
 
 PATH=$JAVA_HOME/jre/bin:$ANT_HOME/bin:$PATH
