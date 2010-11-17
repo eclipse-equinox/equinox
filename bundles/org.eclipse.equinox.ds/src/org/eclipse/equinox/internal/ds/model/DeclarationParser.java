@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    Lazar Kirchev		 	- bug.id = 320377
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
@@ -74,6 +75,8 @@ public class DeclarationParser implements ExTagListener {
 
 	public Vector components;
 
+	private boolean throwErrors = false;
+
 	private Bundle bundle;
 	private BundleContext bc;
 	private ServiceComponent currentComponent;
@@ -82,6 +85,14 @@ public class DeclarationParser implements ExTagListener {
 	private Hashtable namespaces = null;
 	private boolean rootPassed = false;
 	private String currentURL = null;
+
+	public DeclarationParser() {
+		this(false);
+	}
+
+	public DeclarationParser(boolean toThrowErrors) {
+		this.throwErrors = toThrowErrors;
+	}
 
 	/**
 	 * This method parses an XML file read from the given stream and converts
@@ -134,8 +145,14 @@ public class DeclarationParser implements ExTagListener {
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_START_TAG, currentURL, bundle) + iae.getMessage(), iae);
+			}
 		} catch (Throwable e) {
 			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_START_TAG, currentURL, bundle), e);
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_START_TAG, currentURL, bundle) + e.getMessage(), e);
+			}
 		} finally {
 			if (!rootPassed) {
 				rootPassed = true;
@@ -197,10 +214,16 @@ public class DeclarationParser implements ExTagListener {
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_END_TAG, currentURL, bundle) + iae.getMessage(), iae);
+			}
 		} catch (Throwable e) {
 			currentComponent = null;
 			closeTag = null;
 			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_END_TAG, currentURL, bundle), e);
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_END_TAG, currentURL, bundle) + e.getMessage(), e);
+			}
 		}
 	}
 
@@ -247,7 +270,7 @@ public class DeclarationParser implements ExTagListener {
 				throw e;
 			}
 		} // if null - default cardinality is already initialized in
-		// constructor
+			// constructor
 
 		String policyS = tag.getAttribute(ATTR_POLICY);
 		int policy = ComponentReference.POLICY_STATIC; // default
@@ -416,9 +439,15 @@ public class DeclarationParser implements ExTagListener {
 			if (Activator.DEBUG) {
 				Activator.log.debug("[SCR] Tracing the last exception", iae); //$NON-NLS-1$
 			}
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_PROPERTY, name, currentURL) + iae.getMessage(), iae);
+			}
 		} catch (Throwable e) {
 			//logging unrecognized exception
 			Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, NLS.bind(Messages.ERROR_PROCESSING_PROPERTY, name, currentURL), e);
+			if (throwErrors) {
+				throw new RuntimeException(NLS.bind(Messages.ERROR_PROCESSING_PROPERTY, name, currentURL) + e.getMessage(), e);
+			}
 		}
 	}
 
@@ -451,6 +480,9 @@ public class DeclarationParser implements ExTagListener {
 				invalid = false;
 			} catch (IOException e) {
 				Activator.log(bundle.getBundleContext(), LogService.LOG_ERROR, Messages.ERROR_LOADING_PROPERTIES_FILE, e);
+				if (throwErrors) {
+					throw new RuntimeException(Messages.ERROR_LOADING_PROPERTIES_FILE + e, e);
+				}
 			}
 		}
 

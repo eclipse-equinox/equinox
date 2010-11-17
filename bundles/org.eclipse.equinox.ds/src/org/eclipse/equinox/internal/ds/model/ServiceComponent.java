@@ -10,12 +10,12 @@
  *    ProSyst Software GmbH - initial API and implementation
  *    Simon Archer 		    - bug.id = 225624 
  *    Bryan Hunt 		    - bug.id = 275997 
+ *    Lazar Kirchev		 	- bug.id = 320377
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
@@ -83,6 +83,20 @@ public class ServiceComponent implements Externalizable, Component {
 	int state = Component.STATE_UNSATISFIED;
 	// --- end: model
 
+	public HashSet componentIssues = new HashSet(1, 1);
+
+	public String getComponentIssues() {
+		if (!componentIssues.isEmpty()) {
+			String result = ""; //$NON-NLS-1$
+			Object[] issues = componentIssues.toArray();
+			for (int i = 0; i < issues.length; i++) {
+				result += issues[i] + "\n"; //$NON-NLS-1$
+			}
+			return result;
+		}
+		return null;
+	}
+
 	private static final Class ACTIVATE_METHODS_PARAMETERS[] = new Class[] {ComponentContext.class};
 
 	public ServiceComponent() {
@@ -134,6 +148,7 @@ public class ServiceComponent implements Externalizable, Component {
 						if (!SCRUtil.checkMethodAccess(instance.getClass(), clazz, method, false)) {
 							//the method is not accessible. Stop the search
 							Activator.log(bc, LogService.LOG_WARNING, NLS.bind(Messages.METHOD_UNACCESSABLE, methodName, clazz), null);
+							componentIssues.add(NLS.bind(Messages.METHOD_UNACCESSABLE, methodName, clazz));
 							method = null;
 							break;
 						}
@@ -217,6 +232,7 @@ public class ServiceComponent implements Externalizable, Component {
 					if (activateMethodName != "activate") { //$NON-NLS-1$
 						//the activate method is specified in the component description XML by the user.
 						//It is expected to find it in the implementation class
+						componentIssues.add("Can not activate instance of component " + this.implementation + ". The specified activate method [" + activateMethodName + "] was not found."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						throw new ComponentException(NLS.bind(Messages.SPECIFIED_ACTIVATE_METHOD_NOT_FOUND, instance, this));
 					}
 				}
@@ -241,6 +257,11 @@ public class ServiceComponent implements Externalizable, Component {
 			if (t instanceof ComponentException) {
 				throw (ComponentException) t;
 			}
+			String cause = t.toString();
+			if (t instanceof InvocationTargetException) {
+				cause = t.getCause().toString();
+			}
+			componentIssues.add("Can not activate instance of component " + this.implementation + ". The activation throws: " + cause); //$NON-NLS-1$ //$NON-NLS-2$ 
 			throw new ComponentException(NLS.bind(Messages.EXCEPTION_ACTIVATING_INSTANCE, instance, name), t);
 			// rethrow exception so resolver is eventually notified that
 			// the processed SCP is bad

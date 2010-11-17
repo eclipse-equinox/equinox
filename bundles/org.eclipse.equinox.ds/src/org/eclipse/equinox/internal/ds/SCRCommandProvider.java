@@ -9,10 +9,15 @@
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
  *    Simon Archer		 	- bug.id = 288783
+ *    Lazar Kirchev		 	- bug.id = 320377
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
+import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -355,8 +360,29 @@ public class SCRCommandProvider implements CommandProvider {
 			intp.println();
 		}
 		intp.println("    Instances:"); //$NON-NLS-1$
-		for (int i = 0; i < scp.instances.size(); i++) {
-			intp.println("      " + scp.instances.elementAt(i)); //$NON-NLS-1$
+		if (scp.instances.size() > 0) {
+			ComponentInstanceImpl instance = null;
+			for (int i = 0; i < scp.instances.size(); i++) {
+				instance = (ComponentInstanceImpl) scp.instances.elementAt(i);
+				intp.println("      " + instance); //$NON-NLS-1$
+				if (instance.bindedServices.size() > 0) {
+					intp.println("    	Bound References:"); //$NON-NLS-1$
+					Enumeration refs = instance.bindedServices.keys();
+					ServiceReference sr = null;
+					while (refs.hasMoreElements()) {
+						sr = (ServiceReference) refs.nextElement();
+						Object interfaces = sr.getProperty(Constants.OBJECTCLASS);
+						intp.println("        " + SCRUtil.getStringRepresentation(interfaces)); //$NON-NLS-1$
+						intp.println("      		-> " + instance.bindedServices.get(sr)); //$NON-NLS-1$
+					}
+				}
+			}
+		} else {
+			// there are no instances either because the references are not satisfied or because some runtime issues appear; for example the bind method was not found in the class
+			String issues = scp.serviceComponent.getComponentIssues();
+			if (issues != null) {
+				intp.println("    No instances were created because: " + issues); //$NON-NLS-1$	
+			}
 		}
 	}
 
@@ -520,17 +546,21 @@ public class SCRCommandProvider implements CommandProvider {
 		} else {
 			intp.println(Messages.ALL_COMPONENTS);
 		}
-		intp.print("ID"); //$NON-NLS-1$
-		if (completeInfo) {
-			intp.println(Messages.COMPONENT_DETAILS);
-		} else {
-			intp.print(Messages.STATE);
-			intp.print(Messages.COMPONENT_NAME);
-			intp.println(Messages.LOCATED_IN_BUNDLE);
+
+		if (b == null || scrManager.bundleToServiceComponents != null && scrManager.bundleToServiceComponents.get(b) != null) {
+			intp.print("ID"); //$NON-NLS-1$
+			if (completeInfo) {
+				intp.println(Messages.COMPONENT_DETAILS);
+			} else {
+				intp.print(Messages.STATE);
+				intp.print(Messages.COMPONENT_NAME);
+				intp.println(Messages.LOCATED_IN_BUNDLE);
+			}
 		}
 
 		if (b != null) {
 			if (scrManager.bundleToServiceComponents != null) {
+
 				Vector components = (Vector) scrManager.bundleToServiceComponents.get(b);
 				if (components != null) {
 					for (int i = 0; i < components.size(); i++) {
@@ -554,6 +584,29 @@ public class SCRCommandProvider implements CommandProvider {
 						}
 					}
 				}
+
+				// check the bundle for issues during components resolving
+				// first check for service component header in this bundle
+				String dsHeader = null;
+				Dictionary allHeaders = b.getHeaders(""); //$NON-NLS-1$
+
+				if (!((dsHeader = (String) allHeaders.get(ComponentConstants.SERVICE_COMPONENT)) != null)) {
+					// no component descriptions in this bundle
+					intp.println("No ServiceComponent header was found in bundle " + b.toString()); //$NON-NLS-1$
+					return;
+				}
+
+				// second check if the ds xml is correct
+				Vector issues = parseXMLDeclaration(b, dsHeader);
+				if (issues.size() > 0) {
+					intp.println();
+					intp.println("Issues encountered when parsing components xml declarations"); //$NON-NLS-1$
+					for (int i = 0; i < issues.size(); i++) {
+						intp.println("\t" + issues.get(i)); //$NON-NLS-1$
+						intp.println();
+					}
+				}
+
 			}
 
 		} else {
@@ -620,6 +673,69 @@ public class SCRCommandProvider implements CommandProvider {
 
 	private synchronized int generateID() {
 		return curID++;
+	}
+
+	protected Vector parseXMLDeclaration(Bundle bundle, String dsHeader) {
+		Vector componentsIssues = new Vector();
+		Vector components = new Vector();
+		try {
+			if (dsHeader != null) {
+				StringTokenizer tok = new StringTokenizer(dsHeader, ","); //$NON-NLS-1$
+				DeclarationParser parser = new DeclarationParser(true);
+				// process all definition file
+				while (tok.hasMoreElements()) {
+					String definitionFile = tok.nextToken().trim();
+					int ind = definitionFile.lastIndexOf('/');
+					String path = ind != -1 ? definitionFile.substring(0, ind) : "/"; //$NON-NLS-1$
+					InputStream is = null;
+
+					Enumeration urls = bundle.findEntries(path, ind != -1 ? definitionFile.substring(ind + 1) : definitionFile, false);
+					if (urls == null || !urls.hasMoreElements()) {
+						componentsIssues.add(NLS.bind(Messages.COMPONENT_XML_NOT_FOUND, bundle.getSymbolicName(), definitionFile));
+						continue;
+					}
+
+					// illegal components are ignored, but framework event is posted for
+					// them; however, it will continue and try to load any legal
+					// definitions
+					URL url;
+					while (urls.hasMoreElements()) {
+						url = (URL) urls.nextElement();
+						if (Activator.DEBUG) {
+							Activator.log.debug("ComponentStorage.parseXMLDeclaration(): loading " + url.toString(), null); //$NON-NLS-1$
+						}
+						try {
+							is = url.openStream();
+							if (is == null) {
+								componentsIssues.add(NLS.bind(Messages.CANT_OPEN_STREAM_TO_COMPONENT_XML, url));
+							} else {
+								try {
+									parser.parse(is, bundle, components, url.toString());
+								} catch (Exception e) {
+									componentsIssues.add(e.getMessage());
+								}
+							}
+						} catch (IOException ie) {
+							componentsIssues.add(NLS.bind(Messages.ERROR_OPENING_COMP_XML, url) + "\n\t" + ie); //$NON-NLS-1$
+						} catch (Throwable t) {
+							componentsIssues.add(NLS.bind(Messages.ILLEGAL_DEFINITION_FILE, url) + "\n\t" + t); //$NON-NLS-1$
+						} finally {
+							if (is != null) {
+								is.close();
+							}
+						}
+					}
+				} // end while
+
+				components = parser.components;
+				// make sure the clean-up the parser cache, for the next bundle to
+				// work properly!!!
+				parser.components = null;
+			}
+		} catch (Exception e) {
+			componentsIssues.add("Exception [" + e + "] while parsing DS xml definition."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return componentsIssues;
 	}
 
 	private static class ComponentRef {

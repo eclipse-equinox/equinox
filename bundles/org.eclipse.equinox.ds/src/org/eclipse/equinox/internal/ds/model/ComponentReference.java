@@ -10,12 +10,12 @@
  *    ProSyst Software GmbH - initial API and implementation
  *    Jeremy Volkman 		- bug.id = 182560
  *    Simon Archer 		    - bug.id = 223454
+ *    Lazar Kirchev		 	- bug.id = 320377
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.model;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
@@ -233,6 +233,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 		}
 		buffer.append(')');
 		buffer.append(" is not accessible!"); //$NON-NLS-1$
+		component.componentIssues.add("Method [" + methodName + "]  is not accessible in " + componentInstance.getInstance().getClass());
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
 		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, message, null);
@@ -245,6 +246,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 		buffer.append('(');
 		buffer.append("..."); //$NON-NLS-1$
 		buffer.append(')');
+		component.componentIssues.add("Method [" + methodName + "] was not found in " + componentInstance.getInstance().getClass());
 		appendDetails(buffer, reference);
 		String message = buffer.toString();
 		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, message, null);
@@ -284,6 +286,11 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 	private void logError(String message, Throwable t, Reference reference) {
 		StringBuffer buffer = createBuffer();
 		buffer.append(message);
+		String cause = t.toString();
+		if (t instanceof InvocationTargetException) {
+			cause = "The called method throws: " + t.getCause().toString();
+		}
+		component.componentIssues.add(message + " Root Cause [" + cause + "]");
 		appendDetails(buffer, reference);
 		Activator.log(reference.reference.component.bc, LogService.LOG_ERROR, buffer.toString(), t);
 	}
