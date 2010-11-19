@@ -34,6 +34,7 @@ import org.eclipse.equinox.internal.launcher.Constants;
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class Main {
+
 	/**
 	 * Indicates whether this instance is running in debug mode.
 	 */
@@ -857,7 +858,7 @@ public class Main {
 			for (int j = 0; j < entries.length; j++)
 				qualifiedPath += ", " + FILE_SCHEME + path + entries[j]; //$NON-NLS-1$
 			extensionProperties.put(PROP_CLASSPATH, qualifiedPath);
-			mergeProperties(System.getProperties(), extensionProperties);
+			mergeProperties(System.getProperties(), extensionProperties, null);
 			if (inDevelopmentMode) {
 				String name = extensions[i];
 				if (name.startsWith(REFERENCE_SCHEME)) {
@@ -1752,7 +1753,7 @@ public class Main {
 		Properties configuration = baseConfiguration;
 		if (configuration == null || !getConfigurationLocation().equals(baseConfigurationLocation))
 			configuration = loadConfiguration(getConfigurationLocation());
-		mergeProperties(System.getProperties(), configuration);
+		mergeProperties(System.getProperties(), configuration, null);
 		if ("false".equalsIgnoreCase(System.getProperty(PROP_CONFIG_CASCADED))) //$NON-NLS-1$
 			// if we are not cascaded then remove the parent property even if it was set.
 			System.getProperties().remove(PROP_SHARED_CONFIG_AREA);
@@ -1774,10 +1775,10 @@ public class Main {
 				else {
 					// if the parent we are about to read is the same as the base config we read above,
 					// just reuse the base
-					configuration = baseConfiguration;
+					Properties sharedConfiguration = baseConfiguration;
 					if (!sharedConfigURL.equals(baseConfigurationLocation))
-						configuration = loadConfiguration(sharedConfigURL);
-					mergeProperties(System.getProperties(), configuration);
+						sharedConfiguration = loadConfiguration(sharedConfigURL);
+					mergeProperties(System.getProperties(), sharedConfiguration, configuration);
 					System.getProperties().put(PROP_SHARED_CONFIG_AREA, sharedConfigURL.toExternalForm());
 					if (debug)
 						System.out.println("Shared configuration location:\n    " + sharedConfigURL.toExternalForm()); //$NON-NLS-1$
@@ -2489,7 +2490,8 @@ public class Main {
 		}
 	}
 
-	private void mergeProperties(Properties destination, Properties source) {
+	private void mergeProperties(Properties destination, Properties source, Properties userConfiguration) {
+		final String EXT_OVERRIDE_USER = ".override.user"; //$NON-NLS-1$
 		if (destination == null || source == null)
 			return;
 		for (Enumeration e = source.keys(); e.hasMoreElements();) {
@@ -2505,6 +2507,23 @@ public class Main {
 				continue;
 			}
 			String value = source.getProperty(key);
+
+			// Check to see if we are supposed to override existing values from the user configuraiton.
+			// This is done only in the case of shared install where we have already set the user values 
+			// but want to override them with values from the shared location's config.
+			if (userConfiguration != null && !key.endsWith(EXT_OVERRIDE_USER)) {
+				// check all levels to see if the "override" property was set
+				final String overrideKey = key + EXT_OVERRIDE_USER;
+				boolean shouldOverride = destination.getProperty(overrideKey) != null || source.getProperty(overrideKey) != null;
+				// only set the value if the user specified the override property and if the 
+				// original property wasn't set by a commad-line arg
+				if (shouldOverride && !userConfiguration.contains(key)) {
+					destination.put(key, value);
+					continue;
+				}
+			}
+
+			// only set the value if it doesn't already exist to preserve ordering (command-line, user config, shared config)
 			if (destination.getProperty(key) == null)
 				destination.put(key, value);
 		}
