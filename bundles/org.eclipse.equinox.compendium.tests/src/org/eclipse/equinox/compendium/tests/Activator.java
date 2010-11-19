@@ -19,6 +19,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator {
 	public static String BUNDLE_EVENT = "org.eclipse.equinox.event"; //$NON-NLS-1$
+	public static String BUNDLE_METATYPE = "org.eclipse.equinox.metatype"; //$NON-NLS-1$
 	public static String BUNDLE_USERADMIN = "org.eclipse.equinox.useradmin"; //$NON-NLS-1$
 
 	private static Activator plugin;
