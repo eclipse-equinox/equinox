@@ -120,6 +120,9 @@ public class StreamHandlerFactory extends MultiplexingFactory implements URLStre
 			if (result == null && parentFactory != null)
 				result = parentFactory.createURLStreamHandler(protocol);
 			return result; //result may be null; let the VM handle it (consider sun.net.protocol.www.*)
+		} catch (Throwable t) {
+			adaptor.getFrameworkLog().log(new FrameworkLogEntry(StreamHandlerFactory.class.getName(), FrameworkLogEntry.ERROR, 0, "Unexpected error in factory.", 0, t, null)); //$NON-NLS-1$
+			return null;
 		} finally {
 			releaseRecursive(protocol);
 		}
