@@ -955,8 +955,9 @@ public class ResolverImpl implements Resolver {
 			// check the results to see if we have reduced the number enough
 			if (results.size() > MAX_MULTIPLE_SUPPLIERS_MERGE && packageConstraints != null && bundleConstraints != null) {
 				// we still have too big of a list; filter out constraints that are not in conflict
+				List<ResolverConstraint[]> tooBig = results;
 				results = new ArrayList<ResolverConstraint[]>();
-				for (ResolverConstraint[] constraints : results) {
+				for (ResolverConstraint[] constraints : tooBig) {
 					ResolverConstraint constraint = constraints.length > 0 ? constraints[0] : null;
 					if (constraint instanceof ResolverImport) {
 						if (packageConstraints.contains(constraint.getName()))
