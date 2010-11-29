@@ -1298,8 +1298,11 @@ public class BaseStorage implements SynchronousBundleListener {
 			synchronized (systemState) {
 				if (shutdown)
 					return; // do not start another thread if we have already shutdown
-				if (delay_interval == 0) // all saves are atomic
+				if (delay_interval == 0) {
+					// all saves are atomic; never start a background thread
 					saveAllData(false);
+					return;
+				}
 				lastSaveTime = System.currentTimeMillis();
 				if (runningThread == null) {
 					shutdownHook = new Thread(new Runnable() {

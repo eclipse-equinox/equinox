@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2006 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 
 package org.eclipse.osgi.internal.baseadaptor;
 
-import java.io.*;
+import java.io.IOException;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.adaptor.BundleOperation;
@@ -54,6 +54,12 @@ public class BundleUninstall implements BundleOperation {
 		storage.processExtension(data, BaseStorage.EXTENSION_UNINSTALLED);
 		data.setLastModified(System.currentTimeMillis());
 		storage.updateState(data, BundleEvent.UNINSTALLED);
+		data.setDirty(true);
+		try {
+			data.save();
+		} catch (IOException e) {
+			throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
+		}
 	}
 
 	/**

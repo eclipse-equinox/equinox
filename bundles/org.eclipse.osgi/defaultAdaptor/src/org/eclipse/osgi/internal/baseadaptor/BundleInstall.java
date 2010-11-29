@@ -120,12 +120,13 @@ public class BundleInstall implements BundleOperation {
 
 	public void commit(boolean postpone) throws BundleException {
 		storage.processExtension(data, BaseStorage.EXTENSION_INSTALLED);
+		storage.updateState(data, BundleEvent.INSTALLED);
 		try {
 			data.save();
 		} catch (IOException e) {
 			throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 		}
-		storage.updateState(data, BundleEvent.INSTALLED);
+
 	}
 
 }

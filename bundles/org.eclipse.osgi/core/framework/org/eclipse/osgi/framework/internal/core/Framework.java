@@ -948,8 +948,11 @@ public class Framework implements EventPublisher, Runnable {
 						throw e.getException();
 					}
 				}
+				// must add the bundle before committing (bug 330905)
+				bundles.add(bundle);
 				storage.commit(false);
 			} catch (Throwable error) {
+				bundles.remove(bundle);
 				synchronized (bundles) {
 					bundle.unload();
 				}
@@ -959,8 +962,7 @@ public class Framework implements EventPublisher, Runnable {
 				if (bundleStats != null)
 					bundleStats.watchBundle(bundle, BundleWatcher.END_INSTALLING);
 			}
-			/* bundle has been successfully installed */
-			bundles.add(bundle);
+
 		} catch (Throwable t) {
 			try {
 				storage.undo();

@@ -117,13 +117,13 @@ public class BundleUpdate implements BundleOperation {
 	public void commit(boolean postpone) throws BundleException {
 		storage.processExtension(data, BaseStorage.EXTENSION_UNINSTALLED); // remove the old extension
 		storage.processExtension(newData, BaseStorage.EXTENSION_UPDATED); // update to the new one
+		newData.setLastModified(System.currentTimeMillis()); // save the last modified
+		storage.updateState(newData, BundleEvent.UPDATED);
 		try {
-			newData.setLastModified(System.currentTimeMillis());
 			newData.save();
 		} catch (IOException e) {
 			throw new BundleException(AdaptorMsg.ADAPTOR_STORAGE_EXCEPTION, e);
 		}
-		storage.updateState(newData, BundleEvent.UPDATED);
 		BaseStorageHook oldStorageHook = (BaseStorageHook) data.getStorageHook(BaseStorageHook.KEY);
 		try {
 			oldStorageHook.delete(postpone, BaseStorageHook.DEL_GENERATION);
