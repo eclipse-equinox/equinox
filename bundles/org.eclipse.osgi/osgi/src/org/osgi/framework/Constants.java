@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * 
  * @since 1.1
  * @noimplement
- * @version $Id: ff0e45d094ae8d41e0eb6328e04a424b80279428 $
+ * @version $Id: 820da8ba75151cdf421fa00bebcc17b4cbcfca4f $
  */
 
 public interface Constants {
@@ -1493,19 +1493,14 @@ public interface Constants {
 	 * provider that these intents are already implemented by the exported
 	 * service object.</li>
 	 * <li>A distribution provider must use this property to convey the combined
-	 * intents of:</li>
-	 * <ul>
-	 * <li>The exporting service, and</li>
-	 * <li>the intents that the exporting distribution provider adds, and</li>
-	 * <li>the intents that the importing distribution provider adds.</li>
+	 * intents of: The exporting service, and the intents that the exporting distribution provider adds, and the intents that the importing distribution provider adds.
+	 * </li>
 	 * </ul>
-	 * <i></i>
 	 * 
-	 * </ul> To export a service, a distribution provider must expand any
+	 * To export a service, a distribution provider must expand any
 	 * qualified intents. Both the exporting and importing distribution
 	 * providers must recognize all intents before a service can be distributed.
 	 * 
-	 * <p>
 	 * The value of this property must be of type {@code String},
 	 * {@code String[]}, or {@code Collection} of {@code String}.
 	 * 

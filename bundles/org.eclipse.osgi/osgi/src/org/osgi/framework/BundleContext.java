@@ -73,7 +73,7 @@ import java.util.Dictionary;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: c866b2c67134a66e16121a55f93d7ac401913797 $
+ * @version $Id: ee94ab4b521454625bca547df37f398de63f7e47 $
  */
 
 public interface BundleContext extends BundleReference {
@@ -164,6 +164,13 @@ public interface BundleContext extends BundleReference {
 	 * @return The {@code Bundle} object of the installed bundle.
 	 * @throws BundleException If the input stream cannot be read or the
 	 *         installation failed.
+	 *         <ul>
+	 *         <li>{@link BundleException#READ_ERROR} - The install or update operation failed because another already installed bundle has the same symbolic name and version. This exception type will only occur if the framework is configured to only allow a single bundle to be installed for a given symbolic name and version.</li>
+	 *         <li>{@link BundleException#DUPLICATE_BUNDLE_ERROR} - The install or update operation failed because another already installed bundle has the same symbolic name and version. This exception type will only occur if the framework is configured to only allow a single bundle to be installed for a given symbolic name and version.</li>
+	 *         <li>{@link BundleException#MANIFEST_ERROR} - The manifest was not valid</li>
+	 *         <li>{@link BundleException#SECURITY_ERROR} - The operation failed due to insufficient permissions.</li>
+	 *         <li>{@link BundleException#UNSPECIFIED} - Unspecified error</li>
+	 *         </ul>
 	 * @throws SecurityException If the caller does not have the appropriate
 	 *         {@code AdminPermission[installed bundle,LIFECYCLE]}, and the Java
 	 *         Runtime Environment supports permissions.
@@ -183,6 +190,13 @@ public interface BundleContext extends BundleReference {
 	 * @param location The location identifier of the bundle to install.
 	 * @return The {@code Bundle} object of the installed bundle.
 	 * @throws BundleException If the installation failed.
+	 *         <ul>
+	 *         <li>{@link BundleException#READ_ERROR} - The install or update operation failed because another already installed bundle has the same symbolic name and version. This exception type will only occur if the framework is configured to only allow a single bundle to be installed for a given symbolic name and version.</li>
+	 *         <li>{@link BundleException#DUPLICATE_BUNDLE_ERROR} - The install or update operation failed because another already installed bundle has the same symbolic name and version. This exception type will only occur if the framework is configured to only allow a single bundle to be installed for a given symbolic name and version.</li>
+	 *         <li>{@link BundleException#MANIFEST_ERROR} - The manifest was not valid</li>
+	 *         <li>{@link BundleException#SECURITY_ERROR} - The operation failed due to insufficient permissions.</li>
+	 *         <li>{@link BundleException#UNSPECIFIED} - Unspecified error</li>
+	 *         </ul>
 	 * @throws SecurityException If the caller does not have the appropriate
 	 *         {@code AdminPermission[installed bundle,LIFECYCLE]}, and the Java
 	 *         Runtime Environment supports permissions.
@@ -733,10 +747,10 @@ public interface BundleContext extends BundleReference {
 	 * called to create a service object for the context bundle. If the service
 	 * object returned by the {@code ServiceFactory} object is {@code null}, not
 	 * an {@code instanceof} all the classes named when the service was
-	 * registered or the {@code ServiceFactory} object throws an exception,
-	 * {@code null} is returned and a Framework event of type
-	 * {@link FrameworkEvent#ERROR} containing a {@link ServiceException}
-	 * describing the error is fired. <br>
+	 * registered or the {@code ServiceFactory} object throws an exception or
+	 * will be recursively called for the context bundle, {@code null} is
+	 * returned and a Framework event of type {@link FrameworkEvent#ERROR}
+	 * containing a {@link ServiceException} describing the error is fired. <br>
 	 * This service object is cached by the Framework. While the context
 	 * bundle's use count for the service is greater than zero, subsequent calls
 	 * to get the services's service object for the context bundle will return
