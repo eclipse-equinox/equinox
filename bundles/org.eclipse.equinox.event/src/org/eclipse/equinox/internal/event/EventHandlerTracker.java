@@ -161,9 +161,9 @@ public class EventHandlerTracker extends ServiceTracker<EventHandler, EventHandl
 
 		// Add the handlers with partial matches
 		if (partialWildcard.size() > 0) {
-			int index = topic.length();
+			int index = topic.lastIndexOf('/');
 			while (index >= 0) {
-				String subTopic = topic.substring(0, index); // First subtopic is the complete topic.
+				String subTopic = topic.substring(0, index);
 				List<EventHandlerWrapper> wrappers = partialWildcard.get(subTopic);
 				if (wrappers != null) {
 					handlers.addAll(wrappers);
