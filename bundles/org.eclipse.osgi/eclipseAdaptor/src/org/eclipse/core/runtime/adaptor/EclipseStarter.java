@@ -1297,7 +1297,16 @@ public class EclipseStarter {
 	private static String searchFor(final String target, String start) {
 		String[] candidates = searchCandidates.get(start);
 		if (candidates == null) {
-			candidates = new File(start).list();
+			File startFile = new File(start);
+			// Pre-check if file exists, if not, and it contains escape characters,
+			// try decoding the path
+			if (!startFile.exists() && start.indexOf('%') >= 0) {
+				String decodePath = FrameworkProperties.decode(start);
+				File f = new File(decodePath);
+				if (f.exists())
+					startFile = f;
+			}
+			candidates = startFile.list();
 			if (candidates != null)
 				searchCandidates.put(start, candidates);
 		}
