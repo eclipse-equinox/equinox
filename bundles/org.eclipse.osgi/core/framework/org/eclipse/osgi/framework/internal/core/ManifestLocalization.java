@@ -22,38 +22,39 @@ import org.osgi.framework.Constants;
  * This class is used by the Bundle Class to localize manifest headers.
  */
 public class ManifestLocalization {
-	private AbstractBundle bundle = null;
-	private Dictionary<String, String> rawHeaders = null;
+	final static String DEFAULT_ROOT = FrameworkProperties.getProperty("equinox.root.locale", "en"); //$NON-NLS-1$ //$NON-NLS-2$
+	private final AbstractBundle bundle;
+	private final Dictionary<String, String> rawHeaders;
+	private final String localizationBase;
 	private Dictionary<String, String> defaultLocaleHeaders = null;
-	private Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
+	private final Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
 
 	public ManifestLocalization(AbstractBundle bundle, Dictionary<String, String> rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
+		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
+		if (localizationHeader == null)
+			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		localizationBase = localizationHeader;
 	}
 
-	protected Dictionary<String, String> getHeaders(String localeString) {
+	Dictionary<String, String> getHeaders(String localeString) {
 		if (localeString.length() == 0)
-			return (rawHeaders);
-		boolean isDefaultLocale = false;
-		String defaultLocale = Locale.getDefault().toString();
-		if (localeString.equals(defaultLocale)) {
-			if (defaultLocaleHeaders != null)
-				return (defaultLocaleHeaders);
-			isDefaultLocale = true;
+			return rawHeaders;
+		boolean isDefaultLocale = localeString.equals(Locale.getDefault().toString());
+		Dictionary<String, String> currentDefault = defaultLocaleHeaders;
+		if (isDefaultLocale && currentDefault != null) {
+			return currentDefault;
 		}
 		try {
 			bundle.checkValid();
 		} catch (IllegalStateException ex) {
 			// defaultLocaleHeaders should have been initialized on uninstall
-			if (defaultLocaleHeaders != null)
-				return defaultLocaleHeaders;
-			return (rawHeaders);
+			if (currentDefault != null)
+				return currentDefault;
+			return rawHeaders;
 		}
-		ResourceBundle localeProperties = getResourceBundle(localeString);
-		if (localeProperties == null && !isDefaultLocale)
-			// could not find the requested locale use the default locale
-			localeProperties = getResourceBundle(defaultLocale);
+		ResourceBundle localeProperties = getResourceBundle(localeString, isDefaultLocale);
 		Enumeration<String> e = this.rawHeaders.keys();
 		Headers<String, String> localeHeaders = new Headers<String, String>(this.rawHeaders.size());
 		while (e.hasMoreElements()) {
@@ -88,53 +89,61 @@ public class ManifestLocalization {
 	}
 
 	/*
-	 * This method find the appropiate Manifest Localization file inside the
+	 * This method find the appropriate Manifest Localization file inside the
 	 * bundle. If not found, return null.
 	 */
-	protected ResourceBundle getResourceBundle(String localeString) {
-		String propertiesLocation = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
-		if (propertiesLocation == null) {
-			propertiesLocation = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-		}
+	ResourceBundle getResourceBundle(String localeString, boolean isDefaultLocale) {
+		BundleResourceBundle resourceBundle = lookupResourceBundle(localeString);
+		if (isDefaultLocale)
+			return (ResourceBundle) resourceBundle;
+		// need to determine if this is resource bundle is an empty stem
+		// if it is then the default locale should be used
+		if (resourceBundle == null || resourceBundle.isStemEmpty())
+			return (ResourceBundle) lookupResourceBundle(Locale.getDefault().toString());
+		return (ResourceBundle) resourceBundle;
+	}
 
-		BundleResourceBundle result = cache.get(localeString);
-		if (result != null)
-			return (ResourceBundle) (result.isEmpty() ? null : result);
-		String[] nlVarients = buildNLVariants(localeString);
-		BundleResourceBundle parent = null;
-		for (int i = nlVarients.length - 1; i >= 0; i--) {
-			BundleResourceBundle varientBundle = null;
-			URL varientURL = findResource(propertiesLocation + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
-			if (varientURL == null) {
-				varientBundle = cache.get(nlVarients[i]);
-			} else {
-				InputStream resourceStream = null;
-				try {
-					resourceStream = varientURL.openStream();
-					varientBundle = new LocalizationResourceBundle(resourceStream);
-				} catch (IOException e) {
-					// ignore and continue
-				} finally {
-					if (resourceStream != null) {
-						try {
-							resourceStream.close();
-						} catch (IOException e3) {
-							//Ignore exception
+	private BundleResourceBundle lookupResourceBundle(String localeString) {
+		synchronized (cache) {
+			BundleResourceBundle result = cache.get(localeString);
+			if (result != null)
+				return result.isEmpty() ? null : result;
+			String[] nlVarients = buildNLVariants(localeString);
+			BundleResourceBundle parent = null;
+			for (int i = nlVarients.length - 1; i >= 0; i--) {
+				BundleResourceBundle varientBundle = null;
+				URL varientURL = findResource(localizationBase + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (varientURL == null) {
+					varientBundle = cache.get(nlVarients[i]);
+				} else {
+					InputStream resourceStream = null;
+					try {
+						resourceStream = varientURL.openStream();
+						varientBundle = new LocalizationResourceBundle(resourceStream);
+					} catch (IOException e) {
+						// ignore and continue
+					} finally {
+						if (resourceStream != null) {
+							try {
+								resourceStream.close();
+							} catch (IOException e3) {
+								//Ignore exception
+							}
 						}
 					}
 				}
-			}
 
-			if (varientBundle == null) {
-				varientBundle = new EmptyResouceBundle();
+				if (varientBundle == null) {
+					varientBundle = new EmptyResouceBundle(nlVarients[i]);
+				}
+				if (parent != null)
+					varientBundle.setParent((ResourceBundle) parent);
+				cache.put(nlVarients[i], varientBundle);
+				parent = varientBundle;
 			}
-			if (parent != null)
-				varientBundle.setParent((ResourceBundle) parent);
-			cache.put(nlVarients[i], varientBundle);
-			parent = varientBundle;
+			result = cache.get(localeString);
+			return result.isEmpty() ? null : result;
 		}
-		result = cache.get(localeString);
-		return (ResourceBundle) (result.isEmpty() ? null : result);
 	}
 
 	private URL findResource(String resource) {
@@ -151,14 +160,14 @@ public class ManifestLocalization {
 		return searchBundle.getEntry0(resource);
 	}
 
-	private URL findInResolved(String filePath, AbstractBundle bundleHost) {
+	private static URL findInResolved(String filePath, AbstractBundle bundleHost) {
 		URL result = bundleHost.getEntry0(filePath);
 		if (result != null)
 			return result;
 		return findInFragments(filePath, bundleHost);
 	}
 
-	private URL findInFragments(String filePath, AbstractBundle searchBundle) {
+	private static URL findInFragments(String filePath, AbstractBundle searchBundle) {
 		BundleFragment[] fragments = searchBundle.getFragments();
 		URL fileURL = null;
 		for (int i = 0; fragments != null && i < fragments.length && fileURL == null; i++) {
@@ -168,10 +177,12 @@ public class ManifestLocalization {
 		return fileURL;
 	}
 
-	private abstract interface BundleResourceBundle {
+	private interface BundleResourceBundle {
 		void setParent(ResourceBundle parent);
 
 		boolean isEmpty();
+
+		boolean isStemEmpty();
 	}
 
 	private class LocalizationResourceBundle extends PropertyResourceBundle implements BundleResourceBundle {
@@ -186,9 +197,20 @@ public class ManifestLocalization {
 		public boolean isEmpty() {
 			return false;
 		}
+
+		public boolean isStemEmpty() {
+			return parent == null;
+		}
 	}
 
 	class EmptyResouceBundle extends ResourceBundle implements BundleResourceBundle {
+		private final String localeString;
+
+		public EmptyResouceBundle(String locale) {
+			super();
+			this.localeString = locale;
+		}
+
 		public Enumeration<String> getKeys() {
 			return null;
 		}
@@ -205,6 +227,14 @@ public class ManifestLocalization {
 			if (parent == null)
 				return true;
 			return ((BundleResourceBundle) parent).isEmpty();
+		}
+
+		public boolean isStemEmpty() {
+			if (DEFAULT_ROOT.equals(localeString))
+				return false;
+			if (parent == null)
+				return true;
+			return ((BundleResourceBundle) parent).isStemEmpty();
 		}
 	}
 }

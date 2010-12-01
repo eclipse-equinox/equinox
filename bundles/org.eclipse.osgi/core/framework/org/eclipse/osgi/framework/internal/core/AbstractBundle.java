@@ -1340,10 +1340,11 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		} catch (BundleException ex) {
 			return (null);
 		}
+		String defaultLocale = Locale.getDefault().toString();
 		if (localeString == null) {
-			localeString = Locale.getDefault().toString();
+			localeString = defaultLocale;
 		}
-		return localization.getResourceBundle(localeString);
+		return localization.getResourceBundle(localeString, defaultLocale.equals(localeString));
 	}
 
 	private synchronized ManifestLocalization getManifestLocalization() throws BundleException {
