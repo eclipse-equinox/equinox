@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.server.jetty"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="1.0.100.qualifier"
       provider-name="%providerName">
 
    <copyright>
@@ -12,6 +12,7 @@
    <license url="%licenseURL">
       %license
    </license>
+
    <plugin
          id="javax.servlet"
          download-size="0"
