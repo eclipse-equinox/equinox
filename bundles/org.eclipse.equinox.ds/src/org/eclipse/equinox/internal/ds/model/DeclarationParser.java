@@ -22,7 +22,6 @@ import org.eclipse.equinox.internal.util.xml.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
-import org.osgi.service.metatype.AttributeDefinition;
 
 /**
  * Processes the parsing of the component description XMLs
@@ -72,6 +71,25 @@ public class DeclarationParser implements ExTagListener {
 	private static final String ATTR_TARGET = "target"; //$NON-NLS-1$
 	private static final String ATTR_BIND = "bind"; //$NON-NLS-1$
 	private static final String ATTR_UNBIND = "unbind"; //$NON-NLS-1$
+
+	/** Constant for String property type */
+	public static final int STRING = 1;
+	/** Constant for Long property type */
+	public static final int LONG = 2;
+	/** Constant for Integer property type */
+	public static final int INTEGER = 3;
+	/** Constant for Short property type */
+	public static final int SHORT = 4;
+	/** Constant for Char property type */
+	public static final int CHARACTER = 5;
+	/** Constant for Byte property type */
+	public static final int BYTE = 6;
+	/** Constant for Double property type */
+	public static final int DOUBLE = 7;
+	/** Constant for Float property type */
+	public static final int FLOAT = 8;
+	/** Constant for Boolean property type */
+	public static final int BOOLEAN = 11;
 
 	public Vector components;
 
@@ -381,23 +399,23 @@ public class DeclarationParser implements ExTagListener {
 			String type = tag.getAttribute(ATTR_TYPE);
 			int mtType;
 			if (type == null || "String".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.STRING;
+				mtType = STRING;
 			} else if ("Boolean".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.BOOLEAN;
+				mtType = BOOLEAN;
 			} else if ("Integer".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.INTEGER;
+				mtType = INTEGER;
 			} else if ("Long".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.LONG;
+				mtType = LONG;
 			} else if ("Char".equals(type) || "Character".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
-				mtType = AttributeDefinition.CHARACTER;
+				mtType = CHARACTER;
 			} else if ("Double".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.DOUBLE;
+				mtType = DOUBLE;
 			} else if ("Float".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.FLOAT;
+				mtType = FLOAT;
 			} else if ("Byte".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.BYTE;
+				mtType = BYTE;
 			} else if ("Short".equals(type)) { //$NON-NLS-1$
-				mtType = AttributeDefinition.SHORT;
+				mtType = SHORT;
 			} else {
 				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_PROPERTY_TYPE, type, Integer.toString(tag.getLine())));
 				throw e;
@@ -585,62 +603,53 @@ public class DeclarationParser implements ExTagListener {
 	}
 
 	/**
-	 * Creates an object from a <code>String</code> value and a type, as
-	 * returned by the corresponding {@link AttributeDefinition#getType()}
-	 * method.
-	 * 
-	 * @param string
-	 *            The <code>String</code> value representation of the object.
-	 * @param syntax
-	 *            The object's type as defined by
-	 *            <code>AttributeDefinition</code>.
-	 * 
-	 * @return an Object, which is of a type, corresponding to the given, and
-	 *         value - got from the string parameter. E.g. if syntax is equal to
-	 *         <code>AttributeDefinition.INTEGER</code> and string is "1",
-	 *         then the value returned should be Integer("1").
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if a proper object can not be created due to
-	 *                incompatibility of syntax and value or if the parameters
-	 *                are not correct (e.g. syntax is not a valid
-	 *                <code>AttributeDefinition</code> constant).
+	 * Creates an object from a <code>String</code> value and a type, as defined by the objectType parameter.
+	 *
+	 * @param string The <code>String</code> value representation of the object. 
+	 * @param objectType Defines the type of the object to be generated
+	 *
+	 * @return an Object, which is of a type, corresponding to the given,
+	 * and value - got from the string parameter.
+	 *
+	 * @exception IllegalArgumentException if a proper object can not be created 
+	 * due to incompatibility of objectType and value or if the parameters are not correct
+	 * (e.g. objectType is not a valid constant).
 	 */
-	public static Object makeObject(String string, int syntax) throws IllegalArgumentException {
+	public static Object makeObject(String string, int objectType) throws IllegalArgumentException {
 		try {
-			switch (syntax) {
-				case AttributeDefinition.STRING : {
+			switch (objectType) {
+				case STRING : {
 					return string;
 				}
-				case AttributeDefinition.INTEGER : {
+				case INTEGER : {
 					return new Integer(string);
 				}
-				case AttributeDefinition.LONG : {
+				case LONG : {
 					return new Long(string);
 				}
-				case AttributeDefinition.FLOAT : {
+				case FLOAT : {
 					return new Float(string);
 				}
-				case AttributeDefinition.DOUBLE : {
+				case DOUBLE : {
 					return new Double(string);
 				}
-				case AttributeDefinition.BYTE : {
+				case BYTE : {
 					return new Byte(string);
 				}
-				case AttributeDefinition.SHORT : {
+				case SHORT : {
 					return new Short(string);
 				}
-				case AttributeDefinition.CHARACTER : {
+				case CHARACTER : {
 					if (string.length() == 0) {
 						throw new IllegalArgumentException(Messages.MISSING_CHARACTER);
 					}
 					return new Character(string.charAt(0));
 				}
-				case AttributeDefinition.BOOLEAN : {
+				case BOOLEAN : {
 					return Boolean.valueOf(string);
 				}
 				default : {
-					throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(syntax)));
+					throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(objectType)));
 				}
 			}
 		} catch (NumberFormatException ex) {
@@ -649,80 +658,72 @@ public class DeclarationParser implements ExTagListener {
 	}
 
 	/**
-	 * Makes an array from the string array value and the syntax.
-	 * 
-	 * @param array
-	 *            <code>String</code> array representation of an array, which
-	 *            follows the rules defined by <code>AttributeDefinition</code>.
-	 * @param syntax
-	 *            The array's type as defined by
-	 *            <code>AttributeDefinition</code>.
-	 * 
-	 * @return an arary of primitives or objects, whose component type
-	 *         corresponds to <code>syntax</code>, and value build from the
-	 *         string array passed.
-	 * 
-	 * @exception IllegalArgumentException
-	 *                if any of the elements in the string array can not be
-	 *                converted to a proper object or primitive, or if the
-	 *                <code>syntax</code> is not a valid
-	 *                <code>AttributeDefinition</code> type constant.
+	 * Makes an array from the string array value and the object type.
+	 *
+	 * @param array <code>String</code> array representation of an array.
+	 * @param objectType The array's object type.
+	 *
+	 * @return an array of primitives or objects, whose component type corresponds to <code>objectType</code>,
+	 * and value build from the string array passed.
+	 *
+	 * @exception IllegalArgumentException  if any of the elements in the string array
+	 * can not be converted to a proper object or primitive, or if the <code>objectType</code> is not a valid constant.
 	 */
-	public static Object makeArr(String[] array, int syntax) throws IllegalArgumentException {
-		switch (syntax) {
-			case AttributeDefinition.STRING : {
+	public static Object makeArr(String[] array, int objectType) throws IllegalArgumentException {
+		switch (objectType) {
+			case STRING : {
 				return array;
 			}
-			case AttributeDefinition.INTEGER : {
+			case INTEGER : {
 				int[] ints = new int[array.length];
 				for (int i = 0; i < array.length; i++) {
 					ints[i] = Integer.parseInt(array[i]);
 				}
 				return ints;
 			}
-			case AttributeDefinition.LONG : {
+			case LONG : {
 				long[] longs = new long[array.length];
 				for (int i = 0; i < array.length; i++) {
 					longs[i] = Long.parseLong(array[i]);
 				}
 				return longs;
 			}
-			case AttributeDefinition.FLOAT : {
+			case FLOAT : {
 				float[] floats = new float[array.length];
 				for (int i = 0; i < array.length; i++) {
 					floats[i] = Float.valueOf(array[i]).floatValue();
 				}
 				return floats;
 			}
-			case AttributeDefinition.DOUBLE : {
+			case DOUBLE : {
 				double[] doubles = new double[array.length];
 				for (int i = 0; i < array.length; i++) {
 					doubles[i] = Double.valueOf(array[i]).doubleValue();
 				}
 				return doubles;
 			}
-			case AttributeDefinition.BYTE : {
+			case BYTE : {
 				byte[] bytes = new byte[array.length];
 				for (int i = 0; i < array.length; i++) {
 					bytes[i] = Byte.parseByte(array[i]);
 				}
 				return bytes;
 			}
-			case AttributeDefinition.SHORT : {
+			case SHORT : {
 				short[] shorts = new short[array.length];
 				for (int i = 0; i < array.length; i++) {
 					shorts[i] = Short.parseShort(array[i]);
 				}
 				return shorts;
 			}
-			case AttributeDefinition.CHARACTER : {
+			case CHARACTER : {
 				char[] chars = new char[array.length];
 				for (int i = 0; i < array.length; i++) {
 					chars[i] = array[i].charAt(0);
 				}
 				return chars;
 			}
-			case AttributeDefinition.BOOLEAN : {
+			case BOOLEAN : {
 				boolean[] booleans = new boolean[array.length];
 				for (int i = 0; i < array.length; i++) {
 					booleans[i] = Boolean.valueOf(array[i]).booleanValue();
@@ -730,7 +731,7 @@ public class DeclarationParser implements ExTagListener {
 				return booleans;
 			}
 			default : {
-				throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(syntax)));
+				throw new IllegalArgumentException(NLS.bind(Messages.UNSUPPORTED_TYPE, String.valueOf(objectType)));
 			}
 		}
 	}
