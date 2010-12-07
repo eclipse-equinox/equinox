@@ -1103,7 +1103,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed init", e);
 		}
 		String uuid1_1 = equinox1.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
-		assertNotNull(uuid1_1);
+		verifyUUID(uuid1_1);
 
 		File config2 = OSGiTestsActivator.getContext().getDataFile(getName() + "_2"); //$NON-NLS-1$
 		Map configuration2 = new HashMap();
@@ -1115,7 +1115,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed init", e);
 		}
 		String uuid2_1 = equinox2.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
-		assertNotNull(uuid2_1);
+		verifyUUID(uuid2_1);
 
 		assertFalse("UUIDs are the same: " + uuid1_1, uuid1_1.equals(uuid2_1));
 
@@ -1133,9 +1133,9 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 
 		String uuid1_2 = equinox1.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
-		assertNotNull(uuid1_2);
+		verifyUUID(uuid1_2);
 		String uuid2_2 = equinox2.getBundleContext().getProperty(Constants.FRAMEWORK_UUID);
-		assertNotNull(uuid2_2);
+		verifyUUID(uuid2_2);
 		assertFalse("UUIDs are the same: " + uuid1_1, uuid1_1.equals(uuid1_2));
 		assertFalse("UUIDs are the same: " + uuid1_2, uuid1_2.equals(uuid2_2));
 		assertFalse("UUIDs are the same: " + uuid2_1, uuid2_1.equals(uuid2_2));
@@ -1149,6 +1149,55 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Failed to re-init frameworks.", e);
 		} catch (InterruptedException e) {
 			fail("Failed to stop frameworks.", e);
+		}
+	}
+
+	private void verifyUUID(String uuid) {
+		assertNotNull("Null uuid.", uuid);
+		StringTokenizer st = new StringTokenizer(uuid, "-");
+		String[] uuidSections = new String[5];
+		// All UUIDs must have 5 sections
+		for (int i = 0; i < uuidSections.length; i++) {
+			try {
+				uuidSections[i] = "0x" + st.nextToken();
+			} catch (NoSuchElementException e) {
+				fail("Wrong number of uuid sections: " + uuid, e);
+			}
+		}
+		// make sure there is not an extra section.
+		try {
+			st.nextToken();
+			fail("Too many sections in uuid: " + uuid);
+		} catch (NoSuchElementException e) {
+			// expected
+		}
+		// now verify each section of the UUID can be decoded as a hex string and is the correct size
+		for (int i = 0; i < uuidSections.length; i++) {
+			int limit = 0;
+			switch (i) {
+				case 0 : {
+					limit = 10; // "0x" + 4*<hexOctet> == 10 len
+					break;
+				}
+				case 1 :
+				case 2 :
+				case 3 : {
+					limit = 6; // "0x" + 2*<hexOctet> == 6 len
+					break;
+				}
+				case 4 : {
+					limit = 14; // "0x" + 6*<hexOctet> == 14 len
+					break;
+				}
+				default :
+					break;
+			}
+			assertTrue("UUISection is too big: " + uuidSections[i], uuidSections[i].length() <= limit);
+			try {
+				Long.decode(uuidSections[i]);
+			} catch (NumberFormatException e) {
+				fail("Invalid section: " + uuidSections[i], e);
+			}
 		}
 	}
 
