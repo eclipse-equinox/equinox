@@ -25,17 +25,12 @@ public class ManifestLocalization {
 	final static String DEFAULT_ROOT = FrameworkProperties.getProperty("equinox.root.locale", "en"); //$NON-NLS-1$ //$NON-NLS-2$
 	private final AbstractBundle bundle;
 	private final Dictionary<String, String> rawHeaders;
-	private final String localizationBase;
 	private Dictionary<String, String> defaultLocaleHeaders = null;
 	private final Hashtable<String, BundleResourceBundle> cache = new Hashtable<String, BundleResourceBundle>(5);
 
 	public ManifestLocalization(AbstractBundle bundle, Dictionary<String, String> rawHeaders) {
 		this.bundle = bundle;
 		this.rawHeaders = rawHeaders;
-		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
-		if (localizationHeader == null)
-			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-		localizationBase = localizationHeader;
 	}
 
 	Dictionary<String, String> getHeaders(String localeString) {
@@ -104,6 +99,11 @@ public class ManifestLocalization {
 	}
 
 	private BundleResourceBundle lookupResourceBundle(String localeString) {
+		// get the localization header as late as possible to avoid accessing the raw headers
+		// getting the first value from the raw headers forces the manifest to be parsed (bug 332039)
+		String localizationHeader = rawHeaders.get(Constants.BUNDLE_LOCALIZATION);
+		if (localizationHeader == null)
+			localizationHeader = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
 		synchronized (cache) {
 			BundleResourceBundle result = cache.get(localeString);
 			if (result != null)
@@ -112,7 +112,7 @@ public class ManifestLocalization {
 			BundleResourceBundle parent = null;
 			for (int i = nlVarients.length - 1; i >= 0; i--) {
 				BundleResourceBundle varientBundle = null;
-				URL varientURL = findResource(localizationBase + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
+				URL varientURL = findResource(localizationHeader + (nlVarients[i].equals("") ? nlVarients[i] : '_' + nlVarients[i]) + ".properties"); //$NON-NLS-1$ //$NON-NLS-2$
 				if (varientURL == null) {
 					varientBundle = cache.get(nlVarients[i]);
 				} else {
