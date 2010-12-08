@@ -55,10 +55,14 @@ public class LogTracker extends ServiceTracker<LogService, LogService> implement
 		log(null, level, message, exception);
 	}
 
+	// Must suppress warnings here because the log service is not
+	@SuppressWarnings("rawtypes")
 	public void log(ServiceReference reference, int level, String message) {
 		log(reference, level, message, null);
 	}
 
+	// Must suppress warnings here because the log service is not
+	@SuppressWarnings("rawtypes")
 	public synchronized void log(ServiceReference reference, int level, String message, Throwable exception) {
 		ServiceReference<LogService>[] references = getServiceReferences();
 
