@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Heiko Seeberger and others.
+ * Copyright (c) 2008, 2010 Heiko Seeberger and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ public class Activator implements BundleActivator {
 
     private CachingServiceFactory cachingServiceFactory;
 
-    private ServiceRegistration cachingServiceFactoryRegistration;
+    private ServiceRegistration<?> cachingServiceFactoryRegistration;
 
     /**
      * Registers a new {@link CachingServiceFactory} instance as OSGi service
@@ -82,7 +82,7 @@ public class Activator implements BundleActivator {
     }
 
     private void setDebugEnabled(final BundleContext bundleContext) {
-        final ServiceReference debugOptionsReference = bundleContext
+        final ServiceReference<?> debugOptionsReference = bundleContext
                 .getServiceReference(DebugOptions.class.getName());
         if (debugOptionsReference != null) {
             final DebugOptions debugOptions = (DebugOptions) bundleContext
