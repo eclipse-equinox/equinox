@@ -10,20 +10,19 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.util.Map;
-import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.GenericDescription;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.BundleRevision;
 
 public class GenericCapability extends VersionSupplier {
 	final ResolverBundle resolverBundle;
 	final String[] uses;
 
-	GenericCapability(ResolverBundle resolverBundle, BaseDescription base) {
+	GenericCapability(ResolverBundle resolverBundle, GenericDescription base) {
 		super(base);
 		this.resolverBundle = resolverBundle;
-		String usesDirective = ((GenericDescription) base).getDeclaredDirectives().get(Constants.USES_DIRECTIVE);
+		String usesDirective = base.getDeclaredDirectives().get(Constants.USES_DIRECTIVE);
 		uses = ManifestElement.getArrayFromList(usesDirective);
 	}
 
@@ -36,22 +35,6 @@ public class GenericCapability extends VersionSupplier {
 	}
 
 	public ResolverBundle getResolverBundle() {
-		return resolverBundle;
-	}
-
-	public String getNamespace() {
-		return getGenericDescription().getType();
-	}
-
-	public Map<String, String> getDirectives() {
-		return getGenericDescription().getDeclaredDirectives();
-	}
-
-	public Map<String, Object> getAttributes() {
-		return getGenericDescription().getDeclaredAttributes();
-	}
-
-	public BundleRevision getProviderRevision() {
 		return resolverBundle;
 	}
 

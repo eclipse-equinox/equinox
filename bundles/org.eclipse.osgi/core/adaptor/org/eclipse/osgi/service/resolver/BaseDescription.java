@@ -12,7 +12,7 @@ package org.eclipse.osgi.service.resolver;
 
 import java.util.Map;
 import org.osgi.framework.Version;
-import org.osgi.framework.wiring.WiredCapability;
+import org.osgi.framework.wiring.Capability;
 
 /**
  * This class represents a base description object for a state.  All description
@@ -63,12 +63,12 @@ public interface BaseDescription {
 	public Map<String, Object> getDeclaredAttributes();
 
 	/**
-	 * Returns the wired capability representing this base description.
-	 * Some descriptions types may not be able to be represented by 
-	 * a wired capability.  In such cases <code>null</code> is
+	 * Returns the capability represented by this description.
+	 * Some descriptions types may not be able to represent 
+	 * a capability.  In such cases <code>null</code> is
 	 * returned.
-	 * @return the wired capability representing this base description
+	 * @return the capability represented by this base description
 	 * @since 3.7
 	 */
-	public WiredCapability getWiredCapability();
+	public Capability getCapability();
 }

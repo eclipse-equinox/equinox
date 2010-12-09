@@ -11,7 +11,6 @@
 package org.eclipse.osgi.internal.module;
 
 import org.eclipse.osgi.service.resolver.GenericSpecification;
-import org.osgi.framework.Constants;
 
 public class GenericConstraint extends ResolverConstraint {
 
@@ -43,7 +42,7 @@ public class GenericConstraint extends ResolverConstraint {
 	@Override
 	void addPossibleSupplier(VersionSupplier supplier) {
 		// if there is a supplier with uses constraints then we no longer allow multiples
-		supplierHasUses |= supplier.getDirectives().get(Constants.USES_DIRECTIVE) != null;
+		supplierHasUses |= ((GenericCapability) supplier).getUsesDirective() != null;
 		super.addPossibleSupplier(supplier);
 	}
 

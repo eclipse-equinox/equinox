@@ -1958,7 +1958,7 @@ public class ResolverImpl implements Resolver {
 
 	void removeGenerics(GenericCapability[] generics) {
 		for (GenericCapability capability : generics) {
-			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getNamespace());
+			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getGenericDescription().getType());
 			if (namespace != null)
 				namespace.remove(capability);
 		}
@@ -1966,10 +1966,11 @@ public class ResolverImpl implements Resolver {
 
 	void addGenerics(GenericCapability[] generics) {
 		for (GenericCapability capability : generics) {
-			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(capability.getNamespace());
+			String type = capability.getGenericDescription().getType();
+			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(type);
 			if (namespace == null) {
 				namespace = new VersionHashMap<GenericCapability>(this);
-				resolverGenerics.put(capability.getNamespace(), namespace);
+				resolverGenerics.put(type, namespace);
 			}
 			namespace.put(capability.getName(), capability);
 		}

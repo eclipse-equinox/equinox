@@ -16,6 +16,7 @@ import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.Capability;
 import org.osgi.framework.wiring.WiredCapability;
 
 public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements NativeCodeDescription {
@@ -218,7 +219,12 @@ public class NativeCodeDescriptionImpl extends BaseDescriptionImpl implements Na
 		return Collections.EMPTY_MAP;
 	}
 
-	public WiredCapability getWiredCapability() {
+	public Capability getCapability() {
+		// not supported for native code
+		return null;
+	}
+
+	WiredCapability getWiredCapability() {
 		// not supported for native code
 		return null;
 	}

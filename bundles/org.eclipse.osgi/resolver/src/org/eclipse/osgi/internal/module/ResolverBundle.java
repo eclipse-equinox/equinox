@@ -651,35 +651,10 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	}
 
 	public List<Capability> getDeclaredCapabilities(String namespace) {
-		// This gives a view of the host and attached fragments.
-		Capability[] capabilities = getGenericCapabilities();
-		if (namespace == null)
-			return new ArrayList<Capability>(Arrays.asList(capabilities));
-		List<Capability> result = new ArrayList<Capability>();
-		for (Capability capability : capabilities) {
-			if (namespace.equals(capability.getNamespace()))
-				result.add(capability);
-		}
-		return result;
+		return getBundleDescription().getDeclaredCapabilities(namespace);
 	}
 
 	public int getTypes() {
 		return getBundleDescription().getTypes();
-	}
-
-	public String getNamespace() {
-		return Capability.BUNDLE_CAPABILITY;
-	}
-
-	public Map<String, String> getDirectives() {
-		return getBundleDescription().getDeclaredDirectives();
-	}
-
-	public Map<String, Object> getAttributes() {
-		return getBundleDescription().getDeclaredAttributes();
-	}
-
-	public BundleRevision getProviderRevision() {
-		return this;
 	}
 }

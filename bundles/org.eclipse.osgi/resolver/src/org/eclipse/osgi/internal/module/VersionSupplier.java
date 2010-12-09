@@ -10,20 +10,24 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import java.util.Map;
 import org.eclipse.osgi.service.resolver.BaseDescription;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.Capability;
 
 /*
  * A companion to BaseDescription from the state used while resolving.
  */
 public abstract class VersionSupplier implements Capability {
-	protected BaseDescription base;
+	final protected BaseDescription base;
+	final private Capability capability;
 	private VersionSupplier substitute;
 
 	VersionSupplier(BaseDescription base) {
 		this.base = base;
+		this.capability = base.getCapability();
 	}
 
 	public Version getVersion() {
@@ -38,7 +42,7 @@ public abstract class VersionSupplier implements Capability {
 		return base;
 	}
 
-	// returns true if this version supplier has been dropped and is no longer available as a wire
+	// returns the version supplier that has been substituted for this version supplier
 	VersionSupplier getSubstitute() {
 		return substitute;
 	}
@@ -62,4 +66,31 @@ public abstract class VersionSupplier implements Capability {
 	public String toString() {
 		return base.toString();
 	}
+
+	public String getNamespace() {
+		return capability.getNamespace();
+	}
+
+	public Map<String, String> getDirectives() {
+		return capability.getDirectives();
+	}
+
+	public Map<String, Object> getAttributes() {
+		return capability.getAttributes();
+	}
+
+	public BundleRevision getProviderRevision() {
+		return capability.getProviderRevision();
+	}
+
+	@Override
+	public int hashCode() {
+		return capability.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return capability.equals(obj);
+	}
+
 }

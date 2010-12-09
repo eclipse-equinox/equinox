@@ -84,7 +84,7 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		return null;
 	}
 
-	public WiredCapability getWiredCapability() {
+	WiredCapability getWiredCapability() {
 		synchronized (this.monitor) {
 			BundleDescription supplier = getSupplier();
 			BundleWiring wiring = supplier.getBundleWiring();
@@ -94,13 +94,11 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		}
 	}
 
-	class BaseWiredCapability implements WiredCapability {
-		private final BundleWiring originalWiring;
+	public Capability getCapability() {
+		return new BaseCapability();
+	}
 
-		public BaseWiredCapability(BundleWiring originalWiring) {
-			this.originalWiring = originalWiring;
-		}
-
+	class BaseCapability implements Capability {
 		public BundleRevision getProviderRevision() {
 			return getSupplier();
 		}
@@ -115,6 +113,46 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 
 		public Map<String, Object> getAttributes() {
 			return getDeclaredAttributes();
+		}
+
+		public int hashCode() {
+			return System.identityHashCode(BaseDescriptionImpl.this);
+		}
+
+		private BaseDescriptionImpl getBaseDescription() {
+			return BaseDescriptionImpl.this;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!(obj instanceof Capability))
+				return false;
+			if (obj instanceof BaseCapability)
+				return (((BaseCapability) obj).getBaseDescription() == BaseDescriptionImpl.this);
+			Capability other = (Capability) obj;
+			String otherName = other.getNamespace();
+			if (!getProviderRevision().equals(other.getProviderRevision()))
+				return false;
+			if (otherName == null ? getNamespace() != null : !otherName.equals(getNamespace()))
+				return false;
+			if (!getAttributes().equals(other.getAttributes()))
+				return false;
+			if (!getDirectives().equals(other.getDirectives()))
+				return false;
+			return true;
+		}
+
+		public String toString() {
+			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
+		}
+	}
+
+	class BaseWiredCapability extends BaseCapability implements WiredCapability {
+		private final BundleWiring originalWiring;
+
+		public BaseWiredCapability(BundleWiring originalWiring) {
+			this.originalWiring = originalWiring;
 		}
 
 		public Collection<BundleWiring> getRequirerWirings() {
@@ -156,10 +194,6 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 				return false;
 			BaseWiredCapability other = (BaseWiredCapability) obj;
 			return (other.originalWiring == this.originalWiring) && (this.getImpl() == other.getImpl());
-		}
-
-		public String toString() {
-			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
 		}
 	}
 }

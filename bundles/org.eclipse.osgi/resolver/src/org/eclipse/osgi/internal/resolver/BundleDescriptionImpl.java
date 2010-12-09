@@ -863,18 +863,22 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 
 	public List<Capability> getDeclaredCapabilities(String namespace) {
 		List<Capability> result = new ArrayList<Capability>();
-		if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
-			result.add(BundleDescriptionImpl.this.getWiredCapability());
+		if (host == null) {
+			if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
+				result.add(BundleDescriptionImpl.this.getCapability());
+			}
+		} else {
+			// may need to have a osgi.fragment capability
 		}
 		if (namespace == null || Capability.PACKAGE_CAPABILITY.equals(namespace)) {
 			ExportPackageDescription[] exports = getExportPackages();
 			for (ExportPackageDescription importPkg : exports)
-				result.add(importPkg.getWiredCapability());
+				result.add(importPkg.getCapability());
 		}
 		GenericDescription[] genericCapabilities = getGenericCapabilities();
 		for (GenericDescription capabilitiy : genericCapabilities) {
 			if (namespace == null || namespace.equals(capabilitiy.getType()))
-				result.add(capabilitiy.getWiredCapability());
+				result.add(capabilitiy.getCapability());
 		}
 		return result;
 	}
@@ -929,17 +933,17 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
 				BundleDescription[] requires = getResolvedRequires();
 				for (BundleDescription require : requires)
-					result.add(require.getWiredCapability());
+					result.add(((BaseDescriptionImpl) require).getWiredCapability());
 			}
 			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
 				ExportPackageDescription[] imports = getResolvedImports();
 				for (ExportPackageDescription importPkg : imports)
-					result.add(importPkg.getWiredCapability());
+					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability());
 			}
 			GenericDescription[] genericRequires = getResolvedGenericRequires();
 			for (GenericDescription require : genericRequires) {
 				if (capabilityNamespace == null || capabilityNamespace.equals(require.getType()))
-					result.add(require.getWiredCapability());
+					result.add(((BaseDescriptionImpl) require).getWiredCapability());
 			}
 			return result;
 		}
@@ -954,12 +958,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
 				ExportPackageDescription[] exports = getSelectedExports();
 				for (ExportPackageDescription importPkg : exports)
-					result.add(importPkg.getWiredCapability());
+					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability());
 			}
 			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
 			for (GenericDescription capabilitiy : genericCapabilities) {
 				if (capabilityNamespace == null || capabilityNamespace.equals(capabilitiy.getType()))
-					result.add(capabilitiy.getWiredCapability());
+					result.add(((BaseDescriptionImpl) capabilitiy).getWiredCapability());
 			}
 			return result;
 		}
