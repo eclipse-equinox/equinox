@@ -463,20 +463,21 @@ public class StateBuilder {
 				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
 				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
 					break types;
-				String filterSpec = element.getAttribute("filter"); //$NON-NLS-1$
-				if (filterSpec == null)
-					throw new BundleException("Must specify the filter attribute for " + Constants.REQUIRE_CAPABILITY); //$NON-NLS-1$
+
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
 				spec.setType(namespace);
-				try {
-					FilterImpl filter = FilterImpl.newInstance(filterSpec);
-					spec.setMatchingFilter(filter);
-					String name = filter.getPrimaryKeyValue(namespace);
-					if (name != null)
-						spec.setName(name);
-				} catch (InvalidSyntaxException e) {
-					String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, Constants.REQUIRE_CAPABILITY, element.toString());
-					throw new BundleException(message + " : filter", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
+				String filterSpec = element.getAttribute(Constants.FILTER_ATTRIBUTE);
+				if (filterSpec != null) {
+					try {
+						FilterImpl filter = FilterImpl.newInstance(filterSpec);
+						spec.setMatchingFilter(filter);
+						String name = filter.getPrimaryKeyValue(namespace);
+						if (name != null)
+							spec.setName(name);
+					} catch (InvalidSyntaxException e) {
+						String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, Constants.REQUIRE_CAPABILITY, element.toString());
+						throw new BundleException(message + " : filter", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
+					}
 				}
 				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
 				if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
