@@ -389,16 +389,16 @@ public class StateBuilder {
 		if (ATTR_TYPE_STRING.equalsIgnoreCase(type))
 			return value;
 
-		value = value.trim();
+		String trimmed = value.trim();
 		if (ATTR_TYPE_DOUBLE.equalsIgnoreCase(type))
-			return new Double(value);
+			return new Double(trimmed);
 		else if (ATTR_TYPE_LONG.equalsIgnoreCase(type))
-			return new Long(value);
+			return new Long(trimmed);
 		else if (ATTR_TYPE_URI.equalsIgnoreCase(type))
 			try {
 				Class<?> uriClazz = Class.forName("java.net.URI"); //$NON-NLS-1$
 				Constructor<?> constructor = uriClazz.getConstructor(new Class[] {String.class});
-				return constructor.newInstance(new Object[] {value});
+				return constructor.newInstance(new Object[] {trimmed});
 			} catch (ClassNotFoundException e) {
 				// oh well cannot support; just use string
 				return value;
@@ -408,9 +408,9 @@ public class StateBuilder {
 				throw new RuntimeException(e.getMessage(), e);
 			}
 		else if (ATTR_TYPE_VERSION.equalsIgnoreCase(type))
-			return new Version(value);
+			return new Version(trimmed);
 		else if (ATTR_TYPE_SET.equalsIgnoreCase(type))
-			return ManifestElement.getArrayFromList(value, ","); //$NON-NLS-1$
+			return ManifestElement.getArrayFromList(trimmed, ","); //$NON-NLS-1$
 
 		// assume list type, anything else will throw an exception
 		Tokenizer listTokenizer = new Tokenizer(type);
