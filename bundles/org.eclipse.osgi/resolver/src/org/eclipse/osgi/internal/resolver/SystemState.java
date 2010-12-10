@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -25,11 +26,13 @@ public class SystemState extends StateImpl {
 
 	@Override
 	boolean basicAddBundle(BundleDescription description) {
-		if (context != null && description.getUserObject() == null)
+		if (context != null && description.getUserObject() == null) {
 			// We always set the user object to a BundleReference object;
 			// This allows the resolver to implement BundleRevisions for 
 			// the resolver hooks.
-			description.setUserObject(context.getBundle(description.getBundleId()));
+			AbstractBundle bundle = (AbstractBundle) context.getBundle(description.getBundleId());
+			description.setUserObject(bundle != null ? bundle.getBundleData() : null);
+		}
 		return super.basicAddBundle(description);
 	}
 

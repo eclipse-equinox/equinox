@@ -31,6 +31,8 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
+import org.eclipse.osgi.internal.loader.BundleLoader;
+import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.storagemanager.ManagedOutputStream;
@@ -609,10 +611,40 @@ public class BaseStorage implements SynchronousBundleListener {
 		}
 	}
 
+	private void cleanRemovalPendings(State systemState, BundleDescription[] removalPendings) {
+		if (removalPendings.length == 0)
+			return;
+		systemState.resolve(removalPendings);
+		for (int i = 0; i < removalPendings.length; i++) {
+			Object userObject = removalPendings[i].getUserObject();
+			if (userObject instanceof BundleLoaderProxy) {
+				BundleLoader.closeBundleLoader((BundleLoaderProxy) userObject);
+				try {
+					((BundleLoaderProxy) userObject).getBundleData().close();
+				} catch (IOException e) {
+					// ignore
+				}
+			} else if (userObject instanceof BundleData) {
+				try {
+					((BundleData) userObject).close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+	}
+
 	private void saveStateData(boolean shutdown) {
+		State systemState = stateManager.getSystemState();
 		if (shutdown && "true".equals(FrameworkProperties.getProperty("osgi.forcedRestart"))) //$NON-NLS-1$ //$NON-NLS-2$
 			// increment the state timestamp if a forced restart happened.
-			stateManager.getSystemState().setTimeStamp(stateManager.getSystemState().getTimeStamp() + 1);
+			systemState.setTimeStamp(systemState.getTimeStamp() + 1);
+		BundleDescription[] removalPendings = systemState.getRemovalPending();
+		if (removalPendings.length > 0) {
+			if (!shutdown)
+				return; // never save if removal pending; unless we are shutting down
+			cleanRemovalPendings(systemState, removalPendings);
+		}
 		if (stateManager == null || isReadOnly() || !stateManager.saveNeeded())
 			return;
 		if (Debug.DEBUG_GENERAL)
@@ -692,7 +724,9 @@ public class BaseStorage implements SynchronousBundleListener {
 			// get the content of this bundle
 			content = getBundleContent(data);
 		}
-		BundleFile result = null;
+		BundleFile result = data.getBundleFile(content, base);
+		if (result != null)
+			return result;
 		// Ask factories before doing the default behavior
 		BundleFileFactoryHook[] factories = adaptor.getHookRegistry().getBundleFileFactoryHooks();
 		for (int i = 0; i < factories.length && result == null; i++)
@@ -723,6 +757,8 @@ public class BaseStorage implements SynchronousBundleListener {
 			if (wrapperBundle != null && wrapperBundle != result)
 				result = wrapped = new BundleFileWrapperChain(wrapperBundle, wrapped);
 		}
+		if (!base)
+			data.setBundleFile(content, result);
 		return result;
 	}
 
@@ -1167,7 +1203,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				// because the bundle is not available in the context yet.
 				// We go ahead and set it for the update case for simplicity; 
 				// but this is not strictly necessary
-				newDescription.setUserObject(bundleData.getBundle());
+				newDescription.setUserObject(bundleData);
 				if (oldDescription == null)
 					systemState.addBundle(newDescription);
 				else

@@ -1364,6 +1364,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		BundleDescription description = proxy.getBundleDescription();
 		// must set it back to the bundle object; not null
 		// need to make sure the user object is a BundleReference
-		description.setUserObject(proxy.getBundleHost());
+		description.setUserObject(proxy.getBundleData());
 	}
 }

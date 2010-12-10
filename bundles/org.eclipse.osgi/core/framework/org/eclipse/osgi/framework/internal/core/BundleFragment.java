@@ -77,8 +77,6 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
-					// add the bundle data to the list of removals
-					framework.packageAdmin.addRemovalPending(bundledata);
 					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;
@@ -150,8 +148,6 @@ public class BundleFragment extends AbstractBundle {
 		if (framework.isActive()) {
 			if (hosts != null) {
 				if (state == RESOLVED) {
-					// add the bundle data to the list of removals
-					framework.packageAdmin.addRemovalPending(bundledata);
 					exporting = true; // if we have a host we cannot be removed until the host is refreshed
 					hosts = null;
 					state = INSTALLED;

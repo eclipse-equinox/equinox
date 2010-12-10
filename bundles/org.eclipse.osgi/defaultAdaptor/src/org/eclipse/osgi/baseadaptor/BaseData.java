@@ -23,12 +23,14 @@ import org.eclipse.osgi.baseadaptor.bundlefile.BundleFile;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
+import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.protocol.bundleentry.Handler;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.baseadaptor.DefaultClassLoader;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
@@ -52,6 +54,7 @@ public class BaseData implements BundleData {
 	private String location;
 	private long lastModified;
 	protected BundleFile bundleFile;
+	private ArrayMap<Object, BundleFile> bundleFiles;
 	private boolean dirty = false;
 	protected Dictionary<String, String> manifest;
 	// This field is only used by PDE source lookup, and is set by a hook (bug 126517).  It serves no purpose at runtime.
@@ -205,9 +208,14 @@ public class BaseData implements BundleData {
 		this.lastModified = lastModified;
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		if (bundleFile != null)
 			getBundleFile().close(); // only close the bundleFile if it already exists.
+		if (bundleFiles != null) {
+			for (BundleFile bundlefile : bundleFiles.getValues())
+				bundlefile.close();
+			bundleFiles.clear();
+		}
 	}
 
 	public void open() throws IOException {
@@ -401,6 +409,16 @@ public class BaseData implements BundleData {
 		return bundleFile;
 	}
 
+	public synchronized BundleFile getBundleFile(Object content, boolean base) {
+		return base ? bundleFile : (bundleFiles == null) ? null : bundleFiles.get(content);
+	}
+
+	public synchronized void setBundleFile(Object content, BundleFile bundleFile) {
+		if (bundleFiles == null)
+			bundleFiles = new ArrayMap<Object, BundleFile>(1);
+		bundleFiles.put(content, bundleFile);
+	}
+
 	private static String[] getClassPath(ManifestElement[] classpath) {
 		if (classpath == null) {
 			if (Debug.DEBUG_LOADER)
@@ -491,5 +509,22 @@ public class BaseData implements BundleData {
 		if (ver == null)
 			return name;
 		return name + "_" + ver; //$NON-NLS-1$
+	}
+
+	public Enumeration<URL> findLocalResources(String path) {
+		String[] cp;
+		try {
+			cp = getClassPath();
+		} catch (BundleException e) {
+			cp = new String[0];
+		}
+		if (cp == null)
+			cp = new String[0];
+		// this is not optimized; degenerate case of someone calling getResource on an unresolved bundle!
+		ClasspathManager cm = new ClasspathManager(this, cp, null);
+		cm.initialize();
+		Enumeration<URL> result = cm.findLocalResources(path);
+		// no need to close ClassPathManager because the BundleFile objects are stored in the BaseData and closed on shutdown or uninstall
+		return result;
 	}
 }

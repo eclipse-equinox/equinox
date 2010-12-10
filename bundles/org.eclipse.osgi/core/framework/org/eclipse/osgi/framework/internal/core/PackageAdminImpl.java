@@ -52,7 +52,6 @@ import org.osgi.service.packageadmin.*;
 public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	/** framework object */
 	protected Framework framework;
-	private Map<Long, List<BundleData>> removalPendings = new HashMap<Long, List<BundleData>>();
 
 	/* 
 	 * We need to make sure that the GetBundleAction class loads early to prevent a ClassCircularityError when checking permissions.
@@ -340,23 +339,17 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 				}
 				throw new BundleException(Msg.OSGI_INTERNAL_ERROR);
 			}
-			synchronized (removalPendings) {
-				// ensure that the bundle datas are closed, (fix for bug 259399)
-				List<BundleData> removals = removalPendings.remove(new Long(bundle.getBundleId()));
-				if (removals != null)
-					for (BundleData bundleData : removals) {
-						try {
-							bundleData.close();
-						} catch (IOException e) {
-							// ignore
-						}
-					}
-			}
 			Object userObject = bundle.getUserObject();
 			if (userObject instanceof BundleLoaderProxy) {
 				BundleLoader.closeBundleLoader((BundleLoaderProxy) userObject);
 				try {
-					((BundleLoaderProxy) userObject).getBundleHost().getBundleData().close();
+					((BundleLoaderProxy) userObject).getBundleData().close();
+				} catch (IOException e) {
+					// ignore
+				}
+			} else if (userObject instanceof BundleData) {
+				try {
+					((BundleData) userObject).close();
 				} catch (IOException e) {
 					// ignore
 				}
@@ -638,17 +631,6 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 
 	protected void cleanup() {
 		//This is only called when the framework is shutting down
-		synchronized (removalPendings) {
-			for (List<BundleData> removals : removalPendings.values()) {
-				for (BundleData data : removals)
-					try {
-						data.close();
-					} catch (IOException e) {
-						// ignore
-					}
-			}
-			removalPendings.clear();
-		}
 	}
 
 	protected void setResolvedBundles(InternalSystemBundle systemBundle) {
@@ -715,18 +697,6 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 				break;
 			}
 		FrameworkProperties.setProperty(Constants.OSGI_IMPL_VERSION_KEY, systemBundle.getVersion().toString());
-	}
-
-	void addRemovalPending(BundleData bundledata) {
-		synchronized (removalPendings) {
-			Long id = new Long(bundledata.getBundleID());
-			List<BundleData> removals = removalPendings.get(id);
-			if (removals == null) {
-				removals = new ArrayList<BundleData>(1);
-				removalPendings.put(id, removals);
-			}
-			removals.add(bundledata);
-		}
 	}
 
 	public Bundle getBundle() {

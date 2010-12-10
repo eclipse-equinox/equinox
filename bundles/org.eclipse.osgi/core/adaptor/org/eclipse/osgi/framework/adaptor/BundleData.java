@@ -30,7 +30,7 @@ import org.osgi.framework.*;
  * </p>
  * @since 3.1
  */
-public interface BundleData {
+public interface BundleData extends BundleReference {
 
 	/** The BundleData is for a fragment bundle */
 	public static final int TYPE_FRAGMENT = 0x00000001;
@@ -245,4 +245,11 @@ public interface BundleData {
 	 * @return the DynamicImport-Packaget for this BundleData.
 	 */
 	public String getDynamicImports();
+
+	/**
+	 * Finds local resources by searching the class path of this bundle data.
+	 * @param path the requested resource name.
+	 * @return the requested enumeration of resource URLs or null if the resource does not exist
+	 */
+	public Enumeration<URL> findLocalResources(String path);
 }

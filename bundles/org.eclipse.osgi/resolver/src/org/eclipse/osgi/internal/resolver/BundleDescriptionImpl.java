@@ -984,11 +984,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 
 		private BundleClassLoader getBundleClassLoader() {
-			Object proxy = BundleDescriptionImpl.this.getUserObject();
-			if (proxy instanceof BundleHost)
-				proxy = ((BundleHost) proxy).getLoaderProxy();
-			if (proxy instanceof BundleLoaderProxy)
-				return ((BundleLoaderProxy) proxy).getBundleLoader().createClassLoader();
+			Object o = BundleDescriptionImpl.this.getUserObject();
+			if (!(o instanceof BundleLoaderProxy)) {
+				if (o instanceof BundleReference)
+					o = ((BundleReference) o).getBundle();
+				if (o instanceof BundleHost)
+					o = ((BundleHost) o).getLoaderProxy();
+			}
+			if (o instanceof BundleLoaderProxy)
+				return ((BundleLoaderProxy) o).getBundleLoader().createClassLoader();
 			return null;
 		}
 

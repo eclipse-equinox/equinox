@@ -91,8 +91,6 @@ public class BundleHost extends AbstractBundle {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
 				if (exporting) {
-					// add the bundle data to the list of removals
-					framework.packageAdmin.addRemovalPending(bundledata);
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
 				} else
@@ -161,8 +159,6 @@ public class BundleHost extends AbstractBundle {
 				BundleLoaderProxy curProxy = getLoaderProxy();
 				exporting = curProxy.inUse();
 				if (exporting) {
-					// add the bundle data to the list of removals
-					framework.packageAdmin.addRemovalPending(bundledata);
 					// make sure the BundleLoader is created.
 					curProxy.getBundleLoader().createClassLoader();
 				} else
@@ -271,9 +267,13 @@ public class BundleHost extends AbstractBundle {
 			return null;
 		}
 		loader = checkLoader();
-		if (loader == null)
+		if (loader == null) {
+			Enumeration<URL> result = bundledata.findLocalResources(name);
+			if (result != null && result.hasMoreElements())
+				return result.nextElement();
 			return null;
-		return (loader.findResource(name));
+		}
+		return loader.findResource(name);
 	}
 
 	public Enumeration<URL> getResources(String name) throws IOException {
@@ -283,10 +283,12 @@ public class BundleHost extends AbstractBundle {
 		} catch (SecurityException ee) {
 			return null;
 		}
+		Enumeration<URL> result;
 		loader = checkLoader();
 		if (loader == null)
-			return null;
-		Enumeration<URL> result = loader.getResources(name);
+			result = bundledata.findLocalResources(name);
+		else
+			result = loader.getResources(name);
 		if (result != null && result.hasMoreElements())
 			return result;
 		return null;

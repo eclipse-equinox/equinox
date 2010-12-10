@@ -26,6 +26,7 @@ import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorMsg;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
@@ -47,17 +48,18 @@ public class ClasspathManager {
 	private final static String VALUE_CLASSNAME_LOCK = "classname"; //$NON-NLS-1$
 	private final static boolean LOCK_CLASSNAME = VALUE_CLASSNAME_LOCK.equals(FrameworkProperties.getProperty(PROP_CLASSLOADER_LOCK));
 
-	private BaseData data;
-	private String[] classpath;
+	private final BaseData data;
+	private final String[] classpath;
+	private final BaseClassLoader classloader;
+	private final boolean isParallelClassLoader;
+	private final Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
+
 	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private ClasspathEntry[] entries;
-	private BaseClassLoader classloader;
 	// Note that PDE has internal dependency on this field type/name (bug 267238)
 	private FragmentClasspath[] fragments = emptyFragments;
-	// a collection of String[2], each element is {"libname", "libpath"}
-	private Collection<String[]> loadedLibraries = null;
-	private Map<String, Thread> classNameLocks = new HashMap<String, Thread>(5);
-	private final boolean isParallelClassLoader;
+	// a Map<String,String> where "libname" is the key and libpath" is the value
+	private ArrayMap<String, String> loadedLibraries = null;
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -81,10 +83,11 @@ public class ClasspathManager {
 	 * </p>
 	 */
 	public void initialize() {
-		entries = buildClasspath(classpath, this, data, classloader.getDomain());
+		entries = buildClasspath(classpath, this, data, classloader == null ? null : classloader.getDomain());
 		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
-		for (int i = 0; i < hooks.length; i++)
-			hooks[i].initializedClassLoader(classloader, data);
+		if (classloader != null)
+			for (int i = 0; i < hooks.length; i++)
+				hooks[i].initializedClassLoader(classloader, data);
 	}
 
 	/**
@@ -261,7 +264,11 @@ public class ClasspathManager {
 	}
 
 	private ClasspathEntry createClassPathEntry(BundleFile bundlefile, ProtectionDomain cpDomain, BaseData cpData) {
-		ClasspathEntry entry = classloader.createClassPathEntry(bundlefile, cpDomain);
+		ClasspathEntry entry;
+		if (classloader != null)
+			entry = classloader.createClassPathEntry(bundlefile, cpDomain);
+		else
+			entry = new ClasspathEntry(bundlefile, null);
 		entry.setBaseData(cpData);
 		Object domain = entry.getDomain();
 		if (domain instanceof BundleProtectionDomain)
@@ -627,22 +634,20 @@ public class ClasspathManager {
 	public String findLibrary(String libname) {
 		synchronized (this) {
 			if (loadedLibraries == null)
-				loadedLibraries = new ArrayList<String[]>(1);
+				loadedLibraries = new ArrayMap<String, String>(1);
 		}
 		synchronized (loadedLibraries) {
 			// we assume that each classloader will load a small number of of libraries
 			// instead of wasting space with a map we iterate over our collection of found libraries
 			// each element is a String[2], each array is {"libname", "libpath"}
-			for (Iterator<String[]> libs = loadedLibraries.iterator(); libs.hasNext();) {
-				String[] libNameResult = libs.next();
-				if (libNameResult[0].equals(libname))
-					return libNameResult[1];
-			}
+			String libpath = loadedLibraries.get(libname);
+			if (libpath != null)
+				return libpath;
 
-			String result = classloader.getDelegate().findLibrary(libname);
-			if (result != null)
-				loadedLibraries.add(new String[] {libname, result});
-			return result;
+			libpath = classloader.getDelegate().findLibrary(libname);
+			if (libpath != null)
+				loadedLibraries.put(libname, libpath);
+			return libpath;
 		}
 	}
 

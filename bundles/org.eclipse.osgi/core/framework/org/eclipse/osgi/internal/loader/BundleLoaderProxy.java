@@ -14,6 +14,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
+import org.eclipse.osgi.framework.adaptor.BundleData;
 import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.util.KeyedHashSet;
@@ -39,6 +40,8 @@ public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 	final private BundleHost bundle;
 	// the BundleDescription for the Bundle
 	final private BundleDescription description;
+	// the BundleData for the bundle revision
+	final private BundleData data;
 	// Indicates if this BundleLoaderProxy is stale; 
 	// this is true when the bundle is updated or uninstalled.
 	private boolean stale = false;
@@ -49,6 +52,7 @@ public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 		this.bundle = bundle;
 		this.description = description;
 		this.pkgSources = new KeyedHashSet(false);
+		this.data = bundle.getBundleData();
 	}
 
 	public BundleLoader getBundleLoader() {
@@ -107,6 +111,10 @@ public class BundleLoaderProxy implements RequiredBundle, BundleReference {
 			return null;
 
 		return bundle;
+	}
+
+	public BundleData getBundleData() {
+		return data;
 	}
 
 	public Bundle[] getRequiringBundles() {

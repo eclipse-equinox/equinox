@@ -14,8 +14,6 @@ package org.eclipse.osgi.internal.baseadaptor;
 import java.io.File;
 import java.io.IOException;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
-import org.eclipse.osgi.internal.loader.BundleLoader;
-import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
@@ -104,21 +102,8 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 * @throws IOException
 	 */
 	public void shutdown(File saveStateFile, File saveLazyFile) throws IOException {
-		BundleDescription[] removalPendings = systemState.getRemovalPending();
-		cleanRemovalPendings(removalPendings);
 		writeState(systemState, saveStateFile, saveLazyFile);
 		stopDataManager();
-	}
-
-	private void cleanRemovalPendings(BundleDescription[] removalPendings) {
-		if (removalPendings.length == 0)
-			return;
-		systemState.resolve(removalPendings);
-		for (int i = 0; i < removalPendings.length; i++) {
-			Object userObject = removalPendings[i].getUserObject();
-			if (userObject instanceof BundleLoaderProxy)
-				BundleLoader.closeBundleLoader((BundleLoaderProxy) userObject);
-		}
 	}
 
 	/**
@@ -128,15 +113,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	 * @throws IOException
 	 */
 	public void update(File updateStateFile, File updateLazyFile) throws IOException {
-		BundleDescription[] removalPendings = systemState.getRemovalPending();
-		StateImpl state = systemState;
-		if (removalPendings.length > 0) {
-			state = (StateImpl) state.getFactory().createState(systemState);
-			state.setResolver(createResolver(System.getSecurityManager() != null));
-			state.setPlatformProperties(FrameworkProperties.getProperties());
-			state.resolve(false);
-		}
-		writeState(state, updateStateFile, updateLazyFile);
+		writeState(systemState, updateStateFile, updateLazyFile);
 		// Need to use the timestamp of the original state here
 		lastTimeStamp = systemState.getTimeStamp();
 		// TODO consider updating the state files for lazy loading
