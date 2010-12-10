@@ -11,8 +11,6 @@
 
 package org.eclipse.osgi.internal.serviceregistry;
 
-import org.osgi.framework.ServiceRegistration;
-
 import java.security.*;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
@@ -35,6 +33,7 @@ public class ServiceRegistry {
 
 	static final String findHookName = FindHook.class.getName();
 	static final String eventHookName = EventHook.class.getName();
+	static final String eventListenerHookName = EventListenerHook.class.getName();
 	static final String listenerHookName = ListenerHook.class.getName();
 
 	/** Published services by class name. 
@@ -798,8 +797,13 @@ public class ServiceRegistry {
 		 * removals from that collection will result in removals of the
 		 * entry from the snapshot.
 		 */
-		Collection<BundleContext> shrinkable = asBundleContexts(listenerSnapshot.keySet());
-		notifyEventHooksPrivileged(event, shrinkable);
+		Collection<BundleContext> contexts = asBundleContexts(listenerSnapshot.keySet());
+		notifyEventHooksPrivileged(event, contexts);
+		if (listenerSnapshot.isEmpty()) {
+			return;
+		}
+		Map<BundleContext, Collection<ListenerInfo>> listeners = new ShrinkableValueCollectionMap<BundleContext, ListenerInfo>(listenerSnapshot);
+		notifyEventListenerHooksPrivileged(event, listeners);
 		if (listenerSnapshot.isEmpty()) {
 			return;
 		}
@@ -809,8 +813,8 @@ public class ServiceRegistry {
 		for (Map.Entry<BundleContextImpl, Set<Map.Entry<ServiceListener, FilteredServiceListener>>> entry : listenerSnapshot.entrySet()) {
 			@SuppressWarnings({"unchecked", "rawtypes"})
 			EventDispatcher<ServiceListener, FilteredServiceListener, ServiceEvent> dispatcher = (EventDispatcher) entry.getKey();
-			Set<Map.Entry<ServiceListener, FilteredServiceListener>> listeners = entry.getValue();
-			queue.queueListeners(listeners, dispatcher);
+			Set<Map.Entry<ServiceListener, FilteredServiceListener>> listenerSet = entry.getValue();
+			queue.queueListeners(listenerSet, dispatcher);
 		}
 		queue.dispatchEventSynchronous(SERVICEEVENT, event);
 	}
@@ -1162,6 +1166,35 @@ public class ServiceRegistry {
 
 			public String getHookClassName() {
 				return eventHookName;
+			}
+
+			public String getHookMethodName() {
+				return "event"; //$NON-NLS-1$
+			}
+		});
+	}
+
+	/**
+	 * Call the registered EventListenerHook services to allow them to inspect and possibly shrink the result.
+	 * The EventListenerHooks must be called in order: descending by service.ranking, then ascending by service.id.
+	 * This is the natural order for ServiceReference.
+	 * 
+	 * @param event The service event to be delivered.
+	 * @param result The result to return to the caller which may have been shrunk by the EventListenerHooks.
+	 */
+	private void notifyEventListenerHooksPrivileged(final ServiceEvent event, final Map<BundleContext, Collection<ListenerInfo>> result) {
+		if (Debug.DEBUG_HOOKS) {
+			Debug.println("notifyServiceEventListenerHooks(" + event.getType() + ":" + event.getServiceReference() + "," + result + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		}
+		notifyHooksPrivileged(new HookContext() {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
+				if (hook instanceof EventListenerHook) {
+					((EventListenerHook) hook).event(event, result);
+				}
+			}
+
+			public String getHookClassName() {
+				return eventListenerHookName;
 			}
 
 			public String getHookMethodName() {

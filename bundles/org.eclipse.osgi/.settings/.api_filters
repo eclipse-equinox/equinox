@@ -876,6 +876,15 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/service/EventListenerHook.java" type="org.osgi.framework.hooks.service.EventListenerHook">
+<filter comment="Ignore OSGi API" id="1108344834">
+<message_arguments>
+<message_argument value="1.1"/>
+<message_argument value="3.7"/>
+<message_argument value="org.osgi.framework.hooks.service.EventListenerHook"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>

@@ -195,24 +195,31 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 		for (int i = 0; i < size; i++) {
 			if (entries[i].key == key) {
 				V v = entries[i].value;
-				if (size == 1) {
-					entries = empty();
-					return v;
-				}
-				@SuppressWarnings("unchecked")
-				Entry<K, V>[] newEntries = new Entry[size - 1];
-				if (i > 0) {
-					System.arraycopy(entries, 0, newEntries, 0, i);
-				}
-				int next = size - 1 - i;
-				if (next > 0) {
-					System.arraycopy(entries, i + 1, newEntries, i, next);
-				}
-				entries = newEntries;
+				entries = removeEntry(entries, i);
 				return v;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Static method used to return an Entry array with the ith entry removed.
+	 */
+	static <K, V> Entry<K, V>[] removeEntry(final Entry<K, V>[] entries, final int i) {
+		int size = entries.length;
+		if (size == 1) {
+			return empty();
+		}
+		@SuppressWarnings("unchecked")
+		Entry<K, V>[] newEntries = new Entry[size - 1];
+		if (i > 0) {
+			System.arraycopy(entries, 0, newEntries, 0, i);
+		}
+		int next = size - 1 - i;
+		if (next > 0) {
+			System.arraycopy(entries, i + 1, newEntries, i, next);
+		}
+		return newEntries;
 	}
 
 	/**
@@ -239,7 +246,7 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	 * @return The empty array of entries.
 	 */
 	@SuppressWarnings("unchecked")
-	private static <K, V> Entry<K, V>[] empty() {
+	static <K, V> Entry<K, V>[] empty() {
 		return emptyArray;
 	}
 
@@ -324,42 +331,40 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 
 	/**
 	 * Returns a snapshot of the entries in this map.
-	 * The returned set will NOT be changed by future changes to this map.
+	 * Changes to the returned set or this map will not affect each other.
 	 * 
 	 * @return A Set of Map.Entry for each entry in this map.
-	 * The set and the entries returned by the set cannot be modified.
+	 * The entries returned by the set cannot be modified.
 	 */
 	public Set<Map.Entry<K, V>> entrySet() {
-		return new EntrySet<K, V>(entries());
+		return new Snapshot<K, V>(entries()).entrySet();
 	}
 
 	/**
 	 * Returns a snapshot of the keys in this map.
-	 * The returned set will NOT be changed by future changes to this map.
+	 * Changes to the returned set or this map will not affect each other.
 	 * 
 	 * @return A Set of the key objects in this map
-	 * The set cannot be modified.
 	 */
 	public Set<K> keySet() {
-		return new KeySet<K>(entries());
+		return new Snapshot<K, V>(entries()).keySet();
 	}
 
 	/**
 	 * Returns a snapshot of the values in this map.
-	 * The returned collection will NOT be changed by future changes to this map.
+	 * Changes to the returned set or this map will not affect each other.
 	 * 
 	 * @return A Collection of the value objects in this map.
-	 * The collection cannot be modified.
 	 */
 	public Collection<V> values() {
-		return new ValueCollection<V>(entries());
+		return new Snapshot<K, V>(entries()).values();
 	}
 
 	/**
 	 * This class represents the entry in this identity map.
 	 * Entry is immutable.
 	 */
-	private static class Entry<K, V> implements Map.Entry<K, V> {
+	static private final class Entry<K, V> implements Map.Entry<K, V> {
 		/**
 		 * Key object.
 		 */
@@ -415,152 +420,233 @@ public class CopyOnWriteIdentityMap<K, V> implements Map<K, V> {
 	}
 
 	/**
-	 * Set class used for entry sets.
-	 *
-	 * This class is immutable.
+	 * A snapshot of the entries in the map. This snapshot used by
+	 * the map collection views. Changes made by the collection 
+	 * views only mutate the snapshot and not the map. The collection
+	 * views only allow removal not addition.
 	 */
-	private static class EntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
-		private final Entry<K, V>[] entries;
+	static private final class Snapshot<K, V> {
+		volatile Entry<K, V>[] entries;
 
-		EntrySet(Entry<K, V>[] entries) {
-			this.entries = entries;
+		Snapshot(Entry<K, V>[] e) {
+			entries = e;
 		}
 
-		public Iterator<Map.Entry<K, V>> iterator() {
-			return new EntryIterator<K, V>(entries);
+		Entry<K, V>[] entries() {
+			return entries;
 		}
 
-		public int size() {
-			return entries.length;
-		}
-	}
-
-	/**
-	 * Set class used for key sets.
-	 *
-	 * This class is immutable.
-	 */
-	private static class KeySet<K> extends AbstractSet<K> {
-		private final Entry<K, ?>[] entries;
-
-		KeySet(Entry<K, ?>[] entries) {
-			this.entries = entries;
+		synchronized void removeEntry(int i) {
+			entries = CopyOnWriteIdentityMap.removeEntry(entries, i);
 		}
 
-		public Iterator<K> iterator() {
-			return new KeyIterator<K>(entries);
+		synchronized void clearEntries() {
+			entries = CopyOnWriteIdentityMap.empty();
 		}
 
-		public int size() {
-			return entries.length;
-		}
-	}
-
-	/**
-	 * Collection class used for value collections.
-	 *
-	 * This class is immutable.
-	 */
-	private static class ValueCollection<V> extends AbstractCollection<V> {
-		private final Entry<?, V>[] entries;
-
-		ValueCollection(Entry<?, V>[] entries) {
-			this.entries = entries;
+		Set<Map.Entry<K, V>> entrySet() {
+			return new EntrySet();
 		}
 
-		public Iterator<V> iterator() {
-			return new ValueIterator<V>(entries);
+		Set<K> keySet() {
+			return new KeySet();
 		}
 
-		public int size() {
-			return entries.length;
-		}
-	}
-
-	/** 
-	 * Iterator class used for entry sets.
-	 */
-	private static class EntryIterator<K, V> implements Iterator<Map.Entry<K, V>> {
-		private final Entry<K, V>[] entries;
-		private final int length;
-		private int cursor = 0;
-
-		EntryIterator(Entry<K, V>[] entries) {
-			this.entries = entries;
-			this.length = entries.length;
+		Collection<V> values() {
+			return new ValueCollection();
 		}
 
-		public boolean hasNext() {
-			return cursor < length;
-		}
-
-		public Map.Entry<K, V> next() {
-			if (cursor == length) {
-				throw new NoSuchElementException();
+		/**
+		 * Entry set view over the snapshot.
+		 */
+		private final class EntrySet extends AbstractSet<Map.Entry<K, V>> {
+			EntrySet() {
+				super();
 			}
-			return entries[cursor++];
-		}
 
-		public void remove() {
-			throw new UnsupportedOperationException(); // the collection cannot be modified.
-		}
-	}
-
-	/** 
-	 * Iterator class used for key sets.
-	 */
-	private static class KeyIterator<K> implements Iterator<K> {
-		private final Entry<K, ?>[] entries;
-		private final int length;
-		private int cursor = 0;
-
-		KeyIterator(Entry<K, ?>[] entries) {
-			this.entries = entries;
-			this.length = entries.length;
-		}
-
-		public boolean hasNext() {
-			return cursor < length;
-		}
-
-		public K next() {
-			if (cursor == length) {
-				throw new NoSuchElementException();
+			public Iterator<Map.Entry<K, V>> iterator() {
+				return new EntryIterator();
 			}
-			return entries[cursor++].key;
-		}
 
-		public void remove() {
-			throw new UnsupportedOperationException(); // the collection cannot be modified.
-		}
-	}
-
-	/** 
-	 * Iterator class used for value collections.
-	 */
-	private static class ValueIterator<V> implements Iterator<V> {
-		private final Entry<?, V>[] entries;
-		private final int length;
-		private int cursor = 0;
-
-		ValueIterator(Entry<?, V>[] entries) {
-			this.entries = entries;
-			this.length = entries.length;
-		}
-
-		public boolean hasNext() {
-			return cursor < length;
-		}
-
-		public V next() {
-			if (cursor == length) {
-				throw new NoSuchElementException();
+			public int size() {
+				return entries().length;
 			}
-			return entries[cursor++].value;
+
+			public boolean remove(Object o) {
+				if (o == null) {
+					throw new IllegalArgumentException();
+				}
+
+				synchronized (Snapshot.this) {
+					int size = entries.length;
+					for (int i = 0; i < size; i++) {
+						if (entries[i].equals(o)) {
+							removeEntry(i);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			public void clear() {
+				clearEntries();
+			}
 		}
 
-		public void remove() {
-			throw new UnsupportedOperationException(); // the collection cannot be modified.
+		/** 
+		 * Entry set iterator over the snapshot.
+		 */
+		private final class EntryIterator extends SnapshotIterator<Map.Entry<K, V>> {
+			EntryIterator() {
+				super();
+			}
+
+			public Map.Entry<K, V> next() {
+				return nextEntry();
+			}
+		}
+
+		/**
+		 * Key set view over the snapshot.
+		 */
+		private final class KeySet extends AbstractSet<K> {
+			KeySet() {
+				super();
+			}
+
+			public Iterator<K> iterator() {
+				return new KeyIterator();
+			}
+
+			public int size() {
+				return entries().length;
+			}
+
+			public boolean remove(Object o) {
+				if (o == null) {
+					throw new IllegalArgumentException();
+				}
+
+				synchronized (Snapshot.this) {
+					int size = entries.length;
+					for (int i = 0; i < size; i++) {
+						if (entries[i].key == o) {
+							removeEntry(i);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			public void clear() {
+				clearEntries();
+			}
+		}
+
+		/** 
+		 * Key set iterator over the snapshot.
+		 */
+		private final class KeyIterator extends SnapshotIterator<K> {
+			KeyIterator() {
+				super();
+			}
+
+			public K next() {
+				return nextEntry().key;
+			}
+		}
+
+		/**
+		 * Value collection view over the snapshot.
+		 */
+		private final class ValueCollection extends AbstractCollection<V> {
+			ValueCollection() {
+				super();
+			}
+
+			public Iterator<V> iterator() {
+				return new ValueIterator();
+			}
+
+			public int size() {
+				return entries().length;
+			}
+
+			public boolean remove(Object o) {
+				if (o == null) {
+					throw new IllegalArgumentException();
+				}
+
+				synchronized (Snapshot.this) {
+					int size = entries.length;
+					for (int i = 0; i < size; i++) {
+						if (entries[i].value == o) {
+							removeEntry(i);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			public void clear() {
+				clearEntries();
+			}
+		}
+
+		/** 
+		 * Value collection iterator over the snapshot.
+		 */
+		private final class ValueIterator extends SnapshotIterator<V> {
+			ValueIterator() {
+				super();
+			}
+
+			public V next() {
+				return nextEntry().value;
+			}
+		}
+
+		/** 
+		 * Base iterator class handling removal and concurrent modifications.
+		 */
+		private abstract class SnapshotIterator<E> implements Iterator<E> {
+			private int length;
+			private int cursor;
+
+			SnapshotIterator() {
+				length = entries().length;
+				cursor = 0;
+			}
+
+			public final boolean hasNext() {
+				return cursor < length;
+			}
+
+			protected final Entry<K, V> nextEntry() {
+				Entry<K, V>[] e = entries();
+				if (length != e.length) {
+					throw new ConcurrentModificationException();
+				}
+				if (cursor == length) {
+					throw new NoSuchElementException();
+				}
+				return e[cursor++];
+			}
+
+			public final void remove() {
+				if (length != entries().length) {
+					throw new ConcurrentModificationException();
+				}
+				if (cursor == 0) {
+					throw new IllegalStateException();
+				}
+				cursor--;
+				removeEntry(cursor);
+				length = entries().length;
+			}
 		}
 	}
 }

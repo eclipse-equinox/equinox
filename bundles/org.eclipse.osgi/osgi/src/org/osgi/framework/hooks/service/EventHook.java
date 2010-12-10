@@ -29,6 +29,7 @@ import org.osgi.framework.ServiceEvent;
  * (register, modify, and unregister service) operations.
  * 
  * @ThreadSafe
+ * @deprecated As of 1.1. Replaced by {@link EventListenerHook}.
  * @version $Id: 79aa00acbd7322819a783d7cce892a3b7fc52cf7 $
  */
 

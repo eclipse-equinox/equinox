@@ -103,7 +103,7 @@ public class ListenerQueue<K, V, E> {
 			throw new IllegalStateException();
 		}
 
-		if (listeners.size() != 0) {
+		if (!listeners.isEmpty()) {
 			queue.put(listeners, dispatcher); // enqueue the list and its dispatcher
 		}
 	}
