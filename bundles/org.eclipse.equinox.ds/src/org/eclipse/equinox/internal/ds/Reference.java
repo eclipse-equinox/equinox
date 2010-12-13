@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2010 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,6 +29,10 @@ import org.osgi.service.log.LogService;
  * @author Valentin Valchev
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
+ */
+/**
+ * @author stoyan
+ *
  */
 public final class Reference implements org.apache.felix.scr.Reference {
 
@@ -454,6 +458,14 @@ public final class Reference implements org.apache.felix.scr.Reference {
 
 	public boolean isStatic() {
 		return policy == ComponentReference.POLICY_STATIC;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.apache.felix.scr.Reference#getUpdatedMethodName()
+	 */
+	public String getUpdatedMethodName() {
+		// DS specification does not specify this method yet
+		return null;
 	}
 
 }

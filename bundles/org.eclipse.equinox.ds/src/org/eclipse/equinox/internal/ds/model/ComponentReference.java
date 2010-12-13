@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2010 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -668,6 +668,14 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 
 	public boolean isStatic() {
 		return policy == ComponentReference.POLICY_STATIC;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.apache.felix.scr.Reference#getUpdatedMethodName()
+	 */
+	public String getUpdatedMethodName() {
+		// DS specification does not specify this method yet
+		return null;
 	}
 
 }

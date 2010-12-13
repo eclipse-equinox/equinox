@@ -80,9 +80,11 @@ public interface Component {
 	static final int STATE_REGISTERED = 32;
 
 	/**
-	 * The Component is a Component Factory ready to manage Component instances
-	 * from configuration data received from the Configuration Admin Service
-	 * (value is 64).
+	 * The Component is a Component Factory ready to create Component instances
+	 * with the <code>ComponentFactory.newInstance(Dictionary)</code> method
+	 * or (if enabled with the <code>ds.factory.enabled</code> configuration) to
+	 * manage Component instances from configuration data received from the
+	 * Configuration Admin Service (value is 64).
 	 */
 	static final int STATE_FACTORY = 64;
 
@@ -128,7 +130,9 @@ public interface Component {
 
 	/**
 	 * Returns the component ID of this component. This ID is managed by the
-	 * SCR.
+	 * SCR. If the component is not currently enabled the ID might not be
+	 * assigned to the component (yet) and this method will return -1 in this
+	 * case.
 	 */
 	long getId();
 
@@ -214,6 +218,8 @@ public interface Component {
 	 * Returns the <code>org.osgi.service.component.ComponentInstance</code>
 	 * representing this component or <code>null</code> if this component
 	 * is not been activated yet.
+	 *
+	 * @since 1.2
 	 */
 	ComponentInstance getComponentInstance();
 
@@ -224,6 +230,8 @@ public interface Component {
 	 * This method never returns <code>null</code>, that is, if this method is
 	 * not declared in the component descriptor this method returns the
 	 * default value <i>activate</i>.
+	 *
+	 * @since 1.2
 	 */
 	String getActivate();
 
@@ -234,6 +242,8 @@ public interface Component {
 	 * <p>
 	 * For a component declared in a Declarative Services 1.0 descriptor, this
 	 * method always returns <code>false</code>.
+	 *
+	 * @since 1.2
 	 */
 	boolean isActivateDeclared();
 
@@ -244,6 +254,8 @@ public interface Component {
 	 * This method never returns <code>null</code>, that is, if this method is
 	 * not declared in the component descriptor this method returns the
 	 * default value <i>deactivate</i>.
+	 *
+	 * @since 1.2
 	 */
 	String getDeactivate();
 
@@ -254,6 +266,8 @@ public interface Component {
 	 * <p>
 	 * For a component declared in a Declarative Services 1.0 descriptor, this
 	 * method always returns <code>false</code>.
+	 *
+	 * @since 1.2
 	 */
 	boolean isDeactivateDeclared();
 
@@ -264,6 +278,8 @@ public interface Component {
 	 * <p>
 	 * For a component declared in a Declarative Services 1.0 descriptor, this
 	 * method always returns <code>null</code>.
+	 *
+	 * @since 1.2
 	 */
 	String getModified();
 
@@ -280,7 +296,7 @@ public interface Component {
 	 * <dd>Configuration from the Configuration Admin service is supplied to
 	 * the component if available. Otherwise the component is activated without
 	 * Configuration Admin configuration. This is the default value reflecting
-	 * the behaviour of Declarative Services 1.0</dd>
+	 * the behavior of Declarative Services 1.0</dd>
 	 * <dt>require</dt>
 	 * <dd>Configuration is required. The component remains unsatisfied until
 	 * configuration is available from the Configuration Admin service.</dd>
@@ -288,6 +304,8 @@ public interface Component {
 	 * <dd>Configuration is ignored. No Configuration Admin service
 	 * configuration is supplied to the component.</dd>
 	 * </dl>
+	 *
+	 * @since 1.2
 	 */
 	String getConfigurationPolicy();
 

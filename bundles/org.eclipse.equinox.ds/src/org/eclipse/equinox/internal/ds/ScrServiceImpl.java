@@ -35,13 +35,20 @@ public class ScrServiceImpl implements ScrService {
 
 	public Component[] getComponents(Bundle bundle) {
 		if (!disposed && InstanceProcess.resolver != null) {
-			return InstanceProcess.resolver.mgr.getComponent(bundle);
+			return InstanceProcess.resolver.mgr.getComponents(bundle);
 		}
 		return null;
 	}
 
 	public void dispose() {
 		disposed = true;
+	}
+
+	public Component[] getComponents(String componentName) {
+		if (!disposed && InstanceProcess.resolver != null) {
+			return InstanceProcess.resolver.mgr.getComponents(componentName);
+		}
+		return null;
 	}
 
 }

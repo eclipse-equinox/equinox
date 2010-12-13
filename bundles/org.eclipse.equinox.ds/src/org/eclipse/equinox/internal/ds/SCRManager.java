@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2010 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -895,7 +895,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		return null;
 	}
 
-	public Component[] getComponent(Bundle bundle) {
+	public Component[] getComponents(Bundle bundle) {
 		if (bundleToServiceComponents == null || bundleToServiceComponents.isEmpty()) {
 			// no components found till now
 			return null;
@@ -921,4 +921,37 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		}
 		return null;
 	}
+
+	public Component[] getComponents(String componentName) {
+		if (bundleToServiceComponents == null || bundleToServiceComponents.isEmpty()) {
+			// no components found till now
+			return null;
+		}
+		Vector result = new Vector();
+		Enumeration en = bundleToServiceComponents.keys();
+		while (en.hasMoreElements()) {
+			Bundle b = (Bundle) en.nextElement();
+			Vector serviceComponents = (Vector) bundleToServiceComponents.get(b);
+			for (int i = 0; i < serviceComponents.size(); i++) {
+				ServiceComponent sc = (ServiceComponent) serviceComponents.elementAt(i);
+				if (sc.getName().equals(componentName)) {
+					if (sc.componentProps != null && !sc.componentProps.isEmpty()) {
+						// add the created runtime components props
+						result.addAll(sc.componentProps);
+					} else {
+						// add the declared component itself
+						result.add(sc);
+					}
+					break;
+				}
+			}
+		}
+		if (!result.isEmpty()) {
+			Component[] res = new Component[result.size()];
+			result.copyInto(res);
+			return res;
+		}
+		return null;
+	}
+
 }
