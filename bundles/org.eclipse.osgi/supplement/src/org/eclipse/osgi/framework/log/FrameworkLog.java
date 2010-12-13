@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public interface FrameworkLog {
 	 * File.
 	 * @throws IOException if any problem occurs while constructing a
 	 * FileWriter from the newFile.  If this exception is thrown the 
-	 * FrameworkLog will not be effected and will continue to use the 
+	 * FrameworkLog will not be affected and will continue to use the 
 	 * current Writer to log messages.
 	 */
 	public void setFile(File newFile, boolean append) throws IOException;
