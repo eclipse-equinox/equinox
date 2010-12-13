@@ -18,7 +18,7 @@ import org.eclipse.core.internal.runtime.AdapterManager;
  * to the platform's adapter manager.
  * <p>
  * Note: In situations where it would be awkward to subclass this
- * class, the same affect can be achieved simply by implementing
+ * class, the same effect can be achieved simply by implementing
  * the {@link IAdaptable} interface and explicitly forwarding
  * the <code>getAdapter</code> request to an implementation
  * of the {@link IAdapterManager} service. The method would look like:
