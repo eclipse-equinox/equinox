@@ -19,6 +19,7 @@ import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.framework.util.SecureAction;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
@@ -263,15 +264,18 @@ public class ResolverImpl implements Resolver {
 			List<ResolverBundle> sameName = resolverBundles.get(bundleDesc.getName());
 			if (sameName.size() > 1) {
 				// Need to check if one is already resolved
-				Collection<Capability> collisionCandidates = new ArrayList<Capability>(sameName.size() - 1);
+				List<ResolverBundle> collisionCandidates = new ArrayList<ResolverBundle>(sameName.size() - 1);
+				List<Capability> capabilities = new ArrayList<Capability>(sameName.size() - 1);
 				for (ResolverBundle collision : sameName) {
 					if (collision == bundleDesc || !collision.getBundleDescription().isSingleton())
 						continue; // Ignore the bundle we are resolving and non-singletons
-					if (collision.getBundleDescription().isResolved())
+					if (collision.getBundleDescription().isResolved()) {
 						collisionCandidates.add(collision);
+						capabilities.add(collision.getCapability());
+					}
 				}
 				if (hook != null)
-					hook.filterSingletonCollisions(bundle, collisionCandidates);
+					hook.filterSingletonCollisions(bundle.getCapability(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(capabilities, collisionCandidates)));
 				if (!collisionCandidates.isEmpty()) {
 					rejectedSingletons.add(bundleDesc);
 					return false; // Must fail since there is already a resolved bundle
@@ -368,15 +372,22 @@ public class ResolverImpl implements Resolver {
 		boolean foundMatch = false;
 		BundleConstraint hostConstraint = bundle.getHost();
 		List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-		Collection<ResolverBundle> candidates = new ArrayList<ResolverBundle>(hosts);
+		List<ResolverBundle> candidates = new ArrayList<ResolverBundle>(hosts);
+		List<Capability> hostCapabilities = new ArrayList<Capability>(hosts.size());
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
 			ResolverBundle host = iCandidates.next();
-			if (!host.isResolvable() || !hostConstraint.isSatisfiedBy(host))
+			if (!host.isResolvable() || !host.getBundleDescription().attachFragments() || !hostConstraint.isSatisfiedBy(host)) {
 				iCandidates.remove();
+			} else {
+				List<Capability> h = host.getBundleDescription().getDeclaredCapabilities(Capability.HOST_CAPABILITY);
+				// the bundle must have 1 host capability.
+				hostCapabilities.add(h.get(0));
+			}
 		}
+
 		if (hook != null)
-			hook.filterMatches(bundle, asCapabilities(candidates));
+			hook.filterMatches(bundle, asCapabilities(new ArrayMap<Capability, ResolverBundle>(hostCapabilities, candidates)));
 		// we are left with only candidates that satisfy the host constraint
 		for (ResolverBundle host : candidates) {
 			foundMatch = true;
@@ -1084,15 +1095,17 @@ public class ResolverImpl implements Resolver {
 				continue;
 			List<ResolverBundle> sameName = resolverBundles.get(bundleDesc.getName());
 			if (sameName.size() > 1) { // Need to make a selection based off of num dependents
-				Collection<ResolverBundle> singletonCollisions = new ArrayList<ResolverBundle>();
+				List<ResolverBundle> singletonCollisions = new ArrayList<ResolverBundle>();
+				List<Capability> capabilities = new ArrayList<Capability>();
 				for (ResolverBundle sameNameBundle : sameName) {
 					BundleDescription sameNameDesc = sameNameBundle.getBundleDescription();
 					if (sameNameBundle == bundles[i] || !sameNameDesc.isSingleton() || !sameNameDesc.isResolved() || rejectedSingletons.contains(sameNameDesc))
 						continue; // Ignore the bundle we are selecting, non-singletons, and non-resolved
 					singletonCollisions.add(sameNameBundle);
+					capabilities.add(sameNameBundle.getCapability());
 				}
 				if (hook != null)
-					hook.filterSingletonCollisions(bundles[i], asCapabilities(singletonCollisions));
+					hook.filterSingletonCollisions(bundles[i].getCapability(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(capabilities, singletonCollisions)));
 				for (ResolverBundle sameNameBundle : singletonCollisions) {
 					result = true; // to indicate that a singleton decision has been made
 					BundleDescription sameNameDesc = sameNameBundle.getBundleDescription();
@@ -1295,14 +1308,19 @@ public class ResolverImpl implements Resolver {
 			capabilities = Collections.EMPTY_LIST;
 		else
 			capabilities = name == null || "*".equals(name) ? namespace.getAllValues() : namespace.get(name); //$NON-NLS-1$
-		Collection<GenericCapability> candidates = new ArrayList<GenericCapability>(capabilities);
+		List<GenericCapability> candidates = new ArrayList<GenericCapability>(capabilities);
+		List<Capability> genCapabilities = new ArrayList<Capability>(candidates.size());
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<GenericCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			if (!constraint.isSatisfiedBy(iCandidates.next()))
+			GenericCapability capability = iCandidates.next();
+			if (!constraint.isSatisfiedBy(capability)) {
 				iCandidates.remove();
+			} else {
+				genCapabilities.add(capability.getCapability());
+			}
 		}
 		if (hook != null)
-			hook.filterMatches(constraint.getBundle(), asCapabilities(candidates));
+			hook.filterMatches(constraint.getBundle(), asCapabilities(new ArrayMap<Capability, GenericCapability>(genCapabilities, candidates)));
 		boolean result = false;
 		// We are left with only capabilities that satisfy the constraint.
 		for (GenericCapability capability : candidates) {
@@ -1350,14 +1368,19 @@ public class ResolverImpl implements Resolver {
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
 		List<ResolverBundle> bundles = resolverBundles.get(req.getVersionConstraint().getName());
-		Collection<ResolverBundle> candidates = new ArrayList<ResolverBundle>(bundles);
+		List<ResolverBundle> candidates = new ArrayList<ResolverBundle>(bundles);
+		List<Capability> capabilities = new ArrayList<Capability>(candidates.size());
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			if (!req.isSatisfiedBy(iCandidates.next()))
+			ResolverBundle bundle = iCandidates.next();
+			if (!req.isSatisfiedBy(bundle)) {
 				iCandidates.remove();
+			} else {
+				capabilities.add(bundle.getCapability());
+			}
 		}
 		if (hook != null)
-			hook.filterMatches(req.getBundle(), asCapabilities(candidates));
+			hook.filterMatches(req.getBundle(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(capabilities, candidates)));
 		// We are left with only capabilities that satisfy the require bundle.
 		boolean result = false;
 		for (ResolverBundle bundle : candidates) {
@@ -1413,14 +1436,19 @@ public class ResolverImpl implements Resolver {
 		boolean result = false;
 		ResolverExport[] substitutableExps = imp.getBundle().getExports(imp.getName());
 		List<ResolverExport> exports = resolverExports.get(imp.getName());
-		Collection<ResolverExport> candidates = new ArrayList<ResolverExport>(exports);
+		List<ResolverExport> candidates = new ArrayList<ResolverExport>(exports);
+		List<Capability> capabilities = new ArrayList<Capability>(candidates.size());
 		// Must remove candidates that do not match before calling hooks.
 		for (Iterator<ResolverExport> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			if (!imp.isSatisfiedBy(iCandidates.next()))
+			ResolverExport export = iCandidates.next();
+			if (!imp.isSatisfiedBy(export)) {
 				iCandidates.remove();
+			} else {
+				capabilities.add(export.getCapability());
+			}
 		}
 		if (hook != null)
-			hook.filterMatches(imp.getBundle(), asCapabilities(candidates));
+			hook.filterMatches(imp.getBundle(), asCapabilities(new ArrayMap<Capability, ResolverExport>(capabilities, candidates)));
 		// We are left with only capabilities that satisfy the import.
 		for (ResolverExport export : candidates) {
 			if (DEBUG_IMPORTS)

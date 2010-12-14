@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import java.util.Map;
 import org.eclipse.osgi.service.resolver.BaseDescription;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Version;
-import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.Capability;
 
 /*
  * A companion to BaseDescription from the state used while resolving.
  */
-public abstract class VersionSupplier implements Capability {
+public abstract class VersionSupplier {
 	final protected BaseDescription base;
 	final private Capability capability;
 	private VersionSupplier substitute;
@@ -67,30 +65,7 @@ public abstract class VersionSupplier implements Capability {
 		return base.toString();
 	}
 
-	public String getNamespace() {
-		return capability.getNamespace();
+	Capability getCapability() {
+		return capability;
 	}
-
-	public Map<String, String> getDirectives() {
-		return capability.getDirectives();
-	}
-
-	public Map<String, Object> getAttributes() {
-		return capability.getAttributes();
-	}
-
-	public BundleRevision getProviderRevision() {
-		return capability.getProviderRevision();
-	}
-
-	@Override
-	public int hashCode() {
-		return capability.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return capability.equals(obj);
-	}
-
 }

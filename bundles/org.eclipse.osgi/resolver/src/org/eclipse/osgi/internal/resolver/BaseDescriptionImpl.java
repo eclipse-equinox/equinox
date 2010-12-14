@@ -84,27 +84,45 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		return null;
 	}
 
-	WiredCapability getWiredCapability() {
-		synchronized (this.monitor) {
-			BundleDescription supplier = getSupplier();
-			BundleWiring wiring = supplier.getBundleWiring();
-			if (wiring == null)
-				return null;
-			return new BaseWiredCapability(wiring);
-		}
+	WiredCapability getWiredCapability(String namespace) {
+		if (namespace == null)
+			namespace = getInternalNameSpace();
+		if (namespace == null)
+			return null;
+
+		BundleDescription supplier = getSupplier();
+		BundleWiring wiring = supplier.getBundleWiring();
+		if (wiring == null)
+			return null;
+		return new BaseWiredCapability(namespace, wiring);
 	}
 
 	public Capability getCapability() {
-		return new BaseCapability();
+		return getCapability(null);
+	}
+
+	Capability getCapability(String namespace) {
+		if (namespace == null)
+			namespace = getInternalNameSpace();
+		if (namespace == null)
+			return null;
+		return new BaseCapability(namespace);
 	}
 
 	class BaseCapability implements Capability {
+		private final String namespace;
+
+		public BaseCapability(String namespace) {
+			super();
+			this.namespace = namespace;
+		}
+
 		public BundleRevision getProviderRevision() {
 			return getSupplier();
 		}
 
 		public String getNamespace() {
-			return getInternalNameSpace();
+			return namespace;
 		}
 
 		public Map<String, String> getDirectives() {
@@ -112,35 +130,32 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		}
 
 		public Map<String, Object> getAttributes() {
-			return getDeclaredAttributes();
+			Map<String, Object> attrs = getDeclaredAttributes();
+			String internalName = BaseDescriptionImpl.this.getInternalNameSpace();
+			if (namespace.equals(internalName))
+				return attrs;
+			// we are doing an alias, must remove internal Name and add alias
+			attrs = new HashMap<String, Object>(attrs);
+			Object nameValue = attrs.remove(internalName);
+			if (nameValue != null)
+				attrs.put(namespace, nameValue);
+			return Collections.unmodifiableMap(attrs);
 		}
 
 		public int hashCode() {
 			return System.identityHashCode(BaseDescriptionImpl.this);
 		}
 
-		private BaseDescriptionImpl getBaseDescription() {
+		protected BaseDescriptionImpl getBaseDescription() {
 			return BaseDescriptionImpl.this;
 		}
 
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			if (!(obj instanceof Capability))
+			if (!(obj instanceof BaseCapability))
 				return false;
-			if (obj instanceof BaseCapability)
-				return (((BaseCapability) obj).getBaseDescription() == BaseDescriptionImpl.this);
-			Capability other = (Capability) obj;
-			String otherName = other.getNamespace();
-			if (!getProviderRevision().equals(other.getProviderRevision()))
-				return false;
-			if (otherName == null ? getNamespace() != null : !otherName.equals(getNamespace()))
-				return false;
-			if (!getAttributes().equals(other.getAttributes()))
-				return false;
-			if (!getDirectives().equals(other.getDirectives()))
-				return false;
-			return true;
+			return (((BaseCapability) obj).getBaseDescription() == BaseDescriptionImpl.this) && namespace.equals(((BaseCapability) obj).getNamespace());
 		}
 
 		public String toString() {
@@ -151,7 +166,8 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 	class BaseWiredCapability extends BaseCapability implements WiredCapability {
 		private final BundleWiring originalWiring;
 
-		public BaseWiredCapability(BundleWiring originalWiring) {
+		public BaseWiredCapability(String namespace, BundleWiring originalWiring) {
+			super(namespace);
 			this.originalWiring = originalWiring;
 		}
 
@@ -162,6 +178,17 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			BundleDescription supplier = getSupplier();
 			BundleDescription[] dependents = supplier.getDependents();
 			Collection<BundleWiring> requirers = new ArrayList<BundleWiring>();
+			if (Capability.HOST_CAPABILITY.equals(getNamespace())) {
+				// special casing osgi.host capability.
+				// this is needed because the host capability is manufactured only for 
+				// representation in the wiring API.  We need to represent a host wiring
+				// as requiring its own osgi.host capability if it has attached fragments
+				List<BundleRevision> fragments = wiring.getFragmentRevisions();
+				if (fragments != null && fragments.size() > 0)
+					// found at least one fragment add the host wiring as a requirer and return
+					requirers.add(wiring);
+			}
+
 			for (BundleDescription dependent : dependents) {
 				BundleWiring dependentWiring = dependent.getBundleWiring();
 				if (dependentWiring == null) // fragments have no wiring
@@ -179,10 +206,6 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			return originalWiring.isInUse() ? originalWiring : null;
 		}
 
-		BaseDescriptionImpl getImpl() {
-			return BaseDescriptionImpl.this;
-		}
-
 		public int hashCode() {
 			return System.identityHashCode(BaseDescriptionImpl.this) ^ System.identityHashCode(originalWiring);
 		}
@@ -193,7 +216,7 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			if (!(obj instanceof BaseWiredCapability))
 				return false;
 			BaseWiredCapability other = (BaseWiredCapability) obj;
-			return (other.originalWiring == this.originalWiring) && (this.getImpl() == other.getImpl());
+			return (other.originalWiring == this.originalWiring) && super.equals(obj);
 		}
 	}
 }

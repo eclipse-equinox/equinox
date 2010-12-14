@@ -864,9 +864,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	public List<Capability> getDeclaredCapabilities(String namespace) {
 		List<Capability> result = new ArrayList<Capability>();
 		if (host == null) {
-			if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
-				result.add(BundleDescriptionImpl.this.getCapability());
+			if (getSymbolicName() != null) {
+				if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
+					result.add(BundleDescriptionImpl.this.getCapability());
+				}
+				if (attachFragments() && (namespace == null || Capability.HOST_CAPABILITY.equals(namespace))) {
+					result.add(BundleDescriptionImpl.this.getCapability(Capability.HOST_CAPABILITY));
+				}
 			}
+
 		} else {
 			// may need to have a osgi.fragment capability
 		}
@@ -933,17 +939,22 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
 				BundleDescription[] requires = getResolvedRequires();
 				for (BundleDescription require : requires)
-					result.add(((BaseDescriptionImpl) require).getWiredCapability());
+					result.add(((BaseDescriptionImpl) require).getWiredCapability(null));
+			}
+			if (attachFragments() && (capabilityNamespace == null || Capability.HOST_CAPABILITY.equals(capabilityNamespace))) {
+				Collection<BundleRevision> fragments = getFragmentRevisions();
+				if (fragments.size() > 0)
+					result.add(BundleDescriptionImpl.this.getWiredCapability(Capability.HOST_CAPABILITY));
 			}
 			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
 				ExportPackageDescription[] imports = getResolvedImports();
 				for (ExportPackageDescription importPkg : imports)
-					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability());
+					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability(null));
 			}
 			GenericDescription[] genericRequires = getResolvedGenericRequires();
 			for (GenericDescription require : genericRequires) {
 				if (capabilityNamespace == null || capabilityNamespace.equals(require.getType()))
-					result.add(((BaseDescriptionImpl) require).getWiredCapability());
+					result.add(((BaseDescriptionImpl) require).getWiredCapability(null));
 			}
 			return result;
 		}
@@ -952,18 +963,22 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (!isInUse())
 				return null;
 			List<WiredCapability> result = new ArrayList<WiredCapability>();
-			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
-				result.add(BundleDescriptionImpl.this.getWiredCapability());
+			if (getSymbolicName() != null) {
+				if ((capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)))
+					result.add(BundleDescriptionImpl.this.getWiredCapability(null));
+				if (attachFragments() && (capabilityNamespace == null || Capability.HOST_CAPABILITY.endsWith(capabilityNamespace)))
+					result.add(BundleDescriptionImpl.this.getWiredCapability(Capability.HOST_CAPABILITY));
 			}
+
 			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
 				ExportPackageDescription[] exports = getSelectedExports();
 				for (ExportPackageDescription importPkg : exports)
-					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability());
+					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability(null));
 			}
 			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
 			for (GenericDescription capabilitiy : genericCapabilities) {
 				if (capabilityNamespace == null || capabilityNamespace.equals(capabilitiy.getType()))
-					result.add(((BaseDescriptionImpl) capabilitiy).getWiredCapability());
+					result.add(((BaseDescriptionImpl) capabilitiy).getWiredCapability(null));
 			}
 			return result;
 		}
@@ -971,7 +986,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<BundleRevision> getFragmentRevisions() {
 			if (!isInUse())
 				return null;
-			return new ArrayList<BundleRevision>(Arrays.asList(getFragments()));
+			List<BundleRevision> results = new ArrayList<BundleRevision>();
+			BundleDescription[] deps = getDependents();
+			for (BundleDescription dependent : deps) {
+				if (dependent.getHost() != null) {
+					// found a fragment
+					results.add(dependent);
+				}
+			}
+			return results;
 		}
 
 		public ClassLoader getClassLoader() {
