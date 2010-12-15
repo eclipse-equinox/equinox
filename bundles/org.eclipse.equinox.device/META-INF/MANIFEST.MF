@@ -4,7 +4,6 @@ Bundle-Version: 1.0.300.qualifier
 Bundle-Activator: org.eclipse.equinox.device.Activator
 Bundle-SymbolicName: org.eclipse.equinox.device
 Bundle-Vendor: %bundleVendor
-Bundle-Copyright: %bundleCopyright
 Bundle-Localization: plugin
 Import-Service: org.osgi.service.log.LogService
 Import-Package: org.osgi.framework;version="1.2",

@@ -2,7 +2,6 @@ Bundle-ManifestVersion: 2
 Bundle-Vendor: %bundleVendor
 Bundle-Version: 1.0.500.qualifier
 Bundle-Activator: org.eclipse.equinox.http.Activator
-Bundle-Copyright: %bundleCopyright
 Bundle-SymbolicName: org.eclipse.equinox.http
 Bundle-Name: %bundleName
 Import-Package: javax.servlet,
