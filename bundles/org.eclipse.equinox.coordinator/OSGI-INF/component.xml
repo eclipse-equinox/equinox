@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="false" name="org.eclipse.equinox.coordinator">
+   <implementation class="org.eclipse.equinox.coordinator.CoordinatorComponent"/>
+   <service servicefactory="true">
+      <provide interface="org.osgi.service.coordinator.Coordinator"/>
+   </service>
+</scr:component>
