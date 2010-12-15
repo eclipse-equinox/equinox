@@ -71,7 +71,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 			bundleClassLoaderParent = new ClassLoader(Object.class.getClassLoader()) {/* boot class loader*/};
 	}
 
-	private EventPublisher eventPublisher;
+	private Framework eventPublisher;
 	private boolean stopping;
 	private HookRegistry hookRegistry;
 	private FrameworkLog log;
@@ -101,7 +101,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 * @see FrameworkAdaptor#initialize(EventPublisher)
 	 */
 	public void initialize(EventPublisher publisher) {
-		this.eventPublisher = publisher;
+		this.eventPublisher = (Framework) publisher;
 		// set the adaptor for the adaptor hooks
 		AdaptorHook[] adaptorHooks = getHookRegistry().getAdaptorHooks();
 		for (int i = 0; i < adaptorHooks.length; i++)
@@ -437,6 +437,19 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 */
 	public BundleContext getContext() {
 		return context;
+	}
+
+	/**
+	 * Returns the bundle with the specified identifier.  This method 
+	 * does not invoke and bundle find hooks and therefore does not 
+	 * allow bundle find hooks to hide a bundle from the caller.
+	 * 
+	 * @param id The identifier of the bundle to retrieve.
+	 * @return A {@code Bundle} object or {@code null} if the identifier does
+	 *         not match any installed bundle.
+	 */
+	public Bundle getBundle(long id) {
+		return eventPublisher.getBundle(id);
 	}
 
 	/**

@@ -24,7 +24,8 @@ import org.eclipse.osgi.internal.module.GroupingChecker.PackageRoots;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.Capability;
@@ -80,8 +81,8 @@ public class ResolverImpl implements Resolver {
 	private long usesTimeout = -1;
 	private volatile CompositeResolveHelperRegistry compositeHelpers;
 
-	public ResolverImpl(BundleContext context, boolean checkPermissions) {
-		this.permissionChecker = new PermissionChecker(context, checkPermissions, this);
+	public ResolverImpl(boolean checkPermissions) {
+		this.permissionChecker = new PermissionChecker(checkPermissions, this);
 	}
 
 	PermissionChecker getPermissionChecker() {

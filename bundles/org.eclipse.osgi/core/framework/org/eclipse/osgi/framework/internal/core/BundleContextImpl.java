@@ -145,7 +145,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	 * if the identifier doesn't match any installed bundle.
 	 */
 	public Bundle getBundle(long id) {
-		return framework.getBundle(id);
+		return framework.getBundle(this, id);
 	}
 
 	public Bundle getBundle(String location) {

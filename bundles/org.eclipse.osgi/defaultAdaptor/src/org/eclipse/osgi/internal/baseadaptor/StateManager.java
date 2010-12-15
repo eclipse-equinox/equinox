@@ -280,7 +280,7 @@ public class StateManager implements PlatformAdmin, Runnable {
 	}
 
 	private Resolver createResolver(boolean checkPermissions) {
-		return new org.eclipse.osgi.internal.module.ResolverImpl(context, checkPermissions);
+		return new org.eclipse.osgi.internal.module.ResolverImpl(checkPermissions);
 	}
 
 	/**

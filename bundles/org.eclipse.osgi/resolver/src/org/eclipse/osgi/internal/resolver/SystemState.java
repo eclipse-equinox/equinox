@@ -11,26 +11,26 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
 // this class provides synchronous access to resolve and add/remove/update bundle for the framework
 public class SystemState extends StateImpl {
-	private final BundleContext context;
+	private final Framework framework;
 
 	public SystemState(BundleContext context) {
-		this.context = context;
+		this.framework = context == null ? null : ((BundleContextImpl) context).getFramework();
 	}
 
 	@Override
 	boolean basicAddBundle(BundleDescription description) {
-		if (context != null && description.getUserObject() == null) {
+		if (framework != null && description.getUserObject() == null) {
 			// We always set the user object to a BundleReference object;
 			// This allows the resolver to implement BundleRevisions for 
 			// the resolver hooks.
-			AbstractBundle bundle = (AbstractBundle) context.getBundle(description.getBundleId());
+			AbstractBundle bundle = framework.getBundle(description.getBundleId());
 			description.setUserObject(bundle != null ? bundle.getBundleData() : null);
 		}
 		return super.basicAddBundle(description);

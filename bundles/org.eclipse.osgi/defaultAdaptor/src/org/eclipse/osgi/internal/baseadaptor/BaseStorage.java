@@ -794,7 +794,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			return;
 		boolean removedBundle = false;
 		for (int i = 0; i < bundles.length; i++) {
-			if (context.getBundle(bundles[i].getBundleId()) == null) {
+			if (adaptor.getBundle(bundles[i].getBundleId()) == null) {
 				state.removeBundle(bundles[i]);
 				removedBundle = true;
 			}

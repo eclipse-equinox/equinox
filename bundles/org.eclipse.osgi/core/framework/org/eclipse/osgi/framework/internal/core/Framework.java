@@ -993,6 +993,18 @@ public class Framework implements EventPublisher, Runnable {
 		}
 	}
 
+	AbstractBundle getBundle(final BundleContextImpl context, long id) {
+		AbstractBundle bundle = getBundle(id);
+		// TODO we make the system bundle special because there are lots of places
+		// where we assume the system bundle can get all bundles
+		if (bundle == null || context.getBundle().getBundleId() == 0)
+			return bundle;
+		List<AbstractBundle> single = new ArrayList<AbstractBundle>(1);
+		single.add(bundle);
+		notifyFindHooks(context, single);
+		return single.size() == 0 ? null : bundle;
+	}
+
 	public BundleContextImpl getSystemBundleContext() {
 		if (systemBundle == null)
 			return null;
@@ -1056,7 +1068,11 @@ public class Framework implements EventPublisher, Runnable {
 		synchronized (bundles) {
 			allBundles = new ArrayList<AbstractBundle>(bundles.getBundles());
 		}
+		notifyFindHooks(context, allBundles);
+		return allBundles.toArray(new AbstractBundle[allBundles.size()]);
+	}
 
+	private void notifyFindHooks(final BundleContextImpl context, List<AbstractBundle> allBundles) {
 		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(allBundles);
 		if (System.getSecurityManager() == null) {
 			notifyFindHooksPriviledged(context, shrinkable);
@@ -1068,8 +1084,6 @@ public class Framework implements EventPublisher, Runnable {
 				}
 			});
 		}
-
-		return allBundles.toArray(new AbstractBundle[allBundles.size()]);
 	}
 
 	void notifyFindHooksPriviledged(final BundleContextImpl context, final Collection<Bundle> allBundles) {

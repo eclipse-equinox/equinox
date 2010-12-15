@@ -15,13 +15,11 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
 
 public class PermissionChecker {
-	private BundleContext context;
 	private boolean checkPermissions = false;
 	private ResolverImpl resolver;
 
-	public PermissionChecker(BundleContext context, boolean checkPermissions, ResolverImpl resolver) {
-		this.context = context;
-		this.checkPermissions = checkPermissions && context != null; // only can check permissions if context is not null
+	public PermissionChecker(boolean checkPermissions, ResolverImpl resolver) {
+		this.checkPermissions = checkPermissions;
 		this.resolver = resolver;
 	}
 
@@ -36,7 +34,7 @@ public class PermissionChecker {
 		boolean success = false;
 		Permission producerPermission = null, consumerPermission = null;
 		Bundle consumer = null;
-		Bundle producer = context.getBundle(bd.getSupplier().getBundleId());
+		Bundle producer = bd.getSupplier().getBundle();
 		int errorType = 0;
 		if (vc instanceof ImportPackageSpecification) {
 			errorType = ResolverError.IMPORT_PACKAGE_PERMISSION;
@@ -53,7 +51,7 @@ public class PermissionChecker {
 			producerPermission = new CapabilityPermission(gd.getType(), CapabilityPermission.PROVIDE);
 			consumerPermission = new CapabilityPermission(gd.getType(), gd.getDeclaredAttributes(), producer, CapabilityPermission.REQUIRE);
 		}
-		consumer = context.getBundle(vc.getBundle().getBundleId());
+		consumer = vc.getBundle().getBundle();
 		if (producer != null && (producer.getState() & Bundle.UNINSTALLED) == 0) {
 			success = producer.hasPermission(producerPermission);
 			if (!success) {
@@ -84,14 +82,15 @@ public class PermissionChecker {
 	boolean checkPackagePermission(ExportPackageDescription export) {
 		if (!checkPermissions)
 			return true;
-		Bundle bundle = context.getBundle(export.getExporter().getBundleId());
+		export.getSupplier().getBundle();
+		Bundle bundle = export.getSupplier().getBundle();
 		return bundle == null ? false : bundle.hasPermission(new PackagePermission(export.getName(), PackagePermission.EXPORTONLY));
 	}
 
 	boolean checkCapabilityPermission(GenericDescription capability) {
 		if (!checkPermissions)
 			return true;
-		Bundle bundle = context.getBundle(capability.getSupplier().getBundleId());
+		Bundle bundle = capability.getSupplier().getBundle();
 		return bundle == null ? false : bundle.hasPermission(new CapabilityPermission(capability.getType(), CapabilityPermission.PROVIDE));
 	}
 }

@@ -124,7 +124,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		// are allowed access to the resource.
 		String authorized = SECURITY_UNCHECKED;
 		long bundleId = getBundleID(host);
-		Bundle bundle = adaptor == null ? null : adaptor.getContext().getBundle(bundleId);
+		Bundle bundle = adaptor == null ? null : adaptor.getBundle(bundleId);
 		if (checkAuthorization(bundle))
 			authorized = SECURITY_CHECKED;
 		// Always force the use of the hash from the adaptor
@@ -162,7 +162,7 @@ public abstract class BundleResourceHandler extends URLStreamHandler implements 
 		} catch (NumberFormatException nfe) {
 			throw (MalformedURLException) new MalformedURLException(NLS.bind(AdaptorMsg.URL_INVALID_BUNDLE_ID, host)).initCause(nfe);
 		}
-		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getContext().getBundle(bundleID);
+		bundle = adaptor == null ? null : (AbstractBundle) adaptor.getBundle(bundleID);
 		if (bundle == null)
 			throw new IOException(NLS.bind(AdaptorMsg.URL_NO_BUNDLE_FOUND, url.toExternalForm()));
 		// check to make sure that this URL was created using the

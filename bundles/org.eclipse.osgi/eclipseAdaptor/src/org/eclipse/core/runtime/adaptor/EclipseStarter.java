@@ -728,7 +728,7 @@ public class EclipseStarter {
 		if (!isForcedRestart())
 			return;
 		// wait for the system bundle to stop
-		Bundle systemBundle = context.getBundle(0);
+		Bundle systemBundle = framework.getBundle(0);
 		int i = 0;
 		while (i < 5000 && (systemBundle.getState() & (Bundle.STARTING | Bundle.ACTIVE | Bundle.STOPPING)) != 0) {
 			i += 200;

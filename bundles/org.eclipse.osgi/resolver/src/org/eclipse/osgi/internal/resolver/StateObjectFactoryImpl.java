@@ -325,7 +325,7 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 	public State createState(boolean createResolver) {
 		State result = internalCreateState();
 		if (createResolver)
-			result.setResolver(new ResolverImpl(null, false));
+			result.setResolver(new ResolverImpl(false));
 		return result;
 	}
 
