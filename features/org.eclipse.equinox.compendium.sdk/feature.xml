@@ -32,6 +32,20 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.equinox.coordinator"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.coordinator.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.equinox.cm"
          download-size="0"
          install-size="0"
