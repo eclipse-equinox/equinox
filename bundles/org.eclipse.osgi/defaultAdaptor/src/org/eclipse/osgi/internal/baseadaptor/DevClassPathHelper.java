@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.baseadaptor;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
@@ -24,24 +23,59 @@ import org.eclipse.osgi.util.ManifestElement;
  * @since 3.1
  */
 public final class DevClassPathHelper {
-	static private boolean inDevelopmentMode = false;
+	static final private String FILE_PROTOCOL = "file"; //$NON-NLS-1$
+	static final private boolean inDevelopmentMode;
+	static final private File devLocation;
 	static private String[] devDefaultClasspath;
 	static private Dictionary<String, String> devProperties = null;
+	// timestamp for the dev.properties file
+	static private long lastModified = 0;
 
 	static {
-		// Check the osgi.dev property to see if dev classpath entries have been defined.
 		String osgiDev = FrameworkProperties.getProperty("osgi.dev"); //$NON-NLS-1$
+		File f = null;
+		boolean devMode = false;
 		if (osgiDev != null) {
 			try {
-				inDevelopmentMode = true;
+				devMode = true;
 				URL location = new URL(osgiDev);
-				devProperties = load(location);
-				if (devProperties != null)
-					devDefaultClasspath = getArrayFromList(devProperties.get("*")); //$NON-NLS-1$
+
+				if (FILE_PROTOCOL.equals(location.getProtocol())) {
+					f = new File(location.getFile());
+					lastModified = f.lastModified();
+				}
+
+				// Check the osgi.dev property to see if dev classpath entries have been defined.
+				try {
+					load(location.openStream());
+					devMode = true;
+				} catch (IOException e) {
+					// TODO consider logging
+				}
+
 			} catch (MalformedURLException e) {
 				devDefaultClasspath = getArrayFromList(osgiDev);
 			}
 		}
+		inDevelopmentMode = devMode;
+		devLocation = f;
+	}
+
+	/*
+	 * Updates the dev classpath if the file containing the entries have changed
+	 */
+	private static void updateDevProperties() {
+		if (devLocation == null)
+			return;
+		if (devLocation.lastModified() == lastModified)
+			return;
+
+		try {
+			load(new FileInputStream(devLocation));
+		} catch (FileNotFoundException e) {
+			return;
+		}
+		lastModified = devLocation.lastModified();
 	}
 
 	private static String[] getDevClassPath(String id, Dictionary<String, String> properties, String[] defaultClasspath) {
@@ -64,8 +98,12 @@ public final class DevClassPathHelper {
 	 * @return a list of development classpath elements
 	 */
 	public static String[] getDevClassPath(String id, Dictionary<String, String> properties) {
-		if (properties == null)
-			return getDevClassPath(id, devProperties, devDefaultClasspath);
+		if (properties == null) {
+			synchronized (DevClassPathHelper.class) {
+				updateDevProperties();
+				return getDevClassPath(id, devProperties, devDefaultClasspath);
+			}
+		}
 		return getDevClassPath(id, properties, getArrayFromList(properties.get("*"))); //$NON-NLS-1$
 	}
 
@@ -97,24 +135,26 @@ public final class DevClassPathHelper {
 	}
 
 	/*
-	 * Load the given properties file
+	 * Load the given input stream into a dictionary
 	 */
-	private static Dictionary<String, String> load(URL url) {
+	private static void load(InputStream input) {
 		Properties props = new Properties();
 		try {
-			InputStream is = null;
-			try {
-				is = url.openStream();
-				props.load(is);
-			} finally {
-				if (is != null)
-					is.close();
-			}
+			props.load(input);
 		} catch (IOException e) {
 			// TODO consider logging here
+		} finally {
+			if (input != null)
+				try {
+					input.close();
+				} catch (IOException e) {
+					// tried our best
+				}
 		}
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		Dictionary<String, String> result = (Dictionary) props;
-		return result;
+		devProperties = result;
+		if (devProperties != null)
+			devDefaultClasspath = getArrayFromList(devProperties.get("*")); //$NON-NLS-1$
 	}
 }
