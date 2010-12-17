@@ -123,10 +123,9 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Collection<Coordination> getCoordinations() {
-		@SuppressWarnings("hiding")
-		ArrayList<Coordination> coordinations;
+		ArrayList<Coordination> result;
 		synchronized (CoordinatorImpl.class) {
-			coordinations = new ArrayList<Coordination>(idToCoordination.size());
+			result = new ArrayList<Coordination>(idToCoordination.size());
 			for (CoordinationImpl coordination : idToCoordination.values()) {
 				// Ideally, we're only interested in coordinations that have not terminated.
 				// It's okay, however, if the coordination terminates from this point forward.
@@ -134,25 +133,24 @@ public class CoordinatorImpl implements Coordinator {
 					continue;
 				try {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
-					coordinations.add(coordination);
+					result.add(coordination);
 				} catch (SecurityException e) {
 					logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_1, e);
 				}
 			}
 		}
-		coordinations.trimToSize();
-		return coordinations;
+		result.trimToSize();
+		return result;
 	}
 
 	public Coordination peek() {
 		Coordination result = null;
 		Thread thread = Thread.currentThread();
 		synchronized (CoordinationImpl.class) {
-			@SuppressWarnings("hiding")
-			LinkedList<CoordinationImpl> coordinations = threadToCoordinations.get(thread);
+			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(thread);
 			// Be sure to avoid EmptyStackException with this check.
-			if (coordinations != null && !coordinations.isEmpty()) {
-				result = coordinations.getFirst();
+			if (coords != null && !coords.isEmpty()) {
+				result = coords.getFirst();
 			}
 		}
 		return result;
@@ -162,11 +160,10 @@ public class CoordinatorImpl implements Coordinator {
 		Thread thread = Thread.currentThread();
 		CoordinationImpl result = null;
 		synchronized (CoordinatorImpl.class) {
-			@SuppressWarnings("hiding")
-			LinkedList<CoordinationImpl> coordinations = threadToCoordinations.get(thread);
-			if (coordinations != null && !coordinations.isEmpty()) {
-				result = coordinations.removeFirst();
-				if (coordinations.isEmpty()) {
+			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(thread);
+			if (coords != null && !coords.isEmpty()) {
+				result = coords.removeFirst();
+				if (coords.isEmpty()) {
 					// Clean the map up if there are no more coordinations
 					// associated with the current thread.
 					threadToCoordinations.remove(thread);
@@ -219,15 +216,14 @@ public class CoordinatorImpl implements Coordinator {
 
 	void push(CoordinationImpl coordination) throws CoordinationException {
 		synchronized (CoordinatorImpl.class) {
-			@SuppressWarnings("hiding")
-			LinkedList<CoordinationImpl> coordinations = threadToCoordinations.get(coordination.getThread());
-			if (coordinations == null) {
-				coordinations = new LinkedList<CoordinationImpl>();
-				threadToCoordinations.put(coordination.getThread(), coordinations);
+			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(coordination.getThread());
+			if (coords == null) {
+				coords = new LinkedList<CoordinationImpl>();
+				threadToCoordinations.put(coordination.getThread(), coords);
 			}
-			if (coordinations.contains(coordination))
+			if (coords.contains(coordination))
 				throw new CoordinationException(Messages.CoordinatorImpl_3, coordination, CoordinationException.ALREADY_PUSHED);
-			coordinations.addFirst(coordination);
+			coords.addFirst(coordination);
 		}
 	}
 
@@ -236,16 +232,15 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	void shutdown() {
-		@SuppressWarnings("hiding")
-		List<Coordination> coordinations;
+		List<Coordination> coords;
 		synchronized (this) {
 			shutdown = true;
 			// Make a copy so the removal of the coordination from the list during
 			// termination does not interfere with the iteration.
-			coordinations = new ArrayList<Coordination>(this.coordinations);
+			coords = new ArrayList<Coordination>(this.coordinations);
 		}
 		ServiceException serviceException = new ServiceException(Messages.CoordinationImpl_4, ServiceException.UNREGISTERED);
-		for (Coordination coordination : coordinations) {
+		for (Coordination coordination : coords) {
 			coordination.fail(serviceException);
 		}
 	}
@@ -255,11 +250,10 @@ public class CoordinatorImpl implements Coordinator {
 		synchronized (this) {
 			synchronized (CoordinatorImpl.class) {
 				this.coordinations.remove(coordination);
-				@SuppressWarnings("hiding")
-				LinkedList<CoordinationImpl> coordinations = threadToCoordinations.get(coordination.getThread());
-				if (coordinations != null && !coordinations.isEmpty()) {
-					coordinations.remove(coordination);
-					if (coordinations.isEmpty()) {
+				LinkedList<CoordinationImpl> coords = threadToCoordinations.get(coordination.getThread());
+				if (coords != null && !coords.isEmpty()) {
+					coords.remove(coordination);
+					if (coords.isEmpty()) {
 						// Clean the map up if there are no more coordinations
 						// associated with the current thread.
 						threadToCoordinations.remove(coordination.getThread());

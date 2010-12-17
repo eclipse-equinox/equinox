@@ -82,12 +82,11 @@ public class CoordinationImpl implements Coordination {
 				} else {
 					// This means the participant is already participating in another
 					// coordination. Check to see if it's on the same thread.
-					@SuppressWarnings("hiding")
-					Thread thread = coordination.getThread();
+					Thread t = coordination.getThread();
 					// If thread is null, the coordination is not associated with
 					// any thread, and there's nothing to compare. If the coordination 
 					// is using this thread, then we can't block due to risk of deadlock.
-					if (thread == Thread.currentThread()) {
+					if (t == Thread.currentThread()) {
 						throw new CoordinationException(Messages.CoordinationImpl_1, CoordinationImpl.this, CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
@@ -308,8 +307,7 @@ public class CoordinationImpl implements Coordination {
 		coordinator.terminate(this, participants);
 	}
 
-	private void validateName(@SuppressWarnings("hiding")
-	String name) {
+	private static void validateName(String name) {
 		boolean valid = true;
 		if (name == null || name.length() == 0)
 			valid = false;
@@ -330,7 +328,7 @@ public class CoordinationImpl implements Coordination {
 			throw new IllegalArgumentException(Messages.CoordinationImpl_10);
 	}
 
-	private void validateTimeout(long timeout) {
+	private static void validateTimeout(long timeout) {
 		if (timeout < 0)
 			throw new IllegalArgumentException(Messages.CoordinationImpl_12);
 	}
