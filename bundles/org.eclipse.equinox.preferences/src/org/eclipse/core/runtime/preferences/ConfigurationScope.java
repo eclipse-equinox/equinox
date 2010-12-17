@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,14 @@ public final class ConfigurationScope extends AbstractScope {
 	 * scope name for the configuration preference scope.
 	 */
 	public static final String SCOPE = "configuration"; //$NON-NLS-1$
+
+	/**
+	 * Singleton instance of a Configuration Scope object. Typical usage is:
+	 * <code>ConfigurationScope.INSTANCE.getNode(...);</code>
+	 * 
+	 * @since 3.4
+	 */
+	public static final IScopeContext INSTANCE = new ConfigurationScope();
 
 	/**
 	 * Create and return a new configuration scope instance.

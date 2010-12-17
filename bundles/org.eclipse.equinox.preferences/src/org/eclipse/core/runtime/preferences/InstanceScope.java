@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,14 @@ public final class InstanceScope extends AbstractScope {
 	 * scope name for the instance preference scope.
 	 */
 	public static final String SCOPE = "instance"; //$NON-NLS-1$
+
+	/**
+	 * Singleton instance of an Instance Scope object. Typical usage is:
+	 * <code>InstanceScope.INSTANCE.getNode(...);</code>
+	 * 
+	 * @since 3.4
+	 */
+	public static final IScopeContext INSTANCE = new InstanceScope();
 
 	/**
 	 * Create and return a new instance scope instance.
