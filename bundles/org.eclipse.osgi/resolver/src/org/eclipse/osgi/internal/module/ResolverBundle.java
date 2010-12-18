@@ -13,15 +13,12 @@ package org.eclipse.osgi.internal.module;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.Capability;
 
 /*
  * A companion to BundleDescription from the state used while resolving.
  */
-public class ResolverBundle extends VersionSupplier implements Comparable<ResolverBundle>, BundleRevision {
+public class ResolverBundle extends VersionSupplier implements Comparable<ResolverBundle> {
 	public static final int UNRESOLVED = 0;
 	public static final int RESOLVING = 1;
 	public static final int RESOLVED = 2;
@@ -640,21 +637,5 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	boolean isUninstalled() {
 		return uninstalled;
-	}
-
-	public Bundle getBundle() {
-		return getBundleDescription().getBundle();
-	}
-
-	public String getSymbolicName() {
-		return getName();
-	}
-
-	public List<Capability> getDeclaredCapabilities(String namespace) {
-		return getBundleDescription().getDeclaredCapabilities(namespace);
-	}
-
-	public int getTypes() {
-		return getBundleDescription().getTypes();
 	}
 }

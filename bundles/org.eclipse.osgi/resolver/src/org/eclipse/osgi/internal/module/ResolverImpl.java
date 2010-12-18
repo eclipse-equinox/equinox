@@ -388,7 +388,7 @@ public class ResolverImpl implements Resolver {
 		}
 
 		if (hook != null)
-			hook.filterMatches(bundle, asCapabilities(new ArrayMap<Capability, ResolverBundle>(hostCapabilities, candidates)));
+			hook.filterMatches(bundle.getBundleDescription(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(hostCapabilities, candidates)));
 		// we are left with only candidates that satisfy the host constraint
 		for (ResolverBundle host : candidates) {
 			foundMatch = true;
@@ -445,12 +445,16 @@ public class ResolverImpl implements Resolver {
 			@SuppressWarnings("unchecked")
 			Collection<ResolverBundle> hookDisabled = Collections.EMPTY_LIST;
 			if (hook != null) {
-				Collection<BundleRevision> resolvable = new ArrayList<BundleRevision>(unresolvedBundles);
-				int size = resolvable.size();
+				List<ResolverBundle> resolvableBundles = new ArrayList<ResolverBundle>(unresolvedBundles);
+				List<BundleRevision> resolvableRevisions = new ArrayList<BundleRevision>(resolvableBundles.size());
+				for (ResolverBundle bundle : resolvableBundles)
+					resolvableRevisions.add(bundle.getBundleDescription());
+				ArrayMap<BundleRevision, ResolverBundle> resolvable = new ArrayMap<BundleRevision, ResolverBundle>(resolvableRevisions, resolvableBundles);
+				int size = resolvableBundles.size();
 				hook.filterResolvable(resolvable);
 				if (resolvable.size() < size) {
 					hookDisabled = new ArrayList<ResolverBundle>(unresolvedBundles);
-					hookDisabled.removeAll(resolvable);
+					hookDisabled.removeAll(resolvableBundles);
 				}
 			}
 
@@ -1321,7 +1325,7 @@ public class ResolverImpl implements Resolver {
 			}
 		}
 		if (hook != null)
-			hook.filterMatches(constraint.getBundle(), asCapabilities(new ArrayMap<Capability, GenericCapability>(genCapabilities, candidates)));
+			hook.filterMatches(constraint.getBundle().getBundleDescription(), asCapabilities(new ArrayMap<Capability, GenericCapability>(genCapabilities, candidates)));
 		boolean result = false;
 		// We are left with only capabilities that satisfy the constraint.
 		for (GenericCapability capability : candidates) {
@@ -1381,7 +1385,7 @@ public class ResolverImpl implements Resolver {
 			}
 		}
 		if (hook != null)
-			hook.filterMatches(req.getBundle(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(capabilities, candidates)));
+			hook.filterMatches(req.getBundle().getBundleDescription(), asCapabilities(new ArrayMap<Capability, ResolverBundle>(capabilities, candidates)));
 		// We are left with only capabilities that satisfy the require bundle.
 		boolean result = false;
 		for (ResolverBundle bundle : candidates) {
@@ -1449,7 +1453,7 @@ public class ResolverImpl implements Resolver {
 			}
 		}
 		if (hook != null)
-			hook.filterMatches(imp.getBundle(), asCapabilities(new ArrayMap<Capability, ResolverExport>(capabilities, candidates)));
+			hook.filterMatches(imp.getBundle().getBundleDescription(), asCapabilities(new ArrayMap<Capability, ResolverExport>(capabilities, candidates)));
 		// We are left with only capabilities that satisfy the import.
 		for (ResolverExport export : candidates) {
 			if (DEBUG_IMPORTS)
