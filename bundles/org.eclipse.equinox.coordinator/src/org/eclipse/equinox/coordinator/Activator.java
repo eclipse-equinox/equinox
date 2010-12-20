@@ -32,10 +32,10 @@ public class Activator implements BundleActivator {
 			return; // If this property is set we assume DS is being used.
 		Dictionary<String, Object> properties = new Hashtable<String, Object>();
 		// TODO Add desired properties (bundle vendor, etc.).
-		@SuppressWarnings({"unchecked", "hiding"})
+		@SuppressWarnings({"unchecked"})
 		// Use local variable to avoid suppressing unchecked warnings at method level.
-		ServiceRegistration<Coordinator> registration = (ServiceRegistration<Coordinator>) bundleContext.registerService(Coordinator.class.getName(), factory, properties);
-		this.registration = registration;
+		ServiceRegistration<Coordinator> reg = (ServiceRegistration<Coordinator>) bundleContext.registerService(Coordinator.class.getName(), factory, properties);
+		this.registration = reg;
 	}
 
 	public void stop(BundleContext bundleContext) throws Exception {
