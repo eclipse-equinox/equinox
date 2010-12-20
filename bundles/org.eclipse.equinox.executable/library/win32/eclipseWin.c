@@ -286,6 +286,7 @@ _TCHAR * findVMLibrary( _TCHAR* command ) {
 
 void adjustSearchPath( _TCHAR* vmLib ){
 	_TCHAR ** paths;
+	_TCHAR* cwd = NULL;
 	_TCHAR * path = NULL, *newPath = NULL;
 	_TCHAR * c;
 	int i, length;
@@ -293,12 +294,20 @@ void adjustSearchPath( _TCHAR* vmLib ){
 	
 	paths = getVMLibrarySearchPath(vmLib);
 	
+	/* bug 325902 - add current working dir to the end of the search path */
+	length = GetCurrentDirectory(0, NULL);
+	cwd = malloc((length + 1)* sizeof(_TCHAR));
+	GetCurrentDirectory(length, cwd);
+	cwd[length - 1] = pathSeparator;
+	cwd[length] = 0;
+	
 	/* first call to GetEnvironmentVariable tells us how big to make the buffer */
 	length = GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, 0);
 	if (length > 0) {
+		_TCHAR* current [] = { cwd, NULL };
 		path = malloc(length * sizeof(_TCHAR));
 		GetEnvironmentVariable(_T_ECLIPSE("PATH"), path, length);
-		needAdjust = !containsPaths(path, paths);
+		needAdjust = !containsPaths(path, paths) || !containsPaths(path, current);
 		freePath = 1;
 	} else {
 		path = _T_ECLIPSE("");
@@ -308,8 +317,8 @@ void adjustSearchPath( _TCHAR* vmLib ){
 	
 	if (needAdjust) {
 		c = concatStrings(paths);
-		newPath = malloc((_tcslen(c) + length + 1) * sizeof(_TCHAR));
-		_stprintf(newPath, _T_ECLIPSE("%s%s"), c, path);
+		newPath = malloc((_tcslen(c) + length + 1 + _tcslen(cwd) + 1) * sizeof(_TCHAR));
+		_stprintf(newPath, _T_ECLIPSE("%s%s%c%s"), c, path, pathSeparator, cwd);
 		SetEnvironmentVariable( _T_ECLIPSE("PATH"), newPath);
 		free(c);
 		free(newPath);
@@ -318,6 +327,7 @@ void adjustSearchPath( _TCHAR* vmLib ){
 	for (i = 0; paths[i] != NULL; i++)
 		free(paths[i]);
 	free(paths);
+	free(cwd);
 	if (freePath)
 		free(path);
 }

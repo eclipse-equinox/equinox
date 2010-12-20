@@ -355,6 +355,7 @@ static const _TCHAR* getVMArch();
 
 #ifdef _WIN32
 static void     createConsole();
+static void		fixDLLSearchPath();
 static int 		isConsoleLauncher();
 #endif
 static int      consoleLauncher = 0;
@@ -415,6 +416,9 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 #elif _WIN32
     /* this must be before doing any console stuff, platforms other than win32 leave this set to 0 */
     consoleLauncher = isConsoleLauncher();
+    
+    /*fix the DLL search path for security */
+    fixDLLSearchPath();
 #endif
     
     /* Find the directory where the Eclipse program is installed. */
@@ -1373,6 +1377,23 @@ static int isConsoleLauncher() {
 	}
 	return 0;
 }
+
+static void fixDLLSearchPath() {
+#ifdef UNICODE
+	_TCHAR* functionName = _T_ECLIPSE("SetDllDirectoryW");
+#else
+	_TCHAR* functionName = _T_ECLIPSE("SetDllDirectoryA");
+#endif
+
+	BOOL (WINAPI *SetDLLDirectory)(LPCTSTR);
+	void * handle = loadLibrary(_T_ECLIPSE("Kernel32.dll"));
+	if (handle != NULL) {
+		if ( (SetDLLDirectory = findSymbol(handle, functionName)) != NULL) {
+			SetDLLDirectory(_T_ECLIPSE(""));
+		}
+	}
+}
+
 #endif
 
 /* Set the vm to use based on the given .ee file.
