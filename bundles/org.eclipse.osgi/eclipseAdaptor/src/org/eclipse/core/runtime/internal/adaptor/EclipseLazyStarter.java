@@ -100,7 +100,8 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 
 			// The bundle must be started.
 			// Note that another thread may already be starting this bundle;
-			// In this case we will timeout after 5 seconds and record the BundleException
+			// In this case we will timeout after a default of 5 seconds and record the BundleException
+			long startTime = System.currentTimeMillis();
 			try {
 				// do not persist the start of this bundle
 				managers[i].getBaseClassLoader().getDelegate().setLazyTrigger();
@@ -111,7 +112,7 @@ public class EclipseLazyStarter implements ClassLoadingStatsHook, AdaptorHook, H
 					StatusException status = (StatusException) cause;
 					if ((status.getStatusCode() & StatusException.CODE_ERROR) == 0) {
 						if (status.getStatus() instanceof Thread) {
-							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Integer(5000)});
+							String message = NLS.bind(EclipseAdaptorMsg.ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP, new Object[] {Thread.currentThread(), name, status.getStatus(), bundle, new Long(System.currentTimeMillis() - startTime)});
 							adaptor.getFrameworkLog().log(new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.WARNING, 0, message, 0, e, null));
 						}
 						continue;
