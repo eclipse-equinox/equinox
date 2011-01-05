@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Dictionary;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
  * The state of a system as reported by a resolver. This includes all bundles
@@ -624,4 +625,14 @@ public interface State {
 	 * @since 3.4
 	 */
 	public DisabledInfo getDisabledInfo(BundleDescription bundle, String policyName);
+
+	/**
+	 * Sets the resolver hook factory for this state.  The resolver hook factory is 
+	 * used during resolve operations according to the OSGi specification for the
+	 * resolver hook factory.
+	 * @param hookFactory the resolver hook factory
+	 * @since 3.7
+	 * @throws IllegalStateException if the resolver hook factory is already set
+	 */
+	public void setResolverHookFactory(ResolverHookFactory hookFactory);
 }

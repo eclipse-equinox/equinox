@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,7 +91,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private static final String PERM_DATA_FILE = ".permdata"; //$NON-NLS-1$
 	private static final byte PERMDATA_VERSION = 1;
 
-	private final MRUBundleFileList mruList = new MRUBundleFileList();
+	private MRUBundleFileList mruList = new MRUBundleFileList();
 
 	BaseAdaptor adaptor;
 	// assume a file: installURL
@@ -738,7 +738,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			if (isDirectory(data, base, file))
 				result = new DirBundleFile(file);
 			else
-				result = new ZipBundleFile(file, data, this.mruList);
+				result = new ZipBundleFile(file, data, getMRUList());
 		}
 
 		if (result == null && content instanceof String) {
@@ -760,6 +760,12 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (!base)
 			data.setBundleFile(content, result);
 		return result;
+	}
+
+	private synchronized MRUBundleFileList getMRUList() {
+		if (mruList != null)
+			mruList = new MRUBundleFileList();
+		return mruList;
 	}
 
 	private boolean isDirectory(BaseData data, boolean base, File file) {
@@ -918,7 +924,11 @@ public class BaseStorage implements SynchronousBundleListener {
 		storageManagerClosed = true;
 		if (extensionListener != null)
 			context.removeBundleListener(extensionListener);
-		mruList.shutdown();
+		MRUBundleFileList current = mruList;
+		if (current != null)
+			current.shutdown();
+		mruList = null;
+		stateManager = null;
 	}
 
 	public void frameworkStopping(BundleContext fwContext) {

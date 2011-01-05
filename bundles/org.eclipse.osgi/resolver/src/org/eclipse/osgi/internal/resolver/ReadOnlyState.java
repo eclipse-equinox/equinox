@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.Dictionary;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 public final class ReadOnlyState implements State {
 	private final State target;
@@ -227,6 +228,10 @@ public final class ReadOnlyState implements State {
 
 	public void addDynamicImportPackages(BundleDescription importingBundle, ImportPackageSpecification[] dynamicImports) {
 		throw new UnsupportedOperationException();
+	}
+
+	public void setResolverHookFactory(ResolverHookFactory hookFactory) {
+		// do nothing
 	}
 
 }
