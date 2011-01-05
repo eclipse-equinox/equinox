@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ public final class InstanceScope extends AbstractScope {
 
 	/**
 	 * Create and return a new instance scope instance.
+	 * @deprecated call <code>InstanceScope.INSTANCE</code> instead.
 	 */
 	public InstanceScope() {
 		super();
