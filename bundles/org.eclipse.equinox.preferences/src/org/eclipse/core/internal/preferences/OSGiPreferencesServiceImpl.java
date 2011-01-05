@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,17 +53,15 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		 * If pathName is relative, just return it
 		 */
 		private String fixPath(String pathName) {
-			if (pathName.startsWith("/")) {
-				if (pathName.equals("/")) {
+			if (pathName.startsWith("/")) { //$NON-NLS-1$
+				if (pathName.equals("/")) { //$NON-NLS-1$
 					return root.absolutePath();
-				} else {
-					//fix absolute path
-					return root.absolutePath().concat(pathName);
 				}
-			} else {
-				//pass-through relative path
-				return pathName;
+				//fix absolute path
+				return root.absolutePath().concat(pathName);
 			}
+			//pass-through relative path
+			return pathName;
 		}
 
 		/**
@@ -112,16 +110,15 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 		public Preferences parent() {
 			if (wrapped == root) {
 				try {
-					if (!wrapped.nodeExists("")) {
+					if (!wrapped.nodeExists("")) { //$NON-NLS-1$
 						throw new IllegalStateException();
 					}
 				} catch (BackingStoreException e) {
 					//best effort
 				}
 				return null;
-			} else {
-				return new OSGiLocalRootPreferences(wrapped.parent(), root);
 			}
+			return new OSGiLocalRootPreferences(wrapped.parent(), root);
 		}
 
 		public boolean nodeExists(String pathName) throws BackingStoreException {
@@ -130,18 +127,16 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 
 		public String absolutePath() {
 			if (wrapped == root) {
-				return "/";
-			} else {
-				return wrapped.absolutePath().substring(root.absolutePath().length(), wrapped.absolutePath().length());
+				return "/"; //$NON-NLS-1$
 			}
+			return wrapped.absolutePath().substring(root.absolutePath().length(), wrapped.absolutePath().length());
 		}
 
 		public String name() {
 			if (wrapped == root) {
-				return "";
-			} else {
-				return wrapped.name();
+				return ""; //$NON-NLS-1$
 			}
+			return wrapped.name();
 		}
 
 		//delegate to wrapped preference
@@ -234,17 +229,17 @@ public class OSGiPreferencesServiceImpl implements PreferencesService {
 	}
 
 	public Preferences getSystemPreferences() {
-		return new OSGiLocalRootPreferences(bundlePreferences.node("system"));
+		return new OSGiLocalRootPreferences(bundlePreferences.node("system")); //$NON-NLS-1$
 	}
 
 	public Preferences getUserPreferences(String name) {
-		return new OSGiLocalRootPreferences(bundlePreferences.node("user/" + name));
+		return new OSGiLocalRootPreferences(bundlePreferences.node("user/" + name)); //$NON-NLS-1$
 	}
 
 	public String[] getUsers() {
 		String[] users = null;
 		try {
-			users = bundlePreferences.node("user").childrenNames();
+			users = bundlePreferences.node("user").childrenNames(); //$NON-NLS-1$
 		} catch (BackingStoreException e) {
 			//best effort
 		}

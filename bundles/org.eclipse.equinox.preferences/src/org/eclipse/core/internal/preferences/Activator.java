@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private static final String PROP_REGISTER_PERF_SERVICE = "eclipse.service.pref"; //$NON-NLS-1$
 	// the system property
 	private static final String PROP_CUSTOMIZATION = "eclipse.pluginCustomization"; //$NON-NLS-1$
-	
+
 	/**
 	 * Track the registry service - only register preference service if the registry is 
 	 * available
@@ -64,7 +64,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		// Open the services first before processing the command-line args, order is important! (Bug 150288)
 		PreferencesOSGiUtils.getDefault().openServices();
 		processCommandLine();
-		
+
 		boolean shouldRegister = !"false".equalsIgnoreCase(context.getProperty(PROP_REGISTER_PERF_SERVICE)); //$NON-NLS-1$
 		if (shouldRegister) {
 			preferencesService = bundleContext.registerService(IPreferencesService.class.getName(), PreferencesService.getDefault(), new Hashtable());
@@ -130,6 +130,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
 	 */
 	public void modifiedService(ServiceReference reference, Object service) {
+		// nothing to do
 	}
 
 	/* (non-Javadoc)

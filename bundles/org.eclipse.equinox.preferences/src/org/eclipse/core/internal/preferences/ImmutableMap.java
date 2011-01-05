@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.core.internal.preferences.StringPool;
 
 /**
  * Hash table of {String --> String}.
@@ -179,7 +178,7 @@ public abstract class ImmutableMap implements Cloneable {
 		public ImmutableMap removeKey(String key) {
 			return this;
 		}
-		
+
 		protected void internalPut(String key, String value) {
 			throw new IllegalStateException();//cannot put elements in the empty map
 		}
@@ -214,7 +213,7 @@ public abstract class ImmutableMap implements Cloneable {
 	 * @return The value associated with this key, or <code>null</code>
 	 */
 	public abstract String get(String key);
-	
+
 	protected static ImmutableMap createMap(int i) {
 		if (i <= 0)
 			return EMPTY;
@@ -257,6 +256,7 @@ public abstract class ImmutableMap implements Cloneable {
 	 * Method declared on IStringPoolParticipant
 	 */
 	public void shareStrings(StringPool set) {
+		// nothing to do
 	}
 
 	/**

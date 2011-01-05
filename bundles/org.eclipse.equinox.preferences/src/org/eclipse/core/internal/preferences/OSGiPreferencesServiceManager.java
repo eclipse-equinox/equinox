@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 		context.addBundleListener(this);
 
 		//prefBundles = new InstanceScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
-		prefBundles = new ConfigurationScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+		prefBundles = ConfigurationScope.INSTANCE.getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
 
 		//clean up prefs for bundles that have been uninstalled
 		try {
@@ -81,7 +81,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 			//best effort
 		}
 		//return new OSGiPreferencesServiceImpl(new InstanceScope().getNode(getQualifier(bundle)));
-		return new OSGiPreferencesServiceImpl(new ConfigurationScope().getNode(getQualifier(bundle)));
+		return new OSGiPreferencesServiceImpl(ConfigurationScope.INSTANCE.getNode(getQualifier(bundle)));
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 		try {
 			//new InstanceScope().getNode(getQualifier(bundle)).flush();
-			new ConfigurationScope().getNode(getQualifier(bundle)).flush();
+			ConfigurationScope.INSTANCE.getNode(getQualifier(bundle)).flush();
 		} catch (BackingStoreException e) {
 			//best effort
 		}
@@ -121,18 +121,18 @@ public class OSGiPreferencesServiceManager implements ServiceFactory, BundleList
 	protected void removePrefs(String qualifier) throws BackingStoreException {
 		//remove bundle's prefs
 		//new InstanceScope().getNode(qualifier).removeNode();
-		new ConfigurationScope().getNode(qualifier).removeNode();
+		ConfigurationScope.INSTANCE.getNode(qualifier).removeNode();
 
 		//remove from our list of bundles with prefs
 		Preferences bundlesNode = getBundlesNode();
 		bundlesNode.remove(qualifier);
 		bundlesNode.flush();
 	}
-	
+
 	private Preferences getBundlesNode() {
 		try {
 			if (prefBundles == null || !prefBundles.nodeExists("")) { //$NON-NLS-1$
-				prefBundles = new ConfigurationScope().getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
+				prefBundles = ConfigurationScope.INSTANCE.getNode(ORG_ECLIPSE_CORE_INTERNAL_PREFERENCES_OSGI);
 			}
 			return prefBundles;
 		} catch (BackingStoreException e) {
