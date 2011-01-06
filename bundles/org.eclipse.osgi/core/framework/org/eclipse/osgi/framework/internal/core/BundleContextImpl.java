@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,7 +134,7 @@ public class BundleContextImpl implements BundleContext, EventDispatcher<Object,
 	public Bundle installBundle(String location, InputStream in) throws BundleException {
 		checkValid();
 		//note AdminPermission is checked after bundle is loaded
-		return framework.installBundle(location, in, bundle);
+		return framework.installBundle(location, in, this);
 	}
 
 	/**

@@ -32,7 +32,7 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Id: b74b565a3ef7d7668cdd07202f88358f9e7611ed $
+ * @version $Id: 9e117ec9667b040f7752e342aa07d6c7d5bf0275 $
  */
 
 public class BundleException extends Exception {
@@ -114,19 +114,27 @@ public class BundleException extends Exception {
 	public static final int	DUPLICATE_BUNDLE_ERROR	= 9;
 	
     /**
-	 * The framework received an error while reading the input stream for a bundle.
-	 *  
-	 * @since 1.6
-	 */
-	public static final int	READ_ERROR	= 10;
-
-    /**
 	 * The start transient operation failed because the start level of the
 	 * bundle is greater than the current framework start level
 	 * 
 	 * @since 1.5
 	 */
 	public static final int	START_TRANSIENT_ERROR	= 10;
+
+	/**
+	 * The framework received an error while reading the input stream for a
+	 * bundle.
+	 * 
+	 * @since 1.6
+	 */
+	public static final int	READ_ERROR				= 11;
+
+	/**
+	 * A framework hook rejected the operation.
+	 * 
+	 * @since 1.6
+	 */
+	public static final int	REJECTED_BY_HOOK		= 12;
 
 	/**
 	 * Creates a {@code BundleException} with the specified message and

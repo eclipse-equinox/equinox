@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -825,7 +825,7 @@ public class Framework implements EventPublisher, Runnable {
 	 *            then the location is used to get the bundle content.
 	 * @return The Bundle of the installed bundle.
 	 */
-	AbstractBundle installBundle(final String location, final InputStream in, Bundle origin) throws BundleException {
+	AbstractBundle installBundle(final String location, final InputStream in, BundleContext origin) throws BundleException {
 		if (Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -852,13 +852,19 @@ public class Framework implements EventPublisher, Runnable {
 	 * @exception BundleException
 	 *                If the action throws an error.
 	 */
-	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction<AbstractBundle> action, Bundle origin) throws BundleException {
+	protected AbstractBundle installWorker(String location, PrivilegedExceptionAction<AbstractBundle> action, BundleContext origin) throws BundleException {
 		synchronized (installLock) {
 			while (true) {
 				/* Check that the bundle is not already installed. */
 				AbstractBundle bundle = getBundleByLocation(location);
 				/* If already installed, return bundle object */
 				if (bundle != null) {
+					Bundle visible = origin.getBundle(bundle.getBundleId());
+					if (visible == null) {
+						BundleData data = bundle.getBundleData();
+						String msg = NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {data.getSymbolicName(), data.getVersion().toString(), data.getLocation()});
+						throw new BundleException(msg, BundleException.REJECTED_BY_HOOK);
+					}
 					return bundle;
 				}
 				Thread current = Thread.currentThread();
@@ -889,7 +895,7 @@ public class Framework implements EventPublisher, Runnable {
 		/* Don't call adaptor while holding the install lock */
 		try {
 			AbstractBundle bundle = AccessController.doPrivileged(action);
-			publishBundleEvent(new BundleEvent(BundleEvent.INSTALLED, bundle, origin));
+			publishBundleEvent(new BundleEvent(BundleEvent.INSTALLED, bundle, origin.getBundle()));
 			return bundle;
 		} catch (PrivilegedActionException e) {
 			if (e.getException() instanceof RuntimeException)

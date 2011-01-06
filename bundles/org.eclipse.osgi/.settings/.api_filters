@@ -481,6 +481,13 @@
 <message_argument value="READ_ERROR"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore OSGi API." id="1141899266">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="REJECTED_BY_HOOK"/>
+</message_arguments>
+</filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
 <filter comment="Ignore OSGi API" id="403853384">
