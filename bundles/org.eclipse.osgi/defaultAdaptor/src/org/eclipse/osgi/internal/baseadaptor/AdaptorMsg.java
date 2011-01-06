@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,8 @@ import org.eclipse.osgi.util.NLS;
 public class AdaptorMsg extends NLS {
 
 	public static String ADAPTER_FILEEXIST_EXCEPTION;
-	public static String ADAPTOR_DATA_AREA_NOT_SET;
 	public static String ADAPTOR_DIRECTORY_CREATE_EXCEPTION;
 	public static String ADAPTOR_DIRECTORY_EXCEPTION;
-	public static String ADAPTOR_DIRECTORY_REMOVE_EXCEPTION;
-	public static String ADAPTOR_ERROR_GETTING_MANIFEST;
 	public static String ADAPTOR_EXTENSION_IMPORT_ERROR;
 	public static String ADAPTOR_EXTENSION_NATIVECODE_ERROR;
 	public static String ADAPTOR_EXTENSION_REQUIRE_ERROR;
@@ -36,7 +33,6 @@ public class AdaptorMsg extends NLS {
 	public static String ADAPTOR_URL_CREATE_EXCEPTION;
 
 	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
-	public static String BUNDLE_CLASSPATH_PROPERTIES_ERROR;
 	public static String BUNDLE_NATIVECODE_EXCEPTION;
 	public static String BUNDLE_READ_EXCEPTION;
 

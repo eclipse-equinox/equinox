@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_MISSING_HOST;
 	public static String ECLIPSE_CANNOT_CHANGE_LOCATION;
 	public static String ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND;
-	public static String ECLIPSE_BUNDLESTOPPER_ERROR_STOPPING_BUNDLE;
 	public static String ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION;
 
 	public static String fileManager_cannotLock;
@@ -42,8 +41,6 @@ public class EclipseAdaptorMsg extends NLS {
 
 	public static String ECLIPSE_CLASSLOADER_CONCURRENT_STARTUP;
 	public static String ECLIPSE_CLASSLOADER_ACTIVATION;
-	public static String ECLIPSE_CLASSLOADER_ALREADY_STOPPED;
-	public static String ECLIPSE_CLASSLOADER_GENERATED_EXCEPTION;
 
 	public static String ECLIPSE_CONSOLE_COMMANDS_HEADER;
 	public static String ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION;
@@ -60,7 +57,6 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_CONSOLE_DISABLED_COUNT_MESSAGE;
 	public static String ECLIPSE_CONSOLE_DISABLED_BUNDLE_HEADER;
 	public static String ECLIPSE_CONSOLE_DISABLED_BUNDLE_REASON1;
-	public static String ECLIPSE_CONSOLE_DISABLED_BUNDLE_REASON2;
 
 	public static String ECLIPSE_STARTUP_ALREADY_RUNNING;
 	public static String ECLIPSE_STARTUP_STARTUP_ERROR;
@@ -73,8 +69,6 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_ACTIVE;
 	public static String ECLIPSE_STARTUP_ERROR_BUNDLE_NOT_RESOLVED;
 	public static String ECLIPSE_STARTUP_BUNDLE_NOT_FOUND;
-	public static String ECLIPSE_STARTUP_INVALID_PORT;
-	public static String ECLIPSE_STARTUP_FAILED_FIND;
 	public static String ECLIPSE_STARTUP_FAILED_UNINSTALL;
 	public static String ECLIPSE_STARTUP_FAILED_INSTALL;
 	public static String ECLIPSE_STARTUP_FAILED_START;
@@ -104,8 +98,6 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_CONVERTER_PARSE_UNKNOWNTOP_ELEMENT;
 
 	public static String ECLIPSE_PLUGIN_EXTRACTION_PROBLEM;
-
-	public static final String NEW_LINE = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	static {
 		// initialize resource bundles

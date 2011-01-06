@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.osgi.framework.ServiceReference;
  * Internal class.
  */
 public class EclipseCommandProvider implements CommandProvider {
-
+	public static final String NEW_LINE = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String POLICY_CONSOLE = "org.eclipse.osgi.framework.console"; //$NON-NLS-1$
 	private PlatformAdmin platformAdmin;
 	private BundleContext context;
@@ -35,15 +35,15 @@ public class EclipseCommandProvider implements CommandProvider {
 		help.append("---"); //$NON-NLS-1$
 		help.append(EclipseAdaptorMsg.ECLIPSE_CONSOLE_COMMANDS_HEADER);
 		help.append("---"); //$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append(NEW_LINE);
 		help.append("\tdiag - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append(NEW_LINE);
 		help.append("\tenableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append(NEW_LINE);
 		help.append("\tdisableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append(NEW_LINE);
 		help.append("\tdisabledBundles - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_LD_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.NEW_LINE);
+		help.append(NEW_LINE);
 		return help.toString();
 	}
 

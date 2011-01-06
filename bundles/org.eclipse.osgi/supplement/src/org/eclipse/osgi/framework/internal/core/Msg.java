@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import org.eclipse.osgi.util.NLS;
 public class Msg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.osgi.framework.internal.core.ExternalMessages"; //$NON-NLS-1$
 
-	public static String BUNDLE_CLASSPATH_ENTRY_NOT_FOUND_EXCEPTION;
 	public static String MANIFEST_INVALID_HEADER_EXCEPTION;
 	public static String BUNDLE_STATE_CHANGE_EXCEPTION;
 	public static String BUNDLE_UNINSTALLED_EXCEPTION;
@@ -41,9 +40,7 @@ public class Msg extends NLS {
 	public static String BUNDLE_CNFE_NOT_RESOLVED;
 	public static String BUNDLE_LOADER_ATTACHMENT_ERROR;
 
-	public static String BUNDLE_FRAGMENT_IMPORT_CONFLICT;
 	public static String BUNDLE_NO_CLASSPATH_MATCH;
-	public static String FILTER_INVALID;
 
 	public static String FILTER_TERMINATED_ABRUBTLY;
 	public static String FILTER_TRAILING_CHARACTERS;
@@ -57,11 +54,6 @@ public class Msg extends NLS {
 	public static String OSGI_SYSTEMBUNDLE_CREATE_EXCEPTION;
 	public static String BUNDLE_INSTALL_RECURSION_EXCEPTION;
 	public static String BUNDLE_INSTALL_SAME_UNIQUEID;
-
-	public static String ECLIPSE_OSGI_NAME;
-	public static String ECLIPSE_OSGI_VERSION;
-	public static String OSGI_VERSION;
-	public static String ECLIPSE_COPYRIGHT;
 
 	public static String OSGI_INTERNAL_ERROR;
 	public static String BUNDLE_NOT_IN_FRAMEWORK;
@@ -78,11 +70,6 @@ public class Msg extends NLS {
 	public static String STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL;
 
 	public static String BUNDLE_SYSTEMBUNDLE_UNINSTALL_EXCEPTION;
-
-	public static String LAUNCHER_ADAPTOR_ERROR;
-	public static String LAUNCHER_COMPONENT_JAR;
-	public static String LAUNCHER_COMPONENT_MISSING;
-	public static String LAUNCHER_INVALID_PORT;
 
 	public static String HEADER_DUPLICATE_KEY_EXCEPTION;
 	public static String MANIFEST_INVALID_SPACE;
