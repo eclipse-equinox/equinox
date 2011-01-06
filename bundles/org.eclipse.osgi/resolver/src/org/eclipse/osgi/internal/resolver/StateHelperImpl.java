@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,12 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.Capability;
 
 /**
  * An implementation for the StateHelper API. Access to this implementation is
@@ -67,16 +72,16 @@ public final class StateHelperImpl implements StateHelper {
 			addPrerequisites(dependencies[i], reachable);
 	}
 
-	private Map<String, Set<ExportPackageDescription>> getExportedPackageMap(State state) {
-		Map<String, Set<ExportPackageDescription>> result = new HashMap<String, Set<ExportPackageDescription>>(11);
+	private Map<String, List<ExportPackageDescription>> getExportedPackageMap(State state) {
+		Map<String, List<ExportPackageDescription>> result = new HashMap<String, List<ExportPackageDescription>>(11);
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			ExportPackageDescription[] packages = bundles[i].getExportPackages();
 			for (int j = 0; j < packages.length; j++) {
 				ExportPackageDescription description = packages[j];
-				Set<ExportPackageDescription> exports = result.get(description.getName());
+				List<ExportPackageDescription> exports = result.get(description.getName());
 				if (exports == null) {
-					exports = new HashSet<ExportPackageDescription>(1);
+					exports = new ArrayList<ExportPackageDescription>(1);
 					result.put(description.getName(), exports);
 				}
 				exports.add(description);
@@ -85,8 +90,8 @@ public final class StateHelperImpl implements StateHelper {
 		return result;
 	}
 
-	private Map<String, Set<GenericDescription>> getGenericsMap(State state, boolean resolved) {
-		Map<String, Set<GenericDescription>> result = new HashMap<String, Set<GenericDescription>>(11);
+	private Map<String, List<GenericDescription>> getGenericsMap(State state, boolean resolved) {
+		Map<String, List<GenericDescription>> result = new HashMap<String, List<GenericDescription>>(11);
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			if (resolved && !bundles[i].isResolved())
@@ -94,53 +99,54 @@ public final class StateHelperImpl implements StateHelper {
 			GenericDescription[] generics = bundles[i].getGenericCapabilities();
 			for (int j = 0; j < generics.length; j++) {
 				GenericDescription description = generics[j];
-				Set<GenericDescription> genericSet = result.get(description.getName());
-				if (genericSet == null) {
-					genericSet = new HashSet<GenericDescription>(1);
-					result.put(description.getName(), genericSet);
+				List<GenericDescription> genericList = result.get(description.getName());
+				if (genericList == null) {
+					genericList = new ArrayList<GenericDescription>(1);
+					result.put(description.getName(), genericList);
 				}
-				genericSet.add(description);
+				genericList.add(description);
 			}
 		}
 		return result;
 	}
 
-	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles) {
-		Map<String, Set<ExportPackageDescription>> packages = getExportedPackageMap(state);
-		Map<String, Set<GenericDescription>> generics = getGenericsMap(state, false);
+	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles, ResolverHook hook) {
+		Map<String, List<ExportPackageDescription>> packages = getExportedPackageMap(state);
+		Map<String, List<GenericDescription>> generics = getGenericsMap(state, false);
 		Set<VersionConstraint> result = new HashSet<VersionConstraint>(11);
 		List<BundleDescription> bundleList = new ArrayList<BundleDescription>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			bundleList.add(bundles[i]);
 		for (int i = 0; i < bundleList.size(); i++) {
 			BundleDescription description = bundleList.get(i);
-			VersionConstraint[] constraints = getUnsatisfiedConstraints(description);
+			VersionConstraint[] constraints = getUnsatisfiedConstraints(description, hook);
 			for (int j = 0; j < constraints.length; j++) {
 				VersionConstraint constraint = constraints[j];
-				BaseDescription satisfied = null;
+				Collection<BaseDescription> satisfied = null;
 				if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
 					BundleDescription[] suppliers = state.getBundles(constraint.getName());
-					for (int k = 0; k < suppliers.length && satisfied == null; k++)
-						satisfied = constraint.isSatisfiedBy(suppliers[k]) ? suppliers[k] : null;
+					satisfied = getPossibleCandidates(constraint, suppliers, constraint instanceof HostSpecification ? Capability.HOST_CAPABILITY : null, hook, false);
 				} else if (constraint instanceof ImportPackageSpecification) {
-					Set<ExportPackageDescription> exports = packages.get(constraint.getName());
+					List<ExportPackageDescription> exports = packages.get(constraint.getName());
 					if (exports != null)
-						for (Iterator<ExportPackageDescription> iter = exports.iterator(); iter.hasNext() && satisfied == null;) {
-							ExportPackageDescription exportDesc = iter.next();
-							satisfied = constraint.isSatisfiedBy(exportDesc) ? exportDesc : null;
-						}
+						satisfied = getPossibleCandidates(constraint, exports.toArray(new BaseDescription[exports.size()]), null, hook, false);
 				} else if (constraint instanceof GenericSpecification) {
-					Set<GenericDescription> genericSet = generics.get(constraint.getName());
+					List<GenericDescription> genericSet = generics.get(constraint.getName());
 					if (genericSet != null)
-						for (Iterator<GenericDescription> iter = genericSet.iterator(); iter.hasNext() && satisfied == null;) {
-							GenericDescription genDesc = iter.next();
-							satisfied = constraint.isSatisfiedBy(genDesc) ? genDesc : null;
-						}
+						satisfied = getPossibleCandidates(constraint, genericSet.toArray(new BaseDescription[genericSet.size()]), null, hook, false);
 				}
-				if (satisfied == null)
+				if (satisfied == null || satisfied.isEmpty()) {
 					result.add(constraint);
-				else if (!satisfied.getSupplier().isResolved() && !bundleList.contains(satisfied.getSupplier()))
-					bundleList.add(satisfied.getSupplier());
+				} else {
+					for (BaseDescription baseDescription : satisfied) {
+						if (!baseDescription.getSupplier().isResolved() && !bundleList.contains(baseDescription.getSupplier())) {
+							bundleList.add(baseDescription.getSupplier());
+							// TODO only add the first supplier that is not resolved; 
+							// this is the previous behavior before the fix for bug 333071; should consider adding all unresolved
+							break;
+						}
+					}
+				}
 			}
 		}
 		return result.toArray(new VersionConstraint[result.size()]);
@@ -151,13 +157,36 @@ public final class StateHelperImpl implements StateHelper {
 		if (bundles.length == 0)
 			return new VersionConstraint[0];
 		State state = bundles[0].getContainingState();
-		return getUnsatisfiedLeaves(state, bundles);
+		ResolverHook hook = beginHook(state, Arrays.asList((BundleRevision[]) bundles));
+		try {
+			return getUnsatisfiedLeaves(state, bundles, hook);
+		} finally {
+			if (hook != null)
+				hook.end();
+		}
+	}
+
+	private ResolverHook beginHook(State state, Collection<BundleRevision> triggers) {
+		if (!(state instanceof StateImpl))
+			return null;
+		ResolverHookFactory hookFactory = ((StateImpl) state).getResolverHookFactory();
+		return hookFactory == null ? null : hookFactory.begin(triggers);
 	}
 
 	/**
 	 * @see StateHelper
 	 */
 	public VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle) {
+		ResolverHook hook = beginHook(bundle.getContainingState(), Arrays.asList(new BundleRevision[] {bundle}));
+		try {
+			return getUnsatisfiedConstraints(bundle, hook);
+		} finally {
+			if (hook != null)
+				hook.end();
+		}
+	}
+
+	private VersionConstraint[] getUnsatisfiedConstraints(BundleDescription bundle, ResolverHook hook) {
 		State containingState = bundle.getContainingState();
 		if (containingState == null)
 			// it is a bug in the client to call this method when not attached to a state
@@ -165,19 +194,19 @@ public final class StateHelperImpl implements StateHelper {
 		List<VersionConstraint> unsatisfied = new ArrayList<VersionConstraint>();
 		HostSpecification host = bundle.getHost();
 		if (host != null)
-			if (!host.isResolved() && !isResolvable(host))
+			if (!host.isResolved() && !isBundleConstraintResolvable(host, Capability.HOST_CAPABILITY, hook))
 				unsatisfied.add(host);
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
-			if (!requiredBundles[i].isResolved() && !isResolvable(requiredBundles[i]))
+			if (!requiredBundles[i].isResolved() && !isBundleConstraintResolvable(requiredBundles[i], null, hook))
 				unsatisfied.add(requiredBundles[i]);
 		ImportPackageSpecification[] packages = bundle.getImportPackages();
 		for (int i = 0; i < packages.length; i++)
-			if (!packages[i].isResolved() && !isResolvable(packages[i]))
+			if (!packages[i].isResolved() && !isResolvable(packages[i], hook))
 				unsatisfied.add(packages[i]);
 		GenericSpecification[] generics = bundle.getGenericRequires();
 		for (int i = 0; i < generics.length; i++)
-			if (!generics[i].isResolved() && !isResolvable(generics[i]))
+			if (!generics[i].isResolved() && !isResolvable(generics[i], hook))
 				unsatisfied.add(generics[i]);
 		NativeCodeSpecification nativeCode = bundle.getNativeCodeSpecification();
 		if (nativeCode != null && !nativeCode.isResolved())
@@ -185,51 +214,79 @@ public final class StateHelperImpl implements StateHelper {
 		return unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
 	}
 
+	private ArrayMap<Capability, BaseDescription> asArrayMap(List<BaseDescription> descriptions, String namespace) {
+		List<Capability> capabilities = new ArrayList<Capability>(descriptions.size());
+		for (BaseDescription description : descriptions)
+			capabilities.add(((BaseDescriptionImpl) description).getCapability(namespace));
+		return new ArrayMap<Capability, BaseDescription>(capabilities, descriptions);
+	}
+
+	private List<BaseDescription> getPossibleCandidates(VersionConstraint constraint, BaseDescription[] descriptions, String namespace, ResolverHook hook, boolean resolved) {
+		List<BaseDescription> candidates = new ArrayList<BaseDescription>();
+		for (int i = 0; i < descriptions.length; i++)
+			if ((!resolved || descriptions[i].getSupplier().isResolved()) && constraint.isSatisfiedBy(descriptions[i]))
+				candidates.add(descriptions[i]);
+		if (hook != null)
+			hook.filterMatches(constraint.getBundle(), asArrayMap(candidates, namespace));
+		return candidates;
+	}
+
 	/**
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(ImportPackageSpecification constraint) {
-		ExportPackageDescription[] exports = constraint.getBundle().getContainingState().getExportedPackages();
-		for (int i = 0; i < exports.length; i++)
-			if (constraint.isSatisfiedBy(exports[i]))
-				return true;
-		return false;
+		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(new BundleRevision[] {constraint.getBundle()}));
+		try {
+			return isResolvable(constraint, hook);
+		} finally {
+			if (hook != null)
+				hook.end();
+		}
 	}
 
-	private boolean isResolvable(GenericSpecification constraint) {
-		Map<String, Set<GenericDescription>> genericCapabilities = getGenericsMap(constraint.getBundle().getContainingState(), true);
-		Set<GenericDescription> genericSet = genericCapabilities.get(constraint.getName());
-		if (genericSet == null)
+	private boolean isResolvable(ImportPackageSpecification constraint, ResolverHook hook) {
+		ExportPackageDescription[] exports = constraint.getBundle().getContainingState().getExportedPackages();
+		return getPossibleCandidates(constraint, exports, null, hook, true).size() > 0;
+	}
+
+	private boolean isResolvable(GenericSpecification constraint, ResolverHook hook) {
+		Map<String, List<GenericDescription>> genericCapabilities = getGenericsMap(constraint.getBundle().getContainingState(), true);
+		List<GenericDescription> genericList = genericCapabilities.get(constraint.getName());
+		if (genericList == null)
 			return false;
-		for (Iterator<GenericDescription> iter = genericSet.iterator(); iter.hasNext();)
-			if (constraint.isSatisfiedBy(iter.next()))
-				return true;
-		return false;
+		return getPossibleCandidates(constraint, genericList.toArray(new BaseDescription[genericList.size()]), null, hook, true).size() > 0;
 	}
 
 	/**
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(BundleSpecification specification) {
-		return isBundleConstraintResolvable(specification);
+		return isBundleConstraintResolvable(specification, null);
 	}
 
 	/**
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(HostSpecification specification) {
-		return isBundleConstraintResolvable(specification);
+		return isBundleConstraintResolvable(specification, Capability.HOST_CAPABILITY);
 	}
 
 	/*
 	 * Returns whether a bundle specification/host specification can be resolved.
 	 */
-	private boolean isBundleConstraintResolvable(VersionConstraint constraint) {
+	private boolean isBundleConstraintResolvable(VersionConstraint constraint, String namespace) {
+		ResolverHook hook = beginHook(constraint.getBundle().getContainingState(), Arrays.asList(new BundleRevision[] {constraint.getBundle()}));
+		try {
+			return isBundleConstraintResolvable(constraint, namespace, hook);
+		} finally {
+			if (hook != null)
+				hook.end();
+		}
+	}
+
+	private boolean isBundleConstraintResolvable(VersionConstraint constraint, String namespace, ResolverHook hook) {
 		BundleDescription[] availableBundles = constraint.getBundle().getContainingState().getBundles(constraint.getName());
-		for (int i = 0; i < availableBundles.length; i++)
-			if (availableBundles[i].isResolved() && constraint.isSatisfiedBy(availableBundles[i]))
-				return true;
-		return false;
+		return getPossibleCandidates(constraint, availableBundles, namespace, hook, true).size() > 0;
 	}
 
 	public Object[][] sortBundles(BundleDescription[] toSort) {

@@ -594,6 +594,12 @@ public abstract class StateImpl implements State {
 		return newHook;
 	}
 
+	ResolverHookFactory getResolverHookFactory() {
+		synchronized (this.monitor) {
+			return this.hookFactory;
+		}
+	}
+
 	public ResolverHook getResolverHook() {
 		synchronized (this.monitor) {
 			return this.hook;
