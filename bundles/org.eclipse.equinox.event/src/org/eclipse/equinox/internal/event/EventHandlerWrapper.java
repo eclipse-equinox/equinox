@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -196,8 +196,21 @@ public class EventHandlerWrapper {
 		try {
 			handlerService.handleEvent(event);
 		} catch (Throwable t) {
+			if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) { //$NON-NLS-1$
+				Object exception = event.getProperty("exception"); //$NON-NLS-1$
+				if (exception instanceof LogTopicException)
+					return; // avoid endless event dispatching
+				// wrap exception in a LogTopicException to detect endless event dispatching
+				t = new LogTopicException(t);
+			}
 			// log/handle any Throwable thrown by the listener
 			log.log(LogService.LOG_ERROR, NLS.bind(EventAdminMsg.EVENT_DISPATCH_HANDLER_EXCEPTION, event, handlerService), t);
+		}
+	}
+
+	static class LogTopicException extends RuntimeException {
+		public LogTopicException(Throwable cause) {
+			super(cause);
 		}
 	}
 }
