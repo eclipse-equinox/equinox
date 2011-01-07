@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 Cognos Incorporated, IBM Corporation and others
+ * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
  * accompanies this distribution, and is available at
@@ -26,6 +26,13 @@ public class Activator implements BundleActivator, BundleListener, FrameworkList
 	private ExtendedLogServiceFactory logServiceFactory;
 
 	public void start(BundleContext context) throws Exception {
+		ServiceReference[] logRef = context.getServiceReferences(ExtendedLogService.class.getName(), null);
+		if (logRef != null)
+			for (int i = 0; i < logRef.length; i++) {
+				Bundle provider = logRef[i].getBundle();
+				if (provider != null && provider.getBundleId() == 0)
+					return;
+			}
 		logReaderServiceFactory = new ExtendedLogReaderServiceFactory();
 		context.addBundleListener(this);
 		context.addServiceListener(this);
@@ -42,6 +49,8 @@ public class Activator implements BundleActivator, BundleListener, FrameworkList
 	}
 
 	public void stop(BundleContext context) throws Exception {
+		if (logServiceRegistration == null)
+			return;
 		logServiceRegistration.unregister();
 		logServiceRegistration = null;
 		logReaderServiceRegistration.unregister();
