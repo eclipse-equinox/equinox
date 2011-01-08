@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -227,31 +227,6 @@ public class EclipseStarter {
 	 */
 	public static boolean isRunning() {
 		return running;
-	}
-
-	protected static FrameworkLog createFrameworkLog() {
-		FrameworkLog frameworkLog;
-		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
-		if (logFileProp != null) {
-			frameworkLog = new EclipseLog(new File(logFileProp));
-		} else {
-			Location location = LocationManager.getConfigurationLocation();
-			File configAreaDirectory = null;
-			if (location != null)
-				// TODO assumes the URL is a file: url
-				configAreaDirectory = new File(location.getURL().getFile());
-
-			if (configAreaDirectory != null) {
-				String logFileName = Long.toString(System.currentTimeMillis()) + ".log"; //$NON-NLS-1$
-				File logFile = new File(configAreaDirectory, logFileName);
-				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				frameworkLog = new EclipseLog(logFile);
-			} else
-				frameworkLog = new EclipseLog();
-		}
-		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
-			frameworkLog.setConsoleLog(true);
-		return frameworkLog;
 	}
 
 	/**

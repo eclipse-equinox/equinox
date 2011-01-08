@@ -22,7 +22,6 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.eventmgr.*;
 import org.eclipse.osgi.framework.internal.protocol.ContentHandlerFactory;
 import org.eclipse.osgi.framework.internal.protocol.StreamHandlerFactory;
-import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.internal.loader.*;
@@ -1360,12 +1359,6 @@ public class Framework implements EventPublisher, Runnable {
 	}
 
 	public void publishFrameworkEventPrivileged(FrameworkEvent event, FrameworkListener... callerListeners) {
-		// if the event is an error then it should be logged
-		if (event.getType() == FrameworkEvent.ERROR) {
-			FrameworkLog frameworkLog = adaptor.getFrameworkLog();
-			if (frameworkLog != null)
-				frameworkLog.log(event);
-		}
 		// Build the listener snapshot
 		Map<BundleContextImpl, Set<Map.Entry<FrameworkListener, FrameworkListener>>> listenerSnapshot;
 		synchronized (allFrameworkListeners) {

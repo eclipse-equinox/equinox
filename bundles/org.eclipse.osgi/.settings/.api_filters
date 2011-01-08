@@ -401,6 +401,16 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="eclipseAdaptor/src/org/eclipse/equinox/log/internal/ExtendedLogEntryImpl.java" type="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl">
+<filter comment="protected by reflection method check." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
+<message_argument value="Thread"/>
+<message_argument value="getId()"/>
+<message_argument value="OSGi/Minimum-1.2"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
 <filter id="403853384">
 <message_arguments>
@@ -1001,6 +1011,34 @@
 <filter comment="Ignore OSGi API" id="403853384">
 <message_arguments>
 <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionUpdate"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/log/LogEntry.java" type="org.osgi.service.log.LogEntry">
+<filter comment="Ingore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.service.log.LogEntry"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/log/LogListener.java" type="org.osgi.service.log.LogListener">
+<filter comment="Ingore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.service.log.LogListener"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/log/LogReaderService.java" type="org.osgi.service.log.LogReaderService">
+<filter comment="Ingore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.service.log.LogReaderService"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/service/log/LogService.java" type="org.osgi.service.log.LogService">
+<filter comment="Ingore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.service.log.LogService"/>
 </message_arguments>
 </filter>
 </resource>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,15 +55,16 @@ public class FrameworkLogEntry {
 	// It would be nice to rename some of these fields but we cannot change the getter method
 	// names without breaking clients.  Changing only the field names would be confusing.
 	//TODO "entry" has another meaning here - title, summary, tag are better names 
-	private String entry;
-	private String message;
+	private final String entry;
+	private final String message;
 	//TODO get rid of this
-	private int stackCode;
+	private final int stackCode;
 	//TODO: use "reason" or "cause" instead
-	private Throwable throwable;
-	private FrameworkLogEntry[] children;
-	private int severity = 0;
-	private int bundleCode = 0;
+	private final Throwable throwable;
+	private final FrameworkLogEntry[] children;
+	private final int severity;
+	private final int bundleCode;
+	private final Object context;
 
 	/**
 	 * Constructs a new FrameworkLogEntry
@@ -74,11 +75,7 @@ public class FrameworkLogEntry {
 	 * @param children the children
 	 */
 	public FrameworkLogEntry(String entry, String message, int stackCode, Throwable throwable, FrameworkLogEntry[] children) {
-		this.entry = entry;
-		this.message = message;
-		this.stackCode = stackCode;
-		this.throwable = throwable;
-		this.children = children;
+		this(null, entry, 0, 0, message, stackCode, throwable, children);
 	}
 
 	/**
@@ -93,6 +90,23 @@ public class FrameworkLogEntry {
 	 * @since 3.2
 	 */
 	public FrameworkLogEntry(String entry, int severity, int bundleCode, String message, int stackCode, Throwable throwable, FrameworkLogEntry[] children) {
+		this(null, entry, severity, bundleCode, message, stackCode, throwable, children);
+	}
+
+	/**
+	 * Constructs a new FrameworkLogEntry
+	 * @param context the context
+	 * @param entry the entry
+	 * @param severity the severity
+	 * @param bundleCode the bundle code
+	 * @param message the message
+	 * @param stackCode the stack code
+	 * @param throwable the throwable
+	 * @param children the children
+	 * @since 3.7
+	 */
+	public FrameworkLogEntry(Object context, String entry, int severity, int bundleCode, String message, int stackCode, Throwable throwable, FrameworkLogEntry[] children) {
+		this.context = context;
 		this.entry = entry;
 		this.message = message;
 		this.stackCode = stackCode;
@@ -171,4 +185,16 @@ public class FrameworkLogEntry {
 		return bundleCode;
 	}
 
+	/**
+	 * Returns the context associated with this <code>FrameworkLogEntry</code>
+	 * object.
+	 * 
+	 * @return <code>Object</code> containing the context associated with this
+	 *         <code>FrameworkLogEntry</code> object;<code>null</code> if no context is
+	 *         associated with this <code>FrameworkLogEntry</code> object.
+	 * @since 3.7
+	 */
+	public Object getContext() {
+		return context;
+	}
 }
