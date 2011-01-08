@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@
 package org.eclipse.core.internal.runtime;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import org.eclipse.core.runtime.*;
 
 /**
@@ -33,6 +32,16 @@ public final class RuntimeLog {
 	 */
 	private static ArrayList queuedMessages = new ArrayList(5);
 
+	private static PlatformLogWriter logWriter;
+
+	static void setLogWriter(PlatformLogWriter logWriter) {
+		synchronized (logListeners) {
+			RuntimeLog.logWriter = logWriter;
+			if (logWriter != null)
+				emptyQueuedMessages();
+		}
+	}
+
 	/**
 	 * See org.eclipse.core.runtime.Platform#addLogListener(ILogListener)
 	 */
@@ -43,19 +52,8 @@ public final class RuntimeLog {
 			// since we want to retain order)
 			logListeners.remove(listener);
 			logListeners.add(listener);
-			if (firstListener) {
-				for (Iterator i = queuedMessages.iterator(); i.hasNext();) {
-					try {
-						IStatus recordedMessage = (IStatus) i.next();
-						listener.logging(recordedMessage, IRuntimeConstants.PI_RUNTIME);
-					} catch (Exception e) {
-						handleException(e);
-					} catch (LinkageError e) {
-						handleException(e);
-					}
-				}
-				queuedMessages.clear();
-			}
+			if (firstListener)
+				emptyQueuedMessages();
 		}
 	}
 
@@ -82,13 +80,21 @@ public final class RuntimeLog {
 	 */
 	public static void log(final IStatus status) {
 		// create array to avoid concurrent access
-		ILogListener[] listeners;
+		ILogListener[] listeners = null;
+		PlatformLogWriter writer;
 		synchronized (logListeners) {
-			listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
-			if (listeners.length == 0) {
-				queuedMessages.add(status);
-				return;
+			writer = logWriter;
+			if (writer == null && logListeners.size() > 0) {
+				listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
+				if (listeners.length == 0) {
+					queuedMessages.add(status);
+					return;
+				}
 			}
+		}
+		if (writer != null) {
+			writer.logging(status);
+			return;
 		}
 		for (int i = 0; i < listeners.length; i++) {
 			try {
@@ -114,7 +120,37 @@ public final class RuntimeLog {
 	 */
 	public static boolean isEmpty() {
 		synchronized (logListeners) {
-			return (logListeners.size() == 0);
+			return (logListeners.size() == 0) && logWriter == null;
+		}
+	}
+
+	private static void emptyQueuedMessages() {
+		IStatus[] queued;
+		synchronized (logListeners) {
+			if (queuedMessages.size() == 0)
+				return;
+			queued = (IStatus[]) queuedMessages.toArray(new IStatus[queuedMessages.size()]);
+			queuedMessages.clear();
+		}
+		for (int i = 0; i < queued.length; i++) {
+			log(queued[i]);
+		}
+	}
+
+	static void logToListeners(IStatus status) {
+		// create array to avoid concurrent access
+		ILogListener[] listeners;
+		synchronized (logListeners) {
+			listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
+		}
+		for (int i = 0; i < listeners.length; i++) {
+			try {
+				listeners[i].logging(status, IRuntimeConstants.PI_RUNTIME);
+			} catch (Exception e) {
+				handleException(e);
+			} catch (LinkageError e) {
+				handleException(e);
+			}
 		}
 	}
 

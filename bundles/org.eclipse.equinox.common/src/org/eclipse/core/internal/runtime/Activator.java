@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@ import java.util.*;
 import org.eclipse.core.internal.boot.PlatformURLBaseConnection;
 import org.eclipse.core.internal.boot.PlatformURLHandler;
 import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -75,6 +77,7 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		bundleContext = context;
 		singleton = this;
 		Dictionary urlProperties = new Hashtable();
@@ -82,6 +85,22 @@ public class Activator implements BundleActivator {
 		platformURLConverterService = context.registerService(URLConverter.class.getName(), new PlatformURLConverter(), urlProperties);
 		adapterManagerService = context.registerService(IAdapterManager.class.getName(), AdapterManager.getDefault(), null);
 		installPlatformURLSupport();
+	}
+
+	private PlatformLogWriter getPlatformWriter(BundleContext context) {
+		ServiceReference logRef = context.getServiceReference(ExtendedLogService.class.getName());
+		ServiceReference readerRef = context.getServiceReference(ExtendedLogReaderService.class.getName());
+		ServiceReference packageAdminRef = context.getServiceReference(PackageAdmin.class.getName());
+		if (logRef == null || readerRef == null || packageAdminRef == null)
+			return null;
+		ExtendedLogService logService = (ExtendedLogService) context.getService(logRef);
+		ExtendedLogReaderService readerService = (ExtendedLogReaderService) context.getService(readerRef);
+		PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminRef);
+		if (logService == null || readerService == null || packageAdmin == null)
+			return null;
+		PlatformLogWriter writer = new PlatformLogWriter(logService, packageAdmin, context.getBundle());
+		readerService.addLogListener(writer, writer);
+		return writer;
 	}
 
 	/*
@@ -280,6 +299,7 @@ public class Activator implements BundleActivator {
 		}
 		bundleContext = null;
 		singleton = null;
+		RuntimeLog.setLogWriter(null);
 	}
 
 	/*
