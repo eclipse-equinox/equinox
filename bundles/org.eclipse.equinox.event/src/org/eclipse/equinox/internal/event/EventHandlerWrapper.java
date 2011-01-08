@@ -209,6 +209,8 @@ public class EventHandlerWrapper {
 	}
 
 	static class LogTopicException extends RuntimeException {
+		private static final long serialVersionUID = -2386940335620739632L;
+
 		public LogTopicException(Throwable cause) {
 			super(cause);
 		}
