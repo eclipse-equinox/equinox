@@ -70,7 +70,6 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 
 	}
 
-	private BaseAdaptor adaptor;
 	private ServiceRegistration<?> frameworkLogReg;
 	private ServiceRegistration<?> perfLogReg;
 
@@ -79,7 +78,7 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	}
 
 	public void initialize(BaseAdaptor initAdaptor) {
-		this.adaptor = initAdaptor;
+		// Nothing
 	}
 
 	/**
