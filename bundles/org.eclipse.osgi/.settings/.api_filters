@@ -402,6 +402,14 @@
 </filter>
 </resource>
 <resource path="eclipseAdaptor/src/org/eclipse/equinox/log/internal/ExtendedLogEntryImpl.java" type="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl">
+<filter comment="Code is protected by reflection check." id="647004193">
+<message_arguments>
+<message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
+<message_argument value="Thread"/>
+<message_argument value="getId()"/>
+<message_argument value="J2SE-1.4"/>
+</message_arguments>
+</filter>
 <filter comment="protected by reflection method check." id="647004193">
 <message_arguments>
 <message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
