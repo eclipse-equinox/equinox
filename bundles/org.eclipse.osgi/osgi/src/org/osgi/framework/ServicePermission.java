@@ -52,7 +52,7 @@ import java.util.Set;
  * {@code ServicePermission} to get the specific service.
  * 
  * @ThreadSafe
- * @version $Id: 7842b91e60fc52dfb52297f82fc00d535c735e77 $
+ * @version $Id: 1b6ee9543f4cbc16add8dc8c40dfa9a6dfee7aa2 $
  */
 
 public final class ServicePermission extends BasicPermission {
@@ -599,7 +599,7 @@ public final class ServicePermission extends BasicPermission {
 		return properties = new Properties(props, service);
 	}
 	
-	private static class Properties extends AbstractMap<String, Object> {
+	static private final class Properties extends AbstractMap<String, Object> {
 		private final Map<String, Object>	properties;
 		private final ServiceReference< ? >	service;
 		private transient volatile Set<Map.Entry<String, Object>>	entries;
@@ -642,7 +642,7 @@ public final class ServicePermission extends BasicPermission {
 			return entries = Collections.unmodifiableSet(all);
 		}
 		
-		private static class Entry implements Map.Entry<String, Object> {
+		static private final class Entry implements Map.Entry<String, Object> {
 			private final String	k;
 			private final Object	v;
 

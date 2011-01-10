@@ -26,9 +26,9 @@ import java.util.Map;
  * during filter expression evaluation in the permission implies method.
  * 
  * @Immutable
- * @version $Id: 7d055fc38d54bb554577fa7b07fc6403ecf276a7 $
+ * @version $Id: 3589831a7594cf36e645a51ab9b9ae5ebfd80beb $
  */
-class SignerProperty {
+final class SignerProperty {
 	private final Bundle	bundle;
 	private final String	pattern;
 

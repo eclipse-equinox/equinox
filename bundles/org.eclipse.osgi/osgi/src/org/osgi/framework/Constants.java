@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * 
  * @since 1.1
  * @noimplement
- * @version $Id: 6088fe0d7418d404f7258b9b1bb99c85fabe426a $
+ * @version $Id: bf31cbaceba8df7648e343136ce87da520e7e675 $
  */
 
 public interface Constants {
@@ -1493,7 +1493,7 @@ public interface Constants {
 	 * provider that these intents are already implemented by the exported
 	 * service object.</li>
 	 * <li>A distribution provider must use this property to convey the combined
-	 * intents of: The exporting service, and the intents that the exporting
+	 * intents of: the exporting service, the intents that the exporting
 	 * distribution provider adds, and the intents that the importing
 	 * distribution provider adds.</li>
 	 * </ul>
@@ -1502,6 +1502,7 @@ public interface Constants {
 	 * intents. Both the exporting and importing distribution providers must
 	 * recognize all intents before a service can be distributed.
 	 * 
+	 * <p>
 	 * The value of this property must be of type {@code String},
 	 * {@code String[]}, or {@code Collection} of {@code String}.
 	 * 

@@ -47,7 +47,7 @@ import org.osgi.framework.SynchronousBundleListener;
  * 
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @version $Id: e1d45cece8110692ef786e69e3162196bb3823a0 $
+ * @version $Id: ebfd73a4e19f025d6ad9029d99c17944ee8c420a $
  * @since 1.4
  */
 public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
@@ -421,7 +421,8 @@ public class BundleTracker<T> implements BundleTrackerCustomizer<T> {
 	 * @ThreadSafe
 	 * @since 1.4
 	 */
-	class Tracked extends AbstractTracked<Bundle, T, BundleEvent> implements
+	private final class Tracked extends AbstractTracked<Bundle, T, BundleEvent>
+			implements
 			SynchronousBundleListener {
 		/**
 		 * Tracked constructor.

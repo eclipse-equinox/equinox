@@ -47,7 +47,7 @@ import java.util.Set;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Id: 4017ce21a422bbf0d4a9d0f192104eced96bec30 $
+ * @version $Id: ad31023478478ecb577e11eb753875cfff57de1b $
  * @since 1.6
  */
 
@@ -538,7 +538,7 @@ public final class CapabilityPermission extends BasicPermission {
 		return properties = new Properties(props, attributes);
 	}
 
-	private static class Properties extends AbstractMap<String, Object> {
+	static private final class Properties extends AbstractMap<String, Object> {
 		private final Map<String, Object>							properties;
 		private final Map<String, Object>							attributes;
 		private transient volatile Set<Map.Entry<String, Object>>	entries;
