@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component id="org.eclipse.equinox.preferences" version="2">
+<resource path="src/org/osgi/service/prefs/Preferences.java" type="org.osgi.service.prefs.Preferences">
+<filter comment="Ignore OSGi API." id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.prefs.Preferences"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="src/org/osgi/service/prefs/PreferencesService.java" type="org.osgi.service.prefs.PreferencesService">
+<filter comment="Ignore OSGi API." id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.service.prefs.PreferencesService"/>
+</message_arguments>
+</filter>
+</resource>
+</component>
