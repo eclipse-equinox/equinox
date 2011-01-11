@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,15 +87,26 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	final Framework framework;
+	private static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
+	private final Framework framework;
 	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
 	private final ServiceTracker<ConsoleSession, FrameworkConsole> sessions;
 	private final String consolePort;
 	private FrameworkCommandProvider fwkCommands;
 	private ServiceRegistration<?> builtinSession;
 	private ConsoleSocketGetter scsg;
+	private final boolean isEnabled;
 
 	public ConsoleManager(Framework framework, String consolePort) {
+		if ("false".equals(FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED)) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
+			isEnabled = false;
+			this.framework = null;
+			this.cpTracker = null;
+			this.sessions = null;
+			this.consolePort = null;
+			return;
+		}
+		this.isEnabled = true;
 		this.framework = framework;
 		this.consolePort = consolePort != null ? consolePort.trim() : consolePort;
 		this.cpTracker = new ServiceTracker<CommandProvider, CommandProvider>(framework.getSystemBundleContext(), CommandProvider.class.getName(), null);
@@ -109,8 +120,10 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	}
 
 	private void startConsole() {
-		if ("none".equals(consolePort)) //$NON-NLS-1$
-			return; // disables all console sessions
+		if (!isEnabled) {
+			return;
+		}
+
 		this.cpTracker.open();
 		this.sessions.open();
 		fwkCommands = new FrameworkCommandProvider(framework);
@@ -165,6 +178,9 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	 *
 	 */
 	public void stopConsole() {
+		if (!isEnabled) {
+			return;
+		}
 		if (builtinSession != null)
 			try {
 				builtinSession.unregister();
