@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,7 +58,7 @@ public class ComponentFactoryImpl implements ComponentFactory {
 			}
 
 			// merge properties
-			Hashtable props = (Hashtable) ((Hashtable) sci.getProperties()).clone();
+			Hashtable props = new Hashtable((Map) sci.getProperties());
 			SCRUtil.copyTo(props, additionalProps);
 
 			// create a new SCP (adds to resolver scpEnabled list)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2010 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,7 +12,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds.impl;
 
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Vector;
 import org.eclipse.equinox.internal.ds.*;
 import org.eclipse.equinox.internal.ds.model.*;
 import org.eclipse.osgi.util.NLS;
@@ -38,8 +39,6 @@ public class ComponentContextImpl implements ComponentContext {
 
 	private SCRManager mgr;
 
-	private ReadOnlyDictionary props;
-
 	public ComponentContextImpl(ServiceComponentProp scp, Bundle usingBundle, ComponentInstanceImpl ci, SCRManager mgr) {
 		this.scp = scp;
 		this.componentInstance = ci;
@@ -53,14 +52,7 @@ public class ComponentContextImpl implements ComponentContext {
 	 * @see org.osgi.service.component.ComponentContext#getProperties()
 	 */
 	public Dictionary getProperties() {
-		if (props == null) {
-			props = new ReadOnlyDictionary((Hashtable) scp.getProperties());
-		} else if (props.delegate != scp.getProperties()) {
-			// the scp properties have been modified by configuration
-			// update the instance with the new properties
-			props.delegate = (Hashtable) scp.getProperties();
-		}
-		return props;
+		return scp.getProperties();
 	}
 
 	/*

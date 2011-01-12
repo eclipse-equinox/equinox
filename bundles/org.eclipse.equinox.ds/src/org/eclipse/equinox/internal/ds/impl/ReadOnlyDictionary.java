@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2010 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,19 +18,23 @@ import java.util.*;
  * 
  * @author Stoyan Boshev
  */
-class ReadOnlyDictionary extends Dictionary implements Map {
+public class ReadOnlyDictionary extends Dictionary implements Map {
 
 	private static final long serialVersionUID = 1L;
 
-	Hashtable delegate;
+	Map delegate;
 
 	/**
 	 * Creates a new ReadOnlyDictionary with initial set of properties
 	 * 
 	 * @param initialProps the initialProperties for this hashtable
 	 */
-	ReadOnlyDictionary(Hashtable initialProps) {
+	public ReadOnlyDictionary(Map initialProps) {
 		this.delegate = initialProps;
+	}
+
+	public void updateDelegate(Map newDelegate) {
+		this.delegate = newDelegate;
 	}
 
 	/* (non-Javadoc)
@@ -67,14 +71,14 @@ class ReadOnlyDictionary extends Dictionary implements Map {
 	 * @see java.util.Dictionary#keys()
 	 */
 	public Enumeration keys() {
-		return delegate.keys();
+		return Collections.enumeration(delegate.keySet());
 	}
 
 	/* (non-Javadoc)
 	 * @see java.util.Dictionary#elements()
 	 */
 	public Enumeration elements() {
-		return delegate.elements();
+		return Collections.enumeration(delegate.values());
 	}
 
 	/* (non-Javadoc)

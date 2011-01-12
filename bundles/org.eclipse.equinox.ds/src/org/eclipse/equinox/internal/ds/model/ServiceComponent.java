@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -20,6 +20,7 @@ import java.util.*;
 import org.apache.felix.scr.Component;
 import org.apache.felix.scr.Reference;
 import org.eclipse.equinox.internal.ds.*;
+import org.eclipse.equinox.internal.ds.impl.ReadOnlyDictionary;
 import org.eclipse.equinox.internal.util.io.Externalizable;
 import org.eclipse.equinox.internal.util.io.ExternalizableDictionary;
 import org.eclipse.osgi.util.NLS;
@@ -84,6 +85,7 @@ public class ServiceComponent implements Externalizable, Component {
 	// --- end: model
 
 	public HashSet componentIssues = new HashSet(1, 1);
+	private ReadOnlyDictionary readOnlyProps;
 
 	public String getComponentIssues() {
 		if (!componentIssues.isEmpty()) {
@@ -859,7 +861,14 @@ public class ServiceComponent implements Externalizable, Component {
 	}
 
 	public Dictionary getProperties() {
-		return properties;
+		if (readOnlyProps == null) {
+			readOnlyProps = new ReadOnlyDictionary(properties);
+		} else {
+			// the scp properties may have been modified by configuration
+			// update the instance with the current properties
+			readOnlyProps.updateDelegate(properties);
+		}
+		return readOnlyProps;
 	}
 
 	public Reference[] getReferences() {

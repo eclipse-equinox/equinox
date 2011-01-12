@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,8 +16,7 @@ import java.security.*;
 import java.util.*;
 import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.*;
-import org.eclipse.equinox.internal.ds.impl.ComponentContextImpl;
-import org.eclipse.equinox.internal.ds.impl.ComponentInstanceImpl;
+import org.eclipse.equinox.internal.ds.impl.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.component.*;
@@ -70,6 +69,7 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 	protected Vector delayActivateSCPNames;
 
 	private SCRManager mgr;
+	private ReadOnlyDictionary readOnlyProps;
 
 	// next free component id
 	private static long componentid = 0;
@@ -113,7 +113,14 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 	 * @return Dictionary properties
 	 */
 	public Dictionary getProperties() {
-		return properties != null ? properties : serviceComponent.properties;
+		if (readOnlyProps == null) {
+			readOnlyProps = new ReadOnlyDictionary(properties != null ? properties : serviceComponent.properties);
+		} else {
+			// the scp properties may have been modified by configuration
+			// update the instance with the current properties
+			readOnlyProps.updateDelegate(properties != null ? properties : serviceComponent.properties);
+		}
+		return readOnlyProps;
 	}
 
 	/**
