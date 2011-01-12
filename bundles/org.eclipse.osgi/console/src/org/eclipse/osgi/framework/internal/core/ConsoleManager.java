@@ -12,8 +12,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -56,7 +55,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 
 		public void run() {
 			// Print message containing port console actually bound to..
-			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, Integer.toString(server.getLocalPort())));
+			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_LISTENING_ON_PORT, server.getInetAddress().toString() + ':' + Integer.toString(server.getLocalPort())));
 			while (!shutdown) {
 				try {
 					Socket socket = server.accept();
@@ -92,23 +91,38 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
 	private final ServiceTracker<ConsoleSession, FrameworkConsole> sessions;
 	private final String consolePort;
+	// Allow for specifying the particular local host address on which the framework to listen for connections. Currently it listens on 
+	// all network interfaces of the host and restricting this is desirable from security point of view. See bug 322917.
+	private final String consoleHost;
 	private FrameworkCommandProvider fwkCommands;
 	private ServiceRegistration<?> builtinSession;
-	private ConsoleSocketGetter scsg;
+	private ConsoleSocketGetter socketGetter;
 	private final boolean isEnabled;
 
-	public ConsoleManager(Framework framework, String consolePort) {
-		if ("false".equals(FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED)) || "none".equals(consolePort)) { //$NON-NLS-1$ //$NON-NLS-2$
+	public ConsoleManager(Framework framework, String consolePropValue) {
+		String port = null;
+		String host = null;
+		if (consolePropValue != null) {
+			int index = consolePropValue.lastIndexOf(":"); //$NON-NLS-1$
+			if (index > -1) {
+				host = consolePropValue.substring(0, index);
+			}
+			port = consolePropValue.substring(index + 1);
+		}
+
+		if ("false".equals(FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED)) || "none".equals(port)) { //$NON-NLS-1$ //$NON-NLS-2$
 			isEnabled = false;
 			this.framework = null;
 			this.cpTracker = null;
 			this.sessions = null;
+			this.consoleHost = null;
 			this.consolePort = null;
 			return;
 		}
 		this.isEnabled = true;
 		this.framework = framework;
-		this.consolePort = consolePort != null ? consolePort.trim() : consolePort;
+		this.consoleHost = host != null ? host.trim() : host;
+		this.consolePort = port != null ? port.trim() : port;
 		this.cpTracker = new ServiceTracker<CommandProvider, CommandProvider>(framework.getSystemBundleContext(), CommandProvider.class.getName(), null);
 		this.sessions = new ServiceTracker<ConsoleSession, FrameworkConsole>(framework.getSystemBundleContext(), ConsoleSession.class.getName(), this);
 	}
@@ -166,7 +180,11 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 			builtinSession = framework.getSystemBundleContext().registerService(ConsoleSession.class.getName(), session, props);
 		} else {
 			try {
-				scsg = new ConsoleManager.ConsoleSocketGetter(new ServerSocket(port));
+				if (consoleHost != null) {
+					socketGetter = new ConsoleSocketGetter(new ServerSocket(port, 0, InetAddress.getByName(consoleHost)));
+				} else {
+					socketGetter = new ConsoleManager.ConsoleSocketGetter(new ServerSocket(port));
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -189,8 +207,8 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 			}
 		sessions.close();
 		cpTracker.close();
-		if (scsg != null)
-			scsg.shutdown();
+		if (socketGetter != null)
+			socketGetter.shutdown();
 		if (fwkCommands != null)
 			fwkCommands.stop();
 	}
