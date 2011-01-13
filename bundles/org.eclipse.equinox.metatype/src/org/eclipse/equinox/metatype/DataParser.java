@@ -78,13 +78,12 @@ public class DataParser {
 	Vector<DesignateHandler> _dp_designateHandlers = new Vector<DesignateHandler>(7);
 	// ObjectClassDefinitions in DataParser class w/ corresponding reference keys
 	Hashtable<String, ObjectClassDefinitionImpl> _dp_OCDs = new Hashtable<String, ObjectClassDefinitionImpl>(7);
-	// pid to ObjectClassDefinitions in DataParser class as a Hashtable
-	Hashtable<String, ObjectClassDefinitionImpl> _dp_pid_to_OCDs_ = new Hashtable<String, ObjectClassDefinitionImpl>(7);
 	// Localization in DataParser class
 	String _dp_localization;
 
 	// Default visibility to avoid a plethora of synthetic accessor method warnings.
 	final LogService logger;
+	final Collection<Designate> designates = new ArrayList<Designate>(7);
 
 	/*
 	 * Constructor of class DataParser.
@@ -101,7 +100,7 @@ public class DataParser {
 	/*
 	 * Main method to parse specific MetaData file.
 	 */
-	public Hashtable<String, ObjectClassDefinitionImpl> doParse() {
+	public Collection<Designate> doParse() {
 
 		try {
 			SAXParser saxParser = _dp_parserFactory.newSAXParser();
@@ -122,7 +121,7 @@ public class DataParser {
 			ioe.printStackTrace();
 			return null;
 		}
-		return _dp_pid_to_OCDs_;
+		return designates;
 	}
 
 	/*
@@ -285,19 +284,13 @@ public class DataParser {
 			}
 			Enumeration<DesignateHandler> designateHandlerKeys = _dp_designateHandlers.elements();
 			while (designateHandlerKeys.hasMoreElements()) {
-				DesignateHandler designateHandler = designateHandlerKeys.nextElement();
+				DesignateHandler dh = designateHandlerKeys.nextElement();
 
-				ObjectClassDefinitionImpl ocd = _dp_OCDs.get(designateHandler._ocdref);
+				ObjectClassDefinitionImpl ocd = _dp_OCDs.get(dh._ocdref);
 				if (ocd != null) {
-					if (designateHandler._factory_val == null) {
-						ocd.setType(ObjectClassDefinitionImpl.PID);
-						_dp_pid_to_OCDs_.put(designateHandler._pid_val, ocd);
-					} else {
-						ocd.setType(ObjectClassDefinitionImpl.FPID);
-						_dp_pid_to_OCDs_.put(designateHandler._factory_val, ocd);
-					}
+					designates.add(new Designate.Builder(dh._pid_val, ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val).merge(dh._merge_val).optional(dh._optional_val).build());
 				} else {
-					logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, designateHandler._ocdref)); //$NON-NLS-1$
+					logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, dh._ocdref)); //$NON-NLS-1$
 
 				}
 			}

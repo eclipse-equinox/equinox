@@ -36,6 +36,9 @@ public class MetaTypeMsg extends NLS {
 
 	public static String METADATA_NOT_FOUND;
 	public static String ASK_INVALID_LOCALE;
+
+	public static String MISSING_REQUIRED_PARAMETER;
+
 	public static String TOKENIZER_GOT_INVALID_DATA;
 	public static String INVALID_PID_METATYPE_PROVIDER_IGNORED;
 

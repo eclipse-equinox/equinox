@@ -27,9 +27,9 @@ public class AttributeTypePasswordTest extends TestCase {
 		Activator.getBundle(Activator.BUNDLE_METATYPE).start();
 		metaTypeReference = Activator.getBundleContext().getServiceReference(MetaTypeService.class.getName());
 		metaType = (MetaTypeService) Activator.getBundleContext().getService(metaTypeReference);
-		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext());
+		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
 		bundleInstaller.refreshPackages(null);
-		bundle = bundleInstaller.installBundle("tb1");
+		bundle = bundleInstaller.installBundle("tb1"); //$NON-NLS-1$
 		bundle.start();
 	}
 
@@ -44,11 +44,11 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword1() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password1")) {
-				assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ads[i].getType());
+			if (ads[i].getID().equals("password1")) { //$NON-NLS-1$
+				assertEquals("Attribute type is not PASSWORD", AttributeDefinition.PASSWORD, ads[i].getType()); //$NON-NLS-1$
 			}
 		}
 	}
@@ -60,11 +60,11 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword2() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password1")) {
-				assertNull("Validation should not be present when min and max are not specified and their are no enumerated constraints", ads[i].validate("1234abcd"));
+			if (ads[i].getID().equals("password1")) { //$NON-NLS-1$
+				assertNull("Validation should not be present when min and max are not specified and their are no enumerated constraints", ads[i].validate("1234abcd")); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -76,13 +76,13 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword3() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password2")) {
-				assertNotNull("Validation should be present when min and max are not specified and their are enumerated constraints", ads[i].validate("password"));
-				assertEquals("Value 'password' should have been valid", 0, ads[i].validate("password").length());
-				assertTrue("Value '1234abcd' should not have been valid", ads[i].validate("1234abcd").length() > 0);
+			if (ads[i].getID().equals("password2")) { //$NON-NLS-1$
+				assertNotNull("Validation should be present when min and max are not specified and their are enumerated constraints", ads[i].validate("password")); //$NON-NLS-1$ //$NON-NLS-2$
+				assertEquals("Value 'password' should have been valid", 0, ads[i].validate("password").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertTrue("Value '1234abcd' should not have been valid", ads[i].validate("1234abcd").length() > 0); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -93,13 +93,13 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword4() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password3")) {
-				assertEquals("Value '12345678' should have been valid", 0, ads[i].validate("12345678").length());
-				assertEquals("Value '123456789' should have been valid", 0, ads[i].validate("123456789").length());
-				assertTrue("Value '1234567' should not have been valid", ads[i].validate("1234567").length() > 0);
+			if (ads[i].getID().equals("password3")) { //$NON-NLS-1$
+				assertEquals("Value '12345678' should have been valid", 0, ads[i].validate("12345678").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertEquals("Value '123456789' should have been valid", 0, ads[i].validate("123456789").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertTrue("Value '1234567' should not have been valid", ads[i].validate("1234567").length() > 0); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -110,13 +110,13 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword5() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password4")) {
-				assertEquals("Value '12345' should have been valid", 0, ads[i].validate("12345").length());
-				assertEquals("Value '1234' should have been valid", 0, ads[i].validate("1234").length());
-				assertTrue("Value '123456' should not have been valid", ads[i].validate("123456").length() > 0);
+			if (ads[i].getID().equals("password4")) { //$NON-NLS-1$
+				assertEquals("Value '12345' should have been valid", 0, ads[i].validate("12345").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertEquals("Value '1234' should have been valid", 0, ads[i].validate("1234").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertTrue("Value '123456' should not have been valid", ads[i].validate("123456").length() > 0); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -127,14 +127,14 @@ public class AttributeTypePasswordTest extends TestCase {
 	 */
 	public void testAttributeTypePassword6() {
 		MetaTypeInformation mti = metaType.getMetaTypeInformation(bundle);
-		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb1", null); //$NON-NLS-1$
 		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
 		for (int i = 0; i < ads.length; i++) {
-			if (ads[i].getID().equals("password5")) {
-				assertEquals("Value '123' should have been valid", 0, ads[i].validate("123").length());
-				assertTrue("Value '12' should not have been valid", ads[i].validate("12").length() > 0);
-				assertEquals("Value '123456' should have been valid", 0, ads[i].validate("123456").length());
-				assertTrue("Value '1234567' should not have been valid", ads[i].validate("1234567").length() > 0);
+			if (ads[i].getID().equals("password5")) { //$NON-NLS-1$
+				assertEquals("Value '123' should have been valid", 0, ads[i].validate("123").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertTrue("Value '12' should not have been valid", ads[i].validate("12").length() > 0); //$NON-NLS-1$ //$NON-NLS-2$
+				assertEquals("Value '123456' should have been valid", 0, ads[i].validate("123456").length()); //$NON-NLS-1$ //$NON-NLS-2$
+				assertTrue("Value '1234567' should not have been valid", ads[i].validate("1234567").length() > 0); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}

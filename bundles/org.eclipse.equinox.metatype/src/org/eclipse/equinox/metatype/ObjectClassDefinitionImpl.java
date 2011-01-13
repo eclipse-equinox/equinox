@@ -24,8 +24,6 @@ import org.osgi.service.metatype.ObjectClassDefinition;
  */
 public class ObjectClassDefinitionImpl extends LocalizationElement implements ObjectClassDefinition, Cloneable {
 
-	public static final int PID = 0;
-	public static final int FPID = 1;
 	public static final char LOCALE_SEP = '_';
 
 	String _name;
@@ -191,20 +189,6 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	 */
 	void setIcon(Icon icon) {
 		this._icon = icon;
-	}
-
-	/**
-	 * Method to get the type of ObjectClassDefinition.
-	 */
-	int getType() {
-		return _type;
-	}
-
-	/**
-	 * Method to set the type of ObjectClassDefinition.
-	 */
-	void setType(int type) {
-		this._type = type;
 	}
 
 	/**
