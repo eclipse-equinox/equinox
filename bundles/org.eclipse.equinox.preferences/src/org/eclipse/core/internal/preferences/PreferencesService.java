@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,9 @@ public class PreferencesService implements IPreferencesService {
 	private static final long STRING_SHARING_INTERVAL = 300000;
 	private static final String MATCH_TYPE_PREFIX = "prefix"; //$NON-NLS-1$
 
-	// cheat here and add "project" even though we really shouldn't know about it
-	// because of plug-in dependencies and it being defined in the resources plug-in
-	private static final String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] {"project", //$NON-NLS-1$ 
-			InstanceScope.SCOPE, //
+	// the order of search scopes when people don't have a specific order set
+	private static String[] DEFAULT_DEFAULT_LOOKUP_ORDER = new String[] { //
+	InstanceScope.SCOPE, //
 			ConfigurationScope.SCOPE, //
 			DefaultScope.SCOPE};
 	private static final char EXPORT_ROOT_PREFIX = '!';
@@ -1104,4 +1103,23 @@ public class PreferencesService implements IPreferencesService {
 		return result;
 	}
 
+	/*
+	 * Return the default search lookup order for when nothing is set.
+	*/
+	public String[] getDefaultDefaultLookupOrder() {
+		return DEFAULT_DEFAULT_LOOKUP_ORDER;
+	}
+
+	/*
+	  * Set the default search order to use when there is nothing else set. Clients should not
+	  * call this method because it is in an internal class and has been created solely for use by
+	  * the org.eclipse.core.resources bundle in response to this bug:
+	  *     https://bugs.eclipse.org/330320
+	  */
+	public void setDefaultDefaultLookupOrder(String[] order) {
+		// shouldn't happen but let's protect against an NPE.
+		if (order == null)
+			order = new String[0];
+		DEFAULT_DEFAULT_LOOKUP_ORDER = order;
+	}
 }
