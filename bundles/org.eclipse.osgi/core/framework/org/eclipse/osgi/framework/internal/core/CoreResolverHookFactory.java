@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 import java.util.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.serviceregistry.*;
+import org.eclipse.osgi.service.resolver.ResolverHookException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
@@ -49,15 +50,19 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 		this.registry = registry;
 	}
 
-	void handleHookException(Throwable t, Object hook, String method, Bundle hookBundle) {
+	void handleHookException(Throwable t, Object hook, String method, Bundle hookBundle, List<HookReference> hookRefs, boolean causeFailure) {
 		if (Debug.DEBUG_HOOKS) {
-			Debug.println(hook.getClass().getName() + "." + method + "() exception: " + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-			Debug.printStackTrace(t);
+			Debug.println(hook.getClass().getName() + "." + method + "() exception:"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (t != null)
+				Debug.printStackTrace(t);
 		}
-		// allow the adaptor to handle this unexpected error
-		context.framework.getAdaptor().handleRuntimeError(t);
-		ServiceException se = new ServiceException(NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method), t);
-		context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, hookBundle, se);
+		String message = NLS.bind(Msg.SERVICE_FACTORY_EXCEPTION, hook.getClass().getName(), method);
+		if (causeFailure) {
+			releaseHooks(hookRefs);
+			throw new ResolverHookException(message, t);
+		}
+		BundleException be = new BundleException(message, BundleException.REJECTED_BY_HOOK, t);
+		context.framework.publishFrameworkEvent(FrameworkEvent.ERROR, hookBundle, be);
 	}
 
 	private ServiceReferenceImpl<ResolverHookFactory>[] getHookReferences() {
@@ -87,11 +92,17 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 						if (hook != null)
 							hookRefs.add(new HookReference(hookRef, hook));
 					} catch (Throwable t) {
-						handleHookException(t, factory, "begin", hookRef.getBundle()); //$NON-NLS-1$
+						handleHookException(t, factory, "begin", hookRef.getBundle(), hookRefs, true); //$NON-NLS-1$
 					}
 				}
 			}
 		return new CoreResolverHook(hookRefs);
+	}
+
+	void releaseHooks(List<HookReference> hookRefs) {
+		for (HookReference hookRef : hookRefs)
+			context.ungetService(hookRef.reference);
+		hookRefs.clear();
 	}
 
 	class CoreResolverHook implements ResolverHook {
@@ -111,12 +122,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					iHooks.remove();
+					handleHookException(null, hookRef.hook, "filterResolvable", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterResolvable(candidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterResolvable", hookRef.reference.getBundle()); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterResolvable", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 					}
 				}
 			}
@@ -132,12 +143,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					iHooks.remove();
+					handleHookException(null, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterSingletonCollisions(singleton, collisionCandidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle()); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 					}
 				}
 			}
@@ -153,12 +164,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					iHooks.remove();
+					handleHookException(null, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterMatches(requirer, candidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterMatches", hookRef.reference.getBundle()); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 					}
 				}
 			}
@@ -177,12 +188,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 					try {
 						hookRef.hook.end();
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "end", hookRef.reference.getBundle()); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "end", hookRef.reference.getBundle(), hooks, false); //$NON-NLS-1$
 					}
-					context.ungetService(hookRef.reference);
+
 				}
 			}
-			hooks.clear();
+			releaseHooks(hooks);
 		}
 	}
 }

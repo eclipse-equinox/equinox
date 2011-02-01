@@ -493,10 +493,17 @@ public abstract class StateImpl implements State {
 					Collection<BundleRevision> triggerRevisions = Collections.unmodifiableCollection(triggers == null ? Collections.EMPTY_LIST : Arrays.asList((BundleRevision[]) triggers));
 					currentHook = begin(triggerRevisions);
 				}
-				resolver.resolve(reResolve, tmpPlatformProperties);
+				ResolverHookException error = null;
+				try {
+					resolver.resolve(reResolve, tmpPlatformProperties);
+				} catch (ResolverHookException e) {
+					error = e;
+					resolverErrors.clear();
+				}
 				resolved = removalPendings.size() == 0;
 
-				StateDelta savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
+				StateDeltaImpl savedChanges = changes == null ? new StateDeltaImpl(this) : changes;
+				savedChanges.setResolverHookException(error);
 				changes = new StateDeltaImpl(this);
 
 				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER) {

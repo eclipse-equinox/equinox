@@ -20,6 +20,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.ResolverHookException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleWiring;
@@ -320,11 +321,13 @@ public class BundleHost extends AbstractBundle {
 
 		if (state == INSTALLED) {
 			try {
-				if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}))
+				if (!framework.packageAdmin.resolveBundles(new Bundle[] {this}, true))
 					throw getResolutionFailureException();
 			} catch (IllegalStateException e) {
 				// Can happen if the resolver detects a nested resolve process
 				throw new BundleException("Unexpected resolution exception.", BundleException.RESOLVE_ERROR, e); //$NON-NLS-1$
+			} catch (ResolverHookException e) {
+				throw new BundleException("Unexpected resolution exception.", BundleException.REJECTED_BY_HOOK, e.getCause()); //$NON-NLS-1$
 			}
 
 		}

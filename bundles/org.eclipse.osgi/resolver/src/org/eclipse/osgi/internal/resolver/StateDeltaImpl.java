@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ final class StateDeltaImpl implements StateDelta {
 	private final State state;
 
 	private final Map<BundleDescription, BundleDelta> changes = new HashMap<BundleDescription, BundleDelta>();
+	private ResolverHookException error;
 
 	public StateDeltaImpl(State state) {
 		this.state = state;
@@ -48,6 +49,14 @@ final class StateDeltaImpl implements StateDelta {
 
 	public State getState() {
 		return state;
+	}
+
+	public ResolverHookException getResovlerHookException() {
+		return error;
+	}
+
+	void setResolverHookException(ResolverHookException error) {
+		this.error = error;
 	}
 
 	void recordBundleAdded(BundleDescriptionImpl added) {

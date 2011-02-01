@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	private final ResolverImpl resolver;
 	private boolean newFragmentExports;
 	private boolean newFragmentCapabilities;
-	private List<ResolverBundle> refs;
 
 	ResolverBundle(BundleDescription bundle, ResolverImpl resolver) {
 		super(bundle);
@@ -55,8 +54,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 	}
 
 	void initialize(boolean useSelectedExports) {
-		if (getBundleDescription().isSingleton())
-			refs = new ArrayList<ResolverBundle>();
 		if (getBundleDescription().getHost() != null) {
 			host = new BundleConstraint(this, getBundleDescription().getHost());
 			exports = new ResolverExport[0];
@@ -594,22 +591,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 	ResolverImpl getResolver() {
 		return resolver;
-	}
-
-	void clearRefs() {
-		if (refs != null)
-			refs.clear();
-	}
-
-	void addRef(ResolverBundle ref) {
-		if (((BundleDescription) getBaseDescription()).isResolved())
-			return; // don't care when the bundle is already resolved
-		if (refs != null && !refs.contains(ref))
-			refs.add(ref);
-	}
-
-	int getRefs() {
-		return refs == null ? 0 : refs.size();
 	}
 
 	ResolverBundle[] getFragments() {

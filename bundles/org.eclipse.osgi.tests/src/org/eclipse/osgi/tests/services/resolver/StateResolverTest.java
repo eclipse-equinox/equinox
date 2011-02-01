@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -630,8 +630,7 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testSingletonsSelection1() throws BundleException {
 		State state = buildEmptyState();
 
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles
+		// test the selection algorithm of the resolver to pick the bundles with the largest version
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -697,18 +696,17 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("2.0", sdk20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1", platform20.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2", rcp10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.3", gef10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", gef10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.4", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", platform10.isResolved()); //$NON-NLS-1$
-		assertFalse("2.6", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
 	public void testSingletonsSelection2() throws BundleException {
 		State state = buildEmptyState();
 
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles; test with cycle added
+		// test the selection algorithm of the resolver to pick the bundles with the largest version; test with cycle added
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -741,7 +739,7 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "cycle; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
 		manifest.put(Constants.REQUIRE_BUNDLE, "gef"); //$NON-NLS-1$
-		BundleDescription cycle10 = state.getFactory().createBundleDescription(state, manifest, "gef10", 4); //$NON-NLS-1$
+		BundleDescription cycle10 = state.getFactory().createBundleDescription(state, manifest, "cycle10", 4); //$NON-NLS-1$
 
 		state.addBundle(sdk10);
 		state.addBundle(platform10);
@@ -783,19 +781,18 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("2.0", sdk20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1", platform20.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2", rcp10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.3", gef10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.4", cycle10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", gef10.isResolved()); //$NON-NLS-1$
+		assertFalse("2.4", cycle10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.6", platform10.isResolved()); //$NON-NLS-1$
-		assertFalse("2.7", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.7", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
 	public void testSingletonsSelection3() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles; with fragments
+		// test the selection algorithm of the resolver to pick the bundles with the largest version; with fragments
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -919,20 +916,20 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.1", platform20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1.1", platform_frag10.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1.2", platform_frag210.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2", rcp10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2.1", rcp_frag10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.3", gef10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", rcp20.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2.1", rcp_frag210.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2.2", rcp_frag10.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", gef10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.4", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", platform10.isResolved()); //$NON-NLS-1$
-		assertFalse("2.6", rcp20.isResolved()); //$NON-NLS-1$
-		assertFalse("2.2.2", rcp_frag210.isResolved()); //$NON-NLS-1$
+		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
+
 	}
 
 	public void testSingletonsSelection4() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles; with fragments using Import-Package
+		// test the selection algorithm of the resolver to pick the bundles with the largest version; with fragments using Import-Package
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1062,18 +1059,19 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("2.1", platform20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1.1", platform_frag10.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1.2", platform_frag210.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2", rcp10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", rcp20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.2.1", rcp_frag10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.3", gef10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2.2", rcp_frag210.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", gef10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.4", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", platform10.isResolved()); //$NON-NLS-1$
-		assertFalse("2.6", rcp20.isResolved()); //$NON-NLS-1$
-		assertFalse("2.2.2", rcp_frag210.isResolved()); //$NON-NLS-1$
+		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
+
 	}
 
 	public void testSingletonsSelection5() throws BundleException {
 		State state = buildEmptyState();
-
+		// test the selection algorithm of the resolver to pick the bundles with the largest version
 		long id = 0;
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
@@ -1085,7 +1083,6 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "base; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
 		manifest.put(Constants.BUNDLE_VERSION, "1.1"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.6"); //$NON-NLS-1$
 		BundleDescription base11 = state.getFactory().createBundleDescription(state, manifest, "base11", id++); //$NON-NLS-1$
 
 		manifest.clear();
@@ -1128,7 +1125,7 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "fragb; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
 		manifest.put(Constants.BUNDLE_VERSION, "1.1"); //$NON-NLS-1$
-		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.0,1.1)\""); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "requires; bundle-version=\"[1.1,1.2)\""); //$NON-NLS-1$
 		manifest.put(Constants.EXPORT_PACKAGE, "fragb; version=1.1"); //$NON-NLS-1$
 		BundleDescription fragb11 = state.getFactory().createBundleDescription(state, manifest, "frag11", id++); //$NON-NLS-1$
 
@@ -1158,14 +1155,14 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(import11);
 		state.resolve();
 
-		assertTrue("1.0", base10.isResolved()); //$NON-NLS-1$
-		assertTrue("1.1", requires10.isResolved()); //$NON-NLS-1$
-		assertTrue("1.2", frag10.isResolved()); //$NON-NLS-1$
+		assertTrue("1.0", base11.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", requires11.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", frag11.isResolved()); //$NON-NLS-1$
 		assertTrue("1.3", fragb11.isResolved()); //$NON-NLS-1$
 		assertTrue("1.4", import11.isResolved()); //$NON-NLS-1$
-		assertFalse("1.5", base11.isResolved()); //$NON-NLS-1$
-		assertFalse("1.6", requires11.isResolved()); //$NON-NLS-1$
-		assertFalse("1.7", frag11.isResolved()); //$NON-NLS-1$
+		assertFalse("1.5", base10.isResolved()); //$NON-NLS-1$
+		assertFalse("1.6", requires10.isResolved()); //$NON-NLS-1$
+		assertFalse("1.7", frag10.isResolved()); //$NON-NLS-1$
 		assertFalse("1.8", fragb10.isResolved()); //$NON-NLS-1$
 		assertFalse("1.9", import10.isResolved()); //$NON-NLS-1$
 	}
@@ -1173,8 +1170,7 @@ public class StateResolverTest extends AbstractStateTest {
 	public void testSingletonsSelection6() throws BundleException {
 		State state = buildEmptyState();
 
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles
+		// test the selection algorithm of the resolver to pick the bundles with the largest version
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "sdk; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1250,18 +1246,17 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("2.0", sdk20.isResolved()); //$NON-NLS-1$
 		assertTrue("2.1", platform20.isResolved()); //$NON-NLS-1$
-		assertTrue("2.2", rcp10.isResolved()); //$NON-NLS-1$
-		assertTrue("2.3", gef10.isResolved()); //$NON-NLS-1$
+		assertTrue("2.2", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", gef10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.4", sdk10.isResolved()); //$NON-NLS-1$
 		assertFalse("2.5", platform10.isResolved()); //$NON-NLS-1$
-		assertFalse("2.6", rcp20.isResolved()); //$NON-NLS-1$
+		assertFalse("2.6", rcp10.isResolved()); //$NON-NLS-1$
 	}
 
 	public void testSingletonsSelection7() throws BundleException {
 		State state = buildEmptyState();
 		long id = 0;
-		// test the selection algorithm of the resolver to pick the bundles which
-		// resolve the largest set of bundles
+		// test the selection algorithm of the resolver to pick the bundles with the largest version
 		Hashtable manifest = new Hashtable();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "singleton; " + Constants.SINGLETON_DIRECTIVE + ":=true"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -180,10 +180,19 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 	}
 
 	public boolean resolveBundles(Bundle[] bundles) {
+		return resolveBundles(bundles, false);
+	}
+
+	boolean resolveBundles(Bundle[] bundles, boolean propagateError) {
 		framework.checkAdminPermission(framework.systemBundle, AdminPermission.RESOLVE);
 		if (bundles == null)
 			bundles = framework.getAllBundles();
-		doResolveBundles(bundles, false, null);
+		try {
+			doResolveBundles(bundles, false, null);
+		} catch (ResolverHookException e) {
+			if (propagateError)
+				throw e;
+		}
 		for (int i = 0; i < bundles.length; i++)
 			if (!((AbstractBundle) bundles[i]).isResolved())
 				return false;
@@ -237,8 +246,11 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 					descriptions = (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));
 				}
 			}
-			BundleDelta[] delta = systemState.resolve(descriptions, refreshPackages).getChanges();
+			StateDelta stateDelta = systemState.resolve(descriptions, refreshPackages);
+			BundleDelta[] delta = stateDelta.getChanges();
 			processDelta(delta, refreshPackages, systemState);
+			if (stateDelta.getResovlerHookException() != null)
+				throw stateDelta.getResovlerHookException();
 		} catch (Throwable t) {
 			if (Debug.DEBUG_PACKAGEADMIN) {
 				Debug.println("PackageAdminImpl.doResolveBundles: Error occured :"); //$NON-NLS-1$
