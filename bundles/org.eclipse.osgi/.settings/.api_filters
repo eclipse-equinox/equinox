@@ -419,6 +419,15 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/AdminPermission.java" type="org.osgi.framework.AdminPermission">
+<filter comment="Ignore OSGi API" id="1141899266">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="WEAVE"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
 <filter id="403853384">
 <message_arguments>
