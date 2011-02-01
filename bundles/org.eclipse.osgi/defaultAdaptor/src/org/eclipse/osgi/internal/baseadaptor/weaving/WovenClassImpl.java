@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		super();
 		this.className = className;
 		this.bytes = bytes;
-		this.dynamicImports = new DynamicImportList();
+		this.dynamicImports = new DynamicImportList(this);
 		this.domain = domain;
 		this.loader = loader;
 		this.registry = registry;
@@ -48,8 +48,10 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	public byte[] getBytes() {
-		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0)
+		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0) {
+			checkPermission();
 			return bytes; // return raw bytes until complete
+		}
 		// we have called all hooks; someone is calling outside of weave call
 		// need to be safe and copy the bytes.
 		byte[] current = bytes;
@@ -59,12 +61,19 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	public void setBytes(byte[] newBytes) {
+		checkPermission();
 		if (newBytes == null)
 			throw new NullPointerException("newBytes cannot be null."); //$NON-NLS-1$
 		if ((hookFlags & FLAG_HOOKSCOMPLETE) != 0)
 			// someone is calling this outside of weave
 			throw new IllegalStateException("Weaving has completed already."); //$NON-NLS-1$
 		this.bytes = newBytes;
+	}
+
+	void checkPermission() {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm != null)
+			sm.checkPermission(new AdminPermission(loader.getBundle(), AdminPermission.WEAVE));
 	}
 
 	public List<String> getDynamicImports() {
