@@ -4,17 +4,17 @@ Bundle-SymbolicName: c2.osgi
 Bundle-Version: 1.0
 Require-Capability: 
  namespace.1;
-  filter="(&(rank>=200)(!(rank>=300))
+  filter:="(&(rank>=200)(!(rank>=300))
           (percent>=0.2)(!(percent>=0.3))
           (test.version>=2.0)(!(test.version>=3.0))
           (test.string~=abc))",
  namespace.2;
-  filter="(&(rank>=200)(!(rank>=300))
+  filter:="(&(rank>=200)(!(rank>=300))
           (percent>=0.2)(!(percent>=0.3))
           (test.version>=2.0)(!(test.version>=3.0))
           (test.string~=abc))",
  namespace.3;
-  filter="(&(rank>=200)(!(rank>=300))
+  filter:="(&(rank>=200)(!(rank>=300))
           (percent>=0.2)(!(percent>=0.3))
           (test.version>=2.0)(!(test.version>=3.0))
           (test.string~=abc))"

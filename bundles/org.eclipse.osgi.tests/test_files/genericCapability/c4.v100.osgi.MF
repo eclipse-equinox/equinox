@@ -3,5 +3,5 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: c4.osgi
 Bundle-Version: 1.0
 Require-Capability: 
- namespace.5; filter="(version=1.0)"
+ namespace.5; filter:="(version=1.0)"
 Import-Package: p6, p7
