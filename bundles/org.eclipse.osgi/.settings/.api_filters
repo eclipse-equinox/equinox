@@ -551,12 +551,6 @@
 <message_argument value="EFFECTIVE_RESOLVE"/>
 </message_arguments>
 </filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FILTER_ATTRIBUTE"/>
-</message_arguments>
-</filter>
 <filter comment="Ignore OSGi API" id="403767336">
 <message_arguments>
 <message_argument value="org.osgi.framework.Constants"/>
@@ -702,6 +696,13 @@
 <message_argument value="1.6"/>
 <message_argument value="3.7"/>
 <message_argument value="FILTER_ATTRIBUTE"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore OSGI API." id="1209008130">
+<message_arguments>
+<message_argument value="1.6"/>
+<message_argument value="3.7"/>
+<message_argument value="FILTER_DIRECTIVE"/>
 </message_arguments>
 </filter>
 <filter comment="Ignore OSGi API" id="1209008130">
