@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,11 +26,11 @@ public class CoordinatorComponent implements Coordinator {
 		return coordinator.addParticipant(participant);
 	}
 
-	public Coordination begin(String name, int timeout) {
+	public Coordination begin(String name, long timeout) {
 		return coordinator.begin(name, timeout);
 	}
 
-	public Coordination create(String name, int timeout) {
+	public Coordination create(String name, long timeout) {
 		return coordinator.create(name, timeout);
 	}
 

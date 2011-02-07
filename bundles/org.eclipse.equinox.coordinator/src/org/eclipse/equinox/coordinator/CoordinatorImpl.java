@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +26,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceException;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
@@ -46,16 +48,71 @@ public class CoordinatorImpl implements Coordinator {
 	private static final Map<Long, CoordinationImpl> idToCoordination = new HashMap<Long, CoordinationImpl>();
 	// Coordination participation must be tracked across all using bundles.
 	private static final Map<Participant, CoordinationImpl> participantToCoordination = new IdentityHashMap<Participant, CoordinationImpl>();
-	/* ThreadLocal, as opposed to the following Map, was considered and rejected 
-	 * because a coordination may be terminated from a thread other than the one 
-	 * it's currently associated with. Termination requires the coordination to be 
-	 * removed from the stack. There would be no access to the ThreadLocal under 
-	 * such circumstances.
-	 * 
-	 * The thread local stack must be tracked across all using bundles.
-	 */
-	private static final Map<Thread, LinkedList<CoordinationImpl>> threadToCoordinations = new HashMap<Thread, LinkedList<CoordinationImpl>>();
 
+	private static ThreadLocal<WeakCoordinationStack> coordinationStack = new ThreadLocal<WeakCoordinationStack>() {
+		@Override 
+		protected WeakCoordinationStack initialValue() {
+			return new WeakCoordinationStack();
+		}
+	};
+	
+	private static class WeakCoordinationStack {
+		private final LinkedList<Reference<CoordinationImpl>> coordinations = new LinkedList<Reference<CoordinationImpl>>();
+		private final ReferenceQueue<CoordinationImpl> queue = new ReferenceQueue<CoordinationImpl>();
+		
+		public WeakCoordinationStack() {
+		}
+
+		public boolean contains(CoordinationImpl c) {
+			purge();
+			for (Reference<CoordinationImpl> r : coordinations) {
+				if (c.equals(r.get()))
+					return true;
+			}
+			return false;
+		}
+		
+		public CoordinationImpl peek() {
+			purge();
+			if (coordinations.isEmpty())
+				return null;
+			return coordinations.getFirst().get();
+		}
+		
+		public CoordinationImpl pop() {
+			purge();
+			if (coordinations.isEmpty())
+				return null;
+			CoordinationImpl c = coordinations.removeFirst().get();
+			if (c != null)
+				c.setThreadAndEnclosingCoordination(null, null);
+			return c;
+		}
+		
+		public void push(CoordinationImpl c) {
+			purge();
+			if (contains(c))
+				throw new CoordinationException(Messages.CoordinatorImpl_3, c, CoordinationException.ALREADY_PUSHED);
+			Reference<CoordinationImpl> r = new WeakReference<CoordinationImpl>(c, queue);
+			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
+			coordinations.addFirst(r);
+		}
+		
+		private void purge() {
+			Reference<? extends CoordinationImpl> r;
+			while ((r = queue.poll()) != null) {
+				int index = coordinations.indexOf(r);
+				coordinations.remove(r);
+				if (index > 0) {
+					r = coordinations.get(index - 1);
+					CoordinationImpl c = r.get();
+					if (c != null)
+						c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.get(index));
+				}
+			}
+		}
+	}
+	
 	private final Bundle bundle;
 	private final List<CoordinationImpl> coordinations;
 	private final LogService logService;
@@ -78,15 +135,15 @@ public class CoordinatorImpl implements Coordinator {
 		return true;
 	}
 
-	public Coordination begin(String name, int timeout) {
+	public Coordination begin(String name, long timeout) {
 		CoordinationImpl coordination = (CoordinationImpl) create(name, timeout);
 		coordination.push();
 		return coordination;
 	}
 
-	public Coordination create(String name, int timeout) {
+	public Coordination create(String name, long timeout) {
 		// This method requires the INITIATE permission. No bundle check is done.
-		checkPermission(CoordinationPermission.INITIATE, name, false);
+		checkPermission(CoordinationPermission.INITIATE, name);
 		CoordinationImpl coordination = new CoordinationImpl(getNextId(), name, timeout, this);
 		synchronized (this) {
 			if (shutdown)
@@ -116,9 +173,14 @@ public class CoordinatorImpl implements Coordinator {
 		synchronized (CoordinatorImpl.class) {
 			result = idToCoordination.get(new Long(id));
 		}
-		if (result == null || result.isTerminated())
-			return null;
-		checkPermission(CoordinationPermission.ADMIN, result.getName());
+		if (result != null && !result.isTerminated()) {
+			try {
+				checkPermission(CoordinationPermission.ADMIN, result.getName());
+			} catch (SecurityException e) {
+				logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_1, e);
+				result = null;
+			}
+		}
 		return result;
 	}
 
@@ -144,35 +206,14 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Coordination peek() {
-		Coordination result = null;
-		Thread thread = Thread.currentThread();
-		synchronized (CoordinationImpl.class) {
-			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(thread);
-			// Be sure to avoid EmptyStackException with this check.
-			if (coords != null && !coords.isEmpty()) {
-				result = coords.getFirst();
-			}
-		}
-		return result;
+		return coordinationStack.get().peek();
 	}
 
 	public Coordination pop() {
-		Thread thread = Thread.currentThread();
-		CoordinationImpl result = null;
-		synchronized (CoordinatorImpl.class) {
-			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(thread);
-			if (coords != null && !coords.isEmpty()) {
-				result = coords.removeFirst();
-				if (coords.isEmpty()) {
-					// Clean the map up if there are no more coordinations
-					// associated with the current thread.
-					threadToCoordinations.remove(thread);
-				}
-			}
-		}
-		if (result != null)
-			result.pop();
-		return result;
+		Coordination c = coordinationStack.get().peek();
+		if (c == null) return null;
+		checkPermission(CoordinationPermission.INITIATE, c.getName());
+		return coordinationStack.get().pop();
 	}
 
 	CoordinationImpl addParticipant(Participant participant, CoordinationImpl coordination) {
@@ -187,11 +228,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	void checkPermission(String permissionType, String coordinationName) {
-		checkPermission(permissionType, coordinationName, true);
-	}
-
-	void checkPermission(String permissionType, String coordinationName, boolean bundleCheckRequired) {
-		checkPermission(new CoordinationPermission(bundleCheckRequired ? bundle : null, coordinationName, permissionType));
+		checkPermission(new CoordinationPermission(coordinationName, bundle, permissionType));
 	}
 
 	void checkPermission(Permission permission) {
@@ -201,12 +238,16 @@ public class CoordinatorImpl implements Coordinator {
 		securityManager.checkPermission(permission);
 	}
 
+	Bundle getBundle() {
+		return bundle;
+	}
+
 	LogService getLogService() {
 		return logService;
 	}
 
 	void purge() {
-		// Purge the timer of all canceled tasks if  we're running on a supportive JCL.
+		// Purge the timer of all canceled tasks if we're running on a supportive JCL.
 		try {
 			Timer.class.getMethod("purge", (Class<?>[]) null).invoke(timer, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
@@ -215,16 +256,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	void push(CoordinationImpl coordination) throws CoordinationException {
-		synchronized (CoordinatorImpl.class) {
-			LinkedList<CoordinationImpl> coords = threadToCoordinations.get(coordination.getThread());
-			if (coords == null) {
-				coords = new LinkedList<CoordinationImpl>();
-				threadToCoordinations.put(coordination.getThread(), coords);
-			}
-			if (coords.contains(coordination))
-				throw new CoordinationException(Messages.CoordinatorImpl_3, coordination, CoordinationException.ALREADY_PUSHED);
-			coords.addFirst(coordination);
-		}
+		coordinationStack.get().push(coordination);
 	}
 
 	void schedule(TimerTask task, Date deadline) {
@@ -239,26 +271,19 @@ public class CoordinatorImpl implements Coordinator {
 			// termination does not interfere with the iteration.
 			coords = new ArrayList<Coordination>(this.coordinations);
 		}
-		ServiceException serviceException = new ServiceException(Messages.CoordinationImpl_4, ServiceException.UNREGISTERED);
 		for (Coordination coordination : coords) {
-			coordination.fail(serviceException);
+			coordination.fail(Coordination.RELEASED);
 		}
 	}
 
+	/*
+	 * This procedure must occur when a coordination is being failed or ended.
+	 */
 	void terminate(Coordination coordination, List<Participant> participants) {
 		// A coordination has been terminated and needs to be removed from the thread local stack.
 		synchronized (this) {
 			synchronized (CoordinatorImpl.class) {
 				this.coordinations.remove(coordination);
-				LinkedList<CoordinationImpl> coords = threadToCoordinations.get(coordination.getThread());
-				if (coords != null && !coords.isEmpty()) {
-					coords.remove(coordination);
-					if (coords.isEmpty()) {
-						// Clean the map up if there are no more coordinations
-						// associated with the current thread.
-						threadToCoordinations.remove(coordination.getThread());
-					}
-				}
 				idToCoordination.remove(new Long(coordination.getId()));
 				participantToCoordination.keySet().removeAll(participants);
 			}

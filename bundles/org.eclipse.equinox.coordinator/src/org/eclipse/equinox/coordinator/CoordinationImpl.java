@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator;
 
+import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
 import org.osgi.service.coordinator.CoordinationPermission;
@@ -25,17 +27,19 @@ import org.osgi.service.coordinator.Participant;
 import org.osgi.service.log.LogService;
 
 public class CoordinationImpl implements Coordination {
+	private volatile Throwable failure;
+	private volatile boolean terminated;
+	
+	private Date deadline;
+	private Reference<CoordinationImpl> enclosingCoordination;
+	private Thread thread;
+	private TimerTask timerTask;
+	
 	private final CoordinatorImpl coordinator;
 	private final long id;
 	private final String name;
 	private final List<Participant> participants;
 	private final Map<Class<?>, Object> variables;
-
-	private volatile Date deadline;
-	private volatile Throwable failure;
-	private volatile boolean terminated;
-	private volatile Thread thread;
-	private volatile TimerTask timerTask;
 
 	public CoordinationImpl(long id, String name, long timeout, CoordinatorImpl coordinator) {
 		validateName(name);
@@ -51,6 +55,8 @@ public class CoordinationImpl implements Coordination {
 	public void addParticipant(Participant participant) throws CoordinationException {
 		// This method requires the PARTICIPATE permission.
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
+		if (participant == null)
+			throw new NullPointerException(Messages.CoordinationImpl_15);
 		/* The caller has permission. Check to see if the participant is already 
 		 * participating in another coordination. Do this in a loop in case the 
 		 * participant must wait for the other coordination to finish. The loop 
@@ -108,8 +114,33 @@ public class CoordinationImpl implements Coordination {
 	}
 
 	public void end() throws CoordinationException {
+		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		// Terminating the coordination must be atomic.
-		terminate();
+		synchronized (this) {
+			// If this coordination is associated with a thread, an additional
+			// check is required.
+			if (thread != null) {
+				// Coordinations may only be ended by the same thread that
+				// pushed them onto the stack, if any.
+				if (thread != Thread.currentThread()) {
+					throw new CoordinationException(Messages.CoordinationImpl_14, this, CoordinationException.WRONG_THREAD);
+				}
+				// Unwind the stack in case there are other coordinations higher
+				// up than this one.
+				while (coordinator.peek() != this) {
+					try {
+						coordinator.peek().end();
+					} catch (CoordinationException e) {
+						coordinator.peek().fail(e);
+					}
+				}
+				// A coordination is removed from the thread local stack only when being ended.
+				// This must occur even if the coordination is already terminated due to a
+				// failure.
+				coordinator.pop();
+			}
+			terminate();
+		}
 		// Notify participants this coordination has ended. Track whether or
 		// not a partial ending has occurred.
 		Exception exception = null;
@@ -136,6 +167,7 @@ public class CoordinationImpl implements Coordination {
 	}
 
 	public long extendTimeout(long timeInMillis) throws CoordinationException {
+		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		validateTimeout(timeInMillis);
 		// We don't want this coordination to terminate before the new timer is 
 		// in place.
@@ -155,13 +187,20 @@ public class CoordinationImpl implements Coordination {
 			boolean cancelled = timerTask.cancel();
 			if (!cancelled) {
 				// This means the previous task has run and is waiting to get a lock on
-				// this coordination. We can't throw an exception here because we can't
+				// this coordination. We can't throw an exception yet because we can't
 				// know which one to use (ALREADY_ENDED or FAILED). Once the lock is
 				// released, the running task may fail this coordination due to a timeout, 
 				// or something else might be waiting to fail this coordination for other
 				// reasons or to end it. We simply don't know who will win the race.
-				// Return 0 to indicate that no extension has occurred.
-				return 0;
+				try {
+					// Wait until this coordination terminates.
+					join(0);
+					// Now determine how it terminated and throw the appropriate exception.
+					checkTerminated();
+				}
+				catch (InterruptedException e) {
+					throw new CoordinationException(Messages.CoordinationImpl_13, this, CoordinationException.UNKNOWN, e);
+				}
 			}
 			// Create the new timeout.
 			timerTask = new CoordinationTimerTask(this);
@@ -175,6 +214,7 @@ public class CoordinationImpl implements Coordination {
 	}
 
 	public boolean fail(Throwable reason) {
+		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		// The reason must not be null.
 		if (reason == null)
 			throw new NullPointerException(Messages.CoordinationImpl_11);
@@ -206,8 +246,19 @@ public class CoordinationImpl implements Coordination {
 		// Return true to indicate this call resulted in the coordination's failure.
 		return true;
 	}
+	
+	public Bundle getBundle() {
+		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
+		return coordinator.getBundle();
+	}
+	
+	public synchronized Coordination getEnclosingCoordination() {
+		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
+		return enclosingCoordination == null ? null : enclosingCoordination.get();
+	}
 
 	public Throwable getFailure() {
+		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		return failure;
 	}
 
@@ -221,18 +272,20 @@ public class CoordinationImpl implements Coordination {
 
 	public List<Participant> getParticipants() {
 		// This method requires the ADMIN permission.
-		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
+		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		// Return a mutable snapshot.
 		synchronized (participants) {
 			return new ArrayList<Participant>(participants);
 		}
 	}
 
-	public Thread getThread() {
+	public synchronized Thread getThread() {
+		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
 		return thread;
 	}
 
 	public Map<Class<?>, Object> getVariables() {
+		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		return variables;
 	}
 
@@ -241,9 +294,7 @@ public class CoordinationImpl implements Coordination {
 	}
 
 	public void join(long timeInMillis) throws InterruptedException {
-		// Treat negative arguments as if they were zero.
-		if (timeInMillis < 0)
-			timeInMillis = 0;
+		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		long start = System.currentTimeMillis();
 		// Wait until this coordination has terminated. Guard against spurious
 		// wakeups using isTerminated().
@@ -258,15 +309,15 @@ public class CoordinationImpl implements Coordination {
 	}
 
 	public Coordination push() throws CoordinationException {
+		coordinator.checkPermission(CoordinationPermission.INITIATE, name);
 		synchronized (this) {
 			checkTerminated();
-			thread = Thread.currentThread();
 			coordinator.push(this);
 		}
 		return this;
 	}
 
-	Date getDeadline() {
+	synchronized Date getDeadline() {
 		return deadline;
 	}
 
@@ -274,15 +325,16 @@ public class CoordinationImpl implements Coordination {
 		return coordinator.getLogService();
 	}
 
-	void pop() {
-		thread = null;
-	}
-
-	void setTimerTask(TimerTask timerTask) {
+	synchronized void setTimerTask(TimerTask timerTask) {
 		this.timerTask = timerTask;
 	}
+	
+	synchronized void setThreadAndEnclosingCoordination(Thread t, Reference<CoordinationImpl> c) {
+		thread = t;
+		enclosingCoordination = c;
+	}
 
-	private synchronized void checkTerminated() throws CoordinationException {
+	private void checkTerminated() throws CoordinationException {
 		// If this coordination is not terminated, simply return.
 		if (!terminated)
 			return;
@@ -297,7 +349,7 @@ public class CoordinationImpl implements Coordination {
 		throw new CoordinationException(Messages.CoordinationImpl_8, CoordinationImpl.this, CoordinationException.ALREADY_ENDED);
 	}
 
-	private synchronized void terminate() throws CoordinationException {
+	private void terminate() throws CoordinationException {
 		checkTerminated();
 		terminated = true;
 		// Cancel the timeout. Purge the task if it was, in fact, canceled.
