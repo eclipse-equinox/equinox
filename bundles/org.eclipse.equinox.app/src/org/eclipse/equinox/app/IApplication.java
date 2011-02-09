@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ package org.eclipse.equinox.app;
 /**
  * Bootstrap type for an application.  An IApplication represent executable 
  * entry points into an application.  An IApplication can be configured into 
- * the Platform's <code>org.eclipse.equinox.applications</code> extension-point.
+ * the Platform's <code>org.eclipse.core.runtime.applications</code> extension-point.
  *
  * <p>
  * Clients may implement this interface.
