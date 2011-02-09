@@ -8,61 +8,61 @@
          point="org.eclipse.equinox.bidi.bidiTypes">
       <typeDescription
             description="%sqlProcessorName"
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpSql"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexSql"
             type="sql">
       </typeDescription>
       <typeDescription
             description="%regexProcessorName"
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpRegex"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexRegex"
             type="regex">
       </typeDescription>
       <typeDescription
             description="%javaProcessorName"
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpJava"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexJava"
             type="java">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpComma"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexComma"
             description="%commaProcessorName"
             type="comma">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpEmail"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexEmail"
             description="%emailProcessorName"
             type="email">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpFile"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexFile"
             description="%fileProcessorName"
             type="file">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpMath"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexMath"
             description="%mathProcessorName"
             type="math">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpProperty"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexProperty"
             description="%propertyProcessorName"
             type="property">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpSystem"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexSystem"
             description="%systemProcessorName"
             type="system">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpUnderscore"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexUnderscore"
             description="%underscoreProcessorName"
             type="underscore">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpURL"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexURL"
             description="%urlProcessorName"
             type="url">
       </typeDescription>
       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.complexp.consumable.ComplExpXPath"
+            class="org.eclipse.equinox.bidi.internal.consumable.BidiComplexXPath"
             description="%xpathProcessorName"
             type="xpath">
       </typeDescription>

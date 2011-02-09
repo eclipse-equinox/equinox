@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<META name="Author" content="Matitiahu Allouche">
+</head>
+<body bgcolor="white">
+
+This package provides interfaces and classes for
+processing complex expressions.
+
+
+<h2>Introduction to Complex Expressions</h2>
+<p>
+Bidirectional text offers interesting challenges to presentation systems.
+For plain text, the Unicode Bidirectional Algorithm
+(<a href="http://www.unicode.org/reports/tr9/">UBA</a>)
+generally specifies satisfactorily how to reorder bidirectional text for
+display. This algorithm is implemented in Java's presentation system.</p>
+<p>
+However, all bidirectional text is not necessarily plain text. There
+are also instances of text structured to follow a given syntax, which
+should be reflected in the display order. The general algorithm, which
+has no awareness of these special cases, often gives incorrect results
+when displaying such structured text.</p>
+<p>
+The general idea in handling complex expressions is to add directional
+formatting characters at proper locations in the text to supplement the
+standard algorithm, so that the final result is correctly displayed
+using the UBA.
+A class which handles complex expressions is thus essentially a
+transformation engine which receives text without directional formatting
+characters as input and produces as output the same text with added
+directional formatting characters, hopefully in the minimum quantity
+which is sufficient to ensure correct display, considering the type of
+complex expression involved.</p>
+<p>
+In this package, text without directional formatting characters is
+called <b><i>lean</i></b> text while the text with added directional
+formatting characters is called <b><i>full</i></b> text.</p>
+<p>
+The class {@link
+<a href="BidiComplexHelper.html"><b>BidiComplexHelper</b></a>}
+is the main tool for processing complex expressions.  It facilitates
+handling several types of complex expressions, each type being handled
+by a specific
+{@link <a href="custom\IBidiComplexProcessor.html"><b><i>processor</i></b></a>} :</p>
+<ul>
+  <li>property (name=value)</li>
+  <li>compound name (xxx_yy_zzzz)</li>
+  <li>comma delimited list</li>
+  <li>system(user)</li>
+  <li>directory and file path</li>
+  <li>e-mail address</li>
+  <li>URL</li>
+  <li>regular expression</li>
+  <li>Xpath</li>
+  <li>Java code</li>
+  <li>SQL statements</li>
+  <li>RTL arithmetic expressions</li>
+</ul>
+<p>
+Other classes and one interface in this package may be used to
+complement and facilitate the action of
+{@link <a href="BidiComplexHelper.html">BidiComplexHelper</a>}:
+<ul>
+  <li>{@link <a href="BidiComplexEnvironment.html">BidiComplexEnvironment</a>}
+  which regroups details about the environment</li>
+  <li>{@link <a href="BidiComplexFeatures.html">BidiComplexFeatures</a>}
+      which allows viewing and manipulating some factors which affect
+      a complex expression processor's behavior</li>
+  <li>{@link <a href="BidiComplexUtil.html">BidiComplexUtil</a>}
+      provides a number of convenience methods to process some common types of
+      complex expressions.  When using methods in this class, there is no need
+      to use other classes of this package.  However, the other classes allow
+      more precise control and possibly better performance.</li>
+  <li>{@link <a href="IBidiComplexExpressionTypes.html">IBidiComplexExpressionTypes</a>}
+      is an interface which contains only literals identifying the various types
+      of complex expressions currently supported.</li>
+  <li>{@link <a href="BidiComplexStringRecord.html">BidiComplexStringRecord</a>}
+      which allows to record strings which are complex expressions with their
+      type, so that another module can check if a given string has been recorded
+      as a complex expression and retrieve its type.</li>
+</ul>
+<p>
+{@link <a href="BidiComplexHelper.html">BidiComplexHelper</a>} and the
+other classes and interface mentioned above are intended for users who
+need to process complex expressions for which there already exist
+processors.
+<p>
+Developers who want to develop new processors to support types of complex
+expressions not currently supported can use the following components of the
+package {@link <a href="custom\package-summary.html">
+org.eclipse.equinox.bidi.custom</a>}:
+<ul>
+  <li>{@link <a href="custom\IBidiComplexProcessor.html">IBidiComplexProcessor</a>}
+      is an interface specifying which methods a processor must provide.</li>
+  <li>{@link <a href="custom\BidiComplexProcessor.html">BidiComplexProcessor</a>}
+      is a generic processor which can be used as superclass for specific
+      processors.</li>
+  <li>{@link <a href="custom\BidiComplexStringProcessor.html">BidiComplexStringProcessor</a>}
+      is a class which allows retrieval of the defined processor types and of the
+      corresponding processors.</li>
+</ul>
+<p>
+There are two other packages associated with the current one:
+<ul>
+  <li>{@link <a href="internal\package-summary.html">
+      org.eclipse.equinox.bidi.internal</a>}</li>
+  <li>{@link <a href="internal\consumable\package-summary.html">
+       org.eclipse.equinox.bidi.internal.consumable</a>}</li>
+</ul>
+The tools in the first package can serve as example of how to develop
+processors for currently unsupported types of complex expressions.<br>
+The latter package contains classes for the processors implementing
+the currently supported types of complex expressions.
+<p>
+However, users wishing to process the currently supported types of
+complex expressions typically don't need to interact with these
+two packages.
+
+<p>&nbsp;</p>
+
+<h2>Abbreviations used in the documentation of this package</h2>
+
+<dl>
+<dt><b>UBA</b><dd>Unicode Bidirectional Algorithm
+
+<dt><b>Bidi</b><dd>Bidirectional
+
+<dt><b>GUI</b><dd>Graphical User Interface
+
+<dt><b>UI</b><dd>User Interface
+
+<dt><b>LTR</b><dd>Left to Right
+
+<dt><b>RTL</b><dd>Right to Left
+
+<dt><b>LRM</b><dd>Left-to-Right Mark
+
+<dt><b>RLM</b><dd>Right-to-Left Mark
+
+<dt><b>LRE</b><dd>Left-to-Right Embedding
+
+<dt><b>RLE</b><dd>Right-to-Left Embedding
+
+<dt><b>PDF</b><dd>Pop Directional Formatting
+</dl>
+
+<p>&nbsp;</p>
+
+<h2>Known Limitations</h2>
+
+<p>The proposed solution is making extensive usage of LRM, RLM, LRE, RLE
+and PDF directional controls which are invisible but affect the way bidi
+text is displayed. The following related key points merit special
+attention:</p>
+
+<ul>
+<li>Implementations of the UBA on various platforms (e.g., Windows and
+Linux) are very similar but nevertheless have known differences. Those
+differences are minor and will not have a visible effect in most cases.
+However there might be cases in which the same bidi text on two
+platforms might look different. These differences will surface in Java
+applications when they use the platform visual components for their UI
+(e.g., AWT, SWT).</li>
+
+<li>It is assumed that the presentation engine supports LRE, RLE and
+PDF directional formatting characters.</li>
+
+<li>Because some presentation engines are not strictly conformant to the
+UBA, the implementation of complex expressions in this package adds LRM
+or RLM characters in association with LRE, RLE or PDF in cases where
+this would not be needed if the presentation engine was fully conformant
+to the UBA. Such added marks will not have harmful effects on
+conformant presentation engines and will help less conformant engines to
+achieve the desired presentation.</li>
+</ul>
+
+</body>
+</html>

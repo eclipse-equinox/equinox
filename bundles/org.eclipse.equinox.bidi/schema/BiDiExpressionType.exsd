@@ -63,7 +63,7 @@
                   The processor that provides specialized bi-directional handling for this type of strings.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.equinox.bidi.complexp.IComplExpProcessor"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.equinox.bidi.custom.IBidiComplexProcessor"/>
                </appInfo>
             </annotation>
          </attribute>
