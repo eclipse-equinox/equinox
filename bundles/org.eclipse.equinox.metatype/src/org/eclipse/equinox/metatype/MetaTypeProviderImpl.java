@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,10 +114,10 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 						// We got some OCDs now.
 						isThereMetaHere = true;
 						for (Designate d : designates) {
-							if (d.isSingleton()) {
-								_allPidOCDs.put(d.getPid(), d.getObjectClassDefinition());
-							} else {
+							if (d.isFactory()) {
 								_allFPidOCDs.put(d.getFactoryPid(), d.getObjectClassDefinition());
+							} else {
+								_allPidOCDs.put(d.getPid(), d.getObjectClassDefinition());
 							}
 						}
 					}

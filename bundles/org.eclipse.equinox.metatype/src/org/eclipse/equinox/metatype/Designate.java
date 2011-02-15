@@ -81,12 +81,12 @@ public class Designate {
 		return factoryPid;
 	}
 
-	public boolean isMerge() {
-		return merge;
+	public boolean isFactory() {
+		return factoryPid != null && factoryPid.length() != 0;
 	}
 
-	public boolean isSingleton() {
-		return factoryPid == null || factoryPid.length() == 0;
+	public boolean isMerge() {
+		return merge;
 	}
 
 	public ObjectClassDefinitionImpl getObjectClassDefinition() {
