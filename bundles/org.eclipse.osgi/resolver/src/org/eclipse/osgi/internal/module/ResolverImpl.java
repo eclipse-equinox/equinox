@@ -1794,7 +1794,11 @@ public class ResolverImpl implements Resolver {
 						if (DEBUG_IMPORTS)
 							ResolverImpl.log("Resolved dynamic import: " + dynamicImport.getBundle() + ":" + dynamicImport.getName() + " -> " + ((ResolverExport) dynamicImport.getSelectedSupplier()).getExporter() + ":" + requestedPackage); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
-						ExportPackageDescription supplier = ((ResolverExport) dynamicImport.getSelectedSupplier()).getExportPackageDescription();
+						// now that we have an export to wire to; populate the roots for that package for the bundle
+						ResolverExport export = (ResolverExport) dynamicImport.getSelectedSupplier();
+						groupingChecker.populateRoots(dynamicImport.getBundle(), export);
+
+						ExportPackageDescription supplier = export.getExportPackageDescription();
 						if (supplier != null)
 							addStateWire(dynamicImport.getBundleDescription(), dynamicImport.getVersionConstraint(), supplier.getExporter(), supplier);
 						return supplier;

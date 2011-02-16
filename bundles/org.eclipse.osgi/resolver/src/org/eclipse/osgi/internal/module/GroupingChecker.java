@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2011 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -28,7 +28,9 @@ public class GroupingChecker {
 	 * roots to do proper uses constraint verification on a dynamic import supplier.
 	 */
 	public void populateRoots(ResolverBundle bundle) {
-		bundles.remove(bundle);
+		if (bundles.containsKey(bundle))
+			// only do the full populate the first time (bug 337272)
+			return;
 		// process all requires
 		BundleConstraint[] requires = bundle.getRequires();
 		for (int j = 0; j < requires.length; j++) {
@@ -46,6 +48,18 @@ public class GroupingChecker {
 					isConsistentInternal(bundle, export, true, null);
 			}
 		}
+	}
+
+	/*
+	 * Re-populates the package roots or an importing bundle with the given export
+	 * This is done after wiring a package from a dynamic import (bug 337272)
+	 */
+	public void populateRoots(ResolverBundle importingBundle, ResolverExport export) {
+		Map<String, PackageRoots> packageRoots = bundles.get(importingBundle);
+		if (packageRoots != null)
+			packageRoots.remove(export.getName());
+		PackageRoots roots = getPackageRoots(export.getExporter(), export.getName(), null);
+		packageRoots.put(export.getName(), roots);
 	}
 
 	/*
