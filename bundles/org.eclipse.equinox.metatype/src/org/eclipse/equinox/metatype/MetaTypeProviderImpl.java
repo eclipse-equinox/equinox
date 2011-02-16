@@ -11,11 +11,13 @@
 package org.eclipse.equinox.metatype;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParserFactory;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.*;
 
@@ -82,50 +84,30 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * @throws IOException If there are errors accessing the metadata.xml file
 	 */
 	private boolean readMetaFiles(Bundle bundle, SAXParserFactory parserFactory) throws IOException {
-
-		boolean isThereMetaHere = false;
-
-		Enumeration<String> allFileKeys = FragmentUtils.findEntryPaths(bundle, MetaTypeService.METATYPE_DOCUMENTS_LOCATION);
-		if (allFileKeys == null)
-			return isThereMetaHere;
-
-		while (allFileKeys.hasMoreElements()) {
-			boolean _isMetaDataFile;
-			String fileName = allFileKeys.nextElement();
-
-			Collection<Designate> designates = null;
-			java.net.URL[] urls = FragmentUtils.findEntries(bundle, fileName);
-			if (urls != null) {
-				for (int i = 0; i < urls.length; i++) {
-					try {
-						// Assume all XML files are what we want by default.
-						_isMetaDataFile = true;
-						DataParser parser = new DataParser(bundle, urls[i], parserFactory, logger);
-						designates = parser.doParse();
-						if (designates.isEmpty()) {
-							_isMetaDataFile = false;
-						}
-					} catch (Exception e) {
-						// Ok, looks like it is not what we want.
-						_isMetaDataFile = false;
-					}
-
-					if (_isMetaDataFile) {
-						// We got some OCDs now.
-						isThereMetaHere = true;
-						for (Designate d : designates) {
-							if (d.isFactory()) {
-								_allFPidOCDs.put(d.getFactoryPid(), d.getObjectClassDefinition());
-							} else {
-								_allPidOCDs.put(d.getPid(), d.getObjectClassDefinition());
-							}
-						}
-					}
+		BundleWiring wiring = bundle.adapt(BundleWiring.class);
+		if (wiring == null)
+			return false;
+		List<URL> entries = wiring.findEntries(MetaTypeService.METATYPE_DOCUMENTS_LOCATION, "*", 0); //$NON-NLS-1$
+		if (entries == null)
+			return false;
+		boolean result = false;
+		for (URL entry : entries) {
+			DataParser parser = new DataParser(bundle, entry, parserFactory, logger);
+			try {
+				Collection<Designate> designates = parser.doParse();
+				if (!designates.isEmpty())
+					result = true;
+				for (Designate designate : designates) {
+					if (designate.isFactory())
+						_allFPidOCDs.put(designate.getFactoryPid(), designate.getObjectClassDefinition());
+					else
+						_allPidOCDs.put(designate.getPid(), designate.getObjectClassDefinition());
 				}
-			} // End of if(urls!=null)
-		} // End of while
-
-		return isThereMetaHere;
+			} catch (Exception e) {
+				// ignore
+			}
+		}
+		return result;
 	}
 
 	/*
@@ -183,7 +165,9 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 
 		if (_locales != null)
 			return checkForDefault(_locales);
-
+		BundleWiring wiring = _bundle.adapt(BundleWiring.class);
+		if (wiring == null)
+			return null;
 		Vector<String> localizationFiles = new Vector<String>(7);
 		// get all the localization resources for PIDS
 		Enumeration<ObjectClassDefinitionImpl> ocds = _allPidOCDs.elements();
@@ -213,14 +197,14 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			} else {
 				baseDir = localizationFile.substring(0, iSlash);
 			}
-			baseFileName = localizationFile + RESOURCE_FILE_CONN;
-			Enumeration<String> resources = FragmentUtils.findEntryPaths(this._bundle, baseDir);
-			if (resources != null) {
-				while (resources.hasMoreElements()) {
-					String resource = resources.nextElement();
-					if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
-						locales.add(resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
-				}
+			baseFileName = '/' + localizationFile + RESOURCE_FILE_CONN;
+			List<URL> entries = wiring.findEntries(baseDir, "*.properties", 0); //$NON-NLS-1$
+			if (entries == null)
+				continue;
+			for (URL entry : entries) {
+				String resource = entry.getPath();
+				if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
+					locales.add(resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
 			}
 		}
 		_locales = locales.toArray(new String[locales.size()]);

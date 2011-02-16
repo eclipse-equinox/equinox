@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation.
+ * Copyright (c) 2005, 2011 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,7 @@
 package org.eclipse.equinox.metatype;
 
 import java.net.URL;
-import java.util.*;
+import java.util.List;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleWiring;
@@ -29,60 +29,30 @@ public class FragmentUtils {
 	}
 
 	/*
-	 * Find all the paths to entries for the bundle and its fragments.
-	 * Returned data is got by Bundle.getEntryPaths().
-	 */
-	public static Enumeration<String> findEntryPaths(Bundle bundle, String path) {
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		if (wiring == null)
-			return null;
-
-		Vector<String> result = new Vector<String>();
-		addEntryPaths(bundle.getEntryPaths(path), result);
-		List<BundleRevision> fragments = wiring.getFragmentRevisions();
-		if (fragments != null) {
-			for (BundleRevision fragment : fragments)
-				addEntryPaths(fragment.getBundle().getEntryPaths(path), result);
-		}
-		return result.size() == 0 ? null : result.elements();
-	}
-
-	/*
-	 * Internal method - add an path to vector, and check for duplucate.
-	 */
-	private static void addEntryPaths(Enumeration<String> ePaths, Vector<String> pathList) {
-
-		if (ePaths == null)
-			return;
-		while (ePaths.hasMoreElements()) {
-			String path = ePaths.nextElement();
-			if (!pathList.contains(path))
-				pathList.add(path);
-		}
-	}
-
-	/*
 	 * Find all the URLs to entries for the bundle and its fragments.
-	 * Returned data is got by Bundle.getEntry().
 	 */
 	public static URL[] findEntries(Bundle bundle, String path) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		if (wiring == null)
 			return null;
-
-		URL url = bundle.getEntry(path);
-		List<BundleRevision> fragments = wiring.getFragmentRevisions();
-		if (fragments == null || fragments.size() == 0)
-			return url == null ? null : new URL[] {url};
-		ArrayList<URL> result = new ArrayList<URL>();
-		if (url != null)
-			result.add(url);
-
-		for (BundleRevision fragment : fragments) {
-			URL fragUrl = fragment.getBundle().getEntry(path);
-			if (fragUrl != null)
-				result.add(fragUrl);
+		String directory = "/"; //$NON-NLS-1$
+		String file = "*"; //$NON-NLS-1$
+		int index = path.lastIndexOf(MetaTypeProviderImpl.DIRECTORY_SEP);
+		switch (index) {
+			case -1 :
+				file = path;
+				break;
+			case 0 :
+				if (path.length() > 1)
+					file = path.substring(1);
+				break;
+			default :
+				directory = path.substring(0, index);
+				file = path.substring(index + 1);
 		}
-		return result.size() == 0 ? null : result.toArray(new URL[result.size()]);
+		List<URL> entries = wiring.findEntries(directory, file, 0);
+		if (entries == null)
+			return null;
+		return entries.toArray(new URL[entries.size()]);
 	}
 }
