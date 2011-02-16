@@ -73,7 +73,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private Map<String, List<ExportPackageDescription>> getExportedPackageMap(State state) {
-		Map<String, List<ExportPackageDescription>> result = new HashMap<String, List<ExportPackageDescription>>(11);
+		Map<String, List<ExportPackageDescription>> result = new HashMap<String, List<ExportPackageDescription>>();
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			ExportPackageDescription[] packages = bundles[i].getExportPackages();
@@ -81,7 +81,7 @@ public final class StateHelperImpl implements StateHelper {
 				ExportPackageDescription description = packages[j];
 				List<ExportPackageDescription> exports = result.get(description.getName());
 				if (exports == null) {
-					exports = new ArrayList<ExportPackageDescription>(1);
+					exports = new ArrayList<ExportPackageDescription>();
 					result.put(description.getName(), exports);
 				}
 				exports.add(description);
@@ -91,7 +91,7 @@ public final class StateHelperImpl implements StateHelper {
 	}
 
 	private Map<String, List<GenericDescription>> getGenericsMap(State state, boolean resolved) {
-		Map<String, List<GenericDescription>> result = new HashMap<String, List<GenericDescription>>(11);
+		Map<String, List<GenericDescription>> result = new HashMap<String, List<GenericDescription>>();
 		BundleDescription[] bundles = state.getBundles();
 		for (int i = 0; i < bundles.length; i++) {
 			if (resolved && !bundles[i].isResolved())
@@ -113,7 +113,7 @@ public final class StateHelperImpl implements StateHelper {
 	private VersionConstraint[] getUnsatisfiedLeaves(State state, BundleDescription[] bundles, ResolverHook hook) {
 		Map<String, List<ExportPackageDescription>> packages = getExportedPackageMap(state);
 		Map<String, List<GenericDescription>> generics = getGenericsMap(state, false);
-		Set<VersionConstraint> result = new HashSet<VersionConstraint>(11);
+		Set<VersionConstraint> result = new HashSet<VersionConstraint>();
 		List<BundleDescription> bundleList = new ArrayList<BundleDescription>(bundles.length);
 		for (int i = 0; i < bundles.length; i++)
 			bundleList.add(bundles[i]);
