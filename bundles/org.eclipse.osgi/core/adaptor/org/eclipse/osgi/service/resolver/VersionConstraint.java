@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
+import org.osgi.framework.wiring.BundleRequirement;
+
 /**
  * VersionConstraints represent the relationship between two bundles (in the 
  * case of bundle requires) or a bundle and a package (in the case of import/export).
@@ -70,4 +72,14 @@ public interface VersionConstraint extends Cloneable {
 	 * @see #isResolved()
 	 */
 	public BaseDescription getSupplier();
+
+	/**
+	 * Returns the requirement represented by this constraint.
+	 * Some constraint types may not be able to represent 
+	 * a requirement.  In such cases <code>null</code> is
+	 * returned.
+	 * @return the requirement represented by this constraint
+	 * @since 3.7
+	 */
+	public BundleRequirement getRequirement();
 }

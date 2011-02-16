@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 35;
+	public static final byte STATE_CACHE_VERSION = 36;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -75,7 +75,10 @@ final class StateReader {
 	}
 
 	private Object getFromObjectTable(int index) {
-		return objectTable.get(new Integer(index));
+		Object result = objectTable.get(new Integer(index));
+		if (result == null)
+			throw new IllegalStateException("Expected to find an object at table index: " + index); //$NON-NLS-1$
+		return result;
 	}
 
 	private boolean readState(StateImpl state, long expectedTimestamp) throws IOException {
@@ -370,6 +373,10 @@ final class StateReader {
 
 		result.setNativeCodeSpecification(readNativeCode(in));
 
+		@SuppressWarnings("rawtypes")
+		Map raw = readMap(in);
+		result.setStateWires(raw);
+
 		result.setFullyLoaded(true); // set fully loaded before setting the dependencies
 		// No need to add bundle dependencies for hosts, imports or requires;
 		// This is done by readBundleDescription
@@ -377,7 +384,14 @@ final class StateReader {
 	}
 
 	private BundleSpecificationImpl readBundleSpec(DataInputStream in) throws IOException {
+		byte tag = readTag(in);
+		if (tag == NULL)
+			return null;
+		if (tag == INDEX)
+			return (BundleSpecificationImpl) getFromObjectTable(in.readInt());
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
+		int tableIndex = in.readInt();
+		addToObjectTable(result, tableIndex);
 		readVersionConstraint(result, in);
 		result.setSupplier(readBundleDescription(in));
 		result.setExported(in.readBoolean());
@@ -395,11 +409,11 @@ final class StateReader {
 		ExportPackageDescriptionImpl exportPackageDesc = new ExportPackageDescriptionImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(exportPackageDesc, tableIndex);
-		exportPackageDesc.setTableIndex(tableIndex);
 		readBaseDescription(exportPackageDesc, in);
 		exportPackageDesc.setExporter(readBundleDescription(in));
 		exportPackageDesc.setAttributes(readMap(in));
 		exportPackageDesc.setDirectives(readMap(in));
+		exportPackageDesc.setFragmentDeclaration(readExportPackageDesc(in));
 		return exportPackageDesc;
 	}
 
@@ -464,6 +478,9 @@ final class StateReader {
 						case 6 :
 							list.add(readVersion(in));
 							break;
+						case 7 :
+							list.add(readStateWire(in));
+							break;
 						default :
 							throw new IOException("Invalid type: " + listType); //$NON-NLS-1$
 					}
@@ -473,6 +490,39 @@ final class StateReader {
 			result.put(key, value);
 		}
 		return result;
+	}
+
+	private Object readStateWire(DataInputStream in) throws IOException {
+		VersionConstraint requirement;
+		BundleDescription requirementHost;
+		BaseDescription capability;
+		BundleDescription capabilityHost;
+
+		byte wireType = in.readByte();
+		switch (wireType) {
+			case 0 :
+				requirement = readImportPackageSpec(in);
+				capability = readExportPackageDesc(in);
+				break;
+			case 1 :
+				requirement = readBundleSpec(in);
+				capability = readBundleDescription(in);
+				break;
+			case 2 :
+				requirement = readHostSpec(in);
+				capability = readBundleDescription(in);
+				break;
+			case 3 :
+				requirement = readGenericSpecification(in);
+				capability = readGenericDescription(in);
+				break;
+			default :
+				throw new IOException("Invalid wire type: " + wireType); //$NON-NLS-1$
+		}
+
+		requirementHost = readBundleDescription(in);
+		capabilityHost = readBundleDescription(in);
+		return new StateWire(requirementHost, requirement, capabilityHost, capability);
 	}
 
 	private String[] readList(DataInputStream in) throws IOException {
@@ -491,7 +541,14 @@ final class StateReader {
 	}
 
 	private ImportPackageSpecificationImpl readImportPackageSpec(DataInputStream in) throws IOException {
+		byte tag = readTag(in);
+		if (tag == NULL)
+			return null;
+		if (tag == INDEX)
+			return (ImportPackageSpecificationImpl) getFromObjectTable(in.readInt());
 		ImportPackageSpecificationImpl result = new ImportPackageSpecificationImpl();
+		int tableIndex = in.readInt();
+		addToObjectTable(result, tableIndex);
 		readVersionConstraint(result, in);
 		result.setSupplier(readExportPackageDesc(in));
 		result.setBundleSymbolicName(readString(in, false));
@@ -505,7 +562,11 @@ final class StateReader {
 		byte tag = readTag(in);
 		if (tag == NULL)
 			return null;
+		if (tag == INDEX)
+			return (HostSpecificationImpl) getFromObjectTable(in.readInt());
 		HostSpecificationImpl result = new HostSpecificationImpl();
+		int tableIndex = in.readInt();
+		addToObjectTable(result, tableIndex);
 		readVersionConstraint(result, in);
 		int hostCount = in.readInt();
 		if (hostCount > 0) {
@@ -542,11 +603,19 @@ final class StateReader {
 		Map directives = readMap(in);
 		if (directives != null)
 			result.setDirectives(directives);
+		result.setFragmentDeclaration(readGenericDescription(in));
 		return result;
 	}
 
 	private GenericSpecification readGenericSpecification(DataInputStream in) throws IOException {
+		byte tag = readTag(in);
+		if (tag == NULL)
+			return null;
+		if (tag == INDEX)
+			return (GenericSpecification) getFromObjectTable(in.readInt());
 		GenericSpecificationImpl result = new GenericSpecificationImpl();
+		int tableIndex = in.readInt();
+		addToObjectTable(result, tableIndex);
 		readVersionConstraint(result, in);
 		result.setType(readString(in, false));
 		int num = in.readInt();

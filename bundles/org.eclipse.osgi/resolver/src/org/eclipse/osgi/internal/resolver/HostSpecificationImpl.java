@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,10 @@
 
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class HostSpecificationImpl extends VersionConstraintImpl implements HostSpecification {
 
@@ -110,5 +111,29 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		synchronized (this.monitor) {
 			this.multihost = multihost;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, String> getInternalDirectives() {
+		// TODO this does not handle extension directive; but we do not support bootclasspath anyway
+		return Collections.EMPTY_MAP;
+	}
+
+	protected Map<String, Object> getInteralAttributes() {
+		Map<String, Object> result = new HashMap<String, Object>(2);
+		synchronized (this.monitor) {
+			if (attributes != null)
+				result.putAll(attributes);
+			result.put(BundleRevision.HOST_NAMESPACE, getName());
+			VersionRange range = getVersionRange();
+			if (range != null)
+				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, range.toString());
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	@Override
+	protected String getInternalNameSpace() {
+		return BundleRevision.HOST_NAMESPACE;
 	}
 }

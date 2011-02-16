@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,10 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Map;
-import org.eclipse.osgi.service.resolver.BaseDescription;
-import org.eclipse.osgi.service.resolver.BundleSpecification;
+import java.util.*;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class BundleSpecificationImpl extends VersionConstraintImpl implements BundleSpecification {
 	private boolean exported;
@@ -92,5 +92,37 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 
 	public String toString() {
 		return "Require-Bundle: " + getName() + "; bundle-version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	@Override
+	protected Map<String, String> getInternalDirectives() {
+		Map<String, String> result = new HashMap<String, String>(2);
+		synchronized (this.monitor) {
+			if (exported)
+				result.put(Constants.VISIBILITY_DIRECTIVE, Constants.VISIBILITY_REEXPORT);
+			if (optional)
+				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	@Override
+	protected Map<String, Object> getInteralAttributes() {
+		Map<String, Object> result = new HashMap<String, Object>(2);
+		synchronized (this.monitor) {
+			if (attributes != null)
+				result.putAll(attributes);
+			result.put(BundleRevision.BUNDLE_NAMESPACE, getName());
+			VersionRange range = getVersionRange();
+			if (range != null)
+				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, range.toString());
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	@Override
+	protected String getInternalNameSpace() {
+		// TODO Auto-generated method stub
+		return BundleRevision.BUNDLE_NAMESPACE;
 	}
 }

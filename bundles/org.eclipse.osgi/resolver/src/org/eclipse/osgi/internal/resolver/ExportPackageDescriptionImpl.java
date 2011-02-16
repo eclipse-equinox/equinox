@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,9 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Version;
-import org.osgi.framework.wiring.Capability;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements ExportPackageDescription {
 	public static final String EQUINOX_EE = "x-equinox-ee"; //$NON-NLS-1$
@@ -31,7 +30,20 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private String[] mandatory;
 	private Boolean internal = Boolean.FALSE;
 	private int equinox_ee = -1;
-	private volatile int tableIndex;
+	private ExportPackageDescription fragmentDeclaration = null;
+
+	public ExportPackageDescriptionImpl() {
+		super();
+	}
+
+	public ExportPackageDescriptionImpl(BundleDescription host, ExportPackageDescription fragmentDeclaration) {
+		setName(fragmentDeclaration.getName());
+		setVersion(fragmentDeclaration.getVersion());
+		setDirectives(fragmentDeclaration.getDirectives());
+		setAttributes(fragmentDeclaration.getAttributes());
+		setExporter(host);
+		this.fragmentDeclaration = fragmentDeclaration;
+	}
 
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
@@ -76,7 +88,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		synchronized (this.monitor) {
 			if (attributes != null)
 				result.putAll(attributes);
-			result.put(Capability.PACKAGE_CAPABILITY, getName());
+			result.put(BundleRevision.PACKAGE_NAMESPACE, getName());
 			result.put(Constants.VERSION_ATTRIBUTE, getVersion());
 			Version bundleVersion = getSupplier().getVersion();
 			if (bundleVersion != null)
@@ -185,19 +197,19 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		this.exporter = exporter;
 	}
 
+	public BaseDescription getFragmentDeclaration() {
+		return fragmentDeclaration;
+	}
+
+	void setFragmentDeclaration(ExportPackageDescription fragmentDeclaration) {
+		this.fragmentDeclaration = fragmentDeclaration;
+	}
+
 	public String toString() {
 		return "Export-Package: " + getName() + "; version=\"" + getVersion() + "\""; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	int getTableIndex() {
-		return tableIndex;
-	}
-
-	void setTableIndex(int tableIndex) {
-		this.tableIndex = tableIndex;
-	}
-
 	String getInternalNameSpace() {
-		return Capability.PACKAGE_CAPABILITY;
+		return BundleRevision.PACKAGE_NAMESPACE;
 	}
 }

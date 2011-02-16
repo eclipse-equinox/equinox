@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+
+import org.osgi.framework.wiring.FrameworkWiring;
 
 /**
  * An installed bundle in the Framework.
@@ -74,7 +76,7 @@ import java.util.Map;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 2b49f64e7a633cefc70b438ec9e1f966ff4f8130 $
+ * @version $Id: 239108e8d54ff493587b9cdfe1688bdefc5a714c $
  */
 public interface Bundle extends Comparable<Bundle> {
 	/**
@@ -257,8 +259,7 @@ public interface Bundle extends Comparable<Bundle> {
 	 * If this bundle's state is {@code UNINSTALLED} then an
 	 * {@code IllegalStateException} is thrown.
 	 * <p>
-	 * If the Framework implements the optional Start Level service and the
-	 * current start level is less than this bundle's start level:
+	 * If the current start level is less than this bundle's start level:
 	 * <ul>
 	 * <li>If the {@link #START_TRANSIENT} option is set, then a
 	 * {@code BundleException} is thrown indicating this bundle cannot be
@@ -512,8 +513,9 @@ public interface Bundle extends Comparable<Bundle> {
 	 * <p>
 	 * If this bundle has exported any packages that are imported by another
 	 * bundle, these packages must remain exported until the
-	 * {@code PackageAdmin.refreshPackages} method has been has been called or
-	 * the Framework is relaunched.
+	 * {@link FrameworkWiring#refreshBundles(java.util.Collection, FrameworkListener...)
+	 * FrameworkWiring.refreshBundles} method has been has been called or the
+	 * Framework is relaunched.
 	 * 
 	 * <p>
 	 * The following steps are required to update a bundle:
@@ -624,8 +626,9 @@ public interface Bundle extends Comparable<Bundle> {
 	 * <p>
 	 * If this bundle has exported any packages, the Framework must continue to
 	 * make these packages available to their importing bundles until the
-	 * {@code PackageAdmin.refreshPackages} method has been called or the
-	 * Framework is relaunched.
+	 * {@link FrameworkWiring#refreshBundles(java.util.Collection, FrameworkListener...)
+	 * FrameworkWiring.refreshBundles} method has been called or the Framework
+	 * is relaunched.
 	 * 
 	 * <p>
 	 * The following steps are required to uninstall a bundle:
@@ -1075,7 +1078,7 @@ public interface Bundle extends Comparable<Bundle> {
 	 * This method is intended to be used to obtain configuration, setup,
 	 * localization and other information from this bundle. This method takes
 	 * into account that the &quot;contents&quot; of this bundle can be extended
-	 * with fragments. This &quot;bundle space&quot; is not a namespace with
+	 * with fragments. This &quot;bundle space&quot; is not a name space with
 	 * unique members; the same entry name can be present multiple times. This
 	 * method therefore returns an enumeration of URL objects. These URLs can
 	 * come from different JARs but have the same path name. This method can
@@ -1117,15 +1120,15 @@ public interface Bundle extends Comparable<Bundle> {
 	 *        files.
 	 * @param recurse If {@code true}, recurse into subdirectories. Otherwise
 	 *        only return entries from the specified path.
-	 * @return An enumeration of URL objects for each matching entry, or {@code
-	 *         null} if no matching entry could not be found or if the caller
-	 *         does not have the appropriate {@code
-	 *         AdminPermission[this,RESOURCE]}, and the Java Runtime Environment
-	 *         supports permissions. The URLs are sorted such that entries from
-	 *         this bundle are returned first followed by the entries from
-	 *         attached fragments in attachment order. If this bundle is a
-	 *         fragment, then only matching entries in this fragment are
-	 *         returned.
+	 * @return An enumeration of URL objects for each matching entry, or
+	 *         {@code null} if no matching entry could not be found or if the
+	 *         caller does not have the appropriate
+	 *         {@code AdminPermission[this,RESOURCE]}, and the Java Runtime
+	 *         Environment supports permissions. The URLs are sorted such that
+	 *         entries from this bundle are returned first followed by the
+	 *         entries from attached fragments in attachment order. If this
+	 *         bundle is a fragment, then only matching entries in this fragment
+	 *         are returned.
 	 * @throws IllegalStateException If this bundle has been uninstalled.
 	 * @since 1.3
 	 */
@@ -1204,6 +1207,9 @@ public interface Bundle extends Comparable<Bundle> {
 	 * @return The object, of the specified type, to which this bundle has been
 	 *         adapted or {@code null} if this bundle cannot be adapted to the
 	 *         specified type.
+	 * @throws SecurityException If the caller does not have the appropriate
+	 *         {@code AdaptPermission[type,this,ADAPT]}, and the Java Runtime
+	 *         Environment supports permissions.
 	 * @since 1.6
 	 */
 	<A> A adapt(Class<A> type);

@@ -17,8 +17,8 @@ import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.Capability;
 
 /**
  * An implementation for the StateHelper API. Access to this implementation is
@@ -125,7 +125,7 @@ public final class StateHelperImpl implements StateHelper {
 				Collection<BaseDescription> satisfied = null;
 				if (constraint instanceof BundleSpecification || constraint instanceof HostSpecification) {
 					BundleDescription[] suppliers = state.getBundles(constraint.getName());
-					satisfied = getPossibleCandidates(constraint, suppliers, constraint instanceof HostSpecification ? Capability.HOST_CAPABILITY : null, hook, false);
+					satisfied = getPossibleCandidates(constraint, suppliers, constraint instanceof HostSpecification ? BundleRevision.HOST_NAMESPACE : null, hook, false);
 				} else if (constraint instanceof ImportPackageSpecification) {
 					List<ExportPackageDescription> exports = packages.get(constraint.getName());
 					if (exports != null)
@@ -194,7 +194,7 @@ public final class StateHelperImpl implements StateHelper {
 		List<VersionConstraint> unsatisfied = new ArrayList<VersionConstraint>();
 		HostSpecification host = bundle.getHost();
 		if (host != null)
-			if (!host.isResolved() && !isBundleConstraintResolvable(host, Capability.HOST_CAPABILITY, hook))
+			if (!host.isResolved() && !isBundleConstraintResolvable(host, BundleRevision.HOST_NAMESPACE, hook))
 				unsatisfied.add(host);
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		for (int i = 0; i < requiredBundles.length; i++)
@@ -214,11 +214,11 @@ public final class StateHelperImpl implements StateHelper {
 		return unsatisfied.toArray(new VersionConstraint[unsatisfied.size()]);
 	}
 
-	private ArrayMap<Capability, BaseDescription> asArrayMap(List<BaseDescription> descriptions, String namespace) {
-		List<Capability> capabilities = new ArrayList<Capability>(descriptions.size());
+	private ArrayMap<BundleCapability, BaseDescription> asArrayMap(List<BaseDescription> descriptions, String namespace) {
+		List<BundleCapability> capabilities = new ArrayList<BundleCapability>(descriptions.size());
 		for (BaseDescription description : descriptions)
 			capabilities.add(((BaseDescriptionImpl) description).getCapability(namespace));
-		return new ArrayMap<Capability, BaseDescription>(capabilities, descriptions);
+		return new ArrayMap<BundleCapability, BaseDescription>(capabilities, descriptions);
 	}
 
 	private List<BaseDescription> getPossibleCandidates(VersionConstraint constraint, BaseDescription[] descriptions, String namespace, ResolverHook hook, boolean resolved) {
@@ -227,7 +227,7 @@ public final class StateHelperImpl implements StateHelper {
 			if ((!resolved || descriptions[i].getSupplier().isResolved()) && constraint.isSatisfiedBy(descriptions[i]))
 				candidates.add(descriptions[i]);
 		if (hook != null)
-			hook.filterMatches(constraint.getBundle(), asArrayMap(candidates, namespace));
+			hook.filterMatches(constraint.getRequirement(), asArrayMap(candidates, namespace));
 		return candidates;
 	}
 
@@ -268,7 +268,7 @@ public final class StateHelperImpl implements StateHelper {
 	 * @see StateHelper
 	 */
 	public boolean isResolvable(HostSpecification specification) {
-		return isBundleConstraintResolvable(specification, Capability.HOST_CAPABILITY);
+		return isBundleConstraintResolvable(specification, BundleRevision.HOST_NAMESPACE);
 	}
 
 	/*

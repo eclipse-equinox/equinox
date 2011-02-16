@@ -12,6 +12,8 @@ package org.eclipse.osgi.internal.module;
 
 import java.util.*;
 import java.util.Map.Entry;
+import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.GenericDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
 
@@ -351,7 +353,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		ArrayList<ResolverExport> hostExports = new ArrayList<ResolverExport>(newExports.length);
 		if (newExports.length > 0 && dynamicAttach) {
-			StateObjectFactory factory = resolver.getState().getFactory();
 			for (int i = 0; i < newExports.length; i++) {
 				ResolverExport currentExports[] = getExports(newExports[i].getName());
 				boolean foundEquivalent = false;
@@ -360,7 +361,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 						foundEquivalent = true;
 				}
 				if (!foundEquivalent) {
-					ExportPackageDescription hostExport = factory.createExportPackageDescription(newExports[i].getName(), newExports[i].getVersion(), newExports[i].getDirectives(), newExports[i].getAttributes(), true, getBundleDescription());
+					ExportPackageDescription hostExport = new ExportPackageDescriptionImpl(getBundleDescription(), newExports[i]);
 					hostExports.add(new ResolverExport(this, hostExport));
 				}
 			}
@@ -369,17 +370,8 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		List<GenericCapability> hostCapabilities = new ArrayList<GenericCapability>(newGenericCapabilities.length);
 		if (newGenericCapabilities.length > 0 && dynamicAttach) {
-			StateObjectFactory factory = resolver.getState().getFactory();
 			for (GenericDescription capability : newGenericCapabilities) {
-				Dictionary<String, Object> origAttrs = capability.getAttributes();
-				Map<String, Object> attrs = new HashMap<String, Object>();
-				if (origAttrs != null) {
-					for (Enumeration<String> keys = origAttrs.keys(); keys.hasMoreElements();) {
-						String key = keys.nextElement();
-						attrs.put(key, origAttrs.get(key));
-					}
-				}
-				GenericDescription hostCapabililty = factory.createGenericDescription(capability.getType(), attrs, null, getBundleDescription());
+				GenericDescription hostCapabililty = new GenericDescriptionImpl(getBundleDescription(), capability);
 				hostCapabilities.add(new GenericCapability(this, hostCapabililty));
 			}
 			fragmentGenericCapabilities.put(fragment.bundleID, hostCapabilities);

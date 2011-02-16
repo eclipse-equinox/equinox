@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.service.resolver;
 
-import java.util.Collection;
-import java.util.Dictionary;
+import java.util.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -229,11 +228,12 @@ public interface State {
 	 * @param selectedCapabilities the selected capabilities for this resolved bundle, can be <code>null</code>
 	 * @param resolvedRequires the {@link BundleDescription}s that resolve the required bundles for this bundle, can be <code>null</code>
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
-	 * @param resolveCapabilities the capabilities that resolve the required capabilities for this bundle, can be <code>null</code>
+	 * @param resolvedCapabilities the capabilities that resolve the required capabilities for this bundle, can be <code>null</code>
+	 * @param resolvedWires the map of state wires for the resolved requirements of the given bundle.  The key is the name space of the requirement.
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.7
 	 */
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities);
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires);
 
 	/**
 	 * Sets the given removal pending bundle to removal complete for this state.

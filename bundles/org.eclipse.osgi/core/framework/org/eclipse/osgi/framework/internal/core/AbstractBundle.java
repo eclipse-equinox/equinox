@@ -30,15 +30,14 @@ import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.startlevel.BundleStartLevel;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.wiring.*;
 
 /**
  * This object is given out to bundles and wraps the internal Bundle object. It
  * is destroyed when a bundle is uninstalled and reused if a bundle is updated.
  * This class is abstract and is extended by BundleHost and BundleFragment.
  */
-public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement, BundleStartLevel, BundleReference {
+public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, KeyedElement, BundleStartLevel, BundleReference, BundleRevisions {
 	private final static long STATE_CHANGE_TIMEOUT;
 	static {
 		long stateChangeWait = 5000;
@@ -1453,8 +1452,27 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		}
 	}
 
+	public final <A> A adapt(Class<A> adapterType) {
+		checkAdaptPermission(adapterType);
+		return adapt0(adapterType);
+	}
+
+	public List<BundleRevision> getRevisions() {
+		List<BundleRevision> revisions = new ArrayList<BundleRevision>();
+		BundleDescription current = getBundleDescription();
+		if (current != null)
+			revisions.add(current);
+		BundleDescription[] removals = framework.adaptor.getState().getRemovalPending();
+		for (BundleDescription removed : removals) {
+			if (removed.getBundleId() == getBundleId() && removed != current) {
+				revisions.add(removed);
+			}
+		}
+		return revisions;
+	}
+
 	@SuppressWarnings("unchecked")
-	public <A> A adapt(Class<A> adapterType) {
+	protected <A> A adapt0(Class<A> adapterType) {
 		if (adapterType.isInstance(this))
 			return (A) this;
 		if (BundleContext.class.equals(adapterType)) {
@@ -1464,20 +1482,30 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 				return null;
 			}
 		}
-		if (BundleStartLevel.class.equals(adapterType))
-			return (A) this;
-
 		if (BundleWiring.class.equals(adapterType)) {
-			if (state == UNINSTALLED || isFragment())
+			if (state == UNINSTALLED)
 				return null;
 			BundleDescription description = getBundleDescription();
-			return (A) description.getBundleWiring();
+			return (A) description.getWiring();
 		}
 
 		if (BundleRevision.class.equals(adapterType)) {
+			if (state == UNINSTALLED)
+				return null;
 			return (A) getBundleDescription();
 		}
 		return null;
+	}
+
+	/**
+	 * Check for permission to get a service.
+	 */
+	private <A> void checkAdaptPermission(Class<A> adapterType) {
+		SecurityManager sm = System.getSecurityManager();
+		if (sm == null) {
+			return;
+		}
+		sm.checkPermission(new AdaptPermission(adapterType.getName(), this, AdaptPermission.ADAPT));
 	}
 
 	public File getDataFile(String filename) {

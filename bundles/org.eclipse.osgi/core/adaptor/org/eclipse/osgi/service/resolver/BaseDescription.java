@@ -12,7 +12,7 @@ package org.eclipse.osgi.service.resolver;
 
 import java.util.Map;
 import org.osgi.framework.Version;
-import org.osgi.framework.wiring.Capability;
+import org.osgi.framework.wiring.BundleCapability;
 
 /**
  * This class represents a base description object for a state.  All description
@@ -70,5 +70,5 @@ public interface BaseDescription {
 	 * @return the capability represented by this base description
 	 * @since 3.7
 	 */
-	public Capability getCapability();
+	public BundleCapability getCapability();
 }

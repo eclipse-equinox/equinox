@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2010, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,43 +25,36 @@ import org.osgi.framework.BundleReference;
 
 /**
  * A wiring for a bundle. Each time a bundle is resolved, a new bundle wiring
- * for the bundle is created. A bundle wiring consists of a bundle and it
- * attached fragments and represents the dependencies with other bundle wirings.
+ * for the bundle is created. A bundle wiring is associated with a bundle
+ * revision and represents the dependencies with other bundle wirings.
  * 
  * <p>
  * The bundle wiring for a bundle is the {@link #isCurrent() current} bundle
- * wiring if the bundle is resolved and the bundle wiring is the most recent
- * bundle wiring. All bundles with non-current, in use bundle wirings are
- * considered removal pending. A bundle wiring is {@link #isInUse() in use} if
- * it is the current wiring or if some other in use bundle wiring is dependent
- * upon it. For example, wired to a package exported by the bundle wiring or
- * requires the bundle wiring. An in use bundle wiring has a class loader. Once
- * a bundle wiring is no longer in use, it is considered stale and is discarded
- * by the framework.
+ * wiring if it is the most recent bundle wiring for the current bundle
+ * revision. A bundle wiring is {@link #isInUse() in use} if it is the current
+ * bundle wiring or if some other in use bundle wiring is dependent upon it. For
+ * example, another bundle wiring is wired to a capability provided by the
+ * bundle wiring. An in use bundle wiring for a non-fragment bundle has a class
+ * loader. All bundles with non-current, in use bundle wirings are considered
+ * removal pending. Once a bundle wiring is no longer in use, it is considered
+ * stale and is discarded by the framework.
  * 
  * <p>
- * A list of all in use bundle wirings for a bundle can be obtained by calling
- * {@link Bundle#adapt(Class) bundle.adapt}({@link BundleWirings}.class).
- * {@link BundleWirings#getWirings() getWirings()}. For non-fragment bundles,
- * the first item in the returned list is the current bundle wiring.
- * 
- * <p>
- * The current bundle wiring for a non-fragment bundle can be obtained by
- * calling {@link Bundle#adapt(Class) bundle.adapt}(BundleWiring.class). A
- * fragment bundle does not itself have bundle wirings. So calling
- * {@link Bundle#adapt(Class) bundle.adapt}(BundleWiring.class) on a fragment
- * must return {@code null}.
+ * The current bundle wiring for a bundle can be obtained by calling
+ * {@link Bundle#adapt(Class) bundle.adapt}(BundleWiring.class). A bundle in the
+ * INSTALLED or UNINSTALLED state does not have a current wiring, adapting such
+ * a bundle returns {@code null}.
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 77da60ad2f9fdeea7bd9465b633b35f8a06c6cdf $
+ * @version $Id: 7a7bc5a26838599519fbd1496248136278b9d1e7 $
  */
 public interface BundleWiring extends BundleReference {
 	/**
 	 * Returns {@code true} if this bundle wiring is the current bundle wiring.
-	 * The bundle wiring for a bundle is the current bundle wiring if the bundle
-	 * is resolved and the bundle wiring is the most recent bundle wiring. All
-	 * bundles with non-current, in use bundle wirings are considered
+	 * The bundle wiring for a bundle is the current bundle wiring if it is the
+	 * most recent bundle wiring for the current bundle revision. All bundles
+	 * with non-current, in use bundle wirings are considered
 	 * {@link FrameworkWiring#getRemovalPendingBundles() removal pending}.
 	 * 
 	 * @return {@code true} if this bundle wiring is the current bundle wiring;
@@ -83,36 +76,99 @@ public interface BundleWiring extends BundleReference {
 	/**
 	 * Returns the capabilities provided by this bundle wiring.
 	 * 
-	 * @param capabilityNamespace The name space of the provided capabilities to
-	 *        return or {@code null} to return the provided capabilities from
-	 *        all name spaces.
-	 * @return A list containing a snapshot of the {@link WiredCapability}s, or
-	 *         an empty list if this bundle wiring provides no capabilities in
-	 *         the specified name space. If this bundle wiring is not
-	 *         {@link #isInUse() in use}, {@code null} will be returned. The
-	 *         list contains the provided capabilities in the order they are
-	 *         specified in the manifest.
-	 */
-	List<WiredCapability> getProvidedCapabilities(String capabilityNamespace);
-
-	/**
-	 * Returns the required capabilities used by this bundle wiring.
+	 * <p>
+	 * A capability may not be required by any bundle wiring and thus there may
+	 * be no {@link #getProvidedWires(String) wires} for the capability.
 	 * 
 	 * <p>
-	 * The result of this method can change if this bundle wiring requires
-	 * additional capabilities.
+	 * A bundle wiring for a non-fragment revision provides a subset of the
+	 * declared capabilities from the bundle revision and all attached fragment
+	 * revisions. Not all declared capabilities may be provided since some may
+	 * be discarded. For example, if a package is declared to be exported and
+	 * import, only one is selected and the other is discarded.
 	 * 
-	 * @param capabilityNamespace The name space of the required capabilities to
-	 *        return or {@code null} to return the required capabilities from
-	 *        all name spaces.
-	 * @return A list containing a snapshot of the {@link WiredCapability}s used
-	 *         by this bundle wiring, or an empty list if this bundle wiring
-	 *         requires no capabilities in the specified name space. If this
-	 *         bundle wiring is not {@link #isInUse() in use}, {@code null} will
-	 *         be returned. The list contains the required capabilities in the
-	 *         order they are specified in the manifest.
+	 * @param namespace The name space of the capabilities to return or
+	 *        {@code null} to return the capabilities from all name spaces.
+	 * @return A list containing a snapshot of the {@link BundleCapability}s, or
+	 *         an empty list if this bundle wiring provides no capabilities in
+	 *         the specified name space. If this bundle wiring is not
+	 *         {@link #isInUse() in use}, {@code null} will be returned. For a
+	 *         given name space, the list contains the wires in the order the
+	 *         capabilities were specified in the manifests of the
+	 *         {@link #getRevision() bundle revision} and the attached fragments
+	 *         of this bundle wiring. There is no ordering defined between
+	 *         capabilities in different name spaces.
 	 */
-	List<WiredCapability> getRequiredCapabilities(String capabilityNamespace);
+	List<BundleCapability> getCapabilities(String namespace);
+
+	/**
+	 * Returns the requirements of this bundle wiring.
+	 * 
+	 * <p>
+	 * A bundle wiring for a non-fragment revision has a subset of the declared
+	 * requirements from the bundle revision and all attached fragment
+	 * revisions. Not all declared requirements may be present since some may be
+	 * discarded. For example, if a package is declared to be optionally
+	 * imported and is not actually imported, the requirement must be discarded.
+	 * 
+	 * @param namespace The name space of the requirements to return or
+	 *        {@code null} to return the requirements from all name spaces.
+	 * @return A list containing a snapshot of the {@link BundleRequirement}s,
+	 *         or an empty list if this bundle wiring uses no requirements in
+	 *         the specified name space. If this bundle wiring is not
+	 *         {@link #isInUse() in use}, {@code null} will be returned. For a
+	 *         given name space, the list contains the wires in the order the
+	 *         requirements were specified in the manifests of the
+	 *         {@link #getRevision() bundle revision} and the attached fragments
+	 *         of this bundle wiring. There is no ordering defined between
+	 *         requirements in different name spaces.
+	 */
+	List<BundleRequirement> getRequirements(String namespace);
+
+	/**
+	 * Returns the {@link BundleWire}s to the provided {@link BundleCapability
+	 * capabilities} of this bundle wiring.
+	 * 
+	 * @param namespace The name space of the capabilities for which to return
+	 *        wires or {@code null} to return the wires for the capabilities in
+	 *        all name spaces.
+	 * @return A list containing a snapshot of the {@link BundleWire}s for the
+	 *         {@link BundleCapability capabilities} of this bundle wiring, or
+	 *         an empty list if this bundle wiring has no capabilities in the
+	 *         specified name space. If this bundle wiring is not
+	 *         {@link #isInUse() in use}, {@code null} will be returned. For a
+	 *         given name space, the list contains the wires in the order the
+	 *         capabilities were specified in the manifests of the
+	 *         {@link #getRevision() bundle revision} and the attached fragments
+	 *         of this bundle wiring. There is no ordering defined between
+	 *         capabilities in different name spaces.
+	 */
+	List<BundleWire> getProvidedWires(String namespace);
+
+	/**
+	 * Returns the {@link BundleWire}s to the {@link BundleRequirement
+	 * requirements} in use by this bundle wiring.
+	 * 
+	 * <p>
+	 * This method may return different results if this bundle wiring adds wires
+	 * to more requirements. For example, dynamically importing a package will
+	 * establish a new wire to the dynamically imported package.
+	 * 
+	 * @param namespace The name space of the requirements for which to return
+	 *        wires or {@code null} to return the wires for the requirements in
+	 *        all name spaces.
+	 * @return A list containing a snapshot of the {@link BundleWire}s for the
+	 *         {@link BundleRequirement requirements} of this bundle wiring, or
+	 *         an empty list if this bundle wiring has no requirements in the
+	 *         specified name space. If this bundle wiring is not
+	 *         {@link #isInUse() in use}, {@code null} will be returned. For a
+	 *         given name space, the list contains the wires in the order the
+	 *         requirements were specified in the manifests of the
+	 *         {@link #getRevision() bundle revision} and the attached fragments
+	 *         of this bundle wiring. There is no ordering defined between
+	 *         requirements in different name spaces.
+	 */
+	List<BundleWire> getRequiredWires(String namespace);
 
 	/**
 	 * Returns the bundle revision for the bundle in this bundle wiring. Since a
@@ -126,27 +182,9 @@ public interface BundleWiring extends BundleReference {
 	 * may refer to an older revision of the bundle.
 	 * 
 	 * @return The bundle revision for this bundle wiring.
+	 * @see BundleRevision#getWiring()
 	 */
-	BundleRevision getBundleRevision();
-
-	/**
-	 * Returns the bundle revisions for all attached fragments of this bundle
-	 * wiring. Since a bundle update can change the entries in a fragment,
-	 * different bundle wirings for the same bundle can have different bundle
-	 * revisions.
-	 * 
-	 * <p>
-	 * The bundle revisions in the list are ordered in fragment attachment order
-	 * such that the first revision in the list is the first attached fragment
-	 * and the last revision in the list is the last attached fragment.
-	 * 
-	 * @return A list containing a snapshot of the {@link BundleRevision}s for
-	 *         all attached fragments attached of this bundle wiring, or an
-	 *         empty list if this bundle wiring does not have any attached
-	 *         fragments. If this bundle wiring is not {@link #isInUse() in use}
-	 *         , {@code null} will be returned.
-	 */
-	List<BundleRevision> getFragmentRevisions();
+	BundleRevision getRevision();
 
 	/**
 	 * Returns the class loader for this bundle wiring. Since a bundle refresh
@@ -154,7 +192,8 @@ public interface BundleWiring extends BundleReference {
 	 * the same bundle will have different class loaders.
 	 * 
 	 * @return The class loader for this bundle wiring. If this bundle wiring is
-	 *         not {@link #isInUse() in use}, {@code null} will be returned.
+	 *         not {@link #isInUse() in use} or this bundle wiring is for a
+	 *         fragment revision, {@code null} will be returned.
 	 * @throws SecurityException If the caller does not have the appropriate
 	 *         {@code RuntimePermission("getClassLoader")}, and the Java Runtime
 	 *         Environment supports permissions.
@@ -162,16 +201,16 @@ public interface BundleWiring extends BundleReference {
 	ClassLoader getClassLoader();
 
 	/**
-	 * Returns entries in this bundle wiring's {@link #getBundleRevision()
-	 * bundle revision} and its attached {@link #getFragmentRevisions() fragment
-	 * revisions}. This bundle wiring's class loader is not used to search for
-	 * entries. Only the contents of this bundle wiring's bundle revision and
-	 * its attached fragment revisions are searched for the specified entries.
+	 * Returns entries in this bundle wiring's {@link #getRevision() bundle
+	 * revision} and its attached fragment revisions. This bundle wiring's class
+	 * loader is not used to search for entries. Only the contents of this
+	 * bundle wiring's bundle revision and its attached fragment revisions are
+	 * searched for the specified entries.
 	 * 
 	 * <p>
 	 * This method takes into account that the &quot;contents&quot; of this
 	 * bundle wiring can have attached fragments. This &quot;bundle space&quot;
-	 * is not a namespace with unique members; the same entry name can be
+	 * is not a name space with unique members; the same entry name can be
 	 * present multiple times. This method therefore returns a list of URL
 	 * objects. These URLs can come from different JARs but have the same path
 	 * name. This method can either return only entries in the specified path or
@@ -199,15 +238,15 @@ public interface BundleWiring extends BundleReference {
 	 *        {@link #FINDENTRIES_RECURSE}. The method must ignore unrecognized
 	 *        options.
 	 * @return An unmodifiable list of URL objects for each matching entry, or
-	 *         an empty list if no matching entry could not be found or if the
-	 *         caller does not have the appropriate
-	 *         {@code AdminPermission[bundle,RESOURCE]} and the Java Runtime
-	 *         Environment supports permissions. The list is ordered such that
-	 *         entries from the {@link #getBundleRevision() bundle revision} are
-	 *         returned first followed by the entries from
-	 *         {@link #getFragmentRevisions() attached fragment revisions} in
-	 *         attachment order. If this bundle wiring is not {@link #isInUse()
-	 *         in use}, {@code null} must be returned.
+	 *         an empty list if no matching entry could not be found, if this
+	 *         bundle wiring is for a fragment revision or if the caller does
+	 *         not have the appropriate {@code AdminPermission[bundle,RESOURCE]}
+	 *         and the Java Runtime Environment supports permissions. The list
+	 *         is ordered such that entries from the {@link #getRevision()
+	 *         bundle revision} are returned first followed by the entries from
+	 *         attached fragment revisions in attachment order. If this bundle
+	 *         wiring is not {@link #isInUse() in use}, {@code null} must be
+	 *         returned.
 	 * @see Bundle#findEntries(String, String, boolean)
 	 */
 	List<URL> findEntries(String path, String filePattern, int options);
@@ -257,7 +296,8 @@ public interface BundleWiring extends BundleReference {
 	 *        This method must ignore unrecognized options.
 	 * @return An unmodifiable collection of resource names for each matching
 	 *         resource, or an empty collection if no matching resource could
-	 *         not be found or if the caller does not have the appropriate
+	 *         not be found, if this bundle wiring is for a fragment revision or
+	 *         if the caller does not have the appropriate
 	 *         {@code AdminPermission[bundle,RESOURCE]} and the Java Runtime
 	 *         Environment supports permissions. The collection is unordered and
 	 *         must contain no duplicate resource names. If this bundle wiring
@@ -283,11 +323,10 @@ public interface BundleWiring extends BundleReference {
 	/**
 	 * The list resource names operation must limit the result to the names of
 	 * matching resources contained in this bundle wiring's
-	 * {@link #getBundleRevision() bundle revision} and its attached
-	 * {@link #getFragmentRevisions() fragment revisions}. The result must not
-	 * include resource names for resources in
-	 * {@link Capability#PACKAGE_CAPABILITY package} names which are
-	 * {@link #getRequiredCapabilities(String) imported} by this wiring.
+	 * {@link #getRevision() bundle revision} and its attached fragment
+	 * revisions. The result must not include resource names for resources in
+	 * {@link BundleRevision#PACKAGE_NAMESPACE package} names which are
+	 * {@link #getRequiredWires(String) imported} by this wiring.
 	 * 
 	 * <p>
 	 * This bit may be set when calling

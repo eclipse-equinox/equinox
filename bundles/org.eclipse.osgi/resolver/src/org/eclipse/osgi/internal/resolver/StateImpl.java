@@ -139,7 +139,7 @@ public abstract class StateImpl implements State {
 					try {
 						resolving = true;
 						resolverErrors.remove(existing);
-						resolveBundle(existing, false, null, null, null, null, null, null, null);
+						resolveBundle(existing, false, null, null, null, null, null, null, null, null);
 					} finally {
 						resolving = false;
 					}
@@ -311,10 +311,10 @@ public abstract class StateImpl implements State {
 	 * @deprecated
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports) {
-		resolveBundle(bundle, status, hosts, selectedExports, substitutedExports, null, resolvedRequires, resolvedImports, null);
+		resolveBundle(bundle, status, hosts, selectedExports, substitutedExports, null, resolvedRequires, resolvedImports, null, null);
 	}
 
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities) {
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires) {
 		synchronized (this.monitor) {
 			if (!resolving)
 				throw new IllegalStateException(); // TODO need error message here!
@@ -333,12 +333,12 @@ public abstract class StateImpl implements State {
 				resolvedBundles.remove(modifiable);
 				modifiable.removeDependencies();
 			}
-			// to support develoment mode we will resolveConstraints even if the resolve status == false
+			// to support development mode we will resolveConstraints even if the resolve status == false
 			// we only do this if the resolved constraints are not null
 			if (selectedExports == null || resolvedRequires == null || resolvedImports == null)
 				unresolveConstraints(modifiable);
 			else
-				resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, selectedCapabilities, resolvedRequires, resolvedImports, resolveCapabilities);
+				resolveConstraints(modifiable, hosts, selectedExports, substitutedExports, selectedCapabilities, resolvedRequires, resolvedImports, resolvedCapabilities, resolvedWires);
 		}
 	}
 
@@ -351,7 +351,7 @@ public abstract class StateImpl implements State {
 		}
 	}
 
-	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities) {
+	private void resolveConstraints(BundleDescriptionImpl bundle, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedWires) {
 		HostSpecificationImpl hostSpec = (HostSpecificationImpl) bundle.getHost();
 		if (hostSpec != null) {
 			if (hosts != null) {
@@ -369,6 +369,7 @@ public abstract class StateImpl implements State {
 		bundle.setSubstitutedExports(substitutedExports);
 		bundle.setSelectedCapabilities(selectedCapabilities);
 		bundle.setResolvedCapabilities(resolvedCapabilities);
+		bundle.setStateWires(resolvedWires);
 
 		bundle.addDependencies(hosts, true);
 		bundle.addDependencies(resolvedRequires, true);
@@ -381,25 +382,6 @@ public abstract class StateImpl implements State {
 		// there are issues here because the order in which fragments are resolved is not always the same ...
 	}
 
-	//	private void checkForSubstitutedExports(BundleDescriptionImpl bundle, ExportPackageDescription[] selectedExports) {
-	//		ExportPackageDescription[] existingSubstitutes = bundle.getSubstitutedExports();
-	//		ExportPackageDescription[] declaredExports = bundle.getExportPackages();
-	//		ArrayList substitutes = new ArrayList();
-	//		for (int i = 0; i < declaredExports.length; i++) {
-	//			boolean selected = false;
-	//			for (int j = 0; !selected && j < selectedExports.length; j++)
-	//				selected = declaredExports[i] == selectedExports[j];
-	//			if (!selected)
-	//				substitutes.add(declaredExports[i]);
-	//		}
-	//		if (substitutes.size() > 0) {
-	//			substitutes.ensureCapacity(substitutes.size() + existingSubstitutes.length);
-	//			for (int i = 0; i < existingSubstitutes.length; i++)
-	//				substitutes.add(0, existingSubstitutes[i]);
-	//			bundle.setSubstitutedExports((ExportPackageDescription[]) substitutes.toArray(new ExportPackageDescription[substitutes.size()]));
-	//		}
-	//	}
-
 	private void unresolveConstraints(BundleDescriptionImpl bundle) {
 		HostSpecificationImpl host = (HostSpecificationImpl) bundle.getHost();
 		if (host != null)
@@ -411,6 +393,7 @@ public abstract class StateImpl implements State {
 		bundle.setSubstitutedExports(null);
 		bundle.setSelectedCapabilities(null);
 		bundle.setResolvedCapabilities(null);
+		bundle.setStateWires(null);
 		bundle.clearAddedDynamicImportPackages();
 
 		// remove the constraint suppliers

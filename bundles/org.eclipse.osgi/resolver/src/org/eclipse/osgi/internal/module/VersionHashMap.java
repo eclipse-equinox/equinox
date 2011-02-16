@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,7 @@ public class VersionHashMap<V extends VersionSupplier> extends MappedList<String
 	void reorder() {
 		for (Iterator<List<V>> it = internal.values().iterator(); it.hasNext();) {
 			List<V> existing = it.next();
-			if (existing.size() > 0)
+			if (existing.size() > 1)
 				Collections.sort(existing, this);
 		}
 	}

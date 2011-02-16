@@ -18,8 +18,7 @@ import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.Capability;
+import org.osgi.framework.wiring.*;
 
 /**
  * This class encapsulates the delegation to ResolverHooks that are registered with the service
@@ -133,13 +132,13 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			}
 		}
 
-		public void filterSingletonCollisions(Capability singleton, Collection<Capability> collisionCandidates) {
+		public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
 			if (Debug.DEBUG_HOOKS) {
 				Debug.println("ResolverHook.filterSingletonCollisions(" + singleton + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (hooks.isEmpty())
 				return;
-			collisionCandidates = new ShrinkableCollection<Capability>(collisionCandidates);
+			collisionCandidates = new ShrinkableCollection<BundleCapability>(collisionCandidates);
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
@@ -154,20 +153,20 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			}
 		}
 
-		public void filterMatches(BundleRevision requirer, Collection<Capability> candidates) {
+		public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
 			if (Debug.DEBUG_HOOKS) {
-				Debug.println("ResolverHook.filterMatches(" + requirer + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Debug.println("ResolverHook.filterMatches(" + requirement + ", " + candidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (hooks.isEmpty())
 				return;
-			candidates = new ShrinkableCollection<Capability>(candidates);
+			candidates = new ShrinkableCollection<BundleCapability>(candidates);
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
 					handleHookException(null, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 				} else {
 					try {
-						hookRef.hook.filterMatches(requirer, candidates);
+						hookRef.hook.filterMatches(requirement, candidates);
 					} catch (Throwable t) {
 						handleHookException(t, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks, true); //$NON-NLS-1$
 					}

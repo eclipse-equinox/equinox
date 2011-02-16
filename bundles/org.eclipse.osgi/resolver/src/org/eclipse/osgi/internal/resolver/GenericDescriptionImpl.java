@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.GenericDescription;
+import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -22,6 +21,29 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 	private volatile BundleDescription supplier;
 	private volatile String type = GenericDescription.DEFAULT_TYPE;
 	private Map<String, String> directives;
+	private GenericDescription fragmentDeclaration;
+
+	public GenericDescriptionImpl() {
+		super();
+	}
+
+	public GenericDescriptionImpl(BundleDescription host, GenericDescription fragmentDeclaration) {
+		setType(fragmentDeclaration.getType());
+		Dictionary<String, Object> origAttrs = fragmentDeclaration.getAttributes();
+		if (origAttrs != null) {
+			Hashtable<String, Object> copyAttrs = new Hashtable<String, Object>();
+			for (Enumeration<String> keys = origAttrs.keys(); keys.hasMoreElements();) {
+				String key = keys.nextElement();
+				copyAttrs.put(key, origAttrs.get(key));
+			}
+			setAttributes(copyAttrs);
+		}
+		Map<String, String> origDirectives = fragmentDeclaration.getDeclaredDirectives();
+		Map<String, String> copyDirectives = new HashMap<String, String>(origDirectives);
+		setDirectives(copyDirectives);
+		setSupplier(host);
+		this.fragmentDeclaration = fragmentDeclaration;
+	}
 
 	public Dictionary<String, Object> getAttributes() {
 		synchronized (this.monitor) {
@@ -112,5 +134,13 @@ public class GenericDescriptionImpl extends BaseDescriptionImpl implements Gener
 
 	String getInternalNameSpace() {
 		return getType();
+	}
+
+	public BaseDescription getFragmentDeclaration() {
+		return fragmentDeclaration;
+	}
+
+	void setFragmentDeclaration(GenericDescription fragmentDeclaration) {
+		this.fragmentDeclaration = fragmentDeclaration;
 	}
 }

@@ -12,8 +12,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import java.util.Collection;
-import java.util.Dictionary;
+import java.util.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
@@ -133,7 +132,7 @@ public final class ReadOnlyState implements State {
 		throw new UnsupportedOperationException();
 	}
 
-	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolveCapabilities) {
+	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, GenericDescription[] selectedCapabilities, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports, GenericDescription[] resolvedCapabilities, Map<String, List<StateWire>> resolvedRequirements) {
 		throw new UnsupportedOperationException();
 	}
 

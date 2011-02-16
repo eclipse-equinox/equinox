@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ class StateWriter {
 	// cached state.
 	private final Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
 
-	private final List<BundleDescription> forcedWrite = new ArrayList<BundleDescription>();
+	private final List<Object> forcedWrite = new ArrayList<Object>();
 
 	private int addToObjectTable(Object object) {
 		Integer cur = objectTable.get(object);
@@ -336,6 +336,7 @@ class StateWriter {
 
 		writeNativeCode(bundle.getNativeCodeSpecification(), out);
 
+		writeMap(out, ((BundleDescriptionImpl) bundle).getWiresInternal());
 		// save the size of the lazy data
 		((BundleDescriptionImpl) bundle).setLazyDataSize(out.size() - dataStart);
 	}
@@ -347,6 +348,8 @@ class StateWriter {
 	}
 
 	private void writeBundleSpec(BundleSpecificationImpl bundle, DataOutputStream out) throws IOException {
+		if (writePrefix(bundle, out))
+			return;
 		writeVersionConstraint(bundle, out);
 		writeBundleDescription((BundleDescription) bundle.getSupplier(), out, false);
 		out.writeBoolean(bundle.isExported());
@@ -361,6 +364,7 @@ class StateWriter {
 		writeBundleDescription(exportPackageDesc.getExporter(), out, false);
 		writeMap(out, exportPackageDesc.getAttributes());
 		writeMap(out, exportPackageDesc.getDirectives());
+		writeExportPackageDesc((ExportPackageDescriptionImpl) exportPackageDesc.getFragmentDeclaration(), out);
 	}
 
 	private void writeGenericDescription(GenericDescription description, DataOutputStream out) throws IOException {
@@ -378,9 +382,12 @@ class StateWriter {
 		writeMap(out, mapAttrs);
 		Map<String, String> directives = description.getDeclaredDirectives();
 		writeMap(out, directives);
+		writeGenericDescription((GenericDescription) ((BaseDescriptionImpl) description).getFragmentDeclaration(), out);
 	}
 
 	private void writeGenericSpecification(GenericSpecification specification, DataOutputStream out) throws IOException {
+		if (writePrefix(specification, out))
+			return;
 		writeVersionConstraint(specification, out);
 		writeStringOrNull(specification.getType() == GenericDescription.DEFAULT_TYPE ? null : specification.getType(), out);
 		GenericDescription[] suppliers = specification.getSuppliers();
@@ -505,10 +512,43 @@ class StateWriter {
 				case 6 :
 					writeVersion((Version) value, out);
 					break;
+				case 7 :
+					writeStateWire((StateWire) value, out);
 				default :
 					break;
 			}
 		}
+	}
+
+	private void writeStateWire(StateWire wire, DataOutputStream out) throws IOException {
+		VersionConstraint requirement = wire.getDeclaredRequirement();
+		if (requirement instanceof ImportPackageSpecificationImpl) {
+			out.writeByte(0);
+			writeImportPackageSpec((ImportPackageSpecificationImpl) requirement, out);
+		} else if (requirement instanceof BundleSpecificationImpl) {
+			out.writeByte(1);
+			writeBundleSpec((BundleSpecificationImpl) requirement, out);
+		} else if (requirement instanceof HostSpecificationImpl) {
+			out.writeByte(2);
+			writeHostSpec((HostSpecificationImpl) requirement, out, false);
+		} else if (requirement instanceof GenericSpecificationImpl) {
+			out.writeByte(3);
+			writeGenericSpecification((GenericSpecificationImpl) requirement, out);
+		} else
+			throw new IllegalArgumentException("Unknown requiement type: " + requirement.getClass());
+
+		BaseDescription capability = wire.getDeclaredCapability();
+		if (capability instanceof BundleDescription)
+			writeBundleDescription((BundleDescription) capability, out, false);
+		else if (capability instanceof ExportPackageDescriptionImpl)
+			writeExportPackageDesc((ExportPackageDescriptionImpl) capability, out);
+		else if (capability instanceof GenericDescription)
+			writeGenericDescription((GenericDescription) capability, out);
+		else
+			throw new IllegalArgumentException("Unknown capability type: " + requirement.getClass());
+
+		writeBundleDescription(wire.getRequirementHost(), out, false);
+		writeBundleDescription(wire.getCapabilityHost(), out, false);
 	}
 
 	private byte getListType(List<?> list) {
@@ -525,6 +565,8 @@ class StateWriter {
 			return 5;
 		if (type instanceof Version)
 			return 6;
+		if (type instanceof StateWire)
+			return 7;
 		return -2;
 	}
 
@@ -544,6 +586,8 @@ class StateWriter {
 	}
 
 	private void writeImportPackageSpec(ImportPackageSpecification importPackageSpec, DataOutputStream out) throws IOException {
+		if (writePrefix(importPackageSpec, out))
+			return;
 		writeVersionConstraint(importPackageSpec, out);
 		// TODO this is a hack until the state dynamic loading is cleaned up
 		// we should only write the supplier if we are resolved
@@ -559,11 +603,13 @@ class StateWriter {
 	}
 
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out, boolean force) throws IOException {
-		if (host == null) {
-			out.writeByte(StateReader.NULL);
+		if (host != null && force && !forcedWrite.contains(host)) {
+			int index = addToObjectTable(host);
+			out.writeByte(StateReader.OBJECT);
+			out.writeInt(index);
+			forcedWrite.add(host);
+		} else if (writePrefix(host, out))
 			return;
-		}
-		out.writeByte(StateReader.OBJECT);
 		writeVersionConstraint(host, out);
 		BundleDescription[] hosts = host.getHosts();
 		if (hosts == null) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class ImportPackageSpecificationImpl extends VersionConstraintImpl implements ImportPackageSpecification {
 	private String resolution = ImportPackageSpecification.RESOLUTION_STATIC; // the default is static
@@ -181,5 +182,33 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 
 	public String toString() {
 		return "Import-Package: " + getName() + "; version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	protected Map<String, String> getInternalDirectives() {
+		Map raw = getDirectives();
+		return Collections.unmodifiableMap(raw);
+	}
+
+	protected Map<String, Object> getInteralAttributes() {
+		Map<String, Object> result = new HashMap<String, Object>(2);
+		synchronized (this.monitor) {
+			if (attributes != null)
+				result.putAll(attributes);
+			result.put(BundleRevision.PACKAGE_NAMESPACE, getName());
+			VersionRange range = getVersionRange();
+			if (range != null)
+				result.put(Constants.VERSION_ATTRIBUTE, range.toString());
+			if (symbolicName != null)
+				result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
+			if (bundleVersionRange != null)
+				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersionRange.toString());
+			return Collections.unmodifiableMap(result);
+		}
+	}
+
+	@Override
+	protected String getInternalNameSpace() {
+		return BundleRevision.PACKAGE_NAMESPACE;
 	}
 }

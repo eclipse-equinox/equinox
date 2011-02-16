@@ -419,6 +419,13 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/AdaptPermission.java" type="org.osgi.framework.AdaptPermission">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.AdaptPermission"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/AdminPermission.java" type="org.osgi.framework.AdminPermission">
 <filter comment="Ignore OSGi API" id="1141899266">
 <message_arguments>
@@ -920,6 +927,13 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook$ListenerInfo">
+<filter comment="Ignore OSGi APIs" id="403853384">
+<message_arguments>
+<message_argument value="org.osgi.framework.hooks.service.ListenerHook.ListenerInfo"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
@@ -969,10 +983,38 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleCapability.java" type="org.osgi.framework.wiring.BundleCapability">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleCapability"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleRequirement.java" type="org.osgi.framework.wiring.BundleRequirement">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleRequirement"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/wiring/BundleRevision.java" type="org.osgi.framework.wiring.BundleRevision">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.wiring.BundleRevision"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleRevisions.java" type="org.osgi.framework.wiring.BundleRevisions">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleRevisions"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/BundleWire.java" type="org.osgi.framework.wiring.BundleWire">
+<filter comment="Ignore OSGi API" id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.BundleWire"/>
 </message_arguments>
 </filter>
 </resource>
@@ -983,31 +1025,10 @@
 </message_arguments>
 </filter>
 </resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleWirings.java" type="org.osgi.framework.wiring.BundleWirings">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleWirings"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/Capability.java" type="org.osgi.framework.wiring.Capability">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.Capability"/>
-</message_arguments>
-</filter>
-</resource>
 <resource path="osgi/src/org/osgi/framework/wiring/FrameworkWiring.java" type="org.osgi.framework.wiring.FrameworkWiring">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.wiring.FrameworkWiring"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/WiredCapability.java" type="org.osgi.framework.wiring.WiredCapability">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.WiredCapability"/>
 </message_arguments>
 </filter>
 </resource>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
@@ -126,5 +127,29 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		synchronized (this.monitor) {
 			this.suppliers = suppliers;
 		}
+	}
+
+	@Override
+	protected Map<String, String> getInternalDirectives() {
+		Map<String, String> result = new HashMap<String, String>(2);
+		synchronized (this.monitor) {
+			if ((resolution & GenericSpecification.RESOLUTION_OPTIONAL) != 0)
+				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
+			if (matchingFilter != null) {
+				result.put(Constants.FILTER_DIRECTIVE, matchingFilter.toString());
+			}
+		}
+		return Collections.unmodifiableMap(result);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected Map<String, Object> getInteralAttributes() {
+		return Collections.EMPTY_MAP;
+	}
+
+	@Override
+	protected String getInternalNameSpace() {
+		return getType();
 	}
 }

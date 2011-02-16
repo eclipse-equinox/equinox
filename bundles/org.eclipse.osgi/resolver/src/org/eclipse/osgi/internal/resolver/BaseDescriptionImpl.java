@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,11 +13,11 @@ package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
 import org.eclipse.osgi.service.resolver.BaseDescription;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.osgi.framework.Version;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 
-abstract class BaseDescriptionImpl implements BaseDescription {
+public abstract class BaseDescriptionImpl implements BaseDescription {
 
 	protected final Object monitor = new Object();
 
@@ -84,24 +84,18 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		return null;
 	}
 
-	WiredCapability getWiredCapability(String namespace) {
-		if (namespace == null)
-			namespace = getInternalNameSpace();
-		if (namespace == null)
-			return null;
-
-		BundleDescription supplier = getSupplier();
-		BundleWiring wiring = supplier.getBundleWiring();
-		if (wiring == null)
-			return null;
-		return new BaseWiredCapability(namespace, wiring);
+	public BaseDescription getFragmentDeclaration() {
+		return null;
 	}
 
-	public Capability getCapability() {
+	public BundleCapability getCapability() {
 		return getCapability(null);
 	}
 
-	Capability getCapability(String namespace) {
+	BundleCapability getCapability(String namespace) {
+		BaseDescriptionImpl fragmentDeclaration = (BaseDescriptionImpl) getFragmentDeclaration();
+		if (fragmentDeclaration != null)
+			return fragmentDeclaration.getCapability(namespace);
 		if (namespace == null)
 			namespace = getInternalNameSpace();
 		if (namespace == null)
@@ -109,7 +103,7 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 		return new BaseCapability(namespace);
 	}
 
-	class BaseCapability implements Capability {
+	class BaseCapability implements BundleCapability {
 		private final String namespace;
 
 		public BaseCapability(String namespace) {
@@ -117,7 +111,7 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 			this.namespace = namespace;
 		}
 
-		public BundleRevision getProviderRevision() {
+		public BundleRevision getRevision() {
 			return getSupplier();
 		}
 
@@ -160,63 +154,6 @@ abstract class BaseDescriptionImpl implements BaseDescription {
 
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
-		}
-	}
-
-	class BaseWiredCapability extends BaseCapability implements WiredCapability {
-		private final BundleWiring originalWiring;
-
-		public BaseWiredCapability(String namespace, BundleWiring originalWiring) {
-			super(namespace);
-			this.originalWiring = originalWiring;
-		}
-
-		public Collection<BundleWiring> getRequirerWirings() {
-			BundleWiring wiring = getProviderWiring();
-			if (wiring == null)
-				return null;
-			BundleDescription supplier = getSupplier();
-			BundleDescription[] dependents = supplier.getDependents();
-			Collection<BundleWiring> requirers = new ArrayList<BundleWiring>();
-			if (Capability.HOST_CAPABILITY.equals(getNamespace())) {
-				// special casing osgi.host capability.
-				// this is needed because the host capability is manufactured only for 
-				// representation in the wiring API.  We need to represent a host wiring
-				// as requiring its own osgi.host capability if it has attached fragments
-				List<BundleRevision> fragments = wiring.getFragmentRevisions();
-				if (fragments != null && fragments.size() > 0)
-					// found at least one fragment add the host wiring as a requirer and return
-					requirers.add(wiring);
-			}
-
-			for (BundleDescription dependent : dependents) {
-				BundleWiring dependentWiring = dependent.getBundleWiring();
-				if (dependentWiring == null) // fragments have no wiring
-					continue;
-				List<WiredCapability> namespace = dependentWiring.getRequiredCapabilities(getNamespace());
-				if (namespace == null)
-					continue;
-				if (namespace.contains(this))
-					requirers.add(dependentWiring);
-			}
-			return requirers;
-		}
-
-		public BundleWiring getProviderWiring() {
-			return originalWiring.isInUse() ? originalWiring : null;
-		}
-
-		public int hashCode() {
-			return System.identityHashCode(BaseDescriptionImpl.this) ^ System.identityHashCode(originalWiring);
-		}
-
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (!(obj instanceof BaseWiredCapability))
-				return false;
-			BaseWiredCapability other = (BaseWiredCapability) obj;
-			return (other.originalWiring == this.originalWiring) && super.equals(obj);
 		}
 	}
 }

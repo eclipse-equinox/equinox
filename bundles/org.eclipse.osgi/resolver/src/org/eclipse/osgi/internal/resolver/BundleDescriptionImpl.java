@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	private volatile int stateBits = FULLY_LOADED | ATTACH_FRAGMENTS | DYNAMIC_FRAGMENTS;
 
 	private volatile long bundleId = -1;
-	private volatile HostSpecification host; //null if the bundle is not a fragment. volatile to allow unsynchronized checks for null
+	volatile HostSpecification host; //null if the bundle is not a fragment. volatile to allow unsynchronized checks for null
 	private volatile StateImpl containingState;
 
 	private volatile Object userObject;
@@ -257,6 +257,23 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	public Map<String, List<StateWire>> getWires() {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			if (currentData.stateWires == null) {
+				currentData.stateWires = new HashMap<String, List<StateWire>>(0);
+			}
+			return currentData.stateWires;
+		}
+	}
+
+	Map<String, List<StateWire>> getWiresInternal() {
+		LazyData currentData = loadLazyData();
+		synchronized (this.monitor) {
+			return currentData.stateWires;
+		}
+	}
+
 	protected void setBundleId(long bundleId) {
 		this.bundleId = bundleId;
 	}
@@ -458,6 +475,13 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		synchronized (this.monitor) {
 			checkLazyData();
 			lazyData.resolvedCapabilities = resolvedCapabilities;
+		}
+	}
+
+	protected void setStateWires(Map<String, List<StateWire>> stateWires) {
+		synchronized (this.monitor) {
+			checkLazyData();
+			lazyData.stateWires = stateWires;
 		}
 	}
 
@@ -792,6 +816,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		String[] executionEnvironments;
 
 		Map<String, Long> dynamicStamps;
+		Map<String, List<StateWire>> stateWires;
 		// Note that this is not persisted in the state cache
 		List<ImportPackageSpecification> addedDynamicImports;
 	}
@@ -856,37 +881,61 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (attributes != null)
 				result.putAll(attributes);
 		}
-		result.put(Capability.BUNDLE_CAPABILITY, getName());
+		result.put(BundleRevision.BUNDLE_NAMESPACE, getName());
 		result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, getVersion());
 		return Collections.unmodifiableMap(result);
 	}
 
-	public List<Capability> getDeclaredCapabilities(String namespace) {
-		List<Capability> result = new ArrayList<Capability>();
+	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
+		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+		if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
+			BundleSpecification[] requires = getRequiredBundles();
+			for (BundleSpecification require : requires) {
+				result.add(require.getRequirement());
+			}
+		}
+		if (host != null && (namespace == null || BundleRevision.HOST_NAMESPACE.equals(namespace))) {
+			result.add(host.getRequirement());
+		}
+		if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
+			ImportPackageSpecification[] imports = getImportPackages();
+			for (ImportPackageSpecification importPkg : imports)
+				result.add(importPkg.getRequirement());
+		}
+		GenericSpecification[] genericSpecifications = getGenericRequires();
+		for (GenericSpecification requirement : genericSpecifications) {
+			if (namespace == null || namespace.equals(requirement.getType()))
+				result.add(requirement.getRequirement());
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
+		List<BundleCapability> result = new ArrayList<BundleCapability>();
 		if (host == null) {
 			if (getSymbolicName() != null) {
-				if (namespace == null || Capability.BUNDLE_CAPABILITY.equals(namespace)) {
+				if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
 					result.add(BundleDescriptionImpl.this.getCapability());
 				}
-				if (attachFragments() && (namespace == null || Capability.HOST_CAPABILITY.equals(namespace))) {
-					result.add(BundleDescriptionImpl.this.getCapability(Capability.HOST_CAPABILITY));
+				if (attachFragments() && (namespace == null || BundleRevision.HOST_NAMESPACE.equals(namespace))) {
+					result.add(BundleDescriptionImpl.this.getCapability(BundleRevision.HOST_NAMESPACE));
 				}
 			}
 
 		} else {
-			// may need to have a osgi.fragment capability
+			// may need to have a osgi.wiring.fragment capability
 		}
-		if (namespace == null || Capability.PACKAGE_CAPABILITY.equals(namespace)) {
+		if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 			ExportPackageDescription[] exports = getExportPackages();
-			for (ExportPackageDescription importPkg : exports)
-				result.add(importPkg.getCapability());
+			for (ExportPackageDescription exportPkg : exports)
+				result.add(exportPkg.getCapability());
 		}
 		GenericDescription[] genericCapabilities = getGenericCapabilities();
 		for (GenericDescription capabilitiy : genericCapabilities) {
 			if (namespace == null || namespace.equals(capabilitiy.getType()))
 				result.add(capabilitiy.getCapability());
 		}
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 
 	public int getTypes() {
@@ -901,14 +950,69 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	}
 
 	String getInternalNameSpace() {
-		return Capability.BUNDLE_CAPABILITY;
+		return BundleRevision.BUNDLE_NAMESPACE;
 	}
 
-	public BundleWiring getBundleWiring() {
+	public BundleWiring getWiring() {
 		synchronized (this.monitor) {
-			if (bundleWiring != null || !isResolved() || (getTypes() & BundleRevision.TYPE_FRAGMENT) != 0)
+			if (bundleWiring != null || !isResolved())
 				return bundleWiring;
 			return bundleWiring = new DescriptionWiring();
+		}
+	}
+
+	static class BundleWireImpl implements BundleWire {
+		private final BundleCapability capability;
+		private final BundleWiring provider;
+		private final BundleRequirement requirement;
+		private final BundleWiring requirer;
+
+		public BundleWireImpl(StateWire wire) {
+			VersionConstraint declaredRequirement = wire.getDeclaredRequirement();
+			if (declaredRequirement instanceof HostSpecification)
+				this.capability = ((BaseDescriptionImpl) wire.getDeclaredCapability()).getCapability(BundleRevision.HOST_NAMESPACE);
+			else
+				this.capability = wire.getDeclaredCapability().getCapability();
+			this.provider = wire.getCapabilityHost().getWiring();
+			this.requirement = declaredRequirement.getRequirement();
+			this.requirer = wire.getRequirementHost().getWiring();
+		}
+
+		public BundleCapability getCapability() {
+			return capability;
+		}
+
+		public BundleRequirement getRequirement() {
+			return requirement;
+		}
+
+		public BundleWiring getProviderWiring() {
+			return provider;
+		}
+
+		public BundleWiring getRequirerWiring() {
+			return requirer;
+		}
+
+		@Override
+		public int hashCode() {
+			int hashcode = 31 + capability.hashCode();
+			hashcode = hashcode * 31 + requirement.hashCode();
+			hashcode = hashcode * 31 + provider.hashCode();
+			hashcode = hashcode * 31 + requirer.hashCode();
+			return hashcode;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof BundleWireImpl))
+				return false;
+			BundleWireImpl other = (BundleWireImpl) obj;
+			return capability.equals(other.getCapability()) && requirement.equals(other.getRequirement()) && provider.equals(other.getProviderWiring()) && requirer.equals(other.getRequirerWiring());
+		}
+
+		public String toString() {
+			return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 		}
 	}
 
@@ -932,69 +1036,115 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return valid && !BundleDescriptionImpl.this.isRemovalPending();
 		}
 
-		public List<WiredCapability> getRequiredCapabilities(String capabilityNamespace) {
+		public List<BundleCapability> getCapabilities(String namespace) {
 			if (!isInUse())
 				return null;
-			List<WiredCapability> result = new ArrayList<WiredCapability>();
-			if (capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)) {
-				BundleDescription[] requires = getResolvedRequires();
-				for (BundleDescription require : requires)
-					result.add(((BaseDescriptionImpl) require).getWiredCapability(null));
-			}
-			if (attachFragments() && (capabilityNamespace == null || Capability.HOST_CAPABILITY.equals(capabilityNamespace))) {
-				Collection<BundleRevision> fragments = getFragmentRevisions();
-				if (fragments.size() > 0)
-					result.add(BundleDescriptionImpl.this.getWiredCapability(Capability.HOST_CAPABILITY));
-			}
-			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
-				ExportPackageDescription[] imports = getResolvedImports();
-				for (ExportPackageDescription importPkg : imports)
-					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability(null));
-			}
-			GenericDescription[] genericRequires = getResolvedGenericRequires();
-			for (GenericDescription require : genericRequires) {
-				if (capabilityNamespace == null || capabilityNamespace.equals(require.getType()))
-					result.add(((BaseDescriptionImpl) require).getWiredCapability(null));
-			}
-			return result;
-		}
-
-		public List<WiredCapability> getProvidedCapabilities(String capabilityNamespace) {
-			if (!isInUse())
-				return null;
-			List<WiredCapability> result = new ArrayList<WiredCapability>();
+			@SuppressWarnings("unchecked")
+			List<BundleCapability> result = Collections.EMPTY_LIST;
+			if (host != null)
+				return result;
+			result = new ArrayList<BundleCapability>();
 			if (getSymbolicName() != null) {
-				if ((capabilityNamespace == null || Capability.BUNDLE_CAPABILITY.equals(capabilityNamespace)))
-					result.add(BundleDescriptionImpl.this.getWiredCapability(null));
-				if (attachFragments() && (capabilityNamespace == null || Capability.HOST_CAPABILITY.endsWith(capabilityNamespace)))
-					result.add(BundleDescriptionImpl.this.getWiredCapability(Capability.HOST_CAPABILITY));
+				if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
+					result.add(BundleDescriptionImpl.this.getCapability());
+				}
+				if (attachFragments() && (namespace == null || BundleRevision.HOST_NAMESPACE.equals(namespace))) {
+					result.add(BundleDescriptionImpl.this.getCapability(BundleRevision.HOST_NAMESPACE));
+				}
 			}
-
-			if (capabilityNamespace == null || Capability.PACKAGE_CAPABILITY.equals(capabilityNamespace)) {
+			if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
 				ExportPackageDescription[] exports = getSelectedExports();
-				for (ExportPackageDescription importPkg : exports)
-					result.add(((BaseDescriptionImpl) importPkg).getWiredCapability(null));
+				for (ExportPackageDescription exportPkg : exports)
+					result.add(exportPkg.getCapability());
 			}
 			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
 			for (GenericDescription capabilitiy : genericCapabilities) {
-				if (capabilityNamespace == null || capabilityNamespace.equals(capabilitiy.getType()))
-					result.add(((BaseDescriptionImpl) capabilitiy).getWiredCapability(null));
+				if (namespace == null || namespace.equals(capabilitiy.getType()))
+					result.add(capabilitiy.getCapability());
 			}
 			return result;
 		}
 
-		public List<BundleRevision> getFragmentRevisions() {
-			if (!isInUse())
+		public List<BundleRequirement> getRequirements(String namespace) {
+			List<BundleWire> requiredWires = getRequiredWires(namespace);
+			if (requiredWires == null)
+				// happens if not in use
 				return null;
-			List<BundleRevision> results = new ArrayList<BundleRevision>();
-			BundleDescription[] deps = getDependents();
-			for (BundleDescription dependent : deps) {
-				if (dependent.getHost() != null) {
-					// found a fragment
-					results.add(dependent);
+			List<BundleRequirement> requirements = new ArrayList<BundleRequirement>(requiredWires.size());
+			for (BundleWire wire : requiredWires) {
+				if (!requirements.contains(wire.getRequirement()))
+					requirements.add(wire.getRequirement());
+			}
+			// get dynamic imports
+			if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
+				if (hasDynamicImports()) {
+					ImportPackageSpecification[] imports = getImportPackages();
+					for (ImportPackageSpecification impPackage : imports) {
+						if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(impPackage.getDirective(Constants.RESOLUTION_DIRECTIVE))) {
+							BundleRequirement req = impPackage.getRequirement();
+							if (!requirements.contains(req))
+								requirements.add(req);
+						}
+					}
 				}
 			}
-			return results;
+			return requirements;
+		}
+
+		public List<BundleWire> getProvidedWires(String namespace) {
+			if (!isInUse())
+				return null;
+			BundleDescription[] dependentBundles = getDependents();
+			List<BundleWire> unorderedResult = new ArrayList<BundleWire>();
+			for (BundleDescription dependent : dependentBundles) {
+				List<BundleWire> dependentWires = dependent.getWiring().getRequiredWires(namespace);
+				if (dependentWires != null)
+					for (BundleWire bundleWire : dependentWires) {
+						if (bundleWire.getProviderWiring() == this)
+							unorderedResult.add(bundleWire);
+					}
+			}
+			List<BundleWire> orderedResult = new ArrayList<BundleWire>(unorderedResult.size());
+			List<BundleCapability> capabilities = getCapabilities(namespace);
+			for (BundleCapability capability : capabilities) {
+				for (Iterator<BundleWire> wires = unorderedResult.iterator(); wires.hasNext();) {
+					BundleWire wire = wires.next();
+					if (wire.getCapability().equals(capability)) {
+						wires.remove();
+						orderedResult.add(wire);
+					}
+				}
+			}
+			return orderedResult;
+		}
+
+		public List<BundleWire> getRequiredWires(String namespace) {
+			if (!isInUse())
+				return null;
+			@SuppressWarnings("unchecked")
+			List<BundleWire> result = Collections.EMPTY_LIST;
+			Map<String, List<StateWire>> wireMap = getWires();
+			if (namespace == null) {
+				result = new ArrayList<BundleWire>();
+				for (List<StateWire> wires : wireMap.values()) {
+					for (StateWire wire : wires) {
+						result.add(new BundleWireImpl(wire));
+					}
+				}
+				return result;
+			}
+			List<StateWire> wires = wireMap.get(namespace);
+			if (wires == null)
+				return result;
+			result = new ArrayList<BundleWire>(wires.size());
+			for (StateWire wire : wires) {
+				result.add(new BundleWireImpl(wire));
+			}
+			return result;
+		}
+
+		public BundleRevision getRevision() {
+			return BundleDescriptionImpl.this;
 		}
 
 		public ClassLoader getClassLoader() {
@@ -1017,10 +1167,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			if (o instanceof BundleLoaderProxy)
 				return ((BundleLoaderProxy) o).getBundleLoader().createClassLoader();
 			return null;
-		}
-
-		public BundleRevision getBundleRevision() {
-			return BundleDescriptionImpl.this;
 		}
 
 		private boolean hasResourcePermission() {

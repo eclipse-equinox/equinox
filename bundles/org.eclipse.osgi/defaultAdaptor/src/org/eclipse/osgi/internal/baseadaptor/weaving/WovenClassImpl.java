@@ -34,6 +34,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private byte[] bytes;
 	private byte hookFlags = 0;
 	private Throwable error;
+	private ServiceRegistration<?> errorHook;
 	private Class<?> clazz;
 
 	public WovenClassImpl(String className, byte[] bytes, ProtectionDomain domain, BundleLoader loader, ServiceRegistry registry, Map<ServiceRegistration<?>, Boolean> blacklist) {
@@ -114,7 +115,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	}
 
 	public BundleWiring getBundleWiring() {
-		return loader.getLoaderProxy().getBundleDescription().getBundleWiring();
+		return loader.getLoaderProxy().getBundleDescription().getWiring();
 	}
 
 	public void call(final Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
@@ -128,9 +129,11 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				((WeavingHook) hook).weave(this);
 			} catch (WeavingException e) {
 				error = e;
+				errorHook = hookRegistration;
 				// do not blacklist on weaving exceptions
 			} catch (Throwable t) {
 				error = t; // save the error to fail later
+				errorHook = hookRegistration;
 				// put the registration on the black list
 				blackList.put(hookRegistration, Boolean.TRUE);
 			}
@@ -187,5 +190,9 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 
 	public String toString() {
 		return className;
+	}
+
+	public ServiceRegistration<?> getErrorHook() {
+		return errorHook;
 	}
 }

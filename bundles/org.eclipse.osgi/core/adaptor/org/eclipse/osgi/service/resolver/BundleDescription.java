@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.osgi.service.resolver;
 
 import java.util.Map;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * This class represents a specific version of a bundle in the system.
@@ -289,14 +288,4 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	 * @since 3.4
 	 */
 	public ExportPackageDescription[] getSubstitutedExports();
-
-	/**
-	 * Returns the bundle wiring object associated with this bundle description.
-	 * A bundle description can only have one bundle wiring object associated with
-	 * it which is in use.  A bundle description must be resolved in order 
-	 * to have a bundle wiring object associated with it.  
-	 * @return the bundle wiring object associated with this bundle description.
-	 * @since 3.7
-	 */
-	public BundleWiring getBundleWiring();
 }

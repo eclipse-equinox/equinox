@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -401,12 +401,12 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <A> A adapt(Class<A> adapterType) {
+	protected <A> A adapt0(Class<A> adapterType) {
 		if (FrameworkStartLevel.class.equals(adapterType))
 			return (A) fsl;
 		else if (FrameworkWiring.class.equals(adapterType))
 			return (A) framework.getPackageAdmin();
-		return super.adapt(adapterType);
+		return super.adapt0(adapterType);
 	}
 
 	class EquinoxStartLevel implements FrameworkStartLevel {

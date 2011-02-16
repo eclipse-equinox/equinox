@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * 
  * @since 1.1
  * @noimplement
- * @version $Id: dfc898e60b6825d9b1dada682a6aecc858daa7f4 $
+ * @version $Id: 517c954ed7d34d2ee762933466f69fa03db7cd37 $
  */
 
 public interface Constants {
@@ -1276,7 +1276,7 @@ public interface Constants {
 	 * persists across multiple Framework invocations.
 	 * 
 	 * <p>
-	 * By convention, every bundle has its own unique namespace, starting with
+	 * By convention, every bundle has its own unique name space, starting with
 	 * the bundle's identifier (see {@link Bundle#getBundleId}) and followed by
 	 * a dot (.). A bundle may use this as the prefix of the persistent
 	 * identifiers for the services it registers.

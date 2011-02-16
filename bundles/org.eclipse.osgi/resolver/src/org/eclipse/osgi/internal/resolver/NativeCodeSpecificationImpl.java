@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,5 +155,20 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		}
 
 		return sb.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, String> getInternalDirectives() {
+		return Collections.EMPTY_MAP;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, Object> getInteralAttributes() {
+		return Collections.EMPTY_MAP;
+	}
+
+	@Override
+	protected String getInternalNameSpace() {
+		return null;
 	}
 }

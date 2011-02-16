@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@ package org.eclipse.osgi.framework.internal.core;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Enumeration;
 import org.eclipse.osgi.framework.adaptor.*;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
@@ -23,8 +23,6 @@ import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.osgi.service.resolver.ResolverHookException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.framework.wiring.BundleWirings;
 
 public class BundleHost extends AbstractBundle {
 	public static final int LAZY_TRIGGER = 0x40000000;
@@ -680,35 +678,6 @@ public class BundleHost extends AbstractBundle {
 		BundleLoader loader = curProxy == null ? null : curProxy.getBundleLoader();
 		BundleClassLoader bcl = loader == null ? null : loader.createClassLoader();
 		return (bcl instanceof ClassLoader) ? (ClassLoader) bcl : null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <A> A adapt(Class<A> adapterType) {
-		if (BundleWirings.class.equals(adapterType)) {
-			return (A) new BundleWirings() {
-				public Bundle getBundle() {
-					return BundleHost.this;
-				}
-
-				public List<BundleWiring> getWirings() {
-					List<BundleWiring> wirings = new ArrayList<BundleWiring>();
-					BundleWiring current = adapt(BundleWiring.class);
-					if (current != null)
-						wirings.add(current);
-					BundleDescription[] removals = framework.adaptor.getState().getRemovalPending();
-					for (BundleDescription removed : removals) {
-						if (removed.getBundleId() == getBundleId()) {
-							BundleWiring removedWiring = removed.getBundleWiring();
-							if (removedWiring != null && removedWiring != current)
-								wirings.add(removedWiring);
-						}
-					}
-					return wirings;
-				}
-
-			};
-		}
-		return super.adapt(adapterType);
 	}
 
 }

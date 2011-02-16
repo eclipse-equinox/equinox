@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.eclipse.osgi.framework.adaptor.ClassLoaderDelegate;
 import org.eclipse.osgi.framework.internal.core.Framework;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 
 public class WeavingHookConfigurator implements HookConfigurator, ClassLoadingHook, ClassLoadingStatsHook {
 	private BaseAdaptor adaptor;
@@ -68,7 +67,9 @@ public class WeavingHookConfigurator implements HookConfigurator, ClassLoadingHo
 		try {
 			return wovenClass.callHooks();
 		} catch (Throwable t) {
-			adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, manager.getBaseData().getBundle(), t);
+			ServiceRegistration<?> errorHook = wovenClass.getErrorHook();
+			Bundle errorBundle = errorHook != null ? errorHook.getReference().getBundle() : manager.getBaseData().getBundle();
+			adaptor.getEventPublisher().publishFrameworkEvent(FrameworkEvent.ERROR, errorBundle, t);
 			// fail hard with a class loading error
 			ClassFormatError error = new ClassFormatError("Unexpected error from weaving hook."); //$NON-NLS-1$
 			error.initCause(t);
