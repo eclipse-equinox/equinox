@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,7 +128,7 @@ public interface ClassLoaderDelegate {
 	 * @param options The options for listing resource names.
 	 * @return a collection of resource names.  If no resources are found then
 	 * the empty collection is returned.
-	 * @see {@link BundleWiring#listResources(String, String, int)}
+	 * @see BundleWiring#listResources(String, String, int)
 	 */
 	public Collection<String> listResources(String path, String filePattern, int options);
 }

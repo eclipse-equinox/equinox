@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -422,7 +422,7 @@ public class StartLevelManager implements EventDispatcher<Object, Object, StartL
 	 * dispatchEvent* method calls. It can provide information (such
 	 * as which listener method to call) so that this method
 	 * can complete the delivery of the event to the listener.
-	 * @param eventObject This object was passed to the ListenerQueue object via one of its
+	 * @param event This object was passed to the ListenerQueue object via one of its
 	 * dispatchEvent* method calls. This object was created by the event source and
 	 * is passed to this method. It should contain all the necessary information (such
 	 * as what event object to pass) so that this method

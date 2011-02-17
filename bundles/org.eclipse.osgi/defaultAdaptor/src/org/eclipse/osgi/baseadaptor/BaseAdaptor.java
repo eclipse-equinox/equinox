@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -569,7 +569,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	 * @param options The options for listing resource names.
 	 * @return a list of resource names.  If no resources are found then
 	 * the empty list is returned.
-	 * @see {@link BundleWiring#listResources(String, String, int)}
+	 * @see BundleWiring#listResources(String, String, int)
 	 */
 	public List<String> listEntryPaths(List<BundleFile> bundleFiles, String path, String filePattern, int options) {
 		// a list used to store the results of the search

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -289,8 +289,8 @@ public interface FrameworkAdaptor {
 	 * @param options The options for listing resource names.
 	 * @return a list of resource URLs.  If no resources are found then
 	 * the empty list is returned.
-	 * @see {@link BundleClassLoader#findEntries(String, String, int)}
-	 * @see {@link Bundle#findEntries(String, String, boolean)}
+	 * @see BundleClassLoader#findEntries(String, String, int)
+	 * @see Bundle#findEntries(String, String, boolean)
 	 */
 	public Enumeration<URL> findEntries(List<BundleData> datas, String path, String filePattern, int options);
 }
