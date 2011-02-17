@@ -576,7 +576,18 @@ public class BaseAdaptor implements FrameworkAdaptor {
 		List<String> pathList = new ArrayList<String>();
 		Filter patternFilter = null;
 		Hashtable<String, String> patternProps = null;
-		if (filePattern != null)
+		if (filePattern != null) {
+			// Optimization: If the file pattern does not include a wildcard then it must represent a single file.
+			// Avoid pattern matching and use BundleFile.getEntry() if recursion was not requested.
+			if (filePattern.indexOf('*') == -1 && (options & BundleWiring.FINDENTRIES_RECURSE) == 0) {
+				path += path.charAt(path.length() - 1) == '/' ? filePattern : '/' + filePattern;
+				for (BundleFile bundleFile : bundleFiles) {
+					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
+						pathList.add(path);
+				}
+				return pathList;
+			}
+			// For when the file pattern includes a wildcard.
 			try {
 				// create a file pattern filter with 'filename' as the key
 				patternFilter = FilterImpl.newInstance("(filename=" + sanitizeFilterInput(filePattern) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -588,6 +599,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 				eventPublisher.publishFrameworkEvent(FrameworkEvent.ERROR, b, e);
 				return pathList;
 			}
+		}
 		// find the entry paths for the datas
 		for (BundleFile bundleFile : bundleFiles) {
 			listEntryPaths(bundleFile, path, patternFilter, patternProps, options, pathList);
@@ -663,7 +675,7 @@ public class BaseAdaptor implements FrameworkAdaptor {
 				// set the filename to the current entry
 				patternProps.put("filename", fileName); //$NON-NLS-1$
 			}
-			// prevent duplicates and match on the patterFilter
+			// prevent duplicates and match on the patternFilter
 			if (!pathList.contains(entry) && (patternFilter == null || patternFilter.matchCase(patternProps)))
 				pathList.add(entry);
 			// recurse only into entries that are directories
