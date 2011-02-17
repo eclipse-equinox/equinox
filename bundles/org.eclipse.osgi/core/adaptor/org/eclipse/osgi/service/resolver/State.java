@@ -189,7 +189,7 @@ public interface State {
 	 * @param resolvedRequires the {@link BundleDescription}s that resolve the required bundles for this bundle, can be <code>null</code>
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
-	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[])}
+	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
@@ -209,7 +209,7 @@ public interface State {
 	 * @param resolvedImports the exported packages that resolve the imports for this bundle, can be <code>null</code>
 	 * @throws IllegalStateException if this is not done during a call to <code>resolve</code>
 	 * @since 3.4
-	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[])}
+	 * @deprecated use {@link #resolveBundle(BundleDescription, boolean, BundleDescription[], ExportPackageDescription[], ExportPackageDescription[], GenericDescription[], BundleDescription[], ExportPackageDescription[], GenericDescription[], Map)}
 	 */
 	public void resolveBundle(BundleDescription bundle, boolean status, BundleDescription[] hosts, ExportPackageDescription[] selectedExports, ExportPackageDescription[] substitutedExports, BundleDescription[] resolvedRequires, ExportPackageDescription[] resolvedImports);
 
