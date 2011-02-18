@@ -642,24 +642,26 @@ public abstract class StateImpl implements State {
 
 	public ExportPackageDescription[] getExportedPackages() {
 		fullyLoad();
-		final List<ExportPackageDescription> allExportedPackages = new ArrayList<ExportPackageDescription>();
-		for (Iterator<KeyedElement> iter = resolvedBundles.iterator(); iter.hasNext();) {
-			BundleDescription bundle = (BundleDescription) iter.next();
-			ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
-			if (bundlePackages == null)
-				continue;
-			for (int i = 0; i < bundlePackages.length; i++)
-				allExportedPackages.add(bundlePackages[i]);
+		synchronized (this.monitor) {
+			List<ExportPackageDescription> allExportedPackages = new ArrayList<ExportPackageDescription>();
+			for (Iterator<KeyedElement> iter = resolvedBundles.iterator(); iter.hasNext();) {
+				BundleDescription bundle = (BundleDescription) iter.next();
+				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
+				if (bundlePackages == null)
+					continue;
+				for (int i = 0; i < bundlePackages.length; i++)
+					allExportedPackages.add(bundlePackages[i]);
+			}
+			for (Iterator<BundleDescription> iter = removalPendings.iterator(); iter.hasNext();) {
+				BundleDescription bundle = iter.next();
+				ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
+				if (bundlePackages == null)
+					continue;
+				for (int i = 0; i < bundlePackages.length; i++)
+					allExportedPackages.add(bundlePackages[i]);
+			}
+			return allExportedPackages.toArray(new ExportPackageDescription[allExportedPackages.size()]);
 		}
-		for (Iterator<BundleDescription> iter = removalPendings.iterator(); iter.hasNext();) {
-			BundleDescription bundle = iter.next();
-			ExportPackageDescription[] bundlePackages = bundle.getSelectedExports();
-			if (bundlePackages == null)
-				continue;
-			for (int i = 0; i < bundlePackages.length; i++)
-				allExportedPackages.add(bundlePackages[i]);
-		}
-		return allExportedPackages.toArray(new ExportPackageDescription[allExportedPackages.size()]);
 	}
 
 	BundleDescription[] getFragments(final BundleDescription host) {
