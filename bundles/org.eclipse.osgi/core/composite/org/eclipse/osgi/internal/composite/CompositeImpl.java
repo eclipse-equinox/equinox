@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,6 +98,14 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 	}
 
 	public Framework getCompositeFramework() {
+		if ((getState() & Bundle.UNINSTALLED) == 0) {
+			if ((companionFramework.getState() & (Bundle.INSTALLED | Bundle.RESOLVED)) != 0)
+				try {
+					companionFramework.init();
+				} catch (BundleException e) {
+					throw new RuntimeException("Cannot initialize child framework.", e);
+				}
+		}
 		return companionFramework;
 	}
 
@@ -106,13 +114,7 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 	}
 
 	protected Bundle getCompanionBundle() {
-		if ((companionFramework.getState() & (Bundle.INSTALLED | Bundle.RESOLVED)) != 0)
-			try {
-				companionFramework.init();
-			} catch (BundleException e) {
-				throw new RuntimeException("Cannot initialize child framework.", e);
-			}
-		return companionFramework.getBundleContext().getBundle(1);
+		return getCompositeFramework().getBundleContext().getBundle(1);
 	}
 
 	public void update(Map compositeManifest) throws BundleException {
