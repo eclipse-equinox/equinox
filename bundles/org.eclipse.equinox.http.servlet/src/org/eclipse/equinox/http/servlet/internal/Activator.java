@@ -50,6 +50,7 @@ public class Activator implements BundleActivator {
 			ServiceRegistration registration = (ServiceRegistration) serviceRegistrations.put(proxyServlets[i], null);
 			registration.unregister();
 		}
+		serviceRegistrations.clear();
 		context = null;
 	}
 
