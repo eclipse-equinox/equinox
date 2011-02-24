@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,10 +14,13 @@ package org.eclipse.equinox.internal.ds;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import org.eclipse.equinox.internal.ds.model.DeclarationParser;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
+import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 
 /**
@@ -52,13 +55,16 @@ public abstract class ComponentStorage {
 
 	protected Vector parseXMLDeclaration(Bundle bundle, String dsHeader) throws Exception {
 		Vector components = new Vector();
-		if (dsHeader != null) {
-			StringTokenizer tok = new StringTokenizer(dsHeader, ","); //$NON-NLS-1$
-			// the parser is not thread safe!!!
-			synchronized (parser) {
-				// process all definition file
-				while (tok.hasMoreElements()) {
-					String definitionFile = tok.nextToken().trim();
+		if (dsHeader == null)
+			return components;
+		ManifestElement[] elements = ManifestElement.parseHeader(ComponentConstants.SERVICE_COMPONENT, dsHeader);
+		// the parser is not thread safe!!!
+		synchronized (parser) {
+			// process all definition file
+			for (int i = 0; i < elements.length; i++) {
+				String[] definitionFiles = elements[i].getValueComponents();
+				for (int j = 0; j < definitionFiles.length; j++) {
+					String definitionFile = definitionFiles[j];
 					int ind = definitionFile.lastIndexOf('/');
 					String path = ind != -1 ? definitionFile.substring(0, ind) : "/"; //$NON-NLS-1$
 					InputStream is = null;
@@ -98,15 +104,14 @@ public abstract class ComponentStorage {
 								is.close();
 							}
 						}
-					}
-				} // end while
+					} // end while
+				} // end for definitionFiles
+			} // end for elements
 
-				components = parser.components;
-				// make sure the clean-up the parser cache, for the next bundle to
-				// work properly!!!
-				parser.components = null;
-			}
-
+			components = parser.components;
+			// make sure the clean-up the parser cache, for the next bundle to
+			// work properly!!!
+			parser.components = null;
 		}
 		return components;
 	}
