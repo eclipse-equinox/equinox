@@ -580,7 +580,10 @@ public class BaseAdaptor implements FrameworkAdaptor {
 			// Optimization: If the file pattern does not include a wildcard  or escape  char then it must represent a single file.
 			// Avoid pattern matching and use BundleFile.getEntry() if recursion was not requested.
 			if ((options & BundleWiring.FINDENTRIES_RECURSE) == 0 && filePattern.indexOf('*') == -1 && filePattern.indexOf('\\') == -1) {
-				path += path.charAt(path.length() - 1) == '/' ? filePattern : '/' + filePattern;
+				if (path.length() == 0)
+					path = filePattern;
+				else
+					path += path.charAt(path.length() - 1) == '/' ? filePattern : '/' + filePattern;
 				for (BundleFile bundleFile : bundleFiles) {
 					if (bundleFile.getEntry(path) != null && !pathList.contains(path))
 						pathList.add(path);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,6 +97,16 @@ public class BundleResourceTests extends CoreTest {
 		checkEntries(bundle, "*(*", 2);
 		checkEntries(bundle, "*\\)*", 2);
 		checkEntries(bundle, "*\\(*", 2);
+	}
+
+	public void testBug338081() throws BundleException {
+		Bundle bundle = installer.installBundle("test"); //$NON-NLS-1$
+		// Empty string same as '/' for bundle root
+		Enumeration entries = bundle.findEntries("", "file1.txt", false); //$NON-NLS-1$
+		assertNotNull("An entry should have been found", entries);
+		assertTrue("An entry should have been found", entries.hasMoreElements());
+		assertTrue("Wrong entry found", ((URL) entries.nextElement()).toString().indexOf("file1.txt") > -1);
+		assertFalse("Only one entry should have been found", entries.hasMoreElements());
 	}
 
 	private void checkEntries(Bundle bundle, String filePattern, int expectedNumber) {
