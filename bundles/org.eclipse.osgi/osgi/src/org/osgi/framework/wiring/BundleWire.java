@@ -21,7 +21,7 @@ package org.osgi.framework.wiring;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: BundleWire.java,v 1.1.2.1 2011/02/14 22:18:14 twatson Exp $
+ * @version $Id: 4f936a84065762ec3267a44f86ae01b0150e44ce $
  */
 public interface BundleWire {
 	/**

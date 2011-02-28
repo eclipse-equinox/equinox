@@ -38,7 +38,7 @@ import org.osgi.framework.BundleReference;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: BundleRevisions.java,v 1.1.2.2 2011/02/14 22:18:14 twatson Exp $
+ * @version $Id: 1d95ad10f0f08b100f8ee2485bdd34120032c7af $
  */
 public interface BundleRevisions extends BundleReference {
 	/**

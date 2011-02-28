@@ -24,7 +24,7 @@ import java.util.Map;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: BundleRequirement.java,v 1.1.2.1 2011/02/14 22:18:14 twatson Exp $
+ * @version $Id: 659132c1fac7526240df377ead0e1bc8d4af2e77 $
  */
 public interface BundleRequirement {
 	/**
