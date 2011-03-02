@@ -99,8 +99,11 @@ class StateWriter {
 			StateHelperImpl.getInstance().sortBundles(bundles);
 			// need to prime the object table with all bundles
 			// this allows us to write only indexes to bundles in the lazy data
-			for (int i = 0; i < bundles.length; i++)
+			for (int i = 0; i < bundles.length; i++) {
 				addToObjectTable(bundles[i]);
+				if (bundles[i].getHost() != null)
+					addToObjectTable(bundles[i].getHost());
+			}
 			// first write the lazy data to get the offsets and sizes to the lazy data
 			fosLazy = new FileOutputStream(lazyFile);
 			outLazy = new DataOutputStream(new BufferedOutputStream(fosLazy));

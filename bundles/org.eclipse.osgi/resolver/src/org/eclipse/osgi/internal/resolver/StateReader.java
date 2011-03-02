@@ -838,7 +838,8 @@ final class StateReader {
 	void flushLazyObjectCache() {
 		for (Iterator<Entry<Integer, Object>> entries = objectTable.entrySet().iterator(); entries.hasNext();) {
 			Map.Entry<Integer, Object> entry = entries.next();
-			if (entry.getValue() instanceof ExportPackageDescription || entry.getValue() instanceof GenericDescription)
+			Object value = entry.getValue();
+			if (value instanceof ExportPackageDescription || value instanceof GenericDescription || value instanceof ImportPackageSpecification || value instanceof BundleSpecification || value instanceof GenericSpecification)
 				entries.remove();
 		}
 	}
