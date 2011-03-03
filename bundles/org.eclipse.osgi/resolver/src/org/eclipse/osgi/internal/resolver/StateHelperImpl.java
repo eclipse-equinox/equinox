@@ -190,7 +190,7 @@ public final class StateHelperImpl implements StateHelper {
 		State containingState = bundle.getContainingState();
 		if (containingState == null)
 			// it is a bug in the client to call this method when not attached to a state
-			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$		
+			throw new IllegalStateException("Does not belong to a state"); //$NON-NLS-1$
 		List<VersionConstraint> unsatisfied = new ArrayList<VersionConstraint>();
 		HostSpecification host = bundle.getHost();
 		if (host != null)
@@ -202,8 +202,16 @@ public final class StateHelperImpl implements StateHelper {
 				unsatisfied.add(requiredBundles[i]);
 		ImportPackageSpecification[] packages = bundle.getImportPackages();
 		for (int i = 0; i < packages.length; i++)
-			if (!packages[i].isResolved() && !isResolvable(packages[i], hook))
+			if (!packages[i].isResolved() && !isResolvable(packages[i], hook)) {
+				if (bundle.isResolved()) {
+					// if the bundle is resolved the check if the import is option.
+					// Here we assume that an unresolved mandatory import must have been dropped
+					// in favor of an export from the same bundle (bug 338240)
+					if (!ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(packages[i].getDirective(Constants.RESOLUTION_DIRECTIVE)))
+						continue;
+				}
 				unsatisfied.add(packages[i]);
+			}
 		GenericSpecification[] generics = bundle.getGenericRequires();
 		for (int i = 0; i < generics.length; i++)
 			if (!generics[i].isResolved() && !isResolvable(generics[i], hook))

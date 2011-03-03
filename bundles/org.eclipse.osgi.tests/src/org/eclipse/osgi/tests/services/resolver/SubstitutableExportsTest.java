@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2777,6 +2777,9 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
 		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
 		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+
+		VersionConstraint[] unsatisfied = state.getStateHelper().getUnsatisfiedConstraints(a);
+		assertEquals("Should not have any unresolvable constraints", 0, unsatisfied.length);
 	}
 
 }
