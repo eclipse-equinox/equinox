@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -782,7 +782,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 					if (desc != null) {
 						boolean title = true;
 						try {
-							ExportPackageDescription[] exports = desc.getExportPackages();
+							ExportPackageDescription[] exports = desc.getSelectedExports();
 							if (exports == null || exports.length == 0) {
 								intp.print("  "); //$NON-NLS-1$
 								intp.println(ConsoleMsg.CONSOLE_NO_EXPORTED_PACKAGES_MESSAGE);
