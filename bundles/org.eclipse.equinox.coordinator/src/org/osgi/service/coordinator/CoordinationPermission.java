@@ -47,7 +47,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * {@code participate} and {@code admin}.
  * 
  * @ThreadSafe
- * @version $Id: e72248b8f838c2618ad9bf33f47f1757e84c1ff3 $
+ * @version $Id: 5c0e011abe0732906361e08819354ec794e1e2fd $
  */
 public class CoordinationPermission extends BasicPermission {
 
@@ -137,7 +137,7 @@ public class CoordinationPermission extends BasicPermission {
 	 * 
 	 * @param filter A filter expression. Filter attribute names are processed
 	 *        in a case sensitive manner. A special value of {@code "*"} can be
-	 *        used to match all Conditions.
+	 *        used to match all coordinations.
 	 * @param actions {@code admin}, {@code initiate} or {@code participate}
 	 *        (canonical order).
 	 * @throws IllegalArgumentException If the filter has an invalid syntax.
@@ -153,7 +153,7 @@ public class CoordinationPermission extends BasicPermission {
 	 * cannot be added to an {@code CoordinationPermission} permission
 	 * collection.
 	 * 
-	 * @param coordinationName The name of the requested Coordination
+	 * @param coordinationName The name of the requested Coordination.
 	 * @param coordinationBundle The bundle which
 	 *        {@link Coordination#getBundle() created} the requested
 	 *        Coordination.

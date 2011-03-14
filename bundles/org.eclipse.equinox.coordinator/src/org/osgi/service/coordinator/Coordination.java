@@ -63,7 +63,7 @@ import org.osgi.framework.Bundle;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 4ee9ee523df72f77661ffc095ea71a0049d9b33d $
+ * @version $Id: 5381fdd48301865d24eabcf57ff81aee9eb6a159 $
  */
 
 public interface Coordination {
@@ -181,15 +181,16 @@ public interface Coordination {
 	 * return {@code true}.
 	 * 
 	 * <p>
-	 * If the Coordination is implicit, then the Coordination is not removed
-	 * from the stack. The initiator must still call end on an implicit
-	 * Coordination to remove this Coordination from the thread local stack.
+	 * If this Coordination has been {@link #push() pushed} onto a thread local
+	 * Coordination stack, this Coordination is not removed from the stack. The
+	 * creator of this Coordination must still call {@link #end()} on this
+	 * Coordination to cause it to be removed from the thread local Coordination
+	 * stack.
 	 * 
-	 * @param cause The failure cause. The failure cause must not be {@code
-	 *        null}.
+	 * @param cause The failure cause. The failure cause must not be
+	 *        {@code null}.
 	 * @return {@code true} if this Coordination was active and was terminated
 	 *         by this method, otherwise {@code false}.
-	 * @throws NullPointerException If cause is {@code null}.
 	 * @throws SecurityException If the caller does not have {@code
 	 *         CoordinationPermission[PARTICIPATE]} for this Coordination.
 	 */
@@ -263,7 +264,6 @@ public interface Coordination {
 	 *         with this Coordination. This exception should normally not be
 	 *         caught by the caller but allowed to be caught by the initiator of
 	 *         this Coordination.
-	 * @throws NullPointerException If participant is {@code null}.
 	 * @throws SecurityException If the caller does not have {@code
 	 *         CoordinationPermission[PARTICIPATE]} for this Coordination.
 	 */
