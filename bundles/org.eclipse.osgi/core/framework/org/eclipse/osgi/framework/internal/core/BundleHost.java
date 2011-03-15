@@ -626,6 +626,8 @@ public class BundleHost extends AbstractBundle {
 			for (int i = 0; i < fragments.length; i++) {
 				if (fragment == fragments[i])
 					return; // this fragment is already attached
+				// need to flush the other attached fragment manifest caches in case the attaching fragment provides translations (bug 339211)
+				fragments[i].manifestLocalization = null;
 				if (!inserted && fragment.getBundleId() < fragments[i].getBundleId()) {
 					// if the loader has already been created
 					// then we cannot attach a fragment into the middle
@@ -642,6 +644,7 @@ public class BundleHost extends AbstractBundle {
 				newFragments[newFragments.length - 1] = fragment;
 			fragments = newFragments;
 		}
+		// need to flush the manifest cache in case the attaching fragment provides translations
 		manifestLocalization = null;
 	}
 
