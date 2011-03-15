@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -210,45 +210,59 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 				return; // already processed this host
 		}
 
-		if (registry.hasContributor(hostID)) {
-			// get the base localization path from the host
-			Dictionary hostHeaders = host.getHeaders(""); //$NON-NLS-1$
-			String localization = (String) hostHeaders.get(Constants.BUNDLE_LOCALIZATION);
-			if (localization == null)
-				// localization may be empty in which case we should check the default
-				localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
-			// we do a simple check to make sure the default nls path exists in the host; 
-			// this is for performance reasons, but I'm not sure it is valid because a host could ship without the default nls properties file but this seems very unlikely
-			URL baseNLS = host.getEntry(localization + ".properties"); //$NON-NLS-1$
-			if (baseNLS == null)
-				return;
-			int lastSlash = localization.lastIndexOf('/');
-			if (lastSlash == localization.length() - 1)
-				return; // just to be safe
-			String baseDir = lastSlash < 0 ? "" : localization.substring(0, lastSlash); //$NON-NLS-1$
-			String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
-			Enumeration nlsFiles = fragment.findEntries(baseDir, filePattern, false);
-			if (nlsFiles == null)
-				return; // return without marking as processed
-			synchronized (currentStateStamp) {
-				// mark this host as processed for the current state stamp.
-				dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+		Bundle[] fragments = OSGIUtils.getDefault().getFragments(host);
+		boolean refresh = false;
+		// check host first
+		if (hasNLSFilesFor(host, fragment)) {
+			refresh = true;
+		} else {
+			// check other fragments of this host
+			for (int i = 0; i < fragments.length && !refresh; i++) {
+				if (fragment.equals(fragments[i]))
+					continue; // skip fragment that was just resolved; it will be added in by the caller
+				if (hasNLSFilesFor(fragments[i], fragment)) {
+					refresh = true;
+				}
 			}
-			// force the host to be removed and added back
+		}
+		if (refresh) {
+			// force the host and fragments to be removed and added back
 			removeBundle(host);
 			addBundle(host, false);
-		}
-		// check other fragments of this host
-		Bundle[] fragments = OSGIUtils.getDefault().getFragments(host);
-		for (int i = 0; i < fragments.length; i++) {
-			if (fragment.equals(fragments[i]))
-				continue; // skip fragment that was just resolved; it will be added in our caller
-			String fragmentID = Long.toString(fragments[i].getBundleId());
-			if (registry.hasContributor(fragmentID)) {
+			for (int i = 0; i < fragments.length; i++) {
+				if (fragment.equals(fragments[i]))
+					continue; // skip fragment that was just resolved; it will be added in by the caller
 				removeBundle(fragments[i]);
 				addBundle(fragments[i], false);
 			}
 		}
+		synchronized (currentStateStamp) {
+			// mark this host as processed for the current state stamp.
+			dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+		}
+	}
+
+	private boolean hasNLSFilesFor(Bundle target, Bundle fragment) {
+		if (!registry.hasContributor(Long.toString(target.getBundleId())))
+			return false;
+		// get the base localization path from the target
+		Dictionary targetHeaders = target.getHeaders(""); //$NON-NLS-1$
+		String localization = (String) targetHeaders.get(Constants.BUNDLE_LOCALIZATION);
+		if (localization == null)
+			// localization may be empty in which case we should check the default
+			localization = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		// we do a simple check to make sure the default nls path exists in the target; 
+		// this is for performance reasons, but I'm not sure it is valid because a target could ship without the default nls properties file but this seems very unlikely
+		URL baseNLS = target.getEntry(localization + ".properties"); //$NON-NLS-1$
+		if (baseNLS == null)
+			return false;
+		int lastSlash = localization.lastIndexOf('/');
+		if (lastSlash == localization.length() - 1)
+			return false; // just to be safe
+		String baseDir = lastSlash < 0 ? "" : localization.substring(0, lastSlash); //$NON-NLS-1$
+		String filePattern = (lastSlash < 0 ? localization : localization.substring(lastSlash + 1)) + "_*.properties"; //$NON-NLS-1$
+		Enumeration nlsFiles = fragment.findEntries(baseDir, filePattern, false);
+		return nlsFiles != null;
 	}
 
 	private static boolean isSingleton(Bundle bundle) {
