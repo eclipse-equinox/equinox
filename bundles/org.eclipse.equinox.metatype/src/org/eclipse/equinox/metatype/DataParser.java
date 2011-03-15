@@ -134,7 +134,7 @@ public class DataParser {
 		}
 
 		switch (type) {
-			// PASSWORD should be treated like STRING.
+		// PASSWORD should be treated like STRING.
 			case AttributeDefinition.PASSWORD :
 			case AttributeDefinition.STRING :
 				// Both the min and max of STRING are Integers.
@@ -509,13 +509,6 @@ public class DataParser {
 			String ad_defaults_str = atts.getValue(DEFAULT);
 			if (ad_defaults_str == null) {
 				// Not a problem, because DEFAULT is an optional attribute.
-				if (ad_cardinality_val == 0) {
-					// But when it is not assigned, CARDINALITY cannot be '0'.
-					_isParsedDataValid = false;
-					logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + MetaTypeMsg.NULL_DEFAULTS); //$NON-NLS-1$
-
-					return;
-				}
 			}
 
 			String ad_required_val = atts.getValue(REQUIRED);
@@ -527,11 +520,7 @@ public class DataParser {
 
 			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger);
 
-			if (ad_cardinality_val == 0) {
-				// Attribute DEFAULT has one and only one occurance.
-				_ad.setDefaultValue(new String[] {ad_defaults_str}, false);
-			} else {
-				// Attribute DEFAULT is a comma delimited list.
+			if (ad_defaults_str != null) {
 				_ad.setDefaultValue(ad_defaults_str, false);
 			}
 		}

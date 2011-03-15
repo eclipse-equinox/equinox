@@ -5,5 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb1" path="bundles_src/metatype/tb1"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb2" path="bundles_src/metatype/tb2"/>
+	<classpathentry kind="src" output="bundle_tests/metatype/tb3" path="bundles_src/metatype/tb3"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

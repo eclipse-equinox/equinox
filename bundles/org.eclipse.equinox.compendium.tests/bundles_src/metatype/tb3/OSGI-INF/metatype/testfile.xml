@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:MetaData 
+		xmlns:md="http://www.org.osgi/xmlns/metatype/v1.0.0/md" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.0.1/md metatype.xsd">
+	<OCD id="ocd1" name="Object">
+		<AD id="password1" type="Password"/>
+		<AD cardinality="0" id="password2" type="Password"/>
+		<AD cardinality="0" default="Hello\, world!" id="string1" type="String"/>
+	</OCD>
+	<Designate pid="org.eclipse.equinox.metatype.tests.tb3">
+		<Object ocdref="ocd1"/>
+	</Designate>
+</md:MetaData>
