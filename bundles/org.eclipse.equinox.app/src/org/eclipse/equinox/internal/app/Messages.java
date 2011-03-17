@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,19 @@ public class Messages extends NLS {
 	public static String apps_running;
 	public static String main_running;
 	public static String max_running;
+
+	// console
+	public static String console_help_app_commands_header;
+	public static String console_help_activeapps_description;
+	public static String console_help_apps_description;
+	public static String console_help_arguments;
+	public static String console_help_lockapp_description;
+	public static String console_help_schedapp_arguments;
+	public static String console_help_schedapp_description;
+	public static String console_help_startapp_description;
+	public static String console_help_stopapp_description;
+	public static String console_help_unlockapp_description;
+	public static String console_help_unschedapp_description;
 
 	static {
 		// load message values from bundle file

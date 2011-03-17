@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.app;
 
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -23,6 +24,11 @@ public class AppCommands implements CommandProvider {
 	private final static String LAUNCHABLE_APP_FILTER = "(&(application.locked=false)(application.launchable=true)(application.visible=true))"; //$NON-NLS-1$
 	private final static String ACTIVE_APP_FILTER = "(!(application.state=STOPPING))"; //$NON-NLS-1$
 	private final static String LOCKED_APP_FILTER = "(application.locked=true)"; //$NON-NLS-1$
+	private final static String NEW_LINE = "\r\n"; //$NON-NLS-1$
+	private final static String TAB = "\t"; //$NON-NLS-1$
+
+	// holds the mappings from command name to command arguments and command description
+	private Map commandsHelp = null;
 
 	private static AppCommands instance;
 	private BundleContext context;
@@ -81,17 +87,86 @@ public class AppCommands implements CommandProvider {
 	}
 
 	public String getHelp() {
+		return getHelp(null);
+	}
+
+	/*
+	 * This method either returns the help message for a particular command, 
+	 * or returns the help messages for all commands (if commandName is null)
+	 */
+	private String getHelp(String commandName) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("\n---Application Admin Commands---\n"); //$NON-NLS-1$
-		sb.append("\tactiveApps - lists all running application IDs\n"); //$NON-NLS-1$
-		sb.append("\tapps - lists all installed application IDs\n"); //$NON-NLS-1$
-		sb.append("\tlockApp <application id> - locks the specified application ID\n"); //$NON-NLS-1$
-		sb.append("\tschedApp <application id> <time filter> [true|false] - schedules the specified application id to launch at the specified time filter.  Can optionally make the schedule recurring.\n"); //$NON-NLS-1$
-		sb.append("\tstartApp <application id> - starts the specified application ID\n"); //$NON-NLS-1$
-		sb.append("\tstopApp <application id> - stops the specified running application ID\n"); //$NON-NLS-1$
-		sb.append("\tunlockApp <application id> - unlocks the specified application ID\n"); //$NON-NLS-1$
-		sb.append("\tunschedApp <application id> - unschedules all scheduled applications with the specified application ID\n"); //$NON-NLS-1$
+
+		if (commandsHelp == null) {
+			initializeCommandsHelp();
+		}
+
+		if (commandName != null) {
+			if (commandsHelp.containsKey(commandName)) {
+				addCommand(commandName, (String[]) commandsHelp.get(commandName), sb);
+			}
+			return sb.toString();
+		}
+
+		addHeader(Messages.console_help_app_commands_header, sb);
+		Iterator i = commandsHelp.entrySet().iterator();
+		while (i.hasNext()) {
+			Entry entry = (Entry) i.next();
+			String command = (String) entry.getKey();
+			String[] attributes = (String[]) entry.getValue();
+			addCommand(command, attributes, sb);
+		}
+
 		return sb.toString();
+	}
+
+	private void initializeCommandsHelp() {
+		commandsHelp = new LinkedHashMap();
+		commandsHelp.put("activeApps", new String[] {Messages.console_help_activeapps_description}); //$NON-NLS-1$
+		commandsHelp.put("apps", new String[] {Messages.console_help_apps_description}); //$NON-NLS-1$
+		commandsHelp.put("lockApp", new String[] {Messages.console_help_arguments, Messages.console_help_lockapp_description}); //$NON-NLS-1$
+		commandsHelp.put("schedApp", new String[] {Messages.console_help_schedapp_arguments, Messages.console_help_schedapp_description}); //$NON-NLS-1$
+		commandsHelp.put("startApp", new String[] {Messages.console_help_arguments, Messages.console_help_startapp_description}); //$NON-NLS-1$
+		commandsHelp.put("stopApp", new String[] {Messages.console_help_arguments, Messages.console_help_stopapp_description}); //$NON-NLS-1$
+		commandsHelp.put("unlockApp", new String[] {Messages.console_help_arguments, Messages.console_help_unlockapp_description}); //$NON-NLS-1$
+		commandsHelp.put("unschedApp", new String[] {Messages.console_help_arguments, Messages.console_help_unschedapp_description}); //$NON-NLS-1$
+	}
+
+	/** Private helper method for getHelp.  Formats the help headers. */
+	private void addHeader(String header, StringBuffer help) {
+		help.append("---"); //$NON-NLS-1$
+		help.append(header);
+		help.append("---"); //$NON-NLS-1$
+		help.append(NEW_LINE);
+	}
+
+	/** Private helper method for getHelp.  Formats the command descriptions. */
+	private void addCommand(String command, String description, StringBuffer help) {
+		help.append(TAB);
+		help.append(command);
+		help.append(" - "); //$NON-NLS-1$
+		help.append(description);
+		help.append(NEW_LINE);
+	}
+
+	/** Private helper method for getHelp.  Formats the command descriptions with command arguments. */
+	private void addCommand(String command, String parameters, String description, StringBuffer help) {
+		help.append(TAB);
+		help.append(command);
+		help.append(" "); //$NON-NLS-1$
+		help.append(parameters);
+		help.append(" - "); //$NON-NLS-1$
+		help.append(description);
+		help.append(NEW_LINE);
+	}
+
+	/** Private helper method for getHelp. According to its arguments chooses which one of the above addCommand methods to use. */
+	private void addCommand(String command, String[] attributes, StringBuffer help) {
+		if (attributes.length == 1) {
+			addCommand(command, attributes[0], help);
+		} else if (attributes.length == 2) {
+			addCommand(command, attributes[0], attributes[1], help);
+		}
 	}
 
 	private Dictionary getServiceProps(ServiceReference ref) {
@@ -280,5 +355,24 @@ public class AppCommands implements CommandProvider {
 				context.ungetService(application);
 			}
 		}
+	}
+
+	/**
+	 * Handles the help command
+	 * 
+	 * @param intp
+	 * @return description for a particular command or false if there is no command with the specified name
+	 */
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return new Boolean(false);
+		}
+		String help = getHelp(commandName);
+
+		if (help.length() > 0) {
+			return help;
+		}
+		return new Boolean(false);
 	}
 }
