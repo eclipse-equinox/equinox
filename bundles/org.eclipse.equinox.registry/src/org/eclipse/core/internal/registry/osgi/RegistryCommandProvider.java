@@ -109,7 +109,7 @@ public class RegistryCommandProvider implements CommandProvider {
 	public Object _help(CommandInterpreter intp) {
 		String commandName = intp.nextArgument();
 		if (commandName == null) {
-			return new Boolean(false);
+			return Boolean.FALSE;
 		}
 		String help = getHelp(commandName);
 
