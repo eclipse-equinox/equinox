@@ -116,6 +116,7 @@ public class RegistryCommandProvider implements CommandProvider {
 		if (help.length() > 0) {
 			return help;
 		}
+
 		return Boolean.FALSE;
 	}
 
