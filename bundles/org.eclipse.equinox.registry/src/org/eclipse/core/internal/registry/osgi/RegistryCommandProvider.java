@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,16 +18,36 @@ import org.eclipse.osgi.framework.console.CommandProvider;
 
 public class RegistryCommandProvider implements CommandProvider {
 
-	private final static String helpText = "---Extension Registry Commands---\n" + //$NON-NLS-1$
-			"\tns [-v] [name] - display extension points in the namespace; add -v to display extensions\n" + //$NON-NLS-1$
-			"\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements\n"; //$NON-NLS-1$
+	private final static String NEW_LINE = "\r\n"; //$NON-NLS-1$
 
 	private static final String indent = "   "; //$NON-NLS-1$
 
 	private boolean verbose = false; // is command run in a "verbose" mode?
 
 	public String getHelp() {
-		return helpText;
+		return getHelp(null);
+	}
+
+	/*
+	 * This method either returns the help message for a particular command, 
+	 * or returns the help messages for all commands (if commandName is null)
+	 */
+	private String getHelp(String commandName) {
+		boolean all = commandName == null;
+		StringBuffer sb = new StringBuffer();
+		if (all) {
+			sb.append("---Extension Registry Commands---"); //$NON-NLS-1$
+			sb.append(NEW_LINE);
+		}
+		if (all || "ns".equals(commandName)) { //$NON-NLS-1$
+			sb.append("\tns [-v] [name] - display extension points in the namespace; add -v to display extensions"); //$NON-NLS-1$
+			sb.append(NEW_LINE);
+		}
+		if (all || "pt".equals(commandName)) { //$NON-NLS-1$
+			sb.append("\tpt [-v] uniqueExtensionPointId - display the extension point and extensions; add -v to display config elements"); //$NON-NLS-1$
+			sb.append(NEW_LINE);
+		}
+		return sb.toString();
 	}
 
 	public void _ns(CommandInterpreter ci) throws Exception {
@@ -78,6 +98,25 @@ public class RegistryCommandProvider implements CommandProvider {
 				ci.println();
 			}
 		}
+	}
+
+	/**
+	 * Handles the help command
+	 * 
+	 * @param intp
+	 * @return description for a particular command or false if there is no command with the specified name
+	 */
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return new Boolean(false);
+		}
+		String help = getHelp(commandName);
+
+		if (help.length() > 0) {
+			return help;
+		}
+		return Boolean.FALSE;
 	}
 
 	// This method has a side effect of setting the verbose flag

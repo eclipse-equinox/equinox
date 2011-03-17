@@ -373,6 +373,6 @@ public class AppCommands implements CommandProvider {
 		if (help.length() > 0) {
 			return help;
 		}
-		return new Boolean(false);
+		return Boolean.FALSE;
 	}
 }
