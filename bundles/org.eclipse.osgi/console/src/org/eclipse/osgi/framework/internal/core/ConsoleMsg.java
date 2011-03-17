@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,7 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_HELP_PROFILE_HEADING;
 	public static String CONSOLE_HELP_PROFILELOG_DESCRIPTION;
 	public static String CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION;
+	public static String CONSOLE_HELP_HELP_COMMAND_DESCRIPTION;
 
 	public static String CONSOLE_NO_BUNDLE_SPECIFIED_ERROR;
 	public static String CONSOLE_NOTHING_TO_INSTALL_ERROR;
@@ -141,6 +142,8 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_REQUIRES_MESSAGE;
 	public static String CONSOLE_CAN_NOT_USE_STARTLEVEL_NO_STARTLEVEL_SVC_ERROR;
 	public static String CONSOLE_CANNOT_FIND_BUNDLE_ERROR;
+	public static String CONSOLE_PROPS_COMMAND_DESCRIPTION;
+	public static String CONSOLE_THREADS_COMMAND_DESCRIPTION;
 
 	public static String STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL;
 	public static String STARTLEVEL_BUNDLE_STARTLEVEL;

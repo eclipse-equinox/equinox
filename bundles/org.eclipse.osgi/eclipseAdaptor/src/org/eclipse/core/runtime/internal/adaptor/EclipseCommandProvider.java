@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.core.runtime.internal.adaptor;
 
+import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.service.resolver.*;
@@ -21,30 +23,70 @@ import org.osgi.framework.ServiceReference;
  * Internal class.
  */
 public class EclipseCommandProvider implements CommandProvider {
-	public static final String NEW_LINE = System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String NEW_LINE = "\r\n"; //$NON-NLS-1$
+	public static final String TAB = "\t"; //$NON-NLS-1$
 	private static final String POLICY_CONSOLE = "org.eclipse.osgi.framework.console"; //$NON-NLS-1$
 	private PlatformAdmin platformAdmin;
 	private BundleContext context;
+
+	// holds the mapping between command name and command description
+	private Map<String, String> commandsHelp = null;
 
 	public EclipseCommandProvider(BundleContext context) {
 		this.context = context;
 	}
 
 	public String getHelp() {
+		return getHelp(null);
+	}
+
+	/* Returns either the help message for a particular command, 
+	 * or the help messages for all commands (if commandName is not specified)*/
+	private String getHelp(String commandName) {
 		StringBuffer help = new StringBuffer(512);
-		help.append("---"); //$NON-NLS-1$
-		help.append(EclipseAdaptorMsg.ECLIPSE_CONSOLE_COMMANDS_HEADER);
-		help.append("---"); //$NON-NLS-1$
-		help.append(NEW_LINE);
-		help.append("\tdiag - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(NEW_LINE);
-		help.append("\tenableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(NEW_LINE);
-		help.append("\tdisableBundle - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(NEW_LINE);
-		help.append("\tdisabledBundles - " + EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_LD_COMMAND_DESCRIPTION);//$NON-NLS-1$
-		help.append(NEW_LINE);
+
+		if (commandsHelp == null) {
+			initializeCommandsHelp();
+		}
+
+		if (commandName != null) {
+			if (commandsHelp.containsKey(commandName)) {
+				addCommand(commandName, commandsHelp.get(commandName), help);
+			}
+			return help.toString();
+		}
+
+		addHeader(EclipseAdaptorMsg.ECLIPSE_CONSOLE_COMMANDS_HEADER, help);
+		for (Entry<String, String> entry : commandsHelp.entrySet()) {
+			addCommand(entry.getKey(), entry.getValue(), help);
+		}
+
 		return help.toString();
+	}
+
+	private void initializeCommandsHelp() {
+		commandsHelp = new LinkedHashMap<String, String>();
+		commandsHelp.put("diag", EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION); //$NON-NLS-1$
+		commandsHelp.put("enableBundle", EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION); //$NON-NLS-1$
+		commandsHelp.put("disableBundle", EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION); //$NON-NLS-1$
+		commandsHelp.put("disabledBundles", EclipseAdaptorMsg.ECLIPSE_CONSOLE_HELP_LD_COMMAND_DESCRIPTION); //$NON-NLS-1$
+	}
+
+	/** Private helper method for getHelp.  Formats the help headers. */
+	private void addHeader(String header, StringBuffer help) {
+		help.append("---"); //$NON-NLS-1$
+		help.append(header);
+		help.append("---"); //$NON-NLS-1$
+		help.append(NEW_LINE);
+	}
+
+	/** Private helper method for getHelp.  Formats the command descriptions. */
+	private void addCommand(String command, String description, StringBuffer help) {
+		help.append(TAB);
+		help.append(command);
+		help.append(" - "); //$NON-NLS-1$
+		help.append(description);
+		help.append(NEW_LINE);
 	}
 
 	private BundleDescription getBundleDescriptionFromToken(State state, String token) {
@@ -212,6 +254,21 @@ public class EclipseCommandProvider implements CommandProvider {
 		} finally {
 			ungetPlatformAdmin();
 		}
+	}
+
+	/**
+	 * Handles the help command
+	 * 
+	 * @param intp
+	 * @return description for a particular command or false if there is no command with the specified name
+	 */
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return false;
+		}
+		String help = getHelp(commandName);
+		return help.length() > 0 ? help : false;
 	}
 
 	private String formatBundleName(BundleDescription b) {

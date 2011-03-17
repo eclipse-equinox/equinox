@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.internal.permadmin.SecurityAdmin;
@@ -57,7 +58,7 @@ import org.osgi.service.startlevel.StartLevel;
  headers (<id>|<location>) - print bundle headers
  packages {<pkgname>|<id>|<location>} - display imported/exported package details
  props - display System properties
- services {filter} - display registered service details
+ services {filter} - display registered service details. Examples for [filter]: (objectClass=com.xyz.Person); (&(objectClass=com.xyz.Person)(sn=Jensen)); passing only com.xyz.Person is a shortcut for (objectClass=com.xyz.Person). The filter syntax specification is available at http://www.ietf.org/rfc/rfc1960.txt
  ss - display installed bundles (short status)
  status - display installed bundles and registered services
  threads - display threads and thread groups
@@ -70,6 +71,8 @@ import org.osgi.service.startlevel.StartLevel;
  setfwsl <start level> - set the framework start level
  setbsl <start level> (<id>|<location>) - set the start level for the bundle(s)
  setibsl <start level> - set the initial bundle start level
+ ---Getting Help---
+ help <command> - Display help for the specified command
  
  *
  *  There is a method for each command which is named '_'+method.  The methods are
@@ -92,6 +95,11 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 
 	/** this list contains the bundles known to be lazily awaiting activation */
 	private final List<Bundle> lazyActivation = new ArrayList<Bundle>();
+
+	/** this map contains the mapping between the command name and its description and eventually arguments.*/
+	private Map<String, String[]> commandsHelp = null;
+	/** this map contains the mapping between the command groups and the names of the commands in each group*/
+	private Map<String, String[]> commandGroups = null;
 
 	/**
 	 *  Constructor.
@@ -134,42 +142,105 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 	 @return The help string
 	 */
 	public String getHelp() {
+		return getHelp(null);
+	}
+
+	/* This method either returns the help message for a particular command, 
+	 * or returns the help messages for all commands (if commandName is not specified)*/
+	private String getHelp(String commandName) {
 		StringBuffer help = new StringBuffer(1024);
-		addHeader(ConsoleMsg.CONSOLE_HELP_CONTROLLING_FRAMEWORK_HEADER, help);
-		addCommand("launch", ConsoleMsg.CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("shutdown", ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("close", ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("exit", ConsoleMsg.CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("init", ConsoleMsg.CONSOLE_HELP_INIT_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("setprop", ConsoleMsg.CONSOLE_HELP_KEYVALUE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION, help); //$NON-NLS-1$  
-		addHeader(ConsoleMsg.CONSOLE_HELP_CONTROLLING_BUNDLES_HEADER, help);
-		addCommand("install", ConsoleMsg.CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("uninstall", ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("start", ConsoleMsg.CONSOLE_HELP_START_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("stop", ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("refresh", ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("update", ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addHeader(ConsoleMsg.CONSOLE_HELP_DISPLAYING_STATUS_HEADER, help);
-		addCommand("status", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("ss", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("services", ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("packages", ConsoleMsg.CONSOLE_HELP_PACKAGES_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("bundles", ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("bundle", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("headers", ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addHeader(ConsoleMsg.CONSOLE_HELP_EXTRAS_HEADER, help);
-		addCommand("exec", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("fork", ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION, help); //$NON-NLS-1$
-		addCommand("gc", ConsoleMsg.CONSOLE_HELP_GC_COMMAND_DESCRIPTION, help); //$NON-NLS-1$ 
-		addCommand("getprop ", ConsoleMsg.CONSOLE_HELP_GETPROP_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION, help);//$NON-NLS-1$
-		addHeader(ConsoleMsg.STARTLEVEL_HELP_HEADING, help);
-		addCommand("sl", ConsoleMsg.CONSOLE_HELP_OPTIONAL_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SL, help); //$NON-NLS-1$ 
-		addCommand("setfwsl", ConsoleMsg.STARTLEVEL_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETFWSL, help); //$NON-NLS-1$ 
-		addCommand("setbsl", ConsoleMsg.STARTLEVEL_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETBSL, help); //$NON-NLS-1$ 
-		addCommand("setibsl", ConsoleMsg.STARTLEVEL_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETIBSL, help); //$NON-NLS-1$ 
-		addHeader(ConsoleMsg.CONSOLE_HELP_PROFILE_HEADING, help);
-		addCommand("profilelog", ConsoleMsg.CONSOLE_HELP_PROFILELOG_DESCRIPTION, help); //$NON-NLS-1$ 	
+
+		if (commandsHelp == null) {
+			initializeCommandsHelp();
+		}
+
+		if (commandGroups == null) {
+			initializeCommandGroups();
+		}
+
+		if (commandName != null) {
+			if (commandsHelp.containsKey(commandName)) {
+				addCommand(commandName, commandsHelp.get(commandName), help);
+			}
+			return help.toString();
+		}
+
+		for (Entry<String, String[]> groupEntry : commandGroups.entrySet()) {
+			addHeader(groupEntry.getKey(), help);
+			for (String command : groupEntry.getValue()) {
+				addCommand(command, commandsHelp.get(command), help);
+			}
+		}
+
 		return help.toString();
+	}
+
+	private void initializeCommandsHelp() {
+		commandsHelp = new HashMap<String, String[]>();
+		// add help for commands for controlling the framework
+		commandsHelp.put("launch", new String[] {ConsoleMsg.CONSOLE_HELP_LAUNCH_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("shutdown", new String[] {ConsoleMsg.CONSOLE_HELP_SHUTDOWN_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("close", new String[] {ConsoleMsg.CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("exit", new String[] {ConsoleMsg.CONSOLE_HELP_EXIT_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("init", new String[] {ConsoleMsg.CONSOLE_HELP_INIT_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("setprop", new String[] {ConsoleMsg.CONSOLE_HELP_KEYVALUE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("setp", new String[] {ConsoleMsg.CONSOLE_HELP_KEYVALUE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SETPROP_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+
+		// add help for commands for controlling bundles
+		commandsHelp.put("install", new String[] {ConsoleMsg.CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("i", new String[] {ConsoleMsg.CONSOLE_HELP_INSTALL_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("uninstall", new String[] {ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("un", new String[] {ConsoleMsg.CONSOLE_HELP_UNINSTALL_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("start", new String[] {ConsoleMsg.CONSOLE_HELP_START_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("sta", new String[] {ConsoleMsg.CONSOLE_HELP_START_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("stop", new String[] {ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("sto", new String[] {ConsoleMsg.CONSOLE_HELP_STOP_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("refresh", new String[] {ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("r", new String[] {ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("update", new String[] {ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("up", new String[] {ConsoleMsg.CONSOLE_HELP_UPDATE_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+
+		// add help for commands for displaying status
+		commandsHelp.put("status", new String[] {ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("s", new String[] {ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_STATUS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("ss", new String[] {ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("services", new String[] {ConsoleMsg.CONSOLE_HELP_FILTER_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_SERVICES_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("packages", new String[] {ConsoleMsg.CONSOLE_HELP_PACKAGES_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("p", new String[] {ConsoleMsg.CONSOLE_HELP_PACKAGES_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_PACKAGES_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("bundles", new String[] {ConsoleMsg.CONSOLE_HELP_STATE_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLES_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("bundle", new String[] {ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("b", new String[] {ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_BUNDLE_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("headers", new String[] {ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("h", new String[] {ConsoleMsg.CONSOLE_HELP_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_HEADERS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+
+		// add help for extra commands
+		commandsHelp.put("exec", new String[] {ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("fork", new String[] {ConsoleMsg.CONSOLE_HELP_COMMAND_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_FORK_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("gc", new String[] {ConsoleMsg.CONSOLE_HELP_GC_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("getprop", new String[] {ConsoleMsg.CONSOLE_HELP_GETPROP_ARGUMENT_DESCRIPTION, ConsoleMsg.CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("props", new String[] {ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("pr", new String[] {ConsoleMsg.CONSOLE_PROPS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("threads", new String[] {ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+		commandsHelp.put("t", new String[] {ConsoleMsg.CONSOLE_THREADS_COMMAND_DESCRIPTION}); //$NON-NLS-1$
+
+		// add help for startlevel commands
+		commandsHelp.put("sl", new String[] {ConsoleMsg.CONSOLE_HELP_OPTIONAL_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SL}); //$NON-NLS-1$
+		commandsHelp.put("setfwsl", new String[] {ConsoleMsg.STARTLEVEL_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETFWSL}); //$NON-NLS-1$
+		commandsHelp.put("setbsl", new String[] {ConsoleMsg.STARTLEVEL_IDLOCATION_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETBSL}); //$NON-NLS-1$
+		commandsHelp.put("setibsl", new String[] {ConsoleMsg.STARTLEVEL_ARGUMENT_DESCRIPTION, ConsoleMsg.STARTLEVEL_HELP_SETIBSL}); //$NON-NLS-1$
+
+		// add help for profilelog command
+		commandsHelp.put("profilelog", new String[] {ConsoleMsg.CONSOLE_HELP_PROFILELOG_DESCRIPTION}); //$NON-NLS-1$
+	}
+
+	private void initializeCommandGroups() {
+		commandGroups = new LinkedHashMap<String, String[]>();
+		commandGroups.put(ConsoleMsg.CONSOLE_HELP_CONTROLLING_FRAMEWORK_HEADER, new String[] {"launch", "shutdown", "close", "exit", "init", "setprop"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		commandGroups.put(ConsoleMsg.CONSOLE_HELP_CONTROLLING_BUNDLES_HEADER, new String[] {"install", "uninstall", "start", "stop", "refresh", "update"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		commandGroups.put(ConsoleMsg.CONSOLE_HELP_DISPLAYING_STATUS_HEADER, new String[] {"status", "ss", "services", "packages", "bundles", "bundle", "headers"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+		commandGroups.put(ConsoleMsg.CONSOLE_HELP_EXTRAS_HEADER, new String[] {"exec", "fork", "gc", "getprop", "props", "threads"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		commandGroups.put(ConsoleMsg.STARTLEVEL_HELP_HEADING, new String[] {"sl", "setfwsl", "setbsl", "setibsl"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		commandGroups.put(ConsoleMsg.CONSOLE_HELP_PROFILE_HEADING, new String[] {"profilelog"}); //$NON-NLS-1$
 	}
 
 	/** Private helper method for getHelp.  Formats the help headers. */
@@ -189,7 +260,7 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		help.append(newline);
 	}
 
-	/** Private helper method for getHelp.  Formats the command descriptions with command arguements. */
+	/** Private helper method for getHelp.  Formats the command descriptions with command arguments. */
 	private void addCommand(String command, String parameters, String description, StringBuffer help) {
 		help.append(tab);
 		help.append(command);
@@ -198,6 +269,15 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		help.append(" - "); //$NON-NLS-1$
 		help.append(description);
 		help.append(newline);
+	}
+
+	/** Private helper method for getHelp. According to its arguments chooses which one of the above addCommand methods to use. */
+	private void addCommand(String command, String[] attributes, StringBuffer help) {
+		if (attributes.length == 1) {
+			addCommand(command, attributes[0], help);
+		} else if (attributes.length == 2) {
+			addCommand(command, attributes[0], attributes[1], help);
+		}
 	}
 
 	/**
@@ -537,7 +617,31 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 			filter = buf.toString();
 		}
 
-		ServiceReference<?>[] services = context.getServiceReferences((String) null, filter);
+		InvalidSyntaxException originalException = null;
+		ServiceReference<?>[] services = null;
+
+		try {
+			services = context.getServiceReferences((String) null, filter);
+		} catch (InvalidSyntaxException e) {
+			originalException = e;
+		}
+
+		if (filter != null) {
+			filter = filter.trim();
+		}
+		// If the filter is invalid and does not start with a bracket, probably the argument was the name of an interface.
+		// Try to construct an object class filter with this argument, and if still invalid - throw the original InvalidSyntaxException
+		if (originalException != null && !filter.startsWith("(") && filter.indexOf(' ') < 0) { //$NON-NLS-1$
+			try {
+				filter = "(" + Constants.OBJECTCLASS + "=" + filter + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				services = context.getServiceReferences((String) null, filter);
+			} catch (InvalidSyntaxException e) {
+				throw originalException;
+			}
+		} else if (originalException != null) {
+			throw originalException;
+		}
+
 		if (services != null) {
 			int size = services.length;
 			if (size > 0) {
@@ -1632,6 +1736,21 @@ public class FrameworkCommandProvider implements CommandProvider, SynchronousBun
 		} finally {
 			context.ungetService(ref);
 		}
+	}
+
+	/**
+	 * Handles the help command
+	 * 
+	 * @param intp
+	 * @return description for a particular command or false if there is no command with the specified name
+	 */
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return false;
+		}
+		String help = getHelp(commandName);
+		return help.length() > 0 ? help : false;
 	}
 
 	/**

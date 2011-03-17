@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,42 +144,103 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 			}
 			return retval;
 		}
+
+		// handle "help" command here
+		if (cmd.equalsIgnoreCase("help") && !tok.hasMoreElements()) { //$NON-NLS-1$
+			displayAllHelp();
+			return retval;
+		}
+
 		Class<?>[] parameterTypes = new Class[] {CommandInterpreter.class};
 		Object[] parameters = new Object[] {this};
 		boolean executed = false;
 		int size = commandProviders.length;
-		for (int i = 0; !executed && (i < size); i++) {
-			try {
-				Object target = commandProviders[i];
-				Method method = target.getClass().getMethod("_" + cmd, parameterTypes); //$NON-NLS-1$
-				retval = method.invoke(target, parameters);
-				executed = true; // stop after the command has been found
-			} catch (NoSuchMethodException ite) {
-				// keep going - maybe another command provider will be able to execute this command
-			} catch (InvocationTargetException ite) {
-				executed = true; // don't want to keep trying - we found the method but got an error
-				printStackTrace(ite.getTargetException());
-			} catch (Exception ee) {
-				executed = true; // don't want to keep trying - we got an error we don't understand
-				printStackTrace(ee);
+
+		if (cmd.equalsIgnoreCase("help") && tok.hasMoreElements()) { //$NON-NLS-1$
+			String commandName = nextArgument();
+
+			String builtinHelp = getHelp(commandName);
+			if (builtinHelp != null) {
+				print(builtinHelp);
+				return builtinHelp;
 			}
-		}
-		// if no command was found to execute, display help for all registered command providers
-		if (!executed) {
 			for (int i = 0; i < size; i++) {
+				// re-create the StringTokenizer for the call of each CommandProvider - there may be help commands in more than one CommandProvider
+				tok = new StringTokenizer(commandName);
+				boolean isException = false;
+				Object target = commandProviders[i];
+				Method method = null;
 				try {
-					CommandProvider commandProvider = commandProviders[i];
-					out.print(commandProvider.getHelp());
-					out.flush();
+					method = target.getClass().getMethod("_" + cmd, parameterTypes); //$NON-NLS-1$
+					retval = method.invoke(target, parameters);
+				} catch (NoSuchMethodException e) {
+					// keep going - maybe another command provider will provide help <command> method
+					isException = true;
+				} catch (InvocationTargetException e) {
+					// keep going - maybe another command provider will provide help <command> method
+					printStackTrace(e.getTargetException());
+					isException = true;
 				} catch (Exception ee) {
 					printStackTrace(ee);
 				}
+
+				if (retval != null) {
+					if (retval instanceof Boolean) {
+						executed = executed || ((Boolean) retval).booleanValue();
+					} else if (retval instanceof String) {
+						print(retval);
+						return retval;
+					} else {
+						// this could happen if a CommandProvider provides an arbitrary help command;
+						// since there is no way to determine if this CommandProvider provides the search command,
+						// we should continue with the other CommandProvider
+						executed = true;
+					}
+				} else {
+					// if the return value is null, but there was no exception assume that a help method was called
+					executed = executed || !isException;
+				}
 			}
-			// call help for the more command provided by this class
-			out.print(getHelp());
-			out.flush();
+		} else {
+			for (int i = 0; !executed && (i < size); i++) {
+				try {
+					Object target = commandProviders[i];
+					Method method = target.getClass().getMethod("_" + cmd, parameterTypes); //$NON-NLS-1$
+					retval = method.invoke(target, parameters);
+					executed = true; // stop after the command has been found
+				} catch (NoSuchMethodException ite) {
+					// keep going - maybe another command provider will be able to execute this command
+				} catch (InvocationTargetException ite) {
+					executed = true; // don't want to keep trying - we found the method but got an error
+					printStackTrace(ite.getTargetException());
+				} catch (Exception ee) {
+					executed = true; // don't want to keep trying - we got an error we don't understand
+					printStackTrace(ee);
+				}
+			}
+		}
+
+		// if no command was found to execute, display help for all registered command providers
+		if (!executed) {
+			displayAllHelp();
 		}
 		return retval;
+	}
+
+	private void displayAllHelp() {
+		int size = commandProviders.length;
+		for (int i = 0; i < size; i++) {
+			try {
+				CommandProvider commandProvider = commandProviders[i];
+				out.print(commandProvider.getHelp());
+				out.flush();
+			} catch (Exception ee) {
+				printStackTrace(ee);
+			}
+		}
+		// call help for the more command provided by this class
+		out.print(getHelp(null));
+		out.flush();
 	}
 
 	private Object innerExecute(String cmd) {
@@ -399,19 +460,32 @@ public class FrameworkCommandInterpreter implements CommandInterpreter {
 	 Answer a string (may be as many lines as you like) with help
 	 texts that explain the command.
 	 */
-	public String getHelp() {
+	public String getHelp(String commandName) {
+		boolean all = commandName == null;
 		StringBuffer help = new StringBuffer(256);
-		help.append(ConsoleMsg.CONSOLE_HELP_CONTROLLING_CONSOLE_HEADING);
-		help.append(newline);
-		help.append(tab);
-		help.append("more - "); //$NON-NLS-1$
-		help.append(ConsoleMsg.CONSOLE_HELP_MORE);
-		help.append(newline);
-		help.append(tab);
-		help.append("disconnect - "); //$NON-NLS-1$
-		help.append(ConsoleMsg.CONSOLE_HELP_DISCONNECT);
-		help.append(newline);
-		return help.toString();
+		if (all) {
+			help.append(ConsoleMsg.CONSOLE_HELP_CONTROLLING_CONSOLE_HEADING);
+			help.append(newline);
+		}
+		if (all || "more".equals(commandName)) { //$NON-NLS-1$
+			help.append(tab);
+			help.append("more - "); //$NON-NLS-1$
+			help.append(ConsoleMsg.CONSOLE_HELP_MORE);
+			help.append(newline);
+		}
+		if (all || "disconnect".equals(commandName)) { //$NON-NLS-1$
+			help.append(tab);
+			help.append("disconnect - "); //$NON-NLS-1$
+			help.append(ConsoleMsg.CONSOLE_HELP_DISCONNECT);
+			help.append(newline);
+		}
+		if (all || "help".equals(commandName)) { //$NON-NLS-1$
+			help.append(tab);
+			help.append("help <commmand> - "); //$NON-NLS-1$
+			help.append(ConsoleMsg.CONSOLE_HELP_HELP_COMMAND_DESCRIPTION);
+			help.append(newline);
+		}
+		return help.length() == 0 ? null : help.toString();
 	}
 
 	/**
