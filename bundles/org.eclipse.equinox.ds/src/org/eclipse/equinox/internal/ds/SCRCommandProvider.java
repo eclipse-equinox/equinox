@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2009 by ProSyst Software GmbH
+ * Copyright (c) 1997-2011 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,18 +45,41 @@ public class SCRCommandProvider implements CommandProvider {
 	}
 
 	public String getHelp() {
+		return getHelp(null);
+	}
+
+	/*
+	 * This method either returns the help message for a particular command, 
+	 * or returns the help messages for all commands (if commandName is null)
+	 */
+	private String getHelp(String commandName) {
+		boolean all = commandName == null;
 		StringBuffer res = new StringBuffer(1000);
-		res.append("---").append(Messages.SCR).append("---\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		res.append("\tlist/ls [-c] [bundle id] - ").append(Messages.LIST_ALL_COMPONENTS); //$NON-NLS-1$
-		res.append("\n\t\t\t").append(Messages.LIST_ALL_BUNDLE_COMPONENTS); //$NON-NLS-1$
-		res.append("\n\tcomponent/comp <component id> - ").append(Messages.PRINT_COMPONENT_INFO); //$NON-NLS-1$
-		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
-		res.append("\n\tenable/en <component id> - ").append(Messages.ENABLE_COMPONENT); //$NON-NLS-1$
-		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
-		res.append("\n\tdisable/dis <component id> - ").append(Messages.DISABLE_COMPONENT); //$NON-NLS-1$
-		res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
-		res.append("\n\tenableAll/enAll [bundle id] - ").append(Messages.ENABLE_ALL_COMPONENTS); //$NON-NLS-1$
-		res.append("\n\tdisableAll/disAll [bundle id] - ").append(Messages.DISABLE_ALL_COMPONENTS).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (all) {
+			res.append("---").append(Messages.SCR).append("---\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (all || "list".equals(commandName) || "ls".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\tlist/ls [-c] [bundle id] - ").append(Messages.LIST_ALL_COMPONENTS); //$NON-NLS-1$
+			res.append("\r\n\t\t\t").append(Messages.LIST_ALL_BUNDLE_COMPONENTS); //$NON-NLS-1$
+		}
+		if (all || "component".equals(commandName) || "comp".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\r\n\tcomponent/comp <component id> - ").append(Messages.PRINT_COMPONENT_INFO); //$NON-NLS-1$
+			res.append("\r\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		}
+		if (all || "enable".equals(commandName) || "en".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\r\n\tenable/en <component id> - ").append(Messages.ENABLE_COMPONENT); //$NON-NLS-1$
+			res.append("\r\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		}
+		if (all || "disable".equals(commandName) || "dis".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\n\tdisable/dis <component id> - ").append(Messages.DISABLE_COMPONENT); //$NON-NLS-1$
+			res.append("\n\t\t\t<component id> - ").append(Messages.COMPONENT_ID_DEFINIED_BY_LIST_COMMAND); //$NON-NLS-1$
+		}
+		if (all || "enableAll".equals(commandName) || "enAll".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\r\n\tenableAll/enAll [bundle id] - ").append(Messages.ENABLE_ALL_COMPONENTS); //$NON-NLS-1$
+		}
+		if (all || "disableAll".equals(commandName) || "disAll".equals(commandName)) { //$NON-NLS-1$ //$NON-NLS-2$
+			res.append("\n\tdisableAll/disAll [bundle id] - ").append(Messages.DISABLE_ALL_COMPONENTS).append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return res.toString();
 	}
 
@@ -237,6 +260,25 @@ public class SCRCommandProvider implements CommandProvider {
 	 */
 	public void _disAll(CommandInterpreter intp) throws Exception {
 		_disableAll(intp);
+	}
+
+	/**
+	 * Handles the help command
+	 * 
+	 * @param intp
+	 * @return description for a particular command or false if there is no command with the specified name
+	 */
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return new Boolean(false);
+		}
+		String help = getHelp(commandName);
+
+		if (help.length() > 0) {
+			return help;
+		}
+		return Boolean.FALSE;
 	}
 
 	private String[] getParams(CommandInterpreter intp) {
