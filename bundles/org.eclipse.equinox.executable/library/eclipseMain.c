@@ -14,6 +14,11 @@
 #include "eclipseCommon.h"
 #include "eclipseConfig.h"
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,6 +57,7 @@ static _TCHAR* 	getDefaultOfficialName(_TCHAR* program);
 static _TCHAR*  findProgram(_TCHAR* argv[]);
 static _TCHAR*  findLibrary(_TCHAR* library, _TCHAR* program);
 static _TCHAR*  checkForIni(int argc, _TCHAR* argv[]);
+static _TCHAR*  getDirFromProgram(_TCHAR* program);
  
 static int initialArgc;
 static _TCHAR** initialArgv;
@@ -153,7 +159,7 @@ int main( int argc, _TCHAR* argv[] )
 	officialName = name != NULL ? _tcsdup( name ) : getDefaultOfficialName(program);
 	
 	/* Find the directory where the Eclipse program is installed. */
-    programDir = getProgramDir(program);
+    programDir = getDirFromProgram(program);
 
 	/* Find the eclipse library */
     eclipseLibrary = findLibrary(eclipseLibrary, program);
@@ -313,7 +319,7 @@ static int createUserArgs(int configArgc, _TCHAR **configArgv, int *argc, _TCHAR
  * This function takes the directory where program executable resides and
  * determines the installation directory.
  */
-_TCHAR* getProgramDir(_TCHAR* program)
+_TCHAR* getDirFromProgram(_TCHAR* program)
 {
 	_TCHAR*  ch;
 	
@@ -329,10 +335,11 @@ _TCHAR* getProgramDir(_TCHAR* program)
    		return programDir;
     }
 
-	/* Can't figure out from the program */
+	/* Can't figure out from the program, lets use the cwd */
 	free(programDir);
-	programDir = NULL;
-	return NULL;
+	programDir = malloc( MAX_PATH_LENGTH * sizeof (_TCHAR));
+	_tgetcwd( programDir, MAX_PATH_LENGTH );
+	return programDir;
 }
 
 _TCHAR* getOfficialName() {

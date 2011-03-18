@@ -276,8 +276,8 @@ _TCHAR* findSymlinkCommand( _TCHAR* command, int resolve )
 	                }
 #endif
 	                /* Determine if the executable resides in this directory. */
-	                if (cmdPath[0] == _T_ECLIPSE('.') &&
-	                   (_tcslen(cmdPath) == 1 || (_tcslen(cmdPath) == 2 && IS_DIR_SEPARATOR(cmdPath[1]))))
+	                if (_tcslen(cmdPath) == 0 || /*an empty path entry is treated as '.' */
+	                	(cmdPath[0] == _T_ECLIPSE('.') && (_tcslen(cmdPath) == 1 || (_tcslen(cmdPath) == 2 && IS_DIR_SEPARATOR(cmdPath[1])))))
 	                {
 	                	_tgetcwd( cmdPath, MAX_PATH_LENGTH );
 	                }
