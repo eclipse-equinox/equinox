@@ -342,6 +342,11 @@ _TCHAR* getDirFromProgram(_TCHAR* program)
 	return programDir;
 }
 
+_TCHAR* getProgramDir()
+{
+	return programDir;
+}
+
 _TCHAR* getOfficialName() {
 	return officialName;
 }
