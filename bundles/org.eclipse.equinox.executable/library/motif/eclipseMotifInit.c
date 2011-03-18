@@ -104,13 +104,15 @@ void * loadMotifShimLibrary() {
 		_TCHAR* eclipseMotifLib = _T_ECLIPSE("libeclipse-motif.so");
 		_TCHAR* path = strdup(eclipseLibrary);
 		_TCHAR* c = strrchr(path, '/');
-		if (c == NULL)
+		if (c == NULL) {
+			free(path);
 			return NULL;
+		}
 
 		*c = 0;
 		c = malloc((strlen(path) + 2 + strlen(eclipseMotifLib)) * sizeof(char));
 		_stprintf(c, _T_ECLIPSE("%s/%s"), path, eclipseMotifLib);
-
+		free(path);
 		return dlopen(c, RTLD_LAZY);
 	}
 	return 0;
