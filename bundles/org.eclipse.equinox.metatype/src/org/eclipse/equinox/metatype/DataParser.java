@@ -521,7 +521,7 @@ public class DataParser {
 			_ad = new AttributeDefinitionImpl(ad_id_val, ad_name_val, ad_description_val, _dataType, ad_cardinality_val, convert(ad_min_val, _dataType), convert(ad_max_val, _dataType), Boolean.valueOf(ad_required_val).booleanValue(), _dp_localization, logger);
 
 			if (ad_defaults_str != null) {
-				_ad.setDefaultValue(ad_defaults_str, false);
+				_ad.setDefaultValue(ad_defaults_str, true);
 			}
 		}
 

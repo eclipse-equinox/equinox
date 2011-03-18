@@ -27,7 +27,7 @@ public class MetaTypeMsg extends NLS {
 	public static String NULL_IS_INVALID;
 	public static String VALUE_OUT_OF_RANGE;
 	public static String VALUE_OUT_OF_OPTION;
-	public static String TOO_MANY_VALUES;
+	public static String CARDINALITY_VIOLATION;
 	public static String NULL_OPTIONS;
 	public static String INCONSISTENT_OPTIONS;
 	public static String INVALID_OPTIONS;

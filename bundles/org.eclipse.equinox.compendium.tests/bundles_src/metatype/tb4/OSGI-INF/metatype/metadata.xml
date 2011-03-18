@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:MetaData 
+		xmlns:md="http://www.org.osgi/xmlns/metatype/v1.0.0/md" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.0.1/md metatype.xsd">
+	<OCD id="ocd1" name="Object">
+		<AD cardinality="0" default="\&#x000D;" id="char1" type="Char">
+			<Option label="Space" value="\&#x0020;"/>
+			<Option label="Tab" value="\&#x0009;"/>
+			<Option label="Line Feed" value="\&#x000A;\"/>
+			<Option label="Carriage Return" value="\&#x000D;"/>
+			<Option label="Capital A" value="A"/>
+			<Option label="Lowercase Z" value="z"/>
+		</AD>
+		<AD default="\&#x000D;\&#x000A;" id="string1" type="String"/>
+		<AD 
+				cardinality="3" 
+				default=" \\ Hello\, wo\rld! ,&quot;Goodbye\, cruel world ...&quot; \&#x000D;\&#x000A;     , To B\e\,\&#x000D;\&#x000A;Or not\ to be&#0009;\&#0009;&#x0020;&#0009;" 
+				id="string2" 
+				type="String">
+			<Option label="1" value=" \\ Hello\, wo\rld! \"/>
+			<Option label="2" value="&quot;Goodbye\, cruel world ...&quot; \&#x000D;\&#x000A;     "/>
+			<Option label="3" value=" To B\e\,\&#x000D;\&#x000A;Or not\ to be&#0009;\&#0009;&#x0020;&#0009;"/>
+		</AD>
+		<AD id="string3" type="String"/>
+		<AD default="" id="string4" type="String">
+			<Option label="Empty String" value=""/>
+		</AD>
+		<AD default="" id="integer1" type="Integer">
+			<Option label="Empty String" value=""/>
+		</AD>
+		<AD cardinality="5" default="," id="string5" type="String">
+			<Option label="Empty String" value=""/>
+			<Option label="2 Empty Strings" value=","/>
+			<Option label="3 Empty Strings" value=",,"/>
+			<Option label="4 Empty Strings" value=",,,"/>
+			<Option label="5 Empty Strings" value=",,,,"/>
+			<Option label="6 Empty Strings" value=",,,,,"/>
+		</AD>
+		<AD cardinality="1" default="A,B" id="char2" type="Char">
+			<Option label="Capital A" value="A"/>
+			<Option label="Capital B" value="B"/>
+			<Option label="Capitals C and D" value="C,D"/>
+			<Option label="Capital E" value="E"/>
+		</AD>
+		<AD id="char3" max="&#x0020;" min="&#x0009;" type="Char"/>
+	</OCD>
+	<Designate pid="org.eclipse.equinox.metatype.tests.tb4">
+		<Object ocdref="ocd1"/>
+	</Designate>
+</md:MetaData>
