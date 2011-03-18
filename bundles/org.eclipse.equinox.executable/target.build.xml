@@ -102,7 +102,7 @@
 			<fileset dir="${basedir}/bin/carbon/macosx/x86" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="Elcipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.carbon.x86/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
 	</target>
 	<target name="rootFilesmacosx_cocoa_ppc">
 		<mkdir dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}"/>
@@ -110,7 +110,7 @@
 			<fileset dir="${basedir}/bin/cocoa/macosx/ppc" includes="**"			/>
 		</copy>
 		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="${launcherName}" /> 
-		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="Elcipse.app/Contents/MacOS/launcher" /> 
+		<chmod perm="755" dir="${feature.base}/macosx.cocoa.ppc/${collectingFolder}" includes="Eclipse.app/Contents/MacOS/launcher" /> 
 	</target>
 	<target name="rootFilesmacosx_cocoa_x86">
 		<mkdir dir="${feature.base}/macosx.cocoa.x86/${collectingFolder}"/>
