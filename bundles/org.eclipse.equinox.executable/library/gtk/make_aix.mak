@@ -99,7 +99,8 @@ eclipseNix.o: ../eclipseNix.c
 	$(CC) $(CFLAGS) -c ../eclipseNix.c -o eclipseNix.o
 
 $(EXEC): $(MAIN_OBJS) $(COMMON_OBJS)
-	$(CC) ${M_ARCH} -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	$(CC) ${M_ARCH} -Wl,-bM:UR -o $(EXEC) $(MAIN_OBJS) $(COMMON_OBJS) $(LIBS)
+	sedmgr -c exempt $(EXEC)
 	
 $(DLL): $(DLL_OBJS) $(COMMON_OBJS)
 	$(CC) $(LFLAGS) -o $(DLL) $(DLL_OBJS) $(COMMON_OBJS) $(LIBS)
