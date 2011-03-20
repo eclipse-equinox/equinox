@@ -40,7 +40,7 @@ public class ProxyContext {
 			proxyContextTempDir.mkdirs();
 		}
 	}
-	
+
 	public void destroy() {
 		if (proxyContextTempDir != null)
 			deleteDirectory(proxyContextTempDir);
@@ -52,7 +52,7 @@ public class ProxyContext {
 	}
 
 	synchronized String getServletPath() {
-		return servletPath;
+		return (servletPath == null ? "" : servletPath); //$NON-NLS-1$
 	}
 
 	synchronized void createContextAttributes(HttpContext httpContext) {
@@ -61,7 +61,7 @@ public class ProxyContext {
 			attributes = new ContextAttributes(httpContext);
 			attributesMap.put(httpContext, attributes);
 		}
-		attributes.addReference();	
+		attributes.addReference();
 	}
 
 	synchronized void destroyContextAttributes(HttpContext httpContext) {
@@ -72,11 +72,11 @@ public class ProxyContext {
 			attributes.destroy();
 		}
 	}
-	
+
 	synchronized Dictionary getContextAttributes(HttpContext httpContext) {
 		return (Dictionary) attributesMap.get(httpContext);
 	}
-	
+
 	/**
 	 * deleteDirectory is a convenience method to recursively delete a directory
 	 * @param directory - the directory to delete.
@@ -95,7 +95,7 @@ public class ProxyContext {
 		}
 		return directory.delete();
 	}
-	
+
 	public class ContextAttributes extends Hashtable {
 		private static final long serialVersionUID = 1916670423277243587L;
 		private int referenceCount;
@@ -107,19 +107,19 @@ public class ProxyContext {
 				put(JAVAX_SERVLET_CONTEXT_TEMPDIR, contextTempDir);
 			}
 		}
-		
+
 		public void destroy() {
 			File contextTempDir = (File) get(JAVAX_SERVLET_CONTEXT_TEMPDIR);
 			if (contextTempDir != null)
 				deleteDirectory(contextTempDir);
 		}
-				
+
 		public void addReference() {
-			referenceCount++;			
+			referenceCount++;
 		}
 
 		public void removeReference() {
-			referenceCount--;			
+			referenceCount--;
 		}
 
 		public int referenceCount() {
