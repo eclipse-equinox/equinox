@@ -56,7 +56,8 @@ static GtkWidget*   image = 0;
 static sem_t* mutex;
 static Atom appWindowAtom, launcherWindowAtom;
 static _TCHAR** openFilePath = NULL; /* the files we want to open */
-static int openFileTimeout = 60; /* number of seconds to wait before timeout */
+static int openFileTimeout = 60; 	 /* number of seconds to wait before timeout */
+static int windowPropertySet = 0;	 /* set to 1 on success */
 
 static struct sigaction quitAction;
 static struct sigaction intAction;
@@ -149,6 +150,7 @@ static int setAppWindowPropertyFn() {
 		propVal = concatPaths(openFilePath, _T_ECLIPSE(':'));
 		gtk.XChangeProperty(gtk_GDK_DISPLAY, appWindow, propAtom, propAtom, 8, PropModeAppend, (unsigned char *)propVal, _tcslen(propVal));
 		free(propVal);
+		windowPropertySet = 1;
 		return 1;
 	}
 	return 0;
@@ -333,7 +335,7 @@ char** getArgVM( char* vm )
 JavaResults* launchJavaVM( char* args[] )
 {
 	JavaResults* jvmResults = NULL;
-  	pid_t   jvmProcess;
+  	pid_t   jvmProcess, finishedProcess = 0;
   	int     exitCode;
   	
 #ifdef MOZILLA_FIX
@@ -357,7 +359,22 @@ JavaResults* launchJavaVM( char* args[] )
 	/* If the JVM is still running, wait for it to terminate. */
 	if (jvmProcess != 0)
 	{
-		waitpid(jvmProcess, &exitCode, 0);
+		/* When attempting a file open, we need to spin the event loop
+		 * for setAppWindowTimerProc to run.  When that succeeds or times out, 
+		 * we can stop the event loop and just wait on the child process.
+		 */
+		if (openFilePath != NULL) {
+			struct timespec sleepTime;
+			sleepTime.tv_sec = 0;
+			sleepTime.tv_nsec = 5e+8; // 500 milliseconds
+			
+			while(openFileTimeout > 0 && !windowPropertySet && (finishedProcess = waitpid(jvmProcess, &exitCode, WNOHANG)) == 0) {
+				dispatchMessages();
+				nanosleep(&sleepTime, NULL);
+			}
+		}
+		if (finishedProcess == 0)
+			waitpid(jvmProcess, &exitCode, 0);
       	if (WIFEXITED(exitCode))
       		/* TODO, this should really be a runResult if we could distinguish the launch problem above */
 			jvmResults->launchResult = WEXITSTATUS(exitCode);
