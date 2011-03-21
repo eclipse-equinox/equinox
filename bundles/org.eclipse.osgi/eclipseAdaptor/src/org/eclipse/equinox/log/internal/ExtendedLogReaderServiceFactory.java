@@ -11,9 +11,9 @@ import java.io.PrintStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
-import java.util.Map.Entry;
 import org.eclipse.equinox.log.LogFilter;
 import org.eclipse.equinox.log.SynchronousLogListener;
+import org.eclipse.osgi.internal.baseadaptor.ArrayMap;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
@@ -47,7 +47,7 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	private static PrintStream errorStream;
 
-	private Map<LogListener, Object[]> listeners = new HashMap<LogListener, Object[]>();
+	private ArrayMap<LogListener, Object[]> listeners = new ArrayMap<LogListener, Object[]>(5);
 	private LogFilter[] filters = null;
 
 	private BasicReadWriteLock listenersLock = new BasicReadWriteLock();
@@ -151,11 +151,12 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, level, message, exception);
 		listenersLock.readLock();
 		try {
-			for (Entry<LogListener, Object[]> entry : listeners.entrySet()) {
-				Object[] listenerObjects = entry.getValue();
+			int size = listeners.size();
+			for (int i = 0; i < size; i++) {
+				Object[] listenerObjects = listeners.getValue(i);
 				LogFilter filter = (LogFilter) listenerObjects[0];
 				if (safeIsLoggable(filter, bundle, name, level)) {
-					LogListener listener = entry.getKey();
+					LogListener listener = listeners.getKey(i);
 					SerializedTaskQueue taskQueue = (SerializedTaskQueue) listenerObjects[1];
 					if (taskQueue != null) {
 						taskQueue.put(new LogTask(logEntry, listener));
@@ -191,7 +192,9 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	private void recalculateFilters() {
 		List<LogFilter> filtersList = new ArrayList<LogFilter>();
-		for (Object[] listenerObjects : listeners.values()) {
+		int size = listeners.size();
+		for (int i = 0; i < size; i++) {
+			Object[] listenerObjects = listeners.getValue(i);
 			LogFilter filter = (LogFilter) listenerObjects[0];
 			if (filter == NULL_LOGGER_FILTER) {
 				filters = ALWAYS_LOG;
