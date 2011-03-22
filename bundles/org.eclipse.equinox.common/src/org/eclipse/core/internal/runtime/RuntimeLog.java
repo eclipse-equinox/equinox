@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.*;
  * 
  * @since org.eclipse.equinox.common 3.2
  */
-// XXX this must be removed and replaced with something more reasonable
 public final class RuntimeLog {
 
 	private static ArrayList logListeners = new ArrayList(5);
@@ -36,8 +35,9 @@ public final class RuntimeLog {
 
 	static void setLogWriter(PlatformLogWriter logWriter) {
 		synchronized (logListeners) {
+			boolean firstListener = isEmpty();
 			RuntimeLog.logWriter = logWriter;
-			if (logWriter != null)
+			if (firstListener && logWriter != null)
 				emptyQueuedMessages();
 		}
 	}
@@ -47,7 +47,7 @@ public final class RuntimeLog {
 	 */
 	public static void addLogListener(ILogListener listener) {
 		synchronized (logListeners) {
-			boolean firstListener = (logListeners.size() == 0);
+			boolean firstListener = isEmpty();
 			// replace if already exists (Set behaviour but we use an array
 			// since we want to retain order)
 			logListeners.remove(listener);
@@ -84,25 +84,27 @@ public final class RuntimeLog {
 		PlatformLogWriter writer;
 		synchronized (logListeners) {
 			writer = logWriter;
-			if (writer == null && logListeners.size() > 0) {
-				listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
-				if (listeners.length == 0) {
+			if (writer == null) {
+				if (logListeners.isEmpty()) {
 					queuedMessages.add(status);
 					return;
 				}
+				listeners = (ILogListener[]) logListeners.toArray(new ILogListener[logListeners.size()]);
 			}
 		}
 		if (writer != null) {
 			writer.logging(status);
 			return;
 		}
-		for (int i = 0; i < listeners.length; i++) {
-			try {
-				listeners[i].logging(status, IRuntimeConstants.PI_RUNTIME);
-			} catch (Exception e) {
-				handleException(e);
-			} catch (LinkageError e) {
-				handleException(e);
+		if (listeners != null) {
+			for (int i = 0; i < listeners.length; i++) {
+				try {
+					listeners[i].logging(status, IRuntimeConstants.PI_RUNTIME);
+				} catch (Exception e) {
+					handleException(e);
+				} catch (LinkageError e) {
+					handleException(e);
+				}
 			}
 		}
 	}
@@ -115,19 +117,29 @@ public final class RuntimeLog {
 	}
 
 	/**
-	 * Helps determine if any listeners are registered with the logging mechanism.
-	 * @return true if no listeners are registered
+	 * Helps determine if the logging mechanism is ready for logging.
+	 * @return true the logging mechanism is ready for logging.
 	 */
 	public static boolean isEmpty() {
 		synchronized (logListeners) {
-			return (logListeners.size() == 0) && logWriter == null;
+			return (logListeners.isEmpty()) && (logWriter == null);
+		}
+	}
+
+	/**
+	 * Determines if there are any listeners
+	 * @return true if there is at least one listener.
+	 */
+	public static boolean hasListeners() {
+		synchronized (logListeners) {
+			return (!logListeners.isEmpty());
 		}
 	}
 
 	private static void emptyQueuedMessages() {
 		IStatus[] queued;
 		synchronized (logListeners) {
-			if (queuedMessages.size() == 0)
+			if (queuedMessages.isEmpty())
 				return;
 			queued = (IStatus[]) queuedMessages.toArray(new IStatus[queuedMessages.size()]);
 			queuedMessages.clear();
