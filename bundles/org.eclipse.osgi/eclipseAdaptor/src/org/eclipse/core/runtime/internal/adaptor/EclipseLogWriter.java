@@ -80,6 +80,7 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	private Writer writer;
 
 	private final String loggerName;
+	private final boolean enabled;
 
 	int maxLogSize = DEFAULT_LOG_SIZE; // The value is in KB.
 	int maxLogFiles = DEFAULT_LOG_FILES;
@@ -91,10 +92,11 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified File to log messages to
 	 * @param outFile a file to log messages to
 	 */
-	public EclipseLogWriter(File outFile, String loggerName) {
+	public EclipseLogWriter(File outFile, String loggerName, boolean enabled) {
 		this.outFile = outFile;
 		this.writer = null;
 		this.loggerName = loggerName;
+		this.enabled = enabled;
 		readLogProperties();
 	}
 
@@ -102,13 +104,14 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	 * Constructs an EclipseLog which uses the specified Writer to log messages to
 	 * @param writer a writer to log messages to
 	 */
-	public EclipseLogWriter(Writer writer, String loggerName) {
+	public EclipseLogWriter(Writer writer, String loggerName, boolean enabled) {
 		if (writer == null)
 			// log to System.err by default
 			this.writer = logForStream(System.err);
 		else
 			this.writer = writer;
 		this.loggerName = loggerName;
+		this.enabled = enabled;
 	}
 
 	private Throwable getRoot(Throwable t) {
@@ -258,10 +261,10 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 		}
 	}
 
-	public synchronized void log(FrameworkLogEntry logEntry) {
+	private synchronized void log(FrameworkLogEntry logEntry) {
 		if (logEntry == null)
 			return;
-		if (!isLoggable(logEntry))
+		if (!isLoggable(logEntry.getSeverity()))
 			return;
 		try {
 			checkLogFileSize();
@@ -652,15 +655,17 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	/**
 	 * Determines if the log entry should be logged based on log level.
 	 */
-	private boolean isLoggable(FrameworkLogEntry entry) {
+	private boolean isLoggable(int fwkEntrySeverity) {
 		if (logLevel == 0)
 			return true;
-		return (entry.getSeverity() & logLevel) != 0;
+		return (fwkEntrySeverity & logLevel) != 0;
 	}
 
 	public boolean isLoggable(Bundle bundle, String loggableName, int loggableLevel) {
+		if (!enabled)
+			return false;
 		if (loggerName.equals(loggableName))
-			return true;
+			return isLoggable(convertSeverity(loggableLevel));
 		if (EclipseLogHook.PERF_LOGGER_NAME.equals(loggableName))
 			// we don't want to do anything with performance logger unless
 			// this is the performance logger (check done above).
@@ -683,7 +688,7 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 			return;
 		}
 		// OK we are now in a case where someone logged a normal entry to the real LogService
-		log(new FrameworkLogEntry(getFwkEntryTag(entry), convertSeverity(entry), 0, entry.getMessage(), 0, entry.getException(), null));
+		log(new FrameworkLogEntry(getFwkEntryTag(entry), convertSeverity(entry.getLevel()), 0, entry.getMessage(), 0, entry.getException(), null));
 	}
 
 	private static String getFwkEntryTag(LogEntry entry) {
@@ -693,8 +698,8 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 		return "unknown"; //$NON-NLS-1$
 	}
 
-	private static int convertSeverity(LogEntry entry) {
-		switch (entry.getLevel()) {
+	private static int convertSeverity(int entryLevel) {
+		switch (entryLevel) {
 			case LogService.LOG_ERROR :
 				return FrameworkLogEntry.ERROR;
 			case LogService.LOG_WARNING :

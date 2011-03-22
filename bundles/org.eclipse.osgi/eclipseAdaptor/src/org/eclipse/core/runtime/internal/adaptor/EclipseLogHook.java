@@ -29,6 +29,8 @@ import org.osgi.framework.*;
 public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 	static final String EQUINOX_LOGGER_NAME = "org.eclipse.equinox.logger"; //$NON-NLS-1$
 	static final String PERF_LOGGER_NAME = "org.eclipse.performance.logger"; //$NON-NLS-1$
+	private static final String PROP_LOG_ENABLED = "eclipse.log.enabled"; //$NON-NLS-1$
+
 	// The eclipse log file extension */
 	private static final String LOG_EXT = ".log"; //$NON-NLS-1$
 	private final LogServiceManager logServiceManager;
@@ -38,8 +40,9 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 
 	public EclipseLogHook() {
 		String logFileProp = FrameworkProperties.getProperty(EclipseStarter.PROP_LOGFILE);
+		boolean enabled = "true".equals(FrameworkProperties.getProperty(PROP_LOG_ENABLED, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 		if (logFileProp != null) {
-			logWriter = new EclipseLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME);
+			logWriter = new EclipseLogWriter(new File(logFileProp), EQUINOX_LOGGER_NAME, enabled);
 		} else {
 			Location location = LocationManager.getConfigurationLocation();
 			File configAreaDirectory = null;
@@ -51,17 +54,17 @@ public class EclipseLogHook implements HookConfigurator, AdaptorHook {
 				String logFileName = Long.toString(System.currentTimeMillis()) + EclipseLogHook.LOG_EXT;
 				File logFile = new File(configAreaDirectory, logFileName);
 				FrameworkProperties.setProperty(EclipseStarter.PROP_LOGFILE, logFile.getAbsolutePath());
-				logWriter = new EclipseLogWriter(logFile, EQUINOX_LOGGER_NAME);
+				logWriter = new EclipseLogWriter(logFile, EQUINOX_LOGGER_NAME, enabled);
 			} else
-				logWriter = new EclipseLogWriter((Writer) null, EQUINOX_LOGGER_NAME);
+				logWriter = new EclipseLogWriter((Writer) null, EQUINOX_LOGGER_NAME, enabled);
 		}
 
 		File logFile = logWriter.getFile();
 		if (logFile != null) {
 			File perfLogFile = new File(logFile.getParentFile(), "performance.log"); //$NON-NLS-1$
-			perfWriter = new EclipseLogWriter(perfLogFile, PERF_LOGGER_NAME);
+			perfWriter = new EclipseLogWriter(perfLogFile, PERF_LOGGER_NAME, true);
 		} else {
-			perfWriter = new EclipseLogWriter((Writer) null, PERF_LOGGER_NAME);
+			perfWriter = new EclipseLogWriter((Writer) null, PERF_LOGGER_NAME, true);
 		}
 		if ("true".equals(FrameworkProperties.getProperty(EclipseStarter.PROP_CONSOLE_LOG))) //$NON-NLS-1$
 			logWriter.setConsoleLog(true);
