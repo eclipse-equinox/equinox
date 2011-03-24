@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -239,7 +239,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 				String oldValue = childNode.internalPut(key, value);
 				// notify listeners if applicable
 				if (notify && !value.equals(oldValue))
-					node.firePreferenceEvent(key, oldValue, value);
+					childNode.firePreferenceEvent(key, oldValue, value);
 			}
 		}
 		PreferencesService.getDefault().shareStrings();
