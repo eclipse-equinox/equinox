@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
@@ -215,8 +214,10 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	 * Internal Method - to get resource bundle.
 	 */
 	private ResourceBundle getResourceBundle(String locale, final Bundle bundle) {
-
-		String resourceBase = (_localization == null ? Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME : _localization);
+		// Determine the base name of the bundle localization property files.
+		// If the <MetaData> 'localization' attribute was not specified,
+		// use the Bundle-Localization manifest header value instead if it exists.
+		String resourceBase = _localization != null ? _localization : MetaTypeProviderImpl.getBundleLocalization(bundle);
 
 		// There are seven searching candidates possible:
 		// baseName + 

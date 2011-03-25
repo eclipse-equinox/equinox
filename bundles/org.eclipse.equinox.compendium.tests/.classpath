@@ -7,5 +7,8 @@
 	<classpathentry kind="src" output="bundle_tests/metatype/tb2" path="bundles_src/metatype/tb2"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb3" path="bundles_src/metatype/tb3"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb4" path="bundles_src/metatype/tb4"/>
+	<classpathentry kind="src" output="bundle_tests/metatype/tb5" path="bundles_src/metatype/tb5"/>
+	<classpathentry kind="src" output="bundle_tests/metatype/tb6" path="bundles_src/metatype/tb6"/>
+	<classpathentry kind="src" output="bundle_tests/metatype/tb7" path="bundles_src/metatype/tb7"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

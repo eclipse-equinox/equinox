@@ -18,6 +18,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Tests for Equinox MetaType"); //$NON-NLS-1$
 		suite.addTestSuite(AttributeTypePasswordTest.class);
 		suite.addTestSuite(Bug332161Test.class);
+		suite.addTestSuite(Bug340899Test.class);
 		suite.addTestSuite(BugTests.class);
 		suite.addTestSuite(SameOcdPidFactoryPidTest.class);
 		return suite;

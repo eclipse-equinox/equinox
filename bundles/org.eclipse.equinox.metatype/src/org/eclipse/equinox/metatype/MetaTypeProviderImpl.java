@@ -184,7 +184,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 				localizationFiles.add(ocd._localization);
 		}
 		if (localizationFiles.size() == 0)
-			localizationFiles.add(Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME);
+			localizationFiles.add(getBundleLocalization(_bundle));
 		Vector<String> locales = new Vector<String>(7);
 		Enumeration<String> eLocalizationFiles = localizationFiles.elements();
 		while (eLocalizationFiles.hasMoreElements()) {
@@ -209,6 +209,15 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		}
 		_locales = locales.toArray(new String[locales.size()]);
 		return checkForDefault(_locales);
+	}
+
+	static String getBundleLocalization(Bundle bundle) {
+		// Use the Bundle-Localization manifest header value if it exists.
+		String baseName = bundle.getHeaders("").get(Constants.BUNDLE_LOCALIZATION); //$NON-NLS-1$
+		if (baseName == null)
+			// If the manifest header does not exist, use the default.
+			baseName = Constants.BUNDLE_LOCALIZATION_DEFAULT_BASENAME;
+		return baseName;
 	}
 
 	/**
