@@ -85,7 +85,7 @@
          id="org.eclipse.equinox.http.jetty"
          download-size="0"
          install-size="0"
-         version="2.0.0.qualifier"
+         version="2.0.100.qualifier"
          unpack="false"/>
 
    <plugin
