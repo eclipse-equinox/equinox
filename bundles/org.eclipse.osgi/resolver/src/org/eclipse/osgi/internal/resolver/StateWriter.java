@@ -94,76 +94,78 @@ class StateWriter {
 		DataOutputStream outState = null;
 		FileOutputStream fosLazy = null;
 		FileOutputStream fosState = null;
-		try {
-			BundleDescription[] bundles = state.getBundles();
-			StateHelperImpl.getInstance().sortBundles(bundles);
-			// need to prime the object table with all bundles
-			// this allows us to write only indexes to bundles in the lazy data
-			for (int i = 0; i < bundles.length; i++) {
-				addToObjectTable(bundles[i]);
-				if (bundles[i].getHost() != null)
-					addToObjectTable(bundles[i].getHost());
-			}
-			// first write the lazy data to get the offsets and sizes to the lazy data
-			fosLazy = new FileOutputStream(lazyFile);
-			outLazy = new DataOutputStream(new BufferedOutputStream(fosLazy));
-			for (int i = 0; i < bundles.length; i++)
-				writeBundleDescriptionLazyData(bundles[i], outLazy);
-			// now write the state data
-			fosState = new FileOutputStream(stateFile);
-			outState = new DataOutputStream(new BufferedOutputStream(fosState));
-			outState.write(StateReader.STATE_CACHE_VERSION);
-			if (writePrefix(state, outState))
-				return;
-			outState.writeLong(state.getTimeStamp());
-			// write the platform property keys
-			String[] platformPropKeys = state.getPlatformPropertyKeys();
-			writePlatformProp(platformPropKeys, outState);
-			// write the platform property values
-			Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
-			outState.writeInt(propSet.length);
-			for (int i = 0; i < propSet.length; i++) {
-				Dictionary<Object, Object> props = propSet[i];
-				outState.writeInt(platformPropKeys.length);
-				for (int j = 0; j < platformPropKeys.length; j++)
-					writePlatformProp(props.get(platformPropKeys[j]), outState);
-			}
-			outState.writeInt(bundles.length);
-			for (int i = 0; i < bundles.length; i++)
-				// write out each bundle with the force flag set to make sure
-				// the data is written at least once in the non-lazy state data
-				writeBundleDescription(bundles[i], outState, true);
-			// write the DisabledInfos
-			DisabledInfo[] infos = state.getDisabledInfos();
-			outState.writeInt(infos.length);
-			for (int i = 0; i < infos.length; i++)
-				writeDisabledInfo(infos[i], outState);
-			outState.writeBoolean(state.isResolved());
-		} finally {
-			if (outLazy != null) {
-				try {
-					outLazy.flush();
-					fosLazy.getFD().sync();
-				} catch (IOException e) {
-					// do nothing, we tried
+		synchronized (state.monitor) {
+			try {
+				BundleDescription[] bundles = state.getBundles();
+				StateHelperImpl.getInstance().sortBundles(bundles);
+				// need to prime the object table with all bundles
+				// this allows us to write only indexes to bundles in the lazy data
+				for (int i = 0; i < bundles.length; i++) {
+					addToObjectTable(bundles[i]);
+					if (bundles[i].getHost() != null)
+						addToObjectTable(bundles[i].getHost());
 				}
-				try {
-					outLazy.close();
-				} catch (IOException e) {
-					// do nothing
+				// first write the lazy data to get the offsets and sizes to the lazy data
+				fosLazy = new FileOutputStream(lazyFile);
+				outLazy = new DataOutputStream(new BufferedOutputStream(fosLazy));
+				for (int i = 0; i < bundles.length; i++)
+					writeBundleDescriptionLazyData(bundles[i], outLazy);
+				// now write the state data
+				fosState = new FileOutputStream(stateFile);
+				outState = new DataOutputStream(new BufferedOutputStream(fosState));
+				outState.write(StateReader.STATE_CACHE_VERSION);
+				if (writePrefix(state, outState))
+					return;
+				outState.writeLong(state.getTimeStamp());
+				// write the platform property keys
+				String[] platformPropKeys = state.getPlatformPropertyKeys();
+				writePlatformProp(platformPropKeys, outState);
+				// write the platform property values
+				Dictionary<Object, Object>[] propSet = state.getPlatformProperties();
+				outState.writeInt(propSet.length);
+				for (int i = 0; i < propSet.length; i++) {
+					Dictionary<Object, Object> props = propSet[i];
+					outState.writeInt(platformPropKeys.length);
+					for (int j = 0; j < platformPropKeys.length; j++)
+						writePlatformProp(props.get(platformPropKeys[j]), outState);
 				}
-			}
-			if (outState != null) {
-				try {
-					outState.flush();
-					fosState.getFD().sync();
-				} catch (IOException e) {
-					// do nothing, we tried
+				outState.writeInt(bundles.length);
+				for (int i = 0; i < bundles.length; i++)
+					// write out each bundle with the force flag set to make sure
+					// the data is written at least once in the non-lazy state data
+					writeBundleDescription(bundles[i], outState, true);
+				// write the DisabledInfos
+				DisabledInfo[] infos = state.getDisabledInfos();
+				outState.writeInt(infos.length);
+				for (int i = 0; i < infos.length; i++)
+					writeDisabledInfo(infos[i], outState);
+				outState.writeBoolean(state.isResolved());
+			} finally {
+				if (outLazy != null) {
+					try {
+						outLazy.flush();
+						fosLazy.getFD().sync();
+					} catch (IOException e) {
+						// do nothing, we tried
+					}
+					try {
+						outLazy.close();
+					} catch (IOException e) {
+						// do nothing
+					}
 				}
-				try {
-					outState.close();
-				} catch (IOException e) {
-					// do nothing
+				if (outState != null) {
+					try {
+						outState.flush();
+						fosState.getFD().sync();
+					} catch (IOException e) {
+						// do nothing, we tried
+					}
+					try {
+						outState.close();
+					} catch (IOException e) {
+						// do nothing
+					}
 				}
 			}
 		}

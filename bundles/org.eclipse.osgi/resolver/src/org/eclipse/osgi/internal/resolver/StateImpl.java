@@ -38,17 +38,17 @@ public abstract class StateImpl implements State {
 
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
-	transient volatile private boolean resolving = false;
+	transient private boolean resolving = false;
 	transient private LinkedList<BundleDescription> removalPendings = new LinkedList<BundleDescription>();
 
-	private volatile boolean resolved = true;
-	private volatile long timeStamp = System.currentTimeMillis();
+	private boolean resolved = true;
+	private long timeStamp = System.currentTimeMillis();
 	private final KeyedHashSet bundleDescriptions = new KeyedHashSet(false);
 	private final Map<BundleDescription, List<ResolverError>> resolverErrors = new HashMap<BundleDescription, List<ResolverError>>();
 	private StateObjectFactory factory;
 	private final KeyedHashSet resolvedBundles = new KeyedHashSet();
 	private final Map<BundleDescription, List<DisabledInfo>> disabledBundles = new HashMap<BundleDescription, List<DisabledInfo>>();
-	private volatile boolean fullyLoaded = false;
+	private boolean fullyLoaded = false;
 	private boolean dynamicCacheChanged = false;
 	// only used for lazy loading of BundleDescriptions
 	private StateReader reader;
@@ -62,7 +62,7 @@ public abstract class StateImpl implements State {
 
 	private static long cumulativeTime;
 
-	private final Object monitor = new Object();
+	final Object monitor = new Object();
 
 	// to prevent extra-package instantiation 
 	protected StateImpl() {
@@ -415,6 +415,7 @@ public abstract class StateImpl implements State {
 	}
 
 	private StateDelta resolve(boolean incremental, BundleDescription[] reResolve, BundleDescription[] triggers) {
+		fullyLoad();
 		synchronized (this.monitor) {
 			if (resolver == null)
 				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
@@ -423,7 +424,6 @@ public abstract class StateImpl implements State {
 			ResolverHook currentHook = null;
 			try {
 				resolving = true;
-				fullyLoad();
 				long start = 0;
 				if (StateManager.DEBUG_PLATFORM_ADMIN_RESOLVER)
 					start = System.currentTimeMillis();
@@ -1028,13 +1028,9 @@ public abstract class StateImpl implements State {
 
 	// not synchronized on this to prevent deadlock
 	public final void fullyLoad() {
-		// TODO add back if ee min 1.2 adds holdsLock method
-		//if (Thread.holdsLock(this.monitor)) {
-		//	throw new IllegalStateException("Should not call fullyLoad() holding monitor."); //$NON-NLS-1$
-		//}
-		if (reader == null)
-			return;
-		synchronized (reader) {
+		synchronized (this.monitor) {
+			if (reader == null)
+				return;
 			if (fullyLoaded == true)
 				return;
 			if (reader.isLazyLoaded())
@@ -1044,18 +1040,22 @@ public abstract class StateImpl implements State {
 	}
 
 	// not synchronized on this to prevent deadlock
-	public final void unloadLazyData() {
+	public final boolean unloadLazyData(long checkStamp) {
 		// make sure no other thread is trying to unload or load
-		synchronized (reader) {
+		synchronized (this.monitor) {
+			if (checkStamp != getTimeStamp() || dynamicCacheChanged())
+				return false;
 			if (reader.getAccessedFlag()) {
 				reader.setAccessedFlag(false); // reset accessed flag
-				return;
+				return true;
 			}
 			fullyLoaded = false;
 			BundleDescription[] bundles = getBundles();
 			for (int i = 0; i < bundles.length; i++)
 				((BundleDescriptionImpl) bundles[i]).unload();
 			reader.flushLazyObjectCache();
+			resolver.flush();
+			return true;
 		}
 	}
 

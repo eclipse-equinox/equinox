@@ -660,7 +660,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		if (reader == null)
 			throw new IllegalStateException("No valid reader for the bundle description"); //$NON-NLS-1$
 
-		synchronized (reader) {
+		synchronized (currentState.monitor) {
 			if (isFullyLoaded()) {
 				reader.setAccessedFlag(true); // set reader accessed flag
 				return this.lazyData;
@@ -734,7 +734,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		StateReader reader = currentState == null ? null : currentState.getReader();
 		if (reader == null)
 			throw new IllegalStateException("BundleDescription does not belong to a reader."); //$NON-NLS-1$
-		synchronized (reader) {
+		synchronized (currentState.monitor) {
 			if ((stateBits & LAZY_LOADED) == 0)
 				return;
 			if (!isFullyLoaded())

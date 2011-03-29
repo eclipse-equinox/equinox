@@ -763,7 +763,7 @@ final class StateReader {
 		this.accessedFlag = accessedFlag;
 	}
 
-	synchronized void fullyLoad() {
+	void fullyLoad() {
 		setAccessedFlag(true);
 		DataInputStream in = null;
 		try {
@@ -782,7 +782,7 @@ final class StateReader {
 		}
 	}
 
-	synchronized void fullyLoad(BundleDescriptionImpl target) throws IOException {
+	void fullyLoad(BundleDescriptionImpl target) throws IOException {
 		setAccessedFlag(true);
 		DataInputStream in = null;
 		try {
