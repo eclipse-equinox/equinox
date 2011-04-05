@@ -36,17 +36,46 @@ public class ConsoleTestCommandProvider implements CommandProvider {
 	}
 
 	public String getHelp() {
+		return getHelp(null);
+	}
+
+	public Object _help(CommandInterpreter intp) {
+		String commandName = intp.nextArgument();
+		if (commandName == null) {
+			return Boolean.FALSE;
+		}
+		String help = getHelp(commandName);
+
+		if (help.length() > 0) {
+			return help;
+		}
+
+		return Boolean.FALSE;
+	}
+
+	private String getHelp(String commandName) {
+		boolean allCommands = commandName == null;
 		StringBuffer help = new StringBuffer();
-		help.append("---");
-		help.append("Custom commands");
-		help.append("---");
-		help.append("\r\n");
-		help.append("\t");
-		help.append("echo - echos input");
-		help.append("\r\n");
-		help.append("\t");
-		help.append("cust_exec - executes the command, passed as an argument");
-		help.append("\r\n");
+
+		if (allCommands) {
+			help.append("---");
+			help.append("Custom commands");
+			help.append("---");
+			help.append("\r\n");
+			help.append("\t");
+		}
+		if (allCommands || "echo".equals(commandName)) {
+			help.append("echo - echos input");
+			help.append("\r\n");
+		}
+		if (allCommands) {
+			help.append("\t");
+		}
+		if (allCommands || "cust_exec".equals(commandName)) {
+			help.append("cust_exec - executes the command, passed as an argument");
+			help.append("\r\n");
+		}
+
 		return help.toString();
 	}
 

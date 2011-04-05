@@ -25,6 +25,9 @@ import org.osgi.framework.*;
  * provides the commands, registering a ConsoleSession object, through which the commands
  * are sent for execution, and finally checking the output of the commands.
  * 
+ * This also tests the help provided for individual commands. Help for one command from custom command provider, 
+ * and one from the framework command provider is tested.
+ * 
  * Reading the output of the commands is performed in a separate thread in order to ensure that if no
  * output is available the test will not block on the reading
  * 
@@ -52,8 +55,16 @@ public class TestCommandExecution extends CoreTest {
 	private static String COMPOSITE_COMMAND_STRING = "cust_exec echo Hello!";
 	static String COMPOSITE_COMMAND_OUTPUT = "Customized execution of command echo";
 
+	private static String HELP_CUSTOM_COMMAND_STRING = "help cust_exec";
+	static String HELP_CUSTOM_COMMAND_OUTPUT = "cust_exec - executes the command, passed as an argument";
+
+	private static String HELP_FRAMEWORK_COMMAND_STRING = "help ss";
+	static String HELP_FRAMEWORK_COMMAND_OUTPUT = "ss [-s [<comma separated list of bundle states>]  [<segment of bsn>]] - display installed bundles (short status)";
+
 	static String SIMPLE = "simple";
 	static String COMPOSITE = "composite";
+	static String CUSTOM_HELP = "custom_help";
+	static String FRAMEWORK_HELP = "framework_help";
 
 	boolean isOutputOk = false;
 	boolean isCompositeContained = false;
@@ -98,6 +109,33 @@ public class TestCommandExecution extends CoreTest {
 			readThread.interrupt();
 		}
 		assertTrue("Output not as expected", isCompositeContained && isSimpleContained);
+		cleanUp(bundle);
+	}
+
+	public void testHelpCustomCommand() {
+		testCommand(HELP_CUSTOM_COMMAND_STRING, CUSTOM_HELP);
+	}
+
+	public void testHelpFrameworkCommand() {
+		testCommand(HELP_FRAMEWORK_COMMAND_STRING, FRAMEWORK_HELP);
+	}
+
+	private void testCommand(String command, String type) {
+		Bundle bundle = prepare(command);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+		Thread readThread = new Thread(new ReadThread(reader, type));
+		readThread.start();
+
+		try {
+			synchronized (waitObject) {
+				waitObject.wait(TIMEOUT);
+			}
+		} catch (InterruptedException ie) {
+			// do nothing
+		} finally {
+			readThread.interrupt();
+		}
+		assertTrue("Output not as expected", isOutputOk);
 		cleanUp(bundle);
 	}
 
@@ -146,6 +184,10 @@ public class TestCommandExecution extends CoreTest {
 					checkSimple();
 				} else if (type.equals(COMPOSITE)) {
 					checkComposite();
+				} else if (type.equals(CUSTOM_HELP)) {
+					checkCommandOutput(HELP_CUSTOM_COMMAND_OUTPUT);
+				} else if (type.equals(FRAMEWORK_HELP)) {
+					checkCommandOutput(HELP_FRAMEWORK_COMMAND_OUTPUT);
 				}
 			} catch (IOException e) {
 				fail("Unexpected failure", e);
@@ -174,6 +216,27 @@ public class TestCommandExecution extends CoreTest {
 						}
 					}
 				}
+			}
+		}
+
+		private void checkCommandOutput(String expectedOutput) throws IOException {
+			String line;
+			line = reader.readLine();
+			if (line == null || (line != null && line.length() > 0)) {
+				isOutputOk = false;
+				return;
+			}
+			line = reader.readLine();
+			if (line != null && line.indexOf(expectedOutput) > -1) {
+				isOutputOk = true;
+			} else {
+				isOutputOk = false;
+				return;
+			}
+			line = reader.readLine();
+			if (line == null || (line != null && line.length() > 0)) {
+				isOutputOk = false;
+				return;
 			}
 		}
 	}

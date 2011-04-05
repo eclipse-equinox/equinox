@@ -19,6 +19,8 @@ public class AllConsoleTests {
 		suite.addTest(TestCommandExecution.suite());
 		suite.addTest(TestEquinoxStartWithConsole.suite());
 		suite.addTest(TestFrameworkCommandInterpreter.suite());
+		suite.addTest(TestEquinoxStartWithoutConsole.suite());
+		suite.addTest(TestRestrictedTelnetHost.suite());
 		return suite;
 	}
 }
