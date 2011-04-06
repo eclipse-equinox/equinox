@@ -8,7 +8,13 @@
 		<AD cardinality="0" id="password2" type="Password"/>
 		<AD cardinality="0" default="Hello\, world!" id="string1" type="String"/>
 	</OCD>
+	<OCD id="ocd2" name="" description="">
+		<AD id="ad1" name="" description="" type="String"/>
+	</OCD>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb3">
 		<Object ocdref="ocd1"/>
+	</Designate>
+	<Designate pid="ocd2">
+		<Object ocdref="ocd2"/>
 	</Designate>
 </md:MetaData>

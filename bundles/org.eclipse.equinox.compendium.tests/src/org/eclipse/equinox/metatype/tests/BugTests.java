@@ -50,6 +50,26 @@ public class BugTests extends AbstractTest {
 		assertValidationPass(escape(getFirstDefaultValue(ad.getDefaultValue())), ad);
 	}
 
+	/*
+	 * StringIndexOutOfBoundsException when description or name attributes are an empty string
+	 */
+	public void test341963() {
+		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
+		assertNotNull("Metatype information not found", mti); //$NON-NLS-1$
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("ocd2", null); //$NON-NLS-1$
+		assertNotNull("Object class definition not found", ocd); //$NON-NLS-1$
+		assertEquals("Wrong name", "", ocd.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Wrong description", "", ocd.getDescription()); //$NON-NLS-1$ //$NON-NLS-2$
+		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
+		assertNotNull("Attribute definitions not found", ads); //$NON-NLS-1$
+		assertEquals("Wrong number of attribute definitions", 1, ads.length); //$NON-NLS-1$
+
+		AttributeDefinition ad = findAttributeDefinitionById("ad1", ads); //$NON-NLS-1$
+		assertNotNull("Attribute definition not found", ad); //$NON-NLS-1$
+		assertEquals("Wrong name", "", ad.getName()); //$NON-NLS-1$ //$NON-NLS-2$
+		assertEquals("Wrong description", "", ad.getDescription()); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb3"); //$NON-NLS-1$
