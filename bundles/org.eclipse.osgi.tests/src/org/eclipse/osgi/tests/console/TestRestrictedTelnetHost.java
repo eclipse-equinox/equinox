@@ -33,13 +33,17 @@ public class TestRestrictedTelnetHost extends CoreTest {
 	public void testRestrictedTelnetHost() {
 		Framework framework = null;
 		try {
+			InetAddress address = InetAddress.getLocalHost();
+			String hostname = address.getHostName();
+			if ("localhost".equals(hostname))
+				return; // cannot test
 			Map configuration = new HashMap();
 			configuration.put("osgi.console", "localhost:55555");
 			configuration.put("osgi.configuration.area", "inner");
 			EquinoxFactory factory = new EquinoxFactory();
 			framework = factory.newFramework(configuration);
 			framework.start();
-			InetAddress address = InetAddress.getLocalHost();
+
 			try {
 				Socket clientSocket = new Socket(address, 55555);
 				fail("Telnet should listen only on localhost, not on " + address.getHostAddress());
