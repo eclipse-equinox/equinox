@@ -46,6 +46,7 @@ public class TestRestrictedTelnetHost extends CoreTest {
 
 			try {
 				Socket clientSocket = new Socket(address, 55555);
+				clientSocket.close();
 				fail("Telnet should listen only on localhost, not on " + address.getHostAddress());
 			} catch (ConnectException e) {
 				// it's ok; do nothing
