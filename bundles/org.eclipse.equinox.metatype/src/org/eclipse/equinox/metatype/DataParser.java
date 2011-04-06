@@ -288,7 +288,7 @@ public class DataParser {
 
 				ObjectClassDefinitionImpl ocd = _dp_OCDs.get(dh._ocdref);
 				if (ocd != null) {
-					designates.add(new Designate.Builder(dh._pid_val, ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val).merge(dh._merge_val).optional(dh._optional_val).build());
+					designates.add(new Designate.Builder(ocd).bundle(dh._bundle_val).factoryPid(dh._factory_val).merge(dh._merge_val).pid(dh._pid_val).optional(dh._optional_val).build());
 				} else {
 					logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.OCD_ID_NOT_FOUND, dh._ocdref)); //$NON-NLS-1$
 
@@ -654,12 +654,12 @@ public class DataParser {
 
 			logger.log(LogService.LOG_DEBUG, "Here is DesignateHandler():init()"); //$NON-NLS-1$
 			_pid_val = atts.getValue(PID);
-			if (_pid_val == null) {
+			_factory_val = atts.getValue(FACTORY);
+			if (_pid_val == null && _factory_val == null) {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, PID, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, MetaTypeMsg.MISSING_DESIGNATE_PID_AND_FACTORYPID);
 				return;
 			}
-			_factory_val = atts.getValue(FACTORY);
 
 			_bundle_val = atts.getValue(BUNDLE);
 			if (_bundle_val == null) {

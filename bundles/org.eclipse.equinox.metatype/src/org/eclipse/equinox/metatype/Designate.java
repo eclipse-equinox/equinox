@@ -21,14 +21,10 @@ public class Designate {
 		boolean optional;
 		String pid;
 
-		public Builder(String pid, ObjectClassDefinitionImpl ocd) {
-			if (pid == null || pid.length() == 0) {
-				throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.MISSING_REQUIRED_PARAMETER, "pid")); //$NON-NLS-1$
-			}
+		public Builder(ObjectClassDefinitionImpl ocd) {
 			if (ocd == null) {
 				throw new IllegalArgumentException(NLS.bind(MetaTypeMsg.MISSING_REQUIRED_PARAMETER, "ocd")); //$NON-NLS-1$
 			}
-			this.pid = pid;
 			this.ocd = ocd;
 		}
 
@@ -53,6 +49,11 @@ public class Designate {
 
 		public Builder optional(boolean value) {
 			optional = value;
+			return this;
+		}
+
+		public Builder pid(String value) {
+			pid = value;
 			return this;
 		}
 	}

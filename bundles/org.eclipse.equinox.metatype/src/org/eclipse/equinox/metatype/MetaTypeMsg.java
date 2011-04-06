@@ -20,6 +20,7 @@ public class MetaTypeMsg extends NLS {
 	public static String UNEXPECTED_ELEMENT;
 	public static String UNEXPECTED_TEXT;
 	public static String MISSING_ATTRIBUTE;
+	public static String MISSING_DESIGNATE_PID_AND_FACTORYPID;
 	public static String OCD_ID_NOT_FOUND;
 	public static String MISSING_ELEMENT;
 
