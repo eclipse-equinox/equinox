@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,19 +45,17 @@ public class SystemBundleData extends BaseData {
 
 	private File getOsgiBase() {
 		String frameworkLocation = FrameworkProperties.getProperty(SystemBundleData.OSGI_FRAMEWORK);
-		if (frameworkLocation != null)
+		if (frameworkLocation != null && frameworkLocation.startsWith("file:")) //$NON-NLS-1$
 			// TODO assumes the location is a file URL
 			return new File(frameworkLocation.substring(5));
 		try {
 			URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
 			// assumes file URL
-			return new File(url.getPath());
+			if ("file".equals(url.getProtocol())) //$NON-NLS-1$
+				return new File(url.getPath());
 		} catch (Throwable e) {
 			// do nothing
 		}
-		frameworkLocation = FrameworkProperties.getProperty("user.dir"); //$NON-NLS-1$
-		if (frameworkLocation != null)
-			return new File(frameworkLocation);
 		return null;
 	}
 
@@ -88,6 +86,15 @@ public class SystemBundleData extends BaseData {
 	}
 
 	private InputStream getManifestAsResource() {
+		URL url = getManifestURL();
+		try {
+			return url == null ? null : url.openStream();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
+	private URL getManifestURL() {
 		ClassLoader cl = getClass().getClassLoader();
 		try {
 			// get all manifests in your classloader delegation
@@ -98,7 +105,7 @@ public class SystemBundleData extends BaseData {
 					// check each manifest until we find one with the Eclipse-SystemBundle: true header
 					Headers<String, String> headers = Headers.parseManifest(url.openStream());
 					if ("true".equals(headers.get(Constants.ECLIPSE_SYSTEMBUNDLE))) //$NON-NLS-1$
-						return url.openStream();
+						return url;
 				} catch (BundleException e) {
 					// ignore and continue to next URL
 				}
@@ -123,6 +130,35 @@ public class SystemBundleData extends BaseData {
 				}
 
 				public BundleEntry getEntry(String path) {
+					if (Constants.OSGI_BUNDLE_MANIFEST.equals(path)) {
+						System.err.println("Getting system bundle manifest: " + path);
+						return new BundleEntry() {
+
+							public InputStream getInputStream() throws IOException {
+								return getManifestURL().openStream();
+							}
+
+							public long getSize() {
+								return 0;
+							}
+
+							public String getName() {
+								return Constants.OSGI_BUNDLE_MANIFEST;
+							}
+
+							public long getTime() {
+								return 0;
+							}
+
+							public URL getLocalURL() {
+								return getManifestURL();
+							}
+
+							public URL getFileURL() {
+								return null;
+							}
+						};
+					}
 					return null;
 				}
 

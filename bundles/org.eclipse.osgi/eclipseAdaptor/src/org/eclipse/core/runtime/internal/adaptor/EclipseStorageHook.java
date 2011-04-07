@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -417,7 +417,8 @@ public final class EclipseStorageHook implements StorageHook, HookConfigurator {
 			}
 			// the manifest is complete or we could not complete it - take it as it is
 			manifestType = PluginConverterImpl.MANIFEST_TYPE_BUNDLE;
-			if (bundledata.getBundleFile().getBaseFile().isFile()) {
+			File baseFile = bundledata.getBundleFile().getBaseFile();
+			if (baseFile != null && bundledata.getBundleFile().getBaseFile().isFile()) {
 				manifestTimeStamp = bundledata.getBundleFile().getBaseFile().lastModified();
 				manifestType |= PluginConverterImpl.MANIFEST_TYPE_JAR;
 			} else
