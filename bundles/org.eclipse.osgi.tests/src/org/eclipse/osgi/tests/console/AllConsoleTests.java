@@ -20,7 +20,8 @@ public class AllConsoleTests {
 		suite.addTest(TestEquinoxStartWithConsole.suite());
 		suite.addTest(TestFrameworkCommandInterpreter.suite());
 		suite.addTest(TestEquinoxStartWithoutConsole.suite());
-		suite.addTest(TestRestrictedTelnetHost.suite());
+		// TODO disable because of bug 342146
+		//suite.addTest(TestRestrictedTelnetHost.suite());
 		return suite;
 	}
 }
