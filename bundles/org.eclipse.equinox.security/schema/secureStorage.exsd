@@ -3,7 +3,7 @@
 <schema targetNamespace="org.eclipse.equinox.security" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.equinox.security" id="secureStorage" name="Secure strorage modules"/>
+         <meta.schema plugin="org.eclipse.equinox.security" id="secureStorage" name="Secure storage modules"/>
       </appinfo>
       <documentation>
          Describes implementation of the Equinox secure storage module.
