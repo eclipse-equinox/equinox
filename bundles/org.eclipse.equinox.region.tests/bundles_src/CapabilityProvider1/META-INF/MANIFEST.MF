@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CapabilityProvider1
+Bundle-SymbolicName: CapabilityProvider1
+Bundle-Version: 1.0.0
+Provide-Capability: CapabilityProvider1; name=CapabilityProvider1

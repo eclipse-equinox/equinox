@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="stubs/org.eclipse.virgo.teststubs.osgi.jar" sourcepath="stubs/org.eclipse.virgo.teststubs.osgi-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="bundle_tests/PackageProvider1" path="bundles_src/PackageProvider1"/>
+	<classpathentry kind="src" output="bundle_tests/ServiceProvider1" path="bundles_src/ServiceProvider1"/>
+	<classpathentry kind="src" output="bundle_tests/CapabilityProvider1" path="bundles_src/CapabilityProvider1"/>
+	<classpathentry kind="src" output="bundle_tests/PackageProvider2" path="bundles_src/PackageProvider2"/>
+	<classpathentry kind="src" output="bundle_tests/ServiceProvider2" path="bundles_src/ServiceProvider2"/>
+	<classpathentry kind="src" output="bundle_tests/CapabilityProvider2" path="bundles_src/CapabilityProvider2"/>
+	<classpathentry kind="src" output="bundle_tests/PackageClient1" path="bundles_src/PackageClient1"/>
+	<classpathentry kind="src" output="bundle_tests/BundleClient1" path="bundles_src/BundleClient1"/>
+	<classpathentry kind="src" output="bundle_tests/ServiceClient1" path="bundles_src/ServiceClient1"/>
+	<classpathentry kind="src" output="bundle_tests/CapabilityClient1" path="bundles_src/CapabilityClient1"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

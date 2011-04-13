@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PackageProvider1
+Bundle-SymbolicName: PackageProvider1
+Bundle-Version: 1.0.0
+Export-Package: pkg1.a;version="1.0.0",
+ pkg1.b;version="1.0.0"

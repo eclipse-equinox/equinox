@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: BundleClient1
+Bundle-SymbolicName: BundleClient1
+Bundle-Version: 1.0.0
+Require-Bundle: PackageProvider2

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PackageClient1
+Bundle-SymbolicName: PackageClient1
+Bundle-Version: 1.0.0
+Import-Package: pkg2.a,
+ pkg2.b

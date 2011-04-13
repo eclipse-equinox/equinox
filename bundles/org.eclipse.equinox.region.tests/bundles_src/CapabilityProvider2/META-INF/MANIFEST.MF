@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CapabilityProvider2
+Bundle-SymbolicName: CapabilityProvider2
+Bundle-Version: 1.0.0
+Bundle-Activator: capabilityprovider2.Activator
+Provide-Capability: CapabilityProvider2; name=CapabilityProvider2
+Import-Package: org.osgi.framework,
+ org.osgi.util.tracker,
+ pkg1.a,
+ pkg1.b

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ServiceProvider2
+Bundle-SymbolicName: ServiceProvider2
+Bundle-Version: 1.0.0
+Bundle-Activator: serviceprovider2.Activator
+Import-Package: pkg2.a, pkg2.b, org.osgi.framework
