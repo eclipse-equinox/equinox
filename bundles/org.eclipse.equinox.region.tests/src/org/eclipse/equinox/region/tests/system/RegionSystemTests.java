@@ -181,15 +181,6 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testCyclicRegions100() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(100);
 	}
-	public void testCyclicRegions200() throws BundleException, InvalidSyntaxException, InterruptedException {
-		doCyclicRegions(200);
-	}
-	public void testCyclicRegions300() throws BundleException, InvalidSyntaxException, InterruptedException {
-		doCyclicRegions(300);
-	}
-	public void testCyclicRegions400() throws BundleException, InvalidSyntaxException, InterruptedException {
-		doCyclicRegions(400);
-	}
 
 	private void doCyclicRegions(int numLevels) throws BundleException, InvalidSyntaxException, InterruptedException {
 		String regionName1 = getName() + "_1";
