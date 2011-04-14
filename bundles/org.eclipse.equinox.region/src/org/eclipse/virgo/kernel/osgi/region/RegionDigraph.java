@@ -45,10 +45,22 @@ import org.osgi.framework.BundleException;
  * 
  */
 public interface RegionDigraph extends Iterable<Region> {
+	/**
+	 * A {@link FilteredRegion} represents the head region and the {@link RegionFilter} used 
+	 * in a connection with a tail region.
+	 */
     public interface FilteredRegion {
-
+    	/**
+    	 * The head {@link Region} for which the filter is being applied.
+    	 * @return the head region.
+    	 */
         Region getRegion();
 
+        /**
+         * The {@link RegionFilter} used to determine capabilities which are visible from the
+         * head region.
+         * @return the region filter.
+         */
         RegionFilter getFilter();
     }
 
