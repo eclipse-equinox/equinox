@@ -20,8 +20,6 @@ import java.util.*;
  */
 public class ReadOnlyDictionary extends Dictionary implements Map {
 
-	private static final long serialVersionUID = 1L;
-
 	Map delegate;
 
 	/**

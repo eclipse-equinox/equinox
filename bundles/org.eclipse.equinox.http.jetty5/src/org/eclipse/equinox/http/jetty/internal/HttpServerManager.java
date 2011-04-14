@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,9 +18,6 @@ import java.util.*;
 import javax.servlet.*;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
-import org.mortbay.http.*;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedServiceFactory;
@@ -231,7 +228,6 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public static class InternalHttpServiceServlet implements Servlet {
-		private static final long serialVersionUID = 7477982882399972088L;
 		private Servlet httpServiceServlet = new HttpServiceServlet();
 		private ClassLoader contextLoader;
 
