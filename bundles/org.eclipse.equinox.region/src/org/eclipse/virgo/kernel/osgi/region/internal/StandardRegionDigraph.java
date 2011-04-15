@@ -11,25 +11,10 @@
 
 package org.eclipse.virgo.kernel.osgi.region.internal;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.virgo.kernel.osgi.region.Region;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraph;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraphPersistence;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraphVisitor;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilter;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilterBuilder;
+import java.util.*;
+import org.eclipse.virgo.kernel.osgi.region.*;
 import org.eclipse.virgo.util.math.OrderedPair;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 
 /**
  * {@link StandardRegionDigraph} is the default implementation of {@link RegionDigraph}.
@@ -327,4 +312,38 @@ public final class StandardRegionDigraph implements RegionDigraph {
     public RegionDigraphPersistence getRegionDigraphPersistence() {
         return new StandardRegionDigraphPersistence();
     }
+
+	@Override
+	public RegionDigraph copy() throws BundleException {
+		StandardRegionDigraph digraphCopy = new StandardRegionDigraph();
+		digraphCopy.replace(this);
+		return digraphCopy;
+	}
+
+	@Override
+	public void replace(RegionDigraph digraph) throws BundleException {
+        if (!(digraph instanceof StandardRegionDigraph))
+            throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: "
+                + digraph.getClass().getName());
+        Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
+		synchronized (this.monitor) {
+			this.regions.clear();
+			this.filter.clear();
+			for (Region original : filteredRegions.keySet()) {
+				Region copy = this.createRegion(original.getName());
+				for (Long id : original.getBundleIds()) {
+					copy.addBundle(id);
+				}
+			}
+			for (Map.Entry<Region, Set<FilteredRegion>> connection : filteredRegions.entrySet()) {
+				Region tailRegion = this.getRegion(connection.getKey().getName());
+				for (FilteredRegion headFilter : connection.getValue()) {
+					Region headRegion = this.getRegion(headFilter.getRegion().getName());
+					this.connect(tailRegion, headFilter.getFilter(), headRegion);
+				}
+			}
+		}
+	}
+
+    
 }

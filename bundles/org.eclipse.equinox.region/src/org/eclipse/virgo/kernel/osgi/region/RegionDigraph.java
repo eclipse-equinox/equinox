@@ -165,4 +165,19 @@ public interface RegionDigraph extends Iterable<Region> {
      * @return a {@link RegionDigraphPersistence} object.
      */
     RegionDigraphPersistence getRegionDigraphPersistence();
+
+    /**
+     * Creates a copy of this {@link RegionDigraph}.  Modifying the returned copy has no effect on this
+     * digraph.
+     * @return a copy of this digraph.
+     * @throws BundleException if the digraph could not be copied
+     */
+    RegionDigraph copy() throws BundleException;
+
+    /**
+     * Replaces the content of this digraph with the content of the supplied digraph.
+     * @param digraph the digraph to replace this digraph with.
+     * @throws BundleException if the digraph could not be replaced
+     */
+    void replace(RegionDigraph digraph) throws BundleException;
 }

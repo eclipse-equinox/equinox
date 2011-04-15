@@ -20,23 +20,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Set;
-
 import org.easymock.EasyMock;
-import org.eclipse.virgo.kernel.osgi.region.Region;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraph;
+import org.eclipse.virgo.kernel.osgi.region.*;
 import org.eclipse.virgo.kernel.osgi.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilter;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
 import org.eclipse.virgo.util.math.OrderedPair;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
+import org.junit.*;
+import org.osgi.framework.*;
 
 public class StandardRegionDigraphTests {
 
@@ -187,4 +178,56 @@ public class StandardRegionDigraphTests {
         assertTrue(regions.contains(this.mockRegion2));
     }
 
+    private static final String REGION_A = "A";
+    private static final String REGION_B = "B";
+    private static final String REGION_C = "C";
+    private static final String REGION_D = "D";
+    @Test
+    public void testCopyRegion() throws BundleException, InvalidSyntaxException {
+    	replayMocks(); // needed to allow teardown to succeed.
+    	RegionDigraph testDigraph = new StandardRegionDigraph();
+    	long bundleId = 1;
+    	Region a = testDigraph.createRegion(REGION_A);
+    	a.addBundle(bundleId++);
+    	a.addBundle(bundleId++);
+    	Region b = testDigraph.createRegion(REGION_B);
+    	b.addBundle(bundleId++);
+    	b.addBundle(bundleId++);
+    	Region c = testDigraph.createRegion(REGION_C);
+    	c.addBundle(bundleId++);
+    	c.addBundle(bundleId++);
+    	Region d = testDigraph.createRegion(REGION_D);
+    	d.addBundle(bundleId++);
+    	d.addBundle(bundleId++);
+
+    	testDigraph.connect(a, testDigraph.createRegionFilterBuilder().allow("a", "(a=x)").build(), b);
+    	testDigraph.connect(b, testDigraph.createRegionFilterBuilder().allow("b", "(b=x)").build(), c);
+    	testDigraph.connect(c, testDigraph.createRegionFilterBuilder().allow("c", "(c=x)").build(), d);
+    	testDigraph.connect(d, testDigraph.createRegionFilterBuilder().allow("d", "(d=x)").build(), a);
+    	RegionDigraph testCopy = testDigraph.copy();
+    	StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+
+    	a = testCopy.getRegion(REGION_A);
+    	b = testCopy.getRegion(REGION_B);
+    	c = testCopy.getRegion(REGION_C);
+    	d = testCopy.getRegion(REGION_D);
+
+    	for (Region region : testCopy) {
+			testCopy.removeRegion(region);
+		}
+
+    	testCopy.connect(a, testCopy.createRegionFilterBuilder().allow("a", "(a=x)").build(), d);
+    	testCopy.connect(b, testCopy.createRegionFilterBuilder().allow("b", "(b=x)").build(), a);
+    	testCopy.connect(c, testCopy.createRegionFilterBuilder().allow("c", "(c=x)").build(), b);
+    	testCopy.connect(d, testCopy.createRegionFilterBuilder().allow("d", "(d=x)").build(), c);
+
+    	try {
+    		StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+    		fail("Digraphs must not be equal");
+    	} catch (AssertionError e) {
+    		// expected
+    	}
+    	testDigraph.replace(testCopy);
+    	StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+    }
 }
