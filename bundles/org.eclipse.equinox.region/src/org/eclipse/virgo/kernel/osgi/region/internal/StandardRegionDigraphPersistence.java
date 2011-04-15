@@ -11,23 +11,11 @@
 
 package org.eclipse.virgo.kernel.osgi.region.internal;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.virgo.kernel.osgi.region.Region;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraph;
+import java.io.*;
+import java.util.*;
+import org.eclipse.virgo.kernel.osgi.region.*;
 import org.eclipse.virgo.kernel.osgi.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraphPersistence;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilter;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilterBuilder;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.*;
 
 /**
  * 
@@ -111,8 +99,8 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
         }
     }
 
-    static RegionDigraph readRegionDigraph(DataInputStream in) throws IOException, InvalidSyntaxException, BundleException {
-        RegionDigraph digraph = new StandardRegionDigraph();
+    static RegionDigraph readRegionDigraph(DataInputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, InvalidSyntaxException, BundleException {
+        RegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
 
         // Read and check the persistent name and version
         String persistentName = in.readUTF();
@@ -189,7 +177,7 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
      */
     public RegionDigraph load(InputStream input) throws IOException {
         try {
-            return readRegionDigraph(new DataInputStream(input));
+            return readRegionDigraph(new DataInputStream(input), null, null);
         } catch (InvalidSyntaxException e) {
             // This should never happen since the filters were valid on save
             // propagate as IllegalStateException

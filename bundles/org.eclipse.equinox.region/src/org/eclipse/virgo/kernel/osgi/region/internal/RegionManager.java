@@ -75,7 +75,7 @@ public final class RegionManager implements BundleActivator {
 		FileInputStream in = new FileInputStream(digraphFile);
 		try {
 			// TODO need to validate bundle IDs to make sure they are consistent with current bundles
-			return StandardRegionDigraphPersistence.readRegionDigraph(new DataInputStream(in));
+			return StandardRegionDigraphPersistence.readRegionDigraph(new DataInputStream(in), this.bundleContext, this.threadLocal);
 		} finally {
 			try {
 				in.close();

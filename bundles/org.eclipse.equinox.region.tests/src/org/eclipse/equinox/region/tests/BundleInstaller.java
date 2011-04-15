@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests;
 
+import org.osgi.framework.BundleException;
+
+import org.eclipse.virgo.kernel.osgi.region.Region;
+
 import java.io.IOException;
 import java.net.URL;
 import java.security.*;
@@ -27,24 +31,30 @@ public class BundleInstaller {
 	private final ServiceTracker<URLConverter, URLConverter> converter;
 	private final FrameworkWiring frameworkWiring;
 
-	public BundleInstaller(String bundlesRoot, BundleContext context, Bundle testBundle) throws InvalidSyntaxException {
-		this.context = context;
-		frameworkWiring = context.getBundle(0).adapt(FrameworkWiring.class);
+	public BundleInstaller(String bundlesRoot, Bundle contextBundle, Bundle testBundle) throws InvalidSyntaxException {
+		BundleContext bc = contextBundle.getBundleContext();
+		Bundle systemBundle = bc.getBundle(0);
+		context = systemBundle.getBundleContext();
+		frameworkWiring = systemBundle.adapt(FrameworkWiring.class);
 		rootLocation = bundlesRoot;
 		converter = new ServiceTracker<URLConverter, URLConverter>(context, context.createFilter("(&(objectClass=" + URLConverter.class.getName() + ")(protocol=bundleentry))"), null);
 		converter.open();
 		this.testBundle = testBundle;
 	}
 
-	synchronized public Bundle installBundle(String name) throws BundleException {
-		return installBundle(name, true);
+	synchronized public Bundle installBundle(String name, Region region) throws BundleException {
+		return installBundle(name, region, true);
 	}
 
-	synchronized public Bundle installBundle(String name, boolean track) throws BundleException {
+	synchronized public Bundle installBundle(String name) throws BundleException {
+		return installBundle(name, null, true);
+	}
+
+	synchronized public Bundle installBundle(String name, Region region, boolean track) throws BundleException {
 		if (bundles == null && track)
 			return null;
 		String location = getBundleLocation(name);
-		Bundle bundle = context.installBundle(location);
+		Bundle bundle = region != null ? region.installBundle(location) : context.installBundle(location);
 		if (track)
 			bundles.put(name, bundle);
 		return bundle;

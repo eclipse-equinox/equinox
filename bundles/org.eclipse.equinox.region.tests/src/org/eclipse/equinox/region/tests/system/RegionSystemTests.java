@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import org.osgi.framework.BundleContext;
+
 import org.eclipse.virgo.kernel.osgi.region.RegionFilterBuilder;
 
 import org.osgi.framework.Constants;
@@ -39,7 +41,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		List<Bundle> bundles = new ArrayList<Bundle>();
 		// Install all test bundles
 		Bundle pp1, cp2, sc1;
-		bundles.add(pp1 = testRegion.installBundle(bundleInstaller.getBundleLocation(PP1)));
+		bundles.add(pp1 = bundleInstaller.installBundle(PP1, testRegion));
 		// should be able to start pp1 because it depends on nothing
 		pp1.start();
 		// do a sanity check that we have no services available in the isolated region
@@ -47,15 +49,15 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Found extra bundles in region", 1, pp1.getBundleContext().getBundles().length);
 		pp1.stop();
 
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(SP1)));
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(CP1)));
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(PP2)));
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(SP2)));
-		bundles.add(cp2 = testRegion.installBundle(bundleInstaller.getBundleLocation(CP2)));	
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(PC1)));
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(BC1)));
-		bundles.add(sc1 = testRegion.installBundle(bundleInstaller.getBundleLocation(SC1)));
-		bundles.add(testRegion.installBundle(bundleInstaller.getBundleLocation(CC1)));
+		bundles.add(bundleInstaller.installBundle(SP1, testRegion));
+		bundles.add(bundleInstaller.installBundle(CP1, testRegion));
+		bundles.add(bundleInstaller.installBundle(PP2, testRegion));
+		bundles.add(bundleInstaller.installBundle(SP2, testRegion));
+		bundles.add(cp2 = bundleInstaller.installBundle(CP2, testRegion));	
+		bundles.add(bundleInstaller.installBundle(PC1, testRegion));
+		bundles.add(bundleInstaller.installBundle(BC1, testRegion));
+		bundles.add(sc1 = bundleInstaller.installBundle(SC1, testRegion));
+		bundles.add(bundleInstaller.installBundle(CC1, testRegion));
 
 		// Import the system bundle from the systemRegion
 		digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
@@ -67,6 +69,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
 			bundle.start();
 		}
+		BundleContext context = getContext();
 		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + cp2.getBundleId() + "))"), null);
 		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + sc1.getBundleId() + "))"), null);
 
@@ -86,7 +89,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		// create a disconnected test region for each test bundle
 		for (String location : ALL) {
 			Region testRegion = digraph.createRegion(location);
-			bundles.put(location, testRegion.installBundle(bundleInstaller.getBundleLocation(location)));
+			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
 			// Import the system bundle from the systemRegion
 			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
 			// must import Boolean services into systemRegion to test
@@ -159,6 +162,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
 			bundle.start();
 		}
+		BundleContext context = getContext();
 		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
 		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 
@@ -169,6 +173,57 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
 		cp2Tracker.close();
 		sc1Tracker.close();
+	}
+
+	public void testPersistence() throws BundleException, InvalidSyntaxException {
+		// get the system region
+		Region systemRegion = digraph.getRegion(0);
+		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		// create a disconnected test region for each test bundle
+		for (String location : ALL) {
+			Region testRegion = digraph.createRegion(location);
+			bundles.put(location, bundleInstaller.installBundle(location, testRegion));
+			// Import the system bundle from the systemRegion
+			digraph.connect(testRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			// must import Boolean services into systemRegion to test
+			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), testRegion);
+		}
+
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
+
+		regionBundle.stop();
+		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.RESOLVED, bundles.get(SP1).getState());
+		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+		assertEquals(PP2, Bundle.RESOLVED, bundles.get(PP2).getState());
+		assertEquals(SP2, Bundle.RESOLVED, bundles.get(SP2).getState());
+		assertEquals(CP2, Bundle.RESOLVED, bundles.get(CP2).getState());
+		assertEquals(BC1, Bundle.RESOLVED, bundles.get(BC1).getState());
+		assertEquals(SC1, Bundle.RESOLVED, bundles.get(SC1).getState());
+		assertEquals(CC1, Bundle.RESOLVED, bundles.get(CC1).getState());
+
+		startRegionBundle();
+
+		bundleInstaller.refreshPackages(bundles.values().toArray(new Bundle[bundles.size()]));
+		assertEquals(PP1, Bundle.RESOLVED, bundles.get(PP1).getState());
+		assertEquals(SP1, Bundle.INSTALLED, bundles.get(SP1).getState());
+		assertEquals(CP1, Bundle.RESOLVED, bundles.get(CP1).getState());
+		assertEquals(PP2, Bundle.INSTALLED, bundles.get(PP2).getState());
+		assertEquals(SP2, Bundle.INSTALLED, bundles.get(SP2).getState());
+		assertEquals(CP2, Bundle.INSTALLED, bundles.get(CP2).getState());
+		assertEquals(BC1, Bundle.INSTALLED, bundles.get(BC1).getState());
+		assertEquals(SC1, Bundle.INSTALLED, bundles.get(SC1).getState());
+		assertEquals(CC1, Bundle.INSTALLED, bundles.get(CC1).getState());
 	}
 
 	public void testCyclicRegions0() throws BundleException, InvalidSyntaxException, InterruptedException {
@@ -199,18 +254,18 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
 		// add bundles to region1
-		bundles.put(PP1, testRegion1.installBundle(bundleInstaller.getBundleLocation(PP1)));
-		bundles.put(SP2, testRegion1.installBundle(bundleInstaller.getBundleLocation(SP2)));
-		bundles.put(CP2, testRegion1.installBundle(bundleInstaller.getBundleLocation(CP2)));
-		bundles.put(PC1, testRegion1.installBundle(bundleInstaller.getBundleLocation(PC1)));
-		bundles.put(BC1, testRegion1.installBundle(bundleInstaller.getBundleLocation(BC1)));
+		bundles.put(PP1, bundleInstaller.installBundle(PP1, testRegion1));
+		bundles.put(SP2, bundleInstaller.installBundle(SP2, testRegion1));
+		bundles.put(CP2, bundleInstaller.installBundle(CP2, testRegion1));
+		bundles.put(PC1, bundleInstaller.installBundle(PC1, testRegion1));
+		bundles.put(BC1, bundleInstaller.installBundle(BC1, testRegion1));
 
 		// add bundles to region2
-		bundles.put(SP1, testRegion2.installBundle(bundleInstaller.getBundleLocation(SP1)));
-		bundles.put(CP1, testRegion2.installBundle(bundleInstaller.getBundleLocation(CP1)));
-		bundles.put(PP2, testRegion2.installBundle(bundleInstaller.getBundleLocation(PP2)));
-		bundles.put(SC1, testRegion2.installBundle(bundleInstaller.getBundleLocation(SC1)));
-		bundles.put(CC1, testRegion2.installBundle(bundleInstaller.getBundleLocation(CC1)));
+		bundles.put(SP1, bundleInstaller.installBundle(SP1, testRegion2));
+		bundles.put(CP1, bundleInstaller.installBundle(CP1, testRegion2));
+		bundles.put(PP2, bundleInstaller.installBundle(PP2, testRegion2));
+		bundles.put(SC1, bundleInstaller.installBundle(SC1, testRegion2));
+		bundles.put(CC1, bundleInstaller.installBundle(CC1, testRegion2));
 
 		RegionFilterBuilder testRegionFilter1 = digraph.createRegionFilterBuilder();
 		// SP2 -> PP2
@@ -218,6 +273,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		// CP2 -> SP1
 		testRegionFilter1.allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)");
 		// PC1 -> PP2
+		// this is not needed because we already import pkg2.* above
 		//testRegionFilter1.allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)");
 		// BC1 -> PP2
 		testRegionFilter1.allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")");
@@ -243,6 +299,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			assertEquals("Bundle did not resolve: " + bundle.getSymbolicName(), Bundle.RESOLVED, bundle.getState());
 			bundle.start();
 		}
+		BundleContext context = getContext();
 		ServiceTracker<Boolean, Boolean> cp2Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(CP2).getBundleId() + "))"), null);
 		ServiceTracker<Boolean, Boolean> sc1Tracker = new ServiceTracker<Boolean, Boolean>(context, context.createFilter("(&(objectClass=java.lang.Boolean)(bundle.id=" + bundles.get(SC1).getBundleId() + "))"), null);
 

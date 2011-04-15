@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import org.osgi.framework.BundleException;
+
 import java.util.Arrays;
 
 import java.util.List;
@@ -33,7 +35,21 @@ import org.osgi.framework.FrameworkUtil;
 import org.eclipse.equinox.region.tests.BundleInstaller;
 
 import junit.framework.TestCase;
-
+/*
+ * Here are the dependencies between the bundles:
+ * PP1 --> NONE
+ * CP1 --> NONE
+ * SP1 -- package pkg1.* --> PP1
+ * PP2 -- capability CP1 --> CP1
+ * SP2 -- package pkg2.* --> PP2
+ * CP2 -- package pkg1.* --> PP1
+ * CP2 -- service pkg1.* --> SP1
+ * PC1 -- package pkg2.* --> PP2
+ * BC1 -- bundle PP2     --> PP2
+ * SC1 -- service pkg2.* --> SP2
+ * SC1 -- package pkg2.* --> PP2
+ * CC1 -- capability CP2 --> CP2
+ */
 public class AbstractRegionSystemTest extends TestCase{
 	public static final String PP1 = "PackageProvider1";
 	public static final String SP1 = "ServiceProvider1";
@@ -58,27 +74,32 @@ public class AbstractRegionSystemTest extends TestCase{
 			CC1);
 
 	protected BundleInstaller bundleInstaller;
+	protected Bundle regionBundle;
 	protected RegionDigraph digraph;
-	protected BundleContext context;
 	ServiceReference<RegionDigraph> digraphReference;
 
 	@Override
 	protected void setUp() throws Exception {
 		// this is a fragment of the region impl bundle
 		// this line makes sure the region impl bundle is started
-		Bundle regionBundle = FrameworkUtil.getBundle(this.getClass());
+		regionBundle = FrameworkUtil.getBundle(this.getClass());
+
+		startRegionBundle();
+
+		// fun code to get our fragment bundle
+		Bundle testBundle = regionBundle.adapt(BundleWiring.class).getProvidedWires(BundleRevision.HOST_NAMESPACE).get(0).getRequirerWiring().getBundle();
+		bundleInstaller = new BundleInstaller("bundle_tests", regionBundle, testBundle); //$NON-NLS-1$
+	}
+
+	protected void startRegionBundle() throws BundleException {
 		regionBundle.start();
-		context = regionBundle.getBundleContext();
+		BundleContext context = regionBundle.getBundleContext();
 		assertNotNull("No context found", context);
 
 		digraphReference = context.getServiceReference(RegionDigraph.class);
 		assertNotNull("No digraph found", digraphReference);
 		digraph = context.getService(digraphReference);
 		assertNotNull("No digraph found");
-
-		// fun code to get our fragment bundle
-		Bundle testBundle = regionBundle.adapt(BundleWiring.class).getProvidedWires(BundleRevision.HOST_NAMESPACE).get(0).getRequirerWiring().getBundle();
-		bundleInstaller = new BundleInstaller("bundle_tests", regionBundle.getBundleContext(), testBundle); //$NON-NLS-1$
 	}
 
 	@Override
@@ -86,16 +107,16 @@ public class AbstractRegionSystemTest extends TestCase{
 		for (Region region : digraph) {
 			if (!region.contains(0)) {
 				digraph.removeRegion(region);
-				for (Long bundleID : region.getBundleIds()) {
-					Bundle b = context.getBundle(bundleID);
-					b.uninstall();
-				}
 			}
 		}
 		bundleInstaller.shutdown();
 		if (digraphReference != null)
-			context.ungetService(digraphReference);
+			regionBundle.getBundleContext().ungetService(digraphReference);
 	}
 
-	
+	protected BundleContext getContext() {
+		BundleContext context = regionBundle.getBundleContext();
+		assertNotNull("No context available", context);
+		return context;
+	}
 }

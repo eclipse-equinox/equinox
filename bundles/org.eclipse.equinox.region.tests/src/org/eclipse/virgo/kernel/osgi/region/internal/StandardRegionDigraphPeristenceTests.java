@@ -188,7 +188,7 @@ public class StandardRegionDigraphPeristenceTests {
         ByteArrayInputStream input = new ByteArrayInputStream(byteArray);
         DataInputStream dataIn = new DataInputStream(input);
         try {
-            StandardRegionDigraphPersistence.readRegionDigraph(dataIn);
+            StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
         } finally {
             dataIn.close();
         }
@@ -208,7 +208,7 @@ public class StandardRegionDigraphPeristenceTests {
         dataOut.close();
 
         DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(output.toByteArray()));
-        RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn);
+        RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
         dataIn.close();
         return copy;
     }
@@ -223,7 +223,7 @@ public class StandardRegionDigraphPeristenceTests {
 
         DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(output.toByteArray()));
         for (int i = 0; i < iterations; i++) {
-            RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn);
+            RegionDigraph copy = StandardRegionDigraphPersistence.readRegionDigraph(dataIn, null, null);
             assertEquals(digraph, copy);
         }
         dataIn.close();
