@@ -13,7 +13,6 @@ package org.eclipse.virgo.kernel.osgi.region.internal;
 
 import java.util.*;
 import org.eclipse.virgo.kernel.osgi.region.*;
-import org.eclipse.virgo.util.math.OrderedPair;
 import org.osgi.framework.*;
 
 /**
@@ -27,292 +26,311 @@ import org.osgi.framework.*;
  */
 public final class StandardRegionDigraph implements RegionDigraph {
 
-    private final Object monitor = new Object();
+	private static final Set<FilteredRegion> EMPTY_EDGE_SET = Collections.unmodifiableSet(new HashSet<FilteredRegion>());
 
-    private final Set<Region> regions = new HashSet<Region>();
+	private final Object monitor = new Object();
 
-    private final Map<OrderedPair<Region, Region>, RegionFilter> filter = new HashMap<OrderedPair<Region, Region>, RegionFilter>();
+	private final Set<Region> regions = new HashSet<Region>();
 
-    private final BundleContext bundleContext;
+	/* edges maps a given region to an immutable set of edges with their tail at the given region. To update
+	 * the edges for a region, the corresponding immutable set is replaced atomically. */
+	private final Map<Region, Set<FilteredRegion>> edges = new HashMap<Region, Set<FilteredRegion>>();
 
-    private final ThreadLocal<Region> threadLocal;
+	private final BundleContext bundleContext;
 
-    private final SubgraphTraverser subgraphTraverser;
+	private final ThreadLocal<Region> threadLocal;
 
-    StandardRegionDigraph() {
-        this(null, null);
-    }
+	private final SubgraphTraverser subgraphTraverser;
 
-    public StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
-        this.subgraphTraverser = new SubgraphTraverser();
-        this.bundleContext = bundleContext;
-        this.threadLocal = threadLocal;
-    }
+	StandardRegionDigraph() {
+		this(null, null);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Region createRegion(String regionName) throws BundleException {
-        Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal);
-        synchronized (this.monitor) {
-            if (getRegion(regionName) != null) {
-                throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
-            }
-            this.regions.add(region);
-        }
-        notifyAdded(region);
-        return region;
-    }
+	public StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+		this.subgraphTraverser = new SubgraphTraverser();
+		this.bundleContext = bundleContext;
+		this.threadLocal = threadLocal;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public Region createRegion(String regionName) throws BundleException {
+		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal);
+		synchronized (this.monitor) {
+			if (getRegion(regionName) != null) {
+				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
+			}
+			this.regions.add(region);
+			this.edges.put(region, EMPTY_EDGE_SET);
+		}
+		notifyAdded(region);
+		return region;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
 		if (tailRegion == null)
 			throw new IllegalArgumentException("The tailRegion must not be null.");
 		if (filter == null)
 			throw new IllegalArgumentException("The filter must not be null.");
 		if (headRegion == null)
 			throw new IllegalArgumentException("The headRegion must not be null.");
-    	if (headRegion.equals(tailRegion)) {
-            throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION);
-        }
-        OrderedPair<Region, Region> nodePair = new OrderedPair<Region, Region>(tailRegion, headRegion);
-        boolean tailAdded = false;
-        boolean headAdded = false;
-        synchronized (this.monitor) {
-            if (this.filter.containsKey(nodePair)) {
-                throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion,
-                    BundleException.UNSUPPORTED_OPERATION);
-            } else {
-                checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
-                tailAdded = this.regions.add(tailRegion);
-                headAdded = this.regions.add(headRegion);
-                this.filter.put(nodePair, filter);
-            }
-        }
-        if (tailAdded) {
-            notifyAdded(tailRegion);
-        }
-        if (headAdded) {
-            notifyAdded(headRegion);
-        }
-    }
+		if (headRegion.equals(tailRegion)) {
+			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION);
+		}
+		boolean tailAdded = false;
+		boolean headAdded = false;
+		synchronized (this.monitor) {
+			Set<FilteredRegion> edges = this.edges.get(tailRegion);
+			if (edges == null) {
+				edges = new HashSet<FilteredRegion>();
+			} else {
+				edges = new HashSet<FilteredRegion>(edges);
+				for (FilteredRegion edge : edges) {
+					if (headRegion.equals(edge.getRegion())) {
+						throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION);
+					}
+				}
+			}
 
-    private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) throws BundleException {
-        // TODO: enumerate the bundles in the region and check the filter does not allow any of them
-    }
+			checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
+			tailAdded = this.regions.add(tailRegion);
+			headAdded = this.regions.add(headRegion);
+			edges.add(new StandardFilteredRegion(headRegion, filter));
+			this.edges.put(tailRegion, Collections.unmodifiableSet(edges));
+		}
+		if (tailAdded) {
+			notifyAdded(tailRegion);
+		}
+		if (headAdded) {
+			notifyAdded(headRegion);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Iterator<Region> iterator() {
-        synchronized (this.monitor) {
-            Set<Region> snapshot = new HashSet<Region>(this.regions.size());
-            snapshot.addAll(this.regions);
-            return snapshot.iterator();
-        }
-    }
+	private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) throws BundleException {
+		// TODO: enumerate the bundles in the region and check the filter does not allow any of them
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Set<FilteredRegion> getEdges(Region tailRegion) {
-        Set<FilteredRegion> edges = new HashSet<FilteredRegion>();
-        synchronized (this.monitor) {
-            Set<OrderedPair<Region, Region>> regionPairs = this.filter.keySet();
-            for (OrderedPair<Region, Region> regionPair : regionPairs) {
-                if (tailRegion.equals(regionPair.getFirst())) {
-                    edges.add(new StandardFilteredRegion(regionPair.getSecond(), this.filter.get(regionPair)));
-                }
-            }
-        }
-        return edges;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public Iterator<Region> iterator() {
+		synchronized (this.monitor) {
+			Set<Region> snapshot = new HashSet<Region>(this.regions.size());
+			snapshot.addAll(this.regions);
+			return snapshot.iterator();
+		}
+	}
 
-    private static class StandardFilteredRegion implements FilteredRegion {
+	/**
+	 * {@inheritDoc}
+	 */
+	public Set<FilteredRegion> getEdges(Region tailRegion) {
+		synchronized (this.monitor) {
+			// Cope with the case where tailRegion is not in the digraph
+			Set<FilteredRegion> edgeSet = this.edges.get(tailRegion);
+			return edgeSet == null ? EMPTY_EDGE_SET : edgeSet;
+		}
+	}
 
-        private Region region;
+	private static class StandardFilteredRegion implements FilteredRegion {
 
-        private RegionFilter regionFilter;
+		private Region region;
 
-        private StandardFilteredRegion(Region region, RegionFilter regionFilter) {
-            this.region = region;
-            this.regionFilter = regionFilter;
-        }
+		private RegionFilter regionFilter;
 
-        public Region getRegion() {
-            return this.region;
-        }
+		private StandardFilteredRegion(Region region, RegionFilter regionFilter) {
+			this.region = region;
+			this.regionFilter = regionFilter;
+		}
 
-        public RegionFilter getFilter() {
-            return this.regionFilter;
-        }
+		public Region getRegion() {
+			return this.region;
+		}
 
-    }
+		public RegionFilter getFilter() {
+			return this.regionFilter;
+		}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Region getRegion(String regionName) {
-        synchronized (this.monitor) {
-            for (Region region : this) {
-                if (regionName.equals(region.getName())) {
-                    return region;
-                }
-            }
-            return null;
-        }
-    }
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Region getRegion(Bundle bundle) {
-        synchronized (this.monitor) {
-            for (Region region : this) {
-                if (region.contains(bundle)) {
-                    return region;
-                }
-            }
-            return null;
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public Region getRegion(String regionName) {
+		synchronized (this.monitor) {
+			for (Region region : this) {
+				if (regionName.equals(region.getName())) {
+					return region;
+				}
+			}
+			return null;
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Region getRegion(long bundleId) {
-        synchronized (this.monitor) {
-            for (Region region : this) {
-                if (region.contains(bundleId)) {
-                    return region;
-                }
-            }
-            return null;
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public Region getRegion(Bundle bundle) {
+		synchronized (this.monitor) {
+			for (Region region : this) {
+				if (region.contains(bundle)) {
+					return region;
+				}
+			}
+			return null;
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void removeRegion(Region region) {
+	/**
+	 * {@inheritDoc}
+	 */
+	public Region getRegion(long bundleId) {
+		synchronized (this.monitor) {
+			for (Region region : this) {
+				if (region.contains(bundleId)) {
+					return region;
+				}
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeRegion(Region region) {
 		if (region == null)
 			throw new IllegalArgumentException("The region cannot be null.");
-        notifyRemoving(region);
-        synchronized (this.monitor) {
-            this.regions.remove(region);
-            Iterator<OrderedPair<Region, Region>> i = this.filter.keySet().iterator();
-            while (i.hasNext()) {
-                OrderedPair<Region, Region> regionPair = i.next();
-                if (region.equals(regionPair.getFirst()) || region.equals(regionPair.getSecond())) {
-                    i.remove();
-                }
-            }
-        }
-    }
+		notifyRemoving(region);
+		synchronized (this.monitor) {
+			this.regions.remove(region);
+			this.edges.remove(region);
+			for (Region r : this.edges.keySet()) {
+				Set<FilteredRegion> edgeSet = this.edges.get(r);
+				for (FilteredRegion edge : edgeSet) {
+					if (region.equals(edge.getRegion())) {
+						Set<FilteredRegion> mutableEdgeSet = new HashSet<FilteredRegion>(edgeSet);
+						mutableEdgeSet.remove(edge);
+						this.edges.put(r, Collections.unmodifiableSet(mutableEdgeSet));
+						break;
+					}
+				}
+			}
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public String toString() {
-        synchronized (this.monitor) {
-            StringBuffer s = new StringBuffer();
-            boolean first = true;
-            s.append("RegionDigraph{");
-            for (Region r : this) {
-                if (!first) {
-                    s.append(", ");
-                }
-                s.append(r);
-                first = false;
-            }
-            s.append("}");
-            s.append("[");
-            first = true;
-            for (OrderedPair<Region, Region> regionPair : this.filter.keySet()) {
-                if (!first) {
-                    s.append(", ");
-                }
-                s.append(regionPair.getFirst() + "->" + regionPair.getSecond());
-                first = false;
-            }
-            s.append("]");
-            return s.toString();
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public String toString() {
+		synchronized (this.monitor) {
+			StringBuffer s = new StringBuffer();
+			boolean first = true;
+			s.append("RegionDigraph{");
+			for (Region r : this) {
+				if (!first) {
+					s.append(", ");
+				}
+				s.append(r);
+				first = false;
+			}
+			s.append("}");
 
-    public Set<Region> getRegions() {
-        Set<Region> result = new HashSet<Region>();
-        synchronized (this.monitor) {
-            result.addAll(this.regions);
-        }
-        return result;
-    }
+			s.append("[");
+			first = true;
+			for (Region r : this) {
+				Set<FilteredRegion> edgeSet = this.edges.get(r);
+				if (edgeSet != null) {
+					for (FilteredRegion filteredRegion : edgeSet) {
+						if (!first) {
+							s.append(", ");
+						}
+						s.append(r + "->" + filteredRegion.getRegion());
+						first = false;
+					}
+				}
+			}
+			s.append("]");
+			return s.toString();
+		}
+	}
 
-    public RegionFilterBuilder createRegionFilterBuilder() {
-        return new StandardRegionFilterBuilder();
-    }
+	public Set<Region> getRegions() {
+		Set<Region> result = new HashSet<Region>();
+		synchronized (this.monitor) {
+			result.addAll(this.regions);
+		}
+		return result;
+	}
 
-    private void notifyAdded(Region region) {
-        Set<RegionLifecycleListener> listeners = getListeners();
-        for (RegionLifecycleListener listener : listeners) {
-            listener.regionAdded(region);
-        }
-    }
+	public RegionFilterBuilder createRegionFilterBuilder() {
+		return new StandardRegionFilterBuilder();
+	}
 
-    private void notifyRemoving(Region region) {
-        Set<RegionLifecycleListener> listeners = getListeners();
-        for (RegionLifecycleListener listener : listeners) {
-            listener.regionRemoving(region);
-        }
-    }
+	private void notifyAdded(Region region) {
+		Set<RegionLifecycleListener> listeners = getListeners();
+		for (RegionLifecycleListener listener : listeners) {
+			listener.regionAdded(region);
+		}
+	}
 
-    private Set<RegionLifecycleListener> getListeners() {
-        Set<RegionLifecycleListener> listeners = new HashSet<RegionLifecycleListener>();
-        if (this.bundleContext == null)
-            return listeners;
-        try {
-            Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext.getServiceReferences(
-                RegionLifecycleListener.class, null);
-            for (ServiceReference<RegionLifecycleListener> listenerServiceReference : listenerServiceReferences) {
-                RegionLifecycleListener regionLifecycleListener = this.bundleContext.getService(listenerServiceReference);
-                if (regionLifecycleListener != null) {
-                    listeners.add(regionLifecycleListener);
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            e.printStackTrace();
-        }
-        return listeners;
-    }
+	private void notifyRemoving(Region region) {
+		Set<RegionLifecycleListener> listeners = getListeners();
+		for (RegionLifecycleListener listener : listeners) {
+			listener.regionRemoving(region);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void visitSubgraph(Region startingRegion, RegionDigraphVisitor visitor) {
-        this.subgraphTraverser.visitSubgraph(startingRegion, visitor);
-    }
+	private Set<RegionLifecycleListener> getListeners() {
+		Set<RegionLifecycleListener> listeners = new HashSet<RegionLifecycleListener>();
+		if (this.bundleContext == null)
+			return listeners;
+		try {
+			Collection<ServiceReference<RegionLifecycleListener>> listenerServiceReferences = this.bundleContext.getServiceReferences(RegionLifecycleListener.class, null);
+			for (ServiceReference<RegionLifecycleListener> listenerServiceReference : listenerServiceReferences) {
+				RegionLifecycleListener regionLifecycleListener = this.bundleContext.getService(listenerServiceReference);
+				if (regionLifecycleListener != null) {
+					listeners.add(regionLifecycleListener);
+				}
+			}
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
+		}
+		return listeners;
+	}
 
-    /**
-     * Returns a snapshot of filtered regions
-     * 
-     * @return a snapshot of filtered regions
-     */
-    Map<Region, Set<FilteredRegion>> getFilteredRegions() {
-        Map<Region, Set<FilteredRegion>> result = new HashMap<Region, Set<FilteredRegion>>();
-        synchronized (this.monitor) {
-            for (Region region : regions) {
-                result.put(region, getEdges(region));
-            }
-        }
-        return result;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void visitSubgraph(Region startingRegion, RegionDigraphVisitor visitor) {
+		this.subgraphTraverser.visitSubgraph(startingRegion, visitor);
+	}
 
-    public RegionDigraphPersistence getRegionDigraphPersistence() {
-        return new StandardRegionDigraphPersistence();
-    }
+	/**
+	 * Returns a snapshot of filtered regions
+	 * 
+	 * @return a snapshot of filtered regions
+	 */
+	Map<Region, Set<FilteredRegion>> getFilteredRegions() {
+		synchronized (this.monitor) {
+			return new HashMap<Region, Set<FilteredRegion>>(this.edges);
+		}
+	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
+	public RegionDigraphPersistence getRegionDigraphPersistence() {
+		return new StandardRegionDigraphPersistence();
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public RegionDigraph copy() throws BundleException {
 		StandardRegionDigraph digraphCopy = new StandardRegionDigraph();
@@ -320,15 +338,17 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		return digraphCopy;
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void replace(RegionDigraph digraph) throws BundleException {
-        if (!(digraph instanceof StandardRegionDigraph))
-            throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: "
-                + digraph.getClass().getName());
-        Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
+		if (!(digraph instanceof StandardRegionDigraph))
+			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName());
+		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
 		synchronized (this.monitor) {
 			this.regions.clear();
-			this.filter.clear();
+			this.edges.clear();
 			for (Region original : filteredRegions.keySet()) {
 				Region copy = this.createRegion(original.getName());
 				for (Long id : original.getBundleIds()) {
@@ -345,5 +365,4 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		}
 	}
 
-    
 }
