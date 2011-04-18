@@ -18,21 +18,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
-
 import org.easymock.EasyMock;
-import org.eclipse.virgo.kernel.osgi.region.Region;
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraph;
+import org.eclipse.virgo.kernel.osgi.region.*;
 import org.eclipse.virgo.kernel.osgi.region.RegionDigraph.FilteredRegion;
-import org.eclipse.virgo.kernel.osgi.region.RegionFilter;
-import org.eclipse.virgo.util.math.OrderedPair;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.junit.*;
+import org.osgi.framework.*;
 
 public class BundleIdBasedRegionTests {
 
@@ -147,8 +137,6 @@ public class BundleIdBasedRegionTests {
             }
         });
         EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(edges).anyTimes();
-        Set<OrderedPair<String, Version>> allowedBundles = new HashSet<OrderedPair<String, Version>>();
-        allowedBundles.add(new OrderedPair<String, Version>(BUNDLE_SYMBOLIC_NAME_2, BUNDLE_VERSION));
         replayMocks();
 
         Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal);

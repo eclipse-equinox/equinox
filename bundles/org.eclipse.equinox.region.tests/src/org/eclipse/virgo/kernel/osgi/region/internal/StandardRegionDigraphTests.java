@@ -25,7 +25,6 @@ import org.eclipse.virgo.kernel.osgi.region.*;
 import org.eclipse.virgo.kernel.osgi.region.RegionDigraph.FilteredRegion;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
-import org.eclipse.virgo.util.math.OrderedPair;
 import org.junit.*;
 import org.osgi.framework.*;
 
@@ -69,13 +68,13 @@ public class StandardRegionDigraphTests {
         this.regionFilter2 = digraph.createRegionFilterBuilder().build();
     }
 
-    private void setAllowedFilters(OrderedPair<String, Version> b1, OrderedPair<String, Version> b2) throws InvalidSyntaxException {
-        String filter1 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b1.getFirst() + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "="
-            + b1.getSecond() + "))";
+    private void setAllowedFilters(String b1Name, Version b1Version, String b2Name, Version b2Version) throws InvalidSyntaxException {
+        String filter1 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b1Name + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "="
+            + b1Version + "))";
         regionFilter1 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter1).build();
 
-        String filter2 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b1.getFirst() + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "="
-            + b1.getSecond() + "))";
+        String filter2 = "(&(" + RegionFilter.VISIBLE_BUNDLE_NAMESPACE + "=" + b2Name + ")(" + Constants.BUNDLE_VERSION_ATTRIBUTE + "="
+            + b2Version + "))";
         regionFilter2 = digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, filter2).build();
 
     }
@@ -99,11 +98,13 @@ public class StandardRegionDigraphTests {
 
     @Test
     public void testConnectWithFilterContents() throws BundleException, InvalidSyntaxException {
-        OrderedPair<String, Version> b1 = new OrderedPair<String, Version>("b1", new Version("0"));
-        OrderedPair<String, Version> b2 = new OrderedPair<String, Version>("b2", new Version("0"));
-        setAllowedFilters(b1, b2);
-        EasyMock.expect(this.mockRegion1.getBundle(b1.getFirst(), b1.getSecond())).andReturn(null).anyTimes();
-        EasyMock.expect(this.mockRegion1.getBundle(b2.getFirst(), b2.getSecond())).andReturn(null).anyTimes();
+    	String b1Name = "b1";
+    	Version b1Version = new Version("0");
+    	String b2Name = "b2";
+    	Version b2Version = new Version("0");
+        setAllowedFilters(b1Name, b1Version, b2Name, b2Version);
+        EasyMock.expect(this.mockRegion1.getBundle(b1Name, b1Version)).andReturn(null).anyTimes();
+        EasyMock.expect(this.mockRegion1.getBundle(b2Name, b2Version)).andReturn(null).anyTimes();
 
         replayMocks();
 
