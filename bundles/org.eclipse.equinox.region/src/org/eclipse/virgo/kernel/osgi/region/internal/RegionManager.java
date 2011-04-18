@@ -49,6 +49,8 @@ public final class RegionManager implements BundleActivator {
 
     private RegionDigraph digraph;
 
+    private StandardManageableRegionDigraph digraphMBean;
+
     public void start(BundleContext bc) throws BundleException, IOException, InvalidSyntaxException {
     	this.bundleContext = bc;
     	this.domain = bc.getProperty(REGION_DOMAIN_PROP);
@@ -56,11 +58,12 @@ public final class RegionManager implements BundleActivator {
     		this.domain = REGION_DOMAIN_PROP;
         digraph = loadRegionDigraph();
         registerRegionHooks(digraph);
-        registerDigraphMbean(digraph);
+        digraphMBean = registerDigraphMbean(digraph);
         registerRegionDigraph(digraph);
     }
 
     public void stop(BundleContext bc) throws IOException {
+    	digraphMBean.unregisterMbean();
         for (ServiceRegistration<?> registration : registrations)
         	registration.unregister();
         saveDigraph();
@@ -108,10 +111,11 @@ public final class RegionManager implements BundleActivator {
 		
 	}
 
-	private void registerDigraphMbean(RegionDigraph regionDigraph) {
+	private StandardManageableRegionDigraph registerDigraphMbean(RegionDigraph regionDigraph) {
         StandardManageableRegionDigraph standardManageableRegionDigraph = new StandardManageableRegionDigraph(regionDigraph, this.domain,
             this.bundleContext);
         standardManageableRegionDigraph.registerMBean();
+        return standardManageableRegionDigraph;
     }
 
     private void registerRegionHooks(RegionDigraph regionDigraph) {

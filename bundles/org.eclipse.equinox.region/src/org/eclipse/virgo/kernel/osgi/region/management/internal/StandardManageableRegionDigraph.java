@@ -11,6 +11,10 @@
 
 package org.eclipse.virgo.kernel.osgi.region.management.internal;
 
+import java.util.Collection;
+
+import org.osgi.framework.ServiceRegistration;
+
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,28 +60,48 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 
     private final MBeanServer mbeanServer;
 
+    private final ObjectName mbeanName;
+
+    private ServiceRegistration<RegionLifecycleListener> listenerRegistration;
+
+    private final RegionLifecycleListener regionLifecycleListener = new RegionLifecycleListener() {
+
+        public void regionAdded(Region region) {
+            addRegion(region);
+        }
+
+        public void regionRemoving(Region region) {
+            removeRegion(region);
+        }
+
+    };
+
     public StandardManageableRegionDigraph(RegionDigraph regionDigraph, String domain, BundleContext bundleContext) {
         this.regionDigraph = regionDigraph;
         this.domain = domain;
         this.regionObjectNameCreator = new RegionObjectNameCreator(domain);
         this.bundleContext = bundleContext;
         this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
+        try {
+            mbeanName = new ObjectName(this.domain + ":type=RegionDigraph");
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Invalid domain name '" + this.domain + "'", e);
+        }
+        
     }
 
     private void registerRegionLifecycleListener() {
-        RegionLifecycleListener regionLifecycleListener = new RegionLifecycleListener() {
-
-            public void regionAdded(Region region) {
-                addRegion(region);
-            }
-
-            public void regionRemoving(Region region) {
-                removeRegion(region);
-            }
-
-        };
-        this.bundleContext.registerService(RegionLifecycleListener.class, regionLifecycleListener, null);
+    	synchronized (this.monitor) {
+    		listenerRegistration = this.bundleContext.registerService(RegionLifecycleListener.class, regionLifecycleListener, null);
+    	}
     }
+
+    private void unregisterRegionLifecycleListener() {
+    	synchronized (this.monitor) {
+			listenerRegistration.unregister();
+		}
+	}
 
     public void registerMBean() {
         registerRegionLifecycleListener();
@@ -89,18 +113,28 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
             }
         }
 
-        ObjectName name;
-        try {
-            name = new ObjectName(this.domain + ":type=RegionDigraph");
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Invalid domain name '" + this.domain + "'", e);
-        }
-
-        safelyRegisterMBean(this, name);
+        safelyRegisterMBean(this, mbeanName);
     }
 
-    private void safelyRegisterMBean(Object mbean, ObjectName name) {
+    public void unregisterMbean() {
+    	unregisterRegionLifecycleListener();
+    	Collection<String> currentRegionNames;
+    	synchronized (this.monitor) {
+			currentRegionNames = new ArrayList<String>(this.manageableRegions.keySet());
+		}
+    	for (String regionName : currentRegionNames) {
+			removeRegion(regionName);
+		}
+        try {
+            this.mbeanServer.unregisterMBean(this.mbeanName);
+        } catch (MBeanRegistrationException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Problem unregistering mbean", e);
+        } catch (InstanceNotFoundException e) {
+        }
+    }
+
+	private void safelyRegisterMBean(Object mbean, ObjectName name) {
         try {
             try {
                 this.mbeanServer.registerMBean(mbean, name);
@@ -144,7 +178,10 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
     }
 
     private void removeRegion(Region region) {
-        String regionName = region.getName();
+    	removeRegion(region.getName());
+    }
+
+    private void removeRegion(String regionName) {
         synchronized (this.monitor) {
             this.manageableRegions.remove(regionName);
         }
