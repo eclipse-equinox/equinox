@@ -270,7 +270,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";
 
-	public void testMbeans() throws MalformedObjectNameException, BundleException, IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
+	public void testMbeans() throws MalformedObjectNameException, BundleException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
 		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph");
 		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*");
