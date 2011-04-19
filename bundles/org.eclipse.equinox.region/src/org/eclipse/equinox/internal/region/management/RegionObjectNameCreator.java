@@ -11,10 +11,9 @@
 
 package org.eclipse.equinox.internal.region.management;
 
-import org.eclipse.equinox.region.management.ManageableRegion;
-
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import org.eclipse.equinox.region.management.ManageableRegion;
 
 /**
  * {@link RegionObjectNameCreator} is responsible for creating {@link ObjectName}s for {@link ManageableRegion}s.
@@ -26,14 +25,19 @@ import javax.management.ObjectName;
 final class RegionObjectNameCreator {
 
 	private final String domain;
+	private final String frameworkUUID;
 
-	RegionObjectNameCreator(String domain) {
+	RegionObjectNameCreator(String domain, String frameworkUUID) {
 		this.domain = domain;
+		this.frameworkUUID = frameworkUUID;
 	}
 
 	ObjectName getRegionObjectName(String regionName) {
 		try {
-			return new ObjectName(this.domain + ":type=Region,name=" + regionName);
+			String name = this.domain + ":type=Region,name=" + regionName;
+			if (frameworkUUID != null)
+				name += ",frameworkUUID=" + frameworkUUID;
+			return new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
 			return null;

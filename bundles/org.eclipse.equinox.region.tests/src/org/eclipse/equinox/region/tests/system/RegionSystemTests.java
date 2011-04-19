@@ -272,9 +272,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 	public void testMbeans() throws MalformedObjectNameException, BundleException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
 		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph");
-		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*");
-		Set<ObjectInstance> digraphs = server.queryMBeans(digraphName, null);
+		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph,*");
+		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*,*");
+		Set<ObjectInstance> digraphs = server.queryMBeans(null, digraphName);
 		assertEquals("Expected only one instance of digraph", 1, digraphs.size());
 		Set<ObjectInstance> regions = server.queryMBeans(null, regionNameAllQuery);
 		assertEquals("Expected only one instance of region", 1, regions.size());
@@ -287,9 +287,9 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		regions = server.queryMBeans(null, regionNameAllQuery);
 		assertEquals("Wrong number of regions", 3, regions.size());
 
-		Set<ObjectInstance> pp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1));
+		Set<ObjectInstance> pp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1 + ",*"));
 		assertEquals("Expected only one instance of: " + PP1, 1, pp1Query.size());
-		Set<ObjectInstance> sp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1));
+		Set<ObjectInstance> sp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1 + ",*"));
 		assertEquals("Expected only one instance of: " + SP1, 1, sp1Query.size());
 		ObjectName pp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {PP1}, new String[] {String.class.getName()});
 		assertEquals(PP1 + " regions not equal.", pp1Query.iterator().next().getObjectName(), pp1Name);

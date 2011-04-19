@@ -11,32 +11,16 @@
 
 package org.eclipse.equinox.internal.region.management;
 
+import java.lang.management.ManagementFactory;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.management.*;
 import org.eclipse.equinox.internal.region.RegionLifecycleListener;
-
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.equinox.region.management.ManageableRegion;
 import org.eclipse.equinox.region.management.ManageableRegionDigraph;
-
-import java.util.Collection;
-
-import org.osgi.framework.ServiceRegistration;
-
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.*;
 
 /**
  * {@link StandardManageableRegionDigraph} is a {@link ManageableRegionDigraph} that delegates to the
@@ -66,6 +50,8 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 
 	private ServiceRegistration<RegionLifecycleListener> listenerRegistration;
 
+	private final String frameworkUUID;
+
 	private final RegionLifecycleListener regionLifecycleListener = new RegionLifecycleListener() {
 
 		public void regionAdded(Region region) {
@@ -81,11 +67,15 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 	public StandardManageableRegionDigraph(RegionDigraph regionDigraph, String domain, BundleContext bundleContext) {
 		this.regionDigraph = regionDigraph;
 		this.domain = domain;
-		this.regionObjectNameCreator = new RegionObjectNameCreator(domain);
 		this.bundleContext = bundleContext;
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
+		this.frameworkUUID = bundleContext.getProperty(Constants.FRAMEWORK_UUID);
+		this.regionObjectNameCreator = new RegionObjectNameCreator(domain, this.frameworkUUID);
 		try {
-			mbeanName = new ObjectName(this.domain + ":type=RegionDigraph");
+			String name = this.domain + ":type=RegionDigraph";
+			if (frameworkUUID != null)
+				name += ",frameworkUUID=" + frameworkUUID;
+			mbeanName = new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Invalid domain name '" + this.domain + "'", e);
