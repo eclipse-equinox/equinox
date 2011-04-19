@@ -11,11 +11,10 @@
 
 package org.eclipse.equinox.internal.region;
 
-import org.eclipse.equinox.region.*;
-import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-
 import java.io.*;
 import java.util.*;
+import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.osgi.framework.*;
 
 /**
@@ -28,7 +27,7 @@ import org.osgi.framework.*;
  */
 final class StandardRegionDigraphPersistence implements RegionDigraphPersistence {
 
-	private static final String PERSISTENT_NAME = "virgo region digraph";
+	private static final String PERSISTENT_NAME = "equinox region digraph";
 
 	private static final int PERSISTENT_VERSION = 1;
 
