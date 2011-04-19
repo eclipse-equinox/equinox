@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import java.security.*;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.eclipse.core.runtime.adaptor.LocationManager;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.osgi.framework.*;
@@ -97,28 +96,13 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 		// rest of props can be ignored if the configuration is null
 		if (configuration == null)
 			return;
-		// check each osgi defined property and set the appropriate equinox one
-		Object security = configuration.get(Constants.FRAMEWORK_SECURITY);
-		if (security != null) {
-			if (Framework.SECURITY_OSGI.equals(security))
-				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, Framework.SECURITY_OSGI);
-			else if (security instanceof String)
-				FrameworkProperties.setProperty(Framework.PROP_EQUINOX_SECURITY, (String) security);
-		}
-		Object storage = configuration.get(Constants.FRAMEWORK_STORAGE);
-		if (storage != null && storage instanceof String)
-			FrameworkProperties.setProperty(LocationManager.PROP_CONFIG_AREA, (String) storage);
+		// check each osgi clean property and set the appropriate equinox one
 		Object clean = configuration.get(Constants.FRAMEWORK_STORAGE_CLEAN);
 		if (Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT.equals(clean)) {
 			// remove this so we only clean on first init
 			configuration.remove(Constants.FRAMEWORK_STORAGE_CLEAN);
 			FrameworkProperties.setProperty(EclipseStarter.PROP_CLEAN, Boolean.TRUE.toString());
 		}
-		Object parentCL = configuration.get(Constants.FRAMEWORK_BUNDLE_PARENT);
-		if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equals(parentCL))
-			parentCL = "fwk"; //$NON-NLS-1$
-		if (parentCL instanceof String)
-			FrameworkProperties.setProperty("osgi.parentClassloader", (String) parentCL); //$NON-NLS-1$
 	}
 
 	public FrameworkEvent waitForStop(long timeout) throws InterruptedException {

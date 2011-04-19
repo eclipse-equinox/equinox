@@ -56,7 +56,15 @@ public class BaseAdaptor implements FrameworkAdaptor {
 	private static ClassLoader bundleClassLoaderParent;
 	static {
 		// check property for specified parent
-		String type = FrameworkProperties.getProperty(BaseAdaptor.PROP_PARENT_CLASSLOADER, BaseAdaptor.PARENT_CLASSLOADER_BOOT);
+		// check the osgi defined property first
+		String type = FrameworkProperties.getProperty(Constants.FRAMEWORK_BUNDLE_PARENT);
+		if (type != null) {
+			if (Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK.equals(type))
+				type = PARENT_CLASSLOADER_FWK;
+		} else {
+			type = FrameworkProperties.getProperty(BaseAdaptor.PROP_PARENT_CLASSLOADER, BaseAdaptor.PARENT_CLASSLOADER_BOOT);
+		}
+
 		if (BaseAdaptor.PARENT_CLASSLOADER_FWK.equalsIgnoreCase(type))
 			bundleClassLoaderParent = FrameworkAdaptor.class.getClassLoader();
 		else if (BaseAdaptor.PARENT_CLASSLOADER_APP.equalsIgnoreCase(type))

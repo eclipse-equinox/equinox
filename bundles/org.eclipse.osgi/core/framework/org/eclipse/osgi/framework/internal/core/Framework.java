@@ -1264,7 +1264,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * is set much later than we would like!
 	 */
 	protected void installSecurityManager() {
-		String securityManager = FrameworkProperties.getProperty(PROP_EQUINOX_SECURITY, FrameworkProperties.getProperty("java.security.manager")); //$NON-NLS-1$
+		String securityManager = FrameworkProperties.getProperty(Constants.FRAMEWORK_SECURITY, FrameworkProperties.getProperty(PROP_EQUINOX_SECURITY, FrameworkProperties.getProperty("java.security.manager")));
 		if (securityManager != null) {
 			SecurityManager sm = System.getSecurityManager();
 			if (sm == null) {

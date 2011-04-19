@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.Properties;
 import org.eclipse.core.runtime.internal.adaptor.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.service.datalocation.Location;
@@ -103,6 +104,10 @@ public class LocationManager {
 	 * Initializes the Location objects for the LocationManager.
 	 */
 	public static void initializeLocations() {
+		// set the osgi storage area if it exists
+		String osgiStorage = FrameworkProperties.getProperty(Constants.FRAMEWORK_STORAGE);
+		if (osgiStorage != null)
+			FrameworkProperties.setProperty(PROP_CONFIG_AREA, osgiStorage);
 		// do install location initialization first since others may depend on it
 		// assumes that the property is already set
 		installLocation = buildLocation(PROP_INSTALL_AREA, null, "", true, false, null); //$NON-NLS-1$
