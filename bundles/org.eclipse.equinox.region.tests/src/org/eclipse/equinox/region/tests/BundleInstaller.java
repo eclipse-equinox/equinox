@@ -10,14 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests;
 
-import org.osgi.framework.BundleException;
-
-import org.eclipse.virgo.kernel.osgi.region.Region;
-
 import java.io.IOException;
 import java.net.URL;
 import java.security.*;
 import java.util.*;
+import org.eclipse.equinox.region.Region;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.FrameworkWiring;
@@ -27,7 +24,7 @@ public class BundleInstaller {
 	private final BundleContext context;
 	private final Bundle testBundle;
 	private String rootLocation;
-	private  Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+	private Map<String, Bundle> bundles = new HashMap<String, Bundle>();
 	private final ServiceTracker<URLConverter, URLConverter> converter;
 	private final FrameworkWiring frameworkWiring;
 

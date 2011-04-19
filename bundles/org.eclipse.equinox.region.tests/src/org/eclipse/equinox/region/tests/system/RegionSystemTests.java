@@ -10,30 +10,13 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.virgo.kernel.osgi.region.RegionFilterBuilder;
-
-import org.osgi.framework.Constants;
-
-import java.util.Map;
-
-import java.util.HashMap;
-
+import java.util.*;
+import org.eclipse.equinox.region.*;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
-import org.osgi.framework.InvalidSyntaxException;
-
-import org.eclipse.virgo.kernel.osgi.region.RegionFilter;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.eclipse.virgo.kernel.osgi.region.Region;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-
 public class RegionSystemTests extends AbstractRegionSystemTest {
-	public void testBasic() throws BundleException, InvalidSyntaxException, InterruptedException{
+	public void testBasic() throws BundleException, InvalidSyntaxException, InterruptedException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
 		// create a disconnected test region
@@ -53,7 +36,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		bundles.add(bundleInstaller.installBundle(CP1, testRegion));
 		bundles.add(bundleInstaller.installBundle(PP2, testRegion));
 		bundles.add(bundleInstaller.installBundle(SP2, testRegion));
-		bundles.add(cp2 = bundleInstaller.installBundle(CP2, testRegion));	
+		bundles.add(cp2 = bundleInstaller.installBundle(CP2, testRegion));
 		bundles.add(bundleInstaller.installBundle(PC1, testRegion));
 		bundles.add(bundleInstaller.installBundle(BC1, testRegion));
 		bundles.add(sc1 = bundleInstaller.installBundle(SC1, testRegion));
@@ -109,53 +92,23 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 
 		// now make the necessary connections
 		// SP1
-		digraph.connect(
-				digraph.getRegion(SP1), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(),
-				digraph.getRegion(PP1));
+		digraph.connect(digraph.getRegion(SP1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(), digraph.getRegion(PP1));
 		// PP2
-		digraph.connect(
-				digraph.getRegion(PP2), 
-				digraph.createRegionFilterBuilder().allow(CP1, "(name=" + CP1 + ")").build(),
-				digraph.getRegion(CP1));
+		digraph.connect(digraph.getRegion(PP2), digraph.createRegionFilterBuilder().allow(CP1, "(name=" + CP1 + ")").build(), digraph.getRegion(CP1));
 		// SP2
-		digraph.connect(
-				digraph.getRegion(SP2), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(),
-				digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(SP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
 		// CP2
-		digraph.connect(
-				digraph.getRegion(CP2), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(),
-				digraph.getRegion(PP1));
-		digraph.connect(
-				digraph.getRegion(CP2), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)").build(),
-				digraph.getRegion(SP1));
+		digraph.connect(digraph.getRegion(CP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg1.*)").build(), digraph.getRegion(PP1));
+		digraph.connect(digraph.getRegion(CP2), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg1.*)").build(), digraph.getRegion(SP1));
 		// PC1
-		digraph.connect(
-				digraph.getRegion(PC1), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(),
-				digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(PC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
 		// BC1
-		digraph.connect(
-				digraph.getRegion(BC1), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")").build(),
-				digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(BC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_REQUIRE_NAMESPACE, "(" + RegionFilter.VISIBLE_REQUIRE_NAMESPACE + "=" + PP2 + ")").build(), digraph.getRegion(PP2));
 		// SC1
-		digraph.connect(
-				digraph.getRegion(SC1), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(),
-				digraph.getRegion(PP2));
-		digraph.connect(
-				digraph.getRegion(SC1), 
-				digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg2.*)").build(),
-				digraph.getRegion(SP2));
+		digraph.connect(digraph.getRegion(SC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_PACKAGE_NAMESPACE, "(" + RegionFilter.VISIBLE_PACKAGE_NAMESPACE + "=pkg2.*)").build(), digraph.getRegion(PP2));
+		digraph.connect(digraph.getRegion(SC1), digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(" + Constants.OBJECTCLASS + "=pkg2.*)").build(), digraph.getRegion(SP2));
 		// CC1
-		digraph.connect(
-				digraph.getRegion(CC1), 
-				digraph.createRegionFilterBuilder().allow(CP2, "(name=" + CP2 + ")").build(),
-				digraph.getRegion(CP2));
+		digraph.connect(digraph.getRegion(CC1), digraph.createRegionFilterBuilder().allow(CP2, "(name=" + CP2 + ")").build(), digraph.getRegion(CP2));
 
 		bundleInstaller.resolveBundles(bundles.values().toArray(new Bundle[bundles.size()]));
 		for (Bundle bundle : bundles.values()) {
@@ -233,6 +186,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testCyclicRegions10() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(10);
 	}
+
 	public void testCyclicRegions100() throws BundleException, InvalidSyntaxException, InterruptedException {
 		doCyclicRegions(100);
 	}
@@ -287,7 +241,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		testRegionFilter2.allow(CP2, "(name=" + CP2 + ")");
 
 		Region r1, r2 = null;
-		for (int i = 0; i <=numLevels; i++) {
+		for (int i = 0; i <= numLevels; i++) {
 			r1 = (i > 0) ? r2 : testRegion1;
 			r2 = (i < numLevels) ? digraph.createRegion(getName() + "_level_" + i) : testRegion2;
 			r1.connectRegion(r2, testRegionFilter1.build());

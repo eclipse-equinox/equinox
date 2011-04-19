@@ -10,10 +10,8 @@
  *******************************************************************************/
 package capabilityprovider2;
 
-import java.util.Hashtable;
-
 import java.util.Dictionary;
-
+import java.util.Hashtable;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -35,19 +33,20 @@ public class Activator implements BundleActivator {
 			@Override
 			public void modifiedService(ServiceReference<pkg1.a.A> reference, pkg1.a.A service) {
 				// TODO Auto-generated method stub
-				
+
 			}
 
 			@Override
 			public void removedService(ServiceReference<pkg1.a.A> reference, pkg1.a.A service) {
 				// TODO Auto-generated method stub
-				
-			}}).open();
+
+			}
+		}).open();
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-	
+
 	}
 
 }

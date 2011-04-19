@@ -10,13 +10,10 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests;
 
-import junit.framework.TestSuite;
-
-import org.eclipse.equinox.region.tests.system.RegionSystemTests;
-
 import junit.framework.*;
-import org.eclipse.virgo.kernel.osgi.region.hook.*;
-import org.eclipse.virgo.kernel.osgi.region.internal.*;
+import org.eclipse.equinox.internal.region.*;
+import org.eclipse.equinox.internal.region.hook.*;
+import org.eclipse.equinox.region.tests.system.RegionSystemTests;
 
 public class AllTests {
 	public static Test suite() {

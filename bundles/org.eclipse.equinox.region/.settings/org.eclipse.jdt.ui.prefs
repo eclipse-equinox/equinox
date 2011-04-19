@@ -1,6 +1,6 @@
-#Thu Mar 31 16:02:27 CDT 2011
+#Tue Apr 19 11:17:06 CDT 2011
 eclipse.preferences.version=1
-editor_save_participant_org.eclipse.jdt.ui.postsavelistener.cleanup=false
+editor_save_participant_org.eclipse.jdt.ui.postsavelistener.cleanup=true
 formatter_profile=_core
 formatter_settings_version=11
 org.eclipse.jdt.ui.ignorelowercasenames=true

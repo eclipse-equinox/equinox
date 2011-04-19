@@ -10,31 +10,16 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import org.osgi.framework.BundleException;
-
 import java.util.Arrays;
-
 import java.util.List;
-
-import org.eclipse.virgo.kernel.osgi.region.Region;
-
-import org.osgi.framework.BundleContext;
-
-import org.osgi.framework.ServiceReference;
-
-import org.eclipse.virgo.kernel.osgi.region.RegionDigraph;
-
+import junit.framework.TestCase;
+import org.eclipse.equinox.region.Region;
+import org.eclipse.equinox.region.RegionDigraph;
+import org.eclipse.equinox.region.tests.BundleInstaller;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleRevision;
-
 import org.osgi.framework.wiring.BundleWiring;
 
-import org.osgi.framework.Bundle;
-
-import org.osgi.framework.FrameworkUtil;
-
-import org.eclipse.equinox.region.tests.BundleInstaller;
-
-import junit.framework.TestCase;
 /*
  * Here are the dependencies between the bundles:
  * PP1 --> NONE
@@ -50,7 +35,7 @@ import junit.framework.TestCase;
  * SC1 -- package pkg2.* --> PP2
  * CC1 -- capability CP2 --> CP2
  */
-public class AbstractRegionSystemTest extends TestCase{
+public class AbstractRegionSystemTest extends TestCase {
 	public static final String PP1 = "PackageProvider1";
 	public static final String SP1 = "ServiceProvider1";
 	public static final String CP1 = "CapabilityProvider1";
@@ -61,17 +46,7 @@ public class AbstractRegionSystemTest extends TestCase{
 	public static final String BC1 = "BundleClient1";
 	public static final String SC1 = "ServiceClient1";
 	public static final String CC1 = "CapabilityClient1";
-	public static List<String> ALL = Arrays.asList(
-			PP1, 
-			SP1, 
-			CP1, 
-			PP2, 
-			SP2,
-			CP2,
-			PC1,
-			BC1,
-			SC1,
-			CC1);
+	public static List<String> ALL = Arrays.asList(PP1, SP1, CP1, PP2, SP2, CP2, PC1, BC1, SC1, CC1);
 
 	protected BundleInstaller bundleInstaller;
 	protected Bundle regionBundle;
