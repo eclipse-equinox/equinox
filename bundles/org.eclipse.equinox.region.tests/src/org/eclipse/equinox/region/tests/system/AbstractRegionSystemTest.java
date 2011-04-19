@@ -79,6 +79,8 @@ public class AbstractRegionSystemTest extends TestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
+		if ((regionBundle.getState() & Bundle.ACTIVE) == 0)
+			startRegionBundle();
 		for (Region region : digraph) {
 			if (!region.contains(0)) {
 				digraph.removeRegion(region);

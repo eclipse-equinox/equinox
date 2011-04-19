@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import java.lang.management.ManagementFactory;
 import java.util.*;
+import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
@@ -264,5 +266,58 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
 		cp2Tracker.close();
 		sc1Tracker.close();
+	}
+
+	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";
+
+	public void testMbeans() throws MalformedObjectNameException, BundleException, IntrospectionException, InstanceNotFoundException, ReflectionException, MBeanException, AttributeNotFoundException {
+		MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+		ObjectName digraphName = new ObjectName(REGION_DOMAIN_PROP + ":type=RegionDigraph");
+		ObjectName regionNameAllQuery = new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=*");
+		Set<ObjectInstance> digraphs = server.queryMBeans(digraphName, null);
+		assertEquals("Expected only one instance of digraph", 1, digraphs.size());
+		Set<ObjectInstance> regions = server.queryMBeans(null, regionNameAllQuery);
+		assertEquals("Expected only one instance of region", 1, regions.size());
+
+		Region pp1Region = digraph.createRegion(PP1);
+		Bundle pp1Bundle = bundleInstaller.installBundle(PP1, pp1Region);
+		Region sp1Region = digraph.createRegion(SP1);
+		Bundle sp1Bundle = bundleInstaller.installBundle(SP1, sp1Region);
+
+		regions = server.queryMBeans(null, regionNameAllQuery);
+		assertEquals("Wrong number of regions", 3, regions.size());
+
+		Set<ObjectInstance> pp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + PP1));
+		assertEquals("Expected only one instance of: " + PP1, 1, pp1Query.size());
+		Set<ObjectInstance> sp1Query = server.queryMBeans(null, new ObjectName(REGION_DOMAIN_PROP + ":type=Region,name=" + SP1));
+		assertEquals("Expected only one instance of: " + SP1, 1, sp1Query.size());
+		ObjectName pp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {PP1}, new String[] {String.class.getName()});
+		assertEquals(PP1 + " regions not equal.", pp1Query.iterator().next().getObjectName(), pp1Name);
+		ObjectName sp1Name = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {SP1}, new String[] {String.class.getName()});
+		assertEquals(SP1 + " regions not equal.", sp1Query.iterator().next().getObjectName(), sp1Name);
+
+		// test non existing region
+		ObjectName shouldNotExistName = (ObjectName) server.invoke(digraphs.iterator().next().getObjectName(), "getRegion", new Object[] {"ShouldNotExist"}, new String[] {String.class.getName()});
+		assertNull("Should not exist", shouldNotExistName);
+
+		long[] bundleIds = (long[]) server.getAttribute(pp1Name, "BundleIds");
+		assertEquals("Wrong number of bundles", 1, bundleIds.length);
+		assertEquals("Wrong bundle", pp1Bundle.getBundleId(), bundleIds[0]);
+		String name = (String) server.getAttribute(pp1Name, "Name");
+		assertEquals("Wrong name", PP1, name);
+
+		bundleIds = (long[]) server.getAttribute(sp1Name, "BundleIds");
+		assertEquals("Wrong number of bundles", 1, bundleIds.length);
+		assertEquals("Wrong bundle", sp1Bundle.getBundleId(), bundleIds[0]);
+		name = (String) server.getAttribute(sp1Name, "Name");
+		assertEquals("Wrong name", SP1, name);
+
+		regionBundle.stop();
+
+		// Now make sure we have no mbeans
+		digraphs = server.queryMBeans(digraphName, null);
+		assertEquals("Wrong number of digraphs", 0, digraphs.size());
+		regions = server.queryMBeans(null, regionNameAllQuery);
+		assertEquals("Wrong number of regions", 0, regions.size());
 	}
 }
