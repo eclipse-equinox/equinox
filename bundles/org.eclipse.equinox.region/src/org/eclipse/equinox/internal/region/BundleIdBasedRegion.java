@@ -11,25 +11,16 @@
 
 package org.eclipse.equinox.internal.region;
 
-import org.eclipse.equinox.region.*;
-import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-
-import java.util.concurrent.ConcurrentHashMap;
-
-import java.util.concurrent.ConcurrentMap;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.eclipse.equinox.region.*;
+import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
+import org.osgi.framework.*;
 
 /**
  * {@link BundleIdBasedRegion} is an implementation of {@link Region} which keeps a track of the bundles in the region
@@ -50,8 +41,12 @@ final class BundleIdBasedRegion implements Region {
 	// A concurrent data structure ensures the contains method does not need synchronisation.
 	private final ConcurrentMap<Long, Boolean> bundleIds = new ConcurrentHashMap<Long, Boolean>();
 
-	// Updates do need synchronising to avoid races.
+	// This monitor guards bundleIds. bundleIds is a concurrent data structure and
+	// may be read without synchronisation, but updates need synchronising to avoid races.
 	private final Object updateMonitor = new Object();
+
+	// This monitor guards the check for bundle region association across a complete digraph.
+	private final Object regionAssociationMonitor;
 
 	private final String regionName;
 
@@ -61,15 +56,18 @@ final class BundleIdBasedRegion implements Region {
 
 	private final ThreadLocal<Region> threadLocal;
 
-	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal, Object regionAssociationMonitor) {
 		if (regionName == null)
 			throw new IllegalArgumentException("The region name must not be null");
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null");
+		if (regionAssociationMonitor == null)
+			throw new IllegalArgumentException("The region association monitor must not be null");
 		this.regionName = regionName;
 		this.regionDigraph = regionDigraph;
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
+		this.regionAssociationMonitor = regionAssociationMonitor;
 	}
 
 	/**
@@ -83,17 +81,17 @@ final class BundleIdBasedRegion implements Region {
 	 * {@inheritDoc}
 	 */
 	public void addBundle(Bundle bundle) throws BundleException {
-		synchronized (this.updateMonitor) {
-			checkBundleNotAssociatedWithAnotherRegion(bundle);
-
-			this.bundleIds.putIfAbsent(bundle.getBundleId(), Boolean.TRUE);
-		}
+		addBundle(bundle.getBundleId());
 	}
 
-	private void checkBundleNotAssociatedWithAnotherRegion(Bundle bundle) throws BundleException {
+	private void checkBundleNotAssociatedWithAnotherRegion(long bundleId) throws BundleException {
+		if (!Thread.holdsLock(regionAssociationMonitor)) {
+			throw new IllegalStateException("Must be holding the region association lock"); //$NON-NLS-1$
+		}
+		// note that obtaining the Iterator for the digraph requires locking the digraph monitor
 		for (Region r : this.regionDigraph) {
-			if (!this.equals(r) && r.contains(bundle)) {
-				throw new BundleException("Bundle '" + bundle + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION);
+			if (!this.equals(r) && r.contains(bundleId)) {
+				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION);
 			}
 		}
 	}
@@ -101,9 +99,16 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void addBundle(long bundleId) {
+	// There is a lock hierarchy between the per region update monitors, the per digraph
+	// regionAssociationMonitor followed by the digraph monitor:
+	// Any given thread acquires, at most, one updateMonitor followed by the
+	// regionAssociationMonitor followed by the digraph monitor
+	public void addBundle(long bundleId) throws BundleException {
 		synchronized (this.updateMonitor) {
-			this.bundleIds.putIfAbsent(bundleId, Boolean.TRUE);
+			synchronized (regionAssociationMonitor) {
+				checkBundleNotAssociatedWithAnotherRegion(bundleId);
+				this.bundleIds.putIfAbsent(bundleId, Boolean.TRUE);
+			}
 		}
 	}
 
@@ -199,6 +204,17 @@ final class BundleIdBasedRegion implements Region {
 		}
 	}
 
+	// The contains methods must not acquire the updateMonitor in order to prevent
+	// deadlock since a thread holding the updateMonitor of one region can call
+	// checkBundleNotAssociatedWithAnotherRegion which can call the contains
+	// method on another region.
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean contains(long bundleId) {
+		return this.bundleIds.containsKey(bundleId);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -225,13 +241,6 @@ final class BundleIdBasedRegion implements Region {
 		}
 		BundleIdBasedRegion other = (BundleIdBasedRegion) obj;
 		return this.regionName.equals(other.regionName);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean contains(long bundleId) {
-		return this.bundleIds.containsKey(bundleId);
 	}
 
 	/**

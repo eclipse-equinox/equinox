@@ -11,15 +11,10 @@
 
 package org.eclipse.equinox.region;
 
-import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
-
 import java.io.InputStream;
 import java.util.Set;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Version;
+import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
+import org.osgi.framework.*;
 
 /**
  * A <i>region</i> is a subset of the bundles of an OSGi framework. A regions is "weakly" isolated from other regions
@@ -54,11 +49,7 @@ public interface Region {
 	 * <p>
 	 * If the bundle is already associated with another region, throws BundleException with exception type
 	 * INVALID_OPERATION.
-	 * <p>
-	 * If the bundle has the same bundle symbolic name and version as a bundle already present in the region or as a
-	 * bundle import specified on a connection to another region, then BundleException with exception type
-	 * DUPLICATE_BUNDLE_ERROR is thrown.
-	 * 
+	 *
 	 * @param bundle the bundle to be associated with this region
 	 * @throws BundleException if the bundle cannot be associated with the region
 	 */
@@ -68,12 +59,16 @@ public interface Region {
 	 * Associates the given bundle id with this region. If the given bundle id is already associated with this region,
 	 * this is not an error and there is no effect.
 	 * <p>
+	 * If the bundle is already associated with another region, throws BundleException with exception type
+	 * INVALID_OPERATION.
+	 * <p>
 	 * This is useful when manipulating offline resolver states and bundle descriptions which do not correspond to
 	 * bundles.
 	 * 
 	 * @param bundleId the bundle id to be associated with this region
+	 * @throws BundleException if the bundle cannot be associated with the region
 	 */
-	void addBundle(long bundleId);
+	void addBundle(long bundleId) throws BundleException;
 
 	/**
 	 * Installs a bundle and associates the bundle with this region. The bundle's location will have the region name

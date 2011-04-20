@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.internal.region;
 
-import org.eclipse.equinox.region.*;
-
 import java.util.*;
+import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
 
 /**
@@ -30,6 +29,9 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	private static final Set<FilteredRegion> EMPTY_EDGE_SET = Collections.unmodifiableSet(new HashSet<FilteredRegion>());
 
 	private final Object monitor = new Object();
+	// This monitor guards the check for bundle region association across a complete digraph.
+	// See BundleIdBaseRegion for more information
+	private final Object regionAssociationMonitor = new Object();
 
 	private final Set<Region> regions = new HashSet<Region>();
 
@@ -57,7 +59,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 * {@inheritDoc}
 	 */
 	public Region createRegion(String regionName) throws BundleException {
-		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal);
+		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.regionAssociationMonitor);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
 				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
