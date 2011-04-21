@@ -230,4 +230,24 @@ public class StandardRegionDigraphTests {
 		testDigraph.replace(testCopy);
 		StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
 	}
+
+	@Test
+	public void testGetHooks() throws InvalidSyntaxException, BundleException {
+		setDefaultFilters();
+		replayMocks();
+
+		assertNotNull("Resolver Hook is null", digraph.getResolverHookFactory());
+		assertNotNull("Bundle Event Hook is null", digraph.getBundleEventHook());
+		assertNotNull("Bundle Find Hook is null", digraph.getBundleFindHook());
+		assertNotNull("Servie Event Hook is null", digraph.getServiceEventHook());
+		assertNotNull("Service Find Hook is null", digraph.getServiceFindHook());
+
+		RegionDigraph copy = digraph.copy();
+		assertNotNull("Resolver Hook is null", copy.getResolverHookFactory());
+		assertNotNull("Bundle Event Hook is null", copy.getBundleEventHook());
+		assertNotNull("Bundle Find Hook is null", copy.getBundleFindHook());
+		assertNotNull("Servie Event Hook is null", copy.getServiceEventHook());
+		assertNotNull("Service Find Hook is null", copy.getServiceFindHook());
+	}
+
 }

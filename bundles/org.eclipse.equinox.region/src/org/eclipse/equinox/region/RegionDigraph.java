@@ -12,9 +12,9 @@
 package org.eclipse.equinox.region;
 
 import java.util.Set;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
  * {@link RegionDigraph} is a <a href="http://en.wikipedia.org/wiki/Directed_graph">directed graph</a>, or
@@ -180,4 +180,36 @@ public interface RegionDigraph extends Iterable<Region> {
 	 * @throws BundleException if the digraph could not be replaced
 	 */
 	void replace(RegionDigraph digraph) throws BundleException;
+
+	/**
+	 * Gets the resolver hook factory associated with this digraph.
+	 * @return the resolver hook factory
+	 */
+	ResolverHookFactory getResolverHookFactory();
+
+	/**
+	 * Gets the bundle event hook associated with this digraph.
+	 * @return the bundle event hook
+	 */
+	org.osgi.framework.hooks.bundle.EventHook getBundleEventHook();
+
+	/**
+	 * Gets the bundle find hook associated with this digraph.
+	 * @return the bundle find hook
+	 */
+	org.osgi.framework.hooks.bundle.FindHook getBundleFindHook();
+
+	/**
+	 * Gets the service event hook associated with this digraph.
+	 * @return the service event hook
+	 */
+	@SuppressWarnings("deprecation")
+	org.osgi.framework.hooks.service.EventHook getServiceEventHook();
+
+	/**
+	 * Gets the service find hook associated with this digraph.
+	 * @return the service find hook
+	 */
+	org.osgi.framework.hooks.service.FindHook getServiceFindHook();
+
 }

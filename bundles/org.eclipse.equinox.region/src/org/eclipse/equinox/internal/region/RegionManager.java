@@ -11,16 +11,12 @@
 
 package org.eclipse.equinox.internal.region;
 
-import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
-
-import org.eclipse.equinox.internal.region.hook.*;
-
-import org.eclipse.equinox.region.Region;
-import org.eclipse.equinox.region.RegionDigraph;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.eclipse.equinox.internal.region.management.StandardManageableRegionDigraph;
+import org.eclipse.equinox.region.Region;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.EventHook;
 import org.osgi.framework.hooks.bundle.FindHook;
@@ -121,15 +117,13 @@ public final class RegionManager implements BundleActivator {
 	}
 
 	private void registerRegionHooks(RegionDigraph regionDigraph) {
-		registerResolverHookFactory(new RegionResolverHookFactory(regionDigraph));
+		registerResolverHookFactory(regionDigraph.getResolverHookFactory());
 
-		RegionBundleFindHook bundleFindHook = new RegionBundleFindHook(regionDigraph, bundleContext.getBundle().getBundleId());
-		registerBundleFindHook(bundleFindHook);
-		registerBundleEventHook(new RegionBundleEventHook(regionDigraph, bundleFindHook, this.threadLocal));
+		registerBundleFindHook(regionDigraph.getBundleFindHook());
+		registerBundleEventHook(regionDigraph.getBundleEventHook());
 
-		RegionServiceFindHook serviceFindHook = new RegionServiceFindHook(regionDigraph);
-		registerServiceFindHook(serviceFindHook);
-		registerServiceEventHook(new RegionServiceEventHook(serviceFindHook));
+		registerServiceFindHook(regionDigraph.getServiceFindHook());
+		registerServiceEventHook(regionDigraph.getServiceEventHook());
 	}
 
 	private void registerRegionDigraph(RegionDigraph regionDigraph) {

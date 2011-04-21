@@ -12,8 +12,12 @@
 package org.eclipse.equinox.internal.region;
 
 import java.util.*;
+import org.eclipse.equinox.internal.region.hook.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.EventHook;
+import org.osgi.framework.hooks.bundle.FindHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 
 /**
  * {@link StandardRegionDigraph} is the default implementation of {@link RegionDigraph}.
@@ -45,6 +49,13 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 	private final SubgraphTraverser subgraphTraverser;
 
+	private final org.osgi.framework.hooks.bundle.EventHook bundleEventHook;
+	private final org.osgi.framework.hooks.bundle.FindHook bundleFindHook;
+	@SuppressWarnings("deprecation")
+	private final org.osgi.framework.hooks.service.EventHook serviceEventHook;
+	private final org.osgi.framework.hooks.service.FindHook serviceFindHook;
+	private final ResolverHookFactory resolverHookFactory;
+
 	StandardRegionDigraph() {
 		this(null, null);
 	}
@@ -53,6 +64,15 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		this.subgraphTraverser = new SubgraphTraverser();
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
+
+		// Note we are safely escaping this only because we know the hook impls
+		// do not escape the digraph to other threads on construction.
+		this.resolverHookFactory = new RegionResolverHookFactory(this);
+		this.bundleFindHook = new RegionBundleFindHook(this, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
+		this.bundleEventHook = new RegionBundleEventHook(this, this.bundleFindHook, this.threadLocal);
+
+		this.serviceFindHook = new RegionServiceFindHook(this);
+		this.serviceEventHook = new RegionServiceEventHook(serviceFindHook);
 	}
 
 	/**
@@ -366,6 +386,32 @@ public final class StandardRegionDigraph implements RegionDigraph {
 				}
 			}
 		}
+	}
+
+	@Override
+	public ResolverHookFactory getResolverHookFactory() {
+		return resolverHookFactory;
+	}
+
+	@Override
+	public EventHook getBundleEventHook() {
+		return bundleEventHook;
+	}
+
+	@Override
+	public FindHook getBundleFindHook() {
+		return bundleFindHook;
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public org.osgi.framework.hooks.service.EventHook getServiceEventHook() {
+		return serviceEventHook;
+	}
+
+	@Override
+	public org.osgi.framework.hooks.service.FindHook getServiceFindHook() {
+		return serviceFindHook;
 	}
 
 }
