@@ -11,11 +11,10 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.*;
-
 import java.util.Collection;
 import java.util.Iterator;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.equinox.internal.region.EquinoxStateHelper;
+import org.eclipse.equinox.region.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.wiring.*;
@@ -99,16 +98,7 @@ final class RegionResolverHook implements ResolverHook {
 	}
 
 	private Long getBundleId(BundleRevision bundleRevision) {
-		// For testability, use the bundle revision's bundle before casting to ResolverBundle.
-		Bundle bundle = bundleRevision.getBundle();
-		if (bundle != null) {
-			return bundle.getBundleId();
-		}
-		if (bundleRevision instanceof BundleDescription) {
-			BundleDescription bundleDescription = (BundleDescription) bundleRevision;
-			return bundleDescription.getBundleId();
-		}
-		throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", bundleRevision));
+		return EquinoxStateHelper.getBundleId(bundleRevision);
 	}
 
 	private Region getRegion(Bundle bundle) {

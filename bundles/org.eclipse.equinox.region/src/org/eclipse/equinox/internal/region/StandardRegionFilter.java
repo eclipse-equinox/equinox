@@ -11,10 +11,8 @@
 
 package org.eclipse.equinox.internal.region;
 
-import org.eclipse.equinox.region.RegionFilter;
-
 import java.util.*;
-import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.equinox.region.RegionFilter;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -146,15 +144,6 @@ final class StandardRegionFilter implements RegionFilter {
 	}
 
 	private Long getBundleId(BundleRevision bundleRevision) {
-		// For testability, use the bundle revision's bundle before casting to ResolverBundle.
-		Bundle bundle = bundleRevision.getBundle();
-		if (bundle != null) {
-			return bundle.getBundleId();
-		}
-		if (bundleRevision instanceof BundleDescription) {
-			BundleDescription bundleDescription = (BundleDescription) bundleRevision;
-			return bundleDescription.getBundleId();
-		}
-		throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", bundleRevision));
+		return EquinoxStateHelper.getBundleId(bundleRevision);
 	}
 }
