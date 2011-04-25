@@ -176,6 +176,10 @@ public interface RegionDigraph extends Iterable<Region> {
 
 	/**
 	 * Replaces the content of this digraph with the content of the supplied digraph.
+	 * The supplied digraph must have been returned by a call to this digraph 
+	 * {@link #copy()} method.  If this digraph has been modified between the 
+	 * call to {@link #copy()} and {@link #replace(RegionDigraph)} then an
+	 * exception is thrown.
 	 * @param digraph the digraph to replace this digraph with.
 	 * @throws BundleException if the digraph could not be replaced
 	 */

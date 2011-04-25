@@ -55,12 +55,17 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	private final org.osgi.framework.hooks.service.EventHook serviceEventHook;
 	private final org.osgi.framework.hooks.service.FindHook serviceFindHook;
 	private final ResolverHookFactory resolverHookFactory;
+	private final StandardRegionDigraph copyCheck;
 
-	StandardRegionDigraph() {
-		this(null, null);
+	StandardRegionDigraph(StandardRegionDigraph copyCheck) {
+		this(null, null, copyCheck);
 	}
 
 	public StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+		this(bundleContext, threadLocal, null);
+	}
+
+	StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal, StandardRegionDigraph copyCheck) {
 		this.subgraphTraverser = new SubgraphTraverser();
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
@@ -73,6 +78,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
 		this.serviceEventHook = new RegionServiceEventHook(serviceFindHook);
+		this.copyCheck = copyCheck;
 	}
 
 	/**
@@ -356,9 +362,18 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	@Override
 	public RegionDigraph copy() throws BundleException {
-		StandardRegionDigraph digraphCopy = new StandardRegionDigraph();
-		digraphCopy.replace(this);
-		return digraphCopy;
+		// when creating a copy we snapshot the current digraph and create a checkCopy
+		// the checkCopy is tucked away so that we can do a consistency check later to
+		// make sure the current digraph has not changed since the snapshot was taken
+		// when replace is called
+
+		// first create a checkCopy of the current digraph
+		StandardRegionDigraph copyCheckDigraph = new StandardRegionDigraph(null);
+		copyCheckDigraph.replace(this, false);
+		// Now create a carbon copy of the checkCopy digraph
+		StandardRegionDigraph copy = new StandardRegionDigraph(copyCheckDigraph);
+		copy.replace(copyCheckDigraph, false);
+		return copy;
 	}
 
 	/** 
@@ -366,10 +381,17 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	@Override
 	public void replace(RegionDigraph digraph) throws BundleException {
+		replace(digraph, true);
+	}
+
+	private void replace(RegionDigraph digraph, boolean checkCopy) throws BundleException {
 		if (!(digraph instanceof StandardRegionDigraph))
 			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName());
 		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
 		synchronized (this.monitor) {
+			if (checkCopy) {
+				copyCheck(((StandardRegionDigraph) digraph).copyCheck);
+			}
 			this.regions.clear();
 			this.edges.clear();
 			for (Region original : filteredRegions.keySet()) {
@@ -385,6 +407,39 @@ public final class StandardRegionDigraph implements RegionDigraph {
 					this.connect(tailRegion, headFilter.getFilter(), headRegion);
 				}
 			}
+		}
+		if (checkCopy) {
+			// update the copyCheck with the latest snapshot
+			((StandardRegionDigraph) digraph).copyCheck.replace(digraph, false);
+		}
+	}
+
+	private void copyCheck(StandardRegionDigraph check) throws BundleException {
+		if (!Thread.holdsLock(monitor))
+			throw new IllegalStateException("Must hold monitor lock.");
+		Set<Region> checkRegions = check.getRegions();
+		if (regions.size() != checkRegions.size())
+			throw new BundleException("Regions have changed since the copy was made.", BundleException.INVALID_OPERATION);
+		for (Region region : regions) {
+			Region checkRegion = check.getRegion(region.getName());
+			if (checkRegion == null)
+				throw new BundleException("Region is missing since the copy was made.", BundleException.INVALID_OPERATION);
+			if (!region.getBundleIds().equals(checkRegion.getBundleIds()))
+				throw new BundleException("Bundles in a region have changed since copy was made.", BundleException.INVALID_OPERATION);
+			Set<FilteredRegion> checkEdges = check.getEdges(checkRegion);
+			Set<FilteredRegion> regionEdges = getEdges(region);
+			Map<String, RegionFilter> checkEdgesMap = new HashMap<String, RegionFilter>();
+			for (FilteredRegion edge : checkEdges) {
+				checkEdgesMap.put(edge.getRegion().getName(), edge.getFilter());
+			}
+			for (FilteredRegion edge : regionEdges) {
+				RegionFilter checkFilter = checkEdgesMap.get(edge.getRegion().getName());
+				if (checkFilter == null)
+					throw new BundleException("A connection has changed since the copy was made.", BundleException.INVALID_OPERATION);
+				if (!edge.getFilter().getSharingPolicy().equals(checkFilter.getSharingPolicy()))
+					throw new BundleException("A connection has changed since the copy was made.", BundleException.INVALID_OPERATION);
+			}
+
 		}
 	}
 

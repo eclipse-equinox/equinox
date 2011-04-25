@@ -185,7 +185,7 @@ public class StandardRegionDigraphTests {
 	@Test
 	public void testCopyRegion() throws BundleException, InvalidSyntaxException {
 		replayMocks(); // needed to allow teardown to succeed.
-		RegionDigraph testDigraph = new StandardRegionDigraph();
+		RegionDigraph testDigraph = new StandardRegionDigraph(null);
 		long bundleId = 1;
 		Region a = testDigraph.createRegion(REGION_A);
 		a.addBundle(bundleId++);
@@ -229,6 +229,52 @@ public class StandardRegionDigraphTests {
 		}
 		testDigraph.replace(testCopy);
 		StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+
+		// test that we can continue to use the copy to replace as long as it is upto date with the last replace
+		Region testAdd1 = testCopy.createRegion("testAdd1");
+		testCopy.connect(testAdd1, testCopy.createRegionFilterBuilder().allow("testAdd1", "(testAdd=x)").build(), a);
+		try {
+			StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+			fail("Digraphs must not be equal");
+		} catch (AssertionError e) {
+			// expected
+		}
+		testDigraph.replace(testCopy);
+		StandardRegionDigraphPeristenceTests.assertEquals(testDigraph, testCopy);
+
+		// test that we fail if the digraph was modified since last copy/replace
+		testCopy = testDigraph.copy();
+		// add a new bundle to the original
+		Region origA = testDigraph.getRegion(REGION_A);
+		origA.addBundle(bundleId++);
+		try {
+			testDigraph.replace(testCopy);
+			fail("Digraph changed since copy.");
+		} catch (BundleException e) {
+			// expected
+		}
+
+		testCopy = testDigraph.copy();
+		// add a new region to the original
+		Region testAdd2 = testDigraph.createRegion("testAdd2");
+		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=x)").build(), a);
+		try {
+			testDigraph.replace(testCopy);
+			fail("Digraph changed since copy.");
+		} catch (BundleException e) {
+			// expected
+		}
+
+		testCopy = testDigraph.copy();
+		// change a connection in the original
+		testDigraph.removeRegion(testAdd2);
+		testDigraph.connect(testAdd2, testCopy.createRegionFilterBuilder().allow("testAdd2", "(testAdd=y)").build(), a);
+		try {
+			testDigraph.replace(testCopy);
+			fail("Digraph changed since copy.");
+		} catch (BundleException e) {
+			// expected
+		}
 	}
 
 	@Test
