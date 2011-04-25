@@ -199,9 +199,7 @@ final class BundleIdBasedRegion implements Region {
 	 * {@inheritDoc}
 	 */
 	public void connectRegion(Region headRegion, RegionFilter filter) throws BundleException {
-		synchronized (this.updateMonitor) {
-			this.regionDigraph.connect(this, filter, headRegion);
-		}
+		this.regionDigraph.connect(this, filter, headRegion);
 	}
 
 	// The contains methods must not acquire the updateMonitor in order to prevent
