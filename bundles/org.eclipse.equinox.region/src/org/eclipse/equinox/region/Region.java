@@ -185,4 +185,11 @@ public interface Region {
 	 */
 	void visitSubgraph(RegionDigraphVisitor visitor);
 
+	/**
+	 * Gets the {@link RegionDigraph} this region belongs to.  This method must never return null,
+	 * even when a region is removed from a digraph.
+	 * @return the digraph this region belongs to
+	 */
+	RegionDigraph getRegionDigraph();
+
 }

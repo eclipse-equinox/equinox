@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.region;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.equinox.internal.region.hook.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
@@ -32,10 +33,9 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 	private static final Set<FilteredRegion> EMPTY_EDGE_SET = Collections.unmodifiableSet(new HashSet<FilteredRegion>());
 
+	// This monitor guards the modifications and read operations on the digraph as well as 
+	// bundle id modifications of all regions in this digraph
 	private final Object monitor = new Object();
-	// This monitor guards the check for bundle region association across a complete digraph.
-	// See BundleIdBaseRegion for more information
-	private final Object regionAssociationMonitor = new Object();
 
 	private final Set<Region> regions = new HashSet<Region>();
 
@@ -55,17 +55,21 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	private final org.osgi.framework.hooks.service.EventHook serviceEventHook;
 	private final org.osgi.framework.hooks.service.FindHook serviceFindHook;
 	private final ResolverHookFactory resolverHookFactory;
-	private final StandardRegionDigraph copyCheck;
+	private final StandardRegionDigraph origin;
+	// Guarded by the origin monitor
+	private long originTimeStamp;
+	private final AtomicLong timeStamp = new AtomicLong();
 
-	StandardRegionDigraph(StandardRegionDigraph copyCheck) {
-		this(null, null, copyCheck);
+	StandardRegionDigraph(StandardRegionDigraph origin) throws BundleException {
+		this(null, null, origin);
+
 	}
 
-	public StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
+	public StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws BundleException {
 		this(bundleContext, threadLocal, null);
 	}
 
-	StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal, StandardRegionDigraph copyCheck) {
+	private StandardRegionDigraph(BundleContext bundleContext, ThreadLocal<Region> threadLocal, StandardRegionDigraph origin) throws BundleException {
 		this.subgraphTraverser = new SubgraphTraverser();
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
@@ -78,20 +82,29 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
 		this.serviceEventHook = new RegionServiceEventHook(serviceFindHook);
-		this.copyCheck = copyCheck;
+		this.origin = origin;
+		if (origin != null) {
+			synchronized (origin.monitor) {
+				this.originTimeStamp = origin.timeStamp.get();
+				this.replace(origin, false);
+			}
+		} else {
+			this.originTimeStamp = -1;
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Region createRegion(String regionName) throws BundleException {
-		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.monitor, this.timeStamp);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
 				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
 			}
 			this.regions.add(region);
 			this.edges.put(region, EMPTY_EDGE_SET);
+			this.timeStamp.incrementAndGet();
 		}
 		notifyAdded(region);
 		return region;
@@ -110,6 +123,11 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		if (headRegion.equals(tailRegion)) {
 			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION);
 		}
+		if (tailRegion.getRegionDigraph() != this)
+			throw new IllegalArgumentException("The tailRegion does not belong to this digraph.");
+		if (headRegion.getRegionDigraph() != this)
+			throw new IllegalArgumentException("The headRegion does not belong to this digraph.");
+
 		boolean tailAdded = false;
 		boolean headAdded = false;
 		synchronized (this.monitor) {
@@ -130,6 +148,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 			headAdded = this.regions.add(headRegion);
 			edges.add(new StandardFilteredRegion(headRegion, filter));
 			this.edges.put(tailRegion, Collections.unmodifiableSet(edges));
+			this.timeStamp.incrementAndGet();
 		}
 		if (tailAdded) {
 			notifyAdded(tailRegion);
@@ -249,6 +268,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 					}
 				}
 			}
+			this.timeStamp.incrementAndGet();
 		}
 	}
 
@@ -362,18 +382,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	@Override
 	public RegionDigraph copy() throws BundleException {
-		// when creating a copy we snapshot the current digraph and create a checkCopy
-		// the checkCopy is tucked away so that we can do a consistency check later to
-		// make sure the current digraph has not changed since the snapshot was taken
-		// when replace is called
-
-		// first create a checkCopy of the current digraph
-		StandardRegionDigraph copyCheckDigraph = new StandardRegionDigraph(null);
-		copyCheckDigraph.replace(this, false);
-		// Now create a carbon copy of the checkCopy digraph
-		StandardRegionDigraph copy = new StandardRegionDigraph(copyCheckDigraph);
-		copy.replace(copyCheckDigraph, false);
-		return copy;
+		return new StandardRegionDigraph(this);
 	}
 
 	/** 
@@ -384,13 +393,16 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		replace(digraph, true);
 	}
 
-	private void replace(RegionDigraph digraph, boolean checkCopy) throws BundleException {
+	private void replace(RegionDigraph digraph, boolean check) throws BundleException {
 		if (!(digraph instanceof StandardRegionDigraph))
 			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName());
-		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
+		StandardRegionDigraph replacement = (StandardRegionDigraph) digraph;
+		if (check && replacement.origin != this)
+			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph.");
+		Map<Region, Set<FilteredRegion>> filteredRegions = replacement.getFilteredRegions();
 		synchronized (this.monitor) {
-			if (checkCopy) {
-				copyCheck(((StandardRegionDigraph) digraph).copyCheck);
+			if (check && this.timeStamp.get() != replacement.originTimeStamp) {
+				throw new BundleException("The origin timestamp has changed since the replacement copy was created.", BundleException.INVALID_OPERATION);
 			}
 			this.regions.clear();
 			this.edges.clear();
@@ -407,39 +419,10 @@ public final class StandardRegionDigraph implements RegionDigraph {
 					this.connect(tailRegion, headFilter.getFilter(), headRegion);
 				}
 			}
-		}
-		if (checkCopy) {
-			// update the copyCheck with the latest snapshot
-			((StandardRegionDigraph) digraph).copyCheck.replace(digraph, false);
-		}
-	}
-
-	private void copyCheck(StandardRegionDigraph check) throws BundleException {
-		if (!Thread.holdsLock(monitor))
-			throw new IllegalStateException("Must hold monitor lock.");
-		Set<Region> checkRegions = check.getRegions();
-		if (regions.size() != checkRegions.size())
-			throw new BundleException("Regions have changed since the copy was made.", BundleException.INVALID_OPERATION);
-		for (Region region : regions) {
-			Region checkRegion = check.getRegion(region.getName());
-			if (checkRegion == null)
-				throw new BundleException("Region is missing since the copy was made.", BundleException.INVALID_OPERATION);
-			if (!region.getBundleIds().equals(checkRegion.getBundleIds()))
-				throw new BundleException("Bundles in a region have changed since copy was made.", BundleException.INVALID_OPERATION);
-			Set<FilteredRegion> checkEdges = check.getEdges(checkRegion);
-			Set<FilteredRegion> regionEdges = getEdges(region);
-			Map<String, RegionFilter> checkEdgesMap = new HashMap<String, RegionFilter>();
-			for (FilteredRegion edge : checkEdges) {
-				checkEdgesMap.put(edge.getRegion().getName(), edge.getFilter());
+			this.timeStamp.incrementAndGet();
+			if (check) {
+				replacement.originTimeStamp = this.timeStamp.get();
 			}
-			for (FilteredRegion edge : regionEdges) {
-				RegionFilter checkFilter = checkEdgesMap.get(edge.getRegion().getName());
-				if (checkFilter == null)
-					throw new BundleException("A connection has changed since the copy was made.", BundleException.INVALID_OPERATION);
-				if (!edge.getFilter().getSharingPolicy().equals(checkFilter.getSharingPolicy()))
-					throw new BundleException("A connection has changed since the copy was made.", BundleException.INVALID_OPERATION);
-			}
-
 		}
 	}
 
@@ -468,5 +451,4 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	public org.osgi.framework.hooks.service.FindHook getServiceFindHook() {
 		return serviceFindHook;
 	}
-
 }

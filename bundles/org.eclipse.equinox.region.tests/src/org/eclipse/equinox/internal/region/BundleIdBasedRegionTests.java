@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicLong;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
@@ -57,7 +58,8 @@ public class BundleIdBasedRegionTests {
 	private RegionFilter mockRegionFilter;
 
 	private ThreadLocal<Region> threadLocal;
-	private Object regionAssociationMonitor = new Object();
+	private Object globalUpdateMonitor = new Object();
+	private AtomicLong globalTimeStamp = new AtomicLong();
 
 	@Before
 	public void setUp() throws Exception {
@@ -109,7 +111,7 @@ public class BundleIdBasedRegionTests {
 	public void testGetName() {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		assertEquals(REGION_NAME, r.getName());
 	}
 
@@ -140,7 +142,7 @@ public class BundleIdBasedRegionTests {
 		EasyMock.expect(this.mockGraph.getEdges(EasyMock.isA(Region.class))).andReturn(edges).anyTimes();
 		replayMocks();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 	}
 
@@ -148,7 +150,7 @@ public class BundleIdBasedRegionTests {
 	public void testAddExistingBundle() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 		r.addBundle(this.mockBundle);
 	}
@@ -163,7 +165,7 @@ public class BundleIdBasedRegionTests {
 		EasyMock.expect(mockBundle2.getBundleId()).andReturn(BUNDLE_ID_2).anyTimes();
 		EasyMock.replay(mockBundle2);
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 		r.addBundle(mockBundle2);
 	}
@@ -211,7 +213,7 @@ public class BundleIdBasedRegionTests {
 
 		replayMocks();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		return r;
 	}
 
@@ -233,7 +235,7 @@ public class BundleIdBasedRegionTests {
 	public void testContains() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 		assertTrue(r.contains(this.mockBundle));
 	}
@@ -242,7 +244,7 @@ public class BundleIdBasedRegionTests {
 	public void testDoesNotContain() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		assertFalse(r.contains(this.mockBundle));
 	}
 
@@ -250,7 +252,7 @@ public class BundleIdBasedRegionTests {
 	public void testGetBundle() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 		assertEquals(this.mockBundle, r.getBundle(BUNDLE_SYMBOLIC_NAME, BUNDLE_VERSION));
 	}
@@ -259,7 +261,7 @@ public class BundleIdBasedRegionTests {
 	public void testGetBundleNotFound() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(this.mockBundle);
 		assertNull(r.getBundle(BUNDLE_SYMBOLIC_NAME_2, BUNDLE_VERSION));
 	}
@@ -268,7 +270,7 @@ public class BundleIdBasedRegionTests {
 	public void testConnectRegion() throws BundleException {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.connectRegion(this.mockRegion, this.mockRegionFilter);
 	}
 
@@ -276,8 +278,8 @@ public class BundleIdBasedRegionTests {
 	public void testEquals() {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
-		Region s = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
+		Region s = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		assertEquals(r, r);
 		assertEquals(r, s);
 		assertEquals(r.hashCode(), s.hashCode());
@@ -287,8 +289,8 @@ public class BundleIdBasedRegionTests {
 	public void testNotEqual() {
 		defaultSetUp();
 
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
-		Region s = new BundleIdBasedRegion(OTHER_REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
+		Region s = new BundleIdBasedRegion(OTHER_REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		assertFalse(r.equals(s));
 		assertFalse(r.equals(null));
 	}
@@ -296,7 +298,7 @@ public class BundleIdBasedRegionTests {
 	@Test
 	public void testAddRemoveBundleId() throws BundleException {
 		defaultSetUp();
-		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.regionAssociationMonitor);
+		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp);
 		r.addBundle(TEST_BUNDLE_ID);
 		assertTrue(r.contains(TEST_BUNDLE_ID));
 		r.removeBundle(TEST_BUNDLE_ID);
