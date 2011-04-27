@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,8 +53,9 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a new state that is a copy of the given state. The returned state 
-	 * will contain copies of all bundle descriptions in the given state. No data 
-	 * pertaining to resolution is copied.  The returned state will have a 
+	 * will contain copies of all bundle descriptions in the given state.
+	 * The user objects from the original bundle descriptions is not copied and
+	 * no data pertaining to resolution is copied.  The returned state will have a 
 	 * new resolver attached to it.
 	 *  
 	 * @param state a state to be copied
@@ -190,6 +191,7 @@ public interface StateObjectFactory {
 
 	/**
 	 * Creates a bundle description that is a copy of the given description.
+	 * The user object of the original bundle description is not copied.
 	 * 
 	 * @param original the bundle description to be copied
 	 * @return the created bundle description

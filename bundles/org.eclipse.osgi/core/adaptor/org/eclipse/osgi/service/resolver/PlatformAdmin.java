@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2008 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,8 @@ public interface PlatformAdmin {
 	 * an <code>java.lang.UnsupportedOperationException</code>.
 	 * <p>
 	 * If a mutable state is requested, the resulting state will <strong>not</strong> 
-	 * be resolved. 
+	 * be resolved and the user objects from the system state bundle descriptions will 
+	 * not be copied.
 	 * </p> 
 	 * @param mutable whether the returned state should mutable
 	 * @return a state representing the current framework.
