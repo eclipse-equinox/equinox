@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
@@ -34,7 +35,7 @@ final public class BidiComplexUtil {
 	 *  text before the characters specified in the given array of offsets,
 	 *  and can add a prefix and/or a suffix of directional formatting characters.
 	 *  This can be used for instance after obtaining offsets by calling
-	 *  {@link BidiComplexHelper#leanBidiCharOffsets() leanBidiCharOffsets} in order to
+	 *  {@link BidiComplexEngine#leanBidiCharOffsets leanBidiCharOffsets} in order to
 	 *  produce a <i>full</i> text corresponding to the source text.
 	 *  The directional formatting characters that will be added at the given
 	 *  offsets will be LRMs for expressions with LTR base direction and
@@ -211,9 +212,8 @@ final public class BidiComplexUtil {
 
 		// make sure that LRE/PDF are added around the string
 		BidiComplexEnvironment env = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_UNKNOWN);
-		BidiComplexHelper helper = new BidiComplexHelper(new BidiComplexProcessor(), env);
-		helper.setFeatures(new BidiComplexFeatures(delimiters, 0, -1, -1, false, false));
-		return helper.leanToFullText(str);
+		BidiComplexFeatures features = new BidiComplexFeatures(delimiters, 0, -1, -1, false, false);
+		return BidiComplexEngine.leanToFullText(new BidiComplexProcessor(), features, env, str, null);
 	}
 
 	/**
@@ -257,8 +257,7 @@ final public class BidiComplexUtil {
 
 		// make sure that LRE/PDF are added around the string
 		BidiComplexEnvironment env = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_UNKNOWN);
-		BidiComplexHelper helper = new BidiComplexHelper(type, env);
-		return helper.leanToFullText(str);
+		return BidiComplexEngine.leanToFullText(type, null, env, str, null);
 	}
 
 	/**
@@ -308,8 +307,7 @@ final public class BidiComplexUtil {
 
 		// make sure that LRE/PDF are added around the string
 		BidiComplexEnvironment env = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_UNKNOWN);
-		BidiComplexHelper helper = new BidiComplexHelper(type, env);
-		return helper.fullToLeanText(str);
+		return BidiComplexEngine.fullToLeanText(type, null, env, str, null);
 	}
 
 }

@@ -29,5 +29,6 @@ public class BidiComplexTestSuite extends TestSuite {
 		addTestSuite(BidiComplexMathTest.class);
 		addTestSuite(BidiComplexSomeMoreTest.class);
 		addTestSuite(BidiComplexUtilTest.class);
+		addTestSuite(BidiComplexStringRecordTest.class);
 	}
 }

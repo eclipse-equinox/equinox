@@ -8,44 +8,33 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi;
+package org.eclipse.equinox.bidi.custom;
 
-import org.eclipse.equinox.bidi.custom.IBidiComplexProcessor;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
 
 /**
  *  This class defines features of a complex expression processor.
  *  <p>
  *  All public fields in this class are <code>final</code>, i.e. cannot be
  *  changed after creating an instance.
- *  <p>
- *  A <code>BidiComplexFeatures</code> instance can be associated with a
- *  <code>BidiComplexHelper</code> instance using
- *  the {@link BidiComplexHelper#setFeatures setFeatures} method.
  *
- *  <h2>Code Samples</h2>
+ *  <h2>Code Sample</h2>
  *  <p>Example 1 (set all features)
  *  <pre>
  *
- *    BidiComplexFeatures myFeatures = new BidiComplexFeatures("+-=", 0, -1, -1, false, false);
- *    BidiComplexHelper myHelper = new BidiComplexHelper(IBidiComplexExpressionTypes.FILE, myEnv);
- *    myHelper.setFeatures(myFeatures);
+ *    BidiComplexFeatures f1 = new BidiComplexFeatures("+-=", 0, -1, -1, false, false);
  *
  *  </pre>
  *  <p>Example 2 (change only the operators)
  *  <pre>
  *
- *    BidiComplexFeatures f1 = myHelper.getFeatures();
- *    BidiComplexFeatures f2 = new BidiComplexFeatures("[]|()", f1.specialsCount,
- *                                     f1.dirArabic, f1.dirHebrew,
- *                                     f1.ignoreArabic, f1.ignoreHebrew);
- *    myHelper.setFeatures(f2);
+ *    BidiComplexFeatures f2 = new BidiComplexFeatures("[]|()", f1.getSpecialsCount(),
+ *                                     f1.getDirArabic(), f1.getDirHebrew(),
+ *                                     f1.getIgnoreArabic(), f1.getIgnoreHebrew());
  *
  *  </pre>
  *
- *  @see BidiComplexHelper#getFeatures BidiComplexHelper.getFeatures
- *  @see BidiComplexHelper#setFeatures BidiComplexHelper.setFeatures
- *  @see IBidiComplexProcessor#init IBidiComplexProcessor.init
- *  @see IBidiComplexProcessor#updateEnvironment IBidiComplexProcessor.updateEnvironment
+ *  @see IBidiComplexProcessor#getFeatures
  *
  *  @author Matitiahu Allouche
  */
@@ -54,26 +43,26 @@ public class BidiComplexFeatures {
 	/**
 	 *  Constant specifying that the base direction of a complex expression is LTR.
 	 *  The base direction may depend on whether the GUI is
-	 *  {@link BidiComplexEnvironment#mirrored mirrored} and may
+	 *  {@link BidiComplexEnvironment#getMirrored mirrored} and may
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as <code>dirArabic</code>
-	 *  or <code>dirHebrew</code> argument for
-	 *  {@link BidiComplexFeatures#BidiComplexFeatures BidiComplexFeatures constructor} and as value
-	 *  for the {@link #dirArabic} or {@link #dirHebrew} members of
-	 *  <code>BidiComplexFeatures</code>.
+	 *  or <code>dirHebrew</code> argument for the
+	 *  {@link BidiComplexFeatures#BidiComplexFeatures BidiComplexFeatures constructor}
+	 *  and as value returned by {@link #getDirArabic} or {@link #getDirHebrew}
+	 *  methods.
 	 */
 	public static final int DIR_LTR = 0;
 
 	/**
 	 *  Constant specifying that the base direction of a complex expression is RTL.
 	 *  The base direction may depend on whether the GUI is
-	 *  {@link BidiComplexEnvironment#mirrored mirrored} and may
+	 *  {@link BidiComplexEnvironment#getMirrored mirrored} and may
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as <code>dirArabic</code>
-	 *  or <code>dirHebrew</code> argument for
-	 *  {@link BidiComplexFeatures#BidiComplexFeatures BidiComplexFeatures constructor} and as value
-	 *  for the {@link #dirArabic} or {@link #dirHebrew} members of
-	 *  <code>BidiComplexFeatures</code>.
+	 *  or <code>dirHebrew</code> argument for the
+	 *  {@link BidiComplexFeatures#BidiComplexFeatures BidiComplexFeatures constructor}
+	 *  and as value returned by {@link #getDirArabic} or {@link #getDirHebrew}
+	 *  methods.
 	 */
 	public static final int DIR_RTL = 1;
 
@@ -83,9 +72,7 @@ public class BidiComplexFeatures {
 	 *  and support for neither Arabic nor Hebrew.<br>
 	 *  Since there are no operators and no special processing, a complex
 	 *  expression processor with such features would do nothing.<br>
-	 *  It is more efficient to do nothing with a
-	 *  {@link BidiComplexHelper#BidiComplexHelper() BidiComplexHelper}
-	 *  instantiated with no arguments.
+	 *  It is more efficient to do nothing with a <code>null</code> processor.
 	 */
 	public static final BidiComplexFeatures DEFAULT = new BidiComplexFeatures(null, 0, -1, -1, true, true);
 
@@ -93,7 +80,7 @@ public class BidiComplexFeatures {
 	 *  String grouping one-character operators which
 	 *  separate the text of the complex expression into tokens.
 	 */
-	public final String operators;
+	final String operators;
 
 	/**
 	 *  Number of special cases for the associated processor.
@@ -104,7 +91,7 @@ public class BidiComplexFeatures {
 	 *  Examples of special cases are comments, literals, or anything which
 	 *  is not identified by a one-character operator.
 	 */
-	public final int specialsCount;
+	final int specialsCount;
 
 	/**
 	 *  Base direction of the complex expression for Arabic.
@@ -116,7 +103,7 @@ public class BidiComplexFeatures {
 	 *
 	 *  @see #dirHebrew
 	 */
-	public final int dirArabic;
+	final int dirArabic;
 
 	/**
 	 *  Base direction of the complex expression for Hebrew.
@@ -128,54 +115,62 @@ public class BidiComplexFeatures {
 	 *
 	 *  @see #dirArabic
 	 */
-	public final int dirHebrew;
+	final int dirHebrew;
 
 	/**
 	 *  Flag indicating that Arabic letters will not be considered for
 	 *  processing complex expressions. If both this flag and
-	 *  {@link #ignoreHebrew} are set to <code>true</code>, the
+	 *  ignoreHebrew are set to <code>true</code>, the
 	 *  processor will do nothing (but some overhead can be expected).
 	 */
-	public final boolean ignoreArabic;
+	final boolean ignoreArabic;
 
 	/**
 	 *  Flag indicating that Hebrew letters will not be considered for
 	 *  processing complex expressions. If both this flag and
-	 *  {@link #ignoreArabic} are set to <code>true</code>, the
+	 *  ignoreArabic are set to <code>true</code>, the
 	 *  processor will do nothing (but some overhead can be expected).
 	 */
-	public final boolean ignoreHebrew;
+	final boolean ignoreHebrew;
 
 	/**
 	 *  Constructor
 	 *
 	 *  @param operators is a string where each character is a delimiter
 	 *          which separates the complex expression into tokens.
-	 *  @see #operators
+	 *  @see #getOperators
 	 *
 	 *  @param specialsCount specifies the number of special cases handled
-	 *          by the processor.
-	 *  @see #specialsCount
+	 *          by the processor. This value must be identical to the
+	 *          number of special cases handled by the processor with which
+	 *          this <code>BidiComplexFeatures</code> instance is associated.
+	 *  @see #getSpecialsCount
 	 *
 	 *  @param dirArabic specifies the base direction of the complex expression
 	 *          for Arabic. It must be {@link #DIR_LTR} or {@link #DIR_RTL}.
 	 *          If it is not (for instance if it is a negative value), it
 	 *          defaults to <code>DIR_LTR</code>.
-	 *  @see #dirArabic
+	 *  @see #getDirArabic
 	 *
 	 *  @param dirHebrew specifies the base direction of the complex expression
 	 *          for Hebrew. It must be {@link #DIR_LTR} or {@link #DIR_RTL}.
 	 *          If it is not (for instance if it is a negative value), it
 	 *          defaults to <code>DIR_LTR</code>.
-	 *  @see #dirHebrew
+	 *  @see #getDirHebrew
 	 *
 	 *  @param ignoreArabic indicates that Arabic letters will not be
 	 *          considered for processing complex expressions.
-	 *  @see #ignoreArabic
+	 *          If both this flag and <code>ignoreHebrew</code>
+	 *          are set to <code>true</code>, the processor will do
+	 *          nothing (but some overhead can be expected).
+	 *  @see #getIgnoreArabic
 	 *
 	 *  @param ignoreHebrew indicates that Hebrew letters will not be
 	 *          considered for processing complex expressions.
-	 *  @see #ignoreHebrew
+	 *          If both this flag and <code>ignoreArabic</code>
+	 *          are set to <code>true</code>, the processor will do
+	 *          nothing (but some overhead can be expected).
+	 *  @see #getIgnoreHebrew
 	 */
 	public BidiComplexFeatures(String operators, int specialsCount, int dirArabic, int dirHebrew, boolean ignoreArabic, boolean ignoreHebrew) {
 
@@ -185,6 +180,71 @@ public class BidiComplexFeatures {
 		this.dirHebrew = dirHebrew == DIR_LTR || dirHebrew == DIR_RTL ? dirHebrew : DIR_LTR;
 		this.ignoreArabic = ignoreArabic;
 		this.ignoreHebrew = ignoreHebrew;
+	}
+
+	/**
+	 *  @return a string grouping one-character operators which separate
+	 *          the text of the complex expression into tokens.
+	 */
+	public String getOperators() {
+		return operators;
+	}
+
+	/**
+	 *  @return the number of special cases for the associated processor.
+	 *          Special cases exist for some types of complex expression
+	 *          processors. They are implemented by overriding methods
+	 *          {@link IBidiComplexProcessor#indexOfSpecial indexOfSpecial} and
+	 *          {@link IBidiComplexProcessor#processSpecial processSpecial}.
+	 *          Examples of special cases are comments, literals, or
+	 *          anything which is not identified by a one-character operator.
+	 */
+	public int getSpecialsCount() {
+		return specialsCount;
+	}
+
+	/**
+	 *  @return the base direction of the complex expression for Arabic.
+	 *          If a complex expression contains both Arabic and
+	 *          Hebrew words, the first Arabic or Hebrew letter in the
+	 *          expression determines which is the governing script.<br>
+	 *          The value of this field is one of
+	 *          {@link #DIR_LTR} or {@link #DIR_RTL}.
+	 *
+	 *  @see #getDirHebrew
+	 */
+	public int getDirArabic() {
+		return dirArabic;
+	}
+
+	/**
+	 *  @return the base direction of the complex expression for Hebrew.
+	 *          If a complex expression contains both Arabic and
+	 *          Hebrew words, the first Arabic or Hebrew letter in the
+	 *          expression determines which is the governing script.<br>
+	 *          The value of this field is one of
+	 *          {@link #DIR_LTR} or {@link #DIR_RTL}.
+	 *
+	 *  @see #getDirArabic
+	 */
+	public int getDirHebrew() {
+		return dirHebrew;
+	}
+
+	/**
+	 *  @return a flag indicating that Arabic letters will not be considered
+	 *  for processing complex expressions.
+	 */
+	public boolean getIgnoreArabic() {
+		return ignoreArabic;
+	}
+
+	/**
+	 *  Flag indicating that Hebrew letters will not be considered for
+	 *  processing complex expressions.
+	 */
+	public boolean getIgnoreHebrew() {
+		return ignoreHebrew;
 	}
 
 }

@@ -11,7 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEngine;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 
 /**
  * Tests RTL arithmetic
@@ -20,40 +21,27 @@ public class BidiComplexNullProcessorTest extends BidiComplexTestBase {
 
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 
-	private BidiComplexHelper helper;
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		helper = new BidiComplexHelper();
-	}
-
 	public void testNullProcessor() {
-		String full = helper.leanToFullText("abc");
+		String full = BidiComplexEngine.leanToFullText(null, null, null, "abc", null);
 		assertEquals("leanToFullText", "abc", full);
-		full = helper.leanToFullText("abc", 3);
+		int[] state = new int[1];
+		state[0] = 3;
+		full = BidiComplexEngine.leanToFullText(null, null, null, "abc", state);
 		assertEquals("leanToFullText with state", "abc", full);
-		int[] offsets = helper.leanBidiCharOffsets();
-		assertTrue("leanBidiCharOffsets", arrays_equal(offsets, EMPTY_INT_ARRAY));
-		offsets = helper.fullBidiCharOffsets();
-		assertTrue("fullBidiCharOffsets", arrays_equal(offsets, EMPTY_INT_ARRAY));
-		String lean = helper.fullToLeanText("abc");
+		int[] offsets = BidiComplexEngine.leanBidiCharOffsets(null, null, null, "abc", null);
+		assertEquals("leanBidiCharOffsets", 0, offsets.length);
+		offsets = BidiComplexEngine.fullBidiCharOffsets(null, null, null, "abc", null);
+		assertEquals("fullBidiCharOffsets", 0, offsets.length);
+		String lean = BidiComplexEngine.fullToLeanText(null, null, null, "abc", null);
 		assertEquals("fullToLeanText", "abc", lean);
-		lean = helper.fullToLeanText("abc", 3);
+		lean = BidiComplexEngine.fullToLeanText(null, null, null, "abc", state);
 		assertEquals("fullToLeanText with state", "abc", lean);
-		int state = helper.getFinalState();
-		assertEquals("getFinalState", BidiComplexHelper.STATE_NOTHING_GOING, state);
-		int pos = helper.leanToFullPos(13);
-		assertEquals("leanToFullPos", 13, pos);
-		pos = helper.fullToLeanPos(15);
-		assertEquals("fullToLeanPos", 15, pos);
-		assertEquals("getDirProp", Character.DIRECTIONALITY_UNDEFINED, helper.getDirProp(123));
-		int direction = helper.getCurDirection();
+		int[] map = BidiComplexEngine.leanToFullMap(null, null, null, "abc", null);
+		int[] model = {0, 1, 2};
+		assertEquals("leanToFullMap", array_display(model), array_display(map));
+		map = BidiComplexEngine.fullToLeanMap(null, null, null, "abc", null);
+		assertEquals("fullToLeanMap", array_display(model), array_display(map));
+		int direction = BidiComplexEngine.getCurDirection(null, null, null, "abc");
 		assertEquals("getCurDirection", BidiComplexFeatures.DIR_LTR, direction);
-		BidiComplexEnvironment env = helper.getEnvironment();
-		assertEquals("getEnvironment", BidiComplexEnvironment.DEFAULT, env);
-		helper.setEnvironment(env);
-		BidiComplexFeatures features = helper.getFeatures();
-		assertEquals("getFeatures", BidiComplexFeatures.DEFAULT, features);
-		helper.setFeatures(features);
 	}
 }

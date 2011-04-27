@@ -10,26 +10,23 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.IBidiComplexProcessor;
 
 public class BidiComplexTest implements IBidiComplexProcessor {
 
 	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures("-=.:", 0, -1, -1, false, false);
 
-	public BidiComplexFeatures init(BidiComplexHelper caller, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 
-	public BidiComplexFeatures updateEnvironment(BidiComplexHelper caller, BidiComplexEnvironment env) {
-		return FEATURES;
-	}
-
-	public int indexOfSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int fromIndex) {
+	public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		throw new IllegalStateException();
 	}
 
-	public int processSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
 		throw new IllegalStateException();
 	}
 

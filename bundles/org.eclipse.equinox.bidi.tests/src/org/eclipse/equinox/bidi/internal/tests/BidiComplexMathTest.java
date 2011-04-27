@@ -19,24 +19,15 @@ import org.eclipse.equinox.bidi.*;
 public class BidiComplexMathTest extends BidiComplexTestBase {
 
 	static final BidiComplexEnvironment envLTR = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_LTR);
-
 	static final BidiComplexEnvironment envRTL = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_RTL);
 
-	private BidiComplexHelper helper;
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		helper = new BidiComplexHelper(IBidiComplexExpressionTypes.RTL_ARITHMETIC);
-	}
+	String type = IBidiComplexExpressionTypes.RTL_ARITHMETIC;
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
 		String lean = toUT16(data);
-		helper.setEnvironment(envLTR);
-		String fullLTR = helper.leanToFullText(lean);
+		String fullLTR = BidiComplexEngine.leanToFullText(type, null, envLTR, lean, null);
 		assertEquals(msg + " LTR - ", resLTR, toPseudo(fullLTR));
-
-		helper.setEnvironment(envRTL);
-		String fullRTL = helper.leanToFullText(lean);
+		String fullRTL = BidiComplexEngine.leanToFullText(type, null, envRTL, lean, null);
 		assertEquals(msg + " RTL - ", resRTL, toPseudo(fullRTL));
 	}
 

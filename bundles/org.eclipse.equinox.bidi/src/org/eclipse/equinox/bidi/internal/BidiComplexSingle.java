@@ -10,8 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.BidiComplexFeatures;
-import org.eclipse.equinox.bidi.BidiComplexHelper;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
@@ -25,7 +24,7 @@ import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
  *  <pre>
  *  part1=part2
  *  </pre>
- *  The {@link BidiComplexFeatures#operators operators}
+ *  The {@link BidiComplexFeatures#getOperators operators}
  *  field in the {@link BidiComplexFeatures features}
  *  of this processor should contain exactly one character.
  *  Additional characters will be ignored.
@@ -37,17 +36,17 @@ public abstract class BidiComplexSingle extends BidiComplexProcessor {
 	/**
 	 *  This method locates occurrences of the operator.
 	 */
-	public int indexOfSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int fromIndex) {
-		return srcText.indexOf(helper.impl.features.operators.charAt(0), fromIndex);
+	public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		return text.indexOf(features.getOperators().charAt(0), fromIndex);
 	}
 
 	/**
 	 *  This method inserts a mark before the operator if needed and
 	 *  skips to the end of the source string.
 	 */
-	public int processSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int operLocation) {
-		helper.processOperator(operLocation);
-		return srcText.length();
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
+		return text.length();
 	}
 
 }

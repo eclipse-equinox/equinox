@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
- * Processor adapted to processing directory and file paths.
+ *  Processor adapted to processing directory and file paths.
  */
 public class BidiComplexFile extends BidiComplexProcessor {
 	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures(":/\\.", 0, -1, -1, false, false); //$NON-NLS-1$
@@ -25,7 +26,7 @@ public class BidiComplexFile extends BidiComplexProcessor {
 	 *  @return features with operators ":/\.", no special cases,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 

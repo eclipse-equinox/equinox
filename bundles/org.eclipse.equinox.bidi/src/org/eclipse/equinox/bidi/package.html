@@ -15,31 +15,32 @@ Bidirectional text offers interesting challenges to presentation systems.
 For plain text, the Unicode Bidirectional Algorithm
 (<a href="http://www.unicode.org/reports/tr9/">UBA</a>)
 generally specifies satisfactorily how to reorder bidirectional text for
-display. This algorithm is implemented in Java's presentation system.</p>
-<p>
+display. This algorithm is implemented in Java's presentation system.
+</p><p>
 However, all bidirectional text is not necessarily plain text. There
 are also instances of text structured to follow a given syntax, which
 should be reflected in the display order. The general algorithm, which
 has no awareness of these special cases, often gives incorrect results
-when displaying such structured text.</p>
-<p>
+when displaying such structured text.
+</p><p>
 The general idea in handling complex expressions is to add directional
 formatting characters at proper locations in the text to supplement the
 standard algorithm, so that the final result is correctly displayed
 using the UBA.
+</p><p>
 A class which handles complex expressions is thus essentially a
 transformation engine which receives text without directional formatting
 characters as input and produces as output the same text with added
 directional formatting characters, hopefully in the minimum quantity
 which is sufficient to ensure correct display, considering the type of
-complex expression involved.</p>
-<p>
+complex expression involved.
+</p><p>
 In this package, text without directional formatting characters is
 called <b><i>lean</i></b> text while the text with added directional
-formatting characters is called <b><i>full</i></b> text.</p>
-<p>
+formatting characters is called <b><i>full</i></b> text.
+</p><p>
 The class {@link
-<a href="BidiComplexHelper.html"><b>BidiComplexHelper</b></a>}
+<a href="BidiComplexEngine.html"><b>BidiComplexEngine</b></a>}
 is the main tool for processing complex expressions.  It facilitates
 handling several types of complex expressions, each type being handled
 by a specific
@@ -61,13 +62,10 @@ by a specific
 <p>
 Other classes and one interface in this package may be used to
 complement and facilitate the action of
-{@link <a href="BidiComplexHelper.html">BidiComplexHelper</a>}:
+{@link <a href="BidiComplexEngine.html">BidiComplexEngine</a>}:
 <ul>
   <li>{@link <a href="BidiComplexEnvironment.html">BidiComplexEnvironment</a>}
-  which regroups details about the environment</li>
-  <li>{@link <a href="BidiComplexFeatures.html">BidiComplexFeatures</a>}
-      which allows viewing and manipulating some factors which affect
-      a complex expression processor's behavior</li>
+      regroups details about the environment</li>
   <li>{@link <a href="BidiComplexUtil.html">BidiComplexUtil</a>}
       provides a number of convenience methods to process some common types of
       complex expressions.  When using methods in this class, there is no need
@@ -77,12 +75,12 @@ complement and facilitate the action of
       is an interface which contains only literals identifying the various types
       of complex expressions currently supported.</li>
   <li>{@link <a href="BidiComplexStringRecord.html">BidiComplexStringRecord</a>}
-      which allows to record strings which are complex expressions with their
+      allows to record strings which are complex expressions with their
       type, so that another module can check if a given string has been recorded
       as a complex expression and retrieve its type.</li>
 </ul>
 <p>
-{@link <a href="BidiComplexHelper.html">BidiComplexHelper</a>} and the
+{@link <a href="BidiComplexEngine.html">BidiComplexEngine</a>} and the
 other classes and interface mentioned above are intended for users who
 need to process complex expressions for which there already exist
 processors.
@@ -97,8 +95,11 @@ org.eclipse.equinox.bidi.custom</a>}:
   <li>{@link <a href="custom\BidiComplexProcessor.html">BidiComplexProcessor</a>}
       is a generic processor which can be used as superclass for specific
       processors.</li>
+  <li>{@link <a href="custom\BidiComplexFeatures.html">BidiComplexFeatures</a>}
+      allows managing some factors which affect
+      a complex expression processor's behavior.</li>
   <li>{@link <a href="custom\BidiComplexStringProcessor.html">BidiComplexStringProcessor</a>}
-      is a class which allows retrieval of the defined processor types and of the
+      allows retrieval of the defined processor types and of the
       corresponding processors.</li>
 </ul>
 <p>

@@ -10,12 +10,13 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
- * Processor adapted to processing arithmetic expressions with right-to-left
- * base direction.
+ *  Processor adapted to processing arithmetic expressions with right-to-left
+ *  base direction.
  */
 public class BidiComplexMath extends BidiComplexProcessor {
 	static final int RTL = BidiComplexFeatures.DIR_RTL;
@@ -27,7 +28,7 @@ public class BidiComplexMath extends BidiComplexProcessor {
 	 *  @return features with operators "+-/*()=", no special cases,
 	 *          RTL direction for Arabic and Hebrew, and support for both.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 

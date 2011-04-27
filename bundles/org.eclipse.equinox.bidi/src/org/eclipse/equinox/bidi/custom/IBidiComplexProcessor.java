@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
-import org.eclipse.equinox.bidi.*;
-import org.eclipse.equinox.bidi.internal.BidiComplexImpl;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.BidiComplexEngine;
 
 /**
  *  Interface for all complex expression processors.
@@ -23,66 +23,58 @@ import org.eclipse.equinox.bidi.internal.BidiComplexImpl;
 public interface IBidiComplexProcessor {
 
 	/**
-	 *  Do whatever initializations are needed and return the
+	 *  return the
 	 *  {@link BidiComplexFeatures} characterizing the processor.
 	 *
-	 *  @param env the current environment, which may affect the
-	 *          initializations.
-	 *
-	 *  @param caller <code>BidiComplexHelper</code> instance which called this method.
-	 *          This allows access to the field
-	 *          {@link BidiComplexImpl#processorData caller.impl.processorData} where
-	 *          the processor can keep whatever data it needs.
+	 *  @param  env the current environment, which may affect the behavior of
+	 *          the processor. This parameter may be specified as
+	 *          <code>null</code>, in which case the
+	 *          {@link BidiComplexEnvironment#DEFAULT DEFAULT}
+	 *          environment should be assumed.
 	 *
 	 *  @return the features in use for this processor.
 	 */
-	public abstract BidiComplexFeatures init(BidiComplexHelper caller, BidiComplexEnvironment env);
-
-	/**
-	 *  Do whatever renewed initializations are needed after a
-	 *  change in the environment and return the possibly updated
-	 *  {@link BidiComplexFeatures} characterizing the processor.
-	 *
-	 *  @param env the updated environment, which may affect the
-	 *          initializations.
-	 *
-	 *  @param caller <code>BidiComplexHelper</code> instance which called this method.
-	 *          This allows access to the field
-	 *          {@link BidiComplexImpl#processorData caller.impl.processorData} where
-	 *          the processor can keep whatever data it needs.
-	 *
-	 *  @return the features to use for this processor.
-	 */
-	public BidiComplexFeatures updateEnvironment(BidiComplexHelper caller, BidiComplexEnvironment env);
+	public abstract BidiComplexFeatures getFeatures(BidiComplexEnvironment env);
 
 	/**
 	 *  Locate occurrences of special strings within a complex expression
 	 *  and return their indexes one after the other in successive calls.
 	 *  <p>
 	 *  This method is called repeatedly from the code implementing
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText} if the field
-	 *  {@link BidiComplexFeatures#specialsCount specialsCount} returned when
-	 *  {@link #init initializing} the processor is greater than zero.
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText} if the
+	 *  number of special cases appearing in the associated <code>features</code>
+	 *  parameter is greater than zero.
 	 *  <p>
 	 *  The code implementing this method may use the following methods
-	 *  in {@link BidiComplexHelper}:
+	 *  in {@link BidiComplexProcessor}:
 	 *  <ul>
-	 *    <li>{@link BidiComplexHelper#getDirProp getDirProp}</li>
-	 *    <li>{@link BidiComplexHelper#setDirProp setDirProp}</li>
-	 *    <li>{@link BidiComplexHelper#insertMark insertMark}</li>
-	 *    <li>{@link BidiComplexHelper#processOperator processOperator}</li>
-	 *    <li>{@link BidiComplexHelper#setFinalState setFinalState}</li>
+	 *    <li>{@link BidiComplexProcessor#getDirProp getDirProp}</li>
+	 *    <li>{@link BidiComplexProcessor#setDirProp setDirProp}</li>
+	 *    <li>{@link BidiComplexProcessor#insertMark insertMark}</li>
+	 *    <li>{@link BidiComplexProcessor#processOperator processOperator}</li>
 	 *  </ul>
 	 *
+	 *  @param  features is the {@link BidiComplexFeatures} instance
+	 *          currently associated with this processor.
+	 *
+	 *  @param  text is the text of the complex expression before
+	 *          addition of any directional formatting characters.
+	 *
+	 *  @param  dirProps is a parameter received by <code>indexOfSpecial</code>
+	 *          uniquely to be used as argument for calls to methods which
+	 *          need it.
+	 *
+	 *  @param  offsets is a parameter received by <code>indexOfSpecial</code>
+	 *          uniquely to be used as argument for calls to methods which
+	 *          need it.
+	 *
 	 *  @param  caseNumber number of the special case to locate.
-	 *          This number varies from zero to <code>specialsCount - 1</code>.
+	 *          This number varies from 1 to the number of special cases
+	 *          in the features associated with this processor.
 	 *          The meaning of this number is internal to the class
 	 *          implementing <code>indexOfSpecial</code>.
 	 *
-	 *  @param  srcText text of the complex expression before addition of any
-	 *          directional formatting characters.
-	 *
-	 *  @param  fromIndex the index within <code>srcText</code> to start
+	 *  @param  fromIndex the index within <code>text</code> to start
 	 *          the search from.
 	 *
 	 *  @return the position where the start of the special case was located.
@@ -94,57 +86,85 @@ public interface IBidiComplexProcessor {
 	 *          a literal or vice-versa).
 	 *          <br>If no occurrence is found, the method must return -1.
 	 */
-	public int indexOfSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int fromIndex);
+	public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex);
 
 	/**
-	 *  This method is called by {@link BidiComplexHelper#leanToFullText leanToFullText}
+	 *  This method handles special cases specific to this processor.
+	 *  It is called by {@link BidiComplexEngine#leanToFullText leanToFullText}
 	 *  when a special case occurrence is located by
 	 *  {@link #indexOfSpecial indexOfSpecial}.
 	 *  <p>
 	 *  The code implementing this method may use the following methods
-	 *  in {@link BidiComplexHelper}:
+	 *  in {@link BidiComplexProcessor}:
 	 *  <ul>
-	 *    <li>{@link BidiComplexHelper#getDirProp getDirProp}</li>
-	 *    <li>{@link BidiComplexHelper#setDirProp setDirProp}</li>
-	 *    <li>{@link BidiComplexHelper#insertMark insertMark}</li>
-	 *    <li>{@link BidiComplexHelper#processOperator processOperator}</li>
-	 *    <li>{@link BidiComplexHelper#setFinalState setFinalState}</li>
+	 *    <li>{@link BidiComplexProcessor#getDirProp getDirProp}</li>
+	 *    <li>{@link BidiComplexProcessor#setDirProp setDirProp}</li>
+	 *    <li>{@link BidiComplexProcessor#insertMark insertMark}</li>
+	 *    <li>{@link BidiComplexProcessor#processOperator processOperator}</li>
 	 *  </ul>
 	 *  <p>
 	 *  If a special processing cannot be completed within a current call to
 	 *  <code>processSpecial</code> (for instance, a comment has been started
 	 *  in the current line but its end appears in a following line),
-	 *  <code>processSpecial</code> should specify a final state using
-	 *  the method {@link BidiComplexHelper#setFinalState setFinalState}.
+	 *  <code>processSpecial</code> should specify a final state by
+	 *  putting its value in the first element of the <code>state</code>
+	 *  parameter.
 	 *  The meaning of this state is internal to the processor.
 	 *  On a later call to
-	 *  {@link BidiComplexHelper#leanToFullText(String text, int initState)}
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
 	 *  specifying that state value, <code>processSpecial</code> will be
 	 *  called with that value for parameter <code>caseNumber</code> and
 	 *  <code>-1</code> for parameter <code>operLocation</code> and should
 	 *  perform whatever initializations are required depending on the state.
 	 *
-	 *  @param  caseNumber number of the special case to handle.
+	 *  @param  features is the {@link BidiComplexFeatures} instance
+	 *          currently associated with this processor.
 	 *
-	 *  @param  srcText text of the complex expression.
+	 *  @param  text is the text of the complex expression before
+	 *          addition of any directional formatting characters.
+	 *
+	 *  @param  dirProps is a parameter received by <code>processSpecial</code>
+	 *          uniquely to be used as argument for calls to methods which
+	 *          need it.
+	 *
+	 *  @param  offsets is a parameter received by <code>processSpecial</code>
+	 *          uniquely to be used as argument for calls to methods which
+	 *          need it.
+	 *
+	 *  @param  state is an integer array with at least one element.
+	 *          If the processor needs to signal the occurrence of a
+	 *          special case which must be passed to the next call to
+	 *          <code>leanToFullText</code> (for instance, a comment or a
+	 *          literal started but not closed in the current
+	 *          <code>text</code>), it must put a value in the first element
+	 *          of the <code>state</code> parameter.
+	 *          This value must be a number between 1 and the number of
+	 *          special cases appearing in the features associated with
+	 *          this processor. This number is passed back to the caller
+	 *          and should be specified as <code>state</code> argument
+	 *          in the next call to <code>leanToFullText</code> together
+	 *          with the continuation text.
+	 *          The meaning of this number is internal to the processor.
+	 *
+	 *  @param  caseNumber number of the special case to handle.
 	 *
 	 *  @param  operLocation the position returned by
 	 *          {@link #indexOfSpecial indexOfSpecial}. In calls to
-	 *          {@link BidiComplexHelper#leanToFullText(String text, int initState)} or
-	 *          {@link BidiComplexHelper#fullToLeanText(String text, int initState)}
-	 *          specifying an <code>initState</code>
-	 *          parameter, <code>processSpecial</code> is called when initializing
-	 *          the processing with the value of <code>caseNumber</code>
-	 *          equal to <code>initState</code> and the value of
+	 *          {@link BidiComplexEngine#leanToFullText leanToFullText} and other
+	 *          methods of {@link BidiComplexEngine} specifying a  non-null
+	 *          <code>state</code> parameter, <code>processSpecial</code> is
+	 *          called when initializing the processing with the value of
+	 *          <code>caseNumber</code> equal to the value returned in the
+	 *          first element of <code>state</code> and the value of
 	 *          <code>operLocation</code> equal to <code>-1</code>.
 	 *
 	 *  @return the position after the scope of the special case ends.
 	 *          For instance, the position after the end of a comment,
 	 *          the position after the end of a literal.
-	 *          <br>A value greater or equal to the length of <code>srcText</code>
+	 *          <br>A value greater or equal to the length of <code>text</code>
 	 *          means that there is no further occurrence of this case in the
 	 *          current complex expression.
 	 */
-	public int processSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int operLocation);
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation);
 
 }

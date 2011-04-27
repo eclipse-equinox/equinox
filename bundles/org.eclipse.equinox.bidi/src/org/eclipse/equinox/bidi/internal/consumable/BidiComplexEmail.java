@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.internal.BidiComplexDelimsEsc;
 
 /**
- * Processor adapted to processing e-mail addresses.
+ *  Processor adapted to processing e-mail addresses.
  */
 public class BidiComplexEmail extends BidiComplexDelimsEsc {
 	static final int LTR = BidiComplexFeatures.DIR_LTR;
@@ -31,8 +32,10 @@ public class BidiComplexEmail extends BidiComplexDelimsEsc {
 	 *          LTR direction for Hebrew in all cases,
 	 *          and support for both Arabic and Hebrew.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
-		return env.mirrored ? MIRRORED : NOT_MIRRORED;
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
+		if (env == null)
+			env = BidiComplexEnvironment.DEFAULT;
+		return env.getMirrored() ? MIRRORED : NOT_MIRRORED;
 	}
 
 	/**

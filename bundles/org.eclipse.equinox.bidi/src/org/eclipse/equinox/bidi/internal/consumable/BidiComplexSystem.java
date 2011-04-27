@@ -10,14 +10,15 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.internal.BidiComplexSingle;
 
 /**
- * Processor adapted to processing expressions with the following string format:
- * <pre>
- *  system(user)
- * </pre>
+ *  Processor adapted to processing expressions with the following string format:
+ *  <pre>
+ *    system(user)
+ *  </pre>
  */
 public class BidiComplexSystem extends BidiComplexSingle {
 	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures("(", 0, -1, -1, false, false); //$NON-NLS-1$
@@ -29,7 +30,7 @@ public class BidiComplexSystem extends BidiComplexSingle {
 	 *          no special cases, LTR direction for Arabic and Hebrew,
 	 *          and support for both.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 }

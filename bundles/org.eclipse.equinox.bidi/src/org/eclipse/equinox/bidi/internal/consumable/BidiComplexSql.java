@@ -10,7 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEngine;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
@@ -20,14 +22,15 @@ import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
  *  <p>
  *  In applications like an editor where parts of the text might be modified
  *  while other parts are not, the user may want to call
- *  {@link BidiComplexHelper#leanToFullText leanToFullText}
+ *  {@link BidiComplexEngine#leanToFullText leanToFullText}
  *  separately on each line and save the initial state of each line (this is
- *  the final state of the previous line which can be retrieved using
- *  {@link BidiComplexHelper#getFinalState getFinalState}. If both the content
+ *  the final state of the previous line which can be retrieved from the
+ *  value returned in the first element of the <code>state</code> argument).
+ *  If both the content
  *  of a line and its initial state have not changed, the user can be sure that
  *  the last <i>full</i> text computed for this line has not changed either.
  *
- *  @see BidiComplexHelper
+ *  @see BidiComplexEngine#leanToFullText explanation of state in leanToFullText
  *
  *  @author Matitiahu Allouche
  */
@@ -43,7 +46,7 @@ public class BidiComplexSql extends BidiComplexProcessor {
 	 *  @return features with operators "\t!#%&()*+,-./:;<=>?|[]{}", 5 special cases,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 
@@ -57,18 +60,18 @@ public class BidiComplexSql extends BidiComplexProcessor {
 	  *    <li>comments starting with hyphen-hyphen</li>
 	  *  </ol>
 	  */
-	public int indexOfSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int fromIndex) {
+	public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
-			case 0 : /* space */
-				return srcText.indexOf(" ", fromIndex); //$NON-NLS-1$
-			case 1 : /* literal */
-				return srcText.indexOf('\'', fromIndex);
-			case 2 : /* delimited identifier */
-				return srcText.indexOf('"', fromIndex);
-			case 3 : /* slash-aster comment */
-				return srcText.indexOf("/*", fromIndex); //$NON-NLS-1$
-			case 4 : /* hyphen-hyphen comment */
-				return srcText.indexOf("--", fromIndex); //$NON-NLS-1$
+			case 1 : /* space */
+				return text.indexOf(" ", fromIndex); //$NON-NLS-1$
+			case 2 : /* literal */
+				return text.indexOf('\'', fromIndex);
+			case 3 : /* delimited identifier */
+				return text.indexOf('"', fromIndex);
+			case 4 : /* slash-aster comment */
+				return text.indexOf("/*", fromIndex); //$NON-NLS-1$
+			case 5 : /* hyphen-hyphen comment */
+				return text.indexOf("--", fromIndex); //$NON-NLS-1$
 		}
 		// we should never get here
 		return -1;
@@ -84,66 +87,66 @@ public class BidiComplexSql extends BidiComplexProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
 		int location;
 
-		helper.processOperator(operLocation);
+		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
 		switch (caseNumber) {
-			case 0 : /* space */
+			case 1 : /* space */
 				operLocation++;
-				while (operLocation < srcText.length() && srcText.charAt(operLocation) == ' ') {
-					helper.setDirProp(operLocation, WS);
+				while (operLocation < text.length() && text.charAt(operLocation) == ' ') {
+					BidiComplexProcessor.setDirProp(dirProps, operLocation, WS);
 					operLocation++;
 				}
 				return operLocation;
-			case 1 : /* literal */
+			case 2 : /* literal */
 				location = operLocation + 1;
 				while (true) {
-					location = srcText.indexOf('\'', location);
+					location = text.indexOf('\'', location);
 					if (location < 0) {
-						helper.setFinalState(caseNumber);
-						return srcText.length();
+						state[0] = caseNumber;
+						return text.length();
 					}
-					if ((location + 1) < srcText.length() && srcText.charAt(location + 1) == '\'') {
+					if ((location + 1) < text.length() && text.charAt(location + 1) == '\'') {
 						location += 2;
 						continue;
 					}
 					return location + 1;
 				}
-			case 2 : /* delimited identifier */
+			case 3 : /* delimited identifier */
 				location = operLocation + 1;
 				while (true) {
-					location = srcText.indexOf('"', location);
+					location = text.indexOf('"', location);
 					if (location < 0)
-						return srcText.length();
+						return text.length();
 
-					if ((location + 1) < srcText.length() && srcText.charAt(location + 1) == '"') {
+					if ((location + 1) < text.length() && text.charAt(location + 1) == '"') {
 						location += 2;
 						continue;
 					}
 					return location + 1;
 				}
-			case 3 : /* slash-aster comment */
-				if (operLocation < 0)
-					location = 0; // initial state from previous line
+			case 4 : /* slash-aster comment */
+				if (operLocation < 0) // continuation line
+					location = 0;
 				else
 					location = operLocation + 2; // skip the opening slash-aster
-				location = srcText.indexOf("*/", location); //$NON-NLS-1$
+				location = text.indexOf("*/", location); //$NON-NLS-1$
 				if (location < 0) {
-					helper.setFinalState(caseNumber);
-					return srcText.length();
+					state[0] = caseNumber;
+					return text.length();
 				}
 				// we need to call processOperator since text may follow the
 				//  end of comment immediately without even a space
-				helper.processOperator(location);
+				BidiComplexProcessor.processOperator(features, text, dirProps, offsets, location);
 				return location + 2;
-			case 4 : /* hyphen-hyphen comment */
-				location = srcText.indexOf(lineSep, operLocation + 2);
+			case 5 : /* hyphen-hyphen comment */
+				location = text.indexOf(lineSep, operLocation + 2);
 				if (location < 0)
-					return srcText.length();
+					return text.length();
 				return location + lineSep.length();
 		}
 		// we should never get here
-		return srcText.length();
+		return text.length();
 	}
 }

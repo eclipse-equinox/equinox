@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.BidiComplexHelper;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
+import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
  *  <code>BidiComplexDelims</code> is a processor for complex expressions
@@ -21,9 +22,9 @@ import org.eclipse.equinox.bidi.BidiComplexHelper;
  *  that delimiters can be escaped using the backslash character.
  *  <ul>
  *    <li>Two consecutive backslashes in a delimited part are treated like
- *        one regular characters.</li>
+ *        one regular character.</li>
  *    <li>An ending delimiter preceded by an odd number of backslashes is
- *        treated like a regular character of a delimited part.</li>
+ *        treated like a regular character within the delimited part.</li>
  *  </ul>
  *
  *  @author Matitiahu Allouche
@@ -31,19 +32,19 @@ import org.eclipse.equinox.bidi.BidiComplexHelper;
 public abstract class BidiComplexDelimsEsc extends BidiComplexDelims {
 
 	/**
-	*  This method skips until after the matching end delimiter,
-	*  ignoring possibly escaped end delimiters.
-	*/
-	public int processSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int operLocation) {
-		helper.processOperator(operLocation);
+	 *  This method skips until after the matching end delimiter,
+	 *  ignoring possibly escaped end delimiters.
+	 */
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
 		int location = operLocation + 1;
-		char delim = getDelimiters().charAt((caseNumber * 2) + 1);
+		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		while (true) {
-			location = srcText.indexOf(delim, location);
+			location = text.indexOf(delim, location);
 			if (location < 0)
-				return srcText.length();
+				return text.length();
 			int cnt = 0;
-			for (int i = location - 1; srcText.charAt(i) == '\\'; i--) {
+			for (int i = location - 1; text.charAt(i) == '\\'; i--) {
 				cnt++;
 			}
 			location++;

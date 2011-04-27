@@ -21,36 +21,21 @@ import org.eclipse.equinox.bidi.internal.BidiComplexActivator;
  *  All public fields in this class are <code>final</code>, i.e. cannot be
  *  changed after creating an instance.
  *  <p>
- *  A <code>BidiComplexEnvironment</code> instance can be associated with a <code>BidiComplexHelper</code>
- *  instance either when creating the
- * {@link BidiComplexHelper#BidiComplexHelper(java.lang.String, BidiComplexEnvironment) BidiComplexHelper} instance
- *  or using the {@link BidiComplexHelper#setEnvironment setEnvironment} method.
+ *  All methods in {@link BidiComplexEngine} have a BidiComplexEnvironment
+ *  argument. If this argument is specified as <code>null</code>, the
+ *  {@link #DEFAULT} environment is used.
  *
  *  <h2>Code Samples</h2>
- *  <p>Example 1 (set all environment parameters)
+ *  <p>Example (set all environment parameters)
  *  <pre>
  *
  *    BidiComplexEnvironment myEnv = new BidiComplexEnvironment("he_IL", true, BidiComplexEnvironment.ORIENT_RTL);
- *    BidiComplexHelper myHelper = new BidiComplexHelper(IBidiComplexExpressionTypes.FILE, myEnv);
- *
- *  </pre>
- *  <p>Example 2 (change only the orientation)
- *  <pre>
- *
- *    BidiComplexEnvironment env1 = myHelper.getEnvironment();
- *    BidiComplexEnvironment env2 = new BidiComplexEnvironment(env1.language, env1.mirrored, BidiComplexEnvironment.ORIENT_UNKNOWN);
- *    myHelper.setEnvironment(env2);
  *
  *  </pre>
  *  <p>
  *  This class also provides a number of convenience methods related to the environment.
  *  <p>&nbsp;</p>
- *  @see BidiComplexHelper#BidiComplexHelper(String, BidiComplexEnvironment)
- *  @see BidiComplexHelper#BidiComplexHelper(IBidiComplexProcessor, BidiComplexEnvironment)
- *  @see BidiComplexHelper#getEnvironment BidiComplexHelper.getEnvironment
- *  @see BidiComplexHelper#setEnvironment BidiComplexHelper.setEnvironment
- *  @see IBidiComplexProcessor#init IBidiComplexProcessor.init
- *  @see IBidiComplexProcessor#updateEnvironment IBidiComplexProcessor.updateEnvironment
+ *  @see IBidiComplexProcessor#getFeatures
  *
  *  @author Matitiahu Allouche
  */
@@ -59,18 +44,18 @@ public class BidiComplexEnvironment {
 	/**
 	 *  Constant specifying that the orientation of the GUI component
 	 *  where a complex expression will be displayed is LTR.
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_LTR = 0;
 
 	/**
 	 *  Constant specifying that the orientation of the GUI component
 	 *  where a complex expression will be displayed is RTL.
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_RTL = 1;
 
@@ -78,9 +63,9 @@ public class BidiComplexEnvironment {
 	 *  Constant specifying that the orientation of the GUI component
 	 *  where a complex expression will be displayed is contextual with
 	 *  a default of LTR (if no strong character appears in the text).
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_CONTEXTUAL_LTR = 2;
 
@@ -88,9 +73,9 @@ public class BidiComplexEnvironment {
 	 *  Constant specifying that the orientation of the GUI component
 	 *  where a complex expression will be displayed is contextual with
 	 *  a default of RTL (if no strong character appears in the text).
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_CONTEXTUAL_RTL = 3;
 
@@ -99,10 +84,10 @@ public class BidiComplexEnvironment {
 	 *  where a complex expression will be displayed is not known.
 	 *  Directional formatting characters must be added as prefix and
 	 *  suffix whenever a <i>full</i> text is generated using
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}.
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_UNKNOWN = 4;
 
@@ -111,16 +96,16 @@ public class BidiComplexEnvironment {
 	 *  GUI component where a complex expression will be displayed, no
 	 *  directional formatting characters must be added as prefix or
 	 *  suffix when a <i>full</i> text is generated using
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}.
-	 *  It can appear as <code>orientation</code> argument for
-	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor} and as value for the
-	 *  {@link BidiComplexEnvironment#orientation} member of <code>BidiComplexEnvironment</code>.
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}.
+	 *  It can appear as <code>orientation</code> argument for the
+	 *  {@link BidiComplexEnvironment#BidiComplexEnvironment BidiComplexEnvironment constructor}
+	 *  and as value returned by {@link #getOrientation}.
 	 */
 	public static final int ORIENT_IGNORE = 5;
 
 	/**
-	 *  Pre-defined <code>BidiComplexEnvironment</code> instance with values for a non-mirrored GUI
-	 *  and a Left-to-Right presentation component.<br>
+	 *  Pre-defined <code>BidiComplexEnvironment</code> instance with values
+	 *  for a non-mirrored GUI and a Left-to-Right presentation component.<br>
 	 *  The language is set to <code>null</code>, which defaults to the language
 	 *  of the current default locale.
 	 */
@@ -131,67 +116,19 @@ public class BidiComplexEnvironment {
 	 *  ISO-639. If left as <code>null</code>, it defaults to the language
 	 *  of the current default locale.
 	 */
-	public final String language;
+	final String language;
 
 	/**
 	 *  Flag specifying that complex expressions processed under this environment
 	 *  should assume that the GUI is mirrored (globally going from right to left).
 	 */
-	public final boolean mirrored;
+	final boolean mirrored;
 
 	/** Specify the orientation (a.k.a. base direction) of the GUI
 	 *  component in which the <i>full</i> text of the complex expression will
-	 *  be displayed.<br>
-	 *  The orientation must have one of the values
-	 *  {@link #ORIENT_LTR ORIENT_LTR},
-	 *  {@link #ORIENT_LTR ORIENT_RTL},
-	 *  {@link #ORIENT_CONTEXTUAL_LTR ORIENT_CONTEXTUAL_LTR},
-	 *  {@link #ORIENT_CONTEXTUAL_RTL ORIENT_CONTEXTUAL_RTL},
-	 *  {@link #ORIENT_UNKNOWN ORIENT_UNKNOWN} or
-	 *  {@link #ORIENT_IGNORE ORIENT_IGNORE}.
-	  *  <p>
-	 *  When the orientation is <code>ORIENT_LTR</code> and the complex
-	 *  expression has a RTL base direction,
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
-	 *  end.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_RTL</code> and the complex
-	 *  expression has a LTR base direction,
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
-	 *  end.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
-	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
-	 *  to a RTL orientation while the complex expression has a LTR base
-	 *  direction, {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds LRM at the head of the <i>full</i> text.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
-	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
-	 *  to a LTR orientation while the complex expression has a RTL base
-	 *  direction, {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds RLM at the head of the <i>full</i> text.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the complex
-	 *  expression has a LTR base direction,
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
-	 *  end.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the complex
-	 *  expression has a RTL base direction,
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText}
-	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
-	 *  end.
-	 *  <p>
-	 *  When the orientation is <code>ORIENT_IGNORE</code>,
-	 *  {@link BidiComplexHelper#leanToFullText leanToFullText} does not add any directional
-	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
-	 *  <p>
+	 *  be displayed.
 	 */
-	public final int orientation;
+	final int orientation;
 
 	static Locale defaultLocale;
 	static String defaultLanguage;
@@ -207,10 +144,10 @@ public class BidiComplexEnvironment {
 	 *          If longer than 2 letters, the extra letters are ignored.<br>
 	 *          If set to <code>null</code>, it defaults to the language
 	 *          of the default locale.
-	 *  @see #language
+	 *  @see #getLanguage
 	 *
 	 *  @param mirrored specifies if the GUI is mirrored.
-	 *  @see #mirrored
+	 *  @see #getMirrored
 	 *
 	 *  @param orientation specifies the orientation of the component
 	 *          which is to display the complex expression. It must be
@@ -222,7 +159,7 @@ public class BidiComplexEnvironment {
 	 *          {@link #ORIENT_UNKNOWN ORIENT_UNKNOWN} or
 	 *          {@link #ORIENT_IGNORE ORIENT_IGNORE}.<br>
 	 *          If different, it defaults to {@link #ORIENT_UNKNOWN ORIENT_UNKNOWN}.
-	 *  @see #orientation
+	 *  @see #getOrientation
 	 */
 	public BidiComplexEnvironment(String lang, boolean mirrored, int orientation) {
 		if (lang == null) {
@@ -239,14 +176,88 @@ public class BidiComplexEnvironment {
 	}
 
 	/**
+	 *  Return a 2-letters code representing a language as defined by
+	 *  ISO-639. If equal to <code>null</code>, it defaults to the language
+	 *  of the current default locale.
+	 */
+	public String getLanguage() {
+		return language;
+	}
+
+	/**
+	 *  Return a flag indicating that complex expressions processed
+	 *  within this environment should assume that the GUI is mirrored
+	 * (globally going from right to left).
+	 */
+	public boolean getMirrored() {
+		return mirrored;
+	}
+
+	/** Return the orientation (a.k.a. base direction) of the GUI
+	 *  component in which the <i>full</i> text of the complex expression
+	 *  will be displayed.<br>
+	 *  The orientation must have one of the values
+	 *  {@link #ORIENT_LTR ORIENT_LTR},
+	 *  {@link #ORIENT_LTR ORIENT_RTL},
+	 *  {@link #ORIENT_CONTEXTUAL_LTR ORIENT_CONTEXTUAL_LTR},
+	 *  {@link #ORIENT_CONTEXTUAL_RTL ORIENT_CONTEXTUAL_RTL},
+	 *  {@link #ORIENT_UNKNOWN ORIENT_UNKNOWN} or
+	 *  {@link #ORIENT_IGNORE ORIENT_IGNORE}.
+	  *  <p>
+	 *  When the orientation is <code>ORIENT_LTR</code> and the complex
+	 *  expression has a RTL base direction,
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
+	 *  end.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_RTL</code> and the complex
+	 *  expression has a LTR base direction,
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
+	 *  end.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
+	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
+	 *  to a RTL orientation while the complex expression has a LTR base
+	 *  direction, {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds LRM at the head of the <i>full</i> text.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
+	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
+	 *  to a LTR orientation while the complex expression has a RTL base
+	 *  direction, {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds RLM at the head of the <i>full</i> text.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the complex
+	 *  expression has a LTR base direction,
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
+	 *  end.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the complex
+	 *  expression has a RTL base direction,
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
+	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
+	 *  end.
+	 *  <p>
+	 *  When the orientation is <code>ORIENT_IGNORE</code>,
+	 *  {@link BidiComplexEngine#leanToFullText leanToFullText} does not add any directional
+	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
+	 *  <p>
+	 */
+	public int getOrientation() {
+		return orientation;
+	}
+
+	/**
 	 *  Check whether the current language uses a
 	 *  bidi script (Arabic, Hebrew, Farsi or Urdu).
 	 *
 	 *  @return <code>true</code> if the current language uses a bidi script.
 	 *          The language may have been set explicitly when creating the
-	 *          <code>BidiComplexEnvironment</code> instance, or it may have defaulted to
-	 *          the language of the current default locale.
-	 *  @see #BidiComplexEnvironment BidiComplexEnvironment
+	 *          <code>BidiComplexEnvironment</code> instance, or it may have
+	 *          defaulted to the language of the current default locale.
+	 *  @see #getLanguage
 	 */
 	public boolean isBidi() {
 		if (defaultLanguage != null && defaultLocale.equals(getDefaultLocale()))

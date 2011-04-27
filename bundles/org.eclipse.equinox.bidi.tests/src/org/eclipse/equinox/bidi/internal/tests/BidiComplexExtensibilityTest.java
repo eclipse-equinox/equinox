@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.BidiComplexHelper;
+import org.eclipse.equinox.bidi.BidiComplexEngine;
 import org.eclipse.equinox.bidi.custom.BidiComplexStringProcessor;
 import org.eclipse.equinox.bidi.custom.IBidiComplexProcessor;
 
@@ -46,11 +46,10 @@ public class BidiComplexExtensibilityTest extends BidiComplexTestBase {
 		processor = BidiComplexStringProcessor.getProcessor("badtest");
 		assertNull(processor);
 
-		BidiComplexHelper helper = new BidiComplexHelper("test");
 		String data, lean, full, model;
 		data = "ABC.DEF:HOST-COM=HELLO";
 		lean = toUT16(data);
-		full = helper.leanToFullText(lean);
+		full = BidiComplexEngine.leanToFullText("test", null, null, lean, null);
 		model = "ABC@.DEF@:HOST@-COM@=HELLO";
 		assertEquals("Test 'test' plugin", model, toPseudo(full));
 	}

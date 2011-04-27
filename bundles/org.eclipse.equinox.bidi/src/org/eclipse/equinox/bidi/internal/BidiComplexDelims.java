@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.BidiComplexHelper;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
@@ -26,21 +26,21 @@ public abstract class BidiComplexDelims extends BidiComplexProcessor {
 	/**
 	 *  This method locates occurrences of start delimiters.
 	 */
-	public int indexOfSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int fromIndex) {
-		char delim = getDelimiters().charAt(caseNumber * 2);
-		return srcText.indexOf(delim, fromIndex);
+	public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		char delim = getDelimiters().charAt((caseNumber - 1) * 2);
+		return text.indexOf(delim, fromIndex);
 	}
 
 	/**
 	 *  This method skips until after the matching end delimiter.
 	 */
-	public int processSpecial(BidiComplexHelper helper, int caseNumber, String srcText, int operLocation) {
-		helper.processOperator(operLocation);
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
 		int loc = operLocation + 1;
-		char delim = getDelimiters().charAt((caseNumber * 2) + 1);
-		loc = srcText.indexOf(delim, loc);
+		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
+		loc = text.indexOf(delim, loc);
 		if (loc < 0)
-			return srcText.length();
+			return text.length();
 		return loc + 1;
 	}
 

@@ -11,9 +11,9 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.*;
-import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
-import org.eclipse.equinox.bidi.custom.IBidiComplexProcessor;
+import org.eclipse.equinox.bidi.BidiComplexEngine;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  * Tests some weird cases
@@ -22,28 +22,24 @@ import org.eclipse.equinox.bidi.custom.IBidiComplexProcessor;
 public class BidiComplexSomeMoreTest extends BidiComplexTestBase {
 
 	final static BidiComplexEnvironment env1 = new BidiComplexEnvironment("en_US", false, BidiComplexEnvironment.ORIENT_LTR);
-
 	final static BidiComplexEnvironment env2 = new BidiComplexEnvironment("he", false, BidiComplexEnvironment.ORIENT_LTR);
-
-	final static BidiComplexFeatures features = new BidiComplexFeatures(null, 1, -1, -1, false, false);
-
-	BidiComplexHelper helper;
+	final static BidiComplexFeatures myFeatures = new BidiComplexFeatures(null, 1, -1, -1, false, false);
 
 	class Processor1 extends BidiComplexProcessor {
 
-		public BidiComplexFeatures init(BidiComplexHelper caller, BidiComplexEnvironment env) {
-			return features;
+		public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
+			return myFeatures;
 		}
 
-		public int indexOfSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int fromIndex) {
+		public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 
-		public int processSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int operLocation) {
-			int len = srcText.length();
+		public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+			int len = text.length();
 			for (int i = len - 1; i >= 0; i--) {
-				caller.insertMark(i);
-				caller.insertMark(i);
+				BidiComplexProcessor.insertMark(text, dirProps, offsets, i);
+				BidiComplexProcessor.insertMark(text, dirProps, offsets, i);
 			}
 			return len;
 		}
@@ -51,18 +47,18 @@ public class BidiComplexSomeMoreTest extends BidiComplexTestBase {
 
 	class Processor2 extends BidiComplexProcessor {
 
-		public BidiComplexFeatures init(BidiComplexHelper caller, BidiComplexEnvironment env) {
-			return features;
+		public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
+			return myFeatures;
 		}
 	}
 
 	class Processor3 extends BidiComplexProcessor {
 
-		public BidiComplexFeatures init(BidiComplexHelper caller, BidiComplexEnvironment env) {
-			return features;
+		public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
+			return myFeatures;
 		}
 
-		public int indexOfSpecial(BidiComplexHelper caller, int caseNumber, String srcText, int fromIndex) {
+		public int indexOfSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 			return 0;
 		}
 	}
@@ -72,25 +68,22 @@ public class BidiComplexSomeMoreTest extends BidiComplexTestBase {
 		assertTrue(env2.isBidi());
 
 		IBidiComplexProcessor processor = new Processor1();
-		helper = new BidiComplexHelper(processor, env1);
-		String full = toPseudo(helper.leanToFullText("abcd"));
-		assertEquals("@a@b@c@d", full);
+		String full = BidiComplexEngine.leanToFullText(processor, null, env1, "abcd", null);
+		assertEquals("@a@b@c@d", toPseudo(full));
 
 		processor = new Processor2();
-		helper = new BidiComplexHelper(processor, env1);
 		boolean catchFlag = false;
 		try {
-			full = toPseudo(helper.leanToFullText("abcd"));
+			full = BidiComplexEngine.leanToFullText(processor, null, env1, "abcd", null);
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch missing indexOfSpecial", catchFlag);
 
 		processor = new Processor3();
-		helper = new BidiComplexHelper(processor, env1);
 		catchFlag = false;
 		try {
-			full = toPseudo(helper.leanToFullText("abcd"));
+			full = BidiComplexEngine.leanToFullText(processor, null, env1, "abcd", null);
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}

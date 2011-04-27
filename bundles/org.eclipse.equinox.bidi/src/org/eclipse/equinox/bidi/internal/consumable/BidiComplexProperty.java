@@ -10,15 +10,16 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.BidiComplexEnvironment;
+import org.eclipse.equinox.bidi.custom.BidiComplexFeatures;
 import org.eclipse.equinox.bidi.internal.BidiComplexSingle;
 
 /**
- * Processor adapted to processing property file statements.
- * It expects the following string format:
- * <pre>
- *  name=value
- * </pre>
+ *  Processor adapted to processing property file statements.
+ *  It expects the following string format:
+ *  <pre>
+ *    name=value
+ *  </pre>
  */
 public class BidiComplexProperty extends BidiComplexSingle {
 	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures("=", 1, -1, -1, false, false); //$NON-NLS-1$
@@ -29,7 +30,7 @@ public class BidiComplexProperty extends BidiComplexSingle {
 	 *  @return features with one operator (equal sign), 1 special case,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
-	public BidiComplexFeatures init(BidiComplexHelper helper, BidiComplexEnvironment env) {
+	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
 		return FEATURES;
 	}
 

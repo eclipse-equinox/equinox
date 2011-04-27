@@ -107,17 +107,4 @@ public class BidiComplexTestBase extends TestCase {
 		return sb.toString();
 	}
 
-	static boolean arrays_equal(int[] one, int[] two) {
-		int len = one.length;
-		if (len != two.length) {
-			return false;
-		}
-		for (int i = 0; i < len; i++) {
-			if (one[i] != two[i]) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 }
