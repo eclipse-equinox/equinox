@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -370,7 +370,7 @@ public final class URIUtil {
 		if (relativePath == originalPath)
 			return original;
 		try {
-			return new URI(null, relativePath.toString(), null);
+			return new URI(null, null, relativePath.toString(), original.getFragment());
 		} catch (URISyntaxException e) {
 			//cannot make a relative path, just return the original
 			return original;
