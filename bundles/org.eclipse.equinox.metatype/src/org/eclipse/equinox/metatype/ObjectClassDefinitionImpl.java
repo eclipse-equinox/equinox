@@ -171,8 +171,13 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Ob
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
 	 */
 	public InputStream getIcon(int sizeHint) throws IOException {
-
-		if ((_icon == null) || (_icon.getIconSize() != sizeHint)) {
+		// The parameter simply represents a requested size. This method should never return null if an
+		// icon exists.
+		// TODO This method may change further depending on the outcome of certain ongoing CPEG discussions.
+		// It is thought that users should be able to specify the same icon multiple times but of different
+		// sizes. This would require a change to the XML schema. This method would then return the icon with
+		// a size closest to the requested size.
+		if ((_icon == null)) {
 			return null;
 		}
 		Bundle b = _icon.getIconBundle();
