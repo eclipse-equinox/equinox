@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1201,31 +1201,123 @@ public class SystemBundleTests extends AbstractBundleTests {
 		}
 	}
 
+	public void testBug304213() {
+		// test installing bundle with empty manifest
+		File config = OSGiTestsActivator.getContext().getDataFile(getName());
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		File bundleFile = null;
+		try {
+			File baseDir = new File(config, "bundles");
+			baseDir.mkdirs();
+			bundleFile = createBundle(baseDir, getName(), true, true);
+		} catch (IOException e) {
+			fail("Unexpected error creating bundles.", e);
+		}
+		try {
+			systemContext.installBundle("reference:file:///" + bundleFile.getAbsolutePath()); //$NON-NLS-1$
+		} catch (BundleException e) {
+			fail("Unexpected install error", e); //$NON-NLS-1$
+		}
+
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		// remove manifest for testing
+		new File(bundleFile, "META-INF/MANIFEST.MF").delete();
+		systemContext = equinox.getBundleContext();
+		Bundle[] bundles = systemContext.getBundles();
+		// get the headers from each bundle
+		try {
+			for (int i = 0; i < bundles.length; i++) {
+				bundles[i].getHeaders(); //$NON-NLS-1$
+			}
+		} catch (Throwable t) {
+			// An exception used to get thrown here when we tried to close 
+			// the least used bundle file
+			fail("Failed to get bundle entries", t);
+		}
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
 		File[] bundles = new File[bundleCount];
 
 		for (int i = 0; i < bundleCount; i++)
-			bundles[i] = createBundle(outputDir, "-b" + i); //$NON-NLS-1$
+			bundles[i] = createBundle(outputDir, "-b" + i, false, false); //$NON-NLS-1$
 
 		return bundles;
 	}
 
-	private static File createBundle(File outputDir, String id) throws IOException {
-		File file = new File(outputDir, "bundle" + id + ".jar"); //$NON-NLS-1$ //$NON-NLS-2$
-		JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), createManifest(id));
-		jos.flush();
-		jos.close();
+	private static File createBundle(File outputDir, String id, boolean emptyManifest, boolean dirBundle) throws IOException {
+		File file = new File(outputDir, "bundle" + id + (dirBundle ? "" : ".jar")); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!dirBundle) {
+			JarOutputStream jos = new JarOutputStream(new FileOutputStream(file), createManifest(id, emptyManifest));
+			jos.flush();
+			jos.close();
+		} else {
+			File manifest = new File(file, "META-INF/MANIFEST.MF");
+			manifest.getParentFile().mkdirs();
+			FileOutputStream out = new FileOutputStream(manifest);
+			createManifest(id, emptyManifest).write(out);
+			out.close();
+		}
 		return file;
 	}
 
-	private static Manifest createManifest(String id) {
+	private static Manifest createManifest(String id, boolean emptyManifest) {
 		Manifest manifest = new Manifest();
 		Attributes attributes = manifest.getMainAttributes();
 		attributes.putValue("Manifest-Version", "1.0"); //$NON-NLS-1$ //$NON-NLS-2$
-		attributes.putValue("Bundle-ManifestVersion", "2"); //$NON-NLS-1$ //$NON-NLS-2$
-		attributes.putValue("Bundle-SymbolicName", "bundle" + id); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!emptyManifest) {
+			attributes.putValue("Bundle-ManifestVersion", "2"); //$NON-NLS-1$ //$NON-NLS-2$
+			attributes.putValue("Bundle-SymbolicName", "bundle" + id); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return manifest;
 	}
 }
