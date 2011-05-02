@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997-2007 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2008 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -148,7 +148,7 @@ public final class PrivilegedRunner implements ObjectCreator {
 	 * action type and using the given job parameters.
 	 * 
 	 * @author Valentin Valchev
-	 * @version $Revision: 1.3 $
+	 * @version $Revision: 1.1 $
 	 */
 	public static interface PrivilegedDispatcher {
 
