@@ -14,10 +14,7 @@ package org.eclipse.equinox.internal.region;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
@@ -39,16 +36,12 @@ final class BundleIdBasedRegion implements Region {
 
 	private static final String FILE_SCHEME = "file:";
 
-	// A concurrent data structure ensures the contains method does not need synchronisation.
-	private final ConcurrentMap<Long, Boolean> bundleIds = new ConcurrentHashMap<Long, Boolean>();
-
-	// This monitor guards bundleIds. bundleIds is a concurrent data structure and
-	// may be read without synchronisation, but updates need synchronising to avoid races.
-	// Note that this monitor also locks modifications and read operations on the RegionDigraph
-	// As well as bundle id modifications of other Regions in the digraph
+	// Note that this global digraph monitor locks modifications and read operations on the RegionDigraph
+	// This includes modifying and reading the bunlde ids included in this region
 	// It should be considered a global lock on the complete digraph.
 	private final Object globalUpdateMonitor;
 	private final AtomicLong globalTimeStamp;
+	private final Map<Long, Region> globalBundleToRegion;
 
 	private final String regionName;
 
@@ -58,19 +51,22 @@ final class BundleIdBasedRegion implements Region {
 
 	private final ThreadLocal<Region> threadLocal;
 
-	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal, Object globalUpdateMonitor, AtomicLong globalTimeStamp) {
+	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal, Object globalUpdateMonitor, AtomicLong globalTimeStamp, Map<Long, Region> globalBundleToRegion) {
 		if (regionName == null)
 			throw new IllegalArgumentException("The region name must not be null");
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null");
 		if (globalUpdateMonitor == null)
 			throw new IllegalArgumentException("The global update monitor must not be null");
+		if (globalBundleToRegion == null)
+			throw new IllegalArgumentException("The global bundle to region must not be null");
 		this.regionName = regionName;
 		this.regionDigraph = regionDigraph;
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
 		this.globalUpdateMonitor = globalUpdateMonitor;
 		this.globalTimeStamp = globalTimeStamp;
+		this.globalBundleToRegion = globalBundleToRegion;
 	}
 
 	/**
@@ -93,13 +89,11 @@ final class BundleIdBasedRegion implements Region {
 	// There is a global lock obtained to ensure consistency across the complete digraph
 	public void addBundle(long bundleId) throws BundleException {
 		synchronized (this.globalUpdateMonitor) {
-			// note that obtaining the Iterator for the digraph requires locking the digraph monitor; but we already have it
-			for (Region r : this.regionDigraph) {
-				if (!this.equals(r) && r.contains(bundleId)) {
-					throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION);
-				}
+			Region r = this.globalBundleToRegion.get(bundleId);
+			if (r != null && r != this) {
+				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION);
 			}
-			this.bundleIds.putIfAbsent(bundleId, Boolean.TRUE);
+			this.globalBundleToRegion.put(bundleId, this);
 			this.globalTimeStamp.incrementAndGet();
 		}
 
@@ -178,8 +172,8 @@ final class BundleIdBasedRegion implements Region {
 		if (bundleContext == null)
 			return null; // this region is not connected to an OSGi framework
 
-		// The following iteration is weakly consistent and will never throw ConcurrentModificationException.
-		for (long bundleId : this.bundleIds.keySet()) {
+		Set<Long> bundleIds = getBundleIds();
+		for (long bundleId : bundleIds) {
 			Bundle bundle = bundleContext.getBundle(bundleId);
 			if (bundle != null && symbolicName.equals(bundle.getSymbolicName()) && version.equals(bundle.getVersion())) {
 				return bundle;
@@ -195,22 +189,20 @@ final class BundleIdBasedRegion implements Region {
 		this.regionDigraph.connect(this, filter, headRegion);
 	}
 
-	// The contains methods must not acquire the updateMonitor in order to prevent
-	// deadlock since a thread holding the updateMonitor of one region can call
-	// checkBundleNotAssociatedWithAnotherRegion which can call the contains
-	// method on another region.
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean contains(long bundleId) {
-		return this.bundleIds.containsKey(bundleId);
+		synchronized (globalUpdateMonitor) {
+			return globalBundleToRegion.get(bundleId) == this;
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean contains(Bundle bundle) {
-		return this.bundleIds.containsKey(bundle.getBundleId());
+		return contains(bundle.getBundleId());
 	}
 
 	public int hashCode() {
@@ -247,7 +239,7 @@ final class BundleIdBasedRegion implements Region {
 	 */
 	public void removeBundle(long bundleId) {
 		synchronized (this.globalUpdateMonitor) {
-			this.bundleIds.remove(bundleId);
+			this.globalBundleToRegion.remove(bundleId);
 			this.globalTimeStamp.incrementAndGet();
 		}
 	}
@@ -263,7 +255,11 @@ final class BundleIdBasedRegion implements Region {
 	public Set<Long> getBundleIds() {
 		Set<Long> bundleIds = new HashSet<Long>();
 		synchronized (this.globalUpdateMonitor) {
-			bundleIds.addAll(this.bundleIds.keySet());
+			for (Map.Entry<Long, Region> entry : globalBundleToRegion.entrySet()) {
+				if (entry.getValue() == this) {
+					bundleIds.add(entry.getKey());
+				}
+			}
 		}
 		return bundleIds;
 	}

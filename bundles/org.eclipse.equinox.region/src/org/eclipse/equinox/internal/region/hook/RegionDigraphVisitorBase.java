@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.*;
-
 import java.util.*;
+import org.eclipse.equinox.region.*;
 
 /**
  * {@link RegionDigraphVisitorBase} is an abstract base class for {@link RegionDigraphVisitor} implementations in the
@@ -102,6 +101,11 @@ abstract class RegionDigraphVisitorBase<C> implements RegionDigraphVisitor {
 			if (contains(region, candidate)) {
 				allow(candidate);
 			}
+		}
+		if (allowed.containsAll(candidates)) {
+			// there is no need to traverse edges of this region,
+			// it contains all the remaining filtered candidates
+			return false;
 		}
 		return true;
 	}

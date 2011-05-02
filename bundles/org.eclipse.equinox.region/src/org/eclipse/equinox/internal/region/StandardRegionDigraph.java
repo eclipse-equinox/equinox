@@ -39,6 +39,12 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 	private final Set<Region> regions = new HashSet<Region>();
 
+	/*
+	 * bundleToRegion maps a given bundle id to the region for which it belongs.
+	 * this is a global map for all regions in the digraph
+	 */
+	private final Map<Long, Region> bundleToRegion = new HashMap<Long, Region>();
+
 	/* edges maps a given region to an immutable set of edges with their tail at the given region. To update
 	 * the edges for a region, the corresponding immutable set is replaced atomically. */
 	private final Map<Region, Set<FilteredRegion>> edges = new HashMap<Region, Set<FilteredRegion>>();
@@ -97,7 +103,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 * {@inheritDoc}
 	 */
 	public Region createRegion(String regionName) throws BundleException {
-		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.monitor, this.timeStamp);
+		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.monitor, this.timeStamp, this.bundleToRegion);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
 				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
@@ -223,14 +229,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 * {@inheritDoc}
 	 */
 	public Region getRegion(Bundle bundle) {
-		synchronized (this.monitor) {
-			for (Region region : this) {
-				if (region.contains(bundle)) {
-					return region;
-				}
-			}
-			return null;
-		}
+		return getRegion(bundle.getBundleId());
 	}
 
 	/**
@@ -238,12 +237,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	public Region getRegion(long bundleId) {
 		synchronized (this.monitor) {
-			for (Region region : this) {
-				if (region.contains(bundleId)) {
-					return region;
-				}
-			}
-			return null;
+			return bundleToRegion.get(bundleId);
 		}
 	}
 
@@ -406,6 +400,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 			}
 			this.regions.clear();
 			this.edges.clear();
+			this.bundleToRegion.clear();
 			for (Region original : filteredRegions.keySet()) {
 				Region copy = this.createRegion(original.getName());
 				for (Long id : original.getBundleIds()) {
