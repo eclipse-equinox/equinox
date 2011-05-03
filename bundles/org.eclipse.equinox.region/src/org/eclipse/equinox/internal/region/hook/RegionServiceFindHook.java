@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.*;
-
 import java.util.Collection;
+import org.eclipse.equinox.region.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.service.FindHook;
@@ -55,9 +54,9 @@ public final class RegionServiceFindHook implements FindHook {
 		references.retainAll(allowed);
 	}
 
-	private class Visitor extends RegionDigraphVisitorBase<ServiceReference<?>> {
+	class Visitor extends RegionDigraphVisitorBase<ServiceReference<?>> {
 
-		private Visitor(Collection<ServiceReference<?>> candidates) {
+		Visitor(Collection<ServiceReference<?>> candidates) {
 			super(candidates);
 		}
 

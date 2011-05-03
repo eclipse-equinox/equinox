@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.*;
-
 import java.util.Collection;
+import org.eclipse.equinox.region.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.hooks.bundle.FindHook;
@@ -61,9 +60,9 @@ public final class RegionBundleFindHook implements FindHook {
 		bundles.retainAll(allowed);
 	}
 
-	private class Visitor extends RegionDigraphVisitorBase<Bundle> {
+	class Visitor extends RegionDigraphVisitorBase<Bundle> {
 
-		private Visitor(Collection<Bundle> candidates) {
+		Visitor(Collection<Bundle> candidates) {
 			super(candidates);
 		}
 

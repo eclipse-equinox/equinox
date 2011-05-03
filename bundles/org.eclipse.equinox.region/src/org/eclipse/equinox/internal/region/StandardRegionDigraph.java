@@ -106,7 +106,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		Region region = new BundleIdBasedRegion(regionName, this, this.bundleContext, this.threadLocal, this.monitor, this.timeStamp, this.bundleToRegion);
 		synchronized (this.monitor) {
 			if (getRegion(regionName) != null) {
-				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION);
+				throw new BundleException("Region '" + regionName + "' already exists", BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			this.regions.add(region);
 			this.edges.put(region, EMPTY_EDGE_SET);
@@ -121,30 +121,30 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	public void connect(Region tailRegion, RegionFilter filter, Region headRegion) throws BundleException {
 		if (tailRegion == null)
-			throw new IllegalArgumentException("The tailRegion must not be null.");
+			throw new IllegalArgumentException("The tailRegion must not be null."); //$NON-NLS-1$
 		if (filter == null)
-			throw new IllegalArgumentException("The filter must not be null.");
+			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
 		if (headRegion == null)
-			throw new IllegalArgumentException("The headRegion must not be null.");
+			throw new IllegalArgumentException("The headRegion must not be null."); //$NON-NLS-1$
 		if (headRegion.equals(tailRegion)) {
-			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION);
+			throw new BundleException("Cannot connect region '" + headRegion + "' to itself", BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (tailRegion.getRegionDigraph() != this)
-			throw new IllegalArgumentException("The tailRegion does not belong to this digraph.");
+			throw new IllegalArgumentException("The tailRegion does not belong to this digraph."); //$NON-NLS-1$
 		if (headRegion.getRegionDigraph() != this)
-			throw new IllegalArgumentException("The headRegion does not belong to this digraph.");
+			throw new IllegalArgumentException("The headRegion does not belong to this digraph."); //$NON-NLS-1$
 
 		boolean tailAdded = false;
 		boolean headAdded = false;
 		synchronized (this.monitor) {
-			Set<FilteredRegion> edges = this.edges.get(tailRegion);
-			if (edges == null) {
-				edges = new HashSet<FilteredRegion>();
+			Set<FilteredRegion> connections = this.edges.get(tailRegion);
+			if (connections == null) {
+				connections = new HashSet<FilteredRegion>();
 			} else {
-				edges = new HashSet<FilteredRegion>(edges);
-				for (FilteredRegion edge : edges) {
+				connections = new HashSet<FilteredRegion>(connections);
+				for (FilteredRegion edge : connections) {
 					if (headRegion.equals(edge.getRegion())) {
-						throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION);
+						throw new BundleException("Region '" + tailRegion + "' is already connected to region '" + headRegion, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 			}
@@ -152,8 +152,8 @@ public final class StandardRegionDigraph implements RegionDigraph {
 			checkFilterDoesNotAllowExistingBundle(tailRegion, filter);
 			tailAdded = this.regions.add(tailRegion);
 			headAdded = this.regions.add(headRegion);
-			edges.add(new StandardFilteredRegion(headRegion, filter));
-			this.edges.put(tailRegion, Collections.unmodifiableSet(edges));
+			connections.add(new StandardFilteredRegion(headRegion, filter));
+			this.edges.put(tailRegion, Collections.unmodifiableSet(connections));
 			this.timeStamp.incrementAndGet();
 		}
 		if (tailAdded) {
@@ -164,7 +164,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		}
 	}
 
-	private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) throws BundleException {
+	private void checkFilterDoesNotAllowExistingBundle(Region tailRegion, RegionFilter filter) {
 		// TODO: enumerate the bundles in the region and check the filter does not allow any of them
 	}
 
@@ -190,13 +190,13 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		}
 	}
 
-	private static class StandardFilteredRegion implements FilteredRegion {
+	static class StandardFilteredRegion implements FilteredRegion {
 
 		private Region region;
 
 		private RegionFilter regionFilter;
 
-		private StandardFilteredRegion(Region region, RegionFilter regionFilter) {
+		StandardFilteredRegion(Region region, RegionFilter regionFilter) {
 			this.region = region;
 			this.regionFilter = regionFilter;
 		}
@@ -246,7 +246,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	 */
 	public void removeRegion(Region region) {
 		if (region == null)
-			throw new IllegalArgumentException("The region cannot be null.");
+			throw new IllegalArgumentException("The region cannot be null."); //$NON-NLS-1$
 		notifyRemoving(region);
 		synchronized (this.monitor) {
 			this.regions.remove(region);
@@ -273,31 +273,31 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		synchronized (this.monitor) {
 			StringBuffer s = new StringBuffer();
 			boolean first = true;
-			s.append("RegionDigraph{");
+			s.append("RegionDigraph{"); //$NON-NLS-1$
 			for (Region r : this) {
 				if (!first) {
-					s.append(", ");
+					s.append(", "); //$NON-NLS-1$
 				}
 				s.append(r);
 				first = false;
 			}
-			s.append("}");
+			s.append("}"); //$NON-NLS-1$
 
-			s.append("[");
+			s.append("["); //$NON-NLS-1$
 			first = true;
 			for (Region r : this) {
 				Set<FilteredRegion> edgeSet = this.edges.get(r);
 				if (edgeSet != null) {
 					for (FilteredRegion filteredRegion : edgeSet) {
 						if (!first) {
-							s.append(", ");
+							s.append(", "); //$NON-NLS-1$
 						}
-						s.append(r + "->" + filteredRegion.getRegion());
+						s.append(r + "->" + filteredRegion.getRegion()); //$NON-NLS-1$
 						first = false;
 					}
 				}
 			}
-			s.append("]");
+			s.append("]"); //$NON-NLS-1$
 			return s.toString();
 		}
 	}
@@ -389,14 +389,14 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 	private void replace(RegionDigraph digraph, boolean check) throws BundleException {
 		if (!(digraph instanceof StandardRegionDigraph))
-			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName());
+			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		StandardRegionDigraph replacement = (StandardRegionDigraph) digraph;
 		if (check && replacement.origin != this)
-			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph.");
+			throw new IllegalArgumentException("The replacement digraph is not a copy of this digraph."); //$NON-NLS-1$
 		Map<Region, Set<FilteredRegion>> filteredRegions = replacement.getFilteredRegions();
 		synchronized (this.monitor) {
 			if (check && this.timeStamp.get() != replacement.originTimeStamp) {
-				throw new BundleException("The origin timestamp has changed since the replacement copy was created.", BundleException.INVALID_OPERATION);
+				throw new BundleException("The origin timestamp has changed since the replacement copy was created.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 			}
 			this.regions.clear();
 			this.edges.clear();

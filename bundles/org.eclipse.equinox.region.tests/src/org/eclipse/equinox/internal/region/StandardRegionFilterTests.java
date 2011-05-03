@@ -1,6 +1,4 @@
-/*
- * This file is part of the Eclipse Virgo project.
- *
+/*******************************************************************************
  * Copyright (c) 2011 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    VMware Inc. - initial contribution
- */
+ *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
+ *******************************************************************************/
 
 package org.eclipse.equinox.internal.region;
 
@@ -21,7 +19,8 @@ import java.util.*;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.region.RegionFilter;
 import org.eclipse.virgo.teststubs.osgi.framework.*;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -65,10 +64,6 @@ public class StandardRegionFilterTests {
 		EasyMock.expect(barPackage.getNamespace()).andReturn(BundleRevision.PACKAGE_NAMESPACE).anyTimes();
 		EasyMock.expect(barPackage.getAttributes()).andReturn(barAttrs).anyTimes();
 		EasyMock.replay(barPackage);
-	}
-
-	@After
-	public void tearDown() throws Exception {
 	}
 
 	private RegionFilter createBundleFilter(String bundleSymbolicName, Version bundleVersion) throws InvalidSyntaxException {

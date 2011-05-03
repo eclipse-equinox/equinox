@@ -34,9 +34,9 @@ final class RegionObjectNameCreator {
 
 	ObjectName getRegionObjectName(String regionName) {
 		try {
-			String name = this.domain + ":type=Region,name=" + regionName;
+			String name = this.domain + ":type=Region,name=" + regionName; //$NON-NLS-1$
 			if (frameworkUUID != null)
-				name += ",frameworkUUID=" + frameworkUUID;
+				name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 			return new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();

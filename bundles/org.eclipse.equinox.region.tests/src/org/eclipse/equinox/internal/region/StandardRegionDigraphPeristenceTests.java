@@ -1,6 +1,4 @@
 /*******************************************************************************
- * This file is part of the Virgo Web Server.
- *
  * Copyright (c) 2011 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -53,11 +51,6 @@ public class StandardRegionDigraphPeristenceTests {
 				region.addBundle(b);
 			}
 		}
-	}
-
-	@After
-	public void tearDown() throws Exception {
-
 	}
 
 	@Test

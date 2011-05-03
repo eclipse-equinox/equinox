@@ -25,7 +25,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
-	private final static String ALL_SPEC = "(|(!(all=*))(all=*))";
+	private final static String ALL_SPEC = "(|(!(all=*))(all=*))"; //$NON-NLS-1$
 
 	private final static Filter ALL;
 	static {
@@ -44,9 +44,9 @@ final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
 	public RegionFilterBuilder allow(String namespace, String filter) throws InvalidSyntaxException {
 		if (namespace == null)
-			throw new IllegalArgumentException("The namespace must not be null.");
+			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
 		if (filter == null)
-			throw new IllegalArgumentException("The filter must not be null.");
+			throw new IllegalArgumentException("The filter must not be null."); //$NON-NLS-1$
 		synchronized (this.monitor) {
 			Collection<Filter> namespaceFilters = policy.get(namespace);
 			if (namespaceFilters == null) {
@@ -61,7 +61,7 @@ final class StandardRegionFilterBuilder implements RegionFilterBuilder {
 
 	public RegionFilterBuilder allowAll(String namespace) {
 		if (namespace == null)
-			throw new IllegalArgumentException("The namespace must not be null.");
+			throw new IllegalArgumentException("The namespace must not be null."); //$NON-NLS-1$
 		synchronized (this.monitor) {
 			Collection<Filter> namespaceFilters = policy.get(namespace);
 			if (namespaceFilters == null) {

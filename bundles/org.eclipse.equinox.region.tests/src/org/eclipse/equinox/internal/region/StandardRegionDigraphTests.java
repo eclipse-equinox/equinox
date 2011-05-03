@@ -1,6 +1,4 @@
 /*******************************************************************************
- * This file is part of the Virgo Web Server.
- *
  * Copyright (c) 2011 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -66,7 +64,7 @@ public class StandardRegionDigraphTests {
 		this.mockBundle = EasyMock.createMock(Bundle.class);
 	}
 
-	private void setDefaultFilters() throws InvalidSyntaxException {
+	private void setDefaultFilters() {
 		this.regionFilter1 = digraph.createRegionFilterBuilder().build();
 		this.regionFilter2 = digraph.createRegionFilterBuilder().build();
 	}
@@ -90,7 +88,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testConnect() throws BundleException, InvalidSyntaxException {
+	public void testConnect() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -114,7 +112,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test(expected = BundleException.class)
-	public void testConnectLoop() throws BundleException, InvalidSyntaxException {
+	public void testConnectLoop() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -122,7 +120,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test(expected = BundleException.class)
-	public void testDuplicateConnection() throws BundleException, InvalidSyntaxException {
+	public void testDuplicateConnection() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -131,7 +129,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testGetEdges() throws BundleException, InvalidSyntaxException {
+	public void testGetEdges() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -155,7 +153,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testRemoveRegion() throws BundleException, InvalidSyntaxException {
+	public void testRemoveRegion() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -169,7 +167,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testGetRegions() throws BundleException, InvalidSyntaxException {
+	public void testGetRegions() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 
@@ -303,7 +301,7 @@ public class StandardRegionDigraphTests {
 	}
 
 	@Test
-	public void testGetHooks() throws InvalidSyntaxException, BundleException {
+	public void testGetHooks() throws BundleException {
 		setDefaultFilters();
 		replayMocks();
 

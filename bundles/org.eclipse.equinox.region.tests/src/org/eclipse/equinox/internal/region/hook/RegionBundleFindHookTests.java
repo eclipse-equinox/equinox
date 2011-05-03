@@ -86,6 +86,7 @@ public class RegionBundleFindHookTests {
 
 	@After
 	public void tearDown() throws Exception {
+		// nothing
 	}
 
 	@Test

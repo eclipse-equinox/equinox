@@ -50,11 +50,11 @@ public class BundleIdBasedRegionTests {
 
 	private BundleContext mockBundleContext;
 
-	private Region mockRegion;
+	Region mockRegion;
 
-	private Region mockRegion2;
+	Region mockRegion2;
 
-	private RegionFilter mockRegionFilter;
+	RegionFilter mockRegionFilter;
 
 	private ThreadLocal<Region> threadLocal;
 	private Object globalUpdateMonitor = new Object();
@@ -92,6 +92,7 @@ public class BundleIdBasedRegionTests {
 
 			@Override
 			public void remove() {
+				// nothing
 			}
 		};
 		this.mockGraph = EasyMock.createMock(RegionDigraph.class);
@@ -205,6 +206,7 @@ public class BundleIdBasedRegionTests {
 
 			@Override
 			public void remove() {
+				// nothing
 			}
 		};
 		EasyMock.expect(this.mockGraph.iterator()).andReturn(this.regionIterator).anyTimes();
@@ -243,7 +245,7 @@ public class BundleIdBasedRegionTests {
 	}
 
 	@Test
-	public void testDoesNotContain() throws BundleException {
+	public void testDoesNotContain() {
 		defaultSetUp();
 
 		Region r = new BundleIdBasedRegion(REGION_NAME, this.mockGraph, this.mockBundleContext, this.threadLocal, this.globalUpdateMonitor, this.globalTimeStamp, this.globalBundleToRegion);

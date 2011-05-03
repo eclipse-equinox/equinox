@@ -72,13 +72,13 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		this.frameworkUUID = bundleContext.getProperty(Constants.FRAMEWORK_UUID);
 		this.regionObjectNameCreator = new RegionObjectNameCreator(domain, this.frameworkUUID);
 		try {
-			String name = this.domain + ":type=RegionDigraph";
+			String name = this.domain + ":type=RegionDigraph"; //$NON-NLS-1$
 			if (frameworkUUID != null)
-				name += ",frameworkUUID=" + frameworkUUID;
+				name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 			mbeanName = new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Invalid domain name '" + this.domain + "'", e);
+			throw new RuntimeException("Invalid domain name '" + this.domain + "'", e); //$NON-NLS-1$//$NON-NLS-2$
 		}
 
 	}
@@ -121,8 +121,9 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 			this.mbeanServer.unregisterMBean(this.mbeanName);
 		} catch (MBeanRegistrationException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Problem unregistering mbean", e);
+			throw new RuntimeException("Problem unregistering mbean", e); //$NON-NLS-1$
 		} catch (InstanceNotFoundException e) {
+			// Something else unregistered the bean
 		}
 	}
 
@@ -137,7 +138,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("MBean registration failed", e);
+			throw new RuntimeException("MBean registration failed", e); //$NON-NLS-1$
 		}
 	}
 
@@ -161,7 +162,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		return this.manageableRegions.get(regionName);
 	}
 
-	private void addRegion(Region region) {
+	void addRegion(Region region) {
 		StandardManageableRegion manageableRegion = new StandardManageableRegion(region, this, this.regionDigraph);
 		safelyRegisterMBean(manageableRegion, this.regionObjectNameCreator.getRegionObjectName(region.getName()));
 		synchronized (this.monitor) {
@@ -169,7 +170,7 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		}
 	}
 
-	private void removeRegion(Region region) {
+	void removeRegion(Region region) {
 		removeRegion(region.getName());
 	}
 
@@ -181,8 +182,9 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 			this.mbeanServer.unregisterMBean(this.regionObjectNameCreator.getRegionObjectName(regionName));
 		} catch (MBeanRegistrationException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Problem unregistering mbean", e);
+			throw new RuntimeException("Problem unregistering mbean", e); //$NON-NLS-1$
 		} catch (InstanceNotFoundException e) {
+			// Something else unregistered the bean
 		}
 	}
 

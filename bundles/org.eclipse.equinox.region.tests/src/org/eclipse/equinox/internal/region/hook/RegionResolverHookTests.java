@@ -98,6 +98,7 @@ public class RegionResolverHookTests {
 
 	@After
 	public void tearDown() throws Exception {
+		// nothing
 	}
 
 	@Test
@@ -323,22 +324,22 @@ public class RegionResolverHookTests {
 		return stubBundle;
 	}
 
-	private BundleRequirement bundleRequirement(String bundleSymbolicName) {
+	BundleRequirement bundleRequirement(String bundleSymbolicName) {
 		return new StubBundleRequirement(bundle(bundleSymbolicName));
 	}
 
-	private Bundle bundle(String bundleSymbolicName) {
+	Bundle bundle(String bundleSymbolicName) {
 		Bundle bundleA = this.bundles.get(bundleSymbolicName);
 		return bundleA;
 	}
 
-	private final class StubPackageCapability implements BundleCapability {
+	final class StubPackageCapability implements BundleCapability {
 
 		private final String bundleSymbolicName;
 
 		private final String packageName;
 
-		private StubPackageCapability(String bundleSymbolicName, String packageName) {
+		StubPackageCapability(String bundleSymbolicName, String packageName) {
 			this.bundleSymbolicName = bundleSymbolicName;
 			this.packageName = packageName;
 		}
@@ -413,11 +414,11 @@ public class RegionResolverHookTests {
 
 	}
 
-	private final class StubBundleCapability implements BundleCapability {
+	final class StubBundleCapability implements BundleCapability {
 
 		private final String bundleSymbolicName;
 
-		private StubBundleCapability(String bundleSymbolicName) {
+		StubBundleCapability(String bundleSymbolicName) {
 			this.bundleSymbolicName = bundleSymbolicName;
 		}
 
@@ -477,11 +478,11 @@ public class RegionResolverHookTests {
 
 	}
 
-	private final class StubBundleRequirement implements BundleRequirement {
+	final class StubBundleRequirement implements BundleRequirement {
 
 		private final StubBundleRevision bundleRevision;
 
-		private StubBundleRequirement(Bundle bundle) {
+		StubBundleRequirement(Bundle bundle) {
 			this.bundleRevision = new StubBundleRevision(bundle);
 		}
 
@@ -512,11 +513,11 @@ public class RegionResolverHookTests {
 
 	}
 
-	private final class StubBundleRevision implements BundleRevision {
+	final class StubBundleRevision implements BundleRevision {
 
 		private final Bundle bundle;
 
-		private StubBundleRevision(Bundle bundle) {
+		StubBundleRevision(Bundle bundle) {
 			this.bundle = bundle;
 		}
 

@@ -27,13 +27,13 @@ import org.osgi.framework.*;
  */
 final class StandardRegionDigraphPersistence implements RegionDigraphPersistence {
 
-	private static final String PERSISTENT_NAME = "equinox region digraph";
+	private static final String PERSISTENT_NAME = "equinox region digraph"; //$NON-NLS-1$
 
 	private static final int PERSISTENT_VERSION = 1;
 
 	static void writeRegionDigraph(DataOutputStream out, RegionDigraph digraph) throws IOException {
 		if (!(digraph instanceof StandardRegionDigraph))
-			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName());
+			throw new IllegalArgumentException("Only digraphs of type '" + StandardRegionDigraph.class.getName() + "' are allowed: " + digraph.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		Map<Region, Set<FilteredRegion>> filteredRegions = ((StandardRegionDigraph) digraph).getFilteredRegions();
 
 		try {
@@ -104,11 +104,11 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		// Read and check the persistent name and version
 		String persistentName = in.readUTF();
 		if (!PERSISTENT_NAME.equals(persistentName)) {
-			throw new IllegalArgumentException("Input stream does not represent a digraph");
+			throw new IllegalArgumentException("Input stream does not represent a digraph"); //$NON-NLS-1$
 		}
 		int persistentVersion = in.readInt();
 		if (PERSISTENT_VERSION != persistentVersion) {
-			throw new IllegalArgumentException("Input stream contains a digraph with an incompatible version '" + persistentVersion + "'");
+			throw new IllegalArgumentException("Input stream contains a digraph with an incompatible version '" + persistentVersion + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		// read the number of regions
 		int numRegions = in.readInt();
@@ -147,12 +147,12 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		String tailName = in.readUTF();
 		Region tail = digraph.getRegion(tailName);
 		if (tail == null)
-			throw new IOException("Could not find tail region: " + tailName);
+			throw new IOException("Could not find tail region: " + tailName); //$NON-NLS-1$
 		// read head region name
 		String headName = in.readUTF();
 		Region head = digraph.getRegion(headName);
 		if (head == null)
-			throw new IOException("Could not find head region: " + headName);
+			throw new IOException("Could not find head region: " + headName); //$NON-NLS-1$
 		// read the sharing policy
 		RegionFilterBuilder builder = digraph.createRegionFilterBuilder();
 		// read the number of name spaces
@@ -180,11 +180,11 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		} catch (InvalidSyntaxException e) {
 			// This should never happen since the filters were valid on save
 			// propagate as IllegalStateException
-			throw new IllegalStateException("Internal error reading a filter", e);
+			throw new IllegalStateException("Internal error reading a filter", e); //$NON-NLS-1$
 		} catch (BundleException e) {
 			// This should never happen since the digraph was valid on save
 			// propagate as IllegalStateException
-			throw new IllegalStateException("Internal error creating the digraph", e);
+			throw new IllegalStateException("Internal error creating the digraph", e); //$NON-NLS-1$
 		}
 	}
 

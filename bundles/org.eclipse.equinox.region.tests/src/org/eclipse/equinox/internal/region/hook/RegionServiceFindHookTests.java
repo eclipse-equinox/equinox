@@ -94,6 +94,7 @@ public class RegionServiceFindHookTests {
 
 	@After
 	public void tearDown() throws Exception {
+		// nothing
 	}
 
 	@Test

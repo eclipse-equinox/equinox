@@ -34,9 +34,9 @@ import org.osgi.framework.hooks.resolver.ResolverHookFactory;
  */
 public final class RegionManager implements BundleActivator {
 
-	private static final String REGION_KERNEL = "org.eclipse.equinox.region.kernel";
-	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";
-	private static final String DIGRAPH_FILE = "digraph";
+	private static final String REGION_KERNEL = "org.eclipse.equinox.region.kernel"; //$NON-NLS-1$
+	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain"; //$NON-NLS-1$
+	private static final String DIGRAPH_FILE = "digraph"; //$NON-NLS-1$
 
 	Collection<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>();
 

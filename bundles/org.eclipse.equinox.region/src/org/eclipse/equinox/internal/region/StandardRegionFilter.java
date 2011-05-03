@@ -18,12 +18,12 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
 final class StandardRegionFilter implements RegionFilter {
-	private static final String BUNDLE_ID_ATTR = "id";
+	private static final String BUNDLE_ID_ATTR = "id"; //$NON-NLS-1$
 	private final Map<String, Collection<Filter>> filters;
 
 	StandardRegionFilter(Map<String, Collection<Filter>> filters) {
 		if (filters == null) {
-			throw new IllegalArgumentException("filters must not be null.");
+			throw new IllegalArgumentException("filters must not be null."); //$NON-NLS-1$
 		}
 		// must perform deep copy to avoid external changes
 		this.filters = new HashMap<String, Collection<Filter>>((int) ((filters.size() / 0.75) + 1));
@@ -77,7 +77,7 @@ final class StandardRegionFilter implements RegionFilter {
 		return match(filters.get(VISIBLE_ALL_NAMESPACE), bundleAttributes);
 	}
 
-	private boolean match(Collection<Filter> filters, Map<String, ?> attrs) {
+	private static boolean match(Collection<Filter> filters, Map<String, ?> attrs) {
 		if (filters == null)
 			return false;
 		for (Filter filter : filters) {
@@ -87,7 +87,7 @@ final class StandardRegionFilter implements RegionFilter {
 		return false;
 	}
 
-	private boolean match(Collection<Filter> filters, ServiceReference<?> service) {
+	private static boolean match(Collection<Filter> filters, ServiceReference<?> service) {
 		if (filters == null)
 			return false;
 		for (Filter filter : filters) {

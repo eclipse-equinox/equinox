@@ -11,5 +11,5 @@
 package pkg1.a;
 
 public class A {
-
+	// nothing
 }

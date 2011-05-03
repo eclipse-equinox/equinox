@@ -1,6 +1,4 @@
-/*
- * This file is part of the Eclipse Virgo project.
- *
+/*******************************************************************************
  * Copyright (c) 2011 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +6,8 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    VMware Inc. - initial contribution
- */
+ *    SpringSource, a division of VMware - initial API and implementation and/or initial documentation
+ *******************************************************************************/
 
 package org.eclipse.equinox.internal.region.hook;
 
@@ -56,6 +54,7 @@ public class RegionBundleEventHookTests {
 
 	@After
 	public void tearDown() throws Exception {
+		// nothing
 	}
 
 	@Test
@@ -64,6 +63,7 @@ public class RegionBundleEventHookTests {
 
 			@Override
 			public void find(BundleContext context, Collection<Bundle> bundles) {
+				// nothing
 			}
 		};
 		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, this.mockFindHook, this.threadLocal);

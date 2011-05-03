@@ -30,11 +30,11 @@ import org.osgi.framework.*;
  */
 final class BundleIdBasedRegion implements Region {
 
-	private static final String REGION_LOCATION_DELIMITER = "@";
+	private static final String REGION_LOCATION_DELIMITER = "@"; //$NON-NLS-1$
 
-	private static final String REFERENCE_SCHEME = "reference:";
+	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
 
-	private static final String FILE_SCHEME = "file:";
+	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 
 	// Note that this global digraph monitor locks modifications and read operations on the RegionDigraph
 	// This includes modifying and reading the bunlde ids included in this region
@@ -53,13 +53,13 @@ final class BundleIdBasedRegion implements Region {
 
 	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal, Object globalUpdateMonitor, AtomicLong globalTimeStamp, Map<Long, Region> globalBundleToRegion) {
 		if (regionName == null)
-			throw new IllegalArgumentException("The region name must not be null");
+			throw new IllegalArgumentException("The region name must not be null"); //$NON-NLS-1$
 		if (regionDigraph == null)
-			throw new IllegalArgumentException("The region digraph must not be null");
+			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
 		if (globalUpdateMonitor == null)
-			throw new IllegalArgumentException("The global update monitor must not be null");
+			throw new IllegalArgumentException("The global update monitor must not be null"); //$NON-NLS-1$
 		if (globalBundleToRegion == null)
-			throw new IllegalArgumentException("The global bundle to region must not be null");
+			throw new IllegalArgumentException("The global bundle to region must not be null"); //$NON-NLS-1$
 		this.regionName = regionName;
 		this.regionDigraph = regionDigraph;
 		this.bundleContext = bundleContext;
@@ -91,7 +91,7 @@ final class BundleIdBasedRegion implements Region {
 		synchronized (this.globalUpdateMonitor) {
 			Region r = this.globalBundleToRegion.get(bundleId);
 			if (r != null && r != this) {
-				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION);
+				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			this.globalBundleToRegion.put(bundleId, this);
 			this.globalTimeStamp.incrementAndGet();
@@ -104,7 +104,7 @@ final class BundleIdBasedRegion implements Region {
 	 */
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
 		if (this.bundleContext == null)
-			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION);
+			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		setRegionThreadLocal();
 		try {
 			return this.bundleContext.installBundle(this.regionName + REGION_LOCATION_DELIMITER + location, input);
@@ -118,7 +118,7 @@ final class BundleIdBasedRegion implements Region {
 	 */
 	public Bundle installBundle(String location) throws BundleException {
 		if (this.bundleContext == null)
-			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION);
+			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		setRegionThreadLocal();
 		try {
 			return this.bundleContext.installBundle(this.regionName + REGION_LOCATION_DELIMITER + location, openBundleStream(location));
@@ -149,15 +149,15 @@ final class BundleIdBasedRegion implements Region {
 			return new URL(absoluteBundleReferenceUriString).openStream();
 
 		} catch (MalformedURLException e) {
-			throw new BundleException("Location '" + location + "' resulted in an invalid bundle URI '" + absoluteBundleReferenceUriString + "'", e);
+			throw new BundleException("Location '" + location + "' resulted in an invalid bundle URI '" + absoluteBundleReferenceUriString + "'", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		} catch (IOException e) {
-			throw new BundleException("Location '" + location + "' referred to an invalid bundle at URI '" + absoluteBundleReferenceUriString + "'", e);
+			throw new BundleException("Location '" + location + "' referred to an invalid bundle at URI '" + absoluteBundleReferenceUriString + "'", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 
 	private String getAbsoluteUriString(String location) throws BundleException {
 		if (!location.startsWith(FILE_SCHEME)) {
-			throw new BundleException("Cannot install from location '" + location + "' which did not start with '" + FILE_SCHEME + "'");
+			throw new BundleException("Cannot install from location '" + location + "' which did not start with '" + FILE_SCHEME + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		String filePath = location.substring(FILE_SCHEME.length());

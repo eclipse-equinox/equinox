@@ -13,10 +13,7 @@ package org.eclipse.equinox.region;
 
 import java.util.Collection;
 import java.util.Map;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -59,7 +56,7 @@ public interface RegionFilter {
 	 * Name space for sharing services. The filters specified in this name space will be used to match
 	 * {@link ServiceReference services}.
 	 */
-	public static final String VISIBLE_SERVICE_NAMESPACE = "org.eclipse.equinox.allow.service";
+	public static final String VISIBLE_SERVICE_NAMESPACE = "org.eclipse.equinox.allow.service"; //$NON-NLS-1$
 
 	/**
 	 * Name space for sharing bundles. The filters specified in this name space will be use to match against a bundle's
@@ -67,13 +64,13 @@ public interface RegionFilter {
 	 * used for the symbolic name and the attribute {@link Constants#BUNDLE_VERSION_ATTRIBUTE bundle-version} is used
 	 * for the bundle version.
 	 */
-	public static final String VISIBLE_BUNDLE_NAMESPACE = "org.eclipse.equinox.allow.bundle";
+	public static final String VISIBLE_BUNDLE_NAMESPACE = "org.eclipse.equinox.allow.bundle"; //$NON-NLS-1$
 
 	/**
 	 * Name space for matching against all capabilities. The filters specified in this name space will be used to match
 	 * all capabilities.
 	 */
-	public static final String VISIBLE_ALL_NAMESPACE = "org.eclipse.equinox.allow.all";
+	public static final String VISIBLE_ALL_NAMESPACE = "org.eclipse.equinox.allow.all"; //$NON-NLS-1$
 
 	/**
 	 * Determines whether this filter allows the given bundle

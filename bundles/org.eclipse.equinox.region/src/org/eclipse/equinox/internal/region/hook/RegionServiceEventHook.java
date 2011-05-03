@@ -11,9 +11,8 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
-import org.eclipse.equinox.region.RegionDigraph;
-
 import java.util.*;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.service.EventHook;
 import org.osgi.framework.hooks.service.FindHook;
@@ -55,7 +54,7 @@ public final class RegionServiceEventHook implements EventHook {
 	private boolean find(BundleContext finderBundleContext, ServiceReference<?> candidateServiceReference) {
 		Collection<ServiceReference<?>> candidates = new ArrayList<ServiceReference<?>>();
 		candidates.add(candidateServiceReference);
-		this.serviceFindHook.find(finderBundleContext, "", "", false, candidates);
+		this.serviceFindHook.find(finderBundleContext, "", "", false, candidates); //$NON-NLS-1$ //$NON-NLS-2$
 		return !candidates.isEmpty();
 	}
 

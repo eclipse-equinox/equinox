@@ -63,7 +63,7 @@ public class EquinoxStateHelper {
 		}
 		Long result = equinoxSupport == null ? null : equinoxSupport.getBundleId(revision);
 		if (result == null)
-			throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", revision));
+			throw new RuntimeException(String.format("Cannot determine bundle id of BundleRevision '%s'", revision)); //$NON-NLS-1$
 		return result;
 	}
 

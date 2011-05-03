@@ -11,17 +11,10 @@
 
 package org.eclipse.equinox.internal.region.hook;
 
+import java.util.*;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.EventHook;
 import org.osgi.framework.hooks.bundle.FindHook;
 
@@ -88,7 +81,7 @@ public final class RegionBundleEventHook implements EventHook {
 				installRegion.addBundle(eventBundle);
 			} catch (BundleException e) {
 				e.printStackTrace();
-				throw new RuntimeException("Bundle could not be added to region", e);
+				throw new RuntimeException("Bundle could not be added to region", e); //$NON-NLS-1$
 			}
 		} else {
 			Region originRegion = this.regionDigraph.getRegion(originBundle);
@@ -97,7 +90,7 @@ public final class RegionBundleEventHook implements EventHook {
 					originRegion.addBundle(eventBundle);
 				} catch (BundleException e) {
 					e.printStackTrace();
-					throw new RuntimeException("Bundle could not be added to region", e);
+					throw new RuntimeException("Bundle could not be added to region", e); //$NON-NLS-1$
 				}
 			}
 		}
