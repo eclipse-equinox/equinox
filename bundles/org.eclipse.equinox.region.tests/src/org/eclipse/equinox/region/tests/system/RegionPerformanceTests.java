@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
-import java.util.Collection;
 import org.eclipse.core.tests.harness.PerformanceTestRunner;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
@@ -84,7 +83,7 @@ public class RegionPerformanceTests extends AbstractRegionSystemTest {
 		PerformanceTestRunner runner = new PerformanceTestRunner() {
 			protected void test() {
 				try {
-					Collection<ServiceReference<RegionDigraph>> refs = context.getServiceReferences(RegionDigraph.class, null);
+					context.getServiceReferences(RegionDigraph.class, null);
 				} catch (InvalidSyntaxException e) {
 					fail(e.getMessage());
 				}
