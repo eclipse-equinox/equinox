@@ -163,6 +163,48 @@ public class RegionResolverHookTests {
 	}
 
 	@Test
+	public void testResolveSingletonInSameRegions() {
+		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		collisionCandidates.add(bundleCapability(BUNDLE_B));
+		collisionCandidates.add(bundleCapability(BUNDLE_C));
+		collisionCandidates.add(bundleCapability(BUNDLE_D));
+		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
+		assertEquals("Wrong number of collitions", 0, collisionCandidates.size());
+	}
+
+	@Test
+	public void testResolveSingletonInDifferentRegions() throws BundleException {
+		region(REGION_A).addBundle(bundle(BUNDLE_X));
+		BundleCapability collision = bundleCapability(BUNDLE_X);
+		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		collisionCandidates.add(collision);
+		collisionCandidates.add(bundleCapability(BUNDLE_B));
+		collisionCandidates.add(bundleCapability(BUNDLE_C));
+		collisionCandidates.add(bundleCapability(BUNDLE_D));
+		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
+		assertEquals("Wrong number of collitions", 1, collisionCandidates.size());
+		collisionCandidates.contains(collision);
+	}
+
+	@Test
+	public void testResolveSingletonConnectedRegions() throws BundleException, InvalidSyntaxException {
+		RegionFilter filter = createBundleFilter(BUNDLE_B, BUNDLE_VERSION);
+		region(REGION_A).connectRegion(region(REGION_B), filter);
+		region(REGION_A).addBundle(bundle(BUNDLE_X));
+		BundleCapability collisionX = bundleCapability(BUNDLE_X);
+		BundleCapability collisionB = bundleCapability(BUNDLE_B);
+		List<BundleCapability> collisionCandidates = new ArrayList<BundleCapability>();
+		collisionCandidates.add(collisionX);
+		collisionCandidates.add(collisionB);
+		collisionCandidates.add(bundleCapability(BUNDLE_C));
+		collisionCandidates.add(bundleCapability(BUNDLE_D));
+		this.resolverHook.filterSingletonCollisions(bundleCapability(BUNDLE_A), collisionCandidates);
+		assertEquals("Wrong number of collitions", 2, collisionCandidates.size());
+		collisionCandidates.contains(collisionX);
+		collisionCandidates.contains(collisionB);
+	}
+
+	@Test
 	public void testResolveTransitive() throws BundleException, InvalidSyntaxException {
 		region(REGION_A).connectRegion(region(REGION_B), createFilter(PACKAGE_C));
 		region(REGION_B).connectRegion(region(REGION_C), createFilter(PACKAGE_C));
@@ -204,7 +246,6 @@ public class RegionResolverHookTests {
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_B, PACKAGE_DUP)));
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_C, PACKAGE_DUP)));
 		assertTrue(testCandidates.contains(packageCapability(BUNDLE_D, PACKAGE_DUP)));
-
 	}
 
 	@Test

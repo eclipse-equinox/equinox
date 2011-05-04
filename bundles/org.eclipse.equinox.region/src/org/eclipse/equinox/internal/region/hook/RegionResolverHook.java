@@ -38,10 +38,13 @@ final class RegionResolverHook implements ResolverHook {
 
 	@Override
 	public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
-		BundleRevision requirer = requirement.getRevision();
+		filterCandidates(requirement.getRevision(), candidates, false);
+	}
+
+	private void filterCandidates(BundleRevision requirer, Collection<BundleCapability> candidates, boolean singleton) {
 		try {
 			if (DEBUG) {
-				debugEntry(requirer, candidates);
+				debugEntry(requirer, candidates, singleton);
 			}
 
 			if (getBundleId(requirer) == 0L) {
@@ -50,7 +53,10 @@ final class RegionResolverHook implements ResolverHook {
 
 			Region requirerRegion = getRegion(requirer);
 			if (requirerRegion == null) {
-				candidates.clear();
+				// for singleton check; keep all collisions
+				if (!singleton) {
+					candidates.clear();
+				}
 				return;
 			}
 
@@ -118,11 +124,11 @@ final class RegionResolverHook implements ResolverHook {
 
 	@Override
 	public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
-		collisionCandidates.clear(); // XXX temporary hack in lieu of Borislav's changes
+		filterCandidates(singleton.getRevision(), collisionCandidates, true);
 	}
 
-	private void debugEntry(BundleRevision requirer, Collection<BundleCapability> candidates) {
-		System.out.println("Requirer: " + requirer.getSymbolicName() + "_" + requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	private void debugEntry(BundleRevision requirer, Collection<BundleCapability> candidates, boolean singleton) {
+		System.out.println((singleton ? "Singleton" : "Requirer: ") + requirer.getSymbolicName() + "_" + requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		System.out.println("  Candidates: "); //$NON-NLS-1$
 		Iterator<BundleCapability> i = candidates.iterator();
 		while (i.hasNext()) {

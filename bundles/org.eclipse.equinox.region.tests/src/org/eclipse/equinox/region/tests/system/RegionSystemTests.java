@@ -15,6 +15,9 @@ import java.util.*;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class RegionSystemTests extends AbstractRegionSystemTest {
@@ -266,6 +269,105 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertNotNull("The sc1 bundle never found the service.", sc1Tracker.waitForService(2000));
 		cp2Tracker.close();
 		sc1Tracker.close();
+	}
+
+	private ServiceRegistration<ResolverHookFactory> disableAllResolves() {
+		return getContext().registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+
+			@Override
+			public ResolverHook begin(Collection<BundleRevision> triggers) {
+				return new ResolverHook() {
+
+					@Override
+					public void filterSingletonCollisions(BundleCapability singleton, Collection<BundleCapability> collisionCandidates) {
+						// nothing;
+					}
+
+					@Override
+					public void filterResolvable(Collection<BundleRevision> candidates) {
+						// prevent all resolves
+						candidates.clear();
+					}
+
+					@Override
+					public void filterMatches(BundleRequirement requirement, Collection<BundleCapability> candidates) {
+						// nothing;
+					}
+
+					@Override
+					public void end() {
+						// TODO Auto-generated method stub
+
+					}
+				};
+			}
+		}, null);
+	}
+
+	public void testSingletons() throws BundleException {
+		Region region1 = digraph.createRegion(getName() + "_1");
+		Region region2 = digraph.createRegion(getName() + "_2");
+
+		// first install into the same region; higher version 2 should resolve
+		Bundle singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
+		Bundle singleton2 = bundleInstaller.installBundle(SINGLETON2, region1);
+		assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
+		assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
+		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+
+		// now install into different regions; both 1 and 2 should resolve
+		singleton2.uninstall();
+		singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
+		assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
+		assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
+		assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+
+		ServiceRegistration<ResolverHookFactory> disableHook = disableAllResolves();
+		try {
+			// now refresh to get us to an unresolved state again
+			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			// connect region2 -> region1
+			region2.connectRegion(region1, digraph.createRegionFilterBuilder().allowAll(RegionFilter.VISIBLE_BUNDLE_NAMESPACE).build());
+			// enable resolving again
+			disableHook.unregister();
+			disableHook = null;
+
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1, singleton2}));
+			assertTrue("One and only singleton bundle should be resolved", (singleton1.getState() == Bundle.RESOLVED) ^ (singleton2.getState() == Bundle.RESOLVED));
+
+			singleton2.uninstall();
+			disableHook = disableAllResolves();
+			// now refresh to get us to an unresolved state again
+			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			// enable resolving again
+			disableHook.unregister();
+			disableHook = null;
+
+			// make sure singleton1 is resolved first
+			assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton1}));
+			assertEquals("singleton1", Bundle.RESOLVED, singleton1.getState());
+			singleton2 = bundleInstaller.installBundle(SINGLETON2, region2);
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton2}));
+			assertEquals("singleton2", Bundle.INSTALLED, singleton2.getState());
+
+			singleton1.uninstall();
+			disableHook = disableAllResolves();
+			// now refresh to get us to an unresolved state again
+			bundleInstaller.refreshPackages(new Bundle[] {singleton1, singleton2});
+			// enable resolving again
+			disableHook.unregister();
+			disableHook = null;
+
+			// make sure singleton2 is resolved first
+			assertTrue(bundleInstaller.resolveBundles(new Bundle[] {singleton2}));
+			assertEquals("singleton2", Bundle.RESOLVED, singleton2.getState());
+			singleton1 = bundleInstaller.installBundle(SINGLETON1, region1);
+			assertFalse(bundleInstaller.resolveBundles(new Bundle[] {singleton1}));
+			assertEquals("singleton1", Bundle.INSTALLED, singleton1.getState());
+		} finally {
+			if (disableHook != null)
+				disableHook.unregister();
+		}
 	}
 
 	private static final String REGION_DOMAIN_PROP = "org.eclipse.equinox.region.domain";

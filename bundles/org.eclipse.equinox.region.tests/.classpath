@@ -14,5 +14,7 @@
 	<classpathentry kind="src" output="bundle_tests/BundleClient1" path="bundles_src/BundleClient1"/>
 	<classpathentry kind="src" output="bundle_tests/ServiceClient1" path="bundles_src/ServiceClient1"/>
 	<classpathentry kind="src" output="bundle_tests/CapabilityClient1" path="bundles_src/CapabilityClient1"/>
+	<classpathentry kind="src" output="bundle_tests/Singleton1" path="bundles_src/Singleton1"/>
+	<classpathentry kind="src" output="bundle_tests/Singleton2" path="bundles_src/Singleton2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

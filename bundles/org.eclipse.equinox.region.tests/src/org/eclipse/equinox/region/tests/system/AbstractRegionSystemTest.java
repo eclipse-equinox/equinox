@@ -48,6 +48,9 @@ public class AbstractRegionSystemTest extends TestCase {
 	public static final String CC1 = "CapabilityClient1";
 	public static List<String> ALL = Arrays.asList(PP1, SP1, CP1, PP2, SP2, CP2, PC1, BC1, SC1, CC1);
 
+	public static final String SINGLETON1 = "Singleton1";
+	public static final String SINGLETON2 = "Singleton2";
+
 	protected BundleInstaller bundleInstaller;
 	protected Bundle regionBundle;
 	protected RegionDigraph digraph;
