@@ -561,7 +561,7 @@ public class ResolverImpl implements Resolver {
 			String bsn = bundle.getName();
 			Collection<ResolverBundle> selected = selectedSingletons.get(bsn);
 			if (selected != null)
-				continue;
+				continue; // already processed the bsn
 			selected = new ArrayList<ResolverBundle>(1);
 			selectedSingletons.put(bsn, selected);
 
@@ -570,65 +570,89 @@ public class ResolverImpl implements Resolver {
 				selected.add(bundle);
 				continue;
 			}
+			// prime selected with resolved singleton bundles
 			for (ResolverBundle singleton : sameBSN) {
-				if (!singleton.getBundleDescription().isSingleton())
-					continue;
-				if (singleton.getBundleDescription().isResolved()) {
-					if (!selected.contains(singleton))
-						selected.add(singleton);
-					continue;
-				}
-				List<ResolverBundle> collisionCandidates = new ArrayList<ResolverBundle>(sameBSN.size() - 1);
-				List<BundleCapability> capabilities = new ArrayList<BundleCapability>(sameBSN.size() - 1);
-				for (ResolverBundle collision : sameBSN) {
-					if (collision == singleton || !collision.getBundleDescription().isSingleton() || !collision.isResolvable())
-						continue; // Ignore the bundle we are checking and non-singletons and non-resovlable
-					collisionCandidates.add(collision);
-					capabilities.add(collision.getCapability());
-				}
-				if (hook != null)
-					hook.filterSingletonCollisions(singleton.getCapability(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, collisionCandidates)));
-				if (collisionCandidates.isEmpty()) {
-					if (!selected.contains(singleton))
-						selected.add(singleton);
-					continue;
-				}
-				// Check if there is already a version resolved; if so reject all other versions
-				// If no version is resolved; pick the highest version and reject all other versions
-				ResolverBundle alreadyResolved = null;
-				for (ResolverBundle candidate : collisionCandidates) {
-					if (candidate.getBundleDescription().isResolved()) {
-						if (!selected.contains(singleton))
-							selected.add(candidate);
-						alreadyResolved = candidate;
+				if (singleton.getBundleDescription().isSingleton() && singleton.getBundleDescription().isResolved())
+					selected.add(singleton);
+			}
+			// get the collision map for the BSN
+			Map<ResolverBundle, Collection<ResolverBundle>> collisionMap = getCollisionMap(sameBSN);
+			// process the collision map
+			for (ResolverBundle singleton : sameBSN) {
+				if (selected.contains(singleton))
+					continue; // no need to process resolved bundles
+				Collection<ResolverBundle> collisions = collisionMap.get(singleton);
+				if (collisions == null || !singleton.isResolvable())
+					continue; // not a singleton or not resolvable
+				Collection<ResolverBundle> pickOneToResolve = new ArrayList<ResolverBundle>();
+				for (ResolverBundle collision : collisions) {
+					if (selected.contains(collision)) {
+						// Must fail since there is already a selected bundle which is a collision of the singleton bundle
+						singleton.setResolvable(false);
+						state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collision.getBundleDescription().toString(), null);
 						break;
 					}
+					if (!pickOneToResolve.contains(collision))
+						pickOneToResolve.add(collision);
 				}
-				if (alreadyResolved != null) {
-					// Must fail since there is already a resolved bundle
-					singleton.setResolvable(false);
-					state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, alreadyResolved.getBundleDescription().toString(), null);
-					continue;
-				}
-				ResolverBundle selectedVersion = singleton;
-				for (ResolverBundle candidate : collisionCandidates) {
-					if (selected.contains(candidate)) {
-						selectedVersion = candidate;
-						break;
+				// need to make sure the bundle does not collide from the POV of another entry
+				for (Map.Entry<ResolverBundle, Collection<ResolverBundle>> collisionEntry : collisionMap.entrySet()) {
+					if (collisionEntry.getKey() != singleton && collisionEntry.getValue().contains(singleton)) {
+						if (selected.contains(collisionEntry.getKey())) {
+							// Must fail since there is already a selected bundle for which the singleton bundle is a collision
+							singleton.setResolvable(false);
+							state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, collisionEntry.getKey().getBundleDescription().toString(), null);
+							break;
+						}
+						if (!pickOneToResolve.contains(collisionEntry.getKey()))
+							pickOneToResolve.add(collisionEntry.getKey());
 					}
-					boolean higherVersion = selectionPolicy != null ? selectionPolicy.compare(selectedVersion.getBundleDescription(), candidate.getBundleDescription()) > 0 : selectedVersion.getVersion().compareTo(candidate.getVersion()) < 0;
-					if (higherVersion)
-						selectedVersion = candidate;
 				}
-				if (selectedVersion != singleton) {
-					singleton.setResolvable(false);
-					state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, selectedVersion.getBundleDescription().toString(), null);
-				} else {
-					if (!selected.contains(singleton))
-						selected.add(singleton);
+				if (singleton.isResolvable()) {
+					pickOneToResolve.add(singleton);
+					selected.add(pickOneToResolve(pickOneToResolve));
 				}
 			}
 		}
+	}
+
+	private ResolverBundle pickOneToResolve(Collection<ResolverBundle> pickOneToResolve) {
+		ResolverBundle selectedVersion = null;
+		for (ResolverBundle singleton : pickOneToResolve) {
+			if (selectedVersion == null)
+				selectedVersion = singleton;
+			boolean higherVersion = selectionPolicy != null ? selectionPolicy.compare(selectedVersion.getBundleDescription(), singleton.getBundleDescription()) > 0 : selectedVersion.getVersion().compareTo(singleton.getVersion()) < 0;
+			if (higherVersion)
+				selectedVersion = singleton;
+		}
+
+		for (ResolverBundle singleton : pickOneToResolve) {
+			if (singleton != selectedVersion) {
+				singleton.setResolvable(false);
+				state.addResolverError(singleton.getBundleDescription(), ResolverError.SINGLETON_SELECTION, selectedVersion.getBundleDescription().toString(), null);
+			}
+		}
+		return selectedVersion;
+	}
+
+	private Map<ResolverBundle, Collection<ResolverBundle>> getCollisionMap(List<ResolverBundle> sameBSN) {
+		Map<ResolverBundle, Collection<ResolverBundle>> result = new HashMap<ResolverBundle, Collection<ResolverBundle>>();
+		for (ResolverBundle singleton : sameBSN) {
+			if (!singleton.getBundleDescription().isSingleton() || !singleton.isResolvable())
+				continue; // ignore non-singleton and non-resolvable
+			List<ResolverBundle> collisionCandidates = new ArrayList<ResolverBundle>(sameBSN.size() - 1);
+			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(sameBSN.size() - 1);
+			for (ResolverBundle collision : sameBSN) {
+				if (collision == singleton || !collision.getBundleDescription().isSingleton() || !collision.isResolvable())
+					continue; // Ignore the bundle we are checking and non-singletons and non-resolvable
+				collisionCandidates.add(collision);
+				capabilities.add(collision.getCapability());
+			}
+			if (hook != null)
+				hook.filterSingletonCollisions(singleton.getCapability(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, collisionCandidates)));
+			result.put(singleton, collisionCandidates);
+		}
+		return result;
 	}
 
 	private void resolveBundles0(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {
