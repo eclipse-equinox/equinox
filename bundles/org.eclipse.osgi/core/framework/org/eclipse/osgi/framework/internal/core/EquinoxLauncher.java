@@ -86,6 +86,12 @@ public class EquinoxLauncher implements org.osgi.framework.launch.Framework {
 			FrameworkProperties.setProperty(Framework.PROP_FRAMEWORK_THREAD, (String) threadBehavior);
 		}
 
+		// set the compatibility boot delegation flag to false to get "standard" OSGi behavior WRT boot delegation (bug 344850)
+		if (FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION) == null)
+			FrameworkProperties.setProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "false"); //$NON-NLS-1$
+		// set the support for multiple host to true to get "standard" OSGi behavior (bug 344850)
+		if (FrameworkProperties.getProperty("osgi.support.multipleHosts") == null) //$NON-NLS-1$
+			FrameworkProperties.setProperty("osgi.support.multipleHosts", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 		// first check props we are required to provide reasonable defaults for
 		Object windowSystem = configuration == null ? null : configuration.get(Constants.FRAMEWORK_WINDOWSYSTEM);
 		if (windowSystem == null) {
