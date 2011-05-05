@@ -20,25 +20,24 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+static char* prefixes[] = {
+	"xulrunner-1",
+	"mozilla-seamonkey-1",
+	"seamonkey-1",
+	"mozilla-1",
+	"mozilla-firefox-2",
+	"firefox-2",
+	"mozilla-firefox-3",
+	"firefox-3",
+	NULL
+};
+static const int XULRUNNER_INDEX = 0;
 
 /* Filter function used by fixEnvForMozilla() for finding directories
  * with a desired prefix.
  */
 int filter(const struct dirent *dir)
 {
-	char* prefixes[] = {
-		"xulrunner\0",
-		"xulrunner-1",
-		"mozilla-seamonkey-1",
-		"seamonkey-1",
-		"mozilla-1",
-		"mozilla-firefox-2",
-		"firefox-2",
-		"mozilla-firefox-3",
-		"firefox-3",
-		NULL
-	};
-	int XULRUNNER_INDEX = 0;
 #if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
 	char* root = "/usr/lib64/";
 #else
@@ -186,8 +185,17 @@ void fixEnvForMozilla() {
 				{
 					if (sscanf(buffer, "GRE_PATH=%s", path) == 1)
 					{
-						grePath = strdup(path);
-						break;
+						int index = 0;
+						char* prefix = prefixes [index];
+						while (prefix != NULL)
+						{
+							if (strstr(path, prefix))
+							{
+								grePath = strdup(path);
+								break;
+							}
+							prefix = prefixes [++index];
+						}
 					}
 				}
 				fclose(file);
@@ -230,57 +238,21 @@ void fixEnvForMozilla() {
 #endif
 			}
 
+#if defined (SOLARIS)
 			if (grePath == NULL)
 			{
 				/* some other typical installation locations */
 				char* dirs[] = {
-#if defined(__amd64__) || defined(__x86_64__) || defined(__powerpc64__)
-					"/usr/lib64/xulrunner/",
-					"/usr/lib64/mozilla-firefox/",
-					"/usr/lib64/firefox/",
-					"/usr/lib64/mozilla-seamonkey/",
-					"/usr/lib64/seamonkey/",
-					"/usr/lib64/mozilla/",
-#endif
-#if defined (SOLARIS)
-					"/usr/sfw/lib/xulrunner/",
-					"/usr/sfw/lib/mozilla-firefox/",
-					"/usr/sfw/lib/firefox/",
-					"/usr/sfw/lib/mozilla/",
-					"/usr/sfw/lib/mozilla-seamonkey/",
-					"/usr/sfw/lib/seamonkey/",
-#endif
-					"/usr/lib/xulrunner/",
-					"/usr/lib/mozilla-firefox/",
-					"/usr/lib/firefox/",
-					"/usr/lib/mozilla-seamonkey/",
-					"/usr/lib/seamonkey/",
-					"/usr/lib/mozilla/",
-					"/usr/local/xulrunner/",
-					"/opt/xulrunner/",
-					"/usr/local/mozilla-firefox/",
-					"/usr/local/firefox/",
-					"/opt/mozilla-firefox/",
-					"/opt/firefox/",
-					"/usr/local/mozilla-seamonkey/",
-					"/usr/local/seamonkey/",
-					"/opt/mozilla-seamonkey/",
-					"/opt/seamonkey/",
-					"/usr/local/mozilla/",
-					"/opt/mozilla/",
+					"/usr/sfw/lib/mozilla/",	/* Solaris location */
+					"/usr/lib/firefox/",			/* OpenSolaris location */
 					NULL
 				};
 
-#if defined (SOLARIS)
 				/*
 				 * The solaris compiler does not do static linking, so just check
 				 * for a common lib to ensure that the install seems valid.
 				 */
 				char* testlib = "libxpcom.so";
-#else
-				/* Ensure that the install is dynamically-linked and is built with GTK2 */
-				char* testlib = "components/libwidget_gtk2.so";
-#endif
 
 				struct stat buf;
 				int index = 0;
@@ -301,18 +273,18 @@ void fixEnvForMozilla() {
 					dir = dirs [index++];
 				}
 			}
+#endif // SOLARIS
 		}
 
 		if (grePath != NULL)
 		{
-			/* If grePath contains "xul" then do not change the LD_LIBRARY_PATH,
+			/* If grePath contains "xulrunner" then do not change the LD_LIBRARY_PATH,
 			 * since it is likely that a xulrunner (not a mozilla or firefox)
 			 * will be found at runtime.  Note that MOZILLA_FIVE_HOME is still
 			 * updated if grePath contains "xul" since this variable can act as
 			 * a backup GRE to try if an initially-detected one fails to load.
 			 */
-			char* current = strrchr(grePath, 'x');
-			if (current == NULL || strncmp(current, "xul", 3) != 0) {
+			if (!strstr(grePath, "xulrunner")) {
 				ldPath = (char*)realloc(ldPath, strlen(ldPath) + strlen(grePath) + 2);
 				if (strlen(ldPath) > 0) strcat(ldPath, ":");
 				strcat(ldPath, grePath);
