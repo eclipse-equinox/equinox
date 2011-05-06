@@ -62,7 +62,7 @@ public final class URIUtil {
 			//if the base is already a directory then resolve will just do the right thing
 			URI result;
 			if (path.endsWith("/")) {//$NON-NLS-1$
-				result = base.resolve(new URI(null, extension, null));
+				result = base.resolve(new URI(null, null, extension, null));
 				if (decodeResolved) {
 					//see bug 267219 - Java 1.4 implementation of URI#resolve incorrectly encoded the ssp
 					result = new URI(toUnencodedString(result));
