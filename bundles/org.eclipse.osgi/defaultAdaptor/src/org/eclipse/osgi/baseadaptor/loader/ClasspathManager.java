@@ -60,6 +60,8 @@ public class ClasspathManager {
 	private FragmentClasspath[] fragments = emptyFragments;
 	// a Map<String,String> where "libname" is the key and libpath" is the value
 	private ArrayMap<String, String> loadedLibraries = null;
+	// used to detect recusive defineClass calls for the same class on the same class loader (bug 345500)
+	private ThreadLocal<Collection<String>> currentlyDefining = new ThreadLocal<Collection<String>>();
 
 	/**
 	 * Constructs a classpath manager for the given host base data, classpath and base class loader
@@ -553,12 +555,22 @@ public class ClasspathManager {
 			Debug.println("  defining class " + name); //$NON-NLS-1$
 		}
 
+		Collection<String> current = currentlyDefining.get();
+		if (current == null) {
+			current = new ArrayList<String>(5);
+			currentlyDefining.set(current);
+		}
+		if (current.contains(name))
+			return null; // avoid recursive defines (bug 345500)
 		try {
+			current.add(name);
 			return defineClass(name, classbytes, classpathEntry, entry, hooks);
 		} catch (Error e) {
 			if (Debug.DEBUG_LOADER)
 				Debug.println("  error defining class " + name); //$NON-NLS-1$
 			throw e;
+		} finally {
+			current.remove(name);
 		}
 	}
 
