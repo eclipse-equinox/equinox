@@ -16,10 +16,7 @@
 package org.osgi.service.framework;
 
 import java.io.InputStream;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
 
 /**
  * A surrogate bundle is installed in a child framework, and is the child-facing
@@ -40,8 +37,10 @@ import org.osgi.framework.BundleException;
  * </ul>
  * <p>
  * @see CompositeBundle
- * @deprecated This is proposed API. As a result, this API may never be published 
- * or the final API may change substantially by the time of final publication. 
+ * @deprecated This API proposal was rejected by the OSGi Alliance and will 
+ * not be part of any OSGi specification.  Please transition to the 
+ * org.osgi.framework.hooks API to control resolution, bundle, and service 
+ * isolation. This API will be removed from Equinox in the 3.9 release 
  * You are cautioned against relying upon this API.
  */
 public interface SurrogateBundle extends Bundle {

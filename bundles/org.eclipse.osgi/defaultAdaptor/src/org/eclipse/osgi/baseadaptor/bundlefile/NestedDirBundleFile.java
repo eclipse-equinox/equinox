@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,8 +28,8 @@ import java.util.Enumeration;
  * @since 3.2
  */
 public class NestedDirBundleFile extends BundleFile {
-	BundleFile baseBundleFile;
-	String cp;
+	private final BundleFile baseBundleFile;
+	private final String cp;
 
 	/**
 	 * Constructs a NestedDirBundleFile
@@ -39,10 +39,10 @@ public class NestedDirBundleFile extends BundleFile {
 	public NestedDirBundleFile(BundleFile baseBundlefile, String cp) {
 		super(baseBundlefile.getBaseFile());
 		this.baseBundleFile = baseBundlefile;
-		this.cp = cp;
 		if (cp.charAt(cp.length() - 1) != '/') {
-			this.cp = this.cp + '/';
+			cp = cp + '/';
 		}
+		this.cp = cp;
 	}
 
 	public void close() {
@@ -50,29 +50,43 @@ public class NestedDirBundleFile extends BundleFile {
 	}
 
 	public BundleEntry getEntry(String path) {
-		if (path.length() > 0 && path.charAt(0) == '/')
-			path = path.substring(1);
-		String newpath = new StringBuffer(cp).append(path).toString();
-		return baseBundleFile.getEntry(newpath);
+		return baseBundleFile.getEntry(prependNestedDir(path));
 	}
 
 	public boolean containsDir(String dir) {
 		if (dir == null)
 			return false;
 
-		if (dir.length() > 0 && dir.charAt(0) == '/')
-			dir = dir.substring(1);
-		String newdir = new StringBuffer(cp).append(dir).toString();
-		return baseBundleFile.containsDir(newdir);
+		return baseBundleFile.containsDir(prependNestedDir(dir));
+	}
+
+	private String prependNestedDir(String path) {
+		if (path.length() > 0 && path.charAt(0) == '/')
+			path = path.substring(1);
+		return new StringBuffer(cp).append(path).toString();
 	}
 
 	public Enumeration<String> getEntryPaths(String path) {
-		// getEntryPaths is only valid if this is a root bundle file.
-		return null;
+		final Enumeration<String> basePaths = baseBundleFile.getEntryPaths(prependNestedDir(path));
+		final int cpLength = cp.length();
+		if (basePaths == null)
+			return null;
+		return new Enumeration<String>() {
+
+			public boolean hasMoreElements() {
+				return basePaths.hasMoreElements();
+			}
+
+			public String nextElement() {
+				String next = basePaths.nextElement();
+				return next.substring(cpLength);
+			}
+		};
 	}
 
 	public File getFile(String entry, boolean nativeCode) {
 		// getFile is only valid if this is a root bundle file.
+		// TODO to catch bugs we probably should throw new UnsupportedOperationException()
 		return null;
 	}
 

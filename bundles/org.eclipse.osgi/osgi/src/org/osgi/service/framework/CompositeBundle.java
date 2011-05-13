@@ -17,7 +17,6 @@ package org.osgi.service.framework;
 
 import java.io.InputStream;
 import java.util.Map;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
@@ -99,8 +98,10 @@ import org.osgi.framework.launch.Framework;
  * the child framework.
  * 
  * @see SurrogateBundle
- * @deprecated This is proposed API. As a result, this API may never be published 
- * or the final API may change substantially by the time of final publication. 
+ * @deprecated This API proposal was rejected by the OSGi Alliance and will 
+ * not be part of any OSGi specification.  Please transition to the 
+ * org.osgi.framework.hooks API to control resolution, bundle, and service 
+ * isolation. This API will be removed from Equinox in the 3.9 release
  * You are cautioned against relying upon this API.
  * @ThreadSafe
  * @version $Revision: 6860 $
@@ -137,8 +138,7 @@ public interface CompositeBundle extends Bundle {
 	 *             If the update fails.
 	 * @see CompositeBundleFactory#installCompositeBundle(Map, String, Map)
 	 */
-	void update(Map /* <String, String> */compositeManifest)
-			throws BundleException;
+	void update(Map /* <String, String> */compositeManifest) throws BundleException;
 
 	/**
 	 * This operation is not supported for composite bundles. A

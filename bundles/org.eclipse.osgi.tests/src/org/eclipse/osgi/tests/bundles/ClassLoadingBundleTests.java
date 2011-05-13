@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,13 @@ package org.eclipse.osgi.tests.bundles;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1046,6 +1046,20 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		assertEquals("stuff resource", "stuff classpath", readURL(new URL((URL) resourceURLs.get(1), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		assertEquals("root resource", "root classpath test2", readURL(new URL((URL) resourceURLs.get(2), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		assertEquals("stuff resource", "stuff classpath test2", readURL(new URL((URL) resourceURLs.get(3), "resource1"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	public void testListResources() throws BundleException {
+		installer.installBundle("test"); //$NON-NLS-1$
+		Bundle test2 = installer.installBundle("test2"); //$NON-NLS-1$
+
+		assertTrue("Could not resolve test2 bundle", installer.resolveBundles(new Bundle[] {test2}));
+		BundleWiring test2Wiring = (BundleWiring) test2.adapt(BundleWiring.class);
+		Collection resources = test2Wiring.listResources("/", "*", 0);
+		assertTrue("could not find resource", resources.contains("resource2"));
+		resources = test2Wiring.listResources("data/", "resource2", 0);
+		assertTrue("could not find resource", resources.contains("data/resource2"));
+		resources = test2Wiring.listResources("/", "resource*", BundleWiring.LISTRESOURCES_RECURSE);
+		assertTrue("could not find resource", resources.contains("data/resource2"));
 	}
 
 	public void testURLExternalFormat01() throws Exception {

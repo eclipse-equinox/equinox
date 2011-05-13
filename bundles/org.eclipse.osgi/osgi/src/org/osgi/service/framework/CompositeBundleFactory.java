@@ -16,10 +16,7 @@
 package org.osgi.service.framework;
 
 import java.util.Map;
-
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.*;
 import org.osgi.framework.launch.Framework;
 
 /**
@@ -28,8 +25,10 @@ import org.osgi.framework.launch.Framework;
  * If present, there will only be a single instance of this service registered
  * with the Framework.
  * 
- * @deprecated This is proposed API. As a result, this API may never be published 
- * or the final API may change substantially by the time of final publication. 
+ * @deprecated This API proposal was rejected by the OSGi Alliance and will 
+ * not be part of any OSGi specification.  Please transition to the 
+ * org.osgi.framework.hooks API to control resolution, bundle, and service 
+ * isolation. This API will be removed from Equinox in the 3.9 release 
  * You are cautioned against relying upon this API.
  * @ThreadSafe
  * @version $Revision: 6860 $
@@ -42,7 +41,7 @@ public interface CompositeBundleFactory {
 	 * to select services that will be registered into a child framework by its
 	 * associated surrogate bundle.
 	 */
-	public static final String	COMPOSITE_SERVICE_FILTER_IMPORT	= "CompositeServiceFilter-Import";
+	public static final String COMPOSITE_SERVICE_FILTER_IMPORT = "CompositeServiceFilter-Import";
 
 	/**
 	 * Manifest header (named &quot;CompositeServiceFilter-Export&quot;)
@@ -50,7 +49,7 @@ public interface CompositeBundleFactory {
 	 * bundle to select services that will be registered into a parent framework
 	 * by its associated composite bundle.
 	 */
-	public static final String	COMPOSITE_SERVICE_FILTER_EXPORT	= "CompositeServiceFilter-Export";
+	public static final String COMPOSITE_SERVICE_FILTER_EXPORT = "CompositeServiceFilter-Export";
 
 	/**
 	 * Installs a <code>CompositeBundle</code>. The composite bundle has a new
@@ -149,8 +148,6 @@ public interface CompositeBundleFactory {
 	 * @see Framework
 	 * @see CompositeBundle
 	 */
-	CompositeBundle installCompositeBundle(
-			Map /* <String, String> */frameworkConfig, String location,
-			Map /* <String, String> */compositeManifest) throws BundleException;
+	CompositeBundle installCompositeBundle(Map /* <String, String> */frameworkConfig, String location, Map /* <String, String> */compositeManifest) throws BundleException;
 
 }
