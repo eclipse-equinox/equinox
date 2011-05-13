@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class CompositeHelper {
 			addImports(attributes, compositeDesc, matchingExports);
 
 			// convert the matchingExports from the composite into exports
-			addExports(attributes, matchingExports);
+			addExports(attributes, compositeDesc, matchingExports);
 		}
 
 		// add the rest
@@ -158,16 +158,22 @@ public class CompositeHelper {
 		addMap(importStatement, export.getAttributes(), "="); //$NON-NLS-1$
 	}
 
-	private static void addExports(Attributes attributes, ExportPackageDescription[] matchingExports) {
+	private static void addExports(Attributes attributes, BundleDescription compositeDesc, ExportPackageDescription[] matchingExports) {
 		if (matchingExports.length == 0)
 			return;
 		StringBuffer exportStatement = new StringBuffer();
 		for (int i = 0; i < matchingExports.length; i++) {
-			if (i != 0)
+			if (matchingExports[i].getExporter() == compositeDesc) {
+				// the matching export from outside is the composite bundle itself
+				// this must be one of our own substitutable exports, it must be ignored (bug 345640)
+				continue;
+			}
+			if (exportStatement.length() > 0)
 				exportStatement.append(',');
 			getExportFrom(matchingExports[i], exportStatement);
 		}
-		attributes.putValue(Constants.EXPORT_PACKAGE, exportStatement.toString());
+		if (exportStatement.length() > 0)
+			attributes.putValue(Constants.EXPORT_PACKAGE, exportStatement.toString());
 	}
 
 	private static void getExportFrom(ExportPackageDescription export, StringBuffer exportStatement) {
