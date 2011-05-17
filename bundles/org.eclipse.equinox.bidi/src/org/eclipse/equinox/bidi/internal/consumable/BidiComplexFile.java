@@ -23,7 +23,7 @@ public class BidiComplexFile extends BidiComplexProcessor {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with operators ":/\.", no special cases,
+	 *  @return features with separators ":/\.", no special cases,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
 	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {

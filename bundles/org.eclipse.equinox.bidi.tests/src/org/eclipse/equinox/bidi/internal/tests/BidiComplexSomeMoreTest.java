@@ -35,7 +35,7 @@ public class BidiComplexSomeMoreTest extends BidiComplexTestBase {
 			return fromIndex;
 		}
 
-		public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+		public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 			int len = text.length();
 			for (int i = len - 1; i >= 0; i--) {
 				BidiComplexProcessor.insertMark(text, dirProps, offsets, i);

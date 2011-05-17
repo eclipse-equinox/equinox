@@ -45,6 +45,7 @@ public class BidiComplexImpl {
 	static final int DIRPROPS_ADD = 2;
 	static final int OFFSETS_SHIFT = 3;
 	static final int[] EMPTY_INT_ARRAY = new int[0];
+	static final BidiComplexEnvironment IGNORE_ENVIRONMENT = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_IGNORE);
 
 	/**
 	 *  Prevent creation of a BidiComplexEngine instance
@@ -56,36 +57,36 @@ public class BidiComplexImpl {
 	/*
 	        // keep private copy of specialsCount to avoid later modification
 	        specialsCount = features.getSpecialsCount();
-	        locations = new int[features.getOperators().length() + specialsCount];
+	        locations = new int[features.getSeparators().length() + specialsCount];
 	    }
 	*/
 	static long computeNextLocation(IBidiComplexProcessor processor, BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
-		String operators = features.getOperators();
-		int operCount = operators.length();
+		String separators = features.getSeparators();
+		int separCount = separators.length();
 		int specialsCount = features.getSpecialsCount();
 		int len = text.length();
 		int nextLocation = len;
 		int idxLocation = 0;
 		// Start with special sequences to give them precedence over simple
-		// operators. This may apply to cases like slash+asterisk versus slash.
+		// separators. This may apply to cases like slash+asterisk versus slash.
 		for (int i = 0; i < specialsCount; i++) {
-			int location = locations[operCount + i];
+			int location = locations[separCount + i];
 			if (location < curPos) {
 				offsets = ensureRoomInOffsets(offsets);
 				location = processor.indexOfSpecial(features, text, dirProps, offsets, i + 1, curPos);
 				if (location < 0)
 					location = len;
-				locations[operCount + i] = location;
+				locations[separCount + i] = location;
 			}
 			if (location < nextLocation) {
 				nextLocation = location;
-				idxLocation = operCount + i;
+				idxLocation = separCount + i;
 			}
 		}
-		for (int i = 0; i < operCount; i++) {
+		for (int i = 0; i < separCount; i++) {
 			int location = locations[i];
 			if (location < curPos) {
-				location = text.indexOf(operators.charAt(i), curPos);
+				location = text.indexOf(separators.charAt(i), curPos);
 				if (location < 0)
 					location = len;
 				locations[i] = location;
@@ -216,9 +217,9 @@ public class BidiComplexImpl {
 	}
 
 	/**
-	 *  @see BidiComplexProcessor#processOperator BidiComplexProcessor.processOperator
+	 *  @see BidiComplexProcessor#processSeparator BidiComplexProcessor.processSeparator
 	 */
-	public static void processOperator(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int operLocation) {
+	public static void processSeparator(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int separLocation) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -231,17 +232,17 @@ public class BidiComplexImpl {
 		// offsets[2] contains the complex expression direction
 		if (offsets[2] == BidiComplexFeatures.DIR_RTL) {
 			// the expression base direction is RTL
-			for (int i = operLocation - 1; i >= 0; i--) {
+			for (int i = separLocation - 1; i >= 0; i--) {
 				byte dirProp = getDirProp(text, dirProps, i);
 				if (dirProp == R || dirProp == AL)
 					return;
 				if (dirProp == L) {
-					for (int j = operLocation; j < len; j++) {
+					for (int j = separLocation; j < len; j++) {
 						dirProp = getDirProp(text, dirProps, j);
 						if (dirProp == R || dirProp == AL)
 							return;
 						if (dirProp == L || dirProp == EN) {
-							insertMark(text, dirProps, offsets, operLocation);
+							insertMark(text, dirProps, offsets, separLocation);
 							return;
 						}
 					}
@@ -269,29 +270,29 @@ public class BidiComplexImpl {
 			_R = Byte.MIN_VALUE;
 		else
 			_R = R;
-		for (int i = operLocation - 1; i >= 0; i--) {
+		for (int i = separLocation - 1; i >= 0; i--) {
 			byte dirProp = getDirProp(text, dirProps, i);
 			if (dirProp == L)
 				return;
 			if (dirProp == _R || dirProp == _AL) {
-				for (int j = operLocation; j < len; j++) {
+				for (int j = separLocation; j < len; j++) {
 					dirProp = getDirProp(text, dirProps, j);
 					if (dirProp == L)
 						return;
 					if (dirProp == _R || dirProp == EN || dirProp == _AL || dirProp == _AN) {
-						insertMark(text, dirProps, offsets, operLocation);
+						insertMark(text, dirProps, offsets, separLocation);
 						return;
 					}
 				}
 				return;
 			}
 			if (dirProp == _AN && !doneAN) {
-				for (int j = operLocation; j < len; j++) {
+				for (int j = separLocation; j < len; j++) {
 					dirProp = getDirProp(text, dirProps, j);
 					if (dirProp == L)
 						return;
 					if (dirProp == _AL || dirProp == _AN || dirProp == _R) {
-						insertMark(text, dirProps, offsets, operLocation);
+						insertMark(text, dirProps, offsets, separLocation);
 						return;
 					}
 				}
@@ -300,163 +301,29 @@ public class BidiComplexImpl {
 		}
 	}
 
-	static final int TEXT = 0; // full text with marks, prefix and suffix
-	static final int TEXT_NOFIX = 1; // full text with marks, no prefix or suffix
-	static final int OFFSETS = 3; // offsets to marks
-	static final int MAP = 4; // source to dest map
-
 	/**
 	 *  @see BidiComplexEngine#leanToFullText BidiComplexEngine.leanToFullText
 	 */
 	public static String leanToFullText(Object processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
-		if (text.length() == 0)
-			return text;
-		return (String) leanToFullCommon(TEXT, processor, features, environment, text, state);
-	}
-
-	/**
-	 *  @see BidiComplexEngine#leanToFullMap BidiComplexEngine.leanToFullMap
-	 */
-	public static int[] leanToFullMap(Object processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
-			return EMPTY_INT_ARRAY;
-		int[] offsets = (int[]) leanToFullCommon(MAP, processor, features, environment, text, state);
-		int[] map = new int[len];
-		int count = offsets[0]; // number of used entries
-		int added = offsets[1]; // prefixLength;
-		for (int pos = 0, i = OFFSETS_SHIFT; pos < len; pos++) {
-			if (i < count && pos == offsets[i]) {
-				added++;
-				i++;
-			}
-			map[pos] = pos + added;
-		}
-		return map;
-	}
-
-	/**
-	 *  @see BidiComplexEngine#leanBidiCharOffsets BidiComplexEngine.leanBidiCharOffsets
-	 */
-	public static int[] leanBidiCharOffsets(Object processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
-		if (text.length() == 0)
-			return EMPTY_INT_ARRAY;
-		int[] offsets = (int[]) leanToFullCommon(OFFSETS, processor, features, environment, text, state);
-		// offsets[0] contains the number of used entries
-		int count = offsets[0] - OFFSETS_SHIFT;
-		int[] result = new int[count];
-		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, count);
-		return result;
-	}
-
-	static Object leanToFullCommon(int option, Object _processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
-		IBidiComplexProcessor processor;
-		if (_processor instanceof java.lang.String) {
-			processor = BidiComplexStringProcessor.getProcessor((String) _processor);
-			if (processor == null)
-				throw new IllegalArgumentException("Invalid processor type!"); //$NON-NLS-1$
-		} else if (_processor instanceof IBidiComplexProcessor)
-			processor = (IBidiComplexProcessor) _processor;
-		else
-			throw new IllegalArgumentException("Invalid processor argument!"); //$NON-NLS-1$
-		if (environment == null)
-			environment = BidiComplexEnvironment.DEFAULT;
-		if (features == null)
-			features = processor.getFeatures(environment);
-		if (state == null) {
-			state = new int[1];
-			state[0] = BidiComplexEngine.STATE_INITIAL;
-		}
-		int len = text.length();
-		// 1 byte for each char in text, + 1 byte = current orientation
+			return text;
 		byte[] dirProps = new byte[len + 1];
-		int orient = getCurOrient(environment, text, dirProps);
-		dirProps[len] = (byte) orient;
-		int operCount = features.getOperators().length();
-		int direction = getCurDirection(processor, features, environment, text, dirProps);
-		// current position
-		int curPos = 0;
-		// offsets of marks to add. Entry 0 is the number of used slots;
-		//  entry 1 is reserved to pass prefixLength.
-		//  entry 2 is reserved to pass direction..
-		int[] offsets = new int[20];
-		offsets[0] = OFFSETS_SHIFT;
-		offsets[2] = direction;
-		// initialize locations
-		int[] locations = new int[operCount + features.getSpecialsCount()];
-		for (int i = 0, k = locations.length; i < k; i++) {
-			locations[i] = -1;
-		}
-		if (state[0] > BidiComplexEngine.STATE_INITIAL) {
-			offsets = ensureRoomInOffsets(offsets);
-			int initState = state[0];
-			state[0] = BidiComplexEngine.STATE_INITIAL;
-			curPos = processor.processSpecial(features, text, dirProps, offsets, state, initState, -1);
-		}
-		while (true) {
-			// location of next token to handle
-			int nextLocation;
-			// index of next token to handle (if < operCount, this is an operator; otherwise a special case
-			int idxLocation;
-			long res = computeNextLocation(processor, features, text, dirProps, offsets, locations, state, curPos);
-			nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
-			if (nextLocation >= len)
-				break;
-			idxLocation = (int) (res >> 32); /* high word */
-			if (idxLocation < operCount) {
-				offsets = ensureRoomInOffsets(offsets);
-				processOperator(features, text, dirProps, offsets, nextLocation);
-				curPos = nextLocation + 1;
-			} else {
-				offsets = ensureRoomInOffsets(offsets);
-				idxLocation -= (operCount - 1); // because caseNumber starts from 1
-				curPos = processor.processSpecial(features, text, dirProps, offsets, state, idxLocation, nextLocation);
-			}
-		}
-
-		if (option == OFFSETS)
-			return offsets;
-
-		boolean addFixes = (option == TEXT) || (option == MAP);
+		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		int prefixLength = offsets[1];
 		int count = offsets[0] - OFFSETS_SHIFT;
-		if ((count == 0) && (!addFixes || (orient == BidiComplexEnvironment.ORIENT_IGNORE) || (orient == direction))) {
-			if (option != MAP)
-				return text;
-			offsets[1] = 0; // no prefix
-			return offsets;
-		}
+		if (count == 0 && prefixLength == 0)
+			return text;
 		int newLen = len + count;
-		int prefixLength;
-		boolean contextual = ((environment.getOrientation() & BidiComplexEnvironment.ORIENT_CONTEXTUAL_LTR) != 0);
-		if (contextual) {
-			// orient and direction may be affected by added marks, thus recompute them
-			orient = getCurOrient(environment, text, dirProps);
-			dirProps[len] = (byte) orient;
-			direction = getCurDirection(processor, features, environment, text, dirProps);
-			offsets[2] = direction;
-		}
-		if (addFixes && ((orient != direction) || (orient == BidiComplexEnvironment.ORIENT_UNKNOWN))) {
-			if (contextual) {
-				prefixLength = 1;
-				newLen++; /* +1 for a mark char */
-			} else {
-				prefixLength = PREFIX_LENGTH;
-				newLen += FIXES_LENGTH;
-			}
-		} else {
-			prefixLength = 0;
-		}
-
-		if (option == MAP) {
-			offsets[1] = prefixLength;
-			return offsets;
-		}
-
+		if (prefixLength == 1)
+			newLen++; /* +1 for a mark char */
+		else if (prefixLength == 2)
+			newLen += FIXES_LENGTH;
 		char[] fullChars = new char[newLen];
 		int added = prefixLength;
 		// add marks at offsets
+		int direction = offsets[2];
 		char curMark = MARKS[direction];
-		char curEmbed = EMBEDS[direction];
 		for (int i = 0, j = OFFSETS_SHIFT; i < len; i++) {
 			char c = text.charAt(i);
 			// offsets[0] contains the number of used entries
@@ -475,6 +342,7 @@ public class BidiComplexImpl {
 				// start of the text and PDF at its end.
 				// However, because of a bug in Windows' handling of LRE/PDF,
 				// we add EMBED_PREFIX at the start and EMBED_SUFFIX at the end.
+				char curEmbed = EMBEDS[direction];
 				fullChars[0] = curEmbed;
 				fullChars[1] = curMark;
 				fullChars[newLen - 1] = PDF;
@@ -482,6 +350,124 @@ public class BidiComplexImpl {
 			}
 		}
 		return new String(fullChars);
+	}
+
+	/**
+	 *  @see BidiComplexEngine#leanToFullMap BidiComplexEngine.leanToFullMap
+	 */
+	public static int[] leanToFullMap(Object processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
+		int len = text.length();
+		if (len == 0)
+			return EMPTY_INT_ARRAY;
+		byte[] dirProps = new byte[len + 1];
+		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		int prefixLength = offsets[1];
+		int[] map = new int[len];
+		int count = offsets[0]; // number of used entries
+		int added = prefixLength;
+		for (int pos = 0, i = OFFSETS_SHIFT; pos < len; pos++) {
+			if (i < count && pos == offsets[i]) {
+				added++;
+				i++;
+			}
+			map[pos] = pos + added;
+		}
+		return map;
+	}
+
+	/**
+	 *  @see BidiComplexEngine#leanBidiCharOffsets BidiComplexEngine.leanBidiCharOffsets
+	 */
+	public static int[] leanBidiCharOffsets(Object processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state) {
+		int len = text.length();
+		if (len == 0)
+			return EMPTY_INT_ARRAY;
+		byte[] dirProps = new byte[len + 1];
+		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		// offsets[0] contains the number of used entries
+		int count = offsets[0] - OFFSETS_SHIFT;
+		int[] result = new int[count];
+		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, count);
+		return result;
+	}
+
+	static int[] leanToFullCommon(Object _processor, BidiComplexFeatures features, BidiComplexEnvironment environment, String text, int[] state, byte[] dirProps) {
+		IBidiComplexProcessor processor;
+		if (_processor instanceof java.lang.String) {
+			processor = BidiComplexStringProcessor.getProcessor((String) _processor);
+			if (processor == null)
+				throw new IllegalArgumentException("Invalid processor type!"); //$NON-NLS-1$
+		} else if (_processor instanceof IBidiComplexProcessor)
+			processor = (IBidiComplexProcessor) _processor;
+		else
+			throw new IllegalArgumentException("Invalid processor argument!"); //$NON-NLS-1$
+		if (environment == null)
+			environment = BidiComplexEnvironment.DEFAULT;
+		if (features == null)
+			features = processor.getFeatures(environment);
+		if (state == null) {
+			state = new int[1];
+			state[0] = BidiComplexEngine.STATE_INITIAL;
+		}
+		int len = text.length();
+		// dirProps: 1 byte for each char in text, + 1 byte = current orientation
+		int orient = getCurOrient(environment, text, dirProps);
+		dirProps[len] = (byte) orient;
+		int separCount = features.getSeparators().length();
+		int direction = getCurDirection(processor, features, environment, text, dirProps);
+		// current position
+		int curPos = 0;
+		// offsets of marks to add. Entry 0 is the number of used slots;
+		//  entry 1 is reserved to pass prefixLength.
+		//  entry 2 is reserved to pass direction..
+		int[] offsets = new int[20];
+		offsets[0] = OFFSETS_SHIFT;
+		offsets[2] = direction;
+		// initialize locations
+		int[] locations = new int[separCount + features.getSpecialsCount()];
+		for (int i = 0, k = locations.length; i < k; i++) {
+			locations[i] = -1;
+		}
+		if (state[0] > BidiComplexEngine.STATE_INITIAL) {
+			offsets = ensureRoomInOffsets(offsets);
+			int initState = state[0];
+			state[0] = BidiComplexEngine.STATE_INITIAL;
+			curPos = processor.processSpecial(features, text, dirProps, offsets, state, initState, -1);
+		}
+		while (true) {
+			// location of next token to handle
+			int nextLocation;
+			// index of next token to handle (if < separCount, this is a separator; otherwise a special case
+			int idxLocation;
+			long res = computeNextLocation(processor, features, text, dirProps, offsets, locations, state, curPos);
+			nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
+			if (nextLocation >= len)
+				break;
+			idxLocation = (int) (res >> 32); /* high word */
+			if (idxLocation < separCount) {
+				offsets = ensureRoomInOffsets(offsets);
+				processSeparator(features, text, dirProps, offsets, nextLocation);
+				curPos = nextLocation + 1;
+			} else {
+				offsets = ensureRoomInOffsets(offsets);
+				idxLocation -= (separCount - 1); // because caseNumber starts from 1
+				curPos = processor.processSpecial(features, text, dirProps, offsets, state, idxLocation, nextLocation);
+			}
+		}
+		if (orient == BidiComplexEnvironment.ORIENT_IGNORE)
+			offsets[1] = 0;
+		else {
+			// recompute orient since it may have changed if contextual
+			orient = getCurOrient(environment, text, dirProps);
+			dirProps[len] = (byte) orient;
+			if (orient == direction && orient != BidiComplexEnvironment.ORIENT_UNKNOWN)
+				offsets[1] = 0;
+			else if ((environment.getOrientation() & BidiComplexEnvironment.ORIENT_CONTEXTUAL_LTR) != 0)
+				offsets[1] = 1;
+			else
+				offsets[1] = 2;
+		}
+		return offsets;
 	}
 
 	/**
@@ -545,7 +531,7 @@ public class BidiComplexImpl {
 				chars[i - cnt] = c;
 		}
 		String lean = new String(chars, 0, lenText - cnt);
-		String full = (String) leanToFullCommon(TEXT_NOFIX, processor, features, environment, lean, state);
+		String full = leanToFullText(processor, features, IGNORE_ENVIRONMENT, lean, state);
 		if (full.equals(text))
 			return lean;
 
@@ -583,7 +569,7 @@ public class BidiComplexImpl {
 			throw new IllegalStateException("Internal error: extra character not a Mark."); //$NON-NLS-1$
 		}
 		if (idxText < lenText) /* full ended before text - this should never happen since
-								            we removed all marks and PDFs at the end of text */
+								             we removed all marks and PDFs at the end of text */
 			throw new IllegalStateException("Internal error: unexpected EOL."); //$NON-NLS-1$
 
 		lean = new String(newChars, 0, newCharsPos);

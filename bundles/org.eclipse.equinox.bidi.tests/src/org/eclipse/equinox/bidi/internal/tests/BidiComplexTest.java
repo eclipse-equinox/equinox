@@ -26,7 +26,7 @@ public class BidiComplexTest implements IBidiComplexProcessor {
 		throw new IllegalStateException();
 	}
 
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		throw new IllegalStateException();
 	}
 

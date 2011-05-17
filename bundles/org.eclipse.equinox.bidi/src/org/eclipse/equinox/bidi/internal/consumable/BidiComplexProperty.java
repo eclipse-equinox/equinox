@@ -27,7 +27,7 @@ public class BidiComplexProperty extends BidiComplexSingle {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with one operator (equal sign), 1 special case,
+	 *  @return features with one separator (equal sign), 1 special case,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
 	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {

@@ -15,8 +15,8 @@ import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
  *  <code>BidiComplexDelims</code> is a processor for complex expressions
- *  composed of text segments separated by operators where the text segments
- *  may include delimited parts within which operators are treated like
+ *  composed of text segments separated by separators where the text segments
+ *  may include delimited parts within which separators are treated like
  *  regular characters and the delimiters may be escaped.
  *  This is similar to {@link BidiComplexDelims} except
  *  that delimiters can be escaped using the backslash character.
@@ -35,9 +35,9 @@ public abstract class BidiComplexDelimsEsc extends BidiComplexDelims {
 	 *  This method skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
-		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
-		int location = operLocation + 1;
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+		int location = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		while (true) {
 			location = text.indexOf(delim, location);

@@ -34,7 +34,7 @@ import org.eclipse.equinox.bidi.internal.BidiComplexImpl;
  *    <li>The behavior of a processor is governed by 3 factors, all included
  *        in associated {@link BidiComplexFeatures features} data.
  *        <ul>
- *          <li>The operators specified for its
+ *          <li>The separators specified for its
  *              {@link BidiComplexFeatures features} determines how submitted
  *              complex expressions are split into tokens.</li>
  *          <li>The tokens are displayed one after the other according
@@ -45,7 +45,7 @@ import org.eclipse.equinox.bidi.internal.BidiComplexImpl;
  *        </ul></li>
  *  </ul>
  *
- *  @see BidiComplexFeatures#getOperators
+ *  @see BidiComplexFeatures#getSeparators
  *  @see BidiComplexFeatures#getDirArabic
  *  @see BidiComplexFeatures#getDirHebrew
  *  @see BidiComplexFeatures#getSpecialsCount
@@ -96,7 +96,7 @@ public class BidiComplexProcessor implements IBidiComplexProcessor {
 	 *
 	 *  @see IBidiComplexProcessor#processSpecial the corresponding interface method
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		// This method must be overridden by all subclasses with any special case.
 		throw new IllegalStateException("A processor must have a processSpecial() method."); //$NON-NLS-1$
 	}
@@ -200,11 +200,11 @@ public class BidiComplexProcessor implements IBidiComplexProcessor {
 	 *  {@link IBidiComplexProcessor#indexOfSpecial indexOfSpecial} or
 	 *  {@link IBidiComplexProcessor#processSpecial processSpecial} in
 	 *  implementations of {@link IBidiComplexProcessor} to add a
-	 *  directional mark before an
-	 *  operator if needed for correct display, depending on the
+	 *  directional mark before a
+	 *  separator if needed for correct display, depending on the
 	 *  base direction of the expression and on the class of the
 	 *  characters in the <i>lean</i> text preceding and following
-	 *  the operator itself.
+	 *  the separator itself.
 	 *
 	 *  @param  features is the {@link BidiComplexFeatures} instance
 	 *          received as parameter to <code>indexOfSpecial</code> or
@@ -216,20 +216,20 @@ public class BidiComplexProcessor implements IBidiComplexProcessor {
 	 *
 	 *  @param  dirProps is a parameter received by <code>indexOfSpecial</code>
 	 *          or <code>processSpecial</code>, uniquely to be used as argument
-	 *          for calls to <code>processOperator</code> and other methods used
+	 *          for calls to <code>processSeparator</code> and other methods used
 	 *          by processors.
 	 *
 	 *  @param  offsets is a parameter received by <code>indexOfSpecial</code>
 	 *          or <code>processSpecial</code>, uniquely to be used as argument
-	 *          for calls to <code>processOperator</code> and other methods used
+	 *          for calls to <code>processSeparator</code> and other methods used
 	 *          by processors.
 	 *
-	 *  @param  operLocation offset of the operator in the <i>lean</i> text.
+	 *  @param  separLocation offset of the separator in the <i>lean</i> text.
 	 *          It must be a non-negative number smaller than the length
 	 *          of the <i>lean</i> text.
 	 */
-	public static void processOperator(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int operLocation) {
-		BidiComplexImpl.processOperator(features, text, dirProps, offsets, operLocation);
+	public static void processSeparator(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int separLocation) {
+		BidiComplexImpl.processSeparator(features, text, dirProps, offsets, separLocation);
 	}
 
 }

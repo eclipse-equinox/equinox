@@ -25,7 +25,7 @@ import org.eclipse.equinox.bidi.BidiComplexEnvironment;
  *    BidiComplexFeatures f1 = new BidiComplexFeatures("+-=", 0, -1, -1, false, false);
  *
  *  </pre>
- *  <p>Example 2 (change only the operators)
+ *  <p>Example 2 (change only the separators)
  *  <pre>
  *
  *    BidiComplexFeatures f2 = new BidiComplexFeatures("[]|()", f1.getSpecialsCount(),
@@ -68,19 +68,19 @@ public class BidiComplexFeatures {
 
 	/**
 	 *  Pre-defined <code>BidiComplexFeatures</code> instance with values for no
-	 *  operators, no special processing, all directions LTR
+	 *  separators, no special processing, all directions LTR
 	 *  and support for neither Arabic nor Hebrew.<br>
-	 *  Since there are no operators and no special processing, a complex
+	 *  Since there are no separators and no special processing, a complex
 	 *  expression processor with such features would do nothing.<br>
 	 *  It is more efficient to do nothing with a <code>null</code> processor.
 	 */
 	public static final BidiComplexFeatures DEFAULT = new BidiComplexFeatures(null, 0, -1, -1, true, true);
 
 	/**
-	 *  String grouping one-character operators which
+	 *  String grouping one-character separators which
 	 *  separate the text of the complex expression into tokens.
 	 */
-	final String operators;
+	final String separators;
 
 	/**
 	 *  Number of special cases for the associated processor.
@@ -89,7 +89,7 @@ public class BidiComplexFeatures {
 	 *  {@link IBidiComplexProcessor#indexOfSpecial indexOfSpecial} and
 	 *  {@link IBidiComplexProcessor#processSpecial processSpecial}.
 	 *  Examples of special cases are comments, literals, or anything which
-	 *  is not identified by a one-character operator.
+	 *  is not identified by a one-character separator.
 	 */
 	final int specialsCount;
 
@@ -136,9 +136,9 @@ public class BidiComplexFeatures {
 	/**
 	 *  Constructor
 	 *
-	 *  @param operators is a string where each character is a delimiter
+	 *  @param separators is a string where each character is a separator
 	 *          which separates the complex expression into tokens.
-	 *  @see #getOperators
+	 *  @see #getSeparators
 	 *
 	 *  @param specialsCount specifies the number of special cases handled
 	 *          by the processor. This value must be identical to the
@@ -172,9 +172,9 @@ public class BidiComplexFeatures {
 	 *          nothing (but some overhead can be expected).
 	 *  @see #getIgnoreHebrew
 	 */
-	public BidiComplexFeatures(String operators, int specialsCount, int dirArabic, int dirHebrew, boolean ignoreArabic, boolean ignoreHebrew) {
+	public BidiComplexFeatures(String separators, int specialsCount, int dirArabic, int dirHebrew, boolean ignoreArabic, boolean ignoreHebrew) {
 
-		this.operators = operators == null ? "" : operators; //$NON-NLS-1$
+		this.separators = separators == null ? "" : separators; //$NON-NLS-1$
 		this.specialsCount = specialsCount;
 		this.dirArabic = dirArabic == DIR_LTR || dirArabic == DIR_RTL ? dirArabic : DIR_LTR;
 		this.dirHebrew = dirHebrew == DIR_LTR || dirHebrew == DIR_RTL ? dirHebrew : DIR_LTR;
@@ -183,11 +183,11 @@ public class BidiComplexFeatures {
 	}
 
 	/**
-	 *  @return a string grouping one-character operators which separate
+	 *  @return a string grouping one-character separators which separate
 	 *          the text of the complex expression into tokens.
 	 */
-	public String getOperators() {
-		return operators;
+	public String getSeparators() {
+		return separators;
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class BidiComplexFeatures {
 	 *          {@link IBidiComplexProcessor#indexOfSpecial indexOfSpecial} and
 	 *          {@link IBidiComplexProcessor#processSpecial processSpecial}.
 	 *          Examples of special cases are comments, literals, or
-	 *          anything which is not identified by a one-character operator.
+	 *          anything which is not identified by a one-character separator.
 	 */
 	public int getSpecialsCount() {
 		return specialsCount;

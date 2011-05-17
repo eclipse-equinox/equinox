@@ -26,7 +26,7 @@ public class BidiComplexSystem extends BidiComplexSingle {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with one operator (opening parhenthesis),
+	 *  @return features with one separator (opening parenthesis),
 	 *          no special cases, LTR direction for Arabic and Hebrew,
 	 *          and support for both.
 	 */

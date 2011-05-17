@@ -103,13 +103,13 @@ public class BidiComplexMethodsTest extends BidiComplexTestBase {
 		flag = f1.getIgnoreHebrew();
 		assertFalse("Ignores Hebrew 1", flag);
 
-		f2 = new BidiComplexFeatures(f1.getOperators(), 0, -1, -1, true, true);
+		f2 = new BidiComplexFeatures(f1.getSeparators(), 0, -1, -1, true, true);
 		flag = f2.getIgnoreArabic();
 		assertTrue("Ignores Arabic 2", flag);
 		flag = f2.getIgnoreHebrew();
 		assertTrue("Ignores Hebrew 2", flag);
 		doTestOrient(f2, "Scripts #1 ", "BCD,EF", "BCD,EF", ">@BCD,EF@^", "@BCD,EF");
-		f2 = new BidiComplexFeatures(f1.getOperators(), 0, -1, -1, false, true);
+		f2 = new BidiComplexFeatures(f1.getSeparators(), 0, -1, -1, false, true);
 		flag = f2.getIgnoreArabic();
 		assertFalse("Ignores Arabic 3", flag);
 		flag = f2.getIgnoreHebrew();
@@ -127,7 +127,7 @@ public class BidiComplexMethodsTest extends BidiComplexTestBase {
 		doTestOrient(f2, "Scripts #12 ", "7,EF", "7,EF", ">@7,EF@^", "@7,EF");
 		doTestOrient(f2, "Scripts #13 ", "BCD,EF", "BCD,EF", ">@BCD,EF@^", "@BCD,EF");
 
-		f2 = new BidiComplexFeatures(f1.getOperators(), 0, -1, -1, true, false);
+		f2 = new BidiComplexFeatures(f1.getSeparators(), 0, -1, -1, true, false);
 		flag = f2.getIgnoreArabic();
 		assertTrue("Ignores Arabic 4", flag);
 		flag = f2.getIgnoreHebrew();
@@ -138,7 +138,7 @@ public class BidiComplexMethodsTest extends BidiComplexTestBase {
 		doTestOrient(f2, "Scripts #17 ", "BCD,12", "BCD@,12", ">@BCD@,12@^", "@BCD@,12");
 		doTestOrient(f2, "Scripts #18 ", "BCD,", "BCD,", ">@BCD,@^", "@BCD,");
 
-		f2 = new BidiComplexFeatures(f1.getOperators(), 0, -1, -1, false, false);
+		f2 = new BidiComplexFeatures(f1.getSeparators(), 0, -1, -1, false, false);
 		doTestOrient(f2, "Scripts #19 ", "123,45|67", "123,45|67", ">@123,45|67@^", "@123,45|67");
 		doTestOrient(f2, "Scripts #20 ", "5,e", "5,e", ">@5,e@^", "5,e");
 		doTestOrient(f2, "Scripts #21 ", "5,#", "5@,#", ">@5@,#@^", "5@,#");
@@ -205,7 +205,7 @@ public class BidiComplexMethodsTest extends BidiComplexTestBase {
 		msg = "TestDirection #1";
 		assertTrue(msg, f1.getDirArabic() == LTR && f1.getDirHebrew() == LTR);
 
-		BidiComplexFeatures f2 = new BidiComplexFeatures(f1.getOperators(), 0, RTL, RTL, false, false);
+		BidiComplexFeatures f2 = new BidiComplexFeatures(f1.getSeparators(), 0, RTL, RTL, false, false);
 		f1 = f2;
 		msg = "TestDirection #2";
 		assertTrue(msg, f1.getDirArabic() == RTL && f1.getDirHebrew() == RTL);

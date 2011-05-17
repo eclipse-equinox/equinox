@@ -36,14 +36,14 @@ import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
  */
 public class BidiComplexSql extends BidiComplexProcessor {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String operators = "\t!#%&()*+,-./:;<=>?|[]{}"; //$NON-NLS-1$
-	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures(operators, 5, -1, -1, false, false);
+	static final String separators = "\t!#%&()*+,-./:;<=>?|[]{}"; //$NON-NLS-1$
+	static final BidiComplexFeatures FEATURES = new BidiComplexFeatures(separators, 5, -1, -1, false, false);
 	static final String lineSep = BidiComplexEnvironment.getLineSep();
 
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with operators "\t!#%&()*+,-./:;<=>?|[]{}", 5 special cases,
+	 *  @return features with separators "\t!#%&()*+,-./:;<=>?|[]{}", 5 special cases,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
 	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {
@@ -87,20 +87,20 @@ public class BidiComplexSql extends BidiComplexProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
-		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
+		BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
 		switch (caseNumber) {
 			case 1 : /* space */
-				operLocation++;
-				while (operLocation < text.length() && text.charAt(operLocation) == ' ') {
-					BidiComplexProcessor.setDirProp(dirProps, operLocation, WS);
-					operLocation++;
+				separLocation++;
+				while (separLocation < text.length() && text.charAt(separLocation) == ' ') {
+					BidiComplexProcessor.setDirProp(dirProps, separLocation, WS);
+					separLocation++;
 				}
-				return operLocation;
+				return separLocation;
 			case 2 : /* literal */
-				location = operLocation + 1;
+				location = separLocation + 1;
 				while (true) {
 					location = text.indexOf('\'', location);
 					if (location < 0) {
@@ -114,7 +114,7 @@ public class BidiComplexSql extends BidiComplexProcessor {
 					return location + 1;
 				}
 			case 3 : /* delimited identifier */
-				location = operLocation + 1;
+				location = separLocation + 1;
 				while (true) {
 					location = text.indexOf('"', location);
 					if (location < 0)
@@ -127,21 +127,21 @@ public class BidiComplexSql extends BidiComplexProcessor {
 					return location + 1;
 				}
 			case 4 : /* slash-aster comment */
-				if (operLocation < 0) // continuation line
+				if (separLocation < 0) // continuation line
 					location = 0;
 				else
-					location = operLocation + 2; // skip the opening slash-aster
+					location = separLocation + 2; // skip the opening slash-aster
 				location = text.indexOf("*/", location); //$NON-NLS-1$
 				if (location < 0) {
 					state[0] = caseNumber;
 					return text.length();
 				}
-				// we need to call processOperator since text may follow the
+				// we need to call processSeparator since text may follow the
 				//  end of comment immediately without even a space
-				BidiComplexProcessor.processOperator(features, text, dirProps, offsets, location);
+				BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, location);
 				return location + 2;
 			case 5 : /* hyphen-hyphen comment */
-				location = text.indexOf(lineSep, operLocation + 2);
+				location = text.indexOf(lineSep, separLocation + 2);
 				if (location < 0)
 					return text.length();
 				return location + lineSep.length();

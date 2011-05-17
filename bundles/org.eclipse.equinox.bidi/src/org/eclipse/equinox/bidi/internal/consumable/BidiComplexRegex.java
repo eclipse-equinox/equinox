@@ -69,7 +69,7 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 	 *
 	 *  @see IBidiComplexProcessor#getFeatures
 	 *
-	 *  @return features with no operators , special cases for each kind of
+	 *  @return features with no separators , special cases for each kind of
 	 *          regular expression syntactic string,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
@@ -118,7 +118,7 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 		// look for R, AL, AN, EN which are potentially needing a mark
 		for (; fromIndex < text.length(); fromIndex++) {
 			dirProp = BidiComplexProcessor.getDirProp(text, dirProps, fromIndex);
-			// R and AL will always be examined using processOperator()
+			// R and AL will always be examined using processSeparator()
 			if (dirProp == R || dirProp == AL)
 				return fromIndex;
 
@@ -135,7 +135,7 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 
 					// digit after R or AL or AN need a mark, except for EN
 					//   following AN, but this is a contrived case, so we
-					//   don't check for it (and calling processOperator()
+					//   don't check for it (and calling processSeparator()
 					//   for it will do no harm)
 					if (dirProp == R || dirProp == AL || dirProp == AN)
 						return fromIndex;
@@ -149,18 +149,18 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		switch (caseNumber) {
 			case 1 : /* comment (?#...) */
-				if (operLocation < 0) {
+				if (separLocation < 0) {
 					// initial state from previous line
 					location = 0;
 				} else {
-					BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
+					BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
 					// skip the opening "(?#"
-					location = operLocation + 3;
+					location = separLocation + 3;
 				}
 				location = text.indexOf(')', location);
 				if (location < 0) {
@@ -174,8 +174,8 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 			case 5 : /* conditional named back reference (?(<name>) */
 			case 6 : /* conditional named back reference (?('name') */
 			case 7 : /* named parentheses reference (?&name) */
-				BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
-				// no need for calling processOperator() for the following cases
+				BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+				// no need for calling processSeparator() for the following cases
 				//   since the starting string contains a L char
 			case 8 : /* named group (?P<name> */
 			case 9 : /* named back reference \k<name> */
@@ -187,20 +187,20 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 			case 15 : /* subroutine call \g'name' */
 			case 16 : /* named back reference recursion (?(R&name) */
 				// skip the opening string
-				location = operLocation + startStrings[caseNumber].length();
+				location = separLocation + startStrings[caseNumber].length();
 				// look for ending character
 				location = text.indexOf(endChars[caseNumber], location);
 				if (location < 0)
 					return text.length();
 				return location + 1;
 			case 17 : /* quoted sequence \Q...\E */
-				if (operLocation < 0) {
+				if (separLocation < 0) {
 					// initial state from previous line
 					location = 0;
 				} else {
-					BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
+					BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
 					// skip the opening "\Q"
-					location = operLocation + 2;
+					location = separLocation + 2;
 				}
 				location = text.indexOf("\\E", location); //$NON-NLS-1$
 				if (location < 0) {
@@ -211,8 +211,8 @@ public class BidiComplexRegex extends BidiComplexProcessor {
 				BidiComplexProcessor.setDirProp(dirProps, location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
-				BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
-				return operLocation + 1;
+				BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+				return separLocation + 1;
 
 		}
 		// we should never get here

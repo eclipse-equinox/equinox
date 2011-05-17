@@ -23,7 +23,7 @@ public class BidiComplexXPath extends BidiComplexDelims {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with operators " /[]<>=!:@.|()+-*",
+	 *  @return features with separators " /[]<>=!:@.|()+-*",
 	 *          2 special cases, LTR direction for Arabic and Hebrew,
 	 *          and support for both.
 	 */

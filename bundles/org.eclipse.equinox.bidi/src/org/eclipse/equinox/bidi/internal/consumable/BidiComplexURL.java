@@ -23,7 +23,7 @@ public class BidiComplexURL extends BidiComplexProcessor {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with operators ":?#/@.[]",
+	 *  @return features with separators ":?#/@.[]",
 	 *          no special cases, LTR direction for Arabic and Hebrew,
 	 *          and support for both.
 	 */

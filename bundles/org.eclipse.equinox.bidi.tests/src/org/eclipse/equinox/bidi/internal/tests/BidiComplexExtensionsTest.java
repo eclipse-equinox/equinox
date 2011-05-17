@@ -169,7 +169,7 @@ public class BidiComplexExtensionsTest extends BidiComplexTestBase {
 		processor = BidiComplexStringProcessor.getProcessor(type);
 		state[0] = BidiComplexEngine.STATE_INITIAL;
 		f1 = processor.getFeatures(null);
-		assertEquals("<>.:,;@", f1.getOperators());
+		assertEquals("<>.:,;@", f1.getSeparators());
 		f2 = new BidiComplexFeatures("+-*/", f1.getSpecialsCount(), f1.getDirArabic(), f1.getDirHebrew(), f1.getIgnoreArabic(), f1.getIgnoreHebrew());
 		doTest3("DelimsEsc #1", "abc+DEF-GHI", "abc+DEF@-GHI");
 		doTest3("DelimsEsc #2", "DEF-GHI (A*B)/JK ", "DEF@-GHI @(A*B)@/JK ");

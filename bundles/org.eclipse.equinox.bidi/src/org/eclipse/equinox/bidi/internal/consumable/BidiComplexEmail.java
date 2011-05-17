@@ -26,7 +26,7 @@ public class BidiComplexEmail extends BidiComplexDelimsEsc {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with operators "<>.:,;@", 2 special cases,
+	 *  @return features with separators "<>.:,;@", 2 special cases,
 	 *          LTR direction for Arabic when the GUI is not mirrored,
 	 *          RTL direction for Arabic when the GUI is mirrored,
 	 *          LTR direction for Hebrew in all cases,

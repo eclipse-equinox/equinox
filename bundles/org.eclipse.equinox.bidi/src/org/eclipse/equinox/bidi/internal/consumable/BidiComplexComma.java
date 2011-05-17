@@ -26,7 +26,7 @@ public class BidiComplexComma extends BidiComplexProcessor {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with one operator (comma), no special cases,
+	 *  @return features with one separator (comma), no special cases,
 	 *          LTR direction for Arabic and Hebrew, and support for both.
 	 */
 	public BidiComplexFeatures getFeatures(BidiComplexEnvironment env) {

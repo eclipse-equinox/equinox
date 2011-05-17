@@ -27,7 +27,7 @@ public class BidiComplexUnderscore extends BidiComplexProcessor {
 	/**
 	 *  This method retrieves the features specific to this processor.
 	 *
-	 *  @return features with one operator (underscore),
+	 *  @return features with one separator (underscore),
 	 *          no special cases, LTR direction for Arabic and Hebrew,
 	 *          and support for both.
 	 */

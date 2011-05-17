@@ -113,8 +113,8 @@ final public class BidiComplexUtil {
 	/*                                                                       */
 	/*************************************************************************/
 
-	//  The default set of delimiters to use to segment a string.
-	private static final String defaultDelimiters = ".:/\\"; //$NON-NLS-1$
+	//  The default set of separators to use to segment a string.
+	private static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
 	// left to right mark
 	private static final char LRM = '\u200e';
 	// left to right mark
@@ -136,15 +136,15 @@ final public class BidiComplexUtil {
 	 *  Process the given text and return a string with appropriate
 	 *  directional formatting characters if the locale is a bidi locale.
 	 *  This is equivalent to calling
-	 *  {@link #process(String str, String delimiters)} with the default
-	 *  set of delimiters (dot, colon, slash, backslash).
+	 *  {@link #process(String str, String separators)} with the default
+	 *  set of separators (dot, colon, slash, backslash).
 	 *
 	 *  @param  str the text to be processed.
 	 *
 	 *  @return the processed string.
 	 */
 	public static String process(String str) {
-		return process(str, defaultDelimiters);
+		return process(str, defaultSeparators);
 	}
 
 	/**
@@ -152,7 +152,7 @@ final public class BidiComplexUtil {
 	 *  it correctly on bidi locales. This is done by adding directional
 	 *  formatting characters so that presentation using the Unicode
 	 *  Bidirectional Algorithm will provide the expected result.
-	 *  The text is segmented according to the provided delimiters.
+	 *  The text is segmented according to the provided separators.
 	 *  Each segment has the Unicode Bidi Algorithm applied to it,
 	 *  but as a whole, the string is oriented left to right.
 	 *  <p>
@@ -167,8 +167,8 @@ final public class BidiComplexUtil {
 	 *
 	 *  @param  str the text to process.
 	 *
-	 *  @param  delimiters delimiters by which the string will be segmented.
-	 *          If <code>null</code>, the default delimiters are used
+	 *  @param  separators separators by which the string will be segmented.
+	 *          If <code>null</code>, the default separators are used
 	 *          (dot, colon, slash, backslash).
 	 *
 	 *  @return the processed string.
@@ -176,7 +176,7 @@ final public class BidiComplexUtil {
 	 *          or of length 0, or if the current locale is not a bidi one,
 	 *          return the original string.
 	 */
-	public static String process(String str, String delimiters) {
+	public static String process(String str, String separators) {
 		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
@@ -207,12 +207,12 @@ final public class BidiComplexUtil {
 			return str;
 		}
 
-		if (delimiters == null)
-			delimiters = defaultDelimiters;
+		if (separators == null)
+			separators = defaultSeparators;
 
 		// make sure that LRE/PDF are added around the string
 		BidiComplexEnvironment env = new BidiComplexEnvironment(null, false, BidiComplexEnvironment.ORIENT_UNKNOWN);
-		BidiComplexFeatures features = new BidiComplexFeatures(delimiters, 0, -1, -1, false, false);
+		BidiComplexFeatures features = new BidiComplexFeatures(separators, 0, -1, -1, false, false);
 		return BidiComplexEngine.leanToFullText(new BidiComplexProcessor(), features, env, str, null);
 	}
 

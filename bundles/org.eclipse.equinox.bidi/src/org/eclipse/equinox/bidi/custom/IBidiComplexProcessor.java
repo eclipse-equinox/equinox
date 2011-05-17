@@ -51,7 +51,7 @@ public interface IBidiComplexProcessor {
 	 *    <li>{@link BidiComplexProcessor#getDirProp getDirProp}</li>
 	 *    <li>{@link BidiComplexProcessor#setDirProp setDirProp}</li>
 	 *    <li>{@link BidiComplexProcessor#insertMark insertMark}</li>
-	 *    <li>{@link BidiComplexProcessor#processOperator processOperator}</li>
+	 *    <li>{@link BidiComplexProcessor#processSeparator processSeparator}</li>
 	 *  </ul>
 	 *
 	 *  @param  features is the {@link BidiComplexFeatures} instance
@@ -100,7 +100,7 @@ public interface IBidiComplexProcessor {
 	 *    <li>{@link BidiComplexProcessor#getDirProp getDirProp}</li>
 	 *    <li>{@link BidiComplexProcessor#setDirProp setDirProp}</li>
 	 *    <li>{@link BidiComplexProcessor#insertMark insertMark}</li>
-	 *    <li>{@link BidiComplexProcessor#processOperator processOperator}</li>
+	 *    <li>{@link BidiComplexProcessor#processSeparator processSeparator}</li>
 	 *  </ul>
 	 *  <p>
 	 *  If a special processing cannot be completed within a current call to
@@ -114,7 +114,7 @@ public interface IBidiComplexProcessor {
 	 *  {@link BidiComplexEngine#leanToFullText leanToFullText}
 	 *  specifying that state value, <code>processSpecial</code> will be
 	 *  called with that value for parameter <code>caseNumber</code> and
-	 *  <code>-1</code> for parameter <code>operLocation</code> and should
+	 *  <code>-1</code> for parameter <code>separLocation</code> and should
 	 *  perform whatever initializations are required depending on the state.
 	 *
 	 *  @param  features is the {@link BidiComplexFeatures} instance
@@ -148,7 +148,7 @@ public interface IBidiComplexProcessor {
 	 *
 	 *  @param  caseNumber number of the special case to handle.
 	 *
-	 *  @param  operLocation the position returned by
+	 *  @param  separLocation the position returned by
 	 *          {@link #indexOfSpecial indexOfSpecial}. In calls to
 	 *          {@link BidiComplexEngine#leanToFullText leanToFullText} and other
 	 *          methods of {@link BidiComplexEngine} specifying a  non-null
@@ -156,7 +156,7 @@ public interface IBidiComplexProcessor {
 	 *          called when initializing the processing with the value of
 	 *          <code>caseNumber</code> equal to the value returned in the
 	 *          first element of <code>state</code> and the value of
-	 *          <code>operLocation</code> equal to <code>-1</code>.
+	 *          <code>separLocation</code> equal to <code>-1</code>.
 	 *
 	 *  @return the position after the scope of the special case ends.
 	 *          For instance, the position after the end of a comment,
@@ -165,6 +165,6 @@ public interface IBidiComplexProcessor {
 	 *          means that there is no further occurrence of this case in the
 	 *          current complex expression.
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation);
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation);
 
 }

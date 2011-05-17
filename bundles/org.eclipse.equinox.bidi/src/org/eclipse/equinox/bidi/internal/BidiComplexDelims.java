@@ -15,8 +15,8 @@ import org.eclipse.equinox.bidi.custom.BidiComplexProcessor;
 
 /**
  *  <code>BidiComplexDelims</code> is a processor for complex expressions
- *  composed of text segments separated by operators where the text segments
- *  may include delimited parts within which operators are treated like
+ *  composed of text segments separated by separators where the text segments
+ *  may include delimited parts within which separators are treated like
  *  regular characters.
  *
  *  @author Matitiahu Allouche
@@ -34,9 +34,9 @@ public abstract class BidiComplexDelims extends BidiComplexProcessor {
 	/**
 	 *  This method skips until after the matching end delimiter.
 	 */
-	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int operLocation) {
-		BidiComplexProcessor.processOperator(features, text, dirProps, offsets, operLocation);
-		int loc = operLocation + 1;
+	public int processSpecial(BidiComplexFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		BidiComplexProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		loc = text.indexOf(delim, loc);
 		if (loc < 0)
@@ -53,7 +53,7 @@ public abstract class BidiComplexDelims extends BidiComplexProcessor {
 	 *         the second character is an end delimiter. In the <i>lean</i>
 	 *         text, any part starting with a start delimiter and ending with
 	 *         the corresponding end delimiter is a delimited part. Within a
-	 *         delimited part, operators are treated like regular characters,
+	 *         delimited part, separators are treated like regular characters,
 	 *         which means that they do not define new segments.
 	 */
 	protected abstract String getDelimiters();
