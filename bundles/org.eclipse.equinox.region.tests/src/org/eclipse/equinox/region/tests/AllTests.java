@@ -13,6 +13,7 @@ package org.eclipse.equinox.region.tests;
 import junit.framework.*;
 import org.eclipse.equinox.internal.region.*;
 import org.eclipse.equinox.internal.region.hook.*;
+import org.eclipse.equinox.region.tests.system.Bug346127Test;
 import org.eclipse.equinox.region.tests.system.RegionSystemTests;
 
 public class AllTests {
@@ -28,6 +29,7 @@ public class AllTests {
 		suite.addTest(new JUnit4TestAdapter(StandardRegionDigraphTests.class));
 		suite.addTest(new JUnit4TestAdapter(StandardRegionFilterTests.class));
 		suite.addTest(new TestSuite(RegionSystemTests.class));
+		suite.addTest(new TestSuite(Bug346127Test.class));
 		return suite;
 	}
 }

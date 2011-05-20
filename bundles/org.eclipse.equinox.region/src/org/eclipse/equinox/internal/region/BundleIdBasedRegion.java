@@ -11,7 +11,8 @@
 
 package org.eclipse.equinox.internal.region;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -30,9 +31,7 @@ import org.osgi.framework.*;
  */
 final class BundleIdBasedRegion implements Region {
 
-	private static final String REGION_LOCATION_DELIMITER = "@"; //$NON-NLS-1$
-
-	private static final String REFERENCE_SCHEME = "reference:"; //$NON-NLS-1$
+	private static final String REGION_LOCATION_DELIMITER = "#"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 
@@ -107,9 +106,22 @@ final class BundleIdBasedRegion implements Region {
 			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		setRegionThreadLocal();
 		try {
-			return this.bundleContext.installBundle(this.regionName + REGION_LOCATION_DELIMITER + location, input);
+			input = checkFileProtocol(location, input);
+			return this.bundleContext.installBundle(location + REGION_LOCATION_DELIMITER + this.regionName, input);
 		} finally {
 			removeRegionThreadLocal();
+		}
+	}
+
+	private InputStream checkFileProtocol(String location, InputStream input) throws BundleException {
+		if (input != null || location.startsWith(FILE_SCHEME))
+			return input;
+		try {
+			return new URL(location).openStream();
+		} catch (MalformedURLException e) {
+			throw new BundleException("The location resulted in an invalid bundle URI: " + location, e); //$NON-NLS-1$
+		} catch (IOException e) {
+			throw new BundleException("The location referred to an invalid bundle at URI: " + location, e); //$NON-NLS-1$
 		}
 	}
 
@@ -117,14 +129,7 @@ final class BundleIdBasedRegion implements Region {
 	 * {@inheritDoc}
 	 */
 	public Bundle installBundle(String location) throws BundleException {
-		if (this.bundleContext == null)
-			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
-		setRegionThreadLocal();
-		try {
-			return this.bundleContext.installBundle(this.regionName + REGION_LOCATION_DELIMITER + location, openBundleStream(location));
-		} finally {
-			removeRegionThreadLocal();
-		}
+		return installBundle(location, null);
 	}
 
 	private void setRegionThreadLocal() {
@@ -135,34 +140,6 @@ final class BundleIdBasedRegion implements Region {
 	private void removeRegionThreadLocal() {
 		if (this.threadLocal != null)
 			this.threadLocal.remove();
-	}
-
-	private InputStream openBundleStream(String location) throws BundleException {
-		String absoluteBundleReferenceUriString;
-		if (location.startsWith(REFERENCE_SCHEME))
-			absoluteBundleReferenceUriString = location;
-		else
-			absoluteBundleReferenceUriString = REFERENCE_SCHEME + getAbsoluteUriString(location);
-
-		try {
-			// Use the reference: scheme to obtain an InputStream for either a file or a directory.
-			return new URL(absoluteBundleReferenceUriString).openStream();
-
-		} catch (MalformedURLException e) {
-			throw new BundleException("Location '" + location + "' resulted in an invalid bundle URI '" + absoluteBundleReferenceUriString + "'", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		} catch (IOException e) {
-			throw new BundleException("Location '" + location + "' referred to an invalid bundle at URI '" + absoluteBundleReferenceUriString + "'", e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-	}
-
-	private String getAbsoluteUriString(String location) throws BundleException {
-		if (!location.startsWith(FILE_SCHEME)) {
-			throw new BundleException("Cannot install from location '" + location + "' which did not start with '" + FILE_SCHEME + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-
-		String filePath = location.substring(FILE_SCHEME.length());
-
-		return FILE_SCHEME + new File(filePath).getAbsolutePath();
 	}
 
 	/**

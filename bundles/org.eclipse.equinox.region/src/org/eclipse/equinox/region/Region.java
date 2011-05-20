@@ -72,7 +72,7 @@ public interface Region {
 
 	/**
 	 * Installs a bundle and associates the bundle with this region. The bundle's location will have the region name
-	 * prepended to the given location to ensure the location is unique across regions.
+	 * appended to the given location to ensure the location is unique across regions.
 	 * <p>
 	 * If the bundle has the same bundle symbolic name and version as a bundle already present in the region or as a
 	 * bundle import specified on a connection to another region, then BundleException with exception type
@@ -88,7 +88,7 @@ public interface Region {
 
 	/**
 	 * Installs a bundle and associates the bundle with this region. The bundle's location will have the region name
-	 * prepended to the given location to ensure the location is unique across regions.
+	 * appended to the given location to ensure the location is unique across regions.
 	 * <p>
 	 * If the bundle has the same bundle symbolic name and version as a bundle already present in the region or as a
 	 * bundle import specified on a connection to another region, then BundleException with exception type

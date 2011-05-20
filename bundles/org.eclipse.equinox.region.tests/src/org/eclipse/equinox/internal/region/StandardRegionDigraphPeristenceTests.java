@@ -107,7 +107,7 @@ public class StandardRegionDigraphPeristenceTests {
 	@Test
 	public void testInvalidOperations() throws IOException, InvalidSyntaxException, BundleException {
 		Region boot = digraph.getRegion(BOOT_REGION);
-		Bundle b = boot.installBundle("dynamic.add.a.1", null);
+		Bundle b = boot.installBundle("dynamic.add.a.1", new ByteArrayInputStream(new byte[0]));
 		// needed because we don't have a bundle hook to add it for us
 		boot.addBundle(b);
 		// needed because StubBundleContext.installBundle does not do this!
@@ -123,7 +123,7 @@ public class StandardRegionDigraphPeristenceTests {
 		p = bootCopy.getBundle(b.getSymbolicName(), b.getVersion());
 		Assert.assertNull(p);
 		try {
-			bootCopy.installBundle("dynamic.add.b.1", null);
+			bootCopy.installBundle("dynamic.add.b.1", new ByteArrayInputStream(new byte[0]));
 		} catch (BundleException e) {
 			// expected
 		}
