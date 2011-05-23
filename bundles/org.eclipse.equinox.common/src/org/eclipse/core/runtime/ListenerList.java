@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,13 +49,13 @@ public class ListenerList {
 
 	/**
 	 * Mode constant (value 0) indicating that listeners should be considered
-	 * the <a href="#same">same</a> if they are equal.
+	 * the <a href="ListenerList.html#same">same</a> if they are equal.
 	 */
 	public static final int EQUALITY = 0;
 
 	/**
 	 * Mode constant (value 1) indicating that listeners should be considered
-	 * the <a href="#same">same</a> if they are identical.
+	 * the <a href="ListenerList.html#same">same</a> if they are identical.
 	 */
 	public static final int IDENTITY = 1;
 
@@ -82,7 +82,7 @@ public class ListenerList {
 	/**
 	 * Creates a listener list using the provided comparison mode.
 	 * 
-	 * @param mode The mode used to determine if listeners are the <a href="#same">same</a>.
+	 * @param mode The mode used to determine if listeners are the <a href="ListenerList.html#same">same</a>.
 	 */
 	public ListenerList(int mode) {
 		if (mode != EQUALITY && mode != IDENTITY)
@@ -91,7 +91,7 @@ public class ListenerList {
 	}
 
 	/**
-	 * Adds a listener to this list. This method has no effect if the <a href="#same">same</a>
+	 * Adds a listener to this list. This method has no effect if the <a href="ListenerList.html#same">same</a>
 	 * listener is already registered.
 	 * 
 	 * @param listener the non-<code>null</code> listener to add
@@ -143,7 +143,7 @@ public class ListenerList {
 	}
 
 	/**
-	 * Removes a listener from this list. Has no effect if the <a href="#same">same</a> 
+	 * Removes a listener from this list. Has no effect if the <a href="ListenerList.html#same">same</a> 
 	 * listener was not already registered.
 	 *
 	 * @param listener the non-<code>null</code> listener to remove
@@ -180,11 +180,11 @@ public class ListenerList {
 	public int size() {
 		return listeners.length;
 	}
-	
-    /**
-     * Removes all listeners from this list.
-     */
-    public synchronized void clear() {
-            listeners = EmptyArray;
-    }
+
+	/**
+	 * Removes all listeners from this list.
+	 */
+	public synchronized void clear() {
+		listeners = EmptyArray;
+	}
 }
