@@ -139,12 +139,13 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 				result.put(Constants.FILTER_DIRECTIVE, matchingFilter.toString());
 			}
 		}
-		return Collections.unmodifiableMap(result);
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
+		// TODO this needs to return all specified attributes from the Require-Capability header.
 		return Collections.EMPTY_MAP;
 	}
 

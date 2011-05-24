@@ -102,27 +102,34 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 				result.put(Constants.VISIBILITY_DIRECTIVE, Constants.VISIBILITY_REEXPORT);
 			if (optional)
 				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
-			return Collections.unmodifiableMap(result);
+			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
+			return result;
 		}
 	}
 
+	private String createFilterDirective() {
+		StringBuffer filter = new StringBuffer();
+		filter.append("(&"); //$NON-NLS-1$
+		synchronized (this.monitor) {
+			addFilterAttribute(filter, BundleRevision.BUNDLE_NAMESPACE, getName());
+			VersionRange range = getVersionRange();
+			if (range != null && range != VersionRange.emptyRange)
+				addFilterAttribute(filter, Constants.BUNDLE_VERSION_ATTRIBUTE, range);
+			if (attributes != null)
+				addFilterAttributes(filter, attributes);
+		}
+		filter.append(')');
+		return filter.toString();
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
-		Map<String, Object> result = new HashMap<String, Object>(2);
-		synchronized (this.monitor) {
-			if (attributes != null)
-				result.putAll(attributes);
-			result.put(BundleRevision.BUNDLE_NAMESPACE, getName());
-			VersionRange range = getVersionRange();
-			if (range != null)
-				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, range.toString());
-			return Collections.unmodifiableMap(result);
-		}
+		return Collections.EMPTY_MAP;
 	}
 
 	@Override
 	protected String getInternalNameSpace() {
-		// TODO Auto-generated method stub
 		return BundleRevision.BUNDLE_NAMESPACE;
 	}
 }

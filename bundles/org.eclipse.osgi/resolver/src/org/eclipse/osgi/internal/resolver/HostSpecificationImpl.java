@@ -114,22 +114,35 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	protected Map<String, String> getInternalDirectives() {
 		// TODO this does not handle extension directive; but we do not support bootclasspath anyway
-		return Collections.EMPTY_MAP;
+		Map<String, String> result = new HashMap<String, String>(2);
+		synchronized (this.monitor) {
+			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
+			return result;
+		}
 	}
 
-	protected Map<String, Object> getInteralAttributes() {
-		Map<String, Object> result = new HashMap<String, Object>(2);
+	private String createFilterDirective() {
+		StringBuffer filter = new StringBuffer();
+		filter.append("(&"); //$NON-NLS-1$
 		synchronized (this.monitor) {
-			if (attributes != null)
-				result.putAll(attributes);
-			result.put(BundleRevision.HOST_NAMESPACE, getName());
+			addFilterAttribute(filter, BundleRevision.HOST_NAMESPACE, getName());
 			VersionRange range = getVersionRange();
-			if (range != null)
-				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, range.toString());
-			return Collections.unmodifiableMap(result);
+			if (range != null && range != VersionRange.emptyRange)
+				addFilterAttribute(filter, Constants.BUNDLE_VERSION_ATTRIBUTE, range);
+			if (attributes != null)
+				addFilterAttributes(filter, attributes);
 		}
+		filter.append(')');
+		return filter.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected Map<String, Object> getInteralAttributes() {
+		return Collections.EMPTY_MAP;
 	}
 
 	@Override

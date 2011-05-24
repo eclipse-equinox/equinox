@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
+import org.osgi.framework.Version;
 import org.osgi.framework.wiring.*;
 
 abstract class VersionConstraintImpl implements VersionConstraint {
@@ -125,7 +126,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 		@SuppressWarnings("unchecked")
 		public Map<String, Object> getAttributes() {
-			return getInteralAttributes();
+			return Collections.unmodifiableMap(getInteralAttributes());
 		}
 
 		public BundleRevision getRevision() {
@@ -155,5 +156,75 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
 		}
+	}
+
+	static StringBuffer addFilterAttributes(StringBuffer filter, Map<String, ?> attributes) {
+		for (Map.Entry<String, ?> entry : attributes.entrySet()) {
+			addFilterAttribute(filter, entry.getKey(), entry.getValue());
+		}
+		return filter;
+	}
+
+	static StringBuffer addFilterAttribute(StringBuffer filter, String attr, Object value) {
+		return addFilterAttribute(filter, attr, value, true);
+	}
+
+	static private final Version MAX_VERSION = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+
+	// TODO this is coupled to the implementation detail of version range for open range check
+	// TODO we need to create a new method on VersionRange to get a filter string and likely should add a FilterBuilder.
+	static StringBuffer addFilterAttribute(StringBuffer filter, String attr, Object value, boolean escapeWildCard) {
+		if (value instanceof VersionRange) {
+			VersionRange range = (VersionRange) value;
+			if (range.getIncludeMinimum()) {
+				filter.append('(').append(attr).append(">=").append(escapeValue(range.getMinimum(), escapeWildCard)).append(')'); //$NON-NLS-1$
+			} else {
+				filter.append("(!(").append(attr).append("<=").append(escapeValue(range.getMinimum(), escapeWildCard)).append("))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			// only include the maximum check if this is not an open range
+			// this check is a bit hacky because we have no method on VersionRange to check if the range really is open
+			if (!(MAX_VERSION.equals(range.getMaximum()) && range.getIncludeMaximum())) {
+				if (range.getIncludeMaximum()) {
+					filter.append('(').append(attr).append("<=").append(escapeValue(range.getMaximum(), escapeWildCard)).append(')'); //$NON-NLS-1$
+				} else {
+					filter.append("(!(").append(attr).append(">=").append(escapeValue(range.getMaximum(), escapeWildCard)).append("))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+		} else {
+			filter.append('(').append(attr).append('=').append(escapeValue(value, escapeWildCard)).append(')');
+		}
+		return filter;
+	}
+
+	private static String escapeValue(Object o, boolean escapeWildCard) {
+		String value = o.toString();
+		boolean escaped = false;
+		int inlen = value.length();
+		int outlen = inlen << 1; /* inlen * 2 */
+
+		char[] output = new char[outlen];
+		value.getChars(0, inlen, output, inlen);
+
+		int cursor = 0;
+		for (int i = inlen; i < outlen; i++) {
+			char c = output[i];
+			switch (c) {
+				case '*' :
+					if (!escapeWildCard)
+						break;
+				case '\\' :
+				case '(' :
+				case ')' :
+					output[cursor] = '\\';
+					cursor++;
+					escaped = true;
+					break;
+			}
+
+			output[cursor] = c;
+			cursor++;
+		}
+
+		return escaped ? new String(output, 0, cursor) : value;
 	}
 }

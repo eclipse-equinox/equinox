@@ -185,26 +185,36 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Override
 	protected Map<String, String> getInternalDirectives() {
 		Map raw = getDirectives();
-		return Collections.unmodifiableMap(raw);
+		raw.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
+		return raw;
 	}
 
-	protected Map<String, Object> getInteralAttributes() {
-		Map<String, Object> result = new HashMap<String, Object>(2);
+	private String createFilterDirective() {
+		StringBuffer filter = new StringBuffer();
+		filter.append("(&"); //$NON-NLS-1$
 		synchronized (this.monitor) {
-			if (attributes != null)
-				result.putAll(attributes);
-			result.put(BundleRevision.PACKAGE_NAMESPACE, getName());
+			addFilterAttribute(filter, BundleRevision.PACKAGE_NAMESPACE, getName(), false);
 			VersionRange range = getVersionRange();
-			if (range != null)
-				result.put(Constants.VERSION_ATTRIBUTE, range.toString());
+			if (range != null && range != VersionRange.emptyRange)
+				addFilterAttribute(filter, Constants.VERSION_ATTRIBUTE, range);
 			if (symbolicName != null)
-				result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
+				addFilterAttribute(filter, Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
 			if (bundleVersionRange != null)
-				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersionRange.toString());
-			return Collections.unmodifiableMap(result);
+				addFilterAttribute(filter, Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersionRange);
+			if (attributes != null)
+				addFilterAttributes(filter, attributes);
 		}
+		filter.append(')');
+		return filter.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected Map<String, Object> getInteralAttributes() {
+		return Collections.EMPTY_MAP;
 	}
 
 	@Override
