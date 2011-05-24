@@ -73,10 +73,6 @@ public interface Region {
 	/**
 	 * Installs a bundle and associates the bundle with this region. The bundle's location will have the region name
 	 * appended to the given location to ensure the location is unique across regions.
-	 * <p>
-	 * If the bundle has the same bundle symbolic name and version as a bundle already present in the region or as a
-	 * bundle import specified on a connection to another region, then BundleException with exception type
-	 * DUPLICATE_BUNDLE_ERROR is thrown.
 	 * 
 	 * @param location the bundle location string
 	 * @param input a stream of the bundle's contents or <code>null</code>
@@ -89,11 +85,6 @@ public interface Region {
 	/**
 	 * Installs a bundle and associates the bundle with this region. The bundle's location will have the region name
 	 * appended to the given location to ensure the location is unique across regions.
-	 * <p>
-	 * If the bundle has the same bundle symbolic name and version as a bundle already present in the region or as a
-	 * bundle import specified on a connection to another region, then BundleException with exception type
-	 * DUPLICATE_BUNDLE_ERROR is thrown.
-	 * 
 	 * 
 	 * @param location the bundle location string
 	 * @return the installed Bundle
