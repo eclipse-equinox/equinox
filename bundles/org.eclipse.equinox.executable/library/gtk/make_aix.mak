@@ -40,7 +40,7 @@ DLL = $(PROGRAM_LIBRARY)
 LIBS = -lpthread -ldl
 
 X11_LIB_ppc = shr4.o
-X11_LIB_ppc64 = shr_64.so
+X11_LIB_ppc64 = shr_64.o
 X11_LIB = -DX11_LIB="\"libX11.a($(X11_LIB_$(DEFAULT_OS_ARCH)))\""
 GTK_LIBS = -DGTK_LIB="\"libgtk-x11-2.0.a(libgtk-x11-2.0.so.0)\"" \
 		   -DGDK_LIB="\"libgdk-x11-2.0.a(libgdk-x11-2.0.so.0)\"" \
