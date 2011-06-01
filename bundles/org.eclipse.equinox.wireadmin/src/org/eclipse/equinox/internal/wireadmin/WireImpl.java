@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2008 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2011 by ProSyst Software GmbH and others.
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *    ProSyst Software GmbH - initial API and implementation
+ *    IBM Corporation - bug fix 347974
  *******************************************************************************/
 package org.eclipse.equinox.internal.wireadmin;
 
@@ -38,8 +39,10 @@ class WireImpl implements Wire, ServiceListener {
 
 	private Class[] flavors;
 
-	/** Holds the last value passed through this <code>Wire</code>. */
+	/** Holds the last value passed to this <code>Wire</code> by the <code>Producer</code>. */
 	private Object lastValue;
+	/** Holds the previous value passed through this <code>Wire</code> to the <code>Consumer</code>. */
+	private Object previousValue;
 
 	private Vector envelopes;
 
@@ -51,8 +54,8 @@ class WireImpl implements Wire, ServiceListener {
 
 	private Filter filter = null;
 
-	/** Holds the time of last <code>Consumer</code> update in milliseconds */
-	private long lastUpdateTime = -1;
+	/** Holds the time of previous <code>Consumer</code> update in milliseconds */
+	private long previousUpdateTime = -1;
 
 	/** Holds the available wire values (filter attributes) */
 	private Hashtable wireValues;
@@ -150,46 +153,51 @@ class WireImpl implements Wire, ServiceListener {
 			}
 		}
 
-		if (filter != null) {
+		try {
+			if (filter != null) {
+				wireValues.put(WireConstants.WIREVALUE_CURRENT, value);
 
-			wireValues.put(WireConstants.WIREVALUE_CURRENT, value);
-
-			// #3329
-			if (lastValue != null) {
-				wireValues.put(WireConstants.WIREVALUE_PREVIOUS, lastValue);
-				wireValues.put(WireConstants.WIREVALUE_ELAPSED, new Long(System.currentTimeMillis() - lastUpdateTime));
-			}
-
-			if (Number.class.isInstance(value) && Number.class.isInstance(lastValue)) {
-				double val = ((Number) value).doubleValue();
-				double lastVal = ((Number) lastValue).doubleValue();
-
-				wireValues.put(WireConstants.WIREVALUE_DELTA_ABSOLUTE, new Double(Math.abs(val - lastVal)));
-				// #3328
-				wireValues.put(WireConstants.WIREVALUE_DELTA_RELATIVE, new Double(Math.abs(1 - lastVal / val)));
-			} else {
-				wireValues.remove(WireConstants.WIREVALUE_DELTA_ABSOLUTE);
-				wireValues.remove(WireConstants.WIREVALUE_DELTA_RELATIVE);
-			}
-
-			if (!filter.match(wireValues)) {
-				if (Activator.LOG_DEBUG) {
-					Activator.log.debug(0, 10012, filter + " / " + value, null, false);
+				// #3329
+				if (previousValue != null) {
+					wireValues.put(WireConstants.WIREVALUE_PREVIOUS, previousValue);
+					wireValues.put(WireConstants.WIREVALUE_ELAPSED, new Long(System.currentTimeMillis() - previousUpdateTime));
+				} else {
+					previousValue = value; // this is to "prime the pump"
 				}
-				return;
-			}
-		}
 
-		if (consumer != null) {
-			try {
-				consumer.updated(this, value);
-			} catch (Throwable t) {
-				parent.notifyListeners(this, WireAdminEvent.CONSUMER_EXCEPTION, t);
-				return;
+				if (Number.class.isInstance(value) && Number.class.isInstance(previousValue)) {
+					double val = ((Number) value).doubleValue();
+					double prevVal = ((Number) previousValue).doubleValue();
+
+					wireValues.put(WireConstants.WIREVALUE_DELTA_ABSOLUTE, new Double(Math.abs(val - prevVal)));
+					// #3328
+					wireValues.put(WireConstants.WIREVALUE_DELTA_RELATIVE, new Double(Math.abs(1 - prevVal / val)));
+				} else {
+					wireValues.remove(WireConstants.WIREVALUE_DELTA_ABSOLUTE);
+					wireValues.remove(WireConstants.WIREVALUE_DELTA_RELATIVE);
+				}
+
+				if (!filter.match(wireValues)) {
+					if (Activator.LOG_DEBUG) {
+						Activator.log.debug(0, 10012, filter + " / " + value, null, false);
+					}
+					return;
+				}
 			}
+
+			if (consumer != null) {
+				try {
+					consumer.updated(this, value);
+				} catch (Throwable t) {
+					parent.notifyListeners(this, WireAdminEvent.CONSUMER_EXCEPTION, t);
+				} finally {
+					previousValue = value;
+					previousUpdateTime = System.currentTimeMillis();
+					parent.notifyListeners(this, WireAdminEvent.WIRE_TRACE, null);
+				}
+			}
+		} finally {
 			lastValue = value;
-			lastUpdateTime = System.currentTimeMillis();
-			parent.notifyListeners(this, WireAdminEvent.WIRE_TRACE, null);
 		}
 	}
 
@@ -503,6 +511,7 @@ class WireImpl implements Wire, ServiceListener {
 		consumer = null;
 
 		lastValue = null;
+		previousValue = null;
 		parent = null;
 		filter = null;
 		wireValues = null;
