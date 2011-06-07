@@ -859,6 +859,8 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * @see org.osgi.service.prefs.Preferences#remove(java.lang.String)
 	 */
 	public void remove(String key) {
+		// illegal state if this node has been removed
+		checkRemoved();
 		String oldValue = properties.get(key);
 		if (oldValue == null)
 			return;
