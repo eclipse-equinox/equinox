@@ -88,7 +88,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		return (hookFlags & FLAG_WEAVINGCOMPLETE) != 0;
 	}
 
-	void setHooksComplete() {
+	private void setHooksComplete() {
 		// create a copy of the bytes array that noone has a reference to
 		byte[] original = bytes;
 		bytes = new byte[bytes.length];
@@ -150,31 +150,35 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 
 	byte[] callHooks() throws Throwable {
 		SecurityManager sm = System.getSecurityManager();
-		if (sm == null) {
-			registry.notifyHooksPrivileged(this);
-		} else {
-			try {
-				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-					public Object run() {
-						registry.notifyHooksPrivileged(WovenClassImpl.this);
-						return null;
-					}
-				});
-			} catch (PrivilegedActionException e) {
-				throw (RuntimeException) e.getException();
+		byte[] wovenBytes = null;
+		List<String> newImports = null;
+		try {
+			if (sm == null) {
+				registry.notifyHooksPrivileged(this);
+			} else {
+				try {
+					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						public Object run() {
+							registry.notifyHooksPrivileged(WovenClassImpl.this);
+							return null;
+						}
+					});
+				} catch (PrivilegedActionException e) {
+					throw (RuntimeException) e.getException();
+				}
+			}
+		} finally {
+			if ((hookFlags & FLAG_HOOKCALLED) != 0) {
+				wovenBytes = bytes;
+				newImports = dynamicImports;
+				setHooksComplete();
 			}
 		}
-		if ((hookFlags & FLAG_HOOKCALLED) == 0)
-			return null; // we never handed this object to a hook; nothing else to do
 
-		byte[] wovenBytes = bytes;
-		List<String> newImports = dynamicImports;
-
-		setHooksComplete();
 		if (error != null)
 			throw error;
 
-		if (newImports.size() > 0) {
+		if (newImports != null) {
 			// add any new dynamic imports
 			for (String newImport : newImports) {
 				try {
@@ -185,6 +189,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				}
 			}
 		}
+
 		return wovenBytes;
 	}
 

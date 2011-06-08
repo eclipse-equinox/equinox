@@ -74,9 +74,6 @@ public class WeavingHookConfigurator implements HookConfigurator, ClassLoadingHo
 			ClassFormatError error = new ClassFormatError("Unexpected error from weaving hook."); //$NON-NLS-1$
 			error.initCause(t);
 			throw error;
-		} finally {
-			// ensure we always tell the woven class that we are done calling hooks.
-			wovenClass.setHooksComplete();
 		}
 	}
 
