@@ -1087,6 +1087,12 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 						}
 					}
 				}
+				ImportPackageSpecification[] addedDynamic = getAddedDynamicImportPackages();
+				for (ImportPackageSpecification dynamicImport : addedDynamic) {
+					BundleRequirement req = dynamicImport.getRequirement();
+					if (!requirements.contains(req))
+						requirements.add(req);
+				}
 			}
 			return requirements;
 		}
