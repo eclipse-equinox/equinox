@@ -421,7 +421,6 @@ public abstract class StateImpl implements State {
 				throw new IllegalStateException("no resolver set"); //$NON-NLS-1$
 			if (resolving == true)
 				throw new IllegalStateException("An attempt to start a nested resolve process has been detected."); //$NON-NLS-1$
-			ResolverHook currentHook = null;
 			try {
 				resolving = true;
 				long start = 0;
@@ -474,7 +473,7 @@ public abstract class StateImpl implements State {
 				if (currentFactory != null) {
 					@SuppressWarnings("unchecked")
 					Collection<BundleRevision> triggerRevisions = Collections.unmodifiableCollection(triggers == null ? Collections.EMPTY_LIST : Arrays.asList((BundleRevision[]) triggers));
-					currentHook = begin(triggerRevisions);
+					begin(triggerRevisions);
 				}
 				ResolverHookException error = null;
 				try {
@@ -499,8 +498,6 @@ public abstract class StateImpl implements State {
 					updateTimeStamp();
 				return savedChanges;
 			} finally {
-				if (currentHook != null)
-					currentHook.end();
 				resolving = false;
 			}
 		}

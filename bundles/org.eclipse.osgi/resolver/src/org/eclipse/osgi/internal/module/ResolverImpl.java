@@ -434,7 +434,21 @@ public class ResolverImpl implements Resolver {
 			ResolverBundle[] bundles = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
 
 			usesCalculationTimeout = false;
+
 			resolveBundles(bundles, platformProperties, hookDisabled);
+
+			@SuppressWarnings("unchecked")
+			Collection<ResolverBundle> optionalResolved = resolveOptional ? resolveOptionalConstraints(currentlyResolved) : Collections.EMPTY_LIST;
+			ResolverHook current = hook;
+			if (current != null) {
+				hook = null;
+				current.end();
+			}
+
+			for (ResolverBundle bundle : optionalResolved) {
+				state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null, null);
+				stateResolveBundle(bundle);
+			}
 			// reorder exports and bundles after resolving the bundles
 			resolverExports.reorder();
 			resolverBundles.reorder();
@@ -444,6 +458,8 @@ public class ResolverImpl implements Resolver {
 			if (DEBUG)
 				ResolverImpl.log("*** END RESOLUTION ***"); //$NON-NLS-1$
 		} finally {
+			if (hook != null)
+				hook.end(); // need to make sure end is always called
 			hook = null;
 		}
 	}
@@ -491,15 +507,18 @@ public class ResolverImpl implements Resolver {
 
 	}
 
-	private void resolveOptionalConstraints(ResolverBundle[] bundles) {
+	private Collection<ResolverBundle> resolveOptionalConstraints(ResolverBundle[] bundles) {
+		Collection<ResolverBundle> result = new ArrayList<ResolverBundle>();
 		for (int i = 0; i < bundles.length; i++) {
-			if (bundles[i] != null)
-				resolveOptionalConstraints(bundles[i]);
+			if (bundles[i] != null && resolveOptionalConstraints(bundles[i])) {
+				result.add(bundles[i]);
+			}
 		}
+		return result;
 	}
 
 	// TODO this does not do proper uses constraint verification.
-	private void resolveOptionalConstraints(ResolverBundle bundle) {
+	private boolean resolveOptionalConstraints(ResolverBundle bundle) {
 		BundleConstraint[] requires = bundle.getRequires();
 		List<ResolverBundle> cycle = new ArrayList<ResolverBundle>();
 		boolean resolvedOptional = false;
@@ -518,11 +537,7 @@ public class ResolverImpl implements Resolver {
 				if (imports[i].getSelectedSupplier() != null)
 					resolvedOptional = true;
 			}
-		if (resolvedOptional) {
-			state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null, null);
-			stateResolveConstraints(bundle);
-			stateResolveBundle(bundle);
-		}
+		return resolvedOptional;
 	}
 
 	private void getCurrentEEs(Dictionary<Object, Object>[] platformProperties) {

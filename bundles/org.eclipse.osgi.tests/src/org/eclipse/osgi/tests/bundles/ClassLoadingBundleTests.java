@@ -19,7 +19,9 @@ import junit.framework.TestSuite;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
-import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1612,6 +1614,86 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 			expectedFrameworkEvents[0] = new FrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, OSGiTestsActivator.getContext().getBundle(0), null);
 			Object[] actualFrameworkEvents = frameworkListenerResults.getResults(1);
 			compareResults(expectedFrameworkEvents, actualFrameworkEvents);
+		}
+	}
+
+	public void testBug348805() {
+		final boolean[] endCalled = {false};
+		ResolverHookFactory error = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// Nothing
+					}
+
+					public void filterResolvable(Collection candidates) {
+						throw new RuntimeException("Error");
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// Nothing
+					}
+
+					public void end() {
+						endCalled[0] = true;
+					}
+				};
+			}
+		};
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		try {
+			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+			try {
+				test.start();
+				fail("Should not be able to start this bundle");
+			} catch (BundleException e) {
+				// expected
+				assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
+			}
+		} catch (BundleException e) {
+			fail("Unexpected install fail", e);
+		} finally {
+			reg.unregister();
+		}
+		assertTrue("end is not called", endCalled[0]);
+	}
+
+	public void testBug348806() {
+		ResolverHookFactory error = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// Nothing
+					}
+
+					public void filterResolvable(Collection candidates) {
+						// Nothing
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// Nothing
+					}
+
+					public void end() {
+						throw new RuntimeException("Error");
+					}
+				};
+			}
+		};
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		try {
+			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+			try {
+				test.start();
+				fail("Should not be able to start this bundle");
+			} catch (BundleException e) {
+				// expected
+				assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
+			}
+		} catch (BundleException e) {
+			fail("Unexpected install fail", e);
+		} finally {
+			reg.unregister();
 		}
 	}
 
