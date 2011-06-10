@@ -22,6 +22,7 @@ import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.*;
 
 public class StateResolverTest extends AbstractStateTest {
 	public static Test suite() {
@@ -3923,6 +3924,198 @@ public class StateResolverTest extends AbstractStateTest {
 
 		ExportPackageDescription xExtra = state.linkDynamicImport(c1, "x.extra");
 		assertNotNull("x.extra dynamic import is null", xExtra);
+	}
+
+	public void testRequirements() throws BundleException, InvalidSyntaxException, IOException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("r1.MF");
+		BundleDescription hostDescription = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		state.addBundle(hostDescription);
+		manifest = loadManifest("r2.MF");
+		BundleDescription fragDescription = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		state.addBundle(fragDescription);
+
+		doTestRequirements(hostDescription, fragDescription);
+
+		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		stateCache.mkdirs();
+		StateObjectFactory.defaultFactory.writeState(state, stateCache);
+		state = StateObjectFactory.defaultFactory.readState(stateCache);
+
+		hostDescription = state.getBundle(0);
+		fragDescription = state.getBundle(1);
+
+		doTestRequirements(hostDescription, fragDescription);
+	}
+
+	private void doTestRequirements(BundleRevision hostRevision, BundleRevision fragRevision) throws InvalidSyntaxException {
+		List pReqs = hostRevision.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of reqs: " + BundleRevision.PACKAGE_NAMESPACE, 8, pReqs.size());
+
+		Map matchingAttrs = new HashMap();
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg1");
+		matchingAttrs.put(Constants.VERSION_ATTRIBUTE, new Version("1.1"));
+
+		checkRequirement((BundleRequirement) pReqs.get(0), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg2");
+		checkRequirement((BundleRequirement) pReqs.get(1), matchingAttrs, null, "(resolution=optional)", true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg3");
+		checkRequirement((BundleRequirement) pReqs.get(2), matchingAttrs, null, "(resolution=mandatory)", true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg4");
+		checkRequirement((BundleRequirement) pReqs.get(3), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg5");
+		checkRequirement((BundleRequirement) pReqs.get(4), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg6");
+		checkRequirement((BundleRequirement) pReqs.get(5), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg7");
+		checkRequirement((BundleRequirement) pReqs.get(6), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.PACKAGE_NAMESPACE, "importer.pkg8");
+		matchingAttrs.put("a1", "v1");
+		matchingAttrs.put("a2", "v2");
+		checkRequirement((BundleRequirement) pReqs.get(7), matchingAttrs, null, "(&(resolution=optional)(d1=v1)(d2=v2))", true);
+
+		matchingAttrs.clear();
+		List bReqs = hostRevision.getDeclaredRequirements(BundleRevision.BUNDLE_NAMESPACE);
+		assertEquals("Wrong number of reqs: " + BundleRevision.BUNDLE_NAMESPACE, 8, bReqs.size());
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b1");
+		matchingAttrs.put(Constants.BUNDLE_VERSION_ATTRIBUTE, new Version("1.1"));
+		checkRequirement((BundleRequirement) bReqs.get(0), matchingAttrs, null, "(&(visibility=reexport)(resolution=optional))", true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b2");
+		checkRequirement((BundleRequirement) bReqs.get(1), matchingAttrs, null, "(&(|(visibility=private)(!(visibility=*)))(|(resolution=mandatory)(!(resolution=*))))", true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b3");
+		checkRequirement((BundleRequirement) bReqs.get(2), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b4");
+		checkRequirement((BundleRequirement) bReqs.get(3), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b5");
+		checkRequirement((BundleRequirement) bReqs.get(4), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b6");
+		checkRequirement((BundleRequirement) bReqs.get(5), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b7");
+		checkRequirement((BundleRequirement) bReqs.get(6), matchingAttrs, null, null, true);
+
+		matchingAttrs.put(BundleRevision.BUNDLE_NAMESPACE, "requirer.b8");
+		matchingAttrs.put("a1", "v1");
+		matchingAttrs.put("a2", "v2");
+		checkRequirement((BundleRequirement) bReqs.get(7), matchingAttrs, null, "(&(resolution=optional)(d1=v1)(d2=v2))", true);
+
+		matchingAttrs.clear();
+		List cReqs = hostRevision.getDeclaredRequirements("require.c1");
+		assertEquals("Wrong number of reqs: require.c1", 1, cReqs.size());
+
+		matchingAttrs.put("a1", "v1");
+		checkRequirement((BundleRequirement) cReqs.get(0), matchingAttrs, null, "(&(|(effective=resolve)(!(effective=*)))(resolution=optional)(filter=\\(a1=v1\\)))", true);
+
+		cReqs = hostRevision.getDeclaredRequirements("require.c2");
+		assertEquals("Wrong number of reqs: require.c2", 1, cReqs.size());
+		matchingAttrs.clear();
+		checkRequirement((BundleRequirement) cReqs.get(0), matchingAttrs, null, "(&(|(effective=resolve)(!(effective=*)))(|(resolution=mandatory)(!(resolution=*))))", false);
+
+		cReqs = hostRevision.getDeclaredRequirements("require.c3");
+		assertEquals("Wrong number of reqs: require.c3", 1, cReqs.size());
+		matchingAttrs.clear();
+		checkRequirement((BundleRequirement) cReqs.get(0), matchingAttrs, "(&(a1=v1)(a2=v2))", "(&(resolution=optional)(d1=v1)(d2=v2))", false);
+
+		List fReqs = fragRevision.getDeclaredRequirements(BundleRevision.HOST_NAMESPACE);
+		assertEquals("Wrong number of host reqs: " + BundleRevision.HOST_NAMESPACE, 1, fReqs.size());
+		matchingAttrs.clear();
+		matchingAttrs.put(BundleRevision.HOST_NAMESPACE, "r1");
+		matchingAttrs.put(Constants.BUNDLE_VERSION_ATTRIBUTE, new Version(1, 1, 1));
+		matchingAttrs.put("a1", "v1");
+		matchingAttrs.put("a2", "v2");
+		checkRequirement((BundleRequirement) fReqs.get(0), matchingAttrs, null, "(&(d1=v1)(d2=v2))", true);
+	}
+
+	private void checkRequirement(BundleRequirement req, Map matchingAttrs, String attributesFilterSpec, String directivesFilterSpec, boolean reqFilter) throws InvalidSyntaxException {
+		if (attributesFilterSpec == null) {
+			assertTrue("Requirement attrs is not empty: " + req, req.getAttributes().isEmpty());
+		} else {
+			Filter filter = FrameworkUtil.createFilter(attributesFilterSpec);
+			assertTrue("Cannot match attribute filter: " + filter, filter.matches(req.getAttributes()));
+		}
+		Map directives = req.getDirectives();
+		String reqFilterSpec = (String) directives.get(Constants.FILTER_DIRECTIVE);
+		if (reqFilterSpec != null) {
+			Filter filter = FrameworkUtil.createFilter(reqFilterSpec);
+			assertTrue("Cannot match requirement filter: " + filter, filter.matches(matchingAttrs));
+		} else {
+			if (reqFilter)
+				fail("Requirement must have filter directive: " + req);
+		}
+		if (directivesFilterSpec != null) {
+			Filter directivesFilter = FrameworkUtil.createFilter(directivesFilterSpec);
+			assertTrue("Cannot match directive filter: " + directivesFilterSpec, directivesFilter.matches(req.getDirectives()));
+		}
+	}
+
+	public void testCapabilities() throws InvalidSyntaxException, BundleException, IOException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("r1.MF");
+		BundleDescription hostDescription = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		state.addBundle(hostDescription);
+
+		doTestCapabilities(hostDescription);
+
+		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		stateCache.mkdirs();
+		StateObjectFactory.defaultFactory.writeState(state, stateCache);
+		state = StateObjectFactory.defaultFactory.readState(stateCache);
+
+		hostDescription = state.getBundle(0);
+	}
+
+	private void doTestCapabilities(BundleRevision hostRevision) throws InvalidSyntaxException {
+		List bundleCaps = hostRevision.getDeclaredCapabilities(BundleRevision.BUNDLE_NAMESPACE);
+		assertEquals("Wrong number of: " + BundleRevision.BUNDLE_NAMESPACE, 1, bundleCaps.size());
+		checkCapability((BundleCapability) bundleCaps.get(0), "(&(osgi.wiring.bundle=r1)(a1=v1)(a2=v2))", "(&(d1=v1)(d2=v2)(singleton=true)(fragment-attachment=resolve-time))");
+
+		List hostCaps = hostRevision.getDeclaredCapabilities(BundleRevision.HOST_NAMESPACE);
+		assertEquals("Wrong number of: " + BundleRevision.HOST_NAMESPACE, 1, hostCaps.size());
+		checkCapability((BundleCapability) hostCaps.get(0), "(&(osgi.wiring.host=r1)(a1=v1)(a2=v2))", "(&(d1=v1)(d2=v2)(singleton=true)(fragment-attachment=resolve-time))");
+
+		List pkgCaps = hostRevision.getDeclaredCapabilities(BundleRevision.PACKAGE_NAMESPACE);
+		assertEquals("Wrong number of: " + BundleRevision.PACKAGE_NAMESPACE, 3, pkgCaps.size());
+		checkCapability((BundleCapability) pkgCaps.get(0), "(&(osgi.wiring.package=exporter.pkg1)(bundle-symbolic-name=r1)(bundle-version=1.0)(version=1.0))", null);
+		checkCapability((BundleCapability) pkgCaps.get(1), "(&(osgi.wiring.package=exporter.pkg2)(bundle-symbolic-name=r1)(bundle-version=1.0)(a1=v1)(a2=v2))", "(&(include=C1,C2)(exclude=C3,C4)(mandatory=a1,a2)(uses=importer.pkg1,importer.pkg2))");
+		checkCapability((BundleCapability) pkgCaps.get(2), "(&(osgi.wiring.package=exporter.pkg3)(bundle-symbolic-name=r1)(bundle-version=1.0)(a1=v1)(a2=v2))", "(&(mandatory=a1,a2)(d1=v1)(d2=v2))");
+
+		List gCaps = hostRevision.getDeclaredCapabilities("provide.c1");
+		assertEquals("Wrong number of: provide.c1", 1, gCaps.size());
+		checkCapability((BundleCapability) gCaps.get(0), "(&(a1=v1)(a2=v2))", "(&(|(effective=resolve)(!(effective=*)))(uses=importer.pkg1,importer.pkg2))");
+
+		gCaps = hostRevision.getDeclaredCapabilities("provide.c2");
+		assertEquals("Wrong number of: provide.c1", 1, gCaps.size());
+		checkCapability((BundleCapability) gCaps.get(0), "(&(a1=v1)(a2=v2))", "(&(|(effective=resolve)(!(effective=*)))(uses=importer.pkg1,importer.pkg2)(d1=v1)(d2=v2))");
+
+	}
+
+	private void checkCapability(BundleCapability cap, String attributeFilterSpec, String directiveFilterSpec) throws InvalidSyntaxException {
+		Filter attributesFilter = FrameworkUtil.createFilter(attributeFilterSpec);
+		assertTrue("Cannot match attribute filter: " + attributesFilter, attributesFilter.matches(cap.getAttributes()));
+
+		if (directiveFilterSpec != null) {
+			Filter directivesFilter = FrameworkUtil.createFilter(directiveFilterSpec);
+			assertTrue("Cannot match directive filter: " + directivesFilter, directivesFilter.matches(cap.getDirectives()));
+		}
 	}
 }
 //testFragmentUpdateNoVersionChanged()

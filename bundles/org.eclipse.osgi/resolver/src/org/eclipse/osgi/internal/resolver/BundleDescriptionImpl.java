@@ -58,6 +58,7 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	private List<BundleDescription> dependents;
 	private String[] mandatory;
 	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 
 	private volatile LazyData lazyData;
 	private volatile int equinox_ee = -1;
@@ -857,8 +858,24 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			mandatory = (String[]) value;
 	}
 
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
+		}
+	}
+
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<String, String>(2);
+		Map<String, String> arbitrary = getArbitraryDirectives();
+		if (arbitrary != null)
+			result.putAll(arbitrary);
 		if (!attachFragments()) {
 			result.put(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_NEVER);
 		} else {

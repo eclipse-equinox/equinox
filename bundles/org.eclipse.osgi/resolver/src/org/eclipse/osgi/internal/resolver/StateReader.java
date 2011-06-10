@@ -46,7 +46,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 36;
+	public static final byte STATE_CACHE_VERSION = 37;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -226,6 +226,7 @@ final class StateReader {
 		if (mandatory != null)
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, mandatory);
 		result.setAttributes(readMap(in));
+		result.setArbitraryDirectives(readMap(in));
 		result.setHost(readHostSpec(in));
 
 		// set the bundle dependencies from imports and requires and hosts.
@@ -397,6 +398,7 @@ final class StateReader {
 		result.setExported(in.readBoolean());
 		result.setOptional(in.readBoolean());
 		result.setAttributes(readMap(in));
+		result.setArbitraryDirectives(readMap(in));
 		return result;
 	}
 
@@ -413,6 +415,7 @@ final class StateReader {
 		exportPackageDesc.setExporter(readBundleDescription(in));
 		exportPackageDesc.setAttributes(readMap(in));
 		exportPackageDesc.setDirectives(readMap(in));
+		exportPackageDesc.setArbitraryDirectives(readMap(in));
 		exportPackageDesc.setFragmentDeclaration(readExportPackageDesc(in));
 		return exportPackageDesc;
 	}
@@ -555,6 +558,7 @@ final class StateReader {
 		result.setBundleVersionRange(readVersionRange(in));
 		result.setAttributes(readMap(in));
 		result.setDirectives(readMap(in));
+		result.setArbitraryDirectives(readMap(in));
 		return result;
 	}
 
@@ -576,6 +580,7 @@ final class StateReader {
 			result.setHosts(hosts);
 		}
 		result.setAttributes(readMap(in));
+		result.setArbitraryDirectives(readMap(in));
 		return result;
 	}
 
@@ -629,6 +634,8 @@ final class StateReader {
 		} catch (InvalidSyntaxException e) {
 			// do nothing this filter was tested before
 		}
+		result.setAttributes(readMap(in));
+		result.setArbitraryDirectives(readMap(in));
 		return result;
 	}
 

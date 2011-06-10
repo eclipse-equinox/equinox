@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,8 +107,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundle.setGenericRequires(createGenericRequires(original.getGenericRequires()));
 		bundle.setNativeCodeSpecification(createNativeCodeSpecification(original.getNativeCodeSpecification()));
 		bundle.setAttributes(original.getAttributes());
-		if (original instanceof BundleDescriptionImpl)
+		if (original instanceof BundleDescriptionImpl) {
 			bundle.setDirective(Constants.MANDATORY_DIRECTIVE, ((BundleDescriptionImpl) original).getDirective(Constants.MANDATORY_DIRECTIVE));
+			bundle.setArbitraryDirectives(((BundleDescriptionImpl) original).getArbitraryDirectives());
+		}
 		return bundle;
 	}
 
@@ -162,9 +164,13 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			req.setType(genericRequires[i].getType());
 			req.setResolution(req.getResolution());
 			try {
-				req.setMatchingFilter(genericRequires[i].getMatchingFilter(), true);
+				req.setMatchingFilter(genericRequires[i].getMatchingFilter(), false);
 			} catch (InvalidSyntaxException e) {
 				// do nothing; this filter should already have been tested
+			}
+			if (genericRequires[i] instanceof GenericSpecificationImpl) {
+				req.setAttributes(((GenericSpecificationImpl) genericRequires[i]).getAttributes());
+				req.setArbitraryDirectives(((GenericSpecificationImpl) genericRequires[i]).getArbitraryDirectives());
 			}
 			result[i] = req;
 		}
@@ -186,8 +192,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		bundleSpec.setVersionRange(original.getVersionRange());
 		bundleSpec.setExported(original.isExported());
 		bundleSpec.setOptional(original.isOptional());
-		if (original instanceof BundleSpecificationImpl)
+		if (original instanceof BundleSpecificationImpl) {
 			bundleSpec.setAttributes(((BundleSpecificationImpl) original).getAttributes());
+			bundleSpec.setArbitraryDirectives(((BundleSpecificationImpl) original).getArbitraryDirectives());
+		}
 		return bundleSpec;
 	}
 
@@ -202,8 +210,10 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		HostSpecificationImpl hostSpec = new HostSpecificationImpl();
 		hostSpec.setName(original.getName());
 		hostSpec.setVersionRange(original.getVersionRange());
-		if (original instanceof HostSpecificationImpl)
+		if (original instanceof HostSpecificationImpl) {
 			hostSpec.setAttributes(((HostSpecificationImpl) original).getAttributes());
+			hostSpec.setArbitraryDirectives(((HostSpecificationImpl) original).getArbitraryDirectives());
+		}
 		return hostSpec;
 	}
 
@@ -227,11 +237,20 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		packageSpec.setBundleVersionRange(original.getBundleVersionRange());
 		packageSpec.setDirectives(original.getDirectives());
 		packageSpec.setAttributes(original.getAttributes());
+		if (original instanceof ImportPackageSpecificationImpl) {
+			packageSpec.setArbitraryDirectives(((ImportPackageSpecificationImpl) original).getArbitraryDirectives());
+		}
 		return packageSpec;
 	}
 
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original) {
-		return createExportPackageDescription(original.getName(), original.getVersion(), original.getDirectives(), original.getAttributes(), true, null);
+		ExportPackageDescriptionImpl exportPackage = new ExportPackageDescriptionImpl();
+		exportPackage.setName(original.getName());
+		exportPackage.setVersion(original.getVersion());
+		exportPackage.setDirectives(original.getDirectives());
+		exportPackage.setAttributes(original.getAttributes());
+		exportPackage.setArbitraryDirectives(((ExportPackageDescriptionImpl) original).getArbitraryDirectives());
+		return exportPackage;
 	}
 
 	public ExportPackageDescription createExportPackageDescription(String packageName, Version version, Map<String, ?> directives, Map<String, ?> attributes, boolean root, BundleDescription exporter) {

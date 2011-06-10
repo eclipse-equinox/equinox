@@ -21,6 +21,8 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	private String type = GenericDescription.DEFAULT_TYPE;
 	private int resolution = 0;
 	private GenericDescription[] suppliers;
+	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 
 	public String getMatchingFilter() {
 		synchronized (this.monitor) {
@@ -129,10 +131,38 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		}
 	}
 
+	Map<String, Object> getAttributes() {
+		synchronized (this.monitor) {
+			return attributes;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setAttributes(Map<String, ?> attributes) {
+		synchronized (this.monitor) {
+			this.attributes = (Map<String, Object>) attributes;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
+		}
+	}
+
 	@Override
 	protected Map<String, String> getInternalDirectives() {
 		Map<String, String> result = new HashMap<String, String>(2);
 		synchronized (this.monitor) {
+			if (arbitraryDirectives != null)
+				result.putAll(arbitraryDirectives);
 			if ((resolution & GenericSpecification.RESOLUTION_OPTIONAL) != 0)
 				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
 			if (matchingFilter != null) {
@@ -145,8 +175,9 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Map<String, Object> getInteralAttributes() {
-		// TODO this needs to return all specified attributes from the Require-Capability header.
-		return Collections.EMPTY_MAP;
+		synchronized (this.monitor) {
+			return attributes == null ? Collections.EMPTY_MAP : new HashMap<String, Object>(attributes);
+		}
 	}
 
 	@Override

@@ -217,6 +217,7 @@ class StateWriter {
 		out.writeBoolean(bundle.dynamicFragments());
 		writeList(out, (String[]) ((BundleDescriptionImpl) bundle).getDirective(Constants.MANDATORY_DIRECTIVE));
 		writeMap(out, bundle.getAttributes());
+		writeMap(out, ((BundleDescriptionImpl) bundle).getArbitraryDirectives());
 		writeHostSpec((HostSpecificationImpl) bundle.getHost(), out, force);
 
 		List<BundleDescription> dependencies = ((BundleDescriptionImpl) bundle).getBundleDependencies();
@@ -243,7 +244,7 @@ class StateWriter {
 		ImportPackageSpecification[] imports = bundle.getImportPackages();
 		out.writeInt(imports.length);
 		for (int i = 0; i < imports.length; i++)
-			writeImportPackageSpec(imports[i], out);
+			writeImportPackageSpec((ImportPackageSpecificationImpl) imports[i], out);
 
 		BundleSpecification[] requiredBundles = bundle.getRequiredBundles();
 		out.writeInt(requiredBundles.length);
@@ -318,7 +319,7 @@ class StateWriter {
 		else {
 			out.writeInt(genericRequires.length);
 			for (int i = 0; i < genericRequires.length; i++)
-				writeGenericSpecification(genericRequires[i], out);
+				writeGenericSpecification((GenericSpecificationImpl) genericRequires[i], out);
 		}
 
 		GenericDescription[] selectedCapabilities = bundle.getSelectedGenericCapabilities();
@@ -360,6 +361,7 @@ class StateWriter {
 		out.writeBoolean(bundle.isExported());
 		out.writeBoolean(bundle.isOptional());
 		writeMap(out, bundle.getAttributes());
+		writeMap(out, bundle.getArbitraryDirectives());
 	}
 
 	private void writeExportPackageDesc(ExportPackageDescriptionImpl exportPackageDesc, DataOutputStream out) throws IOException {
@@ -369,6 +371,7 @@ class StateWriter {
 		writeBundleDescription(exportPackageDesc.getExporter(), out, false);
 		writeMap(out, exportPackageDesc.getAttributes());
 		writeMap(out, exportPackageDesc.getDirectives());
+		writeMap(out, exportPackageDesc.getArbitraryDirectives());
 		writeExportPackageDesc((ExportPackageDescriptionImpl) exportPackageDesc.getFragmentDeclaration(), out);
 	}
 
@@ -390,7 +393,7 @@ class StateWriter {
 		writeGenericDescription((GenericDescription) ((BaseDescriptionImpl) description).getFragmentDeclaration(), out);
 	}
 
-	private void writeGenericSpecification(GenericSpecification specification, DataOutputStream out) throws IOException {
+	private void writeGenericSpecification(GenericSpecificationImpl specification, DataOutputStream out) throws IOException {
 		if (writePrefix(specification, out))
 			return;
 		writeVersionConstraint(specification, out);
@@ -402,6 +405,8 @@ class StateWriter {
 				writeGenericDescription(suppliers[i], out);
 		out.writeInt(specification.getResolution());
 		writeStringOrNull(specification.getMatchingFilter(), out);
+		writeMap(out, specification.getAttributes());
+		writeMap(out, specification.getArbitraryDirectives());
 	}
 
 	private void writeNativeCode(NativeCodeSpecification nativeCodeSpecification, DataOutputStream out) throws IOException {
@@ -590,7 +595,7 @@ class StateWriter {
 		writeVersion(rootDesc.getVersion(), out);
 	}
 
-	private void writeImportPackageSpec(ImportPackageSpecification importPackageSpec, DataOutputStream out) throws IOException {
+	private void writeImportPackageSpec(ImportPackageSpecificationImpl importPackageSpec, DataOutputStream out) throws IOException {
 		if (writePrefix(importPackageSpec, out))
 			return;
 		writeVersionConstraint(importPackageSpec, out);
@@ -605,6 +610,7 @@ class StateWriter {
 		writeVersionRange(importPackageSpec.getBundleVersionRange(), out);
 		writeMap(out, importPackageSpec.getAttributes());
 		writeMap(out, importPackageSpec.getDirectives());
+		writeMap(out, importPackageSpec.getArbitraryDirectives());
 	}
 
 	private void writeHostSpec(HostSpecificationImpl host, DataOutputStream out, boolean force) throws IOException {
@@ -625,6 +631,7 @@ class StateWriter {
 		for (int i = 0; i < hosts.length; i++)
 			writeBundleDescription(hosts[i], out, force);
 		writeMap(out, host.getAttributes());
+		writeMap(out, host.getArbitraryDirectives());
 	}
 
 	// called by writers for VersionConstraintImpl subclasses

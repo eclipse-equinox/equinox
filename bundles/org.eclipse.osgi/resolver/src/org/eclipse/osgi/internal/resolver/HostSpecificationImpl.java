@@ -22,6 +22,7 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	private BundleDescription[] hosts;
 	private boolean multihost = false;
 	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 
 	Map<String, Object> getAttributes() {
 		synchronized (this.monitor) {
@@ -33,6 +34,19 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 	void setAttributes(Map<String, ?> attributes) {
 		synchronized (this.monitor) {
 			this.attributes = (Map<String, Object>) attributes;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
 		}
 	}
 
@@ -113,12 +127,12 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected Map<String, String> getInternalDirectives() {
-		// TODO this does not handle extension directive; but we do not support bootclasspath anyway
 		Map<String, String> result = new HashMap<String, String>(2);
 		synchronized (this.monitor) {
+			if (arbitraryDirectives != null)
+				result.putAll(arbitraryDirectives);
 			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
 			return result;
 		}

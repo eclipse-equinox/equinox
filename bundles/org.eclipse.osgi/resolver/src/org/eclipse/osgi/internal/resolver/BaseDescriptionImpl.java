@@ -12,6 +12,7 @@
 package org.eclipse.osgi.internal.resolver;
 
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.service.resolver.BaseDescription;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
@@ -45,13 +46,13 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		this.version = version;
 	}
 
-	static String toString(Map<String, Object> map, boolean directives) {
+	static <V> String toString(Map<String, V> map, boolean directives) {
 		if (map.size() == 0)
 			return ""; //$NON-NLS-1$
 		String assignment = directives ? ":=" : "="; //$NON-NLS-1$//$NON-NLS-2$
-		Set<Map.Entry<String, Object>> set = map.entrySet();
+		Set<Entry<String, V>> set = map.entrySet();
 		StringBuffer sb = new StringBuffer();
-		for (Map.Entry<String, Object> entry : set) {
+		for (Entry<String, V> entry : set) {
 			sb.append("; "); //$NON-NLS-1$
 			String key = entry.getKey();
 			Object value = entry.getValue();
@@ -153,7 +154,7 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		}
 
 		public String toString() {
-			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
+			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}
 	}
 }

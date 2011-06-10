@@ -23,6 +23,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	private static final Integer EQUINOX_EE_DEFAULT = new Integer(-1);
 	private String[] uses;
 	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 	private volatile BundleDescription exporter;
 	private String exclude;
 	private String include;
@@ -40,6 +41,7 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 		setName(fragmentDeclaration.getName());
 		setVersion(fragmentDeclaration.getVersion());
 		setDirectives(fragmentDeclaration.getDirectives());
+		setArbitraryDirectives(((ExportPackageDescriptionImpl) fragmentDeclaration).getArbitraryDirectives());
 		setAttributes(fragmentDeclaration.getAttributes());
 		setExporter(host);
 		this.fragmentDeclaration = fragmentDeclaration;
@@ -67,6 +69,9 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 	public Map<String, String> getDeclaredDirectives() {
 		Map<String, String> result = new HashMap<String, String>(6);
 		synchronized (this.monitor) {
+			Map<String, String> arbitrary = getArbitraryDirectives();
+			if (arbitrary != null)
+				result.putAll(arbitrary);
 			if (uses != null)
 				result.put(Constants.USES_DIRECTIVE, toString(uses));
 			if (exclude != null)
@@ -162,6 +167,19 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			friends = (String[]) directives.get(Constants.FRIENDS_DIRECTIVE);
 			internal = (Boolean) directives.get(Constants.INTERNAL_DIRECTIVE);
 			equinox_ee = ((Integer) directives.get(EQUINOX_EE)).intValue();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
 		}
 	}
 

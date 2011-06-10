@@ -20,6 +20,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	private boolean exported;
 	private boolean optional;
 	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 
 	protected void setExported(boolean exported) {
 		synchronized (this.monitor) {
@@ -55,6 +56,19 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	void setAttributes(Map<String, ?> attributes) {
 		synchronized (this.monitor) {
 			this.attributes = (Map<String, Object>) attributes;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
 		}
 	}
 
@@ -98,6 +112,8 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 	protected Map<String, String> getInternalDirectives() {
 		Map<String, String> result = new HashMap<String, String>(2);
 		synchronized (this.monitor) {
+			if (arbitraryDirectives != null)
+				result.putAll(arbitraryDirectives);
 			if (exported)
 				result.put(Constants.VISIBILITY_DIRECTIVE, Constants.VISIBILITY_REEXPORT);
 			if (optional)

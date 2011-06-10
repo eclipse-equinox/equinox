@@ -154,7 +154,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		}
 
 		public String toString() {
-			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false);
+			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}
 	}
 

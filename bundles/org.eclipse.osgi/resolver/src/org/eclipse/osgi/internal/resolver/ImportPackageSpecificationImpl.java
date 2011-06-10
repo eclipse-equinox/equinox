@@ -22,6 +22,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 	private String symbolicName;
 	private VersionRange bundleVersionRange;
 	private Map<String, Object> attributes;
+	private Map<String, String> arbitraryDirectives;
 
 	public Map<String, Object> getDirectives() {
 		synchronized (this.monitor) {
@@ -40,7 +41,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
-	public Object setDirective(String key, Object value) {
+	Object setDirective(String key, Object value) {
 		synchronized (this.monitor) {
 			if (key.equals(Constants.RESOLUTION_DIRECTIVE))
 				return resolution = (String) value;
@@ -48,11 +49,24 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		}
 	}
 
-	public void setDirectives(Map<String, ?> directives) {
+	void setDirectives(Map<String, ?> directives) {
 		synchronized (this.monitor) {
 			if (directives == null)
 				return;
 			resolution = (String) directives.get(Constants.RESOLUTION_DIRECTIVE);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	void setArbitraryDirectives(Map<String, ?> directives) {
+		synchronized (this.monitor) {
+			this.arbitraryDirectives = (Map<String, String>) directives;
+		}
+	}
+
+	Map<String, String> getArbitraryDirectives() {
+		synchronized (this.monitor) {
+			return arbitraryDirectives;
 		}
 	}
 
@@ -184,12 +198,21 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 		return "Import-Package: " + getName() + "; version=\"" + getVersionRange() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Override
 	protected Map<String, String> getInternalDirectives() {
-		Map raw = getDirectives();
-		raw.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
-		return raw;
+		synchronized (this.monitor) {
+			Map<String, String> result = new HashMap<String, String>(5);
+			if (arbitraryDirectives != null)
+				result.putAll(arbitraryDirectives);
+			if (resolution != null) {
+				if (ImportPackageSpecification.RESOLUTION_STATIC.equals(resolution))
+					result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_MANDATORY);
+				else
+					result.put(Constants.RESOLUTION_DIRECTIVE, resolution);
+			}
+			result.put(Constants.FILTER_DIRECTIVE, createFilterDirective());
+			return result;
+		}
 	}
 
 	private String createFilterDirective() {

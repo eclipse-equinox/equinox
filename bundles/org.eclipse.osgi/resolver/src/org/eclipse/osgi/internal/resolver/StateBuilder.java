@@ -24,9 +24,16 @@ import org.osgi.framework.*;
  * This class builds bundle description objects from manifests
  */
 public class StateBuilder {
-	static final String[] DEFINED_PACKAGE_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
-	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
-	static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
+	private static final String[] DEFINED_EXPORT_PACKAGE_DIRECTIVES = {Constants.USES_DIRECTIVE, Constants.INCLUDE_DIRECTIVE, Constants.EXCLUDE_DIRECTIVE, Constants.FRIENDS_DIRECTIVE, Constants.INTERNAL_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
+	private static final String[] DEFINED_IMPORT_PACKAGE_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE};
+	private static final String[] DEFINED_PACKAGE_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
+	private static final String[] DEFINED_REQUIRE_BUNDLE_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.VISIBILITY_DIRECTIVE};
+	private static final String[] DEFINED_FRAGMENT_HOST_DIRECTIVES = {Constants.EXTENSION_DIRECTIVE};
+	private static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
+	private static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
+	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE};
+	private static final String[] DEFINED_REQUIRE_CAPABILITY_ATTRS = {};
+	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
 	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
@@ -74,6 +81,7 @@ public class StateBuilder {
 				}
 				result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(bsnElement.getDirective(Constants.MANDATORY_DIRECTIVE)));
 				result.setAttributes(getAttributes(bsnElement, DEFINED_BSN_MATCHING_ATTRS));
+				result.setArbitraryDirectives(getDirectives(bsnElement, DEFINED_BSN_DIRECTIVES));
 			}
 		}
 		// retrieve other headers
@@ -225,6 +233,7 @@ public class StateBuilder {
 		result.setExported(Constants.VISIBILITY_REEXPORT.equals(spec.getDirective(Constants.VISIBILITY_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.REPROVIDE_ATTRIBUTE))); //$NON-NLS-1$
 		result.setOptional(Constants.RESOLUTION_OPTIONAL.equals(spec.getDirective(Constants.RESOLUTION_DIRECTIVE)) || "true".equals(spec.getAttribute(Constants.OPTIONAL_ATTRIBUTE))); //$NON-NLS-1$
 		result.setAttributes(getAttributes(spec, DEFINED_BSN_MATCHING_ATTRS));
+		result.setArbitraryDirectives(getDirectives(spec, DEFINED_REQUIRE_BUNDLE_DIRECTIVES));
 		return result;
 	}
 
@@ -287,6 +296,7 @@ public class StateBuilder {
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, ImportPackageSpecification.RESOLUTION_DYNAMIC);
 			else
 				result.setDirective(Constants.RESOLUTION_DIRECTIVE, getResolution(importPackage.getDirective(Constants.RESOLUTION_DIRECTIVE)));
+			result.setArbitraryDirectives(getDirectives(importPackage, DEFINED_IMPORT_PACKAGE_DIRECTIVES));
 
 			allImports.add(result);
 		}
@@ -332,6 +342,7 @@ public class StateBuilder {
 			result.setDirective(Constants.INTERNAL_DIRECTIVE, Boolean.valueOf(exportPackage.getDirective(Constants.INTERNAL_DIRECTIVE)));
 			result.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(exportPackage.getDirective(Constants.MANDATORY_DIRECTIVE)));
 			result.setAttributes(getAttributes(exportPackage, DEFINED_PACKAGE_MATCHING_ATTRS));
+			result.setArbitraryDirectives(getDirectives(exportPackage, DEFINED_EXPORT_PACKAGE_DIRECTIVES));
 			allExports.add(result);
 		}
 	}
@@ -352,6 +363,24 @@ public class StateBuilder {
 			}
 			providedExports.add(provides[i].getValue());
 		}
+	}
+
+	private static Map<String, String> getDirectives(ManifestElement element, String[] definedDirectives) {
+		Enumeration<String> keys = element.getDirectiveKeys();
+		if (keys == null)
+			return null;
+		Map<String, String> arbitraryDirectives = null;
+		keyloop: while (keys.hasMoreElements()) {
+			String key = keys.nextElement();
+			for (String definedDirective : definedDirectives) {
+				if (definedDirective.equals(key))
+					continue keyloop;
+			}
+			if (arbitraryDirectives == null)
+				arbitraryDirectives = new HashMap<String, String>();
+			arbitraryDirectives.put(key, element.getDirective(key));
+		}
+		return arbitraryDirectives;
 	}
 
 	private static Map<String, Object> getAttributes(ManifestElement element, String[] definedAttrs) {
@@ -443,6 +472,7 @@ public class StateBuilder {
 			multiple = getPlatformProperty(state, "osgi.support.multipleHosts"); //$NON-NLS-1$
 		result.setIsMultiHost("true".equals(multiple)); //$NON-NLS-1$
 		result.setAttributes(getAttributes(spec, DEFINED_BSN_MATCHING_ATTRS));
+		result.setArbitraryDirectives(getDirectives(spec, DEFINED_FRAGMENT_HOST_DIRECTIVES));
 		return result;
 	}
 
@@ -482,6 +512,8 @@ public class StateBuilder {
 				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
 				if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
 					spec.setResolution(GenericSpecification.RESOLUTION_OPTIONAL);
+				spec.setAttributes(getAttributes(element, DEFINED_REQUIRE_CAPABILITY_ATTRS));
+				spec.setArbitraryDirectives(getDirectives(element, DEFINED_REQUIRE_CAPABILITY_DIRECTIVES));
 				result.add(spec);
 			}
 		}
