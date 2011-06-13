@@ -763,7 +763,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private synchronized MRUBundleFileList getMRUList() {
-		if (mruList != null)
+		if (mruList == null)
 			mruList = new MRUBundleFileList();
 		return mruList;
 	}
