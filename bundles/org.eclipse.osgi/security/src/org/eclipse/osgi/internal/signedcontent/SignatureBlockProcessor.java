@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2007, 2011 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -467,12 +467,16 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	private static byte[] readIntoArray(BundleEntry be) throws IOException {
 		int size = (int) be.getSize();
 		InputStream is = be.getInputStream();
-		byte b[] = new byte[size];
-		int rc = readFully(is, b);
-		if (rc != size) {
-			throw new IOException("Couldn't read all of " + be.getName() + ": " + rc + " != " + size); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		try {
+			byte b[] = new byte[size];
+			int rc = readFully(is, b);
+			if (rc != size) {
+				throw new IOException("Couldn't read all of " + be.getName() + ": " + rc + " != " + size); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			return b;
+		} finally {
+			is.close();
 		}
-		return b;
 	}
 
 	private static int readFully(InputStream is, byte b[]) throws IOException {
