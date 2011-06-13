@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,7 @@
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -42,7 +41,7 @@ public class DirZipBundleEntry extends BundleEntry {
 	 * @throws IOException  
 	 */
 	public InputStream getInputStream() throws IOException {
-		return null;
+		return new ByteArrayInputStream(new byte[0]);
 	}
 
 	public long getSize() {

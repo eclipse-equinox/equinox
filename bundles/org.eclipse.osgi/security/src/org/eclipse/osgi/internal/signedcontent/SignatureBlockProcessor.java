@@ -475,7 +475,11 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 			}
 			return b;
 		} finally {
-			is.close();
+			try {
+				is.close();
+			} catch (IOException e) {
+				// do nothing;
+			}
 		}
 	}
 
