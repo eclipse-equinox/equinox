@@ -919,14 +919,22 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong stopEvent", FrameworkEvent.STOPPED, stopEvent.getType()); //$NON-NLS-1$
 	}
 
-	public void testBug253942() {
+	public void testMRUBundleFileList() {
+		doMRUBundleFileList(10);
+	}
+
+	//	public void testMRUBundleFileListExpectedToFail() {
+	//		doMRUBundleFileList(0);
+	//	}
+
+	private void doMRUBundleFileList(int limit) {
 		// create/start/stop/start/stop test
-		File config = OSGiTestsActivator.getContext().getDataFile("testBug253942"); //$NON-NLS-1$
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
 		Properties configuration = new Properties();
 		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
-		configuration.put("osgi.bundlefile.limit", "10"); //$NON-NLS-1$//$NON-NLS-2$
+		configuration.put("osgi.bundlefile.limit", Integer.toString(limit)); //$NON-NLS-1$//$NON-NLS-2$
 
-		Equinox equinox = new Equinox(configuration);
+		final Equinox equinox = new Equinox(configuration);
 		try {
 			equinox.init();
 		} catch (BundleException e) {
@@ -945,7 +953,7 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 		File[] testBundles = null;
 		try {
-			testBundles = createBundles(new File(config, "bundles"), 20); //$NON-NLS-1$
+			testBundles = createBundles(new File(config, "bundles"), 3000); //$NON-NLS-1$
 		} catch (IOException e) {
 			fail("Unexpected error creating budnles", e); //$NON-NLS-1$
 		}
@@ -973,18 +981,41 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
-		systemContext = equinox.getBundleContext();
-		Bundle[] bundles = systemContext.getBundles();
-		// get an entry from each bundle to ensure each one gets opened.
-		try {
-			for (int i = 0; i < bundles.length; i++) {
-				bundles[i].getEntry("/META-INF/MANIFEST.MF"); //$NON-NLS-1$
+
+		openAllBundleFiles(equinox.getBundleContext());
+
+		final Exception[] failureException = new BundleException[1];
+		final FrameworkEvent[] success = new FrameworkEvent[] {null};
+		Thread waitForUpdate = new Thread(new Runnable() {
+			public void run() {
+				try {
+					success[0] = equinox.waitForStop(10000);
+				} catch (InterruptedException e) {
+					failureException[0] = e;
+				}
 			}
-		} catch (Throwable t) {
-			// An exception used to get thrown here when we tried to close 
-			// the least used bundle file
-			fail("Failed to get bundle entries", t);
+		}, "test waitForStop thread"); //$NON-NLS-1$
+		waitForUpdate.start();
+		try {
+			// delay hack to allow waitForUpdate thread to block on waitForStop before we update.
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			fail("unexpected interuption", e);
 		}
+		try {
+			equinox.update();
+		} catch (BundleException e) {
+			fail("Failed to update the framework", e); //$NON-NLS-1$
+		}
+		try {
+			waitForUpdate.join();
+		} catch (InterruptedException e) {
+			fail("unexpected interuption", e); //$NON-NLS-1$
+		}
+		if (failureException[0] != null)
+			fail("Error occurred while waiting", failureException[0]); //$NON-NLS-1$
+
+		openAllBundleFiles(equinox.getBundleContext());
 
 		try {
 			equinox.stop();
@@ -997,6 +1028,20 @@ public class SystemBundleTests extends AbstractBundleTests {
 			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
 		}
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
+	private void openAllBundleFiles(BundleContext context) {
+		Bundle[] bundles = context.getBundles();
+		// get an entry from each bundle to ensure each one gets opened.
+		try {
+			for (int i = 0; i < bundles.length; i++) {
+				assertNotNull("No manifest for: " + bundles[i], bundles[i].getEntry("/META-INF/MANIFEST.MF"));
+			}
+		} catch (Throwable t) {
+			// An exception used to get thrown here when we tried to close 
+			// the least used bundle file
+			fail("Failed to get bundle entries", t);
+		}
 	}
 
 	public void testURLExternalFormat01() {

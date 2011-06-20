@@ -59,13 +59,13 @@ public class StateManager implements PlatformAdmin, Runnable {
 	private long expireTime = 300000; // default to five minutes
 	private long readStartupTime;
 	private StateImpl systemState;
-	private StateObjectFactoryImpl factory;
+	private final StateObjectFactoryImpl factory;
 	private long lastTimeStamp;
 	private boolean cachedState = false;
-	private File stateFile;
-	private File lazyFile;
-	private long expectedTimeStamp;
-	private BundleContext context;
+	private final File stateFile;
+	private final File lazyFile;
+	private final long expectedTimeStamp;
+	private final BundleContext context;
 	private Thread dataManagerThread;
 
 	/**

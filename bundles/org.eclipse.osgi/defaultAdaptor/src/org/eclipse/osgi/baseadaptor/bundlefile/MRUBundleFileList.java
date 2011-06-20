@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	final private long[] useStampList;
 	// the limit of open files to allow before least used bundle file is closed
 	final private int fileLimit; // value < MIN will disable MRU
-	final private EventManager bundleFileCloserManager;
+	private EventManager bundleFileCloserManager = null;
 	final private Map<Object, Object> bundleFileCloser;
 	// the current number of open bundle files
 	private int numOpen = 0;
@@ -63,13 +63,11 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (fileLimit >= MIN) {
 			this.bundleFileList = new BundleFile[fileLimit];
 			this.useStampList = new long[fileLimit];
-			this.bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
 			this.bundleFileCloser = new CopyOnWriteIdentityMap<Object, Object>();
 			this.bundleFileCloser.put(this, this);
 		} else {
 			this.bundleFileList = null;
 			this.useStampList = null;
-			this.bundleFileCloserManager = null;
 			this.bundleFileCloser = null;
 		}
 	}
@@ -84,6 +82,7 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		if (fileLimit < MIN)
 			return; // MRU is disabled
 		BundleFile toRemove = null;
+		EventManager manager = null;
 		synchronized (this) {
 			if (bundleFile.getMruIndex() >= 0)
 				return; // do nothing; someone is trying add a bundleFile that is already in an MRU list
@@ -114,10 +113,16 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 			bundleFile.setMruIndex(index);
 			incUseStamp(index);
 			numOpen++;
+			if (toRemove != null) {
+				if (bundleFileCloserManager == null)
+					bundleFileCloserManager = new EventManager("Bundle File Closer"); //$NON-NLS-1$
+				manager = bundleFileCloserManager;
+			}
+
 		}
 		// must not close the toRemove bundle file while holding the lock of another bundle file (bug 161976)
 		// This queues the bundle file for close asynchronously.
-		closeBundleFile(toRemove);
+		closeBundleFile(toRemove, manager);
 	}
 
 	/**
@@ -188,12 +193,12 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 		}
 	}
 
-	private void closeBundleFile(BundleFile toRemove) {
+	private void closeBundleFile(BundleFile toRemove, EventManager manager) {
 		if (toRemove == null)
 			return;
 		try {
 			/* queue to hold set of listeners */
-			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<Object, Object, BundleFile>(bundleFileCloserManager);
+			ListenerQueue<Object, Object, BundleFile> queue = new ListenerQueue<Object, Object, BundleFile>(manager);
 			/* add bundle file closer to the queue */
 			queue.queueListeners(bundleFileCloser.entrySet(), this);
 			/* dispatch event to set of listeners */
@@ -209,8 +214,11 @@ public class MRUBundleFileList implements EventDispatcher<Object, Object, Bundle
 	 * Closes the bundle file closer thread for the MRU list
 	 */
 	public void shutdown() {
-		if (bundleFileCloserManager != null)
-			bundleFileCloserManager.close();
+		synchronized (this) {
+			if (bundleFileCloserManager != null)
+				bundleFileCloserManager.close();
+			bundleFileCloserManager = null;
+		}
 	}
 
 	/**

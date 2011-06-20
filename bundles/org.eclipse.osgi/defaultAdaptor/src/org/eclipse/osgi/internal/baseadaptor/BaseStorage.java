@@ -91,7 +91,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private static final String PERM_DATA_FILE = ".permdata"; //$NON-NLS-1$
 	private static final byte PERMDATA_VERSION = 1;
 
-	private MRUBundleFileList mruList = new MRUBundleFileList();
+	private final MRUBundleFileList mruList = new MRUBundleFileList();
 
 	BaseAdaptor adaptor;
 	// assume a file: installURL
@@ -442,9 +442,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		return null;
 	}
 
-	void saveAllData(boolean shutdown) {
-		if (Debug.DEBUG_GENERAL)
-			Debug.println("Saving framework data ..."); //$NON-NLS-1$
+	private StorageManager getStorageManager() {
 		if (storageManagerClosed)
 			try {
 				storageManager.open(!LocationManager.getConfigurationLocation().isReadOnly());
@@ -454,6 +452,12 @@ public class BaseStorage implements SynchronousBundleListener {
 				FrameworkLogEntry logEntry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, message, 0, e, null);
 				adaptor.getFrameworkLog().log(logEntry);
 			}
+		return storageManager;
+	}
+
+	void saveAllData(boolean shutdown) {
+		if (Debug.DEBUG_GENERAL)
+			Debug.println("Saving framework data ..."); //$NON-NLS-1$
 		saveBundleDatas();
 		saveStateData(shutdown);
 		savePermissionStorage();
@@ -512,7 +516,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (Debug.DEBUG_GENERAL)
 			Debug.println("About to save permission data ..."); //$NON-NLS-1$
 		try {
-			ManagedOutputStream fmos = storageManager.getOutputStream(PERM_DATA_FILE);
+			ManagedOutputStream fmos = getStorageManager().getOutputStream(PERM_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
 			boolean error = true;
 			try {
@@ -565,7 +569,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (Debug.DEBUG_GENERAL)
 			Debug.println("Saving bundle data ..."); //$NON-NLS-1$
 		try {
-			ManagedOutputStream fmos = storageManager.getOutputStream(LocationManager.BUNDLE_DATA_FILE);
+			ManagedOutputStream fmos = getStorageManager().getOutputStream(LocationManager.BUNDLE_DATA_FILE);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fmos));
 			boolean error = true;
 			try {
@@ -660,9 +664,10 @@ public class BaseStorage implements SynchronousBundleListener {
 				synchronized (stateManager) {
 					stateManager.update(stateTmpFile, lazyTmpFile);
 				}
-			storageManager.lookup(LocationManager.STATE_FILE, true);
-			storageManager.lookup(LocationManager.LAZY_FILE, true);
-			storageManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
+			StorageManager curStorageManager = getStorageManager();
+			curStorageManager.lookup(LocationManager.STATE_FILE, true);
+			curStorageManager.lookup(LocationManager.LAZY_FILE, true);
+			curStorageManager.update(new String[] {LocationManager.STATE_FILE, LocationManager.LAZY_FILE}, new String[] {stateTmpFile.getName(), lazyTmpFile.getName()});
 		} catch (IOException e) {
 			adaptor.getFrameworkLog().log(new FrameworkEvent(FrameworkEvent.ERROR, context.getBundle(), e));
 		} finally {
@@ -738,7 +743,7 @@ public class BaseStorage implements SynchronousBundleListener {
 			if (isDirectory(data, base, file))
 				result = new DirBundleFile(file);
 			else
-				result = new ZipBundleFile(file, data, getMRUList());
+				result = new ZipBundleFile(file, data, mruList);
 		}
 
 		if (result == null && content instanceof String) {
@@ -760,12 +765,6 @@ public class BaseStorage implements SynchronousBundleListener {
 		if (!base)
 			data.setBundleFile(content, result);
 		return result;
-	}
-
-	private synchronized MRUBundleFileList getMRUList() {
-		if (mruList == null)
-			mruList = new MRUBundleFileList();
-		return mruList;
 	}
 
 	private boolean isDirectory(BaseData data, boolean base, File file) {
@@ -857,10 +856,11 @@ public class BaseStorage implements SynchronousBundleListener {
 	}
 
 	private File[] findStorageFiles(String[] fileNames) {
+		StorageManager curStorageManager = getStorageManager();
 		File[] storageFiles = new File[fileNames.length];
 		try {
 			for (int i = 0; i < storageFiles.length; i++)
-				storageFiles[i] = storageManager.lookup(fileNames[i], false);
+				storageFiles[i] = curStorageManager.lookup(fileNames[i], false);
 		} catch (IOException ex) {
 			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading state file " + ex.getMessage()); //$NON-NLS-1$
@@ -896,7 +896,7 @@ public class BaseStorage implements SynchronousBundleListener {
 				//it did not exist in either place, so create it in the original location
 				if (!isReadOnly()) {
 					for (int i = 0; i < storageFiles.length; i++)
-						storageFiles[i] = storageManager.lookup(fileNames[i], true);
+						storageFiles[i] = curStorageManager.lookup(fileNames[i], true);
 				}
 			} catch (IOException ex) {
 				if (Debug.DEBUG_GENERAL) {
@@ -924,10 +924,7 @@ public class BaseStorage implements SynchronousBundleListener {
 		storageManagerClosed = true;
 		if (extensionListener != null)
 			context.removeBundleListener(extensionListener);
-		MRUBundleFileList current = mruList;
-		if (current != null)
-			current.shutdown();
-		mruList = null;
+		mruList.shutdown();
 		stateManager = null;
 	}
 
@@ -946,7 +943,7 @@ public class BaseStorage implements SynchronousBundleListener {
 	private InputStream findStorageStream(String fileName) {
 		InputStream storageStream = null;
 		try {
-			storageStream = storageManager.getInputStream(fileName);
+			storageStream = getStorageManager().getInputStream(fileName);
 		} catch (IOException ex) {
 			if (Debug.DEBUG_GENERAL) {
 				Debug.println("Error reading framework metadata: " + ex.getMessage()); //$NON-NLS-1$

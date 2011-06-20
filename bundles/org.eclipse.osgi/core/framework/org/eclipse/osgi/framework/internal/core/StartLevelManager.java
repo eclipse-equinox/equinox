@@ -257,9 +257,9 @@ public class StartLevelManager implements EventDispatcher<Object, Object, StartL
 						decFWSL(i - 1, sortedBundles);
 					}
 					if (newSL == 0) {
-						// stop and unload all bundles
-						suspendAllBundles(framework.bundles);
+						// unload all bundles
 						unloadAllBundles(framework.bundles);
+						stopSystemBundle();
 					}
 				}
 				framework.publishFrameworkEvent(FrameworkEvent.STARTLEVEL_CHANGED, framework.systemBundle, null, listeners);
@@ -575,9 +575,6 @@ public class StartLevelManager implements EventDispatcher<Object, Object, StartL
 
 		saveActiveStartLevel(decToSL);
 
-		if (decToSL == 0) // stopping the framework
-			return;
-
 		// just decrementing the active startlevel - framework is not shutting down
 		// Do not check framework.isForcedRestart here because we want to stop the active bundles regardless.
 		for (int i = shutdown.length - 1; i >= 0; i--) {
@@ -598,29 +595,9 @@ public class StartLevelManager implements EventDispatcher<Object, Object, StartL
 	}
 
 	/**
-	 *  Suspends all bundles in the vector passed in.
-	 * @param bundles list of Bundle objects to be suspended
+	 * Stops the system bundle
 	 */
-	private void suspendAllBundles(BundleRepository bundles) {
-		boolean changed;
-		do {
-			changed = false;
-
-			AbstractBundle[] shutdown = this.getInstalledBundles(bundles, false);
-
-			// shutdown all running bundles
-			for (int i = shutdown.length - 1; i >= 0; i--) {
-				AbstractBundle bundle = shutdown[i];
-
-				if (framework.suspendBundle(bundle, false)) {
-					if (Debug.DEBUG_STARTLEVEL) {
-						Debug.println("SLL: stopped bundle " + bundle.getBundleId()); //$NON-NLS-1$
-					}
-					changed = true;
-				}
-			}
-		} while (changed);
-
+	private void stopSystemBundle() {
 		try {
 			framework.systemBundle.context.stop();
 		} catch (BundleException sbe) {
