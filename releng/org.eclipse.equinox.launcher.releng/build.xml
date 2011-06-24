@@ -13,6 +13,8 @@
 	<property name="cvsRoot" value="${cvsLogin}@dev.eclipse.org:/cvsroot/rt" />
 	<property name="cvsrsh" value="ssh" />
 	<property name="cvsExecutablePath" value="org.eclipse.equinox/framework/bundles/org.eclipse.equinox.executable" />
+	<property name="cvsExecutableBinaries" value="org.eclipse.equinox/framework/releng/org.eclipse.equinox.executable.binaries" />
+	<property name="cvsLauncherBinaries" value="org.eclipse.equinox/framework/releng/org.eclipse.equinox.launcher.binaries" />
 	<property name="cvsTag" value="HEAD" />
 	
 	<!-- Macro for execing scp -->
@@ -20,11 +22,12 @@
 		<attribute name="dir" />
 		<attribute name="source"/>
 		<attribute name="destination" />
+		<attribute name="flag" default="" />
 		<attribute name="failonerror" default="true" />
 		<sequential>
 			<echo message="Copying @{source} to @{destination}."/>
 			<exec dir="@{dir}" executable="scp" failonerror="@{failonerror}">
-				<arg value="-q"/>
+				<arg value="-q${flag}"/>
 				<arg line="@{source}" />
 				<arg value="@{destination}" />
 			</exec>
@@ -211,6 +214,48 @@
 		<echo message="Building for ${os}, ${ws}, ${arch}"/>
 		<antcall target="buildLocal" />
 		<antcall target="buildRemote" />
+	</target>
+	
+	<target name="stageBinaries" >
+		<property name="staging" value="${basedir}/staging" />
+		
+		<cvs command="export -d org.eclipse.equinox.executable.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutableBinariesPath}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
+		<cvs command="export -d org.eclipse.equinox.launcher.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsLauncherBinariesPath}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
+		
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/bin/*"         destination="org.eclipse.equinox.executable.binaries" />
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/contributed/*" destination="org.eclipse.equinox.executable.binaries" />
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="org.eclipse.equinox.launcher.binaries" />
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="org.eclipse.equinox.launcher.binaries" />
+	
+		<pathconvert property="launcherJar" >
+			<last><sort><fileset dir="${eclipseHome}/plugins" includes="org.eclipse.equinox.launcher_*.jar" /></sort></last>
+		</pathconvert>
+		
+		<java jar="launcherJar" fork="true" >
+			<arg line="-application org.eclipse.ant.core.antRunner" />
+			<arg line="-f ${basedir}/build.xml" />
+			<arg line="publishBinaries" />
+			<arg line="-Dp2.repository=${staging}/p2" />
+			<arg line="-Dstaging=${staging}" />
+		</java>
+	</target>
+		
+	<target name="publishBinaries" >
+		<eclipse.idReplacer featureFilePath="${staging}/org.eclipse.equinox.executable.binaries/feature.xml"  selfVersion="1.0.0.${build_version}" featureIds="" pluginIds=""/>
+		<eclipse.gatherFeature
+			metadataRepository="${p2.repository}"
+			artifactRepository="${p2.repository}"
+			baseDirectory="${staging}/org.eclipse.equinox.launcher.binaries"
+			buildResultFolder="${staging}/org.eclipse.equinox.launcher.binaries"
+		/>
+		
+		<eclipse.idReplacer featureFilePath="${staging}/org.eclipse.equinox.executable.binaries/feature.xml"  selfVersion="1.0.0.${build_version}" featureIds="" pluginIds=""/>
+		<eclipse.gatherFeature
+			metadataRepository="${p2.repository}"
+			artifactRepository="${p2.repository}"
+			baseDirectory="${staging}/org.eclipse.equinox.executable.binaries"
+			buildResultFolder="${staging}/org.eclipse.equinox.executable.binaries"
+		/>
 	</target>
 	
 	<target name="buildLocal" if="local" >

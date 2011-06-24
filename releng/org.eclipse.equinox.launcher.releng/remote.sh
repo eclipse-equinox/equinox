@@ -6,6 +6,8 @@ scriptDir=`dirname "$0"`
 ANT_HOME=/bluebird/teamswt/swt-builddir/build/apache-ant-1.7.1
 extraArgs=""
 
+target=buildConfig
+
 while [ "$1" != "" ]; do
 	if [ "$1" = "-java" ] && [ "$2" != "" ]; then
         JAVA_HOME=/bluebird/teamswt/swt-builddir/build/JRE/$2
@@ -15,6 +17,9 @@ while [ "$1" != "" ]; do
 		shift
     elif [ "$1" = "-antHome" ] && [ "$2" != "" ]; then
 		ANT_HOME="$2"
+		shift
+    elif [ "$1" = "-target" ] && [ "$2" != "" ]; then
+		target="$2"
 		shift
     else
         extraArgs="$extraArgs $1"
@@ -47,5 +52,5 @@ PATH=$JAVA_HOME/jre/bin:$ANT_HOME/bin:$PATH
 export JAVA_HOME ANT_HOME PATH
 echo JAVA_HOME = $JAVA_HOME
 echo ANT_HOME = $ANT_HOME
-echo ant -f ${scriptDir}/build.xml buildConfig $extraArgs 
-ant -f ${scriptDir}/build.xml buildConfig $extraArgs
+echo ant -f ${scriptDir}/build.xml $target $extraArgs 
+ant -f ${scriptDir}/build.xml $target $extraArgs
