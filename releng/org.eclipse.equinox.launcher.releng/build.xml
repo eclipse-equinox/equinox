@@ -222,7 +222,7 @@
 		<antcall target="buildRemote" />
 	</target>
 	
-	<target name="stageBinaries" >
+	<target name="stageBinaries" depends="initProperties">
 		<property name="staging" value="${basedir}/staging" />
 		
 		<cvs command="export -d org.eclipse.equinox.executable.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutableBinariesPath}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
