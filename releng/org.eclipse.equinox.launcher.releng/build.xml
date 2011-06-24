@@ -36,6 +36,31 @@
 		</sequential>
 	</macrodef>
 	
+	<!-- remote mkdir -->
+	<macrodef name="mkremote">
+		<attribute name="dir" />
+		<sequential>
+			<echo message="mkdir @{dir}" />
+			<loadresource property="@{dir}_machine" >
+				<string value="@{dir}" />
+				<filterchain>
+					<replaceregex pattern="^(([^@]*@)?([^:]*)):.*$" replace="\1" flags="g"/>
+				</filterchain>
+			</loadresource>
+			<loadresource property="@{dir}_folder" >
+				<string value="@{dir}" />
+				<filterchain>
+					<replaceregex pattern="^([^@]*@)?[^:]*:(.*)$" replace="\2" flags="g"/>
+				</filterchain>
+			</loadresource>	
+
+			<exec executable="ssh" >
+				<arg value="${@{dir}_machine}" />
+				<arg line="mkdir -p ${@{dir}_folder}" />
+			</exec>
+		</sequential>
+	</macrodef>
+
 	<!-- macro to resolve properties because we can't do ${${prop}} -->
 	<macrodef name="resolveProperty">
 		<attribute name="name" />
@@ -97,6 +122,9 @@
 				<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/sbin:/usr/X11R6/bin" />
 		</exec>	
 		
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		
 		<!-- copy the resulting executable and .so -->
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
@@ -122,6 +150,9 @@
 			<arg line="clean all" />
 		</exec>
 		
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse.exe eclipsec.exe" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
 		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 		<condition property="copyWPF">
@@ -131,6 +162,7 @@
 	</target>
 	
 	<target name="copyWPF" if="copyWPF" >
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 		<SCP dir="${libraryFolder}/${ws}" source="com_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
 	</target>
 	
@@ -141,7 +173,9 @@
 			<arg value="clean all" />
 			<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:${extraPath}" />
 		</exec>	
-			
+
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS"/>
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS" />
 		<SCP dir="${libraryFolder}/carbon" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 		<!-- x86 and ppc are the same universal binary, copy to both under the executable feature -->
@@ -152,6 +186,7 @@
 	</target>
 	
 	<target name="copyMacPPC" if="copyMacPPC" >
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
 		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
 	</target>
 	
