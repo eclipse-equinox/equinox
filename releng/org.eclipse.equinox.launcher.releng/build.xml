@@ -29,7 +29,7 @@
 		<sequential>
 			<echo message="Copying @{source} to @{destination}."/>
 			<exec dir="@{dir}" executable="scp" failonerror="@{failonerror}">
-				<arg value="-q${flag}"/>
+				<arg value="-q@{flag}"/>
 				<arg line="@{source}" />
 				<arg value="@{destination}" />
 			</exec>
