@@ -17,6 +17,8 @@
 	<property name="cvsLauncherBinaries" value="org.eclipse.equinox/framework/releng/org.eclipse.equinox.launcher.binaries" />
 	<property name="cvsTag" value="HEAD" />
 	
+	<available file="${basedir}/launcher.properties" property="launcherProperties" value="${basedir}/launcher.properties" />
+	
 	<!-- Macro for execing scp -->
 	<macrodef name="SCP">
 		<attribute name="dir" />
@@ -168,7 +170,11 @@
 		</condition>
 	</target>
 	
-	<target name="initProperties" >
+	<target name="loadProperties" if="launcherProperties" >
+		<propery file="${launcherProperties}" />
+	</target>
+	
+	<target name="initProperties" depends="loadProperties" >
 		<property name="ws" value="${env.ws}"/>
 		<property name="os" value="${env.os}" />	
 		<property name="arch" value="${env.arch}" />
