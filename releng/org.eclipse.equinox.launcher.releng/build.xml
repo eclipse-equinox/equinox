@@ -171,7 +171,7 @@
 	</target>
 	
 	<target name="loadProperties" if="launcherProperties" >
-		<propery file="${launcherProperties}" />
+		<property file="${launcherProperties}" />
 	</target>
 	
 	<target name="initProperties" depends="loadProperties" >
