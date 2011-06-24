@@ -225,8 +225,8 @@
 	<target name="stageBinaries" depends="initProperties">
 		<property name="staging" value="${basedir}/staging" />
 		
-		<cvs command="export -d org.eclipse.equinox.executable.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutableBinariesPath}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
-		<cvs command="export -d org.eclipse.equinox.launcher.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsLauncherBinariesPath}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
+		<cvs command="export -d org.eclipse.equinox.executable.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutableBinaries}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
+		<cvs command="export -d org.eclipse.equinox.launcher.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsLauncherBinaries}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
 		
 		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/bin/*"         destination="org.eclipse.equinox.executable.binaries" />
 		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/contributed/*" destination="org.eclipse.equinox.executable.binaries" />
