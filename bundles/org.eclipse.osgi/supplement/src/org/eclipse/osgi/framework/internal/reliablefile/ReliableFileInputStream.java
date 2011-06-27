@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,12 +35,12 @@ public class ReliableFileInputStream extends FilterInputStream {
 	/** 
 	 * current position reading from file
 	 */
-	private int readPos;
+	private long readPos;
 
 	/** 
 	 * total file length available for reading
 	 */
-	private int length;
+	private long length;
 
 	/**
 	 * Constructs a new ReliableFileInputStream on the file named <code>name</code>.  If the
@@ -94,7 +94,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 		this.reliable = reliable;
 		sigSize = reliable.getSignatureSize();
 		readPos = 0;
-		length = super.available();
+		this.length = reliable.getInputLength();
 		if (sigSize > length)
 			length = 0; // shouldn't ever happen
 		else
@@ -130,7 +130,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 
 		if (num != -1) {
 			if (num + readPos > length) {
-				num = length - readPos;
+				num = (int) (length - readPos);
 			}
 			readPos += num;
 		}
@@ -168,7 +168,7 @@ public class ReliableFileInputStream extends FilterInputStream {
 	 */
 	public synchronized int available() throws IOException {
 		if (readPos < length) // just in case
-			return (length - readPos);
+			return (int) (length - readPos);
 		return 0;
 	}
 

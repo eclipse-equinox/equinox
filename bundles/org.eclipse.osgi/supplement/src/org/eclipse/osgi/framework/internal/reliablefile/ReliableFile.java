@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -266,15 +266,27 @@ public class ReliableFile {
 				info = cacheFiles.get(file);
 				long timeStamp = file.lastModified();
 				if (info == null || timeStamp != info.timeStamp) {
+					InputStream tempIS = new FileInputStream(file);
 					try {
-						is = new FileInputStream(file);
-						if (is.available() < maxInputStreamBuffer)
-							is = new BufferedInputStream(is);
+						long fileSize = file.length();
+						if (fileSize < maxInputStreamBuffer) {
+							tempIS = new BufferedInputStream(tempIS, (int) fileSize);
+							// reuse the tempIS since it supports mark/reset
+							is = tempIS;
+						}
 						Checksum cksum = getChecksumCalculator();
-						int filetype = getStreamType(is, cksum);
-						info = new CacheInfo(filetype, cksum, timeStamp);
+						int filetype = getStreamType(tempIS, cksum, fileSize);
+						info = new CacheInfo(filetype, cksum, timeStamp, fileSize);
 						cacheFiles.put(file, info);
 					} catch (IOException e) {/*ignore*/
+					} finally {
+						if (is == null) {
+							// close the tempIS since it was simply used to get the check sum
+							try {
+								tempIS.close();
+							} catch (IOException e) {/*ignore*/
+							}
+						}
 					}
 				}
 			}
@@ -358,9 +370,9 @@ public class ReliableFile {
 			appendChecksum = info.checksum;
 			OutputStream os = new FileOutputStream(tmpFile);
 			if (info.filetype == FILETYPE_NOSIGNATURE) {
-				cp(is, os, 0);
+				cp(is, os, 0, info.length);
 			} else {
-				cp(is, os, 16); // don't copy checksum signature
+				cp(is, os, 16, info.length); // don't copy checksum signature
 			}
 			outputFile = tmpFile;
 			return os;
@@ -390,7 +402,7 @@ public class ReliableFile {
 		mv(outputFile, newFile); // throws IOException if problem
 		outputFile = null;
 		appendChecksum = null;
-		CacheInfo info = new CacheInfo(FILETYPE_VALID, checksum, newFile.lastModified());
+		CacheInfo info = new CacheInfo(FILETYPE_VALID, checksum, newFile.lastModified(), newFile.length());
 		cacheFiles.put(newFile, info);
 		cleanup(generations, true);
 		lastGenerationFile = null;
@@ -475,9 +487,8 @@ public class ReliableFile {
 	 *
 	 * @throws IOException If the copy failed.
 	 */
-	private static void cp(InputStream in, OutputStream out, int truncateSize) throws IOException {
+	private static void cp(InputStream in, OutputStream out, int truncateSize, long length) throws IOException {
 		try {
-			int length = in.available();
 			if (truncateSize > length)
 				length = 0;
 			else
@@ -487,15 +498,15 @@ public class ReliableFile {
 				if (length > BUF_SIZE) {
 					bufferSize = BUF_SIZE;
 				} else {
-					bufferSize = length;
+					bufferSize = (int) length;
 				}
 
 				byte buffer[] = new byte[bufferSize];
-				int size = 0;
+				long size = 0;
 				int count;
-				while ((count = in.read(buffer, 0, length)) > 0) {
+				while ((count = in.read(buffer, 0, bufferSize)) > 0) {
 					if ((size + count) >= length)
-						count = length - size;
+						count = (int) (length - size);
 					out.write(buffer, 0, count);
 					size += count;
 				}
@@ -709,6 +720,16 @@ public class ReliableFile {
 		throw new IOException("ReliableFile signature size is unknown"); //$NON-NLS-1$
 	}
 
+	long getInputLength() throws IOException {
+		if (inputFile != null) {
+			CacheInfo info = cacheFiles.get(inputFile);
+			if (info != null) {
+				return info.length;
+			}
+		}
+		throw new IOException("ReliableFile length is unknown"); //$NON-NLS-1$
+	}
+
 	/**
 	 * Returns a Checksum object for the current file contents. This method 
 	 * should be called only after calling getInputStream() or 
@@ -741,12 +762,11 @@ public class ReliableFile {
 	 * @return <code>true</code> if the file is a valid ReliableFile
 	 * @throws IOException If an error occurs verifying the file.
 	 */
-	private int getStreamType(InputStream is, Checksum crc) throws IOException {
-		boolean markSupported = is.markSupported();
+	private int getStreamType(InputStream is, Checksum crc, long len) throws IOException {
+		boolean markSupported = len < Integer.MAX_VALUE && is.markSupported();
 		if (markSupported)
-			is.mark(is.available());
+			is.mark((int) len);
 		try {
-			int len = is.available();
 			if (len < 16) {
 				if (crc != null) {
 					byte data[] = new byte[16];
@@ -764,7 +784,7 @@ public class ReliableFile {
 			while (pos < len) {
 				int read = data.length;
 				if (pos + read > len)
-					read = len - pos;
+					read = (int) (len - pos);
 
 				int num = is.read(data, 0, read);
 				if (num == -1) {
@@ -828,11 +848,13 @@ public class ReliableFile {
 		int filetype;
 		Checksum checksum;
 		long timeStamp;
+		long length;
 
-		CacheInfo(int filetype, Checksum checksum, long timeStamp) {
+		CacheInfo(int filetype, Checksum checksum, long timeStamp, long length) {
 			this.filetype = filetype;
 			this.checksum = checksum;
 			this.timeStamp = timeStamp;
+			this.length = length;
 		}
 	}
 }
