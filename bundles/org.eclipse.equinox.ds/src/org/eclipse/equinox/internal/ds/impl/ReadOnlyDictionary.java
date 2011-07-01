@@ -25,14 +25,14 @@ public class ReadOnlyDictionary extends Dictionary implements Map {
 	/**
 	 * Creates a new ReadOnlyDictionary with initial set of properties
 	 * 
-	 * @param initialProps the initialProperties for this hashtable
+	 * @param initialProps the initialProperties for this dictionary
 	 */
 	public ReadOnlyDictionary(Map initialProps) {
-		this.delegate = initialProps;
+		this.delegate = initialProps != null ? initialProps : Collections.EMPTY_MAP;
 	}
 
 	public void updateDelegate(Map newDelegate) {
-		this.delegate = newDelegate;
+		this.delegate = newDelegate != null ? newDelegate : Collections.EMPTY_MAP;
 	}
 
 	/* (non-Javadoc)
