@@ -49,7 +49,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	/**
 	 * Constructor of class MetaTypeProviderImpl.
 	 */
-	MetaTypeProviderImpl(Bundle bundle, SAXParserFactory parserFactory, LogService logger) throws IOException {
+	MetaTypeProviderImpl(Bundle bundle, SAXParserFactory parserFactory, LogService logger) {
 
 		this._bundle = bundle;
 		this.logger = logger;
@@ -83,7 +83,7 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * @return void
 	 * @throws IOException If there are errors accessing the metadata.xml file
 	 */
-	private boolean readMetaFiles(Bundle bundle, SAXParserFactory parserFactory) throws IOException {
+	private boolean readMetaFiles(Bundle bundle, SAXParserFactory parserFactory) {
 		BundleWiring wiring = bundle.adapt(BundleWiring.class);
 		if (wiring == null)
 			return false;
@@ -95,16 +95,18 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			DataParser parser = new DataParser(bundle, entry, parserFactory, logger);
 			try {
 				Collection<Designate> designates = parser.doParse();
-				if (!designates.isEmpty())
+				if (!designates.isEmpty()) {
 					result = true;
+				}
 				for (Designate designate : designates) {
-					if (designate.isFactory())
+					if (designate.isFactory()) {
 						_allFPidOCDs.put(designate.getFactoryPid(), designate.getObjectClassDefinition());
-					else
+					} else {
 						_allPidOCDs.put(designate.getPid(), designate.getObjectClassDefinition());
+					}
 				}
 			} catch (Exception e) {
-				// ignore
+				logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.METADATA_PARSE_ERROR, new Object[] {entry, bundle.getBundleId()}), e);
 			}
 		}
 		return result;

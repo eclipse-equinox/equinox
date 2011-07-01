@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype;
 
-import java.io.IOException;
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import javax.xml.parsers.SAXParserFactory;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeInformation;
@@ -46,33 +47,24 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 	 * @see org.osgi.service.metatype.MetaTypeService#getMetaTypeInformation(org.osgi.framework.Bundle)
 	 */
 	public MetaTypeInformation getMetaTypeInformation(Bundle bundle) {
-
-		MetaTypeInformation mti;
-		try {
-			mti = getMetaTypeProvider(bundle);
-		} catch (IOException e) {
-			logger.log(LogService.LOG_ERROR, "IOException in MetaTypeInformation:getMetaTypeInformation(Bundle bundle)"); //$NON-NLS-1$
-			e.printStackTrace();
-			mti = null;
-		}
-		return mti;
+		return getMetaTypeProvider(bundle);
 	}
 
 	/**
 	 * Internal Method - to get MetaTypeProvider object.
 	 */
-	private MetaTypeInformation getMetaTypeProvider(final Bundle b) throws java.io.IOException {
-
+	private MetaTypeInformation getMetaTypeProvider(final Bundle b) {
+		final LogService loggerTemp = this.logger;
+		final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
 		try {
 			Long bID = new Long(b.getBundleId());
 			synchronized (_mtps) {
 				if (_mtps.containsKey(bID))
 					return _mtps.get(bID);
 				// Avoid synthetic accessor method warnings.
-				final LogService loggerTemp = this.logger;
-				final ServiceTracker<Object, Object> tracker = this.metaTypeProviderTracker;
+
 				MetaTypeInformation mti = AccessController.doPrivileged(new PrivilegedExceptionAction<MetaTypeInformation>() {
-					public MetaTypeInformation run() throws IOException {
+					public MetaTypeInformation run() {
 						MetaTypeInformationImpl impl = new MetaTypeInformationImpl(b, _parserFactory, loggerTemp);
 						if (!impl._isThereMeta)
 							return new MetaTypeProviderTracker(b, loggerTemp, tracker);
@@ -82,8 +74,9 @@ public class MetaTypeServiceImpl implements MetaTypeService, SynchronousBundleLi
 				_mtps.put(bID, mti);
 				return mti;
 			}
-		} catch (PrivilegedActionException pae) {
-			throw (IOException) pae.getException();
+		} catch (Exception e) {
+			logger.log(LogService.LOG_ERROR, NLS.bind(MetaTypeMsg.EXCEPTION_MESSAGE, e.getMessage()), e);
+			return new MetaTypeProviderTracker(b, loggerTemp, tracker);
 		}
 	}
 

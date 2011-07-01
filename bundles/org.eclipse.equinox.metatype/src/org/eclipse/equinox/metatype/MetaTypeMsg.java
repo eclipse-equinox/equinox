@@ -16,14 +16,13 @@ public class MetaTypeMsg extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.equinox.metatype.ExternalMessages"; //$NON-NLS-1$
 
 	public static String SERVICE_DESCRIPTION;
-
 	public static String UNEXPECTED_ELEMENT;
 	public static String UNEXPECTED_TEXT;
 	public static String MISSING_ATTRIBUTE;
+	public static String INVALID_TYPE;
 	public static String MISSING_DESIGNATE_PID_AND_FACTORYPID;
 	public static String OCD_ID_NOT_FOUND;
 	public static String MISSING_ELEMENT;
-
 	public static String EXCEPTION_MESSAGE;
 	public static String NULL_IS_INVALID;
 	public static String VALUE_OUT_OF_RANGE;
@@ -33,14 +32,12 @@ public class MetaTypeMsg extends NLS {
 	public static String INCONSISTENT_OPTIONS;
 	public static String INVALID_OPTIONS;
 	public static String INVALID_DEFAULTS;
-
 	public static String METADATA_NOT_FOUND;
 	public static String ASK_INVALID_LOCALE;
-
 	public static String MISSING_REQUIRED_PARAMETER;
-
 	public static String TOKENIZER_GOT_INVALID_DATA;
 	public static String INVALID_PID_METATYPE_PROVIDER_IGNORED;
+	public static String METADATA_PARSE_ERROR;
 
 	static {
 		// initialize resource bundles

@@ -100,27 +100,15 @@ public class DataParser {
 	/*
 	 * Main method to parse specific MetaData file.
 	 */
-	public Collection<Designate> doParse() {
-
-		try {
-			SAXParser saxParser = _dp_parserFactory.newSAXParser();
-			_dp_xmlReader = saxParser.getXMLReader();
-			_dp_xmlReader.setContentHandler(new RootHandler());
-			_dp_xmlReader.setErrorHandler(new MyErrorHandler(System.err));
-			InputStream is = _dp_url.openStream();
-			InputSource isource = new InputSource(is);
-			logger.log(LogService.LOG_DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
-			_dp_xmlReader.parse(isource);
-		} catch (ParserConfigurationException pce) {
-			pce.printStackTrace();
-			return null;
-		} catch (SAXException saxe) {
-			saxe.printStackTrace();
-			return null;
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-			return null;
-		}
+	public Collection<Designate> doParse() throws IOException, ParserConfigurationException, SAXException {
+		SAXParser saxParser = _dp_parserFactory.newSAXParser();
+		_dp_xmlReader = saxParser.getXMLReader();
+		_dp_xmlReader.setContentHandler(new RootHandler());
+		_dp_xmlReader.setErrorHandler(new MyErrorHandler(System.err));
+		InputStream is = _dp_url.openStream();
+		InputSource isource = new InputSource(is);
+		logger.log(LogService.LOG_DEBUG, "Starting to parse " + _dp_url); //$NON-NLS-1$					
+		_dp_xmlReader.parse(isource);
 		return designates;
 	}
 
@@ -460,6 +448,11 @@ public class DataParser {
 			}
 
 			String ad_type_val = atts.getValue(TYPE);
+			if (ad_type_val == null) {
+				_isParsedDataValid = false;
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name)); //$NON-NLS-1$
+				return;
+			}
 			if (ad_type_val.equalsIgnoreCase(STRING)) {
 				_dataType = AttributeDefinition.STRING;
 			} else if (ad_type_val.equalsIgnoreCase(LONG)) {
@@ -482,9 +475,8 @@ public class DataParser {
 				_dataType = AttributeDefinition.PASSWORD;
 			} else {
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.MISSING_ATTRIBUTE, TYPE, name)); //$NON-NLS-1$
+				logger.log(LogService.LOG_ERROR, "DataParser.init(String, Attributes, Vector) " + NLS.bind(MetaTypeMsg.INVALID_TYPE, new Object[] {ad_type_val, _dp_url, _dp_bundle.getBundleId()})); //$NON-NLS-1$
 				return;
-
 			}
 
 			String ad_cardinality_str = atts.getValue(CARDINALITY);
