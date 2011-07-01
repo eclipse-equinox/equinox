@@ -267,7 +267,7 @@ public class DataParser {
 			if (_dp_designateHandlers.size() == 0) {
 				// Schema defines at least one DESIGNATE is required.
 				_isParsedDataValid = false;
-				logger.log(LogService.LOG_ERROR, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE)); //$NON-NLS-1$
+				logger.log(LogService.LOG_WARNING, "DataParser.finished() " + NLS.bind(MetaTypeMsg.MISSING_ELEMENT, DESIGNATE)); //$NON-NLS-1$
 				return;
 			}
 			Enumeration<DesignateHandler> designateHandlerKeys = _dp_designateHandlers.elements();
