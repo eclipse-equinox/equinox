@@ -92,6 +92,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 			return false;
 		boolean result = false;
 		for (URL entry : entries) {
+			if (entry.getPath().endsWith("/"))
+				continue;
 			DataParser parser = new DataParser(bundle, entry, parserFactory, logger);
 			try {
 				Collection<Designate> designates = parser.doParse();
