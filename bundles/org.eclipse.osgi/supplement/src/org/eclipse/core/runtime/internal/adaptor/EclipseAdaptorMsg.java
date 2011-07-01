@@ -21,6 +21,9 @@ public class EclipseAdaptorMsg extends NLS {
 	public static String ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE;
 	public static String ECLIPSE_MISSING_REQUIRED_BUNDLE;
 	public static String ECLIPSE_MISSING_HOST;
+	public static String ECLIPSE_MISSING_NATIVECODE;
+	public static String ECLIPSE_MISSING_REQUIRED_CAPABILITY;
+	public static String ECLIPSE_MISSING_REQUIREMENT;
 	public static String ECLIPSE_CANNOT_CHANGE_LOCATION;
 	public static String ECLIPSE_BUNDLESTOPPER_CYCLES_FOUND;
 	public static String ECLIPSE_CACHEDMANIFEST_UNEXPECTED_EXCEPTION;

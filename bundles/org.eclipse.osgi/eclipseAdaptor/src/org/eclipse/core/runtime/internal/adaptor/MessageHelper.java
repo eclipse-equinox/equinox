@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,18 @@ public class MessageHelper {
 			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
 				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_DYNAMIC_IMPORTED_PACKAGE, toString(unsatisfied));
 			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_IMPORTED_PACKAGE, toString(unsatisfied));
-		}
-		if (unsatisfied instanceof BundleSpecification) {
+		} else if (unsatisfied instanceof BundleSpecification) {
 			if (((BundleSpecification) unsatisfied).isOptional())
 				return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_OPTIONAL_REQUIRED_BUNDLE, toString(unsatisfied));
 			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_REQUIRED_BUNDLE, toString(unsatisfied));
+		} else if (unsatisfied instanceof HostSpecification) {
+			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_HOST, toString(unsatisfied));
+		} else if (unsatisfied instanceof NativeCodeSpecification) {
+			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_NATIVECODE, unsatisfied.toString());
+		} else if (unsatisfied instanceof GenericSpecification) {
+			return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_REQUIRED_CAPABILITY, unsatisfied.toString());
 		}
-		return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_HOST, toString(unsatisfied));
+		return NLS.bind(EclipseAdaptorMsg.ECLIPSE_MISSING_REQUIREMENT, unsatisfied.toString());
 	}
 
 	/**
