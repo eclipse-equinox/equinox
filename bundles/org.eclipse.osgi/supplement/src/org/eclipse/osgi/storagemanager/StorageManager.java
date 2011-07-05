@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,14 +87,14 @@ public final class StorageManager {
 	private static final int FILETYPE_STANDARD = 0;
 	private static final int FILETYPE_RELIABLEFILE = 1;
 	private static final SecureAction secure = AccessController.doPrivileged(SecureAction.createSecureAction());
-	private static final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
-	private static final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 	private static final String MANAGER_FOLDER = ".manager"; //$NON-NLS-1$
 	private static final String TABLE_FILE = ".fileTable"; //$NON-NLS-1$
 	private static final String LOCK_FILE = ".fileTableLock"; //$NON-NLS-1$
 	private static final int MAX_LOCK_WAIT = 5000; // 5 seconds 
-	// this should be static but the tests expect to be able to create new managers after changing this setting dynamically
+	// these should be static but the tests expect to be able to create new managers after changing this setting dynamically
 	private final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
+	private final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
+	private final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;
@@ -554,6 +554,17 @@ public final class StorageManager {
 			if (error)
 				fileStream.abort();
 		}
+		// bug 259981 we should clean up
+		if (openCleanup) {
+			try {
+				cleanup(false);
+			} catch (IOException ex) {
+				// If IOException is thrown from our custom method.
+				// log and swallow for now.
+				System.out.println("Unexpected IOException is thrown inside cleanupWithLock. Please look below for stacktrace");
+				ex.printStackTrace(System.out);
+			}
+		}
 		tableStamp = ReliableFile.lastModifiedVersion(tableFile);
 	}
 
@@ -584,11 +595,11 @@ public final class StorageManager {
 	 * This removal is only done if the instance of eclipse calling this method is the last instance using this storage manager.
 	 * @throws IOException
 	 */
-	private void cleanup() throws IOException {
+	private void cleanup(boolean doLock) throws IOException {
 		if (readOnly)
 			return;
 		//Lock first, so someone else can not start while we're in the middle of cleanup
-		if (!lock(true))
+		if (doLock && !lock(true))
 			throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
 		try {
 			//Iterate through the temp files and delete them all, except the one representing this storage manager.
@@ -636,7 +647,8 @@ public final class StorageManager {
 				}
 			}
 		} finally {
-			release();
+			if (doLock)
+				release();
 		}
 	}
 
@@ -662,7 +674,7 @@ public final class StorageManager {
 		if (readOnly)
 			return;
 		try {
-			cleanup();
+			cleanup(true);
 		} catch (IOException e) {
 			//Ignore and close.
 		}
@@ -680,12 +692,12 @@ public final class StorageManager {
 	 * @throws IOException if an error occurred opening the storage manager
 	 */
 	public void open(boolean wait) throws IOException {
-		if (openCleanup)
-			cleanup();
 		if (!readOnly) {
 			managerRoot.mkdirs();
 			if (!managerRoot.exists())
 				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);
+			if (openCleanup)
+				cleanup(true);
 			boolean locked = lock(wait);
 			if (!locked && wait)
 				throw new IOException(EclipseAdaptorMsg.fileManager_cannotLock);

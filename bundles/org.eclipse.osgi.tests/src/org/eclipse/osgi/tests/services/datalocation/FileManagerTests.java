@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.osgi.tests.services.datalocation;
 
 import java.io.*;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
@@ -54,15 +53,14 @@ public class FileManagerTests extends OSGiTest {
 		if (file.isDirectory()) {
 			File[] list = file.listFiles();
 			if (list != null) {
-				for (int idx=0; idx<list.length; idx++) {
+				for (int idx = 0; idx < list.length; idx++) {
 					rm(list[idx]);
 				}
 			}
 		}
 		file.delete();
 	}
-	
-	
+
 	/**
 	 * Open a filemanager in readonly and ensure files are
 	 * not created.
@@ -76,7 +74,7 @@ public class FileManagerTests extends OSGiTest {
 		manager1 = new StorageManager(testDir, null, true);
 		try {
 			manager1.open(true);
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 		files = testDir.list();
@@ -84,21 +82,21 @@ public class FileManagerTests extends OSGiTest {
 		try {
 			manager1.add(fileName);
 			fail("add succedded");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			//good
 		}
-		
+
 		try {
 			manager1.lookup(fileName, true);
 			fail("lookup succedded");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			//good
 		}
-		
+
 		try {
 			manager1.createTempFile(fileName);
 			fail("create temp file succedded");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			//good
 		}
 		files = testDir.list();
@@ -116,12 +114,11 @@ public class FileManagerTests extends OSGiTest {
 			manager2.update(new String[] {fileName}, new String[] {tmpFile.getName()});
 			manager2.close();
 			manager2 = null;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
-		}		
+		}
 	}
-	
-	
+
 	void writeToFile(File file, String str) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		try {
@@ -133,7 +130,6 @@ public class FileManagerTests extends OSGiTest {
 		}
 	}
 
-	
 	private String getInputStreamContents(InputStream is) throws IOException {
 		StringBuffer sb = new StringBuffer();
 		byte[] data = new byte[64];
@@ -141,14 +137,13 @@ public class FileManagerTests extends OSGiTest {
 		try {
 			while ((len = is.read(data)) != -1) {
 				sb.append(new String(data, 0, len));
-			} 
+			}
 		} finally {
 			is.close();
 		}
 		return sb.toString();
 	}
-	
-	
+
 	/**
 	 * This tests a FM update where the a specific file is managed with a 
 	 * revision number of (n) and an update is requested while there already
@@ -161,10 +156,10 @@ public class FileManagerTests extends OSGiTest {
 		manager1 = new StorageManager(base, null);
 		try {
 			manager1.open(false);
-			File file1 = new File(base, testFile+".1");
-			File file2 = new File(base, testFile+".2");
-			File file3 = new File(base, testFile+".3");
-			File file4 = new File(base, testFile+".4");
+			File file1 = new File(base, testFile + ".1");
+			File file2 = new File(base, testFile + ".2");
+			File file3 = new File(base, testFile + ".3");
+			File file4 = new File(base, testFile + ".4");
 			if (file1.exists() || file2.exists() || file3.exists() || file4.exists()) {
 				fail("Test files already exists.");
 				return;
@@ -178,7 +173,7 @@ public class FileManagerTests extends OSGiTest {
 				fail("Failed to create a single test file");
 				return;
 			}
-			
+
 			// create file version (2) outside filemanager
 			writeToFile(file2, "file2 exists");
 
@@ -190,7 +185,7 @@ public class FileManagerTests extends OSGiTest {
 				fail("Failed to skip existing filemanager file.");
 				return;
 			}
-			
+
 			// open a new manager, ensure a lookup results in file version (3)
 			manager2 = new StorageManager(base, null);
 			manager2.open(true);
@@ -203,18 +198,17 @@ public class FileManagerTests extends OSGiTest {
 			assertTrue(file.exists());
 			FileInputStream fis = new FileInputStream(file);
 			assertEquals(getInputStreamContents(fis), "file 3 contents");
-			
+
 			manager2.close();
-			manager2=null;
-			
+			manager2 = null;
+
 			manager1.close();
-			manager1=null;
-		} catch(IOException e) {
+			manager1 = null;
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 	}
 
-	
 	/**
 	 * This tests that FM apis throw exceptions if FM has not yet been opened
 	 * or if FM has been closed.  
@@ -231,17 +225,17 @@ public class FileManagerTests extends OSGiTest {
 			this.writeToFile(tmpFile, "File exists");
 			manager1.update(new String[] {permanentFile}, new String[] {tmpFile.getName()});
 			manager1.add(scratchFile);
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
-		
+
 		// create a new manager, and try making calls
 		manager2 = new StorageManager(base, null);
 		checkOpen(false, permanentFile, scratchFile);
 		// open the manager, try again
 		try {
 			manager2.open(true);
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 		checkOpen(true, permanentFile, scratchFile);
@@ -249,7 +243,7 @@ public class FileManagerTests extends OSGiTest {
 		manager2.close();
 		checkOpen(false, permanentFile, scratchFile);
 		manager2 = null;
-		
+
 		manager1.close();
 		manager1 = null;
 	}
@@ -261,7 +255,7 @@ public class FileManagerTests extends OSGiTest {
 			if (!open)
 				fail("add did not fail.");
 			manager2.remove("failFile");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			if (open)
 				fail("unexpected exception", e);
 		}
@@ -271,7 +265,7 @@ public class FileManagerTests extends OSGiTest {
 			manager2.lookup(permanentFile, false);
 			if (!open)
 				fail("lookup did not fail.");
-		} catch(IOException e) {
+		} catch (IOException e) {
 			if (open)
 				fail("unexpected exception", e);
 		}
@@ -283,13 +277,13 @@ public class FileManagerTests extends OSGiTest {
 		} catch (IOException e) {
 			fail("unexpected exception", e);
 			tmpFile = null;
-		}	
+		}
 		if (tmpFile != null) {
 			try {
 				manager2.update(new String[] {permanentFile}, new String[] {tmpFile.getName()});
 				if (!open)
 					fail("update did not fail.");
-			} catch(IOException e) {
+			} catch (IOException e) {
 				if (open)
 					fail("unexpected exception", e);
 			}
@@ -299,15 +293,15 @@ public class FileManagerTests extends OSGiTest {
 			manager2.remove(scratchFile);
 			if (!open)
 				fail("remove did not fail");
-			else // add the file back if expected to complete
+			else
+				// add the file back if expected to complete
 				manager2.add(scratchFile);
-			} catch(IOException e) {
+		} catch (IOException e) {
 			if (open)
 				fail("unexpected exception", e);
 		}
 	}
-	
-	
+
 	/**
 	 * This tests FM remove() then add().  On a remove(), the file can not be deleted as it may
 	 * be in use by another FM. Then add() the file back and see if the version number written to
@@ -319,9 +313,9 @@ public class FileManagerTests extends OSGiTest {
 	 */
 	public void testRemoveThenAdd() {
 		String fileName = "testRemoveThenAdd.txt";
-		File file1 = new File(base, fileName+".1");
-		File file2 = new File(base, fileName+".2");
-		File file3 = new File(base, fileName+".3");
+		File file1 = new File(base, fileName + ".1");
+		File file2 = new File(base, fileName + ".2");
+		File file3 = new File(base, fileName + ".3");
 		manager1 = new StorageManager(base, null);
 		// create a permanent file
 		try {
@@ -340,7 +334,7 @@ public class FileManagerTests extends OSGiTest {
 			// sanity check
 			if (file1.exists() || !file2.exists() || file3.exists())
 				fail("Failed creating a file revision");
-			
+
 			manager2 = new StorageManager(base, null);
 			manager2.open(true);
 			manager2.remove(fileName);
@@ -359,7 +353,7 @@ public class FileManagerTests extends OSGiTest {
 			assertNotNull(testFile);
 			assertTrue(testFile.getName().endsWith(".3"));
 			assertTrue(file3.exists());
-			
+
 			// open a new manager, ensure that the database was updated
 			// by checking version is also #3
 			manager1 = new StorageManager(base, null);
@@ -367,16 +361,16 @@ public class FileManagerTests extends OSGiTest {
 			testFile = manager1.lookup(fileName, false);
 			assertNotNull(testFile);
 			assertTrue(testFile.getName().endsWith(".3"));
-			
+
 			manager1.close();
 			manager1 = null;
 			manager2.close();
 			manager2 = null;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 	}
-	
+
 	/**
 	 * Test multiple FM do not cleanup any old files as they may be in use.
 	 */
@@ -388,8 +382,8 @@ public class FileManagerTests extends OSGiTest {
 			// this is a Windows-only test
 			return;
 		String fileName = "testMultipleFileManagers.txt";
-		File file1 = new File(base, fileName+".1");
-		File file2 = new File(base, fileName+".2");
+		File file1 = new File(base, fileName + ".1");
+		File file2 = new File(base, fileName + ".2");
 		manager1 = new StorageManager(base, null);
 		try {
 			manager1.open(true);
@@ -398,13 +392,13 @@ public class FileManagerTests extends OSGiTest {
 			file = manager1.createTempFile(fileName);
 			writeToFile(file, "test contents #1");
 			manager1.update(new String[] {fileName}, new String[] {file.getName()});
-			
+
 			// ensure file is version #1
 			file = manager1.lookup(fileName, false);
 			assertNotNull(file);
 			assertTrue(file.getName().endsWith(".1"));
 			assertTrue(file1.exists());
-			
+
 			//new fileMangager using version #1
 			manager2 = new StorageManager(base, null);
 			manager2.open(true);
@@ -413,7 +407,7 @@ public class FileManagerTests extends OSGiTest {
 			assertNotNull(file);
 			assertTrue(file.getName().endsWith(".1"));
 			assertTrue(file1.exists() && !file2.exists());
-			
+
 			// back to manager #1, update file again, close
 			file = manager1.createTempFile(fileName);
 			writeToFile(file, "test contents #2");
@@ -426,7 +420,7 @@ public class FileManagerTests extends OSGiTest {
 			// both files better still exists
 			assertTrue(file1.exists());
 			assertTrue(file2.exists());
-			
+
 			// manager #2
 			// sanity check
 			file = manager2.lookup(fileName, false);
@@ -437,20 +431,20 @@ public class FileManagerTests extends OSGiTest {
 			manager2 = null;
 			assertTrue(!file1.exists());
 			assertTrue(file2.exists());
-			
+
 			// new manager1, does it get version 1?
 			manager1 = new StorageManager(base, null);
 			manager1.open(true);
 			file = manager1.lookup(fileName, false);
 			assertNotNull(file);
 			assertTrue(file.getName().endsWith(".2"));
-			manager1.close();		
+			manager1.close();
 			manager1 = null;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 	}
-	
+
 	/**
 	 * This test will verify that a FM will fail if a lock is held
 	 */
@@ -460,11 +454,11 @@ public class FileManagerTests extends OSGiTest {
 			// this is a Windows-only test
 			return;
 		String fileName = "testJavaIOLocking";
-		File lockFile = new File(new File(base,".manager"),".fileTableLock");
+		File lockFile = new File(new File(base, ".manager"), ".fileTableLock");
 		lockFile.getParentFile().mkdirs();
 		try {
 			new FileOutputStream(lockFile).close();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		}
 		assertTrue(lockFile.exists());
@@ -476,30 +470,81 @@ public class FileManagerTests extends OSGiTest {
 			try {
 				manager1.open(true); // wait for lock
 				fail("open with lock succedded");
-			} catch(IOException e) {
+			} catch (IOException e) {
 				//good
 			}
-			
+
 			manager1.open(false); // don't wait, should work
 			try {
 				manager1.add(fileName);
 				fail("add succedded");
-			} catch(IOException e) {
+			} catch (IOException e) {
 				//good
 			}
 			//sanity check, file should not be managed
 			assertNull(manager1.lookup(fileName, false));
 			manager1.close();
 			manager1 = null;
-		} catch(IOException e) {
+		} catch (IOException e) {
 			fail("unexpected exception", e);
 		} finally {
 			try {
 				if (fos != null)
 					fos.close();
-			} catch(IOException e) {
+			} catch (IOException e) {
 				fail("unexpected exception", e);
 			}
+		}
+	}
+
+	public void testCleanup() {
+		String fileName = "testCleanup.txt";
+		File file1 = new File(base, fileName + ".1");
+		File file2 = new File(base, fileName + ".2");
+		File file3 = new File(base, fileName + ".3");
+		System.setProperty("osgi.embedded.cleanupOnOpen", "true");
+		// create a permanent file
+		try {
+			manager1 = new StorageManager(base, null);
+			manager1.open(true);
+			manager1.add(fileName);
+			// create version (1)
+			File tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #1");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertTrue(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertFalse(file3.toString(), file3.exists());
+
+			// do it again, now version (2)
+			tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #2");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertTrue(file2.toString(), file2.exists());
+			assertFalse(file3.toString(), file3.exists());
+
+			// do it again, now version (3)
+			tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #3");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+
+			manager1.close(); // force a cleanup
+			manager1 = null;
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+		} catch (IOException e) {
+			fail("unexpected exception", e);
+		} finally {
+			System.setProperty("osgi.embedded.cleanupOnOpen", "false");
 		}
 	}
 }
