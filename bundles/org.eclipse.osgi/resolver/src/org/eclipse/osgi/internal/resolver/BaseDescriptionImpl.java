@@ -156,5 +156,9 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
 		}
+
+		public BundleRevision getResource() {
+			return getRevision();
+		}
 	}
 }

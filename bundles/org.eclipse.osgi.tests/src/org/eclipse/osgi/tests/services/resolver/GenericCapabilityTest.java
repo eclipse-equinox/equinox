@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
 public class GenericCapabilityTest extends AbstractStateTest {
-	private static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
-	private static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
+	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
+	static final String GENERIC_CAPABILITY = "Eclipse-GenericCapability"; //$NON-NLS-1$
 
 	public static Test suite() {
 		return new TestSuite(GenericCapabilityTest.class);
@@ -35,7 +35,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -55,6 +55,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer required = new StringBuffer();
+		required.append("genericCapability:osgi.identity; selection-filter=\"(version=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
@@ -68,13 +69,15 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.0", genCap.isResolved());
 		assertTrue("1.1", genReq.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		assertTrue("2.0", genSpecs.length == 3);
+		assertTrue("2.0", genSpecs.length == 4);
 		assertTrue("2.1", genSpecs[0].isResolved());
 		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
 		assertTrue("2.2", genSpecs[1].isResolved());
 		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("2.3", genSpecs[2].isResolved());
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+		assertTrue("2.4", genSpecs[3].isResolved());
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 	}
 
 	public void testGenericsUpdate() throws BundleException {
@@ -82,7 +85,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -102,6 +105,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer required = new StringBuffer();
+		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
@@ -115,17 +119,19 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.0", genCap.isResolved());
 		assertTrue("1.1", genReq.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		assertTrue("2.0", genSpecs.length == 3);
+		assertTrue("2.0", genSpecs.length == 4);
 		assertTrue("2.1", genSpecs[0].isResolved());
 		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
 		assertTrue("2.2", genSpecs[1].isResolved());
 		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("2.3", genSpecs[2].isResolved());
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+		assertTrue("2.4", genSpecs[3].isResolved());
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "2.0.0");
 		capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.2\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -146,13 +152,15 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("3.0", genCap2.isResolved());
 		assertTrue("3.1", genReq.isResolved());
 		genSpecs = genReq.getGenericRequires();
-		assertTrue("4.0", genSpecs.length == 3);
+		assertTrue("4.0", genSpecs.length == 4);
 		assertTrue("4.1", genSpecs[0].isResolved());
 		assertEquals("4.1.1", genSpecs[0].getSupplier(), genCap2.getGenericCapabilities()[0]);
 		assertTrue("4.2", genSpecs[1].isResolved());
 		assertEquals("4.2.1", genSpecs[1].getSupplier(), genCap2.getGenericCapabilities()[1]);
 		assertTrue("4.3", genSpecs[2].isResolved());
 		assertEquals("4.3.1", genSpecs[2].getSupplier(), genCap2.getGenericCapabilities()[2]);
+		assertTrue("4.4", genSpecs[3].isResolved());
+		assertEquals("4.4.1", genSpecs[3].getSupplier(), genCap2.getGenericCapabilities()[3]);
 
 	}
 
@@ -161,7 +169,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -181,6 +189,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer required = new StringBuffer();
+		required.append("genericCapability:osgi.identity; selection-filter=\"(version>=1.0)\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\"");
@@ -194,26 +203,30 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.0", genCap.isResolved());
 		assertTrue("1.1", genReq.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		assertTrue("2.0", genSpecs.length == 3);
+		assertTrue("2.0", genSpecs.length == 4);
 		assertTrue("2.1", genSpecs[0].isResolved());
 		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
 		assertTrue("2.2", genSpecs[1].isResolved());
 		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("2.3", genSpecs[2].isResolved());
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+		assertTrue("2.4", genSpecs[3].isResolved());
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 
 		state.resolve(new BundleDescription[] {genCap});
 
 		assertTrue("3.0", genCap.isResolved());
 		assertTrue("3.1", genReq.isResolved());
 		genSpecs = genReq.getGenericRequires();
-		assertTrue("4.0", genSpecs.length == 3);
+		assertTrue("4.0", genSpecs.length == 4);
 		assertTrue("4.1", genSpecs[0].isResolved());
 		assertEquals("4.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
 		assertTrue("4.2", genSpecs[1].isResolved());
 		assertEquals("4.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("4.3", genSpecs[2].isResolved());
 		assertEquals("4.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
+		assertTrue("4.4", genSpecs[3].isResolved());
+		assertEquals("4.4.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
 
 	}
 
@@ -223,7 +236,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		long bundleID = 0;
 
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -241,7 +254,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability.frag1");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
-		manifest.put(Constants.FRAGMENT_HOST, "genericCapablity;bundle-version=\"[1.0.0,2.0.0)\"");
+		manifest.put(Constants.FRAGMENT_HOST, "genericCapability;bundle-version=\"[1.0.0,2.0.0)\"");
 		capabililty = new StringBuffer();
 		capabililty.append("fragmentStuff");
 		manifest.put(GENERIC_CAPABILITY, capabililty.toString());
@@ -252,10 +265,12 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer required = new StringBuffer();
+		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
-		required.append("fragmentStuff");
+		required.append("fragmentStuff,");
+		required.append("genericCapability.frag1:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
 		manifest.put(GENERIC_REQUIRE, required.toString());
 		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
@@ -268,17 +283,23 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.1", genReq.isResolved());
 		assertTrue("1.2", genCapFrag.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		GenericDescription[] selectedCapabilities = genCap.getSelectedGenericCapabilities();
-		assertTrue("2.0", genSpecs.length == 4);
-		assertEquals("Wrong number of selected capabilities", 4, selectedCapabilities.length);
+		GenericDescription[] selectedHostCapabilities = genCap.getSelectedGenericCapabilities();
+		GenericDescription[] selectedFragCapabilities = genCapFrag.getSelectedGenericCapabilities();
+		assertTrue("2.0", genSpecs.length == 6);
+		assertEquals("Wrong number of selected capabilities", 5, selectedHostCapabilities.length);
+		assertEquals("Wrong number of selected capabilities", 1, selectedFragCapabilities.length);
 		assertTrue("2.1", genSpecs[0].isResolved());
-		assertEquals("2.1.1", genSpecs[0].getSupplier(), selectedCapabilities[0]);
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), selectedHostCapabilities[0]);
 		assertTrue("2.2", genSpecs[1].isResolved());
-		assertEquals("2.2.1", genSpecs[1].getSupplier(), selectedCapabilities[1]);
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), selectedHostCapabilities[1]);
 		assertTrue("2.3", genSpecs[2].isResolved());
-		assertEquals("2.3.1", genSpecs[2].getSupplier(), selectedCapabilities[2]);
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), selectedHostCapabilities[2]);
 		assertTrue("2.4", genSpecs[3].isResolved());
-		assertEquals("2.4.1", genSpecs[3].getSupplier(), selectedCapabilities[3]);
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), selectedHostCapabilities[3]);
+		assertTrue("2.5", genSpecs[4].isResolved());
+		assertEquals("2.5.1", genSpecs[4].getSupplier(), selectedHostCapabilities[4]);
+		assertTrue("2.6", genSpecs[5].isResolved());
+		assertEquals("2.6.1", genSpecs[5].getSupplier(), selectedFragCapabilities[0]);
 	}
 
 	public void testGenericsIntraFrags() throws BundleException {
@@ -304,7 +325,12 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.equinox.generic.frag.b");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.equinox.generic.host;bundle-version=\"1.0.0\"");
-		manifest.put("Eclipse-GenericRequire", "frag.a");
+		StringBuffer required = new StringBuffer();
+		required.append("org.eclipse.equinox.generic.host:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
+		required.append("frag.a,");
+		required.append("org.eclipse.equinox.generic.frag.a:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\",");
+		required.append("org.eclipse.equinox.generic.frag.b:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.fragment))\"");
+		manifest.put(GENERIC_REQUIRE, required.toString());
 		BundleDescription genFragB = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genHost);
@@ -317,10 +343,22 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.2", genFragB.isResolved());
 		GenericSpecification[] genSpecs = genFragB.getGenericRequires();
 		GenericDescription[] selected = genHost.getSelectedGenericCapabilities();
-		assertEquals("Wrong number of selected", 1, selected.length);
-		assertTrue("2.0", genSpecs.length == 1);
+		assertEquals("Wrong number of selected", 1 + 1, selected.length); // + 1 for host osgi.identity cap
+		assertTrue("2.0", genSpecs.length == 4);
+		GenericDescription[] selectedHostCapabilities = genHost.getSelectedGenericCapabilities();
+		GenericDescription[] selectedFragACapabilities = genFragA.getSelectedGenericCapabilities();
+		GenericDescription[] selectedFragBCapabilities = genFragB.getSelectedGenericCapabilities();
+		assertEquals("Wrong number of selected capabilities", 2, selectedHostCapabilities.length);
+		assertEquals("Wrong number of selected capabilities", 1, selectedFragACapabilities.length);
+		assertEquals("Wrong number of selected capabilities", 1, selectedFragBCapabilities.length);
 		assertTrue("2.1", genSpecs[0].isResolved());
-		assertEquals("2.1.1", genSpecs[0].getSupplier(), selected[0]);
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), selectedHostCapabilities[0]);
+		assertTrue("2.2", genSpecs[1].isResolved());
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), selectedHostCapabilities[1]);
+		assertTrue("2.3", genSpecs[2].isResolved());
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), selectedFragACapabilities[0]);
+		assertTrue("2.4", genSpecs[3].isResolved());
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), selectedFragBCapabilities[0]);
 	}
 
 	public void testGenericsAliases() throws BundleException {
@@ -333,7 +371,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.EXPORT_SERVICE, "org.osgi.service.log.LogService; version=1.2");
 		manifest.put("TJW-Export", "my.great.stuff; aLong:long=5150; aDouble:double=3.14; aVersion:version=1.2.0");
@@ -345,6 +383,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		manifest.put(Constants.IMPORT_SERVICE, "org.osgi.service.log.LogService; selection-filter=(version>=1.0.0)");
 		manifest.put("TJW-Import", "my.great.stuff; selection-filter=(&(aLong<=10000)(aLong>=5000))");
+		manifest.put(GENERIC_REQUIRE, "genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\"");
 		BundleDescription genReq = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
 
 		state.addBundle(genCap);
@@ -354,11 +393,13 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.0", genCap.isResolved());
 		assertTrue("1.1", genReq.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		assertTrue("2.0", genSpecs.length == 2);
+		assertTrue("2.0", genSpecs.length == 3);
 		assertTrue("2.1", genSpecs[0].isResolved());
-		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("2.2", genSpecs[1].isResolved());
-		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[2]);
+		assertTrue("2.3", genSpecs[2].isResolved());
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[0]);
 	}
 
 	public void testGenericsOptionalMultiple() throws BundleException {
@@ -366,7 +407,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		Hashtable manifest = new Hashtable();
 		long bundleID = 0;
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapablity");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer capabililty = new StringBuffer();
 		capabililty.append("foo; version=\"1.3.1\"; attr1=\"value1\"; attr2=\"value2\",");
@@ -389,6 +430,7 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericRequire");
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
 		StringBuffer required = new StringBuffer();
+		required.append("genericCapability:osgi.identity; selection-filter=\"(&(version=1.0.0)(type=osgi.bundle))\",");
 		required.append("foo; selection-filter=\"(version>=1.3.0)\",");
 		required.append("bar:bartype; selection-filter=\"(attr1=value1)\",");
 		required.append("test.types:testtype; selection-filter=\"(&(aVersion>=2.0.0)(aLong>=5555)(aDouble>=1.00)(aUri=file:/test)(aSet=c)(aString=someString))\",");
@@ -405,21 +447,23 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		assertTrue("1.0", genCap.isResolved());
 		assertTrue("1.1", genReq.isResolved());
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
-		assertTrue("2.0", genSpecs.length == 6);
+		assertTrue("2.0", genSpecs.length == 7);
 		assertTrue("2.1", genSpecs[0].isResolved());
 		assertEquals("2.1.1", genSpecs[0].getSupplier(), genCap.getGenericCapabilities()[0]);
 		assertTrue("2.2", genSpecs[1].isResolved());
 		assertEquals("2.2.1", genSpecs[1].getSupplier(), genCap.getGenericCapabilities()[1]);
 		assertTrue("2.3", genSpecs[2].isResolved());
 		assertEquals("2.3.1", genSpecs[2].getSupplier(), genCap.getGenericCapabilities()[2]);
-		assertFalse("2.4", genSpecs[3].isResolved());
-		assertTrue("2.5", genSpecs[4].isResolved());
-		assertEquals("2.5.1", genSpecs[4].getSupplier(), genCap.getGenericCapabilities()[3]);
-		assertTrue("2.6", genSpecs[5].isResolved());
-		GenericDescription[] suppliers = genSpecs[5].getSuppliers();
+		assertTrue("2.3", genSpecs[3].isResolved());
+		assertEquals("2.3.1", genSpecs[3].getSupplier(), genCap.getGenericCapabilities()[3]);
+		assertFalse("2.4", genSpecs[4].isResolved());
+		assertTrue("2.5", genSpecs[5].isResolved());
+		assertEquals("2.5.1", genSpecs[5].getSupplier(), genCap.getGenericCapabilities()[4]);
+		assertTrue("2.6", genSpecs[6].isResolved());
+		GenericDescription[] suppliers = genSpecs[6].getSuppliers();
 		assertTrue("2.6.1", suppliers != null && suppliers.length == 2);
-		assertEquals("2.6.2", suppliers[0], genCap.getGenericCapabilities()[5]);
-		assertEquals("2.6.3", suppliers[1], genCap.getGenericCapabilities()[4]);
+		assertEquals("2.6.2", suppliers[0], genCap.getGenericCapabilities()[6]);
+		assertEquals("2.6.3", suppliers[1], genCap.getGenericCapabilities()[5]);
 	}
 
 	public void testGenericsCycles() throws BundleException {
@@ -481,18 +525,18 @@ public class GenericCapabilityTest extends AbstractStateTest {
 		GenericSpecification[] genSpecs = genReq.getGenericRequires();
 		GenericDescription[] selected = genCap.getSelectedGenericCapabilities();
 		assertTrue("2.0", genSpecs.length == 4);
-		assertEquals("Wrong number of selected", 4, selected.length);
+		assertEquals("Wrong number of selected", 4 + 1, selected.length); // + 1 for host osgi.identity caps
 		assertTrue("2.1", genSpecs[0].isResolved());
-		assertEquals("2.1.1", genSpecs[0].getSupplier(), selected[0]);
+		assertEquals("2.1.1", genSpecs[0].getSupplier(), selected[1]);
 		assertTrue("2.2", genSpecs[1].isResolved());
-		assertEquals("2.2.1", genSpecs[1].getSupplier(), selected[1]);
+		assertEquals("2.2.1", genSpecs[1].getSupplier(), selected[2]);
 		assertTrue("2.3", genSpecs[2].isResolved());
-		assertEquals("2.3.1", genSpecs[2].getSupplier(), selected[2]);
+		assertEquals("2.3.1", genSpecs[2].getSupplier(), selected[3]);
 		assertTrue("2.4", genSpecs[3].isResolved());
-		assertEquals("2.4.1", genSpecs[3].getSupplier(), selected[3]);
+		assertEquals("2.4.1", genSpecs[3].getSupplier(), selected[4]);
 		genSpecs = genCap.getGenericRequires();
 		assertTrue("3.0", genSpecs.length == 1);
 		assertTrue("3.1", genSpecs[0].isResolved());
-		assertEquals("3.1.1", genSpecs[0].getSupplier(), genReq.getGenericCapabilities()[0]);
+		assertEquals("3.1.1", genSpecs[0].getSupplier(), genReq.getGenericCapabilities()[1]);
 	}
 }

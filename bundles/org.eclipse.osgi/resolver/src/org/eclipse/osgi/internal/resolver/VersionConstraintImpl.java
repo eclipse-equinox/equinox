@@ -17,7 +17,8 @@ import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
-import org.osgi.framework.Version;
+import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.*;
 import org.osgi.framework.wiring.*;
 
 abstract class VersionConstraintImpl implements VersionConstraint {
@@ -101,6 +102,8 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 	protected abstract Map<String, Object> getInteralAttributes();
 
+	protected abstract boolean hasMandatoryAttributes(String[] mandatory);
+
 	public BundleRequirement getRequirement() {
 		String namespace = getInternalNameSpace();
 		if (namespace == null)
@@ -155,6 +158,26 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 		public String toString() {
 			return getNamespace() + BaseDescriptionImpl.toString(getAttributes(), false) + BaseDescriptionImpl.toString(getDirectives(), true);
+		}
+
+		public boolean matches(Capability capability) {
+			if (capability instanceof BundleCapability)
+				return matches((BundleCapability) capability);
+			// now we must do the generic thing
+			if (!namespace.equals(capability.getNamespace()))
+				return false;
+			String filterSpec = getDirectives().get(ResourceConstants.REQUIREMENT_FILTER_DIRECTIVE);
+			try {
+				if (filterSpec != null && !FrameworkUtil.createFilter(filterSpec).matches(capability.getAttributes()))
+					return false;
+			} catch (InvalidSyntaxException e) {
+				return false;
+			}
+			return hasMandatoryAttributes(ManifestElement.getArrayFromList(capability.getDirectives().get(ResourceConstants.CAPABILITY_MANDATORY_DIRECTIVE)));
+		}
+
+		public BundleRevision getResource() {
+			return getRevision();
 		}
 	}
 

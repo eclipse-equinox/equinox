@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,14 @@ package org.eclipse.osgi.tests.services.resolver;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Dictionary;
+import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.ResourceConstants;
 
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
@@ -105,9 +106,9 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c2", c2.isResolved());
 		assertTrue("c3", c3.isResolved());
 
-		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
-		checkGenericBasics(3, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
-		checkGenericBasics(3, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
 
 		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
 		stateDir.mkdirs();
@@ -130,16 +131,24 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c2", c2.isResolved());
 		assertTrue("c3", c3.isResolved());
 
-		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
-		checkGenericBasics(3, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
-		checkGenericBasics(3, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
 	}
 
 	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided) {
+		checkGenericBasics(expectedCnt, genRequired, genProvided, null);
+	}
+
+	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided, GenericDescription fragIdentity) {
 		assertEquals("Expected number of capabilities do not match", expectedCnt, genRequired.length);
-		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length);
+		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length + (fragIdentity == null ? 0 : 1));
+		Collection providedCollection = new ArrayList(Arrays.asList(genProvided));
 		for (int i = 0; i < genRequired.length; i++) {
-			assertEquals("Wrong provider for requirement.", genProvided[i], genRequired[i]);
+			if (ResourceConstants.IDENTITY_NAMESPACE.equals(genRequired[i].getType()) && genRequired[i].getSupplier().getHost() != null)
+				assertEquals("Wrong fragment provider: " + genRequired[i], fragIdentity, genRequired[i]);
+			else
+				assertTrue("Wrong provider for requirement: " + genRequired[i], providedCollection.remove(genRequired[i]));
 		}
 	}
 
@@ -172,7 +181,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
 		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
 		stateDir.mkdirs();
@@ -194,7 +203,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
 		state.setResolver(platformAdmin.createResolver());
 		state.resolve(new BundleDescription[] {p1});
@@ -205,7 +214,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
 	public void testGenericFragments02() throws BundleException {
@@ -233,7 +242,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1", c1.isResolved());
 		assertFalse("c1Frag", c1Frag.isResolved());
 
-		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 
 		File stateDir = getContext().getDataFile(getName() + 1); //$NON-NLS-1$
 		stateDir.mkdirs();
@@ -253,7 +262,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1", c1.isResolved());
 		assertFalse("c1Frag", c1Frag.isResolved());
 
-		checkGenericBasics(3, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 
 		manifest = loadManifest("p4.osgi.MF");
 		BundleDescription p4 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
@@ -267,7 +276,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 
 		stateDir = getContext().getDataFile(getName() + 2); //$NON-NLS-1$
 		stateDir.mkdirs();
@@ -288,7 +297,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertTrue("c1Frag", c1Frag.isResolved());
 		assertTrue("p4", p4.isResolved());
 
-		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
+		checkGenericBasics(6, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities(), p1Frag.getSelectedGenericCapabilities()[0]);
 	}
 
 	public void testGenericUses() throws BundleException {
@@ -362,6 +371,34 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkUsedCapability(c4v130, p5v100Capability);
 	}
 
+	public void testDeclaringIdentityCapability() {
+		State state = buildEmptyState();
+		Hashtable manifest = new Hashtable();
+		long bundleID = 0;
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "genericCapability");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0");
+		StringBuffer capabililty = new StringBuffer();
+		capabililty.append("testFailure:osgi.identity; test=failure");
+		manifest.put(GenericCapabilityTest.GENERIC_CAPABILITY, capabililty.toString());
+
+		try {
+			state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+			fail("Expected failure to create description that specifies osgi.identity capability");
+		} catch (BundleException e) {
+			// expected
+		}
+
+		manifest.remove(GenericCapabilityTest.GENERIC_CAPABILITY);
+		manifest.put(Constants.PROVIDE_CAPABILITY, "osgi.identity; osgi.identity=testFailure; test=failure");
+		try {
+			state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+			fail("Expected failure to create description that specifies osgi.identity capability");
+		} catch (BundleException e) {
+			// expected
+		}
+	}
+
 	private void checkUsedImports(BundleDescription importer, ExportPackageDescription[] expectedPackages) {
 		ExportPackageDescription[] imported = importer.getResolvedImports();
 		assertEquals("Wrong number of imports for bundle: " + importer, expectedPackages.length, imported.length);
@@ -381,8 +418,9 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 	private void checkUsedCapability(BundleDescription requirer, GenericDescription[] expectedCapabilities) {
 		GenericDescription[] required = requirer.getResolvedGenericRequires();
 		assertEquals("Wrong number of capabilities for bundle: " + requirer, expectedCapabilities.length, required.length);
+		Collection providedCollection = new ArrayList(Arrays.asList(expectedCapabilities));
 		for (int i = 0; i < required.length; i++) {
-			assertEquals("Wrong required capability from bundle: " + requirer, expectedCapabilities[i], required[i]);
+			assertTrue("Wrong provider for requirement: " + required[i], providedCollection.remove(required[i]));
 		}
 	}
 }

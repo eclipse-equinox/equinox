@@ -17,4 +17,6 @@ Eclipse-GenericRequire:
   selection-filter="(&(rank>=300)(!(rank>=400))
           (percent>=0.3)(!(percent>=0.4))
           (test.version>=3.0)(!(test.version>=4.0))
-          (test.string~=abc))"
+          (test.string~=abc))",
+ p3.*:osgi.identity;
+  selection-filter="(&(version=1.0)(type=osgi.bundle))"

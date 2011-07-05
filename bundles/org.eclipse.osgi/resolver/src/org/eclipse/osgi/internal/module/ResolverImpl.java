@@ -1333,7 +1333,7 @@ public class ResolverImpl implements Resolver {
 		if (namespace == null)
 			capabilities = Collections.EMPTY_LIST;
 		else
-			capabilities = name == null || "*".equals(name) ? namespace.getAllValues() : namespace.get(name); //$NON-NLS-1$
+			capabilities = name == null || name.indexOf('*') >= 0 ? namespace.getAllValues() : namespace.get(name);
 		List<GenericCapability> candidates = new ArrayList<GenericCapability>(capabilities);
 		List<BundleCapability> genCapabilities = new ArrayList<BundleCapability>(candidates.size());
 		// Must remove candidates that do not match before calling hooks.
@@ -1359,14 +1359,25 @@ public class ResolverImpl implements Resolver {
 				result = true; // Wired to ourselves
 				continue;
 			}
-			ResolverBundle supplier = capability.getResolverBundle();
-			// if in dev mode then allow a constraint to resolve to an unresolved bundle
-			if (supplier.getState() == ResolverBundle.RESOLVED || (resolveBundle(supplier, cycle) || developmentMode)) {
-				// Check cyclic dependencies
-				if (supplier.getState() == ResolverBundle.RESOLVING)
-					if (!cycle.contains(supplier))
-						cycle.add(supplier);
-			} else {
+			VersionSupplier[] capabilityHosts = capability.getResolverBundle().isFragment() ? capability.getResolverBundle().getHost().getPossibleSuppliers() : new ResolverBundle[] {capability.getResolverBundle()};
+			boolean foundResolvedMatch = false;
+			for (int i = 0; capabilityHosts != null && i < capabilityHosts.length; i++) {
+				ResolverBundle capabilitySupplier = capabilityHosts[i].getResolverBundle();
+				if (capabilitySupplier == constraint.getBundle()) {
+					// the capability is from a fragment attached to this host do not recursively resolve the host again
+					foundResolvedMatch = true;
+					continue;
+				}
+				// if in dev mode then allow a constraint to resolve to an unresolved bundle
+				if (capabilitySupplier.getState() == ResolverBundle.RESOLVED || (resolveBundle(capabilitySupplier, cycle) || developmentMode)) {
+					foundResolvedMatch |= !capability.getResolverBundle().isFragment() ? true : capability.getResolverBundle().getHost().getPossibleSuppliers() != null;
+					// Check cyclic dependencies
+					if (capabilitySupplier.getState() == ResolverBundle.RESOLVING)
+						if (!cycle.contains(capabilitySupplier))
+							cycle.add(capabilitySupplier);
+				}
+			}
+			if (!foundResolvedMatch) {
 				constraint.removePossibleSupplier(capability);
 				continue; // constraint hasn't resolved
 			}

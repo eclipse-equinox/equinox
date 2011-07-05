@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resource.tb1; singleton:="true"; dir1:="d1"; dir2:="d2"; attr1="a1"; attr2="a2"
+Bundle-Version: 1.0.0

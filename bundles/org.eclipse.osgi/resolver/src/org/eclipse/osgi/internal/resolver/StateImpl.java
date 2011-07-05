@@ -871,7 +871,11 @@ public abstract class StateImpl implements State {
 	}
 
 	private void addSystemCapabilities(List<GenericDescription> capabilities, ManifestElement[] elements) {
-		StateBuilder.createOSGiCapabilities(elements, capabilities);
+		try {
+			StateBuilder.createOSGiCapabilities(elements, capabilities);
+		} catch (BundleException e) {
+			throw new RuntimeException("Unexpected exception adding system capabilities.", e); //$NON-NLS-1$
+		}
 	}
 
 	@SuppressWarnings("rawtypes")

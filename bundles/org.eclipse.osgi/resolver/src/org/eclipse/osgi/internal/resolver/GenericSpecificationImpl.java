@@ -57,6 +57,11 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 		return matchingFilter == null || matchingFilter.match(candidate.getAttributes());
 	}
 
+	@Override
+	protected boolean hasMandatoryAttributes(String[] mandatory) {
+		return true;
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(Constants.REQUIRE_CAPABILITY).append(": ").append(getType()); //$NON-NLS-1$

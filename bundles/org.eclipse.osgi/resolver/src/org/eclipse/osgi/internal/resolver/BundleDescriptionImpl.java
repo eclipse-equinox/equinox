@@ -1031,6 +1031,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public String toString() {
 			return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 		}
+
+		public BundleRevision getProvider() {
+			return provider.getRevision();
+		}
+
+		public BundleRevision getRequirer() {
+			return requirer.getRevision();
+		}
 	}
 
 	// Note that description wiring are identity equality based
@@ -1056,11 +1064,14 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public List<BundleCapability> getCapabilities(String namespace) {
 			if (!isInUse())
 				return null;
-			@SuppressWarnings("unchecked")
-			List<BundleCapability> result = Collections.EMPTY_LIST;
+			List<BundleCapability> result = new ArrayList<BundleCapability>();
+			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
+			for (GenericDescription capabilitiy : genericCapabilities) {
+				if (namespace == null || namespace.equals(capabilitiy.getType()))
+					result.add(capabilitiy.getCapability());
+			}
 			if (host != null)
 				return result;
-			result = new ArrayList<BundleCapability>();
 			if (getSymbolicName() != null) {
 				if (namespace == null || BundleRevision.BUNDLE_NAMESPACE.equals(namespace)) {
 					result.add(BundleDescriptionImpl.this.getCapability());
@@ -1073,11 +1084,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 				ExportPackageDescription[] exports = getSelectedExports();
 				for (ExportPackageDescription exportPkg : exports)
 					result.add(exportPkg.getCapability());
-			}
-			GenericDescription[] genericCapabilities = getSelectedGenericCapabilities();
-			for (GenericDescription capabilitiy : genericCapabilities) {
-				if (namespace == null || namespace.equals(capabilitiy.getType()))
-					result.add(capabilitiy.getCapability());
 			}
 			return result;
 		}
@@ -1093,7 +1099,8 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 					requirements.add(wire.getRequirement());
 			}
 			// get dynamic imports
-			if (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace)) {
+			if (getHost() == null && (namespace == null || BundleRevision.PACKAGE_NAMESPACE.equals(namespace))) {
+				// TODO need to handle fragments that add dynamic imports
 				if (hasDynamicImports()) {
 					ImportPackageSpecification[] imports = getImportPackages();
 					for (ImportPackageSpecification impPackage : imports) {
@@ -1229,5 +1236,15 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		public String toString() {
 			return BundleDescriptionImpl.this.toString();
 		}
+	}
+
+	@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+	public List<Capability> getCapabilities(String namespace) {
+		return (List<Capability>) (List) getDeclaredCapabilities(namespace);
+	}
+
+	@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+	public List<Requirement> getRequirements(String namespace) {
+		return (List<Requirement>) (List) getDeclaredRequirements(namespace);
 	}
 }

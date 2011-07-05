@@ -145,6 +145,11 @@ public class NativeCodeSpecificationImpl extends VersionConstraintImpl implement
 		return match;
 	}
 
+	@Override
+	protected boolean hasMandatoryAttributes(String[] mandatory) {
+		return true;
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		NativeCodeDescription[] suppliers = getPossibleSuppliers();

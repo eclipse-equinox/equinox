@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: resource.tf1
+Bundle-Version: 1.0.0
+Fragment-Host: resource.tb1
+Require-Capability: osgi.identity;
+ filter:=(&(osgi.identity=resource.tb4)(version=1.0.0)(type=osgi.bundle))
+

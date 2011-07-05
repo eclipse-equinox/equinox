@@ -16,6 +16,7 @@ import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
 import org.eclipse.osgi.internal.resolver.GenericDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.ResourceConstants;
 
 /*
  * A companion to BundleDescription from the state used while resolving.
@@ -62,7 +63,16 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			imports = new ResolverImport[0];
 			requires = new BundleConstraint[0];
 			genericReqiures = new GenericConstraint[0];
-			genericCapabilities = new GenericCapability[0];
+			GenericDescription[] capabilities = getBundleDescription().getGenericCapabilities();
+			GenericCapability identity = null;
+			for (GenericDescription capability : capabilities) {
+				if (ResourceConstants.IDENTITY_NAMESPACE.equals(capability.getType())) {
+					identity = new GenericCapability(this, capability);
+					break;
+				}
+			}
+
+			genericCapabilities = identity == null ? new GenericCapability[0] : new GenericCapability[] {identity};
 			return;
 		}
 
@@ -311,8 +321,6 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			return; // do not allow fragments with conflicting constraints
 		if (isResolved() && newExports.length > 0)
 			fragment.setNewFragmentExports(true);
-		if (isResolved() && newGenericCapabilities.length > 0)
-			fragment.setNewFragmentCapabilities(true);
 
 		initFragments();
 		// need to make sure there is not already another version of this fragment 
@@ -371,10 +379,16 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		List<GenericCapability> hostCapabilities = new ArrayList<GenericCapability>(newGenericCapabilities.length);
 		if (newGenericCapabilities.length > 0 && dynamicAttach) {
 			for (GenericDescription capability : newGenericCapabilities) {
-				GenericDescription hostCapabililty = new GenericDescriptionImpl(getBundleDescription(), capability);
-				hostCapabilities.add(new GenericCapability(this, hostCapabililty));
+				if (!ResourceConstants.IDENTITY_NAMESPACE.equals(capability.getType())) {
+					GenericDescription hostCapabililty = new GenericDescriptionImpl(getBundleDescription(), capability);
+					hostCapabilities.add(new GenericCapability(this, hostCapabililty));
+				}
 			}
-			fragmentGenericCapabilities.put(fragment.bundleID, hostCapabilities);
+			if (hostCapabilities.size() > 0) {
+				fragmentGenericCapabilities.put(fragment.bundleID, hostCapabilities);
+				if (isResolved())
+					fragment.setNewFragmentCapabilities(true);
+			}
 		}
 		if (dynamicAttach) {
 			resolver.getResolverExports().put(hostExports.toArray(new ResolverExport[hostExports.size()]));

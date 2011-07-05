@@ -989,11 +989,21 @@
 <message_argument value="org.osgi.framework.wiring.BundleCapability"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore osgi API." id="1211105284">
+<message_arguments>
+<message_argument value="getResource()"/>
+</message_arguments>
+</filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/wiring/BundleRequirement.java" type="org.osgi.framework.wiring.BundleRequirement">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.wiring.BundleRequirement"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore osgi API." id="1211105284">
+<message_arguments>
+<message_argument value="getResource()"/>
 </message_arguments>
 </filter>
 </resource>
@@ -1017,6 +1027,16 @@
 <message_argument value="org.osgi.framework.wiring.BundleWire"/>
 </message_arguments>
 </filter>
+<filter comment="Ignore osgi API." id="1211105284">
+<message_arguments>
+<message_argument value="getProvider()"/>
+</message_arguments>
+</filter>
+<filter comment="Ignore osgi API." id="1211105284">
+<message_arguments>
+<message_argument value="getRequirer()"/>
+</message_arguments>
+</filter>
 </resource>
 <resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
 <filter comment="Ignore OSGi API" id="1110441988">
@@ -1025,10 +1045,45 @@
 </message_arguments>
 </filter>
 </resource>
+<resource path="osgi/src/org/osgi/framework/wiring/Capability.java" type="org.osgi.framework.wiring.Capability">
+<filter comment="Ignore osgi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.Capability"/>
+</message_arguments>
+</filter>
+</resource>
 <resource path="osgi/src/org/osgi/framework/wiring/FrameworkWiring.java" type="org.osgi.framework.wiring.FrameworkWiring">
 <filter comment="Ignore OSGi API" id="1110441988">
 <message_arguments>
 <message_argument value="org.osgi.framework.wiring.FrameworkWiring"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/Requirement.java" type="org.osgi.framework.wiring.Requirement">
+<filter comment="Ignore osgi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.Requirement"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/Resource.java" type="org.osgi.framework.wiring.Resource">
+<filter comment="Ignore osgi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.Resource"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/ResourceConstants.java" type="org.osgi.framework.wiring.ResourceConstants">
+<filter comment="Ignore osgi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.ResourceConstants"/>
+</message_arguments>
+</filter>
+</resource>
+<resource path="osgi/src/org/osgi/framework/wiring/Wire.java" type="org.osgi.framework.wiring.Wire">
+<filter comment="Ignore osgi API." id="1110441988">
+<message_arguments>
+<message_argument value="org.osgi.framework.wiring.Wire"/>
 </message_arguments>
 </filter>
 </resource>

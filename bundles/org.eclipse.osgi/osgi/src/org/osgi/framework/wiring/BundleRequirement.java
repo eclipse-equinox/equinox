@@ -18,15 +18,16 @@ package org.osgi.framework.wiring;
 
 import java.util.Map;
 
+
 /**
  * A requirement that has been declared from a {@link BundleRevision bundle
  * revision}.
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 659132c1fac7526240df377ead0e1bc8d4af2e77 $
+ * @version $Id: 3ee254a3c0d5516b56affaa66544c892f3d522cb $
  */
-public interface BundleRequirement {
+public interface BundleRequirement extends Requirement{
 	/**
 	 * Returns the name space of this requirement.
 	 * 
@@ -58,6 +59,11 @@ public interface BundleRequirement {
 	 * @return The bundle revision declaring this requirement.
 	 */
 	BundleRevision getRevision();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	BundleRevision getResource();
 
 	/**
 	 * Returns whether the specified capability matches this requirement.

@@ -16,14 +16,15 @@
 
 package org.osgi.framework.wiring;
 
+
 /**
  * A wire connecting a {@link BundleCapability} to a {@link BundleRequirement}.
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 4f936a84065762ec3267a44f86ae01b0150e44ce $
+ * @version $Id: aca8642cea91995d0b178129cba1131ed327c7e7 $
  */
-public interface BundleWire {
+public interface BundleWire extends Wire {
 	/**
 	 * Returns the {@link BundleCapability} for this wire.
 	 * 
@@ -69,4 +70,14 @@ public interface BundleWire {
 	 *         returned.
 	 */
 	BundleWiring getRequirerWiring();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	BundleRevision getProvider();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	BundleRevision getRequirer();
 }

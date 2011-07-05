@@ -19,6 +19,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.wiring.ResourceConstants;
 
 /**
  * This class builds bundle description objects from manifests
@@ -118,7 +119,7 @@ public class StateBuilder {
 		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires));
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
 		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY));
-		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities));
+		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities, result));
 		ManifestElement[] nativeCode = ManifestElement.parseHeader(Constants.BUNDLE_NATIVECODE, manifest.get(Constants.BUNDLE_NATIVECODE));
 		result.setNativeCodeSpecification(createNativeCode(nativeCode));
 		return result;
@@ -554,13 +555,24 @@ public class StateBuilder {
 		return results;
 	}
 
-	private static GenericDescription[] createGenericCapabilities(ManifestElement[] equinoxCapabilities, ManifestElement[] osgiCapabilities) {
+	private static GenericDescription[] createGenericCapabilities(ManifestElement[] equinoxCapabilities, ManifestElement[] osgiCapabilities, BundleDescription description) throws BundleException {
 		List<GenericDescription> result = createEquinoxCapabilities(equinoxCapabilities);
-		result = createOSGiCapabilities(osgiCapabilities, result);
+		result = createOSGiCapabilities(osgiCapabilities, result, description);
 		return result == null ? null : result.toArray(new GenericDescription[result.size()]);
 	}
 
-	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) {
+	private static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result, BundleDescription description) throws BundleException {
+		if (result == null)
+			result = new ArrayList<GenericDescription>(osgiCapabilities == null ? 1 : osgiCapabilities.length + 1);
+		// Always have an osgi.identity capability if there is a symbolic name.
+		GenericDescription osgiIdentity = createOsgiIdentityCapability(description);
+		if (osgiIdentity != null)
+			// always add the capability to the front
+			result.add(0, osgiIdentity);
+		return createOSGiCapabilities(osgiCapabilities, result);
+	}
+
+	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) throws BundleException {
 		if (osgiCapabilities == null)
 			return result;
 		if (result == null)
@@ -570,8 +582,12 @@ public class StateBuilder {
 			String[] namespaces = element.getValueComponents();
 			types: for (String namespace : namespaces) {
 				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
+				// Any declared osgi.identity capability with an effective directive value of "resolve" will be overridden.
 				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
 					break types; // ignore any namespace that is not effective at resolve time.
+				if (ResourceConstants.IDENTITY_NAMESPACE.equals(namespace))
+					throw new BundleException("A bundle is not allowed to define a capability in the " + ResourceConstants.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				desc.setType(namespace);
 				Map<String, Object> mapAttrs = getAttributes(element, new String[0]);
@@ -591,7 +607,7 @@ public class StateBuilder {
 		return result;
 	}
 
-	private static List<GenericDescription> createEquinoxCapabilities(ManifestElement[] equinoxCapabilities) {
+	private static List<GenericDescription> createEquinoxCapabilities(ManifestElement[] equinoxCapabilities) throws BundleException {
 		if (equinoxCapabilities == null)
 			return null;
 		ArrayList<GenericDescription> results = new ArrayList<GenericDescription>(equinoxCapabilities.length);
@@ -604,6 +620,8 @@ public class StateBuilder {
 				if (colonIdx > 0) {
 					name = genericNames[j].substring(0, colonIdx);
 					desc.setType(genericNames[j].substring(colonIdx + 1));
+					if (ResourceConstants.IDENTITY_NAMESPACE.equals(desc.getType()))
+						throw new BundleException("A bundle is not allowed to define a capability in the " + ResourceConstants.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				Map<String, Object> mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
 				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(mapAttrs);
@@ -747,5 +765,28 @@ public class StateBuilder {
 			String message = NLS.bind(Msg.MANIFEST_INVALID_HEADER_EXCEPTION, headerKey, elements[0].toString());
 			throw new BundleException(message + " : " + NLS.bind(StateMsg.HEADER_EXTENSION_ERROR, hostName), BundleException.MANIFEST_ERROR); //$NON-NLS-1$
 		}
+	}
+
+	private static GenericDescription createOsgiIdentityCapability(BundleDescription description) {
+		if (description.getSymbolicName() == null)
+			return null;
+		GenericDescriptionImpl result = new GenericDescriptionImpl();
+		result.setType(ResourceConstants.IDENTITY_NAMESPACE);
+		Dictionary<String, Object> attributes = new Hashtable<String, Object>(description.getDeclaredAttributes());
+		// remove osgi.wiring.bundle and bundle-version attributes
+		attributes.remove(ResourceConstants.WIRING_BUNDLE_NAMESPACE);
+		attributes.remove(Constants.BUNDLE_VERSION_ATTRIBUTE);
+		attributes.put(ResourceConstants.IDENTITY_NAMESPACE, description.getSymbolicName());
+		attributes.put(ResourceConstants.IDENTITY_TYPE_ATTRIBUTE, description.getHost() == null ? ResourceConstants.IDENTITY_TYPE_BUNDLE : ResourceConstants.IDENTITY_TYPE_FRAGMENT);
+		attributes.put(ResourceConstants.IDENTITY_VERSION_ATTRIBUTE, description.getVersion());
+		result.setAttributes(attributes);
+		Map<String, String> directives = new HashMap<String, String>(description.getDeclaredDirectives());
+		// remove defaults directive values
+		if (!description.isSingleton())
+			directives.remove(Constants.SINGLETON_DIRECTIVE);
+		if (description.attachFragments() && description.dynamicFragments())
+			directives.remove(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
+		result.setDirectives(directives);
+		return result;
 	}
 }

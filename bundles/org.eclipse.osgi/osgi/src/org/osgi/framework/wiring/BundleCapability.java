@@ -18,15 +18,16 @@ package org.osgi.framework.wiring;
 
 import java.util.Map;
 
+
 /**
  * A capability that has been declared from a {@link BundleRevision bundle
  * revision}.
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 0fde13c3228af1aa97872b37ccf0aa6e23123b11 $
+ * @version $Id: 6bbc1e645f927531d40fb245c95f5d26ad189db3 $
  */
-public interface BundleCapability {
+public interface BundleCapability extends Capability{
 	/**
 	 * Returns the name space of this capability.
 	 * 
@@ -58,4 +59,6 @@ public interface BundleCapability {
 	 * @return The bundle revision declaring this capability.
 	 */
 	BundleRevision getRevision();
+
+	BundleRevision getResource();
 }

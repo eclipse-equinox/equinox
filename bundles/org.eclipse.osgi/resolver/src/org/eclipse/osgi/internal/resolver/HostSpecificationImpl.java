@@ -69,14 +69,8 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 			}
 		}
 		String[] mandatory = (String[]) candidate.getDirective(Constants.MANDATORY_DIRECTIVE);
-		if (mandatory != null) {
-			for (String key : mandatory) {
-				if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
-					continue; // has a default value of 0.0.0
-				if (requiredAttrs == null || requiredAttrs.get(key) == null)
-					return false;
-			}
-		}
+		if (!hasMandatoryAttributes(mandatory))
+			return false;
 		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
 			return true;
 		return false;
@@ -86,6 +80,20 @@ public class HostSpecificationImpl extends VersionConstraintImpl implements Host
 		synchronized (this.monitor) {
 			return hosts == null ? BundleDescriptionImpl.EMPTY_BUNDLEDESCS : hosts;
 		}
+	}
+
+	@Override
+	protected boolean hasMandatoryAttributes(String[] mandatory) {
+		if (mandatory != null) {
+			Map<String, ?> requiredAttrs = getAttributes();
+			for (String key : mandatory) {
+				if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
+					continue; // has a default value of 0.0.0
+				if (requiredAttrs == null || requiredAttrs.get(key) == null)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	public boolean isResolved() {

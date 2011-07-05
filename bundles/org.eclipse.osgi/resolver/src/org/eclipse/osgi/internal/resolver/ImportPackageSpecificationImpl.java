@@ -149,10 +149,22 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 			}
 		}
 		String[] mandatory = (String[]) pkgDes.getDirective(Constants.MANDATORY_DIRECTIVE);
+		if (!hasMandatoryAttributes(mandatory))
+			return false;
+		// finally check the ee index
+		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0)
+			return true;
+		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
+		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl) getBundle()).getEquinoxEE();
+	}
+
+	@Override
+	protected boolean hasMandatoryAttributes(String[] mandatory) {
 		if (mandatory != null) {
+			Map<String, ?> importAttrs = getAttributes();
 			for (int i = 0; i < mandatory.length; i++) {
 				if (Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE.equals(mandatory[i])) {
-					if (exporterSymbolicName == null)
+					if (getBundleSymbolicName() == null)
 						return false;
 				} else if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(mandatory[i])) {
 					if (bundleVersionRange == null)
@@ -168,11 +180,7 @@ public class ImportPackageSpecificationImpl extends VersionConstraintImpl implem
 				}
 			}
 		}
-		// finally check the ee index
-		if (((BundleDescriptionImpl) getBundle()).getEquinoxEE() < 0)
-			return true;
-		int eeIndex = ((Integer) pkgDes.getDirective(ExportPackageDescriptionImpl.EQUINOX_EE)).intValue();
-		return eeIndex < 0 || eeIndex == ((BundleDescriptionImpl) getBundle()).getEquinoxEE();
+		return true;
 	}
 
 	protected void setBundleSymbolicName(String symbolicName) {

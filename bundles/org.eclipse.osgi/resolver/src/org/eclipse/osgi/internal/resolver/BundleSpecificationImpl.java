@@ -91,7 +91,17 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 			}
 		}
 		String[] mandatory = (String[]) candidate.getDirective(Constants.MANDATORY_DIRECTIVE);
+		if (!hasMandatoryAttributes(mandatory))
+			return false;
+		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
+			return true;
+		return false;
+	}
+
+	@Override
+	protected boolean hasMandatoryAttributes(String[] mandatory) {
 		if (mandatory != null) {
+			Map<String, ?> requiredAttrs = getAttributes();
 			for (String key : mandatory) {
 				if (Constants.BUNDLE_VERSION_ATTRIBUTE.equals(key))
 					continue; // has a default value of 0.0.0
@@ -99,9 +109,7 @@ public class BundleSpecificationImpl extends VersionConstraintImpl implements Bu
 					return false;
 			}
 		}
-		if (getName() != null && getName().equals(candidate.getSymbolicName()) && (getVersionRange() == null || getVersionRange().isIncluded(candidate.getVersion())))
-			return true;
-		return false;
+		return true;
 	}
 
 	public String toString() {
