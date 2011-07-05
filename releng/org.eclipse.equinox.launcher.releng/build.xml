@@ -139,6 +139,29 @@
 		<SCP dir="${libraryFolder}/${ws}" source="libeclipse-motif.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
 	</target>
 	
+	<target name="buildS390" if="buildS390">
+		<condition property="remoteHost" value="${host_s390}" else="${host_s390x}" >
+			<equals arg1="${arch}" arg2="s390"/>
+		</condition>
+		
+		<property name="workingArea" value="${basedir}/${os}.${ws}.${arch}" />
+		<zip destfile="${workingArea}/library.zip" basedir="${workingArea}" includes="library/**" />
+
+		<SCP dir="${workingArea}" source="library.zip" destination="${remoteHost}:~/equinox" />
+		
+		<exec dir="${workingArea}" executable="ssh" failonerror="true">
+			<arg value="${remoteHost}"/>
+			<arg value="cd equinox; rm -rf library; unzip -q library.zip; library/gtk/build.sh"/>
+		</exec>	
+		
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		
+		<!-- copy the resulting executable and .so -->
+		<SCP dir="${workingArea}" source="${remoteHost}:~/equinox/library/gtk/eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<SCP dir="${workingArea}" source="${remoteHost}:~/equinox/library/gtk/eclipse_*.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+	</target>
+				
 	<target name="buildWindows" if="buildWindows">
 		<!-- exec the batch file to build on windows -->
 		<exec dir="${libraryFolder}/${ws}" executable="cmd" failonerror="true">
@@ -197,10 +220,14 @@
 		<condition property="buildMac" >
 			<equals arg1="${os}" arg2="macosx" />
 		</condition>
+		<condition property="buildS390" >
+			<contains string="${os}" substring="s390" />
+		</condition>
 		<condition property="buildNix" >
 			<not><or>
 				<isset property="buildWindows" />
 				<isset property="buildMac" />
+				<isset property="buildS390" />
 			</or></not>
 		</condition>
 	</target>
@@ -257,48 +284,25 @@
 		<antcall target="buildRemote" />
 	</target>
 	
+	<target name="cloneBinaryRepo" unless="binaryRepoExists" >
+		<exec dir="${staging}" command="git" >
+			<arg value="clone" />
+			<arg value="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
+		</exec>
+	</target>
+	
 	<target name="stageBinaries" depends="initProperties">
 		<property name="staging" value="${basedir}/staging" />
-		
-		<cvs command="export -d org.eclipse.equinox.executable.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutableBinaries}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
-		<cvs command="export -d org.eclipse.equinox.launcher.binaries" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsLauncherBinaries}" cvsRoot="${cvsRoot}" dest="${staging}" quiet="true" failonerror="true"/>
-		
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/bin/*"         destination="org.eclipse.equinox.executable.binaries" />
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/contributed/*" destination="org.eclipse.equinox.executable.binaries" />
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="org.eclipse.equinox.launcher.binaries" />
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="org.eclipse.equinox.launcher.binaries" />
 	
-		<pathconvert property="launcherJar" >
-			<last><sort><fileset dir="${eclipseHome}/plugins" includes="org.eclipse.equinox.launcher_*.jar" /></sort></last>
-		</pathconvert>
+		<available file="${staging}/rt.equinox.binaries" type="dir" property="binaryRepoExists" />
+		<antcall target="cloneBinaryRepo" />
 		
-		<java jar="launcherJar" fork="true" >
-			<arg line="-application org.eclipse.ant.core.antRunner" />
-			<arg line="-f ${basedir}/build.xml" />
-			<arg line="publishBinaries" />
-			<arg line="-Dp2.repository=${staging}/p2" />
-			<arg line="-Dstaging=${staging}" />
-		</java>
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/*" destination="${staging}/rt.equinox.binaries/org.eclipse.equinox.executable" />
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="${staging}/rt.equinox.binaries" />
+		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="${staging}/rt.equinox.binaries" />
+
 	</target>
 		
-	<target name="publishBinaries" >
-		<eclipse.idReplacer featureFilePath="${staging}/org.eclipse.equinox.executable.binaries/feature.xml"  selfVersion="1.0.0.${build_version}" featureIds="" pluginIds=""/>
-		<eclipse.gatherFeature
-			metadataRepository="${p2.repository}"
-			artifactRepository="${p2.repository}"
-			baseDirectory="${staging}/org.eclipse.equinox.launcher.binaries"
-			buildResultFolder="${staging}/org.eclipse.equinox.launcher.binaries"
-		/>
-		
-		<eclipse.idReplacer featureFilePath="${staging}/org.eclipse.equinox.executable.binaries/feature.xml"  selfVersion="1.0.0.${build_version}" featureIds="" pluginIds=""/>
-		<eclipse.gatherFeature
-			metadataRepository="${p2.repository}"
-			artifactRepository="${p2.repository}"
-			baseDirectory="${staging}/org.eclipse.equinox.executable.binaries"
-			buildResultFolder="${staging}/org.eclipse.equinox.executable.binaries"
-		/>
-	</target>
-	
 	<target name="buildLocal" if="local" >
 		<condition property="javaHome" value="${j_win32}" else="${java.home}" >
 			<isset property="j_win32"/>
@@ -334,6 +338,7 @@
 		<antcall target="buildNix" />
 		<antcall target="buildWindows" />
 		<antcall target="buildMac" />
+		<antcall target="buildS390" />
 	</target>
 	
 </project>
