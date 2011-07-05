@@ -403,6 +403,11 @@ public class RegionResolverHookTests {
 		}
 
 		@Override
+		public BundleRevision getResource() {
+			return getRevision();
+		}
+
+		@Override
 		public BundleRevision getRevision() {
 			return new StubBundleRevision(bundle(this.bundleSymbolicName));
 		}
@@ -481,6 +486,11 @@ public class RegionResolverHookTests {
 		}
 
 		@Override
+		public BundleRevision getResource() {
+			return getRevision();
+		}
+
+		@Override
 		public BundleRevision getRevision() {
 			return new StubBundleRevision(bundle(this.bundleSymbolicName));
 		}
@@ -543,6 +553,11 @@ public class RegionResolverHookTests {
 		}
 
 		@Override
+		public BundleRevision getResource() {
+			return getRevision();
+		}
+
+		@Override
 		public BundleRevision getRevision() {
 			return this.bundleRevision;
 		}
@@ -552,6 +567,12 @@ public class RegionResolverHookTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
+		public boolean matches(Capability capability) {
+			if (!(capability instanceof BundleCapability))
+				return false;
+			return matches((BundleCapability) capability);
+		}
 	}
 
 	final class StubBundleRevision implements BundleRevision {
@@ -597,6 +618,17 @@ public class RegionResolverHookTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+		@Override
+		public List<Capability> getCapabilities(String namespace) {
+			return (List<Capability>) (List) getDeclaredCapabilities(namespace);
+		}
+
+		@SuppressWarnings({"cast", "unchecked", "rawtypes"})
+		@Override
+		public List<Requirement> getRequirements(String namespace) {
+			return (List<Requirement>) (List) getDeclaredRequirements(namespace);
+		}
 	}
 
 }
