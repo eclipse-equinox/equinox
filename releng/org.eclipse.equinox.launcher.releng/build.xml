@@ -72,6 +72,19 @@
 		</sequential>
 	</macrodef>
 	
+	<!-- macro for invoking git -->
+	<macrodef name="git">
+		<attribute name="dir" />
+		<attribute name="command" />
+		<attribute name="arguments" default="" />
+		<sequential>
+			<exec dir="@{dir}" executable="git" >
+				<arg value="@{command}"/>
+				<arg line="@{arguments}"/>
+			</exec>
+		</sequential>
+	</macrodef>
+	
 	<target name="init_exeFolder" >
 		<!-- set to "bin" or "contributed" according to which folder under org.eclipse.equinox.executable to store the built eclipse -->
 		<condition property="exeFolder" value="contributed" else="bin">
@@ -284,23 +297,39 @@
 		<antcall target="buildRemote" />
 	</target>
 	
-	<target name="cloneBinaryRepo" unless="binaryRepoExists" >
-		<exec dir="${staging}" command="git" >
-			<arg value="clone" />
-			<arg value="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
-		</exec>
+	<target name="cloneGitRepos" unless="gitRepoExists" >
+		<git dir="${staging}" command="clone" arguments="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git"  />
+		<git dir="${staging}" command="clone" arguments="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.framework.git" />
 	</target>
 	
-	<target name="stageBinaries" depends="initProperties">
-		<property name="staging" value="${basedir}/staging" />
 	
-		<available file="${staging}/rt.equinox.binaries" type="dir" property="binaryRepoExists" />
-		<antcall target="cloneBinaryRepo" />
+	<target name="stageBinaries" depends="initProperties">
+		<tstamp/>
+		<property name="tag" value="v${DSTAMP}-${TSTAMP}"/>
+		<property name="staging" value="${basedir}/staging" />
+		<property name="commitMsg" value="" />
+		
+		<available file="${staging}/rt.equinox.binaries" type="dir" property="gitRepoExists" />
+		<antcall target="cloneGitRepos" />
+		
+		<git dir="${staging}/rt.equinox.binaries" command="pull" />
+		<git dir="${staging}/rt.equinox.framework" command="pull" />
 		
 		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/*" destination="${staging}/rt.equinox.binaries/org.eclipse.equinox.executable" />
 		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="${staging}/rt.equinox.binaries" />
 		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="${staging}/rt.equinox.binaries" />
 
+		<git dir="${staging}/rt.equinox.binaries" command="commit" arguments="-a -m &quot;Recompiled binaries ${commitMsg}&quot;" />
+		<git dir="${staging}/rt.equinox.binaries" command="tag" arguments="${tag}" />
+		<git dir="${staging}/rt.equinox.binaries" command="push" />
+		<git dir="${staging}/rt.equinox.binaries" command="push" arguments="--tags" />
+
+		<replaceregexp match="binaryTag=(.*)" replace="binaryTag=${tag}" >
+			<fileset dir="${staging}/rt.equinox.framework" includes="**/build.properties" />
+		</replaceregexp>
+		<git dir="${staging}/rt.equinox.framework" command="commit" arguments="-a -m &quot;Binaries ${tag} ${commitMsg}&quot;" />
+		<git dir="${staging}/rt.equinox.framework" command="push" />
+		
 	</target>
 		
 	<target name="buildLocal" if="local" >
