@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,20 +19,17 @@ import org.osgi.framework.*;
 import org.osgi.framework.Constants;
 import org.osgi.service.packageadmin.ExportedPackage;
 
+/**
+ * @deprecated
+ */
 public class ExportedPackageImpl implements ExportedPackage {
 
-	private final String specVersion;
 	private final ExportPackageDescription exportedPackage;
 	private final BundleLoaderProxy supplier;
 
 	public ExportedPackageImpl(ExportPackageDescription exportedPackage, BundleLoaderProxy supplier) {
 		this.exportedPackage = exportedPackage;
 		this.supplier = supplier;
-		Version version = exportedPackage.getVersion();
-		if (version != null)
-			this.specVersion = version.toString();
-		else
-			this.specVersion = null;
 	}
 
 	public String getName() {
@@ -78,7 +75,7 @@ public class ExportedPackageImpl implements ExportedPackage {
 	 * @deprecated
 	 */
 	public String getSpecificationVersion() {
-		return specVersion;
+		return exportedPackage.getVersion().toString();
 	}
 
 	public Version getVersion() {
@@ -94,10 +91,9 @@ public class ExportedPackageImpl implements ExportedPackage {
 
 	public String toString() {
 		StringBuffer result = new StringBuffer(getName());
-		if (specVersion != null) {
-			result.append("; ").append(Constants.VERSION_ATTRIBUTE); //$NON-NLS-1$
-			result.append("=\"").append(specVersion).append("\""); //$NON-NLS-1$//$NON-NLS-2$
-		}
+		result.append("; ").append(Constants.VERSION_ATTRIBUTE); //$NON-NLS-1$
+		result.append("=\"").append(exportedPackage.getVersion().toString()).append("\""); //$NON-NLS-1$//$NON-NLS-2$
+
 		return result.toString();
 	}
 }
