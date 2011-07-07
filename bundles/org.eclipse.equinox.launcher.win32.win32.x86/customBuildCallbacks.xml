@@ -44,6 +44,7 @@
 	</target>
 	
 	<target name="pre.gather.bin.parts">
+		<property file="${basedir}/build.properties" />
 		<basename file="${basedir}" property="fragmentName" />
 		<available file="/gitroot/equinox/rt.equinox.binaries.git" type="dir" property="gitRepo" value="/gitroot/equinox/rt.equinox.binaries.git" />
 		<property name="gitRepo" value="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
