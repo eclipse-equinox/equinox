@@ -44,6 +44,20 @@
 	</target>
 	
 	<target name="pre.gather.bin.parts">
+		<basename file="${basedir}" property="fragmentName" />
+		<available file="/gitroot/equinox/rt.equinox.binaries.git" type="dir" property="gitRepo" value="/gitroot/equinox/rt.equinox.binaries.git" />
+		<property name="gitRepo" value="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
+		
+		<exec dir="${basedir}" executable="git" output="${basedir}/binary.tar" errorproperty="errorResult" >
+			<arg line="archive --format=tar --remote=${gitRepo} ${binaryTag} ${fragmentName}" />
+		</exec>
+		
+		<copy todir="${basedir}">
+			<tarfileset includes="${fragmentName}/**" src="${basedir}/binary.tar" />
+			<globmapper from="${fragmentName}/*" to="*" />
+		</copy>
+		
+		<delete file="${basedir}/binary.tar" failonerror="false" quiet="true" />
 	</target>
 	
 	<!-- ===================================================================== -->
