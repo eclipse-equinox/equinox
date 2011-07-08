@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,6 +113,9 @@ public class ServiceUse<S> {
 	S getService() {
 		assert Thread.holdsLock(this);
 		if ((useCount > 0) || (factory == null)) {
+			if (useCount == Integer.MAX_VALUE) {
+				throw new ServiceException(Msg.SERVICE_USE_OVERFLOW);
+			}
 			useCount++;
 			return cachedService;
 		}

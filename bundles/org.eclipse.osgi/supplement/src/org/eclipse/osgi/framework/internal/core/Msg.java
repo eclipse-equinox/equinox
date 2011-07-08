@@ -65,6 +65,7 @@ public class Msg extends NLS {
 	public static String SERVICE_FACTORY_EXCEPTION;
 	public static String SERVICE_OBJECT_NULL_EXCEPTION;
 	public static String SERVICE_FACTORY_RECURSION;
+	public static String SERVICE_USE_OVERFLOW;
 
 	public static String STARTLEVEL_EXCEPTION_INVALID_REQUESTED_STARTLEVEL;
 	public static String STARTLEVEL_CANT_CHANGE_SYSTEMBUNDLE_STARTLEVEL;
