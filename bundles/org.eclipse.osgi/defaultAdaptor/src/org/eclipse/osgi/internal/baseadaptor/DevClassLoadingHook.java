@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,18 +46,31 @@ public class DevClassLoadingHook implements ClassLoadingHook, HookConfigurator, 
 			if (ClasspathManager.addClassPathEntry(cpEntries, devClassPath[i], hostmanager, sourcedata, sourcedomain))
 				result = true;
 			else {
-				// if in dev mode, try using the cp as an absolute path
-				// we assume absolute entries come from fragments.  Find the source
 				String devCP = devClassPath[i];
 				boolean fromFragment = devCP.endsWith(FRAGMENT);
-				if (fromFragment)
-					devCP = devCP.substring(0, devCP.length() - FRAGMENT.length());
-				BaseData fragData = findFragmentSource(sourcedata, devCP, hostmanager, fromFragment);
-				if (fragData != null) {
-					ClasspathEntry entry = hostmanager.getExternalClassPath(devCP, fragData, sourcedomain);
-					if (entry != null) {
-						cpEntries.add(entry);
-						result = true;
+				if (!fromFragment && devCP.indexOf("..") >= 0) { //$NON-NLS-1$
+					// if in dev mode, try using cp as a relative path from the base bundle file
+					File base = sourcedata.getBundleFile().getBaseFile();
+					if (base.isDirectory()) {
+						// this is only supported for directory bundles
+						ClasspathEntry entry = hostmanager.getExternalClassPath(new File(base, devCP).getAbsolutePath(), sourcedata, sourcedomain);
+						if (entry != null) {
+							cpEntries.add(entry);
+							result = true;
+						}
+					}
+				} else {
+					// if in dev mode, try using the cp as an absolute path
+					// we assume absolute entries come from fragments.  Find the source
+					if (fromFragment)
+						devCP = devCP.substring(0, devCP.length() - FRAGMENT.length());
+					BaseData fragData = findFragmentSource(sourcedata, devCP, hostmanager, fromFragment);
+					if (fragData != null) {
+						ClasspathEntry entry = hostmanager.getExternalClassPath(devCP, fragData, sourcedomain);
+						if (entry != null) {
+							cpEntries.add(entry);
+							result = true;
+						}
 					}
 				}
 			}

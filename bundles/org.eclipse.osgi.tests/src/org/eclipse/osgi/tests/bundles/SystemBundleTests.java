@@ -1328,6 +1328,53 @@ public class SystemBundleTests extends AbstractBundleTests {
 		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
 	}
 
+	public void testBug351083DevClassPath() throws InvalidSyntaxException {
+		// create/start/stop/start/stop test
+		BundleInstaller testBundleInstaller = new BundleInstaller("test_files/devCPTests", OSGiTestsActivator.getContext());
+
+		try {
+			File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+			Properties configuration = new Properties();
+			configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+			configuration.put("osgi.dev", "../devCP");
+			Equinox equinox = new Equinox(configuration);
+			try {
+				equinox.start();
+			} catch (BundleException e) {
+				fail("Unexpected exception in init()", e); //$NON-NLS-1$
+			}
+			BundleContext systemContext = equinox.getBundleContext();
+			assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+			// try installing a bundle before starting
+			Bundle tb1 = null;
+			try {
+				tb1 = systemContext.installBundle(testBundleInstaller.getBundleLocation("tb1")); //$NON-NLS-1$
+			} catch (BundleException e1) {
+				fail("failed to install a bundle", e1); //$NON-NLS-1$
+			}
+			URL resource = tb1.getResource("tb1/resource.txt");
+			assertNotNull("Resource is null", resource);
+
+			try {
+				equinox.stop();
+			} catch (BundleException e) {
+				fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+			}
+			try {
+				equinox.waitForStop(10000);
+			} catch (InterruptedException e) {
+				fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+			}
+			assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		} finally {
+			try {
+				testBundleInstaller.shutdown();
+			} catch (BundleException e) {
+				fail("Could not shutdown installer", e);
+			}
+		}
+	}
+
 	private static File[] createBundles(File outputDir, int bundleCount) throws IOException {
 		outputDir.mkdirs();
 
