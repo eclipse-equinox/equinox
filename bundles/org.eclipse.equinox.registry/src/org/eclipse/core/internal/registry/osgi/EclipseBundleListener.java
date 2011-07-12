@@ -216,7 +216,7 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 		if (hasNLSFilesFor(host, fragment)) {
 			refresh = true;
 		} else {
-			// check other fragments of this host
+			// check the fragment provides NLS for other fragments of this host
 			for (int i = 0; i < fragments.length && !refresh; i++) {
 				if (fragment.equals(fragments[i]))
 					continue; // skip fragment that was just resolved; it will be added in by the caller
@@ -235,10 +235,10 @@ public class EclipseBundleListener implements SynchronousBundleListener {
 				removeBundle(fragments[i]);
 				addBundle(fragments[i], false);
 			}
-		}
-		synchronized (currentStateStamp) {
-			// mark this host as processed for the current state stamp.
-			dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+			synchronized (currentStateStamp) {
+				// mark this host as processed for the current state stamp.
+				dynamicAddStateStamps.put(hostID, new Long(currentStateStamp[0]));
+			}
 		}
 	}
 
