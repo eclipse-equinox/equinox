@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<md:MetaData 
+		xmlns:md="http://www.org.osgi/xmlns/metatype/v1.2.0/md" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.2.0/md metatype.xsd"
+		xmlns:validation="urn:xmlns:validation"
+		xmlns:foo="urn:xmlns:foo">
+	<OCD id="ocd1" name="ocd1" foo:foo="bar" validation:enabled="true">
+		<AD name="ad1" id="ad1" type="String" validation:regexp="[a-zA-Z0-9]" validation:validation="validation" foo:bar="foo"/>
+	</OCD>
+	<Designate pid="metatype.extendable.tb1.1">
+		<Object ocdref="ocd1"/>
+	</Designate>
+</md:MetaData>

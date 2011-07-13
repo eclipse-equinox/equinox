@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
+
 import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.metatype.AttributeDefinition;
-import org.osgi.service.metatype.MetaTypeService;
 
 public abstract class AbstractTest extends TestCase {
 	protected BundleInstaller bundleInstaller;
-	protected MetaTypeService metatype;
-
-	private ServiceReference metaTypeReference;
+	protected EquinoxMetaTypeService metatype;
+	protected ServiceReference metaTypeReference;
 
 	protected void assertValidationFail(String value, AttributeDefinition ad) {
 		String result = assertValidationPresent(value, ad);
@@ -75,9 +75,9 @@ public abstract class AbstractTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		Activator.getBundle(Activator.BUNDLE_METATYPE).start();
-		metaTypeReference = Activator.getBundleContext().getServiceReference(MetaTypeService.class.getName());
+		metaTypeReference = Activator.getBundleContext().getServiceReference(EquinoxMetaTypeService.class.getName());
 		assertNotNull("Metatype service reference not found", metaTypeReference); //$NON-NLS-1$
-		metatype = (MetaTypeService) Activator.getBundleContext().getService(metaTypeReference);
+		metatype = (EquinoxMetaTypeService) Activator.getBundleContext().getService(metaTypeReference);
 		assertNotNull("Metatype service not found", metatype); //$NON-NLS-1$
 		bundleInstaller = new BundleInstaller("bundle_tests/metatype", Activator.getBundleContext()); //$NON-NLS-1$
 	}
