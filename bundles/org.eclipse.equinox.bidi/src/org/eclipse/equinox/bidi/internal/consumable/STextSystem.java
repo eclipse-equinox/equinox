@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.internal.STextSingle;
 
 /**
@@ -21,16 +20,11 @@ import org.eclipse.equinox.bidi.internal.STextSingle;
  *  </pre>
  */
 public class STextSystem extends STextSingle {
-	static final STextFeatures FEATURES = new STextFeatures("(", 0, -1, -1, false, false); //$NON-NLS-1$
-
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with one separator (opening parenthesis),
-	 *          no special cases, LTR direction for Arabic and Hebrew,
-	 *          and support for both.
+	 *  @return "(" for the separators specific to this processor.
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return "("; //$NON-NLS-1$
 	}
+
 }

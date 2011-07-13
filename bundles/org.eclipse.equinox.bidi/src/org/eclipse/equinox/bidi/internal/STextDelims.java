@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.custom.STextFeatures;
+import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -19,23 +19,40 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  *  may include delimited parts within which separators are treated like
  *  regular characters.
  *
+ *  <p>A delimited part is bounded by a start delimiter and an end delimiter.
+ *
  *  @author Matitiahu Allouche
  */
 public abstract class STextDelims extends STextProcessor {
 
 	/**
 	 *  This method locates occurrences of start delimiters.
+	 *
+	 *  @return the position starting from offset <code>fromIndex</code>
+	 *          in <code>text</code> of the first occurrence of the
+	 *          start delimiter corresponding to <code>caseNumber</code>
+	 *          (first start delimiter if <code>caseNumber</code> equals 1,
+	 *          second delimiter if <code>caseNumber</code> equals 2, etc...).
+	 *
+	 *  @see #getDelimiters
 	 */
-	public int indexOfSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		char delim = getDelimiters().charAt((caseNumber - 1) * 2);
 		return text.indexOf(delim, fromIndex);
 	}
 
 	/**
-	 *  This method skips until after the matching end delimiter.
+	 *  This method handles the text between start and end delimiters
+	 *  as a token.
+	 *  It inserts a directional mark if needed at position
+	 *  <code>separLocation</code> which corresponds to a start delimiter,
+	 *  and skips until after the matching end delimiter.
+	 *
+	 *  @return the position after the matching end delimiter, or the length
+	 *          of <code>text</code> if no end delimiter is found.
 	 */
-	public int processSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		loc = text.indexOf(delim, loc);

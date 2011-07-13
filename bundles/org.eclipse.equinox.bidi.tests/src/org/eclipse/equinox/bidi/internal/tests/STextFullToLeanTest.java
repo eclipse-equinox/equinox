@@ -11,7 +11,9 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  * Tests fullToLean method
@@ -22,32 +24,32 @@ public class STextFullToLeanTest extends STextTestBase {
 	static final STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
 	static final STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
 
-	String type;
+	STextProcessor processor;
 
 	private void doTest1(String msg, String data, String leanLTR, String fullLTR, int[] l2fMapLTR, int[] f2lMapLTR, String leanRTL, String fullRTL, int[] l2fMapRTL, int[] f2lMapRTL) {
 		String text, full, lean, label;
 		int[] map;
 
 		text = toUT16(data);
-		lean = STextEngine.fullToLeanText(type, null, envLTR, text, null);
+		lean = STextEngine.fullToLeanText(processor, envLTR, text, null);
 		assertEquals(msg + "LTR lean", leanLTR, toPseudo(lean));
-		full = STextEngine.leanToFullText(type, null, envLTR, lean, null);
+		full = STextEngine.leanToFullText(processor, envLTR, lean, null);
 		assertEquals(msg + "LTR full", fullLTR, toPseudo(full));
-		map = STextEngine.leanToFullMap(type, null, envLTR, lean, null);
+		map = STextEngine.leanToFullMap(processor, envLTR, lean, null);
 		label = msg + "leanToFullMap() LTR";
 		assertEquals(label, array_display(l2fMapLTR), array_display(map));
-		map = STextEngine.fullToLeanMap(type, null, envLTR, text, null);
+		map = STextEngine.fullToLeanMap(processor, envLTR, text, null);
 		label = msg + "fullToLeanMap() LTR";
 		assertEquals(label, array_display(f2lMapLTR), array_display(map));
 
-		lean = STextEngine.fullToLeanText(type, null, envRTL, text, null);
+		lean = STextEngine.fullToLeanText(processor, envRTL, text, null);
 		assertEquals(msg + "RTL lean", leanRTL, toPseudo(lean));
-		full = STextEngine.leanToFullText(type, null, envRTL, lean, null);
+		full = STextEngine.leanToFullText(processor, envRTL, lean, null);
 		assertEquals(msg + "RTL full", fullRTL, toPseudo(full));
-		map = STextEngine.leanToFullMap(type, null, envRTL, lean, null);
+		map = STextEngine.leanToFullMap(processor, envRTL, lean, null);
 		label = msg + "leanToFullMap() RTL";
 		assertEquals(label, array_display(l2fMapRTL), array_display(map));
-		map = STextEngine.fullToLeanMap(type, null, envRTL, text, null);
+		map = STextEngine.fullToLeanMap(processor, envRTL, text, null);
 		label = msg + "fullToLeanMap() RTL";
 		assertEquals(label, array_display(f2lMapRTL), array_display(map));
 	}
@@ -60,41 +62,41 @@ public class STextFullToLeanTest extends STextTestBase {
 		data = "update \"AB_CDE\" set \"COL1\"@='01', \"COL2\"@='02' /* GH IJK";
 		text = toUT16(data);
 		state[0] = -1;
-		lean = STextEngine.fullToLeanText(type, null, envLTR, text, state);
+		lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
 		state1 = state[0];
 		model = "update \"AB_CDE\" set \"COL1\"='01', \"COL2\"='02' /* GH IJK";
 		assertEquals(msg + "LTR lean", model, toPseudo(lean));
 		state[0] = -1;
-		full = STextEngine.leanToFullText(type, null, envLTR, lean, state);
+		full = STextEngine.leanToFullText(processor, envLTR, lean, state);
 		assertEquals(msg + "LTR full", data, toPseudo(full));
 		assertEquals(msg + "state from leanToFullText", state1, state[0]);
 		data = "THIS IS A COMMENT LINE";
 		text = toUT16(data);
 		state[0] = state1;
-		lean = STextEngine.fullToLeanText(type, null, envLTR, text, state);
+		lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
 		state2 = state[0];
 		model = "THIS IS A COMMENT LINE";
 		assertEquals(msg + "LTR lean2", model, toPseudo(lean));
 		state[0] = state1;
-		full = STextEngine.leanToFullText(type, null, envLTR, lean, state);
+		full = STextEngine.leanToFullText(processor, envLTR, lean, state);
 		assertEquals(msg + "LTR full2", data, toPseudo(full));
 		assertEquals(msg + "state from leanToFullText2", state2, state[0]);
 		data = "SOME MORE */ where \"COL3\"@=123";
 		text = toUT16(data);
 		state[0] = state2;
-		lean = STextEngine.fullToLeanText(type, null, envLTR, text, state);
+		lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
 		state3 = state[0];
 		model = "SOME MORE */ where \"COL3\"=123";
 		assertEquals(msg + "LTR lean3", model, toPseudo(lean));
 		state[0] = state2;
-		full = STextEngine.leanToFullText(type, null, envLTR, lean, state);
+		full = STextEngine.leanToFullText(processor, envLTR, lean, state);
 		assertEquals(msg + "LTR full3", data, toPseudo(full));
 		assertEquals(msg + "state from leanToFullText3", state3, state[0]);
 	}
 
 	public void testFullToLean() {
 
-		type = ISTextTypes.COMMA_DELIMITED;
+		processor = STextEngine.PROC_COMMA_DELIMITED;
 		doTest1("testFullToLean #1 - ", "", "", "", new int[0], new int[0], "", "", new int[0], new int[0]);
 		int[] map1 = new int[] {0, 1, 2, 3, 4};
 		int[] map2 = new int[] {2, 3, 4, 5, 6};
@@ -241,7 +243,7 @@ public class STextFullToLeanTest extends STextTestBase {
 		doTest1("testFullToLean #37 - ", ">>>@@@@@^^^", "", "", map1, map2, "", "", map1, map2);
 
 		// test fullToLeanText with initial state
-		type = ISTextTypes.SQL;
+		processor = STextEngine.PROC_SQL;
 		doTest2("testFullToLean #38 - ");
 	}
 }

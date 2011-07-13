@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -22,17 +21,11 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  *  </pre>
  */
 public class STextUnderscore extends STextProcessor {
-	static final STextFeatures FEATURES = new STextFeatures("_", 0, -1, -1, false, false); //$NON-NLS-1$
-
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with one separator (underscore),
-	 *          no special cases, LTR direction for Arabic and Hebrew,
-	 *          and support for both.
+	 *  @return "_" as the separators specific to this processor.
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return "_"; //$NON-NLS-1$
 	}
 
 }

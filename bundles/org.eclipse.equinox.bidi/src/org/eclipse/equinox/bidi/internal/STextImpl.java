@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.*;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  *  <code>STextImpl</code> provides the code which implements the API in
@@ -54,16 +54,10 @@ public class STextImpl {
 		// nothing to do
 	}
 
-	/*
-	        // keep private copy of specialsCount to avoid later modification
-	        specialsCount = features.getSpecialsCount();
-	        locations = new int[features.getSeparators().length() + specialsCount];
-	    }
-	*/
-	static long computeNextLocation(ISTextProcessor processor, STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
-		String separators = features.getSeparators();
+	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
+		String separators = processor.getSeparators(environment, text, dirProps);
 		int separCount = separators.length();
-		int specialsCount = features.getSpecialsCount();
+		int specialsCount = processor.getSpecialsCount(environment, text, dirProps);
 		int len = text.length();
 		int nextLocation = len;
 		int idxLocation = 0;
@@ -73,7 +67,7 @@ public class STextImpl {
 			int location = locations[separCount + i];
 			if (location < curPos) {
 				offsets = ensureRoomInOffsets(offsets);
-				location = processor.indexOfSpecial(features, text, dirProps, offsets, i + 1, curPos);
+				location = processor.indexOfSpecial(environment, text, dirProps, offsets, i + 1, curPos);
 				if (location < 0)
 					location = len;
 				locations[separCount + i] = location;
@@ -137,57 +131,15 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#getCurDirection STextEngine.getCurDirection
 	 */
-	public static int getCurDirection(Object _processor, STextFeatures features, STextEnvironment environment, String text, byte[] dirProps) {
-		if (environment == null)
-			environment = STextEnvironment.DEFAULT;
-		if (features == null) {
-			if (_processor == null)
-				return STextFeatures.DIR_LTR;
-			ISTextProcessor processor;
-			if (_processor instanceof java.lang.String) {
-				processor = STextStringProcessor.getProcessor((String) _processor);
-				if (processor == null)
-					throw new IllegalArgumentException("Invalid processor type!"); //$NON-NLS-1$
-			} else if (_processor instanceof ISTextProcessor)
-				processor = (ISTextProcessor) _processor;
-			else
-				throw new IllegalArgumentException("Invalid processor argument!"); //$NON-NLS-1$
-			features = processor.getFeatures(environment);
-		}
-		int dirArabic = features.getDirArabic();
-		int dirHebrew = features.getDirHebrew();
-		// same direction for Arabic and Hebrew?
-		if (dirArabic == dirHebrew)
-			return dirArabic;
-		// check if Arabic or Hebrew letter comes first
-		int len = text.length();
-		if (dirProps == null)
-			dirProps = new byte[len + 1];
-		byte dirProp;
-		for (int i = 0; i < len; i++) {
-			// In the following lines, R and AL represent bidi categories
-			// as defined in the Unicode Bidirectional Algorithm
-			// ( http://www.unicode.org/reports/tr9/ ).
-			// R  represents the category Right to Left character.
-			// AL represents the category Arabic Letter.
-			byte saveOrient = dirProps[len];
-			dirProps[len] = -1; // make getDirProp return B
-			dirProp = getDirProp(text, dirProps, i);
-			dirProps[len] = saveOrient;
-			if (dirProp == AL)
-				return dirArabic;
-			if (dirProp == R)
-				return dirHebrew;
-		}
-		// found no Arabic or Hebrew character
-		return STextFeatures.DIR_LTR;
+	public static int getCurDirection(STextProcessor processor, STextEnvironment environment, String text, byte[] dirProps) {
+		return processor.getDirection(environment, text, dirProps);
 	}
 
 	/**
 	 *  @see STextProcessor#getDirProp STextProcessor.getDirProp
 	 */
 	public static byte getDirProp(String text, byte[] dirProps, int index) {
-		byte dirProp = dirProps[index];
+		byte dirProp = dirProps == null ? 0 : dirProps[index];
 		if (dirProp == 0) {
 			// In the following lines, B, L and R represent bidi categories
 			// as defined in the Unicode Bidirectional Algorithm
@@ -196,14 +148,15 @@ public class STextImpl {
 			// L  represents the category Left to Right character.
 			// R  represents the category Right to Left character.
 			dirProp = Character.getDirectionality(text.charAt(index));
-			if (dirProp == B) {
+			if (dirProp == B && dirProps != null) {
 				// the last entry of dirProps contains the current component orientation
 				byte orient = dirProps[dirProps.length - 1];
 				if (orient == -1)
 					return B;
 				dirProp = orient == STextEnvironment.ORIENT_RTL ? R : L;
 			}
-			dirProps[index] = (byte) (dirProp + DIRPROPS_ADD);
+			if (dirProps != null)
+				dirProps[index] = (byte) (dirProp + DIRPROPS_ADD);
 			return dirProp;
 		}
 		return (byte) (dirProp - DIRPROPS_ADD);
@@ -219,7 +172,7 @@ public class STextImpl {
 	/**
 	 *  @see STextProcessor#processSeparator STextProcessor.processSeparator
 	 */
-	public static void processSeparator(STextFeatures features, String text, byte[] dirProps, int[] offsets, int separLocation) {
+	public static void processSeparator(String text, byte[] dirProps, int[] offsets, int separLocation) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -230,7 +183,7 @@ public class STextImpl {
 		// EN  represents the category European Number.
 		int len = text.length();
 		// offsets[2] contains the structured text direction
-		if (offsets[2] == STextFeatures.DIR_RTL) {
+		if (offsets[2] == STextEngine.DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
 				byte dirProp = getDirProp(text, dirProps, i);
@@ -254,44 +207,28 @@ public class STextImpl {
 
 		// the structured text base direction is LTR
 		boolean doneAN = false;
-		boolean ignoreArabic = features.getIgnoreArabic();
-		boolean ignoreHebrew = features.getIgnoreHebrew();
-		if (ignoreArabic && ignoreHebrew)
-			return;
-		byte _R, _AL, _AN;
-		if (ignoreArabic) {
-			_AL = Byte.MIN_VALUE; // not a real value
-			_AN = Byte.MIN_VALUE;
-		} else {
-			_AL = AL;
-			_AN = AN;
-		}
-		if (ignoreHebrew)
-			_R = Byte.MIN_VALUE;
-		else
-			_R = R;
 		for (int i = separLocation - 1; i >= 0; i--) {
 			byte dirProp = getDirProp(text, dirProps, i);
 			if (dirProp == L)
 				return;
-			if (dirProp == _R || dirProp == _AL) {
+			if (dirProp == R || dirProp == AL) {
 				for (int j = separLocation; j < len; j++) {
 					dirProp = getDirProp(text, dirProps, j);
 					if (dirProp == L)
 						return;
-					if (dirProp == _R || dirProp == EN || dirProp == _AL || dirProp == _AN) {
+					if (dirProp == R || dirProp == EN || dirProp == AL || dirProp == AN) {
 						insertMark(text, dirProps, offsets, separLocation);
 						return;
 					}
 				}
 				return;
 			}
-			if (dirProp == _AN && !doneAN) {
+			if (dirProp == AN && !doneAN) {
 				for (int j = separLocation; j < len; j++) {
 					dirProp = getDirProp(text, dirProps, j);
 					if (dirProp == L)
 						return;
-					if (dirProp == _AL || dirProp == _AN || dirProp == _R) {
+					if (dirProp == AL || dirProp == AN || dirProp == R) {
 						insertMark(text, dirProps, offsets, separLocation);
 						return;
 					}
@@ -304,12 +241,12 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#leanToFullText STextEngine.leanToFullText
 	 */
-	public static String leanToFullText(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static String leanToFullText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return text;
 		byte[] dirProps = new byte[len + 1];
-		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int count = offsets[0] - OFFSETS_SHIFT;
 		if (count == 0 && prefixLength == 0)
@@ -355,12 +292,12 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#leanToFullMap STextEngine.leanToFullMap
 	 */
-	public static int[] leanToFullMap(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanToFullMap(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
 		byte[] dirProps = new byte[len + 1];
-		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int[] map = new int[len];
 		int count = offsets[0]; // number of used entries
@@ -378,12 +315,12 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#leanBidiCharOffsets STextEngine.leanBidiCharOffsets
 	 */
-	public static int[] leanBidiCharOffsets(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
 		byte[] dirProps = new byte[len + 1];
-		int[] offsets = leanToFullCommon(processor, features, environment, text, state, dirProps);
+		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		// offsets[0] contains the number of used entries
 		int count = offsets[0] - OFFSETS_SHIFT;
 		int[] result = new int[count];
@@ -391,20 +328,9 @@ public class STextImpl {
 		return result;
 	}
 
-	static int[] leanToFullCommon(Object _processor, STextFeatures features, STextEnvironment environment, String text, int[] state, byte[] dirProps) {
-		ISTextProcessor processor;
-		if (_processor instanceof java.lang.String) {
-			processor = STextStringProcessor.getProcessor((String) _processor);
-			if (processor == null)
-				throw new IllegalArgumentException("Invalid processor type!"); //$NON-NLS-1$
-		} else if (_processor instanceof ISTextProcessor)
-			processor = (ISTextProcessor) _processor;
-		else
-			throw new IllegalArgumentException("Invalid processor argument!"); //$NON-NLS-1$
+	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, byte[] dirProps) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
-		if (features == null)
-			features = processor.getFeatures(environment);
 		if (state == null) {
 			state = new int[1];
 			state[0] = STextEngine.STATE_INITIAL;
@@ -413,47 +339,51 @@ public class STextImpl {
 		// dirProps: 1 byte for each char in text, + 1 byte = current orientation
 		int orient = getCurOrient(environment, text, dirProps);
 		dirProps[len] = (byte) orient;
-		int separCount = features.getSeparators().length();
-		int direction = getCurDirection(processor, features, environment, text, dirProps);
-		// current position
-		int curPos = 0;
+		int direction = processor.getDirection(environment, text, dirProps);
 		// offsets of marks to add. Entry 0 is the number of used slots;
 		//  entry 1 is reserved to pass prefixLength.
 		//  entry 2 is reserved to pass direction..
 		int[] offsets = new int[20];
 		offsets[0] = OFFSETS_SHIFT;
 		offsets[2] = direction;
-		// initialize locations
-		int[] locations = new int[separCount + features.getSpecialsCount()];
-		for (int i = 0, k = locations.length; i < k; i++) {
-			locations[i] = -1;
-		}
-		if (state[0] > STextEngine.STATE_INITIAL) {
-			offsets = ensureRoomInOffsets(offsets);
-			int initState = state[0];
-			state[0] = STextEngine.STATE_INITIAL;
-			curPos = processor.processSpecial(features, text, dirProps, offsets, state, initState, -1);
-		}
-		while (true) {
-			// location of next token to handle
-			int nextLocation;
-			// index of next token to handle (if < separCount, this is a separator; otherwise a special case
-			int idxLocation;
-			long res = computeNextLocation(processor, features, text, dirProps, offsets, locations, state, curPos);
-			nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
-			if (nextLocation >= len)
-				break;
-			idxLocation = (int) (res >> 32); /* high word */
-			if (idxLocation < separCount) {
-				offsets = ensureRoomInOffsets(offsets);
-				processSeparator(features, text, dirProps, offsets, nextLocation);
-				curPos = nextLocation + 1;
-			} else {
-				offsets = ensureRoomInOffsets(offsets);
-				idxLocation -= (separCount - 1); // because caseNumber starts from 1
-				curPos = processor.processSpecial(features, text, dirProps, offsets, state, idxLocation, nextLocation);
+		if (!processor.skipProcessing(environment, text, dirProps)) {
+			// initialize locations
+			int separCount = processor.getSeparators(environment, text, dirProps).length();
+			int[] locations = new int[separCount + processor.getSpecialsCount(environment, text, dirProps)];
+			for (int i = 0, k = locations.length; i < k; i++) {
+				locations[i] = -1;
 			}
-		}
+			// current position
+			int curPos = 0;
+			if (state[0] > STextEngine.STATE_INITIAL) {
+				offsets = ensureRoomInOffsets(offsets);
+				int initState = state[0];
+				state[0] = STextEngine.STATE_INITIAL;
+				curPos = processor.processSpecial(environment, text, dirProps, offsets, state, initState, -1);
+			}
+			while (true) {
+				// location of next token to handle
+				int nextLocation;
+				// index of next token to handle (if < separCount, this is a separator; otherwise a special case
+				int idxLocation;
+				long res = computeNextLocation(processor, environment, text, dirProps, offsets, locations, state, curPos);
+				nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
+				if (nextLocation >= len)
+					break;
+				idxLocation = (int) (res >> 32); /* high word */
+				if (idxLocation < separCount) {
+					offsets = ensureRoomInOffsets(offsets);
+					processSeparator(text, dirProps, offsets, nextLocation);
+					curPos = nextLocation + 1;
+				} else {
+					offsets = ensureRoomInOffsets(offsets);
+					idxLocation -= (separCount - 1); // because caseNumber starts from 1
+					curPos = processor.processSpecial(environment, text, dirProps, offsets, state, idxLocation, nextLocation);
+				}
+				if (curPos >= len)
+					break;
+			} // end while
+		} // end if (!processor.skipProcessing())
 		if (orient == STextEnvironment.ORIENT_IGNORE)
 			offsets[1] = 0;
 		else {
@@ -473,27 +403,16 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#fullToLeanText STextEngine.fullToLeanText
 	 */
-	public static String fullToLeanText(Object _processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static String fullToLeanText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (text.length() == 0)
 			return text;
-		ISTextProcessor processor;
-		if (_processor instanceof java.lang.String) {
-			processor = STextStringProcessor.getProcessor((String) _processor);
-			if (processor == null)
-				throw new IllegalArgumentException("Invalid processor type!"); //$NON-NLS-1$
-		} else if (_processor instanceof ISTextProcessor)
-			processor = (ISTextProcessor) _processor;
-		else
-			throw new IllegalArgumentException("Invalid processor argument!"); //$NON-NLS-1$
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
-		if (features == null)
-			features = processor.getFeatures(environment);
 		if (state == null) {
 			state = new int[1];
 			state[0] = STextEngine.STATE_INITIAL;
 		}
-		int dir = getCurDirection(processor, features, environment, text, null);
+		int dir = processor.getDirection(environment, text, null);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int i; // used as loop index
@@ -531,7 +450,7 @@ public class STextImpl {
 				chars[i - cnt] = c;
 		}
 		String lean = new String(chars, 0, lenText - cnt);
-		String full = leanToFullText(processor, features, IGNORE_ENVIRONMENT, lean, state);
+		String full = leanToFullText(processor, IGNORE_ENVIRONMENT, lean, state);
 		if (full.equals(text))
 			return lean;
 
@@ -569,7 +488,7 @@ public class STextImpl {
 			throw new IllegalStateException("Internal error: extra character not a Mark."); //$NON-NLS-1$
 		}
 		if (idxText < lenText) /* full ended before text - this should never happen since
-								             we removed all marks and PDFs at the end of text */
+								              we removed all marks and PDFs at the end of text */
 			throw new IllegalStateException("Internal error: unexpected EOL."); //$NON-NLS-1$
 
 		lean = new String(newChars, 0, newCharsPos);
@@ -579,13 +498,13 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#fullToLeanMap STextEngine.fullToLeanMap
 	 */
-	public static int[] fullToLeanMap(Object processor, STextFeatures features, STextEnvironment environment, String full, int[] state) {
+	public static int[] fullToLeanMap(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
-		String lean = fullToLeanText(processor, features, environment, full, state);
+		String lean = fullToLeanText(processor, environment, full, state);
 		int lenLean = lean.length();
-		int dir = getCurDirection(processor, features, environment, lean, null);
+		int dir = processor.getDirection(environment, lean, null);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int[] map = new int[lenFull];
@@ -613,11 +532,11 @@ public class STextImpl {
 	/**
 	 *  @see STextEngine#fullBidiCharOffsets STextEngine.fullBidiCharOffsets
 	 */
-	public static int[] fullBidiCharOffsets(Object processor, STextFeatures features, STextEnvironment environment, String full, int[] state) {
+	public static int[] fullBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
-		String lean = fullToLeanText(processor, features, environment, full, state);
+		String lean = fullToLeanText(processor, environment, full, state);
 		int[] offsets = new int[20];
 		offsets[0] = OFFSETS_SHIFT;
 		int lenLean = lean.length();

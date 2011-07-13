@@ -12,7 +12,6 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 
 /**
  * Tests RTL arithmetic
@@ -22,26 +21,26 @@ public class STextNullProcessorTest extends STextTestBase {
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 
 	public void testNullProcessor() {
-		String full = STextEngine.leanToFullText(null, null, null, "abc", null);
+		String full = STextEngine.leanToFullText(null, null, "abc", null);
 		assertEquals("leanToFullText", "abc", full);
 		int[] state = new int[1];
 		state[0] = 3;
-		full = STextEngine.leanToFullText(null, null, null, "abc", state);
+		full = STextEngine.leanToFullText(null, null, "abc", state);
 		assertEquals("leanToFullText with state", "abc", full);
-		int[] offsets = STextEngine.leanBidiCharOffsets(null, null, null, "abc", null);
+		int[] offsets = STextEngine.leanBidiCharOffsets(null, null, "abc", null);
 		assertEquals("leanBidiCharOffsets", 0, offsets.length);
-		offsets = STextEngine.fullBidiCharOffsets(null, null, null, "abc", null);
+		offsets = STextEngine.fullBidiCharOffsets(null, null, "abc", null);
 		assertEquals("fullBidiCharOffsets", 0, offsets.length);
-		String lean = STextEngine.fullToLeanText(null, null, null, "abc", null);
+		String lean = STextEngine.fullToLeanText(null, null, "abc", null);
 		assertEquals("fullToLeanText", "abc", lean);
-		lean = STextEngine.fullToLeanText(null, null, null, "abc", state);
+		lean = STextEngine.fullToLeanText(null, null, "abc", state);
 		assertEquals("fullToLeanText with state", "abc", lean);
-		int[] map = STextEngine.leanToFullMap(null, null, null, "abc", null);
+		int[] map = STextEngine.leanToFullMap(null, null, "abc", null);
 		int[] model = {0, 1, 2};
 		assertEquals("leanToFullMap", array_display(model), array_display(map));
-		map = STextEngine.fullToLeanMap(null, null, null, "abc", null);
+		map = STextEngine.fullToLeanMap(null, null, "abc", null);
 		assertEquals("fullToLeanMap", array_display(model), array_display(map));
-		int direction = STextEngine.getCurDirection(null, null, null, "abc");
-		assertEquals("getCurDirection", STextFeatures.DIR_LTR, direction);
+		int direction = STextEngine.getCurDirection(null, null, "abc");
+		assertEquals("getCurDirection", STextEngine.DIR_LTR, direction);
 	}
 }

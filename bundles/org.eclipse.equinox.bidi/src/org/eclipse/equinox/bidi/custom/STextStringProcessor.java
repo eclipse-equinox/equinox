@@ -34,7 +34,7 @@ public class STextStringProcessor {
 	 *  @return a reference to an instance of a processor of the
 	 *  required type. If the type is unknown, return <code>null</code>.
 	 */
-	static public ISTextProcessor getProcessor(String type) {
+	static public STextProcessor getProcessor(String type) {
 		return STextTypesCollector.getInstance().getProcessor(type);
 	}
 }

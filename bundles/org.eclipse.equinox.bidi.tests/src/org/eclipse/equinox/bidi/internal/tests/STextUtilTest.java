@@ -12,8 +12,8 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import java.util.Locale;
+import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextUtil;
-import org.eclipse.equinox.bidi.ISTextTypes;
 
 /**
  * Tests methods in BidiComplexUtil
@@ -83,9 +83,9 @@ public class STextUtilTest extends STextTestBase {
 	}
 
 	private void doTest3(String msg, String data, String result, String resLean) {
-		String full = STextUtil.processTyped(toUT16(data), ISTextTypes.COMMA_DELIMITED);
+		String full = STextUtil.processTyped(toUT16(data), STextEngine.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "full", result, toPseudo(full));
-		String lean = STextUtil.deprocess(full, ISTextTypes.COMMA_DELIMITED);
+		String lean = STextUtil.deprocess(full, STextEngine.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "lean", resLean, toPseudo(lean));
 	}
 
@@ -111,20 +111,6 @@ public class STextUtilTest extends STextTestBase {
 		doTest3("Util #3.1 - ", "ABC,DEF,G", ">@ABC@,DEF@,G@^");
 		doTest3("Util #3.2 - ", "", "");
 		doTest3("Util #3.3 - ", ">@DEF@^", ">@DEF@^", "DEF");
-		boolean catchFlag = false;
-		try {
-			STextUtil.deprocess(toUT16("ABC,DE"), "wrong_type");
-		} catch (IllegalArgumentException e) {
-			catchFlag = true;
-		}
-		assertTrue("Catch invalid type on deprocess", catchFlag);
-		catchFlag = false;
-		try {
-			STextUtil.processTyped("abc", "wrong_type");
-		} catch (IllegalArgumentException e) {
-			catchFlag = true;
-		}
-		assertTrue("Catch invalid type on process", catchFlag);
 		// Test insertMarks()
 		doTest4("Util #4.1 - ", "ABCDEFG", new int[] {3, 6}, 0, false, "ABC@DEF@G");
 		doTest4("Util #4.2 - ", "ABCDEFG", new int[] {3, 6}, 0, true, ">@ABC@DEF@G@^");

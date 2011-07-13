@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -22,7 +21,19 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  *
  *  @author Matitiahu Allouche
  */
-final public class STextUtil {
+public final class STextUtil {
+
+	static class MyProcessor extends STextProcessor {
+		String separ;
+
+		MyProcessor(String separators) {
+			separ = separators;
+		}
+
+		public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+			return separ;
+		}
+	}
 
 	/**
 	 *  prevent instantiation
@@ -54,8 +65,8 @@ final public class STextUtil {
 	 *          This argument may be null if there are no marks to add.
 	 *
 	 *  @param  direction specifies the base direction of the structured text.
-	 *          It must be one of the values {@link STextFeatures#DIR_LTR} or
-	 *          {@link STextFeatures#DIR_RTL}.
+	 *          It must be one of the values {@link STextEngine#DIR_LTR} or
+	 *          {@link STextEngine#DIR_RTL}.
 	 *
 	 *  @param  affix specifies if a prefix and a suffix should be added to
 	 *          the result to make sure that the <code>direction</code>
@@ -75,7 +86,7 @@ final public class STextUtil {
 		String curPrefix, curSuffix, full;
 		char curMark, c;
 		char[] fullChars;
-		if (direction == STextFeatures.DIR_LTR) {
+		if (direction == STextEngine.DIR_LTR) {
 			curMark = LRM;
 			curPrefix = "\u202a\u200e"; /* LRE+LRM *///$NON-NLS-1$
 			curSuffix = "\u200e\u202c"; /* LRM+PDF *///$NON-NLS-1$
@@ -212,8 +223,8 @@ final public class STextUtil {
 
 		// make sure that LRE/PDF are added around the string
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
-		STextFeatures features = new STextFeatures(separators, 0, -1, -1, false, false);
-		return STextEngine.leanToFullText(new STextProcessor(), features, env, str, null);
+		STextProcessor processor = new MyProcessor(separators);
+		return STextEngine.leanToFullText(processor, env, str, null);
 	}
 
 	/**
@@ -237,16 +248,19 @@ final public class STextUtil {
 	 *
 	 *  @param  str the text to process.
 	 *
-	 *  @param  type specifies the type of the structured text. It must
-	 *          be one of the values in {@link ISTextTypes} or a value.
-	 *          added by a plug-in extension.
+	 *  @param  processor specifies a processor instance appropriate for
+	 *          the type of the structured text. It will usually be
+	 *          one of the pre-defined processor instances appearing in
+	 *          {@link STextEngine}, but can be an instance
+	 *          added by a plug-in extension or an instance of a
+	 *          processor defined in the application itself.
 	 *
 	 *  @return the processed string.
 	 *          If <code>str</code> is <code>null</code>,
 	 *          or of length 0, or if the current locale is not a bidi one,
 	 *          return the original string.
 	 */
-	public static String processTyped(String str, String type) {
+	public static String processTyped(String str, STextProcessor processor) {
 		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
@@ -257,7 +271,7 @@ final public class STextUtil {
 
 		// make sure that LRE/PDF are added around the string
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
-		return STextEngine.leanToFullText(type, null, env, str, null);
+		return STextEngine.leanToFullText(processor, env, str, null);
 	}
 
 	/**
@@ -296,18 +310,18 @@ final public class STextUtil {
 	 *
 	 *  @param  str string with directional characters to remove.
 	 *
-	 *  @param  type type of the structured text as specified when
+	 *  @param  processor to handle the structured text as specified when
 	 *          calling {@link #processTyped processTyped}.
 	 *
 	 *  @return string with no directional formatting characters.
 	 */
-	public static String deprocess(String str, String type) {
+	public static String deprocess(String str, STextProcessor processor) {
 		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
 			return str;
 
 		// make sure that LRE/PDF are added around the string
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
-		return STextEngine.fullToLeanText(type, null, env, str, null);
+		return STextEngine.fullToLeanText(processor, env, str, null);
 	}
 
 }

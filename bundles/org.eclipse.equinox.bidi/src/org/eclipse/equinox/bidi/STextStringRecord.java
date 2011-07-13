@@ -11,10 +11,10 @@
 package org.eclipse.equinox.bidi;
 
 import java.lang.ref.SoftReference;
-import org.eclipse.equinox.bidi.custom.STextStringProcessor;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  This class records strings which are structured text. Several static
+ *  This class records strings which contain structured text. Several static
  *  methods in this class allow to record such strings in a pool, and to find if
  *  a given string is member of the pool.
  *  <p>
@@ -22,6 +22,11 @@ import org.eclipse.equinox.bidi.custom.STextStringProcessor;
  *  <p>
  *  The pool is managed as a cyclic list. When the pool is full,
  *  each new element overrides the oldest element in the list.
+ *  <p>
+ *  A string may be itself entirely a structured text, or it may contain
+ *  segments each of which is a structured text of a given type. Each such
+ *  segment is identified by its starting and ending offsets within the
+ *  string, and by the processor which is appropriate to handle it.
  */
 public class STextStringRecord {
 	/**
@@ -33,142 +38,272 @@ public class STextStringRecord {
 	private static final int MAXINDEX = POOLSIZE - 1;
 
 	// index of the last entered record
-	private static int last = MAXINDEX;
+	private static int last = -1;
+
+	// flag indicating that the pool has wrapped around
+	private static boolean wrapAround;
 
 	// the pool
-	private static STextStringRecord[] records = new STextStringRecord[POOLSIZE];
+	private static SoftReference[] recordRefs = new SoftReference[POOLSIZE];
 
-	// structured text types
-	private static final String[] types = STextStringProcessor.getKnownTypes();
+	// hash code of the recorded strings
+	private static int[] hashArray = new int[POOLSIZE];
 
-	// maximum type index allowed
-	private static int MAXTYPE = types.length - 1;
+	// total number of segments in the record
+	private int totalSegmentCount;
+
+	// number of used segments in the record
+	private int usedSegmentCount;
 
 	// reference to the recorded string
-	private SoftReference strRef;
+	private String string;
 
-	// hash code of the recorded string
-	private int hash;
+	// reference to the processors of the STT segments in the recorded string
+	private STextProcessor[] processors;
 
-	// reference to the triplets of the recorded string
-	private SoftReference triRef;
+	// reference to the boundaries of the STT segments in the recorded string
+	// (entries 0, 2, 4, ... are start offsets; entries 1, 3, 5, ... are
+	// ending offsets)
+	private short[] boundaries;
 
 	/**
-	 *  Constructor.
-	 *
-	 *  @param  string the string to record
-	 *
-	 *  @param  triplets
-	 *          array of short integers, the number of elements in the array
-	 *          must be a multiple of 3, so that the array is made of one or
-	 *          more triplets of short integers.
-	 *          <p>
-	 *          The first element in each triplet is the beginning offset of a
-	 *          susbstring of <code>string</code> which is a structured text.
-	 *          <p>
-	 *          The second element in each triplet is the ending offset of a
-	 *          susbstring of <code>string</code> which is a structured text.
-	 *          This offset points to one position beyond the last
-	 *          character of the substring.
-	 *          <p>
-	 *          The third element in each triplet is the numeric type of the
-	 *          structured text.<br>
-	 *          The type of a structured text must be one of the string
-	 *          values listed in {@link ISTextTypes}.<br>
-	 *          The corresponding numeric type must be obtained using the
-	 *          method {@link #typeStringToShort typeStringToShort}.
+	 *  Constructor
 	 */
-	public STextStringRecord(String string, short[] triplets) {
-		if (string == null || triplets == null)
-			throw new IllegalArgumentException("The string and triplets argument must not be null!"); //$NON-NLS-1$
-		if ((triplets.length % 3) != 0)
-			throw new IllegalArgumentException("The number of elements in triplets must be a multiple of 3!"); //$NON-NLS-1$
-		for (int i = 2; i < triplets.length; i += 3)
-			if (triplets[i] < 0 || triplets[i] > MAXTYPE)
-				throw new IllegalArgumentException("Illegal type value in element" + i); //$NON-NLS-1$
-		strRef = new SoftReference(string);
-		triRef = new SoftReference(triplets);
-		hash = string.hashCode();
+	private STextStringRecord() {
+		// inhibit creation of new instances by customers
 	}
 
 	/**
-	 *  Get the numeric type of a structured text given its string type.
+	 *  Record a string in the pool. The caller must specify the number
+	 *  of segments in the record (at least 1), and the processor, starting
+	 *  and ending offsets for the first segment.
 	 *
-	 *  @param  type type of structured text as string. It must be one
-	 *          of the strings listed in {@link ISTextTypes}.
+	 *  @param  string the string to record.
 	 *
-	 *  @return a value which is the corresponding numeric type. If
-	 *          <code>type</code> is invalid, the method returns <code>-1</code>.
+	 *  @param  segmentCount number of segments allowed in this string.
+	 *          This number must be >= 1.
+	 *
+	 *  @param  processor the processor appropriate to handle the type
+	 *          of structured text present in the first segment.
+	 *          It may be one of the pre-defined processor instances
+	 *          appearing in {@link STextEngine}, or it may be an instance
+	 *          created by a plug-in or by the application.
+	 *
+	 *  @param  start offset in the string of the starting character of the first
+	 *          segment. It must be >= 0 and less than the length of the string.
+	 *
+	 *  @param  limit offset of the character following the first segment. It
+	 *          must be greater than the <code>start</code> argument and
+	 *          not greater than the length of the string.
+	 *
+	 *  @return an instance of STextRecordString which represents this record.
+	 *          This instance may be used to specify additional segment with
+	 *          {@link #addSegment addSegment}.
+	 *
+	 *  @throws IllegalArgumentException if <code>string</code> is null or
+	 *          if <code>segmentCount</code> is less than 1.
+	 *  @throws also the same exceptions as {@link #addSegment addSegment}.
 	 */
-	public static short typeStringToShort(String type) {
-		for (int i = 0; i < types.length; i++)
-			if (types[i].equals(type))
-				return (short) i;
-		return -1;
+	public static STextStringRecord addRecord(String string, int segmentCount, STextProcessor processor, int start, int limit) {
+		if (string == null)
+			throw new IllegalArgumentException("The string argument must not be null!"); //$NON-NLS-1$
+		if (segmentCount < 1)
+			throw new IllegalArgumentException("The segment count must be at least 1!"); //$NON-NLS-1$
+		synchronized (recordRefs) {
+			if (last < MAXINDEX)
+				last++;
+			else {
+				wrapAround = true;
+				last = 0;
+			}
+		}
+		STextStringRecord record = null;
+		if (recordRefs[last] != null)
+			record = (STextStringRecord) recordRefs[last].get();
+		if (record == null) {
+			record = new STextStringRecord();
+			recordRefs[last] = new SoftReference(record);
+		}
+		hashArray[last] = string.hashCode();
+		for (int i = 0; i < record.usedSegmentCount; i++)
+			record.processors[i] = null;
+		if (segmentCount > record.totalSegmentCount) {
+			record.processors = new STextProcessor[segmentCount];
+			record.boundaries = new short[segmentCount * 2];
+			record.totalSegmentCount = segmentCount;
+		}
+		record.usedSegmentCount = 0;
+		record.string = string;
+		record.addSegment(processor, start, limit);
+		return record;
 	}
 
 	/**
-	 *  Get the string type of a structured text given its numeric type.
+	 *  Add a second or further segment to a record.
 	 *
-	 *  @param shType
-	 *         the numeric type of a structured text. It should be a value
-	 *         obtained using {@link #typeStringToShort typeStringToShort}.
+	 *  @param  processor the processor appropriate to handle the type
+	 *          of structured text present in this segment.
+	 *          It may be one of the pre-defined processor instances
+	 *          appearing in {@link STextEngine}, or it may be an instance
+	 *          created by a plug-in or by the application.
 	 *
-	 *  @return the corresponding string type. If <code>shType</code> is invalid,
-	 *          the method returns <code>null</code>.
+	 *  @param  start offset in the string of the starting character of the
+	 *          segment. It must be >= 0 and less than the length of the string.
+	 *
+	 *  @param  limit offset of the character following the segment. It must be
+	 *          greater than the <code>start</code> argument and not greater
+	 *          than the length of the string.
+	 *
+	 *  @throws IllegalArgumentException if <code>processor</code> is null,
+	 *          or if <code>start</code> or <code>limit</code> have invalid
+	 *          values.
+	 *  @throws IllegalStateException if the current segment exceeds the
+	 *          number of segments specified by <code>segmentCount</code>
+	 *          in the call to {@link #addRecord addRecord} which created
+	 *          the STextStringRecord instance.
 	 */
-	public static String typeShortToString(short shType) {
-		if (shType < 0 || shType > MAXTYPE)
-			return null;
-		return types[shType];
+	public void addSegment(STextProcessor processor, int start, int limit) {
+		if (processor == null)
+			throw new IllegalArgumentException("The processor argument must not be null!"); //$NON-NLS-1$
+		if (start < 0 || start >= string.length())
+			throw new IllegalArgumentException("The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
+		if (limit <= start || limit > string.length())
+			throw new IllegalArgumentException("The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
+		if (usedSegmentCount >= totalSegmentCount)
+			throw new IllegalStateException("All segments of the record are already used!"); //$NON-NLS-1$
+		processors[usedSegmentCount] = processor;
+		boundaries[usedSegmentCount * 2] = (short) start;
+		boundaries[usedSegmentCount * 2 + 1] = (short) limit;
+		usedSegmentCount++;
 	}
 
 	/**
-	 *  Add a record to the pool.
+	 *  Check if a string is recorded and retrieve its record.
 	 *
-	 *  @param record a STextStringRecord instance
-	 */
-	public static synchronized void add(STextStringRecord record) {
-		if (last < MAXINDEX)
-			last++;
-		else
-			last = 0;
-		records[last] = record;
-	}
-
-	/**
-	 *  Check if a string is recorded and retrieve its triplets.
-	 *
-	 *  @param  string the string to check
+	 *  @param  string the string to check.
 	 *
 	 *  @return <code>null</code> if the string is not recorded in the pool;
-	 *          otherwise, return the triplets associated with this string.
+	 *          otherwise, return the STextStringRecord instance which
+	 *          records this string.<br>
+	 *          Once a record has been found, the number of its segments can
+	 *          be retrieved using {@link #getSegmentCount getSegmentCount},
+	 *          its processor can
+	 *          be retrieved using {@link #getProcessor getProcessor},
+	 *          its starting offset can
+	 *          be retrieved using {@link #getStart getStart},
+	 *          its ending offset can
+	 *          be retrieved using {@link #getLimit getLimit},
 	 */
-	public static short[] getTriplets(String string) {
-		if (records[0] == null) // no records at all
+	public static STextStringRecord getRecord(String string) {
+		if (last < 0) // no records at all
 			return null;
 		if (string == null || string.length() < 1)
 			return null;
-		STextStringRecord rec;
-		String str;
-		short[] tri;
+		STextStringRecord record;
 		int myLast = last;
 		int hash = string.hashCode();
 		for (int i = myLast; i >= 0; i--) {
-			rec = records[i];
-			if (hash == rec.hash && (tri = (short[]) rec.triRef.get()) != null && (str = (String) rec.strRef.get()) != null && string.equals(str)) {
-				return tri;
-			}
+			if (hash != hashArray[i])
+				continue;
+			record = (STextStringRecord) recordRefs[i].get();
+			if (record == null)
+				continue;
+			if (string.equals(record.string))
+				return record;
 		}
-		if (records[MAXINDEX] == null) // never recorded past myLast
+		if (!wrapAround) // never recorded past myLast
 			return null;
 		for (int i = MAXINDEX; i > myLast; i--) {
-			rec = records[i];
-			if (hash == rec.hash && (tri = (short[]) rec.triRef.get()) != null && (str = (String) rec.strRef.get()) != null && string.equals(str)) {
-				return tri;
-			}
+			if (hash != hashArray[i])
+				continue;
+			record = (STextStringRecord) recordRefs[i].get();
+			if (record == null)
+				continue;
+			if (string.equals(record.string))
+				return record;
 		}
 		return null;
+	}
+
+	/**
+	 *  Retrieve the number of segments in a record.
+	 *
+	 *  @return the number of segments in the current record. This number
+	 *          is always >= 1.
+	 */
+	public int getSegmentCount() {
+		return usedSegmentCount;
+	}
+
+	private void checkSegmentNumber(int segmentNumber) {
+		if (segmentNumber >= usedSegmentCount)
+			throw new IllegalArgumentException("The segment number " + segmentNumber + " is greater than the total number of segments = " + usedSegmentCount + "!"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	/**
+	 *  Retrieve the processor of a given segment.
+	 *
+	 *  @param  segmentNumber number of the segment about which information
+	 *          is required. It must be >= 0 and less than the number of
+	 *          segments specified by <code>segmentCount</code>
+	 *          in the call to {@link #addRecord addRecord} which created
+	 *          the STextStringRecord instance.
+	 *
+	 *  @return the processor to handle the structured text in the segment
+	 *          specified by <code>segmentNumber</code>.
+	 *
+	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *          has an invalid value.
+	 *
+	 *  @see    #getSegmentCount getSegmentCount
+	 */
+	public STextProcessor getProcessor(int segmentNumber) {
+		checkSegmentNumber(segmentNumber);
+		return processors[segmentNumber];
+	}
+
+	/**
+	 *  Retrieve the starting offset of a given segment.
+	 *
+	 *  @param  segmentNumber number of the segment about which information
+	 *          is required. It must be >= 0 and less than the number of
+	 *          segments specified by <code>segmentCount</code>
+	 *          in the call to {@link #addRecord addRecord} which created
+	 *          the STextStringRecord instance.
+	 *
+	 *  @return the starting offset within the string of the segment
+	 *          specified by <code>segmentNumber</code>.
+	 *
+	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *          has an invalid value.
+	 *
+	 *  @see    #getSegmentCount getSegmentCount
+	 */
+	public int getStart(int segmentNumber) {
+		checkSegmentNumber(segmentNumber);
+		return boundaries[segmentNumber * 2];
+	}
+
+	/**
+	 *  Retrieve the ending offset of a given segment.
+	 *
+	 *  @param  segmentNumber number of the segment about which information
+	 *          is required. It must be >= 0 and less than the number of
+	 *          segments specified by <code>segmentCount</code>
+	 *          in the call to {@link #addRecord addRecord} which created
+	 *          the STextStringRecord instance.
+	 *
+	 *  @return the offset of the position following the segment
+	 *          specified by <code>segmentNumber</code>.
+	 *
+	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *          has an invalid value.
+	 *
+	 *  @see    #getSegmentCount getSegmentCount
+	 */
+	public int getLimit(int segmentNumber) {
+		checkSegmentNumber(segmentNumber);
+		return boundaries[segmentNumber * 2 + 1];
 	}
 
 	/**
@@ -178,15 +313,21 @@ public class STextStringRecord {
 	 */
 	public static synchronized void clear() {
 		for (int i = 0; i <= MAXINDEX; i++) {
-			STextStringRecord sr = records[i];
-			if (sr == null)
-				break;
-			sr.hash = 0;
-			sr.strRef.clear();
-			sr.triRef.clear();
-			records[i] = null;
+			hashArray[i] = 0;
+			SoftReference softRef = recordRefs[i];
+			if (softRef == null)
+				continue;
+			STextStringRecord record = (STextStringRecord) softRef.get();
+			if (record == null)
+				continue;
+			record.boundaries = null;
+			record.processors = null;
+			record.totalSegmentCount = 0;
+			record.usedSegmentCount = 0;
+			recordRefs[i].clear();
 		}
-		last = MAXINDEX;
+		last = -1;
+		wrapAround = false;
 	}
 
 }

@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
-import org.eclipse.equinox.bidi.custom.ISTextProcessor;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextStringProcessor;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
@@ -29,25 +29,16 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *  <h2><a name="processor">How to Specify a Processor</a></h2>
  *
  *  <p>All the methods in this class have a first argument which
- *  designates a type of processor.
+ *  designates a processor.
  *
- *  <p>It can be specified as a string (usually one of the
- *  literals to be found in {@link ISTextTypes}
- *  or as an instance of {@link ISTextProcessor}.
+ *  <p>It must be specified as an instance of {@link STextProcessor}.
+ *  Pre-defined instances are included in <b>STextEngine</b> for all
+ *  the types of structured text supported by this package.
  *
- *  <p>Such an instance can be obtained using the
+ *  <p>For processors supplied by other packages, a processor instance
+ *  can be obtained using the
  *  {@link org.eclipse.equinox.bidi.custom.STextStringProcessor#getProcessor getProcessor}
  *  method for the registered processors, or by instantiating a private processor.
- *
- *  <p>When the same processor is used in multiple calls, it may be
- *  beneficial to obtain a reference to the processor and to use it
- *  in following calls, rather than to specify the processor by its
- *  type expressed as a string, which necessitates a registry search
- *  for each call.
- *
- *  <p>A processor reference is also the only way to examine the
- *  features of a processor by calling its
- *  {@link ISTextProcessor#getFeatures getFeatures} method.
  *
  *  <p>Specifying <code>null</code> for the processor as first argument
  *  of a method causes this method to behave as a no-op.
@@ -90,7 +81,7 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *  <pre>
  *
  *    String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
- *    String fullText = STextEngine.leanToFullText(ISTextTypes.FILE, null, null, leanText, null);
+ *    String fullText = STextEngine.leanToFullText(STextEngine.PROC_FILE, null, leanText, null);
  *    System.out.println("full text = " + fullText);
  *
  *  </pre>
@@ -104,10 +95,10 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *    int[] state = new int[1];
  *    state[0] = STextEngine.STATE_INITIAL;
  *    String leanText = "int i = 3; // first Java statement";
- *    String fullText = STextEngine.leanToFullText(ISTextTypes.JAVA, null, null, leanText, state);
+ *    String fullText = STextEngine.leanToFullText(STextEngine.PROC_JAVA, null, leanText, state);
  *    System.out.println("full text = " + fullText);
  *    leanText = "i += 4; // next Java statement";
- *    fullText = STextEngine.leanToFullText(ISTextTypes.JAVA, null, null, leanText, state);
+ *    fullText = STextEngine.leanToFullText(STextEngine.PROC_JAVA, null, leanText, state);
  *    System.out.println("full text = " + fullText);
  *
  *  </pre>
@@ -122,6 +113,113 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *
  */
 public class STextEngine {
+	/**
+	 * Constant indicating a type of structured text processor adapted
+	 * to processing property file statements. It expects the following
+	 * format:
+	 * <pre>
+	 *  name=value
+	 * </pre>
+	 */
+	public static final STextProcessor PROC_PROPERTY = STextStringProcessor.getProcessor("property"); //$NON-NLS-1$
+
+	/**
+	 * Constant indicating a type of structured text processor adapted
+	 * to processing compound names.
+	 * This type covers names made of one or more parts separated by underscores:
+	 * <pre>
+	 *  part1_part2_part3
+	 * </pre>
+	 */
+	public static final STextProcessor PROC_UNDERSCORE = STextStringProcessor.getProcessor("underscore"); //$NON-NLS-1$
+
+	/**
+	 * Constant indicating a type of structured text processor adapted
+	 * to processing comma-delimited lists, such as:
+	 * <pre>
+	 *  part1,part2,part3
+	 * </pre>
+	 */
+	public static final STextProcessor PROC_COMMA_DELIMITED = STextStringProcessor.getProcessor("comma"); //$NON-NLS-1$
+
+	/**
+	 * Constant indicating a type of structured text processor adapted
+	 * to processing strings with the following format:
+	 * <pre>
+	 *  system(user)
+	 * </pre>
+	 */
+	public static final STextProcessor PROC_SYSTEM_USER = STextStringProcessor.getProcessor("system"); //$NON-NLS-1$
+
+	/**
+	 * Constant indicating a type of structured text processor adapted
+	 * to processing directory and file paths.
+	 */
+	public static final STextProcessor PROC_FILE = STextStringProcessor.getProcessor("file"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing e-mail addresses.
+	 */
+	public static final STextProcessor PROC_EMAIL = STextStringProcessor.getProcessor("email"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing URLs.
+	 */
+	public static final STextProcessor PROC_URL = STextStringProcessor.getProcessor("url"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing regular expressions, possibly spanning more than one
+	 *  line.
+	 */
+	public static final STextProcessor PROC_REGEXP = STextStringProcessor.getProcessor("regex"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing XPath expressions.
+	 */
+	public static final STextProcessor PROC_XPATH = STextStringProcessor.getProcessor("xpath"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing Java code, possibly spanning more than one line.
+	 */
+	public static final STextProcessor PROC_JAVA = STextStringProcessor.getProcessor("java"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing SQL statements, possibly spanning more than one line.
+	 */
+	public static final STextProcessor PROC_SQL = STextStringProcessor.getProcessor("sql"); //$NON-NLS-1$
+
+	/**
+	 *  Constant indicating a type of structured text processor adapted
+	 *  to processing arithmetic expressions, possibly with a RTL base direction.
+	 */
+	public static final STextProcessor PROC_RTL_ARITHMETIC = STextStringProcessor.getProcessor("math"); //$NON-NLS-1$
+
+	/**
+	 *  Constant specifying that the base direction of a structured text is LTR.
+	 *  The base direction may depend on whether the GUI is
+	 *  {@link STextEnvironment#getMirrored mirrored} and may
+	 *  may be different for Arabic and for Hebrew.
+	 *  This constant can appear as value returned by the
+	 *  {@link #getCurDirection getCurDirection} method.
+	 */
+	public static final int DIR_LTR = 0;
+
+	/**
+	 *  Constant specifying that the base direction of a structured text is RTL.
+	 *  The base direction may depend on whether the GUI is
+	 *  {@link STextEnvironment#getMirrored mirrored} and may
+	 *  may be different for Arabic and for Hebrew.
+	 *  This constant can appear as value returned by the
+	 *  {@link #getCurDirection getCurDirection} method.
+	 */
+	public static final int DIR_RTL = 1;
+
 	/**
 	 *  Constant to use in the first element of the <code>state</code>
 	 *  argument when calling most methods of this class
@@ -142,21 +240,11 @@ public class STextEngine {
 	/** Add directional formatting characters to a structured text
 	 *  to ensure correct presentation.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns the <code>text</code> string.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -179,31 +267,21 @@ public class STextEngine {
 	 *          characters added at proper locations to ensure correct
 	 *          presentation.
 	 */
-	public static String leanToFullText(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static String leanToFullText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null)
 			return text;
-		return STextImpl.leanToFullText(processor, features, environment, text, state);
+		return STextImpl.leanToFullText(processor, environment, text, state);
 	}
 
 	/**
 	 *  Given a <i>lean</i> string, compute the positions of each of its
 	 *  characters within the corresponding <i>full</i> string.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns an identity map.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -226,14 +304,14 @@ public class STextEngine {
 	 *          in the <code>text</code> argument, equal to the offset of the
 	 *          corresponding character in the <i>full</i> string.
 	 */
-	public static int[] leanToFullMap(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanToFullMap(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null) {
 			int[] map = new int[text.length()];
 			for (int i = 0; i < map.length; i++)
 				map[i] = i;
 			return map;
 		}
-		return STextImpl.leanToFullMap(processor, features, environment, text, state);
+		return STextImpl.leanToFullMap(processor, environment, text, state);
 	}
 
 	/**
@@ -247,21 +325,11 @@ public class STextEngine {
 	 *  depending on the {@link STextEnvironment#getOrientation orientation} of the
 	 *  GUI component used for display are not reflected in this method.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns an empty array.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -285,31 +353,21 @@ public class STextEngine {
 	 *          added to ensure correct presentation.
 	 *          The offsets are sorted in ascending order.
 	 */
-	public static int[] leanBidiCharOffsets(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null)
 			return EMPTY_INT_ARRAY;
-		return STextImpl.leanBidiCharOffsets(processor, features, environment, text, state);
+		return STextImpl.leanBidiCharOffsets(processor, environment, text, state);
 	}
 
 	/**
 	 *  Remove directional formatting characters which were added to a
 	 *  structured text string to ensure correct presentation.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns the <code>text</code> string.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -334,31 +392,21 @@ public class STextEngine {
 	 *          with {@link #leanToFullText leanToFullText}.
 	 *
 	 */
-	public static String fullToLeanText(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static String fullToLeanText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null)
 			return text;
-		return STextImpl.fullToLeanText(processor, features, environment, text, state);
+		return STextImpl.fullToLeanText(processor, environment, text, state);
 	}
 
 	/**
 	 *  Given a <i>full</i> string, compute the positions of each of its
 	 *  characters within the corresponding <i>lean</i> string.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns an identity map.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -387,14 +435,14 @@ public class STextEngine {
 	 *          added when invoking {@link #leanToFullText leanToFullText}),
 	 *          the value returned for this character is -1.
 	 */
-	public static int[] fullToLeanMap(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] fullToLeanMap(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null) {
 			int[] map = new int[text.length()];
 			for (int i = 0; i < map.length; i++)
 				map[i] = i;
 			return map;
 		}
-		return STextImpl.fullToLeanMap(processor, features, environment, text, state);
+		return STextImpl.fullToLeanMap(processor, environment, text, state);
 	}
 
 	/**
@@ -408,21 +456,11 @@ public class STextEngine {
 	 *  depending on the {@link STextEnvironment#getOrientation orientation}
 	 *  of the GUI component used for display.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
 	 *          returns an empty array.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -447,10 +485,10 @@ public class STextEngine {
 	 *          added to ensure correct presentation.
 	 *          The offsets are sorted in ascending order.
 	 */
-	public static int[] fullBidiCharOffsets(Object processor, STextFeatures features, STextEnvironment environment, String text, int[] state) {
+	public static int[] fullBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (processor == null)
 			return EMPTY_INT_ARRAY;
-		return STextImpl.fullBidiCharOffsets(processor, features, environment, text, state);
+		return STextImpl.fullBidiCharOffsets(processor, environment, text, state);
 	}
 
 	/**
@@ -461,21 +499,11 @@ public class STextEngine {
 	 *  text determines which is the governing script) and on
 	 *  whether the GUI is {@link STextEnvironment#getMirrored mirrored}.
 	 *
-	 *  @param  processor designates one of the registered processors.
-	 *          It can be a string containing a keyword according to
-	 *          the processor type, or a processor reference.
+	 *  @param  processor designates a processor instance.
 	 *          For more details, see above <a href="#processor">
 	 *          How to Specify a Processor</a>.
 	 *          <p>If this argument is <code>null</code>, this method
-	 *          returns {@link STextFeatures#DIR_LTR}.
-	 *
-	 *  @param  features specifies features that affect the processor's
-	 *          behavior.
-	 *          <p>This argument may be specified as <code>null</code>,
-	 *          in which case the processor will use its standard features
-	 *          (as returned by the processor
-	 *          {@link ISTextProcessor#getFeatures getFeatures}
-	 *          method).
+	 *          returns {@link #DIR_LTR}.
 	 *
 	 *  @param  environment specifies an environment whose characteristics
 	 *          may affect the processor's behavior.
@@ -487,11 +515,13 @@ public class STextEngine {
 	 *  @param  text is the structured text string.
 	 *
 	 *  @return the base direction of the structured text.
-	 *          It is one of the values {@link STextFeatures#DIR_LTR}
-	 *          or {@link STextFeatures#DIR_RTL}.
+	 *          It is one of the values {@link #DIR_LTR}
+	 *          or {@link #DIR_RTL}.
 	 */
-	public static int getCurDirection(Object processor, STextFeatures features, STextEnvironment environment, String text) {
-		return STextImpl.getCurDirection(processor, features, environment, text, null);
+	public static int getCurDirection(STextProcessor processor, STextEnvironment environment, String text) {
+		if (processor == null)
+			return DIR_LTR;
+		return STextImpl.getCurDirection(processor, environment, text, null);
 	}
 
 }

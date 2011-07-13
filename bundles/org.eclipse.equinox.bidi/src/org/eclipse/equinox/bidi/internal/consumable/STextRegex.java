@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.*;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  *  <code>STextRegex</code> is a processor for regular expressions.
@@ -57,7 +57,6 @@ public class STextRegex extends STextProcessor {
 			'.', ')', '>', '\'', ')', ')', ')', ')', '>', '>', '\'', '}', ')', '}', '>', '\'', ')'};
 	static final int numberOfStrings = startStrings.length; /* 18 */
 	static final int maxSpecial = numberOfStrings;
-	static final STextFeatures FEATURES = new STextFeatures(null, maxSpecial, -1, -1, false, false);
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
 	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
@@ -65,23 +64,19 @@ public class STextRegex extends STextProcessor {
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
 
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @see ISTextProcessor#getFeatures
-	 *
-	 *  @return features with no separators , special cases for each kind of
-	 *          regular expression syntactic string,
-	 *          LTR direction for Arabic and Hebrew, and support for both.
+	 *  This method retrieves the number of special cases handled by this processor.
+	 *  
+	 *  @return the number of special cases for this processor.
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+		return maxSpecial;
 	}
 
 	/**
 	 *  This method locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
-	public int indexOfSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -149,7 +144,7 @@ public class STextRegex extends STextProcessor {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		switch (caseNumber) {
@@ -158,7 +153,7 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+					STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 					// skip the opening "(?#"
 					location = separLocation + 3;
 				}
@@ -174,7 +169,7 @@ public class STextRegex extends STextProcessor {
 			case 5 : /* conditional named back reference (?(<name>) */
 			case 6 : /* conditional named back reference (?('name') */
 			case 7 : /* named parentheses reference (?&name) */
-				STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 				// no need for calling processSeparator() for the following cases
 				//   since the starting string contains a L char
 			case 8 : /* named group (?P<name> */
@@ -198,7 +193,7 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+					STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 					// skip the opening "\Q"
 					location = separLocation + 2;
 				}
@@ -211,11 +206,40 @@ public class STextRegex extends STextProcessor {
 				STextProcessor.setDirProp(dirProps, location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
-				STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 				return separLocation + 1;
 
 		}
 		// we should never get here
 		return text.length();
 	}
+
+	/**
+	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
+	 *          conditions are satisfied:
+	 *          <ul>
+	 *            <li>The current locale (as expressed by the environment
+	 *                language) is Arabic.</li>
+	 *            <li>The first strong character has an RTL direction.</li>
+	 *            <li>If there is no strong character in the text, the
+	 *                GUI is mirrored.
+	 *          </ul>
+	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
+	 */
+	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+		String language = environment.getLanguage();
+		if (!language.equals("ar")) //$NON-NLS-1$
+			return STextEngine.DIR_LTR;
+		for (int i = 0; i < text.length(); i++) {
+			byte dirProp = getDirProp(text, dirProps, i);
+			if (dirProp == AL || dirProp == R)
+				return STextEngine.DIR_RTL;
+			if (dirProp == L)
+				return STextEngine.DIR_LTR;
+		}
+		if (environment.getMirrored())
+			return STextEngine.DIR_RTL;
+		return STextEngine.DIR_LTR;
+	}
+
 }

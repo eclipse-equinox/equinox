@@ -5,9 +5,14 @@
 </head>
 <body bgcolor="white">
 
-This package provides interfaces and classes for
+This package provides classes for
 processing structured text.
-
+<p>
+There are various types of structured text. Each type should
+be handled by a specific <i>processor</i>. A number of standard
+processors are supplied in the associated package
+{@link <a href="internal\consumable\package-summary.html">
+org.eclipse.equinox.bidi.internal.consumable</a>}.
 
 <h2>Introduction to Structured Text</h2>
 <p>
@@ -44,7 +49,7 @@ The class {@link
 is the main tool for processing structured text.  It facilitates
 handling several types of structured text, each type being handled
 by a specific
-{@link <a href="custom\ISTextProcessor.html"><b><i>processor</i></b></a>} :</p>
+{@link <a href="custom\STextProcessor.html"><b><i>processor</i></b></a>} :</p>
 <ul>
   <li>property (name=value)</li>
   <li>compound name (xxx_yy_zzzz)</li>
@@ -60,28 +65,30 @@ by a specific
   <li>RTL arithmetic expressions</li>
 </ul>
 <p>
-Other classes and one interface in this package may be used to
+For each of these types, a static instance is defined in <b>STextEngine</b>.
+These pre-defined instances can be used as argument in the methods of
+<b>STextEngine</b>.
+</p><p>
+Other classes in this package may be used to
 complement and facilitate the action of
 {@link <a href="STextEngine.html">STextEngine</a>}:
 <ul>
   <li>{@link <a href="STextEnvironment.html">STextEnvironment</a>}
-      regroups details about the environment</li>
+      regroups details about the environment</li>.
   <li>{@link <a href="STextUtil.html">STextUtil</a>}
       provides a number of convenience methods to process some common types of
       structured text.  When using methods in this class, there is no need
       to use other classes of this package.  However, the other classes allow
       more precise control and possibly better performance.</li>
-  <li>{@link <a href="ISTextTypes.html">ISTextTypes</a>}
-      is an interface which contains only literals identifying the various types
-      of structured text currently supported.</li>
   <li>{@link <a href="STextStringRecord.html">STextStringRecord</a>}
-      allows to record strings which are structured text with their
-      type, so that another module can check if a given string has been recorded
-      as a structured text string and retrieve its type.</li>
+      allows to record strings which are structured text with the
+      type of the appropriate processor,
+      so that another module can check if a given string has been recorded
+      as a structured text string and run its processor.</li>
 </ul>
 <p>
 {@link <a href="STextEngine.html">STextEngine</a>} and the
-other classes and interface mentioned above are intended for users who
+other classes mentioned above are intended for users who
 need to process structured text for which there already exist
 processors.
 <p>
@@ -90,14 +97,9 @@ not currently supported can use the following components of the
 package {@link <a href="custom\package-summary.html">
 org.eclipse.equinox.bidi.custom</a>}:
 <ul>
-  <li>{@link <a href="custom\ISTextProcessor.html">ISTextProcessor</a>}
-      is an interface specifying which methods a processor must provide.</li>
   <li>{@link <a href="custom\STextProcessor.html">STextProcessor</a>}
-      is a generic processor which can be used as superclass for specific
+      is a generic processor to be used as superclass for specific
       processors.</li>
-  <li>{@link <a href="custom\STextFeatures.html">STextFeatures</a>}
-      allows managing some factors which affect
-      a structured text processor's behavior.</li>
   <li>{@link <a href="custom\STextStringProcessor.html">STextStringProcessor</a>}
       allows retrieval of the defined processor types and of the
       corresponding processors.</li>

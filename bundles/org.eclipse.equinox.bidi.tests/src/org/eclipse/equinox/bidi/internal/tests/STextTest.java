@@ -11,23 +11,12 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
-import org.eclipse.equinox.bidi.custom.ISTextProcessor;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
-public class STextTest implements ISTextProcessor {
+public class STextTest extends STextProcessor {
 
-	static final STextFeatures FEATURES = new STextFeatures("-=.:", 0, -1, -1, false, false);
-
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
-	}
-
-	public int indexOfSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
-		throw new IllegalStateException();
-	}
-
-	public int processSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
-		throw new IllegalStateException();
+	public String getSeparators(STextEnvironment env, String text, byte[] dirProps) {
+		return "-=.:";
 	}
 
 }

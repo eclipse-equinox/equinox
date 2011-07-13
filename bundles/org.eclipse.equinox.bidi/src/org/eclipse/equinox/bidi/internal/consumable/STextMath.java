@@ -10,26 +10,56 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
+import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  Processor adapted to processing arithmetic expressions with right-to-left
- *  base direction.
+ *  Processor adapted to processing arithmetic expressions with
+ *  a possible right-to-left base direction.
  */
 public class STextMath extends STextProcessor {
-	static final int RTL = STextFeatures.DIR_RTL;
-	static final STextFeatures FEATURES = new STextFeatures("+-/*()=", 0, RTL, RTL, false, false); //$NON-NLS-1$
+	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
+	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
+	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with separators "+-/*()=", no special cases,
-	 *          RTL direction for Arabic and Hebrew, and support for both.
+	 *  @return "+-/*()=" as separators specific to this processor.
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return "+-/*()="; //$NON-NLS-1$
+	}
+
+	/**
+	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
+	 *          conditions are satisfied:
+	 *          <ul>
+	 *            <li>The current locale (as expressed by the environment
+	 *                language) is Arabic.</li>
+	 *            <li>The first strong character is an Arabic letter.</li>
+	 *            <li>If there is no strong character in the text, there is
+	 *                at least one Arabic-Indic digit in the text.</li>
+	 *          </ul>
+	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
+	 */
+	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+		String language = environment.getLanguage();
+		if (!language.equals("ar")) //$NON-NLS-1$
+			return STextEngine.DIR_LTR;
+		boolean flagAN = false;
+		for (int i = 0; i < text.length(); i++) {
+			byte dirProp = getDirProp(text, dirProps, i);
+			if (dirProp == AL)
+				return STextEngine.DIR_RTL;
+			if (dirProp == L || dirProp == R)
+				return STextEngine.DIR_LTR;
+			if (dirProp == AN)
+				flagAN = true;
+		}
+		if (flagAN)
+			return STextEngine.DIR_RTL;
+		return STextEngine.DIR_LTR;
 	}
 
 }

@@ -12,8 +12,8 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.custom.STextStringProcessor;
-import org.eclipse.equinox.bidi.custom.ISTextProcessor;
 
 /**
  * Tests contribution of BiDi processors.
@@ -28,7 +28,7 @@ public class STextExtensibilityTest extends STextTestBase {
 		// check one of the types that we know should be there
 		assertTrue(isTypePresent(types, "regex"));
 
-		ISTextProcessor processor = STextStringProcessor.getProcessor("regex");
+		STextProcessor processor = STextStringProcessor.getProcessor("regex");
 		assertNotNull(processor);
 	}
 
@@ -40,7 +40,7 @@ public class STextExtensibilityTest extends STextTestBase {
 		// check the type added by the test bundle
 		assertTrue(isTypePresent(types, "test"));
 
-		ISTextProcessor processor = STextStringProcessor.getProcessor("test");
+		STextProcessor processor = STextStringProcessor.getProcessor("test");
 		assertNotNull(processor);
 
 		processor = STextStringProcessor.getProcessor("badtest");
@@ -49,7 +49,8 @@ public class STextExtensibilityTest extends STextTestBase {
 		String data, lean, full, model;
 		data = "ABC.DEF:HOST-COM=HELLO";
 		lean = toUT16(data);
-		full = STextEngine.leanToFullText("test", null, null, lean, null);
+		processor = STextStringProcessor.getProcessor("test");
+		full = STextEngine.leanToFullText(processor, null, lean, null);
 		model = "ABC@.DEF@:HOST@-COM@=HELLO";
 		assertEquals("Test 'test' plugin", model, toPseudo(full));
 	}

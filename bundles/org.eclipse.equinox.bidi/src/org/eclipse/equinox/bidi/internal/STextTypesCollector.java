@@ -13,7 +13,7 @@ package org.eclipse.equinox.bidi.internal;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.bidi.custom.ISTextProcessor;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 public class STextTypesCollector implements IRegistryEventListener {
 
@@ -46,12 +46,12 @@ public class STextTypesCollector implements IRegistryEventListener {
 		return result;
 	}
 
-	public ISTextProcessor getProcessor(String type) {
+	public STextProcessor getProcessor(String type) {
 		if (types == null)
 			read();
 		Object processor = types.get(type);
-		if (processor instanceof ISTextProcessor)
-			return (ISTextProcessor) processor;
+		if (processor instanceof STextProcessor)
+			return (STextProcessor) processor;
 		return null;
 	}
 

@@ -12,7 +12,6 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -36,18 +35,20 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  */
 public class STextSql extends STextProcessor {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String separators = "\t!#%&()*+,-./:;<=>?|[]{}"; //$NON-NLS-1$
-	static final STextFeatures FEATURES = new STextFeatures(separators, 5, -1, -1, false, false);
 	static final String lineSep = STextEnvironment.getLineSep();
 
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with separators "\t!#%&()*+,-./:;<=>?|[]{}", 5 special cases,
-	 *          LTR direction for Arabic and Hebrew, and support for both.
+	 *  @return separators "\t!#%&()*+,-./:;<=>?|[]{}".
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return "\t!#%&()*+,-./:;<=>?|[]{}"; //$NON-NLS-1$
+	}
+
+	/**
+	 *  @return 5 as the number of special cases handled by this processor.
+	 */
+	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+		return 5;
 	}
 
 	/**
@@ -60,7 +61,7 @@ public class STextSql extends STextProcessor {
 	  *    <li>comments starting with hyphen-hyphen</li>
 	  *  </ol>
 	  */
-	public int indexOfSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
 				return text.indexOf(" ", fromIndex); //$NON-NLS-1$
@@ -87,10 +88,10 @@ public class STextSql extends STextProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
-		STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 		switch (caseNumber) {
 			case 1 : /* space */
 				separLocation++;
@@ -138,7 +139,7 @@ public class STextSql extends STextProcessor {
 				}
 				// we need to call processSeparator since text may follow the
 				//  end of comment immediately without even a space
-				STextProcessor.processSeparator(features, text, dirProps, offsets, location);
+				STextProcessor.processSeparator(text, dirProps, offsets, location);
 				return location + 2;
 			case 5 : /* hyphen-hyphen comment */
 				location = text.indexOf(lineSep, separLocation + 2);

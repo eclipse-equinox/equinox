@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi;
 
 import java.util.Locale;
-import org.eclipse.equinox.bidi.custom.ISTextProcessor;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
@@ -35,7 +34,6 @@ import org.eclipse.equinox.bidi.internal.STextActivator;
  *  <p>
  *  This class also provides a number of convenience methods related to the environment.
  *  <p>&nbsp;</p>
- *  @see ISTextProcessor#getFeatures
  *
  *  @author Matitiahu Allouche
  */
@@ -130,11 +128,6 @@ public class STextEnvironment {
 	 */
 	final int orientation;
 
-	static Locale defaultLocale;
-	static String defaultLanguage;
-	static boolean defaultBidi;
-	boolean bidiFlag;
-
 	/**
 	 *  Constructor
 	 *
@@ -162,26 +155,26 @@ public class STextEnvironment {
 	 *  @see #getOrientation
 	 */
 	public STextEnvironment(String lang, boolean mirrored, int orientation) {
-		if (lang == null) {
-			language = null;
-		} else {
+		if (lang != null) {
 			if (lang.length() > 2)
 				language = lang.substring(0, 2);
 			else
 				language = lang;
-			bidiFlag = isBidiLanguage(language);
-		}
+		} else
+			language = null;
 		this.mirrored = mirrored;
 		this.orientation = orientation >= ORIENT_LTR && orientation <= ORIENT_IGNORE ? orientation : ORIENT_UNKNOWN;
 	}
 
 	/**
 	 *  Return a 2-letters code representing a language as defined by
-	 *  ISO-639. If equal to <code>null</code>, it defaults to the language
-	 *  of the current default locale.
+	 *  ISO-639. If specified as <code>null</code>, it defaults to the
+	 *  language of the current default locale.
 	 */
 	public String getLanguage() {
-		return language;
+		if (language != null)
+			return language;
+		return getDefaultLocale().getLanguage();
 	}
 
 	/**
@@ -260,20 +253,12 @@ public class STextEnvironment {
 	 *  @see #getLanguage
 	 */
 	public boolean isBidi() {
-		if (defaultLanguage != null && defaultLocale.equals(getDefaultLocale()))
-			return defaultBidi;
-
-		if (language == null) {
-			defaultLocale = getDefaultLocale();
-			defaultLanguage = defaultLocale.getLanguage();
-			defaultBidi = isBidiLanguage(defaultLanguage);
-			return defaultBidi;
-		}
-
-		return bidiFlag;
+		if (language != null)
+			return isBidiLanguage(language);
+		return isBidiLanguage(getDefaultLocale().getLanguage());
 	}
 
-	static boolean isBidiLanguage(String lang) {
+	boolean isBidiLanguage(String lang) {
 		return "iw".equals(lang) || "he".equals(lang) || "ar".equals(lang) || "fa".equals(lang) || "ur".equals(lang); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 

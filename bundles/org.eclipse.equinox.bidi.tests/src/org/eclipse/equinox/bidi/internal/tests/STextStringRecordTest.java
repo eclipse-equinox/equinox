@@ -11,8 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextStringRecord;
-import org.eclipse.equinox.bidi.custom.STextStringProcessor;
 
 /**
  *	Tests the StringRecord class	
@@ -21,99 +21,123 @@ public class STextStringRecordTest extends STextTestBase {
 	public void testStringRecord() {
 		STextStringRecord sr;
 		boolean catchFlag;
-		short[] badTriplet1 = new short[] {0, 0};
-		short[] badTriplet2 = new short[] {0, 0, -1};
-		short[] badTriplet3 = new short[] {0, 0, 999};
-		short[] goodTriplet = new short[] {0, 3, 2};
-		short[] triplets;
-		short type;
-		String strType;
 		// check handling of invalid arguments
 		catchFlag = false;
 		try {
-			sr = new STextStringRecord(null, badTriplet1);
+			sr = STextStringRecord.addRecord(null, 1, STextEngine.PROC_EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch null string argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = new STextStringRecord("xxx", null);
+			sr = STextStringRecord.addRecord("abc", 1, null, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
-		assertTrue("Catch null triplets argument", catchFlag);
+		assertTrue("Catch null processor argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = new STextStringRecord("xxx", badTriplet1);
+			sr = STextStringRecord.addRecord("abc", 0, STextEngine.PROC_EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
-		assertTrue("Catch bad triplet #1 argument", catchFlag);
+		assertTrue("Catch invalid segment count argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = new STextStringRecord("xxx", badTriplet2);
+			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, -1, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
-		assertTrue("Catch bad triplet #2 argument", catchFlag);
+		assertTrue("Catch invalid start argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = new STextStringRecord("xxx", badTriplet3);
+			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 4, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
-		assertTrue("Catch bad triplet #3 argument", catchFlag);
+		assertTrue("Catch invalid start argument", catchFlag);
+		catchFlag = false;
+		try {
+			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 0, 0);
+		} catch (IllegalArgumentException e) {
+			catchFlag = true;
+		}
+		assertTrue("Catch invalid limit argument", catchFlag);
+		catchFlag = false;
+		try {
+			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 0, 5);
+		} catch (IllegalArgumentException e) {
+			catchFlag = true;
+		}
+		assertTrue("Catch invalid limit argument", catchFlag);
 
-		String[] types = STextStringProcessor.getKnownTypes();
-		for (int i = 0; i < types.length; i++) {
-			type = STextStringRecord.typeStringToShort(types[i]);
-			assertFalse(type == -1);
-			strType = STextStringRecord.typeShortToString(type);
-			assertEquals(types[i], strType);
-		}
-		type = STextStringRecord.typeStringToShort("dummy");
-		assertEquals(-1, type);
-		strType = STextStringRecord.typeShortToString((short) 999);
-		assertEquals(null, strType);
 		int poolSize = STextStringRecord.POOLSIZE;
 		int lim = poolSize / 2;
-		triplets = STextStringRecord.getTriplets("xxx");
-		assertEquals(null, triplets);
+		sr = STextStringRecord.getRecord("XXX");
+		assertEquals(null, sr);
 		for (int i = 0; i < lim; i++) {
 			String str = Integer.toString(i);
-			sr = new STextStringRecord(str, goodTriplet);
-			STextStringRecord.add(sr);
+			sr = STextStringRecord.addRecord(str, 1, STextEngine.PROC_EMAIL, 0, 1);
 		}
-		triplets = STextStringRecord.getTriplets(null);
-		assertEquals(null, triplets);
-		triplets = STextStringRecord.getTriplets("");
-		assertEquals(null, triplets);
+		sr = STextStringRecord.getRecord(null);
+		assertEquals(null, sr);
+		sr = STextStringRecord.getRecord("");
+		assertEquals(null, sr);
+
 		for (int i = 0; i < poolSize; i++) {
 			String str = Integer.toString(i);
-			triplets = STextStringRecord.getTriplets(str);
+			sr = STextStringRecord.getRecord(str);
 			if (i < lim)
-				assertFalse(null == triplets);
+				assertFalse(null == sr);
 			else
-				assertTrue(null == triplets);
+				assertTrue(null == sr);
 		}
+
 		for (int i = lim; i <= poolSize; i++) {
 			String str = Integer.toString(i);
-			sr = new STextStringRecord(str, goodTriplet);
-			STextStringRecord.add(sr);
+			sr = STextStringRecord.addRecord(str, 1, STextEngine.PROC_EMAIL, 0, 1);
 		}
 		for (int i = 1; i <= poolSize; i++) {
 			String str = Integer.toString(i);
-			triplets = STextStringRecord.getTriplets(str);
-			assertFalse(null == triplets);
+			sr = STextStringRecord.getRecord(str);
+			assertFalse(null == sr);
 		}
-		triplets = STextStringRecord.getTriplets("0");
-		assertEquals(null, triplets);
+		sr = STextStringRecord.getRecord("0");
+		assertEquals(null, sr);
+		sr = STextStringRecord.addRecord("thisisalongstring", 3, STextEngine.PROC_EMAIL, 0, 2);
+		sr.addSegment(STextEngine.PROC_JAVA, 4, 5);
+		sr.addSegment(STextEngine.PROC_FILE, 6, 7);
+		catchFlag = false;
+		try {
+			sr.addSegment(STextEngine.PROC_EMAIL, 10, 13);
+		} catch (IllegalStateException e) {
+			catchFlag = true;
+		}
+		assertTrue("Catch too many segments", catchFlag);
+		assertEquals(3, sr.getSegmentCount());
+		assertEquals(STextEngine.PROC_EMAIL, sr.getProcessor(0));
+		assertEquals(STextEngine.PROC_JAVA, sr.getProcessor(1));
+		assertEquals(STextEngine.PROC_FILE, sr.getProcessor(2));
+		assertEquals(0, sr.getStart(0));
+		assertEquals(4, sr.getStart(1));
+		assertEquals(6, sr.getStart(2));
+		assertEquals(2, sr.getLimit(0));
+		assertEquals(5, sr.getLimit(1));
+		assertEquals(7, sr.getLimit(2));
+		catchFlag = false;
+		try {
+			sr.getLimit(3);
+		} catch (IllegalArgumentException e) {
+			catchFlag = true;
+		}
+		assertTrue("Catch segment number too large", catchFlag);
+
 		STextStringRecord.clear();
 		for (int i = 0; i <= poolSize; i++) {
 			String str = Integer.toString(i);
-			triplets = STextStringRecord.getTriplets(str);
-			assertEquals(null, triplets);
+			sr = STextStringRecord.getRecord(str);
+			assertEquals(null, sr);
 		}
 	}
 }

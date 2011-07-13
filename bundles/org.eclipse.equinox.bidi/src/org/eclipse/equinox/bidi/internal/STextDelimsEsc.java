@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.custom.STextFeatures;
+import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -32,11 +32,15 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
 public abstract class STextDelimsEsc extends STextDelims {
 
 	/**
-	 *  This method skips until after the matching end delimiter,
+	 *  This method handles the text between start and end delimiters
+	 *  as a token.
+	 *  It inserts a directional mark if needed at position
+	 *  <code>separLocation</code> which corresponds to a start delimiter,
+	 *  and skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.
 	 */
-	public int processSpecial(STextFeatures features, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(features, text, dirProps, offsets, separLocation);
+	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 		int location = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		while (true) {

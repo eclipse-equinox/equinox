@@ -11,24 +11,24 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
 import org.eclipse.equinox.bidi.internal.STextDelims;
 
 /**
  *  Processor adapted to processing XPath expressions.
  */
 public class STextXPath extends STextDelims {
-	static final STextFeatures FEATURES = new STextFeatures(" /[]<>=!:@.|()+-*", 2, -1, -1, false, false); //$NON-NLS-1$
+	/**
+	 *  @return " /[]<>=!:@.|()+-*" as the separators specific to this processor.
+	 */
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return " /[]<>=!:@.|()+-*"; //$NON-NLS-1$
+	}
 
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with separators " /[]<>=!:@.|()+-*",
-	 *          2 special cases, LTR direction for Arabic and Hebrew,
-	 *          and support for both.
+	 *  @return 2 as the number of special cases handled by this processor.
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		return FEATURES;
+	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+		return 2;
 	}
 
 	/**

@@ -10,32 +10,58 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
+import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextFeatures;
+import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextDelimsEsc;
 
 /**
  *  Processor adapted to processing e-mail addresses.
  */
 public class STextEmail extends STextDelimsEsc {
-	static final int LTR = STextFeatures.DIR_LTR;
-	static final int RTL = STextFeatures.DIR_RTL;
-	static final STextFeatures MIRRORED = new STextFeatures("<>.:,;@", 2, RTL, LTR, false, false); //$NON-NLS-1$
-	static final STextFeatures NOT_MIRRORED = new STextFeatures("<>.:,;@", 2, LTR, LTR, false, false); //$NON-NLS-1$
+	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
+	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
+	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 
 	/**
-	 *  This method retrieves the features specific to this processor.
-	 *
-	 *  @return features with separators "<>.:,;@", 2 special cases,
-	 *          LTR direction for Arabic when the GUI is not mirrored,
-	 *          RTL direction for Arabic when the GUI is mirrored,
-	 *          LTR direction for Hebrew in all cases,
-	 *          and support for both Arabic and Hebrew.
+	 *  @return separators "<>.:,;@".
 	 */
-	public STextFeatures getFeatures(STextEnvironment env) {
-		if (env == null)
-			env = STextEnvironment.DEFAULT;
-		return env.getMirrored() ? MIRRORED : NOT_MIRRORED;
+	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		return "<>.:,;@"; //$NON-NLS-1$
+	}
+
+	/**
+	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
+	 *          conditions are satisfied:
+	 *          <ul>
+	 *            <li>The current locale (as expressed by the environment
+	 *                language) is Arabic.</li>
+	 *            <li>The domain part of the email address contains
+	 *                at least one RTL character.</li>
+	 *          </ul>
+	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
+	 */
+	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+		String language = environment.getLanguage();
+		if (!language.equals("ar")) //$NON-NLS-1$
+			return STextEngine.DIR_LTR;
+		int domainStart;
+		domainStart = text.indexOf('@');
+		if (domainStart < 0)
+			domainStart = 0;
+		for (int i = domainStart; i < text.length(); i++) {
+			byte dirProp = STextProcessor.getDirProp(text, dirProps, i);
+			if (dirProp == AL || dirProp == R)
+				return STextEngine.DIR_RTL;
+		}
+		return STextEngine.DIR_LTR;
+	}
+
+	/**
+	 *  @return 2 as number of special cases handled by this processor.
+	 */
+	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+		return 2;
 	}
 
 	/**
