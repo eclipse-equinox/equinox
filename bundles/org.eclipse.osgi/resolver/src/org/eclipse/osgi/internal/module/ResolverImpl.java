@@ -27,8 +27,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.*;
 
 public class ResolverImpl implements Resolver {
 	// Debug fields
@@ -661,13 +660,18 @@ public class ResolverImpl implements Resolver {
 				if (collision == singleton || !collision.getBundleDescription().isSingleton() || !collision.isResolvable())
 					continue; // Ignore the bundle we are checking and non-singletons and non-resolvable
 				collisionCandidates.add(collision);
-				capabilities.add(collision.getCapability());
+				capabilities.add(getIdentity(collision));
 			}
 			if (hook != null)
-				hook.filterSingletonCollisions(singleton.getCapability(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, collisionCandidates)));
+				hook.filterSingletonCollisions(getIdentity(singleton), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, collisionCandidates)));
 			result.put(singleton, collisionCandidates);
 		}
 		return result;
+	}
+
+	private BundleCapability getIdentity(ResolverBundle bundle) {
+		List<BundleCapability> identities = bundle.getBundleDescription().getDeclaredCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		return identities.size() == 1 ? identities.get(0) : bundle.getCapability();
 	}
 
 	private void resolveBundles0(ResolverBundle[] bundles, Dictionary<Object, Object>[] platformProperties) {

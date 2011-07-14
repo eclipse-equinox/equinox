@@ -17,6 +17,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(AllTests.class.getName());
 		suite.addTest(BasicTest.suite());
+		suite.addTest(ResolverHookTests.suite());
 		return suite;
 	}
 }
