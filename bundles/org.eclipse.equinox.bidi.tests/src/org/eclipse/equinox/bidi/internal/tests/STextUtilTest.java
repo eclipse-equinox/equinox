@@ -60,7 +60,7 @@ public class STextUtilTest extends STextTestBase {
 		assertEquals("Util #1 full UR - ", result, toPseudo(full));
 		Locale.setDefault(new Locale(HEBREW));
 		full = STextUtil.process(toUT16(data));
-		String ful2 = STextUtil.process(toUT16(data), null);
+		String ful2 = STextUtil.process(toUT16(data), (String) null);
 		assertEquals("Util #1 full - ", result, toPseudo(full));
 		assertEquals("Util #1 ful2 - ", result, toPseudo(ful2));
 		String lean = STextUtil.deprocess(full);
@@ -83,7 +83,7 @@ public class STextUtilTest extends STextTestBase {
 	}
 
 	private void doTest3(String msg, String data, String result, String resLean) {
-		String full = STextUtil.processTyped(toUT16(data), STextEngine.PROC_COMMA_DELIMITED);
+		String full = STextUtil.process(toUT16(data), STextEngine.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "full", result, toPseudo(full));
 		String lean = STextUtil.deprocess(full, STextEngine.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "lean", resLean, toPseudo(lean));

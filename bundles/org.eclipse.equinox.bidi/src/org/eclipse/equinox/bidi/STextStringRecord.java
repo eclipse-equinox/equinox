@@ -14,19 +14,19 @@ import java.lang.ref.SoftReference;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  This class records strings which contain structured text. Several static
- *  methods in this class allow to record such strings in a pool, and to find if
- *  a given string is member of the pool.
- *  <p>
- *  Instances of this class are the records which are members of the pool.
- *  <p>
- *  The pool is managed as a cyclic list. When the pool is full,
- *  each new element overrides the oldest element in the list.
- *  <p>
- *  A string may be itself entirely a structured text, or it may contain
- *  segments each of which is a structured text of a given type. Each such
- *  segment is identified by its starting and ending offsets within the
- *  string, and by the processor which is appropriate to handle it.
+ * This class records strings which contain structured text. Several static
+ * methods in this class allow to record such strings in a pool, and to find if
+ * a given string is member of the pool.
+ * <p>
+ * Instances of this class are the records which are members of the pool.
+ * </p><p>
+ * The pool is managed as a cyclic list. When the pool is full,
+ * each new element overrides the oldest element in the list.
+ * </p><p>
+ * A string may be itself entirely a structured text, or it may contain
+ * segments each of which is a structured text of a given type. Each such
+ * segment is identified by its starting and ending offsets within the
+ * string, and by the processor which is appropriate to handle it.
  */
 public class STextStringRecord {
 	/**
@@ -67,42 +67,42 @@ public class STextStringRecord {
 	private short[] boundaries;
 
 	/**
-	 *  Constructor
+	 * Constructor
 	 */
 	private STextStringRecord() {
 		// inhibit creation of new instances by customers
 	}
 
 	/**
-	 *  Record a string in the pool. The caller must specify the number
-	 *  of segments in the record (at least 1), and the processor, starting
-	 *  and ending offsets for the first segment.
+	 * Record a string in the pool. The caller must specify the number
+	 * of segments in the record (at least 1), and the processor, starting
+	 * and ending offsets for the first segment.
 	 *
-	 *  @param  string the string to record.
+	 * @param  string the string to record.
 	 *
-	 *  @param  segmentCount number of segments allowed in this string.
-	 *          This number must be >= 1.
+	 * @param  segmentCount number of segments allowed in this string.
+	 *         This number must be >= 1.
 	 *
-	 *  @param  processor the processor appropriate to handle the type
-	 *          of structured text present in the first segment.
-	 *          It may be one of the pre-defined processor instances
-	 *          appearing in {@link STextEngine}, or it may be an instance
-	 *          created by a plug-in or by the application.
+	 * @param  processor the processor appropriate to handle the type
+	 *         of structured text present in the first segment.
+	 *         It may be one of the pre-defined processor instances
+	 *         appearing in {@link STextEngine}, or it may be an instance
+	 *         created by a plug-in or by the application.
 	 *
-	 *  @param  start offset in the string of the starting character of the first
-	 *          segment. It must be >= 0 and less than the length of the string.
+	 * @param  start offset in the string of the starting character of the first
+	 *         segment. It must be >= 0 and less than the length of the string.
 	 *
-	 *  @param  limit offset of the character following the first segment. It
-	 *          must be greater than the <code>start</code> argument and
-	 *          not greater than the length of the string.
+	 * @param  limit offset of the character following the first segment. It
+	 *         must be greater than the <code>start</code> argument and
+	 *         not greater than the length of the string.
 	 *
-	 *  @return an instance of STextRecordString which represents this record.
-	 *          This instance may be used to specify additional segment with
-	 *          {@link #addSegment addSegment}.
+	 * @return an instance of STextRecordString which represents this record.
+	 *         This instance may be used to specify additional segment with
+	 *         {@link #addSegment addSegment}.
 	 *
-	 *  @throws IllegalArgumentException if <code>string</code> is null or
-	 *          if <code>segmentCount</code> is less than 1.
-	 *  @throws also the same exceptions as {@link #addSegment addSegment}.
+	 * @throws IllegalArgumentException if <code>string</code> is null or
+	 *         if <code>segmentCount</code> is less than 1.
+	 * @throws also the same exceptions as {@link #addSegment addSegment}.
 	 */
 	public static STextStringRecord addRecord(String string, int segmentCount, STextProcessor processor, int start, int limit) {
 		if (string == null)
@@ -139,28 +139,28 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Add a second or further segment to a record.
+	 * Add a second or further segment to a record.
 	 *
-	 *  @param  processor the processor appropriate to handle the type
-	 *          of structured text present in this segment.
-	 *          It may be one of the pre-defined processor instances
-	 *          appearing in {@link STextEngine}, or it may be an instance
-	 *          created by a plug-in or by the application.
+	 * @param  processor the processor appropriate to handle the type
+	 *         of structured text present in this segment.
+	 *         It may be one of the pre-defined processor instances
+	 *         appearing in {@link STextEngine}, or it may be an instance
+	 *         created by a plug-in or by the application.
 	 *
-	 *  @param  start offset in the string of the starting character of the
-	 *          segment. It must be >= 0 and less than the length of the string.
+	 * @param  start offset in the string of the starting character of the
+	 *         segment. It must be >= 0 and less than the length of the string.
 	 *
-	 *  @param  limit offset of the character following the segment. It must be
-	 *          greater than the <code>start</code> argument and not greater
-	 *          than the length of the string.
+	 * @param  limit offset of the character following the segment. It must be
+	 *         greater than the <code>start</code> argument and not greater
+	 *         than the length of the string.
 	 *
-	 *  @throws IllegalArgumentException if <code>processor</code> is null,
-	 *          or if <code>start</code> or <code>limit</code> have invalid
-	 *          values.
-	 *  @throws IllegalStateException if the current segment exceeds the
-	 *          number of segments specified by <code>segmentCount</code>
-	 *          in the call to {@link #addRecord addRecord} which created
-	 *          the STextStringRecord instance.
+	 * @throws IllegalArgumentException if <code>processor</code> is null,
+	 *         or if <code>start</code> or <code>limit</code> have invalid
+	 *         values.
+	 * @throws IllegalStateException if the current segment exceeds the
+	 *         number of segments specified by <code>segmentCount</code>
+	 *         in the call to {@link #addRecord addRecord} which created
+	 *         the STextStringRecord instance.
 	 */
 	public void addSegment(STextProcessor processor, int start, int limit) {
 		if (processor == null)
@@ -178,21 +178,21 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Check if a string is recorded and retrieve its record.
+	 * Check if a string is recorded and retrieve its record.
 	 *
-	 *  @param  string the string to check.
+	 * @param  string the string to check.
 	 *
-	 *  @return <code>null</code> if the string is not recorded in the pool;
-	 *          otherwise, return the STextStringRecord instance which
-	 *          records this string.<br>
-	 *          Once a record has been found, the number of its segments can
-	 *          be retrieved using {@link #getSegmentCount getSegmentCount},
-	 *          its processor can
-	 *          be retrieved using {@link #getProcessor getProcessor},
-	 *          its starting offset can
-	 *          be retrieved using {@link #getStart getStart},
-	 *          its ending offset can
-	 *          be retrieved using {@link #getLimit getLimit},
+	 * @return <code>null</code> if the string is not recorded in the pool;
+	 *         otherwise, return the STextStringRecord instance which
+	 *         records this string.<br>
+	 *         Once a record has been found, the number of its segments can
+	 *         be retrieved using {@link #getSegmentCount getSegmentCount},
+	 *         its processor can
+	 *         be retrieved using {@link #getProcessor getProcessor},
+	 *         its starting offset can
+	 *         be retrieved using {@link #getStart getStart},
+	 *         its ending offset can
+	 *         be retrieved using {@link #getLimit getLimit},
 	 */
 	public static STextStringRecord getRecord(String string) {
 		if (last < 0) // no records at all
@@ -226,10 +226,8 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Retrieve the number of segments in a record.
-	 *
-	 *  @return the number of segments in the current record. This number
-	 *          is always >= 1.
+	 * Retrieve the number of segments in a record.
+	 * @return the number of segments in the current record
 	 */
 	public int getSegmentCount() {
 		return usedSegmentCount;
@@ -241,21 +239,21 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Retrieve the processor of a given segment.
+	 * Retrieve the processor of a given segment.
 	 *
-	 *  @param  segmentNumber number of the segment about which information
-	 *          is required. It must be >= 0 and less than the number of
-	 *          segments specified by <code>segmentCount</code>
-	 *          in the call to {@link #addRecord addRecord} which created
-	 *          the STextStringRecord instance.
+	 * @param  segmentNumber number of the segment about which information
+	 *         is required. It must be >= 0 and less than the number of
+	 *         segments specified by <code>segmentCount</code>
+	 *         in the call to {@link #addRecord addRecord} which created
+	 *         the STextStringRecord instance.
 	 *
-	 *  @return the processor to handle the structured text in the segment
-	 *          specified by <code>segmentNumber</code>.
+	 * @return the processor to handle the structured text in the segment
+	 *         specified by <code>segmentNumber</code>.
 	 *
-	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *          has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *         has an invalid value.
 	 *
-	 *  @see    #getSegmentCount getSegmentCount
+	 * @see    #getSegmentCount
 	 */
 	public STextProcessor getProcessor(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -263,21 +261,21 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Retrieve the starting offset of a given segment.
+	 * Retrieve the starting offset of a given segment.
 	 *
-	 *  @param  segmentNumber number of the segment about which information
-	 *          is required. It must be >= 0 and less than the number of
-	 *          segments specified by <code>segmentCount</code>
-	 *          in the call to {@link #addRecord addRecord} which created
-	 *          the STextStringRecord instance.
+	 * @param  segmentNumber number of the segment about which information
+	 *         is required. It must be >= 0 and less than the number of
+	 *         segments specified by <code>segmentCount</code>
+	 *         in the call to {@link #addRecord addRecord} which created
+	 *         the STextStringRecord instance.
 	 *
-	 *  @return the starting offset within the string of the segment
-	 *          specified by <code>segmentNumber</code>.
+	 * @return the starting offset within the string of the segment
+	 *         specified by <code>segmentNumber</code>.
 	 *
-	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *          has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *         has an invalid value.
 	 *
-	 *  @see    #getSegmentCount getSegmentCount
+	 * @see    #getSegmentCount
 	 */
 	public int getStart(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -285,21 +283,21 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Retrieve the ending offset of a given segment.
+	 * Retrieve the ending offset of a given segment.
 	 *
-	 *  @param  segmentNumber number of the segment about which information
-	 *          is required. It must be >= 0 and less than the number of
-	 *          segments specified by <code>segmentCount</code>
-	 *          in the call to {@link #addRecord addRecord} which created
-	 *          the STextStringRecord instance.
+	 * @param  segmentNumber number of the segment about which information
+	 *         is required. It must be >= 0 and less than the number of
+	 *         segments specified by <code>segmentCount</code>
+	 *         in the call to {@link #addRecord addRecord} which created
+	 *         the STextStringRecord instance.
 	 *
-	 *  @return the offset of the position following the segment
-	 *          specified by <code>segmentNumber</code>.
+	 * @return the offset of the position following the segment
+	 *         specified by <code>segmentNumber</code>.
 	 *
-	 *  @throws IllegalArgumentException if <code>segmentNumber</code>
-	 *          has an invalid value.
+	 * @throws IllegalArgumentException if <code>segmentNumber</code>
+	 *         has an invalid value.
 	 *
-	 *  @see    #getSegmentCount getSegmentCount
+	 * @see    #getSegmentCount
 	 */
 	public int getLimit(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -307,9 +305,8 @@ public class STextStringRecord {
 	}
 
 	/**
-	 *  Clear the pool. All elements of the pool are erased and any associated
-	 *  memory is freed.
-	 *
+	 * Clear the pool. All elements of the pool are erased and any associated
+	 * memory is freed.
 	 */
 	public static synchronized void clear() {
 		for (int i = 0; i <= MAXINDEX; i++) {

@@ -23,11 +23,8 @@ public class STextEmail extends STextDelimsEsc {
 	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 
-	/**
-	 *  @return separators "<>.:,;@".
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "<>.:,;@"; //$NON-NLS-1$
+	public STextEmail() {
+		super("<>.:,;@"); //$NON-NLS-1$
 	}
 
 	/**

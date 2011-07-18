@@ -17,11 +17,9 @@ import org.eclipse.equinox.bidi.internal.STextDelims;
  *  Processor adapted to processing XPath expressions.
  */
 public class STextXPath extends STextDelims {
-	/**
-	 *  @return " /[]<>=!:@.|()+-*" as the separators specific to this processor.
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return " /[]<>=!:@.|()+-*"; //$NON-NLS-1$
+
+	public STextXPath() {
+		super(" /[]<>=!:@.|()+-*"); //$NON-NLS-1$
 	}
 
 	/**

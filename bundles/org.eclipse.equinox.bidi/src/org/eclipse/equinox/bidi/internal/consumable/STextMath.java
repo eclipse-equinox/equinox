@@ -24,11 +24,8 @@ public class STextMath extends STextProcessor {
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 
-	/**
-	 *  @return "+-/*()=" as separators specific to this processor.
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "+-/*()="; //$NON-NLS-1$
+	public STextMath() {
+		super("+-/*()="); //$NON-NLS-1$
 	}
 
 	/**

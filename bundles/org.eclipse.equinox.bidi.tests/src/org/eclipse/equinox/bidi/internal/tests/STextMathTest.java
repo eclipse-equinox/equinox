@@ -11,7 +11,6 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import java.util.Locale;
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
@@ -21,8 +20,8 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  */
 public class STextMathTest extends STextTestBase {
 
-	static final STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
-	static final STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
+	static final STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
+	static final STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
 
 	STextProcessor processor = STextEngine.PROC_RTL_ARITHMETIC;
 
@@ -40,13 +39,13 @@ public class STextMathTest extends STextTestBase {
 		verifyOneLine("Math #2", "2+ABC-DEF", "2+ABC@-DEF", ">@2+ABC@-DEF@^");
 		verifyOneLine("Math #3", "A+3*BC/DEF", "A@+3*BC@/DEF", ">@A@+3*BC@/DEF@^");
 		verifyOneLine("Math #4", "4+ABC/DEF", "4+ABC@/DEF", ">@4+ABC@/DEF@^");
-		Locale.setDefault(new Locale("ar"));
+
 		verifyOneLine("Math #5", "5#BC", "<&5#BC&^", "5#BC");
 		verifyOneLine("Math #6", "6#BC-DE", "<&6#BC-DE&^", "6#BC-DE");
 		verifyOneLine("Math #7", "7#BC+DE", "<&7#BC+DE&^", "7#BC+DE");
 		verifyOneLine("Math #8", "8#BC*DE", "<&8#BC*DE&^", "8#BC*DE");
 		verifyOneLine("Math #9", "9#BC/DE", "<&9#BC/DE&^", "9#BC/DE");
 		verifyOneLine("Math #10", "10ab+cd-ef", "10ab+cd-ef", ">@10ab+cd-ef@^");
-		Locale.setDefault(new Locale("he"));
+
 	}
 }

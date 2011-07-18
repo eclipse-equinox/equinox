@@ -64,8 +64,8 @@ public class STextSomeMoreTest extends STextTestBase {
 	}
 
 	public void testSomeMore() {
-		assertFalse(env1.isBidi());
-		assertTrue(env2.isBidi());
+		assertFalse(env1.isProcessingNeeded());
+		assertTrue(env2.isProcessingNeeded());
 
 		STextProcessor processor = new Processor1();
 		String full = STextEngine.leanToFullText(processor, env1, "abcd", null);

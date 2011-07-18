@@ -14,16 +14,23 @@ import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  <code>STextDelims</code> is a processor for structured text
- *  composed of text segments separated by separators where the text segments
- *  may include delimited parts within which separators are treated like
- *  regular characters.
- *
- *  <p>A delimited part is bounded by a start delimiter and an end delimiter.
- *
+ *  A base processor for structured text composed of text segments separated 
+ *  by separators where the text segments may include delimited parts within 
+ *  which separators are treated like regular characters.
+ *  <p>
+ *  A delimited part is bounded by a start delimiter and an end delimiter.
+ *  </p>
  *  @author Matitiahu Allouche
  */
 public abstract class STextDelims extends STextProcessor {
+
+	public STextDelims() {
+		// placeholder
+	}
+
+	public STextDelims(String separators) {
+		super(separators);
+	}
 
 	/**
 	 *  This method locates occurrences of start delimiters.

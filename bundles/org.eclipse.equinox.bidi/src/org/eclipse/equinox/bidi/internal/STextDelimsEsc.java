@@ -14,22 +14,32 @@ import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  <code>STextDelims</code> is a processor for structured text
- *  composed of text segments separated by separators where the text segments
- *  may include delimited parts within which separators are treated like
- *  regular characters and the delimiters may be escaped.
- *  This is similar to {@link STextDelims} except
- *  that delimiters can be escaped using the backslash character.
+ *  A base processor for structured text composed of text segments separated 
+ *  by separators where the text segments may include delimited parts within 
+ *  which separators are treated like regular characters and the delimiters 
+ *  may be escaped.
+ *  <p>
+ *  This is similar to {@link STextDelims} except that delimiters can be escaped 
+ *  using the backslash character.
  *  <ul>
  *    <li>Two consecutive backslashes in a delimited part are treated like
  *        one regular character.</li>
  *    <li>An ending delimiter preceded by an odd number of backslashes is
  *        treated like a regular character within the delimited part.</li>
  *  </ul>
+ *  </p>
  *
  *  @author Matitiahu Allouche
  */
 public abstract class STextDelimsEsc extends STextDelims {
+
+	public STextDelimsEsc() {
+		// placeholder
+	}
+
+	public STextDelimsEsc(String separator) {
+		super(separator);
+	}
 
 	/**
 	 *  This method handles the text between start and end delimiters

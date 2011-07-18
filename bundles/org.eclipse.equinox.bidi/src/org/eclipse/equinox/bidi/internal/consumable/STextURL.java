@@ -10,18 +10,13 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  *  Processor adapted to processing URLs.
  */
 public class STextURL extends STextProcessor {
-	/**
-	 *  @return ":?#/@.[]" as the separators specific to this processor.
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return ":?#/@.[]"; //$NON-NLS-1$
+	public STextURL() {
+		super(":?#/@.[]"); //$NON-NLS-1$
 	}
-
 }

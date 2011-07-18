@@ -13,6 +13,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
  *  <code>STextJava</code> is a processor for structured text
@@ -35,13 +36,10 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  */
 public class STextJava extends STextProcessor {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
-	static final String lineSep = STextEnvironment.getLineSep();
+	static final String lineSep = STextActivator.getInstance().getProperty("line.separator"); //$NON-NLS-1$
 
-	/**
-	 *  @return the separators for Java syntax
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "[](){}.+-<>=~!&*/%^|?:,;\t"; //$NON-NLS-1$
+	public STextJava() {
+		super("[](){}.+-<>=~!&*/%^|?:,;\t"); //$NON-NLS-1$
 	}
 
 	/**

@@ -10,18 +10,14 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  *  Processor adapted to processing directory and file paths.
  */
 public class STextFile extends STextProcessor {
-	/**
-	 *  @return separators ":/\.".
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return ":/\\."; //$NON-NLS-1$
-	}
 
+	public STextFile() {
+		super(":/\\."); //$NON-NLS-1$
+	}
 }

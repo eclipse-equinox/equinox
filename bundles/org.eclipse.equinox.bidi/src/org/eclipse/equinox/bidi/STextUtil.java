@@ -23,60 +23,60 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  */
 public final class STextUtil {
 
-	static class MyProcessor extends STextProcessor {
-		String separ;
+	/**
+	 * The default set of separators used to segment a string: dot, colon, slash, backslash.
+	 */
+	public static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
 
-		MyProcessor(String separators) {
-			separ = separators;
-		}
+	// left to right mark
+	private static final char LRM = '\u200e';
 
-		public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-			return separ;
-		}
-	}
+	// left to right mark
+	private static final char RLM = '\u200f';
+
+	// left to right embedding
+	private static final char LRE = '\u202a';
+
+	// right to left embedding
+	private static final char RLE = '\u202b';
+
+	// pop directional format
+	private static final char PDF = '\u202c';
 
 	/**
-	 *  prevent instantiation
+	 * Prevents instantiation.
 	 */
 	private STextUtil() {
 		// empty
 	}
 
-	/** This is a convenience method which can add directional marks in a given
-	 *  text before the characters specified in the given array of offsets,
-	 *  and can add a prefix and/or a suffix of directional formatting characters.
-	 *  This can be used for instance after obtaining offsets by calling
-	 *  {@link STextEngine#leanBidiCharOffsets leanBidiCharOffsets} in order to
-	 *  produce a <i>full</i> text corresponding to the source text.
-	 *  The directional formatting characters that will be added at the given
-	 *  offsets will be LRMs for structured text strings with LTR base direction
-	 *  and RLMs for strings with RTL base direction. Leading and
-	 *  trailing LRE, RLE and PDF which might be needed as prefix or suffix
-	 *  depending on the orientation of the GUI component used for display
-	 *  may be added depending on argument <code>affix</code>.
-	 *
-	 *  @param  text is the structured text string
-	 *
-	 *  @param  offsets is an array of offsets to characters in <code>text</code>
-	 *          before which an LRM or RLM will be inserted.
-	 *          Members of the array must be non-negative numbers smaller
-	 *          than the length of <code>text</code>.
-	 *          The array must be sorted in ascending order without duplicates.
-	 *          This argument may be null if there are no marks to add.
-	 *
-	 *  @param  direction specifies the base direction of the structured text.
-	 *          It must be one of the values {@link STextEngine#DIR_LTR} or
-	 *          {@link STextEngine#DIR_RTL}.
-	 *
-	 *  @param  affix specifies if a prefix and a suffix should be added to
-	 *          the result to make sure that the <code>direction</code>
-	 *          specified as third argument is honored even if the string
-	 *          is displayed in a GUI component with a different orientation.
-	 *
-	 *  @return a string corresponding to the source <code>text</code> with
-	 *          directional marks (LRMs or RLMs) added at the specified offsets,
-	 *          and directional formatting characters (LRE, RLE, PDF) added
-	 *          as prefix and suffix if so required.
+	/** 
+	 * This method adds directional marks to the given text before the characters 
+	 * specified in the given array of offsets. It can be used to add a prefix and/or 
+	 * a suffix of directional formatting characters.
+	 * <p>
+	 * The directional marks will be LRMs for structured text strings with LTR base 
+	 * direction and RLMs for strings with RTL base direction.
+	 * </p><p> 
+	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
+	 * be added depending on the value of the <code>affix</code> argument.
+	 * </p>
+	 * @see STextEngine#leanBidiCharOffsets(STextProcessor, STextEnvironment, String, int[])
+	 * 
+	 * @param  text the structured text string
+	 * @param  offsets an array of offsets to characters in <code>text</code>
+	 *         before which an LRM or RLM will be inserted.
+	 *         The array must be sorted in ascending order without duplicates.
+	 *         This argument may be <code>null</code> if there are no marks to add.
+	 * @param  direction the base direction of the structured text.
+	 *         It must be one of the values {@link STextEngine#DIR_LTR}, or
+	 *         {@link STextEngine#DIR_RTL}.
+	 * @param  affix specifies if a prefix and a suffix should be added to
+	 *         the result
+	 * @return a string corresponding to the source <code>text</code> with
+	 *         directional marks (LRMs or RLMs) added at the specified offsets,
+	 *         and directional formatting characters (LRE, RLE, PDF) added
+	 *         as prefix and suffix if so required.
 	 */
 	public static String insertMarks(String text, int[] offsets, int direction, boolean affix) {
 		int textLen = text.length();
@@ -118,83 +118,48 @@ public final class STextUtil {
 		return full;
 	}
 
-	/*************************************************************************/
-	/*                                                                       */
-	/*  The following code is provided for compatibility with TextProcessor  */
-	/*                                                                       */
-	/*************************************************************************/
-
-	//  The default set of separators to use to segment a string.
-	private static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
-	// left to right mark
-	private static final char LRM = '\u200e';
-	// left to right mark
-	private static final char RLM = '\u200f';
-	// left to right embedding
-	private static final char LRE = '\u202a';
-	// right to left embedding
-	private static final char RLE = '\u202b';
-	// pop directional format
-	private static final char PDF = '\u202c';
-
-	static boolean isProcessingNeeded() {
-		if (!STextEnvironment.isSupportedOS())
-			return false;
-		return STextEnvironment.DEFAULT.isBidi();
-	}
-
 	/**
 	 *  Process the given text and return a string with appropriate
-	 *  directional formatting characters if the locale is a bidi locale.
-	 *  This is equivalent to calling
+	 *  directional formatting characters. This is equivalent to calling
 	 *  {@link #process(String str, String separators)} with the default
-	 *  set of separators (dot, colon, slash, backslash).
-	 *
-	 *  @param  str the text to be processed.
-	 *
-	 *  @return the processed string.
+	 *  set of separators.
+	 *  <p>
+	 *  The processing adds directional formatting characters so that presentation 
+	 *  using the Unicode Bidirectional Algorithm will provide the expected result.
+	 *  The text is segmented according to the provided separators.
+	 *  Each segment has the Unicode Bidi Algorithm applied to it,
+	 *  but as a whole, the string is oriented left to right.
+	 *  </p><p>
+	 *  For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
+	 *  (where capital letters indicate RTL text) should render as
+	 *  <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.
+	 *  </p>
+	 *  @param  str the text to be processed
+	 *  @return the processed string
 	 */
 	public static String process(String str) {
 		return process(str, defaultSeparators);
 	}
 
 	/**
-	 *  Process a string that has a particular semantic meaning to render
-	 *  it correctly on bidi locales. This is done by adding directional
-	 *  formatting characters so that presentation using the Unicode
-	 *  Bidirectional Algorithm will provide the expected result.
-	 *  The text is segmented according to the provided separators.
-	 *  Each segment has the Unicode Bidi Algorithm applied to it,
-	 *  but as a whole, the string is oriented left to right.
-	 *  <p>
-	 *  For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
-	 *  (where capital letters indicate RTL text) should render as
-	 *  <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.</p>
-	 *  <p>
-	 *  NOTE: this method inserts directional formatting characters into the
-	 *  text. Methods like <code>String.equals(String)</code> and
-	 *  <code>String.length()</code> called on the resulting string will not
-	 *  return the same values as would be returned for the original string.</p>
-	 *
-	 *  @param  str the text to process.
-	 *
-	 *  @param  separators separators by which the string will be segmented.
-	 *          If <code>null</code>, the default separators are used
-	 *          (dot, colon, slash, backslash).
-	 *
-	 *  @return the processed string.
-	 *          If <code>str</code> is <code>null</code>,
-	 *          or of length 0, or if the current locale is not a bidi one,
-	 *          return the original string.
+	 * Process a string that has a particular semantic meaning to render
+	 * it correctly on bidi locales. 
+	 * @see #process(String)
+	 * @param  str the text to process
+	 * @param  separators separators by which the string will be segmented
+	 * @return the processed string
 	 */
 	public static String process(String str, String separators) {
-		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
+		if ((str == null) || (str.length() <= 1))
 			return str;
 
 		// do not process a string that has already been processed.
 		if (str.charAt(0) == LRE && str.charAt(str.length() - 1) == PDF)
 			return str;
 
+		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
+		if (!env.isProcessingNeeded())
+			return str;
 		// do not process a string if all the following conditions are true:
 		//  a) it has no RTL characters
 		//  b) it starts with a LTR character
@@ -222,46 +187,20 @@ public final class STextUtil {
 			separators = defaultSeparators;
 
 		// make sure that LRE/PDF are added around the string
-		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
-		STextProcessor processor = new MyProcessor(separators);
+		STextProcessor processor = new STextProcessor(separators);
 		return STextEngine.leanToFullText(processor, env, str, null);
 	}
 
 	/**
-	 *  Process a string that has a particular semantic meaning to render
-	 *  it correctly on bidi locales. This is done by adding directional
-	 *  formatting characters so that presentation using the Unicode
-	 *  Bidirectional Algorithm will provide the expected result..
-	 *  The text is segmented according to the syntax specified in the
-	 *  <code>type</code> argument.
-	 *  Each segment has the Unicode Bidi Algorithm applied to it, but the
-	 *  order of the segments is governed by the type of the structured text.
-	 *  <p>
-	 *  For example, a file path such as <tt>d:\myfolder\FOLDER\MYFILE.java</tt>
-	 *  (where capital letters indicate RTL text) should render as
-	 *  <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.</p>
-	 *  <p>
-	 *  NOTE: this method inserts directional formatting characters into the
-	 *  text. Methods like <code>String.equals(String)</code> and
-	 *  <code>String.length()</code> called on the resulting string will not
-	 *  return the same values as would be returned for the original string.</p>
-	 *
-	 *  @param  str the text to process.
-	 *
-	 *  @param  processor specifies a processor instance appropriate for
-	 *          the type of the structured text. It will usually be
-	 *          one of the pre-defined processor instances appearing in
-	 *          {@link STextEngine}, but can be an instance
-	 *          added by a plug-in extension or an instance of a
-	 *          processor defined in the application itself.
-	 *
-	 *  @return the processed string.
-	 *          If <code>str</code> is <code>null</code>,
-	 *          or of length 0, or if the current locale is not a bidi one,
-	 *          return the original string.
+	 * Processes a string that has a particular semantic meaning to render
+	 * it correctly on bidi locales. 
+	 * @see #process(String)
+	 * @param  str the text to process
+	 * @param  processor a processor instance appropriate for the type of the structured text
+	 * @return the processed string
 	 */
-	public static String processTyped(String str, STextProcessor processor) {
-		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
+	public static String process(String str, STextProcessor processor) {
+		if ((str == null) || (str.length() <= 1))
 			return str;
 
 		// do not process a string that has already been processed.
@@ -271,19 +210,21 @@ public final class STextUtil {
 
 		// make sure that LRE/PDF are added around the string
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
+		if (!env.isProcessingNeeded())
+			return str;
 		return STextEngine.leanToFullText(processor, env, str, null);
 	}
 
 	/**
-	 *  Remove directional formatting characters in the given string that
-	 *  were inserted by one of the {@link #process process} methods.
-	 *
-	 *  @param  str string with directional characters to remove.
-	 *
-	 *  @return string with no directional formatting characters.
+	 * Removes directional formatting characters in the given string.
+	 * @param  str string with directional characters to remove
+	 * @return string without directional formatting characters
 	 */
 	public static String deprocess(String str) {
-		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
+		if ((str == null) || (str.length() <= 1))
+			return str;
+		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
+		if (!env.isProcessingNeeded())
 			return str;
 
 		StringBuffer buf = new StringBuffer();
@@ -305,22 +246,19 @@ public final class STextUtil {
 	}
 
 	/**
-	 *  Remove directional formatting characters in the given string that
-	 *  were inserted by the {@link #processTyped processTyped} method.
-	 *
-	 *  @param  str string with directional characters to remove.
-	 *
-	 *  @param  processor to handle the structured text as specified when
-	 *          calling {@link #processTyped processTyped}.
-	 *
-	 *  @return string with no directional formatting characters.
+	 * Removes directional formatting characters in the given string.
+	 * @param  str string with directional characters to remove
+	 * @param  processor appropriate for the structured text
+	 * @return string without directional formatting characters
 	 */
 	public static String deprocess(String str, STextProcessor processor) {
-		if ((str == null) || (str.length() <= 1) || !isProcessingNeeded())
+		if ((str == null) || (str.length() <= 1))
 			return str;
 
 		// make sure that LRE/PDF are added around the string
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
+		if (!env.isProcessingNeeded())
+			return str;
 		return STextEngine.fullToLeanText(processor, env, str, null);
 	}
 

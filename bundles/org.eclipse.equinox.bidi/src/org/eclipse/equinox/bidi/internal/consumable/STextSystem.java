@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.internal.STextSingle;
 
 /**
@@ -20,11 +19,9 @@ import org.eclipse.equinox.bidi.internal.STextSingle;
  *  </pre>
  */
 public class STextSystem extends STextSingle {
-	/**
-	 *  @return "(" for the separators specific to this processor.
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "("; //$NON-NLS-1$
+
+	public STextSystem() {
+		super("("); //$NON-NLS-1$
 	}
 
 }

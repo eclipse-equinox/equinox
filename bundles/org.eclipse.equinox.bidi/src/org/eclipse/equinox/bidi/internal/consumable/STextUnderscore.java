@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -21,11 +20,8 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  *  </pre>
  */
 public class STextUnderscore extends STextProcessor {
-	/**
-	 *  @return "_" as the separators specific to this processor.
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "_"; //$NON-NLS-1$
-	}
 
+	public STextUnderscore() {
+		super("_"); //$NON-NLS-1$
+	}
 }

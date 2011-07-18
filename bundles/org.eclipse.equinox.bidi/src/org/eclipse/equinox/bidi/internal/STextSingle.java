@@ -14,8 +14,7 @@ import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
- *  <code>STextSingle</code> is a processor for structured text
- *  composed of two parts separated by a separator.
+ *  A base processor for structured text composed of two parts separated by a separator.
  *  The first occurrence of the separator delimits the end of the first part
  *  and the start of the second part. Further occurrences of the separator,
  *  if any, are treated like regular characters of the second text part.
@@ -30,7 +29,11 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
  *
  *  @author Matitiahu Allouche
  */
-public abstract class STextSingle extends STextProcessor {
+public class STextSingle extends STextProcessor {
+
+	public STextSingle(String separator) {
+		super(separator);
+	}
 
 	/**
 	 *  This method locates occurrences of the separator.

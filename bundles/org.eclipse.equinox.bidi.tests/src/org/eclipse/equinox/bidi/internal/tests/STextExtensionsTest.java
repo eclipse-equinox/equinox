@@ -11,8 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import java.util.Locale;
 import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -21,24 +21,28 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 public class STextExtensionsTest extends STextTestBase {
 
+	STextEnvironment env = STextEnvironment.DEFAULT;
+	STextEnvironment envArabic = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
+	STextEnvironment envHebrew = new STextEnvironment("he", false, STextEnvironment.ORIENT_LTR);
+
 	STextProcessor processor;
 	int[] state = new int[1];
 
 	private void doTest1(String label, String data, String result) {
 		String full;
-		full = STextEngine.leanToFullText(processor, null, toUT16(data), state);
+		full = STextEngine.leanToFullText(processor, env, toUT16(data), state);
 		assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
 	private void doTest2(String label, String data, String result) {
 		String full;
-		full = STextEngine.leanToFullText(processor, null, data, state);
+		full = STextEngine.leanToFullText(processor, env, data, state);
 		assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
 	private void doTest3(String label, String data, String result) {
 		String full;
-		full = STextEngine.leanToFullText(processor, null, toUT16(data), state);
+		full = STextEngine.leanToFullText(processor, env, toUT16(data), state);
 		assertEquals(label + " data = " + data, result, toPseudo(full));
 	}
 
@@ -47,6 +51,7 @@ public class STextExtensionsTest extends STextTestBase {
 		String data;
 		processor = STextEngine.PROC_COMMA_DELIMITED;
 		state[0] = STextEngine.STATE_INITIAL;
+
 		doTest1("Comma #1", "ab,cd, AB, CD, EFG", "ab,cd, AB@, CD@, EFG");
 
 		processor = STextEngine.PROC_EMAIL;
@@ -55,13 +60,13 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Email #2", "DEF.GHI \"A.B\":JK ", "DEF@.GHI @\"A.B\"@:JK ");
 		doTest1("Email #3", "DEF,GHI (A,B);JK ", "DEF@,GHI @(A,B)@;JK ");
 		doTest1("Email #4", "DEF.GHI (A.B :JK ", "DEF@.GHI @(A.B :JK ");
-		Locale.setDefault(new Locale("ar"));
+		env = envArabic;
 		doTest1("Email #5", "#EF.GHI \"A.B\":JK ", "<&#EF.GHI \"A.B\":JK &^");
 		doTest1("Email #6", "#EF,GHI (A,B);JK ", "<&#EF,GHI (A,B);JK &^");
 		doTest1("Email #7", "#EF.GHI (A.B :JK ", "<&#EF.GHI (A.B :JK &^");
 		data = toUT16("peter.pan") + "@" + toUT16("#EF.GHI");
 		doTest2("Email #8", data, "<&peter&.pan@#EF.GHI&^");
-		Locale.setDefault(new Locale("he"));
+		env = envHebrew;
 		data = toUT16("peter.pan") + "@" + toUT16("DEF.GHI");
 		doTest2("Email #9", data, "peter.pan@DEF@.GHI");
 
@@ -134,7 +139,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Regex #17.6", "aB*123", "aB*@123");
 		doTest1("Regex #17.7", "aB*567", "aB*@567");
 
-		Locale.setDefault(new Locale("ar"));
+		env = envArabic;
 		data = toUT16("#BC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "<&#BC(?#DEF)GHI&^");
 		data = toUT16("#BC(?") + "#" + toUT16("DEF");
@@ -170,7 +175,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest2("Regex #16.1", data, "<&#BC\\qDEF&^");
 		data = toUT16("#HI") + "\\E" + toUT16("JKL");
 		doTest2("Regex #16.2", data, "<&#HI\\eJKL&^");
-		Locale.setDefault(new Locale("he"));
+		env = envHebrew;
 
 		processor = STextEngine.PROC_SQL;
 		state[0] = STextEngine.STATE_INITIAL;

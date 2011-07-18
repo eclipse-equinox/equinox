@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.internal.STextSingle;
 
 /**
@@ -21,11 +20,8 @@ import org.eclipse.equinox.bidi.internal.STextSingle;
  *  </pre>
  */
 public class STextProperty extends STextSingle {
-	/**
-	 *  @return one separator (equal sign).
-	 */
-	public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
-		return "="; //$NON-NLS-1$
-	}
 
+	public STextProperty() {
+		super("="); //$NON-NLS-1$
+	}
 }
