@@ -62,7 +62,7 @@
                   The processor that provides specialized bidirectional handling for this type of strings.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.equinox.bidi.custom.ISTextProcessor"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.equinox.bidi.custom.STextProcessor:"/>
                </appInfo>
             </annotation>
          </attribute>

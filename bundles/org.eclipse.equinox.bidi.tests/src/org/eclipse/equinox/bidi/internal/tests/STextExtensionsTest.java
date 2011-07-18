@@ -11,8 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.*;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -49,12 +48,12 @@ public class STextExtensionsTest extends STextTestBase {
 	public void testExtensions() {
 
 		String data;
-		processor = STextEngine.PROC_COMMA_DELIMITED;
+		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
 		state[0] = STextEngine.STATE_INITIAL;
 
 		doTest1("Comma #1", "ab,cd, AB, CD, EFG", "ab,cd, AB@, CD@, EFG");
 
-		processor = STextEngine.PROC_EMAIL;
+		processor = STextProcessorFactory.PROC_EMAIL;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("Email #1", "abc.DEF:GHI", "abc.DEF@:GHI");
 		doTest1("Email #2", "DEF.GHI \"A.B\":JK ", "DEF@.GHI @\"A.B\"@:JK ");
@@ -70,11 +69,11 @@ public class STextExtensionsTest extends STextTestBase {
 		data = toUT16("peter.pan") + "@" + toUT16("DEF.GHI");
 		doTest2("Email #9", data, "peter.pan@DEF@.GHI");
 
-		processor = STextEngine.PROC_FILE;
+		processor = STextProcessorFactory.PROC_FILE;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("File #1", "c:\\A\\B\\FILE.EXT", "c:\\A@\\B@\\FILE@.EXT");
 
-		processor = STextEngine.PROC_JAVA;
+		processor = STextProcessorFactory.PROC_JAVA;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("Java #1", "A = B + C;", "A@ = B@ + C;");
 		doTest1("Java #2", "A   = B + C;", "A@   = B@ + C;");
@@ -87,13 +86,13 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Java #9", "A = //B+C* D;", "A@ = //B+C* D;");
 		doTest1("Java #10", "A = //B+C`|D+E;", "A@ = //B+C`|D@+E;");
 
-		processor = STextEngine.PROC_PROPERTY;
+		processor = STextProcessorFactory.PROC_PROPERTY;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("Property #0", "NAME,VAL1,VAL2", "NAME,VAL1,VAL2");
 		doTest1("Property #1", "NAME=VAL1,VAL2", "NAME@=VAL1,VAL2");
 		doTest1("Property #2", "NAME=VAL1,VAL2=VAL3", "NAME@=VAL1,VAL2=VAL3");
 
-		processor = STextEngine.PROC_REGEXP;
+		processor = STextProcessorFactory.PROC_REGEXP;
 		state[0] = STextEngine.STATE_INITIAL;
 		data = toUT16("ABC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "A@B@C@(?#DEF)@G@H@I");
@@ -177,7 +176,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest2("Regex #16.2", data, "<&#HI\\eJKL&^");
 		env = envHebrew;
 
-		processor = STextEngine.PROC_SQL;
+		processor = STextProcessorFactory.PROC_SQL;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("SQL #0", "abc GHI", "abc GHI");
 		doTest1("SQL #1", "abc DEF   GHI", "abc DEF@   GHI");
@@ -196,26 +195,26 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("SQL #12", "ABC\"DEF \"\" G I\" JKL,MN", "ABC@\"DEF \"\" G I\"@ JKL@,MN");
 		doTest1("SQL #13", "ABC--DEF GHI`|JKL MN", "ABC@--DEF GHI`|JKL@ MN");
 
-		processor = STextEngine.PROC_SYSTEM_USER;
+		processor = STextProcessorFactory.PROC_SYSTEM_USER;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("System #1", "HOST(JACK)", "HOST@(JACK)");
 
-		processor = STextEngine.PROC_UNDERSCORE;
+		processor = STextProcessorFactory.PROC_UNDERSCORE;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("Underscore #1", "A_B_C_d_e_F_G", "A@_B@_C_d_e_F@_G");
 
-		processor = STextEngine.PROC_URL;
+		processor = STextProcessorFactory.PROC_URL;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("URL #1", "WWW.DOMAIN.COM/DIR1/DIR2/dir3/DIR4", "WWW@.DOMAIN@.COM@/DIR1@/DIR2/dir3/DIR4");
 
-		processor = STextEngine.PROC_XPATH;
+		processor = STextProcessorFactory.PROC_XPATH;
 		state[0] = STextEngine.STATE_INITIAL;
 		doTest1("Xpath #1", "abc(DEF)GHI", "abc(DEF@)GHI");
 		doTest1("Xpath #2", "DEF.GHI \"A.B\":JK ", "DEF@.GHI@ \"A.B\"@:JK ");
 		doTest1("Xpath #3", "DEF!GHI 'A!B'=JK ", "DEF@!GHI@ 'A!B'@=JK ");
 		doTest1("Xpath #4", "DEF.GHI 'A.B :JK ", "DEF@.GHI@ 'A.B :JK ");
 
-		processor = STextEngine.PROC_EMAIL;
+		processor = STextProcessorFactory.PROC_EMAIL;
 		state[0] = STextEngine.STATE_INITIAL;
 		assertEquals("<>.:,;@", processor.getSeparators(null, "", null));
 		doTest3("DelimsEsc #1", "abc.DEF.GHI", "abc.DEF@.GHI");

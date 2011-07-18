@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.STextProcessorFactory;
 import org.eclipse.equinox.bidi.STextStringRecord;
 
 /**
@@ -24,7 +24,7 @@ public class STextStringRecordTest extends STextTestBase {
 		// check handling of invalid arguments
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord(null, 1, STextEngine.PROC_EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(null, 1, STextProcessorFactory.PROC_EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
@@ -38,35 +38,35 @@ public class STextStringRecordTest extends STextTestBase {
 		assertTrue("Catch null processor argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 0, STextEngine.PROC_EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord("abc", 0, STextProcessorFactory.PROC_EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid segment count argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, -1, 1);
+			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.PROC_EMAIL, -1, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid start argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 4, 1);
+			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.PROC_EMAIL, 4, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid start argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 0, 0);
+			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.PROC_EMAIL, 0, 0);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid limit argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextEngine.PROC_EMAIL, 0, 5);
+			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.PROC_EMAIL, 0, 5);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
@@ -78,7 +78,7 @@ public class STextStringRecordTest extends STextTestBase {
 		assertEquals(null, sr);
 		for (int i = 0; i < lim; i++) {
 			String str = Integer.toString(i);
-			sr = STextStringRecord.addRecord(str, 1, STextEngine.PROC_EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(str, 1, STextProcessorFactory.PROC_EMAIL, 0, 1);
 		}
 		sr = STextStringRecord.getRecord(null);
 		assertEquals(null, sr);
@@ -96,7 +96,7 @@ public class STextStringRecordTest extends STextTestBase {
 
 		for (int i = lim; i <= poolSize; i++) {
 			String str = Integer.toString(i);
-			sr = STextStringRecord.addRecord(str, 1, STextEngine.PROC_EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(str, 1, STextProcessorFactory.PROC_EMAIL, 0, 1);
 		}
 		for (int i = 1; i <= poolSize; i++) {
 			String str = Integer.toString(i);
@@ -105,20 +105,20 @@ public class STextStringRecordTest extends STextTestBase {
 		}
 		sr = STextStringRecord.getRecord("0");
 		assertEquals(null, sr);
-		sr = STextStringRecord.addRecord("thisisalongstring", 3, STextEngine.PROC_EMAIL, 0, 2);
-		sr.addSegment(STextEngine.PROC_JAVA, 4, 5);
-		sr.addSegment(STextEngine.PROC_FILE, 6, 7);
+		sr = STextStringRecord.addRecord("thisisalongstring", 3, STextProcessorFactory.PROC_EMAIL, 0, 2);
+		sr.addSegment(STextProcessorFactory.PROC_JAVA, 4, 5);
+		sr.addSegment(STextProcessorFactory.PROC_FILE, 6, 7);
 		catchFlag = false;
 		try {
-			sr.addSegment(STextEngine.PROC_EMAIL, 10, 13);
+			sr.addSegment(STextProcessorFactory.PROC_EMAIL, 10, 13);
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch too many segments", catchFlag);
 		assertEquals(3, sr.getSegmentCount());
-		assertEquals(STextEngine.PROC_EMAIL, sr.getProcessor(0));
-		assertEquals(STextEngine.PROC_JAVA, sr.getProcessor(1));
-		assertEquals(STextEngine.PROC_FILE, sr.getProcessor(2));
+		assertEquals(STextProcessorFactory.PROC_EMAIL, sr.getProcessor(0));
+		assertEquals(STextProcessorFactory.PROC_JAVA, sr.getProcessor(1));
+		assertEquals(STextProcessorFactory.PROC_FILE, sr.getProcessor(2));
 		assertEquals(0, sr.getStart(0));
 		assertEquals(4, sr.getStart(1));
 		assertEquals(6, sr.getStart(2));

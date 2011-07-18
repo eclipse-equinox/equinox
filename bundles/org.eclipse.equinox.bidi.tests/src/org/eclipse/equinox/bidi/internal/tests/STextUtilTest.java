@@ -12,7 +12,7 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import java.util.Locale;
-import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.STextProcessorFactory;
 import org.eclipse.equinox.bidi.STextUtil;
 
 /**
@@ -83,9 +83,9 @@ public class STextUtilTest extends STextTestBase {
 	}
 
 	private void doTest3(String msg, String data, String result, String resLean) {
-		String full = STextUtil.process(toUT16(data), STextEngine.PROC_COMMA_DELIMITED);
+		String full = STextUtil.process(toUT16(data), STextProcessorFactory.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "full", result, toPseudo(full));
-		String lean = STextUtil.deprocess(full, STextEngine.PROC_COMMA_DELIMITED);
+		String lean = STextUtil.deprocess(full, STextProcessorFactory.PROC_COMMA_DELIMITED);
 		assertEquals(msg + "lean", resLean, toPseudo(lean));
 	}
 

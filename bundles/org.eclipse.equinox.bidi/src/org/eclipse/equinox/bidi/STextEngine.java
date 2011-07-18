@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi;
 
 import org.eclipse.equinox.bidi.custom.STextProcessor;
-import org.eclipse.equinox.bidi.custom.STextStringProcessor;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
@@ -20,7 +19,7 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  * <p>
  * Several common processors are included in <b>STextEngine</b>. For processors 
  * supplied by other packages, a processor instance can be obtained using the
- * {@link org.eclipse.equinox.bidi.custom.STextStringProcessor#getProcessor}
+ * {@link org.eclipse.equinox.bidi.STextProcessorFactory#getProcessor}
  * method for the registered processors, or by instantiating a private processor.
  * </p><p>
  * Most of the methods in this class have a <code>text</code>
@@ -79,92 +78,6 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *
  */
 public class STextEngine {
-	/**
-	 * Constant indicating a type of structured text processor adapted
-	 * to processing property file statements. It expects the following
-	 * format:
-	 * <pre>
-	 *  name=value
-	 * </pre>
-	 */
-	public static final STextProcessor PROC_PROPERTY = STextStringProcessor.getProcessor("property"); //$NON-NLS-1$
-
-	/**
-	 * Constant indicating a type of structured text processor adapted
-	 * to processing compound names.
-	 * This type covers names made of one or more parts separated by underscores:
-	 * <pre>
-	 *  part1_part2_part3
-	 * </pre>
-	 */
-	public static final STextProcessor PROC_UNDERSCORE = STextStringProcessor.getProcessor("underscore"); //$NON-NLS-1$
-
-	/**
-	 * Constant indicating a type of structured text processor adapted
-	 * to processing comma-delimited lists, such as:
-	 * <pre>
-	 *  part1,part2,part3
-	 * </pre>
-	 */
-	public static final STextProcessor PROC_COMMA_DELIMITED = STextStringProcessor.getProcessor("comma"); //$NON-NLS-1$
-
-	/**
-	 * Constant indicating a type of structured text processor adapted
-	 * to processing strings with the following format:
-	 * <pre>
-	 *  system(user)
-	 * </pre>
-	 */
-	public static final STextProcessor PROC_SYSTEM_USER = STextStringProcessor.getProcessor("system"); //$NON-NLS-1$
-
-	/**
-	 * Constant indicating a type of structured text processor adapted
-	 * to processing directory and file paths.
-	 */
-	public static final STextProcessor PROC_FILE = STextStringProcessor.getProcessor("file"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing e-mail addresses.
-	 */
-	public static final STextProcessor PROC_EMAIL = STextStringProcessor.getProcessor("email"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing URLs.
-	 */
-	public static final STextProcessor PROC_URL = STextStringProcessor.getProcessor("url"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing regular expressions, possibly spanning more than one
-	 *  line.
-	 */
-	public static final STextProcessor PROC_REGEXP = STextStringProcessor.getProcessor("regex"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing XPath expressions.
-	 */
-	public static final STextProcessor PROC_XPATH = STextStringProcessor.getProcessor("xpath"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing Java code, possibly spanning more than one line.
-	 */
-	public static final STextProcessor PROC_JAVA = STextStringProcessor.getProcessor("java"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing SQL statements, possibly spanning more than one line.
-	 */
-	public static final STextProcessor PROC_SQL = STextStringProcessor.getProcessor("sql"); //$NON-NLS-1$
-
-	/**
-	 *  Constant indicating a type of structured text processor adapted
-	 *  to processing arithmetic expressions, possibly with a RTL base direction.
-	 */
-	public static final STextProcessor PROC_RTL_ARITHMETIC = STextStringProcessor.getProcessor("math"); //$NON-NLS-1$
 
 	/**
 	 *  Constant specifying that the base direction of a structured text is LTR.

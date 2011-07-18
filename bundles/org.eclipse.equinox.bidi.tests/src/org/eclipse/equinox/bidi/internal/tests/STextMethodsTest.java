@@ -11,8 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.*;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -77,7 +76,7 @@ public class STextMethodsTest extends STextTestBase {
 		String data, lean, full, model;
 		int[] state = new int[1];
 		state[0] = -1;
-		processor = STextEngine.PROC_JAVA;
+		processor = STextProcessorFactory.PROC_JAVA;
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
 		full = STextEngine.leanToFullText(processor, null, lean, state);
@@ -131,7 +130,7 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestLeanOffsets() {
 		String lean, data, label;
 		int[] state = new int[1];
-		processor = STextEngine.PROC_JAVA;
+		processor = STextProcessorFactory.PROC_JAVA;
 		int[] offsets;
 		int[] model;
 
@@ -153,7 +152,7 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestFullOffsets(String label, String data, int[] resLTR, int[] resRTL, int[] resCon) {
 		String full, lean, msg;
 		int[] offsets;
-		processor = STextEngine.PROC_COMMA_DELIMITED;
+		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
 
 		lean = toUT16(data);
 		full = STextEngine.leanToFullText(processor, envLTR, lean, null);
@@ -269,7 +268,7 @@ public class STextMethodsTest extends STextTestBase {
 
 		doTestOrientation();
 
-		processor = STextEngine.PROC_COMMA_DELIMITED;
+		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
 		doTestOrient("Methods #1 ", "", "", "", "");
 		doTestOrient("Methods #2 ", "abc", "abc", ">@abc@^", "abc");
 		doTestOrient("Methods #3 ", "ABC", "ABC", ">@ABC@^", "@ABC");
@@ -290,7 +289,7 @@ public class STextMethodsTest extends STextTestBase {
 
 		doTestDirection();
 
-		processor = STextEngine.PROC_COMMA_DELIMITED;
+		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
 		String data = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
 		String lean = toUT16(data);
 		String full = STextEngine.leanToFullText(processor, null, lean, null);
