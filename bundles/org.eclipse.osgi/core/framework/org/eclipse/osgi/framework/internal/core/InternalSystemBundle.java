@@ -57,10 +57,10 @@ public class InternalSystemBundle extends BundleHost implements org.osgi.framewo
 			String systemExtraValue = FrameworkProperties.getProperty(systemExtraProp);
 			if (systemValue == null)
 				systemValue = systemExtraValue;
-			else if (systemExtraValue != null)
+			else if (systemExtraValue != null && systemExtraValue.trim().length() > 0)
 				systemValue += ", " + systemExtraValue; //$NON-NLS-1$
 			String result = headers.get(header);
-			if (systemValue != null) {
+			if (systemValue != null && systemValue.trim().length() > 0) {
 				if (result != null)
 					result += ", " + systemValue; //$NON-NLS-1$
 				else
