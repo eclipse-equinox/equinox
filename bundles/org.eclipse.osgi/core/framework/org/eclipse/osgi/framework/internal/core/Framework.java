@@ -111,6 +111,7 @@ public class Framework implements EventPublisher, Runnable {
 	public final boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
 	private final boolean allowDuplicateBSNVersion = Constants.FRAMEWORK_BSNVERSION_MULTIPLE.equals(FrameworkProperties.getProperty(Constants.FRAMEWORK_BSNVERSION));
+	private final boolean allowRefreshDuplicateBSN = Boolean.TRUE.toString().equals(FrameworkProperties.getProperty(Constants.REFRESH_DUPLICATE_BSN, "true")); //$NON-NLS-1$
 	ClassLoaderDelegateHook[] delegateHooks;
 	private volatile boolean forcedRestart = false;
 	/**
@@ -1952,4 +1953,9 @@ public class Framework implements EventPublisher, Runnable {
 	ContextFinder getContextFinder() {
 		return contextFinder;
 	}
+
+	public boolean isRefreshDuplicateBSNAllowed() {
+		return allowRefreshDuplicateBSN;
+	}
+
 }

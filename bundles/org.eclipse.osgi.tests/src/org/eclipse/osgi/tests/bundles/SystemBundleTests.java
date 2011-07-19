@@ -20,6 +20,10 @@ import org.eclipse.osgi.launch.Equinox;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1388,6 +1392,99 @@ public class SystemBundleTests extends AbstractBundleTests {
 		} catch (BundleException e) {
 			fail("Failed to start the framework", e); //$NON-NLS-1$
 		}
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+	}
+
+	public void testBug351519RefreshEnabled() {
+		doTestBug351519Refresh(Boolean.TRUE);
+	}
+
+	public void testBug351519RefreshDisabled() {
+		doTestBug351519Refresh(Boolean.FALSE);
+	}
+
+	public void testBug351519RefreshDefault() {
+		doTestBug351519Refresh(null);
+	}
+
+	private void doTestBug351519Refresh(Boolean refreshDuplicates) {
+		// Create a framework with equinox.refresh.duplicate.bsn=false configuration
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		if (refreshDuplicates != null)
+			configuration.put("equinox.refresh.duplicate.bsn", refreshDuplicates.toString());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in init()", e); //$NON-NLS-1$
+		}
+		BundleContext systemContext = equinox.getBundleContext();
+
+		systemContext.registerService(ResolverHookFactory.class, new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterResolvable(Collection candidates) {
+						// nothing
+					}
+
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// resolve all singletons
+						collisionCandidates.clear();
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// nothing
+					}
+
+					public void end() {
+						// nothing
+					}
+				};
+			}
+		}, null);
+
+		BundleInstaller testBundleInstaller = null;
+		BundleInstaller testBundleResolver = null;
+		try {
+			testBundleResolver = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", systemContext);
+			testBundleInstaller = new BundleInstaller(OSGiTestsActivator.TEST_FILES_ROOT + "wiringTests/bundles", getContext());
+		} catch (InvalidSyntaxException e) {
+			fail("Failed to create installers.", e);
+		}
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+		// try installing a bundle before starting
+		Bundle tb1v1 = null, tb1v2 = null;
+		try {
+			tb1v1 = systemContext.installBundle(testBundleInstaller.getBundleLocation("singleton.tb1v1")); //$NON-NLS-1$
+			tb1v2 = systemContext.installBundle(testBundleInstaller.getBundleLocation("singleton.tb1v2")); //$NON-NLS-1$
+		} catch (BundleException e1) {
+			fail("failed to install a bundle", e1); //$NON-NLS-1$
+		}
+
+		assertTrue("Could not resolve test bundles", testBundleResolver.resolveBundles(new Bundle[] {tb1v1, tb1v2}));
+		Bundle[] refreshed = testBundleResolver.refreshPackages(new Bundle[] {tb1v1});
+		if (refreshDuplicates == null || refreshDuplicates.booleanValue()) {
+			List refreshedList = Arrays.asList(refreshed);
+			assertEquals("Wrong number of refreshed bundles", 2, refreshed.length);
+			assertTrue("Refreshed bundles does not include v1", refreshedList.contains(tb1v1));
+			assertTrue("Refreshed bundles does not include v2", refreshedList.contains(tb1v2));
+		} else {
+			assertEquals("Wrong number of refreshed bundles", 1, refreshed.length);
+			assertEquals("Refreshed bundles does not include v1", refreshed[0], tb1v1);
+		}
+
 		try {
 			equinox.stop();
 		} catch (BundleException e) {

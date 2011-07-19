@@ -228,19 +228,21 @@ public class PackageAdminImpl implements PackageAdmin, FrameworkWiring {
 						BundleDescription description = ((AbstractBundle) bundles[i]).getBundleDescription();
 						if (description != null && description.getBundleId() != 0 && !results.contains(description))
 							results.add(description);
-						// add in any bundles that have the same symbolic name see bug (169593)
-						AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
-						if (sameNames != null && sameNames.length > 1) {
-							if (addDeltas == null)
-								addDeltas = systemState.getChanges().getChanges(BundleDelta.ADDED, false);
-							for (int j = 0; j < sameNames.length; j++)
-								if (sameNames[j] != bundles[i]) {
-									BundleDescription sameName = sameNames[j].getBundleDescription();
-									if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName)) {
-										if (checkExtensionBundle(sameName, addDeltas))
-											results.add(sameName);
+						if (framework.isRefreshDuplicateBSNAllowed()) {
+							// add in any bundles that have the same symbolic name see bug (169593)
+							AbstractBundle[] sameNames = framework.bundles.getBundles(bundles[i].getSymbolicName());
+							if (sameNames != null && sameNames.length > 1) {
+								if (addDeltas == null)
+									addDeltas = systemState.getChanges().getChanges(BundleDelta.ADDED, false);
+								for (int j = 0; j < sameNames.length; j++)
+									if (sameNames[j] != bundles[i]) {
+										BundleDescription sameName = sameNames[j].getBundleDescription();
+										if (sameName != null && sameName.getBundleId() != 0 && !results.contains(sameName)) {
+											if (checkExtensionBundle(sameName, addDeltas))
+												results.add(sameName);
+										}
 									}
-								}
+							}
 						}
 					}
 					descriptions = (results.size() == 0 ? null : results.toArray(new BundleDescription[results.size()]));

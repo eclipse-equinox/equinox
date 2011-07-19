@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -231,4 +231,24 @@ public class Constants implements org.osgi.framework.Constants {
 	 * @deprecated use {@link #ECLIPSE_LAZYSTART_EXCEPTIONS}
 	 */
 	public static final String ECLIPSE_AUTOSTART_EXCEPTIONS = ECLIPSE_LAZYSTART_EXCEPTIONS;
+
+	/**
+	 * Framework launching property specifying whether Equinox's FrameworkWiring
+	 * implementation should refresh bundles with equal symbolic names.
+	 *
+	 * <p>
+	 * Default value is <b>TRUE</b> in this release of the Equinox.
+	 * This default may change to <b>FALSE</b> in a future Equinox release.
+	 * Therefore, code must not assume the default behavior is
+	 * <b>TRUE</b> and should interrogate the value of this property to
+	 * determine the behavior.
+	 *
+	 * <p>
+	 * The value of this property may be retrieved by calling the
+	 * {@code BundleContext.getProperty} method.
+	 * @see  <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=351519">bug 351519</a>
+	 * @since 3.7.1
+	 */
+	public static final String REFRESH_DUPLICATE_BSN = "equinox.refresh.duplicate.bsn"; //$NON-NLS-1$
+
 }
