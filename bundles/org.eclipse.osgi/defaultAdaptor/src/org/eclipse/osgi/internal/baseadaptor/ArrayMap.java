@@ -51,7 +51,7 @@ public class ArrayMap<K, V> implements Collection<K> {
 	public void put(K key, V value) {
 		int index = keys.indexOf(key);
 		if (index > 0) {
-			values.add(index, value);
+			values.set(index, value);
 		} else {
 			keys.add(key);
 			values.add(value);
