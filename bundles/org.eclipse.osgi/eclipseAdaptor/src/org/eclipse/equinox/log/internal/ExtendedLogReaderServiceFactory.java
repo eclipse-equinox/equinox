@@ -20,6 +20,8 @@ import org.osgi.service.log.LogListener;
 
 public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedLogReaderServiceImpl> {
 
+	static final int MAX_RECURSIONS = 50;
+
 	static final class LogTask implements Runnable {
 		private final LogEntry logEntry;
 		private final LogListener listener;
@@ -114,8 +116,10 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 	}
 
 	boolean isLoggablePrivileged(Bundle bundle, String name, int level) {
-		listenersLock.readLock();
+		int numNested = listenersLock.readLock();
 		try {
+			if (numNested == MAX_RECURSIONS)
+				return false;
 			if (filters == null)
 				return false;
 
@@ -149,8 +153,10 @@ public class ExtendedLogReaderServiceFactory implements ServiceFactory<ExtendedL
 
 	void logPrivileged(Bundle bundle, String name, Object context, int level, String message, Throwable exception) {
 		LogEntry logEntry = new ExtendedLogEntryImpl(bundle, name, context, level, message, exception);
-		listenersLock.readLock();
+		int numNested = listenersLock.readLock();
 		try {
+			if (numNested >= MAX_RECURSIONS)
+				return;
 			int size = listeners.size();
 			for (int i = 0; i < size; i++) {
 				Object[] listenerObjects = listeners.getValue(i);

@@ -428,4 +428,24 @@ public class LoggingTests extends AbstractBundleTests {
 			logRef.unget(getContext());
 		}
 	}
+
+	public void testBug347183() throws BundleException {
+		// test recursive logging
+		final Bundle testBundle = installer.installBundle("test.logging.a"); //$NON-NLS-1$
+		testBundle.start();
+		LogServiceReference logRef = getLogService(getContext());
+		Platform.addLogListener(new ILogListener() {
+
+			public void logging(IStatus status, String plugin) {
+				Platform.getLog(testBundle).log(status);
+			}
+		});
+		logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
+
+		// prime the log so we don't have to create it in the logging call
+		Platform.getLog(testBundle);
+
+		logRef.fwkLog.log(new FrameworkLogEntry(getContext().getBundle().getSymbolicName(), FrameworkLogEntry.ERROR, 0, "Test message", 0, null, null));
+
+	}
 }
