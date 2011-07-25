@@ -715,7 +715,9 @@ public final class StorageManager {
 	/**
 	 * Creates a new unique empty temporary-file in the storage manager base directory. The file name
 	 * must be at least 3 characters. This file can later be used to update a managed file.
-	 * 
+	 * <p>
+	 * Note that {@link File#deleteOnExit()} is not called on the returned file.
+	 * </p>
 	 * @param file the file name to create temporary file from.
 	 * @return the newly-created empty file.
 	 * @throws IOException if the file can not be created.
@@ -725,7 +727,8 @@ public final class StorageManager {
 		if (readOnly)
 			throw new IOException(EclipseAdaptorMsg.fileManager_illegalInReadOnlyMode);
 		File tmpFile = File.createTempFile(file, ReliableFile.tmpExt, base);
-		tmpFile.deleteOnExit();
+		// bug 350106: do not use deleteOnExit()  If clients really want that the
+		// they can call it themselves.
 		return tmpFile;
 	}
 
