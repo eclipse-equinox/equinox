@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -68,7 +69,7 @@ public class STextRegex extends STextProcessor {
 	 *  
 	 *  @return the number of special cases for this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
 		return maxSpecial;
 	}
 
@@ -76,7 +77,7 @@ public class STextRegex extends STextProcessor {
 	 *  This method locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -112,18 +113,18 @@ public class STextRegex extends STextProcessor {
 			fromIndex = 1;
 		// look for R, AL, AN, EN which are potentially needing a mark
 		for (; fromIndex < text.length(); fromIndex++) {
-			dirProp = STextProcessor.getDirProp(text, dirProps, fromIndex);
+			dirProp = dirProps.getOrientationAt(fromIndex);
 			// R and AL will always be examined using processSeparator()
 			if (dirProp == R || dirProp == AL)
 				return fromIndex;
 
 			if (dirProp == EN || dirProp == AN) {
 				// no need for a mark after the first digit in a number
-				if (STextProcessor.getDirProp(text, dirProps, fromIndex - 1) == dirProp)
+				if (dirProps.getOrientationAt(fromIndex - 1) == dirProp)
 					continue;
 
 				for (int i = fromIndex - 1; i >= 0; i--) {
-					dirProp = STextProcessor.getDirProp(text, dirProps, i);
+					dirProp = dirProps.getOrientationAt(i);
 					// after a L char, no need for a mark
 					if (dirProp == L)
 						continue;
@@ -144,7 +145,7 @@ public class STextRegex extends STextProcessor {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		switch (caseNumber) {
@@ -203,7 +204,7 @@ public class STextRegex extends STextProcessor {
 					return text.length();
 				}
 				// set the dirProp for the "E" to L (Left to Right character)
-				STextProcessor.setDirProp(dirProps, location + 1, L);
+				dirProps.setOrientationAt(location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
 				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
@@ -226,12 +227,12 @@ public class STextRegex extends STextProcessor {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = getDirProp(text, dirProps, i);
+			byte dirProp = dirProps.getOrientationAt(i);
 			if (dirProp == AL || dirProp == R)
 				return STextEngine.DIR_RTL;
 			if (dirProp == L)

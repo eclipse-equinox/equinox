@@ -14,7 +14,7 @@ package org.eclipse.equinox.bidi.internal.tests;
 import org.eclipse.equinox.bidi.STextEngine;
 
 /**
- * Tests RTL arithmetic
+ * Tests null processor
  */
 public class STextNullProcessorTest extends STextTestBase {
 

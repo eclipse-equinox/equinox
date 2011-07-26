@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -40,13 +41,13 @@ public class STextMath extends STextProcessor {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
 		boolean flagAN = false;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = getDirProp(text, dirProps, i);
+			byte dirProp = dirProps.getOrientationAt(i);
 			if (dirProp == AL)
 				return STextEngine.DIR_RTL;
 			if (dirProp == L || dirProp == R)

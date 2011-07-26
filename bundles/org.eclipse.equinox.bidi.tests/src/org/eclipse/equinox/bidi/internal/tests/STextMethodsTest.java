@@ -12,6 +12,7 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.*;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -34,20 +35,20 @@ public class STextMethodsTest extends STextTestBase {
 
 	class MyComma extends STextProcessor {
 
-		public String getSeparators(STextEnvironment environment, String text, byte[] dirProps) {
+		public String getSeparators(STextEnvironment environment, String text, STextDirections dirProps) {
 			return ","; //$NON-NLS-1$
 		}
 
-		public boolean skipProcessing(STextEnvironment environment, String text, byte[] dirProps) {
-			byte dirProp = getDirProp(text, dirProps, 0);
+		public boolean skipProcessing(STextEnvironment environment, String text, STextDirections dirProps) {
+			byte dirProp = dirProps.getOrientationAt(0);
 			if (dirProp == AL)
 				return true;
 			return false;
 		}
 
-		public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+		public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
 			for (int i = 0; i < text.length(); i++) {
-				byte dirProp = getDirProp(text, dirProps, i);
+				byte dirProp = dirProps.getOrientationAt(i);
 				if (dirProp == AL)
 					return dirArabic;
 			}
@@ -185,15 +186,19 @@ public class STextMethodsTest extends STextTestBase {
 		dirArabic = RTL;
 		dirHebrew = LTR;
 		msg = "TestDirection #1";
-		dirA = processor.getDirection(null, toUT16("###"), null);
-		dirH = processor.getDirection(null, toUT16("ABC"), null);
+		String text = toUT16("###");
+		dirA = processor.getDirection(null, text, new STextDirections(text));
+		text = toUT16("ABC");
+		dirH = processor.getDirection(null, toUT16("ABC"), new STextDirections(text));
 		assertTrue(msg, dirA == RTL && dirH == LTR);
 
 		dirArabic = RTL;
 		dirHebrew = RTL;
 		msg = "TestDirection #2";
-		dirA = processor.getDirection(null, toUT16("###"), null);
-		dirH = processor.getDirection(null, toUT16("ABC"), null);
+		text = toUT16("###");
+		dirA = processor.getDirection(null, text, new STextDirections(text));
+		text = toUT16("ABC");
+		dirH = processor.getDirection(null, text, new STextDirections(text));
 		assertTrue(msg, dirA == RTL && dirH == RTL);
 
 		dirArabic = dirHebrew = LTR;
@@ -212,8 +217,10 @@ public class STextMethodsTest extends STextTestBase {
 
 		dirArabic = RTL;
 		msg = "TestDirection #10.5";
-		dirA = processor.getDirection(null, toUT16("###"), null);
-		dirH = processor.getDirection(null, toUT16("ABC"), null);
+		text = toUT16("###");
+		dirA = processor.getDirection(null, text, new STextDirections(text));
+		text = toUT16("ABC");
+		dirH = processor.getDirection(null, text, new STextDirections(text));
 		assertTrue(msg, dirA == RTL && dirH == LTR);
 		STextEnvironment environment = new STextEnvironment(null, true, STextEnvironment.ORIENT_LTR);
 		data = "ABC,#DEF,HOST,com";

@@ -116,4 +116,8 @@ final public class STextProcessorFactory {
 	static public STextProcessor getProcessor(String id) {
 		return STextTypesCollector.getInstance().getProcessor(id);
 	}
+
+	static public STextProcessor getMultiProcessor(String id) {
+		return new STextProcessorMultipass();
+	}
 }

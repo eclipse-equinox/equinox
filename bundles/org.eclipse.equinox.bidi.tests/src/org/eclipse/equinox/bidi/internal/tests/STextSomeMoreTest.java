@@ -13,6 +13,7 @@ package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -26,15 +27,15 @@ public class STextSomeMoreTest extends STextTestBase {
 
 	class Processor1 extends STextProcessor {
 
-		public int getSpecialsCount(STextEnvironment env, String text, byte[] dirProps) {
+		public int getSpecialsCount(STextEnvironment env, String text, STextDirections dirProps) {
 			return 1;
 		}
 
-		public int indexOfSpecial(STextEnvironment env, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(STextEnvironment env, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 
-		public int processSpecial(STextEnvironment env, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		public int processSpecial(STextEnvironment env, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 			int len = text.length();
 			for (int i = len - 1; i >= 0; i--) {
 				STextProcessor.insertMark(text, dirProps, offsets, i);
@@ -46,7 +47,7 @@ public class STextSomeMoreTest extends STextTestBase {
 
 	class Processor2 extends STextProcessor {
 
-		public int getSpecialsCount(STextEnvironment env, String text, byte[] dirProps) {
+		public int getSpecialsCount(STextEnvironment env, String text, STextDirections dirProps) {
 			return 1;
 		}
 
@@ -54,11 +55,11 @@ public class STextSomeMoreTest extends STextTestBase {
 
 	class Processor3 extends STextProcessor {
 
-		public int getSpecialsCount(STextEnvironment env, String text, byte[] dirProps) {
+		public int getSpecialsCount(STextEnvironment env, String text, STextDirections dirProps) {
 			return 1;
 		}
 
-		public int indexOfSpecial(STextEnvironment env, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(STextEnvironment env, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 	}

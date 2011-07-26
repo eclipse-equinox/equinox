@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.internal.STextDelimsEsc;
 
 /**
@@ -38,7 +38,7 @@ public class STextEmail extends STextDelimsEsc {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
@@ -47,7 +47,7 @@ public class STextEmail extends STextDelimsEsc {
 		if (domainStart < 0)
 			domainStart = 0;
 		for (int i = domainStart; i < text.length(); i++) {
-			byte dirProp = STextProcessor.getDirProp(text, dirProps, i);
+			byte dirProp = dirProps.getOrientationAt(i);
 			if (dirProp == AL || dirProp == R)
 				return STextEngine.DIR_RTL;
 		}
@@ -57,7 +57,7 @@ public class STextEmail extends STextDelimsEsc {
 	/**
 	 *  @return 2 as number of special cases handled by this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
 		return 2;
 	}
 

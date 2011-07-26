@@ -10,13 +10,11 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 public class STextTest extends STextProcessor {
 
-	public String getSeparators(STextEnvironment env, String text, byte[] dirProps) {
-		return "-=.:";
+	public STextTest() {
+		super("-=.:");
 	}
-
 }

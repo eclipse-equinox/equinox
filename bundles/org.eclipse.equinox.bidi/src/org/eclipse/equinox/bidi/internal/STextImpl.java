@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -25,12 +26,23 @@ import org.eclipse.equinox.bidi.custom.STextProcessor;
 public class STextImpl {
 
 	static final String EMPTY_STRING = ""; //$NON-NLS-1$
+
+	// In the following lines, B, L, R and AL represent bidi categories
+	// as defined in the Unicode Bidirectional Algorithm
+	// ( http://www.unicode.org/reports/tr9/ ).
+	// B  represents the category Block Separator.
+	// L  represents the category Left to Right character.
+	// R  represents the category Right to Left character.
+	// AL represents the category Arabic Letter.
+	// AN represents the category Arabic Number.
+	// EN  represents the category European Number.
 	static final byte B = Character.DIRECTIONALITY_PARAGRAPH_SEPARATOR;
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
 	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
+
 	static final char LRM = 0x200E;
 	static final char RLM = 0x200F;
 	static final char LRE = 0x202A;
@@ -42,7 +54,6 @@ public class STextImpl {
 	static final int PREFIX_LENGTH = 2;
 	static final int SUFFIX_LENGTH = 2;
 	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
-	static final int DIRPROPS_ADD = 2;
 	static final int OFFSETS_SHIFT = 3;
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 	static final STextEnvironment IGNORE_ENVIRONMENT = new STextEnvironment(null, false, STextEnvironment.ORIENT_IGNORE);
@@ -54,7 +65,7 @@ public class STextImpl {
 		// nothing to do
 	}
 
-	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
+	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
 		String separators = processor.getSeparators(environment, text, dirProps);
 		int separCount = separators.length();
 		int specialsCount = processor.getSpecialsCount(environment, text, dirProps);
@@ -93,105 +104,21 @@ public class STextImpl {
 		return nextLocation + (((long) idxLocation) << 32);
 	}
 
-	static int getCurOrient(STextEnvironment environment, String text, byte[] dirProps) {
-		int orient = environment.getOrientation();
-		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL_LTR) == 0) {
-			// absolute orientation
-			return orient;
-		}
-		// contextual orientation
-		int len = text.length();
-		byte dirProp;
-		for (int i = 0; i < len; i++) {
-			// In the following lines, B, L, R and AL represent bidi categories
-			// as defined in the Unicode Bidirectional Algorithm
-			// ( http://www.unicode.org/reports/tr9/ ).
-			// B  represents the category Block Separator.
-			// L  represents the category Left to Right character.
-			// R  represents the category Right to Left character.
-			// AL represents the category Arabic Letter.
-			dirProp = dirProps[i];
-			if (dirProp == 0) {
-				dirProp = Character.getDirectionality(text.charAt(i));
-				if (dirProp == B) // B char resolves to L or R depending on orientation
-					continue;
-				dirProps[i] = (byte) (dirProp + DIRPROPS_ADD);
-			} else {
-				dirProp -= DIRPROPS_ADD;
-			}
-			if (dirProp == L)
-				return STextEnvironment.ORIENT_LTR;
-			if (dirProp == R || dirProp == AL)
-				return STextEnvironment.ORIENT_RTL;
-		}
-		// return the default orientation corresponding to the contextual orientation
-		return orient & 1;
-	}
-
-	/**
-	 *  @see STextEngine#getCurDirection STextEngine.getCurDirection
-	 */
-	public static int getCurDirection(STextProcessor processor, STextEnvironment environment, String text, byte[] dirProps) {
-		return processor.getDirection(environment, text, dirProps);
-	}
-
-	/**
-	 *  @see STextProcessor#getDirProp STextProcessor.getDirProp
-	 */
-	public static byte getDirProp(String text, byte[] dirProps, int index) {
-		byte dirProp = dirProps == null ? 0 : dirProps[index];
-		if (dirProp == 0) {
-			// In the following lines, B, L and R represent bidi categories
-			// as defined in the Unicode Bidirectional Algorithm
-			// ( http://www.unicode.org/reports/tr9/ ).
-			// B  represents the category Block Separator.
-			// L  represents the category Left to Right character.
-			// R  represents the category Right to Left character.
-			dirProp = Character.getDirectionality(text.charAt(index));
-			if (dirProp == B && dirProps != null) {
-				// the last entry of dirProps contains the current component orientation
-				byte orient = dirProps[dirProps.length - 1];
-				if (orient == -1)
-					return B;
-				dirProp = orient == STextEnvironment.ORIENT_RTL ? R : L;
-			}
-			if (dirProps != null)
-				dirProps[index] = (byte) (dirProp + DIRPROPS_ADD);
-			return dirProp;
-		}
-		return (byte) (dirProp - DIRPROPS_ADD);
-	}
-
-	/**
-	 *  @see STextProcessor#setDirProp STextProcessor.setDirProp
-	 */
-	public static void setDirProp(byte[] dirProps, int index, byte dirProp) {
-		dirProps[index] = (byte) (dirProp + DIRPROPS_ADD);
-	}
-
 	/**
 	 *  @see STextProcessor#processSeparator STextProcessor.processSeparator
 	 */
-	public static void processSeparator(String text, byte[] dirProps, int[] offsets, int separLocation) {
-		// In this method, L, R, AL, AN and EN represent bidi categories
-		// as defined in the Unicode Bidirectional Algorithm
-		// ( http://www.unicode.org/reports/tr9/ ).
-		// L  represents the category Left to Right character.
-		// R  represents the category Right to Left character.
-		// AL represents the category Arabic Letter.
-		// AN represents the category Arabic Number.
-		// EN  represents the category European Number.
+	public static void processSeparator(String text, STextDirections dirProps, int[] offsets, int separLocation) {
 		int len = text.length();
 		// offsets[2] contains the structured text direction
 		if (offsets[2] == STextEngine.DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
-				byte dirProp = getDirProp(text, dirProps, i);
+				byte dirProp = dirProps.getOrientationAt(i);
 				if (dirProp == R || dirProp == AL)
 					return;
 				if (dirProp == L) {
 					for (int j = separLocation; j < len; j++) {
-						dirProp = getDirProp(text, dirProps, j);
+						dirProp = dirProps.getOrientationAt(j);
 						if (dirProp == R || dirProp == AL)
 							return;
 						if (dirProp == L || dirProp == EN) {
@@ -208,12 +135,12 @@ public class STextImpl {
 		// the structured text base direction is LTR
 		boolean doneAN = false;
 		for (int i = separLocation - 1; i >= 0; i--) {
-			byte dirProp = getDirProp(text, dirProps, i);
+			byte dirProp = dirProps.getOrientationAt(i);
 			if (dirProp == L)
 				return;
 			if (dirProp == R || dirProp == AL) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = getDirProp(text, dirProps, j);
+					dirProp = dirProps.getOrientationAt(j);
 					if (dirProp == L)
 						return;
 					if (dirProp == R || dirProp == EN || dirProp == AL || dirProp == AN) {
@@ -225,7 +152,7 @@ public class STextImpl {
 			}
 			if (dirProp == AN && !doneAN) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = getDirProp(text, dirProps, j);
+					dirProp = dirProps.getOrientationAt(j);
 					if (dirProp == L)
 						return;
 					if (dirProp == AL || dirProp == AN || dirProp == R) {
@@ -285,7 +212,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return text;
-		byte[] dirProps = new byte[len + 1];
+		STextDirections dirProps = new STextDirections(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int count = offsets[0] - OFFSETS_SHIFT;
@@ -336,7 +263,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		byte[] dirProps = new byte[len + 1];
+		STextDirections dirProps = new STextDirections(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int[] map = new int[len];
@@ -359,7 +286,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		byte[] dirProps = new byte[len + 1];
+		STextDirections dirProps = new STextDirections(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		// offsets[0] contains the number of used entries
 		int count = offsets[0] - OFFSETS_SHIFT;
@@ -368,7 +295,7 @@ public class STextImpl {
 		return result;
 	}
 
-	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, byte[] dirProps) {
+	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextDirections dirProps) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		if (state == null) {
@@ -376,9 +303,7 @@ public class STextImpl {
 			state[0] = STextEngine.STATE_INITIAL;
 		}
 		int len = text.length();
-		// dirProps: 1 byte for each char in text, + 1 byte = current orientation
-		int orient = getCurOrient(environment, text, dirProps);
-		dirProps[len] = (byte) orient;
+		int orient = dirProps.getBaseOrientation(environment);
 		int direction = processor.getDirection(environment, text, dirProps);
 		// offsets of marks to add. Entry 0 is the number of used slots;
 		//  entry 1 is reserved to pass prefixLength.
@@ -428,8 +353,7 @@ public class STextImpl {
 			offsets[1] = 0;
 		else {
 			// recompute orient since it may have changed if contextual
-			orient = getCurOrient(environment, text, dirProps);
-			dirProps[len] = (byte) orient;
+			orient = dirProps.getBaseOrientation(environment);
 			if (orient == direction && orient != STextEnvironment.ORIENT_UNKNOWN)
 				offsets[1] = 0;
 			else if ((environment.getOrientation() & STextEnvironment.ORIENT_CONTEXTUAL_LTR) != 0)
@@ -452,7 +376,7 @@ public class STextImpl {
 			state = new int[1];
 			state[0] = STextEngine.STATE_INITIAL;
 		}
-		int dir = processor.getDirection(environment, text, null);
+		int dir = processor.getDirection(environment, text, new STextDirections(text));
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int i; // used as loop index
@@ -544,7 +468,7 @@ public class STextImpl {
 			return EMPTY_INT_ARRAY;
 		String lean = fullToLeanText(processor, environment, full, state);
 		int lenLean = lean.length();
-		int dir = processor.getDirection(environment, lean, null);
+		int dir = processor.getDirection(environment, lean, new STextDirections(lean));
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int[] map = new int[lenFull];
@@ -581,18 +505,19 @@ public class STextImpl {
 		offsets[0] = OFFSETS_SHIFT;
 		int lenLean = lean.length();
 		int idxLean, idxFull;
+		STextDirections dirProps = new STextDirections(full);
 		// lean must be a subset of Full, so we only check on iLean < leanLen
 		for (idxLean = idxFull = 0; idxLean < lenLean; idxFull++) {
 			if (full.charAt(idxFull) == lean.charAt(idxLean))
 				idxLean++;
 			else {
 				offsets = ensureRoomInOffsets(offsets);
-				insertMark(lean, null, offsets, idxFull);
+				insertMark(lean, dirProps, offsets, idxFull);
 			}
 		}
 		for (; idxFull < lenFull; idxFull++) {
 			offsets = ensureRoomInOffsets(offsets);
-			insertMark(lean, null, offsets, idxFull);
+			insertMark(lean, dirProps, offsets, idxFull);
 		}
 		int[] result = new int[offsets[0] - OFFSETS_SHIFT];
 		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, result.length);
@@ -612,7 +537,7 @@ public class STextImpl {
 	/**
 	 *  @see STextProcessor#insertMark STextProcessor.insertMark
 	 */
-	public static void insertMark(String text, byte[] dirProps, int[] offsets, int offset) {
+	public static void insertMark(String text, STextDirections dirProps, int[] offsets, int offset) {
 		int count = offsets[0];// number of used entries
 		int index = count - 1; // index of greatest member <= offset
 		// look up after which member the new offset should be inserted
@@ -634,17 +559,9 @@ public class STextImpl {
 		if (dirProps == null || offset < 1)
 			return;
 
-		byte dirProp = getDirProp(text, dirProps, offset);
+		byte dirProp = dirProps.getOrientationAt(offset);
 		// if the current char is a strong one or a digit, we change the
 		//   dirProp of the previous char to account for the inserted mark.
-		// In the following lines, L, R, AL, AN and EN represent bidi categories
-		// as defined in the Unicode Bidirectional Algorithm
-		// ( http://www.unicode.org/reports/tr9/ ).
-		// L  represents the category Left to Right character.
-		// R  represents the category Right to Left character.
-		// AL represents the category Arabic Letter.
-		// AN represents the category Arabic Number.
-		// EN  represents the category European Number.
 		if (dirProp == L || dirProp == R || dirProp == AL || dirProp == EN || dirProp == AN)
 			index = offset - 1;
 		else
@@ -652,7 +569,7 @@ public class STextImpl {
 			index = offset;
 
 		int dir = offsets[2]; // current structured text direction
-		setDirProp(dirProps, index, STRONGS[dir]);
+		dirProps.setOrientationAt(index, STRONGS[dir]);
 		return;
 	}
 

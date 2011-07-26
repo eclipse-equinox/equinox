@@ -11,6 +11,7 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.internal.STextDelims;
 
 /**
@@ -25,7 +26,7 @@ public class STextXPath extends STextDelims {
 	/**
 	 *  @return 2 as the number of special cases handled by this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
 		return 2;
 	}
 

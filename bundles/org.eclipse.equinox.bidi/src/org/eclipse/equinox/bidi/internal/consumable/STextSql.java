@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
@@ -45,7 +46,7 @@ public class STextSql extends STextProcessor {
 	/**
 	 *  @return 5 as the number of special cases handled by this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, byte[] dirProps) {
+	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
 		return 5;
 	}
 
@@ -59,7 +60,7 @@ public class STextSql extends STextProcessor {
 	  *    <li>comments starting with hyphen-hyphen</li>
 	  *  </ol>
 	  */
-	public int indexOfSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
 				return text.indexOf(" ", fromIndex); //$NON-NLS-1$
@@ -86,7 +87,7 @@ public class STextSql extends STextProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(STextEnvironment environment, String text, byte[] dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
@@ -94,7 +95,7 @@ public class STextSql extends STextProcessor {
 			case 1 : /* space */
 				separLocation++;
 				while (separLocation < text.length() && text.charAt(separLocation) == ' ') {
-					STextProcessor.setDirProp(dirProps, separLocation, WS);
+					dirProps.setOrientationAt(separLocation, WS);
 					separLocation++;
 				}
 				return separLocation;

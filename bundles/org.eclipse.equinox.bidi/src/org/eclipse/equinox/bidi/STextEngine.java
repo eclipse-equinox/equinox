@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
+import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
@@ -295,6 +296,7 @@ public class STextEngine {
 		return STextImpl.fullBidiCharOffsets(processor, environment, text, state);
 	}
 
+	// TBD why is this method here and not just in the processor? Is it interesting in general?
 	/**
 	 * Get the base direction of a structured text. This base direction may depend on
 	 * whether the text contains Arabic or Hebrew words. If the text contains both, 
@@ -312,7 +314,7 @@ public class STextEngine {
 	public static int getCurDirection(STextProcessor processor, STextEnvironment environment, String text) {
 		if (processor == null)
 			return DIR_LTR;
-		return STextImpl.getCurDirection(processor, environment, text, null);
+		return processor.getDirection(environment, text, new STextDirections(text));
 	}
 
 }
