@@ -499,7 +499,9 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			// the fragment is being detached because one of its imports or requires cannot be resolved;
 			// we need to check the remaining fragment constraints to make sure they do not have
 			// the same unresolved constraint.
-			for (ResolverBundle remainingFrag : fragments) {
+			// bug 353103: must make a snapshot to avoid ConcurrentModificationException
+			ResolverBundle[] remainingFrags = fragments.toArray(new ResolverBundle[fragments.size()]);
+			for (ResolverBundle remainingFrag : remainingFrags) {
 				List<ResolverImport> additionalImports = new ArrayList<ResolverImport>(0);
 				List<BundleConstraint> additionalRequires = new ArrayList<BundleConstraint>(0);
 				if (hasUnresolvedConstraint(reason, fragment, remainingFrag, oldImports, oldRequires, additionalImports, additionalRequires))
@@ -540,7 +542,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			constraints = remainingFragRequires;
 		for (int i = 0; i < constraints.length; i++)
 			if (reason.getName().equals(constraints[i].getName())) {
-				detachFragment(remainingFragment, null);
+				detachFragment(remainingFragment, reason);
 				return true;
 			}
 		for (int i = 0; i < oldImports.length; i++) {
