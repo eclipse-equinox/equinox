@@ -47,7 +47,7 @@ public class STextEmail extends STextDelimsEsc {
 		if (domainStart < 0)
 			domainStart = 0;
 		for (int i = domainStart; i < text.length(); i++) {
-			byte dirProp = dirProps.getOrientationAt(i);
+			byte dirProp = dirProps.getBidiTypeAt(i);
 			if (dirProp == AL || dirProp == R)
 				return STextEngine.DIR_RTL;
 		}

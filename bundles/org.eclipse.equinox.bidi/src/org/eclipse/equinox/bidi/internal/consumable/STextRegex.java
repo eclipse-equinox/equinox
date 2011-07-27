@@ -113,18 +113,18 @@ public class STextRegex extends STextProcessor {
 			fromIndex = 1;
 		// look for R, AL, AN, EN which are potentially needing a mark
 		for (; fromIndex < text.length(); fromIndex++) {
-			dirProp = dirProps.getOrientationAt(fromIndex);
+			dirProp = dirProps.getBidiTypeAt(fromIndex);
 			// R and AL will always be examined using processSeparator()
 			if (dirProp == R || dirProp == AL)
 				return fromIndex;
 
 			if (dirProp == EN || dirProp == AN) {
 				// no need for a mark after the first digit in a number
-				if (dirProps.getOrientationAt(fromIndex - 1) == dirProp)
+				if (dirProps.getBidiTypeAt(fromIndex - 1) == dirProp)
 					continue;
 
 				for (int i = fromIndex - 1; i >= 0; i--) {
-					dirProp = dirProps.getOrientationAt(i);
+					dirProp = dirProps.getBidiTypeAt(i);
 					// after a L char, no need for a mark
 					if (dirProp == L)
 						continue;
@@ -204,7 +204,7 @@ public class STextRegex extends STextProcessor {
 					return text.length();
 				}
 				// set the dirProp for the "E" to L (Left to Right character)
-				dirProps.setOrientationAt(location + 1, L);
+				dirProps.setBidiTypeAt(location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
 				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
@@ -232,7 +232,7 @@ public class STextRegex extends STextProcessor {
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = dirProps.getOrientationAt(i);
+			byte dirProp = dirProps.getBidiTypeAt(i);
 			if (dirProp == AL || dirProp == R)
 				return STextEngine.DIR_RTL;
 			if (dirProp == L)

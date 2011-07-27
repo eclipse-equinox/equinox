@@ -40,7 +40,7 @@ public class STextMethodsTest extends STextTestBase {
 		}
 
 		public boolean skipProcessing(STextEnvironment environment, String text, STextDirections dirProps) {
-			byte dirProp = dirProps.getOrientationAt(0);
+			byte dirProp = dirProps.getBidiTypeAt(0);
 			if (dirProp == AL)
 				return true;
 			return false;
@@ -48,7 +48,7 @@ public class STextMethodsTest extends STextTestBase {
 
 		public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
 			for (int i = 0; i < text.length(); i++) {
-				byte dirProp = dirProps.getOrientationAt(i);
+				byte dirProp = dirProps.getBidiTypeAt(i);
 				if (dirProp == AL)
 					return dirArabic;
 			}

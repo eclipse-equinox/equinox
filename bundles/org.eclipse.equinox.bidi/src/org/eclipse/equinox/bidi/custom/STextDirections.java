@@ -33,11 +33,7 @@ public class STextDirections {
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
 
-	// TBD consider moving L, R, AL, AN, EN, B into this class from STextImpl
-	// TBD add methods:
-	// isRTL	(dirProp == R || dirProp == AL)
-	// isLTR	(dirProp == L || dirProp == EN)
-	// isStrong (isRTL() || isLTR() || dirProp == AN) <= excludes unknown, B, WS
+	private static final int DIRPROPS_ADD = 2;
 
 	final protected String text;
 
@@ -45,23 +41,15 @@ public class STextDirections {
 	private byte[] dirProps;
 
 	// current orientation
-	private byte baseOrientation = 0; // "0" means "unknown"
+	private byte baseOrientation = 0; // "0" means "unknown" // Mati: 0 is not a good choice for unknown orientation since 0 corresponds to LTR.
 
 	public STextDirections(String text) {
 		this.text = text;
 		dirProps = new byte[text.length()];
 	}
 
-	public void setBaseOrientation(byte orientation) {
-		baseOrientation = orientation;
-	}
-
-	public byte getBaseOrientation() {
-		return baseOrientation;
-	}
-
 	private byte getCachedDirectionAt(int index) {
-		return (byte) (dirProps[index] - 1);
+		return (byte) (dirProps[index] - DIRPROPS_ADD);
 	}
 
 	private boolean hasCachedDirectionAt(int i) {
@@ -73,8 +61,8 @@ public class STextDirections {
 	 *         one of the values which can be returned by
 	 *         <code>java.lang.Character.getDirectionality</code>.
 	 */
-	public void setOrientationAt(int i, byte dirProp) {
-		dirProps[i] = (byte) (dirProp + 1);
+	public void setBidiTypeAt(int i, byte dirProp) {
+		dirProps[i] = (byte) (dirProp + DIRPROPS_ADD);
 	}
 
 	public int getBaseOrientation(STextEnvironment environment) {
@@ -91,7 +79,7 @@ public class STextDirections {
 					dirProp = Character.getDirectionality(text.charAt(i));
 					if (dirProp == B) // B char resolves to L or R depending on orientation
 						continue;
-					setOrientationAt(i, dirProp);
+					setBidiTypeAt(i, dirProp);
 				} else {
 					dirProp = getCachedDirectionAt(i);
 				}
@@ -104,8 +92,6 @@ public class STextDirections {
 					break;
 				}
 			}
-			if (result == -1) // return the default orientation minus contextual bit
-				result = orient & 1;
 		}
 		baseOrientation = (byte) result;
 		return result;
@@ -118,15 +104,15 @@ public class STextDirections {
 	 * @return the bidirectional class of the character. It is one of the
 	 * values which can be returned by {@link Character#getDirectionality(char)}
 	 */
-	public byte getOrientationAt(int index) {
+	public byte getBidiTypeAt(int index) {
 		if (hasCachedDirectionAt(index))
 			return getCachedDirectionAt(index);
 		byte dirProp = Character.getDirectionality(text.charAt(index));
 		if (dirProp == B) {
-			byte orient = getBaseOrientation();
+			byte orient = baseOrientation;
 			dirProp = (orient == STextEnvironment.ORIENT_RTL) ? R : L;
 		}
-		setOrientationAt(index, dirProp);
+		setBidiTypeAt(index, dirProp);
 		return dirProp;
 	}
 

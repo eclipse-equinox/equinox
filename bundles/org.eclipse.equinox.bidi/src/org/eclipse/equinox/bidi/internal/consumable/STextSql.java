@@ -95,7 +95,7 @@ public class STextSql extends STextProcessor {
 			case 1 : /* space */
 				separLocation++;
 				while (separLocation < text.length() && text.charAt(separLocation) == ' ') {
-					dirProps.setOrientationAt(separLocation, WS);
+					dirProps.setBidiTypeAt(separLocation, WS);
 					separLocation++;
 				}
 				return separLocation;

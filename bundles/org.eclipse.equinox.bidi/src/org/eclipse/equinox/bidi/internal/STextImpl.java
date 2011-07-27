@@ -113,12 +113,12 @@ public class STextImpl {
 		if (offsets[2] == STextEngine.DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
-				byte dirProp = dirProps.getOrientationAt(i);
+				byte dirProp = dirProps.getBidiTypeAt(i);
 				if (dirProp == R || dirProp == AL)
 					return;
 				if (dirProp == L) {
 					for (int j = separLocation; j < len; j++) {
-						dirProp = dirProps.getOrientationAt(j);
+						dirProp = dirProps.getBidiTypeAt(j);
 						if (dirProp == R || dirProp == AL)
 							return;
 						if (dirProp == L || dirProp == EN) {
@@ -135,12 +135,12 @@ public class STextImpl {
 		// the structured text base direction is LTR
 		boolean doneAN = false;
 		for (int i = separLocation - 1; i >= 0; i--) {
-			byte dirProp = dirProps.getOrientationAt(i);
+			byte dirProp = dirProps.getBidiTypeAt(i);
 			if (dirProp == L)
 				return;
 			if (dirProp == R || dirProp == AL) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = dirProps.getOrientationAt(j);
+					dirProp = dirProps.getBidiTypeAt(j);
 					if (dirProp == L)
 						return;
 					if (dirProp == R || dirProp == EN || dirProp == AL || dirProp == AN) {
@@ -152,7 +152,7 @@ public class STextImpl {
 			}
 			if (dirProp == AN && !doneAN) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = dirProps.getOrientationAt(j);
+					dirProp = dirProps.getBidiTypeAt(j);
 					if (dirProp == L)
 						return;
 					if (dirProp == AL || dirProp == AN || dirProp == R) {
@@ -505,19 +505,18 @@ public class STextImpl {
 		offsets[0] = OFFSETS_SHIFT;
 		int lenLean = lean.length();
 		int idxLean, idxFull;
-		STextDirections dirProps = new STextDirections(full);
 		// lean must be a subset of Full, so we only check on iLean < leanLen
 		for (idxLean = idxFull = 0; idxLean < lenLean; idxFull++) {
 			if (full.charAt(idxFull) == lean.charAt(idxLean))
 				idxLean++;
 			else {
 				offsets = ensureRoomInOffsets(offsets);
-				insertMark(lean, dirProps, offsets, idxFull);
+				insertMark(lean, null, offsets, idxFull);
 			}
 		}
 		for (; idxFull < lenFull; idxFull++) {
 			offsets = ensureRoomInOffsets(offsets);
-			insertMark(lean, dirProps, offsets, idxFull);
+			insertMark(lean, null, offsets, idxFull);
 		}
 		int[] result = new int[offsets[0] - OFFSETS_SHIFT];
 		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, result.length);
@@ -559,7 +558,7 @@ public class STextImpl {
 		if (dirProps == null || offset < 1)
 			return;
 
-		byte dirProp = dirProps.getOrientationAt(offset);
+		byte dirProp = dirProps.getBidiTypeAt(offset);
 		// if the current char is a strong one or a digit, we change the
 		//   dirProp of the previous char to account for the inserted mark.
 		if (dirProp == L || dirProp == R || dirProp == AL || dirProp == EN || dirProp == AN)
@@ -569,7 +568,7 @@ public class STextImpl {
 			index = offset;
 
 		int dir = offsets[2]; // current structured text direction
-		dirProps.setOrientationAt(index, STRONGS[dir]);
+		dirProps.setBidiTypeAt(index, STRONGS[dir]);
 		return;
 	}
 

@@ -47,7 +47,7 @@ public class STextMath extends STextProcessor {
 			return STextEngine.DIR_LTR;
 		boolean flagAN = false;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = dirProps.getOrientationAt(i);
+			byte dirProp = dirProps.getBidiTypeAt(i);
 			if (dirProp == AL)
 				return STextEngine.DIR_RTL;
 			if (dirProp == L || dirProp == R)

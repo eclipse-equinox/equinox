@@ -296,7 +296,6 @@ public class STextEngine {
 		return STextImpl.fullBidiCharOffsets(processor, environment, text, state);
 	}
 
-	// TBD why is this method here and not just in the processor? Is it interesting in general?
 	/**
 	 * Get the base direction of a structured text. This base direction may depend on
 	 * whether the text contains Arabic or Hebrew words. If the text contains both, 
