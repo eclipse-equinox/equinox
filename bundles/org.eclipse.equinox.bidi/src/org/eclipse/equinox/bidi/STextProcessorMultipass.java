@@ -13,6 +13,7 @@ package org.eclipse.equinox.bidi;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
+// TBD experimental
 public class STextProcessorMultipass extends STextProcessor {
 
 	private int[] state = new int[] {0};
