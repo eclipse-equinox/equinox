@@ -216,7 +216,7 @@ public class STextExtensionsTest extends STextTestBase {
 
 		processor = STextProcessorFactory.PROC_EMAIL;
 		state[0] = STextEngine.STATE_INITIAL;
-		assertEquals("<>.:,;@", processor.getSeparators(null, "", null));
+		assertEquals("<>.:,;@", processor.getSeparators(null));
 		doTest3("DelimsEsc #1", "abc.DEF.GHI", "abc.DEF@.GHI");
 		doTest3("DelimsEsc #2", "DEF.GHI (A:B);JK ", "DEF@.GHI @(A:B)@;JK ");
 		doTest3("DelimsEsc #3", "DEF.GHI (A:B);JK ", "DEF@.GHI @(A:B)@;JK ");

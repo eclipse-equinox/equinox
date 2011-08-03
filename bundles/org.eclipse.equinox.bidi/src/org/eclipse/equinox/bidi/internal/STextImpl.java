@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextDirections;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -65,10 +65,10 @@ public class STextImpl {
 		// nothing to do
 	}
 
-	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
-		String separators = processor.getSeparators(environment, text, dirProps);
+	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
+		String separators = processor.getSeparators(environment);
 		int separCount = separators.length();
-		int specialsCount = processor.getSpecialsCount(environment, text, dirProps);
+		int specialsCount = processor.getSpecialsCount(environment);
 		int len = text.length();
 		int nextLocation = len;
 		int idxLocation = 0;
@@ -107,7 +107,7 @@ public class STextImpl {
 	/**
 	 *  @see STextProcessor#processSeparator STextProcessor.processSeparator
 	 */
-	public static void processSeparator(String text, STextDirections dirProps, int[] offsets, int separLocation) {
+	public static void processSeparator(String text, STextCharTypes dirProps, int[] offsets, int separLocation) {
 		int len = text.length();
 		// offsets[2] contains the structured text direction
 		if (offsets[2] == STextEngine.DIR_RTL) {
@@ -212,7 +212,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return text;
-		STextDirections dirProps = new STextDirections(text);
+		STextCharTypes dirProps = new STextCharTypes(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int count = offsets[0] - OFFSETS_SHIFT;
@@ -263,7 +263,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextDirections dirProps = new STextDirections(text);
+		STextCharTypes dirProps = new STextCharTypes(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		int prefixLength = offsets[1];
 		int[] map = new int[len];
@@ -286,7 +286,7 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextDirections dirProps = new STextDirections(text);
+		STextCharTypes dirProps = new STextCharTypes(text);
 		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
 		// offsets[0] contains the number of used entries
 		int count = offsets[0] - OFFSETS_SHIFT;
@@ -295,7 +295,7 @@ public class STextImpl {
 		return result;
 	}
 
-	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextDirections dirProps) {
+	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextCharTypes dirProps) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		if (state == null) {
@@ -303,7 +303,7 @@ public class STextImpl {
 			state[0] = STextEngine.STATE_INITIAL;
 		}
 		int len = text.length();
-		int orient = dirProps.getBaseOrientation(environment);
+		int orient = dirProps.getOrientation(environment);
 		int direction = processor.getDirection(environment, text, dirProps);
 		// offsets of marks to add. Entry 0 is the number of used slots;
 		//  entry 1 is reserved to pass prefixLength.
@@ -313,8 +313,8 @@ public class STextImpl {
 		offsets[2] = direction;
 		if (!processor.skipProcessing(environment, text, dirProps)) {
 			// initialize locations
-			int separCount = processor.getSeparators(environment, text, dirProps).length();
-			int[] locations = new int[separCount + processor.getSpecialsCount(environment, text, dirProps)];
+			int separCount = processor.getSeparators(environment).length();
+			int[] locations = new int[separCount + processor.getSpecialsCount(environment)];
 			for (int i = 0, k = locations.length; i < k; i++) {
 				locations[i] = -1;
 			}
@@ -353,7 +353,7 @@ public class STextImpl {
 			offsets[1] = 0;
 		else {
 			// recompute orient since it may have changed if contextual
-			orient = dirProps.getBaseOrientation(environment);
+			orient = dirProps.getOrientation(environment);
 			if (orient == direction && orient != STextEnvironment.ORIENT_UNKNOWN)
 				offsets[1] = 0;
 			else if ((environment.getOrientation() & STextEnvironment.ORIENT_CONTEXTUAL_LTR) != 0)
@@ -376,7 +376,7 @@ public class STextImpl {
 			state = new int[1];
 			state[0] = STextEngine.STATE_INITIAL;
 		}
-		int dir = processor.getDirection(environment, text, new STextDirections(text));
+		int dir = processor.getDirection(environment, text);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int i; // used as loop index
@@ -468,7 +468,7 @@ public class STextImpl {
 			return EMPTY_INT_ARRAY;
 		String lean = fullToLeanText(processor, environment, full, state);
 		int lenLean = lean.length();
-		int dir = processor.getDirection(environment, lean, new STextDirections(lean));
+		int dir = processor.getDirection(environment, lean);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int[] map = new int[lenFull];
@@ -536,7 +536,7 @@ public class STextImpl {
 	/**
 	 *  @see STextProcessor#insertMark STextProcessor.insertMark
 	 */
-	public static void insertMark(String text, STextDirections dirProps, int[] offsets, int offset) {
+	public static void insertMark(String text, STextCharTypes dirProps, int[] offsets, int offset) {
 		int count = offsets[0];// number of used entries
 		int index = count - 1; // index of greatest member <= offset
 		// look up after which member the new offset should be inserted

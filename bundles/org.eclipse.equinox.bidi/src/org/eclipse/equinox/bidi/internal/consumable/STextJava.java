@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextDirections;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
@@ -46,7 +46,7 @@ public class STextJava extends STextProcessor {
 	/**
 	 *  @return 4 as the number of special cases handled by this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getSpecialsCount(STextEnvironment environment) {
 		return 4;
 	}
 
@@ -59,7 +59,7 @@ public class STextJava extends STextProcessor {
 	     *    <li>comments starting with slash-slash</li>
 	     *  </ol>
 	     */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
 				return text.indexOf(' ', fromIndex);
@@ -83,7 +83,7 @@ public class STextJava extends STextProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location, counter, i;
 
 		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);

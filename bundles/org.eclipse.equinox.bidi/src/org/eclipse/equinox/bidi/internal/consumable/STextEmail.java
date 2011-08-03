@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextDirections;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.internal.STextDelimsEsc;
 
 /**
@@ -27,6 +27,10 @@ public class STextEmail extends STextDelimsEsc {
 		super("<>.:,;@"); //$NON-NLS-1$
 	}
 
+	public int getDirection(STextEnvironment environment, String text) {
+		return getDirection(environment, text, new STextCharTypes(text));
+	}
+
 	/**
 	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
@@ -38,7 +42,7 @@ public class STextEmail extends STextDelimsEsc {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
@@ -57,7 +61,7 @@ public class STextEmail extends STextDelimsEsc {
 	/**
 	 *  @return 2 as number of special cases handled by this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getSpecialsCount(STextEnvironment environment) {
 		return 2;
 	}
 

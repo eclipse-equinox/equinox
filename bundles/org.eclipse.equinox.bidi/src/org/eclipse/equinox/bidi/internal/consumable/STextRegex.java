@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextDirections;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -69,7 +69,7 @@ public class STextRegex extends STextProcessor {
 	 *  
 	 *  @return the number of special cases for this processor.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getSpecialsCount(STextEnvironment environment) {
 		return maxSpecial;
 	}
 
@@ -77,7 +77,7 @@ public class STextRegex extends STextProcessor {
 	 *  This method locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -145,7 +145,7 @@ public class STextRegex extends STextProcessor {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		switch (caseNumber) {
@@ -215,6 +215,10 @@ public class STextRegex extends STextProcessor {
 		return text.length();
 	}
 
+	public int getDirection(STextEnvironment environment, String text) {
+		return getDirection(environment, text, new STextCharTypes(text));
+	}
+
 	/**
 	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
@@ -227,7 +231,7 @@ public class STextRegex extends STextProcessor {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;

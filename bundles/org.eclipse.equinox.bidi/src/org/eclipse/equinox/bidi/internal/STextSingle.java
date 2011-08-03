@@ -11,7 +11,7 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextDirections;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -41,8 +41,8 @@ public class STextSingle extends STextProcessor {
 	 *
 	 *  @see #getSeparators getSeparators
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int caseNumber, int fromIndex) {
-		return text.indexOf(this.getSeparators(environment, text, dirProps).charAt(0), fromIndex);
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		return text.indexOf(this.getSeparators(environment).charAt(0), fromIndex);
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class STextSingle extends STextProcessor {
 	 *
 	 *  @return the length of <code>text</code>.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextDirections dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
 		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
 		return text.length();
 	}
@@ -61,7 +61,7 @@ public class STextSingle extends STextProcessor {
 	 *
 	 *  @return 1.
 	 */
-	public int getSpecialsCount(STextEnvironment environment, String text, STextDirections dirProps) {
+	public int getSpecialsCount(STextEnvironment environment) {
 		return 1;
 	}
 

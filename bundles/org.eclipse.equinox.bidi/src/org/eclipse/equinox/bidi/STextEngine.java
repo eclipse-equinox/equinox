@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
-import org.eclipse.equinox.bidi.custom.STextDirections;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
@@ -313,7 +312,7 @@ public class STextEngine {
 	public static int getCurDirection(STextProcessor processor, STextEnvironment environment, String text) {
 		if (processor == null)
 			return DIR_LTR;
-		return processor.getDirection(environment, text, new STextDirections(text));
+		return processor.getDirection(environment, text);
 	}
 
 }

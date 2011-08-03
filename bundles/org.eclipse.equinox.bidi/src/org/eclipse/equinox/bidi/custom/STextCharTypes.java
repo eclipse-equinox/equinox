@@ -15,7 +15,7 @@ import org.eclipse.equinox.bidi.STextEnvironment;
 /**
  * The class determines bidirectional types of characters in a string.
  */
-public class STextDirections {
+public class STextCharTypes {
 
 	// In the following lines, B, L, R and AL represent bidi categories
 	// as defined in the Unicode Bidirectional Algorithm
@@ -41,9 +41,9 @@ public class STextDirections {
 	private byte[] dirProps;
 
 	// current orientation
-	private byte baseOrientation = 0; // "0" means "unknown" // Mati: 0 is not a good choice for unknown orientation since 0 corresponds to LTR.
+	private int orientation = -1; // "-1" means "unknown"
 
-	public STextDirections(String text) {
+	public STextCharTypes(String text) {
 		this.text = text;
 		dirProps = new byte[text.length()];
 	}
@@ -65,7 +65,7 @@ public class STextDirections {
 		dirProps[i] = (byte) (dirProp + DIRPROPS_ADD);
 	}
 
-	public int getBaseOrientation(STextEnvironment environment) {
+	public int getOrientation(STextEnvironment environment) {
 		int result;
 		int orient = environment.getOrientation();
 		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL_LTR) == 0) { // absolute orientation
@@ -83,7 +83,7 @@ public class STextDirections {
 				} else {
 					dirProp = getCachedDirectionAt(i);
 				}
-				if (dirProp == L) { // TBD || == EN ?
+				if (dirProp == L) {
 					result = STextEnvironment.ORIENT_LTR;
 					break;
 				}
@@ -93,7 +93,7 @@ public class STextDirections {
 				}
 			}
 		}
-		baseOrientation = (byte) result;
+		orientation = result;
 		return result;
 	}
 
@@ -109,8 +109,7 @@ public class STextDirections {
 			return getCachedDirectionAt(index);
 		byte dirProp = Character.getDirectionality(text.charAt(index));
 		if (dirProp == B) {
-			byte orient = baseOrientation;
-			dirProp = (orient == STextEnvironment.ORIENT_RTL) ? R : L;
+			dirProp = (orientation == STextEnvironment.ORIENT_RTL) ? R : L;
 		}
 		setBidiTypeAt(index, dirProp);
 		return dirProp;
