@@ -39,21 +39,21 @@ public class STextMethodsTest extends STextTestBase {
 			return ","; //$NON-NLS-1$
 		}
 
-		public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes dirProps) {
-			byte dirProp = dirProps.getBidiTypeAt(0);
-			if (dirProp == AL)
+		public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes charTypes) {
+			byte charType = charTypes.getBidiTypeAt(0);
+			if (charType == AL)
 				return true;
 			return false;
 		}
 
 		public int getDirection(STextEnvironment environment, String text) {
-			return getDirection(environment, text, new STextCharTypes(text));
+			return getDirection(environment, text, new STextCharTypes(this, environment, text));
 		}
 
-		public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
+		public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 			for (int i = 0; i < text.length(); i++) {
-				byte dirProp = dirProps.getBidiTypeAt(i);
-				if (dirProp == AL)
+				byte charType = charTypes.getBidiTypeAt(i);
+				if (charType == AL)
 					return dirArabic;
 			}
 			return dirHebrew;

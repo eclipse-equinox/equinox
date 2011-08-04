@@ -30,7 +30,7 @@ public class STextMath extends STextProcessor {
 	}
 
 	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(text));
+		return getDirection(environment, text, new STextCharTypes(this, environment, text));
 	}
 
 	/**
@@ -45,23 +45,22 @@ public class STextMath extends STextProcessor {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
 		boolean flagAN = false;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = dirProps.getBidiTypeAt(i);
-			if (dirProp == AL)
+			byte charType = charTypes.getBidiTypeAt(i);
+			if (charType == AL)
 				return STextEngine.DIR_RTL;
-			if (dirProp == L || dirProp == R)
+			if (charType == L || charType == R)
 				return STextEngine.DIR_LTR;
-			if (dirProp == AN)
+			if (charType == AN)
 				flagAN = true;
 		}
 		if (flagAN)
 			return STextEngine.DIR_RTL;
 		return STextEngine.DIR_LTR;
 	}
-
 }

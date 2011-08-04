@@ -98,7 +98,7 @@ public class STextProcessor {
 	 * @param  text is the structured text string before
 	 *         addition of any directional formatting characters.
 	 *
-	 * @param  dirProps is a parameter received by <code>indexOfSpecial</code>
+	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         uniquely to be used as argument for calls to methods which
 	 *         need it.
 	 *
@@ -132,7 +132,7 @@ public class STextProcessor {
 	 * number of special cases is zero, which means that
 	 * <code>indexOfSpecial</code> should never be called for them.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		// This method must be overridden by all subclasses with special cases.
 		throw new IllegalStateException("A processor with specialsCount > 0 must have an indexOfSpecial() method."); //$NON-NLS-1$
 	}
@@ -167,7 +167,7 @@ public class STextProcessor {
 	 * @param  text is the structured text string before
 	 *         addition of any directional formatting characters.
 	 *
-	 * @param  dirProps is a parameter received by <code>processSpecial</code>
+	 * @param  charTypes is a parameter received by <code>processSpecial</code>
 	 *         uniquely to be used as argument for calls to methods which
 	 *         need it.
 	 *
@@ -216,7 +216,7 @@ public class STextProcessor {
 	 * number of special cases is zero, which means that
 	 * <code>processSpecial</code> should never be called for them.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
 		// This method must be overridden by all subclasses with any special case.
 		throw new IllegalStateException("A processor with specialsCount > 0 must have a processSpecial() method."); //$NON-NLS-1$
 	}
@@ -236,7 +236,7 @@ public class STextProcessor {
 	 *         parameter to <code>indexOfSpecial</code> or
 	 *         <code>processSpecial</code>.
 	 *
-	 * @param  dirProps is a parameter received by <code>indexOfSpecial</code>
+	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>, uniquely to be used as argument
 	 *         for calls to <code>insertMark</code> and other methods used
 	 *         by processors.
@@ -252,8 +252,8 @@ public class STextProcessor {
 	 *         For the benefit of efficiency, it is better to insert
 	 *         multiple marks in ascending order of the offsets.
 	 */
-	public static final void insertMark(String text, STextCharTypes dirProps, int[] offsets, int offset) {
-		STextImpl.insertMark(text, dirProps, offsets, offset);
+	public static final void insertMark(String text, STextCharTypes charTypes, STextOffsets offsets, int offset) {
+		offsets.insertOffset(charTypes, offset);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public class STextProcessor {
 	 *         parameter to <code>indexOfSpecial</code> or
 	 *         <code>processSpecial</code>.
 	 *
-	 * @param  dirProps is a parameter received by <code>indexOfSpecial</code>
+	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>, uniquely to be used as argument
 	 *         for calls to <code>processSeparator</code> and other methods used
 	 *         by processors.
@@ -287,8 +287,8 @@ public class STextProcessor {
 	 *         It must be a non-negative number smaller than the length
 	 *         of the <i>lean</i> text.
 	 */
-	public static final void processSeparator(String text, STextCharTypes dirProps, int[] offsets, int separLocation) {
-		STextImpl.processSeparator(text, dirProps, offsets, separLocation);
+	public static final void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
+		STextImpl.processSeparator(text, charTypes, offsets, separLocation);
 	}
 
 	/**
@@ -349,8 +349,8 @@ public class STextProcessor {
 	 *
 	 * @param  text is the structured text string to process.
 	 *
-	 * @param  dirProps is a parameter received uniquely to be used as argument
-	 *         for calls to <code>getDirProp</code> and other methods used
+	 * @param  charTypes is a parameter received uniquely to be used as argument
+	 *         for calls to <code>getCharType</code> and other methods used
 	 *         by processors.
 	 *
 	 * @return the base direction of the structured text. This direction
@@ -360,7 +360,7 @@ public class STextProcessor {
 	 *         The value returned is either
 	 *         {@link STextEngine#DIR_LTR DIR_LTR} or {@link STextEngine#DIR_RTL DIR_RTL}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		return STextEngine.DIR_LTR;
 	}
 
@@ -407,15 +407,15 @@ public class STextProcessor {
 	 *
 	 * @param  text is the structured text string to process.
 	 *
-	 * @param  dirProps is a parameter received uniquely to be used as argument
-	 *         for calls to <code>getDirProp</code> and other methods used
+	 * @param  charTypes is a parameter received uniquely to be used as argument
+	 *         for calls to <code>getCharType</code> and other methods used
 	 *         by processors.
 	 *
 	 * @return a flag indicating if there is no need to process the structured
 	 *         text to add directional formatting characters.
 	 *
 	 */
-	public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes dirProps) {
+	public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		return false;
 	}
 

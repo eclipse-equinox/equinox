@@ -28,7 +28,7 @@ public class STextEmail extends STextDelimsEsc {
 	}
 
 	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(text));
+		return getDirection(environment, text, new STextCharTypes(this, environment, text));
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class STextEmail extends STextDelimsEsc {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
@@ -51,8 +51,8 @@ public class STextEmail extends STextDelimsEsc {
 		if (domainStart < 0)
 			domainStart = 0;
 		for (int i = domainStart; i < text.length(); i++) {
-			byte dirProp = dirProps.getBidiTypeAt(i);
-			if (dirProp == AL || dirProp == R)
+			byte charType = charTypes.getBidiTypeAt(i);
+			if (charType == AL || charType == R)
 				return STextEngine.DIR_RTL;
 		}
 		return STextEngine.DIR_LTR;

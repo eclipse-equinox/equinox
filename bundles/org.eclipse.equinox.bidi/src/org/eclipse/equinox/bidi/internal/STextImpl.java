@@ -12,8 +12,7 @@ package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  *  <code>STextImpl</code> provides the code which implements the API in
@@ -50,22 +49,20 @@ public class STextImpl {
 	static final char PDF = 0x202C;
 	static final char[] MARKS = {LRM, RLM};
 	static final char[] EMBEDS = {LRE, RLE};
-	static final byte[] STRONGS = {L, R};
 	static final int PREFIX_LENGTH = 2;
 	static final int SUFFIX_LENGTH = 2;
 	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
-	static final int OFFSETS_SHIFT = 3;
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 	static final STextEnvironment IGNORE_ENVIRONMENT = new STextEnvironment(null, false, STextEnvironment.ORIENT_IGNORE);
 
 	/**
-	 *  Prevent creation of a STextEngine instance
+	 *  Prevent creation of a STextImpl instance
 	 */
 	private STextImpl() {
 		// nothing to do
 	}
 
-	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] locations, int[] state, int curPos) {
+	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] locations, int curPos) {
 		String separators = processor.getSeparators(environment);
 		int separCount = separators.length();
 		int specialsCount = processor.getSpecialsCount(environment);
@@ -77,8 +74,8 @@ public class STextImpl {
 		for (int i = 0; i < specialsCount; i++) {
 			int location = locations[separCount + i];
 			if (location < curPos) {
-				offsets = ensureRoomInOffsets(offsets);
-				location = processor.indexOfSpecial(environment, text, dirProps, offsets, i + 1, curPos);
+				offsets.ensureRoom();
+				location = processor.indexOfSpecial(environment, text, charTypes, offsets, i + 1, curPos);
 				if (location < 0)
 					location = len;
 				locations[separCount + i] = location;
@@ -107,22 +104,22 @@ public class STextImpl {
 	/**
 	 *  @see STextProcessor#processSeparator STextProcessor.processSeparator
 	 */
-	public static void processSeparator(String text, STextCharTypes dirProps, int[] offsets, int separLocation) {
+	public static void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
 		int len = text.length();
-		// offsets[2] contains the structured text direction
-		if (offsets[2] == STextEngine.DIR_RTL) {
+		int direction = charTypes.getDirection();
+		if (direction == STextEngine.DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
-				byte dirProp = dirProps.getBidiTypeAt(i);
-				if (dirProp == R || dirProp == AL)
+				byte charType = charTypes.getBidiTypeAt(i);
+				if (charType == R || charType == AL)
 					return;
-				if (dirProp == L) {
+				if (charType == L) {
 					for (int j = separLocation; j < len; j++) {
-						dirProp = dirProps.getBidiTypeAt(j);
-						if (dirProp == R || dirProp == AL)
+						charType = charTypes.getBidiTypeAt(j);
+						if (charType == R || charType == AL)
 							return;
-						if (dirProp == L || dirProp == EN) {
-							insertMark(text, dirProps, offsets, separLocation);
+						if (charType == L || charType == EN) {
+							offsets.insertOffset(charTypes, separLocation);
 							return;
 						}
 					}
@@ -135,28 +132,28 @@ public class STextImpl {
 		// the structured text base direction is LTR
 		boolean doneAN = false;
 		for (int i = separLocation - 1; i >= 0; i--) {
-			byte dirProp = dirProps.getBidiTypeAt(i);
-			if (dirProp == L)
+			byte charType = charTypes.getBidiTypeAt(i);
+			if (charType == L)
 				return;
-			if (dirProp == R || dirProp == AL) {
+			if (charType == R || charType == AL) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = dirProps.getBidiTypeAt(j);
-					if (dirProp == L)
+					charType = charTypes.getBidiTypeAt(j);
+					if (charType == L)
 						return;
-					if (dirProp == R || dirProp == EN || dirProp == AL || dirProp == AN) {
-						insertMark(text, dirProps, offsets, separLocation);
+					if (charType == R || charType == EN || charType == AL || charType == AN) {
+						offsets.insertOffset(charTypes, separLocation);
 						return;
 					}
 				}
 				return;
 			}
-			if (dirProp == AN && !doneAN) {
+			if (charType == AN && !doneAN) {
 				for (int j = separLocation; j < len; j++) {
-					dirProp = dirProps.getBidiTypeAt(j);
-					if (dirProp == L)
+					charType = charTypes.getBidiTypeAt(j);
+					if (charType == L)
 						return;
-					if (dirProp == AL || dirProp == AN || dirProp == R) {
-						insertMark(text, dirProps, offsets, separLocation);
+					if (charType == AL || charType == AN || charType == R) {
+						offsets.insertOffset(charTypes, separLocation);
 						return;
 					}
 				}
@@ -212,10 +209,10 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return text;
-		STextCharTypes dirProps = new STextCharTypes(text);
-		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
-		int prefixLength = offsets[1];
-		int count = offsets[0] - OFFSETS_SHIFT;
+		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
+		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		int prefixLength = offsets.getPrefixLength();
+		int count = offsets.getCount();
 		if (count == 0 && prefixLength == 0)
 			return text;
 		int newLen = len + count;
@@ -226,12 +223,11 @@ public class STextImpl {
 		char[] fullChars = new char[newLen];
 		int added = prefixLength;
 		// add marks at offsets
-		int direction = offsets[2];
+		int direction = charTypes.getDirection();
 		char curMark = MARKS[direction];
-		for (int i = 0, j = OFFSETS_SHIFT; i < len; i++) {
+		for (int i = 0, j = 0; i < len; i++) {
 			char c = text.charAt(i);
-			// offsets[0] contains the number of used entries
-			if (j < offsets[0] && i == offsets[j]) {
+			if (j < count && i == offsets.getOffset(j)) {
 				fullChars[i + added] = curMark;
 				added++;
 				j++;
@@ -263,14 +259,14 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextCharTypes dirProps = new STextCharTypes(text);
-		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
-		int prefixLength = offsets[1];
+		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
+		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		int prefixLength = offsets.getPrefixLength();
 		int[] map = new int[len];
-		int count = offsets[0]; // number of used entries
+		int count = offsets.getCount(); // number of used entries
 		int added = prefixLength;
-		for (int pos = 0, i = OFFSETS_SHIFT; pos < len; pos++) {
-			if (i < count && pos == offsets[i]) {
+		for (int pos = 0, i = 0; pos < len; pos++) {
+			if (i < count && pos == offsets.getOffset(i)) {
 				added++;
 				i++;
 			}
@@ -286,16 +282,12 @@ public class STextImpl {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextCharTypes dirProps = new STextCharTypes(text);
-		int[] offsets = leanToFullCommon(processor, environment, text, state, dirProps);
-		// offsets[0] contains the number of used entries
-		int count = offsets[0] - OFFSETS_SHIFT;
-		int[] result = new int[count];
-		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, count);
-		return result;
+		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
+		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		return offsets.getArray();
 	}
 
-	static int[] leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextCharTypes dirProps) {
+	static STextOffsets leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextCharTypes charTypes) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		if (state == null) {
@@ -303,15 +295,9 @@ public class STextImpl {
 			state[0] = STextEngine.STATE_INITIAL;
 		}
 		int len = text.length();
-		int orient = dirProps.getOrientation(environment);
-		int direction = processor.getDirection(environment, text, dirProps);
-		// offsets of marks to add. Entry 0 is the number of used slots;
-		//  entry 1 is reserved to pass prefixLength.
-		//  entry 2 is reserved to pass direction..
-		int[] offsets = new int[20];
-		offsets[0] = OFFSETS_SHIFT;
-		offsets[2] = direction;
-		if (!processor.skipProcessing(environment, text, dirProps)) {
+		int direction = processor.getDirection(environment, text, charTypes);
+		STextOffsets offsets = new STextOffsets();
+		if (!processor.skipProcessing(environment, text, charTypes)) {
 			// initialize locations
 			int separCount = processor.getSeparators(environment).length();
 			int[] locations = new int[separCount + processor.getSpecialsCount(environment)];
@@ -321,46 +307,47 @@ public class STextImpl {
 			// current position
 			int curPos = 0;
 			if (state[0] > STextEngine.STATE_INITIAL) {
-				offsets = ensureRoomInOffsets(offsets);
+				offsets.ensureRoom();
 				int initState = state[0];
 				state[0] = STextEngine.STATE_INITIAL;
-				curPos = processor.processSpecial(environment, text, dirProps, offsets, state, initState, -1);
+				curPos = processor.processSpecial(environment, text, charTypes, offsets, state, initState, -1);
 			}
 			while (true) {
 				// location of next token to handle
 				int nextLocation;
 				// index of next token to handle (if < separCount, this is a separator; otherwise a special case
 				int idxLocation;
-				long res = computeNextLocation(processor, environment, text, dirProps, offsets, locations, state, curPos);
+				long res = computeNextLocation(processor, environment, text, charTypes, offsets, locations, curPos);
 				nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
 				if (nextLocation >= len)
 					break;
+				offsets.ensureRoom();
 				idxLocation = (int) (res >> 32); /* high word */
 				if (idxLocation < separCount) {
-					offsets = ensureRoomInOffsets(offsets);
-					processSeparator(text, dirProps, offsets, nextLocation);
+					processSeparator(text, charTypes, offsets, nextLocation);
 					curPos = nextLocation + 1;
 				} else {
-					offsets = ensureRoomInOffsets(offsets);
 					idxLocation -= (separCount - 1); // because caseNumber starts from 1
-					curPos = processor.processSpecial(environment, text, dirProps, offsets, state, idxLocation, nextLocation);
+					curPos = processor.processSpecial(environment, text, charTypes, offsets, state, idxLocation, nextLocation);
 				}
 				if (curPos >= len)
 					break;
 			} // end while
 		} // end if (!processor.skipProcessing())
-		if (orient == STextEnvironment.ORIENT_IGNORE)
-			offsets[1] = 0;
+		int prefixLength;
+		int orientation = environment.getOrientation();
+		if (orientation == STextEnvironment.ORIENT_IGNORE)
+			prefixLength = 0;
 		else {
-			// recompute orient since it may have changed if contextual
-			orient = dirProps.getOrientation(environment);
-			if (orient == direction && orient != STextEnvironment.ORIENT_UNKNOWN)
-				offsets[1] = 0;
-			else if ((environment.getOrientation() & STextEnvironment.ORIENT_CONTEXTUAL_LTR) != 0)
-				offsets[1] = 1;
+			int resolvedOrientation = charTypes.resolveOrientation(environment);
+			if (orientation != STextEnvironment.ORIENT_UNKNOWN && resolvedOrientation == direction)
+				prefixLength = 0;
+			else if ((orientation & STextEnvironment.ORIENT_CONTEXTUAL_LTR) != 0)
+				prefixLength = 1;
 			else
-				offsets[1] = 2;
+				prefixLength = 2;
 		}
+		offsets.setPrefixLength(prefixLength);
 		return offsets;
 	}
 
@@ -501,8 +488,7 @@ public class STextImpl {
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
 		String lean = fullToLeanText(processor, environment, full, state);
-		int[] offsets = new int[20];
-		offsets[0] = OFFSETS_SHIFT;
+		STextOffsets offsets = new STextOffsets();
 		int lenLean = lean.length();
 		int idxLean, idxFull;
 		// lean must be a subset of Full, so we only check on iLean < leanLen
@@ -510,66 +496,14 @@ public class STextImpl {
 			if (full.charAt(idxFull) == lean.charAt(idxLean))
 				idxLean++;
 			else {
-				offsets = ensureRoomInOffsets(offsets);
-				insertMark(lean, null, offsets, idxFull);
+				offsets.ensureRoom();
+				offsets.insertOffset(null, idxFull);
 			}
 		}
 		for (; idxFull < lenFull; idxFull++) {
-			offsets = ensureRoomInOffsets(offsets);
-			insertMark(lean, null, offsets, idxFull);
+			offsets.ensureRoom();
+			offsets.insertOffset(null, idxFull);
 		}
-		int[] result = new int[offsets[0] - OFFSETS_SHIFT];
-		System.arraycopy(offsets, OFFSETS_SHIFT, result, 0, result.length);
-		return result;
+		return offsets.getArray();
 	}
-
-	static int[] ensureRoomInOffsets(int[] offsets) {
-		// make sure
-		if ((offsets.length - offsets[0]) < 3) {
-			int[] newOffsets = new int[offsets.length * 2];
-			System.arraycopy(offsets, 0, newOffsets, 0, offsets[0]);
-			return newOffsets;
-		}
-		return offsets;
-	}
-
-	/**
-	 *  @see STextProcessor#insertMark STextProcessor.insertMark
-	 */
-	public static void insertMark(String text, STextCharTypes dirProps, int[] offsets, int offset) {
-		int count = offsets[0];// number of used entries
-		int index = count - 1; // index of greatest member <= offset
-		// look up after which member the new offset should be inserted
-		while (index >= OFFSETS_SHIFT) {
-			int wrkOffset = offsets[index];
-			if (offset > wrkOffset)
-				break;
-			if (offset == wrkOffset)
-				return; // avoid duplicates
-			index--;
-		}
-		index++; // index now points at where to insert
-		int length = count - index; // number of members to move up
-		if (length > 0) // shift right all members greater than offset
-			System.arraycopy(offsets, index, offsets, index + 1, length);
-		offsets[index] = offset;
-		offsets[0]++; // number of used entries
-		// if the offset is 0, adding a mark does not change anything
-		if (dirProps == null || offset < 1)
-			return;
-
-		byte dirProp = dirProps.getBidiTypeAt(offset);
-		// if the current char is a strong one or a digit, we change the
-		//   dirProp of the previous char to account for the inserted mark.
-		if (dirProp == L || dirProp == R || dirProp == AL || dirProp == EN || dirProp == AN)
-			index = offset - 1;
-		else
-			// if the current char is a neutral, we change its own dirProp
-			index = offset;
-
-		int dir = offsets[2]; // current structured text direction
-		dirProps.setBidiTypeAt(index, STRONGS[dir]);
-		return;
-	}
-
 }

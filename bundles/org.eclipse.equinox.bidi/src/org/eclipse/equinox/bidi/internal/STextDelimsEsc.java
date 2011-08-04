@@ -11,8 +11,7 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  *  A base processor for structured text composed of text segments separated 
@@ -50,8 +49,8 @@ public abstract class STextDelimsEsc extends STextDelims {
 	 *  and skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
+		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 		int location = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		while (true) {

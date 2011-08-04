@@ -12,8 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
@@ -59,7 +58,7 @@ public class STextJava extends STextProcessor {
 	     *    <li>comments starting with slash-slash</li>
 	     *  </ol>
 	     */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
 				return text.indexOf(' ', fromIndex);
@@ -83,15 +82,15 @@ public class STextJava extends STextProcessor {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
 		int location, counter, i;
 
-		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 		switch (caseNumber) {
 			case 1 : /* space */
 				separLocation++;
 				while (separLocation < text.length() && text.charAt(separLocation) == ' ') {
-					dirProps.setBidiTypeAt(separLocation, WS);
+					charTypes.setBidiTypeAt(separLocation, WS);
 					separLocation++;
 				}
 				return separLocation;
@@ -120,7 +119,7 @@ public class STextJava extends STextProcessor {
 				}
 				// we need to call processSeparator since text may follow the
 				//  end of comment immediately without even a space
-				STextProcessor.processSeparator(text, dirProps, offsets, location);
+				STextProcessor.processSeparator(text, charTypes, offsets, location);
 				return location + 2;
 			case 4 : /* slash-slash comment */
 				location = text.indexOf(lineSep, separLocation + 2);

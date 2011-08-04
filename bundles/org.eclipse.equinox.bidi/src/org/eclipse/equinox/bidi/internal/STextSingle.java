@@ -11,8 +11,7 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  *  A base processor for structured text composed of two parts separated by a separator.
@@ -41,7 +40,7 @@ public class STextSingle extends STextProcessor {
 	 *
 	 *  @see #getSeparators getSeparators
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		return text.indexOf(this.getSeparators(environment).charAt(0), fromIndex);
 	}
 
@@ -51,8 +50,8 @@ public class STextSingle extends STextProcessor {
 	 *
 	 *  @return the length of <code>text</code>.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
+		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 		return text.length();
 	}
 

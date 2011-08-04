@@ -12,8 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  *  <code>STextRegex</code> is a processor for regular expressions.
@@ -77,7 +76,7 @@ public class STextRegex extends STextProcessor {
 	 *  This method locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -86,7 +85,7 @@ public class STextRegex extends STextProcessor {
 		// AL represents the category Arabic Letter.
 		// AN represents the category Arabic Number.
 		// EN  represents the category European Number.
-		byte dirProp;
+		byte charType;
 
 		if (caseNumber < numberOfStrings) {
 			/*  1 *//* comment (?#...) */
@@ -113,27 +112,27 @@ public class STextRegex extends STextProcessor {
 			fromIndex = 1;
 		// look for R, AL, AN, EN which are potentially needing a mark
 		for (; fromIndex < text.length(); fromIndex++) {
-			dirProp = dirProps.getBidiTypeAt(fromIndex);
+			charType = charTypes.getBidiTypeAt(fromIndex);
 			// R and AL will always be examined using processSeparator()
-			if (dirProp == R || dirProp == AL)
+			if (charType == R || charType == AL)
 				return fromIndex;
 
-			if (dirProp == EN || dirProp == AN) {
+			if (charType == EN || charType == AN) {
 				// no need for a mark after the first digit in a number
-				if (dirProps.getBidiTypeAt(fromIndex - 1) == dirProp)
+				if (charTypes.getBidiTypeAt(fromIndex - 1) == charType)
 					continue;
 
 				for (int i = fromIndex - 1; i >= 0; i--) {
-					dirProp = dirProps.getBidiTypeAt(i);
+					charType = charTypes.getBidiTypeAt(i);
 					// after a L char, no need for a mark
-					if (dirProp == L)
+					if (charType == L)
 						continue;
 
 					// digit after R or AL or AN need a mark, except for EN
 					//   following AN, but this is a contrived case, so we
 					//   don't check for it (and calling processSeparator()
 					//   for it will do no harm)
-					if (dirProp == R || dirProp == AL || dirProp == AN)
+					if (charType == R || charType == AL || charType == AN)
 						return fromIndex;
 				}
 				continue;
@@ -145,7 +144,7 @@ public class STextRegex extends STextProcessor {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
 		switch (caseNumber) {
@@ -154,7 +153,7 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+					STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 					// skip the opening "(?#"
 					location = separLocation + 3;
 				}
@@ -170,7 +169,7 @@ public class STextRegex extends STextProcessor {
 			case 5 : /* conditional named back reference (?(<name>) */
 			case 6 : /* conditional named back reference (?('name') */
 			case 7 : /* named parentheses reference (?&name) */
-				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+				STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 				// no need for calling processSeparator() for the following cases
 				//   since the starting string contains a L char
 			case 8 : /* named group (?P<name> */
@@ -194,7 +193,7 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+					STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 					// skip the opening "\Q"
 					location = separLocation + 2;
 				}
@@ -203,11 +202,11 @@ public class STextRegex extends STextProcessor {
 					state[0] = caseNumber;
 					return text.length();
 				}
-				// set the dirProp for the "E" to L (Left to Right character)
-				dirProps.setBidiTypeAt(location + 1, L);
+				// set the charType for the "E" to L (Left to Right character)
+				charTypes.setBidiTypeAt(location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
-				STextProcessor.processSeparator(text, dirProps, offsets, separLocation);
+				STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
 				return separLocation + 1;
 
 		}
@@ -216,7 +215,7 @@ public class STextRegex extends STextProcessor {
 	}
 
 	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(text));
+		return getDirection(environment, text, new STextCharTypes(this, environment, text));
 	}
 
 	/**
@@ -231,15 +230,15 @@ public class STextRegex extends STextProcessor {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes dirProps) {
+	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextEngine.DIR_LTR;
 		for (int i = 0; i < text.length(); i++) {
-			byte dirProp = dirProps.getBidiTypeAt(i);
-			if (dirProp == AL || dirProp == R)
+			byte charType = charTypes.getBidiTypeAt(i);
+			if (charType == AL || charType == R)
 				return STextEngine.DIR_RTL;
-			if (dirProp == L)
+			if (charType == L)
 				return STextEngine.DIR_LTR;
 		}
 		if (environment.getMirrored())

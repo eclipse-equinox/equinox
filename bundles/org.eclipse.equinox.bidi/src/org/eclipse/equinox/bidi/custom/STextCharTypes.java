@@ -33,86 +33,129 @@ public class STextCharTypes {
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
 
-	private static final int DIRPROPS_ADD = 2;
+	private static final int CHARTYPES_ADD = 2;
 
+	final protected STextProcessor processor;
+	final protected STextEnvironment environment;
 	final protected String text;
 
 	// 1 byte for each char in text
-	private byte[] dirProps;
+	private byte[] types;
 
-	// current orientation
-	private int orientation = -1; // "-1" means "unknown"
-
-	public STextCharTypes(String text) {
-		this.text = text;
-		dirProps = new byte[text.length()];
-	}
-
-	private byte getCachedDirectionAt(int index) {
-		return (byte) (dirProps[index] - DIRPROPS_ADD);
-	}
-
-	private boolean hasCachedDirectionAt(int i) {
-		return (dirProps[i] != 0); // "0" means "unknown"
-	}
+	// structured text direction. -1 means not yet computed; -2 means within processor.getDirection
+	private int direction = -1;
 
 	/**
-	 * @param  dirProp bidirectional class of the character. It must be
-	 *         one of the values which can be returned by
-	 *         <code>java.lang.Character.getDirectionality</code>.
+	 *  Constructor
+	 *  
+	 *  @param  processor is the processor handling this occurrence of
+	 *          structured text.
+	 *          
+	 *  @param  environment the current environment, which may affect the behavior of
+	 *          the processor. This parameter may be specified as
+	 *          <code>null</code>, in which case the
+	 *          {@link STextEnvironment#DEFAULT DEFAULT}
+	 *          environment should be assumed.
+	 *  
+	 *  @param text is the text whose characters are analyzed.
 	 */
-	public void setBidiTypeAt(int i, byte dirProp) {
-		dirProps[i] = (byte) (dirProp + DIRPROPS_ADD);
+	public STextCharTypes(STextProcessor processor, STextEnvironment environment, String text) {
+		this.processor = processor;
+		this.environment = environment;
+		this.text = text;
+		types = new byte[text.length()];
 	}
 
-	public int getOrientation(STextEnvironment environment) {
-		int result;
-		int orient = environment.getOrientation();
-		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL_LTR) == 0) { // absolute orientation
-			result = orient;
-		} else { // contextual orientation:
-			result = orient & 1; // initiate to the default orientation minus contextual bit
-			int len = text.length();
-			byte dirProp;
-			for (int i = 0; i < len; i++) {
-				if (!hasCachedDirectionAt(i)) {
-					dirProp = Character.getDirectionality(text.charAt(i));
-					if (dirProp == B) // B char resolves to L or R depending on orientation
-						continue;
-					setBidiTypeAt(i, dirProp);
-				} else {
-					dirProp = getCachedDirectionAt(i);
-				}
-				if (dirProp == L) {
-					result = STextEnvironment.ORIENT_LTR;
-					break;
-				}
-				if (dirProp == R || dirProp == AL) {
-					result = STextEnvironment.ORIENT_RTL;
-					break;
-				}
-			}
-		}
-		orientation = result;
-		return result;
+	public int getDirection() {
+		if (direction < 0)
+			direction = processor.getDirection(environment, text, this);
+		return direction;
+	}
+
+	private byte getCachedTypeAt(int index) {
+		return (byte) (types[index] - CHARTYPES_ADD);
+	}
+
+	private boolean hasCachedTypeAt(int i) {
+		return (types[i] != 0); // "0" means "unknown"
 	}
 
 	/**
-	 * Returns directionality of the character in the original string at
-	 * the specified index.
-	 * @param index position of the character in the <i>lean</i> text
-	 * @return the bidirectional class of the character. It is one of the
-	 * values which can be returned by {@link Character#getDirectionality(char)}
+	 *  Returns directionality of the character in the original string at
+	 *  the specified index.
+	 *  
+	 *  @param  index position of the character in the <i>lean</i> text
+	 *  
+	 *  @return the bidi type of the character. It is one of the
+	 *          values which can be returned by 
+	 *          {@link Character#getDirectionality(char)}.
 	 */
 	public byte getBidiTypeAt(int index) {
-		if (hasCachedDirectionAt(index))
-			return getCachedDirectionAt(index);
-		byte dirProp = Character.getDirectionality(text.charAt(index));
-		if (dirProp == B) {
-			dirProp = (orientation == STextEnvironment.ORIENT_RTL) ? R : L;
+		if (hasCachedTypeAt(index))
+			return getCachedTypeAt(index);
+		byte charType = Character.getDirectionality(text.charAt(index));
+		if (charType == B) {
+			if (direction < 0) {
+				if (direction < -1) // called by processor.getDirection
+					return charType; // avoid infinite recursion
+				direction = -2; // signal we go within processor.getDirection
+				direction = processor.getDirection(environment, text, this);
+			}
+			charType = (direction == STextEnvironment.ORIENT_RTL) ? R : L;
 		}
-		setBidiTypeAt(index, dirProp);
-		return dirProp;
+		setBidiTypeAt(index, charType);
+		return charType;
 	}
 
+	/**
+	 *  Force a bidi type on a character.
+	 *  
+	 *  @param  index is the index of the character whose bidi type is set.
+	 *   
+	 *  @param  charType bidirectional type of the character. It must be
+	 *          one of the values which can be returned by
+	 *          <code>java.lang.Character.getDirectionality</code>.
+	 */
+	public void setBidiTypeAt(int index, byte charType) {
+		types[index] = (byte) (charType + CHARTYPES_ADD);
+	}
+
+	/**
+	 *  Get the orientation of the component in which the text will
+	 *  be displayed.
+	 *  
+	 *  @param  envir is the current environment, which may affect the behavior of
+	 *          the processor. This parameter may be specified as
+	 *          <code>null</code>, in which case the
+	 *          {@link STextEnvironment#DEFAULT DEFAULT}
+	 *          environment should be assumed.
+	 *  
+	 *  @return the orientation as either 
+	 *          {@link STextEnvironment#ORIENT_LTR} or
+	 *          {@link STextEnvironment#ORIENT_RTL}.
+	 */
+	public int resolveOrientation(STextEnvironment envir) {
+		int orient = envir.getOrientation();
+		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL_LTR) == 0) { // absolute orientation
+			return orient;
+		}
+		// contextual orientation:
+		orient &= 1; // initiate to the default orientation minus contextual bit
+		int len = text.length();
+		byte charType;
+		for (int i = 0; i < len; i++) {
+			if (!hasCachedTypeAt(i)) {
+				charType = Character.getDirectionality(text.charAt(i));
+				if (charType == B) // B char resolves to L or R depending on orientation
+					continue;
+				setBidiTypeAt(i, charType);
+			} else
+				charType = getCachedTypeAt(i);
+			if (charType == L)
+				return STextEnvironment.ORIENT_LTR;
+			if (charType == R || charType == AL)
+				return STextEnvironment.ORIENT_RTL;
+		}
+		return orient;
+	}
 }

@@ -13,8 +13,7 @@ package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextEngine;
 import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.*;
 
 /**
  * Tests some weird cases
@@ -31,15 +30,15 @@ public class STextSomeMoreTest extends STextTestBase {
 			return 1;
 		}
 
-		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 
-		public int processSpecial(STextEnvironment env, String text, STextCharTypes dirProps, int[] offsets, int[] state, int caseNumber, int separLocation) {
+		public int processSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
 			int len = text.length();
 			for (int i = len - 1; i >= 0; i--) {
-				STextProcessor.insertMark(text, dirProps, offsets, i);
-				STextProcessor.insertMark(text, dirProps, offsets, i);
+				STextProcessor.insertMark(text, charTypes, offsets, i);
+				STextProcessor.insertMark(text, charTypes, offsets, i);
 			}
 			return len;
 		}
@@ -59,7 +58,7 @@ public class STextSomeMoreTest extends STextTestBase {
 			return 1;
 		}
 
-		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes dirProps, int[] offsets, int caseNumber, int fromIndex) {
+		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 			return fromIndex;
 		}
 	}
