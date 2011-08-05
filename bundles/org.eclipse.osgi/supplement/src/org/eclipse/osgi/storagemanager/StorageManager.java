@@ -95,6 +95,7 @@ public final class StorageManager {
 	private final boolean useReliableFiles = Boolean.valueOf(secure.getProperty("osgi.useReliableFiles")).booleanValue(); //$NON-NLS-1$
 	private final boolean tempCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanTempFiles")).booleanValue(); //$NON-NLS-1$
 	private final boolean openCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnOpen")).booleanValue(); //$NON-NLS-1$
+	private final boolean saveCleanup = Boolean.valueOf(secure.getProperty("osgi.embedded.cleanupOnSave")).booleanValue(); //$NON-NLS-1$
 
 	private class Entry {
 		int readId;
@@ -555,7 +556,7 @@ public final class StorageManager {
 				fileStream.abort();
 		}
 		// bug 259981 we should clean up
-		if (openCleanup) {
+		if (saveCleanup) {
 			try {
 				cleanup(false);
 			} catch (IOException ex) {
@@ -606,7 +607,7 @@ public final class StorageManager {
 			String[] files = managerRoot.list();
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
-					if (files[i].endsWith(".instance") && instanceFile != null && !files[i].equalsIgnoreCase(instanceFile.getName())) { //$NON-NLS-1$
+					if (files[i].endsWith(".instance") && (instanceFile == null || !files[i].equalsIgnoreCase(instanceFile.getName()))) { //$NON-NLS-1$
 						Locker tmpLocker = BasicLocation.createLocker(new File(managerRoot, files[i]), lockMode);
 						if (tmpLocker.lock()) {
 							//If I can lock it is a file that has been left behind by a crash

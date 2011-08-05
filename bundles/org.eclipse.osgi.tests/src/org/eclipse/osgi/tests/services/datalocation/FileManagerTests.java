@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.tests.OSGiTest;
+import org.osgi.framework.Constants;
 
 public class FileManagerTests extends OSGiTest {
 	StorageManager manager1;
@@ -376,10 +377,11 @@ public class FileManagerTests extends OSGiTest {
 	 */
 	public void testMultipleFileManagers() {
 		// This test relies on a file lock to fail if the same process already
-		//  holds a file lock. This is true on Win32 but not on Linux. So run 
-		//  this test for windows only.
-		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")))
-			// this is a Windows-only test
+		// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6. 
+		// So run this test for windows only.
+		String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+		if (!"win32".equalsIgnoreCase(System.getProperty("osgi.os")) && ee.indexOf("JavaSE-1.6") == -1)
+			// this is a Windows-only test or JavaSE-1.6 or higher test
 			return;
 		String fileName = "testMultipleFileManagers.txt";
 		File file1 = new File(base, fileName + ".1");
@@ -497,12 +499,96 @@ public class FileManagerTests extends OSGiTest {
 		}
 	}
 
-	public void testCleanup() {
-		String fileName = "testCleanup.txt";
+	public void testCleanupOnOpen() {
+		String fileName = getName() + ".txt";
 		File file1 = new File(base, fileName + ".1");
 		File file2 = new File(base, fileName + ".2");
 		File file3 = new File(base, fileName + ".3");
 		System.setProperty("osgi.embedded.cleanupOnOpen", "true");
+		// create a permanent file
+		try {
+			manager1 = new StorageManager(base, null);
+			manager1.open(true);
+			manager1.add(fileName);
+			// create version (1)
+			File tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #1");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertTrue(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertFalse(file3.toString(), file3.exists());
+
+			// do it again, now version (2)
+			tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #2");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertTrue(file1.toString(), file1.exists());
+			assertTrue(file2.toString(), file2.exists());
+			assertFalse(file3.toString(), file3.exists());
+
+			// do it again, now version (3)
+			tmpFile = manager1.createTempFile(fileName);
+			writeToFile(tmpFile, "File exists #3");
+			manager1.update(new String[] {fileName}, new String[] {tmpFile.getName()});
+			// sanity check
+			assertTrue(file1.toString(), file1.exists());
+			assertTrue(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+
+			// This test relies on a file lock to fail if the same process already
+			// holds a file lock. This is true on Win32 but not on Linux/Mac unless using Java 6. 
+			// So run this test for windows only or Java 6 or higher.
+			String ee = System.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+			if ("win32".equalsIgnoreCase(System.getProperty("osgi.os")) || ee.indexOf("JavaSE-1.6") != -1) {
+				// this is a Windows-only test or JavaSE-1.6 or higher test
+				// Check to see that a new manager does not delete on open/close while manager1 is open
+				manager2 = new StorageManager(base, null);
+				manager2.open(true);
+				manager2.close();
+				// sanity check
+				assertTrue(file1.toString(), file1.exists());
+				assertTrue(file2.toString(), file2.exists());
+				assertTrue(file3.toString(), file3.exists());
+			}
+
+			manager1.close(); // force a cleanup
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+
+			// recreate file1 and file2 to test cleanup on open
+			writeToFile(file1, "File exists #1");
+			writeToFile(file2, "File exists #2");
+			assertTrue(file1.toString(), file1.exists());
+			assertTrue(file2.toString(), file2.exists());
+			manager1.open(true);
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+
+			manager1.close(); // force a cleanup
+			manager1 = null;
+			// sanity check
+			assertFalse(file1.toString(), file1.exists());
+			assertFalse(file2.toString(), file2.exists());
+			assertTrue(file3.toString(), file3.exists());
+		} catch (IOException e) {
+			fail("unexpected exception", e);
+		} finally {
+			System.setProperty("osgi.embedded.cleanupOnOpen", "false");
+		}
+	}
+
+	public void testCleanupOnSave() {
+		String fileName = getName() + ".txt";
+		File file1 = new File(base, fileName + ".1");
+		File file2 = new File(base, fileName + ".2");
+		File file3 = new File(base, fileName + ".3");
+		System.setProperty("osgi.embedded.cleanupOnSave", "true");
 		// create a permanent file
 		try {
 			manager1 = new StorageManager(base, null);
@@ -544,7 +630,7 @@ public class FileManagerTests extends OSGiTest {
 		} catch (IOException e) {
 			fail("unexpected exception", e);
 		} finally {
-			System.setProperty("osgi.embedded.cleanupOnOpen", "false");
+			System.setProperty("osgi.embedded.cleanupOnSave", "false");
 		}
 	}
 }
