@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+
 import org.eclipse.equinox.bidi.internal.STextDelims;
 
 /**

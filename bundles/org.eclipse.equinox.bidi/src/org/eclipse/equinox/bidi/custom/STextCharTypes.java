@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 
 /**
  * The class determines bidirectional types of characters in a string.

@@ -9,6 +9,36 @@
             description="Test"
             type="test">
       </typeDescription>
+     <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessor1"
+            description="Test processor 1"
+            type="test.Processor1">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessor2"
+            description="Test processor 2"
+            type="test.Processor2">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessor3"
+            description="Test processor 3"
+            type="test.Processor3">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessorMyCommaRL"
+            description="Test my comma RL"
+            type="test.MyCommaRL">
+      </typeDescription>
+       <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessorMyCommaRR"
+            description="Test my comma RR"
+            type="test.MyCommaRR">
+      </typeDescription>
+      <typeDescription
+            class="org.eclipse.equinox.bidi.internal.tests.TestProcessorMyCommaLL"
+            description="Test my comma LL"
+            type="test.MyCommaLL">
+      </typeDescription>
    </extension>
 
 </plugin>

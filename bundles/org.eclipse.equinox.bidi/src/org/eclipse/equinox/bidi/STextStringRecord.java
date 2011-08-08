@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi;
 
 import java.lang.ref.SoftReference;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  * This class records strings which contain structured text. Several static
@@ -59,7 +58,7 @@ public class STextStringRecord {
 	private String string;
 
 	// reference to the processors of the STT segments in the recorded string
-	private STextProcessor[] processors;
+	private String[] processors;
 
 	// reference to the boundaries of the STT segments in the recorded string
 	// (entries 0, 2, 4, ... are start offsets; entries 1, 3, 5, ... are
@@ -85,8 +84,7 @@ public class STextStringRecord {
 	 *
 	 * @param  processor the processor appropriate to handle the type
 	 *         of structured text present in the first segment.
-	 *         It may be one of the pre-defined processor instances
-	 *         appearing in {@link STextEngine}, or it may be an instance
+	 *         It may be one of the pre-defined processor instances, or it may be an instance
 	 *         created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the first
@@ -104,7 +102,7 @@ public class STextStringRecord {
 	 *         if <code>segmentCount</code> is less than 1.
 	 * @throws also the same exceptions as {@link #addSegment addSegment}.
 	 */
-	public static STextStringRecord addRecord(String string, int segmentCount, STextProcessor processor, int start, int limit) {
+	public static STextStringRecord addRecord(String string, int segmentCount, String processorID, int start, int limit) {
 		if (string == null)
 			throw new IllegalArgumentException("The string argument must not be null!"); //$NON-NLS-1$
 		if (segmentCount < 1)
@@ -128,13 +126,13 @@ public class STextStringRecord {
 		for (int i = 0; i < record.usedSegmentCount; i++)
 			record.processors[i] = null;
 		if (segmentCount > record.totalSegmentCount) {
-			record.processors = new STextProcessor[segmentCount];
+			record.processors = new String[segmentCount];
 			record.boundaries = new short[segmentCount * 2];
 			record.totalSegmentCount = segmentCount;
 		}
 		record.usedSegmentCount = 0;
 		record.string = string;
-		record.addSegment(processor, start, limit);
+		record.addSegment(processorID, start, limit);
 		return record;
 	}
 
@@ -143,8 +141,7 @@ public class STextStringRecord {
 	 *
 	 * @param  processor the processor appropriate to handle the type
 	 *         of structured text present in this segment.
-	 *         It may be one of the pre-defined processor instances
-	 *         appearing in {@link STextEngine}, or it may be an instance
+	 *         It may be one of the pre-defined processor instances, or it may be an instance
 	 *         created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the
@@ -162,8 +159,8 @@ public class STextStringRecord {
 	 *         in the call to {@link #addRecord addRecord} which created
 	 *         the STextStringRecord instance.
 	 */
-	public void addSegment(STextProcessor processor, int start, int limit) {
-		if (processor == null)
+	public void addSegment(String processorID, int start, int limit) {
+		if (processorID == null)
 			throw new IllegalArgumentException("The processor argument must not be null!"); //$NON-NLS-1$
 		if (start < 0 || start >= string.length())
 			throw new IllegalArgumentException("The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
@@ -171,7 +168,7 @@ public class STextStringRecord {
 			throw new IllegalArgumentException("The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
 		if (usedSegmentCount >= totalSegmentCount)
 			throw new IllegalStateException("All segments of the record are already used!"); //$NON-NLS-1$
-		processors[usedSegmentCount] = processor;
+		processors[usedSegmentCount] = processorID;
 		boundaries[usedSegmentCount * 2] = (short) start;
 		boundaries[usedSegmentCount * 2 + 1] = (short) limit;
 		usedSegmentCount++;
@@ -255,7 +252,7 @@ public class STextStringRecord {
 	 *
 	 * @see    #getSegmentCount
 	 */
-	public STextProcessor getProcessor(int segmentNumber) {
+	public String getProcessor(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
 		return processors[segmentNumber];
 	}

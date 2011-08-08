@@ -12,8 +12,8 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextProcessorFactory;
-
-import org.eclipse.equinox.bidi.STextEngine;
+import org.eclipse.equinox.bidi.advanced.STextProcessorFactoryNew;
+import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -51,7 +51,11 @@ public class STextExtensibilityTest extends STextTestBase {
 		data = "ABC.DEF:HOST-COM=HELLO";
 		lean = toUT16(data);
 		processor = STextProcessorFactory.getProcessor("test");
-		full = STextEngine.leanToFullText(processor, null, lean, null);
+		// XXX full = STextEngine.leanToFullText(processor, null, lean, null);
+
+		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor("test");
+		full = processorNew.leanToFullText(lean);
+
 		model = "ABC@.DEF@:HOST@-COM@=HELLO";
 		assertEquals("Test 'test' plugin", model, toPseudo(full));
 	}

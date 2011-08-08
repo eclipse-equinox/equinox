@@ -11,8 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.*;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.STextProcessorFactory;
+import org.eclipse.equinox.bidi.advanced.*;
 
 /**
  * Tests RTL arithmetic
@@ -22,13 +22,14 @@ public class STextMathTest extends STextTestBase {
 	static final STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
 	static final STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
 
-	STextProcessor processor = STextProcessorFactory.PROC_RTL_ARITHMETIC;
-
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
+		STextProcessorNew processorLTR = STextProcessorFactoryNew.getProcessor(STextProcessorFactory.RTL_ARITHMETIC, envLTR);
 		String lean = toUT16(data);
-		String fullLTR = STextEngine.leanToFullText(processor, envLTR, lean, null);
+		String fullLTR = processorLTR.leanToFullText(lean);
 		assertEquals(msg + " LTR - ", resLTR, toPseudo(fullLTR));
-		String fullRTL = STextEngine.leanToFullText(processor, envRTL, lean, null);
+
+		STextProcessorNew processorRTL = STextProcessorFactoryNew.getProcessor(STextProcessorFactory.RTL_ARITHMETIC, envRTL);
+		String fullRTL = processorRTL.leanToFullText(lean);
 		assertEquals(msg + " RTL - ", resRTL, toPseudo(fullRTL));
 	}
 

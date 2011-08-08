@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
+import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
@@ -61,7 +62,7 @@ public final class STextUtil {
 	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
 	 * be added depending on the value of the <code>affix</code> argument.
 	 * </p>
-	 * @see STextEngine#leanBidiCharOffsets(STextProcessor, STextEnvironment, String, int[])
+	 * @see STextProcessorNew#leanBidiCharOffsets(String)
 	 * 
 	 * @param  text the structured text string
 	 * @param  offsets an array of offsets to characters in <code>text</code>
@@ -69,8 +70,8 @@ public final class STextUtil {
 	 *         The array must be sorted in ascending order without duplicates.
 	 *         This argument may be <code>null</code> if there are no marks to add.
 	 * @param  direction the base direction of the structured text.
-	 *         It must be one of the values {@link STextEngine#DIR_LTR}, or
-	 *         {@link STextEngine#DIR_RTL}.
+	 *         It must be one of the values {@link STextDirection#DIR_LTR}, or
+	 *         {@link STextDirection#DIR_RTL}.
 	 * @param  affix specifies if a prefix and a suffix should be added to
 	 *         the result
 	 * @return a string corresponding to the source <code>text</code> with
@@ -86,7 +87,7 @@ public final class STextUtil {
 		String curPrefix, curSuffix, full;
 		char curMark, c;
 		char[] fullChars;
-		if (direction == STextEngine.DIR_LTR) {
+		if (direction == STextDirection.DIR_LTR) {
 			curMark = LRM;
 			curPrefix = "\u202a\u200e"; /* LRE+LRM *///$NON-NLS-1$
 			curSuffix = "\u200e\u202c"; /* LRM+PDF *///$NON-NLS-1$
@@ -188,7 +189,8 @@ public final class STextUtil {
 
 		// make sure that LRE/PDF are added around the string
 		STextProcessor processor = new STextProcessor(separators);
-		return STextEngine.leanToFullText(processor, env, str, null);
+		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		return processorNew.leanToFullText(str);
 	}
 
 	/**
@@ -212,7 +214,8 @@ public final class STextUtil {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		return STextEngine.leanToFullText(processor, env, str, null);
+		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		return processorNew.leanToFullText(str);
 	}
 
 	/**
@@ -259,7 +262,8 @@ public final class STextUtil {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		return STextEngine.fullToLeanText(processor, env, str, null);
+		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		return processorNew.fullToLeanText(str);
 	}
 
 }

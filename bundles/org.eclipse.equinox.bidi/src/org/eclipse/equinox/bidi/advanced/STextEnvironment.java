@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi;
+package org.eclipse.equinox.bidi.advanced;
 
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
@@ -178,4 +178,40 @@ public class STextEnvironment {
 		}
 		return processingNeeded.booleanValue();
 	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((language == null) ? 0 : language.hashCode());
+		result = prime * result + (mirrored ? 1231 : 1237);
+		result = prime * result + orientation;
+		result = prime * result + ((processingNeeded == null) ? 0 : processingNeeded.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		STextEnvironment other = (STextEnvironment) obj;
+		if (language == null) {
+			if (other.language != null)
+				return false;
+		} else if (!language.equals(other.language))
+			return false;
+		if (mirrored != other.mirrored)
+			return false;
+		if (orientation != other.orientation)
+			return false;
+		if (processingNeeded == null) {
+			if (other.processingNeeded != null)
+				return false;
+		} else if (!processingNeeded.equals(other.processingNeeded))
+			return false;
+		return true;
+	}
+
 }

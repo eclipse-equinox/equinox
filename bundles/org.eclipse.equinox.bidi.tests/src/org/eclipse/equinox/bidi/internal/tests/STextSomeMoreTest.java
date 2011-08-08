@@ -11,79 +11,37 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
-import org.eclipse.equinox.bidi.custom.*;
+import org.eclipse.equinox.bidi.advanced.*;
 
 /**
- * Tests some weird cases
+ * Test edge conditions.
  */
-
 public class STextSomeMoreTest extends STextTestBase {
 
 	final static STextEnvironment env1 = new STextEnvironment("en_US", false, STextEnvironment.ORIENT_LTR);
 	final static STextEnvironment env2 = new STextEnvironment("he", false, STextEnvironment.ORIENT_LTR);
 
-	class Processor1 extends STextProcessor {
-
-		public int getSpecialsCount(STextEnvironment env) {
-			return 1;
-		}
-
-		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
-			return fromIndex;
-		}
-
-		public int processSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
-			int len = text.length();
-			for (int i = len - 1; i >= 0; i--) {
-				STextProcessor.insertMark(text, charTypes, offsets, i);
-				STextProcessor.insertMark(text, charTypes, offsets, i);
-			}
-			return len;
-		}
-	}
-
-	class Processor2 extends STextProcessor {
-
-		public int getSpecialsCount(STextEnvironment env) {
-			return 1;
-		}
-
-	}
-
-	class Processor3 extends STextProcessor {
-
-		public int getSpecialsCount(STextEnvironment env) {
-			return 1;
-		}
-
-		public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
-			return fromIndex;
-		}
-	}
-
 	public void testSomeMore() {
 		assertFalse(env1.isProcessingNeeded());
 		assertTrue(env2.isProcessingNeeded());
 
-		STextProcessor processor = new Processor1();
-		String full = STextEngine.leanToFullText(processor, env1, "abcd", null);
+		STextProcessorNew processor1 = STextProcessorFactoryNew.getProcessor("test.Processor1", env1);
+		String full = processor1.leanToFullText("abcd");
 		assertEquals("@a@b@c@d", toPseudo(full));
 
-		processor = new Processor2();
+		STextProcessorNew processor2 = STextProcessorFactoryNew.getProcessor("test.Processor2", env1);
 		boolean catchFlag = false;
 		try {
-			full = STextEngine.leanToFullText(processor, env1, "abcd", null);
+			full = processor2.leanToFullText("abcd");
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch missing indexOfSpecial", catchFlag);
 
-		processor = new Processor3();
 		catchFlag = false;
+		STextProcessorNew processor3 = STextProcessorFactoryNew.getProcessor("test.Processor3", env1);
 		try {
-			full = STextEngine.leanToFullText(processor, env1, "abcd", null);
+			full = processor3.leanToFullText("abcd");
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}

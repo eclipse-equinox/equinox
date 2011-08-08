@@ -8,6 +8,7 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.2
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.equinox.bidi,
+ org.eclipse.equinox.bidi.advanced,
  org.eclipse.equinox.bidi.custom,
  org.eclipse.equinox.bidi.internal;x-internal:=true,
  org.eclipse.equinox.bidi.internal.consumable;x-internal:=true

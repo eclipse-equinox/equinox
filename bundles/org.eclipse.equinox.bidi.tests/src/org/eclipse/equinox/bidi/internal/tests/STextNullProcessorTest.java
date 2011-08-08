@@ -11,7 +11,6 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextEngine;
 
 /**
  * Tests null processor
@@ -21,6 +20,7 @@ public class STextNullProcessorTest extends STextTestBase {
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 
 	public void testNullProcessor() {
+		/* not needed
 		String full = STextEngine.leanToFullText(null, null, "abc", null);
 		assertEquals("leanToFullText", "abc", full);
 		int[] state = new int[1];
@@ -42,5 +42,6 @@ public class STextNullProcessorTest extends STextTestBase {
 		assertEquals("fullToLeanMap", array_display(model), array_display(map));
 		int direction = STextEngine.getCurDirection(null, null, "abc");
 		assertEquals("getCurDirection", STextEngine.DIR_LTR, direction);
+		*/
 	}
 }

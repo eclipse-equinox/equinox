@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.STextDirection;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
@@ -23,11 +24,7 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *  <ul>
  *    <li>Processor instances may be accessed simultaneously by
  *        several threads. They should have no instance variables.</li>
- *    <li>All the user methods in {@link STextEngine} implement a logic
- *        common to all processors, located in {@link STextImpl}.
- *        These methods all have a first argument which is a processor
- *        instance.
- *        The common logic uses processor methods to query the
+ *    <li>The common logic uses processor methods to query the
  *        characteristics of the specific processor:
  *        <ul>
  *          <li>the separators which separate the structured text into
@@ -57,7 +54,6 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *        conditionally (by calling {@link #processSeparator processSeparator}).</li>
  *  </ul>
  *
- * @see STextEngine
  * @author Matitiahu Allouche
  */
 public class STextProcessor {
@@ -83,8 +79,7 @@ public class STextProcessor {
 	 * Locate occurrences of special strings within a structured text
 	 * and return their indexes one after the other in successive calls.
 	 * <p>
-	 * This method is called repeatedly from the code implementing
-	 * {@link STextEngine#leanToFullText} if the number of special cases 
+	 * This method is called repeatedly if the number of special cases 
 	 * returned by {@link #getSpecialsCount} is greater than zero.
 	 * </p><p>
 	 * A processor handling special cases must override this method.
@@ -139,7 +134,7 @@ public class STextProcessor {
 
 	/**
 	 * This method handles special cases specific to this processor.
-	 * It is called by {@link STextEngine#leanToFullText} when a special case occurrence 
+	 * It is called when a special case occurrence 
 	 * is located by {@link #indexOfSpecial}.
 	 * <p>
 	 * If a special processing cannot be completed within a current call to
@@ -149,8 +144,7 @@ public class STextProcessor {
 	 * putting its value in the first element of the <code>state</code>
 	 * parameter.
 	 * The meaning of this state is internal to the processor.
-	 * On a later call to {@link STextEngine#leanToFullText} specifying that 
-	 * state value, <code>processSpecial</code> will be called with that value 
+	 * On a later call, <code>processSpecial</code> will be called with that value 
 	 * for parameter <code>caseNumber</code> and <code>-1</code> for parameter 
 	 * <code>separLocation</code> and should perform whatever initializations are required
 	 * depending on the state.
@@ -195,8 +189,8 @@ public class STextProcessor {
 	 *
 	 * @param  separLocation the position returned by
 	 *         {@link #indexOfSpecial indexOfSpecial}. In calls to
-	 *         {@link STextEngine#leanToFullText leanToFullText} and other
-	 *         methods of {@link STextEngine} specifying a  non-null
+	 *         {@link STextProcessorNew#leanToFullText leanToFullText} and other
+	 *         methods of {@link STextProcessorNew} specifying a  non-null
 	 *         <code>state</code> parameter, <code>processSpecial</code> is
 	 *         called when initializing the processing with the value of
 	 *         <code>caseNumber</code> equal to the value returned in the
@@ -329,10 +323,10 @@ public class STextProcessor {
 	 *         whether the structured text contains Arabic or Hebrew
 	 *         letters.<br>
 	 *         The value returned is either
-	 *         {@link STextEngine#DIR_LTR DIR_LTR} or {@link STextEngine#DIR_RTL DIR_RTL}.
+	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
 	 */
 	public int getDirection(STextEnvironment environment, String text) {
-		return STextEngine.DIR_LTR;
+		return STextDirection.DIR_LTR;
 	}
 
 	/**
@@ -358,10 +352,10 @@ public class STextProcessor {
 	 *         whether the structured text contains Arabic or Hebrew
 	 *         letters.<br>
 	 *         The value returned is either
-	 *         {@link STextEngine#DIR_LTR DIR_LTR} or {@link STextEngine#DIR_RTL DIR_RTL}.
+	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
 	 */
 	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
-		return STextEngine.DIR_LTR;
+		return STextDirection.DIR_LTR;
 	}
 
 	/**

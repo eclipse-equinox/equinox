@@ -26,7 +26,7 @@ final public class STextProcessorFactory {
 	 *  name=value
 	 * </pre>
 	 */
-	public static final STextProcessor PROC_PROPERTY = getProcessor("property"); //$NON-NLS-1$
+	public static final String PROPERTY = "property"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for compound names. It expects text to be made of one or more 
@@ -35,7 +35,7 @@ final public class STextProcessorFactory {
 	 *  part1_part2_part3
 	 * </pre>
 	 */
-	public static final STextProcessor PROC_UNDERSCORE = getProcessor("underscore"); //$NON-NLS-1$
+	public static final String UNDERSCORE = "underscore"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for comma-delimited lists, such as:
@@ -43,7 +43,7 @@ final public class STextProcessorFactory {
 	 *  part1,part2,part3
 	 * </pre>
 	 */
-	public static final STextProcessor PROC_COMMA_DELIMITED = getProcessor("comma"); //$NON-NLS-1$
+	public static final String COMMA_DELIMITED = "comma"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for strings with the following format:
@@ -51,47 +51,47 @@ final public class STextProcessorFactory {
 	 *  system(user)
 	 * </pre>
 	 */
-	public static final STextProcessor PROC_SYSTEM_USER = getProcessor("system"); //$NON-NLS-1$
+	public static final String SYSTEM_USER = "system"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for directory and file paths.
 	 */
-	public static final STextProcessor PROC_FILE = getProcessor("file"); //$NON-NLS-1$
+	public static final String FILE = "file"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for e-mail addresses.
 	 */
-	public static final STextProcessor PROC_EMAIL = getProcessor("email"); //$NON-NLS-1$
+	public static final String EMAIL = "email"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for URLs.
 	 */
-	public static final STextProcessor PROC_URL = getProcessor("url"); //$NON-NLS-1$
+	public static final String URL = "url"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for regular expressions, possibly spanning multiple lines.
 	 */
-	public static final STextProcessor PROC_REGEXP = getProcessor("regex"); //$NON-NLS-1$
+	public static final String REGEXP = "regex"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for XPath expressions.
 	 */
-	public static final STextProcessor PROC_XPATH = getProcessor("xpath"); //$NON-NLS-1$
+	public static final String XPATH = "xpath"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for Java code, possibly spanning multiple lines.
 	 */
-	public static final STextProcessor PROC_JAVA = getProcessor("java"); //$NON-NLS-1$
+	public static final String JAVA = "java"; //$NON-NLS-1$
 
 	/**
 	 * Structured text processor for SQL statements, possibly spanning multiple lines.
 	 */
-	public static final STextProcessor PROC_SQL = getProcessor("sql"); //$NON-NLS-1$
+	public static final String SQL = "sql"; //$NON-NLS-1$
 
 	/**
 	 *  Structured text processor for arithmetic expressions, possibly with a RTL base direction.
 	 */
-	public static final STextProcessor PROC_RTL_ARITHMETIC = getProcessor("math"); //$NON-NLS-1$
+	public static final String RTL_ARITHMETIC = "math"; //$NON-NLS-1$
 
 	/**
 	 * Prevents instantiation
@@ -117,7 +117,4 @@ final public class STextProcessorFactory {
 		return STextTypesCollector.getInstance().getProcessor(id);
 	}
 
-	static public STextProcessor getMultiProcessor(String id) {
-		return new STextProcessorMultipass();
-	}
 }

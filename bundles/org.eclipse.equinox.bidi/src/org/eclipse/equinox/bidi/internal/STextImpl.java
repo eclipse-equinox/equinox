@@ -10,18 +10,11 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.STextDirection;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
 import org.eclipse.equinox.bidi.custom.*;
 
-/**
- *  <code>STextImpl</code> provides the code which implements the API in
- *  {@link STextEngine}. All its public methods are shadows of similarly
- *  signed methods of <code>STextEngine</code>, and their documentation
- *  is by reference to the methods in <code>STextEngine</code>.
- *
- *  @author Matitiahu Allouche
- */
 public class STextImpl {
 
 	static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -101,13 +94,10 @@ public class STextImpl {
 		return nextLocation + (((long) idxLocation) << 32);
 	}
 
-	/**
-	 *  @see STextProcessor#processSeparator STextProcessor.processSeparator
-	 */
 	public static void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
 		int len = text.length();
 		int direction = charTypes.getDirection();
-		if (direction == STextEngine.DIR_RTL) {
+		if (direction == STextDirection.DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
 				byte charType = charTypes.getBidiTypeAt(i);
@@ -165,45 +155,45 @@ public class STextImpl {
 	/**
 	 *  When the orientation is <code>ORIENT_LTR</code> and the
 	 *  structured text has a RTL base direction,
-	 *  {@link STextEngine#leanToFullText leanToFullText}
+	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_RTL</code> and the
 	 *  structured text has a LTR base direction,
-	 *  {@link STextEngine#leanToFullText leanToFullText}
+	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
 	 *  to a RTL orientation while the structured text has a LTR base
-	 *  direction, {@link STextEngine#leanToFullText leanToFullText}
+	 *  direction, {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds LRM at the head of the <i>full</i> text.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
 	 *  to a LTR orientation while the structured text has a RTL base
-	 *  direction, {@link STextEngine#leanToFullText leanToFullText}
+	 *  direction, {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds RLM at the head of the <i>full</i> text.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the
 	 *  structured text has a LTR base direction,
-	 *  {@link STextEngine#leanToFullText leanToFullText}
+	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the
 	 *  structured text has a RTL base direction,
-	 *  {@link STextEngine#leanToFullText leanToFullText}
+	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
 	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_IGNORE</code>,
-	 *  {@link STextEngine#leanToFullText leanToFullText} does not add any directional
+	 *  {@link STextProcessorNew#leanToFullText leanToFullText} does not add any directional
 	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
 	 *  <p>
-	 *  @see STextEngine#leanToFullText STextEngine.leanToFullText
+	 *  @see STextProcessorNew#leanToFullText STextEngine.leanToFullText
 	 */
 	public static String leanToFullText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
@@ -252,9 +242,6 @@ public class STextImpl {
 		return new String(fullChars);
 	}
 
-	/**
-	 *  @see STextEngine#leanToFullMap STextEngine.leanToFullMap
-	 */
 	public static int[] leanToFullMap(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
@@ -275,9 +262,6 @@ public class STextImpl {
 		return map;
 	}
 
-	/**
-	 *  @see STextEngine#leanBidiCharOffsets STextEngine.leanBidiCharOffsets
-	 */
 	public static int[] leanBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
@@ -287,12 +271,20 @@ public class STextImpl {
 		return offsets.getArray();
 	}
 
+	/**
+	 *  Constant to use in the first element of the <code>state</code>
+	 *  argument when calling most methods of this class
+	 *  to indicate that there is no context of previous lines which
+	 *  should be initialized before performing the operation.
+	 */
+	public static final int STATE_INITIAL = 0; // TBD move
+
 	static STextOffsets leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextCharTypes charTypes) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		if (state == null) {
 			state = new int[1];
-			state[0] = STextEngine.STATE_INITIAL;
+			state[0] = STATE_INITIAL;
 		}
 		int len = text.length();
 		int direction = processor.getDirection(environment, text, charTypes);
@@ -306,10 +298,10 @@ public class STextImpl {
 			}
 			// current position
 			int curPos = 0;
-			if (state[0] > STextEngine.STATE_INITIAL) {
+			if (state[0] > STATE_INITIAL) {
 				offsets.ensureRoom();
 				int initState = state[0];
-				state[0] = STextEngine.STATE_INITIAL;
+				state[0] = STATE_INITIAL;
 				curPos = processor.processSpecial(environment, text, charTypes, offsets, state, initState, -1);
 			}
 			while (true) {
@@ -351,18 +343,11 @@ public class STextImpl {
 		return offsets;
 	}
 
-	/**
-	 *  @see STextEngine#fullToLeanText STextEngine.fullToLeanText
-	 */
 	public static String fullToLeanText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		if (text.length() == 0)
 			return text;
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
-		if (state == null) {
-			state = new int[1];
-			state[0] = STextEngine.STATE_INITIAL;
-		}
 		int dir = processor.getDirection(environment, text);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
@@ -446,9 +431,6 @@ public class STextImpl {
 		return lean;
 	}
 
-	/**
-	 *  @see STextEngine#fullToLeanMap STextEngine.fullToLeanMap
-	 */
 	public static int[] fullToLeanMap(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
@@ -480,9 +462,6 @@ public class STextImpl {
 		return map;
 	}
 
-	/**
-	 *  @see STextEngine#fullBidiCharOffsets STextEngine.fullBidiCharOffsets
-	 */
 	public static int[] fullBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)

@@ -10,8 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextEngine;
-import org.eclipse.equinox.bidi.STextEnvironment;
+import org.eclipse.equinox.bidi.STextDirection;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -20,7 +21,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *  <p>
  *  In applications like an editor where parts of the text might be modified
  *  while other parts are not, the user may want to call
- *  {@link STextEngine#leanToFullText leanToFullText}
+ *  {@link STextProcessorNew#leanToFullText}
  *  separately on each line and save the initial state of each line (this is
  *  the final state of the previous line which can be retrieved using
  *  the value returned in the first element of the <code>state</code> argument).
@@ -28,7 +29,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *  of a line and its initial state have not changed, the user can be sure that
  *  the last <i>full</i> text computed for this line has not changed either.
  *
- *  @see STextEngine#leanToFullText explanation of state in leanToFullText
+ *  @see STextProcessorNew#leanToFullText explanation of state in leanToFullText
  *
  *  @author Matitiahu Allouche
  */
@@ -219,7 +220,7 @@ public class STextRegex extends STextProcessor {
 	}
 
 	/**
-	 *  @return {@link STextEngine#DIR_RTL DIR_RTL} if the following
+	 *  @return {@link STextDirection#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
 	 *          <ul>
 	 *            <li>The current locale (as expressed by the environment
@@ -228,22 +229,22 @@ public class STextRegex extends STextProcessor {
 	 *            <li>If there is no strong character in the text, the
 	 *                GUI is mirrored.
 	 *          </ul>
-	 *          Otherwise, returns {@link STextEngine#DIR_LTR DIR_LTR}.
+	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
 	 */
 	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
-			return STextEngine.DIR_LTR;
+			return STextDirection.DIR_LTR;
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
 			if (charType == AL || charType == R)
-				return STextEngine.DIR_RTL;
+				return STextDirection.DIR_RTL;
 			if (charType == L)
-				return STextEngine.DIR_LTR;
+				return STextDirection.DIR_LTR;
 		}
 		if (environment.getMirrored())
-			return STextEngine.DIR_RTL;
-		return STextEngine.DIR_LTR;
+			return STextDirection.DIR_RTL;
+		return STextDirection.DIR_LTR;
 	}
 
 }
