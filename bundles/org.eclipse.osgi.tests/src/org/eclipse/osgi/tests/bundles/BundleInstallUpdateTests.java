@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,16 @@
 package org.eclipse.osgi.tests.bundles;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.CollisionHook;
 
 public class BundleInstallUpdateTests extends AbstractBundleTests {
 	public static Test suite() {
@@ -193,6 +196,53 @@ public class BundleInstallUpdateTests extends AbstractBundleTests {
 			} catch (BundleException e) {
 				// nothing
 			}
+		}
+	}
+
+	public void testCollisionHook() throws BundleException, MalformedURLException, IOException {
+		Bundle test1 = installer.installBundle("test");
+		installer.installBundle("test2");
+		try {
+			test1.update(new URL(installer.getBundleLocation("test2")).openStream());
+			fail("Expected to fail to update to another bsn/version that causes collision");
+		} catch (BundleException e) {
+			// expected;
+		}
+		Bundle junk = null;
+		try {
+			junk = OSGiTestsActivator.getContext().installBundle("junk", new URL(installer.getBundleLocation("test2")).openStream());
+			fail("Expected to fail to install duplication bsn/version that causes collision");
+		} catch (BundleException e) {
+			// expected;
+		} finally {
+			if (junk != null)
+				junk.uninstall();
+			junk = null;
+		}
+
+		CollisionHook hook = new CollisionHook() {
+			public void filterCollisions(int operationType, Bundle target, Collection collisionCandidates) {
+				collisionCandidates.clear();
+			}
+		};
+		ServiceRegistration reg = OSGiTestsActivator.getContext().registerService(CollisionHook.class, hook, null);
+		try {
+			try {
+				test1.update(new URL(installer.getBundleLocation("test2")).openStream());
+			} catch (BundleException e) {
+				fail("Expected to succeed in updating to a duplicate bsn/version", e);
+			}
+			try {
+				junk = OSGiTestsActivator.getContext().installBundle("junk", new URL(installer.getBundleLocation("test2")).openStream());
+			} catch (BundleException e) {
+				fail("Expected to succeed to install duplication bsn/version that causes collision", e);
+			} finally {
+				if (junk != null)
+					junk.uninstall();
+				junk = null;
+			}
+		} finally {
+			reg.unregister();
 		}
 	}
 }

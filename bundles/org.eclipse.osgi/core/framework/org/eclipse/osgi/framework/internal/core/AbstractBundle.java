@@ -29,6 +29,7 @@ import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.signedcontent.*;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.wiring.*;
 
@@ -660,7 +661,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 		try {
 			BundleData newBundleData = storage.begin();
 			// Must call framework createBundle to check execution environment.
-			final AbstractBundle newBundle = framework.createAndVerifyBundle(newBundleData, false);
+			final AbstractBundle newBundle = framework.createAndVerifyBundle(CollisionHook.UPDATING, this, newBundleData, false);
 			boolean exporting;
 			int st = getState();
 			synchronized (bundles) {

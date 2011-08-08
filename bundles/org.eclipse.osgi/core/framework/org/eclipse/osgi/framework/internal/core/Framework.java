@@ -33,8 +33,7 @@ import org.eclipse.osgi.signedcontent.SignedContentFactory;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.bundle.EventHook;
-import org.osgi.framework.hooks.bundle.FindHook;
+import org.osgi.framework.hooks.bundle.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -77,6 +76,10 @@ public class Framework implements EventPublisher, Runnable {
 	protected StartLevelManager startLevelManager;
 	/** The ServiceRegistry */
 	private ServiceRegistry serviceRegistry;
+	private final int BSN_VERSION;
+	private static final int BSN_VERSION_SINGLE = 1;
+	private static final int BSN_VERSION_MULTIPLE = 2;
+	private static final int BSN_VERSION_MANAGED = 3;
 
 	/*
 	 * The following maps objects keep track of event listeners
@@ -99,6 +102,7 @@ public class Framework implements EventPublisher, Runnable {
 	protected static final int BATCHEVENT_END = Integer.MIN_VALUE;
 	static final String eventHookName = EventHook.class.getName();
 	static final String findHookName = FindHook.class.getName();
+	static final String collisionHookName = CollisionHook.class.getName();
 	/** EventManager for event delivery. */
 	protected EventManager eventManager;
 	/* Reservation object for install synchronization */
@@ -110,7 +114,6 @@ public class Framework implements EventPublisher, Runnable {
 	private boolean bootDelegateAll = false;
 	public final boolean contextBootDelegation = "true".equals(FrameworkProperties.getProperty("osgi.context.bootdelegation", "true")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	public final boolean compatibiltyBootDelegation = "true".equals(FrameworkProperties.getProperty(Constants.OSGI_COMPATIBILITY_BOOTDELEGATION, "true")); //$NON-NLS-1$ //$NON-NLS-2$
-	private final boolean allowDuplicateBSNVersion = Constants.FRAMEWORK_BSNVERSION_MULTIPLE.equals(FrameworkProperties.getProperty(Constants.FRAMEWORK_BSNVERSION));
 	private final boolean allowRefreshDuplicateBSN = Boolean.TRUE.toString().equals(FrameworkProperties.getProperty(Constants.REFRESH_DUPLICATE_BSN, "true")); //$NON-NLS-1$
 	ClassLoaderDelegateHook[] delegateHooks;
 	private volatile boolean forcedRestart = false;
@@ -159,20 +162,19 @@ public class Framework implements EventPublisher, Runnable {
 	 *  
 	 */
 	public Framework(FrameworkAdaptor adaptor) {
-		initialize(adaptor);
-	}
-
-	/**
-	 * Initialize the framework to an unlaunched state. This method is called
-	 * by the Framework constructor.
-	 *  
-	 */
-	protected void initialize(FrameworkAdaptor initAdaptor) {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logEnter("Framework.initialze()", null); //$NON-NLS-1$
+		String bsnVersion = FrameworkProperties.getProperty(Constants.FRAMEWORK_BSNVERSION);
+		if (Constants.FRAMEWORK_BSNVERSION_SINGLE.equals(bsnVersion)) {
+			BSN_VERSION = BSN_VERSION_SINGLE;
+		} else if (Constants.FRAMEWORK_BSNVERSION_MULTIPLE.equals(bsnVersion)) {
+			BSN_VERSION = BSN_VERSION_MULTIPLE;
+		} else {
+			BSN_VERSION = BSN_VERSION_MANAGED;
+		}
 		long start = System.currentTimeMillis();
-		this.adaptor = initAdaptor;
-		delegateHooks = initAdaptor instanceof BaseAdaptor ? ((BaseAdaptor) initAdaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
+		this.adaptor = adaptor;
+		delegateHooks = adaptor instanceof BaseAdaptor ? ((BaseAdaptor) adaptor).getHookRegistry().getClassLoaderDelegateHooks() : null;
 		active = false;
 		installSecurityManager();
 		if (Debug.DEBUG_SECURITY) {
@@ -183,11 +185,11 @@ public class Framework implements EventPublisher, Runnable {
 		// initialize ContextFinder
 		initializeContextFinder();
 		/* initialize the adaptor */
-		initAdaptor.initialize(this);
+		adaptor.initialize(this);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "adapter initialized"); //$NON-NLS-1$//$NON-NLS-2$
 		try {
-			initAdaptor.initializeStorage();
+			adaptor.initializeStorage();
 		} catch (IOException e) /* fatal error */{
 			throw new RuntimeException(e.getMessage(), e);
 		}
@@ -197,12 +199,12 @@ public class Framework implements EventPublisher, Runnable {
 		 * This must be done before calling any of the framework getProperty
 		 * methods.
 		 */
-		initializeProperties(initAdaptor.getProperties());
+		initializeProperties(adaptor.getProperties());
 		/* initialize admin objects */
 		packageAdmin = new PackageAdminImpl(this);
 		try {
 			// always create security admin even with security off
-			securityAdmin = new SecurityAdmin(null, this, initAdaptor.getPermissionStorage());
+			securityAdmin = new SecurityAdmin(null, this, adaptor.getPermissionStorage());
 		} catch (IOException e) /* fatal error */{
 			e.printStackTrace();
 			throw new RuntimeException(e.getMessage(), e);
@@ -227,13 +229,13 @@ public class Framework implements EventPublisher, Runnable {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done createSystemBundle"); //$NON-NLS-1$ //$NON-NLS-2$
 		/* install URLStreamHandlerFactory */
-		installURLStreamHandlerFactory(systemBundle.context, initAdaptor);
+		installURLStreamHandlerFactory(systemBundle.context, adaptor);
 		/* install ContentHandlerFactory for OSGi URLStreamHandler support */
-		installContentHandlerFactory(systemBundle.context, initAdaptor);
+		installContentHandlerFactory(systemBundle.context, adaptor);
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("Framework.initialze()", "done new URLStream/Content HandlerFactory"); //$NON-NLS-1$//$NON-NLS-2$
 		/* create bundle objects for all installed bundles. */
-		BundleData[] bundleDatas = initAdaptor.getInstalledBundles();
+		BundleData[] bundleDatas = adaptor.getInstalledBundles();
 		bundles = new BundleRepository(bundleDatas == null ? 10 : bundleDatas.length + 1);
 		/* add the system bundle to the Bundle Repository */
 		bundles.add(systemBundle);
@@ -703,14 +705,20 @@ public class Framework implements EventPublisher, Runnable {
 
 	/**
 	 * Create a new Bundle object.
-	 * 
 	 * @param bundledata the BundleData of the Bundle to create
 	 */
-	AbstractBundle createAndVerifyBundle(BundleData bundledata, boolean setBundle) throws BundleException {
+	AbstractBundle createAndVerifyBundle(int operationType, Bundle target, BundleData bundledata, boolean setBundle) throws BundleException {
 		// Check for a bundle already installed with the same symbolic name and version.
-		if (!allowDuplicateBSNVersion && bundledata.getSymbolicName() != null) {
-			AbstractBundle installedBundle = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
-			if (installedBundle != null && installedBundle.getBundleId() != bundledata.getBundleID()) {
+		if (BSN_VERSION != BSN_VERSION_MULTIPLE && bundledata.getSymbolicName() != null) {
+			List<AbstractBundle> installedBundles = getBundleBySymbolicName(bundledata.getSymbolicName(), bundledata.getVersion());
+			if (operationType == CollisionHook.UPDATING) {
+				installedBundles.remove(target);
+			}
+			if (BSN_VERSION == BSN_VERSION_MANAGED && !installedBundles.isEmpty()) {
+				notifyCollisionHooks(operationType, target, installedBundles);
+			}
+			if (!installedBundles.isEmpty()) {
+				Bundle installedBundle = installedBundles.iterator().next();
 				String msg = NLS.bind(Msg.BUNDLE_INSTALL_SAME_UNIQUEID, new Object[] {installedBundle.getSymbolicName(), installedBundle.getVersion().toString(), installedBundle.getLocation()});
 				throw new DuplicateBundleException(msg, installedBundle);
 			}
@@ -825,7 +833,7 @@ public class Framework implements EventPublisher, Runnable {
 	 *            then the location is used to get the bundle content.
 	 * @return The Bundle of the installed bundle.
 	 */
-	AbstractBundle installBundle(final String location, final InputStream in, BundleContext origin) throws BundleException {
+	AbstractBundle installBundle(final String location, final InputStream in, final BundleContextImpl origin) throws BundleException {
 		if (Debug.DEBUG_GENERAL) {
 			Debug.println("install from inputstream: " + location + ", " + in); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -835,7 +843,7 @@ public class Framework implements EventPublisher, Runnable {
 				/* Map the InputStream or location to a URLConnection */
 				URLConnection source = in != null ? new BundleSource(in) : adaptor.mapLocationToURLConnection(location);
 				/* call the worker to install the bundle */
-				return installWorkerPrivileged(location, source, callerContext);
+				return installWorkerPrivileged(location, source, callerContext, origin);
 			}
 		}, origin);
 	}
@@ -919,16 +927,20 @@ public class Framework implements EventPublisher, Runnable {
 	 *            The location identifier of the bundle to install.
 	 * @param source
 	 *            The URLConnection from which the bundle will be read.
+	 * @param callerContext
+	 *            The caller access control context
+	 * @param origin 
+	 *            The origin bundle context that is installing the the bundle
 	 * @return The {@link AbstractBundle}of the installed bundle.
 	 * @exception BundleException
 	 *                If the provided stream cannot be read.
 	 */
-	protected AbstractBundle installWorkerPrivileged(String location, URLConnection source, AccessControlContext callerContext) throws BundleException {
+	protected AbstractBundle installWorkerPrivileged(String location, URLConnection source, AccessControlContext callerContext, BundleContextImpl origin) throws BundleException {
 		BundleOperation storage = adaptor.installBundle(location, source);
 		final AbstractBundle bundle;
 		try {
 			BundleData bundledata = storage.begin();
-			bundle = createAndVerifyBundle(bundledata, true);
+			bundle = createAndVerifyBundle(CollisionHook.INSTALLING, origin.getBundle(), bundledata, true);
 
 			BundleWatcher bundleStats = adaptor.getBundleWatcher();
 			if (bundleStats != null)
@@ -1022,17 +1034,16 @@ public class Framework implements EventPublisher, Runnable {
 	}
 
 	/**
-	 * Retrieve the bundle that has the given symbolic name and version.
+	 * Retrieve the bundles that has the given symbolic name and version.
 	 * 
 	 * @param symbolicName
 	 *            The symbolic name of the bundle to retrieve
 	 * @param version The version of the bundle to retrieve
-	 * @return A {@link AbstractBundle}object, or <code>null</code> if the
-	 *         identifier doesn't match any installed bundle.
+	 * @return A collection of {@link AbstractBundle} that match the symbolic name and version
 	 */
-	public AbstractBundle getBundleBySymbolicName(String symbolicName, Version version) {
+	public List<AbstractBundle> getBundleBySymbolicName(String symbolicName, Version version) {
 		synchronized (bundles) {
-			return bundles.getBundle(symbolicName, version);
+			return bundles.getBundles(symbolicName, version);
 		}
 	}
 
@@ -1109,6 +1120,41 @@ public class Framework implements EventPublisher, Runnable {
 
 			public String getHookMethodName() {
 				return "find"; //$NON-NLS-1$ 
+			}
+		});
+	}
+
+	private void notifyCollisionHooks(final int operationType, final Bundle target, List<AbstractBundle> collisionCandidates) {
+		final Collection<Bundle> shrinkable = new ShrinkableCollection<Bundle>(collisionCandidates);
+		if (System.getSecurityManager() == null) {
+			notifyCollisionHooksPriviledged(operationType, target, shrinkable);
+		} else {
+			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				public Object run() {
+					notifyCollisionHooksPriviledged(operationType, target, shrinkable);
+					return null;
+				}
+			});
+		}
+	}
+
+	void notifyCollisionHooksPriviledged(final int operationType, final Bundle target, final Collection<Bundle> collisionCandidates) {
+		if (Debug.DEBUG_HOOKS) {
+			Debug.println("notifyCollisionHooks(" + operationType + ", " + target + ", " + collisionCandidates + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		}
+		getServiceRegistry().notifyHooksPrivileged(new HookContext() {
+			public void call(Object hook, ServiceRegistration<?> hookRegistration) throws Exception {
+				if (hook instanceof CollisionHook) {
+					((CollisionHook) hook).filterCollisions(operationType, target, collisionCandidates);
+				}
+			}
+
+			public String getHookClassName() {
+				return collisionHookName;
+			}
+
+			public String getHookMethodName() {
+				return "filterCollisions"; //$NON-NLS-1$ 
 			}
 		});
 	}
@@ -1209,7 +1255,7 @@ public class Framework implements EventPublisher, Runnable {
 	 * @param symbolicName
 	 *            The symbolic name for the bundle
 	 * @return Bundle object for bundle with the specified Unique or null if no
-	 *         bundle is installed with the specified location.
+	 *         bundle is installed with the specified symbolicName.
 	 */
 	protected AbstractBundle[] getBundleBySymbolicName(String symbolicName) {
 		synchronized (bundles) {

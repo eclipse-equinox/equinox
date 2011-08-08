@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,18 +68,22 @@ public final class BundleRepository {
 		return bundlesBySymbolicName.get(symbolicName);
 	}
 
-	public synchronized AbstractBundle getBundle(String symbolicName, Version version) {
+	@SuppressWarnings("unchecked")
+	public synchronized List<AbstractBundle> getBundles(String symbolicName, Version version) {
 		AbstractBundle[] bundles = getBundles(symbolicName);
+		List<AbstractBundle> result = null;
 		if (bundles != null) {
 			if (bundles.length > 0) {
 				for (int i = 0; i < bundles.length; i++) {
 					if (bundles[i].getVersion().equals(version)) {
-						return bundles[i];
+						if (result == null)
+							result = new ArrayList<AbstractBundle>();
+						result.add(bundles[i]);
 					}
 				}
 			}
 		}
-		return null;
+		return result == null ? Collections.EMPTY_LIST : result;
 	}
 
 	public synchronized void add(AbstractBundle bundle) {
