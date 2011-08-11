@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,9 @@ public class Base64 {
 	final static private byte BASE64_PADDING = 126;
 	final static private byte BASE64_INVALID = 127;
 
-	static private byte[] decodeTable = null;
+	final static private byte[] decodeTable = new byte[256];
 
-	synchronized static private void init() {
-		decodeTable = new byte[256];
+	static {
 		for (int i = 0; i < 256; i++)
 			decodeTable[i] = BASE64_INVALID;
 
@@ -47,8 +46,6 @@ public class Base64 {
 	static public byte[] decode(String str) {
 		if (str == null)
 			return null;
-		if (decodeTable == null)
-			init();
 
 		// eliminate all unexpected characters (might have EOLs inserted)
 		char[] source = str.toCharArray();
