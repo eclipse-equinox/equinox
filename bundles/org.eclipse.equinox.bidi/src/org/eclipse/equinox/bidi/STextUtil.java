@@ -62,7 +62,7 @@ public final class STextUtil {
 	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
 	 * be added depending on the value of the <code>affix</code> argument.
 	 * </p>
-	 * @see STextProcessorNew#leanBidiCharOffsets(String)
+	 * @see ISTextExpert#leanBidiCharOffsets(String)
 	 * 
 	 * @param  text the structured text string
 	 * @param  offsets an array of offsets to characters in <code>text</code>
@@ -189,7 +189,7 @@ public final class STextUtil {
 
 		// make sure that LRE/PDF are added around the string
 		STextProcessor processor = new STextProcessor(separators);
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		ISTextExpert processorNew = STextExpertFactory.getExpert(processor, env);
 		return processorNew.leanToFullText(str);
 	}
 
@@ -214,7 +214,7 @@ public final class STextUtil {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		ISTextExpert processorNew = STextExpertFactory.getExpert(processor, env);
 		return processorNew.leanToFullText(str);
 	}
 
@@ -262,7 +262,7 @@ public final class STextUtil {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(processor, env);
+		ISTextExpert processorNew = STextExpertFactory.getExpert(processor, env);
 		return processorNew.fullToLeanText(str);
 	}
 

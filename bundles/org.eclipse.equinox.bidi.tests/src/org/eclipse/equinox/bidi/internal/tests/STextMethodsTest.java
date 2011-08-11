@@ -47,38 +47,30 @@ public class STextMethodsTest extends STextTestBase {
 
 	private void doTestState() {
 		String data, lean, full, model;
-		int[] state = new int[1];
-		state[0] = -1;
-		//processor = STextProcessorFactory.PROC_JAVA;
-
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getMultipassProcessor(STextProcessorFactory.JAVA);
+		ISTextExpert expert = STextExpertFactory.getPrivateExpert(STextProcessorFactory.JAVA);
 
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, null, lean, state);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 
 		model = "A@=B@+C@;/* D=E+F;";
 		assertEquals("full1", model, toPseudo(full));
 		data = "A=B+C; D=E+F;";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, null, lean, state);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 
 		model = "A=B+C; D=E+F;";
 		assertEquals("full2", model, toPseudo(full));
 		data = "A=B+C;*/ D=E+F;";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, null, lean, state);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 
 		model = "A=B+C;@*/ D@=E@+F;";
 		assertEquals("full3", model, toPseudo(full));
 	}
 
 	private void doTestOrientation() {
-		int orient;
-		orient = STextEnvironment.DEFAULT.getOrientation();
+		int orient = STextEnvironment.DEFAULT.getOrientation();
 		assertEquals("orient #1", STextEnvironment.ORIENT_LTR, orient);
 
 		orient = envIGN.getOrientation();
@@ -94,19 +86,16 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestOrient(String processorDefID, String label, String data, String resLTR, String resRTL, String resCon) {
 		String full, lean;
 
-		STextProcessorNew processorLTR = STextProcessorFactoryNew.getProcessor(processorDefID, envLTR);
-		STextProcessorNew processorRTL = STextProcessorFactoryNew.getProcessor(processorDefID, envRTL);
-		STextProcessorNew processorCRL = STextProcessorFactoryNew.getProcessor(processorDefID, envCRL);
+		ISTextExpert expertLTR = STextExpertFactory.getExpert(processorDefID, envLTR);
+		ISTextExpert expertRTL = STextExpertFactory.getExpert(processorDefID, envRTL);
+		ISTextExpert expertCRL = STextExpertFactory.getExpert(processorDefID, envCRL);
 
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, envLTR, lean, null);
-		full = processorLTR.leanToFullText(lean);
+		full = expertLTR.leanToFullText(lean);
 		assertEquals(label + "LTR full", resLTR, toPseudo(full));
-		//full = STextEngine.leanToFullText(processor, envRTL, lean, null);
-		full = processorRTL.leanToFullText(lean);
+		full = expertRTL.leanToFullText(lean);
 		assertEquals("label + RTL full", resRTL, toPseudo(full));
-		//full = STextEngine.leanToFullText(processor, envCRL, lean, null);
-		full = processorCRL.leanToFullText(lean);
+		full = expertCRL.leanToFullText(lean);
 		assertEquals(label + "CON full", resCon, toPseudo(full));
 	}
 
@@ -117,25 +106,20 @@ public class STextMethodsTest extends STextTestBase {
 
 	private void doTestLeanOffsets() {
 		String lean, data, label;
-		int[] state = new int[1];
-		//processor = STextProcessorFactory.PROC_JAVA;
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getMultipassProcessor(STextProcessorFactory.JAVA);
+		ISTextExpert expert = STextExpertFactory.getExpert(STextProcessorFactory.JAVA);
 
 		int[] offsets;
 		int[] model;
 
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
-		state[0] = -1;
-		//offsets = STextEngine.leanBidiCharOffsets(processor, null, lean, state);
-		offsets = processorNew.leanBidiCharOffsets(lean);
+		offsets = expert.leanBidiCharOffsets(lean);
 		model = new int[] {1, 3, 5};
 		label = "leanBidiCharOffsets() #1 ";
 		assertEquals(label, array_display(model), array_display(offsets));
 		data = "A=B+C;*/ D=E+F;";
 		lean = toUT16(data);
-		//offsets = STextEngine.leanBidiCharOffsets(processor, null, lean, state);
-		offsets = processorNew.leanBidiCharOffsets(lean);
+		offsets = expert.leanBidiCharOffsets(lean);
 		model = new int[] {6, 10, 12};
 		label = "leanBidiCharOffsets() #2 ";
 		assertEquals(label, array_display(model), array_display(offsets));
@@ -144,28 +128,21 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestFullOffsets(String label, String data, int[] resLTR, int[] resRTL, int[] resCon) {
 		String full, lean, msg;
 		int[] offsets;
-		//		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getMultipassProcessor(STextProcessorFactory.COMMA_DELIMITED, envLTR);
-		STextProcessorNew processorRTL = STextProcessorFactoryNew.getMultipassProcessor(STextProcessorFactory.COMMA_DELIMITED, envRTL);
-		STextProcessorNew processorCLR = STextProcessorFactoryNew.getMultipassProcessor(STextProcessorFactory.COMMA_DELIMITED, envCLR);
+		ISTextExpert expertLTR = STextExpertFactory.getExpert(STextProcessorFactory.COMMA_DELIMITED, envLTR);
+		ISTextExpert expertRTL = STextExpertFactory.getExpert(STextProcessorFactory.COMMA_DELIMITED, envRTL);
+		ISTextExpert expertCLR = STextExpertFactory.getExpert(STextProcessorFactory.COMMA_DELIMITED, envCLR);
 
 		lean = toUT16(data);
-		//		full = STextEngine.leanToFullText(processor, envLTR, lean, null);
-		full = processorNew.leanToFullText(lean);
-		//		offsets = STextEngine.fullBidiCharOffsets(processor, envLTR, full, null);
-		offsets = processorNew.fullBidiCharOffsets(full);
+		full = expertLTR.leanToFullText(lean);
+		offsets = expertLTR.fullBidiCharOffsets(full);
 		msg = label + "LTR ";
 		assertEquals(msg, array_display(resLTR), array_display(offsets));
-		//full = STextEngine.leanToFullText(processor, envRTL, lean, null);
-		full = processorRTL.leanToFullText(lean);
-		//offsets = STextEngine.fullBidiCharOffsets(processor, envRTL, full, null);
-		offsets = processorRTL.fullBidiCharOffsets(full);
+		full = expertRTL.leanToFullText(lean);
+		offsets = expertRTL.fullBidiCharOffsets(full);
 		msg = label + "RTL ";
 		assertEquals(msg, array_display(resRTL), array_display(offsets));
-		//full = STextEngine.leanToFullText(processor, envCLR, lean, null);
-		full = processorCLR.leanToFullText(lean);
-		//		offsets = STextEngine.fullBidiCharOffsets(processor, envCLR, full, null);
-		offsets = processorCLR.fullBidiCharOffsets(full);
+		full = expertCLR.leanToFullText(lean);
+		offsets = expertCLR.fullBidiCharOffsets(full);
 		msg = label + "CON ";
 		assertEquals(msg, array_display(resCon), array_display(offsets));
 	}
@@ -182,79 +159,74 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestDirection() {
 		String data, lean, full, model;
 		int dirA, dirH;
-		STextProcessorNew processorRL = STextProcessorFactoryNew.getProcessor("test.MyCommaRL");
-		dirA = processorRL.getCurDirection(toUT16("###"));
-		dirH = processorRL.getCurDirection(toUT16("ABC"));
+		ISTextExpert expertRL = STextExpertFactory.getExpert("test.MyCommaRL");
+		dirA = expertRL.getCurDirection(toUT16("###"));
+		dirH = expertRL.getCurDirection(toUT16("ABC"));
 		assertTrue("TestDirection #1", dirA == RTL && dirH == LTR);
 
-		STextProcessorNew processorRR = STextProcessorFactoryNew.getProcessor("test.MyCommaRR");
-		dirA = processorRR.getCurDirection(toUT16("###"));
-		dirH = processorRR.getCurDirection(toUT16("ABC"));
+		ISTextExpert expertRR = STextExpertFactory.getExpert("test.MyCommaRR");
+		dirA = expertRR.getCurDirection(toUT16("###"));
+		dirH = expertRR.getCurDirection(toUT16("ABC"));
 		assertTrue("TestDirection #2", dirA == RTL && dirH == RTL);
 
-		STextProcessorNew processorLL = STextProcessorFactoryNew.getProcessor("test.MyCommaLL");
+		ISTextExpert expertLL = STextExpertFactory.getExpert("test.MyCommaLL");
 		lean = toUT16("ABC,#DEF,HOST,com");
-		full = processorLL.leanToFullText(lean);
+		full = expertLL.leanToFullText(lean);
 		assertEquals("TestDirection #9 full", "ABC@,#DEF@,HOST,com", toPseudo(full));
 
 		lean = toUT16("ABC,DEF,HOST,com");
-		full = processorLL.leanToFullText(lean);
+		full = expertLL.leanToFullText(lean);
 
 		assertEquals("TestDirection #10 full", "ABC@,DEF@,HOST,com", toPseudo(full));
 
 		STextEnvironment environment = new STextEnvironment(null, true, STextEnvironment.ORIENT_LTR);
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor("test.MyCommaRL", environment);
-		dirA = processorNew.getCurDirection(toUT16("###"));
-		dirH = processorNew.getCurDirection(toUT16("ABC"));
+		ISTextExpert expert = STextExpertFactory.getExpert("test.MyCommaRL", environment);
+		dirA = expert.getCurDirection(toUT16("###"));
+		dirH = expert.getCurDirection(toUT16("ABC"));
 		assertTrue("TestDirection #10.5", dirA == RTL && dirH == LTR);
 
 		lean = toUT16("ABC,#DEF,HOST,com");
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 		assertEquals("TestDirection #11 full", "<&ABC,#DEF,HOST,com&^", toPseudo(full));
 
 		data = "ABc,#DEF,HOSt,COM";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, environment, lean, null);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 		model = "<&ABc,#DEF,HOSt,COM&^";
 		assertEquals("TestDirection #12 full", model, toPseudo(full));
 
 		data = "ABc,#DEF,HOSt,";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, environment, lean, null);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 		model = "<&ABc,#DEF,HOSt,&^";
 		assertEquals("TestDirection #13 full", model, toPseudo(full));
 
 		data = "ABC,DEF,HOST,com";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, environment, lean, null);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 		model = "ABC@,DEF@,HOST,com";
 		assertEquals("TestDirection #14 full", model, toPseudo(full));
 
 		data = "--,---,----";
 		lean = toUT16(data);
-		//full = STextEngine.leanToFullText(processor, environment, lean, null);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 		model = "--,---,----";
 		assertEquals("TestDirection #15 full", model, toPseudo(full));
 
 		data = "ABC,|DEF,HOST,com";
 		lean = toUT16(data);
-		//		full = STextEngine.leanToFullText(processor, environment, lean, null);
-		full = processorNew.leanToFullText(lean);
+		full = expert.leanToFullText(lean);
 
 		model = "ABC,|DEF@,HOST,com";
 		assertEquals("TestDirection #16 full", model, toPseudo(full));
 
 		data = "ABc,|#DEF,HOST,com";
 		lean = toUT16(data);
-		processorNew = STextProcessorFactoryNew.getProcessor("test.MyCommaRL", envRTLMIR);
-		full = processorNew.leanToFullText(lean);
+		expert = STextExpertFactory.getExpert("test.MyCommaRL", envRTLMIR);
+		full = expert.leanToFullText(lean);
 		model = "ABc,|#DEF,HOST,com";
 		assertEquals("TestDirection #17 full", model, toPseudo(full));
-		int dir = processorNew.getCurDirection(lean);
+		int dir = expert.getCurDirection(lean);
 		assertEquals("Test curDirection", RTL, dir);
 	}
 
@@ -286,12 +258,10 @@ public class STextMethodsTest extends STextTestBase {
 
 		doTestDirection();
 
-		STextProcessorNew processorNew = STextProcessorFactoryNew.getProcessor(STextProcessorFactory.COMMA_DELIMITED);
-		//		processor = STextProcessorFactory.PROC_COMMA_DELIMITED;
+		ISTextExpert expert = STextExpertFactory.getExpert(STextProcessorFactory.COMMA_DELIMITED);
 		String data = "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z";
 		String lean = toUT16(data);
-		//String full = STextEngine.leanToFullText(processor, null, lean, null);
-		String full = processorNew.leanToFullText(lean);
+		String full = expert.leanToFullText(lean);
 		String model = "A@,B@,C@,D@,E@,F@,G@,H@,I@,J@,K@,L@,M@,N@,O@,P@,Q@,R@,S@,T@,U@,V@,W@,X@,Y@,Z";
 		assertEquals("many inserts", model, toPseudo(full));
 	}

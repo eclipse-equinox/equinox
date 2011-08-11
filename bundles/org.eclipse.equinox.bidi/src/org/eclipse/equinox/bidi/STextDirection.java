@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 
+// TBD combine with STextUtil; remove duplicates of those two constants
 public interface STextDirection {
 
 	/**

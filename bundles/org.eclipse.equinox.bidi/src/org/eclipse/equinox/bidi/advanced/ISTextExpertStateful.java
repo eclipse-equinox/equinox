@@ -10,11 +10,15 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.advanced;
 
-public interface STextProcessorMultipassNew extends STextProcessorNew {
+public interface ISTextExpertStateful extends ISTextExpert {
+
+	public void setState(int state);
+
+	public int getState();
 
 	/**
 	 * Resets non-shared processor state to initial.
 	 */
-	public void reset();
+	public void resetState();
 
 }

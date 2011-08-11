@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.*;
 
 public class STextImpl {
@@ -155,45 +155,45 @@ public class STextImpl {
 	/**
 	 *  When the orientation is <code>ORIENT_LTR</code> and the
 	 *  structured text has a RTL base direction,
-	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_RTL</code> and the
 	 *  structured text has a LTR base direction,
-	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
 	 *  to a RTL orientation while the structured text has a LTR base
-	 *  direction, {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  direction, {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds LRM at the head of the <i>full</i> text.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_CONTEXTUAL_LTR</code> or
 	 *  <code>ORIENT_CONTEXTUAL_RTL</code> and the data content would resolve
 	 *  to a LTR orientation while the structured text has a RTL base
-	 *  direction, {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  direction, {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds RLM at the head of the <i>full</i> text.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the
 	 *  structured text has a LTR base direction,
-	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds LRE+LRM at the head of the <i>full</i> text and LRM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_UNKNOWN</code> and the
 	 *  structured text has a RTL base direction,
-	 *  {@link STextProcessorNew#leanToFullText leanToFullText}
+	 *  {@link ISTextExpert#leanToFullText leanToFullText}
 	 *  adds RLE+RLM at the head of the <i>full</i> text and RLM+PDF at its
 	 *  end.
 	 *  <p>
 	 *  When the orientation is <code>ORIENT_IGNORE</code>,
-	 *  {@link STextProcessorNew#leanToFullText leanToFullText} does not add any directional
+	 *  {@link ISTextExpert#leanToFullText leanToFullText} does not add any directional
 	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
 	 *  <p>
-	 *  @see STextProcessorNew#leanToFullText STextEngine.leanToFullText
+	 *  @see ISTextExpert#leanToFullText STextEngine.leanToFullText
 	 */
 	public static String leanToFullText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();

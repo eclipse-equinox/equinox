@@ -11,64 +11,51 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
+import org.eclipse.equinox.bidi.STextProcessorFactory;
 import org.eclipse.equinox.bidi.advanced.*;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
 
 /**
  * Tests fullToLean method
  */
-
 public class STextFullToLeanTest extends STextTestBase {
 
-	static final STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
-	static final STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
+	private static final STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
+	private static final STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
 
-	STextProcessor processor;
-	String descriptorID;
+	private String type;
 
 	private void doTest1(String msg, String data, String leanLTR, String fullLTR, int[] l2fMapLTR, int[] f2lMapLTR, String leanRTL, String fullRTL, int[] l2fMapRTL, int[] f2lMapRTL) {
 		String text, full, lean, label;
 		int[] map;
 
 		text = toUT16(data);
-		//lean = STextEngine.fullToLeanText(processor, envLTR, text, null);
-		// XXX
-		STextProcessorNew processorLTR = STextProcessorFactoryNew.getProcessor(descriptorID, envLTR);
-		lean = processorLTR.fullToLeanText(text);
+		ISTextExpert expertLTR = STextExpertFactory.getExpert(type, envLTR);
+		lean = expertLTR.fullToLeanText(text);
 
 		assertEquals(msg + "LTR lean", leanLTR, toPseudo(lean));
-		//full = STextEngine.leanToFullText(processor, envLTR, lean, null);
-		full = processorLTR.leanToFullText(lean);
+		full = expertLTR.leanToFullText(lean);
 
 		assertEquals(msg + "LTR full", fullLTR, toPseudo(full));
-		//map = STextEngine.leanToFullMap(processor, envLTR, lean, null);
-		map = processorLTR.leanToFullMap(lean);
+		map = expertLTR.leanToFullMap(lean);
 
 		label = msg + "leanToFullMap() LTR";
 		assertEquals(label, array_display(l2fMapLTR), array_display(map));
-		// map = STextEngine.fullToLeanMap(processor, envLTR, text, null);
-		map = processorLTR.fullToLeanMap(text);
+		map = expertLTR.fullToLeanMap(text);
 
 		label = msg + "fullToLeanMap() LTR";
 		assertEquals(label, array_display(f2lMapLTR), array_display(map));
 
-		STextProcessorNew processorRTL = STextProcessorFactoryNew.getProcessor(descriptorID, envRTL);
-
-		//lean = STextEngine.fullToLeanText(processor, envRTL, text, null);
-		lean = processorRTL.fullToLeanText(text);
-
+		ISTextExpert expertRTL = STextExpertFactory.getExpert(type, envRTL);
+		lean = expertRTL.fullToLeanText(text);
 		assertEquals(msg + "RTL lean", leanRTL, toPseudo(lean));
-		//full = STextEngine.leanToFullText(processor, envRTL, lean, null);
-		full = processorRTL.leanToFullText(lean);
+		full = expertRTL.leanToFullText(lean);
 
 		assertEquals(msg + "RTL full", fullRTL, toPseudo(full));
-		//map = STextEngine.leanToFullMap(processor, envRTL, lean, null);
-		map = processorRTL.leanToFullMap(lean);
+		map = expertRTL.leanToFullMap(lean);
 
 		label = msg + "leanToFullMap() RTL";
 		assertEquals(label, array_display(l2fMapRTL), array_display(map));
-		//map = STextEngine.fullToLeanMap(processor, envRTL, text, null);
-		map = processorRTL.fullToLeanMap(text);
+		map = expertRTL.fullToLeanMap(text);
 
 		label = msg + "fullToLeanMap() RTL";
 		assertEquals(label, array_display(f2lMapRTL), array_display(map));
@@ -76,69 +63,54 @@ public class STextFullToLeanTest extends STextTestBase {
 
 	private void doTest2(String msg) {
 		String text, data, full, lean, model;
-		int[] state = new int[1];
 		int state1, state2, state3;
 
 		data = "update \"AB_CDE\" set \"COL1\"@='01', \"COL2\"@='02' /* GH IJK";
 		text = toUT16(data);
-		state[0] = -1;
-		//lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
+		ISTextExpertStateful expertLTR = STextExpertFactory.getPrivateExpert(type, envLTR);
+		expertLTR.setState(-1);
+		lean = expertLTR.fullToLeanText(text);
 
-		// XXX state = -1?
-		STextProcessorNew processorLTR = STextProcessorFactoryNew.getMultipassProcessor(descriptorID, envLTR);
-		lean = processorLTR.fullToLeanText(text);
-
-		state1 = state[0];
+		state1 = expertLTR.getState();
 		model = "update \"AB_CDE\" set \"COL1\"='01', \"COL2\"='02' /* GH IJK";
 		assertEquals(msg + "LTR lean", model, toPseudo(lean));
-		state[0] = -1;
-		//full = STextEngine.leanToFullText(processor, envLTR, lean, state);
-		// XXX state = -1?
-		STextProcessorNew processorLTR2 = STextProcessorFactoryNew.getMultipassProcessor(descriptorID, envLTR);
-		full = processorLTR2.leanToFullText(lean);
+		ISTextExpertStateful expertLTR2 = STextExpertFactory.getPrivateExpert(type, envLTR);
+		expertLTR2.setState(-1);
+		full = expertLTR2.leanToFullText(lean);
 
 		assertEquals(msg + "LTR full", data, toPseudo(full));
-		assertEquals(msg + "state from leanToFullText", state1, state[0]);
+		assertEquals(msg + "state from leanToFullText", state1, expertLTR2.getState());
 		data = "THIS IS A COMMENT LINE";
 		text = toUT16(data);
-		state[0] = state1;
-		// lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
-		lean = processorLTR.fullToLeanText(text);
+		expertLTR.setState(state1);
+		lean = expertLTR.fullToLeanText(text);
 
-		state2 = state[0];
+		state2 = expertLTR.getState();
 		model = "THIS IS A COMMENT LINE";
 		assertEquals(msg + "LTR lean2", model, toPseudo(lean));
-		state[0] = state1;
-		//full = STextEngine.leanToFullText(processor, envLTR, lean, state);
-		full = processorLTR2.leanToFullText(lean);
+		expertLTR2.setState(state1);
+		full = expertLTR2.leanToFullText(lean);
 
 		assertEquals(msg + "LTR full2", data, toPseudo(full));
-		assertEquals(msg + "state from leanToFullText2", state2, state[0]);
+		assertEquals(msg + "state from leanToFullText2", state2, expertLTR2.getState());
 		data = "SOME MORE */ where \"COL3\"@=123";
 		text = toUT16(data);
 
-		state[0] = state2;
-		//lean = STextEngine.fullToLeanText(processor, envLTR, text, state);
-		lean = processorLTR.fullToLeanText(text);
+		expertLTR.setState(state2);
+		lean = expertLTR.fullToLeanText(text);
 
-		state3 = state[0];
+		state3 = expertLTR.getState();
 		model = "SOME MORE */ where \"COL3\"=123";
 		assertEquals(msg + "LTR lean3", model, toPseudo(lean));
-		state[0] = state2;
 
-		/* XXX this does not work, need re-do
-		// XXX state?
-		//full = STextEngine.leanToFullText(processor, envLTR, lean, state);
-		full = processorLTR.leanToFullText(lean);
-
+		expertLTR.setState(state2);
+		full = expertLTR.leanToFullText(lean);
 		assertEquals(msg + "LTR full3", data, toPseudo(full));
-		assertEquals(msg + "state from leanToFullText3", state3, state[0]);
-		*/
+		assertEquals(msg + "state from leanToFullText3", state3, expertLTR.getState());
 	}
 
 	public void testFullToLean() {
-
-		descriptorID = "comma";
+		type = STextProcessorFactory.COMMA_DELIMITED;
 		doTest1("testFullToLean #1 - ", "", "", "", new int[0], new int[0], "", "", new int[0], new int[0]);
 		int[] map1 = new int[] {0, 1, 2, 3, 4};
 		int[] map2 = new int[] {2, 3, 4, 5, 6};
@@ -285,7 +257,7 @@ public class STextFullToLeanTest extends STextTestBase {
 		doTest1("testFullToLean #37 - ", ">>>@@@@@^^^", "", "", map1, map2, "", "", map1, map2);
 
 		// test fullToLeanText with initial state
-		descriptorID = "sql";
+		type = STextProcessorFactory.SQL;
 		doTest2("testFullToLean #38 - ");
 	}
 }

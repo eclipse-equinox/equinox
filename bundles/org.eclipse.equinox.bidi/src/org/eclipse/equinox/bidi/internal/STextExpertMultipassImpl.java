@@ -11,10 +11,10 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.STextProcessorMultipassNew;
+import org.eclipse.equinox.bidi.advanced.ISTextExpertStateful;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
-public class STextProcessorMultipassImplNew extends STextProcessorImplNew implements STextProcessorMultipassNew {
+public class STextExpertMultipassImpl extends STextExpertImpl implements ISTextExpertStateful {
 
 	/**
 	 *  Constant to use in the first element of the <code>state</code>
@@ -24,11 +24,11 @@ public class STextProcessorMultipassImplNew extends STextProcessorImplNew implem
 	 */
 	public static final int STATE_INITIAL = 0;
 
-	private int[] state;
+	private int[] state = new int[] {STATE_INITIAL};
 
-	public STextProcessorMultipassImplNew(STextProcessor structuredTextDescriptor, STextEnvironment environment) {
+	public STextExpertMultipassImpl(STextProcessor structuredTextDescriptor, STextEnvironment environment) {
 		super(structuredTextDescriptor, environment);
-		reset();
+		resetState();
 	}
 
 	public String leanToFullText(String text) {
@@ -59,8 +59,16 @@ public class STextProcessorMultipassImplNew extends STextProcessorImplNew implem
 		return structuredTextDescriptor.getDirection(environment, text);
 	}
 
-	public void reset() {
-		state = new int[] {STATE_INITIAL};
+	public void resetState() {
+		state[0] = STATE_INITIAL;
+	}
+
+	public void setState(int newState) {
+		state[0] = newState;
+	}
+
+	public int getState() {
+		return state[0];
 	}
 
 }

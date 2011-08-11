@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.custom;
 
 import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
@@ -189,8 +189,8 @@ public class STextProcessor {
 	 *
 	 * @param  separLocation the position returned by
 	 *         {@link #indexOfSpecial indexOfSpecial}. In calls to
-	 *         {@link STextProcessorNew#leanToFullText leanToFullText} and other
-	 *         methods of {@link STextProcessorNew} specifying a  non-null
+	 *         {@link ISTextExpert#leanToFullText leanToFullText} and other
+	 *         methods of {@link ISTextExpert} specifying a  non-null
 	 *         <code>state</code> parameter, <code>processSpecial</code> is
 	 *         called when initializing the processing with the value of
 	 *         <code>caseNumber</code> equal to the value returned in the

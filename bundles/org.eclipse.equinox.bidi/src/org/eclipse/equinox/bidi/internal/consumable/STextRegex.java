@@ -12,7 +12,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -21,7 +21,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *  <p>
  *  In applications like an editor where parts of the text might be modified
  *  while other parts are not, the user may want to call
- *  {@link STextProcessorNew#leanToFullText}
+ *  {@link ISTextExpert#leanToFullText}
  *  separately on each line and save the initial state of each line (this is
  *  the final state of the previous line which can be retrieved using
  *  the value returned in the first element of the <code>state</code> argument).
@@ -29,7 +29,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *  of a line and its initial state have not changed, the user can be sure that
  *  the last <i>full</i> text computed for this line has not changed either.
  *
- *  @see STextProcessorNew#leanToFullText explanation of state in leanToFullText
+ *  @see ISTextExpert#leanToFullText explanation of state in leanToFullText
  *
  *  @author Matitiahu Allouche
  */

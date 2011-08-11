@@ -19,17 +19,18 @@ import org.eclipse.equinox.bidi.advanced.*;
  */
 public class STextMathTest extends STextTestBase {
 
-	static final STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
-	static final STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
+	private STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
+	private STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
+
+	private ISTextExpert expertLTR = STextExpertFactory.getExpert(STextProcessorFactory.RTL_ARITHMETIC, envLTR);
+	private ISTextExpert expertRTL = STextExpertFactory.getExpert(STextProcessorFactory.RTL_ARITHMETIC, envRTL);
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
-		STextProcessorNew processorLTR = STextProcessorFactoryNew.getProcessor(STextProcessorFactory.RTL_ARITHMETIC, envLTR);
 		String lean = toUT16(data);
-		String fullLTR = processorLTR.leanToFullText(lean);
+		String fullLTR = expertLTR.leanToFullText(lean);
 		assertEquals(msg + " LTR - ", resLTR, toPseudo(fullLTR));
 
-		STextProcessorNew processorRTL = STextProcessorFactoryNew.getProcessor(STextProcessorFactory.RTL_ARITHMETIC, envRTL);
-		String fullRTL = processorRTL.leanToFullText(lean);
+		String fullRTL = expertRTL.leanToFullText(lean);
 		assertEquals(msg + " RTL - ", resRTL, toPseudo(fullRTL));
 	}
 
@@ -46,6 +47,5 @@ public class STextMathTest extends STextTestBase {
 		verifyOneLine("Math #8", "8#BC*DE", "<&8#BC*DE&^", "8#BC*DE");
 		verifyOneLine("Math #9", "9#BC/DE", "<&9#BC/DE&^", "9#BC/DE");
 		verifyOneLine("Math #10", "10ab+cd-ef", "10ab+cd-ef", ">@10ab+cd-ef@^");
-
 	}
 }

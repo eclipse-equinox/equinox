@@ -11,17 +11,18 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.STextProcessorNew;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextProcessor;
 
-public class STextProcessorImplNew implements STextProcessorNew {
+public class STextExpertImpl implements ISTextExpert {
 
 	protected STextProcessor structuredTextDescriptor;
 	protected STextEnvironment environment;
 
+	// XXX potentially problematic - implementation might write into it?
 	private final static int[] initialState = new int[] {0};
 
-	public STextProcessorImplNew(STextProcessor structuredTextDescriptor, STextEnvironment environment) {
+	public STextExpertImpl(STextProcessor structuredTextDescriptor, STextEnvironment environment) {
 		this.structuredTextDescriptor = structuredTextDescriptor;
 		this.environment = environment;
 	}

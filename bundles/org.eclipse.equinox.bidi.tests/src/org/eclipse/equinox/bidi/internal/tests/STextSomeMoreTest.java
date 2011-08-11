@@ -25,23 +25,23 @@ public class STextSomeMoreTest extends STextTestBase {
 		assertFalse(env1.isProcessingNeeded());
 		assertTrue(env2.isProcessingNeeded());
 
-		STextProcessorNew processor1 = STextProcessorFactoryNew.getProcessor("test.Processor1", env1);
-		String full = processor1.leanToFullText("abcd");
+		ISTextExpert expert1 = STextExpertFactory.getExpert("test.Processor1", env1);
+		String full = expert1.leanToFullText("abcd");
 		assertEquals("@a@b@c@d", toPseudo(full));
 
-		STextProcessorNew processor2 = STextProcessorFactoryNew.getProcessor("test.Processor2", env1);
+		ISTextExpert expert2 = STextExpertFactory.getExpert("test.Processor2", env1);
 		boolean catchFlag = false;
 		try {
-			full = processor2.leanToFullText("abcd");
+			full = expert2.leanToFullText("abcd");
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch missing indexOfSpecial", catchFlag);
 
 		catchFlag = false;
-		STextProcessorNew processor3 = STextProcessorFactoryNew.getProcessor("test.Processor3", env1);
+		ISTextExpert expert3 = STextExpertFactory.getExpert("test.Processor3", env1);
 		try {
-			full = processor3.leanToFullText("abcd");
+			full = expert3.leanToFullText("abcd");
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}

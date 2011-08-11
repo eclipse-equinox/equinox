@@ -74,7 +74,7 @@ package org.eclipse.equinox.bidi.advanced;
  *  @author Matitiahu Allouche
  *
  */
-public interface STextProcessorNew {
+public interface ISTextExpert {
 
 	/**
 	 *  Constant specifying that the base direction of a structured text is LTR.
