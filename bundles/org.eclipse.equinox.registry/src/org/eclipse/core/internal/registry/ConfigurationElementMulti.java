@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		return getTranslatedAtIndex(index, locale);
 	}
 
-	private String getTranslatedAtIndex(int index, String locale) {
+	synchronized private String getTranslatedAtIndex(int index, String locale) {
 		String[] translated = null;
 		if (!translatedProperties.containsKey(locale)) {
 			String[] propertiesNonTranslated = getNonTranslated();
@@ -88,19 +88,19 @@ public class ConfigurationElementMulti extends ConfigurationElement {
 		return propertiesNonTranslated;
 	}
 
-	int getNumCachedLocales() {
+	synchronized int getNumCachedLocales() {
 		return translatedProperties.getSzie();
 	}
 
-	String[] getCachedLocales() {
+	synchronized String[] getCachedLocales() {
 		return translatedProperties.getKeys();
 	}
 
-	String[][] getCachedTranslations() {
+	synchronized String[][] getCachedTranslations() {
 		return translatedProperties.getValues();
 	}
 
-	void setTranslatedProperties(DirectMap translated) {
+	synchronized void setTranslatedProperties(DirectMap translated) {
 		translatedProperties = translated;
 	}
 
