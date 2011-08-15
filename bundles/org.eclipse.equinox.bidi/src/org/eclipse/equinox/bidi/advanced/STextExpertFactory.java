@@ -77,7 +77,7 @@ final public class STextExpertFactory {
 	}
 
 	static public ISTextExpert getExpert(STextTypeHandler handler, STextEnvironment environment) {
-		return new STextImpl(handler, environment, new int[1]);
+		return new STextImpl(handler, environment, STextState.createState());
 	}
 
 	static public ISTextExpertStateful getPrivateExpert(String type) {
@@ -88,7 +88,7 @@ final public class STextExpertFactory {
 		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 		if (handler == null)
 			return null;
-		return new STextImpl(handler, environment, new int[1]);
+		return new STextImpl(handler, environment, STextState.createState());
 	}
 
 }

@@ -12,9 +12,9 @@ package org.eclipse.equinox.bidi.advanced;
 
 public interface ISTextExpertStateful extends ISTextExpert {
 
-	public void setState(int state);
+	public void setState(Object state);
 
-	public int getState();
+	public Object getState();
 
 	/**
 	 * Resets non-shared expert state to initial.

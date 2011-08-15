@@ -12,8 +12,8 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import java.util.Locale;
-import org.eclipse.equinox.bidi.STextProcessor;
 import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
+import org.eclipse.equinox.bidi.STextProcessor;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**

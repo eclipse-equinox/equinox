@@ -61,8 +61,7 @@ package org.eclipse.equinox.bidi.advanced;
  * code in order to obtain the <i>full</i>
  * text corresponding to the <i>lean</i> text of each line.
  * <pre>
- *   int[] state = new int[1];
- *   state[0] = STextEngine.STATE_INITIAL;
+ *   Object state = STextState.createState();
  *   String leanText = "int i = 3; // first Java statement";
  *   String fullText = STextEngine.leanToFullText(STextEngine.PROC_JAVA, null, leanText, state);
  *   System.out.println("full text = " + fullText);

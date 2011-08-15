@@ -58,7 +58,7 @@ public abstract class STextDelims extends STextTypeHandler {
 	 *  @return the position after the matching end delimiter, or the length
 	 *          of <code>text</code> if no end delimiter is found.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);

@@ -10,11 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.*;
 import org.eclipse.equinox.bidi.internal.STextActivator;
-import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
  *  <code>STextJava</code> is a handler for structured text
@@ -38,6 +36,7 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
 public class STextJava extends STextTypeHandler {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
 	static final String lineSep = STextActivator.getInstance().getProperty("line.separator"); //$NON-NLS-1$
+	private static final Integer INTEGER_3 = new Integer(3);
 
 	public STextJava() {
 		super("[](){}.+-<>=~!&*/%^|?:,;\t"); //$NON-NLS-1$
@@ -83,10 +82,12 @@ public class STextJava extends STextTypeHandler {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
+	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
 		int location, counter, i;
 
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
+		if (separLocation < 0)
+			caseNumber = ((Integer) STextState.getValueAndReset(state)).intValue();
 		switch (caseNumber) {
 			case 1 : /* space */
 				separLocation++;
@@ -115,7 +116,7 @@ public class STextJava extends STextTypeHandler {
 					location = separLocation + 2; // skip the opening slash-aster
 				location = text.indexOf("*/", location); //$NON-NLS-1$
 				if (location < 0) {
-					STextImpl.setState(state, caseNumber);
+					STextState.setValue(state, INTEGER_3);
 					return text.length();
 				}
 				// we need to call processSeparator since text may follow the
