@@ -23,12 +23,11 @@ public class STextTestSuite extends TestSuite {
 	public STextTestSuite() {
 		addTestSuite(STextExtensibilityTest.class);
 		addTestSuite(STextMethodsTest.class);
-		addTestSuite(STextNullProcessorTest.class);
 		addTestSuite(STextFullToLeanTest.class);
 		addTestSuite(STextExtensionsTest.class);
 		addTestSuite(STextMathTest.class);
 		addTestSuite(STextSomeMoreTest.class);
-		addTestSuite(STextUtilTest.class);
+		addTestSuite(STextProcessorTest.class);
 		addTestSuite(STextStringRecordTest.class);
 	}
 }

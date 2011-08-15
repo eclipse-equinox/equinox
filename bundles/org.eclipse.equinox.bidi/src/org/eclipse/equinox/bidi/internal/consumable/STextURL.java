@@ -10,12 +10,12 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Processor adapted to processing URLs.
+ *  Handler adapted to processing URLs.
  */
-public class STextURL extends STextProcessor {
+public class STextURL extends STextTypeHandler {
 	public STextURL() {
 		super(":?#/@.[]"); //$NON-NLS-1$
 	}

@@ -11,12 +11,13 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
+import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
- *  <code>STextRegex</code> is a processor for regular expressions.
+ *  <code>STextRegex</code> is a handler for regular expressions.
  *  Such expressions may span multiple lines.
  *  <p>
  *  In applications like an editor where parts of the text might be modified
@@ -33,7 +34,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *
  *  @author Matitiahu Allouche
  */
-public class STextRegex extends STextProcessor {
+public class STextRegex extends STextTypeHandler {
 	static final String[] startStrings = {"", /*  0 *//* dummy *///$NON-NLS-1$
 			"(?#", /*  1 *//* comment (?#...) *///$NON-NLS-1$
 			"(?<", /*  2 *//* named group (?<name> *///$NON-NLS-1$
@@ -65,9 +66,9 @@ public class STextRegex extends STextProcessor {
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
 
 	/**
-	 *  This method retrieves the number of special cases handled by this processor.
+	 *  This method retrieves the number of special cases handled by this handler.
 	 *  
-	 *  @return the number of special cases for this processor.
+	 *  @return the number of special cases for this handler.
 	 */
 	public int getSpecialsCount(STextEnvironment environment) {
 		return maxSpecial;
@@ -154,13 +155,13 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+					STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 					// skip the opening "(?#"
 					location = separLocation + 3;
 				}
 				location = text.indexOf(')', location);
 				if (location < 0) {
-					state[0] = caseNumber;
+					STextImpl.setState(state, caseNumber);
 					return text.length();
 				}
 				return location + 1;
@@ -170,7 +171,7 @@ public class STextRegex extends STextProcessor {
 			case 5 : /* conditional named back reference (?(<name>) */
 			case 6 : /* conditional named back reference (?('name') */
 			case 7 : /* named parentheses reference (?&name) */
-				STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+				STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 				// no need for calling processSeparator() for the following cases
 				//   since the starting string contains a L char
 			case 8 : /* named group (?P<name> */
@@ -194,20 +195,20 @@ public class STextRegex extends STextProcessor {
 					// initial state from previous line
 					location = 0;
 				} else {
-					STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+					STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 					// skip the opening "\Q"
 					location = separLocation + 2;
 				}
 				location = text.indexOf("\\E", location); //$NON-NLS-1$
 				if (location < 0) {
-					state[0] = caseNumber;
+					STextImpl.setState(state, caseNumber);
 					return text.length();
 				}
 				// set the charType for the "E" to L (Left to Right character)
 				charTypes.setBidiTypeAt(location + 1, L);
 				return location + 2;
 			case 18 : /* R, AL, AN, EN */
-				STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+				STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 				return separLocation + 1;
 
 		}

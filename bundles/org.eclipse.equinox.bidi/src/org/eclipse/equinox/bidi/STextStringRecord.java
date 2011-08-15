@@ -25,7 +25,7 @@ import java.lang.ref.SoftReference;
  * A string may be itself entirely a structured text, or it may contain
  * segments each of which is a structured text of a given type. Each such
  * segment is identified by its starting and ending offsets within the
- * string, and by the processor which is appropriate to handle it.
+ * string, and by the handler which is appropriate to handle it.
  */
 public class STextStringRecord {
 	/**
@@ -57,8 +57,8 @@ public class STextStringRecord {
 	// reference to the recorded string
 	private String string;
 
-	// reference to the processors of the STT segments in the recorded string
-	private String[] processors;
+	// reference to the handlers of the STT segments in the recorded string
+	private String[] handlers;
 
 	// reference to the boundaries of the STT segments in the recorded string
 	// (entries 0, 2, 4, ... are start offsets; entries 1, 3, 5, ... are
@@ -74,7 +74,7 @@ public class STextStringRecord {
 
 	/**
 	 * Record a string in the pool. The caller must specify the number
-	 * of segments in the record (at least 1), and the processor, starting
+	 * of segments in the record (at least 1), and the handler, starting
 	 * and ending offsets for the first segment.
 	 *
 	 * @param  string the string to record.
@@ -82,9 +82,9 @@ public class STextStringRecord {
 	 * @param  segmentCount number of segments allowed in this string.
 	 *         This number must be >= 1.
 	 *
-	 * @param  processor the processor appropriate to handle the type
+	 * @param  handler the handler appropriate to handle the type
 	 *         of structured text present in the first segment.
-	 *         It may be one of the pre-defined processor instances, or it may be an instance
+	 *         It may be one of the pre-defined handler instances, or it may be an instance
 	 *         created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the first
@@ -102,7 +102,7 @@ public class STextStringRecord {
 	 *         if <code>segmentCount</code> is less than 1.
 	 * @throws also the same exceptions as {@link #addSegment addSegment}.
 	 */
-	public static STextStringRecord addRecord(String string, int segmentCount, String processorID, int start, int limit) {
+	public static STextStringRecord addRecord(String string, int segmentCount, String handlerID, int start, int limit) {
 		if (string == null)
 			throw new IllegalArgumentException("The string argument must not be null!"); //$NON-NLS-1$
 		if (segmentCount < 1)
@@ -124,24 +124,24 @@ public class STextStringRecord {
 		}
 		hashArray[last] = string.hashCode();
 		for (int i = 0; i < record.usedSegmentCount; i++)
-			record.processors[i] = null;
+			record.handlers[i] = null;
 		if (segmentCount > record.totalSegmentCount) {
-			record.processors = new String[segmentCount];
+			record.handlers = new String[segmentCount];
 			record.boundaries = new short[segmentCount * 2];
 			record.totalSegmentCount = segmentCount;
 		}
 		record.usedSegmentCount = 0;
 		record.string = string;
-		record.addSegment(processorID, start, limit);
+		record.addSegment(handlerID, start, limit);
 		return record;
 	}
 
 	/**
 	 * Add a second or further segment to a record.
 	 *
-	 * @param  processor the processor appropriate to handle the type
+	 * @param  handler the handler appropriate to handle the type
 	 *         of structured text present in this segment.
-	 *         It may be one of the pre-defined processor instances, or it may be an instance
+	 *         It may be one of the pre-defined handler instances, or it may be an instance
 	 *         created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the
@@ -151,7 +151,7 @@ public class STextStringRecord {
 	 *         greater than the <code>start</code> argument and not greater
 	 *         than the length of the string.
 	 *
-	 * @throws IllegalArgumentException if <code>processor</code> is null,
+	 * @throws IllegalArgumentException if <code>handler</code> is null,
 	 *         or if <code>start</code> or <code>limit</code> have invalid
 	 *         values.
 	 * @throws IllegalStateException if the current segment exceeds the
@@ -159,16 +159,16 @@ public class STextStringRecord {
 	 *         in the call to {@link #addRecord addRecord} which created
 	 *         the STextStringRecord instance.
 	 */
-	public void addSegment(String processorID, int start, int limit) {
-		if (processorID == null)
-			throw new IllegalArgumentException("The processor argument must not be null!"); //$NON-NLS-1$
+	public void addSegment(String handlerID, int start, int limit) {
+		if (handlerID == null)
+			throw new IllegalArgumentException("The handler argument must not be null!"); //$NON-NLS-1$
 		if (start < 0 || start >= string.length())
 			throw new IllegalArgumentException("The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
 		if (limit <= start || limit > string.length())
 			throw new IllegalArgumentException("The limit position must be greater than the start position but no greater than the length of the string!"); //$NON-NLS-1$
 		if (usedSegmentCount >= totalSegmentCount)
 			throw new IllegalStateException("All segments of the record are already used!"); //$NON-NLS-1$
-		processors[usedSegmentCount] = processorID;
+		handlers[usedSegmentCount] = handlerID;
 		boundaries[usedSegmentCount * 2] = (short) start;
 		boundaries[usedSegmentCount * 2 + 1] = (short) limit;
 		usedSegmentCount++;
@@ -184,8 +184,8 @@ public class STextStringRecord {
 	 *         records this string.<br>
 	 *         Once a record has been found, the number of its segments can
 	 *         be retrieved using {@link #getSegmentCount getSegmentCount},
-	 *         its processor can
-	 *         be retrieved using {@link #getProcessor getProcessor},
+	 *         its handler can
+	 *         be retrieved using {@link #getHandler getHandler},
 	 *         its starting offset can
 	 *         be retrieved using {@link #getStart getStart},
 	 *         its ending offset can
@@ -236,7 +236,7 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Retrieve the processor of a given segment.
+	 * Retrieve the handler of a given segment.
 	 *
 	 * @param  segmentNumber number of the segment about which information
 	 *         is required. It must be >= 0 and less than the number of
@@ -244,7 +244,7 @@ public class STextStringRecord {
 	 *         in the call to {@link #addRecord addRecord} which created
 	 *         the STextStringRecord instance.
 	 *
-	 * @return the processor to handle the structured text in the segment
+	 * @return the handler to handle the structured text in the segment
 	 *         specified by <code>segmentNumber</code>.
 	 *
 	 * @throws IllegalArgumentException if <code>segmentNumber</code>
@@ -252,9 +252,9 @@ public class STextStringRecord {
 	 *
 	 * @see    #getSegmentCount
 	 */
-	public String getProcessor(int segmentNumber) {
+	public String getHandler(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
-		return processors[segmentNumber];
+		return handlers[segmentNumber];
 	}
 
 	/**
@@ -315,7 +315,7 @@ public class STextStringRecord {
 			if (record == null)
 				continue;
 			record.boundaries = null;
-			record.processors = null;
+			record.handlers = null;
 			record.totalSegmentCount = 0;
 			record.usedSegmentCount = 0;
 			recordRefs[i].clear();

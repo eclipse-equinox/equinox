@@ -11,11 +11,10 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
- *  A base processor for structured text composed of text segments separated 
+ *  A base handler for structured text composed of text segments separated 
  *  by separators where the text segments may include delimited parts within 
  *  which separators are treated like regular characters.
  *  <p>
@@ -23,7 +22,7 @@ import org.eclipse.equinox.bidi.custom.*;
  *  </p>
  *  @author Matitiahu Allouche
  */
-public abstract class STextDelims extends STextProcessor {
+public abstract class STextDelims extends STextTypeHandler {
 
 	public STextDelims() {
 		// placeholder
@@ -60,7 +59,7 @@ public abstract class STextDelims extends STextProcessor {
 	 *          of <code>text</code> if no end delimiter is found.
 	 */
 	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
 		loc = text.indexOf(delim, loc);

@@ -13,13 +13,13 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Processor adapted to processing arithmetic expressions with
+ *  Handler adapted to processing arithmetic expressions with
  *  a possible right-to-left base direction.
  */
-public class STextMath extends STextProcessor {
+public class STextMath extends STextTypeHandler {
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
 	static final byte R = Character.DIRECTIONALITY_RIGHT_TO_LEFT;
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;

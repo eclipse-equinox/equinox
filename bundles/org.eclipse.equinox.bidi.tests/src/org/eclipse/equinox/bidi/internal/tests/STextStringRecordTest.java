@@ -11,8 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextProcessorFactory;
 import org.eclipse.equinox.bidi.STextStringRecord;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 
 /**
  *	Tests the StringRecord class	
@@ -24,7 +24,7 @@ public class STextStringRecordTest extends STextTestBase {
 		// check handling of invalid arguments
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord(null, 1, STextProcessorFactory.EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(null, 1, STextTypeHandlerFactory.EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
@@ -35,38 +35,38 @@ public class STextStringRecordTest extends STextTestBase {
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
-		assertTrue("Catch null processor argument", catchFlag);
+		assertTrue("Catch null handler argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 0, STextProcessorFactory.EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord("abc", 0, STextTypeHandlerFactory.EMAIL, 0, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid segment count argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.EMAIL, -1, 1);
+			sr = STextStringRecord.addRecord("abc", 1, STextTypeHandlerFactory.EMAIL, -1, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid start argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.EMAIL, 4, 1);
+			sr = STextStringRecord.addRecord("abc", 1, STextTypeHandlerFactory.EMAIL, 4, 1);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid start argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.EMAIL, 0, 0);
+			sr = STextStringRecord.addRecord("abc", 1, STextTypeHandlerFactory.EMAIL, 0, 0);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch invalid limit argument", catchFlag);
 		catchFlag = false;
 		try {
-			sr = STextStringRecord.addRecord("abc", 1, STextProcessorFactory.EMAIL, 0, 5);
+			sr = STextStringRecord.addRecord("abc", 1, STextTypeHandlerFactory.EMAIL, 0, 5);
 		} catch (IllegalArgumentException e) {
 			catchFlag = true;
 		}
@@ -78,7 +78,7 @@ public class STextStringRecordTest extends STextTestBase {
 		assertEquals(null, sr);
 		for (int i = 0; i < lim; i++) {
 			String str = Integer.toString(i);
-			sr = STextStringRecord.addRecord(str, 1, STextProcessorFactory.EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(str, 1, STextTypeHandlerFactory.EMAIL, 0, 1);
 		}
 		sr = STextStringRecord.getRecord(null);
 		assertEquals(null, sr);
@@ -96,7 +96,7 @@ public class STextStringRecordTest extends STextTestBase {
 
 		for (int i = lim; i <= poolSize; i++) {
 			String str = Integer.toString(i);
-			sr = STextStringRecord.addRecord(str, 1, STextProcessorFactory.EMAIL, 0, 1);
+			sr = STextStringRecord.addRecord(str, 1, STextTypeHandlerFactory.EMAIL, 0, 1);
 		}
 		for (int i = 1; i <= poolSize; i++) {
 			String str = Integer.toString(i);
@@ -105,20 +105,20 @@ public class STextStringRecordTest extends STextTestBase {
 		}
 		sr = STextStringRecord.getRecord("0");
 		assertEquals(null, sr);
-		sr = STextStringRecord.addRecord("thisisalongstring", 3, STextProcessorFactory.EMAIL, 0, 2);
-		sr.addSegment(STextProcessorFactory.JAVA, 4, 5);
-		sr.addSegment(STextProcessorFactory.FILE, 6, 7);
+		sr = STextStringRecord.addRecord("thisisalongstring", 3, STextTypeHandlerFactory.EMAIL, 0, 2);
+		sr.addSegment(STextTypeHandlerFactory.JAVA, 4, 5);
+		sr.addSegment(STextTypeHandlerFactory.FILE, 6, 7);
 		catchFlag = false;
 		try {
-			sr.addSegment(STextProcessorFactory.EMAIL, 10, 13);
+			sr.addSegment(STextTypeHandlerFactory.EMAIL, 10, 13);
 		} catch (IllegalStateException e) {
 			catchFlag = true;
 		}
 		assertTrue("Catch too many segments", catchFlag);
 		assertEquals(3, sr.getSegmentCount());
-		assertEquals(STextProcessorFactory.EMAIL, sr.getProcessor(0));
-		assertEquals(STextProcessorFactory.JAVA, sr.getProcessor(1));
-		assertEquals(STextProcessorFactory.FILE, sr.getProcessor(2));
+		assertEquals(STextTypeHandlerFactory.EMAIL, sr.getHandler(0));
+		assertEquals(STextTypeHandlerFactory.JAVA, sr.getHandler(1));
+		assertEquals(STextTypeHandlerFactory.FILE, sr.getHandler(2));
 		assertEquals(0, sr.getStart(0));
 		assertEquals(4, sr.getStart(1));
 		assertEquals(6, sr.getStart(2));

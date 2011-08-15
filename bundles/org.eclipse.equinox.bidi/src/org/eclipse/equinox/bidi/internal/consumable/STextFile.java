@@ -10,12 +10,12 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Processor adapted to processing directory and file paths.
+ *  Handler adapted to processing directory and file paths.
  */
-public class STextFile extends STextProcessor {
+public class STextFile extends STextTypeHandler {
 
 	public STextFile() {
 		super(":/\\."); //$NON-NLS-1$

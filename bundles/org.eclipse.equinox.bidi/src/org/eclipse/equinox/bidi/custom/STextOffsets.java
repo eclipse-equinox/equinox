@@ -67,7 +67,7 @@ public class STextOffsets {
 	/**
 	 * Insert an offset value in the offset array so that the array 
 	 * stays in ascending order.
-	 * @param  procData is a group of data accessible to processors.
+	 * @param  procData is a group of data accessible to handlers.
 	 * @param  offset is the value to insert.
 	 */
 	public void insertOffset(STextCharTypes charTypes, int offset) {

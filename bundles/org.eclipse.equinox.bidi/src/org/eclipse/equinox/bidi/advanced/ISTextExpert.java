@@ -14,10 +14,10 @@ package org.eclipse.equinox.bidi.advanced;
  * For a general introduction to structured text, see
  * {@link <a href="package-summary.html"> the package documentation</a>}.
  * <p>
- * Several common processors are included in <b>STextEngine</b>. For processors 
- * supplied by other packages, a processor instance can be obtained using the
- * {@link org.eclipse.equinox.bidi.STextProcessorFactory#getProcessor}
- * method for the registered processors, or by instantiating a private processor.
+ * Several common handlers are included in <b>STextEngine</b>. For handlers 
+ * supplied by other packages, a handler instance can be obtained using the
+ * {@link org.eclipse.equinox.bidi.STextTypeHandlerFactory#getHandler}
+ * method for the registered handlers, or by instantiating a private handler.
  * </p><p>
  * Most of the methods in this class have a <code>text</code>
  * argument which may be just a part of a larger body of text.
@@ -100,7 +100,7 @@ public interface ISTextExpert {
 	 * Add directional formatting characters to a structured text
 	 * to ensure correct presentation.
 	 * 
-	 * @param  processor the processor applicable to the text. If <code>null</code>, 
+	 * @param  handler the handler applicable to the text. If <code>null</code>, 
 	 * the method returns unmodified text.
 	 * 
 	 * @param  environment a bidi environment. If <code>null</code>, the default environment 
@@ -122,11 +122,11 @@ public interface ISTextExpert {
 	 * Given a <i>lean</i> string, compute the positions of each of its
 	 * characters within the corresponding <i>full</i> string.
 	 *
-	 * @param  processor designates a processor instance. If <code>null</code>, this 
+	 * @param  handler designates a handler instance. If <code>null</code>, this 
 	 * method returns an identity map.
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param text is the structured text string.
 	 *
@@ -151,10 +151,10 @@ public interface ISTextExpert {
 	 * depending on the {@link STextEnvironment#getOrientation orientation} of the
 	 * GUI component used for display are not reflected in this method.
 	 * </p>
-	 * @param processor designates a processor instance
+	 * @param handler designates a handler instance
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param text is the structured text string
 	 *
@@ -173,10 +173,10 @@ public interface ISTextExpert {
 	 * Remove directional formatting characters which were added to a
 	 * structured text string to ensure correct presentation.
 	 *
-	 * @param  processor designates a processor instance
+	 * @param  handler designates a handler instance
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param text is the structured text string including directional formatting characters.
 	 *
@@ -195,10 +195,10 @@ public interface ISTextExpert {
 	 * Given a <i>full</i> string, compute the positions of each of its
 	 * characters within the corresponding <i>lean</i> string.
 	 *
-	 * @param  processor designates a processor instance
+	 * @param  handler designates a handler instance
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param  text is the structured text string including directional formatting characters.
 	 *
@@ -225,10 +225,10 @@ public interface ISTextExpert {
 	 * or suffixed depending on the {@link STextEnvironment#getOrientation orientation} 
 	 * of the GUI component used for display.
 	 * </p>
-	 * @param  processor designates a processor instance
+	 * @param  handler designates a handler instance
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param  text is the structured text string including directional formatting characters
 	 *
@@ -248,10 +248,10 @@ public interface ISTextExpert {
 	 * whether the text contains Arabic or Hebrew words. If the text contains both, 
 	 * the first Arabic or Hebrew letter in the text determines which is the governing script.
 	 *
-	 * @param  processor designates a processor instance
+	 * @param  handler designates a handler instance
 	 *
 	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the processor's behavior. If <code>null</code>, the default environment is used.
+	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param  text is the structured text string
 	 *

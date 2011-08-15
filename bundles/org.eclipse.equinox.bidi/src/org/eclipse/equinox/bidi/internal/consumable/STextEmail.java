@@ -16,7 +16,7 @@ import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.internal.STextDelimsEsc;
 
 /**
- *  Processor adapted to processing e-mail addresses.
+ *  Handler adapted to processing e-mail addresses.
  */
 public class STextEmail extends STextDelimsEsc {
 	static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
@@ -59,7 +59,7 @@ public class STextEmail extends STextDelimsEsc {
 	}
 
 	/**
-	 *  @return 2 as number of special cases handled by this processor.
+	 *  @return 2 as number of special cases handled by this handler.
 	 */
 	public int getSpecialsCount(STextEnvironment environment) {
 		return 2;

@@ -11,11 +11,10 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-
 import org.eclipse.equinox.bidi.internal.STextDelims;
 
 /**
- *  Processor adapted to processing XPath expressions.
+ *  Handler adapted to processing XPath expressions.
  */
 public class STextXPath extends STextDelims {
 
@@ -24,7 +23,7 @@ public class STextXPath extends STextDelims {
 	}
 
 	/**
-	 *  @return 2 as the number of special cases handled by this processor.
+	 *  @return 2 as the number of special cases handled by this handler.
 	 */
 	public int getSpecialsCount(STextEnvironment environment) {
 		return 2;

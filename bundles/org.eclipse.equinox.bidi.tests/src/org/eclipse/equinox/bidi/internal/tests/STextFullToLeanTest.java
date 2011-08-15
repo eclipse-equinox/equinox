@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextProcessorFactory;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
 
 /**
@@ -110,7 +110,7 @@ public class STextFullToLeanTest extends STextTestBase {
 	}
 
 	public void testFullToLean() {
-		type = STextProcessorFactory.COMMA_DELIMITED;
+		type = STextTypeHandlerFactory.COMMA_DELIMITED;
 		doTest1("testFullToLean #1 - ", "", "", "", new int[0], new int[0], "", "", new int[0], new int[0]);
 		int[] map1 = new int[] {0, 1, 2, 3, 4};
 		int[] map2 = new int[] {2, 3, 4, 5, 6};
@@ -257,7 +257,7 @@ public class STextFullToLeanTest extends STextTestBase {
 		doTest1("testFullToLean #37 - ", ">>>@@@@@^^^", "", "", map1, map2, "", "", map1, map2);
 
 		// test fullToLeanText with initial state
-		type = STextProcessorFactory.SQL;
+		type = STextTypeHandlerFactory.SQL;
 		doTest2("testFullToLean #38 - ");
 	}
 }

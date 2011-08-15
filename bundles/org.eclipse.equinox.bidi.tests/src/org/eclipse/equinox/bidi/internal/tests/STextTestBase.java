@@ -14,7 +14,7 @@ package org.eclipse.equinox.bidi.internal.tests;
 import junit.framework.TestCase;
 
 /**
- * Base functionality for the processor tests.
+ * Base functionality for the handler tests.
  */
 public class STextTestBase extends TestCase {
 

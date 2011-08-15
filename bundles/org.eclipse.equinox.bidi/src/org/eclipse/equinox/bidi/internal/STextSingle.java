@@ -11,26 +11,25 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
- *  A base processor for structured text composed of two parts separated by a separator.
+ *  A base handler for structured text composed of two parts separated by a separator.
  *  The first occurrence of the separator delimits the end of the first part
  *  and the start of the second part. Further occurrences of the separator,
  *  if any, are treated like regular characters of the second text part.
- *  The processor makes sure that the text be presented in the form
+ *  The handler makes sure that the text be presented in the form
  *  (assuming that the equal sign is the separator):
  *  <pre>
  *  part1=part2
  *  </pre>
- *  The string returned by {@link STextProcessor#getSeparators getSeparators}
- *  for this processor should contain exactly one character.
+ *  The string returned by {@link STextTypeHandler#getSeparators getSeparators}
+ *  for this handler should contain exactly one character.
  *  Additional characters will be ignored.
  *
  *  @author Matitiahu Allouche
  */
-public class STextSingle extends STextProcessor {
+public class STextSingle extends STextTypeHandler {
 
 	public STextSingle(String separator) {
 		super(separator);
@@ -52,12 +51,12 @@ public class STextSingle extends STextProcessor {
 	 *  @return the length of <code>text</code>.
 	 */
 	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
-		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		return text.length();
 	}
 
 	/**
-	 *  This method returns 1 as number of special cases handled by this processor.
+	 *  This method returns 1 as number of special cases handled by this handler.
 	 *
 	 *  @return 1.
 	 */

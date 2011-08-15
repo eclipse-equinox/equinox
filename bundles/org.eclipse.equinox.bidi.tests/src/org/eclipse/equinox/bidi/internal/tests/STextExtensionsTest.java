@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextProcessorFactory;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
 
 /**
@@ -43,30 +43,30 @@ public class STextExtensionsTest extends STextTestBase {
 	public void testExtensions() {
 		String data;
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.COMMA_DELIMITED, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.COMMA_DELIMITED, env);
 		doTest1("Comma #1", "ab,cd, AB, CD, EFG", "ab,cd, AB@, CD@, EFG");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.EMAIL, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.EMAIL, env);
 		doTest1("Email #1", "abc.DEF:GHI", "abc.DEF@:GHI");
 		doTest1("Email #2", "DEF.GHI \"A.B\":JK ", "DEF@.GHI @\"A.B\"@:JK ");
 		doTest1("Email #3", "DEF,GHI (A,B);JK ", "DEF@,GHI @(A,B)@;JK ");
 		doTest1("Email #4", "DEF.GHI (A.B :JK ", "DEF@.GHI @(A.B :JK ");
 		env = envArabic;
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.EMAIL, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.EMAIL, env);
 		doTest1("Email #5", "#EF.GHI \"A.B\":JK ", "<&#EF.GHI \"A.B\":JK &^");
 		doTest1("Email #6", "#EF,GHI (A,B);JK ", "<&#EF,GHI (A,B);JK &^");
 		doTest1("Email #7", "#EF.GHI (A.B :JK ", "<&#EF.GHI (A.B :JK &^");
 		data = toUT16("peter.pan") + "@" + toUT16("#EF.GHI");
 		doTest2("Email #8", data, "<&peter&.pan@#EF.GHI&^");
 		env = envHebrew;
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.EMAIL, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.EMAIL, env);
 		data = toUT16("peter.pan") + "@" + toUT16("DEF.GHI");
 		doTest2("Email #9", data, "peter.pan@DEF@.GHI");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.FILE, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.FILE, env);
 		doTest1("File #1", "c:\\A\\B\\FILE.EXT", "c:\\A@\\B@\\FILE@.EXT");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.JAVA, env);
+		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.JAVA, env);
 		doTest1("Java #1", "A = B + C;", "A@ = B@ + C;");
 		doTest1("Java #2", "A   = B + C;", "A@   = B@ + C;");
 		doTest1("Java #3", "A = \"B+C\"+D;", "A@ = \"B+C\"@+D;");
@@ -78,12 +78,12 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Java #9", "A = //B+C* D;", "A@ = //B+C* D;");
 		doTest1("Java #10", "A = //B+C`|D+E;", "A@ = //B+C`|D@+E;");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.PROPERTY, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.PROPERTY, env);
 		doTest1("Property #0", "NAME,VAL1,VAL2", "NAME,VAL1,VAL2");
 		doTest1("Property #1", "NAME=VAL1,VAL2", "NAME@=VAL1,VAL2");
 		doTest1("Property #2", "NAME=VAL1,VAL2=VAL3", "NAME@=VAL1,VAL2=VAL3");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.REGEXP, env);
+		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.REGEXP, env);
 		data = toUT16("ABC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "A@B@C@(?#DEF)@G@H@I");
 		data = toUT16("ABC(?") + "#" + toUT16("DEF");
@@ -129,7 +129,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Regex #17.7", "aB*567", "aB*@567");
 
 		env = envArabic;
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.REGEXP, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.REGEXP, env);
 		data = toUT16("#BC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "<&#BC(?#DEF)GHI&^");
 		data = toUT16("#BC(?") + "#" + toUT16("DEF");
@@ -167,7 +167,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest2("Regex #16.2", data, "<&#HI\\eJKL&^");
 		env = envHebrew;
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.SQL, env);
+		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.SQL, env);
 		doTest1("SQL #0", "abc GHI", "abc GHI");
 		doTest1("SQL #1", "abc DEF   GHI", "abc DEF@   GHI");
 		doTest1("SQL #2", "ABC, DEF,   GHI", "ABC@, DEF@,   GHI");
@@ -185,22 +185,22 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("SQL #12", "ABC\"DEF \"\" G I\" JKL,MN", "ABC@\"DEF \"\" G I\"@ JKL@,MN");
 		doTest1("SQL #13", "ABC--DEF GHI`|JKL MN", "ABC@--DEF GHI`|JKL@ MN");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.SYSTEM_USER, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.SYSTEM_USER, env);
 		doTest1("System #1", "HOST(JACK)", "HOST@(JACK)");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.UNDERSCORE, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.UNDERSCORE, env);
 		doTest1("Underscore #1", "A_B_C_d_e_F_G", "A@_B@_C_d_e_F@_G");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.URL, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.URL, env);
 		doTest1("URL #1", "WWW.DOMAIN.COM/DIR1/DIR2/dir3/DIR4", "WWW@.DOMAIN@.COM@/DIR1@/DIR2/dir3/DIR4");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.XPATH, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.XPATH, env);
 		doTest1("Xpath #1", "abc(DEF)GHI", "abc(DEF@)GHI");
 		doTest1("Xpath #2", "DEF.GHI \"A.B\":JK ", "DEF@.GHI@ \"A.B\"@:JK ");
 		doTest1("Xpath #3", "DEF!GHI 'A!B'=JK ", "DEF@!GHI@ 'A!B'@=JK ");
 		doTest1("Xpath #4", "DEF.GHI 'A.B :JK ", "DEF@.GHI@ 'A.B :JK ");
 
-		expert = STextExpertFactory.getExpert(STextProcessorFactory.EMAIL, env);
+		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.EMAIL, env);
 		doTest3("DelimsEsc #1", "abc.DEF.GHI", "abc.DEF@.GHI");
 		doTest3("DelimsEsc #2", "DEF.GHI (A:B);JK ", "DEF@.GHI @(A:B)@;JK ");
 		doTest3("DelimsEsc #3", "DEF.GHI (A:B);JK ", "DEF@.GHI @(A:B)@;JK ");

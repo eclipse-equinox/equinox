@@ -17,7 +17,7 @@ public interface ISTextExpertStateful extends ISTextExpert {
 	public int getState();
 
 	/**
-	 * Resets non-shared processor state to initial.
+	 * Resets non-shared expert state to initial.
 	 */
 	public void resetState();
 

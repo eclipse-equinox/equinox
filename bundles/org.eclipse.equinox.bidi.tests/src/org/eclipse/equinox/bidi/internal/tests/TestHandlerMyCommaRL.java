@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-public class TestProcessorMyCommaLL extends TestProcessorMyComma {
+public class TestHandlerMyCommaRL extends TestHandlerMyComma {
 
-	public TestProcessorMyCommaLL() {
-		super(LTR, LTR);
+	public TestHandlerMyCommaRL() {
+		super(RTL, LTR);
 	}
 }

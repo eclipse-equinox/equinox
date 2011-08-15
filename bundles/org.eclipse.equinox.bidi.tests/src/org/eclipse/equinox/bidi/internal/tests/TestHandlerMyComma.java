@@ -13,9 +13,9 @@ package org.eclipse.equinox.bidi.internal.tests;
 import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
-public class TestProcessorMyComma extends STextProcessor {
+public class TestHandlerMyComma extends STextTypeHandler {
 
 	private final static byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 	protected final static int LTR = STextDirection.DIR_LTR;
@@ -24,7 +24,7 @@ public class TestProcessorMyComma extends STextProcessor {
 	final int dirArabic;
 	final int dirHebrew;
 
-	public TestProcessorMyComma(int dirArabic, int dirHebrew) {
+	public TestHandlerMyComma(int dirArabic, int dirHebrew) {
 		this.dirArabic = dirArabic;
 		this.dirHebrew = dirHebrew;
 	}

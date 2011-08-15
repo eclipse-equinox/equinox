@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Processor adapted to processing comma-delimited lists, such as:
+ *  Handler adapted to processing comma-delimited lists, such as:
  *  <pre>
  *    part1,part2,part3
  *  </pre>
  */
-public class STextComma extends STextProcessor {
+public class STextComma extends STextTypeHandler {
 	public STextComma() {
 		super(","); //$NON-NLS-1$
 	}

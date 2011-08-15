@@ -35,32 +35,32 @@ public class STextCharTypes {
 
 	private static final int CHARTYPES_ADD = 2;
 
-	final protected STextProcessor processor;
+	final protected STextTypeHandler handler;
 	final protected STextEnvironment environment;
 	final protected String text;
 
 	// 1 byte for each char in text
 	private byte[] types;
 
-	// structured text direction. -1 means not yet computed; -2 means within processor.getDirection
+	// structured text direction. -1 means not yet computed; -2 means within handler.getDirection
 	private int direction = -1;
 
 	/**
 	 *  Constructor
 	 *  
-	 *  @param  processor is the processor handling this occurrence of
+	 *  @param  handler is the handler handling this occurrence of
 	 *          structured text.
 	 *          
 	 *  @param  environment the current environment, which may affect the behavior of
-	 *          the processor. This parameter may be specified as
+	 *          the handler. This parameter may be specified as
 	 *          <code>null</code>, in which case the
 	 *          {@link STextEnvironment#DEFAULT DEFAULT}
 	 *          environment should be assumed.
 	 *  
 	 *  @param text is the text whose characters are analyzed.
 	 */
-	public STextCharTypes(STextProcessor processor, STextEnvironment environment, String text) {
-		this.processor = processor;
+	public STextCharTypes(STextTypeHandler handler, STextEnvironment environment, String text) {
+		this.handler = handler;
 		this.environment = environment;
 		this.text = text;
 		types = new byte[text.length()];
@@ -68,7 +68,7 @@ public class STextCharTypes {
 
 	public int getDirection() {
 		if (direction < 0)
-			direction = processor.getDirection(environment, text, this);
+			direction = handler.getDirection(environment, text, this);
 		return direction;
 	}
 
@@ -96,10 +96,10 @@ public class STextCharTypes {
 		byte charType = Character.getDirectionality(text.charAt(index));
 		if (charType == B) {
 			if (direction < 0) {
-				if (direction < -1) // called by processor.getDirection
+				if (direction < -1) // called by handler.getDirection
 					return charType; // avoid infinite recursion
-				direction = -2; // signal we go within processor.getDirection
-				direction = processor.getDirection(environment, text, this);
+				direction = -2; // signal we go within handler.getDirection
+				direction = handler.getDirection(environment, text, this);
 			}
 			charType = (direction == STextEnvironment.ORIENT_RTL) ? R : L;
 		}
@@ -125,7 +125,7 @@ public class STextCharTypes {
 	 *  be displayed.
 	 *  
 	 *  @param  envir is the current environment, which may affect the behavior of
-	 *          the processor. This parameter may be specified as
+	 *          the handler. This parameter may be specified as
 	 *          <code>null</code>, in which case the
 	 *          {@link STextEnvironment#DEFAULT DEFAULT}
 	 *          environment should be assumed.

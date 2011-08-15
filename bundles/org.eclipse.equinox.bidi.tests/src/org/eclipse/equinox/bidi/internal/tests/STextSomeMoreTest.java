@@ -25,11 +25,11 @@ public class STextSomeMoreTest extends STextTestBase {
 		assertFalse(env1.isProcessingNeeded());
 		assertTrue(env2.isProcessingNeeded());
 
-		ISTextExpert expert1 = STextExpertFactory.getExpert("test.Processor1", env1);
+		ISTextExpert expert1 = STextExpertFactory.getExpert("test.Handler1", env1);
 		String full = expert1.leanToFullText("abcd");
 		assertEquals("@a@b@c@d", toPseudo(full));
 
-		ISTextExpert expert2 = STextExpertFactory.getExpert("test.Processor2", env1);
+		ISTextExpert expert2 = STextExpertFactory.getExpert("test.Handler2", env1);
 		boolean catchFlag = false;
 		try {
 			full = expert2.leanToFullText("abcd");
@@ -39,7 +39,7 @@ public class STextSomeMoreTest extends STextTestBase {
 		assertTrue("Catch missing indexOfSpecial", catchFlag);
 
 		catchFlag = false;
-		ISTextExpert expert3 = STextExpertFactory.getExpert("test.Processor3", env1);
+		ISTextExpert expert3 = STextExpertFactory.getExpert("test.Handler3", env1);
 		try {
 			full = expert3.leanToFullText("abcd");
 		} catch (IllegalStateException e) {

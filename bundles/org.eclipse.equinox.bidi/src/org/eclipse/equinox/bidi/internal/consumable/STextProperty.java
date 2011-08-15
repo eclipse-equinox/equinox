@@ -13,7 +13,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.internal.STextSingle;
 
 /**
- *  Processor adapted to processing property file statements.
+ *  Handler adapted to processing property file statements.
  *  It expects the following string format:
  *  <pre>
  *    name=value

@@ -11,7 +11,7 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextProcessorFactory;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
 
 /**
@@ -22,8 +22,8 @@ public class STextMathTest extends STextTestBase {
 	private STextEnvironment envLTR = new STextEnvironment("ar", false, STextEnvironment.ORIENT_LTR);
 	private STextEnvironment envRTL = new STextEnvironment("ar", false, STextEnvironment.ORIENT_RTL);
 
-	private ISTextExpert expertLTR = STextExpertFactory.getExpert(STextProcessorFactory.RTL_ARITHMETIC, envLTR);
-	private ISTextExpert expertRTL = STextExpertFactory.getExpert(STextProcessorFactory.RTL_ARITHMETIC, envRTL);
+	private ISTextExpert expertLTR = STextExpertFactory.getExpert(STextTypeHandlerFactory.RTL_ARITHMETIC, envLTR);
+	private ISTextExpert expertRTL = STextExpertFactory.getExpert(STextTypeHandlerFactory.RTL_ARITHMETIC, envRTL);
 
 	private void verifyOneLine(String msg, String data, String resLTR, String resRTL) {
 		String lean = toUT16(data);

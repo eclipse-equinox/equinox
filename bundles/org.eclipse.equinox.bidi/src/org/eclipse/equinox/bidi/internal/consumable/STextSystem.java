@@ -13,7 +13,7 @@ package org.eclipse.equinox.bidi.internal.consumable;
 import org.eclipse.equinox.bidi.internal.STextSingle;
 
 /**
- *  Processor adapted to processing structured text with the following format:
+ *  Handler adapted to processing structured text with the following format:
  *  <pre>
  *    system(user)
  *  </pre>

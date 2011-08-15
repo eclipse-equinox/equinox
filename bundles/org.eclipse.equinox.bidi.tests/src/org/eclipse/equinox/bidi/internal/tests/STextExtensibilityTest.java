@@ -11,46 +11,46 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextProcessorFactory;
-import org.eclipse.equinox.bidi.advanced.STextExpertFactory;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.advanced.STextExpertFactory;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- * Tests contribution of BiDi processors.
+ * Tests contribution of BiDi handlers.
  */
 public class STextExtensibilityTest extends STextTestBase {
 
 	public void testBaseContributions() {
-		String[] types = STextProcessorFactory.getAllProcessorIDs();
+		String[] types = STextTypeHandlerFactory.getAllHandlerIDs();
 		assertNotNull(types);
 		assertTrue(types.length > 0);
 
 		// check one of the types that we know should be there
 		assertTrue(isTypePresent(types, "regex"));
 
-		STextProcessor processor = STextProcessorFactory.getProcessor("regex");
-		assertNotNull(processor);
+		STextTypeHandler handler = STextTypeHandlerFactory.getHandler("regex");
+		assertNotNull(handler);
 	}
 
 	public void testOtherContributions() {
-		String[] types = STextProcessorFactory.getAllProcessorIDs();
+		String[] types = STextTypeHandlerFactory.getAllHandlerIDs();
 		assertNotNull(types);
 		assertTrue(types.length > 0);
 
 		// check the type added by the test bundle
 		assertTrue(isTypePresent(types, "test"));
 
-		STextProcessor processor = STextProcessorFactory.getProcessor("test");
-		assertNotNull(processor);
+		STextTypeHandler handler = STextTypeHandlerFactory.getHandler("test");
+		assertNotNull(handler);
 
-		processor = STextProcessorFactory.getProcessor("badtest");
-		assertNull(processor);
+		handler = STextTypeHandlerFactory.getHandler("badtest");
+		assertNull(handler);
 
 		String data, lean, full, model;
 		data = "ABC.DEF:HOST-COM=HELLO";
 		lean = toUT16(data);
-		processor = STextProcessorFactory.getProcessor("test");
+		handler = STextTypeHandlerFactory.getHandler("test");
 
 		ISTextExpert expert = STextExpertFactory.getExpert("test");
 		full = expert.leanToFullText(lean);

@@ -10,16 +10,16 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Processor adapted to processing compound names.
+ *  Handler adapted to processing compound names.
  *  This type covers names made of one or more parts, separated by underscores:
  *  <pre>
  *    part1_part2_part3
  *  </pre>
  */
-public class STextUnderscore extends STextProcessor {
+public class STextUnderscore extends STextTypeHandler {
 
 	public STextUnderscore() {
 		super("_"); //$NON-NLS-1$

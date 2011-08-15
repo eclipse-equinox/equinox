@@ -10,13 +10,14 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 import org.eclipse.equinox.bidi.internal.STextActivator;
+import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
- *  <code>STextSql</code> is a processor for structured text
+ *  <code>STextSql</code> is a handler for structured text
  *  composed of SQL statements. Such a structured text may span
  *  multiple lines.
  *  <p>
@@ -34,7 +35,7 @@ import org.eclipse.equinox.bidi.internal.STextActivator;
  *
  *  @author Matitiahu Allouche
  */
-public class STextSql extends STextProcessor {
+public class STextSql extends STextTypeHandler {
 	private static final byte WS = Character.DIRECTIONALITY_WHITESPACE;
 	static final String lineSep = STextActivator.getInstance().getProperty("line.separator"); //$NON-NLS-1$
 
@@ -43,7 +44,7 @@ public class STextSql extends STextProcessor {
 	}
 
 	/**
-	 *  @return 5 as the number of special cases handled by this processor.
+	 *  @return 5 as the number of special cases handled by this handler.
 	 */
 	public int getSpecialsCount(STextEnvironment environment) {
 		return 5;
@@ -89,7 +90,7 @@ public class STextSql extends STextProcessor {
 	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] state, int caseNumber, int separLocation) {
 		int location;
 
-		STextProcessor.processSeparator(text, charTypes, offsets, separLocation);
+		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		switch (caseNumber) {
 			case 1 : /* space */
 				separLocation++;
@@ -103,7 +104,7 @@ public class STextSql extends STextProcessor {
 				while (true) {
 					location = text.indexOf('\'', location);
 					if (location < 0) {
-						state[0] = caseNumber;
+						STextImpl.setState(state, caseNumber);
 						return text.length();
 					}
 					if ((location + 1) < text.length() && text.charAt(location + 1) == '\'') {
@@ -132,12 +133,12 @@ public class STextSql extends STextProcessor {
 					location = separLocation + 2; // skip the opening slash-aster
 				location = text.indexOf("*/", location); //$NON-NLS-1$
 				if (location < 0) {
-					state[0] = caseNumber;
+					STextImpl.setState(state, caseNumber);
 					return text.length();
 				}
 				// we need to call processSeparator since text may follow the
 				//  end of comment immediately without even a space
-				STextProcessor.processSeparator(text, charTypes, offsets, location);
+				STextTypeHandler.processSeparator(text, charTypes, offsets, location);
 				return location + 2;
 			case 5 : /* hyphen-hyphen comment */
 				location = text.indexOf(lineSep, separLocation + 2);

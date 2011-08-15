@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-public class TestProcessorMyCommaRR extends TestProcessorMyComma {
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.custom.*;
 
-	public TestProcessorMyCommaRR() {
-		super(RTL, RTL);
+public class TestHandler3 extends STextTypeHandler {
+
+	public int getSpecialsCount(STextEnvironment env) {
+		return 1;
+	}
+
+	public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+		return fromIndex;
 	}
 }

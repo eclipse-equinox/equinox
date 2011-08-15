@@ -10,9 +10,9 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
-public class STextTest extends STextProcessor {
+public class STextTest extends STextTypeHandler {
 
 	public STextTest() {
 		super("-=.:");

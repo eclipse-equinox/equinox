@@ -12,10 +12,9 @@ package org.eclipse.equinox.bidi.advanced;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.equinox.bidi.STextProcessorFactory;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
-import org.eclipse.equinox.bidi.internal.STextExpertImpl;
-import org.eclipse.equinox.bidi.internal.STextExpertMultipassImpl;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
+import org.eclipse.equinox.bidi.internal.STextImpl;
 
 final public class STextExpertFactory {
 
@@ -36,49 +35,49 @@ final public class STextExpertFactory {
 
 	static public ISTextExpert getExpert() {
 		if (defaultExpert == null) {
-			STextProcessor descriptor = new STextProcessor(defaultSeparators);
-			defaultExpert = new STextExpertImpl(descriptor, STextEnvironment.DEFAULT);
+			STextTypeHandler handler = new STextTypeHandler(defaultSeparators);
+			defaultExpert = new STextImpl(handler, STextEnvironment.DEFAULT, null);
 		}
 		return defaultExpert;
 	}
 
 	static public ISTextExpert getExpert(String type) {
-		ISTextExpert processor;
+		ISTextExpert expert;
 		synchronized (sharedDefaultExperts) {
-			processor = (ISTextExpert) sharedDefaultExperts.get(type);
-			if (processor == null) {
-				STextProcessor descriptor = STextProcessorFactory.getProcessor(type);
-				if (descriptor == null)
+			expert = (ISTextExpert) sharedDefaultExperts.get(type);
+			if (expert == null) {
+				STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
+				if (handler == null)
 					return null;
-				processor = new STextExpertImpl(descriptor, STextEnvironment.DEFAULT);
-				sharedDefaultExperts.put(type, processor);
+				expert = new STextImpl(handler, STextEnvironment.DEFAULT, null);
+				sharedDefaultExperts.put(type, expert);
 			}
 		}
-		return processor;
+		return expert;
 	}
 
 	static public ISTextExpert getExpert(String type, STextEnvironment environment) {
-		ISTextExpert processor;
+		ISTextExpert expert;
 		synchronized (sharedExperts) {
-			Map processors = (Map) sharedExperts.get(type);
-			if (processors == null) {
-				processors = new HashMap(); // environment -> processor
-				sharedExperts.put(type, processors);
+			Map experts = (Map) sharedExperts.get(type);
+			if (experts == null) {
+				experts = new HashMap(); // environment -> expert
+				sharedExperts.put(type, experts);
 			}
-			processor = (ISTextExpert) processors.get(environment);
-			if (processor == null) {
-				STextProcessor descriptor = STextProcessorFactory.getProcessor(type);
-				if (descriptor == null)
+			expert = (ISTextExpert) experts.get(environment);
+			if (expert == null) {
+				STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
+				if (handler == null)
 					return null;
-				processor = new STextExpertImpl(descriptor, environment);
-				processors.put(type, processor);
+				expert = new STextImpl(handler, environment, null);
+				experts.put(type, expert);
 			}
 		}
-		return processor;
+		return expert;
 	}
 
-	static public ISTextExpert getExpert(STextProcessor descriptor, STextEnvironment environment) {
-		return new STextExpertImpl(descriptor, environment);
+	static public ISTextExpert getExpert(STextTypeHandler handler, STextEnvironment environment) {
+		return new STextImpl(handler, environment, new int[1]);
 	}
 
 	static public ISTextExpertStateful getPrivateExpert(String type) {
@@ -86,10 +85,10 @@ final public class STextExpertFactory {
 	}
 
 	static public ISTextExpertStateful getPrivateExpert(String type, STextEnvironment environment) {
-		STextProcessor descriptor = STextProcessorFactory.getProcessor(type);
-		if (descriptor == null)
+		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
+		if (handler == null)
 			return null;
-		return new STextExpertMultipassImpl(descriptor, environment);
+		return new STextImpl(handler, environment, new int[1]);
 	}
 
 }

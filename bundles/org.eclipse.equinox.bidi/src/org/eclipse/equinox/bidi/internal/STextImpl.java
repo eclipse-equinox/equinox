@@ -11,11 +11,10 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
-import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.*;
 
-public class STextImpl {
+public class STextImpl implements ISTextExpertStateful {
 
 	static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
@@ -47,18 +46,67 @@ public class STextImpl {
 	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 	static final STextEnvironment IGNORE_ENVIRONMENT = new STextEnvironment(null, false, STextEnvironment.ORIENT_IGNORE);
+	static final int STATE_INITIAL = 0;
 
-	/**
-	 *  Prevent creation of a STextImpl instance
-	 */
-	private STextImpl() {
-		// nothing to do
+	protected STextTypeHandler structuredTextHandler;
+	protected STextEnvironment environment;
+	protected int[] state;
+
+	public STextImpl(STextTypeHandler structuredTextHandler, STextEnvironment environment, int[] state) {
+		this.structuredTextHandler = structuredTextHandler;
+		this.environment = environment;
+		this.state = state;
 	}
 
-	static long computeNextLocation(STextProcessor processor, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] locations, int curPos) {
-		String separators = processor.getSeparators(environment);
+	public String leanToFullText(String text) {
+		return STextImpl.leanToFullText(structuredTextHandler, environment, text, state);
+	}
+
+	public int[] leanToFullMap(String text) {
+		return STextImpl.leanToFullMap(structuredTextHandler, environment, text, state);
+	}
+
+	public int[] leanBidiCharOffsets(String text) {
+		return STextImpl.leanBidiCharOffsets(structuredTextHandler, environment, text, state);
+	}
+
+	public String fullToLeanText(String text) {
+		return STextImpl.fullToLeanText(structuredTextHandler, environment, text, state);
+	}
+
+	public int[] fullToLeanMap(String text) {
+		return STextImpl.fullToLeanMap(structuredTextHandler, environment, text, state);
+	}
+
+	public int[] fullBidiCharOffsets(String text) {
+		return STextImpl.fullBidiCharOffsets(structuredTextHandler, environment, text, state);
+	}
+
+	public int getCurDirection(String text) {
+		return structuredTextHandler.getDirection(environment, text);
+	}
+
+	public void resetState() {
+		state[0] = STATE_INITIAL;
+	}
+
+	public void setState(int newState) {
+		state[0] = newState;
+	}
+
+	public static void setState(int[] state, int newState) {
+		if (state != null)
+			state[0] = newState;
+	}
+
+	public int getState() {
+		return state[0];
+	}
+
+	static long computeNextLocation(STextTypeHandler handler, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] locations, int curPos) {
+		String separators = handler.getSeparators(environment);
 		int separCount = separators.length();
-		int specialsCount = processor.getSpecialsCount(environment);
+		int specialsCount = handler.getSpecialsCount(environment);
 		int len = text.length();
 		int nextLocation = len;
 		int idxLocation = 0;
@@ -68,7 +116,7 @@ public class STextImpl {
 			int location = locations[separCount + i];
 			if (location < curPos) {
 				offsets.ensureRoom();
-				location = processor.indexOfSpecial(environment, text, charTypes, offsets, i + 1, curPos);
+				location = handler.indexOfSpecial(environment, text, charTypes, offsets, i + 1, curPos);
 				if (location < 0)
 					location = len;
 				locations[separCount + i] = location;
@@ -195,12 +243,12 @@ public class STextImpl {
 	 *  <p>
 	 *  @see ISTextExpert#leanToFullText STextEngine.leanToFullText
 	 */
-	public static String leanToFullText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
+	public static String leanToFullText(STextTypeHandler handler, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return text;
-		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
-		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		STextCharTypes charTypes = new STextCharTypes(handler, environment, text);
+		STextOffsets offsets = leanToFullCommon(handler, environment, text, state, charTypes);
 		int prefixLength = offsets.getPrefixLength();
 		int count = offsets.getCount();
 		if (count == 0 && prefixLength == 0)
@@ -242,12 +290,12 @@ public class STextImpl {
 		return new String(fullChars);
 	}
 
-	public static int[] leanToFullMap(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanToFullMap(STextTypeHandler handler, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
-		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		STextCharTypes charTypes = new STextCharTypes(handler, environment, text);
+		STextOffsets offsets = leanToFullCommon(handler, environment, text, state, charTypes);
 		int prefixLength = offsets.getPrefixLength();
 		int[] map = new int[len];
 		int count = offsets.getCount(); // number of used entries
@@ -262,54 +310,42 @@ public class STextImpl {
 		return map;
 	}
 
-	public static int[] leanBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
+	public static int[] leanBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String text, int[] state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
-		STextCharTypes charTypes = new STextCharTypes(processor, environment, text);
-		STextOffsets offsets = leanToFullCommon(processor, environment, text, state, charTypes);
+		STextCharTypes charTypes = new STextCharTypes(handler, environment, text);
+		STextOffsets offsets = leanToFullCommon(handler, environment, text, state, charTypes);
 		return offsets.getArray();
 	}
 
-	/**
-	 *  Constant to use in the first element of the <code>state</code>
-	 *  argument when calling most methods of this class
-	 *  to indicate that there is no context of previous lines which
-	 *  should be initialized before performing the operation.
-	 */
-	public static final int STATE_INITIAL = 0; // TBD move
-
-	static STextOffsets leanToFullCommon(STextProcessor processor, STextEnvironment environment, String text, int[] state, STextCharTypes charTypes) {
+	static STextOffsets leanToFullCommon(STextTypeHandler handler, STextEnvironment environment, String text, int[] state, STextCharTypes charTypes) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
-		if (state == null) {
-			state = new int[1];
-			state[0] = STATE_INITIAL;
-		}
 		int len = text.length();
-		int direction = processor.getDirection(environment, text, charTypes);
+		int direction = handler.getDirection(environment, text, charTypes);
 		STextOffsets offsets = new STextOffsets();
-		if (!processor.skipProcessing(environment, text, charTypes)) {
+		if (!handler.skipProcessing(environment, text, charTypes)) {
 			// initialize locations
-			int separCount = processor.getSeparators(environment).length();
-			int[] locations = new int[separCount + processor.getSpecialsCount(environment)];
+			int separCount = handler.getSeparators(environment).length();
+			int[] locations = new int[separCount + handler.getSpecialsCount(environment)];
 			for (int i = 0, k = locations.length; i < k; i++) {
 				locations[i] = -1;
 			}
 			// current position
 			int curPos = 0;
-			if (state[0] > STATE_INITIAL) {
+			if (state != null && state[0] > STATE_INITIAL) {
 				offsets.ensureRoom();
 				int initState = state[0];
 				state[0] = STATE_INITIAL;
-				curPos = processor.processSpecial(environment, text, charTypes, offsets, state, initState, -1);
+				curPos = handler.processSpecial(environment, text, charTypes, offsets, state, initState, -1);
 			}
 			while (true) {
 				// location of next token to handle
 				int nextLocation;
 				// index of next token to handle (if < separCount, this is a separator; otherwise a special case
 				int idxLocation;
-				long res = computeNextLocation(processor, environment, text, charTypes, offsets, locations, curPos);
+				long res = computeNextLocation(handler, environment, text, charTypes, offsets, locations, curPos);
 				nextLocation = (int) (res & 0x00000000FFFFFFFF); /* low word */
 				if (nextLocation >= len)
 					break;
@@ -320,12 +356,12 @@ public class STextImpl {
 					curPos = nextLocation + 1;
 				} else {
 					idxLocation -= (separCount - 1); // because caseNumber starts from 1
-					curPos = processor.processSpecial(environment, text, charTypes, offsets, state, idxLocation, nextLocation);
+					curPos = handler.processSpecial(environment, text, charTypes, offsets, state, idxLocation, nextLocation);
 				}
 				if (curPos >= len)
 					break;
 			} // end while
-		} // end if (!processor.skipProcessing())
+		} // end if (!handler.skipProcessing())
 		int prefixLength;
 		int orientation = environment.getOrientation();
 		if (orientation == STextEnvironment.ORIENT_IGNORE)
@@ -343,12 +379,12 @@ public class STextImpl {
 		return offsets;
 	}
 
-	public static String fullToLeanText(STextProcessor processor, STextEnvironment environment, String text, int[] state) {
+	public static String fullToLeanText(STextTypeHandler handler, STextEnvironment environment, String text, int[] state) {
 		if (text.length() == 0)
 			return text;
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
-		int dir = processor.getDirection(environment, text);
+		int dir = handler.getDirection(environment, text);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int i; // used as loop index
@@ -386,7 +422,7 @@ public class STextImpl {
 				chars[i - cnt] = c;
 		}
 		String lean = new String(chars, 0, lenText - cnt);
-		String full = leanToFullText(processor, IGNORE_ENVIRONMENT, lean, state);
+		String full = leanToFullText(handler, IGNORE_ENVIRONMENT, lean, state);
 		if (full.equals(text))
 			return lean;
 
@@ -431,13 +467,13 @@ public class STextImpl {
 		return lean;
 	}
 
-	public static int[] fullToLeanMap(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
+	public static int[] fullToLeanMap(STextTypeHandler handler, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
-		String lean = fullToLeanText(processor, environment, full, state);
+		String lean = fullToLeanText(handler, environment, full, state);
 		int lenLean = lean.length();
-		int dir = processor.getDirection(environment, lean);
+		int dir = handler.getDirection(environment, lean);
 		char curMark = MARKS[dir];
 		char curEmbed = EMBEDS[dir];
 		int[] map = new int[lenFull];
@@ -462,11 +498,11 @@ public class STextImpl {
 		return map;
 	}
 
-	public static int[] fullBidiCharOffsets(STextProcessor processor, STextEnvironment environment, String full, int[] state) {
+	public static int[] fullBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String full, int[] state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
-		String lean = fullToLeanText(processor, environment, full, state);
+		String lean = fullToLeanText(handler, environment, full, state);
 		STextOffsets offsets = new STextOffsets();
 		int lenLean = lean.length();
 		int idxLean, idxFull;

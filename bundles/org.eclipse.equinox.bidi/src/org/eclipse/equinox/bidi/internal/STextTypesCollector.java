@@ -13,7 +13,7 @@ package org.eclipse.equinox.bidi.internal;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.core.runtime.*;
-import org.eclipse.equinox.bidi.custom.STextProcessor;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 public class STextTypesCollector implements IRegistryEventListener {
 
@@ -21,7 +21,7 @@ public class STextTypesCollector implements IRegistryEventListener {
 
 	private static final String CE_NAME = "typeDescription"; //$NON-NLS-1$
 	private static final String ATTR_TYPE = "type"; //$NON-NLS-1$
-	private static final String ATTR_PROCESSOR = "class"; //$NON-NLS-1$
+	private static final String ATTR_HANDLER = "class"; //$NON-NLS-1$
 
 	private Map types;
 	private Map factories;
@@ -46,12 +46,12 @@ public class STextTypesCollector implements IRegistryEventListener {
 		return result;
 	}
 
-	public STextProcessor getProcessor(String type) {
+	public STextTypeHandler getHandler(String type) {
 		if (types == null)
 			read();
-		Object processor = types.get(type);
-		if (processor instanceof STextProcessor)
-			return (STextProcessor) processor;
+		Object handler = types.get(type);
+		if (handler instanceof STextTypeHandler)
+			return (STextTypeHandler) handler;
 		return null;
 	}
 
@@ -76,14 +76,14 @@ public class STextTypesCollector implements IRegistryEventListener {
 				if (CE_NAME != confElements[j].getName())
 					STextActivator.logError("BiDi types: unexpected element name " + confElements[j].getName(), new IllegalArgumentException()); //$NON-NLS-1$
 				String type = confElements[j].getAttribute(ATTR_TYPE);
-				Object processor;
+				Object handler;
 				try {
-					processor = confElements[j].createExecutableExtension(ATTR_PROCESSOR);
+					handler = confElements[j].createExecutableExtension(ATTR_HANDLER);
 				} catch (CoreException e) {
-					STextActivator.logError("BiDi types: unable to create processor for " + type, e); //$NON-NLS-1$
+					STextActivator.logError("BiDi types: unable to create handler for " + type, e); //$NON-NLS-1$
 					continue;
 				}
-				types.put(type, processor);
+				types.put(type, handler);
 				factories.put(type, confElements[j]);
 			}
 		}
