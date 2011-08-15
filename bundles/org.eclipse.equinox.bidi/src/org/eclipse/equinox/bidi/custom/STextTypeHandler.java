@@ -210,7 +210,7 @@ public class STextTypeHandler {
 	 * number of special cases is zero, which means that
 	 * <code>processSpecial</code> should never be called for them.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		// This method must be overridden by all subclasses with any special case.
 		throw new IllegalStateException("A handler with specialsCount > 0 must have a processSpecial() method."); //$NON-NLS-1$
 	}

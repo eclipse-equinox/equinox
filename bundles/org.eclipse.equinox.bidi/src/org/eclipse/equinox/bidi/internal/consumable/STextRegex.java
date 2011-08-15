@@ -11,7 +11,8 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.*;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -62,8 +63,8 @@ public class STextRegex extends STextTypeHandler {
 	static final byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
 	static final byte AN = Character.DIRECTIONALITY_ARABIC_NUMBER;
 	static final byte EN = Character.DIRECTIONALITY_EUROPEAN_NUMBER;
-	private static final Integer INTEGER_1 = new Integer(1);
-	private static final Integer INTEGER_17 = new Integer(17);
+	private static final Integer STATE_COMMENT = new Integer(1);
+	private static final Integer STATE_QUOTED_SEQUENCE = new Integer(17);
 
 	/**
 	 *  This method retrieves the number of special cases handled by this handler.
@@ -146,11 +147,13 @@ public class STextRegex extends STextTypeHandler {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		int location;
 
-		if (separLocation < 0)
-			caseNumber = ((Integer) STextState.getValueAndReset(state)).intValue();
+		if (separLocation < 0) {
+			caseNumber = ((Integer) expert.getState()).intValue(); // TBD guard against "undefined"
+			expert.resetState();
+		}
 		switch (caseNumber) {
 			case 1 : /* comment (?#...) */
 				if (separLocation < 0) {
@@ -163,7 +166,7 @@ public class STextRegex extends STextTypeHandler {
 				}
 				location = text.indexOf(')', location);
 				if (location < 0) {
-					STextState.setValue(state, INTEGER_1);
+					expert.setState(STATE_COMMENT);
 					return text.length();
 				}
 				return location + 1;
@@ -203,7 +206,7 @@ public class STextRegex extends STextTypeHandler {
 				}
 				location = text.indexOf("\\E", location); //$NON-NLS-1$
 				if (location < 0) {
-					STextState.setValue(state, INTEGER_17);
+					expert.setState(STATE_QUOTED_SEQUENCE);
 					return text.length();
 				}
 				// set the charType for the "E" to L (Left to Right character)

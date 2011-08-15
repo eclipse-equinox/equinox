@@ -36,7 +36,7 @@ final public class STextExpertFactory {
 	static public ISTextExpert getExpert() {
 		if (defaultExpert == null) {
 			STextTypeHandler handler = new STextTypeHandler(defaultSeparators);
-			defaultExpert = new STextImpl(handler, STextEnvironment.DEFAULT, null);
+			defaultExpert = new STextImpl(handler, STextEnvironment.DEFAULT, false);
 		}
 		return defaultExpert;
 	}
@@ -49,7 +49,7 @@ final public class STextExpertFactory {
 				STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 				if (handler == null)
 					return null;
-				expert = new STextImpl(handler, STextEnvironment.DEFAULT, null);
+				expert = new STextImpl(handler, STextEnvironment.DEFAULT, false);
 				sharedDefaultExperts.put(type, expert);
 			}
 		}
@@ -69,7 +69,7 @@ final public class STextExpertFactory {
 				STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 				if (handler == null)
 					return null;
-				expert = new STextImpl(handler, environment, null);
+				expert = new STextImpl(handler, environment, false);
 				experts.put(type, expert);
 			}
 		}
@@ -77,18 +77,18 @@ final public class STextExpertFactory {
 	}
 
 	static public ISTextExpert getExpert(STextTypeHandler handler, STextEnvironment environment) {
-		return new STextImpl(handler, environment, STextState.createState());
+		return new STextImpl(handler, environment, true);
 	}
 
-	static public ISTextExpertStateful getPrivateExpert(String type) {
+	static public ISTextExpert getPrivateExpert(String type) {
 		return getPrivateExpert(type, STextEnvironment.DEFAULT);
 	}
 
-	static public ISTextExpertStateful getPrivateExpert(String type, STextEnvironment environment) {
+	static public ISTextExpert getPrivateExpert(String type, STextEnvironment environment) {
 		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 		if (handler == null)
 			return null;
-		return new STextImpl(handler, environment, STextState.createState());
+		return new STextImpl(handler, environment, true);
 	}
 
 }

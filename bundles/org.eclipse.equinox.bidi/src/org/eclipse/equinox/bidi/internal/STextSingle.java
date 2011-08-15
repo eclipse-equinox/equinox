@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
@@ -50,7 +51,7 @@ public class STextSingle extends STextTypeHandler {
 	 *
 	 *  @return the length of <code>text</code>.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		return text.length();
 	}

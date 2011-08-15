@@ -11,10 +11,11 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.*;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
-public class STextImpl implements ISTextExpertStateful {
+public class STextImpl implements ISTextExpert {
 
 	static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
@@ -49,36 +50,39 @@ public class STextImpl implements ISTextExpertStateful {
 
 	protected STextTypeHandler structuredTextHandler;
 	protected STextEnvironment environment;
+
 	protected Object state;
 
-	public STextImpl(STextTypeHandler structuredTextHandler, STextEnvironment environment, Object state) {
+	protected boolean sharedExpert;
+
+	public STextImpl(STextTypeHandler structuredTextHandler, STextEnvironment environment, boolean shared) {
 		this.structuredTextHandler = structuredTextHandler;
 		this.environment = environment;
-		this.state = state;
+		sharedExpert = shared;
 	}
 
 	public String leanToFullText(String text) {
-		return STextImpl.leanToFullText(structuredTextHandler, environment, text, state);
+		return leanToFullText(structuredTextHandler, environment, text, state);
 	}
 
 	public int[] leanToFullMap(String text) {
-		return STextImpl.leanToFullMap(structuredTextHandler, environment, text, state);
+		return leanToFullMap(structuredTextHandler, environment, text, state);
 	}
 
 	public int[] leanBidiCharOffsets(String text) {
-		return STextImpl.leanBidiCharOffsets(structuredTextHandler, environment, text, state);
+		return leanBidiCharOffsets(structuredTextHandler, environment, text, state);
 	}
 
 	public String fullToLeanText(String text) {
-		return STextImpl.fullToLeanText(structuredTextHandler, environment, text, state);
+		return fullToLeanText(structuredTextHandler, environment, text, state);
 	}
 
 	public int[] fullToLeanMap(String text) {
-		return STextImpl.fullToLeanMap(structuredTextHandler, environment, text, state);
+		return fullToLeanMap(structuredTextHandler, environment, text, state);
 	}
 
 	public int[] fullBidiCharOffsets(String text) {
-		return STextImpl.fullBidiCharOffsets(structuredTextHandler, environment, text, state);
+		return fullBidiCharOffsets(structuredTextHandler, environment, text, state);
 	}
 
 	public int getCurDirection(String text) {
@@ -86,24 +90,20 @@ public class STextImpl implements ISTextExpertStateful {
 	}
 
 	public void resetState() {
-		STextState.setValue(state, null);
+		if (sharedExpert)
+			state = null;
 	}
 
 	public void setState(Object newState) {
-		STextState.setValue(state, newState);
-	}
-
-	public static void setState(Object state, Object newState) {
-		STextState.setValue(state, newState);
+		if (sharedExpert)
+			state = newState;
 	}
 
 	public Object getState() {
-		Object value = STextState.getValueAndReset(state);
-		STextState.setValue(state, value);
-		return value;
+		return state;
 	}
 
-	static long computeNextLocation(STextTypeHandler handler, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] locations, int curPos) {
+	long computeNextLocation(STextTypeHandler handler, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int[] locations, int curPos) {
 		String separators = handler.getSeparators(environment);
 		int separCount = separators.length();
 		int specialsCount = handler.getSpecialsCount(environment);
@@ -142,7 +142,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return nextLocation + (((long) idxLocation) << 32);
 	}
 
-	public static void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
+	static public void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
 		int len = text.length();
 		int direction = charTypes.getDirection();
 		if (direction == STextDirection.DIR_RTL) {
@@ -243,7 +243,7 @@ public class STextImpl implements ISTextExpertStateful {
 	 *  <p>
 	 *  @see ISTextExpert#leanToFullText STextEngine.leanToFullText
 	 */
-	public static String leanToFullText(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
+	public String leanToFullText(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
 		int len = text.length();
 		if (len == 0)
 			return text;
@@ -290,7 +290,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return new String(fullChars);
 	}
 
-	public static int[] leanToFullMap(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
+	public int[] leanToFullMap(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
@@ -310,7 +310,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return map;
 	}
 
-	public static int[] leanBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
+	public int[] leanBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
 		int len = text.length();
 		if (len == 0)
 			return EMPTY_INT_ARRAY;
@@ -319,7 +319,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return offsets.getArray();
 	}
 
-	static STextOffsets leanToFullCommon(STextTypeHandler handler, STextEnvironment environment, String text, Object state, STextCharTypes charTypes) {
+	public STextOffsets leanToFullCommon(STextTypeHandler handler, STextEnvironment environment, String text, Object state, STextCharTypes charTypes) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		int len = text.length();
@@ -334,11 +334,9 @@ public class STextImpl implements ISTextExpertStateful {
 			}
 			// current position
 			int curPos = 0;
-			Object value;
-			if (state != null && (value = STextState.getValueAndReset(state)) != null) {
-				STextState.setValue(state, value); // restore the value
+			if (state != null) {
 				offsets.ensureRoom();
-				curPos = handler.processSpecial(environment, text, charTypes, offsets, state, 0, -1);
+				curPos = handler.processSpecial(this, environment, text, charTypes, offsets, 0, -1);
 			}
 			while (true) {
 				// location of next token to handle
@@ -356,7 +354,7 @@ public class STextImpl implements ISTextExpertStateful {
 					curPos = nextLocation + 1;
 				} else {
 					idxLocation -= (separCount - 1); // because caseNumber starts from 1
-					curPos = handler.processSpecial(environment, text, charTypes, offsets, state, idxLocation, nextLocation);
+					curPos = handler.processSpecial(this, environment, text, charTypes, offsets, idxLocation, nextLocation);
 				}
 				if (curPos >= len)
 					break;
@@ -379,7 +377,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return offsets;
 	}
 
-	public static String fullToLeanText(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
+	public String fullToLeanText(STextTypeHandler handler, STextEnvironment environment, String text, Object state) {
 		if (text.length() == 0)
 			return text;
 		if (environment == null)
@@ -467,7 +465,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return lean;
 	}
 
-	public static int[] fullToLeanMap(STextTypeHandler handler, STextEnvironment environment, String full, Object state) {
+	public int[] fullToLeanMap(STextTypeHandler handler, STextEnvironment environment, String full, Object state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;
@@ -498,7 +496,7 @@ public class STextImpl implements ISTextExpertStateful {
 		return map;
 	}
 
-	public static int[] fullBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String full, Object state) {
+	public int[] fullBidiCharOffsets(STextTypeHandler handler, STextEnvironment environment, String full, Object state) {
 		int lenFull = full.length();
 		if (lenFull == 0)
 			return EMPTY_INT_ARRAY;

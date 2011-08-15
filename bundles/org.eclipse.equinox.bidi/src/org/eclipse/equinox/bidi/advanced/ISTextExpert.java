@@ -258,4 +258,18 @@ public interface ISTextExpert {
 	 */
 	public int getCurDirection(String text);
 
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	// Expert's state handling - can be used only for non-shared experts
+
+	// TBD is there a case where we get a shared expert and setting state is a "must"?
+	// Javadoc note: shared experts will ignore this
+	public void setState(Object state);
+
+	// Javadoc note: may return null. Will return null for shared experts
+	public Object getState();
+
+	/**
+	 * Resets state to initial.
+	 */
+	public void resetState();
 }

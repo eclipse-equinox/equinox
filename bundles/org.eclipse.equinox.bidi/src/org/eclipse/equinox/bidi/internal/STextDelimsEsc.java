@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
@@ -49,7 +50,7 @@ public abstract class STextDelimsEsc extends STextDelims {
 	 *  and skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.
 	 */
-	public int processSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, Object state, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int location = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);
