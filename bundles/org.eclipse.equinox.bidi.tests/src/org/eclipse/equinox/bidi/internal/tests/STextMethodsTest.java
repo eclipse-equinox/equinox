@@ -165,13 +165,13 @@ public class STextMethodsTest extends STextTestBase {
 		String data, lean, full, model;
 		int dirA, dirH;
 		ISTextExpert expertRL = STextExpertFactory.getExpert("test.MyCommaRL");
-		dirA = expertRL.getCurDirection(toUT16("###"));
-		dirH = expertRL.getCurDirection(toUT16("ABC"));
+		dirA = expertRL.getTextDirection(toUT16("###"));
+		dirH = expertRL.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #1", dirA == RTL && dirH == LTR);
 
 		ISTextExpert expertRR = STextExpertFactory.getExpert("test.MyCommaRR");
-		dirA = expertRR.getCurDirection(toUT16("###"));
-		dirH = expertRR.getCurDirection(toUT16("ABC"));
+		dirA = expertRR.getTextDirection(toUT16("###"));
+		dirH = expertRR.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #2", dirA == RTL && dirH == RTL);
 
 		ISTextExpert expertLL = STextExpertFactory.getExpert("test.MyCommaLL");
@@ -186,8 +186,8 @@ public class STextMethodsTest extends STextTestBase {
 
 		STextEnvironment environment = new STextEnvironment(null, true, STextEnvironment.ORIENT_LTR);
 		ISTextExpert expert = STextExpertFactory.getExpert("test.MyCommaRL", environment);
-		dirA = expert.getCurDirection(toUT16("###"));
-		dirH = expert.getCurDirection(toUT16("ABC"));
+		dirA = expert.getTextDirection(toUT16("###"));
+		dirH = expert.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #10.5", dirA == RTL && dirH == LTR);
 
 		lean = toUT16("ABC,#DEF,HOST,com");
@@ -231,7 +231,7 @@ public class STextMethodsTest extends STextTestBase {
 		full = expert.leanToFullText(lean);
 		model = "ABc,|#DEF,HOST,com";
 		assertEquals("TestDirection #17 full", model, toPseudo(full));
-		int dir = expert.getCurDirection(lean);
+		int dir = expert.getTextDirection(lean);
 		assertEquals("Test curDirection", RTL, dir);
 	}
 

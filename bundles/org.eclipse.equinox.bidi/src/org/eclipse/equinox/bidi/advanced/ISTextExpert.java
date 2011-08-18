@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.advanced;
 
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
+
 /**
  * For a general introduction to structured text, see
  * {@link <a href="package-summary.html"> the package documentation</a>}.
@@ -94,6 +96,10 @@ public interface ISTextExpert {
 	 *  {@link #getCurDirection getCurDirection} method.
 	 */
 	public static final int DIR_RTL = 1;
+
+	public STextTypeHandler getTypeHandler();
+
+	public STextEnvironment getEnvironment();
 
 	/** 
 	 * Add directional formatting characters to a structured text
@@ -256,7 +262,7 @@ public interface ISTextExpert {
 	 *
 	 * @return the base direction of the structured text, {@link #DIR_LTR} or {@link #DIR_RTL}
 	 */
-	public int getCurDirection(String text);
+	public int getTextDirection(String text);
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Expert's state handling - can be used only for non-shared experts
@@ -271,5 +277,5 @@ public interface ISTextExpert {
 	/**
 	 * Resets state to initial.
 	 */
-	public void resetState();
+	public void clearState();
 }

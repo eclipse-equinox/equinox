@@ -71,7 +71,7 @@ public class STextRegex extends STextTypeHandler {
 	 *  
 	 *  @return the number of special cases for this handler.
 	 */
-	public int getSpecialsCount(STextEnvironment environment) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return maxSpecial;
 	}
 
@@ -79,7 +79,7 @@ public class STextRegex extends STextTypeHandler {
 	 *  This method locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		// In this method, L, R, AL, AN and EN represent bidi categories
 		// as defined in the Unicode Bidirectional Algorithm
 		// ( http://www.unicode.org/reports/tr9/ ).
@@ -147,12 +147,12 @@ public class STextRegex extends STextTypeHandler {
 	/**
 	 *  This method process the special cases.
 	 */
-	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		int location;
 
 		if (separLocation < 0) {
 			caseNumber = ((Integer) expert.getState()).intValue(); // TBD guard against "undefined"
-			expert.resetState();
+			expert.clearState();
 		}
 		switch (caseNumber) {
 			case 1 : /* comment (?#...) */
@@ -221,8 +221,8 @@ public class STextRegex extends STextTypeHandler {
 		return text.length();
 	}
 
-	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(this, environment, text));
+	public int getDirection(ISTextExpert expert, String text) {
+		return getDirection(expert, text, new STextCharTypes(expert, text));
 	}
 
 	/**
@@ -237,7 +237,8 @@ public class STextRegex extends STextTypeHandler {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
+	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
+		STextEnvironment environment = expert.getEnvironment();
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextDirection.DIR_LTR;

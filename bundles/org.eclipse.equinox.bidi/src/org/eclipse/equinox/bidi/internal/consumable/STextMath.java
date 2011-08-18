@@ -11,7 +11,7 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
@@ -29,8 +29,8 @@ public class STextMath extends STextTypeHandler {
 		super("+-/*()="); //$NON-NLS-1$
 	}
 
-	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(this, environment, text));
+	public int getDirection(ISTextExpert expert, String text) {
+		return getDirection(expert, text, new STextCharTypes(expert, text));
 	}
 
 	/**
@@ -45,8 +45,8 @@ public class STextMath extends STextTypeHandler {
 	 *          </ul>
 	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
-		String language = environment.getLanguage();
+	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
+		String language = expert.getEnvironment().getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
 			return STextDirection.DIR_LTR;
 		boolean flagAN = false;

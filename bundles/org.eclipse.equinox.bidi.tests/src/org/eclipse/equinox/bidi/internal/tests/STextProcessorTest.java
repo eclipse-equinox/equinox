@@ -12,9 +12,8 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import java.util.Locale;
-import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.STextProcessor;
-import org.eclipse.equinox.bidi.custom.STextTypeHandler;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 
 /**
  * Tests methods in BidiComplexUtil
@@ -84,10 +83,9 @@ public class STextProcessorTest extends STextTestBase {
 	}
 
 	private void doTest3(String msg, String data, String result, String resLean) {
-		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(STextTypeHandlerFactory.COMMA_DELIMITED);
-		String full = STextProcessor.process(toUT16(data), handler);
+		String full = STextProcessor.processTyped(toUT16(data), STextTypeHandlerFactory.COMMA_DELIMITED);
 		assertEquals(msg + "full", result, toPseudo(full));
-		String lean = STextProcessor.deprocess(full, handler);
+		String lean = STextProcessor.deprocessTyped(full, STextTypeHandlerFactory.COMMA_DELIMITED);
 		assertEquals(msg + "lean", resLean, toPseudo(lean));
 	}
 
@@ -98,7 +96,7 @@ public class STextProcessorTest extends STextTestBase {
 		assertEquals(txt, result, toPseudo(full));
 	}
 
-	public void testBidiComplexUtil() {
+	public void testSTextProcessor() {
 
 		// Test process() and deprocess() with default delimiters
 		doTest1("ABC/DEF/G", ">@ABC@/DEF@/G@^");

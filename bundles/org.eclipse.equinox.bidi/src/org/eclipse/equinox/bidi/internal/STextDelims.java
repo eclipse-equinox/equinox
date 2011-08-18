@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -44,7 +43,7 @@ public abstract class STextDelims extends STextTypeHandler {
 	 *
 	 *  @see #getDelimiters
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		char delim = getDelimiters().charAt((caseNumber - 1) * 2);
 		return text.indexOf(delim, fromIndex);
 	}
@@ -59,7 +58,7 @@ public abstract class STextDelims extends STextTypeHandler {
 	 *  @return the position after the matching end delimiter, or the length
 	 *          of <code>text</code> if no end delimiter is found.
 	 */
-	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		int loc = separLocation + 1;
 		char delim = getDelimiters().charAt((caseNumber * 2) - 1);

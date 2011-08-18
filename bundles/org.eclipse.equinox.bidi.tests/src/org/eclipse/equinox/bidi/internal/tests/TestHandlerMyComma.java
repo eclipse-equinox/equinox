@@ -11,7 +11,7 @@
 package org.eclipse.equinox.bidi.internal.tests;
 
 import org.eclipse.equinox.bidi.STextDirection;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
@@ -29,22 +29,22 @@ public class TestHandlerMyComma extends STextTypeHandler {
 		this.dirHebrew = dirHebrew;
 	}
 
-	public String getSeparators(STextEnvironment environment) {
+	public String getSeparators(ISTextExpert expert) {
 		return ","; //$NON-NLS-1$
 	}
 
-	public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes charTypes) {
+	public boolean skipProcessing(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		byte charType = charTypes.getBidiTypeAt(0);
 		if (charType == AL)
 			return true;
 		return false;
 	}
 
-	public int getDirection(STextEnvironment environment, String text) {
-		return getDirection(environment, text, new STextCharTypes(this, environment, text));
+	public int getDirection(ISTextExpert expert, String text) {
+		return getDirection(expert, text, new STextCharTypes(expert, text));
 	}
 
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
+	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
 			if (charType == AL)

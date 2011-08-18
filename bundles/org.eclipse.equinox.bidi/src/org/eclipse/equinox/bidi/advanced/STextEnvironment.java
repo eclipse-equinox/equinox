@@ -36,26 +36,32 @@ public class STextEnvironment {
 
 	/**
 	 * Specifies that a GUI component should display text depending on the context
+	 * (value is 2).
+	 */
+	public static final int ORIENT_CONTEXTUAL = 1 << 1;
+
+	/**
+	 * Specifies that a GUI component should display text depending on the context
 	 * with default orientation being Left-To-Right (value is 2).
 	 */
-	public static final int ORIENT_CONTEXTUAL_LTR = 2;
+	public static final int ORIENT_CONTEXTUAL_LTR = ORIENT_CONTEXTUAL | ORIENT_LTR;
 
 	/**
 	 * Specifies that a GUI component should display text depending on the context
 	 * with default orientation being Right-To-Left (value is 3).
 	 */
-	public static final int ORIENT_CONTEXTUAL_RTL = 3;
+	public static final int ORIENT_CONTEXTUAL_RTL = ORIENT_CONTEXTUAL | ORIENT_RTL;
 
 	/**
 	 * Used when the orientation of a GUI component is not known (value is 4). 
 	 */
-	public static final int ORIENT_UNKNOWN = 4;
+	public static final int ORIENT_UNKNOWN = 1 << 2;
 
 	/**
 	 * Used to specify that no directional formatting characters 
-	 * should be added as prefix or suffix (value is 5).
+	 * should be added as prefix or suffix (value is 8).
 	 */
-	public static final int ORIENT_IGNORE = 5;
+	public static final int ORIENT_IGNORE = 1 << 3;
 
 	/**
 	 * Pre-defined <code>STextEnvironment</code> instance which uses default locale,

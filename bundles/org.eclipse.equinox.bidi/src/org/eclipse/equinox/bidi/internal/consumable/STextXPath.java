@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.internal.STextDelims;
 
 /**
@@ -25,7 +25,7 @@ public class STextXPath extends STextDelims {
 	/**
 	 *  @return 2 as the number of special cases handled by this handler.
 	 */
-	public int getSpecialsCount(STextEnvironment environment) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 2;
 	}
 

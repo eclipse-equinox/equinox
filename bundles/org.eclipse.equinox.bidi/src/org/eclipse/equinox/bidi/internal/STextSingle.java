@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi.internal;
 
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -41,8 +40,8 @@ public class STextSingle extends STextTypeHandler {
 	 *
 	 *  @see #getSeparators getSeparators
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
-		return text.indexOf(this.getSeparators(environment).charAt(0), fromIndex);
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+		return text.indexOf(this.getSeparators(expert).charAt(0), fromIndex);
 	}
 
 	/**
@@ -51,7 +50,7 @@ public class STextSingle extends STextTypeHandler {
 	 *
 	 *  @return the length of <code>text</code>.
 	 */
-	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		return text.length();
 	}
@@ -61,7 +60,7 @@ public class STextSingle extends STextTypeHandler {
 	 *
 	 *  @return 1.
 	 */
-	public int getSpecialsCount(STextEnvironment environment) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 1;
 	}
 

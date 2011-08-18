@@ -10,12 +10,12 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 public class TestHandler2 extends STextTypeHandler {
 
-	public int getSpecialsCount(STextEnvironment env) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 1;
 	}
 

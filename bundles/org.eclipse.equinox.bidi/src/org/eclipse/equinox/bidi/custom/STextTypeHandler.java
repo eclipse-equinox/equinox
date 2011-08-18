@@ -36,7 +36,7 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *              See {@link #getSpecialsCount getSpecialsCount}.</li>
  *        </ul></li>
  *    <li>Before starting deeper analysis of the submitted text, the common
- *        logic gives to the handler a chance to shorten the processus by
+ *        logic gives to the handler a chance to shorten the process by
  *        invoking its {@link #skipProcessing skipProcessing} method.</li>
  *    <li>The common logic then analyzes the text to segment it into tokens
  *        according to the appearance of separators (as retrieved using
@@ -46,11 +46,11 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *        method, the common logic will repeatedly invoke the handler's
  *        {@link #indexOfSpecial indexOfSpecial} method to let it signal the
  *        presence of special strings which may further delimit the source text.</li>
- *    <li>When such a special case is signalled by the handler, the common
+ *    <li>When such a special case is signaled by the handler, the common
  *        logic will call the handler's {@link #processSpecial processSpecial}
  *        method to give it the opportunity to handle it as needed. Typical
  *        actions that the handler may perform are to add directional marks
- *        inconditionally (by calling {@link #insertMark insertMark} or
+ *        unconditionally (by calling {@link #insertMark insertMark} or
  *        conditionally (by calling {@link #processSeparator processSeparator}).</li>
  *  </ul>
  *
@@ -127,7 +127,7 @@ public class STextTypeHandler {
 	 * number of special cases is zero, which means that
 	 * <code>indexOfSpecial</code> should never be called for them.
 	 */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		// This method must be overridden by all subclasses with special cases.
 		throw new IllegalStateException("A handler with specialsCount > 0 must have an indexOfSpecial() method."); //$NON-NLS-1$
 	}
@@ -210,7 +210,7 @@ public class STextTypeHandler {
 	 * number of special cases is zero, which means that
 	 * <code>processSpecial</code> should never be called for them.
 	 */
-	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		// This method must be overridden by all subclasses with any special case.
 		throw new IllegalStateException("A handler with specialsCount > 0 must have a processSpecial() method."); //$NON-NLS-1$
 	}
@@ -300,7 +300,7 @@ public class STextTypeHandler {
 	 * @return a string grouping one-character separators which separate
 	 *         the structured text into tokens.
 	 */
-	public String getSeparators(STextEnvironment environment) {
+	public String getSeparators(ISTextExpert expert) {
 		return separators;
 	}
 
@@ -325,7 +325,7 @@ public class STextTypeHandler {
 	 *         The value returned is either
 	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
 	 */
-	public int getDirection(STextEnvironment environment, String text) {
+	public int getDirection(ISTextExpert expert, String text) {
 		return STextDirection.DIR_LTR;
 	}
 
@@ -354,7 +354,7 @@ public class STextTypeHandler {
 	 *         The value returned is either
 	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
 	 */
-	public int getDirection(STextEnvironment environment, String text, STextCharTypes charTypes) {
+	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		return STextDirection.DIR_LTR;
 	}
 
@@ -380,7 +380,7 @@ public class STextTypeHandler {
 	 *         anything which is not identified by a one-character separator.
 	 *
 	 */
-	public int getSpecialsCount(STextEnvironment environment) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 0;
 	}
 
@@ -409,7 +409,7 @@ public class STextTypeHandler {
 	 *         text to add directional formatting characters.
 	 *
 	 */
-	public boolean skipProcessing(STextEnvironment environment, String text, STextCharTypes charTypes) {
+	public boolean skipProcessing(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		return false;
 	}
 

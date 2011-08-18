@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 
 /**
@@ -35,6 +36,7 @@ public class STextCharTypes {
 
 	private static final int CHARTYPES_ADD = 2;
 
+	final protected ISTextExpert expert;
 	final protected STextTypeHandler handler;
 	final protected STextEnvironment environment;
 	final protected String text;
@@ -59,16 +61,17 @@ public class STextCharTypes {
 	 *  
 	 *  @param text is the text whose characters are analyzed.
 	 */
-	public STextCharTypes(STextTypeHandler handler, STextEnvironment environment, String text) {
-		this.handler = handler;
-		this.environment = environment;
+	public STextCharTypes(ISTextExpert expert, String text) {
+		this.expert = expert;
+		this.handler = expert.getTypeHandler();
+		this.environment = expert.getEnvironment();
 		this.text = text;
 		types = new byte[text.length()];
 	}
 
 	public int getDirection() {
 		if (direction < 0)
-			direction = handler.getDirection(environment, text, this);
+			direction = handler.getDirection(expert, text, this);
 		return direction;
 	}
 
@@ -99,7 +102,7 @@ public class STextCharTypes {
 				if (direction < -1) // called by handler.getDirection
 					return charType; // avoid infinite recursion
 				direction = -2; // signal we go within handler.getDirection
-				direction = handler.getDirection(environment, text, this);
+				direction = handler.getDirection(expert, text, this);
 			}
 			charType = (direction == STextEnvironment.ORIENT_RTL) ? R : L;
 		}
@@ -136,11 +139,11 @@ public class STextCharTypes {
 	 */
 	public int resolveOrientation(STextEnvironment envir) {
 		int orient = envir.getOrientation();
-		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL_LTR) == 0) { // absolute orientation
+		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL) == 0) { // absolute orientation
 			return orient;
 		}
 		// contextual orientation:
-		orient &= 1; // initiate to the default orientation minus contextual bit
+		orient &= ~STextEnvironment.ORIENT_CONTEXTUAL; // initiate to the default orientation minus contextual bit
 		int len = text.length();
 		byte charType;
 		for (int i = 0; i < len; i++) {

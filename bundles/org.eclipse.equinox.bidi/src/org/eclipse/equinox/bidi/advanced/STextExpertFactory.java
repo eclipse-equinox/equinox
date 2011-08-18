@@ -58,6 +58,8 @@ final public class STextExpertFactory {
 
 	static public ISTextExpert getExpert(String type, STextEnvironment environment) {
 		ISTextExpert expert;
+		if (environment == null)
+			environment = STextEnvironment.DEFAULT;
 		synchronized (sharedExperts) {
 			Map experts = (Map) sharedExperts.get(type);
 			if (experts == null) {
@@ -77,6 +79,8 @@ final public class STextExpertFactory {
 	}
 
 	static public ISTextExpert getExpert(STextTypeHandler handler, STextEnvironment environment) {
+		if (environment == null)
+			environment = STextEnvironment.DEFAULT;
 		return new STextImpl(handler, environment, true);
 	}
 
@@ -88,6 +92,8 @@ final public class STextExpertFactory {
 		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 		if (handler == null)
 			return null;
+		if (environment == null)
+			environment = STextEnvironment.DEFAULT;
 		return new STextImpl(handler, environment, true);
 	}
 

@@ -10,16 +10,16 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.*;
 
 public class TestHandler3 extends STextTypeHandler {
 
-	public int getSpecialsCount(STextEnvironment env) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 1;
 	}
 
-	public int indexOfSpecial(STextEnvironment env, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		return fromIndex;
 	}
 }

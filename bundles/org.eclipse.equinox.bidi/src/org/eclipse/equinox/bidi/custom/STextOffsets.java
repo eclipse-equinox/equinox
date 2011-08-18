@@ -51,7 +51,7 @@ public class STextOffsets {
 	/**
 	 * Mark that all entries in the offsets array are unused.
 	 */
-	public void resetCount() {
+	public void clear() {
 		count = 0;
 	}
 
@@ -71,6 +71,11 @@ public class STextOffsets {
 	 * @param  offset is the value to insert.
 	 */
 	public void insertOffset(STextCharTypes charTypes, int offset) {
+		if (count >= offsets.length) {
+			int[] newOffsets = new int[offsets.length * 2];
+			System.arraycopy(offsets, 0, newOffsets, 0, count);
+			offsets = newOffsets;
+		}
 		int index = count - 1; // index of greatest member <= offset
 		// look up after which member the new offset should be inserted
 		while (index >= 0) {
@@ -109,22 +114,10 @@ public class STextOffsets {
 	}
 
 	/**
-	 * Make sure that there is at least 3 free entries in the offsets array.
-	 */
-	public void ensureRoom() {
-		// make sure there are at least 3 empty slots in offsets
-		if ((offsets.length - count) < 3) {
-			int[] newOffsets = new int[offsets.length * 2];
-			System.arraycopy(offsets, 0, newOffsets, 0, count);
-			offsets = newOffsets;
-		}
-	}
-
-	/**
 	 * Get all and only the used offset entries.
 	 * @return the current used entries of the offsets array.
 	 */
-	public int[] getArray() {
+	public int[] getOffsets() {
 		if (count == offsets.length)
 			return offsets;
 		int[] array = new int[count];

@@ -11,7 +11,6 @@
 package org.eclipse.equinox.bidi.internal.consumable;
 
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
@@ -47,7 +46,7 @@ public class STextSql extends STextTypeHandler {
 	/**
 	 *  @return 5 as the number of special cases handled by this handler.
 	 */
-	public int getSpecialsCount(STextEnvironment environment) {
+	public int getSpecialsCount(ISTextExpert expert) {
 		return 5;
 	}
 
@@ -61,7 +60,7 @@ public class STextSql extends STextTypeHandler {
 	  *    <li>comments starting with hyphen-hyphen</li>
 	  *  </ol>
 	  */
-	public int indexOfSpecial(STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
+	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
 		switch (caseNumber) {
 			case 1 : /* space */
 				return text.indexOf(" ", fromIndex); //$NON-NLS-1$
@@ -88,13 +87,13 @@ public class STextSql extends STextTypeHandler {
 	     *    <li>skip until after a line separator</li>
 	     *  </ol>
 	 */
-	public int processSpecial(ISTextExpert expert, STextEnvironment environment, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
+	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		int location;
 
 		STextTypeHandler.processSeparator(text, charTypes, offsets, separLocation);
 		if (separLocation < 0) {
 			caseNumber = ((Integer) expert.getState()).intValue(); // TBD guard against "undefined"
-			expert.resetState();
+			expert.clearState();
 		}
 		switch (caseNumber) {
 			case 1 : /* space */

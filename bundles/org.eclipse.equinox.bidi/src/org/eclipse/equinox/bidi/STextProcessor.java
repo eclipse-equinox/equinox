@@ -91,11 +91,12 @@ public final class STextProcessor {
 			curMark = LRM;
 			curPrefix = "\u202a\u200e"; /* LRE+LRM *///$NON-NLS-1$
 			curSuffix = "\u200e\u202c"; /* LRM+PDF *///$NON-NLS-1$
-		} else {
+		} else if (direction == STextDirection.DIR_RTL) {
 			curMark = RLM;
 			curPrefix = "\u202b\u200f"; /* RLE+RLM *///$NON-NLS-1$
 			curSuffix = "\u200f\u202c"; /* RLM+PDF *///$NON-NLS-1$
-		}
+		} else
+			throw new IllegalArgumentException();
 		// add marks at offsets
 		if ((offsets != null) && (offsets.length > 0)) {
 			int offLen = offsets.length;
@@ -201,7 +202,7 @@ public final class STextProcessor {
 	 * @param  handler a handler instance appropriate for the type of the structured text
 	 * @return the processed string
 	 */
-	public static String process(String str, STextTypeHandler handler) {
+	public static String processTyped(String str, String textType) {
 		if ((str == null) || (str.length() <= 1))
 			return str;
 
@@ -214,7 +215,7 @@ public final class STextProcessor {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		ISTextExpert expert = STextExpertFactory.getExpert(handler, env);
+		ISTextExpert expert = STextExpertFactory.getExpert(textType, env);
 		return expert.leanToFullText(str);
 	}
 
@@ -254,7 +255,7 @@ public final class STextProcessor {
 	 * @param  handler appropriate for the structured text
 	 * @return string without directional formatting characters
 	 */
-	public static String deprocess(String str, STextTypeHandler handler) {
+	public static String deprocessTyped(String str, String textType) {
 		if ((str == null) || (str.length() <= 1))
 			return str;
 
@@ -262,7 +263,7 @@ public final class STextProcessor {
 		STextEnvironment env = new STextEnvironment(null, false, STextEnvironment.ORIENT_UNKNOWN);
 		if (!env.isProcessingNeeded())
 			return str;
-		ISTextExpert expert = STextExpertFactory.getExpert(handler, env);
+		ISTextExpert expert = STextExpertFactory.getExpert(textType, env);
 		return expert.fullToLeanText(str);
 	}
 
