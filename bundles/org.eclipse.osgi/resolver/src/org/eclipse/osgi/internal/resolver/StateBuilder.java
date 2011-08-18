@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.*;
@@ -19,7 +21,6 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.wiring.ResourceConstants;
 
 /**
  * This class builds bundle description objects from manifests

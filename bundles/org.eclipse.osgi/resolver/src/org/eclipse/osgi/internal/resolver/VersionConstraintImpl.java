@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.osgi.framework.resource.Capability;
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;

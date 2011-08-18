@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2011). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.framework.wiring;
+package org.osgi.framework.resource;
 
 import java.util.Map;
 
@@ -24,9 +24,7 @@ import org.osgi.framework.Constants;
  * A requirement that has been declared from a {@link Resource} .
  * 
  * @ThreadSafe
- * @Immutable
- * 
- * @version $Id: a085f0fb285b6a0d72203440ffdb1c9e6a236f49 $
+ * @version $Id: 34bfa17b8e9a55493390d6df96f2dcb026c74185 $
  */
 public interface Requirement {
 	/**
@@ -88,20 +86,17 @@ public interface Requirement {
 	 * <li>The filter specified by the {@link Constants#FILTER_DIRECTIVE filter}
 	 * directive of this requirement matches the
 	 * {@link Capability#getAttributes() attributes of the specified capability}.
-	 * <li>The {@link #getDirectives() requirement directives} and the
-	 * {@link Capability#getDirectives() capability directives} that apply to
-	 * the name space are satisfied.
+	 * <li>The standard capability {@link Capability#getDirectives() directives} 
+	 * that influence matching and that apply to the name space are satisfied.  
+	 * See the capability {@link ResourceConstants#CAPABILITY_MANDATORY_DIRECTIVE 
+	 * mandatory} directive.
 	 * </ul>
 	 * 
 	 * 
 	 * @param capability
 	 *            The capability to match to this requirement.
 	 * @return {@code true} if the specified capability matches this this
-	 *         requirement. {@link #getNamespace() name space} as this
-	 *         requirement and the filter for this requirement matches the
-	 *         {@link BundleCapability#getAttributes() attributes of the
-	 *         specified capability}; {@code false} otherwise.
+	 *         requirement; {@code false} otherwise.
 	 */
-	// TODO much debate on the placement and need for this method.
 	boolean matches(Capability capability);
 }

@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
 import org.eclipse.osgi.internal.resolver.GenericDescriptionImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.ResourceConstants;
 
 /*
  * A companion to BundleDescription from the state used while resolving.

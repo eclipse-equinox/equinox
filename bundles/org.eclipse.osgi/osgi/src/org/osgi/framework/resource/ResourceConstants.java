@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.osgi.framework.wiring;
+
+package org.osgi.framework.resource;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Defines standard names for the attributes, directives and name spaces for
@@ -26,7 +29,8 @@ import org.osgi.framework.Version;
  * The values associated with these keys are of type {@code String}, unless
  * otherwise indicated.
  * 
- * @version $Id$
+ * @Immutable
+ * @version $Id: 7b7e18d49b0e34e527a70641eed790d808800287 $
  */
 public final class ResourceConstants {
 
@@ -350,7 +354,8 @@ public final class ResourceConstants {
 	 * in the {@link #REQUIREMENT_FILTER_DIRECTIVE filter} of a requirement in
 	 * order for the capability to match the requirement. This directive must
 	 * only be used for capabilities with the {@link #WIRING_PACKAGE_NAMESPACE
-	 * package} name space.
+	 * package}, {@link #WIRING_BUNDLE_NAMESPACE bundle}, or
+	 * {@link #WIRING_HOST_NAMESPACE host} name space.
 	 */
 	public final static String CAPABILITY_MANDATORY_DIRECTIVE = "mandatory";
 

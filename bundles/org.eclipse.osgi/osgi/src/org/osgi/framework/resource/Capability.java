@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2010, 2011). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.framework.wiring;
+package org.osgi.framework.resource;
 
 import java.util.Map;
 
@@ -22,8 +22,7 @@ import java.util.Map;
  * A capability that has been declared from a {@link Resource}.
  * 
  * @ThreadSafe
- * @Immutable
- * @version $Id: a37df4f0d0a54593fab0a3ddec451f0b1342d4f3 $
+ * @version $Id: f230000a3da509b0bff654795c4b694ec86f601c $
  */
 public interface Capability {
 

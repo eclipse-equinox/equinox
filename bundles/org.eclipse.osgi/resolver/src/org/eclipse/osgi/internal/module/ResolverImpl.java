@@ -11,6 +11,8 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;

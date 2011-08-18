@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -20,7 +22,6 @@ import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.ResourceConstants;
 
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
