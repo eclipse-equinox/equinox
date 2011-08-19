@@ -7,38 +7,9 @@
       <typeDescription
             class="org.eclipse.equinox.bidi.internal.tests.STextTest"
             description="Test"
-            type="test">
+            type="test.ID">
       </typeDescription>
-     <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandler1"
-            description="Test Handler 1"
-            type="test.Handler1">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandler2"
-            description="Test Handler 2"
-            type="test.Handler2">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandler3"
-            description="Test Handler 3"
-            type="test.Handler3">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandlerMyCommaRL"
-            description="Test my comma RL"
-            type="test.MyCommaRL">
-      </typeDescription>
-       <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandlerMyCommaRR"
-            description="Test my comma RR"
-            type="test.MyCommaRR">
-      </typeDescription>
-      <typeDescription
-            class="org.eclipse.equinox.bidi.internal.tests.TestHandlerMyCommaLL"
-            description="Test my comma LL"
-            type="test.MyCommaLL">
-      </typeDescription>
+
    </extension>
 
 </plugin>

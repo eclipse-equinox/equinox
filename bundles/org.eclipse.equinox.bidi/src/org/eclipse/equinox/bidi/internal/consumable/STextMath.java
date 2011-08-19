@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
@@ -34,7 +33,7 @@ public class STextMath extends STextTypeHandler {
 	}
 
 	/**
-	 *  @return {@link STextDirection#DIR_RTL DIR_RTL} if the following
+	 *  @return {@link ISTextExpert#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
 	 *          <ul>
 	 *            <li>The current locale (as expressed by the environment
@@ -43,24 +42,24 @@ public class STextMath extends STextTypeHandler {
 	 *            <li>If there is no strong character in the text, there is
 	 *                at least one Arabic-Indic digit in the text.</li>
 	 *          </ul>
-	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
+	 *          Otherwise, returns {@link ISTextExpert#DIR_LTR DIR_LTR}.
 	 */
 	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
-			return STextDirection.DIR_LTR;
+			return ISTextExpert.DIR_LTR;
 		boolean flagAN = false;
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
 			if (charType == AL)
-				return STextDirection.DIR_RTL;
+				return ISTextExpert.DIR_RTL;
 			if (charType == L || charType == R)
-				return STextDirection.DIR_LTR;
+				return ISTextExpert.DIR_LTR;
 			if (charType == AN)
 				flagAN = true;
 		}
 		if (flagAN)
-			return STextDirection.DIR_RTL;
-		return STextDirection.DIR_LTR;
+			return ISTextExpert.DIR_RTL;
+		return ISTextExpert.DIR_LTR;
 	}
 }

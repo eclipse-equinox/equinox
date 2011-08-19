@@ -67,14 +67,14 @@ public class STextFullToLeanTest extends STextTestBase {
 
 		data = "update \"AB_CDE\" set \"COL1\"@='01', \"COL2\"@='02' /* GH IJK";
 		text = toUT16(data);
-		ISTextExpert expertLTR = STextExpertFactory.getPrivateExpert(type, envLTR);
+		ISTextExpert expertLTR = STextExpertFactory.getStatefulExpert(type, envLTR);
 		expertLTR.clearState();
 		lean = expertLTR.fullToLeanText(text);
 
 		state1 = expertLTR.getState();
 		model = "update \"AB_CDE\" set \"COL1\"='01', \"COL2\"='02' /* GH IJK";
 		assertEquals(msg + "LTR lean", model, toPseudo(lean));
-		ISTextExpert expertLTR2 = STextExpertFactory.getPrivateExpert(type, envLTR);
+		ISTextExpert expertLTR2 = STextExpertFactory.getStatefulExpert(type, envLTR);
 		expertLTR2.clearState();
 		full = expertLTR2.leanToFullText(lean);
 

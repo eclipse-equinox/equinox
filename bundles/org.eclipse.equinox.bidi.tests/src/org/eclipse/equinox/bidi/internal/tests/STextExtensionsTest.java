@@ -66,7 +66,7 @@ public class STextExtensionsTest extends STextTestBase {
 		expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.FILE, env);
 		doTest1("File #1", "c:\\A\\B\\FILE.EXT", "c:\\A@\\B@\\FILE@.EXT");
 
-		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.JAVA, env);
+		expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.JAVA, env);
 		doTest1("Java #1", "A = B + C;", "A@ = B@ + C;");
 		doTest1("Java #2", "A   = B + C;", "A@   = B@ + C;");
 		doTest1("Java #3", "A = \"B+C\"+D;", "A@ = \"B+C\"@+D;");
@@ -83,7 +83,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest1("Property #1", "NAME=VAL1,VAL2", "NAME@=VAL1,VAL2");
 		doTest1("Property #2", "NAME=VAL1,VAL2=VAL3", "NAME@=VAL1,VAL2=VAL3");
 
-		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.REGEXP, env);
+		expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.REGEXP, env);
 		data = toUT16("ABC(?") + "#" + toUT16("DEF)GHI");
 		doTest2("Regex #0.0", data, "A@B@C@(?#DEF)@G@H@I");
 		data = toUT16("ABC(?") + "#" + toUT16("DEF");
@@ -167,7 +167,7 @@ public class STextExtensionsTest extends STextTestBase {
 		doTest2("Regex #16.2", data, "<&#HI\\eJKL&^");
 		env = envHebrew;
 
-		expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.SQL, env);
+		expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.SQL, env);
 		doTest1("SQL #0", "abc GHI", "abc GHI");
 		doTest1("SQL #1", "abc DEF   GHI", "abc DEF@   GHI");
 		doTest1("SQL #2", "ABC, DEF,   GHI", "ABC@, DEF@,   GHI");

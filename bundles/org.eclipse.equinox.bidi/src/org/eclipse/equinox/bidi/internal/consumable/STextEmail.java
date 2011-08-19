@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.custom.STextCharTypes;
 import org.eclipse.equinox.bidi.internal.STextDelimsEsc;
@@ -32,7 +31,7 @@ public class STextEmail extends STextDelimsEsc {
 	}
 
 	/**
-	 *  @return {@link STextDirection#DIR_RTL DIR_RTL} if the following
+	 *  @return {@link ISTextExpert#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
 	 *          <ul>
 	 *            <li>The current locale (as expressed by the environment
@@ -40,12 +39,12 @@ public class STextEmail extends STextDelimsEsc {
 	 *            <li>The domain part of the email address contains
 	 *                at least one RTL character.</li>
 	 *          </ul>
-	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
+	 *          Otherwise, returns {@link ISTextExpert#DIR_LTR DIR_LTR}.
 	 */
 	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		String language = expert.getEnvironment().getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
-			return STextDirection.DIR_LTR;
+			return ISTextExpert.DIR_LTR;
 		int domainStart;
 		domainStart = text.indexOf('@');
 		if (domainStart < 0)
@@ -53,9 +52,9 @@ public class STextEmail extends STextDelimsEsc {
 		for (int i = domainStart; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
 			if (charType == AL || charType == R)
-				return STextDirection.DIR_RTL;
+				return ISTextExpert.DIR_RTL;
 		}
-		return STextDirection.DIR_LTR;
+		return ISTextExpert.DIR_LTR;
 	}
 
 	/**

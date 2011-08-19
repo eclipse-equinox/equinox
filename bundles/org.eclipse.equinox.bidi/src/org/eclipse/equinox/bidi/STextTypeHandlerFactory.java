@@ -101,14 +101,6 @@ final public class STextTypeHandlerFactory {
 	}
 
 	/**
-	 * Retrieve all IDs of registered structured text handlers.
-	 * @return an array of text handler IDs.
-	 */
-	static public String[] getAllHandlerIDs() {
-		return STextTypesCollector.getInstance().getTypes();
-	}
-
-	/**
 	 *  Obtain a structured text handler of a given type.
 	 *  @param id string identifying handler
 	 *  @return a handler of the required type, or <code>null</code> if the type is unknown

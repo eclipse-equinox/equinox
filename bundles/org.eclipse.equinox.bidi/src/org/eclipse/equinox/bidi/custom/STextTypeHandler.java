@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.internal.STextImpl;
@@ -323,10 +322,10 @@ public class STextTypeHandler {
 	 *         whether the structured text contains Arabic or Hebrew
 	 *         letters.<br>
 	 *         The value returned is either
-	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
+	 *         {@link ISTextExpert#DIR_LTR DIR_LTR} or {@link ISTextExpert#DIR_RTL DIR_RTL}.
 	 */
 	public int getDirection(ISTextExpert expert, String text) {
-		return STextDirection.DIR_LTR;
+		return ISTextExpert.DIR_LTR;
 	}
 
 	/**
@@ -352,10 +351,10 @@ public class STextTypeHandler {
 	 *         whether the structured text contains Arabic or Hebrew
 	 *         letters.<br>
 	 *         The value returned is either
-	 *         {@link STextDirection#DIR_LTR DIR_LTR} or {@link STextDirection#DIR_RTL DIR_RTL}.
+	 *         {@link ISTextExpert#DIR_LTR DIR_LTR} or {@link ISTextExpert#DIR_RTL DIR_RTL}.
 	 */
 	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
-		return STextDirection.DIR_LTR;
+		return ISTextExpert.DIR_LTR;
 	}
 
 	/**

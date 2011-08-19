@@ -27,13 +27,10 @@ public final class STextProcessor {
 	/**
 	 * The default set of separators used to segment a string: dot, colon, slash, backslash.
 	 */
-	public static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
+	private static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
 
 	// left to right mark
 	private static final char LRM = '\u200e';
-
-	// left to right mark
-	private static final char RLM = '\u200f';
 
 	// left to right embedding
 	private static final char LRE = '\u202a';
@@ -49,75 +46,6 @@ public final class STextProcessor {
 	 */
 	private STextProcessor() {
 		// empty
-	}
-
-	/** 
-	 * This method adds directional marks to the given text before the characters 
-	 * specified in the given array of offsets. It can be used to add a prefix and/or 
-	 * a suffix of directional formatting characters.
-	 * <p>
-	 * The directional marks will be LRMs for structured text strings with LTR base 
-	 * direction and RLMs for strings with RTL base direction.
-	 * </p><p> 
-	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
-	 * be added depending on the value of the <code>affix</code> argument.
-	 * </p>
-	 * @see ISTextExpert#leanBidiCharOffsets(String)
-	 * 
-	 * @param  text the structured text string
-	 * @param  offsets an array of offsets to characters in <code>text</code>
-	 *         before which an LRM or RLM will be inserted.
-	 *         The array must be sorted in ascending order without duplicates.
-	 *         This argument may be <code>null</code> if there are no marks to add.
-	 * @param  direction the base direction of the structured text.
-	 *         It must be one of the values {@link STextDirection#DIR_LTR}, or
-	 *         {@link STextDirection#DIR_RTL}.
-	 * @param  affix specifies if a prefix and a suffix should be added to
-	 *         the result
-	 * @return a string corresponding to the source <code>text</code> with
-	 *         directional marks (LRMs or RLMs) added at the specified offsets,
-	 *         and directional formatting characters (LRE, RLE, PDF) added
-	 *         as prefix and suffix if so required.
-	 */
-	public static String insertMarks(String text, int[] offsets, int direction, boolean affix) {
-		int textLen = text.length();
-		if (textLen == 0)
-			return ""; //$NON-NLS-1$
-
-		String curPrefix, curSuffix, full;
-		char curMark, c;
-		char[] fullChars;
-		if (direction == STextDirection.DIR_LTR) {
-			curMark = LRM;
-			curPrefix = "\u202a\u200e"; /* LRE+LRM *///$NON-NLS-1$
-			curSuffix = "\u200e\u202c"; /* LRM+PDF *///$NON-NLS-1$
-		} else if (direction == STextDirection.DIR_RTL) {
-			curMark = RLM;
-			curPrefix = "\u202b\u200f"; /* RLE+RLM *///$NON-NLS-1$
-			curSuffix = "\u200f\u202c"; /* RLM+PDF *///$NON-NLS-1$
-		} else
-			throw new IllegalArgumentException();
-		// add marks at offsets
-		if ((offsets != null) && (offsets.length > 0)) {
-			int offLen = offsets.length;
-			fullChars = new char[textLen + offLen];
-			int added = 0;
-			for (int i = 0, j = 0; i < textLen; i++) {
-				c = text.charAt(i);
-				if ((j < offLen) && (i == offsets[j])) {
-					fullChars[i + added] = curMark;
-					added++;
-					j++;
-				}
-				fullChars[i + added] = c;
-			}
-			full = new String(fullChars);
-		} else {
-			full = text;
-		}
-		if (affix)
-			return curPrefix + full + curSuffix;
-		return full;
 	}
 
 	/**
@@ -265,6 +193,16 @@ public final class STextProcessor {
 			return str;
 		ISTextExpert expert = STextExpertFactory.getExpert(textType, env);
 		return expert.fullToLeanText(str);
+	}
+
+	/**
+	 * Return the string containing all the default separator characters to be
+	 * used to segment a given string.
+	 * 
+	 * @return string containing all separators
+	 */
+	public static String getDefaultSeparators() {
+		return defaultSeparators;
 	}
 
 }

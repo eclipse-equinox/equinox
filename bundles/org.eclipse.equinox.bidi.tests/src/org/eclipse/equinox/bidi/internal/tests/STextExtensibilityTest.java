@@ -21,27 +21,8 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  */
 public class STextExtensibilityTest extends STextTestBase {
 
-	public void testBaseContributions() {
-		String[] types = STextTypeHandlerFactory.getAllHandlerIDs();
-		assertNotNull(types);
-		assertTrue(types.length > 0);
-
-		// check one of the types that we know should be there
-		assertTrue(isTypePresent(types, "regex"));
-
-		STextTypeHandler handler = STextTypeHandlerFactory.getHandler("regex");
-		assertNotNull(handler);
-	}
-
 	public void testOtherContributions() {
-		String[] types = STextTypeHandlerFactory.getAllHandlerIDs();
-		assertNotNull(types);
-		assertTrue(types.length > 0);
-
-		// check the type added by the test bundle
-		assertTrue(isTypePresent(types, "test"));
-
-		STextTypeHandler handler = STextTypeHandlerFactory.getHandler("test");
+		STextTypeHandler handler = STextTypeHandlerFactory.getHandler("test.ID");
 		assertNotNull(handler);
 
 		handler = STextTypeHandlerFactory.getHandler("badtest");
@@ -52,18 +33,11 @@ public class STextExtensibilityTest extends STextTestBase {
 		lean = toUT16(data);
 		handler = STextTypeHandlerFactory.getHandler("test");
 
-		ISTextExpert expert = STextExpertFactory.getExpert("test");
+		ISTextExpert expert = STextExpertFactory.getExpert("test.ID");
 		full = expert.leanToFullText(lean);
 
 		model = "ABC@.DEF@:HOST@-COM@=HELLO";
 		assertEquals("Test 'test' plugin", model, toPseudo(full));
 	}
 
-	private boolean isTypePresent(String[] types, String type) {
-		for (int i = 0; i < types.length; i++) {
-			if (type.equalsIgnoreCase(types[i]))
-				return true;
-		}
-		return false;
-	}
 }

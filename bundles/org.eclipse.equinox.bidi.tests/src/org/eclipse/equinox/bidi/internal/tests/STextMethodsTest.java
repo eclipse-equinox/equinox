@@ -11,24 +11,65 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.advanced.*;
+import org.eclipse.equinox.bidi.custom.STextCharTypes;
+import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
  * Tests most public methods of BidiComplexEngine
  */
 public class STextMethodsTest extends STextTestBase {
 
-	final static int LTR = STextDirection.DIR_LTR;
-	final static int RTL = STextDirection.DIR_RTL;
-	final static STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
-	final static STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
-	final static STextEnvironment envRTLMIR = new STextEnvironment(null, true, STextEnvironment.ORIENT_RTL);
-	final static STextEnvironment envIGN = new STextEnvironment(null, false, STextEnvironment.ORIENT_IGNORE);
-	final static STextEnvironment envCLR = new STextEnvironment(null, false, STextEnvironment.ORIENT_CONTEXTUAL_LTR);
-	final static STextEnvironment envCRL = new STextEnvironment(null, false, STextEnvironment.ORIENT_CONTEXTUAL_RTL);
-	final static STextEnvironment envERR = new STextEnvironment(null, false, 9999);
+	private final static int LTR = ISTextExpert.DIR_LTR;
+	private final static int RTL = ISTextExpert.DIR_RTL;
+	private final static STextEnvironment envLTR = new STextEnvironment(null, false, STextEnvironment.ORIENT_LTR);
+	private final static STextEnvironment envRTL = new STextEnvironment(null, false, STextEnvironment.ORIENT_RTL);
+	private final static STextEnvironment envRTLMIR = new STextEnvironment(null, true, STextEnvironment.ORIENT_RTL);
+	private final static STextEnvironment envIGN = new STextEnvironment(null, false, STextEnvironment.ORIENT_IGNORE);
+	private final static STextEnvironment envCLR = new STextEnvironment(null, false, STextEnvironment.ORIENT_CONTEXTUAL_LTR);
+	private final static STextEnvironment envCRL = new STextEnvironment(null, false, STextEnvironment.ORIENT_CONTEXTUAL_RTL);
+	private final static STextEnvironment envERR = new STextEnvironment(null, false, 9999);
+	private final static TestHandlerMyComma testMyCommaLL = new TestHandlerMyComma(LTR, LTR);
+	private final static TestHandlerMyComma testMyCommaRR = new TestHandlerMyComma(RTL, RTL);
+	private final static TestHandlerMyComma testMyCommaRL = new TestHandlerMyComma(RTL, LTR);
+
+	private static class TestHandlerMyComma extends STextTypeHandler {
+
+		private final static byte AL = Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC;
+
+		final int dirArabic;
+		final int dirHebrew;
+
+		public TestHandlerMyComma(int dirArabic, int dirHebrew) {
+			this.dirArabic = dirArabic;
+			this.dirHebrew = dirHebrew;
+		}
+
+		public String getSeparators(ISTextExpert expert) {
+			return ","; //$NON-NLS-1$
+		}
+
+		public boolean skipProcessing(ISTextExpert expert, String text, STextCharTypes charTypes) {
+			byte charType = charTypes.getBidiTypeAt(0);
+			if (charType == AL)
+				return true;
+			return false;
+		}
+
+		public int getDirection(ISTextExpert expert, String text) {
+			return getDirection(expert, text, new STextCharTypes(expert, text));
+		}
+
+		public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
+			for (int i = 0; i < text.length(); i++) {
+				byte charType = charTypes.getBidiTypeAt(i);
+				if (charType == AL)
+					return dirArabic;
+			}
+			return dirHebrew;
+		}
+	}
 
 	private void doTestTools() {
 
@@ -47,7 +88,7 @@ public class STextMethodsTest extends STextTestBase {
 
 	private void doTestState() {
 		String data, lean, full, model;
-		ISTextExpert expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.JAVA);
+		ISTextExpert expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.JAVA);
 
 		data = "A=B+C;/* D=E+F;";
 		lean = toUT16(data);
@@ -88,12 +129,12 @@ public class STextMethodsTest extends STextTestBase {
 		assertEquals("orient #4", STextEnvironment.ORIENT_UNKNOWN, orient);
 	}
 
-	private void doTestOrient(String handlerDefID, String label, String data, String resLTR, String resRTL, String resCon) {
+	private void doTestOrient(STextTypeHandler handler, String label, String data, String resLTR, String resRTL, String resCon) {
 		String full, lean;
 
-		ISTextExpert expertLTR = STextExpertFactory.getExpert(handlerDefID, envLTR);
-		ISTextExpert expertRTL = STextExpertFactory.getExpert(handlerDefID, envRTL);
-		ISTextExpert expertCRL = STextExpertFactory.getExpert(handlerDefID, envCRL);
+		ISTextExpert expertLTR = STextExpertFactory.getExpert(handler, envLTR);
+		ISTextExpert expertRTL = STextExpertFactory.getExpert(handler, envRTL);
+		ISTextExpert expertCRL = STextExpertFactory.getExpert(handler, envCRL);
 
 		lean = toUT16(data);
 		full = expertLTR.leanToFullText(lean);
@@ -105,13 +146,13 @@ public class STextMethodsTest extends STextTestBase {
 	}
 
 	private void doTestSkipProcessing() {
-		doTestOrient("test.MyCommaLL", "Skip #1 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
-		doTestOrient("test.MyCommaLL", "Skip #2 ", "#CD,EF", "#CD,EF", ">@#CD,EF@^", "@#CD,EF");
+		doTestOrient(testMyCommaLL, "Skip #1 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
+		doTestOrient(testMyCommaLL, "Skip #2 ", "#CD,EF", "#CD,EF", ">@#CD,EF@^", "@#CD,EF");
 	}
 
 	private void doTestLeanOffsets() {
 		String lean, data, label;
-		ISTextExpert expert = STextExpertFactory.getPrivateExpert(STextTypeHandlerFactory.JAVA);
+		ISTextExpert expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.JAVA);
 
 		int[] offsets;
 		int[] model;
@@ -164,17 +205,17 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestDirection() {
 		String data, lean, full, model;
 		int dirA, dirH;
-		ISTextExpert expertRL = STextExpertFactory.getExpert("test.MyCommaRL");
+		ISTextExpert expertRL = STextExpertFactory.getExpert(testMyCommaRL, envLTR);
 		dirA = expertRL.getTextDirection(toUT16("###"));
 		dirH = expertRL.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #1", dirA == RTL && dirH == LTR);
 
-		ISTextExpert expertRR = STextExpertFactory.getExpert("test.MyCommaRR");
+		ISTextExpert expertRR = STextExpertFactory.getExpert(testMyCommaRR, envLTR);
 		dirA = expertRR.getTextDirection(toUT16("###"));
 		dirH = expertRR.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #2", dirA == RTL && dirH == RTL);
 
-		ISTextExpert expertLL = STextExpertFactory.getExpert("test.MyCommaLL");
+		ISTextExpert expertLL = STextExpertFactory.getExpert(testMyCommaLL, envLTR);
 		lean = toUT16("ABC,#DEF,HOST,com");
 		full = expertLL.leanToFullText(lean);
 		assertEquals("TestDirection #9 full", "ABC@,#DEF@,HOST,com", toPseudo(full));
@@ -185,7 +226,7 @@ public class STextMethodsTest extends STextTestBase {
 		assertEquals("TestDirection #10 full", "ABC@,DEF@,HOST,com", toPseudo(full));
 
 		STextEnvironment environment = new STextEnvironment(null, true, STextEnvironment.ORIENT_LTR);
-		ISTextExpert expert = STextExpertFactory.getExpert("test.MyCommaRL", environment);
+		ISTextExpert expert = STextExpertFactory.getExpert(testMyCommaRL, environment);
 		dirA = expert.getTextDirection(toUT16("###"));
 		dirH = expert.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #10.5", dirA == RTL && dirH == LTR);
@@ -227,7 +268,7 @@ public class STextMethodsTest extends STextTestBase {
 
 		data = "ABc,|#DEF,HOST,com";
 		lean = toUT16(data);
-		expert = STextExpertFactory.getExpert("test.MyCommaRL", envRTLMIR);
+		expert = STextExpertFactory.getExpert(testMyCommaRL, envRTLMIR);
 		full = expert.leanToFullText(lean);
 		model = "ABc,|#DEF,HOST,com";
 		assertEquals("TestDirection #17 full", model, toPseudo(full));
@@ -243,15 +284,16 @@ public class STextMethodsTest extends STextTestBase {
 
 		doTestOrientation();
 
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #1 ", "", "", "", "");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #2 ", "abc", "abc", ">@abc@^", "abc");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #3 ", "ABC", "ABC", ">@ABC@^", "@ABC");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #4 ", "bcd,ef", "bcd,ef", ">@bcd,ef@^", "bcd,ef");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #5 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #6 ", "cde,FG", "cde,FG", ">@cde,FG@^", "cde,FG");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #7 ", "CDE,fg", "CDE,fg", ">@CDE,fg@^", "@CDE,fg");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #8 ", "12..def,GH", "12..def,GH", ">@12..def,GH@^", "12..def,GH");
-		doTestOrient(STextTypeHandlerFactory.COMMA_DELIMITED, "Methods #9 ", "34..DEF,gh", "34..DEF,gh", ">@34..DEF,gh@^", "@34..DEF,gh");
+		STextTypeHandler commaHandler = STextTypeHandlerFactory.getHandler(STextTypeHandlerFactory.COMMA_DELIMITED);
+		doTestOrient(commaHandler, "Methods #1 ", "", "", "", "");
+		doTestOrient(commaHandler, "Methods #2 ", "abc", "abc", ">@abc@^", "abc");
+		doTestOrient(commaHandler, "Methods #3 ", "ABC", "ABC", ">@ABC@^", "@ABC");
+		doTestOrient(commaHandler, "Methods #4 ", "bcd,ef", "bcd,ef", ">@bcd,ef@^", "bcd,ef");
+		doTestOrient(commaHandler, "Methods #5 ", "BCD,EF", "BCD@,EF", ">@BCD@,EF@^", "@BCD@,EF");
+		doTestOrient(commaHandler, "Methods #6 ", "cde,FG", "cde,FG", ">@cde,FG@^", "cde,FG");
+		doTestOrient(commaHandler, "Methods #7 ", "CDE,fg", "CDE,fg", ">@CDE,fg@^", "@CDE,fg");
+		doTestOrient(commaHandler, "Methods #8 ", "12..def,GH", "12..def,GH", ">@12..def,GH@^", "12..def,GH");
+		doTestOrient(commaHandler, "Methods #9 ", "34..DEF,gh", "34..DEF,gh", ">@34..DEF,gh@^", "@34..DEF,gh");
 
 		doTestSkipProcessing();
 

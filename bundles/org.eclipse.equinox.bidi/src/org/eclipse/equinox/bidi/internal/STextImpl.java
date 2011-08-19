@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
@@ -125,7 +124,7 @@ public class STextImpl implements ISTextExpert {
 	static public void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
 		int len = text.length();
 		int direction = charTypes.getDirection();
-		if (direction == STextDirection.DIR_RTL) {
+		if (direction == DIR_RTL) {
 			// the structured text base direction is RTL
 			for (int i = separLocation - 1; i >= 0; i--) {
 				byte charType = charTypes.getBidiTypeAt(i);
@@ -230,44 +229,8 @@ public class STextImpl implements ISTextExpert {
 		STextCharTypes charTypes = new STextCharTypes(this, text);
 		STextOffsets offsets = leanToFullCommon(text, charTypes);
 		int prefixLength = offsets.getPrefixLength();
-		int count = offsets.getCount();
-		if (count == 0 && prefixLength == 0)
-			return text;
-		int newLen = len + count;
-		if (prefixLength == 1)
-			newLen++; /* +1 for a mark char */
-		else if (prefixLength == 2)
-			newLen += FIXES_LENGTH;
-		char[] fullChars = new char[newLen];
-		int added = prefixLength;
-		// add marks at offsets
 		int direction = charTypes.getDirection();
-		char curMark = MARKS[direction];
-		for (int i = 0, j = 0; i < len; i++) {
-			char c = text.charAt(i);
-			if (j < count && i == offsets.getOffset(j)) {
-				fullChars[i + added] = curMark;
-				added++;
-				j++;
-			}
-			fullChars[i + added] = c;
-		}
-		if (prefixLength > 0) { /* add prefix/suffix ? */
-			if (prefixLength == 1) { /* contextual orientation */
-				fullChars[0] = curMark;
-			} else {
-				// When the orientation is RTL, we need to add EMBED at the
-				// start of the text and PDF at its end.
-				// However, because of a bug in Windows' handling of LRE/PDF,
-				// we add EMBED_PREFIX at the start and EMBED_SUFFIX at the end.
-				char curEmbed = EMBEDS[direction];
-				fullChars[0] = curEmbed;
-				fullChars[1] = curMark;
-				fullChars[newLen - 1] = PDF;
-				fullChars[newLen - 2] = curMark;
-			}
-		}
-		return new String(fullChars);
+		return insertMarks(text, offsets.getOffsets(), direction, prefixLength);
 	}
 
 	public int[] leanToFullMap(String text) {
@@ -507,4 +470,52 @@ public class STextImpl implements ISTextExpert {
 			offsets.insertOffset(null, idxFull);
 		return offsets.getOffsets();
 	}
+
+	public String insertMarks(String text, int[] offsets, int direction, int affixLength) {
+		if (direction != DIR_LTR && direction != DIR_RTL)
+			throw new IllegalArgumentException("Invalid direction"); //$NON-NLS-1$
+		if (affixLength < 0 || affixLength > 2)
+			throw new IllegalArgumentException("Invalid affix length"); //$NON-NLS-1$
+		int count = offsets == null ? 0 : offsets.length;
+		if (count == 0 && affixLength == 0)
+			return text;
+		int textLength = text.length();
+		if (textLength == 0)
+			return text;
+		int newLen = textLength + count;
+		if (affixLength == 1)
+			newLen++; /* +1 for a mark char */
+		else if (affixLength == 2)
+			newLen += FIXES_LENGTH;
+		char[] fullChars = new char[newLen];
+		int added = affixLength;
+		// add marks at offsets
+		char curMark = MARKS[direction];
+		for (int i = 0, j = 0; i < textLength; i++) {
+			char c = text.charAt(i);
+			if (j < count && i == offsets[j]) {
+				fullChars[i + added] = curMark;
+				added++;
+				j++;
+			}
+			fullChars[i + added] = c;
+		}
+		if (affixLength > 0) { /* add prefix/suffix ? */
+			if (affixLength == 1) { /* contextual orientation */
+				fullChars[0] = curMark;
+			} else {
+				// When the orientation is RTL, we need to add EMBED at the
+				// start of the text and PDF at its end.
+				// However, because of a bug in Windows' handling of LRE/PDF,
+				// we add EMBED_PREFIX at the start and EMBED_SUFFIX at the end.
+				char curEmbed = EMBEDS[direction];
+				fullChars[0] = curEmbed;
+				fullChars[1] = curMark;
+				fullChars[newLen - 1] = PDF;
+				fullChars[newLen - 2] = curMark;
+			}
+		}
+		return new String(fullChars);
+	}
+
 }

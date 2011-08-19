@@ -248,6 +248,36 @@ public interface ISTextExpert {
 	 */
 	public int[] fullBidiCharOffsets(String text);
 
+	/** 
+	 * This method adds directional marks to the given text before the characters 
+	 * specified in the given array of offsets. It can be used to add a prefix and/or 
+	 * a suffix of directional formatting characters.
+	 * <p>
+	 * The directional marks will be LRMs for structured text strings with LTR base 
+	 * direction and RLMs for strings with RTL base direction.
+	 * </p><p> 
+	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
+	 * be added depending on the value of the <code>affix</code> argument.
+	 * </p>
+	 * @see ISTextExpert#leanBidiCharOffsets(String)
+	 * 
+	 * @param  text the structured text string
+	 * @param  offsets an array of offsets to characters in <code>text</code>
+	 *         before which an LRM or RLM will be inserted.
+	 *         The array must be sorted in ascending order without duplicates.
+	 *         This argument may be <code>null</code> if there are no marks to add.
+	 * @param  direction the base direction of the structured text.
+	 *         It must be one of the values {@link #DIR_LTR}, or
+	 *         {@link #DIR_RTL}.
+	 * @param  affix specifies if a prefix and a suffix should be added to
+	 *         the result
+	 * @return a string corresponding to the source <code>text</code> with
+	 *         directional marks (LRMs or RLMs) added at the specified offsets,
+	 *         and directional formatting characters (LRE, RLE, PDF) added
+	 *         as prefix and suffix if so required.
+	 */
+	public String insertMarks(String text, int[] offsets, int direction, int affixLength);
+
 	/**
 	 * Get the base direction of a structured text. This base direction may depend on
 	 * whether the text contains Arabic or Hebrew words. If the text contains both, 

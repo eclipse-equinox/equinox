@@ -12,6 +12,7 @@ package org.eclipse.equinox.bidi.advanced;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.equinox.bidi.STextProcessor;
 import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 import org.eclipse.equinox.bidi.internal.STextImpl;
@@ -21,7 +22,7 @@ final public class STextExpertFactory {
 	/**
 	 * The default set of separators used to segment a string: dot, colon, slash, backslash.
 	 */
-	private static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
+	private static final String defaultSeparators = STextProcessor.getDefaultSeparators();
 
 	static private Map sharedDefaultExperts = new HashMap(); // String type -> expert
 
@@ -84,11 +85,11 @@ final public class STextExpertFactory {
 		return new STextImpl(handler, environment, true);
 	}
 
-	static public ISTextExpert getPrivateExpert(String type) {
-		return getPrivateExpert(type, STextEnvironment.DEFAULT);
+	static public ISTextExpert getStatefulExpert(String type) {
+		return getStatefulExpert(type, STextEnvironment.DEFAULT);
 	}
 
-	static public ISTextExpert getPrivateExpert(String type, STextEnvironment environment) {
+	static public ISTextExpert getStatefulExpert(String type, STextEnvironment environment) {
 		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 		if (handler == null)
 			return null;

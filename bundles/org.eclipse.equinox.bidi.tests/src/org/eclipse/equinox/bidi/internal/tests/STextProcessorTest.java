@@ -14,6 +14,8 @@ package org.eclipse.equinox.bidi.internal.tests;
 import java.util.Locale;
 import org.eclipse.equinox.bidi.STextProcessor;
 import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
+import org.eclipse.equinox.bidi.advanced.ISTextExpert;
+import org.eclipse.equinox.bidi.advanced.STextExpertFactory;
 
 /**
  * Tests methods in BidiComplexUtil
@@ -89,15 +91,15 @@ public class STextProcessorTest extends STextTestBase {
 		assertEquals(msg + "lean", resLean, toPseudo(lean));
 	}
 
-	private void doTest4(String msg, String data, int[] offsets, int direction, boolean affix, String result) {
-		String txt = msg + "text=" + data + "\n    offsets=" + array_display(offsets) + "\n    direction=" + direction + "\n    affix=" + affix;
+	private void doTest4(String msg, String data, int[] offsets, int direction, int affixLength, String result) {
+		String txt = msg + "text=" + data + "\n    offsets=" + array_display(offsets) + "\n    direction=" + direction + "\n    affixLength=" + affixLength;
 		String lean = toUT16(data);
-		String full = STextProcessor.insertMarks(lean, offsets, direction, affix);
+		ISTextExpert expert = STextExpertFactory.getExpert();
+		String full = expert.insertMarks(lean, offsets, direction, affixLength);
 		assertEquals(txt, result, toPseudo(full));
 	}
 
 	public void testSTextProcessor() {
-
 		// Test process() and deprocess() with default delimiters
 		doTest1("ABC/DEF/G", ">@ABC@/DEF@/G@^");
 		// Test process() and deprocess() with specified delimiters
@@ -112,13 +114,13 @@ public class STextProcessorTest extends STextTestBase {
 		doTest3("Util #3.2 - ", "", "");
 		doTest3("Util #3.3 - ", ">@DEF@^", ">@DEF@^", "DEF");
 		// Test insertMarks()
-		doTest4("Util #4.1 - ", "ABCDEFG", new int[] {3, 6}, 0, false, "ABC@DEF@G");
-		doTest4("Util #4.2 - ", "ABCDEFG", new int[] {3, 6}, 0, true, ">@ABC@DEF@G@^");
-		doTest4("Util #4.3 - ", "ABCDEFG", new int[] {3, 6}, 1, false, "ABC&DEF&G");
-		doTest4("Util #4.4 - ", "ABCDEFG", new int[] {3, 6}, 1, true, "<&ABC&DEF&G&^");
-		doTest4("Util #4.5 - ", "", new int[] {3, 6}, 0, false, "");
-		doTest4("Util #4.6 - ", "", new int[] {3, 6}, 0, true, "");
-		doTest4("Util #4.7 - ", "ABCDEFG", null, 1, false, "ABCDEFG");
-		doTest4("Util #4.8 - ", "ABCDEFG", null, 1, true, "<&ABCDEFG&^");
+		doTest4("Util #4.1 - ", "ABCDEFG", new int[] {3, 6}, 0, 0, "ABC@DEF@G");
+		doTest4("Util #4.2 - ", "ABCDEFG", new int[] {3, 6}, 0, 2, ">@ABC@DEF@G@^");
+		doTest4("Util #4.3 - ", "ABCDEFG", new int[] {3, 6}, 1, 0, "ABC&DEF&G");
+		doTest4("Util #4.4 - ", "ABCDEFG", new int[] {3, 6}, 1, 2, "<&ABC&DEF&G&^");
+		doTest4("Util #4.5 - ", "", new int[] {3, 6}, 0, 0, "");
+		doTest4("Util #4.6 - ", "", new int[] {3, 6}, 0, 2, "");
+		doTest4("Util #4.7 - ", "ABCDEFG", null, 1, 0, "ABCDEFG");
+		doTest4("Util #4.8 - ", "ABCDEFG", null, 1, 2, "<&ABCDEFG&^");
 	}
 }

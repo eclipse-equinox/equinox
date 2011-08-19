@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal.consumable;
 
-import org.eclipse.equinox.bidi.STextDirection;
 import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
@@ -226,7 +225,7 @@ public class STextRegex extends STextTypeHandler {
 	}
 
 	/**
-	 *  @return {@link STextDirection#DIR_RTL DIR_RTL} if the following
+	 *  @return {@link ISTextExpert#DIR_RTL DIR_RTL} if the following
 	 *          conditions are satisfied:
 	 *          <ul>
 	 *            <li>The current locale (as expressed by the environment
@@ -235,23 +234,23 @@ public class STextRegex extends STextTypeHandler {
 	 *            <li>If there is no strong character in the text, the
 	 *                GUI is mirrored.
 	 *          </ul>
-	 *          Otherwise, returns {@link STextDirection#DIR_LTR DIR_LTR}.
+	 *          Otherwise, returns {@link ISTextExpert#DIR_LTR DIR_LTR}.
 	 */
 	public int getDirection(ISTextExpert expert, String text, STextCharTypes charTypes) {
 		STextEnvironment environment = expert.getEnvironment();
 		String language = environment.getLanguage();
 		if (!language.equals("ar")) //$NON-NLS-1$
-			return STextDirection.DIR_LTR;
+			return ISTextExpert.DIR_LTR;
 		for (int i = 0; i < text.length(); i++) {
 			byte charType = charTypes.getBidiTypeAt(i);
 			if (charType == AL || charType == R)
-				return STextDirection.DIR_RTL;
+				return ISTextExpert.DIR_RTL;
 			if (charType == L)
-				return STextDirection.DIR_LTR;
+				return ISTextExpert.DIR_LTR;
 		}
 		if (environment.getMirrored())
-			return STextDirection.DIR_RTL;
-		return STextDirection.DIR_LTR;
+			return ISTextExpert.DIR_RTL;
+		return ISTextExpert.DIR_LTR;
 	}
 
 }
