@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Id: adb84e3bc0b82b842e4da84542057fdf53e2ca6a $
+ * @version $Id: 1da70059917a798aec102d64bf5f8956ce61b7c2 $
  */
 
 public class InvalidSyntaxException extends Exception {
@@ -50,7 +50,7 @@ public class InvalidSyntaxException extends Exception {
 	 * @param filter The invalid filter string.
 	 */
 	public InvalidSyntaxException(String msg, String filter) {
-		super(msg);
+		super(message(msg, filter));
 		this.filter = filter;
 	}
 
@@ -68,8 +68,18 @@ public class InvalidSyntaxException extends Exception {
 	 * @since 1.3
 	 */
 	public InvalidSyntaxException(String msg, String filter, Throwable cause) {
-		super(msg, cause);
+		super(message(msg, filter), cause);
 		this.filter = filter;
+	}
+
+	/**
+	 * Return message string for super constructor.
+	 */
+	private static String message(String msg, String filter) {
+		if ((msg == null) || (filter == null) || msg.indexOf(filter) >= 0) {
+			return msg;
+		}
+		return msg + ": " + filter;
 	}
 
 	/**
@@ -77,7 +87,8 @@ public class InvalidSyntaxException extends Exception {
 	 * {@code InvalidSyntaxException} object.
 	 * 
 	 * @return The invalid filter string.
-	 * @see BundleContext#getServiceReferences
+	 * @see BundleContext#getServiceReferences(Class, String)
+	 * @see BundleContext#getServiceReferences(String, String)
 	 * @see BundleContext#addServiceListener(ServiceListener,String)
 	 */
 	public String getFilter() {

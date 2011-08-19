@@ -29,7 +29,7 @@ import org.osgi.framework.BundleException;
  * (get bundles) operations.
  * 
  * @ThreadSafe
- * @version $Id: 64a98074fa8331b0cd21989f9c8583b99b2370cf $
+ * @version $Id: 4492a677df650072fe6acaea9ea35571f31eb5a9 $
  */
 public interface FindHook {
 	/**

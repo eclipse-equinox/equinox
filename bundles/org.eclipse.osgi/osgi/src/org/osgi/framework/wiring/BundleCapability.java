@@ -26,12 +26,15 @@ import org.osgi.framework.resource.Capability;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 61284c6e75b7e3e5931565fe35a31e237e112abb $
+ * @version $Id: 3b48ced7e0ff67cc42031644879d6b1563296ba5 $
  */
 public interface BundleCapability extends Capability {
 
 	/**
 	 * Returns the bundle revision declaring this capability.
+	 * 
+	 * <p>
+	 * This method returns the same object as {@link #getResource()}.
 	 * 
 	 * @return The bundle revision declaring this capability.
 	 */

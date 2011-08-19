@@ -26,11 +26,14 @@ import org.osgi.framework.resource.Requirement;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: f23f399ad55648e71eb2055792b00560d18cb8b1 $
+ * @version $Id: 2c875c9711292a033a7cd597742b79b5791e9d10 $
  */
 public interface BundleRequirement extends Requirement {
 	/**
 	 * Returns the bundle revision declaring this requirement.
+	 * 
+	 * <p>
+	 * This method returns the same object as {@link #getResource()}.
 	 * 
 	 * @return The bundle revision declaring this requirement.
 	 */
@@ -62,5 +65,4 @@ public interface BundleRequirement extends Requirement {
 	 * {@inheritDoc}
 	 */
 	Map<String, Object> getAttributes();
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.EventObject;
  * @Immutable
  * @see BundleListener
  * @see SynchronousBundleListener
- * @version $Id: ed3c40cd707bed45681cadce114a6cc5db27a844 $
+ * @version $Id: 30ed6fc3603261b53bf1c65128f1f905ccdbed27 $
  */
 
 public class BundleEvent extends EventObject {
@@ -86,7 +86,7 @@ public class BundleEvent extends EventObject {
 	/**
 	 * The bundle has been uninstalled.
 	 * 
-	 * @see Bundle#uninstall
+	 * @see Bundle#uninstall()
 	 */
 	public final static int	UNINSTALLED			= 0x00000010;
 
