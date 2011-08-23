@@ -313,9 +313,13 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	protected static String removeTimestampFromTable(Properties properties) throws IOException {
 		// store the properties in a string and then skip the first line (date/timestamp)
-		Writer writer = new StringWriter();
-		properties.store(writer, null);
-		String string = writer.toString();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		try {
+			properties.store(output, null);
+		} finally {
+			output.close();
+		}
+		String string = output.toString("UTF-8"); //$NON-NLS-1$
 		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
 		return string.substring(string.indexOf(separator) + separator.length());
 	}
