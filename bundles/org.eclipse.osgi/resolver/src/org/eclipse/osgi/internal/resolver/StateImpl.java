@@ -846,12 +846,12 @@ public abstract class StateImpl implements State {
 
 	private void resetSystemCapabilities() {
 		BundleDescription[] systemBundles = getBundles(Constants.SYSTEM_BUNDLE_SYMBOLICNAME);
-		Long builtIn = new Long(1);
 		for (BundleDescription systemBundle : systemBundles) {
 			GenericDescription[] capabilities = systemBundle.getGenericCapabilities();
 			List<GenericDescription> newCapabilities = new ArrayList<GenericDescription>(capabilities.length);
 			for (GenericDescription capability : capabilities) {
-				if (builtIn.equals(capability.getDeclaredAttributes().get("equinox.builtin"))) //$NON-NLS-1$
+				Object equinoxEEIndex = capability.getDeclaredAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
+				if (equinoxEEIndex == null)
 					newCapabilities.add(capability); // keep the built in ones.
 			}
 			// now add the externally defined ones
@@ -863,16 +863,16 @@ public abstract class StateImpl implements State {
 	private void addSystemCapabilities(List<GenericDescription> capabilities) {
 		for (int i = 0; i < platformProperties.length; i++)
 			try {
-				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES)));
-				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA)));
+				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES)), i);
+				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA)), i);
 			} catch (BundleException e) {
 				// TODO consider throwing this... 
 			}
 	}
 
-	private void addSystemCapabilities(List<GenericDescription> capabilities, ManifestElement[] elements) {
+	private void addSystemCapabilities(List<GenericDescription> capabilities, ManifestElement[] elements, Integer profileIndex) {
 		try {
-			StateBuilder.createOSGiCapabilities(elements, capabilities);
+			StateBuilder.createOSGiCapabilities(elements, capabilities, profileIndex);
 		} catch (BundleException e) {
 			throw new RuntimeException("Unexpected exception adding system capabilities.", e); //$NON-NLS-1$
 		}

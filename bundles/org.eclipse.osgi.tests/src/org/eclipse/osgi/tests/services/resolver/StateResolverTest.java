@@ -2714,6 +2714,7 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
 		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++); //$NON-NLS-1$
 
+		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
@@ -2721,6 +2722,7 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4"); //$NON-NLS-1$
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++); //$NON-NLS-1$
 
+		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
@@ -2729,6 +2731,24 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2"); //$NON-NLS-1$
 		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++); //$NON-NLS-1$
 
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.d, pkg.system.b"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee; filter:=\"(&(osgi.ee=JavaSE)(version>=1.4))\""); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.d"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee; filter:=\"(&(osgi.ee=JavaSE)(version>=1.2))\""); //$NON-NLS-1$
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "system.b"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
@@ -2739,26 +2759,38 @@ public class StateResolverTest extends AbstractStateTest {
 		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
 		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.c"); //$NON-NLS-1$ //$NON-NLS-2$
 		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[0].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"JavaSE\"; version:Version=\"1.2\"");
 		props[1].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b, pkg.system.c"); //$NON-NLS-1$ //$NON-NLS-2$
 		props[1].put("org.osgi.framework.executionenvironment", "J2SE-1.4"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.2, 1.3, 1.4\"");
 
 		state.setPlatformProperties(props);
 		state.addBundle(systemBundle);
 		state.addBundle(a);
 		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
 		state.addBundle(systemB);
 		state.resolve();
+
+		Collection ids = systemBundle.getCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		assertNotNull("Null osgi.identity", ids);
+		assertEquals("Wrong number of identities", 1, ids.size());
 
 		assertTrue("1.0", systemBundle.isResolved()); //$NON-NLS-1$
 		assertTrue("1.1", a.isResolved()); //$NON-NLS-1$
 		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
-		assertTrue("1.3", systemB.isResolved()); //$NON-NLS-1$
+		assertTrue("1.3", c.isResolved()); //$NON-NLS-1$
+		assertTrue("1.4", d.isResolved()); //$NON-NLS-1$
+		assertTrue("1.5", systemB.isResolved()); //$NON-NLS-1$
 
 		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemBundle); //$NON-NLS-1$
 		assertTrue("2.1", b.getResolvedImports()[0].getExporter() == systemB); //$NON-NLS-1$
+		assertTrue("2.2", c.getResolvedImports()[1].getExporter() == systemBundle); //$NON-NLS-1$
+		assertTrue("2.3", d.getResolvedImports()[0].getExporter() == systemB); //$NON-NLS-1$
 
 		// now test the uses clause for pkg.b such that bundle 'A' will be forced to used
-		// pkg.system from bundle 'system.b'
+		// pkg.system.b from bundle 'system.b'
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
@@ -2767,7 +2799,18 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2"); //$NON-NLS-1$
 		BundleDescription b_updated = state.getFactory().createBundleDescription(state, manifest, "B", b.getBundleId()); //$NON-NLS-1$
 		state.updateBundle(b_updated);
-		state.resolve(new BundleDescription[] {b_updated});
+
+		// now test the uses clause for pkg.d such that bundle 'C' will be forced to used
+		// pkg.system.b from bundle 'system.b'
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "pkg.d; uses:=\"pkg.system.b\""); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "pkg.system.b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.2"); //$NON-NLS-1$
+		BundleDescription d_updated = state.getFactory().createBundleDescription(state, manifest, "D", d.getBundleId()); //$NON-NLS-1$
+		state.updateBundle(d_updated);
+		state.resolve(new BundleDescription[] {b_updated, d_updated});
 
 		assertTrue("3.0", systemBundle.isResolved()); //$NON-NLS-1$
 		assertTrue("3.1", a.isResolved()); //$NON-NLS-1$
@@ -2776,6 +2819,7 @@ public class StateResolverTest extends AbstractStateTest {
 
 		assertTrue("2.0", a.getResolvedImports()[1].getExporter() == systemB); //$NON-NLS-1$
 		assertTrue("2.1", b_updated.getResolvedImports()[0].getExporter() == systemB); //$NON-NLS-1$
+		assertTrue("2.2", c.getResolvedImports()[1].getExporter() == systemB); //$NON-NLS-1$
 	}
 
 	public void testPlatformProperties02() throws BundleException {

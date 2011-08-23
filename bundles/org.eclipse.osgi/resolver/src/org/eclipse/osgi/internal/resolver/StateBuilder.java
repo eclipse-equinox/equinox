@@ -569,10 +569,10 @@ public class StateBuilder {
 		if (osgiIdentity != null)
 			// always add the capability to the front
 			result.add(0, osgiIdentity);
-		return createOSGiCapabilities(osgiCapabilities, result);
+		return createOSGiCapabilities(osgiCapabilities, result, (Integer) null);
 	}
 
-	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result) throws BundleException {
+	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result, Integer profileIndex) throws BundleException {
 		if (osgiCapabilities == null)
 			return result;
 		if (result == null)
@@ -591,6 +591,8 @@ public class StateBuilder {
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				desc.setType(namespace);
 				Map<String, Object> mapAttrs = getAttributes(element, new String[0]);
+				if (profileIndex != null)
+					mapAttrs.put(ExportPackageDescriptionImpl.EQUINOX_EE, profileIndex);
 				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(mapAttrs);
 				desc.setAttributes(attrs);
 				Map<String, String> directives = new HashMap<String, String>();

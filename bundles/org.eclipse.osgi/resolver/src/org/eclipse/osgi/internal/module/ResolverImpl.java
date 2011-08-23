@@ -1229,6 +1229,13 @@ public class ResolverImpl implements Resolver {
 						failed = true;
 						break;
 					}
+				} else {
+					if ("osgi.ee".equals(genericRequires[i].getNameSpace())) { //$NON-NLS-1$
+						VersionSupplier supplier = genericRequires[i].getSelectedSupplier();
+						Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
+						if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
+							((BundleDescriptionImpl) bundle.getBundleDescription()).setEquinoxEE(ee);
+					}
 				}
 			}
 		}
