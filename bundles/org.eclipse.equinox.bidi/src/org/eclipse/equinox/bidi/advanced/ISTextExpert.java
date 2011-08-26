@@ -13,40 +13,44 @@ package org.eclipse.equinox.bidi.advanced;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
+ * Advanced API for processing structured text.
  * For a general introduction to structured text, see
- * {@link <a href="package-summary.html"> the package documentation</a>}.
+ * {@link <a href="../package-summary.html">the org.eclipse.equinox.bidi
+ * package documentation</a>}.
  * <p>
- * Several common handlers are included in <b>STextEngine</b>. For handlers 
+ * Identifiers for several common handlers are included in 
+ * {@link org.eclipse.equinox.bidi.STextTypeHandlerFactory}. For handlers 
  * supplied by other packages, a handler instance can be obtained using the
  * {@link org.eclipse.equinox.bidi.STextTypeHandlerFactory#getHandler}
  * method for the registered handlers, or by instantiating a private handler.
  * </p><p>
- * Most of the methods in this class have a <code>text</code>
+ * Most of the methods in this interface have a <code>text</code>
  * argument which may be just a part of a larger body of text.
  * When it is the case that the text is submitted in parts with
  * repeated calls, there may be a need to pass information from
  * one invocation to the next one. For instance, one invocation
  * may detect that a comment or a literal has been started but
- * has not been completed. In such cases, a <code>state</code>
- * argument must be used.
+ * has not been completed. In such cases, the state must be managed
+ * by a <code>ISTextExpert</code> instance obtained with the 
+ * {@link STextExpertFactory#getStatefulExpert getStateful} method.
  * </p><p>
- * The <code>state</code> argument must be an array of integers
- * with at least one element. Only the first element is used by
- * the methods of this class.
+ * The <code>state</code> returned after processing a string
+ * can be retrieved, set and reset using the {@link #getState()},
+ * {@link #setState(Object)} and {@link #clearState()} methods.
  * </p><p>
- * When submitting the initial part of the text, the first element
- * of <code>state</code> must contain the value {@link #STATE_INITIAL}
- * or any value <= 0.
+ * When submitting the initial part of a text, the state should be
+ * reset if it is not the first processing call for this 
+ * <code>ISTextExpert</code> instance.
  * </p><p>
- * After calling a method with a non-null <code>state</code> argument,
- * a value is returned in the first element of <code>state</code>. This
- * value should be passed unmodified to the method when calling it again
- * with the text which is the continuation of the text submitted in the
- * last call.
+ * Values returned by {@link #getState()} are opaque objects whose meaning
+ * is internal to the relevant structured type handler. These values can only
+ * be used in {@link #setState(Object) setState} calls to restore a state
+ * previously obtained after processing a given part of a text before 
+ * processing the next part of the text.
  * </p><p>
- * When the text submitted to a method is not a continuation and is not
- * expected to have a continuation , e.g. it is processed all by itself,
- * the <code>state</code> argument should be specified as <code>null</code>.
+ * Note that if the user does not modify the state, the state returned by
+ * a given processing call is automatically passed as initial state to the
+ * next processing call, provided that the expert is a stateful one.
  * </p><p>
  * <b>Code Samples</b>
  * </p><p>
@@ -54,8 +58,9 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  * (directory and file paths) in order to obtain the <i>full</i>
  * text corresponding to the given <i>lean</i> text.
  * <pre>
+ *   ISTextExpert expert = STextExpertFactory.getExpert(STextTypeHandlerFactory.FILE);
  *   String leanText = "D:\\\u05d0\u05d1\\\u05d2\\\u05d3.ext";
- *   String fullText = STextEngine.leanToFullText(STextEngine.PROC_FILE, null, leanText, null);
+ *   String fullText = expert.leanToFullText(leanText);
  *   System.out.println("full text = " + fullText);
  * </pre>
  * </p><p>
@@ -63,12 +68,12 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  * code in order to obtain the <i>full</i>
  * text corresponding to the <i>lean</i> text of each line.
  * <pre>
- *   Object state = STextState.createState();
+ *   ISTextExpert expert = STextExpertFactory.getStatefulExpert(STextTypeHandlerFactory.JAVA);
  *   String leanText = "int i = 3; // first Java statement";
- *   String fullText = STextEngine.leanToFullText(STextEngine.PROC_JAVA, null, leanText, state);
+ *   String fullText = expert.leanToFullText(leanText);
  *   System.out.println("full text = " + fullText);
  *   leanText = "i += 4; // next Java statement";
- *   fullText = STextEngine.leanToFullText(STextEngine.PROC_JAVA, null, leanText, state);
+ *   fullText = expert.leanToFullText(leanText,);
  *   System.out.println("full text = " + fullText);
  * </pre>
  * </p>
@@ -80,10 +85,10 @@ public interface ISTextExpert {
 	/**
 	 *  Constant specifying that the base direction of a structured text is LTR.
 	 *  The base direction may depend on whether the GUI is
-	 *  {@link STextEnvironment#getMirrored mirrored} and may
+	 *  {@link STextEnvironment#getMirrored mirrored} and
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as value returned by the
-	 *  {@link #getCurDirection getCurDirection} method.
+	 *  {@link #getTextDirection getTextDirection} method.
 	 */
 	public static final int DIR_LTR = 0;
 
@@ -93,30 +98,29 @@ public interface ISTextExpert {
 	 *  {@link STextEnvironment#getMirrored mirrored} and may
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as value returned by the
-	 *  {@link #getCurDirection getCurDirection} method.
+	 *  {@link #getTextDirection getTextDirection} method.
 	 */
 	public static final int DIR_RTL = 1;
 
+	/**
+	 * Obtains the structured type handler associated with this 
+	 * <code>ISTextExpert</code> instance.
+	 * @return the type handler instance.
+	 */
 	public STextTypeHandler getTypeHandler();
 
+	/**
+	 * Obtains the environment associated with this 
+	 * <code>ISTextExpert</code> instance.
+	 * @return the environment instance.
+	 */
 	public STextEnvironment getEnvironment();
 
 	/** 
-	 * Add directional formatting characters to a structured text
+	 * Adds directional formatting characters to a structured text
 	 * to ensure correct presentation.
 	 * 
-	 * @param  handler the handler applicable to the text. If <code>null</code>, 
-	 * the method returns unmodified text.
-	 * 
-	 * @param  environment a bidi environment. If <code>null</code>, the default environment 
-	 * is used.
-	 *  
 	 * @param text is the structured text string
-	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
 	 *
 	 * @return the structured text with directional formatting characters added to ensure 
 	 * correct presentation.
@@ -124,29 +128,19 @@ public interface ISTextExpert {
 	public String leanToFullText(String text);
 
 	/**
-	 * Given a <i>lean</i> string, compute the positions of each of its
+	 * Given a <i>lean</i> string, computes the positions of each of its
 	 * characters within the corresponding <i>full</i> string.
-	 *
-	 * @param  handler designates a handler instance. If <code>null</code>, this 
-	 * method returns an identity map.
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param text is the structured text string.
 	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
-	 *
-	 * @return an array which specifies offsets of the <code>text</code> characters
-	 * in the <i>full</i> string
+	 * @return an array of integers with one element for each of the
+	 * characters in the <code>text</code> argument, equal to the offset
+	 * of the corresponding character in the <i>full</i> string.
 	 */
 	public int[] leanToFullMap(String text);
 
 	/**
-	 * Given a <i>lean</i> string, compute the offsets of characters
+	 * Given a <i>lean</i> string, computes the offsets of characters
 	 * before which directional formatting characters must be added
 	 * in order to ensure correct presentation.
 	 * <p>
@@ -156,17 +150,7 @@ public interface ISTextExpert {
 	 * depending on the {@link STextEnvironment#getOrientation orientation} of the
 	 * GUI component used for display are not reflected in this method.
 	 * </p>
-	 * @param handler designates a handler instance
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
-	 *
 	 * @param text is the structured text string
-	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
 	 *
 	 * @return an array of offsets to the characters in the <code>text</code> argument 
 	 * before which directional marks must be added to ensure correct presentation.
@@ -175,20 +159,10 @@ public interface ISTextExpert {
 	public int[] leanBidiCharOffsets(String text);
 
 	/**
-	 * Remove directional formatting characters which were added to a
+	 * Removes directional formatting characters which were added to a
 	 * structured text string to ensure correct presentation.
 	 *
-	 * @param  handler designates a handler instance
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
-	 *
 	 * @param text is the structured text string including directional formatting characters.
-	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
 	 *
 	 * @return the structured text string without directional formatting characters 
 	 * which might have been added by processing it with {@link #leanToFullText}.
@@ -197,31 +171,23 @@ public interface ISTextExpert {
 	public String fullToLeanText(String text);
 
 	/**
-	 * Given a <i>full</i> string, compute the positions of each of its
+	 * Given a <i>full</i> string, computes the positions of each of its
 	 * characters within the corresponding <i>lean</i> string.
-	 *
-	 * @param  handler designates a handler instance
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
 	 *
 	 * @param  text is the structured text string including directional formatting characters.
 	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
-	 *
-	 * @return an array of integers with one element for each of the characters
-	 * in the <code>text</code> argument, equal to the offset of the corresponding character 
-	 * in the <i>lean</i> string. If there is no corresponding character in the <i>lean</i> string 
-	 * (because the specified character is a directional formatting character added when invoking 
-	 * {@link #leanToFullText}), the value returned for this character is -1.
+	 * @return an array of integers with one element for each of the
+	 * characters in the <code>text</code> argument, equal to the offset
+	 * of the corresponding character in the <i>lean</i> string.
+	 * If there is no corresponding character in the <i>lean</i> string 
+	 * (because the specified character is a directional formatting character
+	 * added when invoking {@link #leanToFullText}), 
+	 * the value returned for this character is -1.
 	 */
 	public int[] fullToLeanMap(String text);
 
 	/**
-	 * Given a <i>full</i> string, return the offsets of characters
+	 * Given a <i>full</i> string, returns the offsets of characters
 	 * which are directional formatting characters that have been added
 	 * in order to ensure correct presentation.
 	 * <p>
@@ -230,17 +196,7 @@ public interface ISTextExpert {
 	 * or suffixed depending on the {@link STextEnvironment#getOrientation orientation} 
 	 * of the GUI component used for display.
 	 * </p>
-	 * @param  handler designates a handler instance
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
-	 *
 	 * @param  text is the structured text string including directional formatting characters
-	 *
-	 * @param  state can be used to specify that the <code>text</code> argument is 
-	 * the continuation of text submitted in a previous call and/or to receive information 
-	 * to pass to continuation calls. If all calls to this method are independent from one another,
-	 * this argument should be specified as <code>null</code>.
 	 *
 	 * @return an array of offsets to the characters in the <code>text</code> argument which 
 	 * are directional formatting characters added to ensure correct presentation. The offsets 
@@ -249,15 +205,16 @@ public interface ISTextExpert {
 	public int[] fullBidiCharOffsets(String text);
 
 	/** 
-	 * This method adds directional marks to the given text before the characters 
+	 * Adds directional marks to the given text before the characters 
 	 * specified in the given array of offsets. It can be used to add a prefix and/or 
 	 * a suffix of directional formatting characters.
 	 * <p>
 	 * The directional marks will be LRMs for structured text strings with LTR base 
 	 * direction and RLMs for strings with RTL base direction.
 	 * </p><p> 
-	 * If necessary, leading and trailing directional markers (LRE, RLE and PDF) can 
-	 * be added depending on the value of the <code>affix</code> argument.
+	 * If necessary, leading and trailing directional formatting characters
+	 * (LRE, RLE and PDF) can be added depending on the value of the 
+	 * <code>affix</code> argument.
 	 * </p>
 	 * @see ISTextExpert#leanBidiCharOffsets(String)
 	 * 
@@ -269,8 +226,12 @@ public interface ISTextExpert {
 	 * @param  direction the base direction of the structured text.
 	 *         It must be one of the values {@link #DIR_LTR}, or
 	 *         {@link #DIR_RTL}.
-	 * @param  affix specifies if a prefix and a suffix should be added to
-	 *         the result
+	 * @param  affixLength specifies the length of prefix and suffix 
+	 *         which should be added to the result.<br>
+	 *         0 means no prefix or suffix<br>
+	 *         1 means one LRM or RLM as prefix and no suffix<br>
+	 *         2 means 2 characters in both prefix and suffix.
+	 *         
 	 * @return a string corresponding to the source <code>text</code> with
 	 *         directional marks (LRMs or RLMs) added at the specified offsets,
 	 *         and directional formatting characters (LRE, RLE, PDF) added
@@ -283,29 +244,33 @@ public interface ISTextExpert {
 	 * whether the text contains Arabic or Hebrew words. If the text contains both, 
 	 * the first Arabic or Hebrew letter in the text determines which is the governing script.
 	 *
-	 * @param  handler designates a handler instance
-	 *
-	 * @param  environment specifies an environment whose characteristics may affect 
-	 * the handler's behavior. If <code>null</code>, the default environment is used.
-	 *
-	 * @param  text is the structured text string
+	 * @param  text is the structured text string.
 	 *
 	 * @return the base direction of the structured text, {@link #DIR_LTR} or {@link #DIR_RTL}
 	 */
 	public int getTextDirection(String text);
 
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 	// Expert's state handling - can be used only for non-shared experts
-
-	// TBD is there a case where we get a shared expert and setting state is a "must"?
-	// Javadoc note: shared experts will ignore this
+	//////////////////////////////////////////////////////////////////////
+	/**
+	 * Sets the state for the next text processing call.
+	 * This method does nothing if the expert instance is not a stateful one.
+	 * @param state an object returned by a previous call to {@link #getState}.
+	 */
 	public void setState(Object state);
 
-	// Javadoc note: may return null. Will return null for shared experts
+	/**
+	 * Gets the state established by the last text processing call.
+	 * This is <code>null</code> if the expert instance is not a stateful one,
+	 * or if the last text processing call has nothing to pass to the next call.
+	 * @return the last established state.
+	 */
 	public Object getState();
 
 	/**
-	 * Resets state to initial.
+	 * Resets the state to initial.
+	 * This method does nothing if the expert instance is not a stateful one.
 	 */
 	public void clearState();
 }

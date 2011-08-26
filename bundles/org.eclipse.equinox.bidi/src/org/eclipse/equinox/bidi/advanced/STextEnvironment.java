@@ -13,8 +13,8 @@ package org.eclipse.equinox.bidi.advanced;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
- *  This class describes environment within which structured text strings are 
- *  processed. It includes, for example:
+ *  Describes the environment within which structured text strings are 
+ *  processed. It includes:
  *  <ul>
  *  <li>locale,</li>
  *  <li>desired orientation,</li>
@@ -162,7 +162,7 @@ public class STextEnvironment {
 
 	/**
 	 * Checks if bidi processing is needed in this environment.
-	 * @return <code>true</code> if bidi processing is needed in this environment
+	 * @return <code>true</code> if bidi processing is needed in this environment.
 	 */
 	public boolean isProcessingNeeded() {
 		if (processingNeeded == null) {

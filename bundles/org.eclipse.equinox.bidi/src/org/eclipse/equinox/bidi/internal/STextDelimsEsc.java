@@ -42,9 +42,8 @@ public abstract class STextDelimsEsc extends STextDelims {
 	}
 
 	/**
-	 *  This method handles the text between start and end delimiters
-	 *  as a token.
-	 *  It inserts a directional mark if needed at position
+	 *  Handles the text between start and end delimiters as a token.
+	 *  This method inserts a directional mark if needed at position
 	 *  <code>separLocation</code> which corresponds to a start delimiter,
 	 *  and skips until after the matching end delimiter,
 	 *  ignoring possibly escaped end delimiters.

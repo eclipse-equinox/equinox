@@ -132,9 +132,9 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestOrient(STextTypeHandler handler, String label, String data, String resLTR, String resRTL, String resCon) {
 		String full, lean;
 
-		ISTextExpert expertLTR = STextExpertFactory.getExpert(handler, envLTR);
-		ISTextExpert expertRTL = STextExpertFactory.getExpert(handler, envRTL);
-		ISTextExpert expertCRL = STextExpertFactory.getExpert(handler, envCRL);
+		ISTextExpert expertLTR = STextExpertFactory.getStatefulExpert(handler, envLTR);
+		ISTextExpert expertRTL = STextExpertFactory.getStatefulExpert(handler, envRTL);
+		ISTextExpert expertCRL = STextExpertFactory.getStatefulExpert(handler, envCRL);
 
 		lean = toUT16(data);
 		full = expertLTR.leanToFullText(lean);
@@ -205,17 +205,17 @@ public class STextMethodsTest extends STextTestBase {
 	private void doTestDirection() {
 		String data, lean, full, model;
 		int dirA, dirH;
-		ISTextExpert expertRL = STextExpertFactory.getExpert(testMyCommaRL, envLTR);
+		ISTextExpert expertRL = STextExpertFactory.getStatefulExpert(testMyCommaRL, envLTR);
 		dirA = expertRL.getTextDirection(toUT16("###"));
 		dirH = expertRL.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #1", dirA == RTL && dirH == LTR);
 
-		ISTextExpert expertRR = STextExpertFactory.getExpert(testMyCommaRR, envLTR);
+		ISTextExpert expertRR = STextExpertFactory.getStatefulExpert(testMyCommaRR, envLTR);
 		dirA = expertRR.getTextDirection(toUT16("###"));
 		dirH = expertRR.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #2", dirA == RTL && dirH == RTL);
 
-		ISTextExpert expertLL = STextExpertFactory.getExpert(testMyCommaLL, envLTR);
+		ISTextExpert expertLL = STextExpertFactory.getStatefulExpert(testMyCommaLL, envLTR);
 		lean = toUT16("ABC,#DEF,HOST,com");
 		full = expertLL.leanToFullText(lean);
 		assertEquals("TestDirection #9 full", "ABC@,#DEF@,HOST,com", toPseudo(full));
@@ -226,7 +226,7 @@ public class STextMethodsTest extends STextTestBase {
 		assertEquals("TestDirection #10 full", "ABC@,DEF@,HOST,com", toPseudo(full));
 
 		STextEnvironment environment = new STextEnvironment(null, true, STextEnvironment.ORIENT_LTR);
-		ISTextExpert expert = STextExpertFactory.getExpert(testMyCommaRL, environment);
+		ISTextExpert expert = STextExpertFactory.getStatefulExpert(testMyCommaRL, environment);
 		dirA = expert.getTextDirection(toUT16("###"));
 		dirH = expert.getTextDirection(toUT16("ABC"));
 		assertTrue("TestDirection #10.5", dirA == RTL && dirH == LTR);
@@ -268,7 +268,7 @@ public class STextMethodsTest extends STextTestBase {
 
 		data = "ABc,|#DEF,HOST,com";
 		lean = toUT16(data);
-		expert = STextExpertFactory.getExpert(testMyCommaRL, envRTLMIR);
+		expert = STextExpertFactory.getStatefulExpert(testMyCommaRL, envRTLMIR);
 		full = expert.leanToFullText(lean);
 		model = "ABc,|#DEF,HOST,com";
 		assertEquals("TestDirection #17 full", model, toPseudo(full));

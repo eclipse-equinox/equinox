@@ -17,6 +17,9 @@ import org.eclipse.osgi.service.localization.LocaleProvider;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 
+/**
+ * Provides services related to OSGI bundles.
+ */
 public class STextActivator implements BundleActivator {
 
 	private ServiceTracker logTracker = null;

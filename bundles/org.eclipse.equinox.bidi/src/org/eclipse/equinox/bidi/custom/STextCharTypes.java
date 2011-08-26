@@ -14,7 +14,7 @@ import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 
 /**
- * The class determines bidirectional types of characters in a string.
+ * Determines bidirectional types of characters in a string.
  */
 public class STextCharTypes {
 
@@ -50,14 +50,10 @@ public class STextCharTypes {
 	/**
 	 *  Constructor
 	 *  
-	 *  @param  handler is the handler handling this occurrence of
-	 *          structured text.
-	 *          
-	 *  @param  environment the current environment, which may affect the behavior of
-	 *          the handler. This parameter may be specified as
-	 *          <code>null</code>, in which case the
-	 *          {@link STextEnvironment#DEFAULT DEFAULT}
-	 *          environment should be assumed.
+	 * @param  expert ISTextExpert instance through which this handler
+	 *         is invoked. The handler can use ISTextExpert methods to
+	 *         query items stored in the expert instance, like the current
+	 *         {@link STextEnvironment environment}.      
 	 *  
 	 *  @param text is the text whose characters are analyzed.
 	 */
@@ -69,6 +65,18 @@ public class STextCharTypes {
 		types = new byte[text.length()];
 	}
 
+	/**
+	 * Indicates the base text direction appropriate for an instance of
+	 * structured text.
+	 * 
+	 * @return the base direction of the structured text. This direction
+	 *         may not be the same depending on the environment and on
+	 *         whether the structured text contains Arabic or Hebrew
+	 *         letters.<br>
+	 *         The value returned is either
+	 *         {@link ISTextExpert#DIR_LTR DIR_LTR} or 
+	 *         {@link ISTextExpert#DIR_RTL DIR_RTL}.
+	 */
 	public int getDirection() {
 		if (direction < 0)
 			direction = handler.getDirection(expert, text, this);
@@ -84,8 +92,8 @@ public class STextCharTypes {
 	}
 
 	/**
-	 *  Returns directionality of the character in the original string at
-	 *  the specified index.
+	 *  Gets the directionality of the character in the original string
+	 *  at the specified index.
 	 *  
 	 *  @param  index position of the character in the <i>lean</i> text
 	 *  
@@ -111,9 +119,9 @@ public class STextCharTypes {
 	}
 
 	/**
-	 *  Force a bidi type on a character.
+	 *  Forces a bidi type on a character.
 	 *  
-	 *  @param  index is the index of the character whose bidi type is set.
+	 *  @param  index position of the character whose bidi type is set.
 	 *   
 	 *  @param  charType bidirectional type of the character. It must be
 	 *          one of the values which can be returned by
@@ -124,21 +132,17 @@ public class STextCharTypes {
 	}
 
 	/**
-	 *  Get the orientation of the component in which the text will
+	 *  Gets the orientation of the component in which the text will
 	 *  be displayed.
 	 *  
-	 *  @param  envir is the current environment, which may affect the behavior of
-	 *          the handler. This parameter may be specified as
-	 *          <code>null</code>, in which case the
-	 *          {@link STextEnvironment#DEFAULT DEFAULT}
-	 *          environment should be assumed.
-	 *  
 	 *  @return the orientation as either 
-	 *          {@link STextEnvironment#ORIENT_LTR} or
-	 *          {@link STextEnvironment#ORIENT_RTL}.
+	 *          {@link STextEnvironment#ORIENT_LTR},
+	 *          {@link STextEnvironment#ORIENT_RTL},
+	 *          {@link STextEnvironment#ORIENT_UNKNOWN} or
+	 *          {@link STextEnvironment#ORIENT_IGNORE}.
 	 */
-	public int resolveOrientation(STextEnvironment envir) {
-		int orient = envir.getOrientation();
+	public int resolveOrientation() {
+		int orient = environment.getOrientation();
 		if ((orient & STextEnvironment.ORIENT_CONTEXTUAL) == 0) { // absolute orientation
 			return orient;
 		}
@@ -161,4 +165,5 @@ public class STextCharTypes {
 		}
 		return orient;
 	}
+
 }

@@ -15,6 +15,9 @@ import java.util.Map;
 import org.eclipse.core.runtime.*;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
+/**
+ * Provides services related to registered structured text handlers.
+ */
 public class STextTypesCollector implements IRegistryEventListener {
 
 	private static final String EXT_POINT = "org.eclipse.equinox.bidi.bidiTypes"; //$NON-NLS-1$

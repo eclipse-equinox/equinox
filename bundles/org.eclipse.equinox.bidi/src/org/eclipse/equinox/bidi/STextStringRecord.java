@@ -13,7 +13,7 @@ package org.eclipse.equinox.bidi;
 import java.lang.ref.SoftReference;
 
 /**
- * This class records strings which contain structured text. Several static
+ * Records strings which contain structured text. Several static
  * methods in this class allow to record such strings in a pool, and to find if
  * a given string is member of the pool.
  * <p>
@@ -73,7 +73,7 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Record a string in the pool. The caller must specify the number
+	 * Records a string in the pool. The caller must specify the number
 	 * of segments in the record (at least 1), and the handler, starting
 	 * and ending offsets for the first segment.
 	 *
@@ -82,10 +82,11 @@ public class STextStringRecord {
 	 * @param  segmentCount number of segments allowed in this string.
 	 *         This number must be >= 1.
 	 *
-	 * @param  handler the handler appropriate to handle the type
-	 *         of structured text present in the first segment.
-	 *         It may be one of the pre-defined handler instances, or it may be an instance
-	 *         created by a plug-in or by the application.
+	 * @param  handlerID identifier for the handler appropriate to handle 
+	 *         the type of structured text present in the first segment.
+	 *         It may be one of the predefined identifiers in 
+	 *         {@link STextTypeHandlerFactory}, or it may be an identifier
+	 *         for a type handler created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the first
 	 *         segment. It must be >= 0 and less than the length of the string.
@@ -95,7 +96,7 @@ public class STextStringRecord {
 	 *         not greater than the length of the string.
 	 *
 	 * @return an instance of STextRecordString which represents this record.
-	 *         This instance may be used to specify additional segment with
+	 *         This instance may be used to specify additional segments with
 	 *         {@link #addSegment addSegment}.
 	 *
 	 * @throws IllegalArgumentException if <code>string</code> is null or
@@ -137,12 +138,13 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Add a second or further segment to a record.
+	 * Adds a second or further segment to a record.
 	 *
-	 * @param  handler the handler appropriate to handle the type
-	 *         of structured text present in this segment.
-	 *         It may be one of the pre-defined handler instances, or it may be an instance
-	 *         created by a plug-in or by the application.
+	 * @param  handlerID identifier for the handler appropriate to handle 
+	 *         the type of structured text present in the first segment.
+	 *         It may be one of the predefined identifiers in 
+	 *         {@link STextTypeHandlerFactory}, or it may be an identifier
+	 *         for a type handler created by a plug-in or by the application.
 	 *
 	 * @param  start offset in the string of the starting character of the
 	 *         segment. It must be >= 0 and less than the length of the string.
@@ -151,7 +153,7 @@ public class STextStringRecord {
 	 *         greater than the <code>start</code> argument and not greater
 	 *         than the length of the string.
 	 *
-	 * @throws IllegalArgumentException if <code>handler</code> is null,
+	 * @throws IllegalArgumentException if <code>handlerID</code> is null,
 	 *         or if <code>start</code> or <code>limit</code> have invalid
 	 *         values.
 	 * @throws IllegalStateException if the current segment exceeds the
@@ -161,7 +163,7 @@ public class STextStringRecord {
 	 */
 	public void addSegment(String handlerID, int start, int limit) {
 		if (handlerID == null)
-			throw new IllegalArgumentException("The handler argument must not be null!"); //$NON-NLS-1$
+			throw new IllegalArgumentException("The handlerID argument must not be null!"); //$NON-NLS-1$
 		if (start < 0 || start >= string.length())
 			throw new IllegalArgumentException("The start position must be at least 0 and less than the length of the string!"); //$NON-NLS-1$
 		if (limit <= start || limit > string.length())
@@ -175,16 +177,16 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Check if a string is recorded and retrieve its record.
+	 * Checks if a string is recorded and retrieve its record.
 	 *
 	 * @param  string the string to check.
 	 *
 	 * @return <code>null</code> if the string is not recorded in the pool;
-	 *         otherwise, return the STextStringRecord instance which
-	 *         records this string.<br>
+	 *         otherwise, return the <code>STextStringRecord</code> instance 
+	 *         which records this string.<br>
 	 *         Once a record has been found, the number of its segments can
 	 *         be retrieved using {@link #getSegmentCount getSegmentCount},
-	 *         its handler can
+	 *         its handler ID can
 	 *         be retrieved using {@link #getHandler getHandler},
 	 *         its starting offset can
 	 *         be retrieved using {@link #getStart getStart},
@@ -223,7 +225,8 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Retrieve the number of segments in a record.
+	 * Retrieves the number of segments in a record.
+	 * 
 	 * @return the number of segments in the current record
 	 */
 	public int getSegmentCount() {
@@ -236,21 +239,18 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Retrieve the handler of a given segment.
+	 * Retrieves the handler ID of a given segment.
 	 *
 	 * @param  segmentNumber number of the segment about which information
 	 *         is required. It must be >= 0 and less than the number of
-	 *         segments specified by <code>segmentCount</code>
-	 *         in the call to {@link #addRecord addRecord} which created
-	 *         the STextStringRecord instance.
+	 *         segments returned  by {@link #getSegmentCount}.
 	 *
-	 * @return the handler to handle the structured text in the segment
+	 * @return the handler ID of the handler appropriate to 
+	 *         process the structured text in the segment
 	 *         specified by <code>segmentNumber</code>.
 	 *
 	 * @throws IllegalArgumentException if <code>segmentNumber</code>
 	 *         has an invalid value.
-	 *
-	 * @see    #getSegmentCount
 	 */
 	public String getHandler(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -258,21 +258,17 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Retrieve the starting offset of a given segment.
+	 * Retrieves the starting offset of a given segment.
 	 *
 	 * @param  segmentNumber number of the segment about which information
 	 *         is required. It must be >= 0 and less than the number of
-	 *         segments specified by <code>segmentCount</code>
-	 *         in the call to {@link #addRecord addRecord} which created
-	 *         the STextStringRecord instance.
+	 *         segments returned  by {@link #getSegmentCount}.
 	 *
 	 * @return the starting offset within the string of the segment
 	 *         specified by <code>segmentNumber</code>.
 	 *
 	 * @throws IllegalArgumentException if <code>segmentNumber</code>
 	 *         has an invalid value.
-	 *
-	 * @see    #getSegmentCount
 	 */
 	public int getStart(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -280,21 +276,17 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Retrieve the ending offset of a given segment.
+	 * Retrieves the ending offset of a given segment.
 	 *
 	 * @param  segmentNumber number of the segment about which information
 	 *         is required. It must be >= 0 and less than the number of
-	 *         segments specified by <code>segmentCount</code>
-	 *         in the call to {@link #addRecord addRecord} which created
-	 *         the STextStringRecord instance.
+	 *         segments returned  by {@link #getSegmentCount}.
 	 *
 	 * @return the offset of the position following the segment
 	 *         specified by <code>segmentNumber</code>.
 	 *
 	 * @throws IllegalArgumentException if <code>segmentNumber</code>
 	 *         has an invalid value.
-	 *
-	 * @see    #getSegmentCount
 	 */
 	public int getLimit(int segmentNumber) {
 		checkSegmentNumber(segmentNumber);
@@ -302,7 +294,7 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Clear the pool. All elements of the pool are erased and any associated
+	 * Clears the pool. All elements of the pool are erased and any associated
 	 * memory is freed.
 	 */
 	public static synchronized void clear() {

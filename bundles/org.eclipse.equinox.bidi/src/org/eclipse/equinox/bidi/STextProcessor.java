@@ -14,7 +14,7 @@ import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  This class provides a number of convenience functions facilitating the
+ *  Provides a number of convenience functions facilitating the
  *  processing of structured text.
  *
  *  @noextend This class is not intended to be subclassed by clients.
@@ -25,7 +25,8 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 public final class STextProcessor {
 
 	/**
-	 * The default set of separators used to segment a string: dot, colon, slash, backslash.
+	 * The default set of separators used to segment a string: dot, 
+	 * colon, slash, backslash.
 	 */
 	private static final String defaultSeparators = ".:/\\"; //$NON-NLS-1$
 
@@ -49,7 +50,7 @@ public final class STextProcessor {
 	}
 
 	/**
-	 *  Process the given text and return a string with appropriate
+	 *  Processes the given text and returns a string with appropriate
 	 *  directional formatting characters. This is equivalent to calling
 	 *  {@link #process(String str, String separators)} with the default
 	 *  set of separators.
@@ -64,20 +65,25 @@ public final class STextProcessor {
 	 *  (where capital letters indicate RTL text) should render as
 	 *  <tt>d:\myfolder\REDLOF\ELIFYM.java</tt>.
 	 *  </p>
-	 *  @param  str the text to be processed
-	 *  @return the processed string
+	 *  
+	 *  @param  str the text to be processed.
+	 *  
+	 *  @return the processed string.
 	 */
 	public static String process(String str) {
 		return process(str, defaultSeparators);
 	}
 
 	/**
-	 * Process a string that has a particular semantic meaning to render
-	 * it correctly on bidi locales. 
+	 * Processes a string that has a particular semantic meaning to render
+	 * it correctly on bidi locales.
+	 *  
 	 * @see #process(String)
-	 * @param  str the text to process
-	 * @param  separators separators by which the string will be segmented
-	 * @return the processed string
+	 * 
+	 * @param  str the text to process.
+	 * @param  separators characters by which the string will be segmented.
+	 * 
+	 * @return the processed string.
 	 */
 	public static String process(String str, String separators) {
 		if ((str == null) || (str.length() <= 1))
@@ -118,16 +124,23 @@ public final class STextProcessor {
 
 		// make sure that LRE/PDF are added around the string
 		STextTypeHandler handler = new STextTypeHandler(separators);
-		ISTextExpert expert = STextExpertFactory.getExpert(handler, env);
+		ISTextExpert expert = STextExpertFactory.getStatefulExpert(handler, env);
 		return expert.leanToFullText(str);
 	}
 
 	/**
 	 * Processes a string that has a particular semantic meaning to render
-	 * it correctly on bidi locales. 
+	 * it correctly on bidi locales.
+	 * 
 	 * @see #process(String)
-	 * @param  str the text to process
-	 * @param  handler a handler instance appropriate for the type of the structured text
+	 * 
+	 * @param  str the text to process.
+	 * @param  textType an identifier for the  handler instance appropriate 
+	 *         for the type of the structured text.
+	 *         It may be one of the identifiers defined in 
+	 *         {@link STextTypeHandlerFactory} or a type handler identifier 
+	 *         specified in a plug-in.
+	 *         
 	 * @return the processed string
 	 */
 	public static String processTyped(String str, String textType) {
@@ -149,8 +162,10 @@ public final class STextProcessor {
 
 	/**
 	 * Removes directional formatting characters in the given string.
-	 * @param  str string with directional characters to remove
-	 * @return string without directional formatting characters
+	 * 
+	 * @param  str string with directional characters to remove.
+	 * 
+	 * @return string without directional formatting characters.
 	 */
 	public static String deprocess(String str) {
 		if ((str == null) || (str.length() <= 1))
@@ -179,9 +194,16 @@ public final class STextProcessor {
 
 	/**
 	 * Removes directional formatting characters in the given string.
-	 * @param  str string with directional characters to remove
-	 * @param  handler appropriate for the structured text
-	 * @return string without directional formatting characters
+	 * 
+	 * @param  str string with directional characters to remove.
+	 * 
+	 * @param  textType an identifier for the  handler instance appropriate 
+	 *         for the type of the structured text.
+	 *         It may be one of the identifiers defined in 
+	 *         {@link STextTypeHandlerFactory} or a type handler identifier 
+	 *         specified in a plug-in.
+	 *         
+	 * @return string without directional formatting characters.
 	 */
 	public static String deprocessTyped(String str, String textType) {
 		if ((str == null) || (str.length() <= 1))
@@ -196,10 +218,10 @@ public final class STextProcessor {
 	}
 
 	/**
-	 * Return the string containing all the default separator characters to be
+	 * Returns a string containing all the default separator characters to be
 	 * used to segment a given string.
 	 * 
-	 * @return string containing all separators
+	 * @return string containing all separators.
 	 */
 	public static String getDefaultSeparators() {
 		return defaultSeparators;

@@ -9,10 +9,10 @@ This package provides classes for
 processing structured text.
 <p>
 There are various types of structured text. Each type should
-be handled by a specific <i>processor</i>. A number of standard
-processors are supplied in the associated package
-{@link <a href="internal\consumable\package-summary.html">
-org.eclipse.equinox.bidi.internal.consumable</a>}.
+be handled by a specific <i>type handler</i>. A number of standard
+type handlers are supplied in the associated package
+<a href="internal/consumable/package-summary.html">
+org.eclipse.equinox.bidi.internal.consumable</a>.
 
 <h2>Introduction to Structured Text</h2>
 <p>
@@ -28,10 +28,10 @@ should be reflected in the display order. The general algorithm, which
 has no awareness of these special cases, often gives incorrect results
 when displaying such structured text.
 </p><p>
-The general idea in handling structured text is to add directional
-formatting characters at proper locations in the text to supplement the
-standard algorithm, so that the final result is correctly displayed
-using the UBA.
+The general idea in handling structured text in this package is to add
+directional formatting characters at proper locations in the text to
+supplement the standard algorithm, so that the final result is correctly
+displayed using the UBA.
 </p><p>
 A class which handles structured text is thus essentially a
 transformation engine which receives text without directional formatting
@@ -45,11 +45,12 @@ called <b><i>lean</i></b> text while the text with added directional
 formatting characters is called <b><i>full</i></b> text.
 </p><p>
 The class {@link
-<a href="STextEngine.html"><b>STextEngine</b></a>}
+<a href="STextProcessor.html"><b>STextProcessor</b></a>}
 is the main tool for processing structured text.  It facilitates
 handling several types of structured text, each type being handled
 by a specific
-{@link <a href="custom\STextProcessor.html"><b><i>processor</i></b></a>} :</p>
+{@link <a href="custom/STextTypeHandler.html">
+<b><i>type handler</i></b></a>} :</p>
 <ul>
   <li>property (name=value)</li>
   <li>compound name (xxx_yy_zzzz)</li>
@@ -65,51 +66,75 @@ by a specific
   <li>RTL arithmetic expressions</li>
 </ul>
 <p>
-For each of these types, a static instance is defined in <b>STextEngine</b>.
-These pre-defined instances can be used as argument in the methods of
-<b>STextEngine</b>.
+For each of these types, an identifier is defined in
+{@link <a href="STextTypeHandlerFactory.html">
+<b><i>STextTypeHandlerFactory</i></b></a>} :</p>
+These identifiers can be used as argument in some methods of
+<b>STextProcessor</b> to specify the type of handler to apply.
 </p><p>
-Other classes in this package may be used to
-complement and facilitate the action of
-{@link <a href="STextEngine.html">STextEngine</a>}:
+Another class in this package may be used to
+complement the action of
+{@link <a href="STextProcessor.html">STextProcessor</a>}:
 <ul>
-  <li>{@link <a href="STextEnvironment.html">STextEnvironment</a>}
-      regroups details about the environment</li>.
-  <li>{@link <a href="STextUtil.html">STextUtil</a>}
-      provides a number of convenience methods to process some common types of
-      structured text.  When using methods in this class, there is no need
-      to use other classes of this package.  However, the other classes allow
-      more precise control and possibly better performance.</li>
   <li>{@link <a href="STextStringRecord.html">STextStringRecord</a>}
       allows to record strings which are structured text with the
-      type of the appropriate processor,
+      type of the appropriate handler,
       so that another module can check if a given string has been recorded
-      as a structured text string and run its processor.</li>
+      as a structured text string and run its type handler.</li>
 </ul>
 <p>
-{@link <a href="STextEngine.html">STextEngine</a>} and the
-other classes mentioned above are intended for users who
-need to process structured text for which there already exist
-processors.
+The classes included in this package are intended for users who
+need to process structured text in the most straightforward
+manner, when the following conditions are satisfied:
+<ul>
+  <li>There exists an appropriate handler for the type of the
+      structured text.</li>
+  <li>There is no need to specify non-default conditions related
+      to the {@link <a href="advanced/STextEnvironment.html">
+      environment</a>}.</li>
+  <li>The only operations needed are to transform <i>lean</i> text
+      into <i>full</i> text or vice versa.</li>
+  <li>There is no interdependence between the processing of a
+      given string and the processing of preceding or
+      succeeding strings.</li>
+</ul>
 <p>
-Developers who want to develop new processors to support types of structured text
-not currently supported can use the following components of the
-package {@link <a href="custom\package-summary.html">
+When their needs go beyond the conditions above,
+users can use classes in the
+{@link <a href="advanced/package-summary.html">
+org.eclipse.equinox.bidi.advanced</a>} package:
+<ul>
+  <li>{@link <a href="advanced/ISTextExpert.html">ISTextExpert</a>}
+      provides more sophisticated methods for processing the
+      structured text.</li>
+  <li>{@link <a href="advanced/STextEnvironment.html">STextEnvironment</a>}
+      specifies properties of the environment.</li>
+  <li>{@link <a href="advanced/STextExpertFactory.html">STextExpertFactory</a>}
+      associates a type handler with an environment and provides
+      a <code>STextExpert</code> instance for the user.
+</ul>
+<p>
+Developers who want to develop new handlers to support types of
+structured text not currently supported can use the following components
+of the package {@link <a href="custom/package-summary.html">
 org.eclipse.equinox.bidi.custom</a>}:
 <ul>
-  <li>{@link <a href="custom\STextProcessor.html">STextProcessor</a>}
-      is a generic processor to be used as superclass for specific
-      processors.</li>
-  <li>{@link <a href="custom\STextStringProcessor.html">STextStringProcessor</a>}
-      allows retrieval of the defined processor types and of the
-      corresponding processors.</li>
+  <li>{@link <a href="custom/STextTypeHandler.html">STextTypeHandler</a>}
+      is a generic handler to be used as superclass for specific
+      handlers.</li>
+  <li>{@link <a href="custom/STextCharTypes.html">STextCharTypes</a>}
+      provides services related to the bidi classification of characters.</li>
+  <li>{@link <a href="custom/STextOffsets.html">STextOffsets</a>}
+      provides services related to managing an array of offsets to locations
+      where directional formatting characters should be added in the source
+      string.</li>
 </ul>
 <p>
 There are two other packages associated with the current one:
 <ul>
-  <li>{@link <a href="internal\package-summary.html">
+  <li>{@link <a href="internal/package-summary.html">
       org.eclipse.equinox.bidi.internal</a>}</li>
-  <li>{@link <a href="internal\consumable\package-summary.html">
+  <li>{@link <a href="internal/consumable/package-summary.html">
        org.eclipse.equinox.bidi.internal.consumable</a>}</li>
 </ul>
 The tools in the first package can serve as example of how to develop

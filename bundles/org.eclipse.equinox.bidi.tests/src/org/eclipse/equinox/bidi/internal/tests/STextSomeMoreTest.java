@@ -77,12 +77,12 @@ public class STextSomeMoreTest extends STextTestBase {
 		assertTrue(env2.isProcessingNeeded());
 
 		STextTypeHandler handler1 = new TestHandler1();
-		ISTextExpert expert1 = STextExpertFactory.getExpert(handler1, env1);
+		ISTextExpert expert1 = STextExpertFactory.getStatefulExpert(handler1, env1);
 		String full = expert1.leanToFullText("abcd");
 		assertEquals("@a@b@c@d", toPseudo(full));
 
 		STextTypeHandler handler2 = new TestHandler2();
-		ISTextExpert expert2 = STextExpertFactory.getExpert(handler2, env1);
+		ISTextExpert expert2 = STextExpertFactory.getStatefulExpert(handler2, env1);
 		boolean catchFlag = false;
 		try {
 			full = expert2.leanToFullText("abcd");
@@ -92,7 +92,7 @@ public class STextSomeMoreTest extends STextTestBase {
 		assertTrue("Catch missing indexOfSpecial", catchFlag);
 
 		STextTypeHandler handler3 = new TestHandler3();
-		ISTextExpert expert3 = STextExpertFactory.getExpert(handler3, env1);
+		ISTextExpert expert3 = STextExpertFactory.getStatefulExpert(handler3, env1);
 		catchFlag = false;
 		try {
 			full = expert3.leanToFullText("abcd");

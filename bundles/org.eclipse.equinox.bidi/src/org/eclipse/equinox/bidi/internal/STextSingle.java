@@ -36,7 +36,7 @@ public class STextSingle extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method locates occurrences of the separator.
+	 *  Locates occurrences of the separator.
 	 *
 	 *  @see #getSeparators getSeparators
 	 */
@@ -45,7 +45,7 @@ public class STextSingle extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method inserts a mark before the separator if needed and
+	 *  Inserts a mark before the separator if needed and
 	 *  skips to the end of the source string.
 	 *
 	 *  @return the length of <code>text</code>.
@@ -56,7 +56,7 @@ public class STextSingle extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method returns 1 as number of special cases handled by this handler.
+	 *  Returns 1 as number of special cases handled by this handler.
 	 *
 	 *  @return 1.
 	 */

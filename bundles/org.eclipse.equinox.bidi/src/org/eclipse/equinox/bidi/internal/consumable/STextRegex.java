@@ -15,7 +15,7 @@ import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
- *  <code>STextRegex</code> is a handler for regular expressions.
+ *  Handler for regular expressions.
  *  Such expressions may span multiple lines.
  *  <p>
  *  In applications like an editor where parts of the text might be modified
@@ -23,12 +23,12 @@ import org.eclipse.equinox.bidi.custom.*;
  *  {@link ISTextExpert#leanToFullText}
  *  separately on each line and save the initial state of each line (this is
  *  the final state of the previous line which can be retrieved using
- *  the value returned in the first element of the <code>state</code> argument).
+ *  {@link ISTextExpert#getState()}.
  *  If both the content
  *  of a line and its initial state have not changed, the user can be sure that
  *  the last <i>full</i> text computed for this line has not changed either.
  *
- *  @see ISTextExpert#leanToFullText explanation of state in leanToFullText
+ *  @see ISTextExpert explanation of state
  *
  *  @author Matitiahu Allouche
  */
@@ -66,7 +66,7 @@ public class STextRegex extends STextTypeHandler {
 	private static final Integer STATE_QUOTED_SEQUENCE = new Integer(17);
 
 	/**
-	 *  This method retrieves the number of special cases handled by this handler.
+	 *  Retrieves the number of special cases handled by this handler.
 	 *  
 	 *  @return the number of special cases for this handler.
 	 */
@@ -75,7 +75,7 @@ public class STextRegex extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method locates occurrences of the syntactic strings and of
+	 *  Locates occurrences of the syntactic strings and of
 	 *  R, AL, EN, AN characters.
 	 */
 	public int indexOfSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int fromIndex) {
@@ -144,7 +144,7 @@ public class STextRegex extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method process the special cases.
+	 *  Processes the special cases.
 	 */
 	public int processSpecial(ISTextExpert expert, String text, STextCharTypes charTypes, STextOffsets offsets, int caseNumber, int separLocation) {
 		int location;

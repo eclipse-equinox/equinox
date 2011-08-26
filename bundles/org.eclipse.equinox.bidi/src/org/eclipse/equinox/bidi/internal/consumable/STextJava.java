@@ -15,21 +15,20 @@ import org.eclipse.equinox.bidi.custom.*;
 import org.eclipse.equinox.bidi.internal.STextActivator;
 
 /**
- *  <code>STextJava</code> is a handler for structured text
- *  composed of Java statements. Such a structured text may span
- *  multiple lines.
+ *  Handler for structured text composed of Java statements.
+ *  Such a structured text may span multiple lines.
  *  <p>
  *  In applications like an editor where parts of the text might be modified
  *  while other parts are not, the user may want to call
  *  {@link ISTextExpert#leanToFullText}
  *  separately on each line and save the initial state of each line (this is
  *  the final state of the previous line which can be retrieved using
- *  the value returned in the first element of the <code>state</code> argument).
+ *  {@link ISTextExpert#getState()}).
  *  If both the content
  *  of a line and its initial state have not changed, the user can be sure that
  *  the last <i>full</i> text computed for this line has not changed either.
  *
- *  @see ISTextExpert#leanToFullText explanation of state in leanToFullText
+ *  @see ISTextExpert explanation of state
  *
  *  @author Matitiahu Allouche
  */
@@ -50,7 +49,7 @@ public class STextJava extends STextTypeHandler {
 	}
 
 	/**
-	     *  This method looks for occurrences of 4 special strings:
+	     *  Locates occurrences of 4 special strings:
 	     *  <ol>
 	     *    <li>spaces</li>
 	     *    <li>literals starting with quotation mark</li>
@@ -74,7 +73,7 @@ public class STextJava extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method processes the 4 special cases as follows.
+	 *  Processes the 4 special cases as follows.
 	     *  <ol>
 	     *    <li>skip the run of spaces</li>
 	     *    <li>look for a matching quotation mark and skip until after it</li>

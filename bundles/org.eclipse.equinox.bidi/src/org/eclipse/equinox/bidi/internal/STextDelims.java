@@ -33,7 +33,7 @@ public abstract class STextDelims extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method locates occurrences of start delimiters.
+	 *  Locates occurrences of start delimiters.
 	 *
 	 *  @return the position starting from offset <code>fromIndex</code>
 	 *          in <code>text</code> of the first occurrence of the
@@ -49,9 +49,8 @@ public abstract class STextDelims extends STextTypeHandler {
 	}
 
 	/**
-	 *  This method handles the text between start and end delimiters
-	 *  as a token.
-	 *  It inserts a directional mark if needed at position
+	 *  Handles the text between start and end delimiters as a token.
+	 *  This methoed inserts a directional mark if needed at position
 	 *  <code>separLocation</code> which corresponds to a start delimiter,
 	 *  and skips until after the matching end delimiter.
 	 *

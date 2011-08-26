@@ -10,6 +10,13 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.custom;
 
+/**
+ * Provides various services related to managing the array of
+ * offsets where directional formatting characters will be inserted.
+ * 
+ * @author Matitiahu Allouche
+ *
+ */
 public class STextOffsets {
 
 	private static final byte L = Character.DIRECTIONALITY_LEFT_TO_RIGHT;
@@ -35,13 +42,17 @@ public class STextOffsets {
 	}
 
 	/**
-	 * Store the prefix length
+	 * Stores the prefix length
+	 * 
+	 * @param prefLen value assigned to the prefix length
 	 */
 	public void setPrefixLength(int prefLen) {
 		prefixLength = prefLen;
 	}
 
 	/**
+	 * Gets the number of used entries in the offsets array.
+	 * 
 	 * @return the number of used entries in the offsets array.
 	 */
 	public int getCount() {
@@ -49,15 +60,17 @@ public class STextOffsets {
 	}
 
 	/**
-	 * Mark that all entries in the offsets array are unused.
+	 * Marks that all entries in the offsets array are unused.
 	 */
 	public void clear() {
 		count = 0;
 	}
 
 	/**
-	 * Get the value of a specified entry in the offsets array.
-	 * @param  index is the index of the entry of interest.
+	 * Gets the value of a specified entry in the offsets array.
+	 * 
+	 * @param  index the index of the entry of interest.
+	 * 
 	 * @return the value of the specified entry.
 	 */
 	public int getOffset(int index) {
@@ -65,10 +78,13 @@ public class STextOffsets {
 	}
 
 	/**
-	 * Insert an offset value in the offset array so that the array 
+	 * Inserts an offset value in the offset array so that the array 
 	 * stays in ascending order.
-	 * @param  procData is a group of data accessible to handlers.
-	 * @param  offset is the value to insert.
+	 * 
+	 * @param  charTypes an object whose methods can be useful to the 
+	 *         handler.
+	 *         
+	 * @param  offset the value to insert.
 	 */
 	public void insertOffset(STextCharTypes charTypes, int offset) {
 		if (count >= offsets.length) {
@@ -114,7 +130,8 @@ public class STextOffsets {
 	}
 
 	/**
-	 * Get all and only the used offset entries.
+	 * Gets all and only the used offset entries.
+	 * 
 	 * @return the current used entries of the offsets array.
 	 */
 	public int[] getOffsets() {
@@ -124,4 +141,5 @@ public class STextOffsets {
 		System.arraycopy(offsets, 0, array, 0, count);
 		return array;
 	}
+
 }

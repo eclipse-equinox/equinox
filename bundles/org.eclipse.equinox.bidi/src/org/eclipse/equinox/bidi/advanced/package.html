@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<META name="Author" content="Matitiahu Allouche">
+</head>
+<body bgcolor="white">
+
+This package provides classes for users  who need finer control
+on structured text handling.
+<br>
+Note that the basic functions are provided in package
+{@link <a href="../package-summary.html">
+org.eclipse.equinox.bidi</a>} and its
+{@link <a href="../STextProcessor.html">STextProcessor</a>} class.
+<p>
+In particular, the user should use the methods in the
+{@link <a href="ISTextExpert.html">ISTextExpert</a>} class
+in the following cases:</p>
+<ul>
+  <li>The structured type handler to use is not one of those
+      predefined in {@link <a href="../STextTypeHandlerFactory.html">
+      STextTypeHandlerFactory</a>}.</li>
+  <li>A non-default {@link <a href="STextEnvironment.html">
+      environment</a>} needs to be specified.</li>
+  <li>A call to a method processing a piece of text may create a state
+      which affects the processing of the next piece of text.</li>
+  <li>The user needs to manage the offsets where directional formatting
+      characters are inserted in the text.</li>
+</ul>
+</body>
+</html>

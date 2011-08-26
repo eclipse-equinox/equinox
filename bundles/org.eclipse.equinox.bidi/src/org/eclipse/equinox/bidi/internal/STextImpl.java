@@ -14,6 +14,12 @@ import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 import org.eclipse.equinox.bidi.custom.*;
 
+/**
+ * Implementation for ISTextExpert.
+ * 
+ * @author Matitiahu Allouche
+ *
+ */
 public class STextImpl implements ISTextExpert {
 
 	static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -304,7 +310,7 @@ public class STextImpl implements ISTextExpert {
 		if (orientation == STextEnvironment.ORIENT_IGNORE)
 			prefixLength = 0;
 		else {
-			int resolvedOrientation = charTypes.resolveOrientation(environment);
+			int resolvedOrientation = charTypes.resolveOrientation();
 			if (orientation != STextEnvironment.ORIENT_UNKNOWN && resolvedOrientation == direction)
 				prefixLength = 0;
 			else if ((orientation & STextEnvironment.ORIENT_CONTEXTUAL) != 0)
