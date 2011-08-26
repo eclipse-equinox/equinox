@@ -22,6 +22,7 @@ import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.ResourceConstants;
 import org.osgi.framework.wiring.*;
 
 public class StateResolverTest extends AbstractStateTest {
