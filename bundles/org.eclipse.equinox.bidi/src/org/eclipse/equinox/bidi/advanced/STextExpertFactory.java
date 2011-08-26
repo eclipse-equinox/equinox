@@ -134,29 +134,6 @@ final public class STextExpertFactory {
 
 	/**
 	 * Obtains a ISTextExpert instance for processing structured text with
-	 *  the specified type handler and the specified environment.
-	 *  This expert instance can handle states.
-	 * 
-	 * @param handler the type handler instance. It may have been obtained using 
-	 *             {@link STextTypeHandlerFactory#getHandler(String)} or
-	 *             by instantiating a type handler.
-	 * @param  environment the current environment, which may affect the behavior of
-	 *         the expert. This parameter may be specified as
-	 *         <code>null</code>, in which case the
-	 *         {@link STextEnvironment#DEFAULT DEFAULT}
-	 *         environment should be assumed.
-	 * @return the ISTextExpert instance.
-	 * @throws IllegalArgumentException if <code>type</code> is not a known type
-	 *         identifier.
-	 */
-	static public ISTextExpert getStatefulExpert(STextTypeHandler handler, STextEnvironment environment) {
-		if (environment == null)
-			environment = STextEnvironment.DEFAULT;
-		return new STextImpl(handler, environment, true);
-	}
-
-	/**
-	 * Obtains a ISTextExpert instance for processing structured text with
 	 *  the specified type handler.
 	 *  This expert instance can handle states.
 	 * 
@@ -192,6 +169,27 @@ final public class STextExpertFactory {
 		STextTypeHandler handler = STextTypeHandlerFactory.getHandler(type);
 		if (handler == null)
 			throw new IllegalArgumentException("Invalid type argument"); //$NON-NLS-1$
+		return getStatefulExpert(handler, environment);
+	}
+
+	/**
+	 * Obtains a ISTextExpert instance for processing structured text with
+	 *  the specified type handler and the specified environment.
+	 *  This expert instance can handle states.
+	 * 
+	 * @param handler the type handler instance. It may have been obtained using 
+	 *             {@link STextTypeHandlerFactory#getHandler(String)} or
+	 *             by instantiating a type handler.
+	 * @param  environment the current environment, which may affect the behavior of
+	 *         the expert. This parameter may be specified as
+	 *         <code>null</code>, in which case the
+	 *         {@link STextEnvironment#DEFAULT DEFAULT}
+	 *         environment should be assumed.
+	 * @return the ISTextExpert instance.
+	 * @throws IllegalArgumentException if <code>type</code> is not a known type
+	 *         identifier.
+	 */
+	static public ISTextExpert getStatefulExpert(STextTypeHandler handler, STextEnvironment environment) {
 		if (environment == null)
 			environment = STextEnvironment.DEFAULT;
 		return new STextImpl(handler, environment, true);
