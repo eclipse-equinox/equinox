@@ -845,6 +845,13 @@
                 <message_argument value="SERVICE_INTENTS"/>
             </message_arguments>
         </filter>
+        <filter comment="Ignore OSGi APIs" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="RESOLUTION_DYNAMIC"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/Filter.java" type="org.osgi.framework.Filter">
         <filter comment="Ignore OSGi API" id="403853384">
