@@ -93,6 +93,8 @@ public class ProxyServlet extends HttpServlet {
 		ServletRegistration registration = null;
 		List matchingFilterRegistrations = Collections.EMPTY_LIST;
 		String dispatchPathInfo = HttpServletRequestAdaptor.getDispatchPathInfo(req);
+		if (dispatchPathInfo == null)
+			dispatchPathInfo = "/"; //$NON-NLS-1$
 		synchronized (this) {
 			if (extensionAlias == null)
 				registration = (ServletRegistration) servletRegistrations.get(alias);
