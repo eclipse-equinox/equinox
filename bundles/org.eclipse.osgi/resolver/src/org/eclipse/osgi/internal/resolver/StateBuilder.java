@@ -31,8 +31,8 @@ public class StateBuilder {
 	private static final String[] DEFINED_PACKAGE_MATCHING_ATTRS = {Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.PACKAGE_SPECIFICATION_VERSION, Constants.VERSION_ATTRIBUTE};
 	private static final String[] DEFINED_REQUIRE_BUNDLE_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.VISIBILITY_DIRECTIVE};
 	private static final String[] DEFINED_FRAGMENT_HOST_DIRECTIVES = {Constants.EXTENSION_DIRECTIVE};
-	private static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
-	private static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
+	static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
+	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_ATTRS = {};
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
@@ -108,7 +108,7 @@ public class StateBuilder {
 		ManifestElement[] provides = ManifestElement.parseHeader(Constants.PROVIDE_PACKAGE, manifest.get(Constants.PROVIDE_PACKAGE));
 		boolean strict = state != null && state.inStrictMode();
 		List<String> providedExports = new ArrayList<String>(provides == null ? 0 : provides.length);
-		result.setExportPackages(createExportPackages(exports, provides, providedExports, manifestVersion, strict));
+		result.setExportPackages(createExportPackages(exports, provides, providedExports, strict));
 		ManifestElement[] imports = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, manifest.get(Constants.IMPORT_PACKAGE));
 		ManifestElement[] dynamicImports = ManifestElement.parseHeader(Constants.DYNAMICIMPORT_PACKAGE, manifest.get(Constants.DYNAMICIMPORT_PACKAGE));
 		result.setImportPackages(createImportPackages(result.getExportPackages(), providedExports, imports, dynamicImports, manifestVersion));
@@ -194,7 +194,7 @@ public class StateBuilder {
 		return result;
 	}
 
-	private static String getPlatformProperty(StateImpl state, String key) {
+	private static String getPlatformProperty(State state, String key) {
 		Dictionary<Object, Object>[] platformProps = state == null ? null : state.getPlatformProperties();
 		return platformProps == null || platformProps.length == 0 ? null : (String) platformProps[0].get(key);
 	}
@@ -228,7 +228,7 @@ public class StateBuilder {
 		return result;
 	}
 
-	private static BundleSpecification createRequiredBundle(ManifestElement spec) {
+	static BundleSpecification createRequiredBundle(ManifestElement spec) {
 		BundleSpecificationImpl result = new BundleSpecificationImpl();
 		result.setName(spec.getValue());
 		result.setVersionRange(getVersionRange(spec.getAttribute(Constants.BUNDLE_VERSION_ATTRIBUTE)));
@@ -306,25 +306,25 @@ public class StateBuilder {
 
 	private static String getResolution(String resolution) {
 		String result = ImportPackageSpecification.RESOLUTION_STATIC;
-		if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
-			result = ImportPackageSpecification.RESOLUTION_OPTIONAL;
+		if (Constants.RESOLUTION_OPTIONAL.equals(resolution) || ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(resolution))
+			result = resolution;
 		return result;
 	}
 
-	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] provides, List<String> providedExports, int manifestVersion, boolean strict) {
+	static ExportPackageDescription[] createExportPackages(ManifestElement[] exported, ManifestElement[] provides, List<String> providedExports, boolean strict) {
 		int numExports = (exported == null ? 0 : exported.length) + (provides == null ? 0 : provides.length);
 		if (numExports == 0)
 			return null;
 		List<ExportPackageDescription> allExports = new ArrayList<ExportPackageDescription>(numExports);
 		if (exported != null)
 			for (int i = 0; i < exported.length; i++)
-				addExportPackages(exported[i], allExports, manifestVersion, strict);
+				addExportPackages(exported[i], allExports, strict);
 		if (provides != null)
 			addProvidePackages(provides, allExports, providedExports);
 		return allExports.toArray(new ExportPackageDescription[allExports.size()]);
 	}
 
-	private static void addExportPackages(ManifestElement exportPackage, List<ExportPackageDescription> allExports, int manifestVersion, boolean strict) {
+	static void addExportPackages(ManifestElement exportPackage, List<ExportPackageDescription> allExports, boolean strict) {
 		String[] exportNames = exportPackage.getValueComponents();
 		for (int i = 0; i < exportNames.length; i++) {
 			// if we are in strict mode and the package is marked as internal, skip it.
@@ -367,7 +367,7 @@ public class StateBuilder {
 		}
 	}
 
-	private static Map<String, String> getDirectives(ManifestElement element, String[] definedDirectives) {
+	static Map<String, String> getDirectives(ManifestElement element, String[] definedDirectives) {
 		Enumeration<String> keys = element.getDirectiveKeys();
 		if (keys == null)
 			return null;
@@ -385,7 +385,7 @@ public class StateBuilder {
 		return arbitraryDirectives;
 	}
 
-	private static Map<String, Object> getAttributes(ManifestElement element, String[] definedAttrs) {
+	static Map<String, Object> getAttributes(ManifestElement element, String[] definedAttrs) {
 		Enumeration<String> keys = element.getKeys();
 		Map<String, Object> arbitraryAttrs = null;
 		if (keys == null)
@@ -463,7 +463,7 @@ public class StateBuilder {
 		return components;
 	}
 
-	private static HostSpecification createHostSpecification(ManifestElement spec, StateImpl state) {
+	static HostSpecification createHostSpecification(ManifestElement spec, State state) {
 		if (spec == null)
 			return null;
 		HostSpecificationImpl result = new HostSpecificationImpl();
@@ -484,7 +484,7 @@ public class StateBuilder {
 		return result == null ? null : result.toArray(new GenericSpecification[result.size()]);
 	}
 
-	private static List<GenericSpecification> createOSGiRequires(ManifestElement[] osgiRequires, List<GenericSpecification> result) throws BundleException {
+	static List<GenericSpecification> createOSGiRequires(ManifestElement[] osgiRequires, List<GenericSpecification> result) throws BundleException {
 		if (osgiRequires == null)
 			return result;
 		if (result == null)
@@ -562,7 +562,7 @@ public class StateBuilder {
 		return result == null ? null : result.toArray(new GenericDescription[result.size()]);
 	}
 
-	private static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result, BundleDescription description) throws BundleException {
+	static List<GenericDescription> createOSGiCapabilities(ManifestElement[] osgiCapabilities, List<GenericDescription> result, BundleDescription description) throws BundleException {
 		if (result == null)
 			result = new ArrayList<GenericDescription>(osgiCapabilities == null ? 1 : osgiCapabilities.length + 1);
 		// Always have an osgi.identity capability if there is a symbolic name.
@@ -770,7 +770,7 @@ public class StateBuilder {
 		}
 	}
 
-	private static GenericDescription createOsgiIdentityCapability(BundleDescription description) {
+	static GenericDescription createOsgiIdentityCapability(BundleDescription description) {
 		if (description.getSymbolicName() == null)
 			return null;
 		GenericDescriptionImpl result = new GenericDescriptionImpl();

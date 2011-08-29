@@ -74,6 +74,52 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 		return bundle;
 	}
 
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode) {
+		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
+		bundle.setBundleId(id);
+
+		try {
+			ManifestElement[] symbolicNameElements = ManifestElement.parseHeader(Constants.BUNDLE_SYMBOLICNAME, symbolicName);
+			if (symbolicNameElements.length > 0) {
+				ManifestElement bsnElement = symbolicNameElements[0];
+				bundle.setSymbolicName(bsnElement.getValue());
+				bundle.setStateBit(BundleDescriptionImpl.SINGLETON, "true".equals(bsnElement.getDirective(Constants.SINGLETON_DIRECTIVE))); //$NON-NLS-1$
+				String fragmentAttachment = bsnElement.getDirective(Constants.FRAGMENT_ATTACHMENT_DIRECTIVE);
+				if (fragmentAttachment != null) {
+					if (fragmentAttachment.equals(Constants.FRAGMENT_ATTACHMENT_RESOLVETIME)) {
+						bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, true);
+						bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, false);
+					} else if (fragmentAttachment.equals(Constants.FRAGMENT_ATTACHMENT_NEVER)) {
+						bundle.setStateBit(BundleDescriptionImpl.ATTACH_FRAGMENTS, false);
+						bundle.setStateBit(BundleDescriptionImpl.DYNAMIC_FRAGMENTS, false);
+					}
+				}
+				bundle.setDirective(Constants.MANDATORY_DIRECTIVE, ManifestElement.getArrayFromList(bsnElement.getDirective(Constants.MANDATORY_DIRECTIVE)));
+				bundle.setAttributes(StateBuilder.getAttributes(bsnElement, StateBuilder.DEFINED_BSN_MATCHING_ATTRS));
+				bundle.setArbitraryDirectives(StateBuilder.getDirectives(bsnElement, StateBuilder.DEFINED_BSN_DIRECTIVES));
+			}
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Illegal symbolic name: " + symbolicName).initCause(e); //$NON-NLS-1$
+		}
+
+		bundle.setVersion(version);
+		bundle.setLocation(location);
+		bundle.setRequiredBundles(required);
+		bundle.setHost(host);
+		bundle.setImportPackages(imports);
+		bundle.setExportPackages(exports);
+		bundle.setPlatformFilter(platformFilter);
+		bundle.setExecutionEnvironments(executionEnvironments);
+		bundle.setGenericRequires(genericRequires);
+		GenericDescription[] includeIdentity = new GenericDescription[genericCapabilities == null ? 1 : genericCapabilities.length + 1];
+		if (genericCapabilities != null)
+			System.arraycopy(genericCapabilities, 0, includeIdentity, 1, genericCapabilities.length);
+		includeIdentity[0] = StateBuilder.createOsgiIdentityCapability(bundle);
+		bundle.setGenericCapabilities(includeIdentity);
+		bundle.setNativeCodeSpecification(nativeCode);
+		return bundle;
+	}
+
 	public BundleDescription createBundleDescription(BundleDescription original) {
 		BundleDescriptionImpl bundle = new BundleDescriptionImpl();
 		bundle.setBundleId(original.getBundleId());
@@ -463,5 +509,89 @@ public class StateObjectFactoryImpl implements StateObjectFactory {
 			throw new IllegalArgumentException();
 		StateWriter writer = new StateWriter();
 		writer.saveStateDeprecated((StateImpl) state, stream);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<BundleSpecification> createBundleSpecifications(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_BUNDLE, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			List<BundleSpecification> result = new ArrayList<BundleSpecification>(elements.length);
+			for (ManifestElement element : elements)
+				result.add(StateBuilder.createRequiredBundle(element));
+			return result;
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<HostSpecification> createHostSpecifications(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			List<HostSpecification> result = new ArrayList<HostSpecification>(elements.length);
+			for (ManifestElement element : elements)
+				result.add(StateBuilder.createHostSpecification(element, null));
+			return result;
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			List<ImportPackageSpecification> result = new ArrayList<ImportPackageSpecification>(elements.length);
+			for (ManifestElement element : elements)
+				StateBuilder.addImportPackages(element, result, 2, false);
+			return result;
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<GenericDescription> createGenericDescriptions(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			return StateBuilder.createOSGiCapabilities(elements, new ArrayList<GenericDescription>(elements.length), (Integer) null);
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<GenericSpecification> createGenericSpecifications(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			return StateBuilder.createOSGiRequires(elements, new ArrayList<GenericSpecification>(elements.length));
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration) {
+		try {
+			ManifestElement[] elements = ManifestElement.parseHeader(Constants.IMPORT_PACKAGE, declaration);
+			if (elements == null)
+				return Collections.EMPTY_LIST;
+			List<ExportPackageDescription> result = new ArrayList<ExportPackageDescription>(elements.length);
+			for (ManifestElement element : elements)
+				StateBuilder.addExportPackages(element, result, false);
+			return result;
+		} catch (BundleException e) {
+			throw (IllegalArgumentException) new IllegalArgumentException("Declaration is invalid: " + declaration).initCause(e); //$NON-NLS-1$
+		}
 	}
 }

@@ -71,4 +71,27 @@ public interface BaseDescription {
 	 * @since 3.7
 	 */
 	public BundleCapability getCapability();
+
+	/**
+	 * Returns the user object associated to this description, or 
+	 * <code>null</code> if none exists.
+	 *  
+	 * @return the user object associated to this description,
+	 * or <code>null</code>
+	 * @since 3.8
+	 */
+	public Object getUserObject();
+
+	/**
+	 * Associates a user-provided object to this description, or
+	 * removes an existing association, if <code>null</code> is provided. The 
+	 * provided object is not interpreted in any ways by this 
+	 * description.
+	 * 
+	 * @param userObject an arbitrary object provided by the user, or 
+	 * <code>null</code>
+	 * @since 3.8
+	 */
+	public void setUserObject(Object userObject);
+
 }

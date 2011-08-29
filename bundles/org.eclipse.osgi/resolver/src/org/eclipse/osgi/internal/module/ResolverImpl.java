@@ -11,8 +11,6 @@
  ******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import org.osgi.framework.resource.ResourceConstants;
-
 import java.security.AccessController;
 import java.util.*;
 import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
@@ -29,7 +27,9 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRevision;
 
 public class ResolverImpl implements Resolver {
 	// Debug fields
@@ -348,23 +348,28 @@ public class ResolverImpl implements Resolver {
 		// find all available hosts to attach to.
 		boolean foundMatch = false;
 		BundleConstraint hostConstraint = bundle.getHost();
-		List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
-		List<ResolverBundle> candidates = new ArrayList<ResolverBundle>(hosts);
-		List<BundleCapability> hostCapabilities = new ArrayList<BundleCapability>(hosts.size());
-		// Must remove candidates that do not match before calling hooks.
-		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			ResolverBundle host = iCandidates.next();
-			if (!host.isResolvable() || !host.getBundleDescription().attachFragments() || !hostConstraint.isSatisfiedBy(host)) {
-				iCandidates.remove();
-			} else {
-				List<BundleCapability> h = host.getBundleDescription().getDeclaredCapabilities(BundleRevision.HOST_NAMESPACE);
-				// the bundle must have 1 host capability.
-				hostCapabilities.add(h.get(0));
+		long timestamp;
+		List<ResolverBundle> candidates;
+		do {
+			timestamp = state.getTimeStamp();
+			List<ResolverBundle> hosts = resolverBundles.get(hostConstraint.getVersionConstraint().getName());
+			candidates = new ArrayList<ResolverBundle>(hosts);
+			List<BundleCapability> hostCapabilities = new ArrayList<BundleCapability>(hosts.size());
+			// Must remove candidates that do not match before calling hooks.
+			for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				ResolverBundle host = iCandidates.next();
+				if (!host.isResolvable() || !host.getBundleDescription().attachFragments() || !hostConstraint.isSatisfiedBy(host)) {
+					iCandidates.remove();
+				} else {
+					List<BundleCapability> h = host.getBundleDescription().getDeclaredCapabilities(BundleRevision.HOST_NAMESPACE);
+					// the bundle must have 1 host capability.
+					hostCapabilities.add(h.get(0));
+				}
 			}
-		}
 
-		if (hook != null)
-			hook.filterMatches(hostConstraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(hostCapabilities, candidates)));
+			if (hook != null)
+				hook.filterMatches(hostConstraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(hostCapabilities, candidates)));
+		} while (timestamp != state.getTimeStamp());
 		// we are left with only candidates that satisfy the host constraint
 		for (ResolverBundle host : candidates) {
 			foundMatch = true;
@@ -372,6 +377,7 @@ public class ResolverImpl implements Resolver {
 		}
 		if (!foundMatch)
 			state.addResolverError(bundle.getBundleDescription(), ResolverError.MISSING_FRAGMENT_HOST, bundle.getHost().getVersionConstraint().toString(), bundle.getHost().getVersionConstraint());
+
 	}
 
 	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary<Object, Object>[] platformProperties) {
@@ -564,7 +570,7 @@ public class ResolverImpl implements Resolver {
 		if (DEBUG_WIRING)
 			printWirings();
 		// set the resolved status of the bundles in the State
-		stateResolveBundles(bundles);
+		stateResolveBundles(bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]));
 	}
 
 	private void selectSingletons(ResolverBundle[] bundles) {
@@ -1340,26 +1346,31 @@ public class ResolverImpl implements Resolver {
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
-		VersionHashMap<GenericCapability> namespace = resolverGenerics.get(constraint.getNameSpace());
-		String name = constraint.getName();
-		List<GenericCapability> capabilities;
-		if (namespace == null)
-			capabilities = Collections.EMPTY_LIST;
-		else
-			capabilities = name == null || name.indexOf('*') >= 0 ? namespace.getAllValues() : namespace.get(name);
-		List<GenericCapability> candidates = new ArrayList<GenericCapability>(capabilities);
-		List<BundleCapability> genCapabilities = new ArrayList<BundleCapability>(candidates.size());
-		// Must remove candidates that do not match before calling hooks.
-		for (Iterator<GenericCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			GenericCapability capability = iCandidates.next();
-			if (!constraint.isSatisfiedBy(capability)) {
-				iCandidates.remove();
-			} else {
-				genCapabilities.add(capability.getCapability());
+		List<GenericCapability> candidates;
+		long timestamp;
+		do {
+			timestamp = state.getTimeStamp();
+			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(constraint.getNameSpace());
+			String name = constraint.getName();
+			List<GenericCapability> capabilities;
+			if (namespace == null)
+				capabilities = Collections.EMPTY_LIST;
+			else
+				capabilities = name == null || name.indexOf('*') >= 0 ? namespace.getAllValues() : namespace.get(name);
+			candidates = new ArrayList<GenericCapability>(capabilities);
+			List<BundleCapability> genCapabilities = new ArrayList<BundleCapability>(candidates.size());
+			// Must remove candidates that do not match before calling hooks.
+			for (Iterator<GenericCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				GenericCapability capability = iCandidates.next();
+				if (!constraint.isSatisfiedBy(capability)) {
+					iCandidates.remove();
+				} else {
+					genCapabilities.add(capability.getCapability());
+				}
 			}
-		}
-		if (hook != null)
-			hook.filterMatches(constraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, GenericCapability>(genCapabilities, candidates)));
+			if (hook != null)
+				hook.filterMatches(constraint.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, GenericCapability>(genCapabilities, candidates)));
+		} while (timestamp != state.getTimeStamp());
 		boolean result = false;
 		// We are left with only capabilities that satisfy the constraint.
 		for (GenericCapability capability : candidates) {
@@ -1416,20 +1427,25 @@ public class ResolverImpl implements Resolver {
 				ResolverImpl.log("  - already wired"); //$NON-NLS-1$
 			return true; // Already wired (due to grouping dependencies) so just return
 		}
-		List<ResolverBundle> bundles = resolverBundles.get(req.getVersionConstraint().getName());
-		List<ResolverBundle> candidates = new ArrayList<ResolverBundle>(bundles);
-		List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
-		// Must remove candidates that do not match before calling hooks.
-		for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			ResolverBundle bundle = iCandidates.next();
-			if (!req.isSatisfiedBy(bundle)) {
-				iCandidates.remove();
-			} else {
-				capabilities.add(bundle.getCapability());
+		List<ResolverBundle> candidates;
+		long timestamp;
+		do {
+			timestamp = state.getTimeStamp();
+			List<ResolverBundle> bundles = resolverBundles.get(req.getVersionConstraint().getName());
+			candidates = new ArrayList<ResolverBundle>(bundles);
+			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
+			// Must remove candidates that do not match before calling hooks.
+			for (Iterator<ResolverBundle> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				ResolverBundle bundle = iCandidates.next();
+				if (!req.isSatisfiedBy(bundle)) {
+					iCandidates.remove();
+				} else {
+					capabilities.add(bundle.getCapability());
+				}
 			}
-		}
-		if (hook != null)
-			hook.filterMatches(req.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, candidates)));
+			if (hook != null)
+				hook.filterMatches(req.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverBundle>(capabilities, candidates)));
+		} while (timestamp != state.getTimeStamp());
 		// We are left with only capabilities that satisfy the require bundle.
 		boolean result = false;
 		for (ResolverBundle bundle : candidates) {
@@ -1483,20 +1499,25 @@ public class ResolverImpl implements Resolver {
 		}
 		boolean result = false;
 		ResolverExport[] substitutableExps = imp.getBundle().getExports(imp.getName());
-		List<ResolverExport> exports = resolverExports.get(imp.getName());
-		List<ResolverExport> candidates = new ArrayList<ResolverExport>(exports);
-		List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
-		// Must remove candidates that do not match before calling hooks.
-		for (Iterator<ResolverExport> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
-			ResolverExport export = iCandidates.next();
-			if (!imp.isSatisfiedBy(export)) {
-				iCandidates.remove();
-			} else {
-				capabilities.add(export.getCapability());
+		long timestamp;
+		List<ResolverExport> candidates;
+		do {
+			timestamp = state.getTimeStamp();
+			List<ResolverExport> exports = resolverExports.get(imp.getName());
+			candidates = new ArrayList<ResolverExport>(exports);
+			List<BundleCapability> capabilities = new ArrayList<BundleCapability>(candidates.size());
+			// Must remove candidates that do not match before calling hooks.
+			for (Iterator<ResolverExport> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				ResolverExport export = iCandidates.next();
+				if (!imp.isSatisfiedBy(export)) {
+					iCandidates.remove();
+				} else {
+					capabilities.add(export.getCapability());
+				}
 			}
-		}
-		if (hook != null)
-			hook.filterMatches(imp.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverExport>(capabilities, candidates)));
+			if (hook != null)
+				hook.filterMatches(imp.getRequirement(), asCapabilities(new ArrayMap<BundleCapability, ResolverExport>(capabilities, candidates)));
+		} while (timestamp != state.getTimeStamp());
 		// We are left with only capabilities that satisfy the import.
 		for (ResolverExport export : candidates) {
 			if (DEBUG_IMPORTS)
@@ -1892,6 +1913,9 @@ public class ResolverImpl implements Resolver {
 		resolverExports.put(rb.getExportPackages());
 		resolverBundles.put(rb.getName(), rb);
 		addGenerics(rb.getGenericCapabilities());
+		if (hook != null && rb.isFragment()) {
+			attachFragment0(rb);
+		}
 	}
 
 	public void bundleRemoved(BundleDescription bundle, boolean pending) {

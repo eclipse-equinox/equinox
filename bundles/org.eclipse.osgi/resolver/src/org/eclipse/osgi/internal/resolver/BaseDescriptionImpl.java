@@ -14,6 +14,7 @@ package org.eclipse.osgi.internal.resolver;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.service.resolver.BaseDescription;
+import org.eclipse.osgi.service.resolver.extras.DescriptionReference;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
@@ -25,6 +26,8 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 	private volatile String name;
 
 	private volatile Version version;
+
+	private volatile Object userObject;
 
 	public String getName() {
 		return name;
@@ -104,7 +107,15 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 		return new BaseCapability(namespace);
 	}
 
-	class BaseCapability implements BundleCapability {
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+
+	class BaseCapability implements BundleCapability, DescriptionReference {
 		private final String namespace;
 
 		public BaseCapability(String namespace) {
@@ -159,6 +170,10 @@ public abstract class BaseDescriptionImpl implements BaseDescription {
 
 		public BundleRevision getResource() {
 			return getRevision();
+		}
+
+		public BaseDescription getDescription() {
+			return BaseDescriptionImpl.this;
 		}
 	}
 }

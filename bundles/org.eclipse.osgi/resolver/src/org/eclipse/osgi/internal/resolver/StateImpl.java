@@ -836,7 +836,7 @@ public abstract class StateImpl implements State {
 	private void addSystemExports(List<ExportPackageDescription> exports, ManifestElement[] elements, int index) {
 		if (elements == null)
 			return;
-		ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, 2, false);
+		ExportPackageDescription[] systemExports = StateBuilder.createExportPackages(elements, null, null, false);
 		Integer profInx = new Integer(index);
 		for (int j = 0; j < systemExports.length; j++) {
 			((ExportPackageDescriptionImpl) systemExports[j]).setDirective(ExportPackageDescriptionImpl.EQUINOX_EE, profInx);

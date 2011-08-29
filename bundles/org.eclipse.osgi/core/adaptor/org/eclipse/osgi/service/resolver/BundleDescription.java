@@ -223,26 +223,6 @@ public interface BundleDescription extends BaseDescription, BundleRevision {
 	public BundleDescription[] getDependents();
 
 	/**
-	 * Returns the user object associated to this bundle description, or 
-	 * <code>null</code> if none exists.
-	 *  
-	 * @return the user object associated to this bundle  description,
-	 * or <code>null</code>
-	 */
-	public Object getUserObject();
-
-	/**
-	 * Associates a user-provided object to this bundle description, or
-	 * removes an existing association, if <code>null</code> is provided. The 
-	 * provided object is not interpreted in any ways by this bundle 
-	 * description.
-	 * 
-	 * @param userObject an arbitrary object provided by the user, or 
-	 * <code>null</code>
-	 */
-	public void setUserObject(Object userObject);
-
-	/**
 	 * Returns the platform filter in the form of an LDAP filter
 	 * @return the platfomr filter in the form of an LDAP filter
 	 */

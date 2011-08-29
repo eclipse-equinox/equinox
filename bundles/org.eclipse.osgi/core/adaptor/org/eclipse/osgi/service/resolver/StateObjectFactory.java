@@ -11,8 +11,7 @@
 package org.eclipse.osgi.service.resolver;
 
 import java.io.*;
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.*;
 import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.osgi.framework.*;
 
@@ -162,6 +161,27 @@ public interface StateObjectFactory {
 	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, boolean singleton, boolean attachFragments, boolean dynamicFragments, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
 
 	/**
+	 * Creates a bundle description from the given parameters.
+	 *
+	 * @param id id for the bundle 
+	 * @param symbolicName the symbolic name of the bundle.  This may include directives and/or attributes encoded using the Bundle-SymbolicName header.
+	 * @param version version for the bundle (may be <code>null</code>)
+	 * @param location location for the bundle (may be <code>null</code>)
+	 * @param required version constraints for all required bundles (may be  <code>null</code>)
+	 * @param host version constraint specifying the host for the bundle to be created. Should be <code>null</code> if the bundle is not a fragment
+	 * @param imports version constraints for all packages imported  (may be <code>null</code>)
+	 * @param exports package descriptions of all the exported packages (may be <code>null</code>)
+	 * @param platformFilter the platform filter (may be <code>null</code>)
+	 * @param executionEnvironments the execution environment (may be <code>null</code>)
+	 * @param genericRequires the version constraints for all required capabilities (may be <code>null</code>)
+	 * @param genericCapabilities the specifications of all the capabilities of the bundle (may be <code>null</code>)
+	 * @param nativeCode the native code specification of the bundle (may be <code>null</code>)
+	 * @return the created bundle description
+	 * @since 3.8
+	 */
+	public BundleDescription createBundleDescription(long id, String symbolicName, Version version, String location, BundleSpecification[] required, HostSpecification host, ImportPackageSpecification[] imports, ExportPackageDescription[] exports, String platformFilter, String[] executionEnvironments, GenericSpecification[] genericRequires, GenericDescription[] genericCapabilities, NativeCodeSpecification nativeCode);
+
+	/**
 	 * Returns a bundle description based on the information in the supplied manifest dictionary.
 	 * The manifest should contain String keys and String values which correspond to 
 	 * proper OSGi manifest headers and values.
@@ -219,6 +239,15 @@ public interface StateObjectFactory {
 	public BundleSpecification createBundleSpecification(BundleSpecification original);
 
 	/**
+	 * Creates bundle specifications from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Require-Bundle header.
+	 * @param declaration a string declaring bundle specifications
+	 * @return the bundle specifications
+	 * @since 3.8
+	 */
+	public List<BundleSpecification> createBundleSpecifications(String declaration);
+
+	/**
 	 * Creates a host specification from the given parameters.
 	 *  
 	 * @param hostSymbolicName the symbolic name for the host bundle
@@ -227,6 +256,15 @@ public interface StateObjectFactory {
 	 * @see VersionConstraint for information on the available match rules 
 	 */
 	public HostSpecification createHostSpecification(String hostSymbolicName, VersionRange hostVersionRange);
+
+	/**
+	 * Creates host specifications from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Fragment-Host header.
+	 * @param declaration a string declaring host specifications
+	 * @return the host specifications
+	 * @since 3.8
+	 */
+	public List<HostSpecification> createHostSpecifications(String declaration);
 
 	/**
 	 * Creates a host specification that is a copy of the given constraint.
@@ -256,6 +294,15 @@ public interface StateObjectFactory {
 	 * @return the created package specification 
 	 */
 	public ImportPackageSpecification createImportPackageSpecification(ImportPackageSpecification original);
+
+	/**
+	 * Creates an import package specifications from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Import-Package header.
+	 * @param declaration a string declaring import package specifications
+	 * @return the import package specifications
+	 * @since 3.8
+	 */
+	public List<ImportPackageSpecification> createImportPackageSpecifications(String declaration);
 
 	/**
 	 * Used by the Resolver to dynamically create ExportPackageDescription objects during the resolution process.
@@ -295,6 +342,15 @@ public interface StateObjectFactory {
 	public GenericDescription createGenericDescription(String type, Map<String, ?> attributes, Map<String, String> directives, BundleDescription supplier);
 
 	/**
+	 * Creates generic descriptions from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Provide-Capability header.
+	 * @param declaration a string declaring generic descriptions
+	 * @return the generic descriptions
+	 * @since 3.8
+	 */
+	public List<GenericDescription> createGenericDescriptions(String declaration);
+
+	/**
 	 * Creates a generic specification from the given parameters
 	 * @param name the name of the generic specification
 	 * @param type the type of the generic specification (may be <code>null</code>)
@@ -305,6 +361,15 @@ public interface StateObjectFactory {
 	 * @throws InvalidSyntaxException if the matching filter is invalid
 	 */
 	public GenericSpecification createGenericSpecification(String name, String type, String matchingFilter, boolean optional, boolean multiple) throws InvalidSyntaxException;
+
+	/**
+	 * Creates generic specifications from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Require-Capability header.
+	 * @param declaration a string declaring generic specifications
+	 * @return the generic specifications
+	 * @since 3.8
+	 */
+	public List<GenericSpecification> createGenericSpecifications(String declaration);
 
 	/**
 	 * Creates a native code specification from the given parameters
@@ -330,11 +395,20 @@ public interface StateObjectFactory {
 	public NativeCodeDescription createNativeCodeDescription(String[] nativePaths, String[] processors, String[] osNames, VersionRange[] osVersions, String[] languages, String filter) throws InvalidSyntaxException;
 
 	/**
-	 * Creates an import package specification that is a copy of the given constraint
+	 * Creates an export package specification that is a copy of the given constraint
 	 * @param original the export package to be copied
 	 * @return the created package
 	 */
 	public ExportPackageDescription createExportPackageDescription(ExportPackageDescription original);
+
+	/**
+	 * Creates export package descriptions from the given declaration.  The declaration uses
+	 * the bundle manifest syntax for the Export-Package header.
+	 * @param declaration a string declaring export package descriptions
+	 * @return the export package descriptions
+	 * @since 3.8
+	 */
+	public List<ExportPackageDescription> createExportPackageDescriptions(String declaration);
 
 	/**
 	 * Persists the given state in the given output stream. Closes the stream.

@@ -82,4 +82,26 @@ public interface VersionConstraint extends Cloneable {
 	 * @since 3.7
 	 */
 	public BundleRequirement getRequirement();
+
+	/**
+	 * Returns the user object associated to this constraint, or 
+	 * <code>null</code> if none exists.
+	 *  
+	 * @return the user object associated to this constraint,
+	 * or <code>null</code>
+	 * @since 3.8
+	 */
+	public Object getUserObject();
+
+	/**
+	 * Associates a user-provided object to this constraint, or
+	 * removes an existing association, if <code>null</code> is provided. The 
+	 * provided object is not interpreted in any ways by this 
+	 * constrain.
+	 * 
+	 * @param userObject an arbitrary object provided by the user, or 
+	 * <code>null</code>
+	 * @since 3.8
+	 */
+	public void setUserObject(Object userObject);
 }

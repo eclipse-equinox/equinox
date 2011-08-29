@@ -53,7 +53,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 	volatile HostSpecification host; //null if the bundle is not a fragment. volatile to allow unsynchronized checks for null
 	private volatile StateImpl containingState;
 
-	private volatile Object userObject;
 	private volatile int lazyDataOffset = -1;
 	private volatile int lazyDataSize = -1;
 
@@ -579,14 +578,6 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			}
 			return required;
 		}
-	}
-
-	public Object getUserObject() {
-		return userObject;
-	}
-
-	public void setUserObject(Object userObject) {
-		this.userObject = userObject;
 	}
 
 	protected void addDependent(BundleDescription dependent) {

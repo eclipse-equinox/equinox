@@ -12,16 +12,16 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.osgi.framework.resource.Capability;
-import org.osgi.framework.resource.ResourceConstants;
-
 import java.util.Collections;
 import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.extras.SpecificationReference;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.Capability;
+import org.osgi.framework.resource.ResourceConstants;
 import org.osgi.framework.wiring.*;
 
 abstract class VersionConstraintImpl implements VersionConstraint {
@@ -32,6 +32,7 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 	private VersionRange versionRange;
 	private BundleDescription bundle;
 	private BaseDescription supplier;
+	private volatile Object userObject;
 
 	public String getName() {
 		synchronized (this.monitor) {
@@ -114,7 +115,15 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		return new BundleRequirementImpl(namespace);
 	}
 
-	class BundleRequirementImpl implements BundleRequirement {
+	public Object getUserObject() {
+		return userObject;
+	}
+
+	public void setUserObject(Object userObject) {
+		this.userObject = userObject;
+	}
+
+	class BundleRequirementImpl implements BundleRequirement, SpecificationReference {
 		private final String namespace;
 
 		public BundleRequirementImpl(String namespace) {
@@ -181,6 +190,10 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 
 		public BundleRevision getResource() {
 			return getRevision();
+		}
+
+		public VersionConstraint getSpecification() {
+			return VersionConstraintImpl.this;
 		}
 	}
 
