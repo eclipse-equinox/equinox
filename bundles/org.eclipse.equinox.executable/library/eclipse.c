@@ -477,10 +477,10 @@ JNIEXPORT int run(int argc, _TCHAR* argv[], _TCHAR* vmArgs[])
 #endif
 
     /* If the showsplash option was given and we are using JNI */
-    if (!noSplash && showSplashArg && launchMode == LAUNCH_JNI)
+    if (!noSplash && showSplashArg)
     {
     	splashBitmap = findSplash(showSplashArg);
-    	if (splashBitmap != NULL) {
+    	if (splashBitmap != NULL && launchMode == LAUNCH_JNI) {
 	    	showSplash(splashBitmap);
     	}
     }
