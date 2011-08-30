@@ -17,6 +17,7 @@ Import-Package: junit.framework;version="4.8.1",
  org.aspectj.lang.reflect;version="[1.6.3, 2.0.0)",
  org.aspectj.runtime.internal;version="[1.6.3, 2.0.0)",
  org.aspectj.runtime.reflect;version="[1.6.3, 2.0.0)",
- org.osgi.service.url
+ org.osgi.service.url,
+ org.osgi.framework.resource; version="[1.0.0, 1.1.0)"
 Bundle-ClassPath: stubs/org.eclipse.virgo.teststubs.osgi.jar,
  .

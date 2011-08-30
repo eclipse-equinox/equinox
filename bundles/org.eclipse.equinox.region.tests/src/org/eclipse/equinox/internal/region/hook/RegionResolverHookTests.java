@@ -23,6 +23,8 @@ import org.eclipse.virgo.teststubs.osgi.framework.StubBundleContext;
 import org.junit.*;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
+import org.osgi.framework.resource.Capability;
+import org.osgi.framework.resource.Requirement;
 import org.osgi.framework.wiring.*;
 
 public class RegionResolverHookTests {
