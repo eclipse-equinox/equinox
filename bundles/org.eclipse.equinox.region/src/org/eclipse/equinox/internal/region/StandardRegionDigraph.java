@@ -67,6 +67,8 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	private long originTimeStamp;
 	private final AtomicLong timeStamp = new AtomicLong();
 
+	private volatile Region defaultAssignRegion;
+
 	StandardRegionDigraph(StandardRegionDigraph origin) throws BundleException {
 		this(null, null, origin);
 
@@ -458,5 +460,16 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	@Override
 	public org.osgi.framework.hooks.service.FindHook getServiceFindHook() {
 		return serviceFindHook;
+	}
+
+	@Override
+	public void setDefaultAssignRegion(Region defaultRegion) {
+		this.defaultAssignRegion = defaultRegion;
+
+	}
+
+	@Override
+	public Region getDefaultAssignRegion() {
+		return this.defaultAssignRegion;
 	}
 }

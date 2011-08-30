@@ -77,22 +77,26 @@ public final class RegionBundleEventHook implements EventHook {
 		 */
 		Region installRegion = this.threadLocal.get();
 		if (installRegion != null) {
-			try {
-				installRegion.addBundle(eventBundle);
-			} catch (BundleException e) {
-				e.printStackTrace();
-				throw new RuntimeException("Bundle could not be added to region", e); //$NON-NLS-1$
-			}
+			addBundleToRegion(eventBundle, installRegion);
 		} else {
-			Region originRegion = this.regionDigraph.getRegion(originBundle);
-			if (originRegion != null) {
-				try {
-					originRegion.addBundle(eventBundle);
-				} catch (BundleException e) {
-					e.printStackTrace();
-					throw new RuntimeException("Bundle could not be added to region", e); //$NON-NLS-1$
+			Region defaultAssignRegion = this.regionDigraph.getDefaultAssignRegion();
+			if (defaultAssignRegion != null) {
+				addBundleToRegion(eventBundle, defaultAssignRegion);
+			} else {
+				Region originRegion = this.regionDigraph.getRegion(originBundle);
+				if (originRegion != null) {
+					addBundleToRegion(eventBundle, originRegion);
 				}
 			}
+		}
+	}
+
+	private void addBundleToRegion(Bundle eventBundle, Region region) {
+		try {
+			region.addBundle(eventBundle);
+		} catch (BundleException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Bundle could not be added to region", e); //$NON-NLS-1$
 		}
 	}
 
