@@ -1,4 +1,20 @@
-package org.osgi.framework.wiring;
+/*
+ * Copyright (c) OSGi Alliance (2011). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.osgi.framework.resource;
 
 import java.util.List;
 
@@ -9,9 +25,7 @@ import java.util.List;
  * A resources can be wired together via capabilities and requirements.
  * 
  * @ThreadSafe
- * @Immutable
- *  
- * @version $Id: ab65b58b724ec74515bb8c5bad355658efc2460d $
+ * @version $Id: 047a96acb364265b1cd15a14c74bb5e44da19062 $
  */
 public interface Resource {
 	/**

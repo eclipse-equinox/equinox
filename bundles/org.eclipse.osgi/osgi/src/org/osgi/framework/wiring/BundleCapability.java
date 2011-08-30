@@ -18,6 +18,7 @@ package org.osgi.framework.wiring;
 
 import java.util.Map;
 
+import org.osgi.framework.resource.Capability;
 
 /**
  * A capability that has been declared from a {@link BundleRevision bundle
@@ -25,40 +26,32 @@ import java.util.Map;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 6bbc1e645f927531d40fb245c95f5d26ad189db3 $
+ * @version $Id: 3b48ced7e0ff67cc42031644879d6b1563296ba5 $
  */
-public interface BundleCapability extends Capability{
-	/**
-	 * Returns the name space of this capability.
-	 * 
-	 * @return The name space of this capability.
-	 */
-	String getNamespace();
-
-	/**
-	 * Returns the directives of this capability.
-	 * 
-	 * @return An unmodifiable map of directive names to directive values for
-	 *         this capability, or an empty map if this capability has no
-	 *         directives.
-	 */
-	Map<String, String> getDirectives();
-
-	/**
-	 * Returns the attributes of this capability.
-	 * 
-	 * @return An unmodifiable map of attribute names to attribute values for
-	 *         this capability, or an empty map if this capability has no
-	 *         attributes.
-	 */
-	Map<String, Object> getAttributes();
+public interface BundleCapability extends Capability {
 
 	/**
 	 * Returns the bundle revision declaring this capability.
+	 * 
+	 * <p>
+	 * This method returns the same object as {@link #getResource()}.
 	 * 
 	 * @return The bundle revision declaring this capability.
 	 */
 	BundleRevision getRevision();
 
-	BundleRevision getResource();
+	/**
+	 * {@inheritDoc}
+	 */
+	String getNamespace();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	Map<String, String> getDirectives();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	Map<String, Object> getAttributes();
 }

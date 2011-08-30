@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2000, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2000, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,9 @@ import java.util.Map;
 /**
  * An <a href="http://www.ietf.org/rfc/rfc1960.txt">RFC 1960</a>-based Filter.
  * <p>
- * {@code Filter}s can be created by calling {@link BundleContext#createFilter}
- * or {@link FrameworkUtil#createFilter} with a filter string.
+ * {@code Filter}s can be created by calling
+ * {@link BundleContext#createFilter(String)} or
+ * {@link FrameworkUtil#createFilter(String)} with a filter string.
  * <p>
  * A {@code Filter} can be used numerous times to determine if the match
  * argument matches the filter string that was used to create the {@code Filter}.
@@ -40,7 +41,7 @@ import java.util.Map;
  * @see "Core Specification, Filters, for a description of the filter string syntax."
  * @ThreadSafe
  * @noimplement
- * @version $Id: 4d21267f4b85d1912d73f7e2c049cc968c4237f9 $
+ * @version $Id: 743270de7c45cf30e7904e13b1bb38ce08042467 $
  */
 public interface Filter {
 	/**

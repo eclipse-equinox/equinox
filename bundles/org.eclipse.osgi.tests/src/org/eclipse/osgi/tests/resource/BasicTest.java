@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
+import org.osgi.framework.resource.*;
+
 import java.util.*;
 import java.util.Map.Entry;
 import junit.framework.*;

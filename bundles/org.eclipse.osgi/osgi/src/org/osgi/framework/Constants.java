@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * 
  * @since 1.1
  * @noimplement
- * @version $Id: 517c954ed7d34d2ee762933466f69fa03db7cd37 $
+ * @version $Id: e243fc72560f18d79aee03782b3de92db8c21087 $
  */
 
 public interface Constants {
@@ -619,6 +619,20 @@ public interface Constants {
 	 * @since 1.3
 	 */
 	String	RESOLUTION_OPTIONAL						= "optional";
+
+	/**
+	 * Bundle wiring directive value identifying an dynamic resolution type. A
+	 * dynamic resolution type is used by requirements for
+	 * {@link #DYNAMICIMPORT_PACKAGE dynamically imported packages} in the
+	 * bundle wiring API.
+	 * 
+	 * <p>
+	 * This value cannot be used for the {@value #RESOLUTION_DIRECTIVE}
+	 * directive on a manifest header.
+	 * 
+	 * @since 1.7
+	 */
+	String	RESOLUTION_DYNAMIC						= "dynamic";
 
 	/**
 	 * Manifest header directive identifying a list of packages that an exported
@@ -1277,8 +1291,8 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * By convention, every bundle has its own unique name space, starting with
-	 * the bundle's identifier (see {@link Bundle#getBundleId}) and followed by
-	 * a dot (.). A bundle may use this as the prefix of the persistent
+	 * the bundle's identifier (see {@link Bundle#getBundleId()}) and followed
+	 * by a dot (.). A bundle may use this as the prefix of the persistent
 	 * identifiers for the services it registers.
 	 */
 	String	SERVICE_PID								= "service.pid";
@@ -1293,9 +1307,10 @@ public interface Constants {
 	 * 
 	 * <p>
 	 * The service ranking is used by the Framework to determine the <i>natural
-	 * order</i> of services, see {@link ServiceReference#compareTo}, and the
-	 * <i>default</i> service to be returned from a call to the
-	 * {@link BundleContext#getServiceReference} method.
+	 * order</i> of services, see {@link ServiceReference#compareTo(Object)},
+	 * and the <i>default</i> service to be returned from a call to the
+	 * {@link BundleContext#getServiceReference(Class)} or
+	 * {@link BundleContext#getServiceReference(String)} method.
 	 * 
 	 * <p>
 	 * The default ranking is zero (0). A service with a ranking of

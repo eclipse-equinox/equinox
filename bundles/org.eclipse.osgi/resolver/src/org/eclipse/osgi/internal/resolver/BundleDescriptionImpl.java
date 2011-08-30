@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
+import org.osgi.framework.resource.Capability;
+import org.osgi.framework.resource.Requirement;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;

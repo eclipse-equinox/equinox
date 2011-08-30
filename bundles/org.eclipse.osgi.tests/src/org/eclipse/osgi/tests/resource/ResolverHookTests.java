@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
+import org.osgi.framework.resource.ResourceConstants;
+
 import java.util.*;
 import junit.framework.Test;
 import junit.framework.TestSuite;

@@ -18,6 +18,7 @@ package org.osgi.framework.wiring;
 
 import java.util.Map;
 
+import org.osgi.framework.resource.Requirement;
 
 /**
  * A requirement that has been declared from a {@link BundleRevision bundle
@@ -25,45 +26,18 @@ import java.util.Map;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 3ee254a3c0d5516b56affaa66544c892f3d522cb $
+ * @version $Id: 2c875c9711292a033a7cd597742b79b5791e9d10 $
  */
-public interface BundleRequirement extends Requirement{
-	/**
-	 * Returns the name space of this requirement.
-	 * 
-	 * @return The name space of this requirement.
-	 */
-	String getNamespace();
-
-	/**
-	 * Returns the directives of this requirement.
-	 * 
-	 * @return An unmodifiable map of directive names to directive values for
-	 *         this requirement, or an empty map if this requirement has no
-	 *         directives.
-	 */
-	Map<String, String> getDirectives();
-
-	/**
-	 * Returns the attributes of this requirement.
-	 * 
-	 * @return An unmodifiable map of attribute names to attribute values for
-	 *         this requirement, or an empty map if this requirement has no
-	 *         attributes.
-	 */
-	Map<String, Object> getAttributes();
-
+public interface BundleRequirement extends Requirement {
 	/**
 	 * Returns the bundle revision declaring this requirement.
+	 * 
+	 * <p>
+	 * This method returns the same object as {@link #getResource()}.
 	 * 
 	 * @return The bundle revision declaring this requirement.
 	 */
 	BundleRevision getRevision();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	BundleRevision getResource();
 
 	/**
 	 * Returns whether the specified capability matches this requirement.
@@ -76,4 +50,19 @@ public interface BundleRequirement extends Requirement{
 	 *         specified capability}; {@code false} otherwise.
 	 */
 	boolean matches(BundleCapability capability);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	String getNamespace();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	Map<String, String> getDirectives();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	Map<String, Object> getAttributes();
 }

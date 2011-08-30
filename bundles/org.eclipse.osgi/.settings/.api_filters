@@ -1,1310 +1,1248 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.osgi" version="2">
-<resource path="core/framework/org/eclipse/osgi/framework/internal/protocol/URLStreamHandlerFactoryProxyFor15.java" type="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15">
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15.openConnection(URL, Proxy)"/>
-<message_argument value="Proxy"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="core/framework/org/eclipse/osgi/launch/Equinox.java" type="org.eclipse.osgi.launch.Equinox">
-<filter id="1143996420">
-<message_arguments>
-<message_argument value="adapt(Class&lt;A&gt;)"/>
-</message_arguments>
-</filter>
-<filter id="1143996420">
-<message_arguments>
-<message_argument value="compareTo(Bundle)"/>
-</message_arguments>
-</filter>
-<filter id="1143996420">
-<message_arguments>
-<message_argument value="getDataFile(String)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/EclipseAdaptorHook.java" type="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook$ParsingService">
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
-<message_argument value="DocumentBuilderFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/PluginParser.java" type="org.eclipse.core.runtime.internal.adaptor.PluginParser">
-<filter comment="Code is protected when running on a limited environment" id="579862564">
-<message_arguments>
-<message_argument value="PluginParser"/>
-<message_argument value="DefaultHandler"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="630194212">
-<message_arguments>
-<message_argument value="PluginParser.locator"/>
-<message_argument value="Locator"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="630194212">
-<message_arguments>
-<message_argument value="PluginParser.xmlTracker"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.error(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
-<message_argument value="SAXException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionPointState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleInitialState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryExportState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handlePluginState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresImportState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRuntimeState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseRequiresAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.processingInstruction(String, String)"/>
-<message_argument value="SAXException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.setDocumentLocator(Locator)"/>
-<message_argument value="Locator"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.startElement(String, String, String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.warning(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647000098">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.PluginParser(FrameworkAdaptor, BundleContext, Version)"/>
-<message_argument value="DefaultHandler()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newInstance()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getColumnNumber()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getLineNumber()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getMessage()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
-<message_argument value="SAXParseException"/>
-<message_argument value="getSystemId()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLength()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLocalName(int)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(int)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParser"/>
-<message_argument value="parse(InputStream, DefaultHandler)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="newSAXParser()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setFeature(String, boolean)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setNamespaceAware(boolean)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
-<message_argument value="SAXParserFactory"/>
-<message_argument value="setValidating(boolean)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLength()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getLocalName(int)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(int)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
-<message_argument value="Attributes"/>
-<message_argument value="getValue(String, String)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="eclipseAdaptor/src/org/eclipse/equinox/log/internal/ExtendedLogEntryImpl.java" type="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl">
-<filter comment="Code is protected by reflection check." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
-<message_argument value="Thread"/>
-<message_argument value="getId()"/>
-<message_argument value="J2SE-1.4"/>
-</message_arguments>
-</filter>
-<filter comment="protected by reflection method check." id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
-<message_argument value="Thread"/>
-<message_argument value="getId()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/AdaptPermission.java" type="org.osgi.framework.AdaptPermission">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.AdaptPermission"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/AdminPermission.java" type="org.osgi.framework.AdminPermission">
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="WEAVE"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
-<filter id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.Bundle"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="adapt(Class&lt;A&gt;)"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="getDataFile(String)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleContext.java" type="org.osgi.framework.BundleContext">
-<filter comment="ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.BundleContext"/>
-</message_arguments>
-</filter>
-<filter comment="ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="getBundle(String)"/>
-</message_arguments>
-</filter>
-<filter comment="ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="getServiceReference(Class&lt;S&gt;)"/>
-</message_arguments>
-</filter>
-<filter comment="ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
-</message_arguments>
-</filter>
-<filter comment="ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleEvent.java" type="org.osgi.framework.BundleEvent">
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="BundleEvent(int, Bundle, Bundle)"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="getOrigin()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleException.java" type="org.osgi.framework.BundleException">
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="READ_ERROR"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API." id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="REJECTED_BY_HOOK"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.BundleReference"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/CapabilityPermission.java" type="org.osgi.framework.CapabilityPermission">
-<filter comment="Ignore OSGi APIs." id="1108344834">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="org.osgi.framework.CapabilityPermission"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="EFFECTIVE_ACTIVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="EFFECTIVE_DIRECTIVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="EFFECTIVE_RESOLVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BSNVERSION"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_JARURLS"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="FRAMEWORK_UUID"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="PROVIDE_CAPABILITY"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="REMOTE_INTENTS_SUPPORTED"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="REQUIRE_CAPABILITY"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_EXPORTED_CONFIGS"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_EXPORTED_INTENTS"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_EXPORTED_INTERFACES"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_IMPORTED"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_IMPORTED_CONFIGS"/>
-</message_arguments>
-</filter>
-<filter id="403767336">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-<message_argument value="SERVICE_INTENTS"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.Constants"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="EFFECTIVE_ACTIVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="EFFECTIVE_DIRECTIVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="EFFECTIVE_RESOLVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FILTER_ATTRIBUTE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGI API." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FILTER_DIRECTIVE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_BSNVERSION"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_JARURLS"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FRAMEWORK_UUID"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="PROVIDE_CAPABILITY"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="REMOTE_INTENTS_SUPPORTED"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi APIs." id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="REQUIRE_CAPABILITY"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_EXPORTED_CONFIGS"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_EXPORTED_INTENTS"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_EXPORTED_INTERFACES"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_IMPORTED"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_IMPORTED_CONFIGS"/>
-</message_arguments>
-</filter>
-<filter id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="SERVICE_INTENTS"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/Filter.java" type="org.osgi.framework.Filter">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.Filter"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1209008130">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="matches(Map&lt;String,?&gt;)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServiceException.java" type="org.osgi.framework.ServiceException">
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.6"/>
-<message_argument value="3.7"/>
-<message_argument value="FACTORY_RECURSION"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServiceReference.java" type="org.osgi.framework.ServiceReference">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.ServiceReference"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/ServiceRegistration.java" type="org.osgi.framework.ServiceRegistration">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.ServiceRegistration"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
-<filter id="1143996420">
-<message_arguments>
-<message_argument value="compareTo(Version)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/bundle/CollisionHook.java" type="org.osgi.framework.hooks.bundle.CollisionHook">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.bundle.CollisionHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/bundle/EventHook.java" type="org.osgi.framework.hooks.bundle.EventHook">
-<filter comment="Ingore OSGi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.bundle.EventHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/bundle/FindHook.java" type="org.osgi.framework.hooks.bundle.FindHook">
-<filter comment="Ingore OSGi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.bundle.FindHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHook.java" type="org.osgi.framework.hooks.resolver.ResolverHook">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.resolver.ResolverHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHookFactory.java" type="org.osgi.framework.hooks.resolver.ResolverHookFactory">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.resolver.ResolverHookFactory"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/EventListenerHook.java" type="org.osgi.framework.hooks.service.EventListenerHook">
-<filter comment="Ignore OSGi API" id="1108344834">
-<message_arguments>
-<message_argument value="1.1"/>
-<message_argument value="3.7"/>
-<message_argument value="org.osgi.framework.hooks.service.EventListenerHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook$ListenerInfo">
-<filter comment="Ignore OSGi APIs" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.service.ListenerHook.ListenerInfo"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.weaving.WeavingException"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingHook.java" type="org.osgi.framework.hooks.weaving.WeavingHook">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.weaving.WeavingHook"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.hooks.weaving.WovenClass"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.launch.Framework"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.framework.launch.FrameworkFactory"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/startlevel/BundleStartLevel.java" type="org.osgi.framework.startlevel.BundleStartLevel">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.startlevel.BundleStartLevel"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/startlevel/FrameworkStartLevel.java" type="org.osgi.framework.startlevel.FrameworkStartLevel">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.startlevel.FrameworkStartLevel"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleCapability.java" type="org.osgi.framework.wiring.BundleCapability">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleCapability"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore osgi API." id="1211105284">
-<message_arguments>
-<message_argument value="getResource()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleRequirement.java" type="org.osgi.framework.wiring.BundleRequirement">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleRequirement"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore osgi API." id="1211105284">
-<message_arguments>
-<message_argument value="getResource()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleRevision.java" type="org.osgi.framework.wiring.BundleRevision">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleRevision"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleRevisions.java" type="org.osgi.framework.wiring.BundleRevisions">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleRevisions"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleWire.java" type="org.osgi.framework.wiring.BundleWire">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleWire"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore osgi API." id="1211105284">
-<message_arguments>
-<message_argument value="getProvider()"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore osgi API." id="1211105284">
-<message_arguments>
-<message_argument value="getRequirer()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.BundleWiring"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/Capability.java" type="org.osgi.framework.wiring.Capability">
-<filter comment="Ignore osgi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.Capability"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/FrameworkWiring.java" type="org.osgi.framework.wiring.FrameworkWiring">
-<filter comment="Ignore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.FrameworkWiring"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/Requirement.java" type="org.osgi.framework.wiring.Requirement">
-<filter comment="Ignore osgi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.Requirement"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/Resource.java" type="org.osgi.framework.wiring.Resource">
-<filter comment="Ignore osgi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.Resource"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/ResourceConstants.java" type="org.osgi.framework.wiring.ResourceConstants">
-<filter comment="Ignore osgi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.ResourceConstants"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/framework/wiring/Wire.java" type="org.osgi.framework.wiring.Wire">
-<filter comment="Ignore osgi API." id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.framework.wiring.Wire"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfo">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionUpdate.java" type="org.osgi.service.condpermadmin.ConditionalPermissionUpdate">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionUpdate"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/log/LogEntry.java" type="org.osgi.service.log.LogEntry">
-<filter comment="Ingore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.service.log.LogEntry"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/log/LogListener.java" type="org.osgi.service.log.LogListener">
-<filter comment="Ingore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.service.log.LogListener"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/log/LogReaderService.java" type="org.osgi.service.log.LogReaderService">
-<filter comment="Ingore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.service.log.LogReaderService"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/log/LogService.java" type="org.osgi.service.log.LogService">
-<filter comment="Ingore OSGi API" id="1110441988">
-<message_arguments>
-<message_argument value="org.osgi.service.log.LogService"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/packageadmin/ExportedPackage.java" type="org.osgi.service.packageadmin.ExportedPackage">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.packageadmin.ExportedPackage"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/packageadmin/PackageAdmin.java" type="org.osgi.service.packageadmin.PackageAdmin">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.packageadmin.PackageAdmin"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/packageadmin/RequiredBundle.java" type="org.osgi.service.packageadmin.RequiredBundle">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.packageadmin.RequiredBundle"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/permissionadmin/PermissionAdmin.java" type="org.osgi.service.permissionadmin.PermissionAdmin">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.permissionadmin.PermissionAdmin"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/startlevel/StartLevel.java" type="org.osgi.service.startlevel.StartLevel">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.startlevel.StartLevel"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/service/url/URLConstants.java" type="org.osgi.service.url.URLConstants">
-<filter comment="Ignore OSGi API" id="403853384">
-<message_arguments>
-<message_argument value="org.osgi.service.url.URLConstants"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/util/tracker/BundleTracker.java" type="org.osgi.util.tracker.BundleTracker">
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.7"/>
-<message_argument value="getTracked()"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.7"/>
-<message_argument value="isEmpty()"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="osgi/src/org/osgi/util/tracker/ServiceTracker.java" type="org.osgi.util.tracker.ServiceTracker">
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.7"/>
-<message_argument value="getServices(T[])"/>
-</message_arguments>
-</filter>
-<filter id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.7"/>
-<message_argument value="getTracked()"/>
-</message_arguments>
-</filter>
-<filter comment="Ignore OSGi API" id="1141899266">
-<message_arguments>
-<message_argument value="1.5"/>
-<message_argument value="3.7"/>
-<message_argument value="isEmpty()"/>
-</message_arguments>
-</filter>
-<filter id="1143996420">
-<message_arguments>
-<message_argument value="ServiceTracker(BundleContext, Class&lt;S&gt;, ServiceTrackerCustomizer&lt;S,T&gt;)"/>
-</message_arguments>
-</filter>
-</resource>
-<resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
-<filter comment="Code is protected when running on a limited environment" id="630194212">
-<message_arguments>
-<message_argument value="Locker_JavaNio.fileLock"/>
-<message_argument value="FileLock"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileLock"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="OverlappingFileLockException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="646971428">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="OverlappingFileLockException"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileChannel"/>
-<message_argument value="tryLock(long, long, boolean)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="FileLock"/>
-<message_argument value="release()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
-<message_argument value="RandomAccessFile"/>
-<message_argument value="getChannel()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="FileChannel"/>
-<message_argument value="tryLock(long, long, boolean)"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
-<message_argument value="RandomAccessFile"/>
-<message_argument value="getChannel()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-<filter comment="Code is protected when running on a limited environment" id="647004193">
-<message_arguments>
-<message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.release()"/>
-<message_argument value="FileLock"/>
-<message_argument value="release()"/>
-<message_argument value="OSGi/Minimum-1.2"/>
-</message_arguments>
-</filter>
-</resource>
+    <resource path="core/framework/org/eclipse/osgi/framework/internal/protocol/URLStreamHandlerFactoryProxyFor15.java" type="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15">
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.osgi.framework.internal.protocol.URLStreamHandlerFactoryProxyFor15.openConnection(URL, Proxy)"/>
+                <message_argument value="Proxy"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="core/framework/org/eclipse/osgi/launch/Equinox.java" type="org.eclipse.osgi.launch.Equinox">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="adapt(Class&lt;A&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="compareTo(Bundle)"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="getDataFile(String)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/EclipseAdaptorHook.java" type="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook$ParsingService">
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
+                <message_argument value="DocumentBuilderFactory"/>
+                <message_argument value="newInstance()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.EclipseAdaptorHook.ParsingService.createService()"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="newInstance()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="eclipseAdaptor/src/org/eclipse/core/runtime/internal/adaptor/PluginParser.java" type="org.eclipse.core.runtime.internal.adaptor.PluginParser">
+        <filter comment="Code is protected when running on a limited environment" id="579862564">
+            <message_arguments>
+                <message_argument value="PluginParser"/>
+                <message_argument value="DefaultHandler"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="630194212">
+            <message_arguments>
+                <message_argument value="PluginParser.locator"/>
+                <message_argument value="Locator"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="630194212">
+            <message_arguments>
+                <message_argument value="PluginParser.xmlTracker"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.error(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
+                <message_argument value="SAXException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.fatalError(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionPointState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleExtensionState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleInitialState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryExportState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handlePluginState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresImportState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRequiresState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleRuntimeState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseRequiresAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.processingInstruction(String, String)"/>
+                <message_argument value="SAXException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.setDocumentLocator(Locator)"/>
+                <message_argument value="Locator"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.startElement(String, String, String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.warning(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647000098">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.PluginParser(FrameworkAdaptor, BundleContext, Version)"/>
+                <message_argument value="DefaultHandler()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.acquireXMLParsing(BundleContext)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="newInstance()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.handleLibraryState(String, Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getValue(String, String)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="getColumnNumber()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="getLineNumber()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="getMessage()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.logStatus(SAXParseException)"/>
+                <message_argument value="SAXParseException"/>
+                <message_argument value="getSystemId()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getLength()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getLocalName(int)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseFragmentAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getValue(int)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parseLibraryAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getValue(String, String)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParser"/>
+                <message_argument value="parse(InputStream, DefaultHandler)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="newSAXParser()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="setFeature(String, boolean)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="setNamespaceAware(boolean)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePlugin(InputStream)"/>
+                <message_argument value="SAXParserFactory"/>
+                <message_argument value="setValidating(boolean)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getLength()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getLocalName(int)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginAttributes(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getValue(int)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.PluginParser.parsePluginRequiresImport(Attributes)"/>
+                <message_argument value="Attributes"/>
+                <message_argument value="getValue(String, String)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="eclipseAdaptor/src/org/eclipse/equinox/log/internal/ExtendedLogEntryImpl.java" type="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl">
+        <filter comment="Code is protected by reflection check." id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
+                <message_argument value="Thread"/>
+                <message_argument value="getId()"/>
+                <message_argument value="J2SE-1.4"/>
+            </message_arguments>
+        </filter>
+        <filter comment="protected by reflection method check." id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.equinox.log.internal.ExtendedLogEntryImpl.getId(Thread)"/>
+                <message_argument value="Thread"/>
+                <message_argument value="getId()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/AdaptPermission.java" type="org.osgi.framework.AdaptPermission">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.AdaptPermission"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/AdminPermission.java" type="org.osgi.framework.AdminPermission">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="WEAVE"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/Bundle.java" type="org.osgi.framework.Bundle">
+        <filter id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Bundle"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="adapt(Class&lt;A&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getDataFile(String)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/BundleContext.java" type="org.osgi.framework.BundleContext">
+        <filter comment="ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.BundleContext"/>
+            </message_arguments>
+        </filter>
+        <filter comment="ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getBundle(String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getServiceReference(Class&lt;S&gt;)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getServiceReferences(Class&lt;S&gt;, String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="registerService(Class&lt;S&gt;, S, Dictionary&lt;String,?&gt;)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/BundleEvent.java" type="org.osgi.framework.BundleEvent">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="BundleEvent(int, Bundle, Bundle)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getOrigin()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/BundleException.java" type="org.osgi.framework.BundleException">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="READ_ERROR"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API." id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="REJECTED_BY_HOOK"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/BundleReference.java" type="org.osgi.framework.BundleReference">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.BundleReference"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/CapabilityPermission.java" type="org.osgi.framework.CapabilityPermission">
+        <filter comment="Ignore OSGi APIs." id="1108344834">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="org.osgi.framework.CapabilityPermission"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="EFFECTIVE_ACTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="EFFECTIVE_DIRECTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="EFFECTIVE_RESOLVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_BSNVERSION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_JARURLS"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="FRAMEWORK_UUID"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="PROVIDE_CAPABILITY"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="REMOTE_INTENTS_SUPPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="REQUIRE_CAPABILITY"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_EXPORTED_CONFIGS"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_EXPORTED_INTENTS"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_EXPORTED_INTERFACES"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_IMPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_IMPORTED_CONFIGS"/>
+            </message_arguments>
+        </filter>
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+                <message_argument value="SERVICE_INTENTS"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Constants"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="EFFECTIVE_ACTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="EFFECTIVE_DIRECTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="EFFECTIVE_RESOLVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FILTER_ATTRIBUTE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGI API." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FILTER_DIRECTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_BSNVERSION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_BSNVERSION_MULTIPLE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_BSNVERSION_SINGLE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_COMMAND_ABSPATH"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_JARURLS"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_SYSTEMCAPABILITIES"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_SYSTEMCAPABILITIES_EXTRA"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FRAMEWORK_UUID"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="PROVIDE_CAPABILITY"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="REMOTE_CONFIGS_SUPPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="REMOTE_INTENTS_SUPPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs." id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="REQUIRE_CAPABILITY"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_EXPORTED_CONFIGS"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_EXPORTED_INTENTS"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_EXPORTED_INTENTS_EXTRA"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_EXPORTED_INTERFACES"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_IMPORTED"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_IMPORTED_CONFIGS"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="SERVICE_INTENTS"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi APIs" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="RESOLUTION_DYNAMIC"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/Filter.java" type="org.osgi.framework.Filter">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.Filter"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="matches(Map&lt;String,?&gt;)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceException.java" type="org.osgi.framework.ServiceException">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.6"/>
+                <message_argument value="3.7"/>
+                <message_argument value="FACTORY_RECURSION"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceReference.java" type="org.osgi.framework.ServiceReference">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.ServiceReference"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/ServiceRegistration.java" type="org.osgi.framework.ServiceRegistration">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.ServiceRegistration"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="compareTo(Version)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/bundle/CollisionHook.java" type="org.osgi.framework.hooks.bundle.CollisionHook">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.bundle.CollisionHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/bundle/EventHook.java" type="org.osgi.framework.hooks.bundle.EventHook">
+        <filter comment="Ingore OSGi API." id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.bundle.EventHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/bundle/FindHook.java" type="org.osgi.framework.hooks.bundle.FindHook">
+        <filter comment="Ingore OSGi API." id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.bundle.FindHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHook.java" type="org.osgi.framework.hooks.resolver.ResolverHook">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.resolver.ResolverHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/resolver/ResolverHookFactory.java" type="org.osgi.framework.hooks.resolver.ResolverHookFactory">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.resolver.ResolverHookFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/service/EventListenerHook.java" type="org.osgi.framework.hooks.service.EventListenerHook">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.7"/>
+                <message_argument value="org.osgi.framework.hooks.service.EventListenerHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/service/ListenerHook.java" type="org.osgi.framework.hooks.service.ListenerHook$ListenerInfo">
+        <filter comment="Ignore OSGi APIs" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.service.ListenerHook.ListenerInfo"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingException.java" type="org.osgi.framework.hooks.weaving.WeavingException">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.weaving.WeavingException"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/weaving/WeavingHook.java" type="org.osgi.framework.hooks.weaving.WeavingHook">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.weaving.WeavingHook"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/hooks/weaving/WovenClass.java" type="org.osgi.framework.hooks.weaving.WovenClass">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.hooks.weaving.WovenClass"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/launch/Framework.java" type="org.osgi.framework.launch.Framework">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.launch.Framework"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/launch/FrameworkFactory.java" type="org.osgi.framework.launch.FrameworkFactory">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.launch.FrameworkFactory"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/Capability.java" type="org.osgi.framework.resource.Capability">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.Capability"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/Requirement.java" type="org.osgi.framework.resource.Requirement">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.Requirement"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/Resource.java" type="org.osgi.framework.resource.Resource">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.Resource"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/ResourceConstants.java" type="org.osgi.framework.resource.ResourceConstants">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.ResourceConstants"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/Wire.java" type="org.osgi.framework.resource.Wire">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.Wire"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/startlevel/BundleStartLevel.java" type="org.osgi.framework.startlevel.BundleStartLevel">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.startlevel.BundleStartLevel"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/startlevel/FrameworkStartLevel.java" type="org.osgi.framework.startlevel.FrameworkStartLevel">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.startlevel.FrameworkStartLevel"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionAdmin.java" type="org.osgi.service.condpermadmin.ConditionalPermissionAdmin">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionAdmin"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionInfo.java" type="org.osgi.service.condpermadmin.ConditionalPermissionInfo">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionInfo"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/condpermadmin/ConditionalPermissionUpdate.java" type="org.osgi.service.condpermadmin.ConditionalPermissionUpdate">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.condpermadmin.ConditionalPermissionUpdate"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/log/LogEntry.java" type="org.osgi.service.log.LogEntry">
+        <filter comment="Ingore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.log.LogEntry"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/log/LogListener.java" type="org.osgi.service.log.LogListener">
+        <filter comment="Ingore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.log.LogListener"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/log/LogReaderService.java" type="org.osgi.service.log.LogReaderService">
+        <filter comment="Ingore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.log.LogReaderService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/log/LogService.java" type="org.osgi.service.log.LogService">
+        <filter comment="Ingore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.service.log.LogService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/packageadmin/ExportedPackage.java" type="org.osgi.service.packageadmin.ExportedPackage">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.packageadmin.ExportedPackage"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/packageadmin/PackageAdmin.java" type="org.osgi.service.packageadmin.PackageAdmin">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.packageadmin.PackageAdmin"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/packageadmin/RequiredBundle.java" type="org.osgi.service.packageadmin.RequiredBundle">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.packageadmin.RequiredBundle"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/permissionadmin/PermissionAdmin.java" type="org.osgi.service.permissionadmin.PermissionAdmin">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.permissionadmin.PermissionAdmin"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/startlevel/StartLevel.java" type="org.osgi.service.startlevel.StartLevel">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.startlevel.StartLevel"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/service/url/URLConstants.java" type="org.osgi.service.url.URLConstants">
+        <filter comment="Ignore OSGi API" id="403853384">
+            <message_arguments>
+                <message_argument value="org.osgi.service.url.URLConstants"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/util/tracker/BundleTracker.java" type="org.osgi.util.tracker.BundleTracker">
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getTracked()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="isEmpty()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/util/tracker/ServiceTracker.java" type="org.osgi.util.tracker.ServiceTracker">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getServices(T[])"/>
+            </message_arguments>
+        </filter>
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="getTracked()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.5"/>
+                <message_argument value="3.7"/>
+                <message_argument value="isEmpty()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="ServiceTracker(BundleContext, Class&lt;S&gt;, ServiceTrackerCustomizer&lt;S,T&gt;)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="supplement/src/org/eclipse/core/runtime/internal/adaptor/Locker_JavaNio.java" type="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio">
+        <filter comment="Code is protected when running on a limited environment" id="630194212">
+            <message_arguments>
+                <message_argument value="Locker_JavaNio.fileLock"/>
+                <message_argument value="FileLock"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+                <message_argument value="FileLock"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+                <message_argument value="OverlappingFileLockException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="646971428">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+                <message_argument value="OverlappingFileLockException"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+                <message_argument value="FileChannel"/>
+                <message_argument value="tryLock(long, long, boolean)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+                <message_argument value="FileLock"/>
+                <message_argument value="release()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.isLocked()"/>
+                <message_argument value="RandomAccessFile"/>
+                <message_argument value="getChannel()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+                <message_argument value="FileChannel"/>
+                <message_argument value="tryLock(long, long, boolean)"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.lock()"/>
+                <message_argument value="RandomAccessFile"/>
+                <message_argument value="getChannel()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Code is protected when running on a limited environment" id="647004193">
+            <message_arguments>
+                <message_argument value="org.eclipse.core.runtime.internal.adaptor.Locker_JavaNio.release()"/>
+                <message_argument value="FileLock"/>
+                <message_argument value="release()"/>
+                <message_argument value="OSGi/Minimum-1.2"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
