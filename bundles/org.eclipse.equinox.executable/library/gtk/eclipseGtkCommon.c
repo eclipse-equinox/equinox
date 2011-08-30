@@ -47,8 +47,10 @@ void displayMessage(char* title, char* message)
 	GtkWidget* dialog;
 	
     /* If GTK has not been initialized yet, do it now. */
-    if (initWindowSystem( &saveArgc, saveArgv, 1 ) != 0)
+    if (initWindowSystem( &saveArgc, saveArgv, 1 ) != 0) {
+    	printf("%s:\n%s\n", title, message);
     	return;
+    }
 
   	dialog = gtk.gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
 				   					GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
@@ -89,7 +91,10 @@ int initWindowSystem(int* pArgc, char* argv[], int showSplash)
 
 	/* Initialize GTK. */
     gtk.gtk_set_locale();
-    gtk.gtk_init_check(pArgc, &argv);
+    if (!gtk.gtk_init_check(pArgc, &argv)) {
+    	return -1;
+    }
+
 	/*_gdk_set_program_class(getOfficialName());*/
 	gtkInitialized = TRUE;
 	return 0;
