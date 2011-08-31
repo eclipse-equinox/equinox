@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2009 IBM Corporation and others. 
+    Copyright (c) 2009, 2011 IBM Corporation and others. 
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -9,13 +9,9 @@
         IBM Corporation - initial API and implementation
  -->
 <project name="Launcher Build" basedir="." default="build">
-	<property name="cvsLogin" value=":pserver:anonymous" />
-	<property name="cvsRoot" value="${cvsLogin}@dev.eclipse.org:/cvsroot/rt" />
-	<property name="cvsrsh" value="ssh" />
-	<property name="cvsExecutablePath" value="org.eclipse.equinox/framework/bundles/org.eclipse.equinox.executable" />
-	<property name="cvsExecutableBinaries" value="org.eclipse.equinox/framework/releng/org.eclipse.equinox.executable.binaries" />
-	<property name="cvsLauncherBinaries" value="org.eclipse.equinox/framework/releng/org.eclipse.equinox.launcher.binaries" />
-	<property name="cvsTag" value="HEAD" />
+	<property name="gitFrameworkRepo" value="git.eclipse.org/gitroot/equinox/rt.equinox.framework.git" />
+	<property name="gitBinaryRepo" value="git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
+	<property name="gitTag" value="master" />
 	
 	<available file="${basedir}/launcher.properties" property="launcherProperties" value="${basedir}/launcher.properties" />
 	
@@ -121,8 +117,16 @@
 	<target name="fetchExecutableSource" >
 		<!-- fetch the source and put it in a folder unique to this platform so we don't interfere with other
 		     compiles if the working folder is shared accross multiple machines -->
+		<mkdir dir="${basedir}/${os}.${ws}.${arch}" />
 		<delete dir="${basedir}/${os}.${ws}.${arch}/library" failonerror="false"/> 
-		<cvs command="export -d ${os}.${ws}.${arch}/library" tag="${cvsTag}" cvsrsh="${cvsrsh}" package="${cvsExecutablePath}/library" cvsRoot="${cvsRoot}" dest="${basedir}" quiet="true" failonerror="true"/>
+		
+		<git dir="${basedir}/${os}.${ws}.${arch}" command="clone" arguments="http://${gitFrameworkRepo}" />
+		<git dir="${basedir}/${os}.${ws}.${arch}/rt.equinox.framework" command="checkout" arguments="${gitTag}" />
+		<git dir="${basedir}/${os}.${ws}.${arch}/rt.equinox.framework" command="pull" />
+		
+		<copy todir="${basedir}/${os}.${ws}.${arch}/library" >
+			<fileset dir="${basedir}/${os}.${ws}.${arch}/rt.equinox.framework/bundles/org.eclipse.equinox.executable/library" includes="**" />
+		</copy>
 	</target>
 	
 	<target name="buildNix" if="buildNix">
@@ -298,8 +302,8 @@
 	</target>
 	
 	<target name="cloneGitRepos" unless="gitRepoExists" >
-		<git dir="${staging}" command="clone" arguments="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git"  />
-		<git dir="${staging}" command="clone" arguments="ssh://git.eclipse.org/gitroot/equinox/rt.equinox.framework.git" />
+		<git dir="${staging}" command="clone" arguments="ssh://${gitBinaryRepo}"  />
+		<git dir="${staging}" command="clone" arguments="ssh://${gitFrameworkRepo}" />
 	</target>
 	
 	
@@ -311,6 +315,9 @@
 		
 		<available file="${staging}/rt.equinox.binaries" type="dir" property="gitRepoExists" />
 		<antcall target="cloneGitRepos" />
+		
+		<git dir="${staging}/rt.equinox.binaries" command="checkout" arguments="${gitTag}" />
+		<git dir="${staging}/rt.equinox.framework" command="checkout" arguments="${gitTag}" />
 		
 		<git dir="${staging}/rt.equinox.binaries" command="pull" />
 		<git dir="${staging}/rt.equinox.framework" command="pull" />
@@ -353,7 +360,7 @@
 			<arg line="${sshUser} ${machine}" />
 			<arg line="sh ${workspace}/remote.sh" />
 			<arg line="${javaArg}" />
-			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DcvsLogin=${cvsLogin} -DcvsTag=${cvsTag}" />
+			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DgitTag=${gitTag}" />
 			<arg value="-DresultsBaseFolder=${resultsBaseFolder}" />
 		</exec>
 	</target>
