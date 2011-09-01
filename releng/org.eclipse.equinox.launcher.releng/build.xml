@@ -343,6 +343,12 @@
 		<condition property="javaHome" value="${j_win32}" else="${java.home}" >
 			<isset property="j_win32"/>
 		</condition>
+		
+		<mkdir dir="${basedir}/${os}.${ws}.${arch}/library" />
+		<copy todir="${basedir}/${os}.${ws}.${arch}/library" >
+			<fileset dir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" />
+		</copy>
+		
 		<antcall target="buildConfig" />
 	</target>
 	
@@ -354,7 +360,9 @@
 		<condition property="sshUser" value="-l ${userName}" else="" >
 			<isset property="userName" />
 		</condition>
-		<SCP dir="${basedir}" source="remote.sh build.xml" destination="${scpDest}:${workspace}" />
+		
+		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
+		<SCP dir="${basedir}" source="remote.sh build.xml library.zip" destination="${scpDest}:${workspace}" />
 		<echo message="Execing ssh ${machine}" />
 		<exec executable="ssh" failonerror="true" >
 			<arg line="${sshUser} ${machine}" />
@@ -366,10 +374,13 @@
 	</target>
 
 	<target name="buildConfig" depends="init_exeFolder,init_fragment,determineBuild" >
-		<antcall target="fetchExecutableSource" />
+		<!--<antcall target="fetchExecutableSource" />-->
 		<property name="javaHome" value="${java.home}/.." />
 		<property name="libraryFolder" value="${basedir}/${os}.${ws}.${arch}/library" />
 		<property file="${libraryFolder}/make_version.mak" />
+		
+		<mkdir dir="${libraryFolder}" />
+		<unzip src="${basedir}/library.zip" dest="${libraryFolder}" />
 		
 		<antcall target="buildNix" />
 		<antcall target="buildWindows" />
