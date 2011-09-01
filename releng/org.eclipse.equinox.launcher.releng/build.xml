@@ -161,12 +161,9 @@
 			<equals arg1="${arch}" arg2="s390"/>
 		</condition>
 		
-		<property name="workingArea" value="${basedir}/${os}.${ws}.${arch}" />
-		<zip destfile="${workingArea}/library.zip" basedir="${workingArea}" includes="library/**" />
-
-		<SCP dir="${workingArea}" source="library.zip" destination="${remoteHost}:~/equinox" />
+		<SCP dir="${basedir}" source="library.zip" destination="${remoteHost}:~/equinox" />
 		
-		<exec dir="${workingArea}" executable="ssh" failonerror="true">
+		<exec dir="${basedir}" executable="ssh" failonerror="true">
 			<arg value="${remoteHost}"/>
 			<arg value="cd equinox; rm -rf library; unzip -q library.zip; library/gtk/build.sh"/>
 		</exec>	
@@ -175,8 +172,8 @@
 		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 		
 		<!-- copy the resulting executable and .so -->
-		<SCP dir="${workingArea}" source="${remoteHost}:~/equinox/library/gtk/eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<SCP dir="${workingArea}" source="${remoteHost}:~/equinox/library/gtk/eclipse_*.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<SCP dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<SCP dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse_*.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
 	</target>
 				
 	<target name="buildWindows" if="buildWindows">
@@ -362,11 +359,12 @@
 		</condition>
 		
 		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
-		<SCP dir="${basedir}" source="remote.sh build.xml library.zip" destination="${scpDest}:${workspace}" />
+		<mkremote dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
+		<SCP dir="${basedir}" source="remote.sh build.xml library.zip" destination="${scpDest}:${workspace}/${os}.${ws}.${arch}" />
 		<echo message="Execing ssh ${machine}" />
 		<exec executable="ssh" failonerror="true" >
 			<arg line="${sshUser} ${machine}" />
-			<arg line="sh ${workspace}/remote.sh" />
+			<arg line="sh ${workspace}/${os}.${ws}.${arch}/remote.sh" />
 			<arg line="${javaArg}" />
 			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DgitTag=${gitTag}" />
 			<arg value="-DresultsBaseFolder=${resultsBaseFolder}" />
@@ -376,7 +374,7 @@
 	<target name="buildConfig" depends="init_exeFolder,init_fragment,determineBuild" >
 		<!--<antcall target="fetchExecutableSource" />-->
 		<property name="javaHome" value="${java.home}/.." />
-		<property name="libraryFolder" value="${basedir}/${os}.${ws}.${arch}/library" />
+		<property name="libraryFolder" value="${basedir}/library" />
 		
 		<delete dir="${libraryFolder}" failonerror="false" />
 		<mkdir dir="${libraryFolder}" />
