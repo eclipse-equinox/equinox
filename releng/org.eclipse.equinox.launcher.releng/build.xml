@@ -377,10 +377,12 @@
 		<!--<antcall target="fetchExecutableSource" />-->
 		<property name="javaHome" value="${java.home}/.." />
 		<property name="libraryFolder" value="${basedir}/${os}.${ws}.${arch}/library" />
-		<property file="${libraryFolder}/make_version.mak" />
 		
+		<delete dir="${libraryFolder}" failonerror="false" />
 		<mkdir dir="${libraryFolder}" />
 		<unzip src="${basedir}/library.zip" dest="${libraryFolder}" />
+		
+		<property file="${libraryFolder}/make_version.mak" />
 		
 		<antcall target="buildNix" />
 		<antcall target="buildWindows" />
