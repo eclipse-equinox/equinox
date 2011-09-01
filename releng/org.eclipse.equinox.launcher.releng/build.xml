@@ -371,7 +371,7 @@
 		</exec>
 	</target>
 
-	<target name="buildConfig" depends="init_exeFolder,init_fragment,determineBuild" >
+	<target name="buildConfig" depends="init_exeFolder,init_fragment,loadProperties,determineBuild" >
 		<!--<antcall target="fetchExecutableSource" />-->
 		<property name="javaHome" value="${java.home}/.." />
 		<property name="libraryFolder" value="${basedir}/library" />
