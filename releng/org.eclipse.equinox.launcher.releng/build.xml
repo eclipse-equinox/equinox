@@ -354,16 +354,13 @@
 		<condition property="scpDest" value="${userName}@${machine}" else="${machine}" >
 			<isset property="userName" />
 		</condition>
-		<condition property="sshUser" value="-l ${userName}" else="" >
-			<isset property="userName" />
-		</condition>
 		
 		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
 		<mkremote dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
 		<SCP dir="${basedir}" source="remote.sh build.xml launcher.properties library.zip" destination="${scpDest}:${workspace}/${os}.${ws}.${arch}" />
 		<echo message="Execing ssh ${machine}" />
 		<exec executable="ssh" failonerror="true" >
-			<arg line="${sshUser} ${machine}" />
+			<arg line="${scpDest}" />
 			<arg line="sh ${workspace}/${os}.${ws}.${arch}/remote.sh" />
 			<arg line="${javaArg}" />
 			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DgitTag=${gitTag}" />
