@@ -42,8 +42,12 @@ final class StandardRegionFilter implements RegionFilter {
 	public boolean isAllowed(Bundle bundle) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>(3);
 		String bsn = bundle.getSymbolicName();
-		if (bsn != null)
+		if (bsn != null) {
+			// TODO the javadoc says to use the bundle-symbolic-name attribute; leaving this for behavior compatibility
 			attrs.put(VISIBLE_BUNDLE_NAMESPACE, bsn);
+			// This is the correct attribute to use according to the javadoc
+			attrs.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, bsn);
+		}
 		attrs.put(org.osgi.framework.Constants.BUNDLE_VERSION_ATTRIBUTE, bundle.getVersion());
 		attrs.put(BUNDLE_ID_ATTR, bundle.getBundleId());
 		return isBundleAllowed(attrs);
