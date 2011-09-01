@@ -41,9 +41,9 @@ DLL_LIBS = kernel32.lib user32.lib comctl32.lib gdi32.lib Advapi32.lib libcmt.li
 # LFLAGS = /INCREMENTAL:NO /NOLOGO -subsystem:windows -entry:wmainCRTStartup -machine:IA64
 
 # was: windows
-LFLAGS       = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO /LARGEADDRESSAWARE -subsystem:windows -entry:wmainCRTStartup -machine:IA64
-CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO /LARGEADDRESSAWARE -subsystem:console -entry:wmainCRTStartup -machine:IA64
-DLL_LFLAGS   = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO /LARGEADDRESSAWARE /PDB:NONE -entry:_DllMainCRTStartup -dll /BASE:0x72000000 /DLL -machine:IA64
+LFLAGS       = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:windows -entry:wmainCRTStartup -machine:IA64
+CONSOLEFLAGS = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO -subsystem:console -entry:wmainCRTStartup -machine:IA64
+DLL_LFLAGS   = /NODEFAULTLIB /INCREMENTAL:NO /RELEASE /NOLOGO /PDB:NONE -entry:_DllMainCRTStartup -dll /BASE:0x72000000 /DLL -machine:IA64
 RES    = eclipse.res
 EXEC   = eclipse.exe
 CONSOLE = eclipsec.exe
