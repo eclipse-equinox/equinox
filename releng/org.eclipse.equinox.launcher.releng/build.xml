@@ -360,7 +360,7 @@
 		
 		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
 		<mkremote dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
-		<SCP dir="${basedir}" source="remote.sh build.xml library.zip" destination="${scpDest}:${workspace}/${os}.${ws}.${arch}" />
+		<SCP dir="${basedir}" source="remote.sh build.xml launcher.properties library.zip" destination="${scpDest}:${workspace}/${os}.${ws}.${arch}" />
 		<echo message="Execing ssh ${machine}" />
 		<exec executable="ssh" failonerror="true" >
 			<arg line="${sshUser} ${machine}" />
