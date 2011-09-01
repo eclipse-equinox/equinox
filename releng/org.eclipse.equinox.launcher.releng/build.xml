@@ -235,7 +235,7 @@
 			<equals arg1="${os}" arg2="macosx" />
 		</condition>
 		<condition property="buildS390" >
-			<contains string="${os}" substring="s390" />
+			<contains string="${arch}" substring="s390" />
 		</condition>
 		<condition property="buildNix" >
 			<not><or>
