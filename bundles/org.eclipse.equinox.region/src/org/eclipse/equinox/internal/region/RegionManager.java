@@ -46,7 +46,7 @@ public final class RegionManager implements BundleActivator {
 
 	private String domain;
 
-	private RegionDigraph digraph;
+	private StandardRegionDigraph digraph;
 
 	private StandardManageableRegionDigraph digraphMBean;
 
@@ -68,7 +68,7 @@ public final class RegionManager implements BundleActivator {
 		saveDigraph();
 	}
 
-	private RegionDigraph loadRegionDigraph() throws BundleException, IOException, InvalidSyntaxException {
+	private StandardRegionDigraph loadRegionDigraph() throws BundleException, IOException, InvalidSyntaxException {
 		File digraphFile = bundleContext.getDataFile(DIGRAPH_FILE);
 		if (digraphFile == null || !digraphFile.exists()) {
 			// no persistent digraph available, create a new one
@@ -87,8 +87,8 @@ public final class RegionManager implements BundleActivator {
 		}
 	}
 
-	private RegionDigraph createRegionDigraph() throws BundleException {
-		RegionDigraph regionDigraph = new StandardRegionDigraph(this.bundleContext, this.threadLocal);
+	private StandardRegionDigraph createRegionDigraph() throws BundleException {
+		StandardRegionDigraph regionDigraph = new StandardRegionDigraph(this.bundleContext, this.threadLocal);
 		Region kernelRegion = regionDigraph.createRegion(REGION_KERNEL);
 		for (Bundle bundle : this.bundleContext.getBundles()) {
 			kernelRegion.addBundle(bundle);
@@ -116,9 +116,10 @@ public final class RegionManager implements BundleActivator {
 		return standardManageableRegionDigraph;
 	}
 
-	private void registerRegionHooks(RegionDigraph regionDigraph) {
+	private void registerRegionHooks(StandardRegionDigraph regionDigraph) {
 		registerResolverHookFactory(regionDigraph.getResolverHookFactory());
 
+		registerBundleCollisionHook(regionDigraph.getBundleCollisionHook());
 		registerBundleFindHook(regionDigraph.getBundleFindHook());
 		registerBundleEventHook(regionDigraph.getBundleEventHook());
 
@@ -146,6 +147,12 @@ public final class RegionManager implements BundleActivator {
 	private void registerBundleEventHook(EventHook eventHook) {
 		this.registrations.add(this.bundleContext.registerService(EventHook.class, eventHook, null));
 
+	}
+
+	private void registerBundleCollisionHook(Object collisionHook) {
+		if (collisionHook != null) {
+			this.registrations.add(this.bundleContext.registerService("org.osgi.framework.hooks.bundle.CollisionHook", collisionHook, null)); //$NON-NLS-1$
+		}
 	}
 
 	private void registerResolverHookFactory(ResolverHookFactory resolverHookFactory) {

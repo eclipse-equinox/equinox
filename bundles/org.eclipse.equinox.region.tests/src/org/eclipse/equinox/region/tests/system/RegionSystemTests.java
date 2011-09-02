@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.equinox.region.tests.system;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 import java.util.*;
 import javax.management.*;
 import org.eclipse.equinox.region.*;
@@ -421,5 +423,127 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong number of digraphs", 0, digraphs.size());
 		regions = server.queryMBeans(null, regionNameAllQuery);
 		assertEquals("Wrong number of regions", 0, regions.size());
+	}
+
+	public void testBundleCollisionDisconnectedRegions() throws BundleException, InvalidSyntaxException {
+		// get the system region
+		Region systemRegion = digraph.getRegion(0);
+		Collection<Bundle> bundles = new HashSet<Bundle>();
+		// create 4 disconnected test regions and install each bundle into each region
+		int numRegions = 4;
+		String regionName = "IsolatedRegion_";
+		for (int i = 0; i < numRegions; i++) {
+			Region region = digraph.createRegion(regionName + i);
+			// Import the system bundle from the systemRegion
+			digraph.connect(region, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			// must import Boolean services into systemRegion to test
+			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), region);
+			for (String location : ALL) {
+				Bundle b = bundleInstaller.installBundle(location, region);
+				bundles.add(b);
+			}
+		}
+
+		assertEquals("Wrong number of bundles installed", numRegions * ALL.size(), bundles.size());
+		assertTrue("Could not resolve bundles.", bundleInstaller.resolveBundles(bundles.toArray(new Bundle[bundles.size()])));
+
+		// test install of duplicates
+		for (int i = 0; i < numRegions; i++) {
+			Region region = digraph.getRegion(regionName + i);
+			for (String name : ALL) {
+				String location = bundleInstaller.getBundleLocation(name);
+				try {
+					Bundle b = region.installBundle(getName() + "_expectToFail", new URL(location).openStream());
+					b.uninstall();
+					fail("Expected a bundle exception on duplicate bundle installation: " + name);
+				} catch (BundleException e) {
+					// expected
+					assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+				} catch (IOException e) {
+					fail("Failed to open bunldle location: " + e.getMessage());
+				}
+			}
+		}
+
+		// test update to a duplicate
+		for (int i = 0; i < numRegions; i++) {
+			Region region = digraph.getRegion(regionName + i);
+
+			Bundle regionPP1 = region.getBundle(PP1, new Version(1, 0, 0));
+
+			String locationSP1 = bundleInstaller.getBundleLocation(SP1);
+			try {
+				regionPP1.update(new URL(locationSP1).openStream());
+				fail("Expected a bundle exception on duplicate bundle update: " + region);
+			} catch (BundleException e) {
+				// expected
+				assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+			} catch (IOException e) {
+				fail("Failed to open bunldle location: " + e.getMessage());
+			}
+
+			// now uninstall SP1 and try to update PP1 to SP1 again
+			Bundle regionSP1 = region.getBundle(SP1, new Version(1, 0, 0));
+			regionSP1.uninstall();
+
+			try {
+				regionPP1.update(new URL(locationSP1).openStream());
+			} catch (IOException e) {
+				fail("Failed to open bunldle location: " + e.getMessage());
+			}
+		}
+	}
+
+	public void testBundleCollisionConnectedRegions() throws BundleException, InvalidSyntaxException {
+		// get the system region
+		Region systemRegion = digraph.getRegion(0);
+		Collection<Bundle> bundles = new HashSet<Bundle>();
+		// create 3 connected test regions and install each bundle into each region
+		int numRegions = 4;
+		String regionName = "ConnectedRegion_";
+		for (int i = 0; i < numRegions; i++) {
+			Region region = digraph.createRegion(regionName + i);
+			// Import the system bundle from the systemRegion
+			digraph.connect(region, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(id=0)").build(), systemRegion);
+			// must import Boolean services into systemRegion to test
+			digraph.connect(systemRegion, digraph.createRegionFilterBuilder().allow(RegionFilter.VISIBLE_SERVICE_NAMESPACE, "(objectClass=java.lang.Boolean)").build(), region);
+		}
+
+		Region region0 = digraph.getRegion(regionName + 0);
+		Region region1 = digraph.getRegion(regionName + 1);
+		Region region2 = digraph.getRegion(regionName + 2);
+
+		// create connections that share the bundles we want
+		RegionFilterBuilder filterBuilder = digraph.createRegionFilterBuilder();
+		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=" + PP1 + ")");
+		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=" + SP1 + ")");
+		filterBuilder.allow(RegionFilter.VISIBLE_BUNDLE_NAMESPACE, "(bundle-symbolic-name=" + CP1 + ")");
+		region1.connectRegion(region0, filterBuilder.build());
+		region2.connectRegion(region1, filterBuilder.build());
+
+		// install a bundle in each region
+		bundleInstaller.installBundle(PP1, region0);
+		bundleInstaller.installBundle(SP1, region1);
+		bundleInstaller.installBundle(CP1, region2);
+
+		// Should not be able to install SP1 into region0 because that would collide with SP1->region1->region0
+		assertInstallFail(SP1, region0);
+		// Should not be able to install PP1 into region1 because that would collide with region1->region0->PP1
+		assertInstallFail(PP1, region1);
+		// Should not be able to install PP1 into region2 because that would collide with region2->region1->region0->PP1
+		assertInstallFail(PP1, region2);
+		// Should not be able to install CP1 into region0 because that would collide with CP1->region2->region1->region0
+		assertInstallFail(CP1, region0);
+	}
+
+	private void assertInstallFail(String name, Region region) {
+		try {
+			Bundle b = bundleInstaller.installBundle(name, region);
+			b.uninstall();
+			fail("Expected a bundle exception on duplicate bundle install: " + region);
+		} catch (BundleException e) {
+			// expected
+			assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
+		}
 	}
 }

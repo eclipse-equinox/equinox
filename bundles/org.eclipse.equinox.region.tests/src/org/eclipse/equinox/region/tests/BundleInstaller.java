@@ -39,21 +39,24 @@ public class BundleInstaller {
 		this.testBundle = testBundle;
 	}
 
-	synchronized public Bundle installBundle(String name, Region region) throws BundleException {
-		return installBundle(name, region, true);
-	}
-
 	synchronized public Bundle installBundle(String name) throws BundleException {
-		return installBundle(name, null, true);
+		return installBundle(name, null);
 	}
 
-	synchronized public Bundle installBundle(String name, Region region, boolean track) throws BundleException {
-		if (bundles == null && track)
+	synchronized public Bundle installBundle(String name, Region region) throws BundleException {
+		if (bundles == null)
 			return null;
 		String location = getBundleLocation(name);
 		Bundle bundle = region != null ? region.installBundle(location) : context.installBundle(location);
-		if (track)
+		if (bundles.containsKey(name)) {
+			int offset = 0;
+			while (bundles.containsKey(name + '_' + offset)) {
+				offset++;
+			}
+			bundles.put(name + '_' + offset, bundle);
+		} else {
 			bundles.put(name, bundle);
+		}
 		return bundle;
 	}
 
@@ -155,7 +158,7 @@ public class BundleInstaller {
 	}
 
 	synchronized public Bundle[] refreshPackages(Bundle[] refresh) {
-		if (bundles == null)
+		if (refresh == null)
 			return null;
 		final boolean[] flag = new boolean[] {false};
 		FrameworkListener listener = new FrameworkListener() {
@@ -192,7 +195,7 @@ public class BundleInstaller {
 	}
 
 	synchronized public boolean resolveBundles(Bundle[] resolve) {
-		if (bundles == null)
+		if (resolve == null)
 			return false;
 		return frameworkWiring.resolveBundles(Arrays.asList(resolve));
 	}

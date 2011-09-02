@@ -28,8 +28,6 @@ import org.osgi.framework.hooks.bundle.FindHook;
 
 public class RegionBundleEventHookTests {
 
-	private FindHook mockFindHook;
-
 	private BundleEvent bundleEvent;
 
 	private Collection<BundleContext> contexts;
@@ -43,7 +41,6 @@ public class RegionBundleEventHookTests {
 	@Before
 	public void setUp() throws Exception {
 		this.mockRegionDigraph = EasyMock.createMock(RegionDigraph.class);
-		this.mockFindHook = EasyMock.createMock(FindHook.class);
 		this.eventBundle = new StubBundle();
 		this.bundleEvent = new BundleEvent(BundleEvent.STARTED, this.eventBundle, this.eventBundle);
 		this.contexts = new HashSet<BundleContext>();
@@ -59,28 +56,28 @@ public class RegionBundleEventHookTests {
 
 	@Test
 	public void testEventAllowed() {
-		this.mockFindHook = new FindHook() {
+		FindHook mockFindHook = new FindHook() {
 
 			@Override
 			public void find(BundleContext context, Collection<Bundle> bundles) {
 				// nothing
 			}
 		};
-		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, this.mockFindHook, this.threadLocal);
+		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.bundleEvent, this.contexts);
 		assertEquals(1, this.contexts.size());
 	}
 
 	@Test
 	public void testEventNotAllowed() {
-		this.mockFindHook = new FindHook() {
+		FindHook mockFindHook = new FindHook() {
 
 			@Override
 			public void find(BundleContext context, Collection<Bundle> bundles) {
 				bundles.clear();
 			}
 		};
-		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, this.mockFindHook, this.threadLocal);
+		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.bundleEvent, this.contexts);
 		assertTrue(this.contexts.isEmpty());
 	}

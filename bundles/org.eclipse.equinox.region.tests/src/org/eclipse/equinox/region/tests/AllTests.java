@@ -19,6 +19,7 @@ import org.eclipse.equinox.region.tests.system.RegionSystemTests;
 public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Equinox Region Tests");
+		suite.addTest(new JUnit4TestAdapter(RegionBundleCollisionHookTests.class));
 		suite.addTest(new JUnit4TestAdapter(RegionBundleEventHookTests.class));
 		suite.addTest(new JUnit4TestAdapter(RegionBundleFindHookTests.class));
 		suite.addTest(new JUnit4TestAdapter(RegionResolverHookTests.class));

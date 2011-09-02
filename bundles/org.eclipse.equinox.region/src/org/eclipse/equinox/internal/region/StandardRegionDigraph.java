@@ -55,6 +55,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 
 	private final SubgraphTraverser subgraphTraverser;
 
+	private final Object bundleCollisionHook;
 	private final org.osgi.framework.hooks.bundle.EventHook bundleEventHook;
 	private final org.osgi.framework.hooks.bundle.FindHook bundleFindHook;
 	@SuppressWarnings("deprecation")
@@ -83,8 +84,16 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		// Note we are safely escaping this only because we know the hook impls
 		// do not escape the digraph to other threads on construction.
 		this.resolverHookFactory = new RegionResolverHookFactory(this);
+
 		this.bundleFindHook = new RegionBundleFindHook(this, bundleContext == null ? 0 : bundleContext.getBundle().getBundleId());
 		this.bundleEventHook = new RegionBundleEventHook(this, this.bundleFindHook, this.threadLocal);
+		Object hook;
+		try {
+			hook = new RegionBundleCollisionHook(this, this.threadLocal);
+		} catch (Throwable t) {
+			hook = null;
+		}
+		this.bundleCollisionHook = hook;
 
 		this.serviceFindHook = new RegionServiceFindHook(this);
 		this.serviceEventHook = new RegionServiceEventHook(serviceFindHook);
@@ -424,6 +433,10 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	@Override
 	public ResolverHookFactory getResolverHookFactory() {
 		return resolverHookFactory;
+	}
+
+	Object getBundleCollisionHook() {
+		return bundleCollisionHook;
 	}
 
 	@Override

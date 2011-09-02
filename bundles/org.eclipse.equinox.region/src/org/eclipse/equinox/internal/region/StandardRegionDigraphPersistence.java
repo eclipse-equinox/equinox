@@ -98,8 +98,8 @@ final class StandardRegionDigraphPersistence implements RegionDigraphPersistence
 		}
 	}
 
-	static RegionDigraph readRegionDigraph(DataInputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, InvalidSyntaxException, BundleException {
-		RegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
+	static StandardRegionDigraph readRegionDigraph(DataInputStream in, BundleContext bundleContext, ThreadLocal<Region> threadLocal) throws IOException, InvalidSyntaxException, BundleException {
+		StandardRegionDigraph digraph = new StandardRegionDigraph(bundleContext, threadLocal);
 
 		// Read and check the persistent name and version
 		String persistentName = in.readUTF();
