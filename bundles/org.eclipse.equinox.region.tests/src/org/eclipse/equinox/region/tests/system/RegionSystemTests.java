@@ -497,7 +497,6 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 	public void testBundleCollisionConnectedRegions() throws BundleException, InvalidSyntaxException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
-		Collection<Bundle> bundles = new HashSet<Bundle>();
 		// create 3 connected test regions and install each bundle into each region
 		int numRegions = 4;
 		String regionName = "ConnectedRegion_";
