@@ -448,20 +448,23 @@ public class SignatureBlockProcessor implements SignedContentConstants {
 	}
 
 	private static String stripContinuations(String entry) {
-		if (entry.indexOf("\n ") < 0) //$NON-NLS-1$
+		if (entry.indexOf("\n ") < 0 && entry.indexOf("\r ") < 0) //$NON-NLS-1$//$NON-NLS-2$
 			return entry;
-		StringBuffer buffer = new StringBuffer(entry.length());
-		int cont = entry.indexOf("\n "); //$NON-NLS-1$
-		int start = 0;
-		while (cont >= 0) {
-			buffer.append(entry.substring(start, cont - 1));
-			start = cont + 2;
-			cont = cont + 2 < entry.length() ? entry.indexOf("\n ", cont + 2) : -1; //$NON-NLS-1$
-		}
-		// get the last one continuation
-		if (start < entry.length())
-			buffer.append(entry.substring(start));
+		StringBuffer buffer = new StringBuffer(entry);
+		removeAll(buffer, "\r\n "); //$NON-NLS-1$
+		removeAll(buffer, "\n "); //$NON-NLS-1$
+		removeAll(buffer, "\r "); //$NON-NLS-1$
 		return buffer.toString();
+	}
+
+	private static StringBuffer removeAll(StringBuffer buffer, String toRemove) {
+		int index = buffer.indexOf(toRemove);
+		int length = toRemove.length();
+		while (index > 0) {
+			buffer.replace(index, index + length, ""); //$NON-NLS-1$
+			index = buffer.indexOf(toRemove, index);
+		}
+		return buffer;
 	}
 
 	private static byte[] readIntoArray(BundleEntry be) throws IOException {
