@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -214,6 +214,8 @@ public class Main {
 	private static final String NO_DEFAULT = "@noDefault"; //$NON-NLS-1$
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
+	// Placeholder for hashcode of installation directory
+	private static final String INSTALL_HASH_PLACEHOLDER = "@install.hash"; //$NON-NLS-1$
 
 	// types of parent classloaders the framework can have
 	private static final String PARENT_CLASSLOADER_APP = "app"; //$NON-NLS-1$
@@ -1236,6 +1238,12 @@ public class Main {
 					String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
 					location = new File(base, userDefaultAppendage).getAbsolutePath();
 				}
+				int idx = location.indexOf(INSTALL_HASH_PLACEHOLDER);
+				if (idx == 0) {
+					throw new RuntimeException("The location cannot start with '" + INSTALL_HASH_PLACEHOLDER + "': " + location); //$NON-NLS-1$ //$NON-NLS-2$
+				} else if (idx > 0) {
+					location = location.substring(0, idx) + getInstallDirHash() + location.substring(idx + INSTALL_HASH_PLACEHOLDER.length());
+				}
 				result = buildURL(location, true);
 			}
 		} finally {
@@ -1314,17 +1322,7 @@ public class Main {
 		if (installURL == null)
 			return null;
 		File installDir = new File(installURL.getFile());
-		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
-		int hashCode;
-		try {
-			hashCode = installDir.getCanonicalPath().hashCode();
-		} catch (IOException ioe) {
-			// fall back to absolute path
-			hashCode = installDir.getAbsolutePath().hashCode();
-		}
-		if (hashCode < 0)
-			hashCode = -(hashCode);
-		String installDirHash = String.valueOf(hashCode);
+		String installDirHash = getInstallDirHash();
 
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
@@ -1351,6 +1349,29 @@ public class Main {
 		}
 		String userHome = System.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
+	}
+
+	/**
+	 * Return hash code identifying an absolute installation path
+	 * @return hash code as String
+	 */
+	private String getInstallDirHash() {
+		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
+		URL installURL = getInstallLocation();
+		if (installURL == null)
+			return ""; //$NON-NLS-1$
+		File installDir = new File(installURL.getFile());
+		int hashCode;
+		try {
+			hashCode = installDir.getCanonicalPath().hashCode();
+		} catch (IOException ioe) {
+			// fall back to absolute path
+			hashCode = installDir.getAbsolutePath().hashCode();
+		}
+		if (hashCode < 0)
+			hashCode = -(hashCode);
+		String installDirHash = String.valueOf(hashCode);
+		return installDirHash;
 	}
 
 	/**

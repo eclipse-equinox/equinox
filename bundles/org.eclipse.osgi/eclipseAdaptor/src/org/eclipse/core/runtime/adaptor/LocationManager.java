@@ -73,6 +73,8 @@ public class LocationManager {
 	private static final String NO_DEFAULT = "@noDefault"; //$NON-NLS-1$
 	private static final String USER_HOME = "@user.home"; //$NON-NLS-1$
 	private static final String USER_DIR = "@user.dir"; //$NON-NLS-1$
+	// Placeholder for hashcode of installation directory
+	private static final String INSTALL_HASH_PLACEHOLDER = "@install.hash"; //$NON-NLS-1$
 
 	private static final String INSTANCE_DATA_AREA_PREFIX = ".metadata/.plugins/"; //$NON-NLS-1$
 
@@ -204,6 +206,12 @@ public class LocationManager {
 			String base = substituteVar(location, USER_DIR, PROP_USER_DIR);
 			location = new File(base, userDefaultAppendage).getAbsolutePath();
 		}
+		int idx = location.indexOf(INSTALL_HASH_PLACEHOLDER);
+		if (idx == 0) {
+			throw new RuntimeException("The location cannot start with '" + INSTALL_HASH_PLACEHOLDER + "': " + location); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (idx > 0) {
+			location = location.substring(0, idx) + getInstallDirHash() + location.substring(idx + INSTALL_HASH_PLACEHOLDER.length());
+		}
 		URL url = buildURL(location, true);
 		BasicLocation result = null;
 		if (url != null) {
@@ -295,17 +303,7 @@ public class LocationManager {
 		if (installURL == null)
 			return null;
 		File installDir = new File(installURL.getFile());
-		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
-		int hashCode;
-		try {
-			hashCode = installDir.getCanonicalPath().hashCode();
-		} catch (IOException ioe) {
-			// fall back to absolute path
-			hashCode = installDir.getAbsolutePath().hashCode();
-		}
-		if (hashCode < 0)
-			hashCode = -(hashCode);
-		String installDirHash = String.valueOf(hashCode);
+		String installDirHash = getInstallDirHash();
 
 		String appName = "." + ECLIPSE; //$NON-NLS-1$
 		File eclipseProduct = new File(installDir, PRODUCT_SITE_MARKER);
@@ -332,6 +330,30 @@ public class LocationManager {
 		}
 		String userHome = FrameworkProperties.getProperty(PROP_USER_HOME);
 		return new File(userHome, appName + "/" + pathAppendage).getAbsolutePath(); //$NON-NLS-1$
+	}
+
+	/**
+	 * Return hash code identifying an absolute installation path
+	 * @return hash code as String
+	 */
+	private static String getInstallDirHash() {
+		// compute an install dir hash to prevent configuration area collisions with other eclipse installs
+		String installProperty = FrameworkProperties.getProperty(PROP_INSTALL_AREA);
+		URL installURL = buildURL(installProperty, true);
+		if (installURL == null)
+			return ""; //$NON-NLS-1$
+		File installDir = new File(installURL.getFile());
+		int hashCode;
+		try {
+			hashCode = installDir.getCanonicalPath().hashCode();
+		} catch (IOException ioe) {
+			// fall back to absolute path
+			hashCode = installDir.getAbsolutePath().hashCode();
+		}
+		if (hashCode < 0)
+			hashCode = -(hashCode);
+		String installDirHash = String.valueOf(hashCode);
+		return installDirHash;
 	}
 
 	/**

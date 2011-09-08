@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.equinox.launcher.motif.hpux.ia64_32;singleton:=true
-Bundle-Version: 1.1.100.qualifier
-Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.3.0)"
+Bundle-Version: 1.1.200.qualifier
+Fragment-Host: org.eclipse.equinox.launcher;bundle-version="[1.0.0,1.4.0)"
 Bundle-Vendor: %providerName
 Eclipse-PlatformFilter: (& (osgi.ws=motif) (osgi.os=hpux) (osgi.arch=ia64_32) )
 Bundle-Localization: launcher.motif.hpux.ia64_32
