@@ -79,7 +79,7 @@ public final class RegionBundleEventHook implements EventHook {
 		if (installRegion != null) {
 			addBundleToRegion(eventBundle, installRegion);
 		} else {
-			Region defaultAssignRegion = this.regionDigraph.getDefaultAssignRegion();
+			Region defaultAssignRegion = this.regionDigraph.getDefaultRegion();
 			if (defaultAssignRegion != null) {
 				addBundleToRegion(eventBundle, defaultAssignRegion);
 			} else {

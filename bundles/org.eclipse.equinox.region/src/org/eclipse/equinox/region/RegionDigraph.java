@@ -221,7 +221,7 @@ public interface RegionDigraph extends Iterable<Region> {
 	 * 
 	 * @param defaultRegion the region where all bundles installed via {@link BundleContext} will be assigned to
 	 */
-	void setDefaultAssignRegion(Region defaultRegion);
+	void setDefaultRegion(Region defaultRegion);
 
 	/**
 	 * Gets the default {@link Region}, where all bundles installed via {@link BundleContext} are assigned.
@@ -230,6 +230,6 @@ public interface RegionDigraph extends Iterable<Region> {
 	 * @param defaultRegion the region where all bundles installed via {@link BundleContext} will be assigned to
 	 * @return The default region to assign to or <b>null</b> if it isn't set
 	 */
-	Region getDefaultAssignRegion();
+	Region getDefaultRegion();
 
 }

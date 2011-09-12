@@ -67,7 +67,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	private long originTimeStamp;
 	private final AtomicLong timeStamp = new AtomicLong();
 
-	private volatile Region defaultAssignRegion;
+	private volatile Region defaultRegion;
 
 	StandardRegionDigraph(StandardRegionDigraph origin) throws BundleException {
 		this(null, null, origin);
@@ -108,6 +108,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		} else {
 			this.originTimeStamp = -1;
 		}
+		this.defaultRegion = null;
 	}
 
 	/**
@@ -260,6 +261,9 @@ public final class StandardRegionDigraph implements RegionDigraph {
 			throw new IllegalArgumentException("The region cannot be null."); //$NON-NLS-1$
 		notifyRemoving(region);
 		synchronized (this.monitor) {
+			if (this.defaultRegion != null && this.defaultRegion.equals(region)) {
+				this.defaultRegion = null;
+			}
 			this.regions.remove(region);
 			this.edges.remove(region);
 			for (Region r : this.edges.keySet()) {
@@ -463,13 +467,16 @@ public final class StandardRegionDigraph implements RegionDigraph {
 	}
 
 	@Override
-	public void setDefaultAssignRegion(Region defaultRegion) {
-		this.defaultAssignRegion = defaultRegion;
-
+	public void setDefaultRegion(Region defaultRegion) {
+		if (this.regions.contains(defaultRegion) || defaultRegion == null) {
+			this.defaultRegion = defaultRegion;
+		} else {
+			throw new IllegalArgumentException("Can't set " + defaultRegion.toString() + " as default region. It isn't contained in this digraph.");
+		}
 	}
 
 	@Override
-	public Region getDefaultAssignRegion() {
-		return this.defaultAssignRegion;
+	public Region getDefaultRegion() {
+		return this.defaultRegion;
 	}
 }
