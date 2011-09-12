@@ -21,6 +21,8 @@ import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.resource.*;
+import org.osgi.framework.wiring.BundleWire;
+import org.osgi.framework.wiring.BundleWiring;
 
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
@@ -437,6 +439,46 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		} catch (BundleException e) {
 			// expected
 		}
+	}
+
+	public void testOSGiCardinality() throws BundleException {
+		State state = buildEmptyState();
+		long bundleID = 0;
+		Dictionary manifest;
+
+		manifest = loadManifest("p1.osgi.MF");
+		BundleDescription p1 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p2.osgi.MF");
+		BundleDescription p2 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("p3.osgi.MF");
+		BundleDescription p3 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+		manifest = loadManifest("c5.osgi.MF");
+		BundleDescription c5 = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME), bundleID++);
+
+		state.addBundle(p1);
+		state.addBundle(p2);
+		state.addBundle(p3);
+		state.addBundle(c5);
+
+		state.resolve();
+
+		assertTrue("p1", p1.isResolved());
+		assertTrue("p2", p2.isResolved());
+		assertTrue("p3", p3.isResolved());
+		assertTrue("c5", c5.isResolved());
+
+		BundleWiring c5Wiring = c5.getWiring();
+		List requiredWires = c5Wiring.getRequiredWires(null);
+		assertEquals("Wrong number of required wires.", 3, requiredWires.size());
+		List expectedCapabilities = new ArrayList();
+		expectedCapabilities.addAll(p1.getCapabilities("namespace.1"));
+		expectedCapabilities.addAll(p2.getCapabilities("namespace.1"));
+		expectedCapabilities.addAll(p3.getCapabilities("namespace.1"));
+		for (Iterator iWires = requiredWires.iterator(); iWires.hasNext();) {
+			BundleWire wire = (BundleWire) iWires.next();
+			expectedCapabilities.remove(wire.getCapability());
+		}
+		assertTrue("Unexpected capability wire: " + requiredWires, expectedCapabilities.isEmpty());
 	}
 
 	private void checkUsedImports(BundleDescription importer, ExportPackageDescription[] expectedPackages) {

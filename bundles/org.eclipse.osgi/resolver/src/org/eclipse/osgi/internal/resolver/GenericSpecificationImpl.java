@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.internal.core.FilterImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.ResourceConstants;
 
 public class GenericSpecificationImpl extends VersionConstraintImpl implements GenericSpecification {
 	private Filter matchingFilter;
@@ -170,6 +171,8 @@ public class GenericSpecificationImpl extends VersionConstraintImpl implements G
 				result.putAll(arbitraryDirectives);
 			if ((resolution & GenericSpecification.RESOLUTION_OPTIONAL) != 0)
 				result.put(Constants.RESOLUTION_DIRECTIVE, Constants.RESOLUTION_OPTIONAL);
+			if ((resolution & GenericSpecification.RESOLUTION_MULTIPLE) != 0)
+				result.put(ResourceConstants.REQUIREMENT_CARDINALITY_DIRECTIVE, ResourceConstants.REQUIREMENT_CARDINALITY_MULTIPLE);
 			if (matchingFilter != null) {
 				result.put(Constants.FILTER_DIRECTIVE, matchingFilter.toString());
 			}

@@ -32,7 +32,7 @@ public class StateBuilder {
 	private static final String[] DEFINED_FRAGMENT_HOST_DIRECTIVES = {Constants.EXTENSION_DIRECTIVE};
 	static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
 	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
-	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE};
+	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE, ResourceConstants.REQUIREMENT_CARDINALITY_DIRECTIVE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_ATTRS = {};
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
@@ -506,9 +506,14 @@ public class StateBuilder {
 						throw new BundleException(message + " : filter", BundleException.MANIFEST_ERROR, e); //$NON-NLS-1$
 					}
 				}
-				String resolution = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
-				if (Constants.RESOLUTION_OPTIONAL.equals(resolution))
-					spec.setResolution(GenericSpecification.RESOLUTION_OPTIONAL);
+				String resolutionDirective = element.getDirective(Constants.RESOLUTION_DIRECTIVE);
+				int resolution = 0;
+				if (Constants.RESOLUTION_OPTIONAL.equals(resolutionDirective))
+					resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
+				String cardinality = element.getDirective(ResourceConstants.REQUIREMENT_CARDINALITY_DIRECTIVE);
+				if (ResourceConstants.REQUIREMENT_CARDINALITY_MULTIPLE.equals(cardinality))
+					resolution |= GenericSpecification.RESOLUTION_MULTIPLE;
+				spec.setResolution(resolution);
 				spec.setAttributes(getAttributes(element, DEFINED_REQUIRE_CAPABILITY_ATTRS));
 				spec.setArbitraryDirectives(getDirectives(element, DEFINED_REQUIRE_CAPABILITY_DIRECTIVES));
 				result.add(spec);

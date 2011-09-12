@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: c3.osgi
+Bundle-Version: 1.0
+Require-Capability: 
+ namespace.1;
+  filter:="(&(rank>=100)(!(rank>=400))
+          (percent>=0.1)(!(percent>=0.4))
+          (test.version>=1.0)(!(test.version>=4.0)))";
+  cardinality:="multiple"
