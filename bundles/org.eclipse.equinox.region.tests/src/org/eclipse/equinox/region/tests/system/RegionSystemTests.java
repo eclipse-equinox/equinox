@@ -545,4 +545,45 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 			assertEquals("Wrong exception type.", BundleException.DUPLICATE_BUNDLE_ERROR, e.getType());
 		}
 	}
+
+	public void testDefaultRegion() throws BundleException {
+		digraph.setDefaultRegion(null);
+
+		Region systemRegion = digraph.getRegion(regionBundle);
+		Region pp1Region = digraph.createRegion(PP1);
+
+		Bundle pp1Bundle = bundleInstaller.installBundle(PP1, null);
+		Region result = digraph.getRegion(pp1Bundle);
+		assertEquals("Wrong region", systemRegion, result);
+
+		pp1Bundle.uninstall();
+
+		digraph.setDefaultRegion(pp1Region);
+		pp1Bundle = bundleInstaller.installBundle(PP1, null);
+		result = digraph.getRegion(pp1Bundle);
+		assertEquals("Wrong region", pp1Region, result);
+
+		digraph.setDefaultRegion(null);
+	}
+
+	public void testRemoveDefaultRegion() throws BundleException {
+		digraph.setDefaultRegion(null);
+
+		Region pp1Region = digraph.createRegion(PP1);
+		digraph.setDefaultRegion(pp1Region);
+		digraph.removeRegion(pp1Region);
+		assertEquals("DefaultRegion is not null", null, digraph.getDefaultRegion());
+	}
+
+	public void testSetNotExistingDefaultRegion() throws BundleException {
+		Region pp1Region = digraph.createRegion(PP1);
+		digraph.removeRegion(pp1Region);
+		try {
+			digraph.setDefaultRegion(pp1Region);
+			assertFalse("IllegalArgumentException not thrown for setting non-existing region as default", true);
+		} catch (IllegalArgumentException iae) {
+			assertNull("DefaultRegion is not null", digraph.getDefaultRegion());
+		}
+	}
+
 }

@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 import org.easymock.EasyMock;
+import org.eclipse.equinox.internal.region.StandardRegionDigraph;
 import org.eclipse.equinox.region.Region;
 import org.eclipse.equinox.region.RegionDigraph;
 import org.eclipse.virgo.teststubs.osgi.framework.StubBundle;
@@ -38,15 +39,48 @@ public class RegionBundleEventHookTests {
 
 	private ThreadLocal<Region> threadLocal;
 
+	private StandardRegionDigraph digraph;
+
+	private Region mockRegion1;
+
+	private Region mockRegion2;
+
+	private BundleEvent installedEvent1;
+
+	private BundleEvent installedEvent2;
+
+	private StubBundle eventBundle1;
+
+	private StubBundle eventBundle2;
+
 	@Before
 	public void setUp() throws Exception {
 		this.mockRegionDigraph = EasyMock.createMock(RegionDigraph.class);
 		this.eventBundle = new StubBundle();
+
+		this.eventBundle1 = new StubBundle(1L, "my.bundle1", new Version("0"), "loc1");
+		this.eventBundle2 = new StubBundle(2L, "my.bundle2", new Version("0"), "loc2");
+
 		this.bundleEvent = new BundleEvent(BundleEvent.STARTED, this.eventBundle, this.eventBundle);
+
+		this.installedEvent1 = new BundleEvent(BundleEvent.INSTALLED, eventBundle1, this.eventBundle);
+		this.installedEvent2 = new BundleEvent(BundleEvent.INSTALLED, eventBundle2, this.eventBundle);
+
 		this.contexts = new HashSet<BundleContext>();
 		StubBundleContext stubListenerBundleContext = new StubBundleContext();
 		this.contexts.add(stubListenerBundleContext);
 		this.threadLocal = new ThreadLocal<Region>();
+
+		StubBundle stubSystemBundle = new StubBundle(0L, "osgi.framework", new Version("0"), "loc");
+		StubBundleContext stubBundleContext = new StubBundleContext();
+		stubBundleContext.addInstalledBundle(stubSystemBundle);
+		this.digraph = new StandardRegionDigraph(stubBundleContext, new ThreadLocal<Region>());
+		this.digraph.createRegion("mockRegion1");
+		this.digraph.createRegion("mockRegion2");
+		this.mockRegion1 = digraph.getRegion("mockRegion1");
+		this.mockRegion2 = digraph.getRegion("mockRegion2");
+		this.mockRegion1.addBundle(this.eventBundle);
+
 	}
 
 	@After
@@ -80,6 +114,28 @@ public class RegionBundleEventHookTests {
 		EventHook eventHook = new RegionBundleEventHook(this.mockRegionDigraph, mockFindHook, this.threadLocal);
 		eventHook.event(this.bundleEvent, this.contexts);
 		assertTrue(this.contexts.isEmpty());
+	}
+
+	@Test
+	public void testDefaultRegion() {
+		FindHook mockFindHook = new FindHook() {
+
+			@Override
+			public void find(BundleContext context, Collection<Bundle> bundles) {
+				bundles.clear();
+			}
+		};
+
+		this.digraph.setDefaultRegion(null);
+		EventHook eventHook = new RegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
+		eventHook.event(this.installedEvent1, this.contexts);
+		assertTrue(this.digraph.getRegion(this.eventBundle1).equals(this.mockRegion1));
+
+		this.digraph.setDefaultRegion(this.mockRegion2);
+		eventHook = new RegionBundleEventHook(this.digraph, mockFindHook, this.threadLocal);
+		eventHook.event(this.installedEvent2, this.contexts);
+		assertTrue(this.digraph.getRegion(this.eventBundle2).equals(this.mockRegion2));
+
 	}
 
 }
