@@ -2,8 +2,8 @@
 <feature
       id="org.eclipse.equinox.serverside.sdk"
       label="%featureName"
-      version="3.7.0.qualifier"
-      provider-name="%providerName" 
+      version="3.8.0.qualifier"
+      provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
 
