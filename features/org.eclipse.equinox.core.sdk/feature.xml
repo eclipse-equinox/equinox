@@ -2,11 +2,11 @@
 <feature
       id="org.eclipse.equinox.core.sdk"
       label="%featureName"
-      version="3.7.0.qualifier"
-      provider-name="%providerName" 
+      version="3.8.0.qualifier"
+      provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
-      
+
    <description>
       %description
    </description>
@@ -298,13 +298,13 @@
          version="0.0.0"
          unpack="false"/>
 
- <plugin
+   <plugin
          id="org.eclipse.equinox.region"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
+
    <plugin
          id="org.eclipse.equinox.region.source"
          download-size="0"

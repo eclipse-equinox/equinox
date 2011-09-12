@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.equinox.executable"
       label="%featureName"
-      version="3.5.0.qualifier"
+      version="3.6.0.qualifier"
       license-feature="org.eclipse.license"
       license-feature-version="1.0.0.qualifier">
 
@@ -139,8 +139,8 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-         
-	<plugin
+
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.aix.ppc64"
          os="aix"
          ws="gtk"
@@ -150,7 +150,7 @@
          version="0.0.0"
          fragment="true"/>
 
-	<plugin
+   <plugin
          id="org.eclipse.equinox.launcher.gtk.aix.ppc"
          os="aix"
          ws="gtk"
@@ -169,7 +169,7 @@
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-                  
+
    <plugin
          id="org.eclipse.equinox.launcher.motif.hpux.ia64_32"
          os="hpux"
