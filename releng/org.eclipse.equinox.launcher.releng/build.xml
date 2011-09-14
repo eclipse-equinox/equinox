@@ -169,6 +169,9 @@
 	</target>
 	
 	<target name="buildNix" if="buildNix">
+		
+		<fixcrlf file="${libraryFolder}/${ws}/build.sh" />
+		
 		<!-- exec the build.sh for flavors of unix -->
 		<exec dir="${libraryFolder}/${ws}" executable="sh" failonerror="true">
 				<arg value="build.sh"/>
@@ -238,6 +241,8 @@
 	</target>
 	
 	<target name="buildMac" if="buildMac">
+		<fixcrlf file="${libraryFolder}/${ws}/build.sh" />
+		
 		<exec dir="${libraryFolder}/carbon" executable="sh" failonerror="true">
 			<arg value="build.sh"/>
 			<arg line="-ws ${ws} -arch ${arch}"/>
