@@ -170,7 +170,7 @@
 	
 	<target name="buildNix" if="buildNix">
 		
-		<fixcrlf file="${libraryFolder}" includes="**/*.sh,**/*.mak" />
+		<fixcrlf file="${libraryFolder}" includes="**/*.sh,**/*.mak,**/*.c,**/*.h" />
 		
 		<!-- exec the build.sh for flavors of unix -->
 		<exec dir="${libraryFolder}/${ws}" executable="sh" failonerror="true">
