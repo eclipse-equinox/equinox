@@ -292,6 +292,7 @@
 		<resolveProperty name="machine" value="m_${os}.${arch}" />
 		<resolveProperty name="javaArg" value="j_${os}.${arch}" />
 		<resolveProperty name="userName" value="u_${os}.${arch}" />
+		<property name="userName" value="swtbuild" />
 		
 		<!-- windows is built locally, everything else is remote -->
 		<condition property="local" >
@@ -306,9 +307,11 @@
 		<condition property="workspace" value="/Users/swtbuild/build/equinox" >
 			<equals arg1="${os}" arg2="macosx"/>
 		</condition>
+		<!--
 		<condition property="workspace" value="~/equinox" >
 			<equals arg1="${os}.${arch}" arg2="solaris.x86" />
 		</condition>
+		-->
 		<property name="workspace" value="/bluebird/teamswt/equinox" />
 	</target>
 	
