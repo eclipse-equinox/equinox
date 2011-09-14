@@ -13,10 +13,12 @@
 	<property name="gitBinaryRepo" value="git.eclipse.org/gitroot/equinox/rt.equinox.binaries.git" />
 	<property name="gitTag" value="master" />
 	
+	<property name="keyfile" value="C:\BUILD\ssh\swtbuild_dsa_private" /> 
+	
 	<available file="${basedir}/launcher.properties" property="launcherProperties" value="${basedir}/launcher.properties" />
 	
 	<!-- Macro for execing scp -->
-	<macrodef name="SCP">
+	<macrodef name="scp-exec">
 		<attribute name="dir" />
 		<attribute name="source"/>
 		<attribute name="destination" />
@@ -33,23 +35,11 @@
 	</macrodef>
 	
 	<!-- remote mkdir -->
-	<macrodef name="mkremote">
+	<macrodef name="mkremote-exec">
 		<attribute name="dir" />
 		<sequential>
 			<echo message="mkdir @{dir}" />
-			<loadresource property="@{dir}_machine" >
-				<string value="@{dir}" />
-				<filterchain>
-					<replaceregex pattern="^(([^@]*@)?([^:]*)):.*$" replace="\1" flags="g"/>
-				</filterchain>
-			</loadresource>
-			<loadresource property="@{dir}_folder" >
-				<string value="@{dir}" />
-				<filterchain>
-					<replaceregex pattern="^([^@]*@)?[^:]*:(.*)$" replace="\2" flags="g"/>
-				</filterchain>
-			</loadresource>	
-
+			<parseLocation prefix="@{dir}" location="@{dir}" />
 			<exec executable="ssh" >
 				<arg value="${@{dir}_machine}" />
 				<arg line="mkdir -p ${@{dir}_folder}" />
@@ -57,6 +47,56 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="mkremote-task">
+		<attribute name="dir" />
+		<sequential>
+			<echo message="mkdir @{dir}" />
+			<parseLocation prefix="@{dir}" location="@{dir}" />
+			<sshexec host="${@{dir}_machine}" username="${@{dir}_user}" keyfile="${keyfile}" trust="true" failonerror="true" command="mkdir -p ${@{dir}_folder}" />
+		</sequential>
+	</macrodef>
+				
+	<macrodef name="parseLocation" >
+		<attribute name="prefix" />
+		<attribute name="location" />
+		<sequential>
+			<loadresource property="@{prefix}_user_machine" >
+				<string value="@{location}" />
+				<filterchain>
+					<replaceregex pattern="^(([^@]*@)?([^:]*)):.*$" replace="\1" flags="g"/>
+				</filterchain>
+			</loadresource>
+			
+			<loadresource property="@{prefix}_folder" >
+				<string value="@{location}" />
+				<filterchain>
+					<replaceregex pattern="^([^@]*@)?[^:]*:(.*)$" replace="\2" flags="g"/>
+				</filterchain>
+			</loadresource>
+			
+			<condition property="@{prefix}_user" value="swtbuild" >
+				<not><contains string="${@{prefix}_user_machine}" substring="@" /></not>
+			</condition>
+			<condition property="@{prefix}_machine" value="${@{prefix}_user_machine}" >
+				<not><contains string="${@{prefix}_user_machine}" substring="@" /></not>
+			</condition>
+			
+			<loadresource property="@{prefix}_user" >
+				<string value="@{prefix}_user_machine" />
+				<filterchain>
+					<replaceregex pattern="^([^@]*)@(.*)$" replace="\1" flags="g"/>
+				</filterchain>
+			</loadresource>
+			
+			<loadresource property="@{prefix}_machine" >
+				<string value="@{prefix}_user_machine" />
+				<filterchain>
+					<replaceregex pattern="^([^@]*)@(.*)$" replace="\2" flags="g"/>
+				</filterchain>
+			</loadresource>
+		</sequential>
+	</macrodef>
+		
 	<!-- macro to resolve properties because we can't do ${${prop}} -->
 	<macrodef name="resolveProperty">
 		<attribute name="name" />
@@ -94,17 +134,9 @@
 	</target>
 	
 	<target name="init_fragment" >
-		<!-- set to "contributed" or "fragments" according to which folder under org.eclipse.equinox.launcher to find the fragment -->
-		<condition property="subFolder" value="contributed" else="fragments">
-			<or>
-				<equals arg1="s390" arg2="${arch}" />
-				<equals arg1="s390x" arg2="${arch}" />
-				<equals arg1="solaris.x86" arg2="${os}.${arch}" />
-			</or>
-		</condition>
 		<!-- mac only has arch in fragment name for x86_64 -->
-		<condition property="fragmentFolder" value="${subFolder}/org.eclipse.equinox.launcher.${ws}.${os}.${arch}" 
-											 else="${subFolder}/org.eclipse.equinox.launcher.${ws}.${os}" >
+		<condition property="fragmentFolder" value="org.eclipse.equinox.launcher.${ws}.${os}.${arch}" 
+											 else="org.eclipse.equinox.launcher.${ws}.${os}" >
 			<not>
 				<and>
 					<equals arg1="macosx" arg2="${os}"/>
@@ -139,12 +171,12 @@
 				<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/sbin:/usr/X11R6/bin" />
 		</exec>	
 		
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<mkremote-exec dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote-exec dir="${resultsBaseFolder}/${fragmentFolder}" />
 		
 		<!-- copy the resulting executable and .so -->
-		<SCP dir="${libraryFolder}/${ws}" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<scp-exec dir="${libraryFolder}/${ws}" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<scp-exec dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/${fragmentFolder}" />
 		
 		<condition property="copyMotifLib" >
 			<equals arg1="aix.motif" arg2="${os}.${ws}" />
@@ -153,7 +185,7 @@
 	</target>
 			
 	<target name="copyMotifLib" if="copyMotifLib" >
-		<SCP dir="${libraryFolder}/${ws}" source="libeclipse-motif.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
+		<scp-exec dir="${libraryFolder}/${ws}" source="libeclipse-motif.so" destination="${resultsBaseFolder}/${fragmentFolder}" failonerror="false" />
 	</target>
 	
 	<target name="buildS390" if="buildS390">
@@ -161,19 +193,19 @@
 			<equals arg1="${arch}" arg2="s390"/>
 		</condition>
 		
-		<SCP dir="${basedir}" source="library.zip" destination="${remoteHost}:~/equinox" />
+		<scp-exec dir="${basedir}" source="library.zip" destination="${remoteHost}:~/equinox" />
 		
 		<exec dir="${basedir}" executable="ssh" failonerror="true">
 			<arg value="${remoteHost}"/>
 			<arg value="cd equinox; rm -rf library; unzip -q library.zip; library/gtk/build.sh"/>
 		</exec>	
 		
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<mkremote-exec dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote-exec dir="${resultsBaseFolder}/${fragmentFolder}" />
 		
 		<!-- copy the resulting executable and .so -->
-		<SCP dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<SCP dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse_*.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<scp-exec dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<scp-exec dir="${basedir}" source="${remoteHost}:~/equinox/library/gtk/eclipse_*.so" destination="${resultsBaseFolder}/${fragmentFolder}" />
 	</target>
 				
 	<target name="buildWindows" if="buildWindows">
@@ -187,20 +219,15 @@
 			<arg line="clean all" />
 		</exec>
 		
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<mkremote-task dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
+		<mkremote-task dir="${resultsBaseFolder}/${fragmentFolder}" />
 		
-		<SCP dir="${libraryFolder}/${ws}" source="eclipse.exe eclipsec.exe" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}" />
-		<SCP dir="${libraryFolder}/${ws}" source="eclipse_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
-		<condition property="copyWPF">
-			<equals arg1="${ws}" arg2="wpf" />
-		</condition>
-		<antcall target="copyWPF" />
-	</target>
-	
-	<target name="copyWPF" if="copyWPF" >
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
-		<SCP dir="${libraryFolder}/${ws}" source="com_${maj_ver}${min_ver}.dll" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" failonerror="false" />
+		<scp trust="yes" keyfile="${keyfile}" todir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}">
+			<fileset dir="${libraryFolder}/${ws}" includes="eclipse.exe,eclipsec.exe" />
+		</scp>	
+		<scp trust="yes" keyfile="${keyfile}" todir="${resultsBaseFolder}/${fragmentFolder}">
+			<fileset dir="${libraryFolder}/${ws}" includes="eclipse_${maj_ver}${min_ver}.dll,com_${maj_ver}${min_ver}.dll" />
+		</scp>	
 	</target>
 	
 	<target name="buildMac" if="buildMac">
@@ -211,10 +238,10 @@
 			<env key="PATH" value="/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin:${extraPath}" />
 		</exec>	
 
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS"/>
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
-		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS" />
-		<SCP dir="${libraryFolder}/carbon" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/org.eclipse.equinox.launcher/${fragmentFolder}" />
+		<mkremote-exec dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS"/>
+		<mkremote-exec dir="${resultsBaseFolder}/${fragmentFolder}" />
+		<scp-exec dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/${arch}/Eclipse.app/Contents/MacOS" />
+		<scp-exec dir="${libraryFolder}/carbon" source="eclipse_${maj_ver}${min_ver}.so" destination="${resultsBaseFolder}/${fragmentFolder}" />
 		<!-- x86 and ppc are the same universal binary, copy to both under the executable feature -->
 		<condition property="copyMacPPC">
 			<equals arg1="${arch}" arg2="x86" />
@@ -224,7 +251,7 @@
 	
 	<target name="copyMacPPC" if="copyMacPPC" >
 		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
-		<SCP dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
+		<scp-exec dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
 	</target>
 	
 	<target name="determineBuild" >
@@ -319,10 +346,10 @@
 		<git dir="${staging}/rt.equinox.binaries" command="pull" />
 		<git dir="${staging}/rt.equinox.framework" command="pull" />
 		
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/*" destination="${staging}/rt.equinox.binaries/org.eclipse.equinox.executable" />
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="${staging}/rt.equinox.binaries" />
-		<SCP dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="${staging}/rt.equinox.binaries" />
-
+		<execscp-exec dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.executable/*" destination="${staging}/rt.equinox.binaries/org.eclipse.equinox.executable" />
+		<execscp-exec dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/fragments/*"     destination="${staging}/rt.equinox.binaries" />
+		<execscp-exec dir="${staging}" flag="r" source="${resultsBaseFolder}/org.eclipse.equinox.launcher/contributed/*"   destination="${staging}/rt.equinox.binaries" />
+		
 		<git dir="${staging}/rt.equinox.binaries" command="commit" arguments="-a -m &quot;Recompiled binaries ${commitMsg}&quot;" />
 		<git dir="${staging}/rt.equinox.binaries" command="tag" arguments="${tag}" />
 		<git dir="${staging}/rt.equinox.binaries" command="push" />
@@ -356,16 +383,15 @@
 		</condition>
 		
 		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
-		<mkremote dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
-		<SCP dir="${basedir}" source="remote.sh build.xml launcher.properties library.zip" destination="${scpDest}:${workspace}/${os}.${ws}.${arch}" />
+		<mkremote-task dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
+		
+		<scp trust="yes" keyfile="${keyfile}" file="${libraryFolder}/carbon/eclipse" todir="${scpDest}:${workspace}/${os}.${ws}.${arch}" >
+			<fileset dir="${basedir}" includes="remote.sh,build.xml,launcher.properties,library.zip" />
+		</scp>
+		
 		<echo message="Execing ssh ${machine}" />
-		<exec executable="ssh" failonerror="true" >
-			<arg line="${scpDest}" />
-			<arg line="sh ${workspace}/${os}.${ws}.${arch}/remote.sh" />
-			<arg line="${javaArg}" />
-			<arg line="-Dos=${os} -Dws=${ws} -Darch=${arch} -DgitTag=${gitTag}" />
-			<arg value="-DresultsBaseFolder=${resultsBaseFolder}" />
-		</exec>
+		<sshexec host="${machine}" username="${userName}" keyfile="${keyfile}" trust="true" failonerror="true"
+				 command="sh ${workspace}/${os}.${ws}.${arch}/remote.sh ${javaArg} -Dos=${os} -Dws=${ws} -Darch=${arch} -DgitTag=${gitTag} -DresultsBaseFolder=${resultsBaseFolder}" />
 	</target>
 
 	<target name="buildConfig" depends="init_exeFolder,init_fragment,loadProperties,determineBuild" >
