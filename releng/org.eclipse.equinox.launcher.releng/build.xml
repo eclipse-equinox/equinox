@@ -41,7 +41,7 @@
 			<echo message="mkdir @{dir}" />
 			<parseLocation prefix="@{dir}" location="@{dir}" />
 			<exec executable="ssh" >
-				<arg value="${@{dir}_machine}" />
+				<arg value="${@{dir}_user_machine}" />
 				<arg line="mkdir -p ${@{dir}_folder}" />
 			</exec>
 		</sequential>
