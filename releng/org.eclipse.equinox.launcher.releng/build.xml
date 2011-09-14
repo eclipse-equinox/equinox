@@ -392,7 +392,7 @@
 		<zip basedir="${localGitClone}/bundles/org.eclipse.equinox.executable/library" includes="**" destfile="${basedir}/library.zip" />
 		<mkremote-task dir="${scpDest}:${workspace}/${os}.${ws}.${arch}"/>
 		
-		<scp trust="yes" keyfile="${keyfile}" file="${libraryFolder}/carbon/eclipse" todir="${scpDest}:${workspace}/${os}.${ws}.${arch}" >
+		<scp trust="yes" keyfile="${keyfile}" todir="${scpDest}:${workspace}/${os}.${ws}.${arch}" >
 			<fileset dir="${basedir}" includes="remote.sh,build.xml,launcher.properties,library.zip" />
 		</scp>
 		
