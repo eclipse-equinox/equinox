@@ -262,7 +262,7 @@
 	</target>
 	
 	<target name="copyMacPPC" if="copyMacPPC" >
-		<mkremote dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
+		<mkremote-exec dir="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
 		<scp-exec dir="${libraryFolder}/carbon" source="eclipse" destination="${resultsBaseFolder}/org.eclipse.equinox.executable/${exeFolder}/${ws}/${os}/ppc/Eclipse.app/Contents/MacOS" />
 	</target>
 	
