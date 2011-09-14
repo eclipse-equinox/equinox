@@ -170,7 +170,7 @@
 	
 	<target name="buildNix" if="buildNix">
 		
-		<fixcrlf file="${libraryFolder}/${ws}/build.sh" />
+		<fixcrlf file="${libraryFolder}" includes="**/*.sh,**/*.mak" />
 		
 		<!-- exec the build.sh for flavors of unix -->
 		<exec dir="${libraryFolder}/${ws}" executable="sh" failonerror="true">
@@ -241,7 +241,7 @@
 	</target>
 	
 	<target name="buildMac" if="buildMac">
-		<fixcrlf file="${libraryFolder}/${ws}/build.sh" />
+		<fixcrlf file="${libraryFolder}" includes="**/*.sh,**/*.mak" />
 		
 		<exec dir="${libraryFolder}/carbon" executable="sh" failonerror="true">
 			<arg value="build.sh"/>
