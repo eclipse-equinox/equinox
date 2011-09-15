@@ -10,8 +10,46 @@ package org.eclipse.equinox.internal.resolver;
 
 import java.util.*;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.Version;
 
 public class FilterParser {
+	static class Range {
+		private char leftRule = 0;
+		private Version leftVersion;
+		private Version rightVersion;
+		private char rightRule = 0;
+		private Collection<Version> excludes = new ArrayList<Version>(0);
+
+		public String toString() {
+			if (rightVersion == null) {
+				return leftVersion.toString();
+			}
+			return leftRule + leftVersion.toString() + ',' + rightVersion.toString() + rightRule;
+		}
+
+		void addExclude(Version exclude) {
+			this.excludes.add(exclude);
+			setLeft(leftRule, leftVersion);
+			setRight(rightRule, rightVersion);
+		}
+
+		boolean setLeft(char leftRule, Version leftVersion) {
+			if (this.leftVersion != null && this.leftVersion != leftVersion)
+				return false;
+			this.leftRule = excludes.contains(leftVersion) ? '(' : leftRule;
+			this.leftVersion = leftVersion;
+			return true;
+		}
+
+		boolean setRight(char rightRule, Version rightVersion) {
+			if (this.rightVersion != null && this.rightVersion != rightVersion)
+				return false;
+			this.rightRule = excludes.contains(rightVersion) ? ')' : rightRule;
+			this.rightVersion = rightVersion;
+			return true;
+		}
+	}
+
 	public static class FilterComponent {
 		/* filter operators */
 		public static final int EQUAL = 1;
@@ -58,78 +96,82 @@ public class FilterParser {
 		}
 
 		public Map<String, String> getStandardOSGiAttributes(String... versions) {
-			@SuppressWarnings("unchecked")
-			Collection<String> versionAttrs = (Collection<String>) (versions == null ? Collections.emptyList() : Arrays.asList(versions));
 			if (op != AND && op != EQUAL)
 				throw new IllegalStateException("Invalid filter for Starndard OSGi Attributes: " + op); //$NON-NLS-1$
 			Map<String, String> result = new HashMap<String, String>();
-			addAttributes(result, versionAttrs, false);
-			// fix >= ranges (e.g. Import-Package: foo; version=1.0 == (&(osgi.wiring.package=foo)(version>=0))
-			for (String versionAttr : versionAttrs) {
-				String range = result.get(versionAttr);
-				if (range != null && range.startsWith("[") && !(range.endsWith(")") || range.endsWith("]"))) {
-					range = range.substring(1);
-					result.put(versionAttr, range);
+			Map<String, Range> versionAttrs = new HashMap<String, Range>();
+			if (versions != null) {
+				for (String versionAttr : versions) {
+					versionAttrs.put(versionAttr, null);
 				}
 			}
+			addAttributes(result, versionAttrs, false);
+			for (Map.Entry<String, Range> entry : versionAttrs.entrySet()) {
+				Range range = entry.getValue();
+				if (range != null) {
+					result.put(entry.getKey(), range.toString());
+				}
+			}
+
 			return result;
 		}
 
-		private void addAttributes(Map<String, String> attributes, Collection<String> versionAttrs, boolean not) {
+		private void addAttributes(Map<String, String> attributes, Map<String, Range> versionAttrs, boolean not) {
 			if (op == EQUAL) {
-				if (!versionAttrs.contains(attr)) {
+				if (!versionAttrs.containsKey(attr)) {
 					attributes.put(attr, value);
 				} else {
 					// this is an exact range e.g. [value,value]
-					String currentRange = attributes.get(attr);
-					if (currentRange != null || not)
-						throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
-					attributes.put(attr, '[' + value + ',' + value + ']');
+					Range currentRange = versionAttrs.get(attr);
+					if (currentRange != null) {
+						if (not) {
+							// this is an expanded for of the filter, e.g.:
+							// [1.0,2.0) -> (&(version>=1.0)(version<=2.0)(!(version=2.0)))
+							currentRange.addExclude(new Version(value));
+						} else {
+							throw new IllegalStateException("Invalid range for: " + attr); //$NON-NLS-1$
+						}
+					}
+					currentRange = new Range();
+					Version version = new Version(value);
+					currentRange.setLeft('[', version);
+					currentRange.setRight(']', version);
+					versionAttrs.put(attr, currentRange);
 				}
 			} else if (op == LESS) {
-				if (!versionAttrs.contains(attr))
+				if (!versionAttrs.containsKey(attr))
 					throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
-				String currentRange = attributes.get(attr);
-				boolean rangeStart = currentRange != null && (currentRange.startsWith("(") || currentRange.startsWith("[")); //$NON-NLS-1$ //$NON-NLS-2$
-				boolean rangeEnd = currentRange != null && (currentRange.endsWith(")") || currentRange.endsWith("]")); //$NON-NLS-1$ //$NON-NLS-2$
-				if (rangeStart && rangeEnd) {
-					throw new IllegalStateException("range is already defined for attribute: " + attr); //$NON-NLS-1$
+				Range currentRange = versionAttrs.get(attr);
+				if (currentRange == null) {
+					currentRange = new Range();
+					versionAttrs.put(attr, currentRange);
 				}
 				if (not) {
 					// this must be a range start "(value"
-					if (rangeStart)
+					if (!currentRange.setLeft('(', new Version(value)))
 						throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
-					currentRange = '(' + value + (rangeEnd ? (',' + currentRange) : ""); //$NON-NLS-1$
 				} else {
 					// this must be a range end "value]"
-					if (rangeEnd)
+					if (!currentRange.setRight(']', new Version(value)))
 						throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
-					currentRange = (rangeStart ? (currentRange + ',') : "") + value + ']'; //$NON-NLS-1$
 				}
-				if (currentRange != null)
-					attributes.put(attr, currentRange);
 			} else if (op == GREATER) {
-				if (!versionAttrs.contains(attr))
+				if (!versionAttrs.containsKey(attr))
 					throw new IllegalStateException("Invalid attribute: " + attr); //$NON-NLS-1$
-				String currentRange = attributes.get(attr);
-				boolean rangeStart = currentRange != null && (currentRange.startsWith("(") || currentRange.startsWith("[")); //$NON-NLS-1$ //$NON-NLS-2$
-				boolean rangeEnd = currentRange != null && (currentRange.endsWith(")") || currentRange.endsWith("]")); //$NON-NLS-1$ //$NON-NLS-2$
-				if (rangeStart && rangeEnd) {
-					throw new IllegalStateException("range is already defined for attribute: " + attr); //$NON-NLS-1$
+				Range currentRange = versionAttrs.get(attr);
+				if (currentRange == null) {
+					currentRange = new Range();
+					versionAttrs.put(attr, currentRange);
 				}
 				if (not) {
 					// this must be a range end "value)"
-					if (rangeEnd)
+					if (!currentRange.setRight(')', new Version(value)))
 						throw new IllegalStateException("range end is already processed for attribute: " + attr); //$NON-NLS-1$
-					currentRange = (rangeStart ? (currentRange + ',') : "") + value + ')'; //$NON-NLS-1$
 				} else {
 					// this must be a range start "[value"
-					if (rangeStart)
+					if (!currentRange.setLeft('[', new Version(value)))
 						throw new IllegalStateException("range start is already processed for attribute: " + attr); //$NON-NLS-1$
-					currentRange = '[' + value + (rangeEnd ? (',' + currentRange) : ""); //$NON-NLS-1$
 				}
-				if (currentRange != null)
-					attributes.put(attr, currentRange);
 			} else if (op == AND) {
 				for (FilterComponent component : nested) {
 					component.addAttributes(attributes, versionAttrs, false);
@@ -137,7 +179,7 @@ public class FilterParser {
 			} else if (op == NOT) {
 				nested.get(0).addAttributes(attributes, versionAttrs, true);
 			} else {
-				throw new IllegalStateException("Invalid filter for standard OSGi requirements: " + op);
+				throw new IllegalStateException("Invalid filter for standard OSGi requirements: " + op); //$NON-NLS-1$
 			}
 		}
 	}
@@ -157,11 +199,11 @@ public class FilterParser {
 		try {
 			filter = parse_filter();
 		} catch (ArrayIndexOutOfBoundsException e) {
-			throw new InvalidSyntaxException("Filter ended abruptly", filterstring, e);
+			throw new InvalidSyntaxException("Filter ended abruptly", filterstring, e); //$NON-NLS-1$
 		}
 
 		if (pos != filterChars.length) {
-			throw new InvalidSyntaxException("Extraneous trailing characters: " + filterstring.substring(pos), filterstring);
+			throw new InvalidSyntaxException("Extraneous trailing characters: " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 		}
 		return filter;
 	}
@@ -171,7 +213,7 @@ public class FilterParser {
 		skipWhiteSpace();
 
 		if (filterChars[pos] != '(') {
-			throw new InvalidSyntaxException("Missing '(': " + filterstring.substring(pos), filterstring);
+			throw new InvalidSyntaxException("Missing '(': " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 		}
 
 		pos++;
@@ -181,7 +223,7 @@ public class FilterParser {
 		skipWhiteSpace();
 
 		if (filterChars[pos] != ')') {
-			throw new InvalidSyntaxException("Missing ')': " + filterstring.substring(pos), filterstring);
+			throw new InvalidSyntaxException("Missing ')': " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 		}
 
 		pos++;
@@ -300,7 +342,7 @@ public class FilterParser {
 			}
 		}
 
-		throw new InvalidSyntaxException("Invalid operator: " + filterstring.substring(pos), filterstring);
+		throw new InvalidSyntaxException("Invalid operator: " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 	}
 
 	private String parse_attr() throws InvalidSyntaxException {
@@ -324,7 +366,7 @@ public class FilterParser {
 		int length = end - begin;
 
 		if (length == 0) {
-			throw new InvalidSyntaxException("Missing attr: " + filterstring.substring(pos), filterstring);
+			throw new InvalidSyntaxException("Missing attr: " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 		}
 
 		return new String(filterChars, begin, length);
@@ -342,7 +384,7 @@ public class FilterParser {
 				}
 
 				case '(' : {
-					throw new InvalidSyntaxException("Invalid value: " + filterstring.substring(pos), filterstring);
+					throw new InvalidSyntaxException("Invalid value: " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 				}
 
 				case '\\' : {
@@ -360,7 +402,7 @@ public class FilterParser {
 		}
 
 		if (sb.length() == 0) {
-			throw new InvalidSyntaxException("Missing value: " + filterstring.substring(pos), filterstring);
+			throw new InvalidSyntaxException("Missing value: " + filterstring.substring(pos), filterstring); //$NON-NLS-1$
 		}
 
 		return sb.toString();
