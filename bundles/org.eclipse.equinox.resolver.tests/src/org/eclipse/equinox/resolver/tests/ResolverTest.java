@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others
+ * Copyright (c) 2011 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -84,6 +85,23 @@ public class ResolverTest extends TestCase {
 					namespace.put(description.getName(), repoCapabilities);
 				}
 				repoCapabilities.add(description);
+				if (repoCapabilities.size() > 1) {
+					Collections.sort(repoCapabilities, new Comparator<BaseDescription>() {
+						public int compare(BaseDescription d1, BaseDescription d2) {
+								String systemBundle = "org.eclipse.osgi";
+								if (systemBundle.equals(d1.getSupplier().getSymbolicName()) && !systemBundle.equals(d2.getSupplier().getSymbolicName()))
+									return -1;
+								else if (!systemBundle.equals(d1.getSupplier().getSymbolicName()) && systemBundle.equals(d2.getSupplier().getSymbolicName()))
+									return 1;
+							if (d1.getSupplier().isResolved() != d2.getSupplier().isResolved())
+								return d1.getSupplier().isResolved() ? -1 : 1;
+							int versionCompare = -(d1.getVersion().compareTo(d2.getVersion()));
+							if (versionCompare != 0)
+								return versionCompare;
+							return d1.getSupplier().getBundleId() <= d2.getSupplier().getBundleId() ? -1 : 1;
+						}
+					});
+				}
 			}
 		}
 		return repository;
@@ -477,9 +495,6 @@ public class ResolverTest extends TestCase {
 		}
 
 		public Collection<Capability> findProviders(Requirement requirement) throws NullPointerException {
-			if (requirement instanceof RootRequirement)
-				return ((RootRequirement) requirement).getTarget();
-
 			List<Capability> result = new ArrayList<Capability>();
 			Map<String, List<BaseDescription>> namespace = repository.get(requirement.getNamespace());
 			VersionConstraint specification = ((SpecificationReference) requirement).getSpecification();
