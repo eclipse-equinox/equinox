@@ -286,6 +286,9 @@ public class EquinoxResolverHook implements ResolverHookFactory, ResolverHook {
 	}
 
 	private List<GenericSpecification> createRequireCapability(Requirement requirement) {
+		Map<String, String> directives = new HashMap<String, String>(requirement.getDirectives());
+		// always remove the effective directive; all requirements are effective at this point
+		directives.remove(Constants.EFFECTIVE_DIRECTIVE);
 		String declaration = requirement.getNamespace() + toString(requirement.getAttributes(), "=", false) + toString(requirement.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
 		List<GenericSpecification> result = state.getFactory().createGenericSpecifications(declaration);
 		for (GenericSpecification genericSpecification : result) {
