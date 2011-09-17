@@ -1042,7 +1042,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 					 * We can exploit our knowledge that the security context of FrameworkSecurityManager
 					 * is an AccessControlContext to invoke it properly with the ProtectionDomain.
 					 */
-					AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
+					AccessControlContext acc = getAccessControlContext();
 					try {
 						sm.checkPermission((Permission) permission, acc);
 						return true;
@@ -1183,6 +1183,10 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	 */
 	public BundleProtectionDomain getProtectionDomain() {
 		return domain;
+	}
+
+	private AccessControlContext getAccessControlContext() {
+		return new AccessControlContext(new ProtectionDomain[] {domain});
 	}
 
 	protected BundleFragment[] getFragments() {
@@ -1483,6 +1487,11 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 				return null;
 			}
 		}
+
+		if (AccessControlContext.class.equals(adapterType)) {
+			return (A) getAccessControlContext();
+		}
+
 		if (BundleWiring.class.equals(adapterType)) {
 			if (state == UNINSTALLED)
 				return null;
