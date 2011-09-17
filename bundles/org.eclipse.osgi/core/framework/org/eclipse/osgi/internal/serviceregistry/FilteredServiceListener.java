@@ -29,6 +29,8 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	private final BundleContextImpl context;
 	/** is this an AllServiceListener */
 	private final boolean allservices;
+	/** is this an UnfilteredServiceListener */
+	private final boolean unfiltered;
 	/** an objectClass required by the filter */
 	private final String objectClass;
 	/** indicates whether the listener has been removed */
@@ -43,13 +45,14 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	 * @exception InvalidSyntaxException if the filter is invalid.
 	 */
 	FilteredServiceListener(final BundleContextImpl context, final ServiceListener listener, final String filterstring) throws InvalidSyntaxException {
+		this.unfiltered = (listener instanceof UnfilteredServiceListener);
 		if (filterstring == null) {
 			this.filter = null;
 			this.objectClass = null;
 		} else {
 			FilterImpl filterImpl = FilterImpl.newInstance(filterstring);
 			String clazz = filterImpl.getRequiredObjectClass();
-			if (clazz == null) {
+			if (unfiltered || (clazz == null)) {
 				this.objectClass = null;
 				this.filter = filterImpl;
 			} else {
@@ -115,7 +118,7 @@ class FilteredServiceListener implements ServiceListener, ListenerHook.ListenerI
 	private ServiceEvent filterMatch(ServiceEvent delivered) {
 		boolean modified = delivered.getType() == ServiceEvent.MODIFIED;
 		ServiceEvent event = modified ? ((ModifiedServiceEvent) delivered).getModifiedEvent() : delivered;
-		if (filter == null) {
+		if (unfiltered || (filter == null)) {
 			return event;
 		}
 		ServiceReference<?> reference = event.getServiceReference();

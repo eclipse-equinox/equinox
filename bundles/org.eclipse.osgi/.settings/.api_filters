@@ -890,6 +890,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/UnfilteredServiceListener.java" type="org.osgi.framework.UnfilteredServiceListener">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.framework.UnfilteredServiceListener"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
         <filter id="1143996420">
             <message_arguments>
