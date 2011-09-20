@@ -250,6 +250,11 @@ public class EquinoxResolverHook implements ResolverHookFactory, ResolverHook {
 			attributes = new HashMap<String, Object>(attributes);
 			attributes.remove("x-equinox-ee"); //$NON-NLS-1$
 		}
+		if (directives.get(Constants.EFFECTIVE_DIRECTIVE) != null) {
+			// always remove the effective directive
+			directives = new HashMap<String, String>(directives);
+			directives.remove(Constants.EFFECTIVE_DIRECTIVE);
+		}
 		String declaration = capability.getNamespace() + toString(attributes, "=", false) + toString(directives, ":=", true); //$NON-NLS-1$//$NON-NLS-2$
 		List<GenericDescription> result = state.getFactory().createGenericDescriptions(declaration);
 		for (GenericDescription genericDescription : result) {
@@ -286,6 +291,12 @@ public class EquinoxResolverHook implements ResolverHookFactory, ResolverHook {
 	}
 
 	private List<GenericSpecification> createRequireCapability(Requirement requirement) {
+		Map<String, String> directives = requirement.getDirectives();
+		if (directives.get(Constants.EFFECTIVE_DIRECTIVE) != null) {
+			// always remove the effective directive; all requirements are effective at this point
+			directives = new HashMap<String, String>(directives);
+			directives.remove(Constants.EFFECTIVE_DIRECTIVE);
+		}
 		String declaration = requirement.getNamespace() + toString(requirement.getAttributes(), "=", false) + toString(requirement.getDirectives(), ":=", true); //$NON-NLS-1$ //$NON-NLS-2$
 		List<GenericSpecification> result = state.getFactory().createGenericSpecifications(declaration);
 		for (GenericSpecification genericSpecification : result) {
