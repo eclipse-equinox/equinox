@@ -77,9 +77,9 @@ public class Activator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		bundleContext = context;
 		singleton = this;
+		RuntimeLog.setLogWriter(getPlatformWriter(context));
 		Dictionary urlProperties = new Hashtable();
 		urlProperties.put("protocol", "platform"); //$NON-NLS-1$ //$NON-NLS-2$
 		platformURLConverterService = context.registerService(URLConverter.class.getName(), new PlatformURLConverter(), urlProperties);
@@ -297,9 +297,9 @@ public class Activator implements BundleActivator {
 			localizationTracker.close();
 			localizationTracker = null;
 		}
+		RuntimeLog.setLogWriter(null);
 		bundleContext = null;
 		singleton = null;
-		RuntimeLog.setLogWriter(null);
 	}
 
 	/*
