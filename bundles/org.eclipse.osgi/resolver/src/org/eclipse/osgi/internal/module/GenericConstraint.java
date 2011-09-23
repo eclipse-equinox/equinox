@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,17 @@
 package org.eclipse.osgi.internal.module;
 
 import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.osgi.framework.Constants;
 
 public class GenericConstraint extends ResolverConstraint {
 
+	private final boolean effective;
 	private boolean supplierHasUses;
 
 	GenericConstraint(ResolverBundle bundle, GenericSpecification constraint) {
 		super(bundle, constraint);
+		String effectiveDirective = constraint.getRequirement().getDirectives().get(Constants.EFFECTIVE_DIRECTIVE);
+		effective = effectiveDirective == null || Constants.EFFECTIVE_RESOLVE.equals(effectiveDirective);
 	}
 
 	boolean isOptional() {
@@ -26,6 +30,10 @@ public class GenericConstraint extends ResolverConstraint {
 
 	boolean isMultiple() {
 		return !supplierHasUses && (((GenericSpecification) constraint).getResolution() & GenericSpecification.RESOLUTION_MULTIPLE) != 0;
+	}
+
+	boolean isEffective() {
+		return effective;
 	}
 
 	public String getNameSpace() {

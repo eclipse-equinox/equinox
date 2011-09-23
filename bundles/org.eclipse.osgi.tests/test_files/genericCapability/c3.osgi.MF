@@ -19,4 +19,7 @@ Require-Capability:
           (test.version>=3.0)(!(test.version>=4.0))
           (test.string~=abc))",
  osgi.identity;
-  filter:="(&(osgi.identity=p3.*)(version=1.0)(type=osgi.bundle))"
+  filter:="(&(osgi.identity=p3.*)(version=1.0)(type=osgi.bundle))",
+ not.effective;
+  filter:="(not.effective=true)";
+  effective:=active

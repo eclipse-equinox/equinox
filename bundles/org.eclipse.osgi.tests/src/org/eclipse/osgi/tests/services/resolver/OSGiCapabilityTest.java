@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.services.resolver;
 
-import org.osgi.framework.resource.ResourceConstants;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +20,7 @@ import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.resource.*;
 
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
@@ -111,6 +110,17 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkGenericBasics(4, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
 		checkGenericBasics(4, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
 
+		if (p1Manifest.indexOf(".osgi.") != -1) {
+			checkForNonEffectiveCapability(p1);
+			checkForNonEffectiveCapability(p2);
+			checkForNonEffectiveCapability(p3);
+		}
+		if (c1Manifest.indexOf(".osgi.") != -1) {
+			checkForNonEffectiveRequirement(c1);
+			checkForNonEffectiveRequirement(c2);
+			checkForNonEffectiveRequirement(c3);
+		}
+
 		File stateDir = getContext().getDataFile(getName()); //$NON-NLS-1$
 		stateDir.mkdirs();
 		try {
@@ -135,6 +145,35 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		checkGenericBasics(4, c1.getResolvedGenericRequires(), p1.getSelectedGenericCapabilities());
 		checkGenericBasics(4, c2.getResolvedGenericRequires(), p2.getSelectedGenericCapabilities());
 		checkGenericBasics(4, c3.getResolvedGenericRequires(), p3.getSelectedGenericCapabilities());
+
+		if (p1Manifest.indexOf(".osgi.") != -1) {
+			checkForNonEffectiveCapability(p1);
+			checkForNonEffectiveCapability(p2);
+			checkForNonEffectiveCapability(p3);
+		}
+		if (c1Manifest.indexOf(".osgi.") != -1) {
+			checkForNonEffectiveRequirement(c1);
+			checkForNonEffectiveRequirement(c2);
+			checkForNonEffectiveRequirement(c3);
+		}
+	}
+
+	private static final String notEffective = "not.effective";
+
+	private void checkForNonEffectiveCapability(BundleDescription p1) {
+		List nonEffectiveCaps = p1.getCapabilities(notEffective);
+		assertNotNull(nonEffectiveCaps);
+		assertEquals("Wrong number of not.effective", 1, nonEffectiveCaps.size());
+		Capability c = (Capability) nonEffectiveCaps.get(0);
+		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE, c.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
+	}
+
+	private void checkForNonEffectiveRequirement(BundleDescription c1) {
+		List nonEffectiveReqs = c1.getRequirements(notEffective);
+		assertNotNull(nonEffectiveReqs);
+		assertEquals("Wrong number of not.effective", 1, nonEffectiveReqs.size());
+		Requirement r = (Requirement) nonEffectiveReqs.get(0);
+		assertEquals("Wrong effective value", Constants.EFFECTIVE_ACTIVE, r.getDirectives().get(Constants.EFFECTIVE_DIRECTIVE));
 	}
 
 	private void checkGenericBasics(int expectedCnt, GenericDescription[] genRequired, GenericDescription[] genProvided) {

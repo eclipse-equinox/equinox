@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.osgi.framework.resource.ResourceConstants;
-
 import java.lang.reflect.Constructor;
 import java.util.*;
 import org.eclipse.osgi.framework.internal.core.*;
@@ -21,6 +19,7 @@ import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.ResourceConstants;
 
 /**
  * This class builds bundle description objects from manifests
@@ -491,11 +490,7 @@ public class StateBuilder {
 			result = new ArrayList<GenericSpecification>();
 		for (ManifestElement element : osgiRequires) {
 			String[] namespaces = element.getValueComponents();
-			types: for (String namespace : namespaces) {
-				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
-				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
-					break types;
-
+			for (String namespace : namespaces) {
 				GenericSpecificationImpl spec = new GenericSpecificationImpl();
 				spec.setType(namespace);
 				String filterSpec = element.getDirective(Constants.FILTER_DIRECTIVE);
@@ -581,11 +576,7 @@ public class StateBuilder {
 
 		for (ManifestElement element : osgiCapabilities) {
 			String[] namespaces = element.getValueComponents();
-			types: for (String namespace : namespaces) {
-				String effective = element.getDirective(Constants.EFFECTIVE_DIRECTIVE);
-				// Any declared osgi.identity capability with an effective directive value of "resolve" will be overridden.
-				if (effective != null && !Constants.EFFECTIVE_RESOLVE.equals(effective))
-					break types; // ignore any namespace that is not effective at resolve time.
+			for (String namespace : namespaces) {
 				if (ResourceConstants.IDENTITY_NAMESPACE.equals(namespace))
 					throw new BundleException("A bundle is not allowed to define a capability in the " + ResourceConstants.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 

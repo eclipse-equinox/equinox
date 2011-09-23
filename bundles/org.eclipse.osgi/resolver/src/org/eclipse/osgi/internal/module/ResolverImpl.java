@@ -1223,26 +1223,28 @@ public class ResolverImpl implements Resolver {
 		if (!failed) {
 			GenericConstraint[] genericRequires = bundle.getGenericRequires();
 			for (int i = 0; i < genericRequires.length; i++) {
-				if (!resolveGenericReq(genericRequires[i], cycle)) {
-					if (DEBUG || DEBUG_GENERICS)
-						ResolverImpl.log("** GENERICS " + genericRequires[i].getVersionConstraint().getName() + "[" + genericRequires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
-					if (genericRequires[i].isFromFragment()) {
-						if (!developmentMode) // only detach fragments when not in devmode
-							bundle.detachFragment(bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null);
-						continue;
-					}
-					if (!developmentMode) {
-						// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
-						failed = true;
-						break;
-					}
-				} else {
-					if ("osgi.ee".equals(genericRequires[i].getNameSpace())) { //$NON-NLS-1$
-						VersionSupplier supplier = genericRequires[i].getSelectedSupplier();
-						Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
-						if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
-							((BundleDescriptionImpl) bundle.getBundleDescription()).setEquinoxEE(ee);
+				if (genericRequires[i].isEffective()) {
+					if (!resolveGenericReq(genericRequires[i], cycle)) {
+						if (DEBUG || DEBUG_GENERICS)
+							ResolverImpl.log("** GENERICS " + genericRequires[i].getVersionConstraint().getName() + "[" + genericRequires[i].getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						state.addResolverError(genericRequires[i].getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, genericRequires[i].getVersionConstraint().toString(), genericRequires[i].getVersionConstraint());
+						if (genericRequires[i].isFromFragment()) {
+							if (!developmentMode) // only detach fragments when not in devmode
+								bundle.detachFragment(bundleMapping.get(genericRequires[i].getVersionConstraint().getBundle()), null);
+							continue;
+						}
+						if (!developmentMode) {
+							// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
+							failed = true;
+							break;
+						}
+					} else {
+						if ("osgi.ee".equals(genericRequires[i].getNameSpace())) { //$NON-NLS-1$
+							VersionSupplier supplier = genericRequires[i].getSelectedSupplier();
+							Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
+							if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
+								((BundleDescriptionImpl) bundle.getBundleDescription()).setEquinoxEE(ee);
+						}
 					}
 				}
 			}
@@ -1713,7 +1715,7 @@ public class ResolverImpl implements Resolver {
 		GenericCapability[] capabilities = rb.getGenericCapabilities();
 		List<GenericDescription> selectedCapabilities = new ArrayList<GenericDescription>(capabilities.length);
 		for (GenericCapability capability : capabilities)
-			if (permissionChecker.checkCapabilityPermission(capability.getGenericDescription()))
+			if (capability.isEffective() && permissionChecker.checkCapabilityPermission(capability.getGenericDescription()))
 				selectedCapabilities.add(capability.getGenericDescription());
 		GenericDescription[] selectedCapabilitiesArray = selectedCapabilities.toArray(new GenericDescription[selectedCapabilities.size()]);
 
@@ -2120,6 +2122,8 @@ public class ResolverImpl implements Resolver {
 
 	void addGenerics(GenericCapability[] generics) {
 		for (GenericCapability capability : generics) {
+			if (!capability.isEffective())
+				continue;
 			String type = capability.getGenericDescription().getType();
 			VersionHashMap<GenericCapability> namespace = resolverGenerics.get(type);
 			if (namespace == null) {
