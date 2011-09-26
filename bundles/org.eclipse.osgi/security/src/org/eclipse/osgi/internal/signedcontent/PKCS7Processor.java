@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2006, 2011 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -197,7 +197,11 @@ public class PKCS7Processor implements SignedContentConstants {
 			dateFormatSB.append("'Z'"); //$NON-NLS-1$
 
 			try {
-				DateFormat dateFormt = new SimpleDateFormat(dateFormatSB.toString());
+				// if the current locale is th_TH, or ja_JP_JP, then our dateFormat object will end up with
+				// a calendar such as Buddhist or Japanese Imperial Calendar, and the signing time will be 
+				// incorrect ... so always use English as the locale for parsing the time, resulting in a 
+				// Gregorian calendar
+				DateFormat dateFormt = new SimpleDateFormat(dateFormatSB.toString(), Locale.ENGLISH);
 				dateFormt.setTimeZone(TimeZone.getTimeZone("GMT")); //$NON-NLS-1$
 				signingTime = dateFormt.parse(dateString);
 			} catch (ParseException e) {
