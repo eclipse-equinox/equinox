@@ -13,7 +13,7 @@ package org.eclipse.equinox.metatype.impl;
 import org.eclipse.osgi.util.NLS;
 
 public class MetaTypeMsg extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.equinox.metatype.ExternalMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.equinox.metatype.impl.ExternalMessages"; //$NON-NLS-1$
 
 	public static String SERVICE_DESCRIPTION;
 	public static String UNEXPECTED_ELEMENT;
