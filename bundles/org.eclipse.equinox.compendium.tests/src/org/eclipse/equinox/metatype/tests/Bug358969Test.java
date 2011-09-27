@@ -16,7 +16,8 @@ import org.eclipse.equinox.metatype.impl.MetaTypeMsg;
 public class Bug358969Test extends AbstractTest {
 	public void test1() {
 		String message = "NLS properties file not configured correctly"; //$NON-NLS-1$
-		assertFalse(message, MetaTypeMsg.SERVICE_DESCRIPTION.startsWith("NLS missing message:")); //$NON-NLS-1$
-		assertFalse(message, LogTrackerMsg.Debug.startsWith("NLS missing message:")); //$NON-NLS-1$
+		String prefix = "NLS missing message:"; //$NON-NLS-1$
+		assertFalse(message, MetaTypeMsg.SERVICE_DESCRIPTION.startsWith(prefix));
+		assertFalse(message, LogTrackerMsg.Debug.startsWith(prefix));
 	}
 }
