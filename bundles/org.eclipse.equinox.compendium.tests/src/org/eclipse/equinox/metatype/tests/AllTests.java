@@ -22,6 +22,7 @@ public class AllTests {
 		suite.addTestSuite(BugTests.class);
 		suite.addTestSuite(SameOcdPidFactoryPidTest.class);
 		suite.addTestSuite(ExtendableTest.class);
+		suite.addTestSuite(Bug358969Test.class);
 		return suite;
 	}
 }
