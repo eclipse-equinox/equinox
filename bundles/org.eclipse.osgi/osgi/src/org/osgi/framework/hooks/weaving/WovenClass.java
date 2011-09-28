@@ -35,7 +35,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * 
  * @NotThreadSafe
  * @noimplement
- * @version $Id: c689a4c27dc39af1bf5f51338f1a8eaca1dddc1a $
+ * @version $Id$
  */
 public interface WovenClass {
 

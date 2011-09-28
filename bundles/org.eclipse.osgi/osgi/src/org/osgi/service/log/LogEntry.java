@@ -29,7 +29,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: e20fd66ff9e0264d77f7b7ea19212b305d1b3a40 $
+ * @version $Id$
  * @see LogReaderService#getLog
  * @see LogListener
  */

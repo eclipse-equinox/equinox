@@ -32,7 +32,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @ThreadSafe
  * @see ResolverHook
- * @version $Id: 4023566367435f07c047a7ba571f3bedc53aa37a $
+ * @version $Id$
  */
 public interface ResolverHookFactory {
 	/**

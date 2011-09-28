@@ -25,7 +25,7 @@ import java.util.List;
  * A resources can be wired together via capabilities and requirements.
  * 
  * @ThreadSafe
- * @version $Id: 047a96acb364265b1cd15a14c74bb5e44da19062 $
+ * @version $Id$
  */
 public interface Resource {
 	/**

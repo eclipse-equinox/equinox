@@ -29,7 +29,7 @@ import org.osgi.framework.BundleEvent;
  * (install, start, stop, update, and uninstall bundle) operations.
  * 
  * @ThreadSafe
- * @version $Id: 18ea1ec1f14f47410a43e99be4da3b2583149722 $
+ * @version $Id$
  */
 public interface EventHook {
 

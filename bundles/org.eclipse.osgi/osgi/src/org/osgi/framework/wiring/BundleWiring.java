@@ -48,7 +48,7 @@ import org.osgi.framework.resource.ResourceConstants;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: ca8336db29d70e54bf0e9ba516a618f041040b97 $
+ * @version $Id$
  */
 public interface BundleWiring extends BundleReference {
 	/**

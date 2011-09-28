@@ -47,7 +47,7 @@ import java.util.Set;
  * </ul>
  * 
  * @ThreadSafe
- * @version $Id: bab1ac06b46613f6cff39b291295d8b3e51d58ce $
+ * @version $Id$
  * @since 1.6
  */
 

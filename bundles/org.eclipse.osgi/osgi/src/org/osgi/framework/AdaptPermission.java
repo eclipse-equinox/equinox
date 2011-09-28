@@ -40,7 +40,7 @@ import java.util.Map;
  * {@code AdaptPermission} has one action: {@code adapt}.
  * 
  * @ThreadSafe
- * @version $Id: bc4c5d392d2534a7744f6fc00f4665502f82033c $
+ * @version $Id$
  */
 public class AdaptPermission extends BasicPermission {
 

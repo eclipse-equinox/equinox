@@ -20,7 +20,7 @@ package org.osgi.framework.resource;
  * A wire connecting a {@link Capability} to a {@link Requirement}.
  * 
  * @ThreadSafe
- * @version $Id: e1d43aa8b1d29bcd6d840397b18d6af0b3ae6824 $
+ * @version $Id$
  */
 public interface Wire {
 	/**

@@ -49,7 +49,7 @@ import org.osgi.framework.resource.ResourceConstants;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 2eb450f15fc9d4fe1b611dc55e2238b972b4c486 $
+ * @version $Id$
  */
 public interface BundleRevision extends BundleReference, Resource {
 	/**

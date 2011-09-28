@@ -42,7 +42,7 @@ import javax.security.auth.x500.X500Principal;
  * 
  * @since 1.3
  * @ThreadSafe
- * @version $Id: a902bc156ea997ed244831c7fab0f290a08ac0c1 $
+ * @version $Id$
  */
 public class FrameworkUtil {
 	/**

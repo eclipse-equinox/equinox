@@ -57,7 +57,7 @@ package org.osgi.service.permissionadmin;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 91132d707097c085fdb3fb7241c9599335427082 $
+ * @version $Id$
  */
 public interface PermissionAdmin {
 	/**

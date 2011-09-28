@@ -34,7 +34,7 @@ package org.osgi.framework.hooks.weaving;
  * bytes as modified by previously called weaving hooks.
  * 
  * @ThreadSafe
- * @version $Id: d1985029024baba2db1c56aab1e06ee953fd6365 $
+ * @version $Id$
  */
 
 public interface WeavingHook {

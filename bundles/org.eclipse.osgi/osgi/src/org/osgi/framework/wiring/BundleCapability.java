@@ -26,7 +26,7 @@ import org.osgi.framework.resource.Capability;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 3b48ced7e0ff67cc42031644879d6b1563296ba5 $
+ * @version $Id$
  */
 public interface BundleCapability extends Capability {
 

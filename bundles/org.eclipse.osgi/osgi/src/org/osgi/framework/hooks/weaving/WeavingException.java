@@ -23,7 +23,7 @@ package org.osgi.framework.hooks.weaving;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Id: eb38b85f6ed66ec445fb2f0ee7143df021327a9a $
+ * @version $Id$
  */
 
 public class WeavingException extends RuntimeException {

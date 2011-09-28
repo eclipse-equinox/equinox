@@ -35,7 +35,7 @@ import java.net.*;
  * @see AbstractURLStreamHandlerService
  * 
  * @ThreadSafe
- * @version $Id: 4982ef5b407669975afe2856a9702246d2d9c2ba $
+ * @version $Id$
  */
 public interface URLStreamHandlerService {
 	/**

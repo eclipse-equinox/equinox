@@ -34,7 +34,7 @@ import java.util.Dictionary;
  * @see BundleContext#registerService(String[],Object,Dictionary)
  * @ThreadSafe
  * @noimplement
- * @version $Id: f8da04fc7afe9fda184ea3e6f674c78fe86ffebb $
+ * @version $Id$
  */
 
 public interface ServiceRegistration<S> {

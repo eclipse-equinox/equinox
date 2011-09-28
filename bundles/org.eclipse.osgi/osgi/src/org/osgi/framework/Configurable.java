@@ -26,7 +26,7 @@ package org.osgi.framework;
  * {@code instanceof Configurable}.
  * 
  * @deprecated As of 1.2. Please use Configuration Admin service.
- * @version $Id: 29705c0c238aa456cda1b1a13458079bf1542771 $
+ * @version $Id$
  */
 public interface Configurable {
 	/**

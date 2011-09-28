@@ -34,7 +34,7 @@ import org.osgi.framework.FrameworkListener;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: f9f3f89b5b8d369453d645a52a482a385a2bd520 $
+ * @version $Id$
  */
 public interface FrameworkWiring extends BundleReference {
 	/**

@@ -35,7 +35,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @Immutable
  * @see FrameworkListener
- * @version $Id: e05c6ffd542fa432835961882bf6b15b0620ffb6 $
+ * @version $Id$
  */
 
 public class FrameworkEvent extends EventObject {

@@ -27,7 +27,7 @@ package org.osgi.service.url;
  * otherwise indicated.
  * 
  * @noimplement
- * @version $Id: 5ec8db316249f4b956fe083b986c11153d0fa8fe $
+ * @version $Id$
  */
 public interface URLConstants {
 	/**

@@ -24,7 +24,7 @@ import org.osgi.framework.Constants;
  * A requirement that has been declared from a {@link Resource} .
  * 
  * @ThreadSafe
- * @version $Id: 34bfa17b8e9a55493390d6df96f2dcb026c74185 $
+ * @version $Id$
  */
 public interface Requirement {
 	/**

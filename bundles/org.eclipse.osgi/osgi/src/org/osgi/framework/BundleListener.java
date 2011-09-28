@@ -34,7 +34,7 @@ import java.util.EventListener;
  * 
  * @see BundleEvent
  * @NotThreadSafe
- * @version $Id: d48b4a8a59c839466a3d749dde23980d236f58c6 $
+ * @version $Id$
  */
 
 public interface BundleListener extends EventListener {

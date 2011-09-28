@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceReference;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 3f44517702a7c759054adbd7bdcc561ace624af9 $
+ * @version $Id$
  */
 public interface LogService {
 	/**

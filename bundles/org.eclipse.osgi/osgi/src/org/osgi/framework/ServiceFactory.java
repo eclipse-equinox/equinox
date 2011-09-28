@@ -45,7 +45,7 @@ package org.osgi.framework;
  * @param <S> Type of Service
  * @see BundleContext#getService(ServiceReference)
  * @ThreadSafe
- * @version $Id: c241514f24ba70c6ca6dc10bd1700854d748e1c7 $
+ * @version $Id$
  */
 
 public interface ServiceFactory<S> {

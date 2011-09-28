@@ -76,7 +76,7 @@ import java.util.Dictionary;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: b51aaae4a35957753b41b47aa5a21603bbd262dd $
+ * @version $Id$
  */
 
 public interface BundleContext extends BundleReference {

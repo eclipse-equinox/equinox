@@ -49,7 +49,7 @@ import org.osgi.framework.FrameworkUtil;
  * RDNs).
  * 
  * @ThreadSafe
- * @version $Id: 6e10febd6a8cfc31973ece0af29c352ed972b105 $
+ * @version $Id$
  */
 public class BundleSignerCondition {
 	private static final String	CONDITION_TYPE	= "org.osgi.service.condpermadmin.BundleSignerCondition";

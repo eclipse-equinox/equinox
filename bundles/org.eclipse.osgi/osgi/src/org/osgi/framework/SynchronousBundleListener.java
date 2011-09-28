@@ -57,7 +57,7 @@ package org.osgi.framework;
  * @since 1.1
  * @see BundleEvent
  * @ThreadSafe
- * @version $Id: 74246f4ceeba7f9a5ee198048522f93d4691c51a $
+ * @version $Id$
  */
 
 public interface SynchronousBundleListener extends BundleListener {

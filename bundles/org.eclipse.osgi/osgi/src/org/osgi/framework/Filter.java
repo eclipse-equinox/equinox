@@ -41,7 +41,7 @@ import java.util.Map;
  * @see "Core Specification, Filters, for a description of the filter string syntax."
  * @ThreadSafe
  * @noimplement
- * @version $Id: 743270de7c45cf30e7904e13b1bb38ce08042467 $
+ * @version $Id$
  */
 public interface Filter {
 	/**

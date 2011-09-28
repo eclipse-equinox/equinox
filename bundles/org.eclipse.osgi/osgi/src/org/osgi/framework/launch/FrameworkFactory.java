@@ -46,7 +46,7 @@ import org.osgi.framework.Bundle;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: c370e19dba77231f0dbf1601218ad97b20391ea0 $
+ * @version $Id$
  */
 public interface FrameworkFactory {
 

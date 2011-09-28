@@ -28,7 +28,7 @@ import org.osgi.framework.launch.Framework;
  * 
  * @since 1.1
  * @noimplement
- * @version $Id: e243fc72560f18d79aee03782b3de92db8c21087 $
+ * @version $Id$
  */
 
 public interface Constants {

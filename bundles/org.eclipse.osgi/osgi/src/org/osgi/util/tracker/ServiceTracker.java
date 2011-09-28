@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
  * @param <S> The type of the service being tracked.
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @version $Id: df62459c90f49d06e89ff8f20915a9eec401217e $
+ * @version $Id$
  */
 public class ServiceTracker<S, T> implements ServiceTrackerCustomizer<S, T> {
 	/* set this to true to compile in debug messages */

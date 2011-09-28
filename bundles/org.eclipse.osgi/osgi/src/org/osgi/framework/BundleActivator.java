@@ -45,7 +45,7 @@ package org.osgi.framework;
  * object can be created by {@code Class.newInstance()}.
  * 
  * @NotThreadSafe
- * @version $Id: 1b73057bd270ab07f0a16430dba16e5132eea24f $
+ * @version $Id$
  */
 
 public interface BundleActivator {

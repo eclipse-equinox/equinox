@@ -32,7 +32,7 @@
  * <p>
  * {@code  Import-Package: org.osgi.service.log; version="[1.3,1.4)"}
  * 
- * @version $Id: 5c4120fc17628d242e1641557eacb9581b08c920 $
+ * @version $Id$
  */
 
 package org.osgi.service.log;

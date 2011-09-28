@@ -29,7 +29,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 887450b65e453145d57197e2db75db0bb2918ef4 $
+ * @version $Id$
  */
 public interface ConditionalPermissionAdmin {
 	/**

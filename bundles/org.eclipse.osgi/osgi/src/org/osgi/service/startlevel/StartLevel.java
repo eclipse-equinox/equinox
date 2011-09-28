@@ -68,7 +68,7 @@ import org.osgi.framework.Bundle;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: bf1b71ed6c9f9d75785b26dccb34362017d93f4a $
+ * @version $Id$
  * @deprecated This service has been replaced by the
  *             <code>org.osgi.framework.startlevel</code> package.
  */

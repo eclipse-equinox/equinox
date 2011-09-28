@@ -22,7 +22,7 @@ import java.util.Map;
  * A capability that has been declared from a {@link Resource}.
  * 
  * @ThreadSafe
- * @version $Id: f230000a3da509b0bff654795c4b694ec86f601c $
+ * @version $Id$
  */
 public interface Capability {
 

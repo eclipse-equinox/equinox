@@ -76,7 +76,7 @@ import org.osgi.framework.wiring.FrameworkWiring;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 9d9159b15aa541f80f0ca3260c13f4ee0fb7878f $
+ * @version $Id$
  */
 public interface Bundle extends Comparable<Bundle> {
 	/**

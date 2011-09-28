@@ -45,7 +45,7 @@ import org.osgi.framework.BundleEvent;
  * 
  * @param <T> The type of the tracked object.
  * @ThreadSafe
- * @version $Id: 0e80f2555530b217faef57726a5938f0087a45c5 $
+ * @version $Id$
  * @since 1.4
  */
 public interface BundleTrackerCustomizer<T> {

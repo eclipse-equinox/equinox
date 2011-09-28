@@ -29,7 +29,7 @@ import org.osgi.framework.Bundle;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: a268c3bdc986080fa16bdb2f56ba1d3800d030dd $
+ * @version $Id$
  * @deprecated This service has been replaced by the
  *             <code>org.osgi.framework.wiring</code> package.
  * @see org.osgi.service.packageadmin.ExportedPackage

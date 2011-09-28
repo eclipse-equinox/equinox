@@ -32,7 +32,7 @@ import org.osgi.framework.hooks.service.ListenerHook.ListenerInfo;
  * 
  * @ThreadSafe
  * @since 1.1
- * @version $Id: 61c6aa7e7d4c85b3e5a6a3a340155bcda0074505 $
+ * @version $Id$
  */
 
 public interface EventListenerHook {

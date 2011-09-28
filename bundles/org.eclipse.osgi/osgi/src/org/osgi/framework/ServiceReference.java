@@ -48,7 +48,7 @@ import java.util.Dictionary;
  * @see BundleContext#getService(ServiceReference)
  * @ThreadSafe
  * @noimplement
- * @version $Id: 3adba50fc211993c78ec5ecb46f8fa360a6cff6a $
+ * @version $Id$
  */
 
 public interface ServiceReference<S> extends Comparable<Object> {

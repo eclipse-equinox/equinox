@@ -24,7 +24,7 @@ import org.osgi.framework.resource.Wire;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 6dc92f05a3786642510e2f126c5e751c73cf8c3e $
+ * @version $Id$
  */
 public interface BundleWire extends Wire {
 	/**

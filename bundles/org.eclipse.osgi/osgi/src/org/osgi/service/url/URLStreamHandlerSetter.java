@@ -32,7 +32,7 @@ import java.net.URL;
  * {@code java.net.URL} for the protocol.
  * 
  * @ThreadSafe
- * @version $Id: f55d4c29678503c244f56dcb2b5621b3be11cc8d $
+ * @version $Id$
  */
 public interface URLStreamHandlerSetter {
 	/**

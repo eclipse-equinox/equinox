@@ -29,7 +29,7 @@ import java.util.EventListener;
  * method.
  * 
  * @ThreadSafe
- * @version $Id: 9b1ea6645e00027d03684b74745f47a42fb9ad30 $
+ * @version $Id$
  * @see LogReaderService
  * @see LogEntry
  * @see LogReaderService#addLogListener(LogListener)

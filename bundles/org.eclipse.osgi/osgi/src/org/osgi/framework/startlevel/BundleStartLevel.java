@@ -30,7 +30,7 @@ import org.osgi.framework.BundleReference;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 9a000be191fe3cb4ae82535a30940db0340d5356 $
+ * @version $Id$
  */
 public interface BundleStartLevel extends BundleReference {
 	/**

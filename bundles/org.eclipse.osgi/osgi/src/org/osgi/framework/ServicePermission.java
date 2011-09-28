@@ -52,7 +52,7 @@ import java.util.Set;
  * {@code ServicePermission} to get the specific service.
  * 
  * @ThreadSafe
- * @version $Id: 1b6ee9543f4cbc16add8dc8c40dfa9a6dfee7aa2 $
+ * @version $Id$
  */
 
 public final class ServicePermission extends BasicPermission {

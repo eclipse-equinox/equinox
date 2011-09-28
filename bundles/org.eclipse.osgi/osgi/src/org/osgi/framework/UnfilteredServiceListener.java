@@ -65,7 +65,7 @@ import org.osgi.framework.hooks.service.ListenerHook;
  * @see ServicePermission
  * @ThreadSafe
  * @since 1.7
- * @version $Id: 543a345802f8dc7a49d29e8fb7aee7004ee2b329 $
+ * @version $Id$
  */
 
 public interface UnfilteredServiceListener extends ServiceListener {

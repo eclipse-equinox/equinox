@@ -45,7 +45,7 @@ import java.util.List;
  * </ul>
  * 
  * @Immutable
- * @version $Id: dd1d84aa3175b2a2dfec879d04c93887f05161be $
+ * @version $Id$
  */
 public class ConditionInfo {
 	private final String	type;

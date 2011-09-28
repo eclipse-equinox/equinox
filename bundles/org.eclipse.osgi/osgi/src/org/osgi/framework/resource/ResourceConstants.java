@@ -30,7 +30,7 @@ import org.osgi.framework.wiring.BundleWiring;
  * otherwise indicated.
  * 
  * @Immutable
- * @version $Id: 7b7e18d49b0e34e527a70641eed790d808800287 $
+ * @version $Id$
  */
 public final class ResourceConstants {
 

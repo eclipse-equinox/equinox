@@ -34,7 +34,7 @@ package org.osgi.service.permissionadmin;
  * Permission class has been exported by a bundle.
  * 
  * @Immutable
- * @version $Id: b9516d07ada162fb8fc750f09e1e3a686189c46b $
+ * @version $Id$
  */
 public class PermissionInfo {
 	private final String	type;

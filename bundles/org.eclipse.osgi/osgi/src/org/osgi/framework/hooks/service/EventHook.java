@@ -30,7 +30,7 @@ import org.osgi.framework.ServiceEvent;
  * 
  * @ThreadSafe
  * @deprecated As of 1.1. Replaced by {@link EventListenerHook}.
- * @version $Id: 8fb8cfa2c8847f99fd84711e12f02a57bf06932e $
+ * @version $Id$
  */
 
 public interface EventHook {

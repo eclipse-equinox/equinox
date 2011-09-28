@@ -33,7 +33,7 @@ import java.util.EventObject;
  * @Immutable
  * @see ServiceListener
  * @see AllServiceListener
- * @version $Id: 670625e507deac1b5e6930fa448711c383e10d1a $
+ * @version $Id$
  */
 
 public class ServiceEvent extends EventObject {

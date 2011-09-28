@@ -55,7 +55,7 @@ package org.osgi.framework;
  * @see ServicePermission
  * @ThreadSafe
  * @since 1.3
- * @version $Id: 35cee8a49e89b7b222aa3f85e1af0b4a4b550ce6 $
+ * @version $Id$
  */
 
 public interface AllServiceListener extends ServiceListener {
