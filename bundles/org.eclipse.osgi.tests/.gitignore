@@ -1,3 +1,4 @@
-bin
-bundle_tests
-inner
+/bin/
+/bundle_tests/
+/inner/
+.DS_Store
