@@ -496,7 +496,7 @@ final class StateReader {
 	}
 
 	private Object readStateWire(DataInputStream in) throws IOException {
-		VersionConstraint requirement;
+		VersionConstraintImpl requirement;
 		BundleDescription requirementHost;
 		BaseDescription capability;
 		BundleDescription capabilityHost;
@@ -525,6 +525,11 @@ final class StateReader {
 
 		requirementHost = readBundleDescription(in);
 		capabilityHost = readBundleDescription(in);
+
+		if (requirement.getBundle() == null) {
+			// Need to fix up dynamic imports added by weaving hook (bug 359394)
+			requirement.setBundle(requirementHost);
+		}
 		return new StateWire(requirementHost, requirement, capabilityHost, capability);
 	}
 
@@ -612,12 +617,12 @@ final class StateReader {
 		return result;
 	}
 
-	private GenericSpecification readGenericSpecification(DataInputStream in) throws IOException {
+	private GenericSpecificationImpl readGenericSpecification(DataInputStream in) throws IOException {
 		byte tag = readTag(in);
 		if (tag == NULL)
 			return null;
 		if (tag == INDEX)
-			return (GenericSpecification) getFromObjectTable(in.readInt());
+			return (GenericSpecificationImpl) getFromObjectTable(in.readInt());
 		GenericSpecificationImpl result = new GenericSpecificationImpl();
 		int tableIndex = in.readInt();
 		addToObjectTable(result, tableIndex);

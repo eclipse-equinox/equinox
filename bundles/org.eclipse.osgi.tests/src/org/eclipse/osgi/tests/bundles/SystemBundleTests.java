@@ -22,8 +22,9 @@ import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.framework.wiring.BundleCapability;
-import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.hooks.weaving.WeavingHook;
+import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.wiring.*;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
@@ -1415,6 +1416,148 @@ public class SystemBundleTests extends AbstractBundleTests {
 
 	public void testBug351519RefreshDefault() {
 		doTestBug351519Refresh(null);
+	}
+
+	public void testWeavingPersistence() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in start()", e); //$NON-NLS-1$
+		}
+
+		BundleContext systemContext = equinox.getBundleContext();
+		assertNotNull("System context is null", systemContext); //$NON-NLS-1$
+
+		Bundle test1 = null;
+		try {
+			test1 = systemContext.installBundle(installer.getBundleLocation("substitutes.a"));
+		} catch (BundleException e) {
+			fail("Unexpected error installing bundle", e);//$NON-NLS-1$
+		}
+		long testID1 = test1.getBundleId();
+
+		final Bundle testFinal1 = test1;
+		ServiceRegistration reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
+			public void weave(WovenClass wovenClass) {
+				if (!testFinal1.equals(wovenClass.getBundleWiring().getBundle()))
+					return;
+				if (!"substitutes.x.Ax".equals(wovenClass.getClassName()))
+					return;
+				List dynamicImports = wovenClass.getDynamicImports();
+				dynamicImports.add("*");
+			}
+		}, null);
+
+		try {
+			testFinal1.loadClass("substitutes.x.Ax");
+			testFinal1.loadClass("org.osgi.framework.hooks.bundle.FindHook");
+		} catch (Throwable t) {
+			fail("Unexpected testing bundle", t);
+		} finally {
+			reg.unregister();
+		}
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in start()", e); //$NON-NLS-1$
+		}
+
+		systemContext = equinox.getBundleContext();
+		test1 = systemContext.getBundle(testID1);
+
+		Bundle test2 = null;
+		try {
+			test2 = systemContext.installBundle(installer.getBundleLocation("exporter.importer1"));
+		} catch (BundleException e) {
+			fail("Unexpected error installing bundle", e);//$NON-NLS-1$
+		}
+		long testID2 = test2.getBundleId();
+
+		final Bundle testFinal2 = test2;
+		reg = systemContext.registerService(WeavingHook.class, new WeavingHook() {
+			public void weave(WovenClass wovenClass) {
+				if (!testFinal2.equals(wovenClass.getBundleWiring().getBundle()))
+					return;
+				if (!"exporter.importer.test.Test1".equals(wovenClass.getClassName()))
+					return;
+				List dynamicImports = wovenClass.getDynamicImports();
+				dynamicImports.add("*");
+			}
+		}, null);
+
+		try {
+			testFinal2.loadClass("exporter.importer.test.Test1");
+			testFinal2.loadClass("org.osgi.framework.hooks.service.FindHook");
+		} catch (Throwable t) {
+			fail("Unexpected testing bundle", t);
+		} finally {
+			reg.unregister();
+		}
+
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception in start()", e); //$NON-NLS-1$
+		}
+
+		systemContext = equinox.getBundleContext();
+		test1 = systemContext.getBundle(testID1);
+		test2 = systemContext.getBundle(testID2);
+
+		BundleRevision rev1 = (BundleRevision) test1.adapt(BundleRevision.class);
+		BundleRevision rev2 = (BundleRevision) test2.adapt(BundleRevision.class);
+		BundleWiring wiring1 = rev1.getWiring();
+		BundleWiring wiring2 = rev2.getWiring();
+
+		assertNotNull("wiring1 is null", wiring1);
+		assertNotNull("wiring2 is null", wiring2);
+
+		List packages1 = wiring1.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
+		List packages2 = wiring2.getRequiredWires(BundleRevision.PACKAGE_NAMESPACE);
+
+		// could make this a more complete check, but with the bug the dynamic wires 
+		// are missing altogether because we fail to save the resolver state cache.
+		assertEquals("Wrong number of wires for wiring1", 3, packages1.size());
+		assertEquals("Wrong number of wires for wiring2", 2, packages2.size());
+
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected error stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
 	}
 
 	private void doTestBug351519Refresh(Boolean refreshDuplicates) {
