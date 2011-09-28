@@ -32,7 +32,7 @@ import org.osgi.framework.resource.Wire;
  * specified {@link Resource resources} based on a supplied {@link Environment}.
  * 
  * @ThreadSafe
- * @version $Id: 93375420122cbe48e6fba5af207af43826a508fa $
+ * @version $Id$
  */
 public interface Resolver {
   /**

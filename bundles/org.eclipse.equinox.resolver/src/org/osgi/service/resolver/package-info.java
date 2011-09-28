@@ -32,7 +32,7 @@
  * <p>
  * {@code  Import-Package: org.osgi.service.resolver; version="[1.0,1.1)"}
  * 
- * @version $Id: ffe26e5b960ebceb84699fd1cb8f211d9a386bf4 $
+ * @version $Id$
  */
 
 package org.osgi.service.resolver;

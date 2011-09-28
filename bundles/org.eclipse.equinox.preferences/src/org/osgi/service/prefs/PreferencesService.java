@@ -29,7 +29,7 @@ package org.osgi.service.prefs;
  * {@code PreferencesService} object to that bundle.
  *  
  * @noimplement
- * @version $Id: bcb430ac769863b4239575c1edeedc23fc5ab097 $
+ * @version $Id$
  */
 public interface PreferencesService {
 	/**
