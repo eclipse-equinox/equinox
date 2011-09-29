@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,6 +147,10 @@ public class UniversalUniqueIdentifier {
 		} catch (UnknownHostException e) {
 			//valid for this to be thrown be a machine with no IP connection
 			//It is VERY important NOT to throw this exception
+			return null;
+		} catch (ArrayIndexOutOfBoundsException e) {
+			// there appears to be a bug in the VM if there is an alias
+			// see bug 354820.  As above it is important not to throw this
 			return null;
 		}
 	}
