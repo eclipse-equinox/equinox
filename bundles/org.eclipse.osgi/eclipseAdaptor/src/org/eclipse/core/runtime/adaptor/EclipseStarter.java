@@ -267,7 +267,7 @@ public class EclipseStarter {
 		if (Profile.PROFILE && Profile.STARTUP)
 			Profile.logTime("EclipseStarter.startup()", "osgi launched"); //$NON-NLS-1$ //$NON-NLS-2$
 		consoleMgr = ConsoleManager.startConsole(framework);
-		if (consoleMgr != null && Profile.PROFILE && Profile.STARTUP) {
+		if (Profile.PROFILE && Profile.STARTUP) {
 			Profile.logTime("EclipseStarter.startup()", "console started"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		framework.launch();
@@ -290,6 +290,14 @@ public class EclipseStarter {
 			Profile.logTime("EclipseStarter.startup()", "StartLevel set"); //$NON-NLS-1$ //$NON-NLS-2$
 		// they should all be active by this time
 		ensureBundlesActive(startBundles);
+
+		// in the case where the built-in console is disabled we should try to start the console bundle
+		try {
+			consoleMgr.checkForConsoleBundle();
+		} catch (BundleException e) {
+			FrameworkLogEntry entry = new FrameworkLogEntry(FrameworkAdaptor.FRAMEWORK_SYMBOLICNAME, FrameworkLogEntry.ERROR, 0, e.getMessage(), 0, e, null);
+			log.log(entry);
+		}
 		if (debug || FrameworkProperties.getProperty(PROP_DEV) != null)
 			// only spend time showing unresolved bundles in dev/debug mode and the state has changed
 			if (stateStamp != adaptor.getState().getTimeStamp())

@@ -18,8 +18,7 @@ import java.util.Hashtable;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.console.ConsoleSession;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -86,8 +85,9 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	private static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
-	private final Framework framework;
+	private static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console.supportability"; //$NON-NLS-1$
+	public static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
+	final Framework framework;
 	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
 	private final ServiceTracker<ConsoleSession, FrameworkConsole> sessions;
 	private final String consolePort;
@@ -98,6 +98,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	private ServiceRegistration<?> builtinSession;
 	private ConsoleSocketGetter socketGetter;
 	private final boolean isEnabled;
+	private final String consoleBundle;
 
 	public ConsoleManager(Framework framework, String consolePropValue) {
 		String port = null;
@@ -109,22 +110,21 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 			}
 			port = consolePropValue.substring(index + 1);
 		}
-
-		if ("false".equals(FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED)) || "none".equals(port)) { //$NON-NLS-1$ //$NON-NLS-2$
-			isEnabled = false;
-			this.framework = null;
-			this.cpTracker = null;
-			this.sessions = null;
-			this.consoleHost = null;
-			this.consolePort = null;
-			return;
-		}
-		this.isEnabled = true;
 		this.framework = framework;
 		this.consoleHost = host != null ? host.trim() : host;
 		this.consolePort = port != null ? port.trim() : port;
+		String enabled = FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED, "true"); //$NON-NLS-1$
+		if (!"true".equals(enabled) || "none".equals(port)) { //$NON-NLS-1$ //$NON-NLS-2$
+			isEnabled = false;
+			this.cpTracker = null;
+			this.sessions = null;
+			this.consoleBundle = "false".equals(enabled) ? CONSOLE_BUNDLE : enabled; //$NON-NLS-1$
+			return;
+		}
+		this.isEnabled = true;
 		this.cpTracker = new ServiceTracker<CommandProvider, CommandProvider>(framework.getSystemBundleContext(), CommandProvider.class.getName(), null);
 		this.sessions = new ServiceTracker<ConsoleSession, FrameworkConsole>(framework.getSystemBundleContext(), ConsoleSession.class.getName(), this);
+		this.consoleBundle = "unknown"; //$NON-NLS-1$
 	}
 
 	public static ConsoleManager startConsole(Framework framework) {
@@ -188,6 +188,31 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	public void checkForConsoleBundle() throws BundleException {
+		if (isEnabled)
+			return;
+		if ("none".equals(consolePort)) //$NON-NLS-1$
+			return;
+		// otherwise we need to check for the equinox console bundle and start it
+		if (consolePort == null || consolePort.length() > 0) {
+			// no -console was specified or it has specified none or a port for telnet;
+			// need to make sure the gogo shell does not create an interactive console on standard in/out
+			FrameworkProperties.setProperty("gosh.args", "--nointeractive"); //$NON-NLS-1$//$NON-NLS-2$
+		}
+
+		Bundle[] consoles = framework.getBundleBySymbolicName(consoleBundle);
+		if (consoles == null || consoles.length == 0) {
+			if (consolePort != null)
+				throw new BundleException("Could not find bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION); //$NON-NLS-1$
+			return;
+		}
+		try {
+			consoles[0].start(Bundle.START_TRANSIENT);
+		} catch (BundleException e) {
+			throw new BundleException("Could not start bundle: " + consoleBundle, BundleException.UNSUPPORTED_OPERATION, e); //$NON-NLS-1$
 		}
 	}
 
