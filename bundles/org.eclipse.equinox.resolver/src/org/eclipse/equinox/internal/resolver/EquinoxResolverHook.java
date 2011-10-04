@@ -145,7 +145,7 @@ public class EquinoxResolverHook implements ResolverHookFactory, ResolverHook {
 				}
 
 				public String toString() {
-					return "[" + requirer + ':' + requirement + "] -> [" + provider + ':' + capability + ']'; //$NON-NLS-1$ //$NON-NLS-2$
+					return "[" + requirer + ':' + requirement.getResource() + ':' + requirement + "] -> [" + provider + ':' + capability.getResource() + ':' + capability + ']'; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			});
 		}
