@@ -401,7 +401,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
-	synchronized public void flush() throws BackingStoreException {
+	public void flush() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
 
