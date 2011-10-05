@@ -401,7 +401,15 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
-	public void flush() throws BackingStoreException {
+	synchronized public void flush() throws BackingStoreException {
+		internalFlush();
+	}
+
+	/*
+	 * Do the real flushing in a non-synchronized internal method so sub-classes 
+	 * (mainly ProjectPreferences and ProfilePreferences) don't cause deadlocks.
+	 */
+	protected void internalFlush() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
 
