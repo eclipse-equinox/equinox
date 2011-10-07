@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2006, 2011 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,10 @@ public class FrameworkProperties {
 				// snapshot of System properties for uses of getProperties who expect to see framework properties set as System properties
 				// we need to do this for all system properties because the properties object is used to back
 				// BundleContext#getProperty method which expects all system properties to be available
-				properties.putAll(systemProperties);
+				synchronized (systemProperties) {
+					// bug 360198 - must synchronize on systemProperties to avoid concurrent modification exception
+					properties.putAll(systemProperties);
+				}
 			}
 		}
 		return properties;
