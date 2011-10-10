@@ -241,7 +241,7 @@ public class ResolverTest extends TestCase {
 		dumpResults(result);
 	}
 
-	public void testResolverServiceFragmentHost() throws BundleException {
+	public void testResolverServiceFragmentHost1() throws BundleException {
 		StateObjectFactory factory = platformAdmin.getFactory();
 		int id = 0;		
 		List<BundleDescription> revisions = new ArrayList<BundleDescription>();
@@ -284,6 +284,53 @@ public class ResolverTest extends TestCase {
 		manifest.put(Constants.EXPORT_PACKAGE, "c");
 		BundleDescription cFrag = factory.createBundleDescription(null, manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), id++);
 		revisions.add(cFrag);
+
+		Map<String, Map<String, List<BaseDescription>>> repository = getRepository(revisions);
+		Map<Resource, List<Wire>> result = resolver.resolve(new TestEnvironment(null, repository), Arrays.asList(a), null);
+
+		Map<Resource, List<Wire>> expectedWiring = getWiring(revisions);
+		compareWirings(expectedWiring, result);
+		dumpResults(result);
+	}
+
+	public void testResolverServiceFragmentHost2() throws BundleException {
+		StateObjectFactory factory = platformAdmin.getFactory();
+		int id = 0;		
+		List<BundleDescription> revisions = new ArrayList<BundleDescription>();
+		Hashtable<String, String> manifest = new Hashtable<String, String>();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.IMPORT_PACKAGE, "b.frag, b; v=1");
+		BundleDescription a = factory.createBundleDescription(null, manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), id++);
+		revisions.add(a);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; version=1.0; v=1");
+		BundleDescription b1 = factory.createBundleDescription(null, manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), id++);
+		revisions.add(b1);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B");
+		manifest.put(Constants.BUNDLE_VERSION, "2.0");
+		manifest.put(Constants.EXPORT_PACKAGE, "b; version=1.0; v=2");
+		BundleDescription b2 = factory.createBundleDescription(null, manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), id++);
+		revisions.add(b2);
+
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2");
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "BFrag");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0");
+		manifest.put(Constants.FRAGMENT_HOST, "B; multiple-hosts:=true");
+		manifest.put(Constants.EXPORT_PACKAGE, "b.frag; uses:=b");
+		BundleDescription bFrag = factory.createBundleDescription(null, manifest, manifest.get(Constants.BUNDLE_SYMBOLICNAME), id++);
+		revisions.add(bFrag);
+
 
 		Map<String, Map<String, List<BaseDescription>>> repository = getRepository(revisions);
 		Map<Resource, List<Wire>> result = resolver.resolve(new TestEnvironment(null, repository), Arrays.asList(a), null);

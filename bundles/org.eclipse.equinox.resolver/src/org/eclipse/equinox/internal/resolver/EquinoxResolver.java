@@ -24,6 +24,9 @@ public class EquinoxResolver implements Resolver {
 
 	public Map<Resource, List<Wire>> resolve(Environment environment, Collection<? extends Resource> mandatoryResources, Collection<? extends Resource> optionalResources) throws ResolutionException {
 		State state = factory.createState(true);
+		Hashtable<String, Object> platformProperties = new Hashtable<String, Object>();
+		platformProperties.put("osgi.support.multipleHosts", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+		state.setPlatformProperties(platformProperties);
 		EquinoxResolverHook resolverHook = new EquinoxResolverHook(state, environment);
 		state.setResolverHookFactory(resolverHook);
 		return resolverHook.resolve(mandatoryResources, optionalResources);
