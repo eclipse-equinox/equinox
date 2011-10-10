@@ -81,7 +81,7 @@ import java.util.Collection;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 3c784ae44a1e93f4841d38f65894fef179f01a91 $
+ * @version $Id$
  */
 public interface Coordinator {
 

@@ -45,7 +45,7 @@ package org.osgi.service.coordinator;
  * returns.
  * 
  * @ThreadSafe
- * @version $Id: 52e3d84eb0cb8a8cc04c4ca787dde8db81c0140d $
+ * @version $Id$
  */
 public interface Participant {
 	/**

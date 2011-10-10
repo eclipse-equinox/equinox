@@ -32,7 +32,7 @@ import java.util.Map;
  * being scheduled, the {@link #SCHEDULE_ID} service property contains the
  * schedule identifier.
  * 
- * @version $Id: f3385ad4cf9ce8f802ab44bd9bc76f865960b6e0 $
+ * @version $Id$
  */
 public interface ScheduledApplication {
     

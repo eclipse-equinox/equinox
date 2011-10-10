@@ -63,7 +63,7 @@ import org.osgi.framework.Bundle;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 5381fdd48301865d24eabcf57ff81aee9eb6a159 $
+ * @version $Id$
  */
 
 public interface Coordination {

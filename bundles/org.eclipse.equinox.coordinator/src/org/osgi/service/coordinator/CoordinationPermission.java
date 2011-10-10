@@ -47,7 +47,7 @@ import org.osgi.framework.InvalidSyntaxException;
  * {@code participate} and {@code admin}.
  * 
  * @ThreadSafe
- * @version $Id: 5c0e011abe0732906361e08819354ec794e1e2fd $
+ * @version $Id$
  */
 public class CoordinationPermission extends BasicPermission {
 
