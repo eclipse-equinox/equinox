@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,7 @@ import org.eclipse.osgi.framework.adaptor.FrameworkAdaptor;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.framework.debug.FrameworkDebugOptions;
-import org.eclipse.osgi.framework.internal.core.BundleHost;
-import org.eclipse.osgi.framework.internal.core.FrameworkProperties;
+import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
@@ -93,7 +92,10 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		if (converter == null)
 			converter = new PluginConverterImpl(adaptor, context);
 		registrations.add(AdaptorUtil.register(PluginConverter.class.getName(), converter, context));
-		registrations.add(AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context));
+		String builtinEnabled = FrameworkProperties.getProperty(ConsoleManager.PROP_CONSOLE_ENABLED, "true"); //$NON-NLS-1$
+		if ("true".equals(builtinEnabled)) { //$NON-NLS-1$
+			registrations.add(AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context));
+		}
 		registrations.add(AdaptorUtil.register(org.eclipse.osgi.service.localization.BundleLocalization.class.getName(), new BundleLocalizationImpl(), context));
 	}
 
