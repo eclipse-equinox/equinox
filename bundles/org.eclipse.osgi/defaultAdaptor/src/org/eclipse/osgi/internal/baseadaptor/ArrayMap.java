@@ -164,11 +164,21 @@ public class ArrayMap<K, V> implements Collection<K>, Sortable<K> {
 		Collections.sort(sortedKeys, comparator);
 		List<V> sortedValues = new ArrayList<V>(sortedKeys.size());
 		for (K key : sortedKeys) {
-			sortedValues.add(get(key));
+			sortedValues.add(getByIdentity(key));
 		}
 		clear();
 		for (int i = 0; i < sortedKeys.size(); i++) {
 			put(sortedKeys.get(i), sortedValues.get(i));
 		}
+	}
+
+	private V getByIdentity(K key) {
+		int index = 0;
+		for (K existing : keys) {
+			if (existing == key)
+				return getValue(index);
+			index++;
+		}
+		return null;
 	}
 }
