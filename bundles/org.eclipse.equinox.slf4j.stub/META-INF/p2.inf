@@ -1,0 +1,9 @@
+# this file is a workaround for bug 313553
+# https://bugs.eclipse.org/bugs/show_bug.cgi?id=313553
+#
+# see also
+# https://bugs.eclipse.org/bugs/show_bug.cgi?id=177851#c9
+
+provides.0.namespace = org.slf4j.api
+provides.0.name = org.slf4j.impl.StaticLoggerBinder
+provides.0.version = 1.6.1

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Console supportability tests
+Bundle-SymbolicName: org.eclipse.equinox.console.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: junit.framework;version="4.8.1",
+ org.apache.sshd.client.future,
+ org.easymock;version="2.4.0",
+ org.junit;version="4.8.1"
+Fragment-Host: org.eclipse.equinox.console
