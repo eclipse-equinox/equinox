@@ -33,12 +33,18 @@ import org.apache.felix.service.command.Parameter;
 import org.eclipse.equinox.console.command.adapter.Activator;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.BundleSpecification;
 import org.eclipse.osgi.service.resolver.DisabledInfo;
 import org.eclipse.osgi.service.resolver.ExportPackageDescription;
+import org.eclipse.osgi.service.resolver.GenericSpecification;
+import org.eclipse.osgi.service.resolver.HostSpecification;
 import org.eclipse.osgi.service.resolver.ImportPackageSpecification;
+import org.eclipse.osgi.service.resolver.NativeCodeSpecification;
 import org.eclipse.osgi.service.resolver.PlatformAdmin;
+import org.eclipse.osgi.service.resolver.ResolverError;
 import org.eclipse.osgi.service.resolver.State;
 import org.eclipse.osgi.service.resolver.StateHelper;
+import org.eclipse.osgi.service.resolver.VersionConstraint;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -99,7 +105,11 @@ import org.osgi.service.startlevel.StartLevel;
  setfwsl <start level> - set the framework start level
  setbsl <start level> (<id>|<location>) - set the start level for the bundle(s)
  setibsl <start level> - set the initial bundle start level
- 
+ ---Eclipse Runtime commands---
+ diag - Displays unsatisfied constraints for the specified bundle(s)
+ enableBundle - Enable the specified bundle(s)
+ disableBundle - Disable the specified bundle(s)
+ disabledBundles - List disabled bundles in the system
 */
 
 public class EquinoxCommandProvider implements SynchronousBundleListener {
@@ -123,7 +133,10 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 		"install", "up", "up", "up", "update", "update", "update", "un", "uninstall", "s", "status", "se", "services",
 		"p", "p", "packages", "packages", "bundles", "b", "bundle", "gc", "init", "close", "r", "refresh", "exec",
 		"fork", "h", "headers", "pr", "props", "setp", "setprop", "ss", "t", "threads", "sl", "setfwsl", "setbsl",
-		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop"};
+		"setibsl", "requiredBundles", "classSpaces", "profilelog", "getPackages", "getprop", "diag", "enableBundle", 
+		"disableBundle", "disabledBundles"};
+	
+	private static final String POLICY_CONSOLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
 	
 	/**
 	 *  Constructor.
@@ -1794,6 +1807,193 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 			}
 		}
 	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION)
+	public void diag(@Descriptor(ConsoleMsg.CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
+		if (bundleIds.length == 0) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+		
+		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
+		if (platformAdmin == null) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE);
+			return;
+		}
+
+		State systemState = platformAdmin.getState(false);
+		for (long bundleId : bundleIds) {
+			BundleDescription bundle = systemState.getBundle(bundleId);
+			if (bundle == null) {
+				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
+				continue;
+			}
+			System.out.println(bundle.getLocation() + " [" + bundle.getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+			VersionConstraint[] unsatisfied = platformAdmin.getStateHelper().getUnsatisfiedConstraints(bundle);
+			ResolverError[] resolverErrors = platformAdmin.getState(false).getResolverErrors(bundle);
+			for (int i = 0; i < resolverErrors.length; i++) {
+				if ((resolverErrors[i].getType() & (ResolverError.MISSING_FRAGMENT_HOST | ResolverError.MISSING_GENERIC_CAPABILITY | ResolverError.MISSING_IMPORT_PACKAGE | ResolverError.MISSING_REQUIRE_BUNDLE)) != 0)
+					continue;
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(resolverErrors[i].toString());
+			}
+
+			if (unsatisfied.length == 0 && resolverErrors.length == 0) {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_NO_CONSTRAINTS);
+			}
+			if (unsatisfied.length > 0) {
+				System.out.print("  "); //$NON-NLS-1$
+				System.out.println(ConsoleMsg.CONSOLE_DIRECT_CONSTRAINTS);
+			}
+			for (int i = 0; i < unsatisfied.length; i++) {
+				System.out.print("    "); //$NON-NLS-1$
+				System.out.println(getResolutionFailureMessage(unsatisfied[i]));
+			}
+			VersionConstraint[] unsatisfiedLeaves = platformAdmin.getStateHelper().getUnsatisfiedLeaves(new BundleDescription[] {bundle});
+			boolean foundLeaf = false;
+			for (int i = 0; i < unsatisfiedLeaves.length; i++) {
+				if (unsatisfiedLeaves[i].getBundle() == bundle)
+					continue;
+				if (!foundLeaf) {
+					foundLeaf = true;
+					System.out.print("  "); //$NON-NLS-1$
+					System.out.println(ConsoleMsg.CONSOLE_LEAF_CONSTRAINTS);
+				}
+				System.out.print("    "); //$NON-NLS-1$
+				System.out.println(unsatisfiedLeaves[i].getBundle().getLocation() + " [" + unsatisfiedLeaves[i].getBundle().getBundleId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				System.out.print("      "); //$NON-NLS-1$
+				System.out.println(getResolutionFailureMessage(unsatisfiedLeaves[i]));
+			}
+		}
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION)
+	public void enableBundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_ENABLE_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
+		if (bundleIds.length == 0) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+		
+		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
+		if (platformAdmin == null) {
+			System.out.println(ConsoleMsg.CONSOLE_CANNOT_ENABLE_NO_PLATFORM_ADMIN_MESSAGE);
+			return;
+		}
+
+
+		State systemState = platformAdmin.getState(false);
+		for (long bundleId : bundleIds) {
+			BundleDescription bundle = systemState.getBundle(bundleId);
+			if (bundle == null) {
+				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
+				continue;
+			}
+
+			DisabledInfo[] infos = systemState.getDisabledInfos(bundle);
+			for (int i = 0; i < infos.length; i++) {
+				platformAdmin.removeDisabledInfo(infos[i]);
+			}
+		}
+
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION)
+	public void disableBundle(@Descriptor(ConsoleMsg.CONSOLE_HELP_DISABLE_COMMAND_ARGUMENT_DESCRIPTION) long[] bundleIds) throws Exception {
+		if (bundleIds.length == 0) {
+			System.out.println(ConsoleMsg.CONSOLE_NO_BUNDLE_SPECIFIED_ERROR);
+			return;
+		}
+		
+		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
+		if (platformAdmin == null) {
+			System.out.println(ConsoleMsg.CONSOLE_CANNOT_DISABLE_NO_PLATFORM_ADMIN_MESSAGE);
+			return;
+		}
+
+
+		State systemState = platformAdmin.getState(false);
+		for (long bundleId : bundleIds) {
+			BundleDescription bundle = systemState.getBundle(bundleId);
+			if (bundle == null) {
+				System.out.println(NLS.bind(ConsoleMsg.CONSOLE_CANNOT_FIND_BUNDLE_ERROR, bundleId));
+				continue;
+			}
+				DisabledInfo info = new DisabledInfo(POLICY_CONSOLE, ConsoleMsg.CONSOLE_CONSOLE_BUNDLE_DISABLED_MESSAGE, bundle);
+				platformAdmin.addDisabledInfo(info);
+			}
+	}
+	
+	@Descriptor(ConsoleMsg.CONSOLE_HELP_LD_COMMAND_DESCRIPTION)
+	public void disabledBundles() throws Exception {
+		
+		PlatformAdmin platformAdmin = activator.getPlatformAdmin();
+		if (platformAdmin == null) {
+			System.out.println(ConsoleMsg.CONSOLE_CANNOT_LIST_DISABLED_NO_PLATFORM_ADMIN_MESSAGE);
+			return;
+		}
+
+		State systemState = platformAdmin.getState(false);
+		BundleDescription[] disabledBundles = systemState.getDisabledBundles();
+
+		System.out.println(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_COUNT_MESSAGE, String.valueOf(disabledBundles.length)));
+
+		if (disabledBundles.length > 0) {
+			System.out.println();
+		}
+		for (int i = 0; i < disabledBundles.length; i++) {
+			DisabledInfo[] disabledInfos = systemState.getDisabledInfos(disabledBundles[i]);
+
+			System.out.println(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_HEADER, formatBundleName(disabledBundles[i]), String.valueOf(disabledBundles[i].getBundleId())));
+			System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_REASON, disabledInfos[0].getMessage(), disabledInfos[0].getPolicyName()));
+
+			for (int j = 1; j < disabledInfos.length; j++) {
+				System.out.print(NLS.bind(ConsoleMsg.CONSOLE_DISABLED_BUNDLE_REASON, disabledInfos[j].getMessage(), String.valueOf(disabledInfos[j].getPolicyName())));
+			}
+
+			System.out.println();
+		}
+	}
+	
+	private String formatBundleName(BundleDescription b) {
+		String label = b.getSymbolicName();
+		if (label == null || label.length() == 0)
+			label = b.toString();
+		else
+			label = label + "_" + b.getVersion(); //$NON-NLS-1$
+
+		return label;
+	}
+	
+	private String getResolutionFailureMessage(VersionConstraint unsatisfied) {
+		if (unsatisfied.isResolved())
+			throw new IllegalArgumentException();
+		if (unsatisfied instanceof ImportPackageSpecification) {
+			if (ImportPackageSpecification.RESOLUTION_OPTIONAL.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_OPTIONAL_IMPORTED_PACKAGE, versionToString(unsatisfied));
+			if (ImportPackageSpecification.RESOLUTION_DYNAMIC.equals(((ImportPackageSpecification) unsatisfied).getDirective(Constants.RESOLUTION_DIRECTIVE)))
+				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_DYNAMIC_IMPORTED_PACKAGE, versionToString(unsatisfied));
+			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_IMPORTED_PACKAGE, versionToString(unsatisfied));
+		} else if (unsatisfied instanceof BundleSpecification) {
+			if (((BundleSpecification) unsatisfied).isOptional())
+				return NLS.bind(ConsoleMsg.CONSOLE_MISSING_OPTIONAL_REQUIRED_BUNDLE, versionToString(unsatisfied));
+			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIRED_BUNDLE, versionToString(unsatisfied));
+		} else if (unsatisfied instanceof HostSpecification) {
+			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_HOST, versionToString(unsatisfied));
+		} else if (unsatisfied instanceof NativeCodeSpecification) {
+			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_NATIVECODE, unsatisfied.toString());
+		} else if (unsatisfied instanceof GenericSpecification) {
+			return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIRED_CAPABILITY, unsatisfied.toString());
+		}
+		return NLS.bind(ConsoleMsg.CONSOLE_MISSING_REQUIREMENT, unsatisfied.toString());
+	}
+	
+	private static String versionToString(VersionConstraint constraint) {
+		org.eclipse.osgi.service.resolver.VersionRange versionRange = constraint.getVersionRange();
+		if (versionRange == null)
+			return constraint.getName();
+		return constraint.getName() + '_' + versionRange;
+	}
 
 	/**
 	 * This is used to track lazily activated bundles.
@@ -1817,3 +2017,4 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 
 	}
 }
+

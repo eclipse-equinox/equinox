@@ -75,6 +75,27 @@ public class ConsoleMsg extends NLS {
 	public static String CONSOLE_THREADTYPE_TITLE;
 	public static String CONSOLE_REQUIRES_MESSAGE;
 	public static String CONSOLE_CANNOT_ACCESS_SYSTEM_PROPERTIES;
+	public static String CONSOLE_NO_CONSTRAINTS_NO_PLATFORM_ADMIN_MESSAGE;
+	public static String CONSOLE_CANNOT_FIND_BUNDLE_ERROR;
+	public static String CONSOLE_NO_CONSTRAINTS;
+	public static String CONSOLE_DIRECT_CONSTRAINTS;
+	public static String CONSOLE_LEAF_CONSTRAINTS;
+	public static String CONSOLE_MISSING_IMPORTED_PACKAGE;
+	public static String CONSOLE_MISSING_OPTIONAL_IMPORTED_PACKAGE;
+	public static String CONSOLE_MISSING_DYNAMIC_IMPORTED_PACKAGE;
+	public static String CONSOLE_MISSING_OPTIONAL_REQUIRED_BUNDLE;
+	public static String CONSOLE_MISSING_REQUIRED_BUNDLE;
+	public static String CONSOLE_MISSING_HOST;
+	public static String CONSOLE_MISSING_NATIVECODE;
+	public static String CONSOLE_MISSING_REQUIRED_CAPABILITY;
+	public static String CONSOLE_MISSING_REQUIREMENT;
+	public static String CONSOLE_CONSOLE_BUNDLE_DISABLED_MESSAGE;
+	public static String CONSOLE_CANNOT_ENABLE_NO_PLATFORM_ADMIN_MESSAGE;
+	public static String CONSOLE_CANNOT_DISABLE_NO_PLATFORM_ADMIN_MESSAGE;
+	public static String CONSOLE_CANNOT_LIST_DISABLED_NO_PLATFORM_ADMIN_MESSAGE;
+	public static String CONSOLE_DISABLED_COUNT_MESSAGE;
+	public static String CONSOLE_DISABLED_BUNDLE_HEADER;
+	public static String CONSOLE_DISABLED_BUNDLE_REASON;
 
 	public static String STARTLEVEL_FRAMEWORK_ACTIVE_STARTLEVEL;
 	public static String STARTLEVEL_BUNDLE_STARTLEVEL;
@@ -140,6 +161,13 @@ public class ConsoleMsg extends NLS {
 	public static final String CONSOLE_HELP_VISIBLE_PACKAGES_COMMAND_ARGUMENTS_DESCRIPTION = "bundle to list the visible packages";
 	public static final String CONSOLE_HELP_GETPROP_COMMAND_DESCRIPTION = "displays the system properties with the given name, or all of them";
 	public static final String CONSOLE_HELP_GETPROP_COMMAND_ARGUMENT_DESCRIPTION = "name of system property to dispaly";
+	public static final String CONSOLE_HELP_DIAG_COMMAND_DESCRIPTION = "Displays unsatisfied constraints for the specified bundle(s)";
+	public static final String CONSOLE_HELP_DIAG_COMMAND_ARGUMENT_DESCRIPTION = "IDs of bundle(s), for which to display unsatisfied constraints";
+	public static final String CONSOLE_HELP_ENABLE_COMMAND_DESCRIPTION="Enable the specified bundle(s)";
+	public static final String CONSOLE_HELP_ENABLE_COMMAND_ARGUMENT_DESCRIPTION="IDs of bundle(s) to enable";
+	public static final String CONSOLE_HELP_DISABLE_COMMAND_DESCRIPTION="Disable the specified bundle(s)";
+	public static final String CONSOLE_HELP_DISABLE_COMMAND_ARGUMENT_DESCRIPTION="IDs of bundle(s) to disable";
+	public static final String CONSOLE_HELP_LD_COMMAND_DESCRIPTION="List disabled bundles in the system";
 
 	static {
 		// initialize resource bundles
