@@ -211,7 +211,6 @@ public class TelnetInputScannerTests {
 
         private boolean isCalled = false;
 
-        @Override
         public void finished() {
             isCalled = true;
         }

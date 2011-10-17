@@ -51,7 +51,6 @@ public class CommandProviderAdapterTest {
         	return i.nextArgument();
         }
         
-		@Override
 		public String getHelp() {
 			return "this is a test command provider";
 		}

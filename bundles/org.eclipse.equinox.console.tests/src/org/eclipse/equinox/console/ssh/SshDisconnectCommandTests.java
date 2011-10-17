@@ -81,7 +81,6 @@ public class SshDisconnectCommandTests {
 		session.put((String)EasyMock.anyObject(), EasyMock.anyObject());
 		EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
 
-			@Override
 			public Object answer() throws Throwable {
 				sshSession = (SshSession)EasyMock.getCurrentArguments()[1];
 				return null;
