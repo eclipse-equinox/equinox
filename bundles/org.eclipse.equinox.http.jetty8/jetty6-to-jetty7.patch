@@ -1,0 +1,204 @@
+Index: .project
+===================================================================
+RCS file: /cvsroot/rt/org.eclipse.equinox/compendium/bundles/org.eclipse.equinox.http.jetty6/.project,v
+retrieving revision 1.3
+diff -u -r1.3 .project
+--- .project	25 Apr 2008 14:38:54 -0000	1.3
++++ .project	16 Apr 2010 21:35:58 -0000
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <projectDescription>
+-	<name>org.eclipse.equinox.http.jetty6</name>
++	<name>org.eclipse.equinox.http.jetty7</name>
+ 	<comment></comment>
+ 	<projects>
+ 	</projects>
+Index: META-INF/MANIFEST.MF
+===================================================================
+RCS file: /cvsroot/rt/org.eclipse.equinox/compendium/bundles/org.eclipse.equinox.http.jetty6/META-INF/MANIFEST.MF,v
+retrieving revision 1.24
+diff -u -r1.24 MANIFEST.MF
+--- META-INF/MANIFEST.MF	24 Apr 2009 20:54:41 -0000	1.24
++++ META-INF/MANIFEST.MF	16 Apr 2010 21:35:58 -0000
+@@ -4,23 +4,28 @@
+ Bundle-Vendor: %providerName
+ Bundle-Localization: plugin
+ Bundle-SymbolicName: org.eclipse.equinox.http.jetty
+-Bundle-Version: 2.0.0.qualifier
++Bundle-Version: 3.0.0.qualifier
+ Bundle-Activator: org.eclipse.equinox.http.jetty.internal.Activator
+ Import-Package: javax.servlet;version="[2.5.0,2.6.0)",
+  javax.servlet.http;version="[2.5.0,2.6.0)",
+  org.eclipse.equinox.http.servlet;version="1.0.0",
+- org.mortbay.component;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty.bio;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty.handler;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty.nio;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty.security;version="[6.1.0,7.0.0)",
+- org.mortbay.jetty.servlet;version="[6.1.0,7.0.0)",
+- org.mortbay.log;version="[6.1.0,7.0.0)",
++ org.eclipse.jetty.http;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.io.bio;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.io.nio;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server.bio;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server.handler;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server.nio;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server.session;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.server.ssl;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.servlet;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.util;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.util.component;version="[7.0.0,8.0.0)",
++ org.eclipse.jetty.util.log;version="[7.0.0,8.0.0)",
+  org.osgi.framework;version="1.3.0",
+  org.osgi.service.cm;version="1.2.0",
+  org.osgi.service.startlevel;version="1.0"
+-Bundle-RequiredExecutionEnvironment: J2SE-1.4
++Bundle-RequiredExecutionEnvironment: J2SE-1.5
+ Export-Package: org.eclipse.equinox.http.jetty;version="1.1.0"
+ Comment-Header: Both Eclipse-LazyStart and Bundle-ActivationPolicy are specified for compatibility with 3.2
+ Eclipse-LazyStart: true
+Index: src/org/eclipse/equinox/http/jetty/JettyCustomizer.java
+===================================================================
+RCS file: /cvsroot/rt/org.eclipse.equinox/compendium/bundles/org.eclipse.equinox.http.jetty6/src/org/eclipse/equinox/http/jetty/JettyCustomizer.java,v
+retrieving revision 1.2
+diff -u -r1.2 JettyCustomizer.java
+--- src/org/eclipse/equinox/http/jetty/JettyCustomizer.java	17 Apr 2009 21:58:58 -0000	1.2
++++ src/org/eclipse/equinox/http/jetty/JettyCustomizer.java	16 Apr 2010 21:35:58 -0000
+@@ -33,13 +33,13 @@
+ 	 * framework. Changing those may cause breakage and thus must be avoided.
+ 	 * </p>
+ 	 * @param context 
+-	 *             	the Jetty context; in case of Jetty 6 the context is of 
+-	 *             	type <code>org.mortbay.jetty.servlet.Context</code>
++	 *             	the Jetty context; in case of Jetty 7 the context is of 
++	 *             	type <code>org.eclipse.jetty.servlet.ServletContextHandler</code>
+ 	 * @param settings
+ 	 * 				the settings as passed to {@link JettyConfigurator#startServer(String, Dictionary)}
+ 	 * @return context
+-	 *             	the customized context; in case of Jetty 6 the context is of 
+-	 *             	type <code>org.mortbay.jetty.servlet.Context</code>
++	 *             	the customized context; in case of Jetty 7 the context is of 
++	 *             	type <code>org.eclipse.jetty.servlet.ServletContextHandler</code>
+ 	 */
+ 	public Object customizeContext(Object context, Dictionary settings) {
+ 		return context;
+@@ -52,13 +52,13 @@
+ 	 * Implementors may perform additional configuration of the Jetty Connector.
+ 	 * </p>
+ 	 * @param connector 
+-	 *             	the Jetty connector; in case of Jetty 6 the context is of 
+-	 *             	type <code>org.mortbay.jetty.Connector</code>
++	 *             	the Jetty connector; in case of Jetty 7 the context is of 
++	 *             	type <code>org.eclipse.jetty.server.Connector</code>
+ 	 * @param settings
+ 	 * 				the settings as passed to {@link JettyConfigurator#startServer(String, Dictionary)}
+ 	 * @return connector
+ 	 *             	the customized connector; in case of Jetty 6 the connector is of 
+-	 *             	type <code>org.mortbay.jetty.Connector</code>
++	 *             	type <code>org.eclipse.jetty.server.Connector</code>
+ 	 */
+ 	public Object customizeHttpConnector(Object connector, Dictionary settings) {
+ 		return connector;
+@@ -71,13 +71,13 @@
+ 	 * Implementors may perform additional configuration of the Jetty Connector.
+ 	 * </p>
+ 	 * @param connector 
+-	 *             	the Jetty connector; in case of Jetty 6 the connector is of 
+-	 *             	type <code>org.mortbay.jetty.Connector</code>
++	 *             	the Jetty connector; in case of Jetty 7 the connector is of 
++	 *             	type <code>oorg.eclipse.jetty.server.Connector</code>
+ 	 * @param settings
+ 	 * 				the settings as passed to {@link JettyConfigurator#startServer(String, Dictionary)}
+ 	 * @return connector
+-	 *             	the customized connector; in case of Jetty 6 the connector is of 
+-	 *             	type <code>org.mortbay.jetty.Connector</code>
++	 *             	the customized connector; in case of Jetty 7 the connector is of 
++	 *             	type <code>org.eclipse.jetty.server.Connector</code>
+ 	 */
+ 	public Object customizeHttpsConnector(Object connector, Dictionary settings) {
+ 		return connector;
+Index: src/org/eclipse/equinox/http/jetty/internal/HttpServerManager.java
+===================================================================
+RCS file: /cvsroot/rt/org.eclipse.equinox/compendium/bundles/org.eclipse.equinox.http.jetty6/src/org/eclipse/equinox/http/jetty/internal/HttpServerManager.java,v
+retrieving revision 1.20
+diff -u -r1.20 HttpServerManager.java
+--- src/org/eclipse/equinox/http/jetty/internal/HttpServerManager.java	20 May 2009 21:12:37 -0000	1.20
++++ src/org/eclipse/equinox/http/jetty/internal/HttpServerManager.java	16 Apr 2010 21:35:58 -0000
+@@ -18,12 +18,15 @@
+ import org.eclipse.equinox.http.jetty.JettyConstants;
+ import org.eclipse.equinox.http.jetty.JettyCustomizer;
+ import org.eclipse.equinox.http.servlet.HttpServiceServlet;
+-import org.mortbay.jetty.Connector;
+-import org.mortbay.jetty.Server;
+-import org.mortbay.jetty.bio.SocketConnector;
+-import org.mortbay.jetty.nio.SelectChannelConnector;
+-import org.mortbay.jetty.security.SslSocketConnector;
+-import org.mortbay.jetty.servlet.*;
++import org.eclipse.jetty.server.Connector;
++import org.eclipse.jetty.server.Server;
++import org.eclipse.jetty.server.bio.SocketConnector;
++import org.eclipse.jetty.server.nio.SelectChannelConnector;
++import org.eclipse.jetty.server.session.HashSessionManager;
++import org.eclipse.jetty.server.session.SessionHandler;
++import org.eclipse.jetty.server.ssl.SslSocketConnector;
++import org.eclipse.jetty.servlet.ServletContextHandler;
++import org.eclipse.jetty.servlet.ServletHolder;
+ import org.osgi.framework.Constants;
+ import org.osgi.service.cm.ConfigurationException;
+ import org.osgi.service.cm.ManagedServiceFactory;
+@@ -98,12 +101,12 @@
+ 		if (otherInfo != null)
+ 			holder.setInitParameter(JettyConstants.OTHER_INFO, otherInfo);
+ 
+-		Context httpContext = createHttpContext(dictionary);
++		ServletContextHandler httpContext = createHttpContext(dictionary);
+ 		if (null != customizer)
+-			httpContext = (Context) customizer.customizeContext(httpContext, dictionary);
++			httpContext = (ServletContextHandler) customizer.customizeContext(httpContext, dictionary);
+ 
+ 		httpContext.addServlet(holder, "/*"); //$NON-NLS-1$
+-		server.addHandler(httpContext);
++		server.setHandler(httpContext);
+ 
+ 		try {
+ 			server.start();
+@@ -241,8 +244,8 @@
+ 		return sslConnector;
+ 	}
+ 
+-	private Context createHttpContext(Dictionary dictionary) {
+-		Context httpContext = new Context();
++	private ServletContextHandler createHttpContext(Dictionary dictionary) {
++		ServletContextHandler httpContext = new ServletContextHandler();
+ 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
+ 		httpContext.setClassLoader(this.getClass().getClassLoader());
+ 
+Index: src/org/slf4j/Logger.java
+===================================================================
+RCS file: /cvsroot/rt/org.eclipse.equinox/compendium/bundles/org.eclipse.equinox.http.jetty6/src/org/slf4j/Logger.java,v
+retrieving revision 1.2
+diff -u -r1.2 Logger.java
+--- src/org/slf4j/Logger.java	17 Apr 2009 20:24:43 -0000	1.2
++++ src/org/slf4j/Logger.java	16 Apr 2010 21:35:58 -0000
+@@ -10,8 +10,8 @@
+  *******************************************************************************/
+ package org.slf4j;
+ 
+-import org.mortbay.log.Log;
+-import org.mortbay.log.StdErrLog;
++import org.eclipse.jetty.util.log.Log;
++import org.eclipse.jetty.util.log.StdErrLog;
+ 
+ // NOTE: This class is not a real SLF4J implementation and MUST NOT be exported as a general implementation!
+ // It is a place-holder to allow overriding the default logging done in Jetty
+@@ -80,7 +80,7 @@
+ 			setDebugEnabled(true);
+ 	}
+ 
+-	public org.mortbay.log.Logger getLogger(String name) {
++	public org.eclipse.jetty.util.log.Logger getLogger(String name) {
+ 		if ((name == null && this.localName == null) || (name != null && name.equals(this.localName)))
+ 			return this;
+ 		return new Logger(name);
