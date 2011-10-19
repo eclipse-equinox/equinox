@@ -72,7 +72,7 @@ public class ServletContextAdaptor {
 		};
 	}
 
-	private Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+	Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		Method m = (Method) contextToHandlerMethods.get(method);
 		if (m != null) {
 			return m.invoke(this, args);
