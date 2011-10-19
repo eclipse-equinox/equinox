@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2007 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.*;
@@ -26,7 +27,7 @@ public class ServletContextAdaptor implements ServletContext {
 	private AccessControlContext acc;
 	private ProxyContext proxyContext;
 
-	public ServletContextAdaptor(ProxyContext proxyContext, ServletContext servletContext, HttpContext httpContext, AccessControlContext acc) {
+	ServletContextAdaptor(ProxyContext proxyContext, ServletContext servletContext, HttpContext httpContext, AccessControlContext acc) {
 		this.servletContext = servletContext;
 		this.httpContext = httpContext;
 		this.acc = acc;
@@ -182,5 +183,9 @@ public class ServletContextAdaptor implements ServletContext {
 			// ignore
 		}
 		return null;
+	}
+
+	Object getSubject() {
+		return servletContext;
 	}
 }

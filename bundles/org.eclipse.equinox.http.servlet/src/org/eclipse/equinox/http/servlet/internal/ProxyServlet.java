@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -170,8 +170,8 @@ public class ProxyServlet extends HttpServlet {
 			throw new ServletException("This servlet has already been registered."); //$NON-NLS-1$
 
 		ServletRegistration registration = new ServletRegistration(servlet, httpContext);
-		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
-		ServletConfig servletConfig = new ServletConfigImpl(servlet, initparams, wrappedServletContext);
+		ServletContext servletContextProxy = createServletContextProxy(httpContext);
+		ServletConfig servletConfig = new ServletConfigImpl(servlet, initparams, servletContextProxy);
 
 		boolean initialized = false;
 		proxyContext.createContextAttributes(httpContext);
@@ -235,8 +235,8 @@ public class ProxyServlet extends HttpServlet {
 
 		int filterPriority = findFilterPriority(initparams);
 		FilterRegistration registration = new FilterRegistration(filter, httpContext, alias, filterPriority);
-		ServletContext wrappedServletContext = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
-		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, wrappedServletContext);
+		ServletContext servletContextProxy = createServletContextProxy(httpContext);
+		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, servletContextProxy);
 
 		boolean initialized = false;
 		proxyContext.createContextAttributes(httpContext);
@@ -248,6 +248,11 @@ public class ProxyServlet extends HttpServlet {
 				proxyContext.destroyContextAttributes(httpContext);
 		}
 		filterRegistrations.put(filter, registration);
+	}
+
+	private ServletContext createServletContextProxy(HttpContext httpContext) {
+		ServletContextAdaptor adapter = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
+		return ServletContextProxyFactory.create(adapter);
 	}
 
 	private int findFilterPriority(Dictionary initparams) {
