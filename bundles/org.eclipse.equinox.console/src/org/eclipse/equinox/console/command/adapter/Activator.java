@@ -58,10 +58,6 @@ public class Activator implements BundleActivator {
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
 	private static SshCommand sshConnection = null;
-	private static Object telnetLock = new Object();
-	private static Object sshLock = new Object(); 
-	private static List<TelnetCommand> telnetConnections = new ArrayList<TelnetCommand>();
-	private static List<SshCommand> sshConnections = new ArrayList<SshCommand>();
 	
 	private ServiceTracker<CommandProcessor, ServiceTracker<ConsoleSession, CommandSession>> commandProcessorTracker;
 	// Tracker for Equinox CommandProviders
