@@ -198,7 +198,7 @@ public class JspServlet extends HttpServlet {
 		}
 	}
 
-	private final static Map contextToHandlerMethods;
+	final static Map contextToHandlerMethods;
 	static {
 		contextToHandlerMethods = createContextToHandlerMethods();
 	}
@@ -243,7 +243,7 @@ public class JspServlet extends HttpServlet {
 			};
 		}
 
-		private Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			Method m = (Method) JspServlet.contextToHandlerMethods.get(method);
 			if (m != null) {
 				return m.invoke(this, args);
