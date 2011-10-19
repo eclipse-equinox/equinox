@@ -47,6 +47,7 @@ public class ClasspathManager {
 	private final static String PROP_CLASSLOADER_LOCK = "osgi.classloader.lock"; //$NON-NLS-1$
 	private final static String VALUE_CLASSNAME_LOCK = "classname"; //$NON-NLS-1$
 	private final static boolean LOCK_CLASSNAME = VALUE_CLASSNAME_LOCK.equals(FrameworkProperties.getProperty(PROP_CLASSLOADER_LOCK));
+	private final static Class<?>[] NULL_CLASS_RESULT = new Class[2];
 
 	private final BaseData data;
 	private final String[] classpath;
@@ -452,10 +453,10 @@ public class ClasspathManager {
 		try {
 			for (int i = 0; i < hooks.length; i++)
 				hooks[i].preFindLocalClass(classname, this);
-			if (LOCK_CLASSNAME || isParallelClassLoader)
-				result = findLocalClass_LockClassName(classname, hooks);
-			else
-				result = findLocalClass_LockClassLoader(classname, hooks);
+			result = findLoadedClass(classname);
+			if (result != null)
+				return result;
+			result = findLocalClassImpl(classname, hooks);
 			return result;
 		} finally {
 			for (int i = 0; i < hooks.length; i++)
@@ -463,28 +464,23 @@ public class ClasspathManager {
 		}
 	}
 
-	private Class<?> findLocalClass_LockClassName(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
-		boolean initialLock = lockClassName(classname);
-		try {
-			return findLocalClassImpl(classname, hooks);
-		} finally {
-			if (initialLock)
-				unlockClassName(classname);
+	private Class<?> findLoadedClass(String classname) {
+		if (LOCK_CLASSNAME || isParallelClassLoader) {
+			boolean initialLock = lockClassName(classname);
+			try {
+				return classloader.publicFindLoaded(classname);
+			} finally {
+				if (initialLock)
+					unlockClassName(classname);
+			}
 		}
-	}
-
-	private Class<?> findLocalClass_LockClassLoader(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
 		synchronized (classloader) {
-			return findLocalClassImpl(classname, hooks);
+			return classloader.publicFindLoaded(classname);
 		}
 	}
 
 	private Class<?> findLocalClassImpl(String classname, ClassLoadingStatsHook[] hooks) throws ClassNotFoundException {
-		// must call findLoadedClass here even if it was called earlier,
-		// the findLoadedClass and defineClass calls must be atomic
-		Class<?> result = classloader.publicFindLoaded(classname);
-		if (result != null)
-			return result;
+		Class<?> result = null;
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] != null) {
 				result = findClassImpl(classname, entries[i], hooks);
@@ -504,7 +500,7 @@ public class ClasspathManager {
 		throw new ClassNotFoundException(classname);
 	}
 
-	private boolean lockClassName(String classname) throws ClassNotFoundException {
+	private boolean lockClassName(String classname) {
 		synchronized (classNameLocks) {
 			Object lockingThread = classNameLocks.get(classname);
 			Thread current = Thread.currentThread();
@@ -520,7 +516,7 @@ public class ClasspathManager {
 					lockingThread = classNameLocks.get(classname);
 				} catch (InterruptedException e) {
 					current.interrupt();
-					throw new ClassNotFoundException(classname, e);
+					throw (LinkageError) new LinkageError(classname).initCause(e);
 				}
 			}
 		}
@@ -535,7 +531,7 @@ public class ClasspathManager {
 
 	private Class<?> findClassImpl(String name, ClasspathEntry classpathEntry, ClassLoadingStatsHook[] hooks) {
 		if (Debug.DEBUG_LOADER)
-			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClass(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			Debug.println("BundleClassLoader[" + classpathEntry.getBundleFile() + "].findClassImpl(" + name + ")"); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 		String filename = name.replace('.', '/').concat(".class"); //$NON-NLS-1$
 		BundleEntry entry = classpathEntry.getBundleFile().getEntry(filename);
 		if (entry == null)
@@ -549,7 +545,6 @@ public class ClasspathManager {
 				Debug.println("  IOException reading " + filename + " from " + classpathEntry.getBundleFile()); //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
-
 		if (Debug.DEBUG_LOADER) {
 			Debug.println("  read " + classbytes.length + " bytes from " + classpathEntry.getBundleFile() + "/" + filename); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			Debug.println("  defining class " + name); //$NON-NLS-1$
@@ -590,19 +585,45 @@ public class ClasspathManager {
 	private Class<?> defineClass(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClassLoadingStatsHook[] statsHooks) {
 		ClassLoadingHook[] hooks = data.getAdaptor().getHookRegistry().getClassLoadingHooks();
 		byte[] modifiedBytes = classbytes;
-		Class<?> result = null;
+		// The result holds two Class objects.  
+		// The first slot to either a pre loaded class or the newly defined class.
+		// The second slot is only set to a newly defined class object if it was successfully defined
+		Class<?>[] result = NULL_CLASS_RESULT;
 		try {
 			for (int i = 0; i < hooks.length; i++) {
 				modifiedBytes = hooks[i].processClass(name, classbytes, classpathEntry, entry, this);
 				if (modifiedBytes != null)
 					classbytes = modifiedBytes;
 			}
-
-			result = classloader.defineClass(name, classbytes, classpathEntry, entry);
+			if (LOCK_CLASSNAME || isParallelClassLoader) {
+				boolean initialLock = lockClassName(name);
+				try {
+					result = defineClassHoldingLock(name, classbytes, classpathEntry, entry);
+				} finally {
+					if (initialLock)
+						unlockClassName(name);
+				}
+			} else {
+				synchronized (classloader) {
+					result = defineClassHoldingLock(name, classbytes, classpathEntry, entry);
+				}
+			}
 		} finally {
 			for (int i = 0; i < statsHooks.length; i++)
-				statsHooks[i].recordClassDefine(name, result, classbytes, classpathEntry, entry, this);
+				// only pass the newly defined class to the hook
+				statsHooks[i].recordClassDefine(name, result[1], classbytes, classpathEntry, entry, this);
 		}
+		// return either the pre-loaded class or the newly defined class
+		return result[0];
+	}
+
+	private Class<?>[] defineClassHoldingLock(String name, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry) {
+		Class<?>[] result = new Class[2];
+		// must call findLoadedClass here even if it was called earlier,
+		// the findLoadedClass and defineClass calls must be atomic
+		result[0] = classloader.publicFindLoaded(name);
+		if (result[0] == null)
+			result[0] = result[1] = classloader.defineClass(name, classbytes, classpathEntry, entry);
 		return result;
 	}
 
