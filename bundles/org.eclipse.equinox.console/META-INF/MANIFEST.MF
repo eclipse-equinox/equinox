@@ -1,23 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Console supportability plug-in
+Bundle-Name: Console plug-in
 Bundle-SymbolicName: org.eclipse.equinox.console
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.equinox.console.command.adapter.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Import-Package: javax.security.auth;resolution:=optional,
- javax.security.auth.callback;resolution:=optional,
- javax.security.auth.login;resolution:=optional,
- javax.security.auth.spi;resolution:=optional,
- org.apache.felix.service.command;status=provisional;version="0.8.0",
- org.apache.sshd;version="0.5.0";resolution:=optional,
- org.apache.sshd.common;version="0.5.0";resolution:=optional,
- org.apache.sshd.server;version="0.5.0";resolution:=optional,
- org.apache.sshd.server.jaas;version="0.5.0";resolution:=optional,
- org.apache.sshd.server.keyprovider;version="0.5.0";resolution:=optional,
- org.apache.sshd.server.session;version="0.5.0";resolution:=optional,
- org.apache.sshd.server.shell;version="0.5.0";resolution:=optional,
+Import-Package: org.apache.felix.service.command;status=provisional;version="0.8.0",
  org.eclipse.osgi.framework.console,
  org.eclipse.osgi.service.environment,
  org.eclipse.osgi.service.resolver,
@@ -29,5 +18,6 @@ Import-Package: javax.security.auth;resolution:=optional,
  org.osgi.service.permissionadmin,
  org.osgi.service.startlevel,
  org.osgi.util.tracker
-Export-Package: org.eclipse.equinox.console.completion.common,
- org.eclipse.equinox.console.jaas
+Export-Package: org.eclipse.equinox.console.common,
+ org.eclipse.equinox.console.common.terminal,
+ org.eclipse.equinox.console.completion.common

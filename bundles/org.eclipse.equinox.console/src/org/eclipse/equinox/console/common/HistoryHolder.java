@@ -9,7 +9,7 @@
  *     Lazar Kirchev, SAP AG - initial API and implementation 
  *******************************************************************************/
 
-package org.eclipse.equinox.console.supportability;
+package org.eclipse.equinox.console.common;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;

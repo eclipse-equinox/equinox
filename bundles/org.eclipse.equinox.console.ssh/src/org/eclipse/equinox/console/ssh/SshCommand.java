@@ -161,14 +161,7 @@ public class SshCommand {
             
             checkPortAvailable(port);
             
-            try {
-				sshServ = new SshServ(processors, context, host, port);
-			} catch (NoClassDefFoundError e) {
-				// ssh server bundles are optional and may not be available
-				System.out.println("SSH bundles not available! If you want to use SSH, please install Apache sshd-core, Apache mina-core, slf4j-api and a slf4j logger implementation bundles");
-				sshServ = null;
-				return;
-			}
+            sshServ = new SshServ(processors, context, host, port);
             sshServ.setName("equinox ssh");
             
             if ("true".equals(context.getProperty(DEFAULT_USER_STORE_PROPERTY))) {

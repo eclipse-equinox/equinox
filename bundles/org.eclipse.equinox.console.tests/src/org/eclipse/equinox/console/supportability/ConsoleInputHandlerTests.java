@@ -11,6 +11,7 @@
 
 package org.eclipse.equinox.console.supportability;
 
+import org.eclipse.equinox.console.common.ConsoleInputHandler;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
 import org.junit.Assert;
 import org.junit.Test;

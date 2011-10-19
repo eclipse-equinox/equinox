@@ -42,12 +42,7 @@ public class SshServ extends Thread {
     }
     
     public void run() throws RuntimeException {
-    	try {
-			sshServer = SshServer.setUpDefaultServer();
-		} catch (NoClassDefFoundError e1) {
-			System.out.println("SSH bundles not available! If you want to use SSH, please install Apache sshd-core, Apache mina-core, slf4j-api and a slf4j logger implementation bundles");
-			throw new RuntimeException("SSH bundles not available");
-		}
+    	sshServer = SshServer.setUpDefaultServer();
 		if (host != null) {
 			sshServer.setHost(host);
 		}

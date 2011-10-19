@@ -27,7 +27,6 @@ import org.eclipse.equinox.console.commands.DisconnectCommand;
 import org.eclipse.equinox.console.commands.EquinoxCommandProvider;
 import org.eclipse.equinox.console.commands.HelpCommand;
 import org.eclipse.equinox.console.commands.ManCommand;
-import org.eclipse.equinox.console.ssh.SshCommand;
 import org.eclipse.equinox.console.telnet.TelnetCommand;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -57,7 +56,6 @@ public class Activator implements BundleActivator {
 	private ServiceTracker<PlatformAdmin, ?> platformAdminTracker;
 	private static boolean isFirstProcessor = true;
 	private static TelnetCommand telnetConnection = null;
-	private static SshCommand sshConnection = null;
 	
 	private ServiceTracker<CommandProcessor, ServiceTracker<ConsoleSession, CommandSession>> commandProcessorTracker;
 	// Tracker for Equinox CommandProviders
@@ -84,11 +82,8 @@ public class Activator implements BundleActivator {
 				isFirstProcessor = false;
 				telnetConnection = new TelnetCommand(processor, context);
 				telnetConnection.start();
-				sshConnection = new SshCommand(processor, context);
-				sshConnection.start();
 			} else {
 				telnetConnection.addCommandProcessor(processor);
-				sshConnection.addCommandProcessor(processor);
 			}
 			
 			ServiceTracker<ConsoleSession, CommandSession> tracker = new ServiceTracker<ConsoleSession, CommandSession>(context, ConsoleSession.class, new SessionCustomizer(context, processor));
@@ -108,7 +103,6 @@ public class Activator implements BundleActivator {
 			tracker.close();
 			CommandProcessor processor = context.getService(reference);
 			telnetConnection.removeCommandProcessor(processor);
-			sshConnection.removeCommandProcessor(processor);
 		}	
 	}
 
@@ -328,12 +322,6 @@ public class Activator implements BundleActivator {
 			telnetConnection.telnet(new String[]{"stop"});
 		} catch (Exception e) {
 			// expected if the telnet server is not started
-		}
-
-		try {
-			sshConnection.ssh(new String[]{"stop"});
-		} catch (Exception e) {
-			// expected if the ssh server is not started
 		}
 
 	}

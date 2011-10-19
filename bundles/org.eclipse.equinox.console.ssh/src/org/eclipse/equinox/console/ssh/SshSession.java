@@ -24,8 +24,8 @@ import org.eclipse.equinox.console.common.ConsoleOutputStream;
 import org.eclipse.equinox.console.common.KEYS;
 import org.eclipse.equinox.console.common.terminal.TerminalTypeMappings;
 import org.eclipse.equinox.console.storage.SecureUserStore;
-import org.eclipse.equinox.console.supportability.ConsoleInputHandler;
-import org.eclipse.equinox.console.supportability.ConsoleInputScanner;
+import org.eclipse.equinox.console.common.ConsoleInputHandler;
+import org.eclipse.equinox.console.common.ConsoleInputScanner;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -22,7 +22,7 @@ import org.apache.felix.service.command.Descriptor;
 import org.eclipse.equinox.console.common.Scanner;
 import org.eclipse.equinox.console.storage.DigestUtil;
 import org.eclipse.equinox.console.storage.SecureUserStore;
-import org.eclipse.equinox.console.supportability.ConsoleInputScanner;
+import org.eclipse.equinox.console.common.ConsoleInputScanner;
 
 /**
  * This class provides commands for administering users: adding, removing and listing users; setting or changing password;

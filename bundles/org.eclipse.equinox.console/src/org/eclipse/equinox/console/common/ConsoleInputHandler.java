@@ -9,13 +9,11 @@
  *     Lazar Kirchev, SAP AG - initial API and implementation 
  *     IBM Corporation - ongoing development
  *******************************************************************************/
-package org.eclipse.equinox.console.supportability;
+package org.eclipse.equinox.console.common;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.eclipse.equinox.console.common.ConsoleInputStream;
-import org.eclipse.equinox.console.common.InputHandler;
 
 /**
  * This class customizes the generic handler with a concrete content processor,

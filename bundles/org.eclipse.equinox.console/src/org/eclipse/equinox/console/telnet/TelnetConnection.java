@@ -17,9 +17,10 @@ import java.net.Socket;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import java.io.Closeable;
+
+import org.eclipse.equinox.console.common.ConsoleInputHandler;
+import org.eclipse.equinox.console.common.ConsoleInputScanner;
 import org.eclipse.equinox.console.common.ConsoleInputStream;
-import org.eclipse.equinox.console.supportability.ConsoleInputHandler;
-import org.eclipse.equinox.console.supportability.ConsoleInputScanner;
 import org.osgi.framework.BundleContext;
 
 /**

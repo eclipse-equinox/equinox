@@ -9,7 +9,7 @@
  *     Lazar Kirchev, SAP AG - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.equinox.console.supportability;
+package org.eclipse.equinox.console.common;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,10 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.service.command.CommandSession;
-import org.eclipse.equinox.console.common.ConsoleInputStream;
-import org.eclipse.equinox.console.common.KEYS;
-import org.eclipse.equinox.console.common.Scanner;
-import org.eclipse.equinox.console.common.SimpleByteBuffer;
 import org.eclipse.equinox.console.completion.CompletionHandler;
 import org.osgi.framework.BundleContext;
 
