@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,8 +68,6 @@ import org.osgi.framework.Bundle;
  */
 
 public class JspServlet extends HttpServlet {
-	private static ClassLoader cl = JspServlet.class.getClassLoader();
-
 	private static class BundlePermissionCollection extends PermissionCollection {
 		private static final long serialVersionUID = -6365478608043900677L;
 		private Bundle bundle;
@@ -174,8 +172,13 @@ public class JspServlet extends HttpServlet {
 
 		public ServletConfigAdaptor(ServletConfig config) {
 			this.config = config;
-			Class[] interfaces = new Class[] {ServletContext.class};
-			this.context = (ServletContext) Proxy.newProxyInstance(cl, interfaces, new ServletContextAdaptor(config.getServletContext()));
+			this.context = createServletContext();
+		}
+
+		private ServletContext createServletContext() {
+			ServletContext configServletContext = config.getServletContext();
+			ServletContextAdaptor adaptor = new ServletContextAdaptor(configServletContext);
+			return adaptor.createServletContext();
 		}
 
 		public String getInitParameter(String arg0) {
@@ -197,27 +200,55 @@ public class JspServlet extends HttpServlet {
 
 	private final static Map contextToHandlerMethods;
 	static {
-		HashMap methods = new HashMap();
-		Class servletContextClazz = ServletContext.class;
-		Class handlerClazz = ServletContextAdaptor.class;
-		Method[] handlerMethods = handlerClazz.getDeclaredMethods();
+		contextToHandlerMethods = createContextToHandlerMethods();
+	}
+
+	private static Map createContextToHandlerMethods() {
+		Map methods = new HashMap();
+		Method[] handlerMethods = ServletContextAdaptor.class.getDeclaredMethods();
 		for (int i = 0; i < handlerMethods.length; i++) {
+			Method handlerMethod = handlerMethods[i];
+			String name = handlerMethod.getName();
+			Class[] parameterTypes = handlerMethod.getParameterTypes();
 			try {
-				Method m = servletContextClazz.getMethod(handlerMethods[i].getName(), handlerMethods[i].getParameterTypes());
-				methods.put(m, handlerMethods[i]);
+				Method m = ServletContext.class.getMethod(name, parameterTypes);
+				methods.put(m, handlerMethod);
 			} catch (NoSuchMethodException e) {
 				// do nothing
 			}
 		}
-		contextToHandlerMethods = methods;
+		return methods;
 	}
 
-	class ServletContextAdaptor implements InvocationHandler {
-
+	class ServletContextAdaptor {
 		private ServletContext delegate;
 
 		public ServletContextAdaptor(ServletContext delegate) {
 			this.delegate = delegate;
+		}
+
+		public ServletContext createServletContext() {
+			Class clazz = getClass();
+			ClassLoader classLoader = clazz.getClassLoader();
+			Class[] interfaces = new Class[] {ServletContext.class};
+			InvocationHandler handler = createInvocationHandler();
+			return (ServletContext) Proxy.newProxyInstance(classLoader, interfaces, handler);
+		}
+
+		private InvocationHandler createInvocationHandler() {
+			return new InvocationHandler() {
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					return ServletContextAdaptor.this.invoke(proxy, method, args);
+				}
+			};
+		}
+
+		private Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			Method m = (Method) JspServlet.contextToHandlerMethods.get(method);
+			if (m != null) {
+				return m.invoke(this, args);
+			}
+			return method.invoke(delegate, args);
 		}
 
 		public URL getResource(String name) throws MalformedURLException {
@@ -286,14 +317,6 @@ public class JspServlet extends HttpServlet {
 				}
 			}
 			return result;
-		}
-
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			Method m = (Method) contextToHandlerMethods.get(method);
-			if (m != null) {
-				return m.invoke(this, args);
-			}
-			return method.invoke(delegate, args);
 		}
 	}
 }
