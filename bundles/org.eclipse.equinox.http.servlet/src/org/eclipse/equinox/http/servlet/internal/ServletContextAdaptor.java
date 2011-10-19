@@ -1,33 +1,40 @@
-/*******************************************************************************
- * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
- * Contributors:
- *     Cognos Incorporated - initial API and implementation
- *     IBM Corporation - bug fixes and enhancements
- *******************************************************************************/
 package org.eclipse.equinox.http.servlet.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.security.*;
 import java.util.*;
-import javax.servlet.*;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import org.osgi.service.http.HttpContext;
 
-public class ServletContextAdaptor implements ServletContext {
+public class ServletContextAdaptor implements InvocationHandler {
 
-	private ServletContext servletContext;
-	HttpContext httpContext;
-	private AccessControlContext acc;
-	private ProxyContext proxyContext;
+	private final static Map contextToHandlerMethods;
+	static {
+		Map methods = new HashMap();
+		Class servletContextClazz = ServletContext.class;
+		Class handlerClazz = ServletContextAdaptor.class;
+		Method[] handlerMethods = handlerClazz.getDeclaredMethods();
+		for (int i = 0; i < handlerMethods.length; i++) {
+			try {
+				Method m = servletContextClazz.getMethod(handlerMethods[i].getName(), handlerMethods[i].getParameterTypes());
+				methods.put(m, handlerMethods[i]);
+			} catch (NoSuchMethodException e) {
+				// do nothing
+			}
+		}
+		contextToHandlerMethods = methods;
+	}
+	final private ServletContext servletContext;
+	final HttpContext httpContext;
+	final private AccessControlContext acc;
+	final private ProxyContext proxyContext;
 
-	ServletContextAdaptor(ProxyContext proxyContext, ServletContext servletContext, HttpContext httpContext, AccessControlContext acc) {
+	public ServletContextAdaptor(ProxyContext proxyContext, ServletContext servletContext, HttpContext httpContext, AccessControlContext acc) {
 		this.servletContext = servletContext;
 		this.httpContext = httpContext;
 		this.acc = acc;
@@ -89,7 +96,7 @@ public class ServletContextAdaptor implements ServletContext {
 				}
 			}, acc);
 		} catch (PrivilegedActionException e) {
-			log(e.getException().getMessage(), e.getException());
+			servletContext.log(e.getException().getMessage(), e.getException());
 		}
 		return null;
 	}
@@ -100,92 +107,25 @@ public class ServletContextAdaptor implements ServletContext {
 			try {
 				return url.openStream();
 			} catch (IOException e) {
-				log("Error opening stream for resource '" + name + "'", e); //$NON-NLS-1$ //$NON-NLS-2$
+				servletContext.log("Error opening stream for resource '" + name + "'", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return null;
-	}
-
-	public ServletContext getContext(String arg0) {
-		return servletContext.getContext(arg0);
-	}
-
-	public String getInitParameter(String arg0) {
-		return servletContext.getInitParameter(arg0);
-	}
-
-	public Enumeration getInitParameterNames() {
-		return servletContext.getInitParameterNames();
-	}
-
-	public int getMajorVersion() {
-		return servletContext.getMajorVersion();
-	}
-
-	public int getMinorVersion() {
-		return servletContext.getMinorVersion();
 	}
 
 	public RequestDispatcher getNamedDispatcher(String arg0) {
 		return new RequestDispatcherAdaptor(servletContext.getNamedDispatcher(arg0));
 	}
 
-	public String getRealPath(String arg0) {
-		return servletContext.getRealPath(arg0);
-	}
-
 	public RequestDispatcher getRequestDispatcher(String arg0) {
 		return new RequestDispatcherAdaptor(servletContext.getRequestDispatcher(proxyContext.getServletPath() + arg0));
 	}
 
-	public String getServerInfo() {
-		return servletContext.getServerInfo();
-	}
-
-	/**@deprecated*/
-	public Servlet getServlet(String arg0) throws ServletException {
-		return servletContext.getServlet(arg0);
-	}
-
-	public String getServletContextName() {
-		return servletContext.getServletContextName();
-	}
-
-	/**@deprecated*/
-	public Enumeration getServletNames() {
-		return servletContext.getServletNames();
-	}
-
-	/**@deprecated*/
-	public Enumeration getServlets() {
-		return servletContext.getServlets();
-	}
-
-	/**@deprecated*/
-	public void log(Exception arg0, String arg1) {
-		servletContext.log(arg0, arg1);
-	}
-
-	public void log(String arg0, Throwable arg1) {
-		servletContext.log(arg0, arg1);
-	}
-
-	public void log(String arg0) {
-		servletContext.log(arg0);
-	}
-
-	// Added in Servlet 2.5
-	public String getContextPath() {
-		try {
-			Method getContextPathMethod = servletContext.getClass().getMethod("getContextPath", null); //$NON-NLS-1$
-			return (String) getContextPathMethod.invoke(servletContext, null) + proxyContext.getServletPath();
-		} catch (Exception e) {
-			// ignore
+	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		Method m = (Method) contextToHandlerMethods.get(method);
+		if (m != null) {
+			return m.invoke(this, args);
 		}
-		return null;
-	}
-
-	Object getSubject() {
-		return servletContext;
+		return method.invoke(servletContext, args);
 	}
 }

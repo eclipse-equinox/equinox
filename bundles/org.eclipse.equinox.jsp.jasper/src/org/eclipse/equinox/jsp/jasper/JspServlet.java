@@ -14,7 +14,9 @@ package org.eclipse.equinox.jsp.jasper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -22,10 +24,11 @@ import java.security.Permission;
 import java.security.PermissionCollection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -65,6 +68,7 @@ import org.osgi.framework.Bundle;
  */
 
 public class JspServlet extends HttpServlet {
+	private static ClassLoader cl = JspServlet.class.getClassLoader();
 
 	private static class BundlePermissionCollection extends PermissionCollection {
 		private static final long serialVersionUID = -6365478608043900677L;
@@ -170,7 +174,8 @@ public class JspServlet extends HttpServlet {
 
 		public ServletConfigAdaptor(ServletConfig config) {
 			this.config = config;
-			this.context = new ServletContextAdaptor(config.getServletContext());
+			Class[] interfaces = new Class[] {ServletContext.class};
+			this.context = (ServletContext) Proxy.newProxyInstance(cl, interfaces, new ServletContextAdaptor(config.getServletContext()));
 		}
 
 		public String getInitParameter(String arg0) {
@@ -190,7 +195,25 @@ public class JspServlet extends HttpServlet {
 		}
 	}
 
-	private class ServletContextAdaptor implements ServletContext {
+	private final static Map contextToHandlerMethods;
+	static {
+		HashMap methods = new HashMap();
+		Class servletContextClazz = ServletContext.class;
+		Class handlerClazz = ServletContextAdaptor.class;
+		Method[] handlerMethods = handlerClazz.getDeclaredMethods();
+		for (int i = 0; i < handlerMethods.length; i++) {
+			try {
+				Method m = servletContextClazz.getMethod(handlerMethods[i].getName(), handlerMethods[i].getParameterTypes());
+				methods.put(m, handlerMethods[i]);
+			} catch (NoSuchMethodException e) {
+				// do nothing
+			}
+		}
+		contextToHandlerMethods = methods;
+	}
+
+	class ServletContextAdaptor implements InvocationHandler {
+
 		private ServletContext delegate;
 
 		public ServletContextAdaptor(ServletContext delegate) {
@@ -265,103 +288,12 @@ public class JspServlet extends HttpServlet {
 			return result;
 		}
 
-		public RequestDispatcher getRequestDispatcher(String arg0) {
-			return delegate.getRequestDispatcher(arg0);
-		}
-
-		public Object getAttribute(String arg0) {
-			return delegate.getAttribute(arg0);
-		}
-
-		public Enumeration getAttributeNames() {
-			return delegate.getAttributeNames();
-		}
-
-		public ServletContext getContext(String arg0) {
-			return delegate.getContext(arg0);
-		}
-
-		public String getInitParameter(String arg0) {
-			return delegate.getInitParameter(arg0);
-		}
-
-		public Enumeration getInitParameterNames() {
-			return delegate.getInitParameterNames();
-		}
-
-		public int getMajorVersion() {
-			return delegate.getMajorVersion();
-		}
-
-		public String getMimeType(String arg0) {
-			return delegate.getMimeType(arg0);
-		}
-
-		public int getMinorVersion() {
-			return delegate.getMinorVersion();
-		}
-
-		public RequestDispatcher getNamedDispatcher(String arg0) {
-			return delegate.getNamedDispatcher(arg0);
-		}
-
-		public String getRealPath(String arg0) {
-			return delegate.getRealPath(arg0);
-		}
-
-		public String getServerInfo() {
-			return delegate.getServerInfo();
-		}
-
-		/** @deprecated **/
-		public Servlet getServlet(String arg0) throws ServletException {
-			return delegate.getServlet(arg0);
-		}
-
-		public String getServletContextName() {
-			return delegate.getServletContextName();
-		}
-
-		/** @deprecated **/
-		public Enumeration getServletNames() {
-			return delegate.getServletNames();
-		}
-
-		/** @deprecated **/
-		public Enumeration getServlets() {
-			return delegate.getServlets();
-		}
-
-		/** @deprecated **/
-		public void log(Exception arg0, String arg1) {
-			delegate.log(arg0, arg1);
-		}
-
-		public void log(String arg0, Throwable arg1) {
-			delegate.log(arg0, arg1);
-		}
-
-		public void log(String arg0) {
-			delegate.log(arg0);
-		}
-
-		public void removeAttribute(String arg0) {
-			delegate.removeAttribute(arg0);
-		}
-
-		public void setAttribute(String arg0, Object arg1) {
-			delegate.setAttribute(arg0, arg1);
-		}
-
-		// Added in Servlet 2.5
-		public String getContextPath() {
-			try {
-				Method getContextPathMethod = delegate.getClass().getMethod("getContextPath", null); //$NON-NLS-1$
-				return (String) getContextPathMethod.invoke(delegate, null);
-			} catch (Exception e) {
-				// ignore
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			Method m = (Method) contextToHandlerMethods.get(method);
+			if (m != null) {
+				return m.invoke(this, args);
 			}
-			return null;
+			return method.invoke(delegate, args);
 		}
 	}
 }
