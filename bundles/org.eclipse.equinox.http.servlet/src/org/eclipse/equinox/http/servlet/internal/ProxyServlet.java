@@ -170,8 +170,8 @@ public class ProxyServlet extends HttpServlet {
 			throw new ServletException("This servlet has already been registered."); //$NON-NLS-1$
 
 		ServletRegistration registration = new ServletRegistration(servlet, httpContext);
-		ServletContext servletContextProxy = createServletContextProxy(httpContext);
-		ServletConfig servletConfig = new ServletConfigImpl(servlet, initparams, servletContextProxy);
+		ServletContext servletContext = createServletContext(httpContext);
+		ServletConfig servletConfig = new ServletConfigImpl(servlet, initparams, servletContext);
 
 		boolean initialized = false;
 		proxyContext.createContextAttributes(httpContext);
@@ -235,8 +235,8 @@ public class ProxyServlet extends HttpServlet {
 
 		int filterPriority = findFilterPriority(initparams);
 		FilterRegistration registration = new FilterRegistration(filter, httpContext, alias, filterPriority);
-		ServletContext servletContextProxy = createServletContextProxy(httpContext);
-		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, servletContextProxy);
+		ServletContext servletContext = createServletContext(httpContext);
+		FilterConfig filterConfig = new FilterConfigImpl(filter, initparams, servletContext);
 
 		boolean initialized = false;
 		proxyContext.createContextAttributes(httpContext);
@@ -250,9 +250,9 @@ public class ProxyServlet extends HttpServlet {
 		filterRegistrations.put(filter, registration);
 	}
 
-	private ServletContext createServletContextProxy(HttpContext httpContext) {
-		ServletContextAdaptor handler = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
-		return ServletContextProxyFactory.create(handler);
+	private ServletContext createServletContext(HttpContext httpContext) {
+		ServletContextAdaptor adaptor = new ServletContextAdaptor(proxyContext, getServletContext(), httpContext, AccessController.getContext());
+		return adaptor.createServletContext();
 	}
 
 	private int findFilterPriority(Dictionary initparams) {
