@@ -85,7 +85,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	private static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console.supportability"; //$NON-NLS-1$
+	private static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
 	final Framework framework;
 	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
