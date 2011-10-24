@@ -165,7 +165,8 @@ public class TelnetCommand {
             telnetServer.start();    
         } else if ("stop".equals(command)) {
             if (telnetServer == null) {
-                throw new IllegalStateException("telnet is not running.");
+                System.out.println("telnet is not running.");
+                return;
             }
             
             telnetServer.stopTelnetServer();
@@ -175,12 +176,16 @@ public class TelnetCommand {
     
     public synchronized void addCommandProcessor(CommandProcessor processor) {
     	processors.add(processor);
-    	telnetServer.addCommandProcessor(processor);
+    	if (telnetServer != null) {
+    		telnetServer.addCommandProcessor(processor);
+    	}
     }
     
     public synchronized void removeCommandProcessor(CommandProcessor processor) {
     	processors.remove(processor);
-    	telnetServer.removeCommandProcessor(processor);
+    	if (telnetServer != null) {
+    		telnetServer.removeCommandProcessor(processor);
+    	}
     }
     
     private void printHelp() {

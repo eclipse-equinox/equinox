@@ -84,16 +84,20 @@ public class TelnetServer extends Thread {
     }
 	
 	public synchronized void addCommandProcessor(CommandProcessor processor) {
-		List<TelnetConnection> telnetConnections = new ArrayList<TelnetConnection>();
-		for (Socket socket : sockets) {
-			TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
-			telnetConnections.add(telnetConnection);
-        	telnetConnection.start();
+		processors.add(processor);
+		if (!sockets.isEmpty()) {
+			List<TelnetConnection> telnetConnections = new ArrayList<TelnetConnection>();
+			for (Socket socket : sockets) {
+				TelnetConnection telnetConnection = new TelnetConnection(socket, processor, context);
+				telnetConnections.add(telnetConnection);
+				telnetConnection.start();
+			}
+			processorToConnectionsMapping.put(processor, telnetConnections);
 		}
-		processorToConnectionsMapping.put(processor, telnetConnections);
 	}
 	
 	public synchronized void removeCommandProcessor(CommandProcessor processor) {
+		processors.remove(processor);
 		List<TelnetConnection> telnetConnections = processorToConnectionsMapping.remove(processor);
 		if (telnetConnections != null) {
 			for (TelnetConnection telnetConnection : telnetConnections) {
