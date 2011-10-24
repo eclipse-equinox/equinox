@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,11 +61,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 	private static final int POST_RESOURCES = 6;
 	private static final int PRE_LIBRARY = 7;
 	private static final int POST_LIBRARY = 8;
-
-	private static final boolean USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK = "true".equals(BundleLoaderProxy.secureAction.getProperty("osgi.classloader.singleThreadLoads")); //$NON-NLS-1$//$NON-NLS-2$
-	private static final List<Object[]> waitingList = USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK ? new ArrayList<Object[]>(0) : null;
-	private static Object lockThread;
-	private static int lockCount = 0;
 
 	/* the proxy */
 	final private BundleLoaderProxy proxy;
@@ -423,14 +418,7 @@ public class BundleLoader implements ClassLoaderDelegate {
 			// 1) if startsWith "java." delegate to parent and terminate search
 			// we want to throw ClassNotFoundExceptions if a java.* class cannot be loaded from the parent.
 			return parentCL.loadClass(name);
-		try {
-			if (USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK)
-				lock(createClassLoader());
-			return findClassInternal(name, checkParent, parentCL);
-		} finally {
-			if (USE_GLOBAL_DEADLOCK_AVOIDANCE_LOCK)
-				unlock();
-		}
+		return findClassInternal(name, checkParent, parentCL);
 	}
 
 	private Class<?> findClassInternal(String name, boolean checkParent, ClassLoader parentCL) throws ClassNotFoundException {
@@ -1261,93 +1249,6 @@ public class BundleLoader implements ClassLoaderDelegate {
 		// need to make this method public
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
-		}
-	}
-
-	/* 
-	 * see bug 121737
-	 * To ensure that we do not enter a deadly embrace between classloader cycles
-	 * we attempt to obtain a global lock before do normal osgi delegation.
-	 * This approach ensures that only one thread has a classloader locked at a time
-	 */
-	private static void lock(Object loader) {
-		Thread currentThread = Thread.currentThread();
-		boolean interrupted = false;
-		synchronized (loader) {
-			if (tryLock(currentThread, loader))
-				return; // this thread has the lock
-
-			do {
-				try {
-					// we wait on the loader object here to release its lock incase we have it.
-					// we do not way to wait while holding this lock because that will cause deadlock
-					loader.wait();
-				} catch (InterruptedException e) {
-					interrupted = true;
-					// we still want to try again
-				}
-			} while (!tryLock(currentThread));
-		}
-		if (interrupted)
-			currentThread.interrupt();
-	}
-
-	/*
-	 * returns true if this thread can obtain the global lock or already has the lock;
-	 * otherwise this loader and thread are added to the waitingList
-	 */
-	private synchronized static boolean tryLock(Thread currentThread, Object loader) {
-		if (lockThread == currentThread) {
-			lockCount++;
-			return true;
-		}
-		if (lockThread == null) {
-			lockCount++;
-			lockThread = currentThread;
-			return true;
-		}
-		waitingList.add(new Object[] {currentThread, loader});
-		return false;
-	}
-
-	/*
-	 * returns true if this thread already has the global lock
-	 */
-	private synchronized static boolean tryLock(Thread currentThread) {
-		if (lockThread == currentThread) {
-			lockCount++;
-			return true;
-		}
-		return false;
-	}
-
-	/*
-	 * unlocks the global lock and notifies the first waiting thread that they
-	 * now have the lock
-	 */
-	private static void unlock() {
-		Thread waitingThread = null;
-		Object loader = null;
-		synchronized (BundleLoader.class) {
-			lockCount--;
-			if (lockCount != 0)
-				return;
-
-			if (waitingList.isEmpty()) {
-				lockThread = null;
-				return;
-			}
-
-			Object[] waiting = waitingList.get(0);
-			waitingThread = (Thread) waiting[0];
-			loader = waiting[1];
-		}
-		synchronized (loader) {
-			synchronized (BundleLoader.class) {
-				lockThread = waitingThread;
-				waitingList.remove(0);
-				loader.notifyAll();
-			}
 		}
 	}
 
