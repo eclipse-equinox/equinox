@@ -187,7 +187,8 @@ public class SshCommand {
 			}    
         } else if ("stop".equals(command)) {
             if (sshServ == null) {
-                throw new IllegalStateException("ssh is not running.");
+                System.out.println("ssh is not running.");
+                return;
             }
             
             sshServ.stopSshServer();
@@ -197,12 +198,16 @@ public class SshCommand {
     
     public synchronized void addCommandProcessor(CommandProcessor processor) {
     	processors.add(processor);
-    	sshServ.addCommandProcessor(processor);
+    	if (sshServ != null) {
+    		sshServ.addCommandProcessor(processor);
+    	}
     }
     
     public synchronized void removeCommandProcessor(CommandProcessor processor) {
     	processors.remove(processor);
-    	sshServ.removeCommandProcessor(processor);
+    	if (sshServ != null) {
+    		sshServ.removeCommandProcessor(processor);
+    	}
     }
     
     private void checkPortAvailable(int port) throws Exception {
