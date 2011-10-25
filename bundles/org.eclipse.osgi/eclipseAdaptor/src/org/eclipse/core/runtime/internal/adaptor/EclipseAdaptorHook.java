@@ -92,7 +92,7 @@ public class EclipseAdaptorHook implements AdaptorHook, HookConfigurator {
 		if (converter == null)
 			converter = new PluginConverterImpl(adaptor, context);
 		registrations.add(AdaptorUtil.register(PluginConverter.class.getName(), converter, context));
-		String builtinEnabled = FrameworkProperties.getProperty(ConsoleManager.PROP_CONSOLE_ENABLED, "true"); //$NON-NLS-1$
+		String builtinEnabled = FrameworkProperties.getProperty(ConsoleManager.PROP_CONSOLE_ENABLED, ConsoleManager.CONSOLE_BUNDLE);
 		if ("true".equals(builtinEnabled)) { //$NON-NLS-1$
 			registrations.add(AdaptorUtil.register(CommandProvider.class.getName(), new EclipseCommandProvider(context), context));
 		}

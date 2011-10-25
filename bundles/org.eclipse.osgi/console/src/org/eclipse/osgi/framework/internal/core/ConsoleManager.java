@@ -85,7 +85,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 	public static final String PROP_CONSOLE = "osgi.console"; //$NON-NLS-1$
 	private static final String PROP_SYSTEM_IN_OUT = "console.systemInOut"; //$NON-NLS-1$
 	private static final String CONSOLE_NAME = "OSGi Console"; //$NON-NLS-1$
-	private static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
+	public static final String CONSOLE_BUNDLE = "org.eclipse.equinox.console"; //$NON-NLS-1$
 	public static final String PROP_CONSOLE_ENABLED = "osgi.console.enable.builtin"; //$NON-NLS-1$
 	final Framework framework;
 	private final ServiceTracker<CommandProvider, CommandProvider> cpTracker;
@@ -113,7 +113,7 @@ public class ConsoleManager implements ServiceTrackerCustomizer<ConsoleSession, 
 		this.framework = framework;
 		this.consoleHost = host != null ? host.trim() : host;
 		this.consolePort = port != null ? port.trim() : port;
-		String enabled = FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED, "true"); //$NON-NLS-1$
+		String enabled = FrameworkProperties.getProperty(PROP_CONSOLE_ENABLED, CONSOLE_BUNDLE);
 		if (!"true".equals(enabled) || "none".equals(port)) { //$NON-NLS-1$ //$NON-NLS-2$
 			isEnabled = false;
 			this.cpTracker = null;
