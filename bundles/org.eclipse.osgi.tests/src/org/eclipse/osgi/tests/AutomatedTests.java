@@ -13,7 +13,6 @@ package org.eclipse.osgi.tests;
 import junit.framework.*;
 import org.eclipse.osgi.tests.bundles.BundleTests;
 import org.eclipse.osgi.tests.composites.AllCompositeTests;
-import org.eclipse.osgi.tests.console.AllConsoleTests;
 import org.eclipse.osgi.tests.debugoptions.DebugOptionsTestCase;
 import org.eclipse.osgi.tests.eventmgr.EventManagerTests;
 import org.eclipse.osgi.tests.filter.FilterTests;
@@ -63,7 +62,7 @@ public class AutomatedTests extends TestCase {
 		suite.addTest(PermissionTests.suite());
 		suite.addTest(AllCompositeTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.securityadmin.AllSecurityAdminTests.suite());
-		suite.addTest(AllConsoleTests.suite());
+		//disable suite.addTest(AllConsoleTests.suite());
 		suite.addTest(org.eclipse.osgi.tests.resource.AllTests.suite());
 		return suite;
 	}
