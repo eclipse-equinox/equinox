@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,5 +94,9 @@ public class SurrogateImpl extends CompositeBase implements SurrogateBundle {
 
 	protected void stopHook() {
 		((CompositeModule) getCompanionBundle()).stopped(this);
+	}
+
+	public void uninstall() throws BundleException {
+		throw new BundleException("Cannot uninstall surrogate bundles", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 	}
 }
