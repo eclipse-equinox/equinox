@@ -324,7 +324,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	public String toString() {
 		String result = filterString;
 		if (result == null) {
-			filterString = result = normalize();
+			filterString = result = normalize().toString();
 		}
 		return result;
 	}
@@ -337,7 +337,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 	 * 
 	 * @return This <code>Filter</code>'s filter string.
 	 */
-	private String normalize() {
+	private StringBuffer normalize() {
 		StringBuffer sb = new StringBuffer();
 		sb.append('(');
 
@@ -427,7 +427,7 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 
 		sb.append(')');
 
-		return sb.toString();
+		return sb;
 	}
 
 	/**
@@ -1141,7 +1141,53 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 		return false;
 	}
 
-	private static final Class<?>[] constructorType = new Class[] {String.class};
+	private static Object valueOf(Class<?> target, String value2) {
+		do {
+			Method method;
+			try {
+				method = target.getMethod("valueOf", String.class); //$NON-NLS-1$
+			} catch (NoSuchMethodException e) {
+				break;
+			}
+			if (Modifier.isStatic(method.getModifiers()) && target.isAssignableFrom(method.getReturnType())) {
+				setAccessible(method);
+				try {
+					return method.invoke(null, value2.trim());
+				} catch (IllegalAccessException e) {
+					return null;
+				} catch (InvocationTargetException e) {
+					return null;
+				}
+			}
+		} while (false);
+
+		do {
+			Constructor<?> constructor;
+			try {
+				constructor = target.getConstructor(String.class);
+			} catch (NoSuchMethodException e) {
+				break;
+			}
+			setAccessible(constructor);
+			try {
+				return constructor.newInstance(value2.trim());
+			} catch (IllegalAccessException e) {
+				return null;
+			} catch (InvocationTargetException e) {
+				return null;
+			} catch (InstantiationException e) {
+				return null;
+			}
+		} while (false);
+
+		return null;
+	}
+
+	private static void setAccessible(AccessibleObject accessible) {
+		if (!accessible.isAccessible()) {
+			AccessController.doPrivileged(new SetAccessibleAction(accessible));
+		}
+	}
 
 	private boolean compare_Comparable(int operation, Comparable<Object> value1, Object value2) {
 		if (operation == SUBSTRING) {
@@ -1150,21 +1196,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 			return false;
 		}
-		Constructor<?> constructor;
-		try {
-			constructor = value1.getClass().getConstructor(constructorType);
-		} catch (NoSuchMethodException e) {
-			return false;
-		}
-		try {
-			if (!constructor.isAccessible())
-				AccessController.doPrivileged(new SetAccessibleAction(constructor));
-			value2 = constructor.newInstance(new Object[] {((String) value2).trim()});
-		} catch (IllegalAccessException e) {
-			return false;
-		} catch (InvocationTargetException e) {
-			return false;
-		} catch (InstantiationException e) {
+		value2 = valueOf(value1.getClass(), (String) value2);
+		if (value2 == null) {
 			return false;
 		}
 
@@ -1209,24 +1242,8 @@ public class FilterImpl implements Filter /* since Framework 1.1 */{
 			}
 			return false;
 		}
-		Constructor<?> constructor;
-		try {
-			constructor = value1.getClass().getConstructor(constructorType);
-		} catch (NoSuchMethodException e) {
-			if (Debug.DEBUG_FILTER) {
-				Debug.println("Type not supported"); //$NON-NLS-1$
-			}
-			return false;
-		}
-		try {
-			if (!constructor.isAccessible())
-				AccessController.doPrivileged(new SetAccessibleAction(constructor));
-			value2 = constructor.newInstance(new Object[] {((String) value2).trim()});
-		} catch (IllegalAccessException e) {
-			return false;
-		} catch (InvocationTargetException e) {
-			return false;
-		} catch (InstantiationException e) {
+		value2 = valueOf(value1.getClass(), (String) value2);
+		if (value2 == null) {
 			return false;
 		}
 
