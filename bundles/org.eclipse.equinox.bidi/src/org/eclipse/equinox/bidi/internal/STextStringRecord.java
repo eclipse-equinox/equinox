@@ -8,7 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.equinox.bidi;
+package org.eclipse.equinox.bidi.internal;
+
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 
 import java.lang.ref.SoftReference;
 
