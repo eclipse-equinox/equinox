@@ -40,6 +40,7 @@ final class BundleIdBasedRegion implements Region {
 	// It should be considered a global lock on the complete digraph.
 	private final Object globalUpdateMonitor;
 	private final AtomicLong globalTimeStamp;
+	//TODO: avoid sharing this map across classes.
 	private final Map<Long, Region> globalBundleToRegion;
 
 	private final String regionName;
