@@ -1027,6 +1027,13 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/resource/Wiring.java" type="org.osgi.framework.resource.Wiring">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.resource.Wiring"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/startlevel/BundleStartLevel.java" type="org.osgi.framework.startlevel.BundleStartLevel">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
@@ -1038,6 +1045,49 @@
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.framework.startlevel.FrameworkStartLevel"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/BundleCapability.java" type="org.osgi.framework.wiring.BundleCapability">
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getResource()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/BundleRequirement.java" type="org.osgi.framework.wiring.BundleRequirement">
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getResource()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/BundleWire.java" type="org.osgi.framework.wiring.BundleWire">
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getProvider()"/>
+            </message_arguments>
+        </filter>
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getRequirer()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
+        <filter id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getResource()"/>
             </message_arguments>
         </filter>
     </resource>

@@ -1103,6 +1103,8 @@ public interface Bundle extends Comparable<Bundle> {
 	 * </pre>
 	 * 
 	 * <p>
+	 * URLs for directory entries must have their path end with &quot;/&quot;.
+	 * <p>
 	 * Note: Jar and zip files are not required to include directory entries.
 	 * URLs to directory entries will not be returned if the bundle contents do
 	 * not contain directory entries.

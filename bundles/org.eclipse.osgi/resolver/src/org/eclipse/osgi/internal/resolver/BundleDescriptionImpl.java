@@ -12,9 +12,6 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.resolver;
 
-import org.osgi.framework.resource.Capability;
-import org.osgi.framework.resource.Requirement;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
@@ -25,6 +22,7 @@ import org.eclipse.osgi.framework.util.KeyedElement;
 import org.eclipse.osgi.internal.loader.BundleLoaderProxy;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.*;
 import org.osgi.framework.wiring.*;
 
 public final class BundleDescriptionImpl extends BaseDescriptionImpl implements BundleDescription, KeyedElement {
@@ -1035,6 +1033,39 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
+	/**
+	 * Coerce the generic type of a list from List<BundleWire>
+	 * to List<Wire>
+	 * @param l List to be coerced.
+	 * @return l coerced to List<Wire>
+	 */
+	@SuppressWarnings("unchecked")
+	static List<Wire> asListWire(List<? extends Wire> l) {
+		return (List<Wire>) l;
+	}
+
+	/**
+	 * Coerce the generic type of a list from List<BundleCapability>
+	 * to List<Capability>
+	 * @param l List to be coerced.
+	 * @return l coerced to List<Capability>
+	 */
+	@SuppressWarnings("unchecked")
+	static List<Capability> asListCapability(List<? extends Capability> l) {
+		return (List<Capability>) l;
+	}
+
+	/**
+	 * Coerce the generic type of a list from List<BundleRequirement>
+	 * to List<Requirement>
+	 * @param l List to be coerced.
+	 * @return l coerced to List<Requirement>
+	 */
+	@SuppressWarnings("unchecked")
+	static List<Requirement> asListRequirement(List<? extends Requirement> l) {
+		return (List<Requirement>) l;
+	}
+
 	// Note that description wiring are identity equality based
 	class DescriptionWiring implements BundleWiring {
 		private volatile boolean valid = true;
@@ -1082,6 +1113,10 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return result;
 		}
 
+		public List<Capability> getResourceCapabilities(String namespace) {
+			return asListCapability(getCapabilities(namespace));
+		}
+
 		public List<BundleRequirement> getRequirements(String namespace) {
 			List<BundleWire> requiredWires = getRequiredWires(namespace);
 			if (requiredWires == null)
@@ -1115,6 +1150,10 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return requirements;
 		}
 
+		public List<Requirement> getResourceRequirements(String namespace) {
+			return asListRequirement(getRequirements(namespace));
+		}
+
 		public List<BundleWire> getProvidedWires(String namespace) {
 			if (!isInUse())
 				return null;
@@ -1142,6 +1181,10 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return orderedResult;
 		}
 
+		public List<Wire> getProvidedResourceWires(String namespace) {
+			return asListWire(getProvidedWires(namespace));
+		}
+
 		public List<BundleWire> getRequiredWires(String namespace) {
 			if (!isInUse())
 				return null;
@@ -1167,8 +1210,16 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 			return result;
 		}
 
+		public List<Wire> getRequiredResourceWires(String namespace) {
+			return asListWire(getRequiredWires(namespace));
+		}
+
 		public BundleRevision getRevision() {
 			return BundleDescriptionImpl.this;
+		}
+
+		public BundleRevision getResource() {
+			return getRevision();
 		}
 
 		public ClassLoader getClassLoader() {
@@ -1232,13 +1283,11 @@ public final class BundleDescriptionImpl extends BaseDescriptionImpl implements 
 		}
 	}
 
-	@SuppressWarnings({"cast", "unchecked", "rawtypes"})
 	public List<Capability> getCapabilities(String namespace) {
-		return (List<Capability>) (List) getDeclaredCapabilities(namespace);
+		return asListCapability(getDeclaredCapabilities(namespace));
 	}
 
-	@SuppressWarnings({"cast", "unchecked", "rawtypes"})
 	public List<Requirement> getRequirements(String namespace) {
-		return (List<Requirement>) (List) getDeclaredRequirements(namespace);
+		return asListRequirement(getDeclaredRequirements(namespace));
 	}
 }
