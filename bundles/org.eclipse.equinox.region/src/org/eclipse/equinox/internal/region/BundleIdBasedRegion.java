@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Set;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.osgi.framework.*;
@@ -35,43 +34,34 @@ final class BundleIdBasedRegion implements Region {
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
 
-	// Note that this global digraph monitor locks modifications and read operations on the RegionDigraph
-	// This includes modifying and reading the bunlde ids included in this region
-	// It should be considered a global lock on the complete digraph.
-	private final Object globalUpdateMonitor;
-	private final AtomicLong globalTimeStamp;
-	//TODO: avoid sharing this map across classes.
-	private final Map<Long, Region> globalBundleToRegion;
-
 	private final String regionName;
 
 	private final RegionDigraph regionDigraph;
+
+	private final BundleIdToRegionMapping bundleIdToRegionMapping;
 
 	private final BundleContext bundleContext;
 
 	private final ThreadLocal<Region> threadLocal;
 
-	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleContext bundleContext, ThreadLocal<Region> threadLocal, Object globalUpdateMonitor, AtomicLong globalTimeStamp, Map<Long, Region> globalBundleToRegion) {
+	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
 		if (regionName == null)
 			throw new IllegalArgumentException("The region name must not be null"); //$NON-NLS-1$
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
-		if (globalUpdateMonitor == null)
-			throw new IllegalArgumentException("The global update monitor must not be null"); //$NON-NLS-1$
-		if (globalBundleToRegion == null)
-			throw new IllegalArgumentException("The global bundle to region must not be null"); //$NON-NLS-1$
+		if (bundleIdToRegionMapping == null)
+			throw new IllegalArgumentException("The bundle id to region mapping must not be null"); //$NON-NLS-1$
 		this.regionName = regionName;
 		this.regionDigraph = regionDigraph;
+		this.bundleIdToRegionMapping = bundleIdToRegionMapping;
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
-		this.globalUpdateMonitor = globalUpdateMonitor;
-		this.globalTimeStamp = globalTimeStamp;
-		this.globalBundleToRegion = globalBundleToRegion;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public String getName() {
 		return this.regionName;
 	}
@@ -79,6 +69,7 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void addBundle(Bundle bundle) throws BundleException {
 		addBundle(bundle.getBundleId());
 	}
@@ -86,22 +77,15 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
-	// There is a global lock obtained to ensure consistency across the complete digraph
+	@Override
 	public void addBundle(long bundleId) throws BundleException {
-		synchronized (this.globalUpdateMonitor) {
-			Region r = this.globalBundleToRegion.get(bundleId);
-			if (r != null && r != this) {
-				throw new BundleException("Bundle '" + bundleId + "' is already associated with region '" + r + "'", BundleException.INVALID_OPERATION); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			this.globalBundleToRegion.put(bundleId, this);
-			this.globalTimeStamp.incrementAndGet();
-		}
-
+		this.bundleIdToRegionMapping.associateBundleWithRegion(bundleId, this);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
 		if (this.bundleContext == null)
 			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
@@ -129,6 +113,7 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Bundle installBundle(String location) throws BundleException {
 		return installBundle(location, null);
 	}
@@ -146,6 +131,7 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public Bundle getBundle(String symbolicName, Version version) {
 		if (bundleContext == null)
 			return null; // this region is not connected to an OSGi framework
@@ -163,6 +149,7 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void connectRegion(Region headRegion, RegionFilter filter) throws BundleException {
 		this.regionDigraph.connect(this, filter, headRegion);
 	}
@@ -170,19 +157,20 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean contains(long bundleId) {
-		synchronized (globalUpdateMonitor) {
-			return globalBundleToRegion.get(bundleId) == this;
-		}
+		return this.bundleIdToRegionMapping.isBundleAssociatedWithRegion(bundleId, this);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public boolean contains(Bundle bundle) {
 		return contains(bundle.getBundleId());
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -190,6 +178,7 @@ final class BundleIdBasedRegion implements Region {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -207,6 +196,7 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeBundle(Bundle bundle) {
 		removeBundle(bundle.getBundleId());
 
@@ -215,11 +205,9 @@ final class BundleIdBasedRegion implements Region {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeBundle(long bundleId) {
-		synchronized (this.globalUpdateMonitor) {
-			this.globalBundleToRegion.remove(bundleId);
-			this.globalTimeStamp.incrementAndGet();
-		}
+		this.bundleIdToRegionMapping.dissociateBundle(bundleId);
 	}
 
 	/**
@@ -230,22 +218,26 @@ final class BundleIdBasedRegion implements Region {
 		return getName();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<Long> getBundleIds() {
-		Set<Long> bundleIds = new HashSet<Long>();
-		synchronized (this.globalUpdateMonitor) {
-			for (Map.Entry<Long, Region> entry : globalBundleToRegion.entrySet()) {
-				if (entry.getValue() == this) {
-					bundleIds.add(entry.getKey());
-				}
-			}
-		}
-		return bundleIds;
+		return this.bundleIdToRegionMapping.getBundleIds(this);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Set<FilteredRegion> getEdges() {
 		return this.regionDigraph.getEdges(this);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void visitSubgraph(RegionDigraphVisitor visitor) {
 		this.regionDigraph.visitSubgraph(this, visitor);
 	}
