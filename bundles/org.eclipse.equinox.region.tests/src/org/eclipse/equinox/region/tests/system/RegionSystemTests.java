@@ -596,10 +596,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		digraph.removeRegion(pp1Region);
 		assertNull("Region still associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
 
-		// Adding a bundle to a region should probably be an error
+		// Adding a bundle to a removed region should not change the digraph and should error
 		try {
 			pp1Region.addBundle(TEST_BUNDLE_ID);
-			assertTrue("Added a bundle to a region which was not part of a digraph", true);
+			fail("Added a bundle to a region which was not part of a digraph");
 		} catch (IllegalStateException e) {
 			// expected
 		}
@@ -608,10 +608,10 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		Region pp2Region = digraph.createRegion(PP2);
 		pp2Region.addBundle(TEST_BUNDLE_ID);
 
-		// removing a bundle from a removed region should not change the digraph
+		// removing a bundle from a removed region should not change the digraph and should error
 		try {
 			pp1Region.removeBundle(TEST_BUNDLE_ID);
-			assertTrue("Removed a bundle via a region which was not part of a digraph", true);
+			fail("Removed a bundle via a region which was not part of a digraph");
 		} catch (IllegalStateException e) {
 			// Expected
 		}
