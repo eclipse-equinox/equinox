@@ -12,6 +12,7 @@
 package org.eclipse.equinox.internal.region;
 
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.equinox.region.Region;
 import org.osgi.framework.BundleException;
 
@@ -92,6 +93,22 @@ final class StandardBundleIdToRegionMapping implements BundleIdToRegionMapping {
 	public Region getRegion(long bundleId) {
 		synchronized (this.monitor) {
 			return this.bundleToRegion.get(bundleId);
+		}
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void dissociateRegion(Region region) {
+		synchronized (this.monitor) {
+			Iterator<Entry<Long, Region>> iterator = this.bundleToRegion.entrySet().iterator();
+			while (iterator.hasNext()) {
+				Entry<Long, Region> entry = iterator.next();
+				if (entry.getValue() == region) {
+					iterator.remove();
+				}
+			}
 		}
 	}
 }

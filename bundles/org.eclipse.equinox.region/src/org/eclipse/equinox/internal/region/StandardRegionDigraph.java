@@ -39,6 +39,8 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	private final Set<Region> regions = new HashSet<Region>();
 
+	// Alien calls may be made to the following object while this.monitor is locked
+	// as this.monitor is higher in the lock hierarchy than this object's own monitor.
 	private final BundleIdToRegionMapping bundleIdToRegionMapping;
 
 	/* edges maps a given region to an immutable set of edges with their tail at the given region. To update
@@ -272,6 +274,7 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 					}
 				}
 			}
+			this.bundleIdToRegionMapping.dissociateRegion(region);
 			incrementUpdateCount();
 		}
 	}
@@ -496,10 +499,15 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 		return this.defaultRegion;
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void associateBundleWithRegion(long bundleId, Region region) throws BundleException {
-		this.bundleIdToRegionMapping.associateBundleWithRegion(bundleId, region);
-		incrementUpdateCount();
+		synchronized (this.monitor) {
+			this.bundleIdToRegionMapping.associateBundleWithRegion(bundleId, region);
+			incrementUpdateCount();
+		}
 	}
 
 	private void incrementUpdateCount() {
@@ -509,26 +517,57 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void dissociateBundle(long bundleId) {
-		this.bundleIdToRegionMapping.dissociateBundle(bundleId);
-		incrementUpdateCount();
+		synchronized (this.monitor) {
+			this.bundleIdToRegionMapping.dissociateBundle(bundleId);
+			incrementUpdateCount();
+		}
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isBundleAssociatedWithRegion(long bundleId, Region region) {
-		return this.bundleIdToRegionMapping.isBundleAssociatedWithRegion(bundleId, region);
+		synchronized (this.monitor) {
+			return this.bundleIdToRegionMapping.isBundleAssociatedWithRegion(bundleId, region);
+		}
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Set<Long> getBundleIds(Region region) {
-		return this.bundleIdToRegionMapping.getBundleIds(region);
+		synchronized (this.monitor) {
+			return this.bundleIdToRegionMapping.getBundleIds(region);
+		}
 	}
 
+	/** 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void clear() {
-		this.bundleIdToRegionMapping.clear();
-		incrementUpdateCount();
+		synchronized (this.monitor) {
+			this.bundleIdToRegionMapping.clear();
+			incrementUpdateCount();
+		}
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void dissociateRegion(Region region) {
+		synchronized (this.monitor) {
+			this.bundleIdToRegionMapping.dissociateRegion(region);
+			incrementUpdateCount();
+		}
 	}
 
 }

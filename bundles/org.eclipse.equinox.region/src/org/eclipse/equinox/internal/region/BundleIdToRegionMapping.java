@@ -29,8 +29,6 @@ public interface BundleIdToRegionMapping {
 	 * If the bundle id is already associated with the given region, there is no
 	 * effect on the association and no exception is thrown.
 	 * 
-	 * TODO: need to check type of Region? Validity of region?
-	 * 
 	 * @param bundleId the bundle id to be associated
 	 * @param region the {@link Region} with which the bundle id is to be associated
 	 * @throws BundleException
@@ -44,6 +42,12 @@ public interface BundleIdToRegionMapping {
 	 * @param bundleId the bundle id to be dissociated
 	 */
 	void dissociateBundle(long bundleId);
+
+	/**
+	 * Dissociates any bundle ids which may be associated with the given region.
+	 * @param region the {@link Region} to be dissociated
+	 */
+	void dissociateRegion(Region region);
 
 	/**
 	 * Returns the {@link Region} associated with the given bundle id or <code>null</code>
