@@ -505,8 +505,15 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	@Override
 	public void associateBundleWithRegion(long bundleId, Region region) throws BundleException {
 		synchronized (this.monitor) {
+			checkRegionExists(region);
 			this.bundleIdToRegionMapping.associateBundleWithRegion(bundleId, region);
 			incrementUpdateCount();
+		}
+	}
+
+	private void checkRegionExists(Region region) {
+		if (!this.regions.contains(region)) {
+			throw new IllegalStateException("Operation not allowed on region " + region.getName() + " which is not part of a digraph"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -521,9 +528,10 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void dissociateBundle(long bundleId) {
+	public void dissociateBundleFromRegion(long bundleId, Region region) {
 		synchronized (this.monitor) {
-			this.bundleIdToRegionMapping.dissociateBundle(bundleId);
+			checkRegionExists(region);
+			this.bundleIdToRegionMapping.dissociateBundleFromRegion(bundleId, region);
 			incrementUpdateCount();
 		}
 	}

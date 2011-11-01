@@ -44,7 +44,7 @@ final class StandardBundleIdToRegionMapping implements BundleIdToRegionMapping {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void dissociateBundle(long bundleId) {
+	public void dissociateBundleFromRegion(long bundleId, Region region) {
 		synchronized (this.monitor) {
 			this.bundleToRegion.remove(bundleId);
 		}

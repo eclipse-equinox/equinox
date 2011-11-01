@@ -13,6 +13,7 @@ package org.eclipse.equinox.internal.region;
 
 import java.util.Set;
 import org.eclipse.equinox.region.Region;
+import org.eclipse.equinox.region.RegionDigraph;
 import org.osgi.framework.BundleException;
 
 /**
@@ -28,20 +29,24 @@ public interface BundleIdToRegionMapping {
 	 * id is already associated with a different region, throws {@link BundleException}.
 	 * If the bundle id is already associated with the given region, there is no
 	 * effect on the association and no exception is thrown.
+	 * <p>
+	 * If the given region does not belong to a {@link RegionDigraph} an
+	 * {@link IllegalStateException} is thrown.
 	 * 
 	 * @param bundleId the bundle id to be associated
 	 * @param region the {@link Region} with which the bundle id is to be associated
-	 * @throws BundleException
+	 * @throws BundleException if the bundle id is already associated with a different region
 	 */
 	void associateBundleWithRegion(long bundleId, Region region) throws BundleException;
 
 	/**
-	 * Dissociates the given bundle id with any region with which it may be
-	 * associated.
+	 * Dissociates the given bundle id from the given region. If the given region
+	 * does not belong to a {@link RegionDigraph} an {@link IllegalStateException} is thrown.
 	 * 
 	 * @param bundleId the bundle id to be dissociated
+	 * @param region the {@link Region} from which the bundle id is to be dissociated
 	 */
-	void dissociateBundle(long bundleId);
+	void dissociateBundleFromRegion(long bundleId, Region region);
 
 	/**
 	 * Dissociates any bundle ids which may be associated with the given region.
@@ -51,7 +56,7 @@ public interface BundleIdToRegionMapping {
 
 	/**
 	 * Returns the {@link Region} associated with the given bundle id or <code>null</code>
-	 * if the given bundle id is not associated with a region.
+	 * if the given bundle id is not associated with a region associated with a {@link RegionDigraph}.
 	 * 
 	 * @param bundleId the bundle id whose region is required
 	 * @return the {@link Region} associated with the given bundle id or or <code>null</code>

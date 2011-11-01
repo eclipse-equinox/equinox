@@ -207,7 +207,7 @@ final class BundleIdBasedRegion implements Region {
 	 */
 	@Override
 	public void removeBundle(long bundleId) {
-		this.bundleIdToRegionMapping.dissociateBundle(bundleId);
+		this.bundleIdToRegionMapping.dissociateBundleFromRegion(bundleId, this);
 	}
 
 	/**

@@ -60,7 +60,7 @@ public class StandardBundleIdToRegionMappingTests {
 	@Test
 	public void testDissociateBundle() throws BundleException {
 		this.bundleIdToRegionMapping.associateBundleWithRegion(TEST_BUNDLE_ID, mockRegion);
-		this.bundleIdToRegionMapping.dissociateBundle(TEST_BUNDLE_ID);
+		this.bundleIdToRegionMapping.dissociateBundleFromRegion(TEST_BUNDLE_ID, mockRegion);
 		assertNull(this.bundleIdToRegionMapping.getRegion(TEST_BUNDLE_ID));
 	}
 
