@@ -11,7 +11,8 @@
 
 package org.eclipse.equinox.bidi.internal.tests;
 
-import org.eclipse.equinox.bidi.STextStringRecord;
+import org.eclipse.equinox.bidi.internal.STextStringRecord;
+
 import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 
 /**
