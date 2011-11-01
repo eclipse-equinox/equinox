@@ -595,6 +595,22 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Region not associated with bundle id", pp1Region, digraph.getRegion(TEST_BUNDLE_ID));
 		digraph.removeRegion(pp1Region);
 		assertNull("Region still associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
+
+		// Adding a bundle to a region should probably be an error
+		try {
+			pp1Region.addBundle(TEST_BUNDLE_ID);
+			// TODO should fail if this succeeds?
+		} catch (Exception e) {
+			// TODO should be expected I think?
+		}
+		assertNull("Region now associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
+
+		Region pp2Region = digraph.createRegion(PP2);
+		pp2Region.addBundle(TEST_BUNDLE_ID);
+		// removing a bundle from a removed region should not change the digraph
+		// TODO should be a no-op, or should some exception be thrown?
+		pp1Region.removeBundle(TEST_BUNDLE_ID);
+		assertEquals("Wrong region found for the bundle id", pp2Region, digraph.getRegion(TEST_BUNDLE_ID));
 	}
 
 }
