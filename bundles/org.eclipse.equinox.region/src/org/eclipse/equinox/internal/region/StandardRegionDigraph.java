@@ -471,7 +471,7 @@ public final class StandardRegionDigraph implements RegionDigraph {
 		if (this.regions.contains(defaultRegion) || defaultRegion == null) {
 			this.defaultRegion = defaultRegion;
 		} else {
-			throw new IllegalArgumentException("Can't set " + defaultRegion.toString() + " as default region. It isn't contained in this digraph.");
+			throw new IllegalArgumentException("Can't set " + defaultRegion.toString() + " as default region. It isn't contained in this digraph."); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 

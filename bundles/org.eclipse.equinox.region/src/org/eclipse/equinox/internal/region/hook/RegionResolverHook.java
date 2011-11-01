@@ -128,7 +128,7 @@ final class RegionResolverHook implements ResolverHook {
 	}
 
 	private void debugEntry(BundleRevision requirer, Collection<BundleCapability> candidates, boolean singleton) {
-		System.out.println((singleton ? "Singleton" : "Requirer: ") + requirer.getSymbolicName() + "_" + requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		System.out.println((singleton ? "Singleton" : "Requirer: ") + requirer.getSymbolicName() + "_" + requirer.getVersion() + "[" + getBundleId(requirer) + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		System.out.println("  Candidates: "); //$NON-NLS-1$
 		Iterator<BundleCapability> i = candidates.iterator();
 		while (i.hasNext()) {
