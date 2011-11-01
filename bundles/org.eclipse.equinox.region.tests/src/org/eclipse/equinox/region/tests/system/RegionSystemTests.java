@@ -23,6 +23,9 @@ import org.osgi.framework.wiring.*;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class RegionSystemTests extends AbstractRegionSystemTest {
+
+	private static final long TEST_BUNDLE_ID = 452345245L;
+
 	public void testBasic() throws BundleException, InvalidSyntaxException, InterruptedException {
 		// get the system region
 		Region systemRegion = digraph.getRegion(0);
@@ -584,6 +587,14 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		} catch (IllegalArgumentException iae) {
 			assertNull("DefaultRegion is not null", digraph.getDefaultRegion());
 		}
+	}
+
+	public void testRemoveRegion() throws BundleException {
+		Region pp1Region = digraph.createRegion(PP1);
+		pp1Region.addBundle(TEST_BUNDLE_ID);
+		assertEquals("Region not associated with bundle id", pp1Region, digraph.getRegion(TEST_BUNDLE_ID));
+		digraph.removeRegion(pp1Region);
+		assertNull("Region still associated with bundle id", digraph.getRegion(TEST_BUNDLE_ID));
 	}
 
 }
