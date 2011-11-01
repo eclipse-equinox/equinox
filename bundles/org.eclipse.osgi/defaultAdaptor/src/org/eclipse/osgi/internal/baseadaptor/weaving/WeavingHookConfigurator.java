@@ -56,7 +56,7 @@ public class WeavingHookConfigurator implements HookConfigurator, ClassLoadingHo
 			return null;
 		}
 		// create a woven class object and add it to the thread local stack
-		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, classpathEntry.getDomain(), loader, registry, blackList);
+		WovenClassImpl wovenClass = new WovenClassImpl(name, classbytes, entry, classpathEntry.getDomain(), loader, registry, blackList);
 		List<WovenClassImpl> wovenClasses = wovenClassStack.get();
 		if (wovenClasses == null) {
 			wovenClasses = new ArrayList<WovenClassImpl>(6);

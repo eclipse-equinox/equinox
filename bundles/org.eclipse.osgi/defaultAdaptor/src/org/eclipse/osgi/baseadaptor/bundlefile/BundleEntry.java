@@ -11,9 +11,11 @@
 
 package org.eclipse.osgi.baseadaptor.bundlefile;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import org.eclipse.osgi.framework.debug.Debug;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 
 /**
  * A BundleEntry represents one entry of a BundleFile.
@@ -89,47 +91,8 @@ public abstract class BundleEntry {
 	public byte[] getBytes() throws IOException {
 		InputStream in = getInputStream();
 		int length = (int) getSize();
-		byte[] classbytes;
-		int bytesread = 0;
-		int readcount;
 		if (Debug.DEBUG_LOADER)
 			Debug.println("  about to read " + length + " bytes from " + getName()); //$NON-NLS-1$ //$NON-NLS-2$
-
-		try {
-			if (length > 0) {
-				classbytes = new byte[length];
-				for (; bytesread < length; bytesread += readcount) {
-					readcount = in.read(classbytes, bytesread, length - bytesread);
-					if (readcount <= 0) /* if we didn't read anything */
-						break; /* leave the loop */
-				}
-			} else /* BundleEntry does not know its own length! */{
-				length = BUF_SIZE;
-				classbytes = new byte[length];
-				readloop: while (true) {
-					for (; bytesread < length; bytesread += readcount) {
-						readcount = in.read(classbytes, bytesread, length - bytesread);
-						if (readcount <= 0) /* if we didn't read anything */
-							break readloop; /* leave the loop */
-					}
-					byte[] oldbytes = classbytes;
-					length += BUF_SIZE;
-					classbytes = new byte[length];
-					System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
-				}
-			}
-			if (classbytes.length > bytesread) {
-				byte[] oldbytes = classbytes;
-				classbytes = new byte[bytesread];
-				System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
-			}
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ee) {
-				// nothing to do here
-			}
-		}
-		return classbytes;
+		return AdaptorUtil.getBytes(in, length, BUF_SIZE);
 	}
 }

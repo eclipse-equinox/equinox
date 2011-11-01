@@ -12,6 +12,8 @@ package org.eclipse.osgi.internal.baseadaptor.weaving;
 
 import java.security.*;
 import java.util.*;
+import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
+import org.eclipse.osgi.internal.baseadaptor.AdaptorUtil;
 import org.eclipse.osgi.internal.loader.BundleLoader;
 import org.eclipse.osgi.internal.serviceregistry.HookContext;
 import org.eclipse.osgi.internal.serviceregistry.ServiceRegistry;
@@ -26,21 +28,24 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	private final static byte FLAG_WEAVINGCOMPLETE = 0x04;
 	private final static String weavingHookName = WeavingHook.class.getName();
 	private final String className;
+	private final BundleEntry entry;
 	private final List<String> dynamicImports;
 	private final ProtectionDomain domain;
 	private final BundleLoader loader;
 	final ServiceRegistry registry;
 	private final Map<ServiceRegistration<?>, Boolean> blackList;
-	private byte[] bytes;
+	private byte[] validBytes;
+	private byte[] resultBytes;
 	private byte hookFlags = 0;
 	private Throwable error;
 	private ServiceRegistration<?> errorHook;
 	private Class<?> clazz;
 
-	public WovenClassImpl(String className, byte[] bytes, ProtectionDomain domain, BundleLoader loader, ServiceRegistry registry, Map<ServiceRegistration<?>, Boolean> blacklist) {
+	public WovenClassImpl(String className, byte[] bytes, BundleEntry entry, ProtectionDomain domain, BundleLoader loader, ServiceRegistry registry, Map<ServiceRegistration<?>, Boolean> blacklist) {
 		super();
 		this.className = className;
-		this.bytes = bytes;
+		this.validBytes = this.resultBytes = bytes;
+		this.entry = entry;
 		this.dynamicImports = new DynamicImportList(this);
 		this.domain = domain;
 		this.loader = loader;
@@ -51,13 +56,13 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 	public byte[] getBytes() {
 		if ((hookFlags & FLAG_HOOKSCOMPLETE) == 0) {
 			checkPermission();
-			return bytes; // return raw bytes until complete
+			return validBytes; // return raw bytes until complete
 		}
 		// we have called all hooks; someone is calling outside of weave call
 		// need to be safe and copy the bytes.
-		byte[] current = bytes;
+		byte[] current = validBytes;
 		byte[] results = new byte[current.length];
-		System.arraycopy(bytes, 0, results, 0, current.length);
+		System.arraycopy(current, 0, results, 0, current.length);
 		return results;
 	}
 
@@ -68,7 +73,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		if ((hookFlags & FLAG_HOOKSCOMPLETE) != 0)
 			// someone is calling this outside of weave
 			throw new IllegalStateException("Weaving has completed already."); //$NON-NLS-1$
-		this.bytes = newBytes;
+		this.resultBytes = this.validBytes = newBytes;
 	}
 
 	void checkPermission() {
@@ -90,9 +95,9 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 
 	private void setHooksComplete() {
 		// create a copy of the bytes array that noone has a reference to
-		byte[] original = bytes;
-		bytes = new byte[bytes.length];
-		System.arraycopy(original, 0, bytes, 0, original.length);
+		byte[] original = validBytes;
+		validBytes = new byte[original.length];
+		System.arraycopy(original, 0, validBytes, 0, original.length);
 		hookFlags |= FLAG_HOOKSCOMPLETE;
 	}
 
@@ -124,7 +129,13 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 		if (hook instanceof WeavingHook) {
 			if (blackList.containsKey(hookRegistration))
 				return; // black listed hook
-			hookFlags |= FLAG_HOOKCALLED;
+			if ((hookFlags & FLAG_HOOKCALLED) == 0) {
+				hookFlags |= FLAG_HOOKCALLED;
+				// only do this check on the first weaving hook call
+				if (!validBytes(validBytes)) {
+					validBytes = AdaptorUtil.getBytes(entry.getInputStream(), (int) entry.getSize(), 8 * 1024);
+				}
+			}
 			try {
 				((WeavingHook) hook).weave(this);
 			} catch (WeavingException e) {
@@ -138,6 +149,20 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 				blackList.put(hookRegistration, Boolean.TRUE);
 			}
 		}
+	}
+
+	private boolean validBytes(byte[] checkBytes) {
+		if (checkBytes == null || checkBytes.length < 4)
+			return false;
+		if ((checkBytes[0] & 0xCA) != 0xCA)
+			return false;
+		if ((checkBytes[1] & 0xFE) != 0xFE)
+			return false;
+		if ((checkBytes[2] & 0xBA) != 0xBA)
+			return false;
+		if ((checkBytes[3] & 0xBE) != 0xBE)
+			return false;
+		return true;
 	}
 
 	public String getHookMethodName() {
@@ -169,7 +194,7 @@ public final class WovenClassImpl implements WovenClass, HookContext {
 			}
 		} finally {
 			if ((hookFlags & FLAG_HOOKCALLED) != 0) {
-				wovenBytes = bytes;
+				wovenBytes = resultBytes;
 				newImports = dynamicImports;
 				setHooksComplete();
 			}

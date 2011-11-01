@@ -235,4 +235,46 @@ public class AdaptorUtil {
 		// TODO should we do this by hand ourselves?
 		return file.toURL();
 	}
+
+	public static byte[] getBytes(InputStream in, int length, int BUF_SIZE) throws IOException {
+		byte[] classbytes;
+		int bytesread = 0;
+		int readcount;
+		try {
+			if (length > 0) {
+				classbytes = new byte[length];
+				for (; bytesread < length; bytesread += readcount) {
+					readcount = in.read(classbytes, bytesread, length - bytesread);
+					if (readcount <= 0) /* if we didn't read anything */
+						break; /* leave the loop */
+				}
+			} else /* does not know its own length! */{
+				length = BUF_SIZE;
+				classbytes = new byte[length];
+				readloop: while (true) {
+					for (; bytesread < length; bytesread += readcount) {
+						readcount = in.read(classbytes, bytesread, length - bytesread);
+						if (readcount <= 0) /* if we didn't read anything */
+							break readloop; /* leave the loop */
+					}
+					byte[] oldbytes = classbytes;
+					length += BUF_SIZE;
+					classbytes = new byte[length];
+					System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
+				}
+			}
+			if (classbytes.length > bytesread) {
+				byte[] oldbytes = classbytes;
+				classbytes = new byte[bytesread];
+				System.arraycopy(oldbytes, 0, classbytes, 0, bytesread);
+			}
+		} finally {
+			try {
+				in.close();
+			} catch (IOException ee) {
+				// nothing to do here
+			}
+		}
+		return classbytes;
+	}
 }
