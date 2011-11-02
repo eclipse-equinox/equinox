@@ -584,7 +584,7 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		try {
 			digraph.setDefaultRegion(pp1Region);
 			assertFalse("IllegalArgumentException not thrown for setting non-existing region as default", true);
-		} catch (IllegalArgumentException iae) {
+		} catch (IllegalStateException _) {
 			assertNull("DefaultRegion is not null", digraph.getDefaultRegion());
 		}
 	}

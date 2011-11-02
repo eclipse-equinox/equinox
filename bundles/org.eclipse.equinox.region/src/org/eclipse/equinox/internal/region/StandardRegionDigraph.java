@@ -247,7 +247,9 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 * {@inheritDoc}
 	 */
 	public Region getRegion(long bundleId) {
-		return this.bundleIdToRegionMapping.getRegion(bundleId);
+		synchronized (this.monitor) {
+			return this.bundleIdToRegionMapping.getRegion(bundleId);
+		}
 	}
 
 	/**
@@ -484,10 +486,11 @@ public final class StandardRegionDigraph implements BundleIdToRegionMapping, Reg
 	 */
 	@Override
 	public void setDefaultRegion(Region defaultRegion) {
-		if (this.regions.contains(defaultRegion) || defaultRegion == null) {
+		synchronized (this.monitor) {
+			if (defaultRegion != null) {
+				checkRegionExists(defaultRegion);
+			}
 			this.defaultRegion = defaultRegion;
-		} else {
-			throw new IllegalArgumentException("Can't set " + defaultRegion.toString() + " as default region. It isn't contained in this digraph."); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 
