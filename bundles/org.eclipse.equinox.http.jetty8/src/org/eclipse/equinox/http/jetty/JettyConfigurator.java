@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others
+ * Copyright (c) 2007, 2011 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,11 +36,13 @@ public class JettyConfigurator {
 	 * @param settings The dictionary of settings used to configure the server instance
 	 * @throws Exception If the server failed to start for any reason
 	 */
-	public static void startServer(String id, Dictionary settings) throws Exception {
+	public static void startServer(String id, Dictionary<String, ? extends Object> settings) throws Exception {
 		checkConfigurationPermission();
 		String pid = PID_PREFIX + id;
-		settings.put(Constants.SERVICE_PID, pid);
-		Activator.startServer(pid, settings);
+		@SuppressWarnings("unchecked")
+		Dictionary<String, Object> raw = (Dictionary<String, Object>) settings;
+		raw.put(Constants.SERVICE_PID, pid);
+		Activator.startServer(pid, raw);
 	}
 
 	/**

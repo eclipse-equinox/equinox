@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2011 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.osgi.framework.*;
 import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.startlevel.StartLevel;
 
+@SuppressWarnings("deprecation")
 public class Activator implements BundleActivator {
 
 	private static final String JETTY_WORK_DIR = "jettywork"; //$NON-NLS-1$
@@ -46,6 +47,7 @@ public class Activator implements BundleActivator {
 	private static HttpServerManager staticServerManager;
 
 	private HttpServerManager httpServerManager;
+	@SuppressWarnings("rawtypes")
 	private ServiceRegistration registration;
 
 	public void start(BundleContext context) throws Exception {
@@ -56,17 +58,18 @@ public class Activator implements BundleActivator {
 
 		String autostart = context.getProperty(AUTOSTART);
 		if ((autostart == null || Boolean.valueOf(autostart).booleanValue()) && !isBundleActivationPolicyUsed(context)) {
-			Dictionary defaultSettings = createDefaultSettings(context);
+			Dictionary<String, Object> defaultSettings = createDefaultSettings(context);
 			httpServerManager.updated(DEFAULT_PID, defaultSettings);
 		}
 
-		Dictionary dictionary = new Hashtable();
+		Dictionary<String, Object> dictionary = new Hashtable<String, Object>();
 		dictionary.put(Constants.SERVICE_PID, MANAGED_SERVICE_FACTORY_PID);
 
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean isBundleActivationPolicyUsed(BundleContext context) {
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel sl = ((reference != null) ? (StartLevel) context.getService(reference) : null);
@@ -95,9 +98,9 @@ public class Activator implements BundleActivator {
 		httpServerManager = null;
 	}
 
-	private Dictionary createDefaultSettings(BundleContext context) {
+	private Dictionary<String, Object> createDefaultSettings(BundleContext context) {
 		final String PROPERTY_PREFIX = "org.eclipse.equinox.http.jetty."; //$NON-NLS-1$
-		Dictionary defaultSettings = new Hashtable();
+		Dictionary<String, Object> defaultSettings = new Hashtable<String, Object>();
 
 		// PID
 		defaultSettings.put(Constants.SERVICE_PID, DEFAULT_PID);
@@ -214,7 +217,7 @@ public class Activator implements BundleActivator {
 		return defaultSettings;
 	}
 
-	public synchronized static void startServer(String pid, Dictionary settings) throws Exception {
+	public synchronized static void startServer(String pid, Dictionary<String, ?> settings) throws Exception {
 		if (staticServerManager == null)
 			throw new IllegalStateException("Inactive"); //$NON-NLS-1$
 

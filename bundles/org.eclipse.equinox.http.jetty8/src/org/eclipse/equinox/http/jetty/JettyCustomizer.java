@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 Gunnar Wagenknecht, IBM Corporation and others
+ * Copyright (c) 2008, 2011 Gunnar Wagenknecht, IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,7 +41,7 @@ public abstract class JettyCustomizer {
 	 *             	the customized context; in case of Jetty 7 the context is of 
 	 *             	type <code>org.eclipse.jetty.servlet.ServletContextHandler</code>
 	 */
-	public Object customizeContext(Object context, Dictionary settings) {
+	public Object customizeContext(Object context, Dictionary<String, ?> settings) {
 		return context;
 	}
 
@@ -60,7 +60,7 @@ public abstract class JettyCustomizer {
 	 *             	the customized connector; in case of Jetty 6 the connector is of 
 	 *             	type <code>org.eclipse.jetty.server.Connector</code>
 	 */
-	public Object customizeHttpConnector(Object connector, Dictionary settings) {
+	public Object customizeHttpConnector(Object connector, Dictionary<String, ?> settings) {
 		return connector;
 	}
 
@@ -79,7 +79,7 @@ public abstract class JettyCustomizer {
 	 *             	the customized connector; in case of Jetty 7 the connector is of 
 	 *             	type <code>org.eclipse.jetty.server.Connector</code>
 	 */
-	public Object customizeHttpsConnector(Object connector, Dictionary settings) {
+	public Object customizeHttpsConnector(Object connector, Dictionary<String, ?> settings) {
 		return connector;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	private static final String DIR_PREFIX = "pid_"; //$NON-NLS-1$
 	private static final String INTERNAL_CONTEXT_CLASSLOADER = "org.eclipse.equinox.http.jetty.internal.ContextClassLoader"; //$NON-NLS-1$
 
-	private Map servers = new HashMap();
+	private Map<String, Server> servers = new HashMap<String, Server>();
 	private File workDir;
 
 	public HttpServerManager(File workDir) {
@@ -45,7 +45,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public synchronized void deleted(String pid) {
-		Server server = (Server) servers.remove(pid);
+		Server server = servers.remove(pid);
 		if (server != null) {
 			try {
 				server.stop();
@@ -62,7 +62,8 @@ public class HttpServerManager implements ManagedServiceFactory {
 		return this.getClass().getName();
 	}
 
-	public synchronized void updated(String pid, Dictionary dictionary) throws ConfigurationException {
+	@SuppressWarnings("unchecked")
+	public synchronized void updated(String pid, @SuppressWarnings("rawtypes") Dictionary dictionary) throws ConfigurationException {
 		deleted(pid);
 		Server server = new Server();
 
@@ -117,14 +118,14 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	public synchronized void shutdown() throws Exception {
-		for (Iterator it = servers.values().iterator(); it.hasNext();) {
-			Server server = (Server) it.next();
+		for (Iterator<Server> it = servers.values().iterator(); it.hasNext();) {
+			Server server = it.next();
 			server.stop();
 		}
 		servers.clear();
 	}
 
-	private Connector createHttpConnector(Dictionary dictionary) {
+	private Connector createHttpConnector(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		Boolean httpEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_ENABLED);
 		if (httpEnabled != null && !httpEnabled.booleanValue())
 			return null;
@@ -180,7 +181,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		return Boolean.TRUE;
 	}
 
-	private Connector createHttpsConnector(Dictionary dictionary) {
+	private Connector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		Boolean httpsEnabled = (Boolean) dictionary.get(JettyConstants.HTTPS_ENABLED);
 		if (httpsEnabled == null || !httpsEnabled.booleanValue())
 			return null;
@@ -199,22 +200,22 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		String keyStore = (String) dictionary.get(JettyConstants.SSL_KEYSTORE);
 		if (keyStore != null)
-			sslConnector.setKeystore(keyStore);
+			sslConnector.getSslContextFactory().setKeyStore(keyStore);
 
 		String password = (String) dictionary.get(JettyConstants.SSL_PASSWORD);
 		if (password != null)
-			sslConnector.setPassword(password);
+			sslConnector.getSslContextFactory().setKeyStorePassword(password);
 
 		String keyPassword = (String) dictionary.get(JettyConstants.SSL_KEYPASSWORD);
 		if (keyPassword != null)
-			sslConnector.setKeyPassword(keyPassword);
+			sslConnector.getSslContextFactory().setKeyManagerPassword(keyPassword);
 
 		Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null) {
 			if (needClientAuth instanceof String)
 				needClientAuth = Boolean.valueOf((String) needClientAuth);
 
-			sslConnector.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
+			sslConnector.getSslContextFactory().setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
 		}
 
 		Object wantClientAuth = dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
@@ -222,16 +223,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 			if (wantClientAuth instanceof String)
 				wantClientAuth = Boolean.valueOf((String) wantClientAuth);
 
-			sslConnector.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
+			sslConnector.getSslContextFactory().setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
 		}
 
 		String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
 		if (protocol != null)
-			sslConnector.setProtocol(protocol);
+			sslConnector.getSslContextFactory().setProtocol(protocol);
 
 		String keystoreType = (String) dictionary.get(JettyConstants.SSL_KEYSTORETYPE);
 		if (keystoreType != null)
-			sslConnector.setKeystoreType(keystoreType);
+			sslConnector.getSslContextFactory().setKeyStoreType(keystoreType);
 
 		if (sslConnector.getPort() == 0) {
 			try {
@@ -244,7 +245,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		return sslConnector;
 	}
 
-	private ServletContextHandler createHttpContext(Dictionary dictionary) {
+	private ServletContextHandler createHttpContext(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		ServletContextHandler httpContext = new ServletContextHandler();
 		httpContext.setAttribute(INTERNAL_CONTEXT_CLASSLOADER, Thread.currentThread().getContextClassLoader());
 		httpContext.setClassLoader(this.getClass().getClassLoader());
@@ -268,7 +269,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		return httpContext;
 	}
 
-	private JettyCustomizer createJettyCustomizer(Dictionary dictionary) {
+	private JettyCustomizer createJettyCustomizer(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		String customizerClass = (String) dictionary.get(JettyConstants.CUSTOMIZER_CLASS);
 		if (null == customizerClass)
 			return null;
