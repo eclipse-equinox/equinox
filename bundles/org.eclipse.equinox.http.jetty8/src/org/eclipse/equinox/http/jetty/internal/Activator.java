@@ -71,6 +71,7 @@ public class Activator implements BundleActivator {
 
 	@SuppressWarnings("unchecked")
 	private boolean isBundleActivationPolicyUsed(BundleContext context) {
+		@SuppressWarnings("rawtypes")
 		ServiceReference reference = context.getServiceReference(StartLevel.class.getName());
 		StartLevel sl = ((reference != null) ? (StartLevel) context.getService(reference) : null);
 		if (sl != null) {
