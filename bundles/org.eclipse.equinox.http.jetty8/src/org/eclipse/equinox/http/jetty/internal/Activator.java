@@ -51,7 +51,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		File jettyWorkDir = new File(context.getDataFile(""), JETTY_WORK_DIR); //$NON-NLS-1$ 
 		jettyWorkDir.mkdir();
-		setStdErrLogThreshold(context.getProperty(LOG_STDERR_THRESHOLD));
+		EquinoxStdErrLog.setThresholdLogger(context.getProperty(LOG_STDERR_THRESHOLD));
 		httpServerManager = new HttpServerManager(jettyWorkDir);
 
 		String autostart = context.getProperty(AUTOSTART);
@@ -65,16 +65,6 @@ public class Activator implements BundleActivator {
 
 		registration = context.registerService(ManagedServiceFactory.class.getName(), httpServerManager, dictionary);
 		setStaticServerManager(httpServerManager);
-	}
-
-	private void setStdErrLogThreshold(String property) {
-		try {
-			Class clazz = Class.forName("org.slf4j.Logger");
-			Method method = clazz.getMethod("setThresholdLogger", new Class[] {String.class});
-			method.invoke(null, new Object[] {property});
-		} catch (Throwable t) {
-			// ignore
-		}
 	}
 
 	private boolean isBundleActivationPolicyUsed(BundleContext context) {
