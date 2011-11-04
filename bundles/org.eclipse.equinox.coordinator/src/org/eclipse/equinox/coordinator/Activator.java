@@ -43,5 +43,6 @@ public class Activator implements BundleActivator {
 		if (registration != null)
 			registration.unregister();
 		factory.shutdown();
+		CoordinationWeakReference.processOrphanedCoordinations();
 	}
 }

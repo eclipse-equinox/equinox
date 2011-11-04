@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator;
 
-import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -31,7 +30,7 @@ public class CoordinationImpl implements Coordination {
 	private volatile boolean terminated;
 	
 	private Date deadline;
-	private Reference<CoordinationImpl> enclosingCoordination;
+	private CoordinationImpl enclosingCoordination;
 	private Thread thread;
 	private TimerTask timerTask;
 	
@@ -127,7 +126,7 @@ public class CoordinationImpl implements Coordination {
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one.
-				while (coordinator.peek() != this) {
+				while (!coordinator.peek().equals(this)) {
 					try {
 						coordinator.peek().end();
 					} catch (CoordinationException e) {
@@ -146,9 +145,10 @@ public class CoordinationImpl implements Coordination {
 		Exception exception = null;
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
+		CoordinationReferent referent = new CoordinationReferent(this);
 		for (Participant participant : participants) {
 			try {
-				participant.ended(this);
+				participant.ended(referent);
 			} catch (Exception e) {
 				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.CoordinationImpl_4, e);
 				// Only the first exception will be propagated.
@@ -232,9 +232,10 @@ public class CoordinationImpl implements Coordination {
 		// Notify participants this coordination has failed.
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
+		CoordinationReferent referent = new CoordinationReferent(this);
 		for (Participant participant : participants) {
 			try {
-				participant.failed(this);
+				participant.failed(referent);
 			} catch (Exception e) {
 				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.CoordinationImpl_6, e);
 			}
@@ -254,7 +255,7 @@ public class CoordinationImpl implements Coordination {
 	
 	public synchronized Coordination getEnclosingCoordination() {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
-		return enclosingCoordination == null ? null : enclosingCoordination.get();
+		return enclosingCoordination;
 	}
 
 	public Throwable getFailure() {
@@ -329,7 +330,7 @@ public class CoordinationImpl implements Coordination {
 		this.timerTask = timerTask;
 	}
 	
-	synchronized void setThreadAndEnclosingCoordination(Thread t, Reference<CoordinationImpl> c) {
+	synchronized void setThreadAndEnclosingCoordination(Thread t, CoordinationImpl c) {
 		thread = t;
 		enclosingCoordination = c;
 	}

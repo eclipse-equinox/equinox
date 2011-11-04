@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator;
 
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,59 +54,35 @@ public class CoordinatorImpl implements Coordinator {
 	};
 	
 	private static class WeakCoordinationStack {
-		private final LinkedList<Reference<CoordinationImpl>> coordinations = new LinkedList<Reference<CoordinationImpl>>();
-		private final ReferenceQueue<CoordinationImpl> queue = new ReferenceQueue<CoordinationImpl>();
+		private final LinkedList<CoordinationImpl> coordinations = new LinkedList<CoordinationImpl>();
 		
 		public WeakCoordinationStack() {
 		}
 
 		public boolean contains(CoordinationImpl c) {
-			purge();
-			for (Reference<CoordinationImpl> r : coordinations) {
-				if (c.equals(r.get()))
-					return true;
-			}
-			return false;
+			return coordinations.contains(c);
 		}
 		
 		public CoordinationImpl peek() {
-			purge();
 			if (coordinations.isEmpty())
 				return null;
-			return coordinations.getFirst().get();
+			return coordinations.getFirst();
 		}
 		
 		public CoordinationImpl pop() {
-			purge();
 			if (coordinations.isEmpty())
 				return null;
-			CoordinationImpl c = coordinations.removeFirst().get();
+			CoordinationImpl c = coordinations.removeFirst();
 			if (c != null)
 				c.setThreadAndEnclosingCoordination(null, null);
 			return c;
 		}
 		
 		public void push(CoordinationImpl c) {
-			purge();
 			if (contains(c))
 				throw new CoordinationException(Messages.CoordinatorImpl_3, c, CoordinationException.ALREADY_PUSHED);
-			Reference<CoordinationImpl> r = new WeakReference<CoordinationImpl>(c, queue);
 			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
-			coordinations.addFirst(r);
-		}
-		
-		private void purge() {
-			Reference<? extends CoordinationImpl> r;
-			while ((r = queue.poll()) != null) {
-				int index = coordinations.indexOf(r);
-				coordinations.remove(r);
-				if (index > 0) {
-					r = coordinations.get(index - 1);
-					CoordinationImpl c = r.get();
-					if (c != null)
-						c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.get(index));
-				}
-			}
+			coordinations.addFirst(c);
 		}
 	}
 	
@@ -128,6 +101,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public boolean addParticipant(Participant participant) throws CoordinationException {
+		CoordinationWeakReference.processOrphanedCoordinations();
 		Coordination coordination = peek();
 		if (coordination == null)
 			return false;
@@ -136,19 +110,22 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Coordination begin(String name, long timeout) {
-		CoordinationImpl coordination = (CoordinationImpl) create(name, timeout);
+		Coordination coordination = create(name, timeout);
 		coordination.push();
 		return coordination;
 	}
 
 	public Coordination create(String name, long timeout) {
+		CoordinationWeakReference.processOrphanedCoordinations();
 		// This method requires the INITIATE permission. No bundle check is done.
 		checkPermission(CoordinationPermission.INITIATE, name);
 		CoordinationImpl coordination = new CoordinationImpl(getNextId(), name, timeout, this);
+		CoordinationReferent referent = new CoordinationReferent(coordination);
 		synchronized (this) {
 			if (shutdown)
 				throw new IllegalStateException(Messages.CoordinatorImpl_2);
 			synchronized (CoordinatorImpl.class) {
+				CoordinationWeakReference.newInstance(referent);
 				coordinations.add(coordination);
 				idToCoordination.put(new Long(coordination.getId()), coordination);
 			}
@@ -158,10 +135,11 @@ public class CoordinatorImpl implements Coordinator {
 			coordination.setTimerTask(timerTask);
 			schedule(timerTask, coordination.getDeadline());
 		}
-		return coordination;
+		return referent;
 	}
 
 	public boolean fail(Throwable reason) {
+		CoordinationWeakReference.processOrphanedCoordinations();
 		Coordination coordination = peek();
 		if (coordination == null)
 			return false;
@@ -169,9 +147,12 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Coordination getCoordination(long id) {
-		CoordinationImpl result = null;
+		CoordinationWeakReference.processOrphanedCoordinations();
+		CoordinationReferent result = null;
 		synchronized (CoordinatorImpl.class) {
-			result = idToCoordination.get(new Long(id));
+			CoordinationImpl c = idToCoordination.get(new Long(id));
+			if (c != null)
+				result = new CoordinationReferent(c);
 		}
 		if (result != null && !result.isTerminated()) {
 			try {
@@ -185,6 +166,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Collection<Coordination> getCoordinations() {
+		CoordinationWeakReference.processOrphanedCoordinations();
 		ArrayList<Coordination> result;
 		synchronized (CoordinatorImpl.class) {
 			result = new ArrayList<Coordination>(idToCoordination.size());
@@ -195,7 +177,7 @@ public class CoordinatorImpl implements Coordinator {
 					continue;
 				try {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
-					result.add(coordination);
+					result.add(new CoordinationReferent(coordination));
 				} catch (SecurityException e) {
 					logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_1, e);
 				}
@@ -206,14 +188,19 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	public Coordination peek() {
-		return coordinationStack.get().peek();
+		CoordinationWeakReference.processOrphanedCoordinations();
+		CoordinationImpl c = coordinationStack.get().peek();
+		if (c == null)
+			return null;
+		return new CoordinationReferent(c);
 	}
 
 	public Coordination pop() {
-		Coordination c = coordinationStack.get().peek();
+		CoordinationWeakReference.processOrphanedCoordinations();
+		CoordinationImpl c = coordinationStack.get().peek();
 		if (c == null) return null;
 		checkPermission(CoordinationPermission.INITIATE, c.getName());
-		return coordinationStack.get().pop();
+		return new CoordinationReferent(coordinationStack.get().pop());
 	}
 
 	CoordinationImpl addParticipant(Participant participant, CoordinationImpl coordination) {
@@ -264,6 +251,7 @@ public class CoordinatorImpl implements Coordinator {
 	}
 
 	void shutdown() {
+		CoordinationWeakReference.processOrphanedCoordinations();
 		List<Coordination> coords;
 		synchronized (this) {
 			shutdown = true;

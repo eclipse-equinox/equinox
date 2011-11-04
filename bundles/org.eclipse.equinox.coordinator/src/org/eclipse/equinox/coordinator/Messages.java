@@ -35,6 +35,7 @@ public class Messages extends NLS {
 	public static String CoordinatorImpl_2;
 	public static String CoordinatorImpl_3;
 	public static String CoordinatorImpl_4;
+	public static String CoordinatorImpl_5;
 
 	static {
 		// initialize resource bundle
