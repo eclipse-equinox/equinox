@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -288,5 +288,13 @@ public class DefaultClassLoader extends ClassLoader implements ParallelClassLoad
 
 	public Collection<String> listLocalResources(String path, String filePattern, int options) {
 		return manager.listLocalResources(path, filePattern, options);
+	}
+
+	public String toString() {
+		Bundle b = getBundle();
+		StringBuffer result = new StringBuffer(super.toString());
+		if (b == null)
+			return result.toString();
+		return result.append('[').append(b.getSymbolicName()).append(':').append(b.getVersion()).append("(id=").append(b.getBundleId()).append(")]").toString(); //$NON-NLS-1$//$NON-NLS-2$
 	}
 }
