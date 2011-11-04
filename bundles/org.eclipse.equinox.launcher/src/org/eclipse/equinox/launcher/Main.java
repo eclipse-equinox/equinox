@@ -1165,6 +1165,8 @@ public class Main {
 	private static URL buildURL(String spec, boolean trailingSlash) {
 		if (spec == null)
 			return null;
+		if (File.separatorChar == '\\')
+			spec = spec.trim();
 		boolean isFile = spec.startsWith(FILE_SCHEME);
 		try {
 			if (isFile) {
