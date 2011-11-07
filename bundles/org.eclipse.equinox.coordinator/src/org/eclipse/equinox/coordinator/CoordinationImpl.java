@@ -126,7 +126,8 @@ public class CoordinationImpl implements Coordination {
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one.
-				while (!coordinator.peek().equals(this)) {
+				CoordinationReferent referent = new CoordinationReferent(this);
+				while (!coordinator.peek().equals(referent)) {
 					try {
 						coordinator.peek().end();
 					} catch (CoordinationException e) {
@@ -255,7 +256,9 @@ public class CoordinationImpl implements Coordination {
 	
 	public synchronized Coordination getEnclosingCoordination() {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
-		return enclosingCoordination;
+		if (enclosingCoordination == null)
+			return null;
+		return new CoordinationReferent(enclosingCoordination);
 	}
 
 	public Throwable getFailure() {
@@ -315,7 +318,7 @@ public class CoordinationImpl implements Coordination {
 			checkTerminated();
 			coordinator.push(this);
 		}
-		return this;
+		return new CoordinationReferent(this);
 	}
 
 	synchronized Date getDeadline() {

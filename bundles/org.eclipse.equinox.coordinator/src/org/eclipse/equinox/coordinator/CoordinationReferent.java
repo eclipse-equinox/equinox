@@ -88,9 +88,11 @@ public class CoordinationReferent implements Coordination {
 	
 	@Override
 	public boolean equals(Object object) {
-		if (object instanceof CoordinationReferent)
-			return coordination.equals(((CoordinationReferent)object).coordination);
-		return coordination.equals(object);
+		if (object == this)
+			return true;
+		if (!(object instanceof CoordinationReferent))
+			return false;
+		return coordination.equals(((CoordinationReferent)object).coordination);
 	}
 	
 	@Override
