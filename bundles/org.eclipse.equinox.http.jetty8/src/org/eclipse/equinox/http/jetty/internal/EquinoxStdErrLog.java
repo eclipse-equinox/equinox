@@ -39,7 +39,7 @@ public class EquinoxStdErrLog implements Logger {
 		threshold = parseThresholdProperty(property);
 		// this is a hack to make sure the built-in jetty StdErrLog is not being used
 		org.eclipse.jetty.util.log.Logger rootLogger = Log.getRootLogger();
-		if (rootLogger == null || (rootLogger instanceof StdErrLog && !(rootLogger instanceof EquinoxStdErrLog))) {
+		if (rootLogger == null || (rootLogger instanceof StdErrLog)) {
 			// The built-in jetty StdErrLog is be used; replace with ours.
 			Log.setLog(getRootLogger());
 		}
