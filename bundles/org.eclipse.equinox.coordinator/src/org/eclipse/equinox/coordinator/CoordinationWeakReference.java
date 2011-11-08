@@ -47,7 +47,13 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 					c.end();
 				}
 				catch (CoordinationException e) {
-					// This is expected since we already failed the coordination.
+					// This is expected since we already failed the coordination...
+					if (!Coordination.ORPHANED.equals(e.getCause()))
+						// ...but only if the cause is ORPHANED.
+						c.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.CoordinatorImpl_5, c.getName(), c.getId()), e);
+				}
+				catch (Throwable t) {
+					c.getLogService().log(LogService.LOG_ERROR, NLS.bind(Messages.CoordinatorImpl_5, c.getName(), c.getId()), t);
 				}
 			}
 		}
