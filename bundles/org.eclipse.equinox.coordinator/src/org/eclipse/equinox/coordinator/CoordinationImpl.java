@@ -26,19 +26,19 @@ import org.osgi.service.coordinator.CoordinationPermission;
 import org.osgi.service.coordinator.Participant;
 import org.osgi.service.log.LogService;
 
-public class CoordinationImpl implements Coordination {
+public class CoordinationImpl {
 	// Holds a strong reference to the CoordinationWeakReference object associated
 	// with this CoordinationImpl. Serves no other purpose. Needs no guarding.
 	CoordinationWeakReference reference;
-	
+
 	private volatile Throwable failure;
 	private volatile boolean terminated;
-	
+
 	private Date deadline;
 	private CoordinationImpl enclosingCoordination;
 	private Thread thread;
 	private TimerTask timerTask;
-	
+
 	private final CoordinatorImpl coordinator;
 	private final long id;
 	private final String name;
@@ -66,11 +66,11 @@ public class CoordinationImpl implements Coordination {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		if (participant == null)
 			throw new NullPointerException(NLS.bind(Messages.NullParameter, "participant")); //$NON-NLS-1$
-		/* The caller has permission. Check to see if the participant is already 
-		 * participating in another coordination. Do this in a loop in case the 
-		 * participant must wait for the other coordination to finish. The loop 
+		/* The caller has permission. Check to see if the participant is already
+		 * participating in another coordination. Do this in a loop in case the
+		 * participant must wait for the other coordination to finish. The loop
 		 * will exit under the following circumstances.
-		 * 
+		 *
 		 * (1) This coordination is terminated.
 		 * (2) The participant is already participating in another coordination
 		 * using the same thread as this one.
@@ -80,18 +80,18 @@ public class CoordinationImpl implements Coordination {
 		while (true) {
 			CoordinationImpl coordination;
 			synchronized (this) {
-				// Check to see if this coordination has already terminated. If so, 
+				// Check to see if this coordination has already terminated. If so,
 				// throw the appropriate exception.
 				checkTerminated();
 				coordination = coordinator.addParticipant(participant, this);
 				if (coordination == null) {
-					// The same participant is not currently participating in 
-					// any coordination. Add it to this coordination and break 
+					// The same participant is not currently participating in
+					// any coordination. Add it to this coordination and break
 					// out of the loop.
 					participants.add(participant);
 					break;
 				} else if (coordination == this) {
-					// The same participant is being added twice to this 
+					// The same participant is being added twice to this
 					// coordination. Nothing to do.
 					break;
 				} else {
@@ -99,17 +99,17 @@ public class CoordinationImpl implements Coordination {
 					// coordination. Check to see if it's on the same thread.
 					Thread t = coordination.getThread();
 					// If thread is null, the coordination is not associated with
-					// any thread, and there's nothing to compare. If the coordination 
+					// any thread, and there's nothing to compare. If the coordination
 					// is using this thread, then we can't block due to risk of deadlock.
 					if (t == Thread.currentThread()) {
-						throw new CoordinationException(Messages.Deadlock, CoordinationImpl.this, CoordinationException.DEADLOCK_DETECTED);
+						throw new CoordinationException(Messages.Deadlock, referent, CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
 			}
-			// The participant is already participating in another coordination 
+			// The participant is already participating in another coordination
 			// that's not using this thread. Block until that coordination has
 			// finished. A decision was made here to use a timeout and incur the
-			// expense of waking up and rejoining in order to make a reasonably 
+			// expense of waking up and rejoining in order to make a reasonably
 			// timely exit if this coordination terminates.
 			try {
 				coordination.join(1000);
@@ -117,7 +117,7 @@ public class CoordinationImpl implements Coordination {
 				coordinator.getLogService().log(LogService.LOG_DEBUG, Messages.LockInterrupted, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
-				throw new CoordinationException(Messages.LockInterrupted, CoordinationImpl.this, CoordinationException.LOCK_INTERRUPTED, e);
+				throw new CoordinationException(Messages.LockInterrupted, referent, CoordinationException.LOCK_INTERRUPTED, e);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class CoordinationImpl implements Coordination {
 				// Coordinations may only be ended by the same thread that
 				// pushed them onto the stack, if any.
 				if (thread != Thread.currentThread()) {
-					throw new CoordinationException(Messages.EndingThreadNotSame, this, CoordinationException.WRONG_THREAD);
+					throw new CoordinationException(Messages.EndingThreadNotSame, referent, CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one.
@@ -171,17 +171,17 @@ public class CoordinationImpl implements Coordination {
 		}
 		// If a partial ending has occurred, throw the required exception.
 		if (exception != null) {
-			throw new CoordinationException(Messages.CoordinationPartiallyEnded, this, CoordinationException.PARTIALLY_ENDED, exception);
+			throw new CoordinationException(Messages.CoordinationPartiallyEnded, referent, CoordinationException.PARTIALLY_ENDED, exception);
 		}
 	}
 
 	public long extendTimeout(long timeInMillis) throws CoordinationException {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		validateTimeout(timeInMillis);
-		// We don't want this coordination to terminate before the new timer is 
+		// We don't want this coordination to terminate before the new timer is
 		// in place.
 		synchronized (this) {
-			// Check to see if this coordination has already terminated. If so, 
+			// Check to see if this coordination has already terminated. If so,
 			// throw the appropriate exception.
 			checkTerminated();
 			// If there was no previous timeout set, return 0 indicating that no
@@ -198,7 +198,7 @@ public class CoordinationImpl implements Coordination {
 				// This means the previous task has run and is waiting to get a lock on
 				// this coordination. We can't throw an exception yet because we can't
 				// know which one to use (ALREADY_ENDED or FAILED). Once the lock is
-				// released, the running task may fail this coordination due to a timeout, 
+				// released, the running task may fail this coordination due to a timeout,
 				// or something else might be waiting to fail this coordination for other
 				// reasons or to end it. We simply don't know who will win the race.
 				try {
@@ -208,7 +208,7 @@ public class CoordinationImpl implements Coordination {
 					checkTerminated();
 				}
 				catch (InterruptedException e) {
-					throw new CoordinationException(Messages.InterruptedTimeoutExtension, this, CoordinationException.UNKNOWN, e);
+					throw new CoordinationException(Messages.InterruptedTimeoutExtension, referent, CoordinationException.UNKNOWN, e);
 				}
 			}
 			// Create the new timeout.
@@ -255,12 +255,12 @@ public class CoordinationImpl implements Coordination {
 		// Return true to indicate this call resulted in the coordination's failure.
 		return true;
 	}
-	
+
 	public Bundle getBundle() {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
 		return coordinator.getBundle();
 	}
-	
+
 	public synchronized Coordination getEnclosingCoordination() {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
 		if (enclosingCoordination == null)
@@ -335,7 +335,7 @@ public class CoordinationImpl implements Coordination {
 	LogService getLogService() {
 		return coordinator.getLogService();
 	}
-	
+
 	// Return the referent to be used by clients other than the initiator.
 	CoordinationReferent getReferent() {
 		return referent;
@@ -344,7 +344,7 @@ public class CoordinationImpl implements Coordination {
 	synchronized void setTimerTask(TimerTask timerTask) {
 		this.timerTask = timerTask;
 	}
-	
+
 	synchronized void setThreadAndEnclosingCoordination(Thread t, CoordinationImpl c) {
 		thread = t;
 		enclosingCoordination = c;
@@ -358,11 +358,11 @@ public class CoordinationImpl implements Coordination {
 		// must be thrown.
 		if (failure != null) {
 			// The fail() method was called indicating the coordination failed.
-			throw new CoordinationException(Messages.CoordinationFailed, this, CoordinationException.FAILED, failure);
+			throw new CoordinationException(Messages.CoordinationFailed, referent, CoordinationException.FAILED, failure);
 		}
-		// The coordination did not fail, so it either partially ended or 
+		// The coordination did not fail, so it either partially ended or
 		// ended successfully.
-		throw new CoordinationException(Messages.CoordinationEnded, CoordinationImpl.this, CoordinationException.ALREADY_ENDED);
+		throw new CoordinationException(Messages.CoordinationEnded, referent, CoordinationException.ALREADY_ENDED);
 	}
 
 	private void terminate() throws CoordinationException {

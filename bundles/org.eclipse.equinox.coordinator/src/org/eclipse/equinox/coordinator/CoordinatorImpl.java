@@ -47,28 +47,28 @@ public class CoordinatorImpl implements Coordinator {
 	private static final Map<Participant, CoordinationImpl> participantToCoordination = new IdentityHashMap<Participant, CoordinationImpl>();
 
 	private static ThreadLocal<WeakCoordinationStack> coordinationStack = new ThreadLocal<WeakCoordinationStack>() {
-		@Override 
+		@Override
 		protected WeakCoordinationStack initialValue() {
 			return new WeakCoordinationStack();
 		}
 	};
-	
+
 	private static class WeakCoordinationStack {
 		private final LinkedList<CoordinationImpl> coordinations = new LinkedList<CoordinationImpl>();
-		
+
 		public WeakCoordinationStack() {
 		}
 
 		public boolean contains(CoordinationImpl c) {
 			return coordinations.contains(c);
 		}
-		
+
 		public CoordinationImpl peek() {
 			if (coordinations.isEmpty())
 				return null;
 			return coordinations.getFirst();
 		}
-		
+
 		public CoordinationImpl pop() {
 			if (coordinations.isEmpty())
 				return null;
@@ -77,15 +77,15 @@ public class CoordinatorImpl implements Coordinator {
 				c.setThreadAndEnclosingCoordination(null, null);
 			return c;
 		}
-		
+
 		public void push(CoordinationImpl c) {
 			if (contains(c))
-				throw new CoordinationException(Messages.CoordinationAlreadyExists, c, CoordinationException.ALREADY_PUSHED);
+				throw new CoordinationException(Messages.CoordinationAlreadyExists, c.getReferent(), CoordinationException.ALREADY_PUSHED);
 			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
 			coordinations.addFirst(c);
 		}
 	}
-	
+
 	private final Bundle bundle;
 	private final List<CoordinationImpl> coordinations;
 	private final LogService logService;
@@ -261,14 +261,14 @@ public class CoordinatorImpl implements Coordinator {
 
 	void shutdown() {
 		CoordinationWeakReference.processOrphanedCoordinations();
-		List<Coordination> coords;
+		List<CoordinationImpl> coords;
 		synchronized (this) {
 			shutdown = true;
 			// Make a copy so the removal of the coordination from the list during
 			// termination does not interfere with the iteration.
-			coords = new ArrayList<Coordination>(this.coordinations);
+			coords = new ArrayList<CoordinationImpl>(this.coordinations);
 		}
-		for (Coordination coordination : coords) {
+		for (CoordinationImpl coordination : coords) {
 			coordination.fail(Coordination.RELEASED);
 		}
 	}
@@ -276,7 +276,7 @@ public class CoordinatorImpl implements Coordinator {
 	/*
 	 * This procedure must occur when a coordination is being failed or ended.
 	 */
-	void terminate(Coordination coordination, List<Participant> participants) {
+	void terminate(CoordinationImpl coordination, List<Participant> participants) {
 		// A coordination has been terminated and needs to be removed from the thread local stack.
 		synchronized (this) {
 			synchronized (CoordinatorImpl.class) {
