@@ -27,6 +27,10 @@ import org.osgi.service.coordinator.Participant;
 import org.osgi.service.log.LogService;
 
 public class CoordinationImpl implements Coordination {
+	// Holds a strong reference to the CoordinationWeakReference object associated
+	// with this CoordinationImpl. Serves no other purpose. Needs no guarding.
+	CoordinationWeakReference reference;
+	
 	private volatile Throwable failure;
 	private volatile boolean terminated;
 	
@@ -39,6 +43,9 @@ public class CoordinationImpl implements Coordination {
 	private final long id;
 	private final String name;
 	private final List<Participant> participants;
+	// Store a referent to be used by clients other than the initiator. It must
+	// not be a reference to the referent returned to the initiator.
+	private final CoordinationReferent referent;
 	private final Map<Class<?>, Object> variables;
 
 	public CoordinationImpl(long id, String name, long timeout, CoordinatorImpl coordinator) {
@@ -50,6 +57,8 @@ public class CoordinationImpl implements Coordination {
 		this.coordinator = coordinator;
 		participants = Collections.synchronizedList(new ArrayList<Participant>());
 		variables = new HashMap<Class<?>, Object>();
+		// Not an escaping 'this' reference. It will not escape the thread calling the constructor.
+		referent = new CoordinationReferent(this);
 	}
 
 	public void addParticipant(Participant participant) throws CoordinationException {
@@ -127,7 +136,6 @@ public class CoordinationImpl implements Coordination {
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one.
-				CoordinationReferent referent = new CoordinationReferent(this);
 				while (!coordinator.peek().equals(referent)) {
 					try {
 						coordinator.peek().end();
@@ -147,7 +155,6 @@ public class CoordinationImpl implements Coordination {
 		Exception exception = null;
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		CoordinationReferent referent = new CoordinationReferent(this);
 		for (Participant participant : participants) {
 			try {
 				participant.ended(referent);
@@ -234,7 +241,6 @@ public class CoordinationImpl implements Coordination {
 		// Notify participants this coordination has failed.
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		CoordinationReferent referent = new CoordinationReferent(this);
 		for (Participant participant : participants) {
 			try {
 				participant.failed(referent);
@@ -259,7 +265,7 @@ public class CoordinationImpl implements Coordination {
 		coordinator.checkPermission(CoordinationPermission.ADMIN, name);
 		if (enclosingCoordination == null)
 			return null;
-		return new CoordinationReferent(enclosingCoordination);
+		return enclosingCoordination.getReferent();
 	}
 
 	public Throwable getFailure() {
@@ -319,7 +325,7 @@ public class CoordinationImpl implements Coordination {
 			checkTerminated();
 			coordinator.push(this);
 		}
-		return new CoordinationReferent(this);
+		return referent;
 	}
 
 	synchronized Date getDeadline() {
@@ -328,6 +334,11 @@ public class CoordinationImpl implements Coordination {
 
 	LogService getLogService() {
 		return coordinator.getLogService();
+	}
+	
+	// Return the referent to be used by clients other than the initiator.
+	CoordinationReferent getReferent() {
+		return referent;
 	}
 
 	synchronized void setTimerTask(TimerTask timerTask) {

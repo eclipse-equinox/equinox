@@ -119,13 +119,21 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		// This method requires the INITIATE permission. No bundle check is done.
 		checkPermission(CoordinationPermission.INITIATE, name);
+		// Create the coordination object itself, which will store its own instance
+		// of a referent to be returned to clients other than the initiator.
 		CoordinationImpl coordination = new CoordinationImpl(getNextId(), name, timeout, this);
+		// Create the referent to be returned to the initiator.
 		CoordinationReferent referent = new CoordinationReferent(coordination);
+		// Create a weak reference to the referent returned to the initiator. No other
+		// references to the initiator's referent must be maintained outside of this
+		// method. A strong reference to the CoordinationWeakReference must be maintained
+		// by the coordination in order to avoid garbage collection. It serves no other
+		// purpose. Just "set it and forget it".
+		coordination.reference = new CoordinationWeakReference(referent, coordination);
 		synchronized (this) {
 			if (shutdown)
 				throw new IllegalStateException(Messages.CoordinatorShutdown);
 			synchronized (CoordinatorImpl.class) {
-				CoordinationWeakReference.newInstance(referent);
 				coordinations.add(coordination);
 				idToCoordination.put(new Long(coordination.getId()), coordination);
 			}
@@ -135,6 +143,7 @@ public class CoordinatorImpl implements Coordinator {
 			coordination.setTimerTask(timerTask);
 			schedule(timerTask, coordination.getDeadline());
 		}
+		// Make sure to return the referent targeted towards the initiator here.
 		return referent;
 	}
 
@@ -152,7 +161,7 @@ public class CoordinatorImpl implements Coordinator {
 		synchronized (CoordinatorImpl.class) {
 			CoordinationImpl c = idToCoordination.get(new Long(id));
 			if (c != null)
-				result = new CoordinationReferent(c);
+				result = c.getReferent();
 		}
 		if (result != null && !result.isTerminated()) {
 			try {
@@ -177,7 +186,7 @@ public class CoordinatorImpl implements Coordinator {
 					continue;
 				try {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
-					result.add(new CoordinationReferent(coordination));
+					result.add(coordination.getReferent());
 				} catch (SecurityException e) {
 					logService.log(LogService.LOG_DEBUG, Messages.GetCoordinationNotPermitted, e);
 				}
@@ -192,7 +201,7 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationImpl c = coordinationStack.get().peek();
 		if (c == null)
 			return null;
-		return new CoordinationReferent(c);
+		return c.getReferent();
 	}
 
 	public Coordination pop() {
@@ -200,7 +209,7 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationImpl c = coordinationStack.get().peek();
 		if (c == null) return null;
 		checkPermission(CoordinationPermission.INITIATE, c.getName());
-		return new CoordinationReferent(coordinationStack.get().pop());
+		return coordinationStack.get().pop().getReferent();
 	}
 
 	CoordinationImpl addParticipant(Participant participant, CoordinationImpl coordination) {

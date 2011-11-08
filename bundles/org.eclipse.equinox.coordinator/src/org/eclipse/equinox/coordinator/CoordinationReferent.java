@@ -99,8 +99,4 @@ public class CoordinationReferent implements Coordination {
 	public int hashCode() {
 		return coordination.hashCode();
 	}
-	
-	CoordinationImpl getDelegate() {
-		return coordination;
-	}
 }

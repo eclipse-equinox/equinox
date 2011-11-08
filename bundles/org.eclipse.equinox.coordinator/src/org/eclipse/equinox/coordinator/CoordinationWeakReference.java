@@ -12,9 +12,6 @@ package org.eclipse.equinox.coordinator;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.eclipse.osgi.util.NLS;
 import org.osgi.service.coordinator.Coordination;
@@ -23,18 +20,10 @@ import org.osgi.service.log.LogService;
 
 public class CoordinationWeakReference extends WeakReference<CoordinationReferent> {
 	private static final ReferenceQueue<CoordinationReferent> referenceQueue = new ReferenceQueue<CoordinationReferent>();
-	private static final Set<CoordinationWeakReference> references = Collections.synchronizedSet(new HashSet<CoordinationWeakReference>());
-	
-	public static CoordinationWeakReference newInstance(CoordinationReferent referent) {
-		CoordinationWeakReference reference = new CoordinationWeakReference(referent);
-		references.add(reference);
-		return reference;
-	}
 	
 	public static void processOrphanedCoordinations() {
 		CoordinationWeakReference r;
 		while ((r = (CoordinationWeakReference)referenceQueue.poll()) != null) {
-			references.remove(r);
 			CoordinationImpl c = r.getCoordination();
 			try {
 				c.fail(Coordination.ORPHANED);
@@ -61,11 +50,11 @@ public class CoordinationWeakReference extends WeakReference<CoordinationReferen
 	
 	private final CoordinationImpl coordination;
 	
-	private CoordinationWeakReference(CoordinationReferent referent) {
+	public CoordinationWeakReference(CoordinationReferent referent, CoordinationImpl coordination) {
 		super(referent, referenceQueue);
-		coordination = referent.getDelegate();
 		if (coordination == null)
 			throw new NullPointerException();
+		this.coordination = coordination;
 	}
 	
 	public CoordinationImpl getCoordination() {
