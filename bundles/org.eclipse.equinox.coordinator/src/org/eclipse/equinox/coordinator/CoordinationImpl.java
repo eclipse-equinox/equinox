@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
@@ -55,7 +56,7 @@ public class CoordinationImpl implements Coordination {
 		// This method requires the PARTICIPATE permission.
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		if (participant == null)
-			throw new NullPointerException(Messages.CoordinationImpl_15);
+			throw new NullPointerException(NLS.bind(Messages.NullParameter, "participant")); //$NON-NLS-1$
 		/* The caller has permission. Check to see if the participant is already 
 		 * participating in another coordination. Do this in a loop in case the 
 		 * participant must wait for the other coordination to finish. The loop 
@@ -92,7 +93,7 @@ public class CoordinationImpl implements Coordination {
 					// any thread, and there's nothing to compare. If the coordination 
 					// is using this thread, then we can't block due to risk of deadlock.
 					if (t == Thread.currentThread()) {
-						throw new CoordinationException(Messages.CoordinationImpl_1, CoordinationImpl.this, CoordinationException.DEADLOCK_DETECTED);
+						throw new CoordinationException(Messages.Deadlock, CoordinationImpl.this, CoordinationException.DEADLOCK_DETECTED);
 					}
 				}
 			}
@@ -104,10 +105,10 @@ public class CoordinationImpl implements Coordination {
 			try {
 				coordination.join(1000);
 			} catch (InterruptedException e) {
-				coordinator.getLogService().log(LogService.LOG_DEBUG, Messages.CoordinationImpl_2, e);
+				coordinator.getLogService().log(LogService.LOG_DEBUG, Messages.LockInterrupted, e);
 				// This thread was interrupted while waiting for the coordination
 				// to terminate.
-				throw new CoordinationException(Messages.CoordinationImpl_3, CoordinationImpl.this, CoordinationException.LOCK_INTERRUPTED, e);
+				throw new CoordinationException(Messages.LockInterrupted, CoordinationImpl.this, CoordinationException.LOCK_INTERRUPTED, e);
 			}
 		}
 	}
@@ -122,7 +123,7 @@ public class CoordinationImpl implements Coordination {
 				// Coordinations may only be ended by the same thread that
 				// pushed them onto the stack, if any.
 				if (thread != Thread.currentThread()) {
-					throw new CoordinationException(Messages.CoordinationImpl_14, this, CoordinationException.WRONG_THREAD);
+					throw new CoordinationException(Messages.EndingThreadNotSame, this, CoordinationException.WRONG_THREAD);
 				}
 				// Unwind the stack in case there are other coordinations higher
 				// up than this one.
@@ -151,7 +152,7 @@ public class CoordinationImpl implements Coordination {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.CoordinationImpl_4, e);
+				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.ParticipantEndedError, e);
 				// Only the first exception will be propagated.
 				if (exception == null)
 					exception = e;
@@ -163,7 +164,7 @@ public class CoordinationImpl implements Coordination {
 		}
 		// If a partial ending has occurred, throw the required exception.
 		if (exception != null) {
-			throw new CoordinationException(Messages.CoordinationImpl_5, this, CoordinationException.PARTIALLY_ENDED, exception);
+			throw new CoordinationException(Messages.CoordinationPartiallyEnded, this, CoordinationException.PARTIALLY_ENDED, exception);
 		}
 	}
 
@@ -200,7 +201,7 @@ public class CoordinationImpl implements Coordination {
 					checkTerminated();
 				}
 				catch (InterruptedException e) {
-					throw new CoordinationException(Messages.CoordinationImpl_13, this, CoordinationException.UNKNOWN, e);
+					throw new CoordinationException(Messages.InterruptedTimeoutExtension, this, CoordinationException.UNKNOWN, e);
 				}
 			}
 			// Create the new timeout.
@@ -218,7 +219,7 @@ public class CoordinationImpl implements Coordination {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
 		// The reason must not be null.
 		if (reason == null)
-			throw new NullPointerException(Messages.CoordinationImpl_11);
+			throw new NullPointerException(Messages.MissingFailureCause);
 		// Terminating the coordination must be atomic.
 		synchronized (this) {
 			// If this coordination is terminated, return false. Do not throw a
@@ -238,7 +239,7 @@ public class CoordinationImpl implements Coordination {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
-				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.CoordinationImpl_6, e);
+				coordinator.getLogService().log(LogService.LOG_WARNING, Messages.ParticipantFailedError, e);
 			}
 		}
 		synchronized (this) {
@@ -346,11 +347,11 @@ public class CoordinationImpl implements Coordination {
 		// must be thrown.
 		if (failure != null) {
 			// The fail() method was called indicating the coordination failed.
-			throw new CoordinationException(Messages.CoordinationImpl_7, this, CoordinationException.FAILED, failure);
+			throw new CoordinationException(Messages.CoordinationFailed, this, CoordinationException.FAILED, failure);
 		}
 		// The coordination did not fail, so it either partially ended or 
 		// ended successfully.
-		throw new CoordinationException(Messages.CoordinationImpl_8, CoordinationImpl.this, CoordinationException.ALREADY_ENDED);
+		throw new CoordinationException(Messages.CoordinationEnded, CoordinationImpl.this, CoordinationException.ALREADY_ENDED);
 	}
 
 	private void terminate() throws CoordinationException {
@@ -381,11 +382,11 @@ public class CoordinationImpl implements Coordination {
 			}
 		}
 		if (!valid)
-			throw new IllegalArgumentException(Messages.CoordinationImpl_10);
+			throw new IllegalArgumentException(Messages.InvalidCoordinationName);
 	}
 
 	private static void validateTimeout(long timeout) {
 		if (timeout < 0)
-			throw new IllegalArgumentException(Messages.CoordinationImpl_12);
+			throw new IllegalArgumentException(Messages.InvalidTimeout);
 	}
 }

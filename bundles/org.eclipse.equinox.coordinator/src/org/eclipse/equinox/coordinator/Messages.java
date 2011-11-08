@@ -14,28 +14,26 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.equinox.coordinator.messages"; //$NON-NLS-1$
-	public static String CoordinationImpl_0;
-	public static String CoordinationImpl_1;
-	public static String CoordinationImpl_10;
-	public static String CoordinationImpl_11;
-	public static String CoordinationImpl_12;
-	public static String CoordinationImpl_13;
-	public static String CoordinationImpl_14;
-	public static String CoordinationImpl_15;
-	public static String CoordinationImpl_2;
-	public static String CoordinationImpl_3;
-	public static String CoordinationImpl_4;
-	public static String CoordinationImpl_5;
-	public static String CoordinationImpl_6;
-	public static String CoordinationImpl_7;
-	public static String CoordinationImpl_8;
-	public static String CoordinationImpl_9;
-	public static String CoordinatorImpl_0;
-	public static String CoordinatorImpl_1;
-	public static String CoordinatorImpl_2;
-	public static String CoordinatorImpl_3;
-	public static String CoordinatorImpl_4;
-	public static String CoordinatorImpl_5;
+	public static String NullParameter;
+	public static String Deadlock;
+	public static String InvalidCoordinationName;
+	public static String MissingFailureCause;
+	public static String InvalidTimeout;
+	public static String InterruptedTimeoutExtension;
+	public static String EndingThreadNotSame;
+	public static String LockInterrupted;
+	public static String ParticipantEndedError;
+	public static String CoordinationPartiallyEnded;
+	public static String ParticipantFailedError;
+	public static String CoordinationFailed;
+	public static String CoordinationEnded;
+	public static String CoordinationTimedOutError;
+	public static String MaxCoordinationIdExceeded;
+	public static String GetCoordinationNotPermitted;
+	public static String CoordinatorShutdown;
+	public static String CoordinationAlreadyExists;
+	public static String CanceledTaskNotPurged;
+	public static String OrphanedCoordinationError;
 
 	static {
 		// initialize resource bundle

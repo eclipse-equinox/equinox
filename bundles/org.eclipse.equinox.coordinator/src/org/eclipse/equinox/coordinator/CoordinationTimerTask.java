@@ -12,6 +12,7 @@ package org.eclipse.equinox.coordinator;
 
 import java.util.TimerTask;
 
+import org.eclipse.osgi.util.NLS;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.log.LogService;
 
@@ -20,7 +21,7 @@ public class CoordinationTimerTask extends TimerTask {
 
 	public CoordinationTimerTask(CoordinationImpl coordination) {
 		if (coordination == null)
-			throw new IllegalArgumentException(Messages.CoordinationImpl_0);
+			throw new NullPointerException(NLS.bind(Messages.NullParameter, "coordination")); //$NON-NLS-1$
 		this.coordination = coordination;
 	}
 
@@ -31,7 +32,7 @@ public class CoordinationTimerTask extends TimerTask {
 		try {
 			coordination.fail(Coordination.TIMEOUT);
 		} catch (Throwable t) {
-			coordination.getLogService().log(LogService.LOG_ERROR, Messages.CoordinationImpl_9, t);
+			coordination.getLogService().log(LogService.LOG_ERROR, Messages.CoordinationTimedOutError, t);
 		}
 	}
 }

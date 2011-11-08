@@ -36,7 +36,7 @@ public class CoordinatorImpl implements Coordinator {
 
 	private synchronized static long getNextId() {
 		if (Long.MAX_VALUE == lastId)
-			throw new IllegalStateException(Messages.CoordinatorImpl_0);
+			throw new IllegalStateException(Messages.MaxCoordinationIdExceeded);
 		// First ID will be 1.
 		return ++lastId;
 	}
@@ -80,7 +80,7 @@ public class CoordinatorImpl implements Coordinator {
 		
 		public void push(CoordinationImpl c) {
 			if (contains(c))
-				throw new CoordinationException(Messages.CoordinatorImpl_3, c, CoordinationException.ALREADY_PUSHED);
+				throw new CoordinationException(Messages.CoordinationAlreadyExists, c, CoordinationException.ALREADY_PUSHED);
 			c.setThreadAndEnclosingCoordination(Thread.currentThread(), coordinations.isEmpty() ? null : coordinations.getFirst());
 			coordinations.addFirst(c);
 		}
@@ -123,7 +123,7 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationReferent referent = new CoordinationReferent(coordination);
 		synchronized (this) {
 			if (shutdown)
-				throw new IllegalStateException(Messages.CoordinatorImpl_2);
+				throw new IllegalStateException(Messages.CoordinatorShutdown);
 			synchronized (CoordinatorImpl.class) {
 				CoordinationWeakReference.newInstance(referent);
 				coordinations.add(coordination);
@@ -158,7 +158,7 @@ public class CoordinatorImpl implements Coordinator {
 			try {
 				checkPermission(CoordinationPermission.ADMIN, result.getName());
 			} catch (SecurityException e) {
-				logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_1, e);
+				logService.log(LogService.LOG_DEBUG, Messages.GetCoordinationNotPermitted, e);
 				result = null;
 			}
 		}
@@ -179,7 +179,7 @@ public class CoordinatorImpl implements Coordinator {
 					checkPermission(CoordinationPermission.ADMIN, coordination.getName());
 					result.add(new CoordinationReferent(coordination));
 				} catch (SecurityException e) {
-					logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_1, e);
+					logService.log(LogService.LOG_DEBUG, Messages.GetCoordinationNotPermitted, e);
 				}
 			}
 		}
@@ -238,7 +238,7 @@ public class CoordinatorImpl implements Coordinator {
 		try {
 			Timer.class.getMethod("purge", (Class<?>[]) null).invoke(timer, (Object[]) null); //$NON-NLS-1$
 		} catch (Exception e) {
-			logService.log(LogService.LOG_DEBUG, Messages.CoordinatorImpl_4, e);
+			logService.log(LogService.LOG_DEBUG, Messages.CanceledTaskNotPurged, e);
 		}
 	}
 
