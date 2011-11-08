@@ -105,6 +105,7 @@ public interface ISTextExpert {
 	/**
 	 * Obtains the structured type handler associated with this 
 	 * <code>ISTextExpert</code> instance.
+	 * 
 	 * @return the type handler instance.
 	 */
 	public STextTypeHandler getTypeHandler();
@@ -214,8 +215,18 @@ public interface ISTextExpert {
 	 * </p><p> 
 	 * If necessary, leading and trailing directional formatting characters
 	 * (LRE, RLE and PDF) can be added depending on the value of the 
-	 * <code>affix</code> argument.
-	 * </p>
+	 * <code>affix</code> argument.</p>
+	 * <ul>
+	 *   <li>A value of 1 means that one LRM or RLM must be prefixed, depending  
+	 *       on the direction. This is useful when the GUI component presenting
+	 *       this text has a contextual orientation.</li>
+	 *   <li>A value of 2 means that LRE+LRM or RLE+RLM must be prefixed, 
+	 *       depending on the direction, and LRM+PDF or RLM+PDF must be
+	 *       suffixed, depending on the direction.
+	 *       This is useful if the GUI component presenting this text needs to
+	 *       have the text orientation explicitly specified.</li>
+	 *   <li>A value of 0 means that no prefix or suffix are needed.</li>
+	 * </ul>
 	 * @see ISTextExpert#leanBidiCharOffsets(String)
 	 * 
 	 * @param  text the structured text string
@@ -256,6 +267,7 @@ public interface ISTextExpert {
 	/**
 	 * Sets the state for the next text processing call.
 	 * This method does nothing if the expert instance is not a stateful one.
+	 * 
 	 * @param state an object returned by a previous call to {@link #getState}.
 	 */
 	public void setState(Object state);
@@ -263,7 +275,8 @@ public interface ISTextExpert {
 	/**
 	 * Gets the state established by the last text processing call.
 	 * This is <code>null</code> if the expert instance is not a stateful one,
-	 * or if the last text processing call has nothing to pass to the next call.
+	 * or if the last text processing call had nothing to pass to the next call.
+	 * 
 	 * @return the last established state.
 	 */
 	public Object getState();

@@ -10,9 +10,8 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
-
 import java.lang.ref.SoftReference;
+import org.eclipse.equinox.bidi.STextTypeHandlerFactory;
 
 /**
  * Records strings which contain structured text. Several static
@@ -80,19 +79,15 @@ public class STextStringRecord {
 	 * and ending offsets for the first segment.
 	 *
 	 * @param  string the string to record.
-	 *
 	 * @param  segmentCount number of segments allowed in this string.
 	 *         This number must be >= 1.
-	 *
 	 * @param  handlerID identifier for the handler appropriate to handle 
 	 *         the type of structured text present in the first segment.
 	 *         It may be one of the predefined identifiers in 
 	 *         {@link STextTypeHandlerFactory}, or it may be an identifier
 	 *         for a type handler created by a plug-in or by the application.
-	 *
 	 * @param  start offset in the string of the starting character of the first
 	 *         segment. It must be >= 0 and less than the length of the string.
-	 *
 	 * @param  limit offset of the character following the first segment. It
 	 *         must be greater than the <code>start</code> argument and
 	 *         not greater than the length of the string.
@@ -147,10 +142,8 @@ public class STextStringRecord {
 	 *         It may be one of the predefined identifiers in 
 	 *         {@link STextTypeHandlerFactory}, or it may be an identifier
 	 *         for a type handler created by a plug-in or by the application.
-	 *
 	 * @param  start offset in the string of the starting character of the
 	 *         segment. It must be >= 0 and less than the length of the string.
-	 *
 	 * @param  limit offset of the character following the segment. It must be
 	 *         greater than the <code>start</code> argument and not greater
 	 *         than the length of the string.
@@ -179,7 +172,7 @@ public class STextStringRecord {
 	}
 
 	/**
-	 * Checks if a string is recorded and retrieve its record.
+	 * Checks if a string is recorded and retrieves its record.
 	 *
 	 * @param  string the string to check.
 	 *

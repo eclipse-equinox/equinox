@@ -14,7 +14,7 @@ import org.eclipse.equinox.bidi.advanced.ISTextExpert;
 import org.eclipse.equinox.bidi.advanced.STextEnvironment;
 
 /**
- * Determines bidirectional types of characters in a string.
+ * Provides services related to the bidi classification of characters.
  */
 public class STextCharTypes {
 
@@ -36,9 +36,21 @@ public class STextCharTypes {
 
 	private static final int CHARTYPES_ADD = 2;
 
+	/**
+	 * The ISTextExpert instance which created this instance.
+	 */
 	final protected ISTextExpert expert;
+	/**
+	 * The STextTypeHandler instance utilized by the expert.
+	 */
 	final protected STextTypeHandler handler;
+	/**
+	 * The environment associated with the expert.
+	 */
 	final protected STextEnvironment environment;
+	/**
+	 * The source text whose characters are analyzed.
+	 */
 	final protected String text;
 
 	// 1 byte for each char in text

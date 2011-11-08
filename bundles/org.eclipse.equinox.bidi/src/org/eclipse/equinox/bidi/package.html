@@ -20,7 +20,8 @@ Bidirectional text offers interesting challenges to presentation systems.
 For plain text, the Unicode Bidirectional Algorithm
 (<a href="http://www.unicode.org/reports/tr9/">UBA</a>)
 generally specifies satisfactorily how to reorder bidirectional text for
-display. This algorithm is implemented in Java's presentation system.
+display. This algorithm is implemented in many presentation and operating 
+systems, like Java/Swing, Windows, Linux.
 </p><p>
 However, all bidirectional text is not necessarily plain text. There
 are also instances of text structured to follow a given syntax, which
@@ -72,17 +73,6 @@ For each of these types, an identifier is defined in
 These identifiers can be used as argument in some methods of
 <b>STextProcessor</b> to specify the type of handler to apply.
 </p><p>
-Another class in this package may be used to
-complement the action of
-{@link <a href="STextProcessor.html">STextProcessor</a>}:
-<ul>
-  <li>{@link <a href="STextStringRecord.html">STextStringRecord</a>}
-      allows to record strings which are structured text with the
-      type of the appropriate handler,
-      so that another module can check if a given string has been recorded
-      as a structured text string and run its type handler.</li>
-</ul>
-<p>
 The classes included in this package are intended for users who
 need to process structured text in the most straightforward
 manner, when the following conditions are satisfied:
@@ -102,51 +92,30 @@ manner, when the following conditions are satisfied:
 When their needs go beyond the conditions above,
 users can use classes in the
 {@link <a href="advanced/package-summary.html">
-org.eclipse.equinox.bidi.advanced</a>} package:
-<ul>
-  <li>{@link <a href="advanced/ISTextExpert.html">ISTextExpert</a>}
-      provides more sophisticated methods for processing the
-      structured text.</li>
-  <li>{@link <a href="advanced/STextEnvironment.html">STextEnvironment</a>}
-      specifies properties of the environment.</li>
-  <li>{@link <a href="advanced/STextExpertFactory.html">STextExpertFactory</a>}
-      associates a type handler with an environment and provides
-      a <code>STextExpert</code> instance for the user.
-</ul>
-<p>
+org.eclipse.equinox.bidi.advanced</a>} package.
+</p><p>
 Developers who want to develop new handlers to support types of
-structured text not currently supported can use the following components
+structured text not currently supported can use components
 of the package {@link <a href="custom/package-summary.html">
-org.eclipse.equinox.bidi.custom</a>}:
-<ul>
-  <li>{@link <a href="custom/STextTypeHandler.html">STextTypeHandler</a>}
-      is a generic handler to be used as superclass for specific
-      handlers.</li>
-  <li>{@link <a href="custom/STextCharTypes.html">STextCharTypes</a>}
-      provides services related to the bidi classification of characters.</li>
-  <li>{@link <a href="custom/STextOffsets.html">STextOffsets</a>}
-      provides services related to managing an array of offsets to locations
-      where directional formatting characters should be added in the source
-      string.</li>
-</ul>
-<p>
-There are two other packages associated with the current one:
+org.eclipse.equinox.bidi.custom</a>}.
+</p><p>
+There are two other packages associated with the current one:</p>
 <ul>
   <li>{@link <a href="internal/package-summary.html">
       org.eclipse.equinox.bidi.internal</a>}</li>
   <li>{@link <a href="internal/consumable/package-summary.html">
        org.eclipse.equinox.bidi.internal.consumable</a>}</li>
 </ul>
+<p>
 The tools in the first package can serve as example of how to develop
 processors for currently unsupported types of structured text.<br>
 The latter package contains classes for the processors implementing
 the currently supported types of structured text.
-<p>
+</p><p>
 However, users wishing to process the currently supported types of
 structured text typically don't need to interact with these
 two packages.
-
-<p>&nbsp;</p>
+</p>
 
 <h2>Abbreviations used in the documentation of this package</h2>
 
@@ -188,7 +157,7 @@ attention:</p>
 Linux) are very similar but nevertheless have known differences. Those
 differences are minor and will not have a visible effect in most cases.
 However there might be cases in which the same bidi text on two
-platforms might look different. These differences will surface in Java
+platforms will look different. These differences will surface in Java
 applications when they use the platform visual components for their UI
 (e.g., AWT, SWT).</li>
 

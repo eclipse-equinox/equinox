@@ -12,7 +12,8 @@ package org.eclipse.equinox.bidi.custom;
 
 /**
  * Provides various services related to managing the array of
- * offsets where directional formatting characters will be inserted.
+ * offsets where directional formatting characters should be inserted
+ * in a source string.
  * 
  * @author Matitiahu Allouche
  *

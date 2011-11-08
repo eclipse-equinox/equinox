@@ -10,12 +10,28 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi;
 
+import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.STextExpertFactory;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 import org.eclipse.equinox.bidi.internal.STextTypesCollector;
 
 /**
  * Provides access to registered structured text handlers.
- * 
+ * <p>
+ * A structured text handler is a subclass of {@link STextTypeHandler}
+ * adapted for a given type of structured text.
+ * <p>
+ * The constants in this class are identifiers for structured text
+ * handlers which are defined and supported "out of the box" by this package.
+ * Text handler identifiers can be used when invoking {@link STextProcessor#processTyped(String, String)},
+ * or when invoking <code>getExpert</code> methods in {@link STextExpertFactory}.
+ * <p>
+ * The {@link #getHandler} method in this class can be used to get a 
+ * structured text handler reference for one of the handlers defined in this
+ * package or for additional structured text handlers registered by plug-ins.
+ * Text handler references can be used when invoking 
+ * {@link STextExpertFactory#getStatefulExpert(STextTypeHandler, STextEnvironment)}.
+ *  
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 final public class STextTypeHandlerFactory {

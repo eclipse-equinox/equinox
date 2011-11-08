@@ -10,8 +10,7 @@
  ******************************************************************************/
 package org.eclipse.equinox.bidi.internal;
 
-import org.eclipse.equinox.bidi.advanced.ISTextExpert;
-import org.eclipse.equinox.bidi.advanced.STextEnvironment;
+import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.*;
 
 /**
@@ -52,11 +51,30 @@ public class STextImpl implements ISTextExpert {
 	static final int FIXES_LENGTH = PREFIX_LENGTH + SUFFIX_LENGTH;
 	static final int[] EMPTY_INT_ARRAY = new int[0];
 
+	/**
+	 * The structured text handler utilized by this expert.
+	 */
 	protected final STextTypeHandler handler;
+	/**
+	 * The environment associated with the expert.
+	 */
 	protected final STextEnvironment environment;
+	/**
+	 * Flag which is true if the expert is stateful.
+	 */
 	protected final boolean sharedExpert;
+	/**
+	 * Last state value set by {@link #setState} or {@link #clearState}.
+	 */
 	protected Object state;
 
+	/**
+	 * Constructor used in {@link STextExpertFactory}.
+	 * 
+	 * @param structuredTextHandler the structured text handler used by this expert.
+	 * @param environment the environment associated with this expert.
+	 * @param shared flag which is true if the expert is stateful.
+	 */
 	public STextImpl(STextTypeHandler structuredTextHandler, STextEnvironment environment, boolean shared) {
 		this.handler = structuredTextHandler;
 		this.environment = environment;
@@ -127,6 +145,9 @@ public class STextImpl implements ISTextExpert {
 		return nextLocation + (((long) idxLocation) << 32);
 	}
 
+	/**
+	 * @see STextTypeHandler#processSeparator STextTypeHandler.processSeparator
+	 */
 	static public void processSeparator(String text, STextCharTypes charTypes, STextOffsets offsets, int separLocation) {
 		int len = text.length();
 		int direction = charTypes.getDirection();
@@ -226,7 +247,6 @@ public class STextImpl implements ISTextExpert {
 	 *  {@link ISTextExpert#leanToFullText leanToFullText} does not add any directional
 	 *  formatting characters as either prefix or suffix of the <i>full</i> text.
 	 *  <p>
-	 *  @see ISTextExpert#leanToFullText STextEngine.leanToFullText
 	 */
 	public String leanToFullText(String text) {
 		int len = text.length();
@@ -512,8 +532,9 @@ public class STextImpl implements ISTextExpert {
 			} else {
 				// When the orientation is RTL, we need to add EMBED at the
 				// start of the text and PDF at its end.
-				// However, because of a bug in Windows' handling of LRE/PDF,
-				// we add EMBED_PREFIX at the start and EMBED_SUFFIX at the end.
+				// However, because of a bug in Windows' handling of LRE/RLE/PDF,
+				// we add LRM or RLM (according to the direction) after the 
+				// LRE/RLE and again before the PDF.
 				char curEmbed = EMBEDS[direction];
 				fullChars[0] = curEmbed;
 				fullChars[1] = curMark;

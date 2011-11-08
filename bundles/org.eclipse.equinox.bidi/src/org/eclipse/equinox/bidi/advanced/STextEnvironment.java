@@ -97,11 +97,11 @@ public class STextEnvironment {
 	/**
 	 * Creates an instance of a structured text environment.
 	 *
-	 * @param lang the language to of the environment, encoded as specified
+	 * @param lang the language of the environment, encoded as specified
 	 * in ISO-639. Might be <code>null</code>, in which case the default
 	 * locale is used.
 	 * @param mirrored specifies if the environment is mirrored.
-	 * @param orientation the orientation of the GUI component: 
+	 * @param orientation the orientation of the GUI component, one of the values: 
 	 *         {@link #ORIENT_LTR ORIENT_LTR},
 	 *         {@link #ORIENT_LTR ORIENT_RTL},
 	 *         {@link #ORIENT_CONTEXTUAL_LTR ORIENT_CONTEXTUAL_LTR},
@@ -124,6 +124,7 @@ public class STextEnvironment {
 	/**
 	 * Returns a 2-letters code representing a language as defined by
 	 * ISO-639.
+	 * 
 	 * @return language of the environment
 	 */
 	public String getLanguage() {
@@ -134,6 +135,7 @@ public class STextEnvironment {
 	 * Returns a flag indicating that structured text processed
 	 * within this environment should assume that the GUI is mirrored
 	 * (globally going from right to left).
+	 * 
 	 * @return <code>true</code> if environment is mirrored 
 	 */
 	public boolean getMirrored() {
@@ -145,7 +147,7 @@ public class STextEnvironment {
 	 * component in which the <i>full</i> structured text
 	 * will be displayed.
 	 * <p>
-	 * The orientation values:
+	 * The orientation value is one of the following:
 	 * <ul>
 	 * <li>{@link #ORIENT_LTR ORIENT_LTR},</li>
 	 * <li>{@link #ORIENT_LTR ORIENT_RTL},</li>
@@ -161,7 +163,11 @@ public class STextEnvironment {
 	}
 
 	/**
-	 * Checks if bidi processing is needed in this environment.
+	 * Checks if bidi processing is needed in this environment. The result 
+	 * depends on the operating system (must be supported by this package)
+	 * and on the language supplied when constructing the instance (it
+	 * must be a language using a bidirectional script).
+	 * 
 	 * @return <code>true</code> if bidi processing is needed in this environment.
 	 */
 	public boolean isProcessingNeeded() {
@@ -185,6 +191,12 @@ public class STextEnvironment {
 		return processingNeeded.booleanValue();
 	}
 
+	/**
+	 * Computes the hashCode based on the values supplied when constructing 
+	 * the instance and on the result of {@link #isProcessingNeeded()}.
+	 * 
+	 * @return the hash code.
+	 */
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -195,6 +207,12 @@ public class STextEnvironment {
 		return result;
 	}
 
+	/**
+	 * Compare 2 environment instances and returns true if both instances
+	 * were constructed with the same arguments.
+	 * 
+	 * @return true if the 2 instances can be used interchangeably.
+	 */
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

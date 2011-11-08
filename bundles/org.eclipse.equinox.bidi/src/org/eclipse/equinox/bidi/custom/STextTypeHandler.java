@@ -23,7 +23,9 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *  <ul>
  *    <li>Handler instances may be accessed simultaneously by
  *        several threads. They should have no instance variables.</li>
- *    <li>The common logic uses handler methods to query the
+ *    <li>This class provides common logic in code which can be invoked
+ *        by any {@link STextTypeHandler structured text handler}. 
+ *        This common logic uses handler methods to query the
  *        characteristics of the specific handler:
  *        <ul>
  *          <li>the separators which separate the structured text into
@@ -87,26 +89,21 @@ public class STextTypeHandler {
 	 *         is invoked. The handler can use ISTextExpert methods to
 	 *         query items stored in the expert instance, like the current
 	 *         {@link STextEnvironment environment}.      
-	 *
 	 * @param  text the structured text string before
 	 *         addition of any directional formatting characters.
-	 *
 	 * @param  charTypes an object whose methods can be useful to the 
 	 *         handler.
-	 *
 	 * @param  offsets an object whose methods can be useful to the 
 	 *         handler.
-	 *
 	 * @param  caseNumber number of the special case to locate.
 	 *         This number varies from 1 to the number of special cases
 	 *         returned by {@link #getSpecialsCount getSpecialsCount}
 	 *         for this handler.
 	 *         The meaning of this number is internal to the class
 	 *         implementing <code>indexOfSpecial</code>.
-	 *
 	 * @param  fromIndex the index within <code>text</code> to start
 	 *         the search from.
-	 *
+	 *         
 	 * @return the position where the start of the special case
 	 *         corresponding to <code>caseNumber</code> was located.
 	 *         The method must return the first occurrence of whatever
@@ -131,7 +128,7 @@ public class STextTypeHandler {
 	/**
 	 * Handles special cases specific to this handler.
 	 * It is called when a special case occurrence 
-	 * is located by {@link #indexOfSpecial}.
+	 * is located by {@link #indexOfSpecial indexOfSpecial}.
 	 * <p>
 	 * If a special processing cannot be completed within a current call to
 	 * <code>processSpecial</code> (for instance, a comment has been started
@@ -154,18 +151,13 @@ public class STextTypeHandler {
 	 *         is invoked. The handler can use ISTextExpert methods to
 	 *         query items stored in the expert instance, like the current
 	 *         {@link STextEnvironment environment}.      
-	 *
 	 * @param  text the structured text string before
 	 *         addition of any directional formatting characters.
-	 *
 	 * @param  charTypes an object whose methods can be useful to the 
 	 *         handler.
-	 *
 	 * @param  offsets an object whose methods can be useful to the 
 	 *         handler.
-	 *
 	 * @param  caseNumber number of the special case to handle.
-	 *
 	 * @param  separLocation the position returned by
 	 *         {@link #indexOfSpecial indexOfSpecial}. After calls to
 	 *         {@link ISTextExpert#leanToFullText leanToFullText} and other
@@ -195,8 +187,10 @@ public class STextTypeHandler {
 	/**
 	 * Specifies that a mark character must be added before the character
 	 * at the specified position of the <i>lean</i> text when generating the
-	 * <i>full</i> text. This method can be called from within {@link #indexOfSpecial}
-	 * or {@link #processSpecial} in extensions of <code>STextTypeHandler</code>.
+	 * <i>full</i> text. This method can be called from within 
+	 * {@link #indexOfSpecial indexOfSpecial} or
+	 * {@link #processSpecial processSpecial} in extensions of 
+	 * <code>STextTypeHandler</code>.
 	 * The mark character will be LRM for structured text
 	 * with a LTR base direction, and RLM for structured text with RTL
 	 * base direction. The mark character is not added physically by this
@@ -206,13 +200,10 @@ public class STextTypeHandler {
 	 * @param  text is the structured text string received as
 	 *         parameter to <code>indexOfSpecial</code> or
 	 *         <code>processSpecial</code>.
-	 *
 	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
-	 *
 	 * @param  offsets is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
-	 *
 	 * @param  offset position of the character in the <i>lean</i> text.
 	 *         It must be a non-negative number smaller than the length
 	 *         of the <i>lean</i> text.
@@ -228,8 +219,9 @@ public class STextTypeHandler {
 	 * display, depending on the base direction of the text and on the
 	 * class of the characters in the <i>lean</i> text preceding and 
 	 * following the separator itself. This method
-	 * can be called from within {@link #indexOfSpecial} or
-	 * {@link #processSpecial} in extensions of <code>STextTypeHandler</code>. 
+	 * can be called from within {@link #indexOfSpecial indexOfSpecial} or
+	 * {@link #processSpecial processSpecial} in extensions of 
+	 * <code>STextTypeHandler</code>. 
 	 * <p>
 	 * The logic implemented in this method considers the text before
 	 * <code>separLocation</code> and the text following it. If, and only if,
@@ -240,13 +232,10 @@ public class STextTypeHandler {
 	 * @param  text is the structured text string received as
 	 *         parameter to <code>indexOfSpecial</code> or
 	 *         <code>processSpecial</code>.
-	 *
 	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
-	 *
 	 * @param  offsets is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
-	 *
 	 * @param  separLocation offset of the separator in the <i>lean</i> text.
 	 *         It must be a non-negative number smaller than the length
 	 *         of the <i>lean</i> text.
@@ -283,7 +272,6 @@ public class STextTypeHandler {
 	 *         is invoked. The handler can use ISTextExpert methods to
 	 *         query items stored in the expert instance, like the current
 	 *         {@link STextEnvironment environment}.      
-	 *
 	 * @param  text the structured text string to process.
 	 *
 	 * @return the base direction of the structured text. This direction
@@ -308,9 +296,7 @@ public class STextTypeHandler {
 	 *         is invoked. The handler can use ISTextExpert methods to
 	 *         query items stored in the expert instance, like the current
 	 *         {@link STextEnvironment environment}.      
-	 *
 	 * @param  text is the structured text string to process.
-	 *
 	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
 	 *
@@ -364,9 +350,7 @@ public class STextTypeHandler {
 	 *         is invoked. The handler can use ISTextExpert methods to
 	 *         query items stored in the expert instance, like the current
 	 *         {@link STextEnvironment environment}.      
-	 *
 	 * @param  text is the structured text string to process.
-	 *
 	 * @param  charTypes is a parameter received by <code>indexOfSpecial</code>
 	 *         or <code>processSpecial</code>.
 	 *

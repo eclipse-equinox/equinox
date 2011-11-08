@@ -36,10 +36,16 @@ public class STextTypesCollector implements IRegistryEventListener {
 		registry.addListener(this, EXT_POINT);
 	}
 
+	/**
+	 * @return a static instance.
+	 */
 	static public STextTypesCollector getInstance() {
 		return instance;
 	}
 
+	/**
+	 * @return a list of all the registered structured text handler types.
+	 */
 	public String[] getTypes() {
 		if (types == null)
 			read();
@@ -49,6 +55,11 @@ public class STextTypesCollector implements IRegistryEventListener {
 		return result;
 	}
 
+	/**
+	 * @param type the identifier for a structured text handler.
+	 * 
+	 * @return the structured text handler instance.
+	 */
 	public STextTypeHandler getHandler(String type) {
 		if (types == null)
 			read();

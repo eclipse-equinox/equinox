@@ -19,7 +19,11 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
 
 /**
  * Obtains ISTextExpert instances.
- * There are two kinds of {@link ISTextExpert} instances (called "experts"):
+ * An {@link ISTextExpert} instance (called in short an "expert") provides
+ * the advanced methods to process a certain type of structured text, and 
+ * is thus related to a specific 
+ * {@link STextTypeHandler structured text type handler}.
+ * There are two kinds of experts:
  * <ul>
  *   <li>stateful, obtained by calling {@link #getStatefulExpert getStatefulExpert}.</li>
  *   <li>not stateful, obtained by calling {@link #getExpert getExpert}.</li>
@@ -27,6 +31,11 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  * <p>Only the stateful kind can remember the state established by a call to
  * a text processing method and transmit it as initial state in the next call
  * to a text processing method.
+ * <p>In other words, the methods 
+ * {@link ISTextExpert#getState() getState},
+ * {@link ISTextExpert#setState setState} and
+ * {@link ISTextExpert#clearState() clearState} of 
+ * {@link ISTextExpert} are inoperative for experts which are not stateful.
  * <p>
  * Using a stateful expert is more resource intensive, thus not stateful
  * experts should be used when feasible. 

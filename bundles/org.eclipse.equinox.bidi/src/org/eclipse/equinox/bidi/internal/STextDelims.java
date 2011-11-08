@@ -50,7 +50,7 @@ public abstract class STextDelims extends STextTypeHandler {
 
 	/**
 	 *  Handles the text between start and end delimiters as a token.
-	 *  This methoed inserts a directional mark if needed at position
+	 *  This method inserts a directional mark if needed at position
 	 *  <code>separLocation</code> which corresponds to a start delimiter,
 	 *  and skips until after the matching end delimiter.
 	 *
