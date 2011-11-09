@@ -35,15 +35,11 @@
          id="org.eclipse.equinox.server.servletbridge"
          version="0.0.0"/>
 
-   <includes
-         id="org.eclipse.equinox.server.simple"
-         version="0.0.0"/>
-
    <plugin
          id="javax.servlet"
          download-size="0"
          install-size="0"
-         version="2.5.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
@@ -62,6 +58,20 @@
 
    <plugin
          id="javax.servlet.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.el"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.el.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -153,6 +163,18 @@
 
    <plugin
          id="org.eclipse.equinox.jsp.jasper.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+   <plugin
+         id="org.apache.jasper.glassfish"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+   <plugin
+         id="org.apache.jasper.glassfish.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
