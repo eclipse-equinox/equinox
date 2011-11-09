@@ -67,26 +67,33 @@
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
+   <!-- <plugin
          id="org.eclipse.equinox.http"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
+         unpack="false"/> 
 
    <plugin
          id="org.eclipse.equinox.http.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
+         unpack="false"/> 
 
-   <plugin
+    <plugin
          id="org.eclipse.equinox.http.jetty"
          download-size="0"
          install-size="0"
          version="2.0.100.qualifier"
-         unpack="false"/>
+         unpack="false"/> -->
+         
+   <plugin
+         id="org.eclipse.equinox.http.jetty"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>          
 
    <plugin
          id="org.eclipse.equinox.http.jetty.source"
@@ -151,7 +158,7 @@
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
+ <!--  <plugin
          id="org.mortbay.jetty.server"
          download-size="0"
          install-size="0"
@@ -174,6 +181,108 @@
 
    <plugin
          id="org.mortbay.jetty.util.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/> -->
+         
+    <plugin
+         id="org.eclipse.jetty.continuation"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>   
+    
+     <plugin
+         id="org.eclipse.jetty.continuation.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>   
+    
+     <plugin
+         id="org.eclipse.jetty.http"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>   
+
+     <plugin
+         id="org.eclipse.jetty.http.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>   
+
+    
+     <plugin
+         id="org.eclipse.jetty.io"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+     <plugin
+         id="org.eclipse.jetty.io.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+    
+    <plugin
+         id="org.eclipse.jetty.security"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+    <plugin
+         id="org.eclipse.jetty.security.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+
+    <plugin
+         id="org.eclipse.jetty.server"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+    <plugin
+         id="org.eclipse.jetty.server.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+
+   <plugin
+         id="org.eclipse.jetty.servlet"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+  <plugin
+         id="org.eclipse.jetty.servlet.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.jetty.util.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
