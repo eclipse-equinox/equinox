@@ -295,6 +295,27 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		uninstallCompositeBundle(compositeBundle);
 	}
 
+	public void testCompositeShare04d_Bug363561() {
+		// create a composite bundle with one bundle that exports some api to parent
+		// install one bundle into parent that uses API from child
+		Map linkManifest = new HashMap();
+		linkManifest.put(Constants.BUNDLE_SYMBOLICNAME, getName()); //$NON-NLS-1$
+		linkManifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		linkManifest.put(Constants.EXPORT_PACKAGE, "test.link.a; attr1=\"value1\"; uses:=\"org.osgi.framework, test.link.a.params\", test.link.a.params; attr2=\"value2\""); //$NON-NLS-1$
+		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, "testCompositeShare04a", null, linkManifest, false, false); //$NON-NLS-1$
+		Bundle constituent = installIntoChild(compositeBundle.getCompositeFramework(), "test.link.a"); //$NON-NLS-1$
+		Bundle testClient = installIntoCurrent("test.link.a.client"); //$NON-NLS-1$
+		startCompositeBundle(compositeBundle, false);
+
+		try {
+			constituent.uninstall();
+		} catch (BundleException e) {
+			fail("Error on uninstall of constituent.", e);
+		}
+		stopCompositeBundle(compositeBundle);
+		uninstallCompositeBundle(compositeBundle);
+	}
+
 	public void testCompositeShare05() {
 		// create a composite bundle with one bundle that exports some api to child
 		// install one bundle into child that uses API from parent

@@ -169,6 +169,9 @@ public class CompositeImpl extends CompositeBase implements CompositeBundle {
 	}
 
 	protected void stopHook() throws BundleException {
+		// bug 363561; need to make sure the class loader is created
+		// before stopping the composite framework
+		checkClassLoader();
 		trackerManager.stoppedComposite();
 		// do not stop the framework unless we are persistently stopped 
 		if ((bundledata.getStatus() & Constants.BUNDLE_STARTED) == 0)
