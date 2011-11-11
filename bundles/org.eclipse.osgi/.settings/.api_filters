@@ -1065,6 +1065,29 @@
                 <message_argument value="getResource()"/>
             </message_arguments>
         </filter>
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="matches(Capability)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/wiring/BundleRevision.java" type="org.osgi.framework.wiring.BundleRevision">
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getCapabilities(String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getRequirements(String)"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/wiring/BundleWire.java" type="org.osgi.framework.wiring.BundleWire">
         <filter id="1209008130">
@@ -1083,11 +1106,39 @@
         </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/wiring/BundleWiring.java" type="org.osgi.framework.wiring.BundleWiring">
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getProvidedResourceWires(String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getRequiredResourceWires(String)"/>
+            </message_arguments>
+        </filter>
         <filter id="1209008130">
             <message_arguments>
                 <message_argument value="1.1"/>
                 <message_argument value="3.8"/>
                 <message_argument value="getResource()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getResourceCapabilities(String)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ingore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.1"/>
+                <message_argument value="3.8"/>
+                <message_argument value="getResourceRequirements(String)"/>
             </message_arguments>
         </filter>
     </resource>
