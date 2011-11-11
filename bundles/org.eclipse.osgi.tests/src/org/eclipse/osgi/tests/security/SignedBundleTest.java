@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -372,6 +372,33 @@ public class SignedBundleTest extends BaseSecurityTest {
 				getTrustEngine().removeTrustAnchor("ca1_leafa");
 			} catch (Exception e) {
 				fail("Failed to uninstall bundle", e);
+			}
+		}
+	}
+
+	public void testSignedContent07a() {
+		Bundle testBundle = null;
+		try {
+			testBundle = installBundle(getTestJarPath("signed_with_corrupt"));
+
+			// Loading a corrupt class will cause a LinkageError
+			testBundle.loadClass("org.eclipse.equinox.security.junit.CorruptClass");
+
+		} catch (LinkageError error) {
+			// will happen if not running with runtime checks
+			if ("all".equals(System.getProperty("osgi.signedcontent.support"))) {
+				// if signed content support is enabled then the cause is an InvalidContentException
+				Throwable t = error.getCause();
+				assertTrue("Cause is the wrong type: " + t, t instanceof InvalidContentException);
+			}
+		} catch (Exception e) {
+
+			fail("Unexpected exception", e);
+		} finally {
+			try {
+				testBundle.uninstall();
+			} catch (Exception e) {
+				// ignore
 			}
 		}
 	}
