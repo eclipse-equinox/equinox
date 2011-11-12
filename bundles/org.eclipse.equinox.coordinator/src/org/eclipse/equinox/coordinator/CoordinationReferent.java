@@ -19,7 +19,7 @@ import org.osgi.service.coordinator.Participant;
 
 public class CoordinationReferent implements Coordination {
 	private final CoordinationImpl coordination;
-	
+
 	public CoordinationReferent(CoordinationImpl coordination) {
 		if (coordination == null)
 			throw new NullPointerException();
@@ -85,7 +85,7 @@ public class CoordinationReferent implements Coordination {
 	public Coordination getEnclosingCoordination() {
 		return coordination.getEnclosingCoordination();
 	}
-	
+
 	@Override
 	public boolean equals(Object object) {
 		if (object == this)
@@ -94,9 +94,14 @@ public class CoordinationReferent implements Coordination {
 			return false;
 		return coordination.equals(((CoordinationReferent)object).coordination);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return coordination.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return coordination.toString();
 	}
 }
