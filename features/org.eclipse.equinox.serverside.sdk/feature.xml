@@ -75,28 +75,7 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
-
-   <!-- <plugin
-         id="org.eclipse.equinox.http"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
          unpack="false"/> 
-
-   <plugin
-         id="org.eclipse.equinox.http.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> 
-
-    <plugin
-         id="org.eclipse.equinox.http.jetty"
-         download-size="0"
-         install-size="0"
-         version="2.0.100.qualifier"
-         unpack="false"/> -->
          
    <plugin
          id="org.eclipse.equinox.http.jetty"
@@ -179,34 +158,6 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
- <!--  <plugin
-         id="org.mortbay.jetty.server"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.mortbay.jetty.server.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.mortbay.jetty.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.mortbay.jetty.util.source"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/> -->
          
     <plugin
          id="org.eclipse.jetty.continuation"
