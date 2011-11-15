@@ -18,7 +18,7 @@ public class Messages extends NLS {
 	public static String Deadlock;
 	public static String InvalidCoordinationName;
 	public static String MissingFailureCause;
-	public static String InvalidTimeout;
+	public static String InvalidTimeInterval;
 	public static String InterruptedTimeoutExtension;
 	public static String EndingThreadNotSame;
 	public static String LockInterrupted;

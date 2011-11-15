@@ -304,17 +304,27 @@ public class CoordinationImpl {
 		return terminated;
 	}
 
-	public void join(long timeInMillis) throws InterruptedException {
+	public void join(final long timeInMillis) throws InterruptedException {
 		coordinator.checkPermission(CoordinationPermission.PARTICIPATE, name);
+		validateTimeout(timeInMillis);
+		// How much system time has elapsed across all waits.
+		long elapsed = 0;
+		// The system time at the start of the wait.
 		long start = System.currentTimeMillis();
 		// Wait until this coordination has terminated. Guard against spurious
-		// wakeups using isTerminated().
+		// wakeups using the termination status.
 		synchronized (this) {
 			while (!terminated) {
-				wait(timeInMillis);
-				long elapsed = System.currentTimeMillis() - start;
-				if (elapsed > timeInMillis)
-					break;
+				// Wait for the desired amount of time minus any time that has already elapsed.
+				wait(timeInMillis - elapsed);
+				// Only track elapsed time if a definite interval was specified.
+				if (timeInMillis != 0) {
+					// Update the elapsed time.
+					elapsed = System.currentTimeMillis() - start;
+					// If the allotted wait time has fully expired, we're done.
+					if (elapsed >= timeInMillis) // Don't allow a wait of zero here!
+						break;
+				}
 			}
 		}
 	}
@@ -398,6 +408,6 @@ public class CoordinationImpl {
 
 	private static void validateTimeout(long timeout) {
 		if (timeout < 0)
-			throw new IllegalArgumentException(Messages.InvalidTimeout);
+			throw new IllegalArgumentException(Messages.InvalidTimeInterval);
 	}
 }
