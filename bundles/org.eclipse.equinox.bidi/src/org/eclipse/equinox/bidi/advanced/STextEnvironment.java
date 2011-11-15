@@ -175,7 +175,7 @@ public class STextEnvironment {
 			String osName = STextActivator.getInstance().getProperty("os.name"); //$NON-NLS-1$/
 			if (osName != null)
 				osName = osName.toLowerCase();
-			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux"); //$NON-NLS-1$ //$NON-NLS-2$
+			boolean supportedOS = osName.startsWith("windows") || osName.startsWith("linux") || osName.startsWith("mac"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (supportedOS) {
 				// Check whether the current language uses a bidi script (Arabic, Hebrew, Farsi or Urdu)
 				boolean isBidi = "iw".equals(language) || //$NON-NLS-1$
