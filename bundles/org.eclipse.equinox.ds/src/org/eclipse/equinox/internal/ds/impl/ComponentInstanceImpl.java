@@ -62,7 +62,6 @@ public class ComponentInstanceImpl implements ComponentInstance {
 			InstanceProcess.resolver.disposeComponentConfigs(toDispose, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
 			if (scp != null) {
 				scp.setState(Component.STATE_DISPOSED);
-				scp = null;
 			}
 		} else {
 			scp.dispose(this, ComponentConstants.DEACTIVATION_REASON_DISPOSED);
@@ -70,6 +69,7 @@ public class ComponentInstanceImpl implements ComponentInstance {
 
 		// free service references if some are left ungotten
 		freeServiceReferences();
+		scp = null;
 		componentContext = null;
 		instance = null;
 	}
