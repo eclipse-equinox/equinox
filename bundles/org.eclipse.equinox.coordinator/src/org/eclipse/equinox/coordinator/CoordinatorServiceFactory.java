@@ -19,15 +19,17 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.coordinator.Coordinator;
 
 public class CoordinatorServiceFactory implements ServiceFactory<Coordinator> {
+	private final BundleContext bundleContext;
 	private final LogTracker logTracker;
 	private final Timer timer = new Timer(true);
 
 	public CoordinatorServiceFactory(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
 		logTracker = new LogTracker(bundleContext, System.out);
 	}
 
 	public Coordinator getService(Bundle bundle, ServiceRegistration<Coordinator> registration) {
-		return new CoordinatorImpl(bundle, logTracker, timer);
+		return new CoordinatorImpl(bundle, logTracker, timer, getMaxTimeout());
 	}
 
 	public void ungetService(Bundle bundle, ServiceRegistration<Coordinator> registration, Coordinator service) {
@@ -36,7 +38,12 @@ public class CoordinatorServiceFactory implements ServiceFactory<Coordinator> {
 
 	void shutdown() {
 		timer.cancel();
-//		CoordinatorImpl.reset();
 		logTracker.close();
+	}
+	
+	private long getMaxTimeout() {
+		String prop = bundleContext.getProperty("org.eclipse.equinox.coordinator.timeout"); //$NON-NLS-1$
+		// Intentionally letting the possible NumberFormatException propagate.
+		return prop == null ? 0 : Long.parseLong(prop);
 	}
 }

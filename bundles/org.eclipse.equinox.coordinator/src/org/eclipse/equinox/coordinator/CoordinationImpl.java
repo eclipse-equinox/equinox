@@ -37,6 +37,7 @@ public class CoordinationImpl {
 	private Date deadline;
 	private CoordinationImpl enclosingCoordination;
 	private Thread thread;
+	private long totalTimeout;
 	private TimerTask timerTask;
 
 	private final CoordinatorImpl coordinator;
@@ -53,7 +54,7 @@ public class CoordinationImpl {
 		validateTimeout(timeout);
 		this.id = id;
 		this.name = name;
-		this.deadline = new Date(System.currentTimeMillis() + timeout);
+		totalTimeout = timeout;
 		this.coordinator = coordinator;
 		participants = Collections.synchronizedList(new ArrayList<Participant>());
 		variables = new HashMap<Class<?>, Object>();
@@ -192,6 +193,25 @@ public class CoordinationImpl {
 			// existing deadline. The deadline will not be null if timerTask is not null.
 			if (timeInMillis == 0)
 				return deadline.getTime();
+			long maxTimeout = coordinator.getMaxTimeout();
+			long newTotalTimeout = totalTimeout + timeInMillis;
+			// If there is no maximum timeout, there's no need to track the total timeout.
+			if (maxTimeout != 0) {
+				// If the max timeout has already been reached, return 0 indicating that no
+				// extension has taken place.
+				if (totalTimeout == maxTimeout)
+					return 0;
+				// If the extension would exceed the maximum timeout, add as much time
+				// as possible.
+				else if (newTotalTimeout > maxTimeout) {
+					totalTimeout = maxTimeout;
+					// Adjust the requested extension amount with the allowable amount.
+					timeInMillis = newTotalTimeout - maxTimeout;
+				}
+				// Otherwise, accept the full extension.
+				else
+					totalTimeout = newTotalTimeout;
+			}
 			// Cancel the current timeout.
 			boolean cancelled = timerTask.cancel();
 			if (!cancelled) {
@@ -338,10 +358,6 @@ public class CoordinationImpl {
 		return referent;
 	}
 
-	synchronized Date getDeadline() {
-		return deadline;
-	}
-
 	LogService getLogService() {
 		return coordinator.getLogService();
 	}
@@ -353,6 +369,8 @@ public class CoordinationImpl {
 
 	synchronized void setTimerTask(TimerTask timerTask) {
 		this.timerTask = timerTask;
+		deadline = new Date(System.currentTimeMillis() + totalTimeout);
+		coordinator.schedule(timerTask, deadline);
 	}
 
 	synchronized void setThreadAndEnclosingCoordination(Thread t, CoordinationImpl c) {
