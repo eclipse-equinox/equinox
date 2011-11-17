@@ -645,9 +645,9 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				synchronized (components) {
 					long startTime = System.currentTimeMillis();
 					try {
-						while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT)) {
+						do {
 							components.wait(1000);
-						}
+						} while (!components.isEmpty() && (System.currentTimeMillis() - startTime < WorkThread.BLOCK_TIMEOUT));
 						if (System.currentTimeMillis() - startTime >= WorkThread.BLOCK_TIMEOUT) {
 							Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.TIMEOUT_REACHED_ENABLING_COMPONENTS, getBundleName(bundle), Integer.toString(WorkThread.BLOCK_TIMEOUT)), null);
 						}
