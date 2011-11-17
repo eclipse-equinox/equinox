@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others
+ * Copyright (c) 2008, 2011 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import org.osgi.util.tracker.ServiceTracker;
  * The activator class controls the plug-in life cycle
  */
 public class Activator implements BundleActivator {
+	public static String BUNDLE_COORDINATOR = "org.eclipse.equinox.coordinator"; //$NON-NLS-1$
 	public static String BUNDLE_EVENT = "org.eclipse.equinox.event"; //$NON-NLS-1$
 	public static String BUNDLE_METATYPE = "org.eclipse.equinox.metatype"; //$NON-NLS-1$
 	public static String BUNDLE_USERADMIN = "org.eclipse.equinox.useradmin"; //$NON-NLS-1$

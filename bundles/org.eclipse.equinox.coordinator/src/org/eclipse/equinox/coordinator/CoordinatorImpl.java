@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.service.coordinator.Coordination;
 import org.osgi.service.coordinator.CoordinationException;
@@ -89,15 +90,19 @@ public class CoordinatorImpl implements Coordinator {
 	private final Bundle bundle;
 	private final List<CoordinationImpl> coordinations;
 	private final LogService logService;
+	private final long maxTimeout;
 	private final Timer timer;
 
 	private boolean shutdown;
 
-	public CoordinatorImpl(Bundle bundle, LogService logService, Timer timer) {
+	public CoordinatorImpl(Bundle bundle, LogService logService, Timer timer, long maxTimeout) {
 		this.bundle = bundle;
 		this.logService = logService;
 		this.timer = timer;
 		coordinations = new ArrayList<CoordinationImpl>();
+		if (maxTimeout < 0)
+			throw new IllegalArgumentException(Messages.InvalidTimeInterval);
+		this.maxTimeout = maxTimeout;
 	}
 
 	public boolean addParticipant(Participant participant) throws CoordinationException {
@@ -119,6 +124,13 @@ public class CoordinatorImpl implements Coordinator {
 		CoordinationWeakReference.processOrphanedCoordinations();
 		// This method requires the INITIATE permission. No bundle check is done.
 		checkPermission(CoordinationPermission.INITIATE, name);
+		// Override the requested timeout with the max timeout, if necessary.
+		if (maxTimeout != 0) {
+			if (timeout == 0 || maxTimeout < timeout) {
+				logService.log(LogService.LOG_WARNING, NLS.bind(Messages.MaximumTimeout, timeout, maxTimeout));
+				timeout = maxTimeout;
+			}
+		}
 		// Create the coordination object itself, which will store its own instance
 		// of a referent to be returned to clients other than the initiator.
 		CoordinationImpl coordination = new CoordinationImpl(getNextId(), name, timeout, this);
@@ -141,7 +153,6 @@ public class CoordinatorImpl implements Coordinator {
 		if (timeout > 0) {
 			TimerTask timerTask = new CoordinationTimerTask(coordination);
 			coordination.setTimerTask(timerTask);
-			schedule(timerTask, coordination.getDeadline());
 		}
 		// Make sure to return the referent targeted towards the initiator here.
 		return referent;
@@ -240,6 +251,10 @@ public class CoordinatorImpl implements Coordinator {
 
 	LogService getLogService() {
 		return logService;
+	}
+	
+	long getMaxTimeout() {
+		return maxTimeout;
 	}
 
 	void purge() {

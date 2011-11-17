@@ -34,6 +34,7 @@ public class Messages extends NLS {
 	public static String CoordinationAlreadyExists;
 	public static String CanceledTaskNotPurged;
 	public static String OrphanedCoordinationError;
+	public static String MaximumTimeout;
 
 	static {
 		// initialize resource bundle
