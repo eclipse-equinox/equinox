@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.EquinoxAttributeDefinition;
-
 import java.util.*;
+import org.eclipse.equinox.metatype.EquinoxAttributeDefinition;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.service.log.LogService;
 
@@ -258,14 +257,20 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 			logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.INVALID_DEFAULTS, vt.getValuesAsString(), reason));
 			return;
 		}
-		setDefaultValue(vt.getValuesAsArray());
+		String[] defaults = vt.getValuesAsArray();
+		// If the default value is a single empty string and cardinality != 0, the default value must become String[0].
+		// We know the cardinality has already been set in the constructor.
+		if (_cardinality != 0 && defaults.length == 1 && defaults[0].length() == 0)
+			setDefaultValue(new String[0]);
+		else
+			setDefaultValue(vt.getValuesAsArray());
 	}
 
 	/**
 	 * Method to set the default value of AttributeDefinition.
 	 * The given parameter is a String array of multi values.
 	 */
-	void setDefaultValue(String[] defaults) {
+	private void setDefaultValue(String[] defaults) {
 		_defaults = defaults;
 	}
 
