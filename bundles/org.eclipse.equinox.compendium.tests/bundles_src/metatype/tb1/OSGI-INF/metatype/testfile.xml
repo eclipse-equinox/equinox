@@ -12,7 +12,51 @@
 		<AD default="password" id="password4" max="5" type="Password"/>
 		<AD default="password" id="password5" max="6" min="3" type="Password"/>
 	</OCD>
+	<OCD id="ocd2" name="getDefaultValues">
+		<!-- Unspecified default. Default value must be null. -->
+		<AD id="1"	cardinality="0"		type="Integer"/>
+		<AD id="2"	cardinality="1"		type="Double"/>
+		<AD id="3"	cardinality="-1"	type="Short"/>
+		<AD id="4"	cardinality="5"		type="Byte"/>
+		<AD id="5"	cardinality="-10"	type="Integer"/>
+		<AD id="6"	cardinality="0"		type="String"/>
+		<AD id="7"	cardinality="1"		type="Password"/>
+		<AD id="8"	cardinality="-1"	type="String"/>
+		<AD id="9"	cardinality="20"	type="Password"/>
+		<AD id="10"	cardinality="-9"	type="String"/>
+		<!-- 
+			Specified default of one or more empty strings with incompatible type.
+			Equinox will log a warning and ignore the default if invalid (i.e. same as unspecified).
+		-->
+		<AD id="11"	cardinality="0"		default=""		type="Byte"/>
+		<AD id="12"	cardinality="1"		default=""		type="Short"/>
+		<AD id="13"	cardinality="-1"	default=""		type="Integer"/>
+		<AD id="14"	cardinality="7"		default=",,,,"	type="Double"/>
+		<AD id="15"	cardinality="-3"	default=","		type="Double"/>
+		<!-- 
+			Specified default of empty string with compatible type.
+			For cardinality = 0, the default value must be String[1]{""}.
+			For cardinality != 0, the default value must be String[0].
+		-->
+		<AD id="16"	cardinality="0"		default=""	type="String"/>
+		<AD id="17"	cardinality="1"		default=""	type="Password"/>
+		<AD id="18"	cardinality="-1"	default=""	type="String"/>
+		<AD id="19"	cardinality="42"	default=""	type="Password"/>
+		<AD id="20"	cardinality="-210"	default=""	type="String"/>
+		<!-- 
+			Specified default of more than one empty string with compatible type.
+			Let n = the number of empty strings in the default value, then the
+			default value must be String[n]{"","",...,""}, where n <= abs(cardinality).
+		-->
+		<AD id="21"	cardinality="2"		default=","		type="String"/>		<!-- String[2]{"",""} -->
+		<AD id="22"	cardinality="-2"	default=","		type="Password"/>	<!-- String[2]{"",""} -->
+		<AD id="23"	cardinality="4"		default=",,"	type="String"/>		<!-- String[3]{"","",""} -->
+		<AD id="24"	cardinality="-8"	default=",,,,"	type="Password"/>	<!-- String[5]{"","","","",""} -->
+	</OCD>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb1">
 		<Object ocdref="ocd1"/>
+	</Designate>
+	<Designate pid="org.eclipse.equinox.metatype.tests.tb1.getDefaultValues">
+		<Object ocdref="ocd2"/>
 	</Designate>
 </md:MetaData>
