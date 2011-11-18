@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MetaType TB8
+Bundle-SymbolicName: org.eclipse.equinox.metatype.tests.tb8
+Bundle-Version: 1.0.0
+Import-Package: does.not.exist
+Bundle-Vendor: IBM
