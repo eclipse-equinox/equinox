@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import javax.xml.parsers.SAXParser;
+import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
@@ -87,14 +86,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * @throws IOException If there are errors accessing the metadata.xml file
 	 */
 	private boolean readMetaFiles(Bundle bundle, SAXParser saxParser) {
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		if (wiring == null)
-			return false;
-		List<URL> entries = wiring.findEntries(MetaTypeService.METATYPE_DOCUMENTS_LOCATION, "*", 0); //$NON-NLS-1$
+		Enumeration<URL> entries = bundle.findEntries(MetaTypeService.METATYPE_DOCUMENTS_LOCATION, "*", false); //$NON-NLS-1$
 		if (entries == null)
 			return false;
 		boolean result = false;
-		for (URL entry : entries) {
+		for (URL entry : Collections.list(entries)) {
 			if (entry.getPath().endsWith("/")) //$NON-NLS-1$
 				continue;
 			DataParser parser = new DataParser(bundle, entry, saxParser, logger);
