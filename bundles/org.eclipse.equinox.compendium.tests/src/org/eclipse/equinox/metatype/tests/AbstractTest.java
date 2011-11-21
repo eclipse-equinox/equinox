@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.tests;
 
+import java.io.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
 import org.eclipse.equinox.metatype.EquinoxMetaTypeService;
 import org.eclipse.osgi.tests.bundles.BundleInstaller;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.metatype.AttributeDefinition;
+import org.osgi.service.metatype.*;
 
 public abstract class AbstractTest extends TestCase {
 	protected BundleInstaller bundleInstaller;
@@ -33,6 +36,11 @@ public abstract class AbstractTest extends TestCase {
 		assertEquals("Wrong type", type, ad.getType()); //$NON-NLS-1$
 	}
 
+	protected void assertAttributeDefinitions(AttributeDefinition[] ads, int size) {
+		assertNotNull("Null attribute definitions", ads); //$NON-NLS-1$
+		assertEquals("Wrong attribute definitions size", size, ads.length); //$NON-NLS-1$
+	}
+
 	protected void assertEquals(String message, String[] s1, String[] s2) {
 		if (s1 == s2)
 			return;
@@ -43,6 +51,41 @@ public abstract class AbstractTest extends TestCase {
 			fail(message + " (array lengths weren't equal)"); //$NON-NLS-1$
 		for (int i = 0; i < s1.length; i++)
 			assertEquals(message, s1[i], s2[i]);
+	}
+
+	protected void assertIcon(InputStream icon, int size) throws IOException {
+		assertNotNull("Icon was null", icon); //$NON-NLS-1$
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			byte[] bytes = new byte[2048];
+			int read;
+			try {
+				while ((read = icon.read(bytes)) != -1) {
+					baos.write(bytes, 0, read);
+				}
+			} finally {
+				icon.close();
+			}
+			Icon i = new ImageIcon(baos.toByteArray());
+			assertEquals("Wrong icon size", size, i.getIconHeight() * i.getIconWidth()); //$NON-NLS-1$
+		} finally {
+			baos.close();
+		}
+	}
+
+	protected void assertNotNull(MetaTypeInformation mti) {
+		assertNotNull("Metatype information was null", mti); //$NON-NLS-1$
+	}
+
+	protected void assertNotNull(ObjectClassDefinition ocd) {
+		assertNotNull("Object class definition was null", ocd); //$NON-NLS-1$
+	}
+
+	protected void assertObjectClassDefinition(ObjectClassDefinition ocd, String id, String name, String description) {
+		assertNotNull(ocd);
+		assertEquals("Wrong object class definition ID", id, ocd.getID()); //$NON-NLS-1$
+		assertEquals("Wrong object class definition name", name, ocd.getName()); //$NON-NLS-1$
+		assertEquals("Wrong object class definition description", description, ocd.getDescription()); //$NON-NLS-1$
 	}
 
 	protected void assertValidationFail(String value, AttributeDefinition ad) {

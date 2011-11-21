@@ -11,6 +11,7 @@
 	<classpathentry kind="src" output="bundle_tests/metatype/tb6" path="bundles_src/metatype/tb6"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb7" path="bundles_src/metatype/tb7"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/tb8" path="bundles_src/metatype/tb8"/>
+	<classpathentry kind="src" output="bundle_tests/metatype/tb9" path="bundles_src/metatype/tb9"/>
 	<classpathentry kind="src" output="bundle_tests/metatype/extendable.tb1" path="bundles_src/metatype/extendable.tb1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
