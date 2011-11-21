@@ -18,7 +18,6 @@ import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.service.log.LogService;
 import org.osgi.service.metatype.MetaTypeProvider;
 import org.osgi.service.metatype.MetaTypeService;
@@ -165,12 +164,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 	 * @see org.osgi.service.metatype.MetaTypeProvider#getLocales()
 	 */
 	public synchronized String[] getLocales() {
-
 		if (_locales != null)
 			return checkForDefault(_locales);
-		BundleWiring wiring = _bundle.adapt(BundleWiring.class);
-		if (wiring == null)
-			return null;
 		Vector<String> localizationFiles = new Vector<String>(7);
 		// get all the localization resources for PIDS
 		Enumeration<ObjectClassDefinitionImpl> ocds = _allPidOCDs.elements();
@@ -201,11 +196,11 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 				baseDir = localizationFile.substring(0, iSlash);
 			}
 			baseFileName = '/' + localizationFile + RESOURCE_FILE_CONN;
-			List<URL> entries = wiring.findEntries(baseDir, "*.properties", 0); //$NON-NLS-1$
+			Enumeration<URL> entries = _bundle.findEntries(baseDir, "*.properties", false); //$NON-NLS-1$
 			if (entries == null)
 				continue;
-			for (URL entry : entries) {
-				String resource = entry.getPath();
+			while (entries.hasMoreElements()) {
+				String resource = entries.nextElement().getPath();
 				if (resource.startsWith(baseFileName) && resource.toLowerCase().endsWith(RESOURCE_FILE_EXT))
 					locales.add(resource.substring(baseFileName.length(), resource.length() - RESOURCE_FILE_EXT.length()));
 			}

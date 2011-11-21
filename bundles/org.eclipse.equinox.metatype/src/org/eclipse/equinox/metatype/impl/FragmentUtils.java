@@ -11,10 +11,9 @@
 package org.eclipse.equinox.metatype.impl;
 
 import java.net.URL;
-import java.util.List;
+import java.util.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
-import org.osgi.framework.wiring.BundleWiring;
 
 /*
  * Fragment Utilities
@@ -32,9 +31,6 @@ public class FragmentUtils {
 	 * Find all the URLs to entries for the bundle and its fragments.
 	 */
 	public static URL[] findEntries(Bundle bundle, String path) {
-		BundleWiring wiring = bundle.adapt(BundleWiring.class);
-		if (wiring == null)
-			return null;
 		String directory = "/"; //$NON-NLS-1$
 		String file = "*"; //$NON-NLS-1$
 		int index = path.lastIndexOf(MetaTypeProviderImpl.DIRECTORY_SEP);
@@ -50,9 +46,10 @@ public class FragmentUtils {
 				directory = path.substring(0, index);
 				file = path.substring(index + 1);
 		}
-		List<URL> entries = wiring.findEntries(directory, file, 0);
+		Enumeration<URL> entries = bundle.findEntries(directory, file, false);
 		if (entries == null)
 			return null;
-		return entries.toArray(new URL[entries.size()]);
+		List<URL> list = Collections.list(entries);
+		return list.toArray(new URL[list.size()]);
 	}
 }
