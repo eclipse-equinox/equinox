@@ -3,10 +3,11 @@
 		xmlns="http://www.org.osgi/xmlns/metatype/v1.2.0/md" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 		xsi:schemaLocation="http://www.org.osgi/xmlns/metatype/v1.2.0/md metatype.xsd">
-	<OCD id="ocd1" name="ocd1">
-		<AD name="ad1" id="ad1" type="String"/>
+	<OCD id="1" name="%ocd1name">
+		<AD id="1" name="%ad1name" type="String"/>
+		<Icon resource="%icon" size="10000"/>
 	</OCD>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb8">
-		<Object ocdref="ocd1"/>
+		<Object ocdref="1"/>
 	</Designate>
 </MetaData>
