@@ -10,32 +10,36 @@
  *******************************************************************************/
 package org.eclipse.equinox.metatype.impl;
 
-import org.eclipse.equinox.metatype.EquinoxAttributeDefinition;
-import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import org.eclipse.equinox.metatype.EquinoxAttributeDefinition;
+import org.eclipse.equinox.metatype.EquinoxObjectClassDefinition;
 import org.osgi.framework.Bundle;
 
 /**
  * Implementation of ObjectClassDefinition
  */
 public class ObjectClassDefinitionImpl extends LocalizationElement implements EquinoxObjectClassDefinition, Cloneable {
-
 	public static final char LOCALE_SEP = '_';
 
-	String _name;
-	String _id;
-	String _description;
+	private static final Comparator<Icon> iconComparator = new Comparator<Icon>() {
+		public int compare(Icon icon1, Icon icon2) {
+			return icon1.getIconSize().compareTo(icon2.getIconSize());
+		}
+	};
 
-	int _type;
-	Vector<AttributeDefinitionImpl> _required = new Vector<AttributeDefinitionImpl>(7);
-	Vector<AttributeDefinitionImpl> _optional = new Vector<AttributeDefinitionImpl>(7);
-	Icon _icon;
-
+	private final String _name;
+	private final String _id;
+	private final String _description;
+	private final int _type;
+	private final Vector<AttributeDefinitionImpl> _required = new Vector<AttributeDefinitionImpl>(7);
+	private final Vector<AttributeDefinitionImpl> _optional = new Vector<AttributeDefinitionImpl>(7);
 	private final ExtendableHelper helper;
+
+	// @GuardedBy("this")
+	private List<Icon> icons;
 
 	/*
 	 * Constructor of class ObjectClassDefinitionImpl.
@@ -70,9 +74,8 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 			AttributeDefinitionImpl ad = _optional.elementAt(i);
 			ocd.addAttributeDefinition((AttributeDefinitionImpl) ad.clone(), false);
 		}
-		if (_icon != null) {
-			ocd.setIcon((Icon) _icon.clone());
-		}
+		if (icons != null)
+			ocd.setIcons(new ArrayList<Icon>(icons));
 		return ocd;
 	}
 
@@ -83,13 +86,6 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 */
 	public String getName() {
 		return getLocalized(_name);
-	}
-
-	/**
-	 * Method to set the name of ObjectClassDefinition.
-	 */
-	void setName(String name) {
-		this._name = name;
 	}
 
 	/*
@@ -108,13 +104,6 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 */
 	public String getDescription() {
 		return getLocalized(_description);
-	}
-
-	/*
-	 * Method to set the description of ObjectClassDefinition.
-	 */
-	void setDescription(String description) {
-		this._description = description;
 	}
 
 	/*
@@ -169,29 +158,56 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	 * 
 	 * @see org.osgi.service.metatype.ObjectClassDefinition#getIcon(int)
 	 */
-	public InputStream getIcon(int sizeHint) throws IOException {
+	public synchronized InputStream getIcon(int sizeHint) throws IOException {
 		// The parameter simply represents a requested size. This method should never return null if an
 		// icon exists.
-		// TODO This method may change further depending on the outcome of certain ongoing CPEG discussions.
-		// It is thought that users should be able to specify the same icon multiple times but of different
-		// sizes. This would require a change to the XML schema. This method would then return the icon with
-		// a size closest to the requested size.
-		if ((_icon == null)) {
-			return null;
-		}
-		Bundle b = _icon.getIconBundle();
-		URL[] urls = FragmentUtils.findEntries(b, getLocalized(_icon.getIconName()));
+		// Temporary icon to hold the requested size for use in binary search comparator.
+		Icon icon = new Icon(null, sizeHint, null);
+		@SuppressWarnings("hiding")
+		// Use a local reference to the icon list to be sure we don't suddenly start using a new one.
+		List<Icon> icons = this.icons;
+		int index = Collections.binarySearch(icons, icon, iconComparator);
+		if (index < 0) {
+			// If the index is less than zero, there wasn't an exact match.
+			// Compute the insertion point. This will be the index of the first icon whose 
+			// size was greater than the requested size, or the list's length if there were none.
+			int insertionPoint = -(index + 1);
+			Icon lessThan = insertionPoint == 0 ? null : icons.get(insertionPoint - 1);
+			Icon greaterThan = insertionPoint == icons.size() ? null : icons.get(insertionPoint);
+			if (lessThan == null)
+				// There were no icons whose size was smaller than the requested size.
+				icon = greaterThan;
+			else if (greaterThan == null)
+				// There were no icons whose size was greater than the requested size.
+				icon = lessThan;
+			else {
+				// There was at least one icon with a smaller size and at least one with
+				// a greater size than the requested size. Compute the average to see which one to choose.
+				int average = (greaterThan.getIconSize() + lessThan.getIconSize()) / 2;
+				if (sizeHint < average)
+					// The smaller icon is closer to the requested size.
+					icon = lessThan;
+				else
+					// The larger icon is closer to the requested size.
+					icon = greaterThan;
+			}
+		} else
+			// The index was greater than or equal to zero, indicating the index of an exact match.
+			icon = icons.get(index);
+		Bundle b = icon.getIconBundle();
+		URL[] urls = FragmentUtils.findEntries(b, getLocalized(icon.getIconName()));
 		if (urls != null && urls.length > 0) {
 			return urls[0].openStream();
 		}
 		return null;
 	}
 
-	/**
-	 * Method to set the icon of ObjectClassDefinition.
-	 */
-	void setIcon(Icon icon) {
-		this._icon = icon;
+	synchronized void setIcons(List<Icon> icons) {
+		// Prepare the list of icons for binary searches as in getIcon(int).
+		Collections.sort(icons, iconComparator);
+		// Make the list unmodifiable for safe binary searches without copying.
+		// We assume the caller makes no modifications to the list.
+		this.icons = Collections.unmodifiableList(icons);
 	}
 
 	/**

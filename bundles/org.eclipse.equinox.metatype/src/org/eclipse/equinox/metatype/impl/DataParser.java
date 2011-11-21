@@ -304,6 +304,7 @@ public class DataParser {
 		String _refID;
 		ObjectClassDefinitionImpl _ocd;
 		Vector<AttributeDefinitionImpl> _ad_vector = new Vector<AttributeDefinitionImpl>(7);
+		List<Icon> icons = new ArrayList<Icon>(5);
 
 		public OcdHandler(ContentHandler handler) {
 			super(handler);
@@ -350,23 +351,17 @@ public class DataParser {
 			} else if (name.equalsIgnoreCase(ICON)) {
 				IconHandler iconHandler = new IconHandler(this);
 				iconHandler.init(name, atts);
-				if (iconHandler._isParsedDataValid) {
-					// Because XML schema allows at most one icon for
-					// one OCD, if more than one icons are read from 
-					// MetaData, then only the final icon will be kept.
-					_ocd.setIcon(iconHandler._icon);
-				}
+				if (iconHandler._isParsedDataValid)
+					icons.add(iconHandler._icon);
 			} else {
 				logger.log(LogService.LOG_WARNING, NLS.bind(MetaTypeMsg.UNEXPECTED_ELEMENT, name));
 			}
 		}
 
 		protected void finished() {
-
 			logger.log(LogService.LOG_DEBUG, "Here is OcdHandler():finished()"); //$NON-NLS-1$
 			if (!_isParsedDataValid)
 				return;
-
 			if (_ad_vector.size() == 0) {
 				// Schema defines at least one AD is required.
 				_isParsedDataValid = false;
@@ -379,7 +374,7 @@ public class DataParser {
 				AttributeDefinitionImpl ad = adKey.nextElement();
 				_ocd.addAttributeDefinition(ad, ad._isRequired);
 			}
-
+			_ocd.setIcons(icons);
 			_parent_OCDs_hashtable.put(_refID, _ocd);
 		}
 	}

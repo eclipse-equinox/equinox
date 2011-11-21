@@ -17,33 +17,21 @@ import org.osgi.framework.Bundle;
  */
 class Icon implements Cloneable {
 
-	private String _fileName;
-	private int _size;
-	private Bundle _bundle;
+	private final String _fileName;
+	private final Integer _size;
+	private final Bundle _bundle;
 
 	/**
 	 * Constructor of class Icon.
 	 */
-	public Icon(String fileName, int size, Bundle bundle) {
+	public Icon(String fileName, Integer size, Bundle bundle) {
 
 		this._fileName = fileName;
 		this._size = size;
 		this._bundle = bundle;
 	}
 
-	/**
-	 * Constructor of class Icon.
-	 */
-	public Icon(String fileName, Bundle bundle) {
-
-		// Integer.MIN_VALUE signifies size was not specified
-		this(fileName, Integer.MIN_VALUE, bundle);
-	}
-
-	/*
-	 * 
-	 */
-	public synchronized Object clone() {
+	public Object clone() {
 		return new Icon(this._fileName, this._size, this._bundle);
 	}
 
@@ -59,7 +47,7 @@ class Icon implements Cloneable {
 	 * 
 	 * @return size or Integer.MIN_VALUE if no size was specified
 	 */
-	int getIconSize() {
+	Integer getIconSize() {
 		return _size;
 	}
 
