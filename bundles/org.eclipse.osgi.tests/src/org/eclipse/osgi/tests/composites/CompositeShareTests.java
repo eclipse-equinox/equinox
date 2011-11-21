@@ -304,7 +304,6 @@ public class CompositeShareTests extends AbstractCompositeTests {
 		linkManifest.put(Constants.EXPORT_PACKAGE, "test.link.a; attr1=\"value1\"; uses:=\"org.osgi.framework, test.link.a.params\", test.link.a.params; attr2=\"value2\""); //$NON-NLS-1$
 		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, "testCompositeShare04a", null, linkManifest, false, false); //$NON-NLS-1$
 		Bundle constituent = installIntoChild(compositeBundle.getCompositeFramework(), "test.link.a"); //$NON-NLS-1$
-		Bundle testClient = installIntoCurrent("test.link.a.client"); //$NON-NLS-1$
 		startCompositeBundle(compositeBundle, false);
 
 		try {
