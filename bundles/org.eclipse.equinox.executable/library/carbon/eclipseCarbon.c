@@ -118,16 +118,20 @@ static NSWindow* window = nil;
 	}
 		
 	for (index = 1; index<=count; index++) {
-		NSAppleEventDescriptor *desc = [event descriptorAtIndex:index];
-		if (desc) {
-			desc = [desc coerceToDescriptorType:typeFSRef];
-			CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, [[desc data] bytes]);
-			if (url) {
-				NSString *pathName = (NSString *)CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
-				[files addObject:pathName];
-				[pathName release];
-				CFRelease(url);
-			}
+		CFURLRef url = NULL;
+		NSAppleEventDescriptor *desc = [event descriptorAtIndex:index], *coerceDesc;
+		if (!desc) continue;
+		if ((coerceDesc = [desc coerceToDescriptorType: typeFSRef]) != NULL) {
+			url = CFURLCreateFromFSRef(kCFAllocatorDefault, [[coerceDesc data] bytes]);
+		} else if ((coerceDesc = [desc coerceToDescriptorType: typeFileURL]) != NULL) {
+			NSData *data = [coerceDesc data];
+			url = CFURLCreateWithBytes(kCFAllocatorDefault, [data bytes], [data length], kCFStringEncodingUTF8, NULL);
+		}
+		if (url) {
+			NSString *pathName = (NSString *)CFURLCopyFileSystemPath(url, kCFURLPOSIXPathStyle);
+			[files addObject:pathName];
+			[pathName release];
+			CFRelease(url);
 		}
 	}
 	
