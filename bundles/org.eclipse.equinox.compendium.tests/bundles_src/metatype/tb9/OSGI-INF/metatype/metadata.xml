@@ -9,7 +9,13 @@
 		<Icon size="22500" resource="icons/tn_ibm_turns_100-150x150.jpg"/>
 		<Icon size="40000" resource="icons/tn_ibm_turns_100-200x200.jpg"/>
 	</OCD>
+	<OCD id="2" name="ocd2">
+		<AD id="1" name="ad1" type="Byte"/>
+	</OCD>
 	<Designate pid="org.eclipse.equinox.metatype.tests.tb9">
 		<Object ocdref="1"/>
+	</Designate>
+	<Designate pid="org.eclipse.equinox.metatype.tests.tb9.2">
+		<Object ocdref="2"/>
 	</Designate>
 </MetaData>

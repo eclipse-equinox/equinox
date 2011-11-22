@@ -49,12 +49,24 @@ public class IconTest extends AbstractTest {
 		assertIcon(ocd.getIcon(31251), 40000);
 	}
 
+	public void testNullIcon() throws Exception {
+		MetaTypeInformation mti = metatype.getMetaTypeInformation(bundle);
+		assertNotNull(mti);
+		ObjectClassDefinition ocd = mti.getObjectClassDefinition("org.eclipse.equinox.metatype.tests.tb9.2", null); //$NON-NLS-1$
+		assertObjectClassDefinition(ocd, "2", "ocd2", null); //$NON-NLS-1$ //$NON-NLS-2$
+		AttributeDefinition[] ads = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
+		assertAttributeDefinitions(ads, 1);
+		assertAttributeDefinition(ads[0], 0, null, null, "1", "ad1", null, null, AttributeDefinition.BYTE); //$NON-NLS-1$ //$NON-NLS-2$
+		assertNull("Icon was not null", ocd.getIcon(10000)); //$NON-NLS-1$
+	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		bundle = bundleInstaller.installBundle("tb9"); //$NON-NLS-1$
 	}
 
 	protected void tearDown() throws Exception {
+		bundle.uninstall();
 		super.tearDown();
 	}
 }
