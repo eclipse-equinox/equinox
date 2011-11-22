@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.internal.ds;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import org.apache.felix.scr.Component;
 import org.eclipse.equinox.internal.ds.impl.ComponentFactoryImpl;
@@ -587,12 +588,18 @@ public class InstanceProcess {
 			try {
 				componentInstance = scp.build(usingBundle, instance, security);
 			} catch (ClassCircularityError e) {
-				Vector component = new Vector(1);
-				component.add(scp.serviceComponent);
-				resolver.mgr.enqueueWork(resolver.mgr, resolver.mgr.ENABLE_COMPONENTS, component, false);
+				processSCPInClassCircularityError(scp);
 				throw new ComponentException(NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), e);
 			} catch (ComponentException e) {
 				Activator.log(null, LogService.LOG_ERROR, e.getMessage(), e.getCause());
+				Throwable t = e.getCause();
+				if (t instanceof InvocationTargetException) {
+					Throwable cause = t.getCause();
+					if (cause instanceof ClassCircularityError) {
+						processSCPInClassCircularityError(scp);
+					}
+				}
+
 				throw e;
 			} catch (Throwable t) {
 				Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_BUILDING_COMPONENT_INSTANCE, scp.serviceComponent), t);
@@ -626,6 +633,12 @@ public class InstanceProcess {
 			}
 			freeLock();
 		}
+	}
+
+	private void processSCPInClassCircularityError(ServiceComponentProp currentScp) {
+		Vector component = new Vector(1);
+		component.add(currentScp.serviceComponent);
+		resolver.mgr.enqueueWork(resolver.mgr, resolver.mgr.ENABLE_COMPONENTS, component, false);
 	}
 
 	public void modifyComponent(ServiceComponentProp scp, Dictionary newProps) throws ComponentException {
