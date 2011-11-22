@@ -10,6 +10,14 @@ package org.eclipse.equinox.metatype;
 import org.osgi.service.metatype.AttributeDefinition;
 
 /**
+ * An {@link Extendable extendable} version of {@link AttributeDefinition 
+ * attribute definition} allowing access to any {@link 
+ * Extendable#getExtensionAttributes(String) extension attributes} provided by
+ * third parties.
+ * <p/>
+ * For example, an Equinox attribute definition will contain all XML attributes
+ * specified as part of the &lt;AD/&gt; element with namespaces other than the 
+ * metatype namespace as extension attributes.
  * 
  * @since 1.2
  *
