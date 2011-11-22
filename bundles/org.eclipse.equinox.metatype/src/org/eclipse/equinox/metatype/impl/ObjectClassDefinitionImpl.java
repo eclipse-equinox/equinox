@@ -166,6 +166,9 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 		@SuppressWarnings("hiding")
 		// Use a local reference to the icon list to be sure we don't suddenly start using a new one.
 		List<Icon> icons = this.icons;
+		// Icons will be null if none were specified.
+		if (icons == null)
+			return null;
 		int index = Collections.binarySearch(icons, icon, iconComparator);
 		if (index < 0) {
 			// If the index is less than zero, there wasn't an exact match.
@@ -203,6 +206,9 @@ public class ObjectClassDefinitionImpl extends LocalizationElement implements Eq
 	}
 
 	synchronized void setIcons(List<Icon> icons) {
+		// Do nothing if icons is null or empty.
+		if (icons == null || icons.isEmpty())
+			return;
 		// Prepare the list of icons for binary searches as in getIcon(int).
 		Collections.sort(icons, iconComparator);
 		// Make the list unmodifiable for safe binary searches without copying.
