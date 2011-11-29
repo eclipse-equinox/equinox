@@ -294,7 +294,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 		OutputStream output = null;
 		try {
-			output = new BufferedOutputStream(new FileOutputStream(new File(location.toOSString())));
+			output = new SafeFileOutputStream(new File(location.toOSString()));
 			output.write(removeTimestampFromTable(properties).getBytes("UTF-8")); //$NON-NLS-1$
 			output.flush();
 		} catch (IOException e) {
@@ -687,7 +687,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		InputStream input = null;
 		Properties result = new Properties();
 		try {
-			input = new BufferedInputStream(new FileInputStream(location.toFile()));
+			input = new SafeFileInputStream(location.toFile());
 			result.load(input);
 		} catch (FileNotFoundException e) {
 			// file doesn't exist but that's ok.
