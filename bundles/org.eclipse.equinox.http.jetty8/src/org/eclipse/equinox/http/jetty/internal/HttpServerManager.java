@@ -181,6 +181,7 @@ public class HttpServerManager implements ManagedServiceFactory {
 		return Boolean.TRUE;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Connector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary) {
 		Boolean httpsEnabled = (Boolean) dictionary.get(JettyConstants.HTTPS_ENABLED);
 		if (httpsEnabled == null || !httpsEnabled.booleanValue())
@@ -200,22 +201,22 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 		String keyStore = (String) dictionary.get(JettyConstants.SSL_KEYSTORE);
 		if (keyStore != null)
-			sslConnector.getSslContextFactory().setKeyStore(keyStore);
+			sslConnector.setKeystore(keyStore);
 
 		String password = (String) dictionary.get(JettyConstants.SSL_PASSWORD);
 		if (password != null)
-			sslConnector.getSslContextFactory().setKeyStorePassword(password);
+			sslConnector.setPassword(password);
 
 		String keyPassword = (String) dictionary.get(JettyConstants.SSL_KEYPASSWORD);
 		if (keyPassword != null)
-			sslConnector.getSslContextFactory().setKeyManagerPassword(keyPassword);
+			sslConnector.setKeyPassword(keyPassword);
 
 		Object needClientAuth = dictionary.get(JettyConstants.SSL_NEEDCLIENTAUTH);
 		if (needClientAuth != null) {
 			if (needClientAuth instanceof String)
 				needClientAuth = Boolean.valueOf((String) needClientAuth);
 
-			sslConnector.getSslContextFactory().setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
+			sslConnector.setNeedClientAuth(((Boolean) needClientAuth).booleanValue());
 		}
 
 		Object wantClientAuth = dictionary.get(JettyConstants.SSL_WANTCLIENTAUTH);
@@ -223,16 +224,16 @@ public class HttpServerManager implements ManagedServiceFactory {
 			if (wantClientAuth instanceof String)
 				wantClientAuth = Boolean.valueOf((String) wantClientAuth);
 
-			sslConnector.getSslContextFactory().setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
+			sslConnector.setWantClientAuth(((Boolean) wantClientAuth).booleanValue());
 		}
 
 		String protocol = (String) dictionary.get(JettyConstants.SSL_PROTOCOL);
 		if (protocol != null)
-			sslConnector.getSslContextFactory().setProtocol(protocol);
+			sslConnector.setProtocol(protocol);
 
 		String keystoreType = (String) dictionary.get(JettyConstants.SSL_KEYSTORETYPE);
 		if (keystoreType != null)
-			sslConnector.getSslContextFactory().setKeyStoreType(keystoreType);
+			sslConnector.setKeystoreType(keystoreType);
 
 		if (sslConnector.getPort() == 0) {
 			try {
