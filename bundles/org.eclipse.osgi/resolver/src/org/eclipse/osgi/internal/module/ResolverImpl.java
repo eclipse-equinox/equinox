@@ -846,8 +846,14 @@ public class ResolverImpl implements Resolver {
 			printCombination(bestCombination);
 		}
 		for (int i = 0; i < bestCombination.length; i++) {
-			for (int j = 0; j < multipleSuppliers[i].length; j++)
-				multipleSuppliers[i][j].setSelectedSupplier(bestCombination[i]);
+			for (int j = 0; j < multipleSuppliers[i].length; j++) {
+				ResolverConstraint constraint = multipleSuppliers[i][j];
+				constraint.setSelectedSupplier(bestCombination[i]);
+				// sanity check to make sure we did not just get wired to our own dropped export
+				VersionSupplier selectedSupplier = constraint.getSelectedSupplier();
+				if (selectedSupplier != null)
+					selectedSupplier.setSubstitute(null);
+			}
 		}
 
 		// do not need to keep uses data in memory

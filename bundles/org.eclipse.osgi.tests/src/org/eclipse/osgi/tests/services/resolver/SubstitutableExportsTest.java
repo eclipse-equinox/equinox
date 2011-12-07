@@ -101,7 +101,7 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "Z"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.EXPORT_PACKAGE, "x; version=0.5; bundle=Z"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "x; version=0.5; bundle=Z, z; uses:=x; version=1.0"); //$NON-NLS-1$
 		BundleDescription z = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
 		manifest.clear();
@@ -2782,4 +2782,80 @@ public class SubstitutableExportsTest extends AbstractStateTest {
 		assertEquals("Should not have any unresolvable constraints", 0, unsatisfied.length);
 	}
 
+	public void testSubstitutableExports025() throws BundleException {
+		State state = getSubstituteUsesState();
+		BundleDescription a = state.getBundle(1);
+		BundleDescription b = state.getBundle(2);
+		BundleDescription c = state.getBundle(3);
+		BundleDescription d = state.getBundle(4);
+		BundleDescription e = state.getBundle(5);
+		BundleDescription f = state.getBundle(6);
+		BundleDescription g = state.getBundle(7);
+
+		Hashtable manifest = new Hashtable();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_BUNDLE, "C"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "z; version=0.5"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "z"); //$NON-NLS-1$
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + (String) manifest.get(Constants.BUNDLE_VERSION), g.getBundleId() + 1);
+		state.addBundle(h);
+
+		state.resolve();
+
+		assertTrue("1.0", a.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", b.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", c.isResolved()); //$NON-NLS-1$
+		assertTrue("1.3", d.isResolved()); //$NON-NLS-1$
+		assertTrue("1.4", e.isResolved()); //$NON-NLS-1$
+		assertTrue("1.5", f.isResolved()); //$NON-NLS-1$
+		assertFalse("1.6", g.isResolved()); //$NON-NLS-1$
+		assertTrue("1.7", h.isResolved()); //$NON-NLS-1$
+
+		ExportPackageDescription[] aVisible = state.getStateHelper().getVisiblePackages(a);
+		ExportPackageDescription[] bVisible = state.getStateHelper().getVisiblePackages(b);
+		ExportPackageDescription[] cVisible = state.getStateHelper().getVisiblePackages(c);
+		ExportPackageDescription[] dVisible = state.getStateHelper().getVisiblePackages(d);
+		ExportPackageDescription[] eVisible = state.getStateHelper().getVisiblePackages(e);
+		ExportPackageDescription[] fVisible = state.getStateHelper().getVisiblePackages(f);
+		ExportPackageDescription[] gVisible = state.getStateHelper().getVisiblePackages(g);
+		ExportPackageDescription[] hVisible = state.getStateHelper().getVisiblePackages(h);
+
+		assertNotNull("aVisible is null", aVisible); //$NON-NLS-1$
+		assertNotNull("bVisible is null", bVisible); //$NON-NLS-1$
+		assertNotNull("cVisible is null", cVisible); //$NON-NLS-1$
+		assertNotNull("dVisible is null", dVisible); //$NON-NLS-1$
+		assertNotNull("eVisible is null", eVisible); //$NON-NLS-1$
+		assertNotNull("fVisible is null", fVisible); //$NON-NLS-1$
+		assertNotNull("gVisible is null", gVisible); //$NON-NLS-1$
+		assertNotNull("hVisible is null", hVisible); //$NON-NLS-1$
+
+		assertEquals("aVisible wrong number", 0, aVisible.length); //$NON-NLS-1$
+		assertEquals("bVisible wrong number", 2, bVisible.length); //$NON-NLS-1$
+		assertEquals("cVisible wrong number", 2, cVisible.length); //$NON-NLS-1$
+		assertEquals("dVisible wrong number", 2, dVisible.length); //$NON-NLS-1$
+		assertEquals("eVisible wrong number", 2, eVisible.length); //$NON-NLS-1$
+		assertEquals("fVisible wrong number", 2, fVisible.length); //$NON-NLS-1$
+		assertEquals("gVisible wrong number", 0, gVisible.length); //$NON-NLS-1$
+		assertEquals("hVisible wrong number", 2, hVisible.length); //$NON-NLS-1$
+
+		ExportPackageDescription[] aExports = a.getSelectedExports();
+		assertEquals("aVisible not correct", aExports, a.getExportPackages()); //$NON-NLS-1$
+		assertEquals("bVisible not correct", aExports, bVisible); //$NON-NLS-1$
+		assertEquals("cVisible not correct", aExports, cVisible); //$NON-NLS-1$
+		assertEquals("dVisible not correct", aExports, dVisible); //$NON-NLS-1$
+		assertEquals("eVisible not correct", aExports, eVisible); //$NON-NLS-1$
+		assertEquals("fVisible not correct", aExports, fVisible); //$NON-NLS-1$
+		assertEquals("hVisible not correct", aExports, hVisible); //$NON-NLS-1$
+
+		ExportPackageDescription[] hExported = h.getSelectedExports();
+		assertEquals("Expected one export", 1, hExported.length);
+		ExportPackageDescription[] hSubstituted = h.getSubstitutedExports();
+		assertEquals("Expected no substitutions", 0, hSubstituted.length);
+
+		ImportPackageSpecification[] hImports = h.getImportPackages();
+		assertEquals("Expected one import", 1, hImports.length);
+		assertEquals("Wrong supplier", hExported[0], hImports[0].getSupplier());
+	}
 }
