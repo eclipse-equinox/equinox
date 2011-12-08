@@ -15,6 +15,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.hooks.weaving.WeavingHook;
+import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.launch.Framework;
 import org.osgi.service.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -1001,6 +1003,54 @@ public class CompositeShareTests extends AbstractCompositeTests {
 			testTCCL.start();
 		} catch (BundleException e) {
 			fail("Unepected", e); //$NON-NLS-1$
+		}
+		uninstallCompositeBundle(compositeBundle);
+	}
+
+	public void testBug365677() {
+		// create a composite bundle with one bundle that exports some api to child
+		// install one bundle into child that uses API from parent
+		// use a weavig hook in the child to add a dynamic import to the client bundle
+		Map linkManifest = new HashMap();
+		linkManifest.put(Constants.BUNDLE_SYMBOLICNAME, getName()); //$NON-NLS-1$
+		linkManifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		linkManifest.put(Constants.IMPORT_PACKAGE, "org.osgi.service.application, test.link.a; attr1=\"value1\", test.link.a.params; attr2=\"value2\""); //$NON-NLS-1$
+		CompositeBundle compositeBundle = createCompositeBundle(linkBundleFactory, getName(), null, linkManifest, false, false); //$NON-NLS-1$
+		installIntoCurrent("test.link.a"); //$NON-NLS-1$
+		final Bundle testClient = installIntoChild(compositeBundle.getCompositeFramework(), "test.link.a.client"); //$NON-NLS-1$
+
+		startCompositeBundle(compositeBundle, false);
+		// first confirm the testClient cannot load from the package that will be added dynamically
+		try {
+			testClient.loadClass("org.osgi.service.application.ApplicationDescriptor"); //$NON-NLS-1$
+			fail("Expected class load exception"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			// expected
+		}
+
+		// Add a weaving hook that will add the dyanmic import
+		compositeBundle.getCompositeFramework().getBundleContext().registerService(WeavingHook.class, new WeavingHook() {
+
+			public void weave(WovenClass wovenClass) {
+				Bundle b = wovenClass.getBundleWiring().getBundle();
+				if (testClient != b)
+					return;
+				wovenClass.getDynamicImports().add("org.osgi.service.application");
+			}
+		}, null);
+
+		// Start client to kick the weaving hook
+		try {
+			testClient.start();
+		} catch (BundleException e) {
+			fail("Unexpected exception", e); //$NON-NLS-1$
+		}
+
+		// Now a load of a class from the dynamically added package should work.
+		try {
+			testClient.loadClass("org.osgi.service.application.ApplicationDescriptor"); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			fail("Unexpected class load exception", e); //$NON-NLS-1$
 		}
 		uninstallCompositeBundle(compositeBundle);
 	}
