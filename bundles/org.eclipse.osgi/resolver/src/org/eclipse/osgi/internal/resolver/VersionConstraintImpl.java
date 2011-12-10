@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.service.resolver.extras.SpecificationReference;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;

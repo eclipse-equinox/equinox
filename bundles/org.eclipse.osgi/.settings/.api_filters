@@ -900,9 +900,32 @@
         </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/Version.java" type="org.osgi.framework.Version">
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="Version(int, int, int, String, boolean)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Ignore OSGi API" id="1141899266">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="isReleaseVersion()"/>
+            </message_arguments>
+        </filter>
         <filter id="1143996420">
             <message_arguments>
                 <message_argument value="compareTo(Version)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/VersionRange.java" type="org.osgi.framework.VersionRange">
+        <filter comment="Ignore OSGi API" id="1108344834">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="org.osgi.framework.VersionRange"/>
             </message_arguments>
         </filter>
     </resource>

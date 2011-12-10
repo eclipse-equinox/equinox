@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.eclipse.osgi.framework.util.SecureAction;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.osgi.framework.*;
 
 /**

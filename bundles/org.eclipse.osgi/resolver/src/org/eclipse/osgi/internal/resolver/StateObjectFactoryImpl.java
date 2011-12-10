@@ -15,6 +15,7 @@ import java.util.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.module.ResolverImpl;
 import org.eclipse.osgi.service.resolver.*;
+import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.storagemanager.StorageManager;
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.*;
