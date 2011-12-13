@@ -379,15 +379,16 @@ public class DefaultPreferences extends EclipsePreferences {
 	 * Takes a preference value and a related resource bundle and
 	 * returns the translated version of this value (if one exists).
 	 */
-	private String translatePreference(String value, Properties props) {
-		if (props == null || value.startsWith(KEY_DOUBLE_PREFIX))
-			return value;
-		if (value.startsWith(KEY_PREFIX)) {
+	private String translatePreference(String origValue, Properties props) {
+		if (props == null || origValue.startsWith(KEY_DOUBLE_PREFIX))
+			return origValue;
+		if (origValue.startsWith(KEY_PREFIX)) {
+			String value = origValue.trim();
 			int ix = value.indexOf(" "); //$NON-NLS-1$
 			String key = ix == -1 ? value.substring(1) : value.substring(1, ix);
 			String dflt = ix == -1 ? value : value.substring(ix + 1);
 			return props.getProperty(key, dflt);
 		}
-		return value;
+		return origValue;
 	}
 }
