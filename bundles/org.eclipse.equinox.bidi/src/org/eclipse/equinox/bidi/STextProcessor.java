@@ -14,10 +14,12 @@ import org.eclipse.equinox.bidi.advanced.*;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- *  Provides methods to process structured text. The methods in this class
- *  are the most straightforward way to transform <i>lean</i> text into 
- *  <i>full</i> text and vice versa (for the meaning of <i>lean</i> and 
- *  <i>full</i> text, please see the 
+ *  Provides methods to process bidirectional text with a specific 
+ *  structure. The methods in this class are the most straightforward 
+ *  way to add directional formatting characters to the source text to 
+ *  ensure correct presentation, or to remove those characters to 
+ *  restore the original text
+ *  (for more explanations, please see the 
  *  <a href="package-summary.html">package documentation</a>).
  *
  *  @noextend This class is not intended to be subclassed by clients.

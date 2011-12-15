@@ -5,14 +5,12 @@
 </head>
 <body bgcolor="white">
 
-This package provides classes for
-processing structured text.
+This package provides classes for processing bidirectional 
+text with a special structure to ensure its proper presentation.
 <p>
 There are various types of structured text. Each type should
-be handled by a specific <i>type handler</i>. A number of standard
-type handlers are supplied in the associated package
-<a href="internal/consumable/package-summary.html">
-org.eclipse.equinox.bidi.internal.consumable</a>.
+be handled by a specific <i>type handler</i>. A number of 
+standard type handlers are supplied with this package.
 
 <h2>Introduction to Structured Text</h2>
 <p>
@@ -98,23 +96,12 @@ Developers who want to develop new handlers to support types of
 structured text not currently supported can use components
 of the package {@link <a href="custom/package-summary.html">
 org.eclipse.equinox.bidi.custom</a>}.
+The source code of packages org.eclipse.equinox.bidi.* can serve as example of
+how to develop processors for currently unsupported types of structured text.
 </p><p>
-There are two other packages associated with the current one:</p>
-<ul>
-  <li>{@link <a href="internal/package-summary.html">
-      org.eclipse.equinox.bidi.internal</a>}</li>
-  <li>{@link <a href="internal/consumable/package-summary.html">
-       org.eclipse.equinox.bidi.internal.consumable</a>}</li>
-</ul>
-<p>
-The tools in the first package can serve as example of how to develop
-processors for currently unsupported types of structured text.<br>
-The latter package contains classes for the processors implementing
-the currently supported types of structured text.
-</p><p>
-However, users wishing to process the currently supported types of
-structured text typically don't need to interact with these
-two packages.
+However, users wishing to process the currently supported types of structured
+text typically don't need to deal with the org.eclipse.equinox.bidi.custom
+package.
 </p>
 
 <h2>Abbreviations used in the documentation of this package</h2>

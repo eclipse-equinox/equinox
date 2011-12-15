@@ -191,7 +191,9 @@ public class STextEnvironment {
 		return processingNeeded.booleanValue();
 	}
 
-	/**
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * Computes the hashCode based on the values supplied when constructing 
 	 * the instance and on the result of {@link #isProcessingNeeded()}.
 	 * 
@@ -207,7 +209,9 @@ public class STextEnvironment {
 		return result;
 	}
 
-	/**
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * Compare 2 environment instances and returns true if both instances
 	 * were constructed with the same arguments.
 	 * 

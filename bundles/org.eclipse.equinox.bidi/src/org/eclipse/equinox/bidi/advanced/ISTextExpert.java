@@ -13,9 +13,13 @@ package org.eclipse.equinox.bidi.advanced;
 import org.eclipse.equinox.bidi.custom.STextTypeHandler;
 
 /**
- * Advanced API for processing structured text.
- * For a general introduction to structured text, see
- * {@link <a href="../package-summary.html">the org.eclipse.equinox.bidi
+ * Provides advanced methods for processing bidirectional text with 
+ * a specific structure to ensure proper presentation.
+ * For a general introduction to structured text, see the 
+ * {@link <a href="../package-summary.html">org.eclipse.equinox.bidi
+ * package documentation</a>}.
+ * For details about when the advanced methods are needed, see
+ * {@link <a href="package-summary.html">this
  * package documentation</a>}.
  * <p>
  * Identifiers for several common handlers are included in 
@@ -32,7 +36,7 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  * may detect that a comment or a literal has been started but
  * has not been completed. In such cases, the state must be managed
  * by a <code>ISTextExpert</code> instance obtained with the 
- * {@link STextExpertFactory#getStatefulExpert getStateful} method.
+ * {@link STextExpertFactory#getStatefulExpert} method.
  * </p><p>
  * The <code>state</code> returned after processing a string
  * can be retrieved, set and reset using the {@link #getState()},
@@ -44,7 +48,7 @@ import org.eclipse.equinox.bidi.custom.STextTypeHandler;
  * </p><p>
  * Values returned by {@link #getState()} are opaque objects whose meaning
  * is internal to the relevant structured type handler. These values can only
- * be used in {@link #setState(Object) setState} calls to restore a state
+ * be used in {@link #setState(Object)} calls to restore a state
  * previously obtained after processing a given part of a text before 
  * processing the next part of the text.
  * </p><p>
@@ -88,7 +92,7 @@ public interface ISTextExpert {
 	 *  {@link STextEnvironment#getMirrored mirrored} and
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as value returned by the
-	 *  {@link #getTextDirection getTextDirection} method.
+	 *  {@link #getTextDirection} method.
 	 */
 	public static final int DIR_LTR = 0;
 
@@ -98,7 +102,7 @@ public interface ISTextExpert {
 	 *  {@link STextEnvironment#getMirrored mirrored} and may
 	 *  may be different for Arabic and for Hebrew.
 	 *  This constant can appear as value returned by the
-	 *  {@link #getTextDirection getTextDirection} method.
+	 *  {@link #getTextDirection} method.
 	 */
 	public static final int DIR_RTL = 1;
 

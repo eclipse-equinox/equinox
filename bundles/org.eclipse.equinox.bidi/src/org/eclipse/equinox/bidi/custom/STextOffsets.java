@@ -36,6 +36,12 @@ public class STextOffsets {
 	private int prefixLength;
 
 	/**
+	 *  Default constructor
+	 */
+	public STextOffsets() {
+	}
+
+	/**
 	 *  @return the stored prefix length
 	 */
 	public int getPrefixLength() {

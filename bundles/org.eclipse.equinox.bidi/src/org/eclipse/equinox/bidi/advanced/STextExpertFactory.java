@@ -25,16 +25,16 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  * {@link STextTypeHandler structured text type handler}.
  * There are two kinds of experts:
  * <ul>
- *   <li>stateful, obtained by calling {@link #getStatefulExpert getStatefulExpert}.</li>
- *   <li>not stateful, obtained by calling {@link #getExpert getExpert}.</li>
+ *   <li>stateful, obtained by calling {@link #getStatefulExpert}.</li>
+ *   <li>not stateful, obtained by calling {@link #getExpert}.</li>
  * </ul>  
  * <p>Only the stateful kind can remember the state established by a call to
  * a text processing method and transmit it as initial state in the next call
  * to a text processing method.
  * <p>In other words, the methods 
- * {@link ISTextExpert#getState() getState},
- * {@link ISTextExpert#setState setState} and
- * {@link ISTextExpert#clearState() clearState} of 
+ * {@link ISTextExpert#getState()},
+ * {@link ISTextExpert#setState} and
+ * {@link ISTextExpert#clearState()} of 
  * {@link ISTextExpert} are inoperative for experts which are not stateful.
  * <p>
  * Using a stateful expert is more resource intensive, thus not stateful
@@ -113,7 +113,7 @@ final public class STextExpertFactory {
 	 * @param  environment the current environment, which may affect the behavior of
 	 *         the expert. This parameter may be specified as
 	 *         <code>null</code>, in which case the
-	 *         {@link STextEnvironment#DEFAULT DEFAULT}
+	 *         {@link STextEnvironment#DEFAULT}
 	 *         environment should be assumed.
 	 * @return the ISTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
@@ -168,7 +168,7 @@ final public class STextExpertFactory {
 	 * @param  environment the current environment, which may affect the behavior of
 	 *         the expert. This parameter may be specified as
 	 *         <code>null</code>, in which case the
-	 *         {@link STextEnvironment#DEFAULT DEFAULT}
+	 *         {@link STextEnvironment#DEFAULT}
 	 *         environment should be assumed.
 	 * @return the ISTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type
@@ -192,7 +192,7 @@ final public class STextExpertFactory {
 	 * @param  environment the current environment, which may affect the behavior of
 	 *         the expert. This parameter may be specified as
 	 *         <code>null</code>, in which case the
-	 *         {@link STextEnvironment#DEFAULT DEFAULT}
+	 *         {@link STextEnvironment#DEFAULT}
 	 *         environment should be assumed.
 	 * @return the ISTextExpert instance.
 	 * @throws IllegalArgumentException if <code>type</code> is not a known type

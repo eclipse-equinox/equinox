@@ -29,30 +29,30 @@ import org.eclipse.equinox.bidi.internal.STextImpl;
  *        characteristics of the specific handler:
  *        <ul>
  *          <li>the separators which separate the structured text into
- *              tokens. See {@link #getSeparators getSeparators}.</li>
+ *              tokens. See {@link #getSeparators}.</li>
  *          <li>the direction which governs the display of tokens
- *              one after the other. See {@link #getDirection getDirection}.</li>
+ *              one after the other. See {@link #getDirection}.</li>
  *          <li>the number of special cases which need to be handled by
  *              code specific to that handler.
- *              See {@link #getSpecialsCount getSpecialsCount}.</li>
+ *              See {@link #getSpecialsCount}.</li>
  *        </ul></li>
  *    <li>Before starting deeper analysis of the submitted text, the common
  *        logic gives to the handler a chance to shorten the process by
- *        invoking its {@link #skipProcessing skipProcessing} method.</li>
+ *        invoking its {@link #skipProcessing} method.</li>
  *    <li>The common logic then analyzes the text to segment it into tokens
  *        according to the appearance of separators (as retrieved using
- *        {@link #getSeparators getSeparators}).</li>
+ *        {@link #getSeparators}).</li>
  *    <li>If the handler indicated a positive number of special cases as
- *        return value from its {@link #getSpecialsCount getSpecialsCount}
+ *        return value from its {@link #getSpecialsCount}
  *        method, the common logic will repeatedly invoke the handler's
- *        {@link #indexOfSpecial indexOfSpecial} method to let it signal the
+ *        {@link #indexOfSpecial} method to let it signal the
  *        presence of special strings which may further delimit the source text.</li>
  *    <li>When such a special case is signaled by the handler, the common
- *        logic will call the handler's {@link #processSpecial processSpecial}
+ *        logic will call the handler's {@link #processSpecial}
  *        method to give it the opportunity to handle it as needed. Typical
  *        actions that the handler may perform are to add directional marks
- *        unconditionally (by calling {@link #insertMark insertMark} or
- *        conditionally (by calling {@link #processSeparator processSeparator}).</li>
+ *        unconditionally (by calling {@link #insertMark} or
+ *        conditionally (by calling {@link #processSeparator}).</li>
  *  </ul>
  *
  * @author Matitiahu Allouche
@@ -97,7 +97,7 @@ public class STextTypeHandler {
 	 *         handler.
 	 * @param  caseNumber number of the special case to locate.
 	 *         This number varies from 1 to the number of special cases
-	 *         returned by {@link #getSpecialsCount getSpecialsCount}
+	 *         returned by {@link #getSpecialsCount}
 	 *         for this handler.
 	 *         The meaning of this number is internal to the class
 	 *         implementing <code>indexOfSpecial</code>.
@@ -128,7 +128,7 @@ public class STextTypeHandler {
 	/**
 	 * Handles special cases specific to this handler.
 	 * It is called when a special case occurrence 
-	 * is located by {@link #indexOfSpecial indexOfSpecial}.
+	 * is located by {@link #indexOfSpecial}.
 	 * <p>
 	 * If a special processing cannot be completed within a current call to
 	 * <code>processSpecial</code> (for instance, a comment has been started
@@ -159,8 +159,8 @@ public class STextTypeHandler {
 	 *         handler.
 	 * @param  caseNumber number of the special case to handle.
 	 * @param  separLocation the position returned by
-	 *         {@link #indexOfSpecial indexOfSpecial}. After calls to
-	 *         {@link ISTextExpert#leanToFullText leanToFullText} and other
+	 *         {@link #indexOfSpecial}. After calls to
+	 *         {@link ISTextExpert#leanToFullText} and other
 	 *         methods of {@link ISTextExpert} which set a non-null
 	 *         final state, <code>processSpecial</code> is
 	 *         called when initializing the processing with value of
@@ -188,8 +188,8 @@ public class STextTypeHandler {
 	 * Specifies that a mark character must be added before the character
 	 * at the specified position of the <i>lean</i> text when generating the
 	 * <i>full</i> text. This method can be called from within 
-	 * {@link #indexOfSpecial indexOfSpecial} or
-	 * {@link #processSpecial processSpecial} in extensions of 
+	 * {@link #indexOfSpecial} or
+	 * {@link #processSpecial} in extensions of 
 	 * <code>STextTypeHandler</code>.
 	 * The mark character will be LRM for structured text
 	 * with a LTR base direction, and RLM for structured text with RTL
@@ -219,8 +219,8 @@ public class STextTypeHandler {
 	 * display, depending on the base direction of the text and on the
 	 * class of the characters in the <i>lean</i> text preceding and 
 	 * following the separator itself. This method
-	 * can be called from within {@link #indexOfSpecial indexOfSpecial} or
-	 * {@link #processSpecial processSpecial} in extensions of 
+	 * can be called from within {@link #indexOfSpecial} or
+	 * {@link #processSpecial} in extensions of 
 	 * <code>STextTypeHandler</code>. 
 	 * <p>
 	 * The logic implemented in this method considers the text before
@@ -314,8 +314,8 @@ public class STextTypeHandler {
 	/**
 	 * Indicates the number of special cases handled by the current handler.
 	 * This method is invoked before starting the processing.
-	 * If the number returned is zero, {@link #indexOfSpecial indexOfSpecial}
-	 * and {@link #processSpecial processSpecial} will not be invoked.
+	 * If the number returned is zero, {@link #indexOfSpecial}
+	 * and {@link #processSpecial} will not be invoked.
 	 * <p>
 	 * If not overridden, this method returns <code>zero</code>.
 	 * </p>
@@ -327,8 +327,8 @@ public class STextTypeHandler {
 	 * @return the number of special cases for the associated handler.
 	 *         Special cases exist for some types of structured text
 	 *         handlers. They are implemented by overriding methods
-	 *         {@link STextTypeHandler#indexOfSpecial indexOfSpecial} and
-	 *         {@link STextTypeHandler#processSpecial processSpecial}.
+	 *         {@link STextTypeHandler#indexOfSpecial} and
+	 *         {@link STextTypeHandler#processSpecial}.
 	 *         Examples of special cases are comments, literals, or
 	 *         anything which is not identified by a one-character separator.
 	 *
