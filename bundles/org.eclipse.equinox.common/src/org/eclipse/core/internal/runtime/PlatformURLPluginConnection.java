@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,6 +77,10 @@ public class PlatformURLPluginConnection extends PlatformURLConnection {
 		String path = (String) obj[1];
 		URL result = b.getEntry(path);
 		if (result != null || "/".equals(path)) //$NON-NLS-1$
+			return result;
+		// try resolving the path through the classloader
+		result = b.getResource(path);
+		if (result != null)
 			return result;
 		// if the result is null then force the creation of a URL that will throw FileNotFoundExceptions
 		return new URL(b.getEntry("/"), path); //$NON-NLS-1$
