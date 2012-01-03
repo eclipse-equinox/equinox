@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -573,4 +573,90 @@ public class SecurityManagerTests extends AbstractBundleTests {
 		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
 	}
 
+	public void testBug367614() {
+		File config = OSGiTestsActivator.getContext().getDataFile(getName()); //$NON-NLS-1$
+		Properties configuration = new Properties();
+		configuration.put(Constants.FRAMEWORK_STORAGE, config.getAbsolutePath());
+		configuration.put(Constants.FRAMEWORK_SECURITY, Framework.SECURITY_OSGI);
+		Equinox equinox = new Equinox(configuration);
+		try {
+			equinox.init();
+		} catch (BundleException e) {
+			fail("Unexpected exception on init()", e); //$NON-NLS-1$
+		}
+		assertNotNull("SecurityManager is null", System.getSecurityManager()); //$NON-NLS-1$
+		// should be in the STARTING state
+		assertEquals("Wrong state for SystemBundle", Bundle.STARTING, equinox.getState()); //$NON-NLS-1$
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.ACTIVE, equinox.getState()); //$NON-NLS-1$
+
+		BundleContext systemContext = equinox.getBundleContext();
+		ConditionalPermissionAdmin ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
+
+		ConditionalPermissionUpdate update = ca.newConditionalPermissionUpdate();
+		List rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		assertTrue("Cannot commit rows", update.commit()); //$NON-NLS-1$
+
+		update = ca.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		try {
+			update.commit();
+			fail("Expected failure to commit duplicate named rows");
+		} catch (Throwable t) {
+			assertTrue("Wrong exception: " + t, t instanceof IllegalStateException);
+			// expected failure
+		}
+
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+
+		// try again from a cached state
+		try {
+			equinox.start();
+		} catch (BundleException e) {
+			fail("Failed to start the framework", e); //$NON-NLS-1$
+		}
+
+		systemContext = equinox.getBundleContext();
+		ca = (ConditionalPermissionAdmin) systemContext.getService(systemContext.getServiceReference(ConditionalPermissionAdmin.class.getName()));
+
+		update = ca.newConditionalPermissionUpdate();
+		rows = update.getConditionalPermissionInfos();
+		rows.add(ca.newConditionalPermissionInfo("test", null, new PermissionInfo[] {allPackagePermission}, ConditionalPermissionInfo.ALLOW));
+		try {
+			update.commit();
+			fail("Expected failure to commit duplicate named rows");
+		} catch (Throwable t) {
+			assertTrue("Wrong exception: " + t, t instanceof IllegalStateException);
+			// expected failure
+		}
+		// put the framework back to the RESOLVED state
+		try {
+			equinox.stop();
+		} catch (BundleException e) {
+			fail("Unexpected erorr stopping framework", e); //$NON-NLS-1$
+		}
+		try {
+			equinox.waitForStop(10000);
+		} catch (InterruptedException e) {
+			fail("Unexpected interrupted exception", e); //$NON-NLS-1$
+		}
+		assertEquals("Wrong state for SystemBundle", Bundle.RESOLVED, equinox.getState()); //$NON-NLS-1$
+		assertNull("SecurityManager is not null", System.getSecurityManager()); //$NON-NLS-1$
+	}
 }
