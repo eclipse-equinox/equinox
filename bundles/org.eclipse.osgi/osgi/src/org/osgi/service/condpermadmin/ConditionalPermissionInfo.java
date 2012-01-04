@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2004, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * 
  * @Immutable
  * @noimplement
- * @version $Id$
+ * @version $Id: c9373ca8250d4c85a91fd7bf796295b69fdd33e7 $
  */
 public interface ConditionalPermissionInfo {
 	/**
@@ -75,7 +75,9 @@ public interface ConditionalPermissionInfo {
 	 * this method can no longer be committed.
 	 * 
 	 * @throws UnsupportedOperationException If this object was created by
-	 *         {@link ConditionalPermissionAdmin#newConditionalPermissionInfo}
+	 *         {@link ConditionalPermissionAdmin#newConditionalPermissionInfo(String)}
+	 *         or
+	 *         {@link ConditionalPermissionAdmin#newConditionalPermissionInfo(String, ConditionInfo[] , PermissionInfo[] , String)}
 	 *         or obtained from a {@link ConditionalPermissionUpdate}. This
 	 *         method only functions if this object was obtained from one of the
 	 *         {@link ConditionalPermissionAdmin} methods deprecated in version

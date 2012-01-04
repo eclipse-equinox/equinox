@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2011). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2011, 2012). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,13 @@ import java.util.Map;
 /**
  * A capability that has been declared from a {@link Resource}.
  * 
+ * <p>
+ * Instances of this type must be <i>effectively immutable</i>. That is, for a
+ * given instance of this interface, the methods defined by this interface must
+ * always return the same result.
+ * 
  * @ThreadSafe
- * @version $Id$
+ * @version $Id: 1fb855c7c4fd0826455a28ed43b0e0d599b3b1ea $
  */
 public interface Capability {
 
@@ -78,4 +83,25 @@ public interface Capability {
 	 * @return The resource declaring this capability.
 	 */
 	Resource getResource();
+
+	/**
+	 * Compares this {@code Capability} to another {@code Capability}.
+	 * 
+	 * <p>
+	 * This {@code Capability} is equal to another {@code Capability} if they
+	 * have the same name space, directives and attributes and are declared by
+	 * the same resource.
+	 * 
+	 * @param obj The object to compare against this {@code Capability}.
+	 * @return {@code true} if this {@code Capability} is equal to the other
+	 *         object; {@code false} otherwise.
+	 */
+	boolean equals(Object obj);
+
+	/**
+	 * Returns the hashCode of this {@code Capability}.
+	 * 
+	 * @return The hashCode of this {@code Capability}.
+	 */
+	int hashCode();
 }

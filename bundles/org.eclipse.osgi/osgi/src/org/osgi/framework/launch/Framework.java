@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2008, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2008, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.osgi.framework.FrameworkEvent;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id$
+ * @version $Id: ae7fc29f8f5df58e9ed588d3d9e5ce7ebdc16ac5 $
  */
 public interface Framework extends Bundle {
 

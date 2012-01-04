@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2001, 2010). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2001, 2011). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ package org.osgi.service.permissionadmin;
  * Permission class has been exported by a bundle.
  * 
  * @Immutable
- * @version $Id$
+ * @version $Id: 64ea7f04345275266715291e22133938ecdb6a78 $
  */
 public class PermissionInfo {
 	private final String	type;
@@ -76,13 +76,13 @@ public class PermissionInfo {
 	}
 
 	/**
-	 * Constructs a {@code PermissionInfo} object from the specified
-	 * encoded {@code PermissionInfo} string. White space in the encoded
+	 * Constructs a {@code PermissionInfo} object from the specified encoded
+	 * {@code PermissionInfo} string. White space in the encoded
 	 * {@code PermissionInfo} string is ignored.
 	 * 
 	 * 
 	 * @param encodedPermission The encoded {@code PermissionInfo}.
-	 * @see #getEncoded
+	 * @see #getEncoded()
 	 * @throws IllegalArgumentException If the specified
 	 *         {@code encodedPermission} is not properly formatted.
 	 */
