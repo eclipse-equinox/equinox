@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 37;
+	public static final byte STATE_CACHE_VERSION = 38;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -713,7 +713,8 @@ final class StateReader {
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
-		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent));
+		boolean release = in.readBoolean();
+		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent, release));
 		//Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
 		return result;
 	}
