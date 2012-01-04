@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.tests.resource;
 
-import org.osgi.framework.resource.*;
-
 import java.util.*;
 import java.util.Map.Entry;
 import junit.framework.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
+import org.osgi.framework.resource.*;
 import org.osgi.framework.wiring.*;
 
 public class BasicTest extends AbstractResourceTest {
@@ -445,7 +444,9 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertNotRequirementMatches(Requirement requirement, Capability capability) {
-		assertFalse("Requirement matches capability", requirement.matches(capability));
+		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
+			return;
+		assertFalse("Requirement matches capability", ((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}
 
 	private void assertNotNull(Capability capability) {
@@ -457,7 +458,9 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertRequirementMatches(Requirement requirement, Capability capability) {
-		assertTrue("Requirement does not match capability", requirement.matches(capability));
+		if (!(requirement instanceof BundleRequirement) || !(capability instanceof BundleCapability))
+			return;
+		assertTrue("Requirement does not match capability", ((BundleRequirement) requirement).matches((BundleCapability) capability));
 	}
 
 	private void assertRequirements(List requirements, int index) {
