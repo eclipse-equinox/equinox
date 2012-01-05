@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -567,13 +567,6 @@ public class RegionResolverHookTests {
 		@Override
 		public boolean matches(BundleCapability capability) {
 			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean matches(Capability capability) {
-			if (!(capability instanceof BundleCapability))
-				return false;
-			return matches((BundleCapability) capability);
 		}
 	}
 
