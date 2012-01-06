@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  * addition and removal.
  * 
  * @ThreadSafe
- * @version $Id: 959ee37e16fdbfb1088b8309907b11b6b784fa63 $
+ * @version $Id$
  */
 
 public interface ListenerHook {

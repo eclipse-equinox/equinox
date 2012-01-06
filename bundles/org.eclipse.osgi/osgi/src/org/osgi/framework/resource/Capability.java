@@ -27,7 +27,7 @@ import java.util.Map;
  * always return the same result.
  * 
  * @ThreadSafe
- * @version $Id: 1fb855c7c4fd0826455a28ed43b0e0d599b3b1ea $
+ * @version $Id$
  */
 public interface Capability {
 

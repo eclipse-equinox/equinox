@@ -32,7 +32,7 @@ package org.osgi.framework;
  * <p>
  * This exception conforms to the general purpose exception chaining mechanism.
  * 
- * @version $Id: dfd1f76ca54be00d888cb880e8dddd7ed8deffa2 $
+ * @version $Id$
  */
 
 public class BundleException extends Exception {

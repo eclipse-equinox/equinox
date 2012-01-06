@@ -26,7 +26,7 @@ import java.util.List;
  * 
  * @ThreadSafe
  * @noimplement
- * @version $Id: 47169b8c2e510f755865d12c40920455aaa01407 $
+ * @version $Id$
  * @since 1.1
  */
 public interface ConditionalPermissionUpdate {

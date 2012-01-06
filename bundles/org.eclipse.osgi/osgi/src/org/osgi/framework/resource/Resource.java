@@ -30,7 +30,7 @@ import java.util.List;
  * always return the same result.
  *
  * @ThreadSafe
- * @version $Id: 4b73a753df5566cdb46b4b53a04fd75e866224ea $
+ * @version $Id$
  */
 public interface Resource {
 	/**

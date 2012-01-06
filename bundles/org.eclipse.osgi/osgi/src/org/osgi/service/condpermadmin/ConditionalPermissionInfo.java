@@ -25,7 +25,7 @@ import org.osgi.service.permissionadmin.PermissionInfo;
  * 
  * @Immutable
  * @noimplement
- * @version $Id: c9373ca8250d4c85a91fd7bf796295b69fdd33e7 $
+ * @version $Id$
  */
 public interface ConditionalPermissionInfo {
 	/**

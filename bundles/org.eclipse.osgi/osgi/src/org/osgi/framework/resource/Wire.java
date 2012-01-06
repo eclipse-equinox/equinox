@@ -25,7 +25,7 @@ package org.osgi.framework.resource;
  * always return the same result.
  *
  * @ThreadSafe
- * @version $Id: 7cab76f1c97c1fbe49ea95989a94fd363354e181 $
+ * @version $Id$
  */
 public interface Wire {
 	/**

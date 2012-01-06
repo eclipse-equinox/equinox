@@ -26,7 +26,7 @@ import org.osgi.framework.resource.Requirement;
  *
  * @ThreadSafe
  * @noimplement
- * @version $Id: bb292dc1bbd9f707652de164beb319867323785f $
+ * @version $Id$
  */
 public interface BundleRequirement extends Requirement {
 	/**

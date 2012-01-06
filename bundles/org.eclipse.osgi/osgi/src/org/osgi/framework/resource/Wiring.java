@@ -28,7 +28,7 @@ import java.util.List;
  * always return the same result.
  *
  * @ThreadSafe
- * @version $Id: ac9bdc86f3ece3efd2aad9068b3bb09bf456dfbf $
+ * @version $Id$
  */
 public interface Wiring {
 	/**
