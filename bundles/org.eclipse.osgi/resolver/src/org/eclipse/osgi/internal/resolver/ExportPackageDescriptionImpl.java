@@ -99,8 +99,12 @@ public class ExportPackageDescriptionImpl extends BaseDescriptionImpl implements
 			if (bundleVersion != null)
 				result.put(Constants.BUNDLE_VERSION_ATTRIBUTE, bundleVersion);
 			String symbolicName = getSupplier().getSymbolicName();
-			if (symbolicName != null)
-				result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
+			if (symbolicName != null) {
+				if (symbolicName.equals(Constants.getInternalSymbolicName()))
+					result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, Arrays.asList(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, symbolicName));
+				else
+					result.put(Constants.BUNDLE_SYMBOLICNAME_ATTRIBUTE, symbolicName);
+			}
 			return Collections.unmodifiableMap(result);
 		}
 	}
