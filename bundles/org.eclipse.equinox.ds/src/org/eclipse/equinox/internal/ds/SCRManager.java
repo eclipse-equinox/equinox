@@ -82,10 +82,6 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		if (Activator.startup)
 			Activator.timeLog("resolver.synchronizeServiceReferences() method took "); //$NON-NLS-1$
 
-		Activator.bc.addBundleListener(this);
-		if (Activator.startup)
-			Activator.timeLog("addBundleListener() method took "); //$NON-NLS-1$
-
 		String storageClass = Activator.bc.getProperty("scr.storage.class"); //$NON-NLS-1$
 		if (storageClass == null) {
 			storageClass = "org.eclipse.equinox.internal.ds.storage.file.FileStorage"; //$NON-NLS-1$
@@ -95,6 +91,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.COULD_NOT_CREATE_INSTANCE, storageClass), e);
 		}
+		if (Activator.startup)
+			Activator.timeLog("Creating storage took "); //$NON-NLS-1$
+
+		Activator.bc.addBundleListener(this);
 	}
 
 	public void startIt() {
