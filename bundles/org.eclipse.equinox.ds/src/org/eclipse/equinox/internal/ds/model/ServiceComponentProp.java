@@ -223,6 +223,7 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 					if (ref.reference.bindMethod == null || ccError != null || !ref.isBound()) {
 						//the bind method is not found and called for some reason or it has thrown exception
 						if (ref.reference.cardinality == ComponentReference.CARDINALITY_1_1 || ref.reference.cardinality == ComponentReference.CARDINALITY_1_N) {
+							Activator.log(null, LogService.LOG_WARNING, "Could not bind a reference of component " + name + ". The reference is: " + ref.reference, null); //$NON-NLS-1$ //$NON-NLS-2$
 							//unbind the already bound references
 							for (int j = i - 1; j >= 0; j--) {
 								ref = (Reference) references.elementAt(i);
@@ -427,9 +428,13 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 					case ComponentReference.CARDINALITY_1_1 :
 					case ComponentReference.CARDINALITY_0_1 :
 						for (int i = 0; i < serviceReferences.length; i++) {
-							reference.reference.bind(reference, componentInstance, serviceReferences[i]);
-							if (reference.reference.bindMethod != null) {
-								//bind method for this reference was found
+							ServiceReference oldBoundService = (reference.reference.policy_option == ComponentReference.POLICY_OPTION_GREEDY && reference.reference.serviceReferences.size() > 0 ? (ServiceReference) reference.reference.serviceReferences.keys().nextElement() : null);
+							boolean bound = reference.reference.bind(reference, componentInstance, serviceReferences[i]);
+							if (bound) {
+								if (oldBoundService != null) {
+									//unbind the previous bound service reference in case we are handling service reference update due to greedy policy option
+									reference.reference.unbind(reference, componentInstance, oldBoundService);
+								}
 								break;
 							}
 						}
@@ -636,6 +641,20 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 				}
 		}
 		ref.reference.unbind(ref, instance, serviceReference);
+	}
+
+	/**
+	 * Call the updated method for this Reference
+	 * 
+	 * @param ref the reference
+	 * @param instance the component instance
+	 * @param serviceReference the service reference which properties have changed
+	 */
+	public void updatedReference(Reference ref, ComponentInstance instance, ServiceReference serviceReference) {
+		if (Activator.DEBUG) {
+			Activator.log.debug("ServiceComponentProp.updatedReference(): component = " + name + ", reference = " + ref.reference.name, null); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		ref.reference.updated(ref, instance, serviceReference);
 	}
 
 	// -- begin helper methods
@@ -850,7 +869,7 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 	}
 
 	public String getModified() {
-		if (!serviceComponent.namespace11) {
+		if (!serviceComponent.isNamespaceAtLeast11()) {
 			return null;
 		}
 		return serviceComponent.modifyMethodName;
@@ -874,14 +893,14 @@ public class ServiceComponentProp implements Component, PrivilegedExceptionActio
 	}
 
 	public boolean isActivateDeclared() {
-		if (!serviceComponent.namespace11) {
+		if (!serviceComponent.isNamespaceAtLeast11()) {
 			return false;
 		}
 		return serviceComponent.activateMethodDeclared;
 	}
 
 	public boolean isDeactivateDeclared() {
-		if (!serviceComponent.namespace11) {
+		if (!serviceComponent.isNamespaceAtLeast11()) {
 			return false;
 		}
 		return serviceComponent.deactivateMethodDeclared;

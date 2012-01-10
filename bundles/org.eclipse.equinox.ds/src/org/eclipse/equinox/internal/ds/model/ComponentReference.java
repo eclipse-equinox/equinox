@@ -39,22 +39,30 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 	public static final int POLICY_STATIC = 0;
 	public static final int POLICY_DYNAMIC = 1;
 
+	public static final int POLICY_OPTION_RELUCTANT = 0; // default
+	public static final int POLICY_OPTION_GREEDY = 1;
+
 	// --- begin: XML def
-	public String name; // required
+	public String name;
 	public String interfaceName; // required
 	public int cardinality = CARDINALITY_1_1;
 	public int policy = POLICY_STATIC;
 	public String target;
 	public String bind;
 	public String unbind;
-	public ServiceComponent component;
+	//defined by DS specification v1.2 - schema v1.2.0
+	public String updated;
+	public int policy_option = POLICY_OPTION_RELUCTANT;
 	// --- end: XML def
+	public ServiceComponent component;
 
 	// --- begin: cache
 	private boolean bindCached;
 	private boolean unbindCached;
+	private boolean updatedCached;
 	Method bindMethod;
 	Method unbindMethod;
+	Method updatedMethod;
 	// --- end: cache
 
 	// --- begin: model
@@ -101,7 +109,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 				logWarning(NLS.bind(Messages.EXCEPTION_GETTING_METHOD, methodName, consumerClass.getName()), err, reference);
 			}
 
-			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.isNamespaceAtLeast11()))
 				break;
 
 			// we need a serviceObject to keep looking, create one if necessary
@@ -157,7 +165,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 				// this may happen on skelmir VM or in case of class loading problems
 				logWarning(NLS.bind(Messages.EXCEPTION_GETTING_METHOD, methodName, consumerClass.getName()), err, reference);
 			}
-			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.isNamespaceAtLeast11()))
 				break;
 
 			// 3) check for bind(class.isAssignableFrom(serviceObjectClass))
@@ -171,11 +179,11 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 					break;
 				}
 			}
-			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11))
+			if (method != null && SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.isNamespaceAtLeast11()))
 				break;
 
 			//implement search for bind/unbind methods according to schema v1.1.0
-			if (component.namespace11) {
+			if (component.isNamespaceAtLeast11()) {
 				for (int i = 0; i < methods.length; i++) {
 					Class[] params = methods[i].getParameterTypes();
 					if (params.length == 2 && methods[i].getName().equals(methodName) && params[0] == interfaceClass && params[1] == Map.class) {
@@ -206,7 +214,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 			return null;
 		}
 
-		if (!SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.namespace11)) {
+		if (!SCRUtil.checkMethodAccess(componentInstance.getInstance().getClass(), consumerClass, method, component.isNamespaceAtLeast11())) {
 			// if method is not visible, log error message
 			logMethodNotVisible(componentInstance, reference, methodName, method.getParameterTypes());
 			return null;
@@ -299,8 +307,9 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 		return new StringBuffer(400);
 	}
 
-	final void bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
+	final boolean bind(Reference reference, ComponentInstance instance, ServiceReference serviceReference) throws Exception {
 		if (bind != null) {
+			boolean bound = false;
 			// DON'T rebind the same object again
 			synchronized (serviceReferences) {
 				Vector instances = (Vector) serviceReferences.get(serviceReference);
@@ -312,7 +321,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 					if (reference.isUnary()) {
 						logWarning(NLS.bind(Messages.SERVICE_REFERENCE_ALREADY_BOUND, serviceReference, instance), null, reference);
 					}
-					return;
+					return false;
 				} else {
 					instances.addElement(instance);
 				}
@@ -345,7 +354,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 
 						//remove the component instance marked as bound
 						removeServiceReference(serviceReference, instance);
-						return;
+						return false;
 					}
 				}
 
@@ -365,6 +374,7 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 
 				try {
 					bindMethod.invoke(instance.getInstance(), params);
+					bound = true;
 				} catch (Throwable t) {
 					logError(NLS.bind(Messages.ERROR_BINDING_REFERENCE, this), t, reference);
 					//remove the component instance marked as bound
@@ -380,7 +390,9 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 				// could be also circularity break
 				logWarning(NLS.bind(Messages.BIND_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE, bind), null, reference);
 			}
+			return bound;
 		}
+		return false;
 	}
 
 	private void removeServiceReference(ServiceReference serviceReference, ComponentInstance instance) {
@@ -491,9 +503,78 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 		}
 	}
 
+	final void updated(Reference reference, ComponentInstance instance, ServiceReference serviceReference) {
+		if (updated != null) {
+			synchronized (serviceReferences) {
+				Vector instances = (Vector) serviceReferences.get(serviceReference);
+				if (instances == null || !instances.contains(instance)) {
+					//this instance is not bound to the passed service reference
+					return;
+				}
+			}
+			// retrieve the method from cache
+			if (!updatedCached) {
+				updatedMethod = getMethod((ComponentInstanceImpl) instance, reference, updated, serviceReference);
+				// updatedMethod can be null in case of circularity
+				if (updatedMethod != null) {
+					updatedCached = true;
+				}
+			}
+			// invoke the method
+			if (updatedMethod != null) {
+				Object methodParam = null;
+				Class[] paramTypes = updatedMethod.getParameterTypes();
+				if (paramTypes.length == 1 && paramTypes[0].equals(ServiceReference.class)) {
+					methodParam = serviceReference;
+				} else {
+					// bindedServices is filled by the getMethod function
+					methodParam = ((ComponentInstanceImpl) instance).bindedServices.get(serviceReference);
+					if (methodParam == null) {
+						methodParam = InstanceProcess.staticRef.getService(reference, serviceReference);
+						if (methodParam != null) {
+							((ComponentInstanceImpl) instance).bindedServices.put(serviceReference, methodParam);
+						}
+					}
+					if (methodParam == null) {
+						// cannot get serviceObject because of circularity
+						Activator.log(null, LogService.LOG_WARNING, NLS.bind(Messages.UPDATED_METHOD_NOT_CALLED, name, component.name), null);
+						return;
+					}
+				}
+
+				Object[] params = null;
+				if (paramTypes.length == 1) {
+					params = SCRUtil.getObjectArray();
+					params[0] = methodParam;
+				} else {
+					//this is the case where we have 2 parameters: a service object and a Map, holding the service properties
+					HashMap map = new HashMap();
+					String[] keys = serviceReference.getPropertyKeys();
+					for (int i = 0; i < keys.length; i++) {
+						map.put(keys[i], serviceReference.getProperty(keys[i]));
+					}
+					params = new Object[] {methodParam, map};
+				}
+
+				try {
+					updatedMethod.invoke(instance.getInstance(), params);
+				} catch (Throwable t) {
+					logError(NLS.bind(Messages.ERROR_UPDATING_REFERENCE, this, instance.getInstance()), t, reference);
+				} finally {
+					if (params.length == 1) {
+						SCRUtil.release(params);
+					}
+				}
+			} else {
+				// could be also circularity break
+				logWarning(NLS.bind(Messages.UPDATED_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE, updated), null, reference);
+			}
+		}
+	}
+
 	public final void dispose() {
-		bindCached = unbindCached = false;
-		bindMethod = unbindMethod = null;
+		bindCached = unbindCached = updatedCached = false;
+		bindMethod = unbindMethod = updatedMethod = null;
 		serviceReferences = null;
 	}
 
@@ -509,6 +590,16 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 				break;
 			case POLICY_STATIC :
 				buffer.append("static"); //$NON-NLS-1$
+		}
+		if (component.isNamespaceAtLeast12()) {
+			buffer.append(", policy-option = "); //$NON-NLS-1$
+			switch (policy_option) {
+				case POLICY_OPTION_RELUCTANT :
+					buffer.append("reluctant"); //$NON-NLS-1$
+					break;
+				case POLICY_OPTION_GREEDY :
+					buffer.append("greedy"); //$NON-NLS-1$
+			}
 		}
 
 		buffer.append(", cardinality = "); //$NON-NLS-1$
@@ -528,6 +619,9 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 		buffer.append(", target = ").append(target); //$NON-NLS-1$
 		buffer.append(", bind = ").append(bind); //$NON-NLS-1$
 		buffer.append(", unbind = ").append(unbind); //$NON-NLS-1$
+		if (component.isNamespaceAtLeast12()) {
+			buffer.append(", updated = ").append(updated); //$NON-NLS-1$
+		}
 		buffer.append("]"); //$NON-NLS-1$
 		return buffer.toString();
 	}
@@ -565,8 +659,20 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 			out.writeBoolean(flag);
 			if (flag)
 				out.writeUTF(unbind);
+
+			// DS 1.2 support
+			out.writeBoolean(component.isNamespaceAtLeast12());
+			if (component.isNamespaceAtLeast12()) {
+				flag = updated != null;
+				out.writeBoolean(flag);
+				if (flag)
+					out.writeUTF(updated);
+
+				out.writeInt(policy_option);
+			}
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_WRITING_OBJECT, e);
+			throw e;
 		}
 	}
 
@@ -599,8 +705,19 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 			flag = in.readBoolean();
 			if (flag)
 				unbind = in.readUTF();
+
+			// DS 1.2 support
+			flag = in.readBoolean();
+			if (flag) {
+				//This is a DS 1.2 component
+				flag = in.readBoolean();
+				if (flag)
+					updated = in.readUTF();
+				policy_option = in.readInt();
+			}
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_READING_OBJECT, e);
+			throw e;
 		}
 	}
 
@@ -674,7 +791,9 @@ public class ComponentReference implements Externalizable, org.apache.felix.scr.
 	 * @see org.apache.felix.scr.Reference#getUpdatedMethodName()
 	 */
 	public String getUpdatedMethodName() {
-		// DS specification does not specify this method yet
+		if (component.isNamespaceAtLeast12()) {
+			return updated;
+		}
 		return null;
 	}
 

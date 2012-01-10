@@ -71,9 +71,9 @@ public final class SCRUtil implements ObjectCreator {
 	/**
 	 * Checks whether the method can be accessed according to the DS v1.1 specification rules (112.8.4 Locating Component Methods)
 	 * @param implClass the component implementation class
-	 * @param currentClass the class where the method is located. This class is in the component imlpementation class hierarchy
+	 * @param currentClass the class where the method is located. This class is in the component implementation class hierarchy
 	 * @param methodToCheck the method to be checked
-	 * @param isComponent11 specifies whether the component is according to schema 1.1 or 1.0. Its value is true in case it is a v1.1 component
+	 * @param isComponent11 specifies whether the component is according to schema 1.1 or higher. Its value is true in case the component version is v1.1 or higher
 	 * @return true, if the method can be executed
 	 */
 	public static boolean checkMethodAccess(Class implClass, Class currentClass, Method methodToCheck, boolean isComponent11) {

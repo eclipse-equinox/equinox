@@ -35,6 +35,7 @@ public class DeclarationParser implements ExTagListener {
 
 	private static final String XMLNS_1_0 = "http://www.osgi.org/xmlns/scr/v1.0.0"; //$NON-NLS-1$
 	private static final String XMLNS_1_1 = "http://www.osgi.org/xmlns/scr/v1.1.0"; //$NON-NLS-1$
+	private static final String XMLNS_1_2 = "http://www.osgi.org/xmlns/scr/v1.2.0"; //$NON-NLS-1$
 	private static final String ATTR_XMLNS = "xmlns"; //$NON-NLS-1$
 
 	private static final String COMPONENT_TAG_NAME = "component"; //$NON-NLS-1$
@@ -49,6 +50,8 @@ public class DeclarationParser implements ExTagListener {
 	private static final String ATTR_ACTIVATE = "activate"; //$NON-NLS-1$
 	private static final String ATTR_DEACTIVATE = "deactivate"; //$NON-NLS-1$
 	private static final String ATTR_MODIFIED = "modified"; //$NON-NLS-1$
+	//component attributes according to schema v1.2
+	private static final String ATTR_CONFIGURATION_PID = "configuration-pid"; //$NON-NLS-1$
 
 	private static final String TAG_IMPLEMENTATION = "implementation"; //$NON-NLS-1$
 	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
@@ -71,6 +74,9 @@ public class DeclarationParser implements ExTagListener {
 	private static final String ATTR_TARGET = "target"; //$NON-NLS-1$
 	private static final String ATTR_BIND = "bind"; //$NON-NLS-1$
 	private static final String ATTR_UNBIND = "unbind"; //$NON-NLS-1$
+	//reference attributes according to schema v1.2
+	private static final String ATTR_UPDATED = "updated"; //$NON-NLS-1$
+	private static final String ATTR_POLICY_OPTION = "policy-option"; //$NON-NLS-1$
 
 	/** Constant for String property type */
 	public static final int STRING = 1;
@@ -202,7 +208,7 @@ public class DeclarationParser implements ExTagListener {
 					// if component factory then immediate by default is false
 					currentComponent.setImmediate(currentComponent.serviceInterfaces == null);
 				}
-				currentComponent.validate(tag.getLine(), isNamespace11(tag.getName()));
+				currentComponent.validate(tag.getLine(), getNamespace(tag.getName()));
 				if (components == null) {
 					components = new Vector(1, 1);
 				}
@@ -268,11 +274,6 @@ public class DeclarationParser implements ExTagListener {
 
 	private void doReference(Tag tag) throws InvalidSyntaxException {
 		String name = tag.getAttribute(ATTR_NAME);
-		//		if (name == null) {
-		//			IllegalArgumentException e = new IllegalArgumentException("The 'reference' tag must have 'name' attribute, at line " + tag.getLine());
-		//			throw e;
-		//		}
-
 		String iface = tag.getAttribute(ATTR_INTERFACE);
 		if (iface == null) {
 			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.NO_INTERFACE_ATTR_IN_REFERENCE_TAG, Integer.toString(tag.getLine())));
@@ -294,10 +295,10 @@ public class DeclarationParser implements ExTagListener {
 		int policy = ComponentReference.POLICY_STATIC; // default
 		if (policyS != null) {
 			// verify the policy attribute values
-			if (policyS.equals("static")) { //$NON-NLS-1$
-				policy = ComponentReference.POLICY_STATIC;
-			} else if (policyS.equals("dynamic")) { //$NON-NLS-1$
+			if (policyS.equals("dynamic")) { //$NON-NLS-1$
 				policy = ComponentReference.POLICY_DYNAMIC;
+			} else if (policyS.equals("static")) { //$NON-NLS-1$
+				policy = ComponentReference.POLICY_STATIC;
 			} else {
 				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_POLICY_ATTR, policyS, Integer.toString(tag.getLine())));
 				throw e;
@@ -321,6 +322,35 @@ public class DeclarationParser implements ExTagListener {
 			throw e;
 		}
 
+		String updated = tag.getAttribute(ATTR_UPDATED);
+		if (updated != null && updated.equals("")) { //$NON-NLS-1$
+			IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_REFERENCE_TAG__UPDATED_ATTR_EMPTY, Integer.toString(tag.getLine())));
+			throw e;
+		}
+
+		String policyOption = tag.getAttribute(ATTR_POLICY_OPTION);
+		int policyOptionProcessed = ComponentReference.POLICY_OPTION_RELUCTANT; //default
+		if (policyOption != null) {
+			if (policyOption.equals("greedy")) { //$NON-NLS-1$
+				policyOptionProcessed = ComponentReference.POLICY_OPTION_GREEDY;
+			} else if (policyOption.equals("reluctant")) { //$NON-NLS-1$
+				policyOptionProcessed = ComponentReference.POLICY_OPTION_RELUCTANT;
+			} else {
+				IllegalArgumentException e = new IllegalArgumentException(NLS.bind(Messages.INVALID_POLICY_OPTION_ATTR, policyOption, Integer.toString(tag.getLine())));
+				throw e;
+			}
+		}
+
+		//check if the current component namespace is suitable for the latest reference attributes
+		if (!isNamespaceAtLeast12(closeTag)) {
+			if (updated != null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_2, ATTR_UPDATED, Integer.toString(tag.getLine())));
+			}
+			if (policyOption != null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_2, ATTR_POLICY_OPTION, Integer.toString(tag.getLine())));
+			}
+		}
+
 		// the reference is autoadded in the ServiceComponent's list of
 		// references
 		// in its constructor
@@ -330,8 +360,9 @@ public class DeclarationParser implements ExTagListener {
 		ref.cardinality = cardinality;
 		ref.policy = policy;
 		ref.bind = bind;
-
 		ref.unbind = unbind;
+		ref.updated = updated;
+		ref.policy_option = policyOptionProcessed;
 		ref.target = tag.getAttribute(ATTR_TARGET);
 		// validate the target filter
 		if (ref.target != null) {
@@ -537,7 +568,7 @@ public class DeclarationParser implements ExTagListener {
 			currentComponent.immediate = Boolean.valueOf(tmp).booleanValue();
 			immediateSet = true;
 		}
-		if (isNamespace11(tagName)) {
+		if (isNamespaceAtLeast11(tagName)) {
 			//processing attribute configuration-policy
 			tmp = tag.getAttribute(ATTR_CONF_POLICY);
 			if (tmp != null && tmp.length() == 0) {
@@ -586,6 +617,22 @@ public class DeclarationParser implements ExTagListener {
 				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_0, ATTR_MODIFIED, Integer.toString(tag.getLine())));
 			}
 		}
+
+		if (isNamespaceAtLeast12(tagName)) {
+			//processing attribute configuration-policy
+			tmp = tag.getAttribute(ATTR_CONFIGURATION_PID);
+			if (tmp != null && tmp.length() == 0) {
+				tmp = null;
+			}
+			if (tmp != null) {
+				currentComponent.configurationPID = tmp;
+			}
+		} else {
+			if (tag.getAttribute(ATTR_CONFIGURATION_PID) != null) {
+				throw new IllegalArgumentException(NLS.bind(Messages.INVALID_TAG_ACCORDING_TO_NAMESPACE1_2, ATTR_CONFIGURATION_PID, Integer.toString(tag.getLine())));
+			}
+		}
+
 	}
 
 	private boolean isCorrectComponentTag(String tagName) {
@@ -596,10 +643,10 @@ public class DeclarationParser implements ExTagListener {
 		}
 		String namespace = getCurrentNamespace(qualifier);
 		if (!rootPassed) { // this is the root element
-			return namespace.length() == 0 || namespace.equals(XMLNS_1_0) || namespace.equals(XMLNS_1_1);
-		} else { // not a root element
-			return namespace.equals(XMLNS_1_0) || namespace.equals(XMLNS_1_1);
+			return namespace.length() == 0 || namespace.equals(XMLNS_1_1) || namespace.equals(XMLNS_1_2) || namespace.equals(XMLNS_1_0);
 		}
+		// not a root element
+		return namespace.equals(XMLNS_1_1) || namespace.equals(XMLNS_1_2) || namespace.equals(XMLNS_1_0);
 	}
 
 	/**
@@ -736,14 +783,35 @@ public class DeclarationParser implements ExTagListener {
 		}
 	}
 
-	private boolean isNamespace11(String tagName) {
+	private int getNamespace(String tagName) {
 		String qualifier = getNamespaceQualifier(tagName);
 		String namespace = getCurrentNamespace(qualifier);
 		if (!rootPassed) { // this is the root element
-			return namespace.length() != 0 && namespace.equals(XMLNS_1_1);
-		} else { // not a root element
-			return namespace.equals(XMLNS_1_1);
+			if (namespace.length() == 0) {
+				return ServiceComponent.NAMESPACE_1_0;
+			}
 		}
+		// not a root element
+		if (namespace.equals(XMLNS_1_0)) {
+			return ServiceComponent.NAMESPACE_1_0;
+		} else if (namespace.equals(XMLNS_1_1)) {
+			return ServiceComponent.NAMESPACE_1_1;
+		} else if (namespace.equals(XMLNS_1_2)) {
+			return ServiceComponent.NAMESPACE_1_2;
+		}
+
+		//namespace is not known
+		return -1;
+	}
+
+	private boolean isNamespaceAtLeast11(String tagName) {
+		int namespace = getNamespace(tagName);
+		return (namespace >= ServiceComponent.NAMESPACE_1_1);
+	}
+
+	private boolean isNamespaceAtLeast12(String tagName) {
+		int namespace = getNamespace(tagName);
+		return (namespace >= ServiceComponent.NAMESPACE_1_2);
 	}
 
 	private void processNamespacesEnter(Tag tag) {

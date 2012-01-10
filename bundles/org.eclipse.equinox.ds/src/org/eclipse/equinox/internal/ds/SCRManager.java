@@ -289,10 +289,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 							//skip processing of this component - it is not interested in configuration changes
 							continue;
 						}
-						String name = sc.name;
+						String name = sc.getConfigurationPID();
 						if (name.equals(pid) || name.equals(fpid)) {
 							if (name.equals(fpid) && sc.factory != null) {
-								Activator.log(sc.bc, LogService.LOG_ERROR, NLS.bind(Messages.FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY, name), null);
+								Activator.log(sc.bc, LogService.LOG_ERROR, NLS.bind(Messages.FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY, sc.name), null);
 								return;
 							}
 							if (sc.enabled) {
@@ -344,7 +344,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 				if (fpid == null) {
 					// there is only one SCP for this SC
 					boolean requiresRestart = true;
-					if (sc.namespace11 && sc.modifyMethodName != "") { //$NON-NLS-1$
+					if (sc.isNamespaceAtLeast11() && sc.modifyMethodName != "") { //$NON-NLS-1$
 						ServiceComponentProp scp = sc.getServiceComponentProp();
 						if (scp != null && scp.isBuilt()) {
 							//process only built components
@@ -378,7 +378,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						}
 					}
 					boolean requiresRestart = true;
-					if (sc.namespace11 && sc.modifyMethodName != "" && scp != null) { //$NON-NLS-1$
+					if (sc.isNamespaceAtLeast11() && sc.modifyMethodName != "" && scp != null) { //$NON-NLS-1$
 						if (scp.isBuilt()) {
 							//process only built components
 							requiresRestart = processConfigurationChange(scp, config[0]);
@@ -837,9 +837,10 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 						continue;
 					}
 					if (sc.enabled) {
+						String componentPID = sc.getConfigurationPID();
 						for (int j = 0; j < configs.length; j++) {
-							if (configs[j].getPid().equals(sc.name) || sc.name.equals(configs[j].getFactoryPid())) {
-								if (sc.name.equals(configs[j].getFactoryPid()) && sc.factory != null) {
+							if (configs[j].getPid().equals(componentPID) || componentPID.equals(configs[j].getFactoryPid())) {
+								if (componentPID.equals(configs[j].getFactoryPid()) && sc.factory != null) {
 									Activator.log(sc.bc, LogService.LOG_ERROR, NLS.bind(Messages.FACTORY_CONF_NOT_APPLICABLE_FOR_COMPONENT_FACTORY, sc.name), null);
 									break;
 								}

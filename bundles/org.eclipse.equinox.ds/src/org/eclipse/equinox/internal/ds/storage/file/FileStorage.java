@@ -89,23 +89,19 @@ public class FileStorage extends ComponentStorage {
 
 			String lastModifiedValue = (String) data.get(getPath(dbBundlePath));
 			if (lastModifiedValue == null) {
-				components = parseXMLDeclaration(bundle, dsHeader);
-				if (components != null && components.size() != 0) {
-					data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
-					saveComponentDefinitions(components, bundle.getBundleId());
-				}
-
+				components = processXMLDeclarations(bundle, dsHeader, dbBundlePath, lastModified);
 			} else {
 				long dbLastModified = Long.parseLong(lastModifiedValue);
 				if (lastModified != dbLastModified) {
-					components = parseXMLDeclaration(bundle, dsHeader);
-					if (components != null && components.size() != 0) {
-						data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
-						saveComponentDefinitions(components, bundle.getBundleId());
-					}
-
+					components = processXMLDeclarations(bundle, dsHeader, dbBundlePath, lastModified);
 				} else {
-					components = loadComponentsFromDB(bundle);
+					try {
+						components = loadComponentsFromDB(bundle);
+					} catch (Throwable t) {
+						Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_LOADING_COMPONENTS, t);
+						//backup plan - parse the bundle's component XML declarations
+						components = processXMLDeclarations(bundle, dsHeader, dbBundlePath, lastModified);
+					}
 				}
 			}
 			return components;
@@ -115,30 +111,34 @@ public class FileStorage extends ComponentStorage {
 		}
 	}
 
-	private Vector loadComponentsFromDB(Bundle bundle) throws Exception {
-		try {
-			String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
-			ServiceComponent currentComponent = null;
-			long bundleId = bundle.getBundleId();
-			dbCompPath[0] = String.valueOf(bundleId);
-			DBObject value = new DBObject();
-			byte[] byteArr = (byte[]) data.get(getPath(dbCompPath));
-			ByteArrayInputStream tmpIn = new ByteArrayInputStream(byteArr);
-			value.readObject(tmpIn);
-			Vector components = value.components;
-			if (components == null) {
-				return null;
-			}
-			for (int i = 0; i < components.size(); i++) {
-				currentComponent = (ServiceComponent) components.elementAt(i);
-				currentComponent.bundle = bundle;
-				currentComponent.bc = bundle.getBundleContext();
-			}
-			return components;
-		} catch (Throwable t) {
-			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_LOADING_COMPONENTS, t);
+	private Vector processXMLDeclarations(Bundle bundle, String dsHeader, String[] dbBundlePath, long lastModified) throws Exception {
+		Vector components = parseXMLDeclaration(bundle, dsHeader);
+		if (components != null && components.size() != 0) {
+			data.put(getPath(dbBundlePath), "" + lastModified); //$NON-NLS-1$
+			saveComponentDefinitions(components, bundle.getBundleId());
 		}
-		return null;
+		return components;
+	}
+
+	private Vector loadComponentsFromDB(Bundle bundle) throws Exception {
+		String[] dbCompPath = new String[] {null, "COMPONENTS"}; //$NON-NLS-1$
+		ServiceComponent currentComponent = null;
+		long bundleId = bundle.getBundleId();
+		dbCompPath[0] = String.valueOf(bundleId);
+		DBObject value = new DBObject();
+		byte[] byteArr = (byte[]) data.get(getPath(dbCompPath));
+		ByteArrayInputStream tmpIn = new ByteArrayInputStream(byteArr);
+		value.readObject(tmpIn);
+		Vector components = value.components;
+		if (components == null) {
+			return null;
+		}
+		for (int i = 0; i < components.size(); i++) {
+			currentComponent = (ServiceComponent) components.elementAt(i);
+			currentComponent.bundle = bundle;
+			currentComponent.bc = bundle.getBundleContext();
+		}
+		return components;
 	}
 
 	public void deleteComponentDefinitions(long bundleID) {

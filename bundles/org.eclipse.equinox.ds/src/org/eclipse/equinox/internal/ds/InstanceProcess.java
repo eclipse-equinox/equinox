@@ -227,12 +227,12 @@ public class InstanceProcess {
 
 								// check if MSF
 								try {
-									Configuration config = Activator.getConfiguration(sc.name);
+									Configuration config = Activator.getConfiguration(sc.getConfigurationPID());
 									if (config != null) {
 										factoryPid = config.getFactoryPid();
 									}
 								} catch (Exception e) {
-									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_GET_CONFIGURATION, sc.name), e);
+									Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANNOT_GET_CONFIGURATION, sc.getConfigurationPID()), e);
 								}
 
 								// if MSF throw exception - can't be
@@ -474,6 +474,37 @@ public class InstanceProcess {
 		} catch (Throwable e) {
 			//should not happen
 			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_ERROR, e);
+		}
+	}
+
+	/**
+	 * Called by dispatcher ( Resolver) when service properties have been modified for some reference  
+	 * 
+	 * @param serviceReferenceTable	Map of <Reference>:<Map of <ServiceComponentProp>:<ServiceReference>>
+	 */
+	final void referencePropertiesUpdated(Hashtable serviceReferenceTable) {
+		// for each element in the table
+		Enumeration e = serviceReferenceTable.keys();
+		while (e.hasMoreElements()) {
+			Reference ref = (Reference) e.nextElement();
+			Hashtable serviceSubTable = (Hashtable) serviceReferenceTable.get(ref);
+			Enumeration sub = serviceSubTable.keys();
+			while (sub.hasMoreElements()) {
+				ServiceComponentProp scp = (ServiceComponentProp) sub.nextElement();
+				ServiceReference serviceReference = (ServiceReference) serviceSubTable.get(scp);
+				// get the list of instances created
+				Vector instances = scp.instances;
+				for (int i = 0; i < instances.size(); i++) {
+					ComponentInstance compInstance = (ComponentInstance) instances.elementAt(i);
+					if (compInstance != null) {
+						try {
+							scp.updatedReference(ref, compInstance, serviceReference);
+						} catch (Throwable t) {
+							Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.ERROR_UPDATING_REFERENCE, ref.reference, compInstance.getInstance()), t);
+						}
+					}
+				}
+			}
 		}
 	}
 

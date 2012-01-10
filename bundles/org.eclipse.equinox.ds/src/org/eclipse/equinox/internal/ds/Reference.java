@@ -30,10 +30,6 @@ import org.osgi.service.log.LogService;
  * @author Stoyan Boshev
  * @author Pavlin Dobrev
  */
-/**
- * @author stoyan
- *
- */
 public final class Reference implements org.apache.felix.scr.Reference {
 
 	public ComponentReference reference;
@@ -98,7 +94,7 @@ public final class Reference implements org.apache.felix.scr.Reference {
 				break;
 			case ComponentReference.CARDINALITY_0_N :
 				cardinalityLow = 0;
-				cardinalityHigh = 999999999;
+				cardinalityHigh = Integer.MAX_VALUE;
 				break;
 			case ComponentReference.CARDINALITY_1_1 :
 				cardinalityLow = 1;
@@ -106,7 +102,7 @@ public final class Reference implements org.apache.felix.scr.Reference {
 				break;
 			case ComponentReference.CARDINALITY_1_N :
 				cardinalityLow = 1;
-				cardinalityHigh = 999999999;
+				cardinalityHigh = Integer.MAX_VALUE;
 		}
 
 	}
@@ -174,7 +170,11 @@ public final class Reference implements org.apache.felix.scr.Reference {
 			if (policy == ComponentReference.POLICY_DYNAMIC) {
 				return false;
 			}
+			if (this.reference.policy_option == ComponentReference.POLICY_OPTION_RELUCTANT) {
+				return false;
+			}
 		}
+
 		String[] serviceNames = (String[]) referenceToBind.getProperty(Constants.OBJECTCLASS);
 		boolean hasName = false;
 		for (int i = 0; i < serviceNames.length; i++) {
@@ -186,16 +186,36 @@ public final class Reference implements org.apache.felix.scr.Reference {
 		if (!hasName) {
 			return false;
 		}
+
 		if (this.reference.bind != null) {
 			if (this.reference.serviceReferences.size() >= cardinalityHigh) {
-				return false;
+				if (this.reference.policy_option == ComponentReference.POLICY_OPTION_RELUCTANT) {
+					return false;
+				} else if (this.reference.policy_option == ComponentReference.POLICY_OPTION_GREEDY) {
+					//check if the single bound service needs replacement with higher ranked service
+					Object currentBoundServiceReference = this.reference.serviceReferences.keys().nextElement();
+					int res = referenceToBind.compareTo(currentBoundServiceReference);
+					if (res <= 0) {
+						// bound service shall not be replaced
+						return false;
+					}
+				}
 			}
 		} else if (!dynamicBind) {
 			//custom case: static reference with no bind method - check its bound service references list
 			if (boundServiceReferences.size() >= cardinalityHigh) {
-				return false;
+				if (this.reference.policy_option == ComponentReference.POLICY_OPTION_GREEDY) {
+					//check if the single bound service needs replacement with higher ranked service
+					Object currentBoundServiceReference = boundServiceReferences.elementAt(0);
+					int res = referenceToBind.compareTo(currentBoundServiceReference);
+					if (res <= 0) {
+						// bound service shall not be replaced
+						return false;
+					}
+				}
 			}
 		}
+
 		// check target filter
 		try {
 			Filter filter = FrameworkUtil.createFilter(target);
@@ -464,7 +484,9 @@ public final class Reference implements org.apache.felix.scr.Reference {
 	 * @see org.apache.felix.scr.Reference#getUpdatedMethodName()
 	 */
 	public String getUpdatedMethodName() {
-		// DS specification does not specify this method yet
+		if (reference.component.isNamespaceAtLeast12()) {
+			return reference.updated;
+		}
 		return null;
 	}
 

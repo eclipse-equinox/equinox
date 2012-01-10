@@ -159,7 +159,7 @@ public final class Resolver implements WorkPerformer {
 
 					// check for a Configuration properties for this component
 					try {
-						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.name + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.name + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						String filter = "(|(" + Constants.SERVICE_PID + '=' + current.getConfigurationPID() + ")(" + ConfigurationAdmin.SERVICE_FACTORYPID + '=' + current.getConfigurationPID() + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						configs = Activator.listConfigurations(filter);
 					} catch (Exception e) {
 						Activator.log(null, LogService.LOG_ERROR, NLS.bind(Messages.CANT_LIST_CONFIGURATIONS, current.name), e);
@@ -178,7 +178,7 @@ public final class Resolver implements WorkPerformer {
 					} else {
 						// if ManagedServiceFactory
 						Configuration config = configs[0];
-						if (config.getFactoryPid() != null && config.getFactoryPid().equals(current.name)) {
+						if (config.getFactoryPid() != null && config.getFactoryPid().equals(current.getConfigurationPID())) {
 							// if ComponentFactory is specified
 							if (current.factory != null) {
 								Activator.log(current.bc, LogService.LOG_ERROR, NLS.bind(Messages.REGISTERED_AS_COMPONENT_AND_MANAGED_SERVICE_FACORY, current.name), null);
@@ -305,11 +305,22 @@ public final class Resolver implements WorkPerformer {
 		Vector resolvedComponents = null;
 		switch (event.getType()) {
 			case ServiceEvent.REGISTERED :
+
 				synchronized (syncLock) {
 					serviceReferenceTable.put(event.getServiceReference(), Boolean.TRUE);
 					if (scpEnabled.isEmpty())
 						return; // check for any enabled configurations
 
+					//check for any static references with policy option "greedy" that need to be bound with this service reference
+					target = selectStaticBind(scpEnabled, event.getServiceReference());
+				}
+
+				if (target != null) {
+					//dispose instances of components with static reference that needs to be bound with the service reference
+					instanceProcess.disposeInstances((Vector) target, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
+				}
+
+				synchronized (syncLock) {
 					resolvedComponents = getComponentsToBuild();
 					target = selectDynamicBind(scpEnabled, event.getServiceReference());
 				}
@@ -393,17 +404,34 @@ public final class Resolver implements WorkPerformer {
 				}
 
 				if (componentsToDispose != null) {
-					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_UNSPECIFIED);
+					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
 				}
 
+				synchronized (syncLock) {
+					//check for any static references with policy option "greedy" that need to be bound with this service reference
+					componentsToDispose = selectStaticBind(scpEnabled, event.getServiceReference());
+				}
+
+				if (componentsToDispose != null) {
+					//dispose instances of components with static reference that needs to be bound with the modified service reference
+					instanceProcess.disposeInstances(componentsToDispose, ComponentConstants.DEACTIVATION_REASON_REFERENCE);
+				}
+
+				Hashtable referencesToUpdate = null;
 				synchronized (syncLock) {
 					// dynamic unbind
 					// check each satisfied scp - do we need to unbind
 					target = selectDynamicUnBind(scpEnabled, event.getServiceReference(), true);
+
+					//check references that need to be updated
+					referencesToUpdate = selectReferencesToUpdate(scpEnabled, event.getServiceReference());
 				}
 
 				if (target != null) {
 					instanceProcess.dynamicUnBind((Hashtable) target);
+				}
+				if (referencesToUpdate != null) {
+					instanceProcess.referencePropertiesUpdated(referencesToUpdate);
 				}
 
 				synchronized (syncLock) {
@@ -765,6 +793,52 @@ public final class Resolver implements WorkPerformer {
 		}
 	}
 
+	//Returns the components with static reference that needs to be bound with the service reference. 
+	//This can happen if the static reference has policy option "greedy"
+	private Vector selectStaticBind(Vector scps, ServiceReference serviceReference) {
+		try {
+			Vector toBind = null;
+			for (int i = 0, size = scps.size(); i < size; i++) {
+				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
+				if (scp.isUnsatisfied()) {
+					//do not check disposed components
+					continue;
+				}
+				Vector references = scp.references;
+				if (references != null) {
+					for (int j = 0; j < references.size(); j++) {
+						Reference reference = (Reference) references.elementAt(j);
+						if (reference.bindNewReference(serviceReference, false)) {
+							if (toBind == null) {
+								toBind = new Vector(2);
+							}
+							toBind.addElement(reference);
+						}
+					}
+				}
+			}
+			Vector result = null;
+			Reference ref = null;
+			if (toBind != null) {
+				result = new Vector();
+				for (int i = 0; i < toBind.size(); i++) {
+					ref = (Reference) toBind.elementAt(i);
+					if (!result.contains(ref.scp)) {
+						result.addElement(ref.scp);
+					}
+				}
+			}
+
+			if (result != null && Activator.DEBUG) {
+				Activator.log.debug("Resolver.selectStaticBind(): selected = " + result.toString(), null); //$NON-NLS-1$
+			}
+			return result;
+		} catch (Throwable t) {
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
+			return null;
+		}
+	}
+
 	private Vector selectStaticUnBind(Vector scpsToCheck, ServiceReference serviceReference, boolean checkSatisfied) {
 		try {
 			Vector toUnbind = null;
@@ -864,6 +938,62 @@ public final class Resolver implements WorkPerformer {
 				Activator.log.debug("Resolver.selectDynamicUnBind(): unbindTable is " + unbindTable.toString(), null); //$NON-NLS-1$
 			}
 			return unbindTable;
+		} catch (Throwable t) {
+			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
+			return null;
+		}
+	}
+
+	/**
+	 * Determine which component references needs to be updated by their specified updated method due to the current service references properties change
+	 * 
+	 * @param scps
+	 * @param serviceReference
+	 * @return Map of <Reference>:<Map of <ServiceComponentProp>:<ServiceReference>>
+	 * 
+	 */
+	private Hashtable selectReferencesToUpdate(Vector scps, ServiceReference serviceReference) {
+		try {
+			if (Activator.DEBUG) {
+				Activator.log.debug("Resolver.selectReferencesToUpdate(): entered", null); //$NON-NLS-1$
+			}
+			Hashtable referencesTable = null;
+			for (int i = 0; i < scps.size(); i++) {
+				Hashtable updateSubTable = null;
+				ServiceComponentProp scp = (ServiceComponentProp) scps.elementAt(i);
+
+				if (scp.isUnsatisfied() || !scp.serviceComponent.isNamespaceAtLeast12()) {
+					//do not check deactivated components or components which are not DS 1.2 compliant
+					continue;
+				}
+				Vector references = scp.references;
+				if (references != null) {
+					for (int j = 0; j < references.size(); j++) {
+						Reference reference = (Reference) references.elementAt(j);
+						if (reference.reference.updated == null) {
+							//the reference does not have updated method specified
+							continue;
+						}
+						if (reference.isStatic() ? reference.staticUnbindReference(serviceReference) : reference.dynamicUnbindReference(serviceReference)) {
+							if (Activator.DEBUG) {
+								Activator.log.debug("Resolver.selectReferencesToUpdate(): selected for update reference " + reference.reference.name + " of component " + scp.toString(), null); //$NON-NLS-1$ //$NON-NLS-2$
+							}
+							if (updateSubTable == null) {
+								updateSubTable = new Hashtable(11);
+							}
+							updateSubTable.put(scp, serviceReference);
+							if (referencesTable == null) {
+								referencesTable = new Hashtable(11);
+							}
+							referencesTable.put(reference, updateSubTable);
+						}
+					}
+				}
+			}
+			if (referencesTable != null && Activator.DEBUG) {
+				Activator.log.debug("Resolver.selectReferencesToUpdate(): referencesTable is " + referencesTable.toString(), null); //$NON-NLS-1$
+			}
+			return referencesTable;
 		} catch (Throwable t) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.UNEXPECTED_EXCEPTION, t);
 			return null;

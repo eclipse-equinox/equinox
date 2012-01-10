@@ -18,6 +18,8 @@ public class Messages extends NLS {
 	public static String ALL_COMPONENTS;
 	public static String ALL_REFERENCES_RESOLVED;
 	public static String BIND_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE;
+	public static String UPDATED_METHOD_NOT_FOUND_OR_NOT_ACCESSIBLE;
+	public static String UPDATED_METHOD_NOT_CALLED;
 	public static String BUNDLE_NOT_FOUND;
 	public static String CANNOT_BUILD_COMPONENT;
 	public static String CANNOT_CREATE_INSTANCE;
@@ -63,6 +65,7 @@ public class Messages extends NLS {
 	public static String ENABLING_ALL_BUNDLE_COMPONENTS;
 	public static String ENABLING_ALL_COMPONENTS;
 	public static String ERROR_BINDING_REFERENCE;
+	public static String ERROR_UPDATING_REFERENCE;
 	public static String ERROR_BUILDING_COMPONENT_INSTANCE;
 	public static String ERROR_CREATING_SCP;
 	public static String ERROR_DEACTIVATING_INSTANCE;
@@ -112,6 +115,7 @@ public class Messages extends NLS {
 	public static String INVALID_COMPONENT_TAG__NO_CLASS_ATTR;
 	public static String INVALID_OBJECT;
 	public static String INVALID_POLICY_ATTR;
+	public static String INVALID_POLICY_OPTION_ATTR;
 	public static String INVALID_PROPERTIES_TAG__INVALID_ENTRY_VALUE;
 	public static String INVALID_PROPERTIES_TAG__NO_ENTRY_ATTR;
 	public static String INVALID_PROPERTY_TAG__NO_BODY_CONTENT;
@@ -121,9 +125,11 @@ public class Messages extends NLS {
 	public static String INVALID_REFERENCE_TAG__BIND_ATTR_EMPTY;
 	public static String INVALID_REFERENCE_TAG__BIND_EQUALS_UNBIND;
 	public static String INVALID_REFERENCE_TAG__UNBIND_ATTR_EMPTY;
+	public static String INVALID_REFERENCE_TAG__UPDATED_ATTR_EMPTY;
 	public static String INVALID_SERVICE_REFERENCE;
 	public static String INVALID_SERVICE_TAG__NO_PROVIDE_TAG;
 	public static String INVALID_TAG_ACCORDING_TO_NAMESPACE1_0;
+	public static String INVALID_TAG_ACCORDING_TO_NAMESPACE1_2;
 	public static String INVALID_TARGET_FILTER;
 	public static String LIST_ALL_BUNDLE_COMPONENTS;
 	public static String LIST_ALL_COMPONENTS;

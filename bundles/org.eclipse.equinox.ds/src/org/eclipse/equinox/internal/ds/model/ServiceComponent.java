@@ -38,9 +38,14 @@ import org.osgi.service.log.LogService;
  */
 public class ServiceComponent implements Externalizable, Component {
 
-	public static String CONF_POLICY_OPTIONAL = "optional"; //$NON-NLS-1$
-	public static String CONF_POLICY_REQUIRE = "require"; //$NON-NLS-1$
-	public static String CONF_POLICY_IGNORE = "ignore"; //$NON-NLS-1$
+	//constants defining possible SCR namespaces XML schemas
+	public static final int NAMESPACE_1_0 = 0;
+	public static final int NAMESPACE_1_1 = 1;
+	public static final int NAMESPACE_1_2 = 2;
+
+	public static final String CONF_POLICY_OPTIONAL = "optional"; //$NON-NLS-1$
+	public static final String CONF_POLICY_REQUIRE = "require"; //$NON-NLS-1$
+	public static final String CONF_POLICY_IGNORE = "ignore"; //$NON-NLS-1$
 
 	public Vector componentProps = null;
 
@@ -54,6 +59,9 @@ public class ServiceComponent implements Externalizable, Component {
 	String deactivateMethodName = "deactivate"; //$NON-NLS-1$
 	public String modifyMethodName = ""; //$NON-NLS-1$
 
+	//Since DS 1.2
+	public String configurationPID;
+
 	// service
 	public Vector serviceInterfaces; // all strings
 	public String[] provides; // the same as above, but as String[]
@@ -63,7 +71,7 @@ public class ServiceComponent implements Externalizable, Component {
 
 	public boolean autoenable = true;
 	public boolean immediate = false;
-	public boolean namespace11 = false;
+	public int namespace = NAMESPACE_1_0;
 	// --- end: XML def
 
 	// --- begin: cache
@@ -114,7 +122,7 @@ public class ServiceComponent implements Externalizable, Component {
 		Class clazz = instance != null ? instance.getClass() : null;
 
 		while (method == null && clazz != null) {
-			if (namespace11) {
+			if (isNamespaceAtLeast11()) {
 				Method[] methods = clazz.getDeclaredMethods();
 				for (int i = 0; i < methods.length; i++) {
 					if (methods[i].getName().equals(methodName)) {
@@ -199,7 +207,7 @@ public class ServiceComponent implements Externalizable, Component {
 
 	void activate(Object instance, ComponentContext context) throws ComponentException {
 		try {
-			if (namespace11) {
+			if (isNamespaceAtLeast11()) {
 				if (!activateCached) {
 					activateCached = true;
 					activateMethod = getMethod(instance, activateMethodName, true);
@@ -272,7 +280,7 @@ public class ServiceComponent implements Externalizable, Component {
 
 	void modified(Object instance, ComponentContext context) throws ComponentException {
 		try {
-			if (namespace11) {
+			if (isNamespaceAtLeast11()) {
 				if (!modifyCached) {
 					modifyCached = true;
 					if (modifyMethodName != "") { //$NON-NLS-1$
@@ -323,7 +331,7 @@ public class ServiceComponent implements Externalizable, Component {
 
 	void deactivate(Object instance, ComponentContext context, int deactivateReason) {
 		try {
-			if (namespace11) {
+			if (isNamespaceAtLeast11()) {
 				if (!deactivateCached) {
 					deactivateCached = true;
 					deactivateMethod = getMethod(instance, deactivateMethodName, false);
@@ -388,25 +396,32 @@ public class ServiceComponent implements Externalizable, Component {
 	}
 
 	/**
-	 * this method is called from the xml parser to validate the component once
+	 * This method is called from the XML parser to validate the component once
 	 * it is fully loaded!
 	 * 
 	 * @param line
 	 *            the line at which the the component definition ends
-	 * @param namespace11 specify whether the namespace of the component is according to XML SCR schema v1.1
+	 * @param _namespace specify the namespace of the component according to XML SCR schema
 	 */
-	void validate(int line, boolean namespace11) {
+	void validate(int line, int _namespace) {
 		//		System.out.println("Validating component " + name + " with namespace " + (namespace11 ? "1.1" : "1.0"));
+		this.namespace = _namespace;
 		if (name == null) {
-			if (namespace11) {
+			if (isNamespaceAtLeast11()) {
 				name = implementation;
 			} else {
 				throw new IllegalArgumentException(NLS.bind(Messages.NO_NAME_ATTRIBUTE, Integer.toString(line)));
 			}
 		}
-		if (namespace11) {
+		if (isNamespaceAtLeast11()) {
 			if (!(configurationPolicy == CONF_POLICY_OPTIONAL || configurationPolicy == CONF_POLICY_REQUIRE || configurationPolicy == CONF_POLICY_IGNORE)) {
 				throw new IllegalArgumentException(NLS.bind(Messages.INCORRECT_ACTIVATION_POLICY, name, Integer.toString(line)));
+			}
+		}
+
+		if (isNamespaceAtLeast12()) {
+			if (configurationPID == null) {
+				configurationPID = name;
 			}
 		}
 
@@ -435,13 +450,13 @@ public class ServiceComponent implements Externalizable, Component {
 			for (int i = 0; i < references.size(); i++) {
 				ComponentReference r = (ComponentReference) references.elementAt(i);
 				if (r.name == null) {
-					if (namespace11) {
+					if (isNamespaceAtLeast11()) {
 						r.name = r.interfaceName;
 					} else {
 						throw new IllegalArgumentException(NLS.bind(Messages.COMPONENT_HAS_ILLEGAL_REFERENCE, new Object[] {name, Integer.toString(line), r}));
 					}
 				}
-				if (r.interfaceName == null || r.name.equals("") || r.interfaceName.equals("")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (r.interfaceName == null || r.name.length() == 0 || r.interfaceName.length() == 0) {
 					throw new IllegalArgumentException(NLS.bind(Messages.COMPONENT_HAS_ILLEGAL_REFERENCE, new Object[] {name, Integer.toString(line), r}));
 				}
 				for (int j = i + 1; j < references.size(); j++) {
@@ -458,8 +473,6 @@ public class ServiceComponent implements Externalizable, Component {
 			provides = new String[serviceInterfaces.size()];
 			serviceInterfaces.copyInto(provides);
 		}
-
-		this.namespace11 = namespace11;
 
 		// make sure that the component will get automatically enabled!
 		enabled = autoenable;
@@ -520,6 +533,13 @@ public class ServiceComponent implements Externalizable, Component {
 		return serviceInterfaces != null && serviceInterfaces.contains(interfaceName);
 	}
 
+	public String getConfigurationPID() {
+		if (isNamespaceAtLeast12()) {
+			return configurationPID;
+		}
+		return name;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -529,11 +549,14 @@ public class ServiceComponent implements Externalizable, Component {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Component["); //$NON-NLS-1$
 		buffer.append("\n\tname = ").append(name); //$NON-NLS-1$
-		if (namespace11) {
+		if (isNamespaceAtLeast11()) {
 			buffer.append("\n\tactivate = ").append(activateMethodName); //$NON-NLS-1$
 			buffer.append("\n\tdeactivate = ").append(deactivateMethodName); //$NON-NLS-1$
 			buffer.append("\n\tmodified = ").append(modifyMethodName); //$NON-NLS-1$
 			buffer.append("\n\tconfiguration-policy = ").append(configurationPolicy); //$NON-NLS-1$
+		}
+		if (isNamespaceAtLeast12()) {
+			buffer.append("\n\tconfiguration-pid = ").append(configurationPID); //$NON-NLS-1$
 		}
 		buffer.append("\n\tfactory = ").append(factory); //$NON-NLS-1$
 		buffer.append("\n\tautoenable = ").append(autoenable); //$NON-NLS-1$
@@ -617,8 +640,8 @@ public class ServiceComponent implements Externalizable, Component {
 				dictionary.writeObject(out);
 			}
 
-			out.writeBoolean(namespace11);
-			if (namespace11) {
+			out.writeInt(namespace);
+			if (isNamespaceAtLeast11()) {
 				if (configurationPolicy == CONF_POLICY_OPTIONAL) {
 					//this is the default value. Do not write it. Just add a mark
 					out.writeBoolean(false);
@@ -648,8 +671,17 @@ public class ServiceComponent implements Externalizable, Component {
 					out.writeUTF(modifyMethodName);
 				}
 			}
+			if (isNamespaceAtLeast12()) {
+				if (configurationPID == name) {
+					out.writeBoolean(false);
+				} else {
+					out.writeBoolean(true);
+					out.writeUTF(configurationPID);
+				}
+			}
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_WRITING_OBJECT, e);
+			throw e;
 		}
 	}
 
@@ -713,8 +745,8 @@ public class ServiceComponent implements Externalizable, Component {
 				}
 				properties = props;
 			}
-			namespace11 = in.readBoolean();
-			if (namespace11) {
+			namespace = in.readInt();
+			if (isNamespaceAtLeast11()) {
 				flag = in.readBoolean();
 				if (flag) {
 					configurationPolicy = in.readUTF();
@@ -738,8 +770,17 @@ public class ServiceComponent implements Externalizable, Component {
 				if (flag)
 					modifyMethodName = in.readUTF();
 			}
+			if (isNamespaceAtLeast12()) {
+				flag = in.readBoolean();
+				if (flag) {
+					configurationPID = in.readUTF();
+				} else {
+					configurationPID = name;
+				}
+			}
 		} catch (Exception e) {
 			Activator.log(null, LogService.LOG_ERROR, Messages.ERROR_READING_OBJECT, e);
+			throw e;
 		}
 	}
 
@@ -778,6 +819,14 @@ public class ServiceComponent implements Externalizable, Component {
 			}
 		}
 		return null;
+	}
+
+	public boolean isNamespaceAtLeast11() {
+		return namespace >= NAMESPACE_1_1;
+	}
+
+	public boolean isNamespaceAtLeast12() {
+		return namespace >= NAMESPACE_1_2;
 	}
 
 	public boolean isImmediate() {
@@ -850,7 +899,7 @@ public class ServiceComponent implements Externalizable, Component {
 	}
 
 	public String getModified() {
-		if (!namespace11) {
+		if (!isNamespaceAtLeast11()) {
 			return null;
 		}
 		return modifyMethodName;
@@ -895,14 +944,14 @@ public class ServiceComponent implements Externalizable, Component {
 	}
 
 	public boolean isActivateDeclared() {
-		if (!namespace11) {
+		if (!isNamespaceAtLeast11()) {
 			return false;
 		}
 		return activateMethodDeclared;
 	}
 
 	public boolean isDeactivateDeclared() {
-		if (!namespace11) {
+		if (!isNamespaceAtLeast11()) {
 			return false;
 		}
 		return deactivateMethodDeclared;
