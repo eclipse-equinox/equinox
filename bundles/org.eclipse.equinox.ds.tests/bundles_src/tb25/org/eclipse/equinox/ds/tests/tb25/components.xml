@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components>
+
+	<!-- This component tests updating of service properties -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.ServicePropertiesComp"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.ServicePropertiesComp"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=service.properties.update.test)"
+			bind="bindRef"
+			updated="serviceUpdatedStatic"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=service.properties.update.test)"
+			policy="dynamic"
+			bind="bindRef"
+			updated="serviceUpdatedDynamic"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component tests Reluctant policy option with static reference binding -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.PolicyReluctantStaticComp"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.PolicyOptionComp"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="0..1"
+			bind="bind01"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="1..1"
+			bind="bind11"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="0..n"
+			bind="bind0n"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="1..n"
+			bind="bind1n"
+			policy-option="reluctant"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component tests Reluctant policy option with dynamic reference binding -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.PolicyReluctantDynamicComp"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.PolicyOptionComp"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="0..1"
+			bind="bind01"
+			policy="dynamic"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="1..1"
+			bind="bind11"
+			policy="dynamic"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="0..n"
+			bind="bind0n"
+			policy="dynamic"
+			policy-option="reluctant"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=reluctant.policy.option.test)"
+			cardinality="1..n"
+			bind="bind1n"
+			policy="dynamic"
+			policy-option="reluctant"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component tests Greedy policy option with static reference binding -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.PolicyGreedyStaticComp"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.PolicyOptionComp"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="0..1"
+			bind="bind01"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="1..1"
+			bind="bind11"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="0..n"
+			bind="bind0n"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="1..n"
+			bind="bind1n"
+			policy-option="greedy"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component tests Greedy policy option with dynamic reference binding -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.PolicyGreedyDynamicComp"
+		immediate="true">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.PolicyOptionComp"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="0..1"
+			bind="bind01"
+			policy="dynamic"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="1..1"
+			bind="bind11"
+			policy="dynamic"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="0..n"
+			bind="bind0n"
+			policy="dynamic"
+			policy-option="greedy"/>
+		<reference
+			interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"
+			target="(service.provider=greedy.policy.option.test)"
+			cardinality="1..n"
+			bind="bind1n"
+			policy="dynamic"
+			policy-option="greedy"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+
+	<!-- This component tests component configuration's PID -->
+	<component
+		xmlns="http://www.osgi.org/xmlns/scr/v1.2.0"
+		name="org.eclipse.equinox.ds.tests.tb25.ConfigPIDComp"
+		immediate="true"
+		configuration-pid="test.changed.configuration.pid">
+		<implementation
+			class="org.eclipse.equinox.ds.tests.tb25.ConfigPIDComp"/>
+		<service>
+			<provide interface="org.eclipse.equinox.ds.tests.tbc.PropertiesProvider"/>
+		</service>
+	</component>
+</components>

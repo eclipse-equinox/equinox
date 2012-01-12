@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2011 by ProSyst Software GmbH
+ * Copyright (c) 1997, 2012 by ProSyst Software GmbH
  * http://www.prosyst.com
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,9 +12,12 @@
 package org.eclipse.equinox.ds.tests.tbc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -2496,6 +2499,9 @@ public class DSTest extends TestCase {
       
       //start again the config admin 
       cmBundle.start();
+      
+      //wait for processing components that depend on configurations
+      Thread.sleep(timeout * 2);
 
       // component with optional configuration should be available and initialized by configuration
       assertEquals("Component with optional configuration should be activated and inited by configuration", 1, getBaseConfigData(COMP_OPTIONAL));
@@ -2519,6 +2525,352 @@ public class DSTest extends TestCase {
       uninstallBundle(tb24);
       cmBundle.start();
     }
+  }
+
+  // Tests update of service properties
+  public void testServicePropertiesUpdate() throws Exception {
+    Bundle tb25 = installBundle("tb25");
+    ServiceRegistration sr = null;
+    try {
+      final String COMP_NAME = "org.eclipse.equinox.ds.tests.tb25.ServicePropertiesComp";
+      final String PROP = "test.property";
+      final String PROP_STATIC = "serviceUpdatedStatic";
+      final String PROP_DYNAMIC = "serviceUpdatedDynamic";
+      tb25.start();
+      waitBundleStart();
+
+      Hashtable props = new Hashtable();
+      props.put("service.provider", "service.properties.update.test");
+      props.put(PROP, Boolean.FALSE);
+
+      // register service referenced by the component
+      sr = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      PropertiesProvider bs = getBaseService(COMP_NAME);
+      assertNotNull("Component " + COMP_NAME + " should be activated", bs);
+
+      // update service properties
+      props.put(PROP, Boolean.TRUE);
+      sr.setProperties((Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      bs = getBaseService(COMP_NAME);
+      assertNotNull("Component " + COMP_NAME + " should still be active", bs);
+      Dictionary compProps = bs.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEquals("Test property should be updated.", Boolean.TRUE, compProps.get(PROP));
+      assertEquals("Updated method for static reference should be called.", Boolean.TRUE, compProps.get(PROP_STATIC));
+      assertEquals("Updated method for dynamic reference should be called.", Boolean.TRUE, compProps.get(PROP_DYNAMIC));
+    } finally {
+      uninstallBundle(tb25);
+      if (sr != null) {
+        unregisterService(sr);
+      }
+    }
+  }
+
+  // Tests Reluctant policy option of service references
+  public void testPolicyOptionReluctant() throws Exception {
+    Bundle tb25 = installBundle("tb25");
+    ServiceRegistration sr = null;
+    ServiceRegistration srLower = null;
+    ServiceRegistration srHigher = null;
+    try {
+      final String COMP_NAME_STATIC = "org.eclipse.equinox.ds.tests.tb25.PolicyReluctantStaticComp";
+      final String COMP_NAME_DYNAMIC = "org.eclipse.equinox.ds.tests.tb25.PolicyReluctantDynamicComp";
+      final String PROP_BIND_01 = "bind01";
+      final String PROP_BIND_11 = "bind11";
+      final String PROP_BIND_0n = "bind0n";
+      final String PROP_BIND_1n = "bind1n";
+      final Integer RANK_1 = new Integer(1);
+      final Integer RANK_2 = new Integer(2);
+      final Integer RANK_3 = new Integer(3);
+      tb25.start();
+      waitBundleStart();
+
+      Hashtable props = new Hashtable();
+      props.put("service.provider", "reluctant.policy.option.test");
+      props.put(Constants.SERVICE_RANKING, RANK_2);
+
+      // register service referenced by the component
+      sr = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      PropertiesProvider bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should be activated", bsStatic);
+      PropertiesProvider bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should be activated", bsDynamic);
+
+      // register service with lower ranking
+      props.put(Constants.SERVICE_RANKING, RANK_1);
+      srLower = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      // check bound references
+      bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should still be active", bsStatic);
+      Dictionary compProps = bsStatic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with lower ranking should be ignored for static 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with lower ranking should be ignored for static 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with lower ranking should be ignored for static 0..n.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with lower ranking should be ignored for static 1..n.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_1n));
+      bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should still be active", bsDynamic);
+      compProps = bsDynamic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with lower ranking should be ignored for dynamic 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with lower ranking should be ignored for dynamic 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with lower ranking should be bound for dynamic 0..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with lower ranking should be bound for dynamic 1..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_1n));
+
+      // register service with higher ranking
+      props.put(Constants.SERVICE_RANKING, RANK_3);
+      srHigher = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      // check bound references
+      bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should still be active", bsStatic);
+      compProps = bsStatic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with higher ranking should be ignored for static 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with higher ranking should be ignored for static 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with higher ranking should be ignored for static 0..n.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with higher ranking should be ignored for static 1..n.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_1n));
+      bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should still be active", bsDynamic);
+      compProps = bsDynamic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with higher ranking should be ignored for dynamic 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with higher ranking should be ignored for dynamic 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 0..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 1..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_1n));
+    } finally {
+      uninstallBundle(tb25);
+      if (sr != null) {
+        unregisterService(sr);
+      }
+      if (srLower != null) {
+        unregisterService(srLower);
+      }
+      if (srHigher != null) {
+        unregisterService(srHigher);
+      }
+    }
+  }
+
+  // Tests Greedy policy option of service references
+  public void testPolicyOptionGreedy() throws Exception {
+    Bundle tb25 = installBundle("tb25");
+    ServiceRegistration sr = null;
+    ServiceRegistration srLower = null;
+    ServiceRegistration srHigher = null;
+    try {
+      final String COMP_NAME_STATIC = "org.eclipse.equinox.ds.tests.tb25.PolicyGreedyStaticComp";
+      final String COMP_NAME_DYNAMIC = "org.eclipse.equinox.ds.tests.tb25.PolicyGreedyDynamicComp";
+      final String PROP_BIND_01 = "bind01";
+      final String PROP_BIND_11 = "bind11";
+      final String PROP_BIND_0n = "bind0n";
+      final String PROP_BIND_1n = "bind1n";
+      final Integer RANK_1 = new Integer(1);
+      final Integer RANK_2 = new Integer(2);
+      final Integer RANK_3 = new Integer(3);
+      tb25.start();
+      waitBundleStart();
+
+      Hashtable props = new Hashtable();
+      props.put("service.provider", "greedy.policy.option.test");
+      props.put(Constants.SERVICE_RANKING, RANK_2);
+
+      // register service referenced by the component
+      sr = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      PropertiesProvider bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should be activated", bsStatic);
+      PropertiesProvider bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should be activated", bsDynamic);
+
+      // register service with lower ranking
+      props.put(Constants.SERVICE_RANKING, RANK_1);
+      srLower = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      // check bound references
+      bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should still be active", bsStatic);
+      Dictionary compProps = bsStatic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with lower ranking should be ignored for static 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with lower ranking should be ignored for static 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with lower ranking should be bound for static 0..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with lower ranking should be bound for static 1..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_1n));
+      bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should still be active", bsDynamic);
+      compProps = bsDynamic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with lower ranking should be ignored for dynamic 0..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with lower ranking should be ignored for dynamic 1..1.", toList(RANK_2),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with lower ranking should be bound for dynamic 0..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with lower ranking should be bound for dynamic 1..n.",
+          toList(RANK_1, RANK_2), (List) compProps.get(PROP_BIND_1n));
+
+      // register service with higher ranking
+      props.put(Constants.SERVICE_RANKING, RANK_3);
+      srHigher = registerService(PropertiesProvider.class.getName(), new DefaultPropertiesProvider(null),
+          (Dictionary) props.clone());
+      Thread.sleep(timeout);
+
+      // check bound references
+      bsStatic = getBaseService(COMP_NAME_STATIC);
+      assertNotNull("Component " + COMP_NAME_STATIC + " should still be active", bsStatic);
+      compProps = bsStatic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with higher ranking should be bound for static 0..1.", toList(RANK_3),
+          (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with higher ranking should be bound for static 1..1.", toList(RANK_3),
+          (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with higher ranking should be bound for static 0..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with higher ranking should be bound for static 1..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_1n));
+      bsDynamic = getBaseService(COMP_NAME_DYNAMIC);
+      assertNotNull("Component " + COMP_NAME_DYNAMIC + " should still be active", bsDynamic);
+      compProps = bsDynamic.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 0..1.",
+          toList(RANK_2, RANK_3), (List) compProps.get(PROP_BIND_01));
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 1..1.",
+          toList(RANK_2, RANK_3), (List) compProps.get(PROP_BIND_11));
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 0..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_0n));
+      assertEqualElements("New target service with higher ranking should be bound for dynamic 1..n.",
+          toList(RANK_1, RANK_2, RANK_3), (List) compProps.get(PROP_BIND_1n));
+    } finally {
+      uninstallBundle(tb25);
+      if (sr != null) {
+        unregisterService(sr);
+      }
+      if (srLower != null) {
+        unregisterService(srLower);
+      }
+      if (srHigher != null) {
+        unregisterService(srHigher);
+      }
+    }
+  }
+
+  // Tests PID of Component configuration
+  public void testComponentConfigurationPID() throws Exception {
+    ConfigurationAdmin cm = (ConfigurationAdmin) trackerCM.getService();
+    if (cm == null) {
+      return;
+    }
+
+    Bundle tb25 = installBundle("tb25");
+    Configuration config = null;
+    try {
+      final String COMP_NAME = "org.eclipse.equinox.ds.tests.tb25.ConfigPIDComp";
+      final String CONFIG_PID = "test.changed.configuration.pid";
+      final String PROP = "test.property";
+
+      // set component configuration
+      config = cm.getConfiguration(CONFIG_PID);
+      Dictionary configProperties = config.getProperties();
+      if (configProperties == null) {
+        configProperties = new Hashtable();
+      }
+      configProperties.put(PROP, Boolean.TRUE);
+      config.update(configProperties);
+      Thread.sleep(timeout);
+
+      tb25.start();
+      waitBundleStart();
+
+      // check component properties
+      PropertiesProvider bs = getBaseService(COMP_NAME);
+      assertNotNull("Component " + COMP_NAME + " should be activated", bs);
+      Dictionary compProps = bs.getProperties();
+      assertNotNull("Component properties should be available.", compProps);
+      assertEquals("Test property should be set.", Boolean.TRUE, compProps.get(PROP));
+    } finally {
+      uninstallBundle(tb25);
+      if (config != null) {
+        config.delete();
+      }
+    }
+  }
+
+  /**
+   * Asserts that two lists contain equal elements (the order doesn't matter).
+   */
+  private static void assertEqualElements(String message, List list1, List list2) {
+    if (list1 == null || list2 == null) {
+      fail(message);
+    }
+    if (list1.size() != list2.size()) {
+      fail(message);
+    }
+    List tmp = new ArrayList(list2);
+    for (Iterator it = list1.iterator(); it.hasNext();) {
+      Object el = it.next();
+      if (!tmp.contains(el)) {
+        fail(message);
+      }
+      tmp.remove(el);
+    }
+  }
+
+  private List toList(Object el) {
+    List list = new ArrayList();
+    list.add(el);
+    return list;
+  }
+
+  private List toList(Object el1, Object el2) {
+    List list = new ArrayList();
+    list.add(el1);
+    list.add(el2);
+    return list;
+  }
+
+  private List toList(Object el1, Object el2, Object el3) {
+    List list = new ArrayList();
+    list.add(el1);
+    list.add(el2);
+    list.add(el3);
+    return list;
   }
 
   /**
