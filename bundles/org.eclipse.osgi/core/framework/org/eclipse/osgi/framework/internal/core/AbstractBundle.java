@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1406,7 +1406,7 @@ public abstract class AbstractBundle implements Bundle, Comparable<Bundle>, Keye
 	class BundleStatusException extends Throwable implements StatusException {
 		private static final long serialVersionUID = 7201911791818929100L;
 		private int code;
-		private Object status;
+		private transient Object status;
 
 		BundleStatusException(String message, int code, Object status) {
 			super(message);
