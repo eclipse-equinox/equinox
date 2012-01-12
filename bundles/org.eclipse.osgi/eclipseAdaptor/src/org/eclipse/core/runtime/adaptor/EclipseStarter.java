@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1297,6 +1297,7 @@ public class EclipseStarter {
 			return null;
 		String result = null;
 		Object[] maxVersion = null;
+		boolean resultIsFile = false;
 		for (int i = 0; i < candidates.length; i++) {
 			String candidateName = candidates[i];
 			if (!candidateName.startsWith(target))
@@ -1316,16 +1317,18 @@ public class EclipseStarter {
 			Object[] currentVersion = getVersionElements(version);
 			if (currentVersion != null && compareVersion(maxVersion, currentVersion) < 0) {
 				File candidate = new File(start, candidateName);
+				boolean candidateIsFile = candidate.isFile();
 				// if simple jar; make sure it is really a file before accepting it
-				if (!simpleJar || candidate.isFile()) {
+				if (!simpleJar || candidateIsFile) {
 					result = candidate.getAbsolutePath();
+					resultIsFile = candidateIsFile;
 					maxVersion = currentVersion;
 				}
 			}
 		}
 		if (result == null)
 			return null;
-		return result.replace(File.separatorChar, '/') + "/"; //$NON-NLS-1$
+		return result.replace(File.separatorChar, '/') + (resultIsFile ? "" : "/"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
