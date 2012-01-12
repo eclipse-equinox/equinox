@@ -148,6 +148,10 @@ public final class Resolver implements WorkPerformer {
 						}
 						continue;
 					}
+					if (current.componentProps != null && current.componentProps.size() > 0) {
+						//component is already enabled and processed. Skipping it.
+						continue;
+					}
 
 					current.setState(Component.STATE_UNSATISFIED);
 

@@ -50,6 +50,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	public final int DISABLE_COMPONENTS = 2;
 
 	protected Hashtable bundleToServiceComponents;
+	protected Hashtable processingBundles = new Hashtable(5);
 	protected Queue queue;
 	private Resolver resolver;
 
@@ -566,6 +567,21 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 	}
 
 	void startedBundle(Bundle bundle) {
+		synchronized (processingBundles) {
+			if (processingBundles.get(bundle) != null) {
+				//the bundle is already being processed
+				return;
+			}
+			processingBundles.put(bundle, ""); //$NON-NLS-1$
+		}
+		try {
+			startedBundle2(bundle);
+		} finally {
+			processingBundles.remove(bundle);
+		}
+	}
+
+	void startedBundle2(Bundle bundle) {
 		long start = 0l;
 		if (Activator.PERF) {
 			start = System.currentTimeMillis();
@@ -853,7 +869,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 								} else {
 									//process the component configurations and eventually modify or restart them
 									ConfigurationEvent ce = new ConfigurationEvent(caReference, ConfigurationEvent.CM_UPDATED, configs[j].getFactoryPid(), configs[j].getPid());
-									processConfigurationEvent(ce, sc);
+									configurationEvent(ce);
 								}
 								break;
 							}
@@ -863,7 +879,7 @@ public class SCRManager implements ServiceListener, SynchronousBundleListener, C
 			}
 		}
 		if (toProcess.size() > 0) {
-			resolver.enableComponents(toProcess);
+			enqueueWork(this, ENABLE_COMPONENTS, toProcess, false);
 		}
 	}
 
