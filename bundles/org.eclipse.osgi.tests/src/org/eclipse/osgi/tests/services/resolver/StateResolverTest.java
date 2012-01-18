@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
+import org.osgi.framework.resource.Capability;
 import org.osgi.framework.resource.ResourceConstants;
 import org.osgi.framework.wiring.*;
 
@@ -2972,7 +2973,6 @@ public class StateResolverTest extends AbstractStateTest {
 
 		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
 		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b"); //$NON-NLS-1$ //$NON-NLS-2$
-		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		state.setPlatformProperties(props);
 		state.addBundle(systemBundle);
@@ -3079,7 +3079,6 @@ public class StateResolverTest extends AbstractStateTest {
 
 		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable()};
 		props[0].put("org.osgi.framework.system.packages", "pkg.system.a, pkg.system.b"); //$NON-NLS-1$ //$NON-NLS-2$
-		props[0].put("org.osgi.framework.executionenvironment", "J2SE-1.2"); //$NON-NLS-1$ //$NON-NLS-2$
 		props[0].put("osgi.system.bundle", configuredSystemBundle); // set the system.bundle to another system bundle (other than org.eclipse.osgi) //$NON-NLS-1$
 
 		state.setPlatformProperties(props);
@@ -3339,6 +3338,321 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("1.4", requireSystemBundle.isResolved()); //$NON-NLS-1$
 
 		assertTrue("2.0", a.getResolvedImports()[0].getExporter() == systemBundle2); //$NON-NLS-1$
+	}
+
+	public void testEECapabilityRequirement() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++); //$NON-NLS-1$
+		state.addBundle(systemBundle);
+
+		List bundles = new ArrayList();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "OSGi/Minimum-1.1"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++); //$NON-NLS-1$
+		bundles.add(a);
+		state.addBundle(a);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "CDC-1.1/Foundation-1.1"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++); //$NON-NLS-1$
+		bundles.add(b);
+		state.addBundle(b);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4"); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++); //$NON-NLS-1$
+		bundles.add(c);
+		state.addBundle(c);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "AA/BB"); //$NON-NLS-1$
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++); //$NON-NLS-1$
+		bundles.add(d);
+		state.addBundle(d);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "E"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "CC-XX/DD-YY"); //$NON-NLS-1$
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, "E", bundleID++); //$NON-NLS-1$
+		bundles.add(e);
+		state.addBundle(e);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "F"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "EE-2.0/FF-YY"); //$NON-NLS-1$
+		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, "F", bundleID++); //$NON-NLS-1$
+		bundles.add(f);
+		state.addBundle(f);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "G"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "GG-XX/HH-1.0"); //$NON-NLS-1$
+		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, "G", bundleID++); //$NON-NLS-1$
+		bundles.add(g);
+		state.addBundle(g);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "H"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "II-1.0/JJ-2.0"); //$NON-NLS-1$
+		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, "H", bundleID++); //$NON-NLS-1$
+		bundles.add(h);
+		state.addBundle(h);
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "OSGi/Minimum-1.0, OSGi/Minimum-1.1, OSGi/Minimum-1.2"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.executionenvironment", "CDC-1.0/Foundation-1.0, CDC-1.1/Foundation-1.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("org.osgi.framework.executionenvironment", "J2SE-1.2, J2SE-1.3, J2SE-1.4, J2SE-1.5, JavaSE-1.6"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[3].put("org.osgi.framework.executionenvironment", "AA/BB");
+		props[4].put("org.osgi.framework.executionenvironment", "CC-XX/DD-YY");
+		props[5].put("org.osgi.framework.executionenvironment", "EE-1.0/FF-YY, EE-2.0/FF-YY");
+		props[6].put("org.osgi.framework.executionenvironment", "GG-XX/HH-1.0, GG-XX/HH-2.0");
+		props[7].put("org.osgi.framework.executionenvironment", "II-1.0/JJ-2.0");
+		state.setPlatformProperties(props);
+
+		state.resolve();
+
+		checkEECapabilities(systemBundle.getWiring().getCapabilities("osgi.ee"), bundles);
+
+		state.setPlatformProperties(new Hashtable());
+		state.resolve(false);
+		assertTrue("2.0", systemBundle.isResolved()); //$NON-NLS-1$
+		assertFalse("2.1", a.isResolved()); //$NON-NLS-1$
+		assertFalse("2.2", b.isResolved()); //$NON-NLS-1$
+		assertFalse("2.3", c.isResolved()); //$NON-NLS-1$
+		assertFalse("2.4", d.isResolved()); //$NON-NLS-1$
+		assertFalse("2.5", e.isResolved()); //$NON-NLS-1$
+		assertFalse("2.7", f.isResolved()); //$NON-NLS-1$
+		assertFalse("2.8", g.isResolved()); //$NON-NLS-1$
+		assertFalse("2.9", h.isResolved()); //$NON-NLS-1$
+
+		props[0].put("org.osgi.framework.executionenvironment", "OSGi/Minimum-1.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.executionenvironment", "CDC-1.1/Foundation-1.1"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("org.osgi.framework.executionenvironment", "J2SE-1.4"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[3].put("org.osgi.framework.executionenvironment", "AA/BB");
+		props[4].put("org.osgi.framework.executionenvironment", "CC-XX/DD-YY");
+		props[5].put("org.osgi.framework.executionenvironment", "EE-2.0/FF-YY");
+		props[6].put("org.osgi.framework.executionenvironment", "GG-XX/HH-1.0");
+		props[7].put("org.osgi.framework.executionenvironment", "II-1.0/JJ-2.0");
+		props[0].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0, 1.1, 1.2\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"CDC/Foundation\"; version:List<Version>=\"1.0, 1.1\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.2, 1.3, 1.4, 1.5, 1.6\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[3].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"AA/BB\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[4].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"CC-XX/DD-YY\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[5].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"EE/FF-YY\"; version:List<Version>=\"1.0, 2.0\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[6].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"GG-XX/HH\"; version:List<Version>=\"1.0, 2.0\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[7].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"II-1.0/JJ-2.0\""); //$NON-NLS-1$ //$NON-NLS-2$
+
+		state.setPlatformProperties(props);
+		state.resolve(false);
+
+		checkEECapabilities(systemBundle.getWiring().getCapabilities("osgi.ee"), bundles);
+	}
+
+	private void checkEECapabilities(List eeCapabilities, List bundles) {
+		assertEquals("Wrong number of ee capabilities.", 8, eeCapabilities.size());
+		for (int i = 0; i < eeCapabilities.size(); i++) {
+			Capability eeCap = (Capability) eeCapabilities.get(i);
+			assertEquals("Wrong namespace: " + eeCap, "osgi.ee", eeCap.getNamespace());
+			Map attrs = eeCap.getAttributes();
+			switch (i) {
+				case 0 :
+					assertEquals("Wrong ee name: " + i, "OSGi/Minimum", attrs.get("osgi.ee"));
+					List v0 = (List) attrs.get("version");
+					assertEquals("Wrong number of versions: " + i, 3, v0.size());
+					assertTrue("Does not contain 1.0.", v0.contains(new Version("1.0")));
+					assertTrue("Does not contain 1.1.", v0.contains(new Version("1.1")));
+					assertTrue("Does not contain 1.2.", v0.contains(new Version("1.2")));
+					break;
+				case 1 :
+					assertEquals("Wrong ee name: " + i, "CDC/Foundation", attrs.get("osgi.ee"));
+					List v1 = (List) attrs.get("version");
+					assertEquals("Wrong number of versions: " + i, 2, v1.size());
+					assertTrue("Does not contain 1.0.", v1.contains(new Version("1.0")));
+					assertTrue("Does not contain 1.1.", v1.contains(new Version("1.1")));
+					break;
+				case 2 :
+					assertEquals("Wrong ee name: " + i, "JavaSE", attrs.get("osgi.ee"));
+					List v2 = (List) attrs.get("version");
+					assertEquals("Wrong number of versions: " + i, 5, v2.size());
+					assertTrue("Does not contain 1.2.", v2.contains(new Version("1.2")));
+					assertTrue("Does not contain 1.3.", v2.contains(new Version("1.3")));
+					assertTrue("Does not contain 1.4.", v2.contains(new Version("1.4")));
+					assertTrue("Does not contain 1.5.", v2.contains(new Version("1.5")));
+					assertTrue("Does not contain 1.6.", v2.contains(new Version("1.6")));
+					break;
+				case 3 :
+					assertEquals("Wrong ee name: " + i, "AA/BB", attrs.get("osgi.ee"));
+					List v3 = (List) attrs.get("version");
+					assertNull("versions is not null", v3);
+					break;
+				case 4 :
+					assertEquals("Wrong ee name: " + i, "CC-XX/DD-YY", attrs.get("osgi.ee"));
+					List v4 = (List) attrs.get("version");
+					assertNull("versions is not null", v4);
+					break;
+				case 5 :
+					assertEquals("Wrong ee name: " + i, "EE/FF-YY", attrs.get("osgi.ee"));
+					List v5 = (List) attrs.get("version");
+					assertEquals("Wrong number of versions: " + i, 2, v5.size());
+					assertTrue("Does not contain 1.0.", v5.contains(new Version("1.0")));
+					assertTrue("Does not contain 2.0.", v5.contains(new Version("2.0")));
+					break;
+				case 6 :
+					assertEquals("Wrong ee name: " + i, "GG-XX/HH", attrs.get("osgi.ee"));
+					List v6 = (List) attrs.get("version");
+					assertEquals("Wrong number of versions: " + i, 2, v6.size());
+					assertTrue("Does not contain 1.0.", v6.contains(new Version("1.0")));
+					assertTrue("Does not contain 2.0.", v6.contains(new Version("2.0")));
+					break;
+				case 7 :
+					assertEquals("Wrong ee name: " + i, "II-1.0/JJ-2.0", attrs.get("osgi.ee"));
+					List v7 = (List) attrs.get("version");
+					assertNull("versions is not null", v7);
+					break;
+				default :
+					break;
+			}
+		}
+
+		assertEquals("Wrong number of bundles.", eeCapabilities.size(), bundles.size());
+		for (int i = 0; i < bundles.size(); i++) {
+			BundleDescription bundle = (BundleDescription) bundles.get(i);
+			assertTrue("The bundle is not resolved: " + bundle, bundle.isResolved());
+			BundleWiring wiring = bundle.getWiring();
+			List eeWires = wiring.getRequiredWires("osgi.ee");
+			assertNotNull("ee wires is null.", eeWires);
+			assertEquals("Wrong number of ee wires", 1, eeWires.size());
+			BundleWire wire = (BundleWire) eeWires.get(0);
+			assertEquals("Wired to wrong ee capability.", eeCapabilities.get(i), wire.getCapability());
+		}
+	}
+
+	public void testEECapabilityRequirement1() throws BundleException {
+		State state = buildEmptyState();
+		int bundleID = 0;
+		Hashtable manifest = new Hashtable();
+
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0"); //$NON-NLS-1$
+		BundleDescription systemBundle = state.getFactory().createBundleDescription(state, manifest, "org.eclipse.osgi", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "A"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "CDC-1.0/Foundation-1.0"); //$NON-NLS-1$
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, "A", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "B"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "OSGi/Minimum-1.1"); //$NON-NLS-1$
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, "B", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "C"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4"); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, "C", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "J2SE-1.4, OSGi/Minimum-1.1"); //$NON-NLS-1$
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "D"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "AA-BB"); //$NON-NLS-1$
+		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, "D", bundleID++); //$NON-NLS-1$
+
+		Dictionary[] props = new Dictionary[] {new Hashtable(), new Hashtable(), new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "OSGi/Minimum-1.0, OSGi/Minimum-1.1, OSGi/Minimum-1.2, CDC-1.0/Foundation-1.0, CDC-1.1/Foundation-1.1, AA-BB"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.executionenvironment", "OSGi/Minimum-1.0, OSGi/Minimum-1.1, OSGi/Minimum-1.2, JRE-1.1, J2SE-1.2, J2SE-1.3, J2SE-1.4"); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("org.osgi.framework.executionenvironment", "OSGi/Minimum-1.0, OSGi/Minimum-1.1, JRE-1.1, J2SE-1.2, J2SE-1.3"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		state.setPlatformProperties(props);
+		state.addBundle(systemBundle);
+		state.addBundle(a);
+		state.addBundle(b);
+		state.addBundle(c);
+		state.addBundle(d);
+		state.addBundle(e);
+
+		state.resolve();
+
+		assertTrue("1.0", systemBundle.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", a.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
+		assertTrue("1.3", c.isResolved()); //$NON-NLS-1$
+		assertTrue("1.4", d.isResolved()); //$NON-NLS-1$
+		assertTrue("1.5", e.isResolved()); //$NON-NLS-1$
+
+		BundleWiring wiringA = a.getWiring();
+		BundleWiring wiringB = b.getWiring();
+		BundleWiring wiringC = c.getWiring();
+		BundleWiring wiringD = d.getWiring();
+		BundleWiring wiringE = e.getWiring();
+
+		List wiresA = wiringA.getRequiredWires("osgi.ee");
+		assertEquals("2.0", 1, wiresA.size());
+		List wiresB = wiringB.getRequiredWires("osgi.ee");
+		assertEquals("2.1", 1, wiresB.size());
+		List wiresC = wiringC.getRequiredWires("osgi.ee");
+		assertEquals("2.2", 1, wiresC.size());
+		List wiresD = wiringD.getRequiredWires("osgi.ee");
+		assertEquals("2.3", 1, wiresD.size());
+		List wiresE = wiringE.getRequiredWires("osgi.ee");
+		assertEquals("2.4", 1, wiresE.size());
+
+		props[0].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0, 1.1, 1.2\", osgi.ee; osgi.ee=\"CDC/Foundation\"; version:List<Version>=\"1.0, 1.1\", osgi.ee; osgi.ee=\"AA-BB\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[1].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0, 1.1, 1.2\", osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3, 1.4\""); //$NON-NLS-1$ //$NON-NLS-2$
+		props[2].put("org.osgi.framework.system.capabilities", "osgi.ee; osgi.ee=\"OSGi/Minimum\"; version:List<Version>=\"1.0, 1.1\", osgi.ee; osgi.ee=\"JavaSE\"; version:List<Version>=\"1.0, 1.1, 1.2, 1.3\""); //$NON-NLS-1$ //$NON-NLS-2$
+
+		state.setPlatformProperties(props);
+		state.resolve(false);
+
+		assertTrue("1.0", systemBundle.isResolved()); //$NON-NLS-1$
+		assertTrue("1.1", a.isResolved()); //$NON-NLS-1$
+		assertTrue("1.2", b.isResolved()); //$NON-NLS-1$
+		assertTrue("1.3", c.isResolved()); //$NON-NLS-1$
+		assertTrue("1.4", d.isResolved()); //$NON-NLS-1$
+		assertTrue("1.5", e.isResolved()); //$NON-NLS-1$
+
+		wiringA = a.getWiring();
+		wiringB = b.getWiring();
+		wiringC = c.getWiring();
+		wiringD = d.getWiring();
+		wiringE = e.getWiring();
+
+		wiresA = wiringA.getRequiredWires("osgi.ee");
+		assertEquals("2.0", 1, wiresA.size());
+		wiresB = wiringB.getRequiredWires("osgi.ee");
+		assertEquals("2.1", 1, wiresB.size());
+		wiresC = wiringC.getRequiredWires("osgi.ee");
+		assertEquals("2.2", 1, wiresC.size());
+		wiresD = wiringD.getRequiredWires("osgi.ee");
+		assertEquals("2.3", 1, wiresD.size());
+		wiresE = wiringE.getRequiredWires("osgi.ee");
+		assertEquals("2.4", 1, wiresE.size());
 	}
 
 	public void testBug338697() throws BundleException, IOException {

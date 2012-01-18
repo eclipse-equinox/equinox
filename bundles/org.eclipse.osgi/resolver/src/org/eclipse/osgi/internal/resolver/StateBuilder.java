@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,7 +100,8 @@ public class StateBuilder {
 		}
 		result.setLocation(location);
 		result.setPlatformFilter(manifest.get(Constants.ECLIPSE_PLATFORMFILTER));
-		result.setExecutionEnvironments(ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT)));
+		String[] brees = ManifestElement.getArrayFromList(manifest.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT));
+		result.setExecutionEnvironments(brees);
 		ManifestElement[] host = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, manifest.get(Constants.FRAGMENT_HOST));
 		if (host != null)
 			result.setHost(createHostSpecification(host[0], state));
@@ -117,7 +118,7 @@ public class StateBuilder {
 		String[][] genericAliases = getGenericAliases(state);
 		ManifestElement[] genericRequires = getGenericRequires(manifest, genericAliases);
 		ManifestElement[] osgiRequires = ManifestElement.parseHeader(Constants.REQUIRE_CAPABILITY, manifest.get(Constants.REQUIRE_CAPABILITY));
-		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires));
+		result.setGenericRequires(createGenericRequires(genericRequires, osgiRequires, brees));
 		ManifestElement[] genericCapabilities = getGenericCapabilities(manifest, genericAliases);
 		ManifestElement[] osgiCapabilities = ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, manifest.get(Constants.PROVIDE_CAPABILITY));
 		result.setGenericCapabilities(createGenericCapabilities(genericCapabilities, osgiCapabilities, result));
@@ -478,10 +479,125 @@ public class StateBuilder {
 		return result;
 	}
 
-	private static GenericSpecification[] createGenericRequires(ManifestElement[] equinoxRequires, ManifestElement[] osgiRequires) throws BundleException {
+	private static GenericSpecification[] createGenericRequires(ManifestElement[] equinoxRequires, ManifestElement[] osgiRequires, String[] brees) throws BundleException {
 		List<GenericSpecification> result = createEquinoxRequires(equinoxRequires);
 		result = createOSGiRequires(osgiRequires, result);
+		result = convertBREEs(brees, result);
 		return result == null ? null : result.toArray(new GenericSpecification[result.size()]);
+	}
+
+	static List<GenericSpecification> convertBREEs(String[] brees, List<GenericSpecification> result) throws BundleException {
+		if (brees == null || brees.length == 0)
+			return result;
+		if (result == null)
+			result = new ArrayList<GenericSpecification>(brees.length);
+		List<String> breeFilters = new ArrayList<String>();
+		for (String bree : brees)
+			breeFilters.add(createOSGiEERequirementFilter(bree));
+		String filterSpec;
+		if (breeFilters.size() == 1) {
+			filterSpec = breeFilters.get(0);
+		} else {
+			StringBuffer filterBuf = new StringBuffer("(|"); //$NON-NLS-1$
+			for (String breeFilter : breeFilters) {
+				filterBuf.append(breeFilter);
+			}
+			filterSpec = filterBuf.append(")").toString(); //$NON-NLS-1$
+		}
+		GenericSpecificationImpl spec = new GenericSpecificationImpl();
+		spec.setType("osgi.ee"); //$NON-NLS-1$
+		try {
+			FilterImpl filter = FilterImpl.newInstance(filterSpec);
+			spec.setMatchingFilter(filter);
+			String name = filter.getPrimaryKeyValue(spec.getType());
+			if (name != null)
+				spec.setName(name);
+		} catch (InvalidSyntaxException e) {
+			throw new BundleException("Error converting required execution environment.", e); //$NON-NLS-1$
+		}
+		result.add(spec);
+		return result;
+	}
+
+	private static String createOSGiEERequirementFilter(String bree) throws BundleException {
+		String[] nameVersion = getOSGiEENameVersion(bree);
+		String eeName = nameVersion[0];
+		String v = nameVersion[1];
+		String filterSpec;
+		if (v == null)
+			filterSpec = "(osgi.ee=" + eeName + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		else
+			filterSpec = "(&(osgi.ee=" + eeName + ")(version=" + v + "))"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		try {
+			// do a sanity check
+			FilterImpl.newInstance(filterSpec);
+		} catch (InvalidSyntaxException e) {
+			filterSpec = "(osgi.ee=" + bree + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			try {
+				// do another sanity check
+				FilterImpl.newInstance(filterSpec);
+			} catch (InvalidSyntaxException e1) {
+				throw new BundleException("Error converting required execution environment.", e1); //$NON-NLS-1$
+			}
+		}
+		return filterSpec;
+	}
+
+	static String[] getOSGiEENameVersion(String bree) {
+		String ee1 = null;
+		String ee2 = null;
+		String v1 = null;
+		String v2 = null;
+		int separator = bree.indexOf('/');
+		if (separator <= 0 || separator == bree.length() - 1) {
+			ee1 = bree;
+		} else {
+			ee1 = bree.substring(0, separator);
+			ee2 = bree.substring(separator + 1);
+		}
+		int v1idx = ee1.indexOf('-');
+		if (v1idx > 0 && v1idx < ee1.length() - 1) {
+			// check for > 0 to avoid EEs starting with -
+			// check for < len - 1 to avoid ending with -
+			try {
+				v1 = ee1.substring(v1idx + 1);
+				// sanity check version format
+				Version.parseVersion(v1);
+				ee1 = ee1.substring(0, v1idx);
+			} catch (IllegalArgumentException e) {
+				v1 = null;
+			}
+		}
+
+		int v2idx = ee2 == null ? -1 : ee2.indexOf('-');
+		if (v2idx > 0 && v2idx < ee2.length() - 1) {
+			// check for > 0 to avoid EEs starting with -
+			// check for < len - 1 to avoid ending with -
+			try {
+				v2 = ee2.substring(v2idx + 1);
+				Version.parseVersion(v2);
+				ee2 = ee2.substring(0, v2idx);
+			} catch (IllegalArgumentException e) {
+				v2 = null;
+			}
+		}
+
+		if (v1 == null)
+			v1 = v2;
+		if (v1 != null && v2 != null && !v1.equals(v2)) {
+			ee1 = bree;
+			ee2 = null;
+			v1 = null;
+			v2 = null;
+		}
+		if ("J2SE".equals(ee1)) //$NON-NLS-1$
+			ee1 = "JavaSE"; //$NON-NLS-1$
+		if ("J2SE".equals(ee2)) //$NON-NLS-1$
+			ee2 = "JavaSE"; //$NON-NLS-1$
+
+		String eeName = ee1 + (ee2 == null ? "" : '/' + ee2); //$NON-NLS-1$
+
+		return new String[] {eeName, v1};
 	}
 
 	static List<GenericSpecification> createOSGiRequires(ManifestElement[] osgiRequires, List<GenericSpecification> result) throws BundleException {

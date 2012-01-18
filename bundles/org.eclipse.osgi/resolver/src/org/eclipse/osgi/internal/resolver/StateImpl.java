@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -791,6 +791,7 @@ public abstract class StateImpl implements State {
 					performResetSystemExports |= checkProp(this.platformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME), newPlatformProperties[i].get(Constants.SYSTEM_BUNDLE_SYMBOLICNAME));
 					performResetSystemCapabilities |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES));
 					performResetSystemCapabilities |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA), newPlatformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA));
+					performResetSystemCapabilities |= checkProp(this.platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT), newPlatformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT));
 				}
 			}
 		}
@@ -865,9 +866,48 @@ public abstract class StateImpl implements State {
 			try {
 				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES)), i);
 				addSystemCapabilities(capabilities, ManifestElement.parseHeader(Constants.PROVIDE_CAPABILITY, (String) platformProperties[i].get(Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA)), i);
+				checkOSGiEE(capabilities, (String) platformProperties[i].get(Constants.FRAMEWORK_EXECUTIONENVIRONMENT), i);
 			} catch (BundleException e) {
 				// TODO consider throwing this... 
 			}
+	}
+
+	private void checkOSGiEE(List<GenericDescription> capabilities, String profileEE, Integer profileIndex) {
+		if (profileEE == null || profileEE.length() == 0)
+			return;
+		for (GenericDescription capability : capabilities) {
+			if ("osgi.ee".equals(capability.getType()) && profileIndex.equals(capability.getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE))) //$NON-NLS-1$
+				return; // profile already specifies osgi.ee capabilities
+		}
+		Map<String, List<String>> eeVersions = new HashMap<String, List<String>>();
+		String[] ees = ManifestElement.getArrayFromList(profileEE);
+		for (String ee : ees) {
+			String[] eeNameVersion = StateBuilder.getOSGiEENameVersion(ee);
+
+			List<String> versions = eeVersions.get(eeNameVersion[0]);
+			if (versions == null) {
+				versions = new ArrayList<String>();
+				eeVersions.put(eeNameVersion[0], versions);
+			}
+			if (eeNameVersion[1] != null && !versions.contains(eeNameVersion[1]))
+				versions.add(eeNameVersion[1]);
+		}
+		for (Map.Entry<String, List<String>> eeVersion : eeVersions.entrySet()) {
+			GenericDescriptionImpl capability = new GenericDescriptionImpl();
+			capability.setType("osgi.ee"); //$NON-NLS-1$
+			Dictionary<String, Object> attributes = new Hashtable<String, Object>();
+			attributes.put(capability.getType(), eeVersion.getKey());
+			if (eeVersion.getValue().size() > 0) {
+				List<Version> versions = new ArrayList<Version>(eeVersion.getValue().size());
+				for (String version : eeVersion.getValue()) {
+					versions.add(new Version(version));
+				}
+				attributes.put("version", versions); //$NON-NLS-1$
+			}
+			attributes.put(ExportPackageDescriptionImpl.EQUINOX_EE, profileIndex);
+			capability.setAttributes(attributes);
+			capabilities.add(capability);
+		}
 	}
 
 	private void addSystemCapabilities(List<GenericDescription> capabilities, ManifestElement[] elements, Integer profileIndex) {
