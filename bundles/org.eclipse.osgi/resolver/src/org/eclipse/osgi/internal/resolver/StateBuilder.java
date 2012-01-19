@@ -505,6 +505,7 @@ public class StateBuilder {
 			filterSpec = filterBuf.append(")").toString(); //$NON-NLS-1$
 		}
 		GenericSpecificationImpl spec = new GenericSpecificationImpl();
+		spec.setResolution(GenericSpecificationImpl.RESOLUTION_FROM_BREE);
 		spec.setType("osgi.ee"); //$NON-NLS-1$
 		try {
 			FilterImpl filter = FilterImpl.newInstance(filterSpec);

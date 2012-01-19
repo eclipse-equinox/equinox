@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others. All rights reserved.
+ * Copyright (c) 2004, 2012 IBM Corporation and others. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
@@ -1455,7 +1455,7 @@ public class ResolverImpl implements Resolver {
 				ResolverImpl.log("Found match: " + capability.getBaseDescription() + ". Wiring"); //$NON-NLS-1$ //$NON-NLS-2$
 			result = true;
 		}
-		return result ? true : constraint.isOptional();
+		return result ? true : constraint.isOptional() || constraint.isFromRequiredEE();
 	}
 
 	// Resolve the supplied import. Returns true if the import can be resolved, false otherwise
