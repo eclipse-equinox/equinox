@@ -651,7 +651,6 @@ class StateWriter {
 		out.writeInt(version.getMinor());
 		out.writeInt(version.getMicro());
 		writeQualifier(version.getQualifier(), out);
-		out.writeBoolean(version.isReleaseVersion());
 	}
 
 	private void writeVersionRange(VersionRange versionRange, DataOutputStream out) throws IOException {

@@ -28,7 +28,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * An empty version range: "0.0.0".  The empty version range includes all valid versions
 	 * (any version greater than or equal to the version 0.0.0).
 	 */
-	public static final VersionRange emptyRange = new VersionRange("0.0.0-"); //$NON-NLS-1$
+	public static final VersionRange emptyRange = new VersionRange("0.0.0"); //$NON-NLS-1$
 
 	/**
 	 * Constructs a VersionRange with the specified minVersion and maxVersion.
@@ -39,7 +39,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * is used. 
 	 */
 	public VersionRange(Version minVersion, boolean includeMin, Version maxVersion, boolean includeMax) {
-		super(includeMin ? INCLUDE_MIN : EXCLUDE_MIN, minVersion == null ? new Version("0.0.0-") : minVersion, versionMax.equals(maxVersion) ? null : maxVersion, includeMax ? INCLUDE_MAX : EXCLUDE_MAX); //$NON-NLS-1$
+		super(includeMin ? INCLUDE_MIN : EXCLUDE_MIN, minVersion == null ? Version.emptyVersion : minVersion, versionMax.equals(maxVersion) ? null : maxVersion, includeMax ? INCLUDE_MAX : EXCLUDE_MAX); 
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class VersionRange extends org.osgi.framework.VersionRange {
 	 * @see Version#Version(String) definition of <code>version</code>
 	 */
 	public VersionRange(String versionRange) {
-		super(versionRange == null || versionRange.length() == 0 ? "0.0.0-" : versionRange); //$NON-NLS-1$
+		super(versionRange == null || versionRange.length() == 0 ? "0.0.0" : versionRange); //$NON-NLS-1$
 	}
 
 	/**

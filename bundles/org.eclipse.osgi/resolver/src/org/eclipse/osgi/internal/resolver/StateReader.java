@@ -47,7 +47,7 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 38;
+	public static final byte STATE_CACHE_VERSION = 37;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
@@ -713,8 +713,7 @@ final class StateReader {
 		int minorComponent = in.readInt();
 		int serviceComponent = in.readInt();
 		String qualifierComponent = readString(in, false);
-		boolean release = in.readBoolean();
-		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent, release));
+		Version result = (Version) ObjectPool.intern(new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent));
 		//Version result = new Version(majorComponent, minorComponent, serviceComponent, qualifierComponent);
 		return result;
 	}

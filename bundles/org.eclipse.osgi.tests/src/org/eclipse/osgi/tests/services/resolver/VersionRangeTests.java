@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import org.osgi.framework.Version;
 public class VersionRangeTests extends TestCase {
 	public void testSingleVersionRange() {
 		VersionRange range;
-		range = new VersionRange("[1.0.0., 1.0.0.-)"); //$NON-NLS-1$
+		range = new VersionRange("[1.0.0, 1.0.0.-)"); //$NON-NLS-1$
 		assertEquals("0.1", Version.parseVersion("1.0"), range.getMinimum()); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("0.9", !range.isIncluded(Version.parseVersion("0.9"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.0", range.isIncluded(Version.parseVersion("1"))); //$NON-NLS-1$ //$NON-NLS-2$
@@ -62,7 +62,7 @@ public class VersionRangeTests extends TestCase {
 	public void testNullMin() {
 		VersionRange nullMin = new VersionRange(null, true, new Version("1.0"), false); //$NON-NLS-1$
 		assertNotNull("0.1", nullMin.getMinimum()); //$NON-NLS-1$
-		assertEquals("0.2", Version.parseVersion("0.0.0-"), nullMin.getMinimum()); //$NON-NLS-1$
+		assertEquals("0.2", Version.emptyVersion, nullMin.getMinimum()); //$NON-NLS-1$
 		assertTrue("1.0", nullMin.isIncluded(null)); //$NON-NLS-1$
 		assertTrue("1.1", nullMin.isIncluded(new Version("0.0"))); //$NON-NLS-1$ //$NON-NLS-2$
 		assertTrue("1.2", nullMin.isIncluded(new Version("0.9.9"))); //$NON-NLS-1$ //$NON-NLS-2$

@@ -4499,7 +4499,7 @@ public class StateResolverTest extends AbstractStateTest {
 		}
 	}
 
-	public void testPreReleaseVersions() throws BundleException {
+	public void testRanges() throws BundleException {
 		State state = buildEmptyState();
 		int bundleID = 0;
 
@@ -4507,9 +4507,9 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.clear();
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "a"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0-SNAPSHOT"); //$NON-NLS-1$
-		manifest.put(Constants.EXPORT_PACKAGE, "a; version=1.0.0-SNAPSHOT");
-		manifest.put(Constants.PROVIDE_CAPABILITY, "test.a; version:Version=1.0.0-SNAPSHOT");
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "a; version=1.0.0");
+		manifest.put(Constants.PROVIDE_CAPABILITY, "test.a; version:Version=1.0.0");
 		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
 		manifest.clear();
@@ -4537,46 +4537,14 @@ public class StateResolverTest extends AbstractStateTest {
 		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "e"); //$NON-NLS-1$
 		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.REQUIRE_CAPABILITY, "test.a; filter:=\"(version>=1.0.0-)\""); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "test.a; filter:=\"(version>=1.0.0)\""); //$NON-NLS-1$
 		BundleDescription e = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "f"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.FRAGMENT_HOST, "a; bundle-version=\"[1.0.0., 1.1)\""); //$NON-NLS-1$
-		BundleDescription f = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "g"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.IMPORT_PACKAGE, "a; version=\"[1.0.0.,2.0)\""); //$NON-NLS-1$
-		BundleDescription g = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "h"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.REQUIRE_BUNDLE, "a; bundle-version=\"[1.0.0.,2.0)\""); //$NON-NLS-1$
-		BundleDescription h = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
-
-		manifest.clear();
-		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "i"); //$NON-NLS-1$
-		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
-		manifest.put(Constants.REQUIRE_CAPABILITY, "test.a; filter:=\"(version>=1.0.0.)\""); //$NON-NLS-1$
-		BundleDescription i = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
 
 		state.addBundle(a);
 		state.addBundle(b);
 		state.addBundle(c);
 		state.addBundle(d);
 		state.addBundle(e);
-		state.addBundle(f);
-		state.addBundle(g);
-		state.addBundle(h);
-		state.addBundle(i);
 
 		state.resolve();
 		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
@@ -4584,11 +4552,6 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("C is not resolved", c.isResolved()); //$NON-NLS-1$
 		assertTrue("D is not resolved", d.isResolved()); //$NON-NLS-1$
 		assertTrue("E is not resolved", e.isResolved()); //$NON-NLS-1$
-		assertFalse("F is not resolved", f.isResolved()); //$NON-NLS-1$
-		assertFalse("G is not resolved", g.isResolved()); //$NON-NLS-1$
-		assertFalse("H is not resolved", h.isResolved()); //$NON-NLS-1$
-		assertFalse("I is not resolved", i.isResolved()); //$NON-NLS-1$
-
 	}
 }
 //testFragmentUpdateNoVersionChanged()
