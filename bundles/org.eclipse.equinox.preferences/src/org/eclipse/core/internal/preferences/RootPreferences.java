@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.core.internal.preferences;
 
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
@@ -52,17 +52,16 @@ public class RootPreferences extends EclipsePreferences {
 	 * @see EclipsePreferences#getChild(String, Plugin)
 	 */
 	protected synchronized IEclipsePreferences getChild(String key, Object context) {
-		Object value = null;
-		IEclipsePreferences child = null;
-		if (children != null)
-			value = children.get(key);
-		if (value != null) {
-			if (value instanceof IEclipsePreferences)
-				return (IEclipsePreferences) value;
-			//lazy initialization
-			child = PreferencesService.getDefault().createNode(key);
-			addChild(key, child);
-		}
+		if (children == null)
+			return null;
+		Object value = children.get(key);
+		if (value == null)
+			return null;
+		if (value instanceof IEclipsePreferences)
+			return (IEclipsePreferences) value;
+		//lazy initialization
+		IEclipsePreferences child = PreferencesService.getDefault().createNode(key);
+		addChild(key, child);
 		return child;
 	}
 
@@ -71,7 +70,13 @@ public class RootPreferences extends EclipsePreferences {
 	 */
 	protected synchronized IEclipsePreferences[] getChildren() {
 		//must perform lazy initialization of child nodes
-		String[] childNames = childrenNames();
+		String[] childNames = new String[0];
+		try {
+			childNames = childrenNames();
+		} catch (BackingStoreException e) {
+			log(new Status(IStatus.ERROR, Activator.PI_PREFERENCES, PrefsMessages.childrenNames, e));
+			return new IEclipsePreferences[0];
+		}
 		IEclipsePreferences[] childNodes = new IEclipsePreferences[childNames.length];
 		for (int i = 0; i < childNames.length; i++)
 			childNodes[i] = getChild(childNames[i], null);

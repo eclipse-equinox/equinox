@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 	private static final String ELEMENT_INITIALIZER = "initializer"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME = "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_CLASS = "class"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_STORAGE = "storage"; //$NON-NLS-1$
 	private static final String ELEMENT_SCOPE = "scope"; //$NON-NLS-1$
 	private static final String ELEMENT_MODIFIER = "modifier"; //$NON-NLS-1$
 	// Store this around for performance
@@ -156,15 +157,33 @@ public class PreferenceServiceRegistryHelper implements IRegistryChangeListener 
 		IScope scope = null;
 		Object value = scopeRegistry.get(name);
 		if (value instanceof IConfigurationElement) {
-			try {
-				scope = (IScope) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_CLASS);
-				scopeRegistry.put(name, scope);
-			} catch (ClassCastException e) {
-				log(createStatusError(PrefsMessages.preferences_classCastScope, e));
-				return new EclipsePreferences(parent, name);
-			} catch (CoreException e) {
-				log(e.getStatus());
-				return new EclipsePreferences(parent, name);
+			// did the user define their own class?
+			if (((IConfigurationElement) value).getAttribute(ATTRIBUTE_CLASS) != null) {
+				try {
+					scope = (IScope) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_CLASS);
+					scopeRegistry.put(name, scope);
+				} catch (ClassCastException e) {
+					log(createStatusError(PrefsMessages.preferences_classCastScope, e));
+					return new EclipsePreferences(parent, name);
+				} catch (CoreException e) {
+					log(e.getStatus());
+					return new EclipsePreferences(parent, name);
+				}
+			} else if (((IConfigurationElement) value).getAttribute(ATTRIBUTE_STORAGE) != null) {
+				// or if they defined a storage class then use EclipsePreferences to model the prefs.
+				try {
+					AbstractPreferenceStorage storage = (AbstractPreferenceStorage) ((IConfigurationElement) value).createExecutableExtension(ATTRIBUTE_STORAGE);
+					ScopeDescriptor descriptor = new ScopeDescriptor(storage);
+					EclipsePreferences result = new EclipsePreferences(parent, name);
+					result.setDescriptor(descriptor);
+					return result;
+				} catch (ClassCastException e) {
+					log(createStatusError(PrefsMessages.preferences_classCastStorage, e));
+					return new EclipsePreferences(parent, name);
+				} catch (CoreException e) {
+					log(e.getStatus());
+					return new EclipsePreferences(parent, name);
+				}
 			}
 		} else
 			scope = (IScope) value;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected boolean removed = false;
 	private ListenerList nodeChangeListeners;
 	private ListenerList preferenceChangeListeners;
+	private ScopeDescriptor descriptor;
 
 	public static boolean DEBUG_PREFERENCE_GENERAL = false;
 	public static boolean DEBUG_PREFERENCE_SET = false;
@@ -196,10 +197,18 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#childrenNames()
 	 */
-	public String[] childrenNames() {
+	public String[] childrenNames() throws BackingStoreException {
 		// illegal state if this node has been removed
 		checkRemoved();
-		return internalChildNames();
+		String[] internal = internalChildNames();
+		// if we are != 0 then we have already been initialized
+		if (internal.length != 0)
+			return internal;
+		// we only want to query the descriptor for the child names if
+		// this node is the scope root
+		if (descriptor != null && getSegmentCount(absolutePath()) == 1)
+			return descriptor.childrenNames(absolutePath());
+		return internal;
 	}
 
 	protected String[] internalChildNames() {
@@ -560,7 +569,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected IEclipsePreferences getLoadLevel() {
-		return null;
+		return descriptor == null ? null : descriptor.getLoadLevel(this);
 	}
 
 	/*
@@ -586,7 +595,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected EclipsePreferences internalCreate(EclipsePreferences nodeParent, String nodeName, Object context) {
-		return new EclipsePreferences(nodeParent, nodeName);
+		EclipsePreferences result = new EclipsePreferences(nodeParent, nodeName);
+		result.descriptor = this.descriptor;
+		return result;
 	}
 
 	/**
@@ -658,7 +669,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Subclasses to over-ride.
 	 */
 	protected boolean isAlreadyLoaded(IEclipsePreferences node) {
-		return true;
+		return descriptor == null ? true : descriptor.isAlreadyLoaded(node.absolutePath());
 	}
 
 	/*
@@ -678,7 +689,15 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * could not be loaded
 	 */
 	protected void load() throws BackingStoreException {
-		load(getLocation());
+		if (descriptor == null) {
+			load(getLocation());
+		} else {
+			// load the properties then set them without sending out change events
+			Properties props = descriptor.load(absolutePath());
+			if (props == null || props.isEmpty())
+				return;
+			convertFromProperties(this, props, false);
+		}
 	}
 
 	protected static Properties loadProperties(IPath location) throws BackingStoreException {
@@ -720,7 +739,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected void loaded() {
-		// do nothing
+		if (descriptor == null) {
+			// do nothing
+		} else {
+			descriptor.loaded(absolutePath());
+		}
 	}
 
 	protected void loadLegacy() {
@@ -989,33 +1012,28 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * was actually removed.
 	 */
 	protected void removeNode(IEclipsePreferences child) {
-		boolean wasRemoved = false;
-		synchronized (this) {
-			if (children != null) {
-				wasRemoved = children.remove(child.name()) != null;
-				if (wasRemoved)
-					makeDirty();
-				if (children.isEmpty())
-					children = null;
-			}
-		}
-		if (wasRemoved)
+		if (removeNode(child.name()) != null) {
 			fireNodeEvent(new NodeChangeEvent(this, child), false);
+			if (descriptor != null)
+				descriptor.removed(child.absolutePath());
+		}
 	}
 
 	/*
 	 * Remove non-initialized node from the collection.
 	 */
-	protected void removeNode(String key) {
+	protected Object removeNode(String key) {
 		synchronized (this) {
 			if (children != null) {
-				boolean wasRemoved = children.remove(key) != null;
-				if (wasRemoved)
+				Object result = children.remove(key);
+				if (result != null)
 					makeDirty();
 				if (children.isEmpty())
 					children = null;
+				return result;
 			}
 		}
+		return null;
 	}
 
 	/*
@@ -1054,7 +1072,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * could not be saved
 	 */
 	protected void save() throws BackingStoreException {
-		save(getLocation());
+		if (descriptor == null) {
+			save(getLocation());
+		} else {
+			descriptor.save(absolutePath(), convertToProperties(new Properties(), "")); //$NON-NLS-1$
+		}
 	}
 
 	protected void save(IPath location) throws BackingStoreException {
@@ -1242,5 +1264,9 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 
 	public String toString() {
 		return absolutePath();
+	}
+
+	void setDescriptor(ScopeDescriptor descriptor) {
+		this.descriptor = descriptor;
 	}
 }

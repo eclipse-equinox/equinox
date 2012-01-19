@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ public class PrefsMessages extends NLS {
 	// Preferences
 	public static String preferences_applyProblems;
 	public static String preferences_classCastScope;
+	public static String preferences_classCastStorage;
 	public static String preferences_classCastListener;
 	public static String preferences_classCastFilterEntry;
 
@@ -38,6 +39,7 @@ public class PrefsMessages extends NLS {
 	public static String preferences_invalidExtensionSuperclass;
 	public static String preferences_invalidFileFormat;
 	public static String preferences_loadException;
+	public static String preferences_loadProblems;
 	public static String preferences_matching;
 	public static String preferences_missingClassAttribute;
 	public static String preferences_missingScopeAttribute;
@@ -47,6 +49,8 @@ public class PrefsMessages extends NLS {
 	public static String preferences_saveProblems;
 	public static String preferences_validate;
 	public static String preferences_validationException;
+	public static String childrenNames;
+	public static String childrenNames2;
 
 	static {
 		// load message values from bundle file
