@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.localization.BundleLocalization;
 import org.eclipse.osgi.service.urlconversion.URLConverter;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.url.URLConstants;
@@ -57,20 +58,6 @@ public class Activator implements BundleActivator {
 	 */
 	public static Activator getDefault() {
 		return singleton;
-	}
-
-	/**
-	 * Print a debug message to the console. 
-	 * Pre-pend the message with the current date and the name of the current thread.
-	 */
-	public static void message(String message) {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(new Date(System.currentTimeMillis()));
-		buffer.append(" - ["); //$NON-NLS-1$
-		buffer.append(Thread.currentThread().getName());
-		buffer.append("] "); //$NON-NLS-1$
-		buffer.append(message);
-		System.out.println(buffer.toString());
 	}
 
 	/* (non-Javadoc)
@@ -225,35 +212,36 @@ public class Activator implements BundleActivator {
 	public String getBundleId(Object object) {
 		if (object == null)
 			return null;
-		if (bundleTracker == null) {
-			message("Bundle tracker is not set"); //$NON-NLS-1$
-			return null;
-		}
-		PackageAdmin packageAdmin = (PackageAdmin) bundleTracker.getService();
+		PackageAdmin packageAdmin = getBundleAdmin();
 		if (packageAdmin == null)
 			return null;
-
 		Bundle source = packageAdmin.getBundle(object.getClass());
 		if (source != null && source.getSymbolicName() != null)
 			return source.getSymbolicName();
 		return null;
 	}
 
-	public ResourceBundle getLocalization(Bundle bundle, String locale) {
+	/**
+	 * Returns the resource bundle responsible for location of the given bundle
+	 * in the given locale. Does not return null.
+	 * @throws MissingResourceException If the corresponding resource could not be found
+	 */
+	public ResourceBundle getLocalization(Bundle bundle, String locale) throws MissingResourceException {
 		if (localizationTracker == null) {
 			BundleContext context = Activator.getContext();
 			if (context == null) {
-				message("ResourceTranslator called before plugin is started"); //$NON-NLS-1$
-				return null;
+				throw new MissingResourceException(CommonMessages.activator_resourceBundleNotStarted, bundle.getSymbolicName(), ""); //$NON-NLS-1$
 			}
 			localizationTracker = new ServiceTracker(context, BundleLocalization.class.getName(), null);
 			localizationTracker.open();
 		}
 		BundleLocalization location = (BundleLocalization) localizationTracker.getService();
+		ResourceBundle result = null;
 		if (location != null)
-			return location.getLocalization(bundle, locale);
-
-		return null;
+			result = location.getLocalization(bundle, locale);
+		if (result == null)
+			throw new MissingResourceException(NLS.bind(CommonMessages.activator_resourceBundleNotFound, locale), bundle.getSymbolicName(), ""); //$NON-NLS-1$
+		return result;
 	}
 
 	/* (non-Javadoc)
