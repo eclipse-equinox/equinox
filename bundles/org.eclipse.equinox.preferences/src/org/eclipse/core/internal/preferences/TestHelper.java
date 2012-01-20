@@ -11,6 +11,7 @@
 package org.eclipse.core.internal.preferences;
 
 import java.util.Properties;
+import org.eclipse.core.runtime.IPath;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class TestHelper {
@@ -19,8 +20,7 @@ public class TestHelper {
 		return node.convertToProperties(new Properties(), prefix);
 	}
 
-	// TODO
-	//public static IPath getInstanceBaseLocation() {
-	//	return InstancePreferences.getBaseLocation();
-	//}
+	public static IPath getInstanceBaseLocation() {
+		return InstancePreferences.getBaseLocation();
+	}
 }
