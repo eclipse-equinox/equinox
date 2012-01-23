@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,11 +24,11 @@ import java.util.Dictionary;
  */
 public interface PluginConverter {
 	/**
-	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
-	 * generates a corresponding bundle manifest at the given default target locaton (a file).
+	 * Converts a plug-in/fragment manifest at the given source base location (a directory or jar file) and 
+	 * generates a corresponding bundle manifest at the given default target location (a file).
 	 * 
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
-	 * 	(a directory, e.g. the plug-in install location)
+	 * 	(a directory or jar file, e.g. the plug-in install location)
 	 * @param bundleManifestLocation the location for the bundle manifest to be generated
 	 * 	(including the file name). 
 	 * @param compatibilityManifest a boolean indicating if the manifest should contain headers to run  
@@ -44,11 +44,11 @@ public interface PluginConverter {
 	public File convertManifest(File pluginBaseLocation, File bundleManifestLocation, boolean compatibilityManifest, String target, boolean analyseJars, Dictionary<String, String> devProperties) throws PluginConversionException;
 
 	/**
-	 * Converts a plug-in/fragment manifest at the given source base location (a directory) and 
+	 * Converts a plug-in/fragment manifest at the given source base location (a directory or jar file) and 
 	 * generates a corresponding bundle manifest returned as a dictionary.
 	 * 
 	 * @param pluginBaseLocation the base location for the plug-in/fragment manifest to be converted
-	 * 	(a directory, e.g. the plug-in install location)
+	 * 	(a directory or jar file, e.g. the plug-in install location)
 	 * @param compatibility a boolean indicating if the manifest should contain headers to run  
 	 * 	in backward compatibility
 	 * @param target a string indicating the version of the runtime for which the manifest generated is targeted
