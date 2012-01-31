@@ -4553,6 +4553,227 @@ public class StateResolverTest extends AbstractStateTest {
 		assertTrue("D is not resolved", d.isResolved()); //$NON-NLS-1$
 		assertTrue("E is not resolved", e.isResolved()); //$NON-NLS-1$
 	}
+
+	public void testBug369880() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "test"); //$NON-NLS-1$ //$NON-NLS-2$
+		state.setPlatformProperties(props);
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.osgi; bundle-version=\"[1.0, 1.1)\""); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(a);
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+
+		state.addBundle(b);
+		state.resolve();
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+
+		BundleWiring aWiring = a.getWiring();
+		List aRequirements = a.getRequirements("osgi.ee");
+		List aRequiredWires = aWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from system bundle", 1, aRequirements.size());
+		assertEquals("Wrong number of wires from system bundle", 1, aRequiredWires.size());
+
+		BundleWiring bWiring = b.getWiring();
+		List bRequirements = b.getRequirements("osgi.ee");
+		List bRequiredWires = bWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from fragment", 1, bRequirements.size());
+		assertEquals("Wrong number of wires from fragment", 1, bRequiredWires.size());
+	}
+
+	public void testResolveFragmentEE01() throws BundleException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "test"); //$NON-NLS-1$ //$NON-NLS-2$
+		state.setPlatformProperties(props);
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.osgi; bundle-version=\"[1.0, 1.1)\""); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee; filter:=\"(osgi.ee=test)\"");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "c"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.identity; filter:=\"(osgi.identity=b)\""); //$NON-NLS-1$
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(b);
+		state.addBundle(a);
+		state.addBundle(c);
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertTrue("C is not resolved", c.isResolved()); //$NON-NLS-1$
+
+		BundleWiring aWiring = a.getWiring();
+		List aRequirements = a.getRequirements("osgi.ee");
+		List aRequiredWires = aWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from system bundle", 1, aRequirements.size());
+		assertEquals("Wrong number of wires from system bundle", 1, aRequiredWires.size());
+
+		BundleWiring bWiring = b.getWiring();
+		List bRequirements = b.getRequirements("osgi.ee");
+		List bRequiredWires = bWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from fragment", 1, bRequirements.size());
+		assertEquals("Wrong number of wires from fragment", 1, bRequiredWires.size());
+
+		BundleWiring cWiring = c.getWiring();
+		List cRequirements = c.getRequirements("osgi.identity");
+		List cRequiredWires = cWiring.getRequiredWires("osgi.identity");
+		assertEquals("Wrong number of osgi.identity requirements from c", 1, cRequirements.size());
+		assertEquals("Wrong number of wires from c", 1, cRequiredWires.size());
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.FRAGMENT_HOST, "org.eclipse.osgi; bundle-version=\"[1.0, 1.1)\""); //$NON-NLS-1$
+		manifest.put(Constants.REQUIRE_CAPABILITY, "osgi.ee; filter:=\"(osgi.ee=fail)\"");
+		b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), b.getBundleId());
+		state.updateBundle(b);
+		state.resolve(false);
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertFalse("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertFalse("C is not resolved", c.isResolved()); //$NON-NLS-1$
+	}
+
+	public void testResolveFragmentEE02() throws BundleException, IOException {
+		State state = buildEmptyState();
+		Dictionary[] props = new Dictionary[] {new Hashtable()};
+		props[0].put("org.osgi.framework.executionenvironment", "test"); //$NON-NLS-1$ //$NON-NLS-2$
+		state.setPlatformProperties(props);
+		int bundleID = 0;
+
+		Hashtable manifest = new Hashtable();
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "org.eclipse.osgi"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription a = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "b"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription b = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "c"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.IMPORT_PACKAGE, "d");
+		manifest.put(Constants.FRAGMENT_HOST, "b");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription c = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(b);
+		state.addBundle(a);
+		state.addBundle(c);
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertFalse("C is resolved", c.isResolved()); //$NON-NLS-1$
+
+		manifest.clear();
+		manifest.put(Constants.BUNDLE_MANIFESTVERSION, "2"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_SYMBOLICNAME, "d"); //$NON-NLS-1$
+		manifest.put(Constants.BUNDLE_VERSION, "1.0.0"); //$NON-NLS-1$
+		manifest.put(Constants.EXPORT_PACKAGE, "d");
+		manifest.put(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT, "test");
+		BundleDescription d = state.getFactory().createBundleDescription(state, manifest, (String) manifest.get(Constants.BUNDLE_SYMBOLICNAME) + manifest.get(Constants.BUNDLE_VERSION), bundleID++);
+
+		state.addBundle(d);
+		state.resolve();
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertFalse("C is resolved", c.isResolved()); //$NON-NLS-1$
+		assertTrue("D is not resolved", d.isResolved()); //$NON-NLS-1$
+
+		state.resolve(new BundleDescription[] {b});
+		assertTrue("A is not resolved", a.isResolved()); //$NON-NLS-1$
+		assertTrue("B is not resolved", b.isResolved()); //$NON-NLS-1$
+		assertTrue("C is not resolved", c.isResolved()); //$NON-NLS-1$
+		assertTrue("D is not resolved", d.isResolved()); //$NON-NLS-1$
+
+		BundleWiring aWiring = a.getWiring();
+		List aRequirements = a.getRequirements("osgi.ee");
+		List aRequiredWires = aWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from system bundle", 1, aRequirements.size());
+		assertEquals("Wrong number of wires from system bundle", 1, aRequiredWires.size());
+
+		BundleWiring bWiring = b.getWiring();
+		List bRequirements = b.getRequirements("osgi.ee");
+		List bRequiredWires = bWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from fragment", 1, bRequirements.size());
+		assertEquals("Wrong number of wires from fragment", 1, bRequiredWires.size());
+
+		BundleWiring cWiring = c.getWiring();
+		List cRequirements = c.getRequirements("osgi.ee");
+		List cRequiredWires = cWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from c", 1, cRequirements.size());
+		assertEquals("Wrong number of wires from c", 1, cRequiredWires.size());
+
+		File stateCache = OSGiTestsActivator.getContext().getDataFile("statecache"); //$NON-NLS-1$
+		stateCache.mkdirs();
+		StateObjectFactory.defaultFactory.writeState(state, stateCache);
+		state = StateObjectFactory.defaultFactory.readState(stateCache);
+
+		a = state.getBundle("org.eclipse.osgi", null);
+		b = state.getBundle("b", null);
+		c = state.getBundle("c", null);
+		d = state.getBundle("d", null);
+
+		aWiring = a.getWiring();
+		aRequirements = a.getRequirements("osgi.ee");
+		aRequiredWires = aWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from system bundle", 1, aRequirements.size());
+		assertEquals("Wrong number of wires from system bundle", 1, aRequiredWires.size());
+
+		bWiring = b.getWiring();
+		bRequirements = b.getRequirements("osgi.ee");
+		bRequiredWires = bWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from fragment", 1, bRequirements.size());
+		assertEquals("Wrong number of wires from fragment", 1, bRequiredWires.size());
+
+		cWiring = c.getWiring();
+		cRequirements = c.getRequirements("osgi.ee");
+		cRequiredWires = cWiring.getRequiredWires("osgi.ee");
+		assertEquals("Wrong number of osgi.ee requirements from c", 1, cRequirements.size());
+		assertEquals("Wrong number of wires from c", 1, cRequiredWires.size());
+	}
 }
 //testFragmentUpdateNoVersionChanged()
 //testFragmentUpdateVersionChanged()

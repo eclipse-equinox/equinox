@@ -149,7 +149,7 @@ public class ResolverImpl implements Resolver {
 	private void rewireBundles() {
 		List<ResolverBundle> visited = new ArrayList<ResolverBundle>(bundleMapping.size());
 		for (ResolverBundle rb : bundleMapping.values()) {
-			if (!rb.getBundleDescription().isResolved() || rb.isFragment())
+			if (!rb.getBundleDescription().isResolved())
 				continue;
 			rewireBundle(rb, visited);
 		}
@@ -347,6 +347,9 @@ public class ResolverImpl implements Resolver {
 	private void attachFragment0(ResolverBundle bundle) {
 		if (!bundle.isFragment() || !bundle.isResolvable())
 			return;
+		bundle.clearWires();
+		if (!resolveOSGiEE(bundle))
+			return;
 		// no need to select singletons now; it will be done when we select the rest of the singleton bundles (bug 152042)
 		// find all available hosts to attach to.
 		boolean foundMatch = false;
@@ -381,6 +384,31 @@ public class ResolverImpl implements Resolver {
 		if (!foundMatch)
 			state.addResolverError(bundle.getBundleDescription(), ResolverError.MISSING_FRAGMENT_HOST, bundle.getHost().getVersionConstraint().toString(), bundle.getHost().getVersionConstraint());
 
+	}
+
+	private boolean resolveOSGiEE(ResolverBundle bundle) {
+		GenericConstraint[] requirements = bundle.getGenericRequires();
+		for (GenericConstraint requirement : requirements) {
+			if (!(StateImpl.OSGI_EE_NAMESPACE.equals(requirement.getNameSpace()) || requirement.isEffective()))
+				continue;
+			{
+				if (!resolveGenericReq(requirement, new ArrayList<ResolverBundle>(0))) {
+					if (DEBUG || DEBUG_GENERICS)
+						ResolverImpl.log("** GENERICS " + requirement.getVersionConstraint().getName() + "[" + requirement.getBundleDescription() + "] failed to resolve"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					state.addResolverError(requirement.getVersionConstraint().getBundle(), ResolverError.MISSING_GENERIC_CAPABILITY, requirement.getVersionConstraint().toString(), requirement.getVersionConstraint());
+					if (!developmentMode) {
+						// fail fast; otherwise we want to attempt to resolver other constraints in dev mode
+						return false;
+					}
+				} else {
+					VersionSupplier supplier = requirement.getSelectedSupplier();
+					Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
+					if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
+						((BundleDescriptionImpl) bundle.getBundleDescription()).setEquinoxEE(ee);
+				}
+			}
+		}
+		return true;
 	}
 
 	public synchronized void resolve(BundleDescription[] reRefresh, Dictionary<Object, Object>[] platformProperties) {
@@ -438,11 +466,25 @@ public class ResolverImpl implements Resolver {
 				}
 			}
 
-			ResolverBundle[] bundles = unresolvedBundles.toArray(new ResolverBundle[unresolvedBundles.size()]);
-
 			usesCalculationTimeout = false;
 
-			resolveBundles(bundles, platformProperties, hookDisabled);
+			List<ResolverBundle> toResolve = new ArrayList<ResolverBundle>(unresolvedBundles);
+			// first resolve the system bundle to allow osgi.ee capabilities to be resolved
+			List<ResolverBundle> unresolvedSystemBundles = new ArrayList<ResolverBundle>(1);
+			String systemBSN = getSystemBundle();
+			for (Iterator<ResolverBundle> iToResolve = toResolve.iterator(); iToResolve.hasNext();) {
+				ResolverBundle rb = iToResolve.next();
+				String symbolicName = rb.getName();
+				if (symbolicName != null && symbolicName.equals(systemBSN)) {
+					unresolvedSystemBundles.add(rb);
+					iToResolve.remove();
+				}
+			}
+			if (!unresolvedSystemBundles.isEmpty())
+				resolveBundles(unresolvedSystemBundles.toArray(new ResolverBundle[unresolvedSystemBundles.size()]), platformProperties, hookDisabled);
+
+			// Now resolve the rest
+			resolveBundles(toResolve.toArray(new ResolverBundle[toResolve.size()]), platformProperties, hookDisabled);
 
 			@SuppressWarnings("unchecked")
 			Collection<ResolverBundle> optionalResolved = resolveOptional ? resolveOptionalConstraints(currentlyResolved) : Collections.EMPTY_LIST;
@@ -1283,7 +1325,7 @@ public class ResolverImpl implements Resolver {
 							break;
 						}
 					} else {
-						if ("osgi.ee".equals(genericRequires[i].getNameSpace())) { //$NON-NLS-1$
+						if (StateImpl.OSGI_EE_NAMESPACE.equals(genericRequires[i].getNameSpace())) {
 							VersionSupplier supplier = genericRequires[i].getSelectedSupplier();
 							Integer ee = supplier == null ? null : (Integer) ((GenericDescription) supplier.getBaseDescription()).getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE);
 							if (ee != null && ((BundleDescriptionImpl) bundle.getBaseDescription()).getEquinoxEE() < 0)
@@ -1438,8 +1480,15 @@ public class ResolverImpl implements Resolver {
 					foundResolvedMatch = true;
 					continue;
 				}
+				boolean successfulResolve = false;
+				if (capabilitySupplier.getState() != ResolverBundle.RESOLVED) {
+					// only attempt to resolve the supplier if not osgi.ee name space
+					if (!StateImpl.OSGI_EE_NAMESPACE.equals(constraint.getNameSpace()))
+						successfulResolve = resolveBundle(capabilitySupplier, cycle);
+				}
+
 				// if in dev mode then allow a constraint to resolve to an unresolved bundle
-				if (capabilitySupplier.getState() == ResolverBundle.RESOLVED || (resolveBundle(capabilitySupplier, cycle) || developmentMode)) {
+				if (capabilitySupplier.getState() == ResolverBundle.RESOLVED || (successfulResolve || developmentMode)) {
 					foundResolvedMatch |= !capability.getResolverBundle().isFragment() ? true : capability.getResolverBundle().getHost().getPossibleSuppliers() != null;
 					// Check cyclic dependencies
 					if (capabilitySupplier.getState() == ResolverBundle.RESOLVING)
@@ -1706,6 +1755,15 @@ public class ResolverImpl implements Resolver {
 			ResolverBundle bundle = (ResolverBundle) (hostRequire == null ? null : hostRequire.getSelectedSupplier());
 			BaseDescription supplier = bundle == null ? null : bundle.getBundleDescription();
 			state.resolveConstraint(requires[i], supplier);
+		}
+		GenericConstraint[] genericRequires = rb.getGenericRequires();
+		for (int i = 0; i < genericRequires.length; i++) {
+			VersionSupplier[] matchingCapabilities = genericRequires[i].getMatchingCapabilities();
+			if (matchingCapabilities == null)
+				state.resolveConstraint(genericRequires[i].getVersionConstraint(), null);
+			else
+				for (int j = 0; j < matchingCapabilities.length; j++)
+					state.resolveConstraint(genericRequires[i].getVersionConstraint(), matchingCapabilities[j].getBaseDescription());
 		}
 	}
 

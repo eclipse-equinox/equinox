@@ -506,7 +506,7 @@ public class StateBuilder {
 		}
 		GenericSpecificationImpl spec = new GenericSpecificationImpl();
 		spec.setResolution(GenericSpecificationImpl.RESOLUTION_FROM_BREE);
-		spec.setType("osgi.ee"); //$NON-NLS-1$
+		spec.setType(StateImpl.OSGI_EE_NAMESPACE);
 		try {
 			FilterImpl filter = FilterImpl.newInstance(filterSpec);
 			spec.setMatchingFilter(filter);

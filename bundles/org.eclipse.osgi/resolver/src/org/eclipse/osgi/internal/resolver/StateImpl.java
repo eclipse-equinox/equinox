@@ -35,6 +35,7 @@ public abstract class StateImpl implements State {
 	private static final String OSGI_ARCH = "osgi.arch"; //$NON-NLS-1$
 	public static final String[] PROPS = {OSGI_OS, OSGI_WS, OSGI_NL, OSGI_ARCH, Constants.FRAMEWORK_SYSTEMPACKAGES, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, Constants.OSGI_RESOLVER_MODE, Constants.FRAMEWORK_EXECUTIONENVIRONMENT, "osgi.resolveOptional", "osgi.genericAliases", Constants.FRAMEWORK_OS_NAME, Constants.FRAMEWORK_OS_VERSION, Constants.FRAMEWORK_PROCESSOR, Constants.FRAMEWORK_LANGUAGE, Constants.STATE_SYSTEM_BUNDLE, Constants.FRAMEWORK_SYSTEMCAPABILITIES, Constants.FRAMEWORK_SYSTEMCAPABILITIES_EXTRA}; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final DisabledInfo[] EMPTY_DISABLEDINFOS = new DisabledInfo[0];
+	public static final String OSGI_EE_NAMESPACE = "osgi.ee"; //$NON-NLS-1$
 
 	transient private Resolver resolver;
 	transient private StateDeltaImpl changes;
@@ -876,7 +877,7 @@ public abstract class StateImpl implements State {
 		if (profileEE == null || profileEE.length() == 0)
 			return;
 		for (GenericDescription capability : capabilities) {
-			if ("osgi.ee".equals(capability.getType()) && profileIndex.equals(capability.getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE))) //$NON-NLS-1$
+			if (OSGI_EE_NAMESPACE.equals(capability.getType()) && profileIndex.equals(capability.getAttributes().get(ExportPackageDescriptionImpl.EQUINOX_EE)))
 				return; // profile already specifies osgi.ee capabilities
 		}
 		Map<String, List<String>> eeVersions = new HashMap<String, List<String>>();
@@ -894,7 +895,7 @@ public abstract class StateImpl implements State {
 		}
 		for (Map.Entry<String, List<String>> eeVersion : eeVersions.entrySet()) {
 			GenericDescriptionImpl capability = new GenericDescriptionImpl();
-			capability.setType("osgi.ee"); //$NON-NLS-1$
+			capability.setType(OSGI_EE_NAMESPACE);
 			Dictionary<String, Object> attributes = new Hashtable<String, Object>();
 			attributes.put(capability.getType(), eeVersion.getKey());
 			if (eeVersion.getValue().size() > 0) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.module;
 
-import org.osgi.framework.resource.ResourceConstants;
-
 import java.util.*;
 import java.util.Map.Entry;
-import org.eclipse.osgi.internal.resolver.ExportPackageDescriptionImpl;
-import org.eclipse.osgi.internal.resolver.GenericDescriptionImpl;
+import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
+import org.osgi.framework.resource.ResourceConstants;
 
 /*
  * A companion to BundleDescription from the state used while resolving.
@@ -63,7 +61,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			exports = new ResolverExport[0];
 			imports = new ResolverImport[0];
 			requires = new BundleConstraint[0];
-			genericReqiures = new GenericConstraint[0];
+			GenericSpecification[] requirements = getBundleDescription().getGenericRequires();
+			List<GenericConstraint> constraints = new ArrayList<GenericConstraint>();
+			for (GenericSpecification requirement : requirements) {
+				if (StateImpl.OSGI_EE_NAMESPACE.equals(requirement.getType()))
+					constraints.add(new GenericConstraint(this, requirement));
+			}
+			genericReqiures = constraints.toArray(new GenericConstraint[constraints.size()]);
 			GenericDescription[] capabilities = getBundleDescription().getGenericCapabilities();
 			GenericCapability identity = null;
 			for (GenericDescription capability : capabilities) {
@@ -355,9 +359,13 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 
 		if (newGenericRequires.length > 0) {
 			ArrayList<GenericConstraint> hostGenericRequires = new ArrayList<GenericConstraint>(newGenericRequires.length);
-			for (int i = 0; i < newGenericRequires.length; i++)
-				hostGenericRequires.add(new GenericConstraint(this, newGenericRequires[i]));
-			fragmentGenericRequires.put(fragment.bundleID, hostGenericRequires);
+			for (int i = 0; i < newGenericRequires.length; i++) {
+				// only add namespaces that are not osgi.ee
+				if (!StateImpl.OSGI_EE_NAMESPACE.equals(newGenericRequires[i].getType()))
+					hostGenericRequires.add(new GenericConstraint(this, newGenericRequires[i]));
+			}
+			if (!hostGenericRequires.isEmpty())
+				fragmentGenericRequires.put(fragment.bundleID, hostGenericRequires);
 		}
 
 		ArrayList<ResolverExport> hostExports = new ArrayList<ResolverExport>(newExports.length);
@@ -454,9 +462,15 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			}
 		}
 		// generic constraints cannot conflict; 
-		// only check that a fragment does not add generics constraints to an already resolved host
-		if (isResolved() && newGenericRequires != null && newGenericRequires.length > 0)
-			result = true;
+		// only check that a fragment does not add generic constraints to an already resolved host
+		if (isResolved() && newGenericRequires != null) {
+			for (GenericSpecification genericSpecification : newGenericRequires) {
+				if (!StateImpl.OSGI_EE_NAMESPACE.equals(genericSpecification.getType())) {
+					result = true;
+					resolver.getState().addResolverError(fragment, ResolverError.FRAGMENT_CONFLICT, genericSpecification.toString(), genericSpecification);
+				}
+			}
+		}
 		return result;
 	}
 
