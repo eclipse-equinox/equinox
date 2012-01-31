@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import org.eclipse.osgi.framework.debug.Debug;
 import org.eclipse.osgi.internal.serviceregistry.*;
 import org.eclipse.osgi.service.resolver.ResolverHookException;
 import org.eclipse.osgi.util.NLS;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -50,7 +49,7 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 		this.registry = registry;
 	}
 
-	void handleHookException(Throwable t, Object hook, String method, Bundle hookBundle, List<HookReference> hookRefs) {
+	void handleHookException(Throwable t, Object hook, String method) {
 		if (Debug.DEBUG_HOOKS) {
 			Debug.println(hook.getClass().getName() + "." + method + "() exception:"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (t != null)
@@ -87,7 +86,13 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 						if (hook != null)
 							hookRefs.add(new HookReference(hookRef, hook));
 					} catch (Throwable t) {
-						handleHookException(t, factory, "begin", hookRef.getBundle(), hookRefs); //$NON-NLS-1$
+						// need to force an end call on the ResolverHooks we got and release them
+						try {
+							new CoreResolverHook(hookRefs).end();
+						} catch (Throwable endError) {
+							// we are already in failure mode; just continue
+						}
+						handleHookException(t, factory, "begin"); //$NON-NLS-1$
 					}
 				}
 			}
@@ -117,12 +122,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					handleHookException(null, hookRef.hook, "filterResolvable", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+					handleHookException(null, hookRef.hook, "filterResolvable"); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterResolvable(candidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterResolvable", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterResolvable"); //$NON-NLS-1$
 					}
 				}
 			}
@@ -138,12 +143,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					handleHookException(null, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+					handleHookException(null, hookRef.hook, "filterSingletonCollisions"); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterSingletonCollisions(singleton, collisionCandidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterSingletonCollisions", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterSingletonCollisions"); //$NON-NLS-1$
 					}
 				}
 			}
@@ -159,12 +164,12 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 				HookReference hookRef = iHooks.next();
 				if (hookRef.reference.getBundle() == null) {
-					handleHookException(null, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+					handleHookException(null, hookRef.hook, "filterMatches"); //$NON-NLS-1$
 				} else {
 					try {
 						hookRef.hook.filterMatches(requirement, candidates);
 					} catch (Throwable t) {
-						handleHookException(t, hookRef.hook, "filterMatches", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+						handleHookException(t, hookRef.hook, "filterMatches"); //$NON-NLS-1$
 					}
 				}
 			}
@@ -177,18 +182,32 @@ public class CoreResolverHookFactory implements ResolverHookFactory {
 			if (hooks.isEmpty())
 				return;
 			try {
+				HookReference missingHook = null;
+				Throwable endError = null;
+				HookReference endBadHook = null;
 				for (Iterator<HookReference> iHooks = hooks.iterator(); iHooks.hasNext();) {
 					HookReference hookRef = iHooks.next();
-					// We do not remove unregistered services here because we are going to remove of of them at the end
-					if (hookRef.reference.getBundle() != null) {
+					// We do not remove unregistered services here because we are going to remove all of them at the end
+					if (hookRef.reference.getBundle() == null) {
+						if (missingHook == null)
+							missingHook = hookRef;
+					} else {
 						try {
 							hookRef.hook.end();
 						} catch (Throwable t) {
-							handleHookException(t, hookRef.hook, "end", hookRef.reference.getBundle(), hooks); //$NON-NLS-1$
+							// Must continue on to the next hook.end method
+							// save the error for throwing at the end
+							if (endError == null) {
+								endError = t;
+								endBadHook = hookRef;
+							}
 						}
-
 					}
 				}
+				if (missingHook != null)
+					handleHookException(null, missingHook.hook, "end"); //$NON-NLS-1$
+				if (endError != null)
+					handleHookException(endError, endBadHook.hook, "end"); //$NON-NLS-1$
 			} finally {
 				releaseHooks(hooks);
 			}

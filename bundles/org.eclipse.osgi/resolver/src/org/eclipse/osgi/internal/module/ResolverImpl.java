@@ -494,6 +494,10 @@ public class ResolverImpl implements Resolver {
 				current.end();
 			}
 
+			// set the resolved status of the bundles in the State
+			// Note this must be done after calling end above in case end throws errors
+			stateResolveBundles(bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]));
+
 			for (ResolverBundle bundle : optionalResolved) {
 				state.resolveBundle(bundle.getBundleDescription(), false, null, null, null, null, null, null, null, null);
 				stateResolveBundle(bundle);
@@ -649,8 +653,6 @@ public class ResolverImpl implements Resolver {
 		resolveBundles0(bundles, platformProperties);
 		if (DEBUG_WIRING)
 			printWirings();
-		// set the resolved status of the bundles in the State
-		stateResolveBundles(bundleMapping.values().toArray(new ResolverBundle[bundleMapping.size()]));
 	}
 
 	private void selectSingletons(ResolverBundle[] bundles) {

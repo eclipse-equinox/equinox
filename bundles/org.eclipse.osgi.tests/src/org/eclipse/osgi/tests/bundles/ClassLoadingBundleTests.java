@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1695,6 +1695,120 @@ public class ClassLoadingBundleTests extends AbstractBundleTests {
 		} finally {
 			reg.unregister();
 		}
+	}
+
+	public void testBug370258_beginException() {
+		final boolean[] endCalled = {false};
+		ResolverHookFactory endHook = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// Nothing
+					}
+
+					public void filterResolvable(Collection candidates) {
+						throw new RuntimeException("Error");
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// Nothing
+					}
+
+					public void end() {
+						endCalled[0] = true;
+					}
+				};
+			}
+		};
+		ResolverHookFactory error = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				throw new RuntimeException("Error");
+			}
+		};
+
+		ServiceRegistration endReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, endHook, null);
+		ServiceRegistration errorReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		try {
+			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+			try {
+				test.start();
+				fail("Should not be able to start this bundle");
+			} catch (BundleException e) {
+				// expected
+				assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
+			}
+		} catch (BundleException e) {
+			fail("Unexpected install fail", e);
+		} finally {
+			errorReg.unregister();
+			endReg.unregister();
+		}
+		assertTrue("end is not called", endCalled[0]);
+	}
+
+	public void testBug370258_endException() {
+		final boolean[] endCalled = {false};
+		ResolverHookFactory endHook = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// Nothing
+					}
+
+					public void filterResolvable(Collection candidates) {
+						throw new RuntimeException("Error");
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// Nothing
+					}
+
+					public void end() {
+						endCalled[0] = true;
+					}
+				};
+			}
+		};
+		ResolverHookFactory error = new ResolverHookFactory() {
+			public ResolverHook begin(Collection triggers) {
+				return new ResolverHook() {
+					public void filterSingletonCollisions(BundleCapability singleton, Collection collisionCandidates) {
+						// Nothing
+					}
+
+					public void filterResolvable(Collection candidates) {
+						// Nothing
+					}
+
+					public void filterMatches(BundleRequirement requirement, Collection candidates) {
+						// Nothing
+					}
+
+					public void end() {
+						throw new RuntimeException("Error");
+					}
+				};
+			}
+		};
+
+		ServiceRegistration errorReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, error, null);
+		ServiceRegistration endReg = OSGiTestsActivator.getContext().registerService(ResolverHookFactory.class, endHook, null);
+		try {
+			Bundle test = installer.installBundle("test"); //$NON-NLS-1$
+			try {
+				test.start();
+				fail("Should not be able to start this bundle");
+			} catch (BundleException e) {
+				// expected
+				assertEquals("Wrong exception type.", BundleException.REJECTED_BY_HOOK, e.getType());
+			}
+		} catch (BundleException e) {
+			fail("Unexpected install fail", e);
+		} finally {
+			errorReg.unregister();
+			endReg.unregister();
+		}
+		assertTrue("end is not called", endCalled[0]);
 	}
 
 	private void doTestArrayTypeLoad(String name) {
