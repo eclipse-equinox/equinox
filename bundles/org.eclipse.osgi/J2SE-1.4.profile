@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2003, 2010 IBM Corporation and others.
+# Copyright (c) 2003, 2012 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -123,6 +123,7 @@ org.osgi.framework.executionenvironment = \
  J2SE-1.4
 org.osgi.framework.system.capabilities = \
  osgi.ee; osgi.ee="OSGi/Minimum"; version:List<Version>="1.0, 1.1, 1.2",\
+ osgi.ee; osgi.ee="JRE"; version:List<Version>="1.0, 1.1",\
  osgi.ee; osgi.ee="JavaSE"; version:List<Version>="1.0, 1.1, 1.2, 1.3, 1.4"
 osgi.java.profile.name = J2SE-1.4
 org.eclipse.jdt.core.compiler.compliance=1.4
