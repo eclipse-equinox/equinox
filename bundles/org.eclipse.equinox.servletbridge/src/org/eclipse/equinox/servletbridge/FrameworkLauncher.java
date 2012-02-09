@@ -251,9 +251,20 @@ public class FrameworkLauncher {
 		attribs.putValue(BUNDLE_VERSION, extensionBundleVersion);
 		attribs.putValue(FRAGMENT_HOST, "system.bundle; extension:=framework"); //$NON-NLS-1$
 
-		String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
 		String packageExports = null;
-		if (context.getMajorVersion() >= 3) {
+		if (context.getMajorVersion() > 3) {
+			// we really have no idea what the packages or versions are, it all just a guess ...
+			String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
+			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
+					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.annotation; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.descriptor; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
+		} else if (context.getMajorVersion() == 3) {
+			// We know spec version 3.0 corresponds to package version 2.6
+			// we are guessing future 3.x spec versions will increment package versions minor, so ...
+			String servletVersion = (context.getMajorVersion() - 1) + "." + (context.getMinorVersion() + 6); //$NON-NLS-1$
 			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
 					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
 					", javax.servlet.annotation; version=" + servletVersion + //$NON-NLS-1$
@@ -261,6 +272,8 @@ public class FrameworkLauncher {
 					", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
 					", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
 		} else {
+			// We know spec version 2.x directly correspond to package versions
+			String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
 			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
 					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
 					", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
