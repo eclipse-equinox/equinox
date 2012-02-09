@@ -252,10 +252,20 @@ public class FrameworkLauncher {
 		attribs.putValue(FRAGMENT_HOST, "system.bundle; extension:=framework"); //$NON-NLS-1$
 
 		String servletVersion = context.getMajorVersion() + "." + context.getMinorVersion(); //$NON-NLS-1$
-		String packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
-				", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
-				", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
-				", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
+		String packageExports = null;
+		if (context.getMajorVersion() >= 3) {
+			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
+					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.annotation; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.descriptor; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
+		} else {
+			packageExports = "org.eclipse.equinox.servletbridge; version=1.1" + //$NON-NLS-1$
+					", javax.servlet; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.http; version=" + servletVersion + //$NON-NLS-1$
+					", javax.servlet.resources; version=" + servletVersion; //$NON-NLS-1$
+		}
 
 		String extendedExports = config.getInitParameter(CONFIG_EXTENDED_FRAMEWORK_EXPORTS);
 		if (extendedExports != null && extendedExports.trim().length() != 0)
