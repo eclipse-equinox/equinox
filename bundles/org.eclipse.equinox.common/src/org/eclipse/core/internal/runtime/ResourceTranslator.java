@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2009 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,12 @@ public class ResourceTranslator {
 		if (bundle == null)
 			return nonTranslated;
 
-		ResourceBundle resourceBundle = getResourceBundle(bundle, locale);
+		ResourceBundle resourceBundle = null;
+		try {
+			resourceBundle = getResourceBundle(bundle, locale);
+		} catch (MissingResourceException e) {
+			// ignore - bug 371103
+		}
 		String[] translated = new String[nonTranslated.length];
 		for (int i = 0; i < nonTranslated.length; i++) {
 			translated[i] = getResourceString(bundle, nonTranslated[i], resourceBundle);
