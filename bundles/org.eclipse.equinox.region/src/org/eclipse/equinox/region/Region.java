@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 VMware Inc.
+ * Copyright (c) 2008, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,19 @@ public interface Region {
 	 * @see BundleContext#installBundle(String)
 	 */
 	Bundle installBundle(String location) throws BundleException;
+
+	/**
+	 * Installs a bundle and associates the bundle with this region. The bundle's location 
+	 * will be used as is.  The caller of this method is responsible for ensuring the 
+	 * location is unique across regions.
+	 * 
+	 * @param location the bundle location string
+	 * @param input a stream of the bundle's contents or <code>null</code>
+	 * @return the installed Bundle
+	 * @throws BundleException if the install fails
+	 * @see BundleContext#installBundle(String, InputStream)
+	 */
+	Bundle installBundleAtLocation(String location, InputStream input) throws BundleException;
 
 	/**
 	 * 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,6 +124,11 @@ public class StandardRegionDigraphPeristenceTests {
 		Assert.assertNull(p);
 		try {
 			bootCopy.installBundle("dynamic.add.b.1", new ByteArrayInputStream(new byte[0]));
+		} catch (BundleException e) {
+			// expected
+		}
+		try {
+			bootCopy.installBundleAtLocation("dynamic.add.b.1", new ByteArrayInputStream(new byte[0]));
 		} catch (BundleException e) {
 			// expected
 		}

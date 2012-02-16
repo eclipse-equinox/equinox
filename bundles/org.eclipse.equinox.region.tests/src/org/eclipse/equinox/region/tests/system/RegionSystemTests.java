@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.equinox.region.tests.system;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import javax.management.*;
@@ -618,4 +619,39 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong region found for the bundle id", pp2Region, digraph.getRegion(TEST_BUNDLE_ID));
 	}
 
+	public void testInstallAtLocation() throws BundleException, MalformedURLException, IOException {
+		// create disconnected test regions
+		Region r1 = digraph.createRegion(getName() + ".1");
+		Region r2 = digraph.createRegion(getName() + ".2");
+
+		String location = bundleInstaller.getBundleLocation(PP1);
+		Bundle b1 = null;
+		Bundle b2 = null;
+		String l1 = null;
+		String l2 = null;
+		try {
+			URL url = new URL(location);
+			b1 = r1.installBundle(location + ".1", url.openStream());
+			l1 = b1.getLocation();
+			b2 = r2.installBundleAtLocation(location + ".2", url.openStream());
+			l2 = b2.getLocation();
+		} finally {
+			if (b1 != null) {
+				try {
+					b1.uninstall();
+				} catch (BundleException e) {
+					// ignore
+				}
+			}
+			if (b2 != null) {
+				try {
+					b2.uninstall();
+				} catch (BundleException e) {
+					// ignore
+				}
+			}
+		}
+		assertEquals("Wrong location found.", location + ".1#" + r1.getName(), l1);
+		assertEquals("Wrong location found.", location + ".2", l2);
+	}
 }

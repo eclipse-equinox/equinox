@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,13 +86,28 @@ final class BundleIdBasedRegion implements Region {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public Bundle installBundleAtLocation(String location, InputStream input) throws BundleException {
+		return installBundle0(location, input, false);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
+		return installBundle0(location, input, true);
+	}
+
+	private Bundle installBundle0(String location, InputStream input, boolean appendRegionName) throws BundleException {
 		if (this.bundleContext == null)
 			throw new BundleException("This region is not connected to an OSGi Framework.", BundleException.INVALID_OPERATION); //$NON-NLS-1$
 		setRegionThreadLocal();
 		try {
 			input = checkFileProtocol(location, input);
-			return this.bundleContext.installBundle(location + REGION_LOCATION_DELIMITER + this.regionName, input);
+			if (appendRegionName) {
+				location = location + REGION_LOCATION_DELIMITER + this.regionName;
+			}
+			return this.bundleContext.installBundle(location, input);
 		} finally {
 			removeRegionThreadLocal();
 		}
