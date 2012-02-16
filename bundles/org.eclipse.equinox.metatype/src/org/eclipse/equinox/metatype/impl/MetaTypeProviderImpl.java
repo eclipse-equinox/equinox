@@ -147,8 +147,8 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		if (locale == null || locale.length() == 0)
 			return false;
 
-		int idx_first = locale.indexOf(ObjectClassDefinitionImpl.LOCALE_SEP);
-		int idx_second = locale.lastIndexOf(ObjectClassDefinitionImpl.LOCALE_SEP);
+		int idx_first = locale.indexOf(LocalizationElement.LOCALE_SEP);
+		int idx_second = locale.lastIndexOf(LocalizationElement.LOCALE_SEP);
 		if (idx_first == -1 && locale.length() == 2)
 			// It is format of only language.
 			return false;
@@ -171,15 +171,17 @@ public class MetaTypeProviderImpl implements MetaTypeProvider {
 		Enumeration<ObjectClassDefinitionImpl> ocds = _allPidOCDs.elements();
 		while (ocds.hasMoreElements()) {
 			ObjectClassDefinitionImpl ocd = ocds.nextElement();
-			if (ocd._localization != null && !localizationFiles.contains(ocd._localization))
-				localizationFiles.add(ocd._localization);
+			String localization = ocd.getLocalization();
+			if (localization != null && !localizationFiles.contains(localization))
+				localizationFiles.add(localization);
 		}
 		// get all the localization resources for FPIDS
 		ocds = _allFPidOCDs.elements();
 		while (ocds.hasMoreElements()) {
 			ObjectClassDefinitionImpl ocd = ocds.nextElement();
-			if (ocd._localization != null && !localizationFiles.contains(ocd._localization))
-				localizationFiles.add(ocd._localization);
+			String localization = ocd.getLocalization();
+			if (localization != null && !localizationFiles.contains(localization))
+				localizationFiles.add(localization);
 		}
 		if (localizationFiles.size() == 0)
 			localizationFiles.add(getBundleLocalization(_bundle));

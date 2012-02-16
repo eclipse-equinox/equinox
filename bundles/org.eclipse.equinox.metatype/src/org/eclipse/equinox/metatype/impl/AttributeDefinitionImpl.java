@@ -44,6 +44,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	}
 
 	private AttributeDefinitionImpl(String id, String name, String description, int type, int cardinality, Object min, Object max, boolean isRequired, String localization, LogService logger, ExtendableHelper helper) {
+		super(localization);
 		this._id = id;
 		this._name = name;
 		this._description = description;
@@ -52,7 +53,6 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 		this._minValue = min;
 		this._maxValue = max;
 		this._isRequired = isRequired;
-		this._localization = localization;
 		this.logger = logger;
 		this.helper = helper;
 	}
@@ -62,7 +62,7 @@ public class AttributeDefinitionImpl extends LocalizationElement implements Equi
 	 */
 	public synchronized Object clone() {
 
-		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, _localization, logger, helper);
+		AttributeDefinitionImpl ad = new AttributeDefinitionImpl(_id, _name, _description, _dataType, _cardinality, _minValue, _maxValue, _isRequired, getLocalization(), logger, helper);
 
 		if (_defaults != null) {
 			ad.setDefaultValue(_defaults.clone());
