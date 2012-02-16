@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,15 +126,46 @@ public class HttpServerManager implements ManagedServiceFactory {
 	}
 
 	private Connector createHttpConnector(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Boolean httpEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_ENABLED);
+		Boolean httpEnabled = null;
+		Object httpEnabledObj = dictionary.get(JettyConstants.HTTP_ENABLED);
+		if (httpEnabledObj instanceof Boolean)
+		{
+			httpEnabled = (Boolean) httpEnabledObj;			
+		}
+		else
+			if (httpEnabledObj instanceof String)
+			{
+				httpEnabled = Boolean.parseBoolean(httpEnabledObj.toString());
+			}	
 		if (httpEnabled != null && !httpEnabled.booleanValue())
 			return null;
 
-		Integer httpPort = (Integer) dictionary.get(JettyConstants.HTTP_PORT);
+		
+		Integer httpPort = null;
+		Object httpPortObj = dictionary.get(JettyConstants.HTTP_PORT);
+		if (httpPortObj instanceof Integer)
+		{
+			httpPort = (Integer) httpPortObj;
+		}
+		else
+			if (httpPortObj instanceof String)
+			{
+				httpPort = Integer.valueOf(httpPortObj.toString());
+			}
 		if (httpPort == null)
 			return null;
 
-		Boolean nioEnabled = (Boolean) dictionary.get(JettyConstants.HTTP_NIO);
+		Boolean nioEnabled = null;
+		Object nioEnabledObj = dictionary.get(JettyConstants.HTTP_NIO);
+		if (nioEnabledObj instanceof Boolean)
+		{
+			nioEnabled = (Boolean) nioEnabledObj;			
+		}
+		else
+			if (nioEnabledObj instanceof String)
+			{
+				nioEnabled = Boolean.parseBoolean(nioEnabledObj.toString());
+			}	
 		if (nioEnabled == null)
 			nioEnabled = getDefaultNIOEnablement();
 
@@ -183,11 +214,31 @@ public class HttpServerManager implements ManagedServiceFactory {
 
 	@SuppressWarnings("deprecation")
 	private Connector createHttpsConnector(@SuppressWarnings("rawtypes") Dictionary dictionary) {
-		Boolean httpsEnabled = (Boolean) dictionary.get(JettyConstants.HTTPS_ENABLED);
+		Boolean httpsEnabled = null;
+		Object httpsEnabledObj = dictionary.get(JettyConstants.HTTPS_ENABLED);
+		if (httpsEnabledObj instanceof Boolean)
+		{
+			httpsEnabled = (Boolean) httpsEnabledObj;			
+		}
+		else
+			if (httpsEnabledObj instanceof String)
+			{
+				httpsEnabled = Boolean.parseBoolean(httpsEnabledObj.toString());
+			}	
 		if (httpsEnabled == null || !httpsEnabled.booleanValue())
 			return null;
 
-		Integer httpsPort = (Integer) dictionary.get(JettyConstants.HTTPS_PORT);
+		Integer httpsPort = null;
+		Object httpsPortObj = dictionary.get(JettyConstants.HTTPS_PORT);
+		if (httpsPortObj instanceof Integer)
+		{
+			httpsPort = (Integer) httpsPortObj;
+		}
+		else
+			if (httpsPortObj instanceof String)
+			{
+				httpsPort = Integer.valueOf(httpsPortObj.toString());
+			}
 		if (httpsPort == null)
 			return null;
 
@@ -261,7 +312,17 @@ public class HttpServerManager implements ManagedServiceFactory {
 		httpContext.setAttribute(CONTEXT_TEMPDIR, contextWorkDir);
 
 		HashSessionManager sessionManager = new HashSessionManager();
-		Integer sessionInactiveInterval = (Integer) dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
+		Integer sessionInactiveInterval = null;
+		Object sessionInactiveIntervalObj = dictionary.get(JettyConstants.CONTEXT_SESSIONINACTIVEINTERVAL);
+		if (sessionInactiveIntervalObj instanceof Integer)
+		{
+			sessionInactiveInterval = (Integer) sessionInactiveIntervalObj;
+		}
+		else
+			if (sessionInactiveIntervalObj instanceof String)
+			{
+				sessionInactiveInterval = Integer.valueOf(sessionInactiveIntervalObj.toString());
+			}
 		if (sessionInactiveInterval != null)
 			sessionManager.setMaxInactiveInterval(sessionInactiveInterval.intValue());
 
