@@ -156,7 +156,9 @@ public class CoordinationImpl {
 		Exception exception = null;
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		for (Participant participant : participants) {
+		List<Participant> participantsToNotify = new ArrayList<Participant>(this.participants);
+		Collections.reverse(participantsToNotify);
+		for (Participant participant : participantsToNotify) {
 			try {
 				participant.ended(referent);
 			} catch (Exception e) {
@@ -261,7 +263,9 @@ public class CoordinationImpl {
 		// Notify participants this coordination has failed.
 		// No additional synchronization is needed here because the participant
 		// list will not be modified post termination.
-		for (Participant participant : participants) {
+		List<Participant> participantsToNotify = new ArrayList<Participant>(this.participants);
+		Collections.reverse(participantsToNotify);
+		for (Participant participant : participantsToNotify) {
 			try {
 				participant.failed(referent);
 			} catch (Exception e) {
