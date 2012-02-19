@@ -17,6 +17,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Tests for Equinox Coordinator"); //$NON-NLS-1$
 		suite.addTestSuite(CoordinationMaxTimeoutTest.class);
+		suite.addTestSuite(ReverseParticipantOrderNotifyTest.class);
 		return suite;
 	}
 }

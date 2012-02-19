@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.equinox.coordinator.tests;
 
-import junit.framework.TestCase;
 import org.eclipse.equinox.compendium.tests.Activator;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.coordinator.*;
 
 /*
@@ -21,13 +19,10 @@ import org.osgi.service.coordinator.*;
  * 
  * https://bugs.eclipse.org/bugs/show_bug.cgi?id=362137
  */
-public class CoordinationMaxTimeoutTest extends TestCase {
+public class CoordinationMaxTimeoutTest extends CoordinatorTest {
 	private static final long DEVIATION = 500;
 	private static final String PROPERTY_NAME = "org.eclipse.equinox.coordinator.timeout"; //$NON-NLS-1$
 	private static final long TIMEOUT = 5000;
-
-	private Coordinator coordinator;
-	private ServiceReference coordinatorRef;
 
 	public void testMaxTimeoutWithNoTimeout() throws Exception {
 		long start = System.currentTimeMillis();
@@ -144,14 +139,8 @@ public class CoordinationMaxTimeoutTest extends TestCase {
 		System.setProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertSystemProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
 		assertFrameworkProperty(PROPERTY_NAME, String.valueOf(TIMEOUT));
-		Activator.getBundle(Activator.BUNDLE_COORDINATOR).start();
-		coordinatorRef = Activator.getBundleContext().getServiceReference(Coordinator.class.getName());
-		coordinator = (Coordinator) Activator.getBundleContext().getService(coordinatorRef);
-	}
-
-	protected void tearDown() throws Exception {
-		Activator.getBundleContext().ungetService(coordinatorRef);
-		Activator.getBundle(Activator.BUNDLE_COORDINATOR).stop();
+		// The above system property initialization must occur before calling super.setUp().
+		super.setUp();
 	}
 
 	private void assertFrameworkProperty(String name, String value) {
