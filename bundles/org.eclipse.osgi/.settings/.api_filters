@@ -402,6 +402,13 @@
         </filter>
     </resource>
     <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
+        <filter comment="Ignore OSGi API" id="1209008130">
+            <message_arguments>
+                <message_argument value="1.7"/>
+                <message_argument value="3.8"/>
+                <message_argument value="FRAMEWORK_BSNVERSION_MANAGED"/>
+            </message_arguments>
+        </filter>
         <filter comment="Ignore OSGi APIs" id="1209008130">
             <message_arguments>
                 <message_argument value="1.7"/>
@@ -435,45 +442,59 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/Capability.java" type="org.osgi.framework.resource.Capability">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/AbstractWiringNamespace.java" type="org.osgi.framework.namespace.AbstractWiringNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.Capability"/>
+                <message_argument value="org.osgi.framework.namespace.AbstractWiringNamespace"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/Requirement.java" type="org.osgi.framework.resource.Requirement">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/BundleNamespace.java" type="org.osgi.framework.namespace.BundleNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.Requirement"/>
+                <message_argument value="org.osgi.framework.namespace.BundleNamespace"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/Resource.java" type="org.osgi.framework.resource.Resource">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/ContractNamespace.java" type="org.osgi.framework.namespace.ContractNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.Resource"/>
+                <message_argument value="org.osgi.framework.namespace.ContractNamespace"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/ResourceConstants.java" type="org.osgi.framework.resource.ResourceConstants">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/ExecutionEnvironmentNamespace.java" type="org.osgi.framework.namespace.ExecutionEnvironmentNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.ResourceConstants"/>
+                <message_argument value="org.osgi.framework.namespace.ExecutionEnvironmentNamespace"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/Wire.java" type="org.osgi.framework.resource.Wire">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/ExtenderNamespace.java" type="org.osgi.framework.namespace.ExtenderNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.Wire"/>
+                <message_argument value="org.osgi.framework.namespace.ExtenderNamespace"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/resource/Wiring.java" type="org.osgi.framework.resource.Wiring">
-        <filter id="1110441988">
+    <resource path="osgi/src/org/osgi/framework/namespace/HostNamespace.java" type="org.osgi.framework.namespace.HostNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
-                <message_argument value="org.osgi.framework.resource.Wiring"/>
+                <message_argument value="org.osgi.framework.namespace.HostNamespace"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/namespace/IdentityNamespace.java" type="org.osgi.framework.namespace.IdentityNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.namespace.IdentityNamespace"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/framework/namespace/PackageNamespace.java" type="org.osgi.framework.namespace.PackageNamespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.namespace.PackageNamespace"/>
             </message_arguments>
         </filter>
     </resource>
@@ -517,6 +538,48 @@
                 <message_argument value="1.1"/>
                 <message_argument value="3.8"/>
                 <message_argument value="getResource()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Capability.java" type="org.osgi.resource.Capability">
+        <filter id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Capability"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Namespace.java" type="org.osgi.resource.Namespace">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Namespace"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Requirement.java" type="org.osgi.resource.Requirement">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Requirement"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Resource.java" type="org.osgi.resource.Resource">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Resource"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Wire.java" type="org.osgi.resource.Wire">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Wire"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="osgi/src/org/osgi/resource/Wiring.java" type="org.osgi.resource.Wiring">
+        <filter comment="Ignore OSGi API" id="1110441988">
+            <message_arguments>
+                <message_argument value="org.osgi.resource.Wiring"/>
             </message_arguments>
         </filter>
     </resource>

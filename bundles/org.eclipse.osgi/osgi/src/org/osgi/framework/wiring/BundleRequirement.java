@@ -18,7 +18,8 @@ package org.osgi.framework.wiring;
 
 import java.util.Map;
 
-import org.osgi.framework.resource.Requirement;
+import org.osgi.framework.namespace.AbstractWiringNamespace;
+import org.osgi.resource.Requirement;
 
 /**
  * A requirement that has been declared from a {@link BundleRevision bundle
@@ -38,10 +39,10 @@ public interface BundleRequirement extends Requirement {
 
 	/**
 	 * Returns whether the specified capability matches this requirement.
-	 *
+	 * 
 	 * @param capability The capability to match to this requirement.
 	 * @return {@code true} if the specified capability has the same
-	 *         {@link #getNamespace() name space} as this requirement and the
+	 *         {@link #getNamespace() namespace} as this requirement and the
 	 *         filter for this requirement matches the
 	 *         {@link BundleCapability#getAttributes() attributes of the
 	 *         specified capability}; {@code false} otherwise.
@@ -55,6 +56,11 @@ public interface BundleRequirement extends Requirement {
 
 	/**
 	 * {@inheritDoc}
+	 * 
+	 * <p>
+	 * All requirement directives not specified by the
+	 * {@link AbstractWiringNamespace wiring namespaces} have no specified
+	 * semantics and are considered extra user defined information.
 	 */
 	Map<String, String> getDirectives();
 

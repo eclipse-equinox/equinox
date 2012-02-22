@@ -15,8 +15,9 @@ import java.util.Map.Entry;
 import junit.framework.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
-import org.osgi.framework.resource.*;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.*;
 
 public class BasicTest extends AbstractResourceTest {
 	private interface CapabilityProvider {
@@ -154,7 +155,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertVersion("1.0.0", version);
 		// Make sure TB1's type is correct.
 		String type = getType(revision);
-		assertType(ResourceConstants.IDENTITY_TYPE_BUNDLE, type);
+		assertType(IdentityNamespace.TYPE_BUNDLE, type);
 		Map arbitraryAttrs = new HashMap();
 		arbitraryAttrs.put("attr1", "a1");
 		arbitraryAttrs.put("attr2", "a2");
@@ -173,7 +174,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, arbitraryAttrs, arbitraryDirs);
 		// There should be 1 provided osgi.identity wire (TB1 -> TB3).
-		List wires = wiring.getProvidedWires(ResourceConstants.IDENTITY_NAMESPACE);
+		List wires = wiring.getProvidedWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB1 and TB3.
 		Wire wire = (Wire) wires.get(0);
@@ -181,7 +182,7 @@ public class BasicTest extends AbstractResourceTest {
 		Requirement requirement = getIdentityRequirement(requirer, 0);
 		assertIdentityWire(wire, capability, revision, requirement, requirer);
 		// There should be 1 required osgi.identity wire (TB4 -> TB1 via TF1).
-		wires = wiring.getRequiredWires(ResourceConstants.IDENTITY_NAMESPACE);
+		wires = wiring.getRequiredWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB4 and TB1 (via TF1).
 		wire = (Wire) wires.get(0);
@@ -243,7 +244,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertVersion("1.0.0", version);
 		// Make sure TB3's type is correct.
 		String type = getType(revision);
-		assertType(ResourceConstants.IDENTITY_TYPE_BUNDLE, type);
+		assertType(IdentityNamespace.TYPE_BUNDLE, type);
 		// Check TB3's osgi.identity capability from the revision.
 		Capability capability = getIdentityCapability(revision);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
@@ -256,7 +257,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 2 required osgi.identity wires (TB1 -> TB3 and TF1 -> TB3).
-		List wires = wiring.getRequiredWires(ResourceConstants.IDENTITY_NAMESPACE);
+		List wires = wiring.getRequiredWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 2);
 		// Check the osgi.identity wire between TB1 and TB3.
 		Wire wire = (Wire) wires.get(0);
@@ -292,7 +293,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertVersion("1.0.0", version);
 		// Make sure TB4's type is correct.
 		String type = getType(revision);
-		assertType(ResourceConstants.IDENTITY_TYPE_BUNDLE, type);
+		assertType(IdentityNamespace.TYPE_BUNDLE, type);
 		// Check TB4's osgi.identity capability from the revision.
 		Capability capability = getIdentityCapability(revision);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
@@ -305,7 +306,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 1 provided osgi.identity wire (TB4 -> TB1 via TF1).
-		List wires = wiring.getProvidedWires(ResourceConstants.IDENTITY_NAMESPACE);
+		List wires = wiring.getProvidedWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TB4 and TB1 (via TF1).
 		Wire wire = (Wire) wires.get(0);
@@ -337,7 +338,7 @@ public class BasicTest extends AbstractResourceTest {
 		assertVersion("1.0.0", version);
 		// Make sure TF1's type is correct.
 		String type = getType(revision);
-		assertType(ResourceConstants.IDENTITY_TYPE_FRAGMENT, type);
+		assertType(IdentityNamespace.TYPE_FRAGMENT, type);
 		// Check TF1's osgi.identity capability from the revision.
 		Capability capability = getIdentityCapability(revision);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
@@ -350,7 +351,7 @@ public class BasicTest extends AbstractResourceTest {
 		capability = getIdentityCapability(wiring);
 		assertIdentityCapability(capability, symbolicName, version, type, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
 		// There should be 1 provided osgi.identity wire (TF1 -> TB3).
-		List wires = wiring.getProvidedWires(ResourceConstants.IDENTITY_NAMESPACE);
+		List wires = wiring.getProvidedWires(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertWires(wires, 1);
 		// Check the osgi.identity wire between TF1 and TB3.
 		Wire wire = (Wire) wires.get(0);
@@ -403,20 +404,20 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertFilterDirective(Requirement requirement) {
-		assertNotNull("Missing filter directive", requirement.getDirectives().get(ResourceConstants.REQUIREMENT_FILTER_DIRECTIVE));
+		assertNotNull("Missing filter directive", requirement.getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE));
 	}
 
 	private void assertIdentityCapability(Capability capability, String symbolicName, Version version, String type, Map arbitraryAttrs, Map arbitraryDirs) {
-		assertEquals("Wrong namespace", ResourceConstants.IDENTITY_NAMESPACE, capability.getNamespace());
+		assertEquals("Wrong namespace", IdentityNamespace.IDENTITY_NAMESPACE, capability.getNamespace());
 		assertEquals("Wrong number of attributes", 3 + arbitraryAttrs.size(), capability.getAttributes().size());
 		// The osgi.identity attribute contains the symbolic name of the resource.
-		assertSymbolicName(symbolicName, (String) capability.getAttributes().get(ResourceConstants.IDENTITY_NAMESPACE));
+		assertSymbolicName(symbolicName, (String) capability.getAttributes().get(IdentityNamespace.IDENTITY_NAMESPACE));
 		// The version attribute must be of type Version.
 		// The version attribute contains the version of the resource.
-		assertVersion(version, (Version) capability.getAttributes().get(ResourceConstants.IDENTITY_VERSION_ATTRIBUTE));
+		assertVersion(version, (Version) capability.getAttributes().get(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE));
 		// The type attribute must be of type String.
 		// The type attribute contains the resource type.
-		assertType(type, (String) capability.getAttributes().get(ResourceConstants.IDENTITY_TYPE_ATTRIBUTE));
+		assertType(type, (String) capability.getAttributes().get(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE));
 		Map attributes = capability.getAttributes();
 		for (Iterator iEntries = arbitraryAttrs.entrySet().iterator(); iEntries.hasNext();) {
 			Map.Entry entry = (Entry) iEntries.next();
@@ -438,7 +439,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private void assertNotIdentityCapability(CapabilityProvider provider) {
-		List capabilities = provider.getCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		List capabilities = provider.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		// A resource with no symbolic name must not provide an identity capability.
 		assertCapabilities(capabilities, 0);
 	}
@@ -502,12 +503,12 @@ public class BasicTest extends AbstractResourceTest {
 		attributes.put("foo", "bar");
 		attributes.put("x", "y");
 		Map directives = new HashMap();
-		directives.put(ResourceConstants.CAPABILITY_MANDATORY_DIRECTIVE, "foo,x");
+		directives.put(Namespace.RESOLUTION_MANDATORY, "foo,x");
 		return new BasicCapability(namespace, attributes, directives);
 	}
 
 	private Capability getIdentityCapability(BundleRevision revision) {
-		List capabilities = revision.getDeclaredCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		List capabilities = revision.getDeclaredCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertCapabilities(capabilities, 1);
 		Capability capability = (Capability) capabilities.get(0);
 		assertNotNull(capability);
@@ -515,7 +516,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private Capability getIdentityCapability(BundleWiring wiring) {
-		List capabilities = wiring.getCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		List capabilities = wiring.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertCapabilities(capabilities, 1);
 		Capability capability = (Capability) capabilities.get(0);
 		assertNotNull(capability);
@@ -523,7 +524,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private Capability getIdentityCapability(Resource resource) {
-		List capabilities = resource.getCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		List capabilities = resource.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertCapabilities(capabilities, 1);
 		Capability capability = (Capability) capabilities.get(0);
 		assertNotNull(capability);
@@ -531,7 +532,7 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private Requirement getIdentityRequirement(BundleRevision revision, int index) {
-		List requirements = revision.getDeclaredRequirements(ResourceConstants.IDENTITY_NAMESPACE);
+		List requirements = revision.getDeclaredRequirements(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertRequirements(requirements, index);
 		Requirement requirement = (Requirement) requirements.get(index);
 		assertNotNull(requirement);
@@ -539,6 +540,6 @@ public class BasicTest extends AbstractResourceTest {
 	}
 
 	private String getType(BundleRevision revision) {
-		return (revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0 ? ResourceConstants.IDENTITY_TYPE_BUNDLE : ResourceConstants.IDENTITY_TYPE_FRAGMENT;
+		return (revision.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0 ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,14 @@ import java.util.Map;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.internal.resolver.BaseDescriptionImpl.BaseCapability;
 import org.eclipse.osgi.service.resolver.*;
-import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.service.resolver.extras.SpecificationReference;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
-import org.osgi.framework.resource.Capability;
-import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.namespace.AbstractWiringNamespace;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Namespace;
 
 abstract class VersionConstraintImpl implements VersionConstraint {
 
@@ -179,14 +180,14 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 			// now we must do the generic thing
 			if (!namespace.equals(capability.getNamespace()))
 				return false;
-			String filterSpec = getDirectives().get(ResourceConstants.REQUIREMENT_FILTER_DIRECTIVE);
+			String filterSpec = getDirectives().get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
 			try {
 				if (filterSpec != null && !FrameworkUtil.createFilter(filterSpec).matches(capability.getAttributes()))
 					return false;
 			} catch (InvalidSyntaxException e) {
 				return false;
 			}
-			return hasMandatoryAttributes(ManifestElement.getArrayFromList(capability.getDirectives().get(ResourceConstants.CAPABILITY_MANDATORY_DIRECTIVE)));
+			return hasMandatoryAttributes(ManifestElement.getArrayFromList(capability.getDirectives().get(AbstractWiringNamespace.CAPABILITY_MANDATORY_DIRECTIVE)));
 		}
 
 		public BundleRevision getResource() {
@@ -209,27 +210,10 @@ abstract class VersionConstraintImpl implements VersionConstraint {
 		return addFilterAttribute(filter, attr, value, true);
 	}
 
-	static private final Version MAX_VERSION = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-
-	// TODO this is coupled to the implementation detail of version range for open range check
-	// TODO we need to create a new method on VersionRange to get a filter string and likely should add a FilterBuilder.
 	static StringBuffer addFilterAttribute(StringBuffer filter, String attr, Object value, boolean escapeWildCard) {
 		if (value instanceof VersionRange) {
 			VersionRange range = (VersionRange) value;
-			if (range.getIncludeMinimum()) {
-				filter.append('(').append(attr).append(">=").append(escapeValue(range.getMinimum(), escapeWildCard)).append(')'); //$NON-NLS-1$
-			} else {
-				filter.append("(!(").append(attr).append("<=").append(escapeValue(range.getMinimum(), escapeWildCard)).append("))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			// only include the maximum check if this is not an open range
-			// this check is a bit hacky because we have no method on VersionRange to check if the range really is open
-			if (!(MAX_VERSION.equals(range.getMaximum()) && range.getIncludeMaximum())) {
-				if (range.getIncludeMaximum()) {
-					filter.append('(').append(attr).append("<=").append(escapeValue(range.getMaximum(), escapeWildCard)).append(')'); //$NON-NLS-1$
-				} else {
-					filter.append("(!(").append(attr).append(">=").append(escapeValue(range.getMaximum(), escapeWildCard)).append("))"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-			}
+			filter.append(range.toFilterString(attr));
 		} else {
 			filter.append('(').append(attr).append('=').append(escapeValue(value, escapeWildCard)).append(')');
 		}

@@ -27,7 +27,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.hooks.resolver.ResolverHook;
-import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRevision;
 
@@ -760,7 +760,7 @@ public class ResolverImpl implements Resolver {
 	}
 
 	private BundleCapability getIdentity(ResolverBundle bundle) {
-		List<BundleCapability> identities = bundle.getBundleDescription().getDeclaredCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		List<BundleCapability> identities = bundle.getBundleDescription().getDeclaredCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		return identities.size() == 1 ? identities.get(0) : bundle.getCapability();
 	}
 

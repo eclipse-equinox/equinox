@@ -20,7 +20,9 @@ import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.*;
-import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.namespace.BundleNamespace;
+import org.osgi.framework.namespace.IdentityNamespace;
+import org.osgi.resource.Namespace;
 
 /**
  * This class builds bundle description objects from manifests
@@ -33,7 +35,7 @@ public class StateBuilder {
 	private static final String[] DEFINED_FRAGMENT_HOST_DIRECTIVES = {Constants.EXTENSION_DIRECTIVE};
 	static final String[] DEFINED_BSN_DIRECTIVES = {Constants.SINGLETON_DIRECTIVE, Constants.FRAGMENT_ATTACHMENT_DIRECTIVE, Constants.MANDATORY_DIRECTIVE};
 	static final String[] DEFINED_BSN_MATCHING_ATTRS = {Constants.BUNDLE_VERSION_ATTRIBUTE, Constants.OPTIONAL_ATTRIBUTE, Constants.REPROVIDE_ATTRIBUTE};
-	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE, ResourceConstants.REQUIREMENT_CARDINALITY_DIRECTIVE};
+	private static final String[] DEFINED_REQUIRE_CAPABILITY_DIRECTIVES = {Constants.RESOLUTION_DIRECTIVE, Constants.FILTER_DIRECTIVE, Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE};
 	private static final String[] DEFINED_REQUIRE_CAPABILITY_ATTRS = {};
 	private static final String[] DEFINED_OSGI_VALIDATE_HEADERS = {Constants.IMPORT_PACKAGE, Constants.DYNAMICIMPORT_PACKAGE, Constants.EXPORT_PACKAGE, Constants.FRAGMENT_HOST, Constants.BUNDLE_SYMBOLICNAME, Constants.REQUIRE_BUNDLE};
 	static final String GENERIC_REQUIRE = "Eclipse-GenericRequire"; //$NON-NLS-1$
@@ -628,8 +630,8 @@ public class StateBuilder {
 				int resolution = 0;
 				if (Constants.RESOLUTION_OPTIONAL.equals(resolutionDirective))
 					resolution |= GenericSpecification.RESOLUTION_OPTIONAL;
-				String cardinality = element.getDirective(ResourceConstants.REQUIREMENT_CARDINALITY_DIRECTIVE);
-				if (ResourceConstants.REQUIREMENT_CARDINALITY_MULTIPLE.equals(cardinality))
+				String cardinality = element.getDirective(Namespace.REQUIREMENT_CARDINALITY_DIRECTIVE);
+				if (Namespace.CARDINALITY_MULTIPLE.equals(cardinality))
 					resolution |= GenericSpecification.RESOLUTION_MULTIPLE;
 				spec.setResolution(resolution);
 				spec.setAttributes(getAttributes(element, DEFINED_REQUIRE_CAPABILITY_ATTRS));
@@ -700,8 +702,8 @@ public class StateBuilder {
 		for (ManifestElement element : osgiCapabilities) {
 			String[] namespaces = element.getValueComponents();
 			for (String namespace : namespaces) {
-				if (ResourceConstants.IDENTITY_NAMESPACE.equals(namespace))
-					throw new BundleException("A bundle is not allowed to define a capability in the " + ResourceConstants.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(namespace))
+					throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 
 				GenericDescriptionImpl desc = new GenericDescriptionImpl();
 				desc.setType(namespace);
@@ -737,8 +739,8 @@ public class StateBuilder {
 				if (colonIdx > 0) {
 					name = genericNames[j].substring(0, colonIdx);
 					desc.setType(genericNames[j].substring(colonIdx + 1));
-					if (ResourceConstants.IDENTITY_NAMESPACE.equals(desc.getType()))
-						throw new BundleException("A bundle is not allowed to define a capability in the " + ResourceConstants.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
+					if (IdentityNamespace.IDENTITY_NAMESPACE.equals(desc.getType()))
+						throw new BundleException("A bundle is not allowed to define a capability in the " + IdentityNamespace.IDENTITY_NAMESPACE + " name space."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				Map<String, Object> mapAttrs = getAttributes(equinoxCapabilities[i], new String[] {Constants.VERSION_ATTRIBUTE});
 				Dictionary<String, Object> attrs = mapAttrs == null ? new Hashtable<String, Object>() : new Hashtable<String, Object>(mapAttrs);
@@ -888,14 +890,14 @@ public class StateBuilder {
 		if (description.getSymbolicName() == null)
 			return null;
 		GenericDescriptionImpl result = new GenericDescriptionImpl();
-		result.setType(ResourceConstants.IDENTITY_NAMESPACE);
+		result.setType(IdentityNamespace.IDENTITY_NAMESPACE);
 		Dictionary<String, Object> attributes = new Hashtable<String, Object>(description.getDeclaredAttributes());
 		// remove osgi.wiring.bundle and bundle-version attributes
-		attributes.remove(ResourceConstants.WIRING_BUNDLE_NAMESPACE);
+		attributes.remove(BundleNamespace.BUNDLE_NAMESPACE);
 		attributes.remove(Constants.BUNDLE_VERSION_ATTRIBUTE);
-		attributes.put(ResourceConstants.IDENTITY_NAMESPACE, description.getSymbolicName());
-		attributes.put(ResourceConstants.IDENTITY_TYPE_ATTRIBUTE, description.getHost() == null ? ResourceConstants.IDENTITY_TYPE_BUNDLE : ResourceConstants.IDENTITY_TYPE_FRAGMENT);
-		attributes.put(ResourceConstants.IDENTITY_VERSION_ATTRIBUTE, description.getVersion());
+		attributes.put(IdentityNamespace.IDENTITY_NAMESPACE, description.getSymbolicName());
+		attributes.put(IdentityNamespace.CAPABILITY_TYPE_ATTRIBUTE, description.getHost() == null ? IdentityNamespace.TYPE_BUNDLE : IdentityNamespace.TYPE_FRAGMENT);
+		attributes.put(IdentityNamespace.CAPABILITY_VERSION_ATTRIBUTE, description.getVersion());
 		result.setAttributes(attributes);
 		Map<String, String> directives = new HashMap<String, String>(description.getDeclaredDirectives());
 		// remove defaults directive values

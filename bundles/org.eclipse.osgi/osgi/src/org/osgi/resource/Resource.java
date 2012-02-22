@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.osgi.framework.resource;
+package org.osgi.resource;
 
 import java.util.List;
 
-
 /**
  * A resource is the representation of a uniquely identified and typed data.
- *
- * A resources can be wired together via capabilities and requirements.
+ * 
+ * A resource declares requirements that need to be satisfied by capabilities
+ * before it can provide its capabilities.
  * 
  * <p>
  * Instances of this type must be <i>effectively immutable</i>. That is, for a
  * given instance of this interface, the methods defined by this interface must
- * always return the same result.
- *
+ * always return the same result. A Resource can be wired through a Resolver.
+ * 
  * @ThreadSafe
  * @version $Id$
  */
@@ -36,26 +36,26 @@ public interface Resource {
 	/**
 	 * Returns the capabilities declared by this resource.
 	 * 
-	 * @param namespace The name space of the declared capabilities to return or
-	 *        {@code null} to return the declared capabilities from all name
-	 *        spaces.
+	 * @param namespace The namespace of the declared capabilities to return or
+	 *        {@code null} to return the declared capabilities from all
+	 *        namespaces.
 	 * @return An unmodifiable list containing the declared {@link Capability}s
-	 *         from the specified name space. The returned list will be empty if
-	 *         this resource declares no capabilities in the specified name
-	 *         space.
+	 *         from the specified namespace. The returned list will be empty if
+	 *         this resource declares no capabilities in the specified
+	 *         namespace.
 	 */
 	List<Capability> getCapabilities(String namespace);
 
 	/**
 	 * Returns the requirements declared by this bundle resource.
-	 *
-	 * @param namespace The name space of the declared requirements to return or
-	 *        {@code null} to return the declared requirements from all name
-	 *        spaces.
+	 * 
+	 * @param namespace The namespace of the declared requirements to return or
+	 *        {@code null} to return the declared requirements from all
+	 *        namespaces.
 	 * @return An unmodifiable list containing the declared {@link Requirement}
-	 *         s from the specified name space. The returned list will be empty
-	 *         if this resource declares no requirements in the specified name
-	 *         space.
+	 *         s from the specified namespace. The returned list will be empty
+	 *         if this resource declares no requirements in the specified
+	 *         namespace.
 	 */
 	List<Requirement> getRequirements(String namespace);
 
@@ -63,10 +63,10 @@ public interface Resource {
 	 * Compares this {@code Resource} to another {@code Resource}.
 	 * 
 	 * <p>
-	 * This {@code Resource} is equal to another {@code Resource} if they have
-	 * they both have the same content and come from the same location. Location
-	 * may be defined as the bundle location if the resource is an installed
-	 * bundle or the repository location if the resource is in a repository.
+	 * This {@code Resource} is equal to another {@code Resource} if both have
+	 * the same content and come from the same location. Location may be defined
+	 * as the bundle location if the resource is an installed bundle or the
+	 * repository location if the resource is in a repository.
 	 * 
 	 * @param obj The object to compare against this {@code Resource}.
 	 * @return {@code true} if this {@code Resource} is equal to the other

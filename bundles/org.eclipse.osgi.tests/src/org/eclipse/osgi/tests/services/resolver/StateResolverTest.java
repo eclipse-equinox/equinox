@@ -22,9 +22,9 @@ import org.eclipse.osgi.internal.resolver.StateObjectFactoryImpl;
 import org.eclipse.osgi.service.resolver.*;
 import org.eclipse.osgi.tests.OSGiTestsActivator;
 import org.osgi.framework.*;
-import org.osgi.framework.resource.Capability;
-import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.*;
+import org.osgi.resource.Capability;
 
 public class StateResolverTest extends AbstractStateTest {
 	public static Test suite() {
@@ -2775,7 +2775,7 @@ public class StateResolverTest extends AbstractStateTest {
 		state.addBundle(systemB);
 		state.resolve();
 
-		Collection ids = systemBundle.getCapabilities(ResourceConstants.IDENTITY_NAMESPACE);
+		Collection ids = systemBundle.getCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
 		assertNotNull("Null osgi.identity", ids);
 		assertEquals("Wrong number of identities", 1, ids.size());
 

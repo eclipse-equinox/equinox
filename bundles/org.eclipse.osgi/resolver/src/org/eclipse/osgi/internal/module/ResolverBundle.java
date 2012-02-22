@@ -15,7 +15,7 @@ import java.util.Map.Entry;
 import org.eclipse.osgi.internal.resolver.*;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.Constants;
-import org.osgi.framework.resource.ResourceConstants;
+import org.osgi.framework.namespace.IdentityNamespace;
 
 /*
  * A companion to BundleDescription from the state used while resolving.
@@ -71,7 +71,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 			GenericDescription[] capabilities = getBundleDescription().getGenericCapabilities();
 			GenericCapability identity = null;
 			for (GenericDescription capability : capabilities) {
-				if (ResourceConstants.IDENTITY_NAMESPACE.equals(capability.getType())) {
+				if (IdentityNamespace.IDENTITY_NAMESPACE.equals(capability.getType())) {
 					identity = new GenericCapability(this, capability);
 					break;
 				}
@@ -388,7 +388,7 @@ public class ResolverBundle extends VersionSupplier implements Comparable<Resolv
 		List<GenericCapability> hostCapabilities = new ArrayList<GenericCapability>(newGenericCapabilities.length);
 		if (newGenericCapabilities.length > 0 && dynamicAttach) {
 			for (GenericDescription capability : newGenericCapabilities) {
-				if (!ResourceConstants.IDENTITY_NAMESPACE.equals(capability.getType())) {
+				if (!IdentityNamespace.IDENTITY_NAMESPACE.equals(capability.getType())) {
 					GenericDescription hostCapabililty = new GenericDescriptionImpl(getBundleDescription(), capability);
 					hostCapabilities.add(new GenericCapability(this, hostCapabililty));
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,9 +20,11 @@ import org.eclipse.osgi.framework.util.Headers;
 import org.eclipse.osgi.service.resolver.*;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
-import org.osgi.framework.resource.*;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.BundleWire;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 
 public class OSGiCapabilityTest extends AbstractStateTest {
 	private static final String MANIFEST_ROOT = "test_files/genericCapability/";
@@ -187,7 +189,7 @@ public class OSGiCapabilityTest extends AbstractStateTest {
 		assertEquals("Specs do not match Descs", genRequired.length, genProvided.length + (fragIdentity == null ? 0 : 1));
 		Collection providedCollection = new ArrayList(Arrays.asList(genProvided));
 		for (int i = 0; i < genRequired.length; i++) {
-			if (ResourceConstants.IDENTITY_NAMESPACE.equals(genRequired[i].getType()) && genRequired[i].getSupplier().getHost() != null)
+			if (IdentityNamespace.IDENTITY_NAMESPACE.equals(genRequired[i].getType()) && genRequired[i].getSupplier().getHost() != null)
 				assertEquals("Wrong fragment provider: " + genRequired[i], fragIdentity, genRequired[i]);
 			else
 				assertTrue("Wrong provider for requirement: " + genRequired[i], providedCollection.remove(genRequired[i]));
