@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,12 +33,6 @@ final class StandardRegionFilter implements RegionFilter {
 		}
 	}
 
-	/**
-	 * Determines whether this filter allows the given bundle
-	 * 
-	 * @param bundle the bundle
-	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
-	 */
 	public boolean isAllowed(Bundle bundle) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>(3);
 		String bsn = bundle.getSymbolicName();
@@ -53,12 +47,6 @@ final class StandardRegionFilter implements RegionFilter {
 		return isBundleAllowed(attrs);
 	}
 
-	/**
-	 * Determines whether this filter allows the given bundle
-	 * 
-	 * @param bundle the bundle revision
-	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
-	 */
 	public boolean isAllowed(BundleRevision bundle) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>(3);
 		String bsn = bundle.getSymbolicName();
@@ -76,9 +64,7 @@ final class StandardRegionFilter implements RegionFilter {
 	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
 	 */
 	private boolean isBundleAllowed(Map<String, ?> bundleAttributes) {
-		if (match(filters.get(VISIBLE_BUNDLE_NAMESPACE), bundleAttributes))
-			return true;
-		return match(filters.get(VISIBLE_ALL_NAMESPACE), bundleAttributes);
+		return isAllowed(VISIBLE_BUNDLE_NAMESPACE, bundleAttributes);
 	}
 
 	private static boolean match(Collection<Filter> filters, Map<String, ?> attrs) {
@@ -101,30 +87,24 @@ final class StandardRegionFilter implements RegionFilter {
 		return false;
 	}
 
-	/**
-	 * Determines whether this filter allows the given service reference.
-	 * 
-	 * @param service the service reference of the service
-	 * @return <code>true</code> if the service is allowed and <code>false</code>otherwise
-	 */
 	public boolean isAllowed(ServiceReference<?> service) {
 		if (match(filters.get(VISIBLE_SERVICE_NAMESPACE), service))
 			return true;
 		return match(filters.get(VISIBLE_ALL_NAMESPACE), service);
 	}
 
-	/**
-	 * Determines whether this filter allows the given capability.
-	 * 
-	 * @param capability the bundle capability
-	 * @return <code>true</code> if the capability is allowed and <code>false</code>otherwise
-	 */
 	public boolean isAllowed(BundleCapability capability) {
-		String namespace = capability.getNamespace();
-		Map<String, ?> attrs = capability.getAttributes();
-		if (match(filters.get(namespace), attrs))
+		return isAllowed(capability.getNamespace(), capability.getAttributes());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isAllowed(String namespace, Map<String, ?> attributes) {
+		if (match(filters.get(namespace), attributes))
 			return true;
-		return match(filters.get(VISIBLE_ALL_NAMESPACE), attrs);
+		return match(filters.get(VISIBLE_ALL_NAMESPACE), attributes);
 	}
 
 	public Map<String, Collection<String>> getSharingPolicy() {

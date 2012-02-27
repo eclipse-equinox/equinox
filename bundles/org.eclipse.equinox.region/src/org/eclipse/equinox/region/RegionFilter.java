@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 VMware Inc.
+ * Copyright (c) 2010, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,7 +73,10 @@ public interface RegionFilter {
 	public static final String VISIBLE_ALL_NAMESPACE = "org.eclipse.equinox.allow.all"; //$NON-NLS-1$
 
 	/**
-	 * Determines whether this filter allows the given bundle
+	 * Determines whether this filter allows the given bundle.  A
+	 * Bundle is allowed if it successfully matches one or more filters
+	 * specified using the {@link RegionFilter#VISIBLE_BUNDLE_NAMESPACE}
+	 * name space.
 	 * 
 	 * @param bundle the bundle
 	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
@@ -81,7 +84,10 @@ public interface RegionFilter {
 	public boolean isAllowed(Bundle bundle);
 
 	/**
-	 * Determines whether this filter allows the given bundle
+	 * Determines whether this filter allows the given bundle.  A
+	 * Bundle is allowed if it successfully matches one or more filters
+	 * specified using the {@link RegionFilter#VISIBLE_BUNDLE_NAMESPACE}
+	 * name space.
 	 * 
 	 * @param bundle the bundle revision
 	 * @return <code>true</code> if the bundle is allowed and <code>false</code>otherwise
@@ -89,7 +95,10 @@ public interface RegionFilter {
 	public boolean isAllowed(BundleRevision bundle);
 
 	/**
-	 * Determines whether this filter allows the given service reference.
+	 * Determines whether this filter allows the given service reference.  A
+	 * service is allowed if its service properties successfully matches one
+	 * or more filters specified using the 
+	 * {@link RegionFilter#VISIBLE_SERVICE_NAMESPACE} name space.
 	 * 
 	 * @param service the service reference of the service
 	 * @return <code>true</code> if the service is allowed and <code>false</code>otherwise
@@ -97,12 +106,36 @@ public interface RegionFilter {
 	public boolean isAllowed(ServiceReference<?> service);
 
 	/**
-	 * Determines whether this filter allows the given capability.
+	 * Determines whether this filter allows the given capability.  A
+	 * capability is allowed if it successfully matches one or more filters
+	 * specified using the {@link BundleCapability#getNamespace() name space}
+	 * of the given capability.  For example, the name spaces 
+	 * {@link RegionFilter#VISIBLE_PACKAGE_NAMESPACE osgi.wiring.package}, 
+	 * {@link RegionFilter#VISIBLE_HOST_NAMESPACE osgi.wiring.host}, and
+	 * {@link RegionFilter#VISIBLE_REQUIRE_NAMESPACE osgi.wiring.bundle}
+	 * may be used.  Any other generic capability 
+	 * {@link RegionFilterBuilder#allow(String, String) name spaces} can also 
+	 * be allowed by the region filter. 
 	 * 
 	 * @param capability the bundle capability
 	 * @return <code>true</code> if the capability is allowed and <code>false</code>otherwise
 	 */
 	public boolean isAllowed(BundleCapability capability);
+
+	/**
+	 * Determines whether this filter allows the given name space with the given attributes.
+	 * The name space can be any generic name space including but not limited to the following:
+	 * {@link #VISIBLE_BUNDLE_NAMESPACE}, {@link #VISIBLE_PACKAGE_NAMESPACE}, 
+	 * {@link #VISIBLE_HOST_NAMESPACE}, {@link #VISIBLE_REQUIRE_NAMESPACE} and 
+	 * {@link #VISIBLE_SERVICE_NAMESPACE}.  Any other generic capability 
+	 * {@link RegionFilterBuilder#allow(String, String) name spaces} can also 
+	 * be allowed by the region filter.
+	 * 
+	 * @param namespace the name space
+	 * @param attributes the attributes to check if they are allowed
+	 * @return <code>true</code> if the name space and attributes are allowed and <code>false</code> otherwise
+	 */
+	public boolean isAllowed(String namespace, Map<String, ?> attributes);
 
 	/**
 	 * Returns a map of the filters used by each name space for this region filter. The may key is the name space and

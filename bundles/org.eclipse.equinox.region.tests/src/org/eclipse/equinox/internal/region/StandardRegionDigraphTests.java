@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Set;
+import java.util.*;
 import org.easymock.EasyMock;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
@@ -297,6 +297,91 @@ public class StandardRegionDigraphTests {
 			fail("Digraph changed since copy.");
 		} catch (BundleException e) {
 			// expected
+		}
+	}
+
+	static class TestRegionDigraphVisitor implements RegionDigraphVisitor {
+		final Collection<Region> visited = new ArrayList<Region>();
+		final String namespace;
+		final Map<String, ?> attributes;
+
+		public TestRegionDigraphVisitor(String namespace, Map<String, ?> attributes) {
+			super();
+			this.namespace = namespace;
+			this.attributes = attributes;
+		}
+
+		@Override
+		public boolean visit(Region region) {
+			visited.add(region);
+			return true;
+		}
+
+		@Override
+		public boolean preEdgeTraverse(RegionFilter regionFilter) {
+			return regionFilter.isAllowed(namespace, attributes);
+		}
+
+		@Override
+		public void postEdgeTraverse(RegionFilter regionFilter) {
+			// nothing
+		}
+
+		Collection<Region> clearVisited() {
+			Collection<Region> result = new ArrayList<Region>(visited);
+			visited.clear();
+			return result;
+		}
+	}
+
+	@Test
+	public void testVisitRegions() throws BundleException, InvalidSyntaxException {
+		replayMocks(); // needed to allow teardown to succeed.
+		RegionDigraph testDigraph = new StandardRegionDigraph(null);
+		Region a = testDigraph.createRegion(REGION_A);
+		Region b = testDigraph.createRegion(REGION_B);
+		Region c = testDigraph.createRegion(REGION_C);
+		Region d = testDigraph.createRegion(REGION_D);
+
+		testDigraph.connect(a, testDigraph.createRegionFilterBuilder().allow("b", "(b=x)").allow("c", "(c=x)").allow("d", "(d=x)").build(), b);
+		testDigraph.connect(b, testDigraph.createRegionFilterBuilder().allow("c", "(c=x)").allow("d", "(d=x)").build(), c);
+		testDigraph.connect(c, testDigraph.createRegionFilterBuilder().allow("d", "(d=x)").build(), d);
+
+		Map<String, String> attributes = new HashMap<String, String>();
+		attributes.put("d", "x");
+		TestRegionDigraphVisitor visitor = new TestRegionDigraphVisitor("d", attributes);
+
+		Collection<Region> expected = new ArrayList<Region>(Arrays.asList(a, b, c, d));
+		for (Region region : expected.toArray(new Region[0])) {
+			testDigraph.visitSubgraph(region, visitor);
+			Collection<Region> visited = visitor.clearVisited();
+			assertEquals("Wrong number of visited: " + region, expected.size(), visited.size());
+			assertTrue("Wrong visited content: " + region, visited.containsAll(expected));
+			expected.remove(region);
+		}
+
+		attributes.clear();
+		attributes.put("c", "x");
+		visitor = new TestRegionDigraphVisitor("c", attributes);
+		expected = new ArrayList<Region>(Arrays.asList(a, b, c));
+		for (Region region : expected.toArray(new Region[0])) {
+			testDigraph.visitSubgraph(region, visitor);
+			Collection<Region> visited = visitor.clearVisited();
+			assertEquals("Wrong number of visited: " + region, expected.size(), visited.size());
+			assertTrue("Wrong visited content: " + region, visited.containsAll(expected));
+			expected.remove(region);
+		}
+
+		attributes.clear();
+		attributes.put("b", "x");
+		visitor = new TestRegionDigraphVisitor("b", attributes);
+		expected = new ArrayList<Region>(Arrays.asList(a, b));
+		for (Region region : expected.toArray(new Region[0])) {
+			testDigraph.visitSubgraph(region, visitor);
+			Collection<Region> visited = visitor.clearVisited();
+			assertEquals("Wrong number of visited: " + region, expected.size(), visited.size());
+			assertTrue("Wrong visited content: " + region, visited.containsAll(expected));
+			expected.remove(region);
 		}
 	}
 
