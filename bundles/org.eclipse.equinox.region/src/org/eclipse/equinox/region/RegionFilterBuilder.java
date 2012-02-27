@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,11 @@ import org.osgi.framework.InvalidSyntaxException;
 /**
  * A builder for creating {@link RegionFilter} instances. A builder instance can be obtained from the
  * {@link RegionDigraph#createRegionFilterBuilder()} method.
+ * <p />
+ * Name spaces are used to configure the filters with a builder.  A name space is a string which is 
+ * used to separate the names of various kinds of OSGi resource whose names could otherwise collide. 
+ * It can be either an OSGi standard value such as 
+ * {@link RegionFilter#VISIBLE_PACKAGE_NAMESPACE osgi.wiring.package} or a user defined value.
  * <p />
  * <strong>Concurrent Semantics</strong><br />
  * 
