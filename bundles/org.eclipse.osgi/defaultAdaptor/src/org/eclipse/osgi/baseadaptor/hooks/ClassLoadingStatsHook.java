@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,10 +66,10 @@ public interface ClassLoadingStatsHook {
 	void postFindLocalResource(String name, URL resource, ClasspathManager manager);
 
 	/**
-	 * Gets called by a classpath manager after a successfully defining a class.  This method allows 
+	 * Gets called by a classpath manager after an attempt is made to define a class.  This method allows 
 	 * a class loading stat hook to record data about a class definition. 
 	 * @param name the name of the class that got defined
-	 * @param clazz the class object that got defined
+	 * @param clazz the class object that got defined or null if an error occurred while defining a class
 	 * @param classbytes the class bytes used to define the class
 	 * @param classpathEntry the ClasspathEntry where the class bytes got read from
 	 * @param entry the BundleEntyr source of the class bytes

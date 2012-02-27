@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -437,11 +437,17 @@ public class ClasspathManager {
 	 * Finds a local class by searching the ClasspathEntry objects of the classpath manager.
 	 * This method will first call all the configured class loading stats hooks 
 	 * {@link ClassLoadingStatsHook#preFindLocalClass(String, ClasspathManager)} methods.  Then it 
-	 * will search for the class.  If a class is found then all configured class loading hooks
-	 * {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 * methods will be called.  The class is then defined; if successfully then all configured class loading 
-	 * stats hooks {@link ClassLoadingStatsHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
-	 * methods are called.  Finally all the configured class loading stats hooks
+	 * will search for the class.  If a class is found then
+	 * <ol>
+	 *   <li>All configured class loading hooks
+	 *       {@link ClassLoadingHook#processClass(String, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
+	 *       methods will be called.</li>
+	 *   <li>The class is then defined.</li>  
+	 *   <li>Finally, all configured class loading 
+	 *       stats hooks {@link ClassLoadingStatsHook#recordClassDefine(String, Class, byte[], ClasspathEntry, BundleEntry, ClasspathManager)}
+	 *       methods are called.</li>
+	 * </ol>
+	 * Finally all the configured class loading stats hooks
 	 * {@link ClassLoadingStatsHook#postFindLocalClass(String, Class, ClasspathManager)} methods are called.
 	 * @param classname the requested class name.
 	 * @return the requested class
