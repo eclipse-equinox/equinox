@@ -11,16 +11,15 @@
 
 package org.eclipse.equinox.console.ssh;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.PublicKey;
-import java.security.interfaces.DSAPublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
-import org.eclipse.equinox.console.internal.ssh.AuthorizedKeys;
+import org.eclipse.equinox.console.internal.ssh.AuthorizedKeysFileAuthenticator;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.sshd.SshServer;
@@ -35,8 +34,10 @@ import org.apache.sshd.server.session.ServerSession;
  *
  */
 public class SshServ extends Thread {
-	private int port;
-	private String host;
+
+	private final BundleContext context;
+	private final int port;
+	private final String host;
 	private SshServer sshServer = null;
 	private SshShellFactory shellFactory = null;
 
@@ -46,7 +47,8 @@ public class SshServ extends Thread {
 	private static final String EQUINOX_CONSOLE_DOMAIN = "equinox_console";
 
     public SshServ(List<CommandProcessor> processors, BundleContext context, String host, int port) {
-    	this.host = host;
+    	this.context = context;
+		this.host = host;
     	this.port = port;
     	shellFactory = new SshShellFactory(processors, context);
     }
@@ -92,45 +94,37 @@ public class SshServ extends Thread {
     }
 
     private PublickeyAuthenticator createSimpleAuthorizedKeysAuthenticator() {
-		// check if property is set
+		// use authorized keys file if property is set
 		final String authorizedKeysFile = System.getProperty(SSH_AUTHORIZED_KEYS_FILE_PROP);
-		if (null == authorizedKeysFile)
-			return null;
+		if (null != authorizedKeysFile) {
+			AuthorizedKeysFileAuthenticator authenticator = new AuthorizedKeysFileAuthenticator();
+			authenticator.setAuthorizedKeysFile(authorizedKeysFile);
+			return authenticator;
+		}
 
-		// dynamically read key file at each login attempt
+		// fall back to dynamic provider based on available OSGi services
 		return new PublickeyAuthenticator() {
+
+			@Override
 			public boolean authenticate(String username, PublicKey key, ServerSession session) {
+				// find available services
 				try {
-					AuthorizedKeys keys = new AuthorizedKeys(authorizedKeysFile);
-					for (PublicKey authorizedKey : keys.getKeys()) {
-						if (isSameKey(authorizedKey, key)) {
-							return true;
+					for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
+						PublickeyAuthenticator authenticator = null;
+						try {
+							authenticator = context.getService(reference);
+							// first positive match wins; continue looking otherwise
+							if(authenticator.authenticate(username, key, session))
+								return true;
+						} finally {
+							if(null != authenticator)
+								context.ungetService(reference);
 						}
 					}
-				} catch (FileNotFoundException e) {
-					System.err.println("Configured authorized_keys file not found! " + e.getMessage());
-				} catch (IOException e) {
-					System.err.println("Please check authorized_keys file! " + e.getMessage());
+				} catch (InvalidSyntaxException e) {
+					// no filter is used
 				}
 				return false;
-			}
-
-			private boolean isSameKey(PublicKey k1, PublicKey k2) throws IOException {
-				if ((k1 instanceof DSAPublicKey) && (k2 instanceof DSAPublicKey)) {
-					return isSameDSAKey((DSAPublicKey) k1, (DSAPublicKey) k2);
-				} else if ((k1 instanceof RSAPublicKey) && (k2 instanceof RSAPublicKey)) {
-					return isSameRSAKey((RSAPublicKey) k1, (RSAPublicKey) k2);
-				} else {
-					throw new IOException("Unsupported key types detected!");
-				}
-			}
-
-			private boolean isSameRSAKey(RSAPublicKey k1, RSAPublicKey k2) {
-				return k1.getPublicExponent().equals(k2.getPublicExponent()) && k1.getModulus().equals(k2.getModulus());
-			}
-
-			private boolean isSameDSAKey(DSAPublicKey k1, DSAPublicKey k2) {
-				return k1.getY().equals(k2.getY()) && k1.getParams().getG().equals(k2.getParams().getG()) && k1.getParams().getP().equals(k2.getParams().getP()) && k1.getParams().getQ().equals(k2.getParams().getQ());
 			}
 		};
     }
