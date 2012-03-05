@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -233,6 +233,10 @@ public class Main {
 	protected File logFile = null;
 	protected BufferedWriter log = null;
 	protected boolean newSession = true;
+
+	// for variable substitution
+	public static final String VARIABLE_DELIM_STRING = "$"; //$NON-NLS-1$
+	public static final char VARIABLE_DELIM_CHAR = '$';
 
 	/**
 	 * A structured form for a version identifier.
@@ -1946,7 +1950,7 @@ public class Main {
 			if (debug)
 				System.out.println(" not found or not read"); //$NON-NLS-1$
 		}
-		return result;
+		return substituteVars(result);
 	}
 
 	private Properties loadProperties(URL url) throws IOException {
@@ -2697,5 +2701,67 @@ public class Main {
 			}
 			return super.findLibrary(name);
 		}
+	}
+
+	private Properties substituteVars(Properties result) {
+		for (Enumeration eKeys = result.keys(); eKeys.hasMoreElements();) {
+			Object key = eKeys.nextElement();
+			if (key instanceof String) {
+				String value = result.getProperty((String) key);
+				if (value != null)
+					result.put(key, substituteVars(value));
+			}
+		}
+		return result;
+	}
+
+	public static String substituteVars(String path) {
+		StringBuffer buf = new StringBuffer(path.length());
+		StringTokenizer st = new StringTokenizer(path, VARIABLE_DELIM_STRING, true);
+		boolean varStarted = false; // indicates we are processing a var subtitute
+		String var = null; // the current var key
+		while (st.hasMoreElements()) {
+			String tok = st.nextToken();
+			if (VARIABLE_DELIM_STRING.equals(tok)) {
+				if (!varStarted) {
+					varStarted = true; // we found the start of a var
+					var = ""; //$NON-NLS-1$
+				} else {
+					// we have found the end of a var
+					String prop = null;
+					// get the value of the var from system properties
+					if (var != null && var.length() > 0)
+						prop = System.getProperty(var);
+					if (prop == null) {
+						try {
+							// try using the System.getenv method if it exists (bug 126921)
+							Method getenv = System.class.getMethod("getenv", new Class[] {String.class}); //$NON-NLS-1$
+							prop = (String) getenv.invoke(null, new Object[] {var});
+						} catch (Throwable t) {
+							// do nothing; 
+							// on 1.4 VMs this throws an error
+							// on J2ME this method does not exist
+						}
+					}
+					if (prop != null)
+						// found a value; use it
+						buf.append(prop);
+					else
+						// could not find a value append the var name w/o delims 
+						buf.append(var == null ? "" : var); //$NON-NLS-1$
+					varStarted = false;
+					var = null;
+				}
+			} else {
+				if (!varStarted)
+					buf.append(tok); // the token is not part of a var
+				else
+					var = tok; // the token is the var key; save the key to process when we find the end token
+			}
+		}
+		if (var != null)
+			// found a case of $var at the end of the path with no trailing $; just append it as is.
+			buf.append(VARIABLE_DELIM_CHAR).append(var);
+		return buf.toString();
 	}
 }

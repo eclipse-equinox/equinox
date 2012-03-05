@@ -24,6 +24,7 @@ import org.eclipse.osgi.framework.internal.core.*;
 import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.eclipse.osgi.internal.baseadaptor.BaseStorageHook;
 import org.eclipse.osgi.internal.profile.Profile;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.resolver.*;
@@ -1153,6 +1154,18 @@ public class EclipseStarter {
 		} catch (IOException e) {
 			// its ok if there is no file.  We'll just use the defaults for everything
 			// TODO but it might be nice to log something with gentle wording (i.e., it is not an error)
+		}
+		return substituteVars(result);
+	}
+
+	private static Properties substituteVars(Properties result) {
+		for (Enumeration<Object> eKeys = result.keys(); eKeys.hasMoreElements();) {
+			Object key = eKeys.nextElement();
+			if (key instanceof String) {
+				String value = result.getProperty((String) key);
+				if (value != null)
+					result.put(key, BaseStorageHook.substituteVars(value));
+			}
 		}
 		return result;
 	}
