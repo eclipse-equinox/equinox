@@ -43,7 +43,7 @@
 	<target name="post.build.sources">
 	</target>
 	
-	<target name="pre.gather.bin.parts">
+	<target name="pre.gather.bin.parts" unless="dontFetchBinaries">
 		<property file="${basedir}/build.properties" />
 		<basename file="${basedir}" property="fragmentName" />
 		<available file="/gitroot/equinox/rt.equinox.binaries.git" type="dir" property="gitRepo" value="/gitroot/equinox/rt.equinox.binaries.git" />
