@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,6 +63,8 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	/** The extension markup to use for backup log files*/
 	private static final String BACKUP_MARK = ".bak_"; //$NON-NLS-1$
 
+	/** The system property used to specify command line args should be omitted from the log */
+	private static final String PROP_LOG_INCLUDE_COMMAND_LINE = "eclipse.log.include.commandline"; //$NON-NLS-1$
 	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
 
 	/** Indicates if the console messages should be printed to the console (System.out) */
@@ -87,6 +89,7 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 	int backupIdx = 0;
 
 	private int logLevel = FrameworkLogEntry.OK;
+	private boolean includeCommandLine = true;
 
 	/**
 	 * Constructs an EclipseLog which uses the specified File to log messages to
@@ -210,8 +213,10 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 		writeln(", NL=" + EclipseEnvironmentInfo.getDefault().getNL()); //$NON-NLS-1$
 		// Add the command-line arguments used to invoke the platform 
 		// XXX: this includes runtime-private arguments - should we do that?
-		writeArgs("Framework arguments: ", EclipseEnvironmentInfo.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
-		writeArgs("Command-line arguments: ", EclipseEnvironmentInfo.getDefault().getCommandLineArgs()); //$NON-NLS-1$
+		if (includeCommandLine) {
+			writeArgs("Framework arguments: ", EclipseEnvironmentInfo.getDefault().getNonFrameworkArgs()); //$NON-NLS-1$
+			writeArgs("Command-line arguments: ", EclipseEnvironmentInfo.getDefault().getCommandLineArgs()); //$NON-NLS-1$
+		}
 	}
 
 	public void close() {
@@ -650,6 +655,8 @@ public class EclipseLogWriter implements SynchronousLogListener, LogFilter {
 			else
 				logLevel = FrameworkLogEntry.OK; // OK (0) means log everything
 		}
+
+		includeCommandLine = "true".equals(secureAction.getProperty(PROP_LOG_INCLUDE_COMMAND_LINE, "true")); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	/**
