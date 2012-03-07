@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,6 +140,12 @@ public class WeavingHook extends AbstractWeavingHook {
     public void recordClassDefine(final String name, final Class clazz,
             final byte[] classbytes, final ClasspathEntry classpathEntry,
             final BundleEntry entry, final ClasspathManager manager) {
+        if (clazz == null) {
+            if (Debug.DEBUG_GENERAL) {
+                Debug.println("Error in defining class: " + name); //$NON-NLS-1$
+            }
+            return;
+        }
         if (entry instanceof WeavingBundleEntry) {
             final WeavingBundleEntry ajBundleEntry = (WeavingBundleEntry) entry;
             if (!ajBundleEntry.dontWeave()) {
