@@ -1159,6 +1159,10 @@ public class EclipseStarter {
 	}
 
 	private static Properties substituteVars(Properties result) {
+		if (result == null) {
+			//nothing todo.
+			return null;
+		}
 		for (Enumeration<Object> eKeys = result.keys(); eKeys.hasMoreElements();) {
 			Object key = eKeys.nextElement();
 			if (key instanceof String) {

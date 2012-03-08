@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Anton Leherbauer (Wind River Systems) - bug 301226
+ *     Red Hat Inc. - bug 373640
  *******************************************************************************/
 package org.eclipse.equinox.launcher;
 
@@ -2704,6 +2705,10 @@ public class Main {
 	}
 
 	private Properties substituteVars(Properties result) {
+		if (result == null) {
+			//nothing todo.
+			return null;
+		}
 		for (Enumeration eKeys = result.keys(); eKeys.hasMoreElements();) {
 			Object key = eKeys.nextElement();
 			if (key instanceof String) {
