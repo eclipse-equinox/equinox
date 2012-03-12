@@ -401,6 +401,13 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="osgi/src/org/osgi/framework/AdaptPermission.java" type="org.osgi.framework.AdaptPermission">
+        <filter comment="Ignore OSGi API" id="337768515">
+            <message_arguments>
+                <message_argument value="org.osgi.framework.AdaptPermission"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="osgi/src/org/osgi/framework/Constants.java" type="org.osgi.framework.Constants">
         <filter comment="Ignore OSGi API" id="1209008130">
             <message_arguments>
@@ -456,24 +463,10 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/ContractNamespace.java" type="org.osgi.framework.namespace.ContractNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.ContractNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="osgi/src/org/osgi/framework/namespace/ExecutionEnvironmentNamespace.java" type="org.osgi.framework.namespace.ExecutionEnvironmentNamespace">
         <filter comment="Ignore OSGi API" id="1110441988">
             <message_arguments>
                 <message_argument value="org.osgi.framework.namespace.ExecutionEnvironmentNamespace"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="osgi/src/org/osgi/framework/namespace/ExtenderNamespace.java" type="org.osgi.framework.namespace.ExtenderNamespace">
-        <filter comment="Ignore OSGi API" id="1110441988">
-            <message_arguments>
-                <message_argument value="org.osgi.framework.namespace.ExtenderNamespace"/>
             </message_arguments>
         </filter>
     </resource>
