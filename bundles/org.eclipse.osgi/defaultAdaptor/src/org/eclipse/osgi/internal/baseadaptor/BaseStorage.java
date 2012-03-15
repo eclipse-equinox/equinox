@@ -1361,7 +1361,11 @@ public class BaseStorage implements SynchronousBundleListener {
 					});
 					runningThread = new Thread(this, "State Saver"); //$NON-NLS-1$
 					runningThread.start();
-					Runtime.getRuntime().addShutdownHook(shutdownHook);
+					try {
+						Runtime.getRuntime().addShutdownHook(shutdownHook);
+					} catch (IllegalStateException e) {
+						// bug 374300 - need to ignore this in case the VM is being shutdown
+					}
 				}
 			}
 		}
