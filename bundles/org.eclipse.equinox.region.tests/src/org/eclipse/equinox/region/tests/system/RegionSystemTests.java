@@ -654,4 +654,13 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong location found.", location + ".1#" + r1.getName(), l1);
 		assertEquals("Wrong location found.", location + ".2", l2);
 	}
+
+	//	public void testInvalidRegionName() {
+	//		String invalidName = "name:withColon";
+	//		try {
+	//			digraph.createRegion(invalidName);
+	//		} catch (Exception e) {
+	//			fail("failed to create region: " + invalidName);
+	//		}
+	//	}
 }
