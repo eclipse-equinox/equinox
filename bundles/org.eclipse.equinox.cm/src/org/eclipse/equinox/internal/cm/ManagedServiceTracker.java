@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 Cognos Incorporated, IBM Corporation and others.
+ * Copyright (c) 2005, 2012 Cognos Incorporated, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,8 +93,10 @@ class ManagedServiceTracker extends ServiceTracker {
 
 	private void add(ServiceReference reference, String pid, ManagedService service) {
 		ConfigurationImpl config = configurationStore.findConfiguration(pid);
-		if (config == null && trackManagedService(pid, reference, service)) {
-			asynchUpdated(service, null);
+		if (config == null) {
+			if (trackManagedService(pid, reference, service)) {
+				asynchUpdated(service, null);
+			}
 		} else {
 			try {
 				config.lock();

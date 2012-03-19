@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others
+ * Copyright (c) 2007, 2012 IBM Corporation and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,11 @@ package org.eclipse.equinox.cm.test;
 import java.util.Dictionary;
 import java.util.Properties;
 import junit.framework.TestCase;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.LogFilter;
 import org.osgi.framework.*;
 import org.osgi.service.cm.*;
+import org.osgi.service.log.*;
 
 public class ManagedServiceTest extends TestCase {
 
@@ -83,6 +86,47 @@ public class ManagedServiceTest extends TestCase {
 		reg.unregister();
 		reg2.unregister();
 		config.delete();
+	}
+
+	public void testBug374637() throws Exception {
+
+		ManagedService ms = new ManagedService() {
+
+			public void updated(Dictionary properties) throws ConfigurationException {
+				// nothing
+			}
+		};
+
+		ExtendedLogReaderService reader = (ExtendedLogReaderService) Activator.getBundleContext().getService(Activator.getBundleContext().getServiceReference(ExtendedLogReaderService.class));
+		synchronized (lock) {
+			locked = false;
+		}
+		LogListener listener = new LogListener() {
+			public void logged(LogEntry entry) {
+				synchronized (lock) {
+					locked = true;
+					lock.notifyAll();
+				}
+			}
+		};
+		reader.addLogListener(listener, new LogFilter() {
+			public boolean isLoggable(Bundle bundle, String loggerName, int logLevel) {
+				return logLevel == LogService.LOG_ERROR;
+			}
+		});
+		Dictionary dict = new Properties();
+		dict.put(Constants.SERVICE_PID, "test");
+		ServiceRegistration reg1 = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+		ServiceRegistration reg2 = Activator.getBundleContext().registerService(ManagedService.class.getName(), ms, dict);
+
+		reg1.unregister();
+		reg2.unregister();
+		reader.removeLogListener(listener);
+
+		synchronized (lock) {
+			lock.wait(1000);
+			assertFalse("Got a error log", locked);
+		}
 	}
 
 	public void testGeneralManagedService() throws Exception {
