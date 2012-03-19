@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,11 +65,24 @@ public interface RegionDigraph extends Iterable<Region> {
 
 	/**
 	 * Create a {@link Region} with the given name. If a region with the given name already exists, then BundleException
-	 * with exception type UNSUPPORTED_OPERATION is thrown.
+	 * with exception type UNSUPPORTED_OPERATION is thrown.  If the region name is not valid then an
+	 * IllegalArgumentException is thrown.  A valid region name contains none of the following 
+	 * characters:
+	 * <ul>
+	 *   <li> : (colon)</li>
+	 *   <li> = (equals)</li>
+	 *   <li> \n (newline)</li>
+	 *   <li> * (asterisk)</li>
+	 *   <li> ? (question mark)</li>
+	 *   <li> , (comma)</li>
+	 *   <li> &quot; (double quotes)</li>
+	 *   <li> \ (backslash)</li>
+	 * </ul>
 	 * 
 	 * @param regionName the name of the region
 	 * @return the {@link Region} created
 	 * @throws BundleException if the region was not created
+	 * @throws IllegalArgumentException if the region name is not valid
 	 */
 	Region createRegion(String regionName) throws BundleException;
 

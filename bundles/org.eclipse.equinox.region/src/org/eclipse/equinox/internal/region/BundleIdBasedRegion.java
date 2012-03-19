@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.eclipse.equinox.region.*;
 import org.eclipse.equinox.region.RegionDigraph.FilteredRegion;
 import org.osgi.framework.*;
@@ -29,7 +30,7 @@ import org.osgi.framework.*;
  * Thread safe.
  */
 final class BundleIdBasedRegion implements Region {
-
+	private static final Pattern invalidName = Pattern.compile("[:=\\n*?,\"\\\\]"); //$NON-NLS-1$
 	private static final String REGION_LOCATION_DELIMITER = "#"; //$NON-NLS-1$
 
 	private static final String FILE_SCHEME = "file:"; //$NON-NLS-1$
@@ -45,8 +46,7 @@ final class BundleIdBasedRegion implements Region {
 	private final ThreadLocal<Region> threadLocal;
 
 	BundleIdBasedRegion(String regionName, RegionDigraph regionDigraph, BundleIdToRegionMapping bundleIdToRegionMapping, BundleContext bundleContext, ThreadLocal<Region> threadLocal) {
-		if (regionName == null)
-			throw new IllegalArgumentException("The region name must not be null"); //$NON-NLS-1$
+		BundleIdBasedRegion.validateName(regionName);
 		if (regionDigraph == null)
 			throw new IllegalArgumentException("The region digraph must not be null"); //$NON-NLS-1$
 		if (bundleIdToRegionMapping == null)
@@ -56,6 +56,13 @@ final class BundleIdBasedRegion implements Region {
 		this.bundleIdToRegionMapping = bundleIdToRegionMapping;
 		this.bundleContext = bundleContext;
 		this.threadLocal = threadLocal;
+	}
+
+	private static void validateName(String name) {
+		if (name == null)
+			throw new IllegalArgumentException("The region name must not be null"); //$NON-NLS-1$
+		if (invalidName.matcher(name).find())
+			throw new IllegalArgumentException("The region name has invalid characters: " + name); //$NON-NLS-1$
 	}
 
 	/**

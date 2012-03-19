@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,14 +33,14 @@ final class RegionObjectNameCreator {
 	}
 
 	ObjectName getRegionObjectName(String regionName) {
+		String name = this.domain + ":type=Region,name=" + regionName; //$NON-NLS-1$
+		if (frameworkUUID != null)
+			name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 		try {
-			String name = this.domain + ":type=Region,name=" + regionName; //$NON-NLS-1$
-			if (frameworkUUID != null)
-				name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 			return new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
-			return null;
+			throw new IllegalArgumentException("Invalid region name '" + regionName + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 

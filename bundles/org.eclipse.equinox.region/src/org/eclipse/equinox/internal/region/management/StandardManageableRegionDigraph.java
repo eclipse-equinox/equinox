@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 VMware Inc.
+ * Copyright (c) 2011, 2012 VMware Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,14 +71,14 @@ public final class StandardManageableRegionDigraph implements ManageableRegionDi
 		this.mbeanServer = ManagementFactory.getPlatformMBeanServer();
 		this.frameworkUUID = bundleContext.getProperty(Constants.FRAMEWORK_UUID);
 		this.regionObjectNameCreator = new RegionObjectNameCreator(domain, this.frameworkUUID);
+		String name = this.domain + ":type=RegionDigraph"; //$NON-NLS-1$
+		if (frameworkUUID != null)
+			name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 		try {
-			String name = this.domain + ":type=RegionDigraph"; //$NON-NLS-1$
-			if (frameworkUUID != null)
-				name += ",frameworkUUID=" + frameworkUUID; //$NON-NLS-1$
 			mbeanName = new ObjectName(name);
 		} catch (MalformedObjectNameException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Invalid domain name '" + this.domain + "'", e); //$NON-NLS-1$//$NON-NLS-2$
+			throw new IllegalArgumentException("Invalid domain name '" + domain + "' resulting in an invalid object name '" + name + "'", e); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 	}

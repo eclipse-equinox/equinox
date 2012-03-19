@@ -655,12 +655,27 @@ public class RegionSystemTests extends AbstractRegionSystemTest {
 		assertEquals("Wrong location found.", location + ".2", l2);
 	}
 
-	//	public void testInvalidRegionName() {
-	//		String invalidName = "name:withColon";
-	//		try {
-	//			digraph.createRegion(invalidName);
-	//		} catch (Exception e) {
-	//			fail("failed to create region: " + invalidName);
-	//		}
-	//	}
+	public void testInvalidRegionName() {
+		Collection<String> invalidNames = new ArrayList<String>();
+		invalidNames.addAll(Arrays.asList(":", "bad:Name", ":bad::name:", ":badname", "badname:"));
+		invalidNames.addAll(Arrays.asList("=", "bad=Name", "=bad==name=", "=badname", "badname="));
+		invalidNames.addAll(Arrays.asList("\n", "bad\nName", "\nbad\n\nname\n", "\nbadname", "badname\n"));
+		invalidNames.addAll(Arrays.asList("*", "bad*Name", "*bad**name*", "*badname", "badname*"));
+		invalidNames.addAll(Arrays.asList("?", "bad?Name", "?bad??name?", "?badname", "badname?"));
+		invalidNames.addAll(Arrays.asList(",", "bad,Name", ",bad,,name,", ",badname", "badname,"));
+		invalidNames.addAll(Arrays.asList("\"", "bad\"Name", "\"bad\"\"name\"", "\"badname", "badname\""));
+		invalidNames.addAll(Arrays.asList("\\", "bad\\Name", "\\bad\\\\name\\", "\\badname", "badname\\"));
+
+		for (String invalidName : invalidNames) {
+			try {
+				digraph.createRegion(invalidName);
+				fail("Expected failure to create region.");
+			} catch (IllegalArgumentException e) {
+				// expected
+			} catch (BundleException e) {
+				fail("Unexpected bundle exception: " + e.getMessage());
+			}
+		}
+
+	}
 }
