@@ -1,0 +1,170 @@
+/*******************************************************************************
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.osgi.container.wiring;
+
+import java.net.URL;
+import java.util.*;
+import org.eclipse.osgi.container.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.*;
+import org.osgi.resource.*;
+
+public class ModuleWiring implements BundleWiring {
+	private final ModuleRevision revision;
+	private final List<ModuleCapability> capabilities;
+	private final List<ModuleRequirement> requirements;
+	private final List<ModuleWire> providedWires;
+	private final List<ModuleWire> requiredWires;
+
+	public ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
+		super();
+		this.revision = revision;
+		this.capabilities = capabilities;
+		this.requirements = requirements;
+		this.providedWires = providedWires;
+		this.requiredWires = requiredWires;
+	}
+
+	@Override
+	public Bundle getBundle() {
+		return revision.getBundle();
+	}
+
+	@Override
+	public boolean isCurrent() {
+		return revision.isCurrent();
+	}
+
+	@Override
+	public boolean isInUse() {
+		return isCurrent() || !providedWires.isEmpty();
+	}
+
+	@Override
+	public List<BundleCapability> getCapabilities(String namespace) {
+		if (namespace == null)
+			return ModuleRevision.asListBundleCapability(Collections.unmodifiableList(capabilities));
+		List<BundleCapability> result = new ArrayList<BundleCapability>();
+		for (ModuleCapability capability : capabilities) {
+			if (namespace.equals(capability.getNamespace())) {
+				result.add(capability);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<BundleRequirement> getRequirements(String namespace) {
+		if (namespace == null)
+			return ModuleRevision.asListBundleRequirement(Collections.unmodifiableList(requirements));
+		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+		for (ModuleRequirement requirement : requirements) {
+			if (namespace.equals(requirement.getNamespace())) {
+				result.add(requirement);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public List<BundleWire> getProvidedWires(String namespace) {
+		return asListBundleWire(getWires(namespace, providedWires));
+	}
+
+	@Override
+	public List<BundleWire> getRequiredWires(String namespace) {
+		return asListBundleWire(getWires(namespace, requiredWires));
+	}
+
+	private static List<ModuleWire> getWires(String namespace, List<ModuleWire> allWires) {
+		if (namespace == null)
+			return Collections.unmodifiableList(allWires);
+		List<ModuleWire> result = new ArrayList<ModuleWire>();
+		for (ModuleWire moduleWire : allWires) {
+			if (namespace.equals(moduleWire.getCapability().getNamespace())) {
+				result.add(moduleWire);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public ModuleRevision getRevision() {
+		return revision;
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<URL> findEntries(String path, String filePattern, int options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<String> listResources(String path, String filePattern, int options) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Capability> getResourceCapabilities(String namespace) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Requirement> getResourceRequirements(String namespace) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Wire> getProvidedResourceWires(String namespace) {
+		return asListWire(getWires(namespace, providedWires));
+	}
+
+	@Override
+	public List<Wire> getRequiredResourceWires(String namespace) {
+		return asListWire(getWires(namespace, requiredWires));
+	}
+
+	@Override
+	public ModuleRevision getResource() {
+		return revision;
+	}
+
+	/**
+	 * Coerce the generic type of a list from List<? extends BundleWire>
+	 * to List<BundleWire>
+	 * @param l List to be coerced.
+	 * @return l coerced to List<BundleWire>
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<BundleWire> asListBundleWire(List<? extends BundleWire> l) {
+		return (List<BundleWire>) l;
+	}
+
+	/**
+	 * Coerce the generic type of a list from List<? extends BundleWire>
+	 * to List<BundleWire>
+	 * @param l List to be coerced.
+	 * @return l coerced to List<BundleWire>
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Wire> asListWire(List<? extends Wire> l) {
+		return (List<Wire>) l;
+	}
+}

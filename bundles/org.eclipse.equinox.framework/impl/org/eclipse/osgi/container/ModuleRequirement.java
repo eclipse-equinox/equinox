@@ -11,7 +11,8 @@
 package org.eclipse.osgi.container;
 
 import java.util.Map;
-import org.osgi.framework.wiring.*;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.BundleRequirement;
 
 public class ModuleRequirement implements BundleRequirement {
 	private final Object monitor = new Object();
@@ -28,7 +29,7 @@ public class ModuleRequirement implements BundleRequirement {
 	}
 
 	@Override
-	public BundleRevision getRevision() {
+	public ModuleRevision getRevision() {
 		synchronized (monitor) {
 			return revision;
 		}
@@ -56,7 +57,7 @@ public class ModuleRequirement implements BundleRequirement {
 	}
 
 	@Override
-	public BundleRevision getResource() {
+	public ModuleRevision getResource() {
 		return revision;
 	}
 }

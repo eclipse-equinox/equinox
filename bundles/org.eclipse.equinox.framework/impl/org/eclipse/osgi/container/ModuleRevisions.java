@@ -22,6 +22,7 @@ public class ModuleRevisions implements BundleRevisions {
 	private final List<BundleRevision> revisions = new ArrayList<BundleRevision>(1);
 	private final Object monitor = new Object();
 	private final Module module;
+	private boolean uninstalled = false;
 
 	ModuleRevisions(Long id, String location, Module module) {
 		this.id = id;
@@ -60,4 +61,11 @@ public class ModuleRevisions implements BundleRevisions {
 		return revision;
 	}
 
+	public boolean isUninstalled() {
+		return uninstalled;
+	}
+
+	void uninsetall() {
+		uninstalled = true;
+	}
 }

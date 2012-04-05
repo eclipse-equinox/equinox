@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.util.*;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
+import org.eclipse.osgi.container.wiring.ModuleWiring;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.*;
@@ -19,21 +20,22 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
 public class ModuleRevision implements BundleRevision {
-	private final Object monitor = new Object();
 	private final String symbolicName;
 	private final Version version;
 	private final int types;
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
 	private final ModuleRevisions revisions;
+	private final ModuleContainer container;
 
-	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions) {
+	ModuleRevision(String symbolicName, Version version, int types, List<GenericInfo> capabilityInfos, List<GenericInfo> requirementInfos, ModuleRevisions revisions, ModuleContainer container) {
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.types = types;
 		this.capabilities = createCapabilities(capabilityInfos);
 		this.requirements = createRequirements(requirementInfos);
 		this.revisions = revisions;
+		this.container = container;
 	}
 
 	private List<ModuleCapability> createCapabilities(List<GenericInfo> capabilityInfos) {
@@ -103,9 +105,8 @@ public class ModuleRevision implements BundleRevision {
 	}
 
 	@Override
-	public BundleWiring getWiring() {
-		// TODO Auto-generated method stub
-		return null;
+	public ModuleWiring getWiring() {
+		return container.getWiring(this);
 	}
 
 	@Override
@@ -122,8 +123,8 @@ public class ModuleRevision implements BundleRevision {
 		return revisions;
 	}
 
-	boolean isCurrent() {
-		return revisions.getRevisions().indexOf(this) == 0;
+	public boolean isCurrent() {
+		return !revisions.isUninstalled() && revisions.getRevisions().indexOf(this) == 0;
 	}
 
 	/**
@@ -133,7 +134,7 @@ public class ModuleRevision implements BundleRevision {
 	 * @return l coerced to List<Capability>
 	 */
 	@SuppressWarnings("unchecked")
-	static List<Capability> asListCapability(List<? extends Capability> l) {
+	public static List<Capability> asListCapability(List<? extends Capability> l) {
 		return (List<Capability>) l;
 	}
 
@@ -144,7 +145,7 @@ public class ModuleRevision implements BundleRevision {
 	 * @return l coerced to List<Requirement>
 	 */
 	@SuppressWarnings("unchecked")
-	static List<Requirement> asListRequirement(List<? extends Requirement> l) {
+	public static List<Requirement> asListRequirement(List<? extends Requirement> l) {
 		return (List<Requirement>) l;
 	}
 
@@ -155,7 +156,7 @@ public class ModuleRevision implements BundleRevision {
 	 * @return l coerced to List<BundleCapability>
 	 */
 	@SuppressWarnings("unchecked")
-	static List<BundleCapability> asListBundleCapability(List<? extends BundleCapability> l) {
+	public static List<BundleCapability> asListBundleCapability(List<? extends BundleCapability> l) {
 		return (List<BundleCapability>) l;
 	}
 
@@ -166,7 +167,7 @@ public class ModuleRevision implements BundleRevision {
 	 * @return l coerced to List<BundleRequirement>
 	 */
 	@SuppressWarnings("unchecked")
-	static List<BundleRequirement> asListBundleRequirement(List<? extends BundleRequirement> l) {
+	public static List<BundleRequirement> asListBundleRequirement(List<? extends BundleRequirement> l) {
 		return (List<BundleRequirement>) l;
 	}
 }

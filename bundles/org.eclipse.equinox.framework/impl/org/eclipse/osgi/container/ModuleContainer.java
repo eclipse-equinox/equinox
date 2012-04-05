@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.eclipse.osgi.container.wiring.ModuleWiring;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
@@ -39,7 +40,8 @@ public class ModuleContainer {
 	private final Map<String, ModuleRevisions> revisionsByLocations = new HashMap<String, ModuleRevisions>();
 	/* @GuardedBy("monitor") */
 	private final Map<String, Collection<ModuleRevision>> revisionByName = new HashMap<String, Collection<ModuleRevision>>();
-
+	/* @GuardedBy("monitor") */
+	private final Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
 	/**
 	 * Hook used to determine if a bundle being installed or updated will cause a collision
 	 */
@@ -120,7 +122,7 @@ public class ModuleContainer {
 			}
 			monitor.writeLock().lock();
 			try {
-				ModuleRevision result = builder.buildRevision(nextId, location, module);
+				ModuleRevision result = builder.buildRevision(nextId, location, module, this);
 				nextId += 1;
 				revisionsByLocations.put(location, result.getRevisions());
 				revisionsByIds.put(result.getRevisions().getId(), result.getRevisions());
@@ -191,7 +193,7 @@ public class ModuleContainer {
 			}
 			monitor.writeLock().lock();
 			try {
-				ModuleRevision result = builder.addRevision(module.getRevisions());
+				ModuleRevision result = builder.addRevision(module.getRevisions(), this);
 				Collection<ModuleRevision> sameName = revisionByName.get(name);
 				if (sameName == null) {
 					sameName = new ArrayList<ModuleRevision>(1);
@@ -224,8 +226,18 @@ public class ModuleContainer {
 					}
 				}
 			}
+			uninstalling.uninsetall();
 		} finally {
 			monitor.writeLock().unlock();
+		}
+	}
+
+	public ModuleWiring getWiring(ModuleRevision revision) {
+		monitor.readLock().lock();
+		try {
+			return wirings.get(revision);
+		} finally {
+			monitor.readLock().unlock();
 		}
 	}
 }

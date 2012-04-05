@@ -1,0 +1,49 @@
+package org.eclipse.osgi.container.wiring;
+
+import org.eclipse.osgi.container.*;
+import org.osgi.framework.wiring.BundleWire;
+
+public class ModuleWire implements BundleWire {
+	private final ModuleCapability capability;
+	private final ModuleRevision hostingProvider;
+	private final ModuleRequirement requirement;
+	private final ModuleRevision hostingRequirer;
+
+	public ModuleWire(ModuleCapability capability, ModuleRevision hostingProvider, ModuleRequirement requirement, ModuleRevision hostingRequirer) {
+		super();
+		this.capability = capability;
+		this.hostingProvider = hostingProvider;
+		this.requirement = requirement;
+		this.hostingRequirer = hostingRequirer;
+	}
+
+	@Override
+	public ModuleCapability getCapability() {
+		return capability;
+	}
+
+	@Override
+	public ModuleRequirement getRequirement() {
+		return requirement;
+	}
+
+	@Override
+	public ModuleWiring getProviderWiring() {
+		return hostingProvider.getWiring();
+	}
+
+	@Override
+	public ModuleWiring getRequirerWiring() {
+		return hostingRequirer.getWiring();
+	}
+
+	@Override
+	public ModuleRevision getProvider() {
+		return capability.getRevision();
+	}
+
+	@Override
+	public ModuleRevision getRequirer() {
+		return requirement.getRevision();
+	}
+}
