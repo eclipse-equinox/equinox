@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container.wiring;
 
+import org.eclipse.osgi.container.Converters;
+
 import java.net.URL;
 import java.util.*;
 import org.eclipse.osgi.container.*;
@@ -51,7 +53,7 @@ public class ModuleWiring implements BundleWiring {
 	@Override
 	public List<BundleCapability> getCapabilities(String namespace) {
 		if (namespace == null)
-			return ModuleRevision.asListBundleCapability(Collections.unmodifiableList(capabilities));
+			return Converters.asListBundleCapability(new ArrayList<BundleCapability>(capabilities));
 		List<BundleCapability> result = new ArrayList<BundleCapability>();
 		for (ModuleCapability capability : capabilities) {
 			if (namespace.equals(capability.getNamespace())) {
@@ -64,7 +66,7 @@ public class ModuleWiring implements BundleWiring {
 	@Override
 	public List<BundleRequirement> getRequirements(String namespace) {
 		if (namespace == null)
-			return ModuleRevision.asListBundleRequirement(Collections.unmodifiableList(requirements));
+			return Converters.asListBundleRequirement(new ArrayList<BundleRequirement>(requirements));
 		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
 		for (ModuleRequirement requirement : requirements) {
 			if (namespace.equals(requirement.getNamespace())) {
@@ -76,17 +78,17 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<BundleWire> getProvidedWires(String namespace) {
-		return asListBundleWire(getWires(namespace, providedWires));
+		return Converters.asListBundleWire(getWires(namespace, providedWires));
 	}
 
 	@Override
 	public List<BundleWire> getRequiredWires(String namespace) {
-		return asListBundleWire(getWires(namespace, requiredWires));
+		return Converters.asListBundleWire(getWires(namespace, requiredWires));
 	}
 
 	private static List<ModuleWire> getWires(String namespace, List<ModuleWire> allWires) {
 		if (namespace == null)
-			return Collections.unmodifiableList(allWires);
+			return new ArrayList<ModuleWire>(allWires);
 		List<ModuleWire> result = new ArrayList<ModuleWire>();
 		for (ModuleWire moduleWire : allWires) {
 			if (namespace.equals(moduleWire.getCapability().getNamespace())) {
@@ -133,38 +135,16 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<Wire> getProvidedResourceWires(String namespace) {
-		return asListWire(getWires(namespace, providedWires));
+		return Converters.asListWire(getWires(namespace, providedWires));
 	}
 
 	@Override
 	public List<Wire> getRequiredResourceWires(String namespace) {
-		return asListWire(getWires(namespace, requiredWires));
+		return Converters.asListWire(getWires(namespace, requiredWires));
 	}
 
 	@Override
 	public ModuleRevision getResource() {
 		return revision;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleWire>
-	 * to List<BundleWire>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleWire>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<BundleWire> asListBundleWire(List<? extends BundleWire> l) {
-		return (List<BundleWire>) l;
-	}
-
-	/**
-	 * Coerce the generic type of a list from List<? extends BundleWire>
-	 * to List<BundleWire>
-	 * @param l List to be coerced.
-	 * @return l coerced to List<BundleWire>
-	 */
-	@SuppressWarnings("unchecked")
-	public static List<Wire> asListWire(List<? extends Wire> l) {
-		return (List<Wire>) l;
 	}
 }

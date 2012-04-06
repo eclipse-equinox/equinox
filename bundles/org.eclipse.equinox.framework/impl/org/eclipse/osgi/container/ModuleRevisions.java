@@ -17,17 +17,20 @@ import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
 
 public class ModuleRevisions implements BundleRevisions {
+	private final Object monitor = new Object();
 	private final Long id;
 	private final String location;
-	private final List<BundleRevision> revisions = new ArrayList<BundleRevision>(1);
-	private final Object monitor = new Object();
 	private final Module module;
-	private boolean uninstalled = false;
+	private final ModuleContainer container;
+	/* @GuardedBy("monitor") */
+	private final List<ModuleRevision> revisions = new ArrayList<ModuleRevision>(1);
+	private volatile boolean uninstalled = false;
 
-	ModuleRevisions(Long id, String location, Module module) {
+	ModuleRevisions(Long id, String location, Module module, ModuleContainer container) {
 		this.id = id;
 		this.location = location;
 		this.module = module;
+		this.container = container;
 	}
 
 	public Long getId() {
@@ -42,6 +45,10 @@ public class ModuleRevisions implements BundleRevisions {
 		return module;
 	}
 
+	ModuleContainer getContainer() {
+		return container;
+	}
+
 	@Override
 	public Bundle getBundle() {
 		return module.getBundle();
@@ -51,6 +58,12 @@ public class ModuleRevisions implements BundleRevisions {
 	public List<BundleRevision> getRevisions() {
 		synchronized (monitor) {
 			return new ArrayList<BundleRevision>(revisions);
+		}
+	}
+
+	List<ModuleRevision> getModuleRevisions() {
+		synchronized (monitor) {
+			return new ArrayList<ModuleRevision>(revisions);
 		}
 	}
 

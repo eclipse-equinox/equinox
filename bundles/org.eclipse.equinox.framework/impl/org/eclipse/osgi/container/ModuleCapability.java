@@ -14,7 +14,6 @@ import java.util.Map;
 import org.osgi.framework.wiring.BundleCapability;
 
 public class ModuleCapability implements BundleCapability {
-	private final Object monitor = new Object();
 	private final String namespace;
 	private final Map<String, String> directives;
 	private final Map<String, Object> attributes;
@@ -29,9 +28,7 @@ public class ModuleCapability implements BundleCapability {
 
 	@Override
 	public ModuleRevision getRevision() {
-		synchronized (monitor) {
-			return revision;
-		}
+		return revision;
 	}
 
 	@Override

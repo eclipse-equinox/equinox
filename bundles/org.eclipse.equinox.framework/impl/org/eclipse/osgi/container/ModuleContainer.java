@@ -17,7 +17,7 @@ import org.eclipse.osgi.container.wiring.ModuleWiring;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
-import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.service.resolver.Resolver;
 
 public class ModuleContainer {
 	/**
@@ -35,31 +35,39 @@ public class ModuleContainer {
 	 */
 	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock();
 	/* @GuardedBy("monitor") */
-	private final Map<Long, ModuleRevisions> revisionsByIds = new HashMap<Long, ModuleRevisions>();
-	/* @GuardedBy("monitor") */
-	private final Map<String, ModuleRevisions> revisionsByLocations = new HashMap<String, ModuleRevisions>();
-	/* @GuardedBy("monitor") */
-	private final Map<String, Collection<ModuleRevision>> revisionByName = new HashMap<String, Collection<ModuleRevision>>();
-	/* @GuardedBy("monitor") */
-	private final Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
+	private ModuleDataBase moduleDataBase;
+
 	/**
 	 * Hook used to determine if a bundle being installed or updated will cause a collision
 	 */
 	private final CollisionHook bundleCollisionHook;
+
 	/**
 	 * Hook used to control the resolution process
 	 */
 	private final ResolverHookFactory resolverHookFactory;
 
 	/**
-	 * The bundle ID used for the next install operation
+	 * Resolver used to resolve modules in this container
 	 */
-	/* @GuardedBy("monitor") */
-	private long nextId = 0;
+	private final Resolver resolver;
 
-	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory) {
+	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver) {
 		this.bundleCollisionHook = bundleCollisionHook;
 		this.resolverHookFactory = resolverHookFactory;
+		this.resolver = resolver;
+	}
+
+	public void setModuleDataBase(ModuleDataBase moduleDataBase) {
+		monitor.writeLock().lock();
+		try {
+			if (this.moduleDataBase != null)
+				throw new IllegalStateException("Module Database is already set."); //$NON-NLS-1$
+			this.moduleDataBase = moduleDataBase;
+			this.moduleDataBase.setContainer(this);
+		} finally {
+			monitor.writeLock().unlock();
+		}
 	}
 
 	public Module install(Module module, BundleContext origin, String location, ModuleRevisionBuilder builder) throws BundleException {
@@ -67,11 +75,11 @@ public class ModuleContainer {
 		boolean locationLocked = false;
 		boolean nameLocked = false;
 		try {
-			ModuleRevisions existingLocation = null;
+			Module existingLocation = null;
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
 			monitor.readLock().lock();
 			try {
-				existingLocation = revisionsByLocations.get(location);
+				existingLocation = moduleDataBase.getModule(location);
 				if (existingLocation == null) {
 					// Attempt to lock the location and name
 					try {
@@ -86,16 +94,14 @@ public class ModuleContainer {
 					}
 					// Collect existing bundles with the same name and version as the bundle we want to install
 					// This is to perform the collision check below
-					Collection<ModuleRevision> existingRevisionNames = revisionByName.get(name);
-					if (existingRevisionNames != null) {
+					Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
+					if (!existingRevisionNames.isEmpty()) {
 						collisionCandidates = new ArrayList<Bundle>(1);
 						for (ModuleRevision equinoxRevision : existingRevisionNames) {
-							if (equinoxRevision.getVersion().equals(builder.getVersion())) {
-								Bundle b = equinoxRevision.getBundle();
-								// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
-								if (b != null && !collisionCandidates.contains(b))
-									collisionCandidates.add(b);
-							}
+							Bundle b = equinoxRevision.getBundle();
+							// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
+							if (b != null && !collisionCandidates.contains(b))
+								collisionCandidates.add(b);
 						}
 					}
 				}
@@ -105,12 +111,12 @@ public class ModuleContainer {
 			// Check that the existing location is visible from the origin bundle
 			if (existingLocation != null) {
 				if (origin != null) {
-					if (origin.getBundle(existingLocation.getId()) == null) {
+					if (origin.getBundle(existingLocation.getRevisions().getId()) == null) {
 						Bundle b = existingLocation.getBundle();
 						throw new BundleException("Bundle \"" + b.getSymbolicName() + "\" version \"" + b.getVersion() + "\" is already installed at location: " + location, BundleException.REJECTED_BY_HOOK);
 					}
 				}
-				return existingLocation.getModule();
+				return existingLocation;
 			}
 			// Check that the bundle does not collide with other bundles with the same name and version
 			// This is from the perspective of the origin bundle
@@ -122,17 +128,8 @@ public class ModuleContainer {
 			}
 			monitor.writeLock().lock();
 			try {
-				ModuleRevision result = builder.buildRevision(nextId, location, module, this);
-				nextId += 1;
-				revisionsByLocations.put(location, result.getRevisions());
-				revisionsByIds.put(result.getRevisions().getId(), result.getRevisions());
-				Collection<ModuleRevision> sameName = revisionByName.get(name);
-				if (sameName == null) {
-					sameName = new ArrayList<ModuleRevision>(1);
-					revisionByName.put(name, sameName);
-				}
-				sameName.add(result);
-				return result.getRevisions().getModule();
+				moduleDataBase.install(module, location, builder);
+				return module;
 			} finally {
 				monitor.writeLock().unlock();
 			}
@@ -163,18 +160,14 @@ public class ModuleContainer {
 				}
 				// Collect existing bundles with the same name and version as the bundle we want to install
 				// This is to perform the collision check below
-				Collection<ModuleRevision> existingRevisionNames = revisionByName.get(name);
-				if (existingRevisionNames != null) {
+				Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
+				if (!existingRevisionNames.isEmpty()) {
 					collisionCandidates = new ArrayList<Bundle>(1);
 					for (ModuleRevision equinoxRevision : existingRevisionNames) {
-						if (equinoxRevision.getVersion().equals(builder.getVersion())) {
-							Bundle b = equinoxRevision.getBundle();
-							// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
-							// Also remove the bundle object we are actually updating since we allow it to update to the 
-							// same name and version
-							if (b != null && !b.equals(module.getBundle()) && !collisionCandidates.contains(b))
-								collisionCandidates.add(b);
-						}
+						Bundle b = equinoxRevision.getBundle();
+						// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
+						if (b != null && !collisionCandidates.contains(b))
+							collisionCandidates.add(b);
 					}
 				}
 
@@ -193,13 +186,7 @@ public class ModuleContainer {
 			}
 			monitor.writeLock().lock();
 			try {
-				ModuleRevision result = builder.addRevision(module.getRevisions(), this);
-				Collection<ModuleRevision> sameName = revisionByName.get(name);
-				if (sameName == null) {
-					sameName = new ArrayList<ModuleRevision>(1);
-					revisionByName.put(name, sameName);
-				}
-				sameName.add(result);
+				ModuleRevision result = moduleDataBase.update(module, builder);
 				return result;
 			} finally {
 				monitor.writeLock().unlock();
@@ -213,20 +200,7 @@ public class ModuleContainer {
 	public void uninstall(Module module) {
 		monitor.writeLock().lock();
 		try {
-			ModuleRevisions uninstalling = module.getRevisions();
-			revisionsByIds.remove(uninstalling.getId());
-			revisionsByLocations.remove(uninstalling).getLocation();
-			List<BundleRevision> revisions = uninstalling.getRevisions();
-			for (BundleRevision revision : revisions) {
-				String name = revision.getSymbolicName();
-				if (name != null) {
-					Collection<ModuleRevision> sameName = revisionByName.get(name);
-					if (sameName != null) {
-						sameName.remove(revision);
-					}
-				}
-			}
-			uninstalling.uninsetall();
+			moduleDataBase.uninstall(module);
 		} finally {
 			monitor.writeLock().unlock();
 		}
@@ -235,7 +209,7 @@ public class ModuleContainer {
 	public ModuleWiring getWiring(ModuleRevision revision) {
 		monitor.readLock().lock();
 		try {
-			return wirings.get(revision);
+			return moduleDataBase.getWiring(revision);
 		} finally {
 			monitor.readLock().unlock();
 		}

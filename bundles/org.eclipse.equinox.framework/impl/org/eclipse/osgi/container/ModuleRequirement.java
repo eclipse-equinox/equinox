@@ -11,15 +11,16 @@
 package org.eclipse.osgi.container;
 
 import java.util.Map;
+import org.osgi.framework.Filter;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 
 public class ModuleRequirement implements BundleRequirement {
-	private final Object monitor = new Object();
 	private final String namespace;
 	private final Map<String, String> directives;
 	private final Map<String, Object> attributes;
 	private final ModuleRevision revision;
+	private volatile Filter filter;
 
 	ModuleRequirement(String namespace, Map<String, String> directives, Map<String, Object> attributes, ModuleRevision revision) {
 		this.namespace = namespace;
@@ -30,9 +31,7 @@ public class ModuleRequirement implements BundleRequirement {
 
 	@Override
 	public ModuleRevision getRevision() {
-		synchronized (monitor) {
-			return revision;
-		}
+		return revision;
 	}
 
 	@Override
@@ -59,5 +58,13 @@ public class ModuleRequirement implements BundleRequirement {
 	@Override
 	public ModuleRevision getResource() {
 		return revision;
+	}
+
+	public Filter getFilter() {
+		return filter;
+	}
+
+	void setFilter(Filter filter) {
+		this.filter = filter;
 	}
 }

@@ -68,14 +68,11 @@ public class ModuleRevisionBuilder {
 	}
 
 	ModuleRevision buildRevision(Long id, String location, Module module, ModuleContainer container) {
-		ModuleRevisions revisions = new ModuleRevisions(id, location, module);
-		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, container);
-		revisions.addRevision(revision);
-		return revision;
+		return addRevision(new ModuleRevisions(id, location, module, container));
 	}
 
-	ModuleRevision addRevision(ModuleRevisions revisions, ModuleContainer container) {
-		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions, container);
+	ModuleRevision addRevision(ModuleRevisions revisions) {
+		ModuleRevision revision = new ModuleRevision(symbolicName, version, types, capabilityInfos, requirementInfos, revisions);
 		revisions.addRevision(revision);
 		return revision;
 	}
