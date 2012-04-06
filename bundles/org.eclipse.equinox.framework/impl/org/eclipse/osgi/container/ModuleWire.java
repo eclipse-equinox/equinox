@@ -8,9 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.wiring;
+package org.eclipse.osgi.container;
 
-import org.eclipse.osgi.container.*;
 import org.osgi.framework.wiring.BundleWire;
 
 public class ModuleWire implements BundleWire {

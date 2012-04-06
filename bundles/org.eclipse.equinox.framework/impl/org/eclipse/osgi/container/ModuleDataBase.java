@@ -11,7 +11,6 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
-import org.eclipse.osgi.container.wiring.ModuleWiring;
 import org.osgi.framework.Filter;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;

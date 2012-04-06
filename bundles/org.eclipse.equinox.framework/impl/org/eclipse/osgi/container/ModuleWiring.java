@@ -8,13 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container.wiring;
-
-import org.eclipse.osgi.container.Converters;
+package org.eclipse.osgi.container;
 
 import java.net.URL;
 import java.util.*;
-import org.eclipse.osgi.container.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;

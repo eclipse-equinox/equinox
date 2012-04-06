@@ -13,7 +13,6 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.eclipse.osgi.container.wiring.ModuleWiring;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
