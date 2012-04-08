@@ -44,6 +44,7 @@ public class SshServ extends Thread {
 	private static final String SSH_KEYSTORE_PROP = "ssh.server.keystore";
 	private static final String SSH_KEYSTORE_PROP_DEFAULT = "hostkey.ser";
 	private static final String SSH_AUTHORIZED_KEYS_FILE_PROP = "ssh.server.authorized_keys";
+	private static final String SSH_CUSTOM_PUBLIC_KEY_AUTHENTICATION = "ssh.custom.publickeys.auth";
 	private static final String EQUINOX_CONSOLE_DOMAIN = "equinox_console";
 
     public SshServ(List<CommandProcessor> processors, BundleContext context, String host, int port) {
@@ -100,32 +101,38 @@ public class SshServ extends Thread {
 			AuthorizedKeysFileAuthenticator authenticator = new AuthorizedKeysFileAuthenticator();
 			authenticator.setAuthorizedKeysFile(authorizedKeysFile);
 			return authenticator;
-		}
+		} 
+		
+		final String customPublicKeysAuthentication = System.getProperty(SSH_CUSTOM_PUBLIC_KEY_AUTHENTICATION);
+		
+		// fall back to dynamic provider based on available OSGi services only if explicitly specified
+		if ("true".equals(customPublicKeysAuthentication)) {
+			return new PublickeyAuthenticator() {
 
-		// fall back to dynamic provider based on available OSGi services
-		return new PublickeyAuthenticator() {
-
-			@Override
-			public boolean authenticate(String username, PublicKey key, ServerSession session) {
-				// find available services
-				try {
-					for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
-						PublickeyAuthenticator authenticator = null;
-						try {
-							authenticator = context.getService(reference);
-							// first positive match wins; continue looking otherwise
-							if(authenticator.authenticate(username, key, session))
-								return true;
-						} finally {
-							if(null != authenticator)
-								context.ungetService(reference);
+				@Override
+				public boolean authenticate(String username, PublicKey key, ServerSession session) {
+					// find available services
+					try {
+						for (ServiceReference<PublickeyAuthenticator> reference : context.getServiceReferences(PublickeyAuthenticator.class, null)) {
+							PublickeyAuthenticator authenticator = null;
+							try {
+								authenticator = context.getService(reference);
+								// first positive match wins; continue looking otherwise
+								if(authenticator.authenticate(username, key, session))
+									return true;
+							} finally {
+								if(null != authenticator)
+									context.ungetService(reference);
+							}
 						}
+					} catch (InvalidSyntaxException e) {
+						// no filter is used
 					}
-				} catch (InvalidSyntaxException e) {
-					// no filter is used
+					return false;
 				}
-				return false;
-			}
-		};
+			};
+		}
+		
+		return null;
     }
 }
