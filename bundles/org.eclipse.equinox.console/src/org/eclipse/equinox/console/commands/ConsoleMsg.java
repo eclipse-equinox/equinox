@@ -134,7 +134,8 @@ public class ConsoleMsg extends NLS {
 	public static final String CONSOLE_HELP_GC_COMMAND_DESCRIPTION = "perform a garbage collection";
 	public static final String CONSOLE_HELP_INIT_COMMAND_DESCRIPTION = "uninstall all bundles";
 	public static final String CONSOLE_HELP_CLOSE_COMMAND_DESCRIPTION = "shutdown and exit";
-	public static final String CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION = "refresh the packages of the specified bundles";
+	public static final String CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION = "refresh the packages of the specified bundles; if -all option is specified refresh packages of all installed bundles";
+	public static final String CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION = "specify to refresh the packages of all installed bundles";
 	public static final String CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION = "list of bundles whose packages to be refreshed; if not present refreshes all bundles";
 	public static final String CONSOLE_HELP_EXEC_COMMAND_DESCRIPTION = "execute a command in a separate process and wait";
 	public static final String CONSOLE_HELP_EXEC_COMMAND_ARGUMENT_DESCRIPTION = "command to be executed";

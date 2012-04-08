@@ -1179,8 +1179,12 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 *  @param bundles bundle(s) to be refreshed
 	 */
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION)
-	public void r(@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
-		refresh(bundles);
+	public void r(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION)
+			@Parameter(absentValue = "false", presentValue = "true", names = { "-all" })
+			boolean shouldRefreshAll,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+		refresh(shouldRefreshAll, bundles);
 	}
 
 	/**
@@ -1190,11 +1194,17 @@ public class EquinoxCommandProvider implements SynchronousBundleListener {
 	 */
 	@SuppressWarnings("deprecation")
 	@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_DESCRIPTION)
-	public void refresh(@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
+	public void refresh(
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_ALL_OPTION_DESCRIPTION)
+			@Parameter(absentValue = "false", presentValue = "true", names = { "-all" })
+			boolean shouldRefreshAll,
+			@Descriptor(ConsoleMsg.CONSOLE_HELP_REFRESH_COMMAND_ARGUMENT_DESCRIPTION) Bundle... bundles) throws Exception {
 		PackageAdmin packageAdmin = activator.getPackageAdmin();
 		if (packageAdmin != null) {
 			if(bundles != null && bundles.length > 0) {
 				packageAdmin.refreshPackages(bundles);
+			} else if (shouldRefreshAll == true) {
+				packageAdmin.refreshPackages(context.getBundles());
 			} else {
 				packageAdmin.refreshPackages(null);
 			}
