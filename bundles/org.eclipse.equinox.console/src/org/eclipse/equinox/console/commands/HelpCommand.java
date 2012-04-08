@@ -37,6 +37,7 @@ public class HelpCommand {
 	private BundleContext context;
 	private Set<CommandProvider> legacyCommandProviders;
 	private ServiceTracker<CommandProvider, Set<CommandProvider>> commandProvidersTracker;
+	private static final String COMMANDS = ".commands";
 	
     public class CommandProviderCustomizer implements ServiceTrackerCustomizer<CommandProvider, Set<CommandProvider>> {
     	private BundleContext context;
@@ -86,21 +87,11 @@ public class HelpCommand {
 	}
 	
 	/**
-	 * Provides help for the available commands. The Gogo help command, used with no arguments, prints the names
-	 * of all registered commands. If a command name is passed as argument to the help command, then the help
-	 * message for the particular command is displayed (if such is defined).
+	 * Provides help for the available commands. Prints the names, descriptions and parameters of all registered commands.
 	 * 
-	 * This method can accept an additional argument -legacy. If this option is specified, the names of all 
-	 * legacy equinox commands are displayed. If -legacy is not specified, then only the Gogo help command is called.
-	 * 
-	 * If -legacy is displayed along with a command name, then the legacy commands are searched
-	 * for a command with this name, and the help message for this command is displayed, if provided. If the 
-	 * CommandProvider, which provides this command, does not provide help for individual commands, then
-	 * the help for all commands in the CommandProvider is displayed. 
-	 * 
-	 * This method can accept an additional argument -all. If this option is specified, then both the names of the 
-	 * legacy equinox commands and the Gogo commands are displayed.
-	 * 
+	 * If a command name is passed as argument to the help command, then the help
+	 * message only for the particular command is displayed (if such is defined).
+	 *  
 	 * @param session
 	 * @param args
 	 * @throws Exception
@@ -113,58 +104,67 @@ public class HelpCommand {
 		}
 		
 		if (command != null) {
-			for (CommandProvider provider : legacyCommandProviders) {
-				Method[] methods = provider.getClass().getMethods();
-				for (Method method : methods) {
-					Object retval = null;
-					if (method.getName().equals("_" + command)) {
-						try {
-							Method helpMethod = provider.getClass().getMethod("_help", CommandInterpreter.class);
-							ArrayList<Object> argsList = new ArrayList<Object>();
-							argsList.add(command);
-							retval = helpMethod.invoke(provider, new CustomCommandInterpreter(argsList));
-						} catch (Exception e) {
-							System.out.println(provider.getHelp());
-							break;
-						}
-						
-						if (retval != null && retval instanceof String) {
-							System.out.println(retval);
-						}
-						break;
-					}
-				}
-			}
-			
-			try {
-				session.execute("felix:help " + command);
-			} catch (IllegalArgumentException e) {
-				handleCommandNotFound();
-			}
-			
+			printLegacyCommandHelp(command);
+			printGogoCommandHelp(session, command);
 			return;
 		}
 
-		printLegacyCommands();
+		printAllLegacyCommandsHelp();
+		printAllGogoCommandsHelp(session);
+	}
+
+	private void printGogoCommandHelp(final CommandSession session, String command) throws Exception {
 		try {
-			session.execute("felix:help");
+			session.execute("felix:help " + command);
 		} catch (IllegalArgumentException e) {
 			handleCommandNotFound();
 		}
-
 	}
-	
-	private void printLegacyCommands() {
+
+	private void printAllLegacyCommandsHelp() {
+		for (CommandProvider commandProvider : legacyCommandProviders) {
+			System.out.println(commandProvider.getHelp());
+		}
+	}
+
+	private void printAllGogoCommandsHelp(final CommandSession session) throws Exception {
+		@SuppressWarnings("unchecked")
+		Set<String> commandNames = (Set<String>) session.get(COMMANDS);
+		
+		try {
+			for (String commandName : commandNames) {
+				session.execute("felix:help " + commandName);
+			}
+		} catch (IllegalArgumentException e) {
+			handleCommandNotFound();
+		}
+	}
+
+	private void printLegacyCommandHelp(String command) {
 		for (CommandProvider provider : legacyCommandProviders) {
 			Method[] methods = provider.getClass().getMethods();
 			for (Method method : methods) {
-				if (method.getName().startsWith("_") && !method.getName().equals("_help")) {
-					System.out.println("equinox:" + method.getName().substring(1));
+				Object retval = null;
+				if (method.getName().equals("_" + command)) {
+					try {
+						Method helpMethod = provider.getClass().getMethod("_help", CommandInterpreter.class);
+						ArrayList<Object> argsList = new ArrayList<Object>();
+						argsList.add(command);
+						retval = helpMethod.invoke(provider, new CustomCommandInterpreter(argsList));
+					} catch (Exception e) {
+						System.out.println(provider.getHelp());
+						break;
+					}
+					
+					if (retval != null && retval instanceof String) {
+						System.out.println(retval);
+					}
+					break;
 				}
 			}
 		}
 	}
-	
+		
 	private boolean checkStarted(String symbolicName) {
 		Bundle[] bundles = context.getBundles();
 		for (Bundle bundle : bundles) {
