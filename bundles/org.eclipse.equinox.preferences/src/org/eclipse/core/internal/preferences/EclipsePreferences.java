@@ -27,7 +27,7 @@ import org.osgi.service.prefs.Preferences;
  * 
  * Implementation notes:
  * 
- *  - For thread safety, we always synchronize on the node object when writing
+ *  - For thread safety, we always synchronize on <tt>writeLock</tt> when writing
  * the children or properties fields.  Must ensure we don't synchronize when calling
  * client code such as listeners.
  * 
@@ -48,13 +48,17 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	protected static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private String cachedPath;
+	protected ImmutableMap properties = ImmutableMap.EMPTY;
 	protected Map children;
+	/**
+	 * Protects write access to properties and children.
+	 */
+	private Object childAndPropertyLock = new Object();
 	protected boolean dirty = false;
 	protected boolean loading = false;
 	protected final String name;
 	// the parent of an EclipsePreference node is always an EclipsePreference node. (or null)
 	protected final EclipsePreferences parent;
-	protected ImmutableMap properties = ImmutableMap.EMPTY;
 	protected boolean removed = false;
 	private ListenerList nodeChangeListeners;
 	private ListenerList preferenceChangeListeners;
@@ -146,12 +150,14 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			toVisit[i].accept(visitor);
 	}
 
-	protected synchronized IEclipsePreferences addChild(String childName, IEclipsePreferences child) {
+	protected IEclipsePreferences addChild(String childName, IEclipsePreferences child) {
 		//Thread safety: synchronize method to protect modification of children field
-		if (children == null)
-			children = Collections.synchronizedMap(new HashMap());
-		children.put(childName, child == null ? (Object) childName : child);
-		return child;
+		synchronized (childAndPropertyLock) {
+			if (children == null)
+				children = Collections.synchronizedMap(new HashMap());
+			children.put(childName, child == null ? (Object) childName : child);
+			return child;
+		}
 	}
 
 	/*
@@ -212,10 +218,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	}
 
 	protected String[] internalChildNames() {
-		Map temp = children;
-		if (temp == null || temp.size() == 0)
-			return EMPTY_STRING_ARRAY;
-		return (String[]) temp.keySet().toArray(EMPTY_STRING_ARRAY);
+		synchronized (childAndPropertyLock) {
+			if (children == null || children.size() == 0)
+				return EMPTY_STRING_ARRAY;
+			return (String[]) children.keySet().toArray(EMPTY_STRING_ARRAY);
+		}
 	}
 
 	/*
@@ -226,7 +233,11 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		checkRemoved();
 		// call each one separately (instead of Properties.clear) so
 		// clients get change notification
-		String[] keys = properties.keys();
+		String[] keys;
+		synchronized (childAndPropertyLock) {
+			keys = properties.keys();
+		}
+		//don't synchronize remove call because it calls listeners
 		for (int i = 0; i < keys.length; i++)
 			remove(keys[i]);
 		makeDirty();
@@ -295,7 +306,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * puts in the file.
 	 */
 	protected static void write(Properties properties, IPath location) throws BackingStoreException {
-		// create the parent dirs if they don't exist
+		// create the parent directories if they don't exist
 		File parentFile = location.toFile().getParentFile();
 		if (parentFile == null)
 			return;
@@ -341,7 +352,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 		// add the key/value pairs from this node
 		boolean addSeparator = prefix.length() != 0;
 		//thread safety: copy reference in case of concurrent change
-		ImmutableMap temp = properties;
+		ImmutableMap temp;
+		synchronized (childAndPropertyLock) {
+			temp = properties;
+		}
 		String[] keys = temp.keys();
 		for (int i = 0, imax = keys.length; i < imax; i++) {
 			String value = temp.get(keys[i]);
@@ -410,8 +424,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	/*
 	 * @see org.osgi.service.prefs.Preferences#flush()
 	 */
-	synchronized public void flush() throws BackingStoreException {
-		internalFlush();
+	public void flush() throws BackingStoreException {
+		synchronized (childAndPropertyLock) {
+			internalFlush();
+		}
 	}
 
 	/*
@@ -482,10 +498,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Return a boolean value indicating whether or not a child with the given
 	 * name is known to this node.
 	 */
-	protected synchronized boolean childExists(String childName) {
-		if (children == null)
-			return false;
-		return children.get(childName) != null;
+	protected boolean childExists(String childName) {
+		synchronized (childAndPropertyLock) {
+			if (children == null)
+				return false;
+			return children.get(childName) != null;
+		}
 	}
 
 	/**
@@ -493,7 +511,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * that matches the given key, or null if there is no matching child.
 	 */
 	protected IEclipsePreferences getChild(String key, Object context, boolean create) {
-		synchronized (this) {
+		synchronized (childAndPropertyLock) {
 			if (children == null)
 				return null;
 			Object value = children.get(key);
@@ -610,7 +628,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 			throw new NullPointerException();
 		// illegal state if this node has been removed
 		checkRemoved();
-		String result = properties.get(key);
+		String result;
+		synchronized (childAndPropertyLock) {
+			result = properties.get(key);
+		}
 		if (DEBUG_PREFERENCE_GET)
 			PrefsMessages.message("Getting preference value: " + absolutePath() + '/' + key + "->" + result); //$NON-NLS-1$ //$NON-NLS-2$
 		return result;
@@ -654,15 +675,17 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * or null if no value existed.
 	 */
 	protected String internalPut(String key, String newValue) {
-		// illegal state if this node has been removed
-		checkRemoved();
-		String oldValue = properties.get(key);
-		if (oldValue != null && oldValue.equals(newValue))
+		synchronized (childAndPropertyLock) {
+			// illegal state if this node has been removed
+			checkRemoved();
+			String oldValue = properties.get(key);
+			if (oldValue != null && oldValue.equals(newValue))
+				return oldValue;
+			if (DEBUG_PREFERENCE_SET)
+				PrefsMessages.message("Setting preference: " + absolutePath() + '/' + key + '=' + newValue); //$NON-NLS-1$
+			properties = properties.put(key, newValue);
 			return oldValue;
-		if (DEBUG_PREFERENCE_SET)
-			PrefsMessages.message("Setting preference: " + absolutePath() + '/' + key + '=' + newValue); //$NON-NLS-1$
-		properties = properties.put(key, newValue);
-		return oldValue;
+		}
 	}
 
 	/*
@@ -677,8 +700,10 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 */
 	public String[] keys() {
 		// illegal state if this node has been removed
-		checkRemoved();
-		return properties.keys();
+		synchronized (childAndPropertyLock) {
+			checkRemoved();
+			return properties.keys();
+		}
 	}
 
 	/**
@@ -969,12 +994,15 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * @see org.osgi.service.prefs.Preferences#remove(java.lang.String)
 	 */
 	public void remove(String key) {
-		// illegal state if this node has been removed
-		checkRemoved();
-		String oldValue = properties.get(key);
-		if (oldValue == null)
-			return;
-		properties = properties.removeKey(key);
+		String oldValue;
+		synchronized (childAndPropertyLock) {
+			// illegal state if this node has been removed
+			checkRemoved();
+			oldValue = properties.get(key);
+			if (oldValue == null)
+				return;
+			properties = properties.removeKey(key);
+		}
 		makeDirty();
 		firePreferenceEvent(key, oldValue, null);
 	}
@@ -1023,7 +1051,7 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * Remove non-initialized node from the collection.
 	 */
 	protected Object removeNode(String key) {
-		synchronized (this) {
+		synchronized (childAndPropertyLock) {
 			if (children != null) {
 				Object result = children.remove(key);
 				if (result != null)
