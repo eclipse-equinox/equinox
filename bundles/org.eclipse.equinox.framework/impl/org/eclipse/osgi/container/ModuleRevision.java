@@ -72,28 +72,36 @@ public class ModuleRevision implements BundleRevision {
 
 	@Override
 	public List<BundleCapability> getDeclaredCapabilities(String namespace) {
+		return Converters.asListBundleCapability(getModuleCapabilities(namespace));
+	}
+
+	@Override
+	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
+		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
+	}
+
+	List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (namespace == null)
-			return Converters.asListBundleCapability(Collections.unmodifiableList(capabilities));
-		List<BundleCapability> result = new ArrayList<BundleCapability>();
+			return Collections.unmodifiableList(capabilities);
+		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
 		for (ModuleCapability capability : capabilities) {
 			if (namespace.equals(capability.getNamespace())) {
 				result.add(capability);
 			}
 		}
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 
-	@Override
-	public List<BundleRequirement> getDeclaredRequirements(String namespace) {
+	List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
-			return Converters.asListBundleRequirement(Collections.unmodifiableList(requirements));
-		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+			return Collections.unmodifiableList(requirements);
+		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
 		for (ModuleRequirement requirement : requirements) {
 			if (namespace.equals(requirement.getNamespace())) {
 				result.add(requirement);
 			}
 		}
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 
 	@Override
@@ -120,7 +128,7 @@ public class ModuleRevision implements BundleRevision {
 		return revisions;
 	}
 
-	public boolean isCurrent() {
+	boolean isCurrent() {
 		return !revisions.isUninstalled() && revisions.getRevisions().indexOf(this) == 0;
 	}
 }

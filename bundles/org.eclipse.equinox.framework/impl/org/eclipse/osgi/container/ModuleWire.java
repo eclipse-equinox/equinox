@@ -18,7 +18,7 @@ public class ModuleWire implements BundleWire {
 	private final ModuleRequirement requirement;
 	private final ModuleRevision hostingRequirer;
 
-	public ModuleWire(ModuleCapability capability, ModuleRevision hostingProvider, ModuleRequirement requirement, ModuleRevision hostingRequirer) {
+	ModuleWire(ModuleCapability capability, ModuleRevision hostingProvider, ModuleRequirement requirement, ModuleRevision hostingRequirer) {
 		super();
 		this.capability = capability;
 		this.hostingProvider = hostingProvider;

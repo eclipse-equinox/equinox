@@ -11,9 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
-import org.osgi.framework.Filter;
 import org.osgi.framework.Version;
-import org.osgi.resource.Capability;
 
 /**
  * 
@@ -26,7 +24,7 @@ public abstract class ModuleDataBase {
 
 	private final Map<String, Collection<ModuleRevision>> revisionByName = new HashMap<String, Collection<ModuleRevision>>();
 
-	private final Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();;
+	private final Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
 
 	void setContainer(ModuleContainer container) {
 		if (this.container != null)
@@ -66,6 +64,7 @@ public abstract class ModuleDataBase {
 		}
 		sameName.add(newRevision);
 		addCapabilities(newRevision);
+		incrementTimestamp();
 	}
 
 	final void uninstall(Module module) {
@@ -82,7 +81,8 @@ public abstract class ModuleDataBase {
 				}
 			}
 		}
-		uninstalling.uninsetall();
+		uninstalling.uninstall();
+		incrementTimestamp();
 	}
 
 	final ModuleRevision update(Module module, ModuleRevisionBuilder builder) {
@@ -95,16 +95,33 @@ public abstract class ModuleDataBase {
 		}
 		sameName.add(newRevision);
 		addCapabilities(newRevision);
+		incrementTimestamp();
 		return newRevision;
 	}
 
-	protected ModuleWiring getWiring(ModuleRevision revision) {
+	ModuleWiring getWiring(ModuleRevision revision) {
 		return wirings.get(revision);
+	}
+
+	Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
+		return new HashMap<ModuleRevision, ModuleWiring>(wirings);
+	}
+
+	Collection<ModuleRevision> getCurrentUnresolved() {
+		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
+		for (Module module : revisionsByLocations.values()) {
+			List<ModuleRevision> revisions = module.getRevisions().getModuleRevisions();
+			if (!revisions.isEmpty())
+				unresolved.add(revisions.get(0));
+		}
+		return unresolved;
 	}
 
 	protected abstract long getNextIdAndIncrement();
 
-	protected abstract Filter createFilter(String filter);
+	protected abstract long getTimestamp();
+
+	protected abstract long incrementTimestamp();
 
 	protected abstract void addCapabilities(ModuleRevision revision);
 
@@ -116,5 +133,5 @@ public abstract class ModuleDataBase {
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
-	protected abstract List<Capability> findCapabilities(ModuleRequirement requirement);
+	protected abstract List<ModuleCapability> findCapabilities(ModuleRequirement requirement);
 }

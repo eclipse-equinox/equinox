@@ -33,11 +33,11 @@ public class ModuleRevisions implements BundleRevisions {
 		this.container = container;
 	}
 
-	public Long getId() {
+	Long getId() {
 		return id;
 	}
 
-	public String getLocation() {
+	String getLocation() {
 		return location;
 	}
 
@@ -74,11 +74,11 @@ public class ModuleRevisions implements BundleRevisions {
 		return revision;
 	}
 
-	public boolean isUninstalled() {
+	boolean isUninstalled() {
 		return uninstalled;
 	}
 
-	void uninsetall() {
+	void uninstall() {
 		uninstalled = true;
 	}
 }

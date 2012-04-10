@@ -16,9 +16,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.resolver.Resolver;
 
 public class ModuleContainer {
+
 	/**
 	 * Used by install operations to establish a write lock on an install location
 	 */
@@ -32,29 +34,23 @@ public class ModuleContainer {
 	/**
 	 * Monitors read and write access to the revision maps and nextId
 	 */
-	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock();
+	final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock();
+
+	private final FrameworkWiring frameworkWiring = new ModuleFrameworkWiring();
+
 	/* @GuardedBy("monitor") */
-	private ModuleDataBase moduleDataBase;
+	ModuleDataBase moduleDataBase;
 
 	/**
 	 * Hook used to determine if a bundle being installed or updated will cause a collision
 	 */
 	private final CollisionHook bundleCollisionHook;
 
-	/**
-	 * Hook used to control the resolution process
-	 */
-	private final ResolverHookFactory resolverHookFactory;
-
-	/**
-	 * Resolver used to resolve modules in this container
-	 */
-	private final Resolver resolver;
+	private final ModuleResolver moduleResolver;
 
 	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver) {
 		this.bundleCollisionHook = bundleCollisionHook;
-		this.resolverHookFactory = resolverHookFactory;
-		this.resolver = resolver;
+		this.moduleResolver = new ModuleResolver(resolverHookFactory, resolver);
 	}
 
 	public void setModuleDataBase(ModuleDataBase moduleDataBase) {
@@ -205,12 +201,55 @@ public class ModuleContainer {
 		}
 	}
 
-	public ModuleWiring getWiring(ModuleRevision revision) {
+	ModuleWiring getWiring(ModuleRevision revision) {
 		monitor.readLock().lock();
 		try {
 			return moduleDataBase.getWiring(revision);
 		} finally {
 			monitor.readLock().unlock();
 		}
+	}
+
+	public FrameworkWiring getFrameworkWiring() {
+		return frameworkWiring;
+	}
+
+	public class ModuleFrameworkWiring implements FrameworkWiring {
+
+		@Override
+		public Bundle getBundle() {
+			monitor.readLock().lock();
+			try {
+				Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
+				return systemModule == null ? null : systemModule.getBundle();
+			} finally {
+				monitor.readLock().unlock();
+			}
+		}
+
+		@Override
+		public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public boolean resolveBundles(Collection<Bundle> bundles) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Collection<Bundle> getRemovalPendingBundles() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 	}
 }

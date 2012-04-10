@@ -18,7 +18,7 @@ public abstract class Module implements BundleReference {
 	protected final ModuleRevisions getRevisions() {
 		ModuleRevisions current = revisions;
 		if (current == null)
-			throw new IllegalStateException("Module installation is not complete.");
+			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
 		return current;
 	}
 

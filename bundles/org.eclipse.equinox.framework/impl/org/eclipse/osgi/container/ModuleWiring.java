@@ -20,10 +20,10 @@ public class ModuleWiring implements BundleWiring {
 	private final ModuleRevision revision;
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
-	private final List<ModuleWire> providedWires;
+	private volatile List<ModuleWire> providedWires;
 	private final List<ModuleWire> requiredWires;
 
-	public ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
+	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
 		super();
 		this.revision = revision;
 		this.capabilities = capabilities;
@@ -47,11 +47,10 @@ public class ModuleWiring implements BundleWiring {
 		return isCurrent() || !providedWires.isEmpty();
 	}
 
-	@Override
-	public List<BundleCapability> getCapabilities(String namespace) {
+	List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (namespace == null)
-			return Converters.asListBundleCapability(new ArrayList<BundleCapability>(capabilities));
-		List<BundleCapability> result = new ArrayList<BundleCapability>();
+			return new ArrayList<ModuleCapability>(capabilities);
+		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
 		for (ModuleCapability capability : capabilities) {
 			if (namespace.equals(capability.getNamespace())) {
 				result.add(capability);
@@ -60,17 +59,35 @@ public class ModuleWiring implements BundleWiring {
 		return result;
 	}
 
-	@Override
-	public List<BundleRequirement> getRequirements(String namespace) {
+	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
-			return Converters.asListBundleRequirement(new ArrayList<BundleRequirement>(requirements));
-		List<BundleRequirement> result = new ArrayList<BundleRequirement>();
+			return new ArrayList<ModuleRequirement>(requirements);
+		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
 		for (ModuleRequirement requirement : requirements) {
 			if (namespace.equals(requirement.getNamespace())) {
 				result.add(requirement);
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public List<BundleCapability> getCapabilities(String namespace) {
+		return Converters.asListBundleCapability(getModuleCapabilities(namespace));
+
+	}
+
+	@Override
+	public List<BundleRequirement> getRequirements(String namespace) {
+		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
+	}
+
+	List<ModuleWire> getProvidedModuleWires(String namespace) {
+		return getWires(namespace, providedWires);
+	}
+
+	List<ModuleWire> getRequiredModuleWires(String namespace) {
+		return getWires(namespace, requiredWires);
 	}
 
 	@Override
@@ -120,14 +137,12 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public List<Capability> getResourceCapabilities(String namespace) {
-		// TODO Auto-generated method stub
-		return null;
+		return Converters.asListCapability(getCapabilities(namespace));
 	}
 
 	@Override
 	public List<Requirement> getResourceRequirements(String namespace) {
-		// TODO Auto-generated method stub
-		return null;
+		return Converters.asListRequirement(getRequirements(namespace));
 	}
 
 	@Override
@@ -143,5 +158,9 @@ public class ModuleWiring implements BundleWiring {
 	@Override
 	public ModuleRevision getResource() {
 		return revision;
+	}
+
+	void setProvidedWires(List<ModuleWire> providedWires) {
+		this.providedWires = providedWires;
 	}
 }
