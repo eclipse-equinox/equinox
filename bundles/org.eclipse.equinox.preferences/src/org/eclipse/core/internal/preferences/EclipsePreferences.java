@@ -1137,7 +1137,12 @@ public class EclipsePreferences implements IEclipsePreferences, IScope {
 	 * @param pool The pool to share strings in
 	 */
 	public void shareStrings(StringPool pool) {
-		properties.shareStrings(pool);
+		//thread safety: copy reference in case of concurrent change	
+		ImmutableMap temp;
+		synchronized (childAndPropertyLock) {
+			temp = properties;
+		}
+		temp.shareStrings(pool);
 		IEclipsePreferences[] myChildren = getChildren(false);
 		for (int i = 0; i < myChildren.length; i++)
 			if (myChildren[i] instanceof EclipsePreferences)
