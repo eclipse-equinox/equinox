@@ -690,8 +690,16 @@ class StateWriter {
 		if (string == null)
 			out.writeByte(StateReader.NULL);
 		else {
-			out.writeByte(StateReader.OBJECT);
-			out.writeUTF(string);
+			byte[] data = string.getBytes(StateReader.UTF_8);
+
+			if (data.length > 65535) {
+				out.writeByte(StateReader.LONG_STRING);
+				out.writeInt(data.length);
+				out.write(data);
+			} else {
+				out.writeByte(StateReader.OBJECT);
+				out.writeUTF(string);
+			}
 		}
 	}
 

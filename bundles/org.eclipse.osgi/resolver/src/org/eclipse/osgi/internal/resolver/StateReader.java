@@ -30,6 +30,7 @@ import org.osgi.framework.*;
 final class StateReader {
 	public static final String STATE_FILE = ".state"; //$NON-NLS-1$
 	public static final String LAZY_FILE = ".lazy"; //$NON-NLS-1$
+	public static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 	private static final int BUFFER_SIZE_LAZY = 4096;
 	private static final int BUFFER_SIZE_FULLYREAD = 16384;
 	private static final SecureAction secureAction = AccessController.doPrivileged(SecureAction.createSecureAction());
@@ -47,10 +48,11 @@ final class StateReader {
 	private volatile int numBundles;
 	private volatile boolean accessedFlag = false;
 
-	public static final byte STATE_CACHE_VERSION = 37;
+	public static final byte STATE_CACHE_VERSION = 38;
 	public static final byte NULL = 0;
 	public static final byte OBJECT = 1;
 	public static final byte INDEX = 2;
+	public static final byte LONG_STRING = 3;
 
 	public StateReader() //TODO - deprecated
 	{
@@ -749,6 +751,18 @@ final class StateReader {
 		byte type = in.readByte();
 		if (type == NULL)
 			return null;
+
+		if (type == LONG_STRING) {
+			int length = in.readInt();
+			byte[] data = new byte[length];
+			in.readFully(data);
+			String string = new String(data, UTF_8);
+
+			if (intern)
+				return string.intern();
+			return (String) ObjectPool.intern(string);
+		}
+
 		if (intern)
 			return in.readUTF().intern();
 		return (String) ObjectPool.intern(in.readUTF());
