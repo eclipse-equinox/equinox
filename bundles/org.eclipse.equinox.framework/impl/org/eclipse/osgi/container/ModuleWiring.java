@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.net.URL;
 import java.util.*;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
 
@@ -21,7 +22,7 @@ public class ModuleWiring implements BundleWiring {
 	private final List<ModuleCapability> capabilities;
 	private final List<ModuleRequirement> requirements;
 	private volatile List<ModuleWire> providedWires;
-	private final List<ModuleWire> requiredWires;
+	private volatile List<ModuleWire> requiredWires;
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
 		super();
@@ -44,7 +45,12 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public boolean isInUse() {
-		return isCurrent() || !providedWires.isEmpty();
+		return isCurrent() || !providedWires.isEmpty() || isFragmentInUse();
+	}
+
+	private boolean isFragmentInUse() {
+		// A fragment is considered in use if it has any required host wires
+		return ((BundleRevision.TYPE_FRAGMENT & revision.getTypes()) != 0) && !getRequiredWires(HostNamespace.HOST_NAMESPACE).isEmpty();
 	}
 
 	List<ModuleCapability> getModuleCapabilities(String namespace) {
@@ -162,5 +168,9 @@ public class ModuleWiring implements BundleWiring {
 
 	void setProvidedWires(List<ModuleWire> providedWires) {
 		this.providedWires = providedWires;
+	}
+
+	void setRequiredWires(List<ModuleWire> requiredWires) {
+		this.requiredWires = requiredWires;
 	}
 }
