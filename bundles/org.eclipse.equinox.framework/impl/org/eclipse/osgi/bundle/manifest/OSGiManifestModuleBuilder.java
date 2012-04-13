@@ -157,7 +157,7 @@ public class OSGiManifestModuleBuilder {
 			String versionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_VERSION_ATTRIBUTE);
 			@SuppressWarnings("deprecation")
 			String specVersionRangeAttr = (String) attributes.remove(Constants.PACKAGE_SPECIFICATION_VERSION);
-			VersionRange versionRange = versionRangeAttr == null ? (specVersionRangeAttr == null ? new VersionRange(specVersionRangeAttr) : null) : new VersionRange(versionRangeAttr);
+			VersionRange versionRange = versionRangeAttr == null ? (specVersionRangeAttr == null ? null : new VersionRange(specVersionRangeAttr)) : new VersionRange(versionRangeAttr);
 			String bundleVersionRangeAttr = (String) attributes.remove(PackageNamespace.CAPABILITY_BUNDLE_VERSION_ATTRIBUTE);
 			VersionRange bundleVersionRange = bundleVersionRangeAttr == null ? null : new VersionRange(bundleVersionRangeAttr);
 			for (String packageName : packageNames) {

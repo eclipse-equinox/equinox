@@ -80,7 +80,7 @@ public class ModuleRevision implements BundleRevision {
 		return Converters.asListBundleRequirement(getModuleRequirements(namespace));
 	}
 
-	List<ModuleCapability> getModuleCapabilities(String namespace) {
+	public List<ModuleCapability> getModuleCapabilities(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(capabilities);
 		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
@@ -92,7 +92,7 @@ public class ModuleRevision implements BundleRevision {
 		return Collections.unmodifiableList(result);
 	}
 
-	List<ModuleRequirement> getModuleRequirements(String namespace) {
+	public List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
 			return Collections.unmodifiableList(requirements);
 		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();

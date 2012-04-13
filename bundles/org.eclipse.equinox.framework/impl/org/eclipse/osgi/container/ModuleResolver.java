@@ -44,7 +44,7 @@ public class ModuleResolver {
 				unresolved.add(revision);
 		}
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, wiringCopy, moduleDataBase);
-		Map<Resource, List<Wire>> result = resolver.resolve(resolveProcess);
+		Map<Resource, List<Wire>> result = resolveProcess.resolve();
 		return generateDelta(result, wiringCopy, unresolved);
 	}
 
@@ -80,11 +80,13 @@ public class ModuleResolver {
 			delta.put(revision, createNewWiring(revision, provided, required));
 		}
 		// Also need to create the wiring deltas for already resolved bundles
-		// This should only include updating provided wires
+		// This should only include updating provided wires and
+		// for fragments it may include new hosts
+		// TODO also need to handle new dynamic wires
 		for (ModuleRevision revision : provided.keySet()) {
 			ModuleWiring existingWiring = wiringCopy.get(revision);
 			if (existingWiring != null)
-				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), unresolved));
+				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), required.get(revision), unresolved));
 		}
 		return delta;
 	}
@@ -217,34 +219,42 @@ public class ModuleResolver {
 		}
 	}
 
-	private static void addProvidedWires(Map<ModuleCapability, List<ModuleWire>> toAdd, List<ModuleWire> existing, List<ModuleCapability> orderedCapabilities) {
-		ListIterator<ModuleWire> iProvidedWires = existing.listIterator();
+	private static void addProvidedWires(Map<ModuleCapability, List<ModuleWire>> toAdd, List<ModuleWire> existing, final List<ModuleCapability> orderedCapabilities) {
+		if (toAdd == null)
+			return;
+		int originalSize = existing.size();
 		for (ModuleCapability capability : orderedCapabilities) {
 			List<ModuleWire> newWires = toAdd.get(capability);
 			if (newWires != null) {
-				fastForward(iProvidedWires);
-				while (iProvidedWires.hasPrevious()) {
-					if (iProvidedWires.previous().getCapability().equals(capability)) {
-						iProvidedWires.next();
-						for (ModuleWire newWire : newWires) {
-							iProvidedWires.add(newWire);
-						}
-					}
-				}
+				existing.addAll(newWires);
 			}
+		}
+		if (originalSize != 0) {
+			Collections.sort(existing, new Comparator<ModuleWire>() {
+				@Override
+				public int compare(ModuleWire w1, ModuleWire w2) {
+					int index1 = orderedCapabilities.indexOf(w1.getCapability());
+					int index2 = orderedCapabilities.indexOf(w2.getCapability());
+					return index1 - index2;
+				}
+			});
 		}
 	}
 
-	private static void removeProvidedWires(List<ModuleWire> existing, Collection<ModuleRevision> unresolved) {
-		// remove any revisions that are unresolved, this is to handle refresh
-		for (ModuleRevision revision : unresolved) {
-			ModuleWiring wiring = revision.getWiring();
-			if (wiring == null)
-				continue;
-			List<ModuleWire> required = wiring.getRequiredModuleWires(null);
-			for (ModuleWire wire : required) {
-				existing.remove(wire);
-			}
+	private static void addRequiredWires(List<ModuleWire> toAdd, List<ModuleWire> existing, final List<ModuleRequirement> orderedRequirements) {
+		if (toAdd == null)
+			return;
+		int originalSize = existing.size();
+		existing.addAll(toAdd);
+		if (originalSize != 0) {
+			Collections.sort(existing, new Comparator<ModuleWire>() {
+				@Override
+				public int compare(ModuleWire w1, ModuleWire w2) {
+					int index1 = orderedRequirements.indexOf(w1.getRequirement());
+					int index2 = orderedRequirements.indexOf(w2.getRequirement());
+					return index1 - index2;
+				}
+			});
 		}
 	}
 
@@ -259,12 +269,16 @@ public class ModuleResolver {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, Collection<ModuleRevision> unresolved) {
+	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, List<ModuleWire> requiredWires, Collection<ModuleRevision> unresolved) {
 		// Create a ModuleWiring that only contains the new ordered list of provided wires
-		List<ModuleWire> existing = existingWiring.getProvidedModuleWires(null);
-		removeProvidedWires(existing, unresolved);
-		addProvidedWires(providedWireMap, existing, existingWiring.getModuleCapabilities(null));
-		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existing, Collections.EMPTY_LIST);
+		List<ModuleWire> existingProvided = existingWiring.getProvidedModuleWires(null);
+		addProvidedWires(providedWireMap, existingProvided, existingWiring.getModuleCapabilities(null));
+
+		// Also need to include any new required wires that may have be added for fragment hosts
+		// Also will be needed for dynamic imports
+		List<ModuleWire> existingRequired = existingWiring.getRequiredModuleWires(null);
+		addRequiredWires(requiredWires, existingRequired, existingWiring.getModuleRequirements(null));
+		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existingProvided, existingRequired);
 	}
 
 	static boolean isSingleton(ModuleRevision revision) {

@@ -244,8 +244,9 @@ public class ModuleContainer {
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
 					if (current != null) {
-						// only need to update the provided wires for currently resolved
+						// only need to update the provided and required wires for currently resolved
 						current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
+						current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
 						deltaEntry.setValue(current); // set the real wiring into the delta
 					} else {
 						newlyResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
@@ -267,13 +268,18 @@ public class ModuleContainer {
 
 		Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
 		Collection<Module> refreshTriggers = getRefreshClosure(initial, wiringCopy);
-		Collection<ModuleRevision> toRemove = new ArrayList<ModuleRevision>();
+		Collection<ModuleRevision> toRemoveRevisions = new ArrayList<ModuleRevision>();
+		Collection<List<ModuleWire>> toRemoveWireLists = new ArrayList<List<ModuleWire>>();
 		for (Module module : refreshTriggers) {
 			boolean first = true;
 			for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
-				wiringCopy.remove(revision);
-				if (!first || revision.getRevisions().isUninstalled())
-					toRemove.add(revision);
+				ModuleWiring removedWiring = wiringCopy.remove(revision);
+				if (!first || revision.getRevisions().isUninstalled()) {
+					toRemoveRevisions.add(revision);
+					if (removedWiring != null) {
+						toRemoveWireLists.add(removedWiring.getRequiredModuleWires(null));
+					}
+				}
 				first = false;
 			}
 			// TODO grab module state change locks and stop modules
@@ -282,7 +288,15 @@ public class ModuleContainer {
 
 		int readLocks = monitor.lockWrite();
 		try {
-			for (ModuleRevision removed : toRemove) {
+			for (List<ModuleWire> removedWires : toRemoveWireLists) {
+				for (ModuleWire removedWire : removedWires) {
+					ModuleWiring provider = removedWire.getProviderWiring();
+					List<ModuleWire> providedWires = provider.getProvidedModuleWires(null);
+					providedWires.remove(removedWire);
+					provider.setProvidedWires(providedWires);
+				}
+			}
+			for (ModuleRevision removed : toRemoveRevisions) {
 				removed.getRevisions().removeRevision(removed);
 				moduleDataBase.removeCapabilities(removed);
 			}
