@@ -12,11 +12,13 @@ package org.eclipse.osgi.container;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.osgi.framework.*;
 import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.Resolver;
 
 public class ModuleContainer {
@@ -32,9 +34,9 @@ public class ModuleContainer {
 	private final LockSet<String> nameLocks = new LockSet<String>(false);
 
 	/**
-	 * Monitors read and write access to the revision maps and nextId
+	 * Monitors read and write access to the moduleDataBase
 	 */
-	final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock();
+	private final UpgradeableReadWriteLock monitor = new UpgradeableReadWriteLock();
 
 	private final FrameworkWiring frameworkWiring = new ModuleFrameworkWiring();
 
@@ -54,14 +56,14 @@ public class ModuleContainer {
 	}
 
 	public void setModuleDataBase(ModuleDataBase moduleDataBase) {
-		monitor.writeLock().lock();
+		int readLocks = monitor.lockWrite();
 		try {
 			if (this.moduleDataBase != null)
 				throw new IllegalStateException("Module Database is already set."); //$NON-NLS-1$
 			this.moduleDataBase = moduleDataBase;
 			this.moduleDataBase.setContainer(this);
 		} finally {
-			monitor.writeLock().unlock();
+			monitor.unlockWrite(readLocks);
 		}
 	}
 
@@ -72,7 +74,7 @@ public class ModuleContainer {
 		try {
 			Module existingLocation = null;
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			monitor.readLock().lock();
+			monitor.lockRead(false);
 			try {
 				existingLocation = moduleDataBase.getModule(location);
 				if (existingLocation == null) {
@@ -101,7 +103,7 @@ public class ModuleContainer {
 					}
 				}
 			} finally {
-				monitor.readLock().unlock();
+				monitor.unlockRead(false);
 			}
 			// Check that the existing location is visible from the origin bundle
 			if (existingLocation != null) {
@@ -121,13 +123,20 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
-			monitor.writeLock().lock();
+			int readLocks = monitor.lockWrite();
 			try {
 				moduleDataBase.install(module, location, builder);
-				return module;
+				// downgrade to read lock to fire installed events
+				monitor.lockRead(false);
 			} finally {
-				monitor.writeLock().unlock();
+				monitor.unlockWrite(readLocks);
 			}
+			try {
+				// TODO fire installed event
+			} finally {
+				monitor.unlockRead(false);
+			}
+			return module;
 		} finally {
 			if (locationLocked)
 				locationLocks.unlock(location);
@@ -136,12 +145,12 @@ public class ModuleContainer {
 		}
 	}
 
-	public ModuleRevision update(Module module, ModuleRevisionBuilder builder) throws BundleException {
+	public void update(Module module, ModuleRevisionBuilder builder) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			monitor.readLock().lock();
+			monitor.lockRead(false);
 			try {
 				// Attempt to lock the name
 				try {
@@ -167,7 +176,7 @@ public class ModuleContainer {
 				}
 
 			} finally {
-				monitor.readLock().unlock();
+				monitor.unlockRead(false);
 			}
 
 			// Check that the bundle does not collide with other bundles with the same name and version
@@ -179,12 +188,11 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
-			monitor.writeLock().lock();
+			int readLocks = monitor.lockWrite();
 			try {
-				ModuleRevision result = moduleDataBase.update(module, builder);
-				return result;
+				moduleDataBase.update(module, builder);
 			} finally {
-				monitor.writeLock().unlock();
+				monitor.unlockWrite(readLocks);
 			}
 		} finally {
 			if (nameLocked)
@@ -193,20 +201,23 @@ public class ModuleContainer {
 	}
 
 	public void uninstall(Module module) {
-		monitor.writeLock().lock();
+		int readLocks = monitor.lockWrite();
 		try {
 			moduleDataBase.uninstall(module);
 		} finally {
-			monitor.writeLock().unlock();
+			monitor.unlockWrite(readLocks);
 		}
+		// TODO fire uninstalled event
+		// no need to hold the read lock because the module has been complete removed
+		// from the database at this point. (except for removal pending wirings).
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
-		monitor.readLock().lock();
+		monitor.lockRead(false);
 		try {
 			return moduleDataBase.getWiring(revision);
 		} finally {
-			monitor.readLock().unlock();
+			monitor.unlockRead(true);
 		}
 	}
 
@@ -214,16 +225,157 @@ public class ModuleContainer {
 		return frameworkWiring;
 	}
 
+	public void resolve(Collection<Module> triggers) throws ResolutionException {
+		monitor.lockRead(true);
+		try {
+			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
+			Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
+			for (Module module : triggers) {
+				ModuleRevision current = module.getCurrentRevision();
+				if (current != null)
+					triggerRevisions.add(current);
+			}
+			Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, wiringCopy, moduleDataBase);
+
+			Collection<Module> newlyResolved = new ArrayList<Module>();
+			// now attempt to apply the delta
+			int readLocks = monitor.lockWrite();
+			try {
+				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
+					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
+					if (current != null) {
+						// only need to update the provided wires for currently resolved
+						current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
+						deltaEntry.setValue(current); // set the real wiring into the delta
+					} else {
+						newlyResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
+					}
+				}
+				moduleDataBase.applyWiring(deltaWiring);
+			} finally {
+				monitor.unlockWrite(readLocks);
+			}
+			// TODO send out resolved events
+		} finally {
+			monitor.unlockRead(true);
+		}
+	}
+
+	private Collection<Module> unresolve(Collection<Module> initial) {
+		if (monitor.getReadHoldCount() == 0) // sanity check
+			throw new IllegalStateException("Must hold read lock and upgrade request"); //$NON-NLS-1$
+
+		Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
+		Collection<Module> refreshTriggers = getRefreshClosure(initial, wiringCopy);
+		Collection<ModuleRevision> toRemove = new ArrayList<ModuleRevision>();
+		for (Module module : refreshTriggers) {
+			boolean first = true;
+			for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
+				wiringCopy.remove(revision);
+				if (!first || revision.getRevisions().isUninstalled())
+					toRemove.add(revision);
+				first = false;
+			}
+			// TODO grab module state change locks and stop modules
+			// TODO remove any non-active modules from the refreshTriggers
+		}
+
+		int readLocks = monitor.lockWrite();
+		try {
+			for (ModuleRevision removed : toRemove) {
+				removed.getRevisions().removeRevision(removed);
+				moduleDataBase.removeCapabilities(removed);
+			}
+			moduleDataBase.applyWiring(wiringCopy);
+		} finally {
+			monitor.unlockWrite(readLocks);
+		}
+		// TODO set unresolved status of modules
+		// TODO fire unresolved events
+		return refreshTriggers;
+	}
+
+	public void refresh(Collection<Module> initial) throws ResolutionException {
+		Collection<Module> refreshTriggers;
+		monitor.lockRead(true);
+		try {
+			refreshTriggers = unresolve(initial);
+			resolve(refreshTriggers);
+		} finally {
+			monitor.unlockRead(true);
+		}
+		// TODO start the trigger modules
+
+	}
+
+	static Collection<Module> getRefreshClosure(Collection<Module> initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+		Set<Module> refreshClosure = new HashSet<Module>();
+		for (Module module : initial)
+			addDependents(module, wiringCopy, refreshClosure);
+		return refreshClosure;
+	}
+
+	private static void addDependents(Module module, Map<ModuleRevision, ModuleWiring> wiringCopy, Set<Module> refreshClosure) {
+		if (refreshClosure.contains(module))
+			return;
+		refreshClosure.add(module);
+		List<ModuleRevision> revisions = module.getRevisions().getModuleRevisions();
+		for (ModuleRevision revision : revisions) {
+			ModuleWiring wiring = wiringCopy.get(revision);
+			if (wiring == null)
+				continue;
+			List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
+			// add all requirers of the provided wires
+			for (ModuleWire providedWire : provided) {
+				addDependents(providedWire.getRequirer().getRevisions().getModule(), wiringCopy, refreshClosure);
+			}
+			// add all hosts of a fragment
+			if (revision.getTypes() == BundleRevision.TYPE_FRAGMENT) {
+				List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+				for (ModuleWire hostWire : hosts) {
+					addDependents(hostWire.getProvider().getRevisions().getModule(), wiringCopy, refreshClosure);
+				}
+			}
+		}
+	}
+
+	static Collection<ModuleRevision> getDependencyClosure(ModuleRevision initial, Map<ModuleRevision, ModuleWiring> wiringCopy) {
+		Set<ModuleRevision> dependencyClosure = new HashSet<ModuleRevision>();
+		addDependents(initial, wiringCopy, dependencyClosure);
+		return dependencyClosure;
+	}
+
+	private static void addDependents(ModuleRevision revision, Map<ModuleRevision, ModuleWiring> wiringCopy, Set<ModuleRevision> dependencyClosure) {
+		if (dependencyClosure.contains(revision))
+			return;
+		dependencyClosure.add(revision);
+		ModuleWiring wiring = wiringCopy.get(revision);
+		if (wiring == null)
+			return;
+		List<ModuleWire> provided = wiring.getProvidedModuleWires(null);
+		// add all requirers of the provided wires
+		for (ModuleWire providedWire : provided) {
+			addDependents(providedWire.getRequirer(), wiringCopy, dependencyClosure);
+		}
+		// add all hosts of a fragment
+		if (revision.getTypes() == BundleRevision.TYPE_FRAGMENT) {
+			List<ModuleWire> hosts = wiring.getRequiredModuleWires(HostNamespace.HOST_NAMESPACE);
+			for (ModuleWire hostWire : hosts) {
+				addDependents(hostWire.getProvider(), wiringCopy, dependencyClosure);
+			}
+		}
+	}
+
 	public class ModuleFrameworkWiring implements FrameworkWiring {
 
 		@Override
 		public Bundle getBundle() {
-			monitor.readLock().lock();
+			monitor.lockRead(false);
 			try {
 				Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
 				return systemModule == null ? null : systemModule.getBundle();
 			} finally {
-				monitor.readLock().unlock();
+				monitor.unlockRead(false);
 			}
 		}
 

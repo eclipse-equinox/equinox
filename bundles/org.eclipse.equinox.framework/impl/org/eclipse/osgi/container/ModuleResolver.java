@@ -35,22 +35,20 @@ public class ModuleResolver {
 		this.resolver = resolver;
 	}
 
-	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Collection<ModuleRevisions> refresh, ModuleDataBase moduleDataBase) throws ResolutionException {
-		Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
-		if (refresh != null) {
-			for (ModuleRevisions revisions : refresh) {
-				for (ModuleRevision revision : revisions.getModuleRevisions()) {
-					wiringCopy.remove(revision);
-				}
-			}
+	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
+		Collection<Module> allModules = moduleDataBase.getModules();
+		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
+		for (Module module : allModules) {
+			ModuleRevision revision = module.getCurrentRevision();
+			if (revision != null && !wiringCopy.containsKey(revision))
+				unresolved.add(revision);
 		}
-		Collection<ModuleRevision> unresolved = moduleDataBase.getCurrentUnresolved();
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, wiringCopy, moduleDataBase);
 		Map<Resource, List<Wire>> result = resolver.resolve(resolveProcess);
-		return generateDelta(result, wiringCopy, refresh);
+		return generateDelta(result, wiringCopy, unresolved);
 	}
 
-	private static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy, Collection<ModuleRevisions> refresh) {
+	private static Map<ModuleRevision, ModuleWiring> generateDelta(Map<Resource, List<Wire>> result, Map<ModuleRevision, ModuleWiring> wiringCopy, Collection<ModuleRevision> unresolved) {
 		Map<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>> provided = new HashMap<ModuleRevision, Map<ModuleCapability, List<ModuleWire>>>();
 		Map<ModuleRevision, List<ModuleWire>> required = new HashMap<ModuleRevision, List<ModuleWire>>();
 		// First populate the list of provided and required wires for revision
@@ -86,7 +84,7 @@ public class ModuleResolver {
 		for (ModuleRevision revision : provided.keySet()) {
 			ModuleWiring existingWiring = wiringCopy.get(revision);
 			if (existingWiring != null)
-				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), refresh));
+				delta.put(revision, createWiringDelta(revision, existingWiring, provided.get(revision), unresolved));
 		}
 		return delta;
 	}
@@ -235,20 +233,16 @@ public class ModuleResolver {
 		}
 	}
 
-	private static void removeProvidedWires(List<ModuleWire> existing, Collection<ModuleRevisions> refresh) {
-		// remove any revisions that are being refreshed
-		for (ModuleRevisions revisions : refresh) {
-			List<ModuleRevision> moduleRevisions = revisions.getModuleRevisions();
-			for (ModuleRevision revision : moduleRevisions) {
-				ModuleWiring wiring = revision.getWiring();
-				if (wiring == null)
-					continue;
-				List<ModuleWire> required = wiring.getRequiredModuleWires(null);
-				for (ModuleWire wire : required) {
-					existing.remove(wire);
-				}
+	private static void removeProvidedWires(List<ModuleWire> existing, Collection<ModuleRevision> unresolved) {
+		// remove any revisions that are unresolved, this is to handle refresh
+		for (ModuleRevision revision : unresolved) {
+			ModuleWiring wiring = revision.getWiring();
+			if (wiring == null)
+				continue;
+			List<ModuleWire> required = wiring.getRequiredModuleWires(null);
+			for (ModuleWire wire : required) {
+				existing.remove(wire);
 			}
-
 		}
 	}
 
@@ -263,10 +257,10 @@ public class ModuleResolver {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, Collection<ModuleRevisions> refresh) {
+	private static ModuleWiring createWiringDelta(ModuleRevision revision, ModuleWiring existingWiring, Map<ModuleCapability, List<ModuleWire>> providedWireMap, Collection<ModuleRevision> unresolved) {
 		// Create a ModuleWiring that only contains the new ordered list of provided wires
 		List<ModuleWire> existing = existingWiring.getProvidedModuleWires(null);
-		removeProvidedWires(existing, refresh);
+		removeProvidedWires(existing, unresolved);
 		addProvidedWires(providedWireMap, existing, existingWiring.getModuleCapabilities(null));
 		return new ModuleWiring(revision, Collections.EMPTY_LIST, Collections.EMPTY_LIST, existing, Collections.EMPTY_LIST);
 	}
@@ -316,9 +310,17 @@ public class ModuleResolver {
 		@Override
 		public List<Capability> findProviders(Requirement requirement) {
 			List<ModuleCapability> candidates = moduleDataBase.findCapabilities((ModuleRequirement) requirement);
+			filterDisabled(candidates);
 			hook.filterMatches((BundleRequirement) requirement, Converters.asListBundleCapability(candidates));
 			Collections.sort(candidates, this);
 			return Converters.asListCapability(candidates);
+		}
+
+		private void filterDisabled(List<ModuleCapability> candidates) {
+			for (Iterator<ModuleCapability> iCandidates = candidates.iterator(); iCandidates.hasNext();) {
+				if (disabled.contains(iCandidates.next().getResource()))
+					iCandidates.remove();
+			}
 		}
 
 		@Override

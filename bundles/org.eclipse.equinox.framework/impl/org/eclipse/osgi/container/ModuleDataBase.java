@@ -11,6 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.framework.Version;
 
 /**
@@ -20,13 +21,31 @@ import org.osgi.framework.Version;
 public abstract class ModuleDataBase {
 	protected ModuleContainer container = null;
 
-	private final Map<String, Module> revisionsByLocations = new HashMap<String, Module>();
+	private final Map<String, Module> revisionsByLocations;
 
-	private final Map<String, Collection<ModuleRevision>> revisionByName = new HashMap<String, Collection<ModuleRevision>>();
+	private final Map<String, Collection<ModuleRevision>> revisionByName;
 
-	private final Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
+	private final Map<ModuleRevision, ModuleWiring> wirings;
 
-	void setContainer(ModuleContainer container) {
+	private final AtomicLong nextId;
+
+	private final AtomicLong timeStamp;
+
+	public ModuleDataBase(Map<String, Module> revisionsByLocations, Map<ModuleRevision, ModuleWiring> wirings, long nextBundleId, long timeStamp) {
+		this.revisionsByLocations = new HashMap<String, Module>(revisionsByLocations);
+		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
+		for (Module module : this.revisionsByLocations.values()) {
+			ModuleRevisions revisions = module.getRevisions();
+			for (ModuleRevision revision : revisions.getModuleRevisions()) {
+				addToRevisionByName(revision);
+			}
+		}
+		this.wirings = wirings == null ? new HashMap<ModuleRevision, ModuleWiring>() : new HashMap<ModuleRevision, ModuleWiring>(wirings);
+		this.nextId = new AtomicLong(nextBundleId);
+		this.timeStamp = new AtomicLong(timeStamp);
+	}
+
+	final void setContainer(ModuleContainer container) {
 		if (this.container != null)
 			throw new IllegalStateException("The container is already set."); //$NON-NLS-1$
 		this.container = container;
@@ -56,15 +75,19 @@ public abstract class ModuleDataBase {
 	final void install(Module module, String location, ModuleRevisionBuilder builder) {
 		ModuleRevision newRevision = builder.buildRevision(getNextIdAndIncrement(), location, module, container);
 		revisionsByLocations.put(location, module);
-		String name = newRevision.getSymbolicName();
+		addToRevisionByName(newRevision);
+		addCapabilities(newRevision);
+		incrementTimestamp();
+	}
+
+	private void addToRevisionByName(ModuleRevision revision) {
+		String name = revision.getSymbolicName();
 		Collection<ModuleRevision> sameName = revisionByName.get(name);
 		if (sameName == null) {
 			sameName = new ArrayList<ModuleRevision>(1);
 			revisionByName.put(name, sameName);
 		}
-		sameName.add(newRevision);
-		addCapabilities(newRevision);
-		incrementTimestamp();
+		sameName.add(revision);
 	}
 
 	final void uninstall(Module module) {
@@ -80,12 +103,20 @@ public abstract class ModuleDataBase {
 					sameName.remove(revision);
 				}
 			}
+			ModuleWiring oldWiring = wirings.get(revision);
+			if (oldWiring == null) {
+				module.getRevisions().removeRevision(revision);
+			}
 		}
 		uninstalling.uninstall();
+
+		cleanupRemovalPending();
+
 		incrementTimestamp();
 	}
 
-	final ModuleRevision update(Module module, ModuleRevisionBuilder builder) {
+	final void update(Module module, ModuleRevisionBuilder builder) {
+		ModuleRevision oldRevision = module.getCurrentRevision();
 		ModuleRevision newRevision = builder.addRevision(module.getRevisions());
 		String name = newRevision.getSymbolicName();
 		Collection<ModuleRevision> sameName = revisionByName.get(name);
@@ -95,33 +126,79 @@ public abstract class ModuleDataBase {
 		}
 		sameName.add(newRevision);
 		addCapabilities(newRevision);
+
+		ModuleWiring oldWiring = wirings.get(oldRevision);
+		if (oldWiring == null) {
+			module.getRevisions().removeRevision(oldRevision);
+			removeCapabilities(oldRevision);
+		}
+
+		cleanupRemovalPending();
+
 		incrementTimestamp();
-		return newRevision;
 	}
 
-	ModuleWiring getWiring(ModuleRevision revision) {
+	private void cleanupRemovalPending() {
+		Collection<ModuleRevision> removalPending = getRemovalPending();
+		for (ModuleRevision removed : removalPending) {
+			if (wirings.get(removed) == null)
+				continue;
+			Collection<ModuleRevision> dependencyClosure = ModuleContainer.getDependencyClosure(removed, wirings);
+			boolean allPendingRemoval = true;
+			for (ModuleRevision pendingRemoval : dependencyClosure) {
+				if (pendingRemoval.isCurrent()) {
+					allPendingRemoval = false;
+					break;
+				}
+			}
+			if (allPendingRemoval) {
+				for (ModuleRevision pendingRemoval : dependencyClosure) {
+					pendingRemoval.getRevisions().removeRevision(pendingRemoval);
+					removeCapabilities(pendingRemoval);
+					wirings.remove(pendingRemoval);
+				}
+			}
+		}
+	}
+
+	Collection<ModuleRevision> getRemovalPending() {
+		Collection<ModuleRevision> removalPending = new ArrayList<ModuleRevision>();
+		for (ModuleWiring wiring : wirings.values()) {
+			if (!wiring.isCurrent())
+				removalPending.add(wiring.getRevision());
+		}
+		return removalPending;
+	}
+
+	final ModuleWiring getWiring(ModuleRevision revision) {
 		return wirings.get(revision);
 	}
 
-	Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
+	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
 		return new HashMap<ModuleRevision, ModuleWiring>(wirings);
 	}
 
-	Collection<ModuleRevision> getCurrentUnresolved() {
-		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
-		for (Module module : revisionsByLocations.values()) {
-			List<ModuleRevision> revisions = module.getRevisions().getModuleRevisions();
-			if (!revisions.isEmpty())
-				unresolved.add(revisions.get(0));
-		}
-		return unresolved;
+	final void applyWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
+		wirings.clear();
+		wirings.putAll(newWiring);
+		incrementTimestamp();
 	}
 
-	protected abstract long getNextIdAndIncrement();
+	final Collection<Module> getModules() {
+		return new ArrayList<Module>(revisionsByLocations.values());
+	}
 
-	protected abstract long getTimestamp();
+	private long getNextIdAndIncrement() {
+		return nextId.getAndIncrement();
+	}
 
-	protected abstract long incrementTimestamp();
+	final protected long getTimestamp() {
+		return timeStamp.get();
+	}
+
+	private void incrementTimestamp() {
+		timeStamp.incrementAndGet();
+	}
 
 	protected abstract void addCapabilities(ModuleRevision revision);
 
@@ -134,4 +211,5 @@ public abstract class ModuleDataBase {
 	 * @return the candidates for the requirement
 	 */
 	protected abstract List<ModuleCapability> findCapabilities(ModuleRequirement requirement);
+
 }

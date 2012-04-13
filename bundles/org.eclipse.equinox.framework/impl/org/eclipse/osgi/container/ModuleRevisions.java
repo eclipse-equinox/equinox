@@ -74,6 +74,13 @@ public class ModuleRevisions implements BundleRevisions {
 		return revision;
 	}
 
+	boolean removeRevision(ModuleRevision revision) {
+		synchronized (monitor) {
+			return revisions.remove(revision);
+		}
+		// TODO probably a good place to clean up the resources (jars, class loaders etc.).
+	}
+
 	boolean isUninstalled() {
 		return uninstalled;
 	}

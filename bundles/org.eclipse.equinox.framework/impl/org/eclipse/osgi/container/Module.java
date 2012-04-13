@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.util.List;
 import org.osgi.framework.BundleReference;
 
 public abstract class Module implements BundleReference {
@@ -20,6 +21,14 @@ public abstract class Module implements BundleReference {
 		if (current == null)
 			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
 		return current;
+	}
+
+	protected final ModuleRevision getCurrentRevision() {
+		ModuleRevisions current = revisions;
+		if (current == null)
+			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
+		List<ModuleRevision> revisionList = current.getModuleRevisions();
+		return revisionList.isEmpty() || current.isUninstalled() ? null : revisionList.get(0);
 	}
 
 	final void setRevisions(ModuleRevisions revisions) {
