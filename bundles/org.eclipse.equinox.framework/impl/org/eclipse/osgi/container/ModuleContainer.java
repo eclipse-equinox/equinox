@@ -217,7 +217,7 @@ public class ModuleContainer {
 		try {
 			return moduleDataBase.getWiring(revision);
 		} finally {
-			monitor.unlockRead(true);
+			monitor.unlockRead(false);
 		}
 	}
 
