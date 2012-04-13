@@ -35,10 +35,10 @@ public class UpgradeableReadWriteLock {
 						} catch (InterruptedException e) {
 							Thread.currentThread().interrupt();
 						}
+					// OK we are clear to attempt write lock now;
+					// reservation lock is held to prevent other reservations
+					lock.writeLock().lock();
 				}
-				// OK we are clear to attempt write lock now;
-				// reservation lock is held to prevent other reservations
-				lock.writeLock().lock();
 			}
 			return 0;
 		}

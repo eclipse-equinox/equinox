@@ -68,7 +68,9 @@ public class ModuleRevisionBuilder {
 	}
 
 	ModuleRevision buildRevision(Long id, String location, Module module, ModuleContainer container) {
-		return addRevision(new ModuleRevisions(id, location, module, container));
+		ModuleRevisions revisions = new ModuleRevisions(id, location, module, container);
+		module.setRevisions(revisions);
+		return addRevision(revisions);
 	}
 
 	ModuleRevision addRevision(ModuleRevisions revisions) {

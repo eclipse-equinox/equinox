@@ -32,7 +32,7 @@ public abstract class ModuleDataBase {
 	private final AtomicLong timeStamp;
 
 	public ModuleDataBase(Map<String, Module> revisionsByLocations, Map<ModuleRevision, ModuleWiring> wirings, long nextBundleId, long timeStamp) {
-		this.revisionsByLocations = new HashMap<String, Module>(revisionsByLocations);
+		this.revisionsByLocations = revisionsByLocations == null ? new HashMap<String, Module>() : new HashMap<String, Module>(revisionsByLocations);
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
 		for (Module module : this.revisionsByLocations.values()) {
 			ModuleRevisions revisions = module.getRevisions();
