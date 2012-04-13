@@ -11,9 +11,12 @@
 package org.eclipse.osgi.container;
 
 import java.util.Map;
-import org.osgi.framework.Filter;
+import org.eclipse.osgi.util.ManifestElement;
+import org.osgi.framework.*;
+import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.resource.Namespace;
 
 public class ModuleRequirement implements BundleRequirement {
 	private final String namespace;
@@ -36,8 +39,37 @@ public class ModuleRequirement implements BundleRequirement {
 
 	@Override
 	public boolean matches(BundleCapability capability) {
-		// TODO Auto-generated method stub
-		return false;
+		if (!namespace.equals(capability.getNamespace()))
+			return false;
+		String filterSpec = directives.get(Namespace.REQUIREMENT_FILTER_DIRECTIVE);
+		if (filterSpec != null) {
+			Filter f = getFilter();
+			if (f == null) {
+				try {
+					f = FrameworkUtil.createFilter(filterSpec);
+					setFilter(f);
+				} catch (InvalidSyntaxException e) {
+					return false;
+				}
+			}
+			if (!f.matches(capability.getAttributes()))
+				return false;
+		}
+		if (PackageNamespace.PACKAGE_NAMESPACE.equals(namespace) || BundleNamespace.BUNDLE_NAMESPACE.equals(namespace) || HostNamespace.HOST_NAMESPACE.equals(namespace)) {
+			// check for mandatory directive
+			String mandatory = capability.getDirectives().get(AbstractWiringNamespace.CAPABILITY_MANDATORY_DIRECTIVE);
+			if (mandatory != null) {
+				if (filterSpec == null)
+					return false;
+				String[] mandatoryAttrs = ManifestElement.getArrayFromList(mandatory, ","); //$NON-NLS-1$
+				for (String mandatoryAttr : mandatoryAttrs) {
+					if (filterSpec.indexOf("(" + mandatoryAttr + "=") < 0) //$NON-NLS-1$ //$NON-NLS-2$
+						return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	@Override
