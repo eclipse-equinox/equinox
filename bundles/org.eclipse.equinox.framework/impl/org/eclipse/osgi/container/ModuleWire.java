@@ -55,4 +55,8 @@ public class ModuleWire implements BundleWire {
 	public ModuleRevision getRequirer() {
 		return requirement.getRevision();
 	}
+
+	public String toString() {
+		return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
+	}
 }

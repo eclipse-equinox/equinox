@@ -11,9 +11,11 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
+import java.util.Map.Entry;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
+import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -130,5 +132,47 @@ public class ModuleRevision implements BundleRevision {
 
 	boolean isCurrent() {
 		return !revisions.isUninstalled() && revisions.getRevisions().indexOf(this) == 0;
+	}
+
+	public String toString() {
+		List<ModuleCapability> identities = getModuleCapabilities(IdentityNamespace.IDENTITY_NAMESPACE);
+		if (identities.isEmpty())
+			return super.toString();
+		return identities.get(0).toString();
+	}
+
+	static <V> String toString(Map<String, V> map, boolean directives) {
+		if (map.size() == 0)
+			return ""; //$NON-NLS-1$
+		String assignment = directives ? ":=" : "="; //$NON-NLS-1$ //$NON-NLS-2$
+		Set<Entry<String, V>> set = map.entrySet();
+		StringBuffer sb = new StringBuffer();
+		for (Entry<String, V> entry : set) {
+			sb.append("; "); //$NON-NLS-1$
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			if (value instanceof List) {
+				@SuppressWarnings("unchecked")
+				List<Object> list = (List<Object>) value;
+				if (list.size() == 0)
+					continue;
+				Object component = list.get(0);
+				String className = component.getClass().getName();
+				String type = className.substring(className.lastIndexOf('.') + 1);
+				sb.append(key).append(':').append("List<").append(type).append(">").append(assignment).append('"'); //$NON-NLS-1$ //$NON-NLS-2$
+				for (Object object : list)
+					sb.append(object).append(',');
+				sb.setLength(sb.length() - 1);
+				sb.append('"');
+			} else {
+				String type = ""; //$NON-NLS-1$
+				if (!(value instanceof String)) {
+					String className = value.getClass().getName();
+					type = ":" + className.substring(className.lastIndexOf('.') + 1); //$NON-NLS-1$
+				}
+				sb.append(key).append(type).append(assignment).append('"').append(value).append('"');
+			}
+		}
+		return sb.toString();
 	}
 }

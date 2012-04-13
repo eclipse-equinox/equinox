@@ -99,4 +99,8 @@ public class ModuleRequirement implements BundleRequirement {
 	void setFilter(Filter filter) {
 		this.filter = filter;
 	}
+
+	public String toString() {
+		return namespace + ModuleRevision.toString(attributes, false) + ModuleRevision.toString(directives, true);
+	}
 }

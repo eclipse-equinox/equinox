@@ -88,4 +88,8 @@ public class ModuleRevisions implements BundleRevisions {
 	void uninstall() {
 		uninstalled = true;
 	}
+
+	public String toString() {
+		return "moduleID=" + id; //$NON-NLS-1$
+	}
 }
