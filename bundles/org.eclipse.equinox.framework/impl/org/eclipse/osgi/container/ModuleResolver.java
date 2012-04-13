@@ -174,6 +174,8 @@ public class ModuleResolver {
 	}
 
 	private static void addFragmentContent(List<ModuleWire> hostWires, ListIterator<ModuleCapability> iCapabilities, ListIterator<ModuleRequirement> iRequirements) {
+		if (hostWires == null)
+			return;
 		for (ModuleWire hostWire : hostWires) {
 			// add fragment capabilities
 			String currentNamespace = null;
