@@ -16,7 +16,7 @@ import org.osgi.framework.BundleReference;
 public abstract class Module implements BundleReference {
 	private volatile ModuleRevisions revisions;
 
-	protected final ModuleRevisions getRevisions() {
+	public final ModuleRevisions getRevisions() {
 		ModuleRevisions current = revisions;
 		if (current == null)
 			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
