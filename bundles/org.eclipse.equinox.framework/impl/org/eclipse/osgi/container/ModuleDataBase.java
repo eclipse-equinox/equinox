@@ -57,7 +57,7 @@ public abstract class ModuleDataBase {
 
 	final Collection<ModuleRevision> getRevisions(String name, Version version) {
 		if (version == null)
-			return revisionByName.get(name);
+			return new ArrayList<ModuleRevision>(revisionByName.get(name));
 
 		Collection<ModuleRevision> existingRevisions = revisionByName.get(name);
 		if (existingRevisions == null) {
