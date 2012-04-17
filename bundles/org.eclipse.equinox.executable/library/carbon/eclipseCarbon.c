@@ -45,7 +45,8 @@ char *findCommand(char *command);
 /* Global Variables */
 char*  defaultVM     = "java";
 char*  vmLibrary	 = "JavaVM";
-char*  shippedVMDir  = "jre/bin/";
+char*  shippedVMDir  = "../../../jre/Contents/Home/jre/bin/";
+int isSUN = 0;
 
 static void adjustLibraryPath(char * vmLibrary);
 static char * findLib(char * command);
@@ -469,10 +470,66 @@ char** getArgVM( char* vm )
 	return result;
 }
 
+char * getJavaVersion(char* command) {
+	FILE *fp;
+	char buffer[4096];
+	char *version = NULL, *firstChar;
+    int numChars = 0;
+	sprintf(buffer,"%s -version 2>&1", command);
+	fp = popen(buffer, "r");
+	if (fp == NULL) {
+		return NULL;
+	}
+	while (fgets(buffer, sizeof(buffer)-1, fp) != NULL) {
+		if (!version) {
+			firstChar = (char *) (strchr(buffer, '"') + 1);
+			if (firstChar != NULL)
+				numChars = (int)  (strrchr(buffer, '"') - firstChar);
+
+			/* Allocate a buffer and copy the version string into it. */
+			if (numChars > 0)
+			{
+				version = malloc( numChars + 1 );
+				strncpy(version, firstChar, numChars);
+				version[numChars] = '\0';
+			}
+		}
+		if (strstr(buffer, "Java HotSpot(TM)") || strstr(buffer, "OpenJDK")) {
+			isSUN = 1;
+			break;
+		}
+		if (strstr(buffer, "IBM") != NULL) {
+			isSUN = 0;
+			break;
+		}
+	}
+	pclose(fp);
+	return version;
+}
+
+char * getJavaHome() {
+	FILE *fp;
+	char path[4096];
+	char *result, *start;
+	fp = popen("/usr/libexec/java_home", "r");
+	if (fp == NULL) {
+		return NULL;
+	}
+	while (fgets(path, sizeof(path)-1, fp) != NULL) {
+	}
+	result = strdup(path);
+	start = strchr(result, '\n');
+	if (start) {
+		start[0] = 0;
+	}
+	pclose(fp);
+	return result;
+}
+
 char * findVMLibrary( char* command ) {
 	char *start, *end;
 	char *version;
-	int length;
+	int length, isJDK7;
 	
 	/*check first to see if command already points to the library */
 	if (strcmp(command, JAVA_FRAMEWORK) == 0) {
@@ -497,7 +554,23 @@ char * findVMLibrary( char* command ) {
 			
 			free(version);
 		} 
-	} else if (strstr(command, "/JavaVM.framework/") == NULL) {
+	}
+	version = getJavaVersion(command);
+	isJDK7 = version && versionCmp(version, "1.7.0") >= 0;
+	if (version) free(version);
+	if (isJDK7) {
+		char *java_home = NULL, *cmd = command;
+		if (strstr(cmd, "/JavaVM.framework/") != NULL && (strstr(cmd, "/Current/") != NULL || strstr(cmd, "/A/") != NULL)) {
+			java_home = cmd = getJavaHome();
+		}
+		start = strstr(cmd, "/Contents/");
+		if (start != NULL){
+			start[0] = 0;
+			return cmd;
+		}
+		if (java_home) free(java_home);
+	}
+	if (strstr(command, "/JavaVM.framework/") == NULL) {
 		char * lib = findLib(command);
 		if (lib != NULL) {
 			adjustLibraryPath(lib);
@@ -815,6 +888,5 @@ void processVMArgs(char **vmargs[] )
 }
 
 int isSunVM( _TCHAR * javaVM, _TCHAR * jniLib ) {
-	_TCHAR *vm = (jniLib != NULL) ? jniLib : javaVM;
-	return (strncmp(vm, JAVA_FRAMEWORK, strlen(JAVA_FRAMEWORK)) == 0);
+	return isSUN;
 }

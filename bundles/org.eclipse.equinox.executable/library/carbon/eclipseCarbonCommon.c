@@ -111,11 +111,20 @@ void displayMessage(char *title, char *message)
 		CFRelease(inDescription);
 }
 
+static int isLibrary( _TCHAR* vm ){
+	_TCHAR *ch = NULL;
+	if (vm == NULL) return 0;
+	ch = _tcsrchr( vm, '.' );
+	if(ch == NULL)
+		return 0;
+	return (_tcsicmp(ch, _T_ECLIPSE(".so")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".jnilib")) == 0) || (_tcsicmp(ch, _T_ECLIPSE(".dylib")) == 0);
+}
+
 /* Load the specified shared library
  */
 void * loadLibrary( char * library ){
-	if (strcmp(library, JAVA_FRAMEWORK) == 0) {
-		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)JAVA_FRAMEWORK, strlen(JAVA_FRAMEWORK), true);
+	if (!isLibrary(library)) {
+		CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)library, strlen(library), true);
 		javaVMBundle = CFBundleCreate(kCFAllocatorDefault, url);
 		CFRelease(url);
 		return (void*) &javaVMBundle;
