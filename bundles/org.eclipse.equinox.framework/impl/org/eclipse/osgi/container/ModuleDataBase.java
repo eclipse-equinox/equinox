@@ -330,6 +330,14 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
+	 * Returns the next module ID
+	 * @return the next module ID
+	 */
+	protected long getNextId() {
+		return nextId.get();
+	}
+
+	/**
 	 * Returns the current timestamp of this database.
 	 * The timestamp is incremented any time a modification
 	 * is made to this database.  For example:
