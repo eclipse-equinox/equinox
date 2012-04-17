@@ -35,15 +35,15 @@
 
 IF x.%1==x.x86 shift
 
-IF NOT "%JAVA_HOME%"=="" GOTO MSVC
 rem *****
 rem Javah
 rem *****
-set JAVA_HOME="C:\Program Files\IBM\Java50"
+IF x."%JAVA_HOME%"==x. set JAVA_HOME="S:\swt-builddir\ibm-java2-sdk-50-win-i386"
+set javaHome=%JAVA_HOME%
 
 :MSVC
 
-call "C:\Program Files\MS_PLAT_SDK\March2007VistaRTM\Bin\setenv.cmd" /vista
+call "S:\swt-builddir\MSSDKs\Microsoft SDK 6.0 Vista\Bin\setenv.cmd" /x86 /vista
 :MAKE
 
 rem --------------------------

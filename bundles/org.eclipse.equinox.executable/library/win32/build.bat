@@ -33,18 +33,23 @@
 @rem ******
 @echo off
 
+IF EXIST C:\BUILD\swt-builddir set LAUNCHER_BUILDDIR=C:\BUILD\swt-builddir
+IF x.%LAUNCHER_BUILDDIR%==x. set LAUNCHER_BUILDDIR=S:\swt-builddir
+echo LAUNCHER build dir: %LAUNCHER_BUILDDIR%
+
 IF x.%1==x.x86_64 GOTO X86_64
 IF x.%1==x.ia64 GOTO IA64
 
 :X86
-IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\IBM-1.5.0-20090707-SR10
+IF x.%DEV_TOOLS%==x. set DEV_TOOLS=%LAUNCHER_BUILDDIR%
+IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-java2-sdk-50-win-i386
 set javaHome=%JAVA_HOME%
 if not x.%MSVC_HOME% == x. goto MAKE
-set MSVC_HOME="C:\Program Files\MS_PLAT_SDK\msvc60\VC98"
+set MSVC_HOME="%LAUNCHER_BUILDDIR%\MSVCs\msvc60\VC98"
 call %MSVC_HOME%\bin\vcvars32.bat
-if not "%mssdk%" == "" goto MAKE
-set mssdk="C:\Program Files\MS_PLAT_SDK\feb2003"
-call %mssdk%\setenv.bat
+if not "%MSSDK%" == "" goto MAKE
+set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\feb2003"
+call %MSSDK%\setenv.bat
 IF x.%1==x.x86 shift
 set defaultOSArch=x86
 set makefile=make_win32.mak
@@ -53,21 +58,21 @@ GOTO MAKE
 :X86_64
 shift
 set defaultOSArch=x86_64
-IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\ibm-sdk-n142p-win64-x86
-IF "x.%mssdk%" == "x."   set mssdk="C:\Program Files\MS_SDK_2003_R2"
+IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-sdk50-x86_64
+IF "x.%MSSDK%" == "x."   set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\Windows Server 2003 SP1 SDK"
 set javaHome=%JAVA_HOME%
 set makefile=make_win64.mak
-call %mssdk%\setenv /X64 /RETAIL
+call %MSSDK%\setenv /X64 /RETAIL
 GOTO MAKE
 
 :IA64
 shift
 set defaultOSArch=ia64
-IF x.%JAVA_HOME%==x. set JAVA_HOME=C:\Dev\Java\jdk-1_5_0_04-fcs-bin-b05-windows-ia64
-IF "x.%mssdk%" == "x."   set mssdk="C:\Program Files\MS_SDK_2003_R2"
+IF x.%JAVA_HOME%==x. set JAVA_HOME=%LAUNCHER_BUILDDIR%\ibm-sdk142-ia64
+IF "x.%MSSDK%" == "x."   set MSSDK="%LAUNCHER_BUILDDIR%\MSSDKs\Windows Server 2003 SP1 SDK"
 set javaHome=%JAVA_HOME%
 set makefile=make_win64_ia64.mak
-call %mssdk%\setenv /SRV64 /RETAIL
+call %MSSDK%\setenv /SRV64 /RETAIL
 GOTO MAKE
 
 :MAKE 
