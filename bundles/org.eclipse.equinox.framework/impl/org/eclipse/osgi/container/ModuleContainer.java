@@ -253,7 +253,8 @@ public class ModuleContainer {
 					triggerRevisions.add(current);
 			}
 			Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, wiringCopy, moduleDataBase);
-
+			if (deltaWiring.isEmpty())
+				return; // nothing to do
 			Collection<Module> newlyResolved = new ArrayList<Module>();
 			// now attempt to apply the delta
 			monitor.lockWrite();
