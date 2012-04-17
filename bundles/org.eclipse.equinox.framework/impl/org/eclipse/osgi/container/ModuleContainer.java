@@ -23,6 +23,10 @@ import org.osgi.framework.wiring.FrameworkWiring;
 import org.osgi.service.resolver.ResolutionException;
 import org.osgi.service.resolver.Resolver;
 
+/**
+ * A container for installing, updating, uninstalling and resolve modules.
+ *
+ */
 public class ModuleContainer {
 
 	/**
@@ -40,8 +44,15 @@ public class ModuleContainer {
 	 */
 	private final UpgradeableReadWriteLock monitor = new UpgradeableReadWriteLock();
 
+	/**
+	 * An implementation of FrameworkWiring for this container
+	 */
 	private final FrameworkWiring frameworkWiring = new ModuleFrameworkWiring();
 
+	/**
+	 * The module database for this container.  All access to this database MUST
+	 * be guarded by the monitor lock
+	 */
 	/* @GuardedBy("monitor") */
 	ModuleDataBase moduleDataBase;
 
@@ -50,6 +61,10 @@ public class ModuleContainer {
 	 */
 	private final CollisionHook bundleCollisionHook;
 
+	/**
+	 * The module resolver which implements the ResolverContext and handles calling the 
+	 * resolver service.
+	 */
 	private final ModuleResolver moduleResolver;
 
 	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver) {
@@ -58,14 +73,14 @@ public class ModuleContainer {
 	}
 
 	public void setModuleDataBase(ModuleDataBase moduleDataBase) {
-		int readLocks = monitor.lockWrite();
+		monitor.lockWrite();
 		try {
 			if (this.moduleDataBase != null)
 				throw new IllegalStateException("Module Database is already set."); //$NON-NLS-1$
 			this.moduleDataBase = moduleDataBase;
 			this.moduleDataBase.setContainer(this);
 		} finally {
-			monitor.unlockWrite(readLocks);
+			monitor.unlockWrite();
 		}
 	}
 
@@ -125,13 +140,13 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
-			int readLocks = monitor.lockWrite();
+			monitor.lockWrite();
 			try {
 				moduleDataBase.install(module, location, builder);
 				// downgrade to read lock to fire installed events
 				monitor.lockRead(false);
 			} finally {
-				monitor.unlockWrite(readLocks);
+				monitor.unlockWrite();
 			}
 			try {
 				// TODO fire installed event
@@ -190,11 +205,11 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
-			int readLocks = monitor.lockWrite();
+			monitor.lockWrite();
 			try {
 				moduleDataBase.update(module, builder);
 			} finally {
-				monitor.unlockWrite(readLocks);
+				monitor.unlockWrite();
 			}
 		} finally {
 			if (nameLocked)
@@ -203,11 +218,11 @@ public class ModuleContainer {
 	}
 
 	public void uninstall(Module module) {
-		int readLocks = monitor.lockWrite();
+		monitor.lockWrite();
 		try {
 			moduleDataBase.uninstall(module);
 		} finally {
-			monitor.unlockWrite(readLocks);
+			monitor.unlockWrite();
 		}
 		// TODO fire uninstalled event
 		// no need to hold the read lock because the module has been complete removed
@@ -241,7 +256,7 @@ public class ModuleContainer {
 
 			Collection<Module> newlyResolved = new ArrayList<Module>();
 			// now attempt to apply the delta
-			int readLocks = monitor.lockWrite();
+			monitor.lockWrite();
 			try {
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
@@ -256,7 +271,7 @@ public class ModuleContainer {
 				}
 				moduleDataBase.mergeWiring(deltaWiring);
 			} finally {
-				monitor.unlockWrite(readLocks);
+				monitor.unlockWrite();
 			}
 			// TODO send out resolved events
 		} finally {
@@ -288,7 +303,7 @@ public class ModuleContainer {
 			// TODO remove any non-active modules from the refreshTriggers
 		}
 
-		int readLocks = monitor.lockWrite();
+		monitor.lockWrite();
 		try {
 			for (List<ModuleWire> removedWires : toRemoveWireLists) {
 				for (ModuleWire removedWire : removedWires) {
@@ -304,7 +319,7 @@ public class ModuleContainer {
 			}
 			moduleDataBase.setWiring(wiringCopy);
 		} finally {
-			monitor.unlockWrite(readLocks);
+			monitor.unlockWrite();
 		}
 		// TODO set unresolved status of modules
 		// TODO fire unresolved events

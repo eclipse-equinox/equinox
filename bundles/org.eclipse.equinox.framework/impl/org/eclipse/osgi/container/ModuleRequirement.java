@@ -18,6 +18,11 @@ import org.osgi.framework.wiring.BundleCapability;
 import org.osgi.framework.wiring.BundleRequirement;
 import org.osgi.resource.Namespace;
 
+/**
+ * An implementation of {@link BundleRequirement}.  This requirement implements 
+ * the matches method according to the OSGi specification which includes
+ * implementing the mandatory directive for the osgi.wiring.* namespaces.
+ */
 public class ModuleRequirement implements BundleRequirement {
 	private final String namespace;
 	private final Map<String, String> directives;
@@ -63,6 +68,7 @@ public class ModuleRequirement implements BundleRequirement {
 					return false;
 				String[] mandatoryAttrs = ManifestElement.getArrayFromList(mandatory, ","); //$NON-NLS-1$
 				for (String mandatoryAttr : mandatoryAttrs) {
+					// TODO doing the simple thing here.  there are likely corner cases this does not satisfy
 					if (filterSpec.indexOf("(" + mandatoryAttr + "=") < 0) //$NON-NLS-1$ //$NON-NLS-2$
 						return false;
 				}
@@ -92,10 +98,18 @@ public class ModuleRequirement implements BundleRequirement {
 		return revision;
 	}
 
+	/**
+	 * The cached instance of the filter used for matching this requirement
+	 * @return the cached instance of the filter.
+	 */
 	public Filter getFilter() {
 		return filter;
 	}
 
+	/**
+	 * Used to cache an instance of a filter used for matching this requirement
+	 * @param filter
+	 */
 	void setFilter(Filter filter) {
 		this.filter = filter;
 	}

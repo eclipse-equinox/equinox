@@ -20,6 +20,9 @@ import org.osgi.framework.wiring.*;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
+/**
+ * An implementation of {@link BundleRevision}.
+ */
 public class ModuleRevision implements BundleRevision {
 	private final String symbolicName;
 	private final Version version;

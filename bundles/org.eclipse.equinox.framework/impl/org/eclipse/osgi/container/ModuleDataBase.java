@@ -15,33 +15,66 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.framework.Version;
 
 /**
- * 
- *
+ * A database for storing modules, their revisions and wiring states.  The
+ * database is responsible for assigning ids and providing access to the
+ * capabilities provided by the revisions currently installed.
+ * <p>
+ * This database is not thread safe all read and write access to this 
+ * database must be protected by external means.  The 
+ * {@link ModuleContainer container} this database is associated with
+ * is responsible for accessing the database in a thread safe way.
  */
 public abstract class ModuleDataBase {
+	/**
+	 * The container this database is associated with
+	 */
 	protected ModuleContainer container = null;
 
-	private final Map<String, Module> revisionsByLocations;
+	/**
+	 * A map of modules by location.
+	 */
+	private final Map<String, Module> modulesByLocations;
 
+	/**
+	 * A map of revision collections by symbolic name
+	 */
 	private final Map<String, Collection<ModuleRevision>> revisionByName;
 
+	/**
+	 * A map of revision wiring objects.
+	 */
 	private final Map<ModuleRevision, ModuleWiring> wirings;
 
+	/**
+	 * Holds the next id to be assigned to a module when it is installed
+	 */
 	private final AtomicLong nextId;
 
+	/**
+	 * Holds the current timestamp of this database.
+	 */
 	private final AtomicLong timeStamp;
 
-	public ModuleDataBase(Map<String, Module> revisionsByLocations, Map<ModuleRevision, ModuleWiring> wirings, long nextBundleId, long timeStamp) {
-		this.revisionsByLocations = revisionsByLocations == null ? new HashMap<String, Module>() : new HashMap<String, Module>(revisionsByLocations);
+	/**
+	 * Constructs a new database with the the specified modules by location,
+	 * wirings, nextId and timeStamp. 
+	 * @param modulesByLocations the modules by location, may be null if there are no revisions
+	 * @param wirings the current wirings for the revisions, may be null if there are no wirings
+	 * @param nextId the next module id for installation.  This must be higher than any currently
+	 * installed module
+	 * @param timeStamp the current timestamp of the database
+	 */
+	public ModuleDataBase(Map<String, Module> modulesByLocations, Map<ModuleRevision, ModuleWiring> wirings, long nextId, long timeStamp) {
+		this.modulesByLocations = modulesByLocations == null ? new HashMap<String, Module>() : new HashMap<String, Module>(modulesByLocations);
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
-		for (Module module : this.revisionsByLocations.values()) {
+		for (Module module : this.modulesByLocations.values()) {
 			ModuleRevisions revisions = module.getRevisions();
 			for (ModuleRevision revision : revisions.getModuleRevisions()) {
 				addToRevisionByName(revision);
 			}
 		}
 		this.wirings = wirings == null ? new HashMap<ModuleRevision, ModuleWiring>() : new HashMap<ModuleRevision, ModuleWiring>(wirings);
-		this.nextId = new AtomicLong(nextBundleId);
+		this.nextId = new AtomicLong(nextId);
 		this.timeStamp = new AtomicLong(timeStamp);
 	}
 
@@ -65,7 +98,7 @@ public abstract class ModuleDataBase {
 	 * @return the module at the given location or null.
 	 */
 	final Module getModule(String location) {
-		return revisionsByLocations.get(location);
+		return modulesByLocations.get(location);
 	}
 
 	/**
@@ -102,7 +135,7 @@ public abstract class ModuleDataBase {
 	 */
 	final void install(Module module, String location, ModuleRevisionBuilder builder) {
 		ModuleRevision newRevision = builder.buildRevision(getNextIdAndIncrement(), location, module, container);
-		revisionsByLocations.put(location, module);
+		modulesByLocations.put(location, module);
 		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
 		incrementTimestamp();
@@ -127,7 +160,7 @@ public abstract class ModuleDataBase {
 	final void uninstall(Module module) {
 		ModuleRevisions uninstalling = module.getRevisions();
 		// remove the location
-		revisionsByLocations.remove(uninstalling.getLocation());
+		modulesByLocations.remove(uninstalling.getLocation());
 		// remove the revisions by name
 		List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 		for (ModuleRevision revision : revisions) {
@@ -285,7 +318,7 @@ public abstract class ModuleDataBase {
 	 * @return a snapshot of all modules.
 	 */
 	final Collection<Module> getModules() {
-		return new ArrayList<Module>(revisionsByLocations.values());
+		return new ArrayList<Module>(modulesByLocations.values());
 	}
 
 	/**
@@ -324,7 +357,7 @@ public abstract class ModuleDataBase {
 	 * @return a snapshot map of all modules by location.
 	 */
 	final protected Map<String, Module> getModuleLocations() {
-		return new HashMap<String, Module>(revisionsByLocations);
+		return new HashMap<String, Module>(modulesByLocations);
 	}
 
 	/**

@@ -16,6 +16,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.framework.wiring.BundleRevisions;
 
+/**
+ * An implementation of {@link BundleRevisions} which represent a 
+ * {@link Module} installed in a {@link ModuleContainer container}.
+ * The ModuleRevisions provides a bridge between the revisions, the 
+ * module and the container they are associated with.  The 
+ * ModuleRevisions holds the information about the installation of
+ * a module in a container such as the module id and location.
+ */
 public class ModuleRevisions implements BundleRevisions {
 	private final Object monitor = new Object();
 	private final Long id;

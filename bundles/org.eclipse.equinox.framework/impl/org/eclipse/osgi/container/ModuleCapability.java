@@ -13,6 +13,9 @@ package org.eclipse.osgi.container;
 import java.util.Map;
 import org.osgi.framework.wiring.BundleCapability;
 
+/**
+ * An implementation of {@link BundleCapability}.
+ */
 public class ModuleCapability implements BundleCapability {
 	private final String namespace;
 	private final Map<String, String> directives;

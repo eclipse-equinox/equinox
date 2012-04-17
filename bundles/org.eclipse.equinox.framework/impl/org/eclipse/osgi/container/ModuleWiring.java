@@ -17,6 +17,9 @@ import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
 
+/**
+ * An implementation of {@link BundleWiring}.
+ */
 public class ModuleWiring implements BundleWiring {
 	private final ModuleRevision revision;
 	private final List<ModuleCapability> capabilities;
@@ -65,7 +68,7 @@ public class ModuleWiring implements BundleWiring {
 		return result;
 	}
 
-	public List<ModuleRequirement> getModuleRequirements(String namespace) {
+	List<ModuleRequirement> getModuleRequirements(String namespace) {
 		if (namespace == null)
 			return new ArrayList<ModuleRequirement>(requirements);
 		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();

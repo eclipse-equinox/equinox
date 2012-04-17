@@ -19,7 +19,11 @@ import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
 import org.osgi.service.resolver.*;
 
-public class ModuleResolver {
+/**
+ * The module resolver handles calls to the {@link Resolver} service for resolving modules
+ * in a module {@link ModuleContainer container}.
+ */
+class ModuleResolver {
 	/**
 	 * Hook used to control the resolution process
 	 */
@@ -30,11 +34,32 @@ public class ModuleResolver {
 	 */
 	final Resolver resolver;
 
-	public ModuleResolver(ResolverHookFactory resolverHookFactory, Resolver resolver) {
+	/**
+	 * Constructs the module resolver with the specified resolver hook factory
+	 * and resolver.
+	 * @param resolverHookFactory the resolver hook factory
+	 * @param resolver the resolver
+	 */
+	ModuleResolver(ResolverHookFactory resolverHookFactory, Resolver resolver) {
 		this.resolverHookFactory = resolverHookFactory;
 		this.resolver = resolver;
 	}
 
+	/**
+	 * Attempts to resolve all unresolved modules installed in the specified module database.
+	 * returns a delta containing the new wirings or modified wirings that should be 
+	 * merged into the specified moduleDatabase.
+	 * <p>
+	 * This method only does read operations on the database no wirings are modified
+	 * directly by this method.  The returned wirings need to be merged into 
+	 * the database.
+	 * @param triggers the triggers that caused the resolver operation to occur
+	 * @param wiringCopy the wiringCopy of the currently resolved revisions
+	 * @param moduleDataBase the module database.
+	 * @return a delta container the new wirings or modified wirings that should be
+	 * merged into the moduleDatabase
+	 * @throws ResolutionException
+	 */
 	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
 		Collection<Module> allModules = moduleDataBase.getModules();
 		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();

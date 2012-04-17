@@ -12,12 +12,29 @@ package org.eclipse.osgi.container;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * A read/write lock that may be upgraded from a read lock to a write lock without 
+ * the risk of allowing another thread to obtain the write lock.
+ * <p>
+ * A read lock may only be upgraded to a write lock if the read lock requested 
+ * an upgrade reservation.  When a read lock requests a upgrade reservation then
+ * it is indicating its intentions to upgrade to a write lock.  Once the upgrade
+ * reservation is held no other thread is allowed to obtain the write lock until
+ * the upgrade reservation is revoked.
+ */
 public class UpgradeableReadWriteLock {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private final Object reservationMonitor = new Object();
 	private Thread reserveUpgradeThread = null;
+	int readLocksHeldByUpgrade = 0;
 
-	public int lockWrite() {
+	/**
+	 * Obtains the write lock.  If the current thread already holds the write lock
+	 * then an {@link IllegalStateException} is thrown, write locks are not reentrant.
+	 * if the upgrade reservation is held by the current thread then all of the 
+	 * currently held read locks are released before obtaining the write lock
+	 */
+	public void lockWrite() {
 		boolean success = lock.writeLock().tryLock();
 		if (success) {
 			if (lock.writeLock().getHoldCount() > 1) {
@@ -40,7 +57,7 @@ public class UpgradeableReadWriteLock {
 					lock.writeLock().lock();
 				}
 			}
-			return 0;
+			return;
 		}
 
 		int readCount = lock.getReadHoldCount();
@@ -67,14 +84,19 @@ public class UpgradeableReadWriteLock {
 			// OK we are clear to attempt write lock now;
 			// reservation lock is held to prevent other reservations
 			lock.writeLock().lock();
+			readLocksHeldByUpgrade = readCount;
 		}
-		return readCount;
 	}
 
-	public void unlockWrite(int readLocks) {
-		// re-obtain the read locks that got released
-		for (int i = 0; i < readLocks; i++)
-			lockRead(false);
+	public void unlockWrite() {
+		synchronized (reservationMonitor) {
+			if (reserveUpgradeThread == Thread.currentThread()) {
+				// re-obtain the read locks that got released during the write upgrade
+				for (int i = 0; i < readLocksHeldByUpgrade; i++)
+					lockRead(false);
+				readLocksHeldByUpgrade = 0;
+			}
+		}
 		// now unlock the write lock
 		lock.writeLock().unlock();
 	}

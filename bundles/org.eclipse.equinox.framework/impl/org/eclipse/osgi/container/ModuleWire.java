@@ -12,6 +12,9 @@ package org.eclipse.osgi.container;
 
 import org.osgi.framework.wiring.BundleWire;
 
+/**
+ * An implementation of {@link BundleWire}.
+ */
 public class ModuleWire implements BundleWire {
 	private final ModuleCapability capability;
 	private final ModuleRevision hostingProvider;
