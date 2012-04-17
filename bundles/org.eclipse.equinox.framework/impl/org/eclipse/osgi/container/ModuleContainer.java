@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.*;
@@ -395,27 +397,77 @@ public class ModuleContainer {
 
 		@Override
 		public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
-			// TODO Auto-generated method stub
-
+			Collection<Module> modules = getModules(bundles);
+			// TODO must happen in background
+			try {
+				refresh(modules);
+			} catch (ResolutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// TODO Must fire refresh event to listeners
 		}
 
 		@Override
 		public boolean resolveBundles(Collection<Bundle> bundles) {
-			// TODO Auto-generated method stub
-			return false;
+			Collection<Module> modules = getModules(bundles);
+			try {
+				resolve(modules);
+			} catch (ResolutionException e) {
+				return false;
+			}
+			for (Module module : modules) {
+				if (getWiring(module.getCurrentRevision()) == null)
+					return false;
+			}
+			return true;
 		}
 
 		@Override
 		public Collection<Bundle> getRemovalPendingBundles() {
-			// TODO Auto-generated method stub
-			return null;
+			monitor.lockRead(false);
+			try {
+				Collection<Bundle> removalPendingBundles = new HashSet<Bundle>();
+				Collection<ModuleRevision> removalPending = moduleDataBase.getRemovalPending();
+				for (ModuleRevision moduleRevision : removalPending) {
+					removalPendingBundles.add(moduleRevision.getBundle());
+				}
+				return removalPendingBundles;
+			} finally {
+				monitor.unlockRead(false);
+			}
 		}
 
 		@Override
 		public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
-			// TODO Auto-generated method stub
-			return null;
+			Collection<Module> modules = getModules(bundles);
+			monitor.lockRead(false);
+			try {
+				Collection<Module> closure = ModuleContainer.getRefreshClosure(modules, moduleDataBase.getWiringsCopy());
+				Collection<Bundle> result = new ArrayList<Bundle>(closure.size());
+				for (Module module : closure) {
+					result.add(module.getBundle());
+				}
+				return result;
+			} finally {
+				monitor.unlockRead(false);
+			}
 		}
 
+		private Collection<Module> getModules(final Collection<Bundle> bundles) {
+			return AccessController.doPrivileged(new PrivilegedAction<Collection<Module>>() {
+				@Override
+				public Collection<Module> run() {
+					Collection<Module> result = new ArrayList<Module>(bundles.size());
+					for (Bundle bundle : bundles) {
+						Module module = bundle.adapt(Module.class);
+						if (module == null)
+							throw new IllegalStateException("Could not adapt a bundle to a module."); //$NON-NLS-1$
+						result.add(module);
+					}
+					return result;
+				}
+			});
+		}
 	}
 }
