@@ -26,6 +26,19 @@
 		</sequential>
 	</macrodef>
 	
+	<!-- macro for invoking git -->
+	<macrodef name="git">
+		<attribute name="dir" />
+		<attribute name="command" />
+		<attribute name="arguments" default="" />
+		<sequential>
+			<exec dir="@{dir}" executable="git" >
+				<arg value="@{command}"/>
+				<arg line="@{arguments}"/>
+			</exec>
+		</sequential>
+	</macrodef>
+	
 	<target name="init_exeFolder" >
 		<!-- set to "bin" or "contributed" according to which folder under org.eclipse.equinox.executable to store the built eclipse -->
 		<condition property="exeFolder" value="contributed" else="bin">
@@ -179,5 +192,19 @@
 			trust="true"
 	 		command="rm -rf ${remotetmpdir}; rm ${remotebuilddir}/${zip_file}"/>
 		<delete file="${basedir}/${zip_file}"/>
+	</target>
+	
+	<target name="commitBinaries" depends="initProperties">
+		<tstamp/>
+		<property name="tag" value="v${DSTAMP}-${TSTAMP}"/>
+		<property name="commitMsg" value="" />
+		
+		<git dir="${localGit}/rt.equinox.binaries" command="commit" arguments="-a -m &quot;Recompiled binaries ${commitMsg}&quot;" />
+		<git dir="${localGit}/rt.equinox.binaries" command="tag" arguments="${tag}" />
+
+		<replaceregexp match="binaryTag=(.*)" replace="binaryTag=${tag}" >
+			<fileset dir="${localGit}/rt.equinox.framework" includes="**/build.properties" />
+		</replaceregexp>
+		<git dir="${localGit}/rt.equinox.framework" command="commit" arguments="-a -m &quot;Binaries ${tag} ${commitMsg}&quot;" />
 	</target>
 </project>
