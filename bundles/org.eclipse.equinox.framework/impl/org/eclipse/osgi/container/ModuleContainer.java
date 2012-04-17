@@ -252,7 +252,7 @@ public class ModuleContainer {
 						newlyResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
 					}
 				}
-				moduleDataBase.applyWiring(deltaWiring);
+				moduleDataBase.mergeWiring(deltaWiring);
 			} finally {
 				monitor.unlockWrite(readLocks);
 			}
@@ -300,7 +300,7 @@ public class ModuleContainer {
 				removed.getRevisions().removeRevision(removed);
 				moduleDataBase.removeCapabilities(removed);
 			}
-			moduleDataBase.applyWiring(wiringCopy);
+			moduleDataBase.setWiring(wiringCopy);
 		} finally {
 			monitor.unlockWrite(readLocks);
 		}
