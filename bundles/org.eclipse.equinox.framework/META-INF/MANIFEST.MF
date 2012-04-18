@@ -12,3 +12,5 @@ Import-Package: org.eclipse.osgi.framework.internal.core,
  org.osgi.framework.namespace;version="[1.0.0,2.0.0)",
  org.osgi.framework.wiring;version="[1.1.0,1.2.0)",
  org.osgi.resource;version="[1.0.0,1.1.0)"
+Export-Package: org.eclipse.osgi.container;version="1.0",
+ org.osgi.service.resolver;version=1.0
