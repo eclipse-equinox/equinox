@@ -41,7 +41,7 @@ public class ModuleRevisions implements BundleRevisions {
 		this.container = container;
 	}
 
-	Long getId() {
+	public Long getId() {
 		return id;
 	}
 
