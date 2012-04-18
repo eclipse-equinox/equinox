@@ -69,7 +69,7 @@ public class UpgradeableReadWriteLock {
 					for (int i = 0; i < readCount; i++)
 						lock.readLock().unlock();
 				}
-			} else if (reserveUpgradeThread != null) {
+			} else {
 				if (readCount > 0) {
 					// attempting write upgrade without reservation
 					throw new IllegalStateException("Attempting upgrade to write without reservation."); //$NON-NLS-1$
