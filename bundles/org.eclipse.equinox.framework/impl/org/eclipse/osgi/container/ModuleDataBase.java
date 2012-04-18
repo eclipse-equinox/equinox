@@ -36,6 +36,11 @@ public abstract class ModuleDataBase {
 	private final Map<String, Module> modulesByLocations;
 
 	/**
+	 * A map of modules by id.
+	 */
+	private final Map<Long, Module> modulesById;
+
+	/**
 	 * A map of revision collections by symbolic name
 	 */
 	private final Map<String, Collection<ModuleRevision>> revisionByName;
@@ -56,24 +61,15 @@ public abstract class ModuleDataBase {
 	private final AtomicLong timeStamp;
 
 	/**
-	 * Constructs a new database with the the specified modules by location,
-	 * wirings, nextId and timeStamp. 
-	 * @param modulesByLocations the modules by location, may be null if there are no revisions
-	 * @param wirings the current wirings for the revisions, may be null if there are no wirings
-	 * @param nextId the next module id for installation.  This must be higher than any currently
-	 * installed module
+	 * Constructs a new database with the the specified nextId and timeStamp. 
+	 * @param nextId the next module id for installation.
 	 * @param timeStamp the current timestamp of the database
 	 */
-	public ModuleDataBase(Map<String, Module> modulesByLocations, Map<ModuleRevision, ModuleWiring> wirings, long nextId, long timeStamp) {
-		this.modulesByLocations = modulesByLocations == null ? new HashMap<String, Module>() : new HashMap<String, Module>(modulesByLocations);
+	public ModuleDataBase(long nextId, long timeStamp) {
+		this.modulesByLocations = new HashMap<String, Module>();
+		this.modulesById = new HashMap<Long, Module>();
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
-		for (Module module : this.modulesByLocations.values()) {
-			ModuleRevisions revisions = module.getRevisions();
-			for (ModuleRevision revision : revisions.getModuleRevisions()) {
-				addToRevisionByName(revision);
-			}
-		}
-		this.wirings = wirings == null ? new HashMap<ModuleRevision, ModuleWiring>() : new HashMap<ModuleRevision, ModuleWiring>(wirings);
+		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
 		this.nextId = new AtomicLong(nextId);
 		this.timeStamp = new AtomicLong(timeStamp);
 	}
@@ -99,6 +95,16 @@ public abstract class ModuleDataBase {
 	 */
 	final Module getModule(String location) {
 		return modulesByLocations.get(location);
+	}
+
+	/**
+	 * Returns the module at the given id or null if no module exists
+	 * at the given location.
+	 * @param id the id of the module.
+	 * @return the module at the given id or null.
+	 */
+	final Module getModule(long id) {
+		return modulesById.get(id);
 	}
 
 	/**
@@ -129,16 +135,28 @@ public abstract class ModuleDataBase {
 
 	/**
 	 * Installs a new revision using the specified builder, location and module
-	 * @param module the module for which the revision is being installed for
 	 * @param location the location to use for the installation
 	 * @param builder the builder to use to create the new revision
+	 * @return the installed module
 	 */
-	final void install(Module module, String location, ModuleRevisionBuilder builder) {
-		ModuleRevision newRevision = builder.buildRevision(getNextIdAndIncrement(), location, module, container);
+	final Module install(String location, ModuleRevisionBuilder builder) {
+		Module module = populate(location, builder, getNextIdAndIncrement());
+		incrementTimestamp();
+		return module;
+	}
+
+	final protected Module populate(String location, ModuleRevisionBuilder builder, long id) {
+		if (container == null)
+			throw new IllegalStateException("Container is not set."); //$NON-NLS-1$
+		if (modulesByLocations.get(location) != null)
+			throw new IllegalArgumentException("Location is already used."); //$NON-NLS-1$
+		Module module = createModule(location, id);
+		ModuleRevision newRevision = builder.buildRevision(id, location, module, container);
 		modulesByLocations.put(location, module);
+		modulesById.put(id, module);
 		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
-		incrementTimestamp();
+		return module;
 	}
 
 	private void addToRevisionByName(ModuleRevision revision) {
@@ -161,6 +179,7 @@ public abstract class ModuleDataBase {
 		ModuleRevisions uninstalling = module.getRevisions();
 		// remove the location
 		modulesByLocations.remove(uninstalling.getLocation());
+		modulesById.remove(uninstalling.getId());
 		// remove the revisions by name
 		List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 		for (ModuleRevision revision : revisions) {
@@ -296,7 +315,7 @@ public abstract class ModuleDataBase {
 	 * @param newWiring the new wiring to take effect.  The values
 	 * from the new wiring are copied.
 	 */
-	final void setWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
+	protected final void setWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
 		wirings.clear();
 		wirings.putAll(newWiring);
 		incrementTimestamp();
@@ -393,5 +412,13 @@ public abstract class ModuleDataBase {
 	 * @return the candidates for the requirement
 	 */
 	protected abstract List<ModuleCapability> findCapabilities(ModuleRequirement requirement);
+
+	/**
+	 * Creates a new module.  This gets called when a new module is installed.
+	 * @param location the location for the module
+	 * @param id the id for the module
+	 * @return the Module
+	 */
+	protected abstract Module createModule(String location, long id);
 
 }

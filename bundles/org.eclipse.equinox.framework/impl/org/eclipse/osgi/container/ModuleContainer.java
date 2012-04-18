@@ -84,7 +84,58 @@ public class ModuleContainer {
 		}
 	}
 
-	public Module install(Module module, BundleContext origin, String location, ModuleRevisionBuilder builder) throws BundleException {
+	/**
+	 * Returns the list of currently installed modules sorted by module id.
+	 * @return the list of currently installed modules sorted by module id.
+	 */
+	public List<Module> getModules() {
+		List<Module> result;
+		monitor.lockRead(false);
+		try {
+			result = new ArrayList<Module>(moduleDataBase.getModules());
+		} finally {
+			monitor.unlockRead(false);
+		}
+		Collections.sort(result, new Comparator<Module>() {
+			@Override
+			public int compare(Module m1, Module m2) {
+				return m1.getRevisions().getId().compareTo(m2.getRevisions().getId());
+			}
+		});
+		return result;
+	}
+
+	/**
+	 * Returns the module installed with the specified id, or null if no 
+	 * such module is installed.
+	 * @param id the id of the module
+	 * @return the module with the specified id, or null of no such module is installed.
+	 */
+	public Module getModule(long id) {
+		monitor.lockRead(false);
+		try {
+			return moduleDataBase.getModule(id);
+		} finally {
+			monitor.unlockRead(false);
+		}
+	}
+
+	/**
+	 * Returns the module installed with the specified location, or null if no 
+	 * such module is installed.
+	 * @param location the location of the module
+	 * @return the module with the specified location, or null of no such module is installed.
+	 */
+	public Module getModule(String location) {
+		monitor.lockRead(false);
+		try {
+			return moduleDataBase.getModule(location);
+		} finally {
+			monitor.unlockRead(false);
+		}
+	}
+
+	public Module install(BundleContext origin, String location, ModuleRevisionBuilder builder) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean locationLocked = false;
 		boolean nameLocked = false;
@@ -140,9 +191,10 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
+			Module result;
 			monitor.lockWrite();
 			try {
-				moduleDataBase.install(module, location, builder);
+				result = moduleDataBase.install(location, builder);
 				// downgrade to read lock to fire installed events
 				monitor.lockRead(false);
 			} finally {
@@ -153,7 +205,7 @@ public class ModuleContainer {
 			} finally {
 				monitor.unlockRead(false);
 			}
-			return module;
+			return result;
 		} finally {
 			if (locationLocked)
 				locationLocks.unlock(location);
@@ -243,7 +295,11 @@ public class ModuleContainer {
 	}
 
 	public void resolve(Collection<Module> triggers) throws ResolutionException {
-		monitor.lockRead(true);
+		resolve(triggers, true);
+	}
+
+	private void resolve(Collection<Module> triggers, boolean reserveUpgrade) throws ResolutionException {
+		monitor.lockRead(reserveUpgrade);
 		try {
 			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
 			Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -276,7 +332,7 @@ public class ModuleContainer {
 			}
 			// TODO send out resolved events
 		} finally {
-			monitor.unlockRead(true);
+			monitor.unlockRead(reserveUpgrade);
 		}
 	}
 
@@ -287,16 +343,26 @@ public class ModuleContainer {
 		Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
 		Collection<Module> refreshTriggers = getRefreshClosure(initial, wiringCopy);
 		Collection<ModuleRevision> toRemoveRevisions = new ArrayList<ModuleRevision>();
-		Collection<List<ModuleWire>> toRemoveWireLists = new ArrayList<List<ModuleWire>>();
+		Collection<ModuleWiring> toRemoveWirings = new ArrayList<ModuleWiring>();
+		Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
 		for (Module module : refreshTriggers) {
 			boolean first = true;
 			for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
 				ModuleWiring removedWiring = wiringCopy.remove(revision);
+				if (removedWiring != null) {
+					toRemoveWirings.add(removedWiring);
+					List<ModuleWire> removedWires = removedWiring.getRequiredModuleWires(null);
+					for (ModuleWire wire : removedWires) {
+						Collection<ModuleWire> providerWires = toRemoveWireLists.get(wire.getProviderWiring());
+						if (providerWires == null) {
+							providerWires = new ArrayList<ModuleWire>();
+							toRemoveWireLists.put(wire.getProviderWiring(), providerWires);
+						}
+						providerWires.add(wire);
+					}
+				}
 				if (!first || revision.getRevisions().isUninstalled()) {
 					toRemoveRevisions.add(revision);
-					if (removedWiring != null) {
-						toRemoveWireLists.add(removedWiring.getRequiredModuleWires(null));
-					}
 				}
 				first = false;
 			}
@@ -306,17 +372,20 @@ public class ModuleContainer {
 
 		monitor.lockWrite();
 		try {
-			for (List<ModuleWire> removedWires : toRemoveWireLists) {
-				for (ModuleWire removedWire : removedWires) {
-					ModuleWiring provider = removedWire.getProviderWiring();
-					List<ModuleWire> providedWires = provider.getProvidedModuleWires(null);
-					providedWires.remove(removedWire);
-					provider.setProvidedWires(providedWires);
-				}
+			// remove any wires from unresolved wirings that got removed
+			for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
+				List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
+				provided.removeAll(entry.getValue());
+				entry.getKey().setProvidedWires(provided);
 			}
+			// remove any revisions that got removed as part of the refresh
 			for (ModuleRevision removed : toRemoveRevisions) {
 				removed.getRevisions().removeRevision(removed);
 				moduleDataBase.removeCapabilities(removed);
+			}
+			// invalidate any removed wiring objects
+			for (ModuleWiring moduleWiring : toRemoveWirings) {
+				moduleWiring.invalidate();
 			}
 			moduleDataBase.setWiring(wiringCopy);
 		} finally {
@@ -332,7 +401,7 @@ public class ModuleContainer {
 		monitor.lockRead(true);
 		try {
 			refreshTriggers = unresolve(initial);
-			resolve(refreshTriggers);
+			resolve(refreshTriggers, false);
 		} finally {
 			monitor.unlockRead(true);
 		}

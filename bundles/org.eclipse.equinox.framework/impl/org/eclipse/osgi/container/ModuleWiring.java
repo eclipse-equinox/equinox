@@ -26,6 +26,7 @@ public class ModuleWiring implements BundleWiring {
 	private final List<ModuleRequirement> requirements;
 	private volatile List<ModuleWire> providedWires;
 	private volatile List<ModuleWire> requiredWires;
+	private volatile boolean isValid = true;
 
 	ModuleWiring(ModuleRevision revision, List<ModuleCapability> capabilities, List<ModuleRequirement> requirements, List<ModuleWire> providedWires, List<ModuleWire> requiredWires) {
 		super();
@@ -43,7 +44,7 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public boolean isCurrent() {
-		return revision.isCurrent();
+		return isValid && revision.isCurrent();
 	}
 
 	@Override
@@ -57,6 +58,8 @@ public class ModuleWiring implements BundleWiring {
 	}
 
 	List<ModuleCapability> getModuleCapabilities(String namespace) {
+		if (!isValid)
+			return null;
 		if (namespace == null)
 			return new ArrayList<ModuleCapability>(capabilities);
 		List<ModuleCapability> result = new ArrayList<ModuleCapability>();
@@ -69,6 +72,8 @@ public class ModuleWiring implements BundleWiring {
 	}
 
 	List<ModuleRequirement> getModuleRequirements(String namespace) {
+		if (!isValid)
+			return null;
 		if (namespace == null)
 			return new ArrayList<ModuleRequirement>(requirements);
 		List<ModuleRequirement> result = new ArrayList<ModuleRequirement>();
@@ -109,7 +114,9 @@ public class ModuleWiring implements BundleWiring {
 		return Converters.asListBundleWire(getWires(namespace, requiredWires));
 	}
 
-	private static List<ModuleWire> getWires(String namespace, List<ModuleWire> allWires) {
+	private List<ModuleWire> getWires(String namespace, List<ModuleWire> allWires) {
+		if (!isValid)
+			return null;
 		if (namespace == null)
 			return new ArrayList<ModuleWire>(allWires);
 		List<ModuleWire> result = new ArrayList<ModuleWire>();
@@ -128,18 +135,24 @@ public class ModuleWiring implements BundleWiring {
 
 	@Override
 	public ClassLoader getClassLoader() {
+		if (!isValid)
+			return null;
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<URL> findEntries(String path, String filePattern, int options) {
+		if (!isValid)
+			return null;
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Collection<String> listResources(String path, String filePattern, int options) {
+		if (!isValid)
+			return null;
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -175,5 +188,9 @@ public class ModuleWiring implements BundleWiring {
 
 	void setRequiredWires(List<ModuleWire> requiredWires) {
 		this.requiredWires = requiredWires;
+	}
+
+	void invalidate() {
+		this.isValid = false;
 	}
 }

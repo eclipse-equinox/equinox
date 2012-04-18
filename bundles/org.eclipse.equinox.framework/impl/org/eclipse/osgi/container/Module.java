@@ -24,7 +24,7 @@ public abstract class Module implements BundleReference {
 	 * Returns the {@link ModuleRevisions} associated with this module.
 	 * @return the {@link ModuleRevisions} associated with this module
 	 */
-	protected final ModuleRevisions getRevisions() {
+	public final ModuleRevisions getRevisions() {
 		ModuleRevisions current = revisions;
 		if (current == null)
 			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
@@ -35,7 +35,7 @@ public abstract class Module implements BundleReference {
 	 * Returns the current {@link ModuleRevision revision} associated with this module.
 	 * @return the current {@link ModuleRevision revision} associated with this module.
 	 */
-	protected final ModuleRevision getCurrentRevision() {
+	public final ModuleRevision getCurrentRevision() {
 		ModuleRevisions current = revisions;
 		if (current == null)
 			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
