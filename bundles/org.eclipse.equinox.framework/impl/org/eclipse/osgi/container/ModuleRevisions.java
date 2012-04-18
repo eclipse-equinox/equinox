@@ -45,7 +45,7 @@ public class ModuleRevisions implements BundleRevisions {
 		return id;
 	}
 
-	String getLocation() {
+	public String getLocation() {
 		return location;
 	}
 

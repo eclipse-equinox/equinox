@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.framework.Version;
@@ -61,29 +62,34 @@ public abstract class ModuleDataBase {
 	private final AtomicLong timeStamp;
 
 	/**
-	 * Constructs a new database with the the specified nextId and timeStamp. 
-	 * @param nextId the next module id for installation.
-	 * @param timeStamp the current timestamp of the database
+	 * Monitors read and write access to this database
 	 */
-	public ModuleDataBase(long nextId, long timeStamp) {
+	private final UpgradeableReadWriteLock monitor = new UpgradeableReadWriteLock();
+
+	/**
+	 * Constructs a new empty database.
+	 */
+	public ModuleDataBase() {
 		this.modulesByLocations = new HashMap<String, Module>();
 		this.modulesById = new HashMap<Long, Module>();
 		this.revisionByName = new HashMap<String, Collection<ModuleRevision>>();
 		this.wirings = new HashMap<ModuleRevision, ModuleWiring>();
-		this.nextId = new AtomicLong(nextId);
-		this.timeStamp = new AtomicLong(timeStamp);
+		this.nextId = new AtomicLong(0);
+		this.timeStamp = new AtomicLong(0);
 	}
 
 	/**
 	 * Sets the container for this database.  A database can only
-	 * be associated with a single container.  This database gets 
-	 * associated with a container when {@link ModuleContainer#setModuleDataBase(ModuleDataBase)}
-	 * is called with this database.
+	 * be associated with a single container and that container must
+	 * have been constructed with this database.
 	 * @param container the container to associate this database with.
 	 */
-	final void setContainer(ModuleContainer container) {
+	public final void setContainer(ModuleContainer container) {
 		if (this.container != null)
 			throw new IllegalStateException("The container is already set."); //$NON-NLS-1$
+		if (container.moduleDataBase != this) {
+			throw new IllegalArgumentException("Container is already using a different database.");
+		}
 		this.container = container;
 	}
 
@@ -140,22 +146,18 @@ public abstract class ModuleDataBase {
 	 * @return the installed module
 	 */
 	final Module install(String location, ModuleRevisionBuilder builder) {
-		Module module = populate(location, builder, getNextIdAndIncrement());
-		incrementTimestamp();
-		return module;
-	}
-
-	final protected Module populate(String location, ModuleRevisionBuilder builder, long id) {
 		if (container == null)
 			throw new IllegalStateException("Container is not set."); //$NON-NLS-1$
 		if (modulesByLocations.get(location) != null)
 			throw new IllegalArgumentException("Location is already used."); //$NON-NLS-1$
+		long id = getNextIdAndIncrement();
 		Module module = createModule(location, id);
 		ModuleRevision newRevision = builder.buildRevision(id, location, module, container);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
 		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
+		incrementTimestamp();
 		return module;
 	}
 
@@ -306,7 +308,7 @@ public abstract class ModuleDataBase {
 	 * Returns a snapshot of the wirings for all revisions.
 	 * @return a snapshot of the wirings for all revisions.
 	 */
-	final protected Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
+	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
 		return new HashMap<ModuleRevision, ModuleWiring>(wirings);
 	}
 
@@ -315,7 +317,7 @@ public abstract class ModuleDataBase {
 	 * @param newWiring the new wiring to take effect.  The values
 	 * from the new wiring are copied.
 	 */
-	protected final void setWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
+	final void setWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
 		wirings.clear();
 		wirings.putAll(newWiring);
 		incrementTimestamp();
@@ -336,8 +338,15 @@ public abstract class ModuleDataBase {
 	 * Returns a snapshot of all modules.
 	 * @return a snapshot of all modules.
 	 */
-	final Collection<Module> getModules() {
-		return new ArrayList<Module>(modulesByLocations.values());
+	protected final List<Module> getModules() {
+		List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
+		Collections.sort(modules, new Comparator<Module>() {
+			@Override
+			public int compare(Module m1, Module m2) {
+				return m1.getRevisions().getId().compareTo(m2.getRevisions().getId());
+			}
+		});
+		return modules;
 	}
 
 	/**
@@ -348,11 +357,7 @@ public abstract class ModuleDataBase {
 		return nextId.getAndIncrement();
 	}
 
-	/**
-	 * Returns the next module ID
-	 * @return the next module ID
-	 */
-	protected long getNextId() {
+	public long getNextId() {
 		return nextId.get();
 	}
 
@@ -379,12 +384,24 @@ public abstract class ModuleDataBase {
 		timeStamp.incrementAndGet();
 	}
 
-	/**
-	 * Returns a snapshot map of all modules by location.
-	 * @return a snapshot map of all modules by location.
-	 */
-	final protected Map<String, Module> getModuleLocations() {
-		return new HashMap<String, Module>(modulesByLocations);
+	public int getReadHoldCount() {
+		return monitor.getReadHoldCount();
+	}
+
+	public void lockRead(boolean reserveUpgrade) {
+		monitor.lockRead(reserveUpgrade);
+	}
+
+	public void lockWrite() {
+		monitor.lockWrite();
+	}
+
+	public void unlockRead(boolean unreserveUpgrade) {
+		monitor.unlockRead(unreserveUpgrade);
+	}
+
+	public void unlockWrite() {
+		monitor.unlockWrite();
 	}
 
 	/**
@@ -421,4 +438,28 @@ public abstract class ModuleDataBase {
 	 */
 	protected abstract Module createModule(String location, long id);
 
+	protected void write(DataOutputStream out, boolean persistWirings) throws IOException {
+		Persistence.write(this, out, persistWirings);
+	}
+
+	protected void load(DataInputStream in) throws IOException {
+		Persistence.load(this, in);
+	}
+
+	private static class Persistence {
+		private static final int VERSION = 1;
+
+		public static void write(ModuleDataBase moduleDataBase, DataOutputStream out, boolean persistWirings) throws IOException {
+			out.write(VERSION);
+			out.writeLong(moduleDataBase.getNextId());
+			Collection<Module> modules = moduleDataBase.getModules();
+		}
+
+		public static void load(ModuleDataBase moduleDataBase, DataInputStream in) throws IOException {
+			int version = in.readInt();
+			if (version < VERSION)
+				throw new UnsupportedOperationException("Perstence version is not correct for loading: " + version + " expecting: " + VERSION);
+		}
+
+	}
 }

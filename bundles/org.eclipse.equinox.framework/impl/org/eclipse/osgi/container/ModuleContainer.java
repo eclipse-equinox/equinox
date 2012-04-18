@@ -40,21 +40,16 @@ public class ModuleContainer {
 	private final LockSet<String> nameLocks = new LockSet<String>(false);
 
 	/**
-	 * Monitors read and write access to the moduleDataBase
-	 */
-	private final UpgradeableReadWriteLock monitor = new UpgradeableReadWriteLock();
-
-	/**
 	 * An implementation of FrameworkWiring for this container
 	 */
 	private final FrameworkWiring frameworkWiring = new ModuleFrameworkWiring();
 
 	/**
 	 * The module database for this container.  All access to this database MUST
-	 * be guarded by the monitor lock
+	 * be guarded by the database lock
 	 */
-	/* @GuardedBy("monitor") */
-	ModuleDataBase moduleDataBase;
+	/* @GuardedBy("moduleDataBase") */
+	final ModuleDataBase moduleDataBase;
 
 	/**
 	 * Hook used to determine if a bundle being installed or updated will cause a collision
@@ -67,21 +62,10 @@ public class ModuleContainer {
 	 */
 	private final ModuleResolver moduleResolver;
 
-	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver) {
+	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver, ModuleDataBase moduleDataBase) {
 		this.bundleCollisionHook = bundleCollisionHook;
 		this.moduleResolver = new ModuleResolver(resolverHookFactory, resolver);
-	}
-
-	public void setModuleDataBase(ModuleDataBase moduleDataBase) {
-		monitor.lockWrite();
-		try {
-			if (this.moduleDataBase != null)
-				throw new IllegalStateException("Module Database is already set."); //$NON-NLS-1$
-			this.moduleDataBase = moduleDataBase;
-			this.moduleDataBase.setContainer(this);
-		} finally {
-			monitor.unlockWrite();
-		}
+		this.moduleDataBase = moduleDataBase;
 	}
 
 	/**
@@ -90,18 +74,12 @@ public class ModuleContainer {
 	 */
 	public List<Module> getModules() {
 		List<Module> result;
-		monitor.lockRead(false);
+		moduleDataBase.lockRead(false);
 		try {
-			result = new ArrayList<Module>(moduleDataBase.getModules());
+			result = moduleDataBase.getModules();
 		} finally {
-			monitor.unlockRead(false);
+			moduleDataBase.unlockRead(false);
 		}
-		Collections.sort(result, new Comparator<Module>() {
-			@Override
-			public int compare(Module m1, Module m2) {
-				return m1.getRevisions().getId().compareTo(m2.getRevisions().getId());
-			}
-		});
 		return result;
 	}
 
@@ -112,11 +90,11 @@ public class ModuleContainer {
 	 * @return the module with the specified id, or null of no such module is installed.
 	 */
 	public Module getModule(long id) {
-		monitor.lockRead(false);
+		moduleDataBase.lockRead(false);
 		try {
 			return moduleDataBase.getModule(id);
 		} finally {
-			monitor.unlockRead(false);
+			moduleDataBase.unlockRead(false);
 		}
 	}
 
@@ -127,11 +105,11 @@ public class ModuleContainer {
 	 * @return the module with the specified location, or null of no such module is installed.
 	 */
 	public Module getModule(String location) {
-		monitor.lockRead(false);
+		moduleDataBase.lockRead(false);
 		try {
 			return moduleDataBase.getModule(location);
 		} finally {
-			monitor.unlockRead(false);
+			moduleDataBase.unlockRead(false);
 		}
 	}
 
@@ -142,7 +120,7 @@ public class ModuleContainer {
 		try {
 			Module existingLocation = null;
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			monitor.lockRead(false);
+			moduleDataBase.lockRead(false);
 			try {
 				existingLocation = moduleDataBase.getModule(location);
 				if (existingLocation == null) {
@@ -171,7 +149,7 @@ public class ModuleContainer {
 					}
 				}
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 			// Check that the existing location is visible from the origin bundle
 			if (existingLocation != null) {
@@ -192,18 +170,18 @@ public class ModuleContainer {
 				}
 			}
 			Module result;
-			monitor.lockWrite();
+			moduleDataBase.lockWrite();
 			try {
 				result = moduleDataBase.install(location, builder);
 				// downgrade to read lock to fire installed events
-				monitor.lockRead(false);
+				moduleDataBase.lockRead(false);
 			} finally {
-				monitor.unlockWrite();
+				moduleDataBase.unlockWrite();
 			}
 			try {
 				// TODO fire installed event
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 			return result;
 		} finally {
@@ -219,7 +197,7 @@ public class ModuleContainer {
 		boolean nameLocked = false;
 		try {
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			monitor.lockRead(false);
+			moduleDataBase.lockRead(false);
 			try {
 				// Attempt to lock the name
 				try {
@@ -245,7 +223,7 @@ public class ModuleContainer {
 				}
 
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 
 			// Check that the bundle does not collide with other bundles with the same name and version
@@ -257,11 +235,11 @@ public class ModuleContainer {
 					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 				}
 			}
-			monitor.lockWrite();
+			moduleDataBase.lockWrite();
 			try {
 				moduleDataBase.update(module, builder);
 			} finally {
-				monitor.unlockWrite();
+				moduleDataBase.unlockWrite();
 			}
 		} finally {
 			if (nameLocked)
@@ -270,11 +248,11 @@ public class ModuleContainer {
 	}
 
 	public void uninstall(Module module) {
-		monitor.lockWrite();
+		moduleDataBase.lockWrite();
 		try {
 			moduleDataBase.uninstall(module);
 		} finally {
-			monitor.unlockWrite();
+			moduleDataBase.unlockWrite();
 		}
 		// TODO fire uninstalled event
 		// no need to hold the read lock because the module has been complete removed
@@ -282,11 +260,11 @@ public class ModuleContainer {
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
-		monitor.lockRead(false);
+		moduleDataBase.lockRead(false);
 		try {
 			return moduleDataBase.getWiring(revision);
 		} finally {
-			monitor.unlockRead(false);
+			moduleDataBase.unlockRead(false);
 		}
 	}
 
@@ -299,7 +277,7 @@ public class ModuleContainer {
 	}
 
 	private void resolve(Collection<Module> triggers, boolean reserveUpgrade) throws ResolutionException {
-		monitor.lockRead(reserveUpgrade);
+		moduleDataBase.lockRead(reserveUpgrade);
 		try {
 			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
 			Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -313,7 +291,7 @@ public class ModuleContainer {
 				return; // nothing to do
 			Collection<Module> newlyResolved = new ArrayList<Module>();
 			// now attempt to apply the delta
-			monitor.lockWrite();
+			moduleDataBase.lockWrite();
 			try {
 				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
 					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
@@ -328,16 +306,16 @@ public class ModuleContainer {
 				}
 				moduleDataBase.mergeWiring(deltaWiring);
 			} finally {
-				monitor.unlockWrite();
+				moduleDataBase.unlockWrite();
 			}
 			// TODO send out resolved events
 		} finally {
-			monitor.unlockRead(reserveUpgrade);
+			moduleDataBase.unlockRead(reserveUpgrade);
 		}
 	}
 
 	private Collection<Module> unresolve(Collection<Module> initial) {
-		if (monitor.getReadHoldCount() == 0) // sanity check
+		if (moduleDataBase.getReadHoldCount() == 0) // sanity check
 			throw new IllegalStateException("Must hold read lock and upgrade request"); //$NON-NLS-1$
 
 		Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
@@ -370,7 +348,7 @@ public class ModuleContainer {
 			// TODO remove any non-active modules from the refreshTriggers
 		}
 
-		monitor.lockWrite();
+		moduleDataBase.lockWrite();
 		try {
 			// remove any wires from unresolved wirings that got removed
 			for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
@@ -389,7 +367,7 @@ public class ModuleContainer {
 			}
 			moduleDataBase.setWiring(wiringCopy);
 		} finally {
-			monitor.unlockWrite();
+			moduleDataBase.unlockWrite();
 		}
 		// TODO set unresolved status of modules
 		// TODO fire unresolved events
@@ -398,12 +376,12 @@ public class ModuleContainer {
 
 	public void refresh(Collection<Module> initial) throws ResolutionException {
 		Collection<Module> refreshTriggers;
-		monitor.lockRead(true);
+		moduleDataBase.lockRead(true);
 		try {
 			refreshTriggers = unresolve(initial);
 			resolve(refreshTriggers, false);
 		} finally {
-			monitor.unlockRead(true);
+			moduleDataBase.unlockRead(true);
 		}
 		// TODO start the trigger modules
 
@@ -471,12 +449,12 @@ public class ModuleContainer {
 
 		@Override
 		public Bundle getBundle() {
-			monitor.lockRead(false);
+			moduleDataBase.lockRead(false);
 			try {
 				Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
 				return systemModule == null ? null : systemModule.getBundle();
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 		}
 
@@ -510,7 +488,7 @@ public class ModuleContainer {
 
 		@Override
 		public Collection<Bundle> getRemovalPendingBundles() {
-			monitor.lockRead(false);
+			moduleDataBase.lockRead(false);
 			try {
 				Collection<Bundle> removalPendingBundles = new HashSet<Bundle>();
 				Collection<ModuleRevision> removalPending = moduleDataBase.getRemovalPending();
@@ -519,14 +497,14 @@ public class ModuleContainer {
 				}
 				return removalPendingBundles;
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 		}
 
 		@Override
 		public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
 			Collection<Module> modules = getModules(bundles);
-			monitor.lockRead(false);
+			moduleDataBase.lockRead(false);
 			try {
 				Collection<Module> closure = ModuleContainer.getRefreshClosure(modules, moduleDataBase.getWiringsCopy());
 				Collection<Bundle> result = new ArrayList<Bundle>(closure.size());
@@ -535,7 +513,7 @@ public class ModuleContainer {
 				}
 				return result;
 			} finally {
-				monitor.unlockRead(false);
+				moduleDataBase.unlockRead(false);
 			}
 		}
 
