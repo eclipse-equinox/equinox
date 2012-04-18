@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.equinox.framework
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.osgi.framework.internal.core,
+ org.eclipse.osgi.framework.util,
  org.eclipse.osgi.util;version="1.1.0",
  org.osgi.framework;version="[1.7.0,2.0.0)",
  org.osgi.framework.hooks.bundle;version="[1.1.0,1.2.0)",
