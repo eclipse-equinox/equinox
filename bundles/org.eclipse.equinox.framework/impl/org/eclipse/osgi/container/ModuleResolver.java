@@ -543,7 +543,7 @@ class ModuleResolver {
 			Long id1 = ((ModuleRevision) c1.getResource()).getRevisions().getId();
 			Long id2 = ((ModuleRevision) c2.getResource()).getRevisions().getId();
 
-			return id1 <= id2 ? -1 : 1;
+			return id1.compareTo(id2);
 		}
 	}
 }
