@@ -17,8 +17,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.osgi.framework.Version;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
+import org.osgi.resource.*;
 
 /**
  * A database for storing modules, their revisions and wiring states.  The
@@ -366,7 +365,7 @@ public abstract class ModuleDataBase {
 		return nextId.getAndIncrement();
 	}
 
-	public long getNextId() {
+	public final long getNextId() {
 		return nextId.get();
 	}
 
@@ -382,7 +381,7 @@ public abstract class ModuleDataBase {
 	 * </ul>
 	 * @return the current timestamp of this database.
 	 */
-	final protected long getTimestamp() {
+	final public long getTimestamp() {
 		return timeStamp.get();
 	}
 
@@ -393,23 +392,23 @@ public abstract class ModuleDataBase {
 		timeStamp.incrementAndGet();
 	}
 
-	public int getReadHoldCount() {
+	public final int getReadHoldCount() {
 		return monitor.getReadHoldCount();
 	}
 
-	public void lockRead(boolean reserveUpgrade) {
+	public final void lockRead(boolean reserveUpgrade) {
 		monitor.lockRead(reserveUpgrade);
 	}
 
-	public void lockWrite() {
+	public final void lockWrite() {
 		monitor.lockWrite();
 	}
 
-	public void unlockRead(boolean unreserveUpgrade) {
+	public final void unlockRead(boolean unreserveUpgrade) {
 		monitor.unlockRead(unreserveUpgrade);
 	}
 
-	public void unlockWrite() {
+	public final void unlockWrite() {
 		monitor.unlockWrite();
 	}
 
@@ -447,18 +446,46 @@ public abstract class ModuleDataBase {
 	 */
 	protected abstract Module createModule(String location, long id);
 
-	protected void write(DataOutputStream out, boolean persistWirings) throws IOException {
+	/**
+	 * Writes this database in a format suitable for using the {@link #load(DataInputStream)}
+	 * method.  All modules are stored which have a current {@link ModuleRevision revision}.
+	 * Only the current revision of each module is stored (no removal pending revisions
+	 * are stored).  Optionally the {@link ModuleWiring wiring} of each current revision 
+	 * may be stored.  Wiring can only be stored if there are no {@link #getRemovalPending()
+	 * removal pending} revisions.
+	 * <p>
+	 * After this database have been written, the output stream is flushed.  
+	 * The output stream remains open after this method returns.
+	 * @param out the data output steam.
+	 * @param persistWirings true if wirings should be persisted.  This option will be ignored
+	 *        if there are {@link #getRemovalPending() removal pending} revisions.
+	 * @throws IOException if writing this database to the specified output stream throws an IOException
+	 */
+	public final void store(DataOutputStream out, boolean persistWirings) throws IOException {
 		lockRead(false);
 		try {
-			Persistence.write(this, out, persistWirings);
+			Persistence.store(this, out, persistWirings);
 		} finally {
 			unlockRead(false);
 		}
 	}
 
-	protected void load(DataInputStream in) throws IOException {
+	/**
+	 * Loads information into this database from the input data stream.  This data
+	 * base must be empty and never been modified (the {@link #getTimestamp() timestamp} is zero.
+	 * All stored modules are loaded into this database.  If the input stream contains
+	 * wiring then it will also be loaded into this database.
+	 * <p>
+	 * The specified stream remains open after this method returns.
+	 * @param in the data input stream.
+	 * @throws IOException if an error occurred when reading from the input stream.
+	 * @throws IllegalStateException if this database is not empty.
+	 */
+	public final void load(DataInputStream in) throws IOException {
 		lockWrite();
 		try {
+			if (timeStamp.get() != 0)
+				throw new IllegalStateException("Can only load into a empty database."); //$NON-NLS-1$
 			Persistence.load(this, in);
 		} finally {
 			unlockWrite();
@@ -469,7 +496,6 @@ public abstract class ModuleDataBase {
 		private static final int VERSION = 1;
 		private static final byte NULL = 0;
 		private static final byte OBJECT = 1;
-		private static final byte INDEX = 2;
 		private static final byte LONG_STRING = 3;
 		private static final String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
@@ -483,15 +509,58 @@ public abstract class ModuleDataBase {
 		private static final byte VALUE_URI = 7;
 		private static final byte VALUE_LIST = 8;
 
-		public static void write(ModuleDataBase moduleDataBase, DataOutputStream out, boolean persistWirings) throws IOException {
+		private static int addToWriteTable(Object object, Map<Object, Integer> objectTable) {
+			if (object == null)
+				throw new NullPointerException();
+			Integer cur = objectTable.get(object);
+			if (cur != null)
+				throw new IllegalStateException("Object is already in the write table: " + object); //$NON-NLS-1$
+			objectTable.put(object, new Integer(objectTable.size()));
+			// return the index of the object just added (i.e. size - 1)
+			return (objectTable.size() - 1);
+		}
+
+		private static void addToReadTable(Object object, int index, Map<Integer, Object> objectTable) {
+			objectTable.put(new Integer(index), object);
+		}
+
+		public static void store(ModuleDataBase moduleDataBase, DataOutputStream out, boolean persistWirings) throws IOException {
 			out.writeInt(VERSION);
 			out.writeLong(moduleDataBase.getTimestamp());
 			out.writeLong(moduleDataBase.getNextId());
 			List<Module> modules = moduleDataBase.getModules();
 			out.writeInt(modules.size());
+
+			Map<Object, Integer> objectTable = new HashMap<Object, Integer>();
 			for (Module module : modules) {
-				writeModule(module, out);
+				writeModule(module, out, objectTable);
 			}
+
+			Collection<ModuleRevision> removalPendings = moduleDataBase.getRemovalPending();
+			// only persist wirings if there are no removals pending
+			persistWirings &= removalPendings.isEmpty();
+			out.writeBoolean(persistWirings);
+			if (!persistWirings) {
+				return;
+			}
+
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDataBase.getWiringsCopy();
+			// prime the object table with all the required wires
+			out.writeInt(wirings.size());
+			for (ModuleWiring wiring : wirings.values()) {
+				List<ModuleWire> requiredWires = wiring.getRequiredModuleWires(null);
+				out.writeInt(requiredWires.size());
+				for (ModuleWire wire : requiredWires) {
+					writeWire(wire, out, objectTable);
+				}
+			}
+
+			// now write all the info about each wiring using only indexes
+			for (ModuleWiring wiring : wirings.values()) {
+				writeWiring(wiring, out, objectTable);
+			}
+
+			out.flush();
 		}
 
 		public static void load(ModuleDataBase moduleDataBase, DataInputStream in) throws IOException {
@@ -502,19 +571,43 @@ public abstract class ModuleDataBase {
 			moduleDataBase.nextId.set(in.readLong());
 			int numModules = in.readInt();
 
+			Map<Integer, Object> objectTable = new HashMap<Integer, Object>();
 			for (int i = 0; i < numModules; i++) {
-				readModule(moduleDataBase, in);
+				readModule(moduleDataBase, in, objectTable);
 			}
+			if (!in.readBoolean())
+				return; // no wires persisted
+
+			int numWirings = in.readInt();
+			// prime the table with all the required wires
+			for (int i = 0; i < numWirings; i++) {
+				int numWires = in.readInt();
+				for (int j = 0; j < numWires; j++) {
+					readWire(in, objectTable);
+				}
+			}
+
+			// now read all the info about each wiring using only indexes
+			Map<ModuleRevision, ModuleWiring> wirings = new HashMap<ModuleRevision, ModuleWiring>();
+			for (int i = 0; i < numWirings; i++) {
+				ModuleWiring wiring = readWiring(in, objectTable);
+				wirings.put(wiring.getRevision(), wiring);
+			}
+			// TODO need to do this without incrementing the timestamp
+			moduleDataBase.setWiring(wirings);
 		}
 
-		private static void writeModule(Module module, DataOutputStream out) throws IOException {
+		private static void writeModule(Module module, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
 			ModuleRevision current = module.getCurrentRevision();
 			if (current == null)
 				return;
+			out.writeInt(addToWriteTable(current, objectTable));
+
 			ModuleRevisions revisions = module.getRevisions();
 
 			writeString(revisions.getLocation(), out);
 			out.writeLong(revisions.getId());
+
 			writeString(current.getSymbolicName(), out);
 			writeVersion(current.getVersion(), out);
 			out.writeInt(current.getTypes());
@@ -522,18 +615,21 @@ public abstract class ModuleDataBase {
 			List<Capability> capabilities = current.getCapabilities(null);
 			out.writeInt(capabilities.size());
 			for (Capability capability : capabilities) {
+				out.writeInt(addToWriteTable(capability, objectTable));
 				writeGenericInfo(capability.getNamespace(), capability.getAttributes(), capability.getDirectives(), out);
 			}
 
 			List<Requirement> requirements = current.getRequirements(null);
 			out.writeInt(requirements.size());
 			for (Requirement requirement : requirements) {
+				out.writeInt(addToWriteTable(requirement, objectTable));
 				writeGenericInfo(requirement.getNamespace(), requirement.getAttributes(), requirement.getDirectives(), out);
 			}
 		}
 
-		private static void readModule(ModuleDataBase moduleDataBase, DataInputStream in) throws IOException {
+		private static void readModule(ModuleDataBase moduleDataBase, DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
 			ModuleRevisionBuilder builder = new ModuleRevisionBuilder();
+			int moduleIndex = in.readInt();
 			String location = readString(in);
 			long id = in.readLong();
 			builder.setSymbolicName(readString(in));
@@ -541,15 +637,141 @@ public abstract class ModuleDataBase {
 			builder.setTypes(in.readInt());
 
 			int numCapabilities = in.readInt();
+			int[] capabilityIndexes = new int[numCapabilities];
 			for (int i = 0; i < numCapabilities; i++) {
+				capabilityIndexes[i] = in.readInt();
 				readGenericInfo(true, in, builder);
 			}
 
 			int numRequirements = in.readInt();
+			int[] requirementIndexes = new int[numRequirements];
 			for (int i = 0; i < numRequirements; i++) {
+				requirementIndexes[i] = in.readInt();
 				readGenericInfo(false, in, builder);
 			}
-			moduleDataBase.load(location, builder, id);
+			Module module = moduleDataBase.load(location, builder, id);
+
+			ModuleRevision current = module.getCurrentRevision();
+			addToReadTable(current, moduleIndex, objectTable);
+
+			List<ModuleCapability> capabilities = current.getModuleCapabilities(null);
+			for (int i = 0; i < capabilities.size(); i++) {
+				addToReadTable(capabilities.get(i), capabilityIndexes[i], objectTable);
+			}
+
+			List<ModuleRequirement> requirements = current.getModuleRequirements(null);
+			for (int i = 0; i < requirements.size(); i++) {
+				addToReadTable(requirements.get(i), requirementIndexes[i], objectTable);
+			}
+		}
+
+		private static void writeWire(ModuleWire wire, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
+			Wire w = wire;
+			Integer capability = objectTable.get(w.getCapability());
+			Integer provider = objectTable.get(w.getProvider());
+			Integer requirement = objectTable.get(w.getRequirement());
+			Integer requirer = objectTable.get(w.getRequirer());
+
+			if (capability == null || provider == null || requirement == null || requirer == null)
+				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+
+			out.writeInt(addToWriteTable(wire, objectTable));
+
+			out.writeInt(capability);
+			out.writeInt(provider);
+			out.writeInt(requirement);
+			out.writeInt(requirer);
+		}
+
+		private static void readWire(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+			int wireIndex = in.readInt();
+
+			ModuleCapability capability = (ModuleCapability) objectTable.get(in.readInt());
+			ModuleRevision provider = (ModuleRevision) objectTable.get(in.readInt());
+			ModuleRequirement requirement = (ModuleRequirement) objectTable.get(in.readInt());
+			ModuleRevision requirer = (ModuleRevision) objectTable.get(in.readInt());
+
+			if (capability == null || provider == null || requirement == null || requirer == null)
+				throw new NullPointerException("Could not find the expected indexes"); //$NON-NLS-1$
+
+			ModuleWire result = new ModuleWire(capability, provider, requirement, requirer);
+
+			addToReadTable(result, wireIndex, objectTable);
+		}
+
+		private static void writeWiring(ModuleWiring wiring, DataOutputStream out, Map<Object, Integer> objectTable) throws IOException {
+			Integer revisionIndex = objectTable.get(wiring.getRevision());
+			if (revisionIndex == null)
+				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+			out.writeInt(revisionIndex);
+
+			List<ModuleCapability> capabilities = wiring.getModuleCapabilities(null);
+			out.writeInt(capabilities.size());
+			for (ModuleCapability capability : capabilities) {
+				Integer capabilityIndex = objectTable.get(capability);
+				if (capabilityIndex == null)
+					throw new NullPointerException("Could not find capability for wiring."); //$NON-NLS-1$
+				out.writeInt(capabilityIndex);
+			}
+
+			List<ModuleRequirement> requirements = wiring.getModuleRequirements(null);
+			out.writeInt(requirements.size());
+			for (ModuleRequirement requirement : requirements) {
+				Integer requirementIndex = objectTable.get(requirement);
+				if (requirementIndex == null)
+					throw new NullPointerException("Could not find requirement for wiring."); //$NON-NLS-1$
+				out.writeInt(requirementIndex);
+			}
+
+			List<ModuleWire> providedWires = wiring.getProvidedModuleWires(null);
+			out.writeInt(providedWires.size());
+			for (ModuleWire wire : providedWires) {
+				Integer wireIndex = objectTable.get(wire);
+				if (wireIndex == null)
+					throw new NullPointerException("Could not find provided wire for wiring."); //$NON-NLS-1$
+				out.writeInt(wireIndex);
+			}
+
+			List<ModuleWire> requiredWires = wiring.getRequiredModuleWires(null);
+			out.writeInt(requiredWires.size());
+			for (ModuleWire wire : requiredWires) {
+				Integer wireIndex = objectTable.get(wire);
+				if (wireIndex == null)
+					throw new NullPointerException("Could not find required wire for wiring."); //$NON-NLS-1$
+				out.writeInt(wireIndex);
+			}
+		}
+
+		private static ModuleWiring readWiring(DataInputStream in, Map<Integer, Object> objectTable) throws IOException {
+			ModuleRevision revision = (ModuleRevision) objectTable.get(in.readInt());
+			if (revision == null)
+				throw new NullPointerException("Could not find revision for wiring."); //$NON-NLS-1$
+
+			int numCapabilities = in.readInt();
+			List<ModuleCapability> capabilities = new ArrayList<ModuleCapability>(numCapabilities);
+			for (int i = 0; i < numCapabilities; i++) {
+				capabilities.add((ModuleCapability) objectTable.get(in.readInt()));
+			}
+
+			int numRequirements = in.readInt();
+			List<ModuleRequirement> requirements = new ArrayList<ModuleRequirement>(numRequirements);
+			for (int i = 0; i < numRequirements; i++) {
+				requirements.add((ModuleRequirement) objectTable.get(in.readInt()));
+			}
+
+			int numProvidedWires = in.readInt();
+			List<ModuleWire> providedWires = new ArrayList<ModuleWire>(numProvidedWires);
+			for (int i = 0; i < numProvidedWires; i++) {
+				providedWires.add((ModuleWire) objectTable.get(in.readInt()));
+			}
+
+			int numRequiredWires = in.readInt();
+			List<ModuleWire> requiredWires = new ArrayList<ModuleWire>(numRequiredWires);
+			for (int i = 0; i < numRequiredWires; i++) {
+				requiredWires.add((ModuleWire) objectTable.get(in.readInt()));
+			}
+
+			return new ModuleWiring(revision, capabilities, requirements, providedWires, requiredWires);
 		}
 
 		private static void writeGenericInfo(String namespace, Map<String, ?> attributes, Map<String, String> directives, DataOutputStream out) throws IOException {
