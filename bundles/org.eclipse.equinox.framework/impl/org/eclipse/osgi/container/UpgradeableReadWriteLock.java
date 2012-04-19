@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.osgi.container;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 /**
  * A read/write lock that may be upgraded from a read lock to a write lock without 
@@ -18,7 +20,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <p>
  * A read lock may only be upgraded to a write lock if the read lock requested 
  * an upgrade reservation.  When a read lock requests a upgrade reservation then
- * it is indicating its intentions to upgrade to a write lock.  Once the upgrade
+ * it is indicating the intention to upgrade to a write lock.  Once the upgrade
  * reservation is held no other thread is allowed to obtain the write lock until
  * the upgrade reservation is revoked.
  */
@@ -26,13 +28,17 @@ public class UpgradeableReadWriteLock {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 	private final Object reservationMonitor = new Object();
 	private Thread reserveUpgradeThread = null;
-	int readLocksHeldByUpgrade = 0;
+	private int readLocksHeldByUpgrade = 0;
 
 	/**
-	 * Obtains the write lock.  If the current thread already holds the write lock
+	 * Acquires the write lock.  
+	 * <p>
+	 * Acquires the write lock if neither the read nor write nor the upgrade reservation lock are held by another thread.
+	 * If the current thread already holds the write lock
 	 * then an {@link IllegalStateException} is thrown, write locks are not reentrant.
-	 * if the upgrade reservation is held by the current thread then all of the 
-	 * currently held read locks are released before obtaining the write lock
+	 * If the upgrade reservation is held by the current thread then all of the 
+	 * currently held read locks are released before obtaining the write lock.
+	 * @see WriteLock#lock()
 	 */
 	public void lockWrite() {
 		boolean success = lock.writeLock().tryLock();
@@ -88,6 +94,14 @@ public class UpgradeableReadWriteLock {
 		}
 	}
 
+	/**
+	 * Attempts to release the write lock. 
+	 * <p>
+	 * If the upgrade reservation is held by the current thread
+	 * then all read locks that were released when acquiring the write lock are re-acquired before
+	 * releasing the write lock and the current thread will retain the upgrade reservation.
+	 * @see WriteLock#unlock()
+	 */
 	public void unlockWrite() {
 		synchronized (reservationMonitor) {
 			if (reserveUpgradeThread == Thread.currentThread()) {
@@ -101,6 +115,19 @@ public class UpgradeableReadWriteLock {
 		lock.writeLock().unlock();
 	}
 
+	/**
+	 * Acquires the read lock.
+	 * <p>
+	 * Acquires the read lock if the write lock and upgrade reservation is not held by another thread.
+	 * <p>
+	 * If the write lock or upgrade reservation are held by another thread then the current thread 
+	 * becomes disabled for thread scheduling purposes and lies dormant until the read lock has been acquired. 
+	 * <p>
+	 * A read lock may be acquired with a request to also acquire the upgrade reservation.  Only a single
+	 * thread may hold the upgrade reservation
+	 * @param reserveUpgrade true if the upgrade reservation is to be acquired also
+	 * @see ReadLock#lock()
+	 */
 	public void lockRead(boolean reserveUpgrade) {
 		if (reserveUpgrade) {
 			synchronized (reservationMonitor) {
@@ -119,6 +146,15 @@ public class UpgradeableReadWriteLock {
 		lock.readLock().lock();
 	}
 
+	/**
+	 * Attempts to release the read lock.
+	 * <p>
+	 * If the number of readers is now zero then the lock is made available for write lock attempts.
+	 * <p>
+	 * A release of the read lock may also request to release the upgrade reservation.
+	 * @param unreserveUpgrade true of the upgrade reservation is to be released also
+	 * @see ReadLock#unlock()
+	 */
 	public void unlockRead(boolean unreserveUpgrade) {
 		if (unreserveUpgrade) {
 			synchronized (reservationMonitor) {
@@ -131,7 +167,11 @@ public class UpgradeableReadWriteLock {
 		lock.readLock().unlock();
 	}
 
-	public int getReadHoldCount() {
+	/**
+	 * @return the number of read holds the current thread has.
+	 * @see ReentrantReadWriteLock#getReadHoldCount()
+	 */
+	int getReadHoldCount() {
 		return lock.getReadHoldCount();
 	}
 }

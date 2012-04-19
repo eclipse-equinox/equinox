@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.osgi.framework.Version;
 import org.osgi.resource.*;
@@ -24,9 +25,16 @@ import org.osgi.resource.*;
  * database is responsible for assigning ids and providing access to the
  * capabilities provided by the revisions currently installed.
  * <p>
- * This database is not thread safe all read and write access to this 
- * database must be protected by external means.  The 
- * {@link ModuleContainer container} this database is associated with
+ * This database is not thread safe.  Unless otherwise noted all read and
+ * write access must be protected by acquiring the appropriate locks.  
+ * All read access must be protected by the {@link #lockRead(boolean)} and 
+ * {@link #unlockRead(boolean)} methods.
+ * All write access must be protected by the {@link #lockWrite()} and 
+ * {@link #unlockWrite()} methods.
+ * <p>
+ * Unless otherwise noted all public methods of a {@link ModuleDataBase}
+ * are considered read operations.
+ * The {@link ModuleContainer container} this database is associated with
  * is responsible for accessing the database in a thread safe way.
  */
 public abstract class ModuleDataBase {
@@ -392,22 +400,41 @@ public abstract class ModuleDataBase {
 		timeStamp.incrementAndGet();
 	}
 
-	public final int getReadHoldCount() {
+	/**
+	 * @return the number of read holds the current thread has.
+	 * @see ReentrantReadWriteLock#getReadHoldCount()
+	 */
+	final int getReadHoldCount() {
 		return monitor.getReadHoldCount();
 	}
 
+	/**
+	 * @param reserveUpgrade
+	 * @see UpgradeableReadWriteLock#lockRead(boolean)
+	 */
 	public final void lockRead(boolean reserveUpgrade) {
 		monitor.lockRead(reserveUpgrade);
 	}
 
+	/**
+	 * @see UpgradeableReadWriteLock#lockWrite()
+	 */
 	public final void lockWrite() {
 		monitor.lockWrite();
 	}
 
+	/**
+	 * 
+	 * @param unreserveUpgrade
+	 * @see UpgradeableReadWriteLock#unlockRead(boolean)
+	 */
 	public final void unlockRead(boolean unreserveUpgrade) {
 		monitor.unlockRead(unreserveUpgrade);
 	}
 
+	/**
+	 * @see UpgradeableReadWriteLock#unlockWrite()
+	 */
 	public final void unlockWrite() {
 		monitor.unlockWrite();
 	}
@@ -454,6 +481,9 @@ public abstract class ModuleDataBase {
 	 * may be stored.  Wiring can only be stored if there are no {@link #getRemovalPending()
 	 * removal pending} revisions.
 	 * <p>
+	 * This method acquires the {@link #lockRead(boolean) read} lock while writing this
+	 * database.
+	 * <p>
 	 * After this database have been written, the output stream is flushed.  
 	 * The output stream remains open after this method returns.
 	 * @param out the data output steam.
@@ -475,6 +505,10 @@ public abstract class ModuleDataBase {
 	 * base must be empty and never been modified (the {@link #getTimestamp() timestamp} is zero.
 	 * All stored modules are loaded into this database.  If the input stream contains
 	 * wiring then it will also be loaded into this database.
+	 * <p>
+	 * Since this method modifies this database it is considered a write operation.
+	 * This method acquires the {@link #lockWrite() write} lock while loading
+	 * the information into this database.
 	 * <p>
 	 * The specified stream remains open after this method returns.
 	 * @param in the data input stream.
