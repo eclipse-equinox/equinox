@@ -55,20 +55,14 @@ class ModuleResolver {
 	 * directly by this method.  The returned wirings need to be merged into 
 	 * the database.
 	 * @param triggers the triggers that caused the resolver operation to occur
-	 * @param wiringCopy the wiringCopy of the currently resolved revisions
+	 * @param unresolved a snapshot of unresolved revisions
+	 * @param wiringCopy the wirings snapshot of the currently resolved revisions
 	 * @param moduleDataBase the module database.
 	 * @return a delta container the new wirings or modified wirings that should be
 	 * merged into the moduleDatabase
 	 * @throws ResolutionException
 	 */
-	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
-		Collection<Module> allModules = moduleDataBase.getModules();
-		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
-		for (Module module : allModules) {
-			ModuleRevision revision = module.getCurrentRevision();
-			if (revision != null && !wiringCopy.containsKey(revision))
-				unresolved.add(revision);
-		}
+	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
 		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, wiringCopy, moduleDataBase);
 		Map<Resource, List<Wire>> result = resolveProcess.resolve();
 		return generateDelta(result, wiringCopy, unresolved);
@@ -339,7 +333,8 @@ class ModuleResolver {
 		private final Collection<ModuleRevision> triggers;
 		private final ModuleDataBase moduleDataBase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
-		private volatile ResolverHook hook;
+		private volatile ResolverHook hook = null;
+		private volatile Map<String, Collection<ModuleRevision>> byName = null;
 
 		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
 			this.unresolved = unresolved;
@@ -425,14 +420,16 @@ class ModuleResolver {
 				selected = new ArrayList<ModuleRevision>(1);
 				selectedSingletons.put(bsn, selected);
 
-				Collection<ModuleRevision> sameBSN = moduleDataBase.getRevisions(bsn, null);
+				// TODO out of band call that obtains the read lock
+				// Should generate our own copy Map<String, Collection<ModuleRevision>> 
+				Collection<ModuleRevision> sameBSN = getRevisions(bsn);
 				if (sameBSN.size() < 2) {
 					selected.add(revision);
 					continue;
 				}
 				// prime selected with resolved singleton bundles
 				for (ModuleRevision singleton : sameBSN) {
-					if (isSingleton(singleton) && singleton.getWiring() != null)
+					if (isSingleton(singleton) && wirings.containsKey(singleton))
 						selected.add(singleton);
 				}
 				// get the collision map for the BSN
@@ -476,6 +473,29 @@ class ModuleResolver {
 					}
 				}
 			}
+		}
+
+		private Collection<ModuleRevision> getRevisions(String name) {
+			Map<String, Collection<ModuleRevision>> current = byName;
+			if (current == null) {
+				Set<ModuleRevision> revisions = new HashSet<ModuleRevision>();
+				revisions.addAll(unresolved);
+				revisions.addAll(wirings.keySet());
+				current = new HashMap<String, Collection<ModuleRevision>>();
+				for (ModuleRevision revision : revisions) {
+					Collection<ModuleRevision> sameName = current.get(revision.getSymbolicName());
+					if (sameName == null) {
+						sameName = new ArrayList<ModuleRevision>();
+						sameName.add(revision);
+					}
+				}
+				byName = current;
+			}
+			Collection<ModuleRevision> result = current.get(name);
+			if (result == null) {
+				return Collections.emptyList();
+			}
+			return result;
 		}
 
 		private ModuleRevision pickOneToResolve(Collection<ModuleRevision> pickOneToResolve) {

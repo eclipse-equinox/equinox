@@ -330,6 +330,7 @@ public class ModuleContainer {
 		if (triggers == null)
 			triggers = new ArrayList<Module>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
+		Collection<ModuleRevision> unresolved = new ArrayList<ModuleRevision>();
 		Map<ModuleRevision, ModuleWiring> wiringClone;
 		long timestamp;
 		moduleDataBase.lockRead();
@@ -341,11 +342,17 @@ public class ModuleContainer {
 				if (current != null)
 					triggerRevisions.add(current);
 			}
+			Collection<Module> allModules = moduleDataBase.getModules();
+			for (Module module : allModules) {
+				ModuleRevision revision = module.getCurrentRevision();
+				if (revision != null && !wiringClone.containsKey(revision))
+					unresolved.add(revision);
+			}
 		} finally {
 			moduleDataBase.unlockRead();
 		}
 
-		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, wiringClone, moduleDataBase);
+		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, unresolved, wiringClone, moduleDataBase);
 		if (deltaWiring.isEmpty())
 			return true; // nothing to do
 
