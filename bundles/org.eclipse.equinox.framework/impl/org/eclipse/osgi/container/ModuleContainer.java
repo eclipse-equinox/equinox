@@ -28,7 +28,7 @@ import org.osgi.service.resolver.Resolver;
  * A container for installing, updating, uninstalling and resolve modules.
  *
  */
-public class ModuleContainer {
+public final class ModuleContainer {
 
 	/**
 	 * Used by install operations to establish a write lock on an install location
@@ -81,14 +81,7 @@ public class ModuleContainer {
 	 * @return the list of currently installed modules sorted by module id.
 	 */
 	public List<Module> getModules() {
-		List<Module> result;
-		moduleDataBase.lockRead();
-		try {
-			result = moduleDataBase.getModules();
-		} finally {
-			moduleDataBase.unlockRead();
-		}
-		return result;
+		return moduleDataBase.getModules();
 	}
 
 	/**
@@ -98,12 +91,7 @@ public class ModuleContainer {
 	 * @return the module with the specified id, or null of no such module is installed.
 	 */
 	public Module getModule(long id) {
-		moduleDataBase.lockRead();
-		try {
-			return moduleDataBase.getModule(id);
-		} finally {
-			moduleDataBase.unlockRead();
-		}
+		return moduleDataBase.getModule(id);
 	}
 
 	/**
@@ -113,12 +101,7 @@ public class ModuleContainer {
 	 * @return the module with the specified location, or null of no such module is installed.
 	 */
 	public Module getModule(String location) {
-		moduleDataBase.lockRead();
-		try {
-			return moduleDataBase.getModule(location);
-		} finally {
-			moduleDataBase.unlockRead();
-		}
+		return moduleDataBase.getModule(location);
 	}
 
 	/**
@@ -193,13 +176,7 @@ public class ModuleContainer {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
-			Module result;
-			moduleDataBase.lockWrite();
-			try {
-				result = moduleDataBase.install(location, builder);
-			} finally {
-				moduleDataBase.unlockWrite();
-			}
+			Module result = moduleDataBase.install(location, builder);
 
 			// TODO fire installed event while not holding the read or write lock
 
@@ -267,12 +244,9 @@ public class ModuleContainer {
 			}
 
 			// TODO stop the module and acquire its state change lock
-			moduleDataBase.lockWrite();
-			try {
-				moduleDataBase.update(module, builder);
-			} finally {
-				moduleDataBase.unlockWrite();
-			}
+
+			moduleDataBase.update(module, builder);
+
 			// TODO release the module state change lock and fire the updated event
 			// TODO start the module if it was active before
 
@@ -287,22 +261,12 @@ public class ModuleContainer {
 	 * @param module the module to uninstall
 	 */
 	public void uninstall(Module module) {
-		moduleDataBase.lockWrite();
-		try {
-			moduleDataBase.uninstall(module);
-		} finally {
-			moduleDataBase.unlockWrite();
-		}
+		moduleDataBase.uninstall(module);
 		// TODO fire uninstalled event
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
-		moduleDataBase.lockRead();
-		try {
-			return moduleDataBase.getWiring(revision);
-		} finally {
-			moduleDataBase.unlockRead();
-		}
+		return moduleDataBase.getWiring(revision);
 	}
 
 	/**
@@ -326,7 +290,7 @@ public class ModuleContainer {
 		}
 	}
 
-	public boolean resolve0(Collection<Module> triggers) throws ResolutionException {
+	private boolean resolve0(Collection<Module> triggers) throws ResolutionException {
 		if (triggers == null)
 			triggers = new ArrayList<Module>(0);
 		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
@@ -542,17 +506,12 @@ public class ModuleContainer {
 		}
 	}
 
-	public class ModuleFrameworkWiring implements FrameworkWiring {
+	private class ModuleFrameworkWiring implements FrameworkWiring {
 
 		@Override
 		public Bundle getBundle() {
-			moduleDataBase.lockRead();
-			try {
-				Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
-				return systemModule == null ? null : systemModule.getBundle();
-			} finally {
-				moduleDataBase.unlockRead();
-			}
+			Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
+			return systemModule == null ? null : systemModule.getBundle();
 		}
 
 		@Override

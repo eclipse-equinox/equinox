@@ -26,19 +26,28 @@ import org.osgi.service.resolver.Resolver;
 /**
  * A database for storing modules, their revisions and wiring states.  The
  * database is responsible for assigning ids and providing access to the
- * capabilities provided by the revisions currently installed.
+ * capabilities provided by the revisions currently installed as well as
+ * the wiring states.
  * <p>
- * This database is not thread safe.  Unless otherwise noted all read and
- * write access must be protected by acquiring the appropriate locks.  
- * All read access must be protected by the {@link #lockRead()} and 
- * {@link #unlockRead()} methods.
- * All write access must be protected by the {@link #lockWrite()} and 
- * {@link #unlockWrite()} methods.
+ * <strong>Concurrent Semantics</strong><br />
+ * 
+ * Implementations must be thread safe.  The database allows for concurrent
+ * read operations and all read operations are protected by the
+ * {@link #lockRead() read} lock.  All write operations are
+ * protected by the {@link #lockWrite() write} lock.  The read and write
+ * locks are reentrant and follow the semantics of the
+ * {@link ReentrantReadWriteLock}.  Just like the {@code ReentrantReadWriteLock}
+ * the lock on a database can not be upgraded from a read to a write.  Doing so will result in an
+ * {@link IllegalMonitorStateException} being thrown.  This is behavior is different from
+ * the {@code ReentrantReadWriteLock} which results in a deadlock if an attempt is made
+ * to upgrade from a read to a write lock.
  * <p>
- * Unless otherwise noted all public methods of a {@link ModuleDataBase}
- * are considered read operations.
- * The {@link ModuleContainer container} this database is associated with
- * is responsible for accessing the database in a thread safe way.
+ * A database is associated with a {@link ModuleContainer container}.  The container
+ * associated with a database provides public API for manipulating the modules 
+ * and their wiring states.  For example, installing, updating, uninstalling,
+ * resolving and unresolving modules.  Except for the {@link #load(DataInputStream)},
+ * all other methods that perform write operations are intended to be used by
+ * the associated container.
  */
 public abstract class ModuleDataBase {
 	/**
@@ -120,62 +129,92 @@ public abstract class ModuleDataBase {
 	/**
 	 * Returns the module at the given location or null if no module exists
 	 * at the given location.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @param location the location of the module.
 	 * @return the module at the given location or null.
 	 */
 	final Module getModule(String location) {
-		return modulesByLocations.get(location);
+		lockRead();
+		try {
+			return modulesByLocations.get(location);
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
 	 * Returns the module at the given id or null if no module exists
 	 * at the given location.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @param id the id of the module.
 	 * @return the module at the given id or null.
 	 */
 	final Module getModule(long id) {
-		return modulesById.get(id);
+		lockRead();
+		try {
+			return modulesById.get(id);
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
 	 * Returns a snapshot collection of revisions with the specified name 
 	 * and version.  If version is {@code null} then all revisions with
 	 * the specified name are returned.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @param name the name of the modules
 	 * @param version the version of the modules or {@code null}
 	 * @return a snapshot collection of revisions with the specified name
 	 * and version.
 	 */
 	final Collection<ModuleRevision> getRevisions(String name, Version version) {
-		if (version == null)
-			return new ArrayList<ModuleRevision>(revisionByName.get(name));
+		lockRead();
+		try {
+			if (version == null)
+				return new ArrayList<ModuleRevision>(revisionByName.get(name));
 
-		Collection<ModuleRevision> existingRevisions = revisionByName.get(name);
-		if (existingRevisions == null) {
-			return Collections.emptyList();
-		}
-		Collection<ModuleRevision> sameVersion = new ArrayList<ModuleRevision>(1);
-		for (ModuleRevision revision : existingRevisions) {
-			if (revision.getVersion().equals(version)) {
-				sameVersion.add(revision);
+			Collection<ModuleRevision> existingRevisions = revisionByName.get(name);
+			if (existingRevisions == null) {
+				return Collections.emptyList();
 			}
+			Collection<ModuleRevision> sameVersion = new ArrayList<ModuleRevision>(1);
+			for (ModuleRevision revision : existingRevisions) {
+				if (revision.getVersion().equals(version)) {
+					sameVersion.add(revision);
+				}
+			}
+			return sameVersion;
+		} finally {
+			unlockRead();
 		}
-		return sameVersion;
 	}
 
 	/**
-	 * Installs a new revision using the specified builder, location and module
+	 * Installs a new revision using the specified builder, location and module.
+	 * <p>
+	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param location the location to use for the installation
 	 * @param builder the builder to use to create the new revision
 	 * @return the installed module
 	 */
 	final Module install(String location, ModuleRevisionBuilder builder) {
-		Module module = load(location, builder, getNextIdAndIncrement());
-		incrementTimestamp();
-		return module;
+		lockWrite();
+		try {
+			Module module = load(location, builder, getNextIdAndIncrement());
+			incrementTimestamp();
+			return module;
+		} finally {
+			unlockWrite();
+		}
 	}
 
 	final Module load(String location, ModuleRevisionBuilder builder, long id) {
+		// sanity check
+		checkWrite();
 		if (container == null)
 			throw new IllegalStateException("Container is not set."); //$NON-NLS-1$
 		if (modulesByLocations.containsKey(location))
@@ -192,6 +231,9 @@ public abstract class ModuleDataBase {
 	}
 
 	private void addToRevisionByName(ModuleRevision revision) {
+		// sanity check
+		checkWrite();
+
 		String name = revision.getSymbolicName();
 		Collection<ModuleRevision> sameName = revisionByName.get(name);
 		if (sameName == null) {
@@ -205,81 +247,89 @@ public abstract class ModuleDataBase {
 	 * Uninstalls the specified module from this database.
 	 * Uninstalling a module will attempt to clean up any removal pending
 	 * revisions possible.
+	 * <p>
+	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param module the module to uninstall
 	 */
 	final void uninstall(Module module) {
-		ModuleRevisions uninstalling = module.getRevisions();
-		// remove the location
-		modulesByLocations.remove(module.getLocation());
-		modulesById.remove(module.getId());
-		// remove the revisions by name
-		List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
-		for (ModuleRevision revision : revisions) {
-			removeCapabilities(revision);
-			String name = revision.getSymbolicName();
-			if (name != null) {
-				Collection<ModuleRevision> sameName = revisionByName.get(name);
-				if (sameName != null) {
-					sameName.remove(revision);
+		lockWrite();
+		try {
+			ModuleRevisions uninstalling = module.getRevisions();
+			// remove the location
+			modulesByLocations.remove(module.getLocation());
+			modulesById.remove(module.getId());
+			// remove the revisions by name
+			List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
+			for (ModuleRevision revision : revisions) {
+				removeCapabilities(revision);
+				String name = revision.getSymbolicName();
+				if (name != null) {
+					Collection<ModuleRevision> sameName = revisionByName.get(name);
+					if (sameName != null) {
+						sameName.remove(revision);
+					}
+				}
+				// if the revision does not have a wiring it can safely be removed
+				// from the revisions for the module
+				ModuleWiring oldWiring = wirings.get(revision);
+				if (oldWiring == null) {
+					module.getRevisions().removeRevision(revision);
 				}
 			}
-			// if the revision does not have a wiring it can safely be removed
-			// from the revisions for the module
-			ModuleWiring oldWiring = wirings.get(revision);
-			if (oldWiring == null) {
-				module.getRevisions().removeRevision(revision);
-			}
-		}
-		// marke the revisions as uninstalled
-		uninstalling.uninstall();
-		// attempt to cleanup any removal pendings
-		cleanupRemovalPending();
+			// marke the revisions as uninstalled
+			uninstalling.uninstall();
+			// attempt to cleanup any removal pendings
+			cleanupRemovalPending();
 
-		incrementTimestamp();
+			incrementTimestamp();
+		} finally {
+			unlockWrite();
+		}
 	}
 
 	/**
-	 * Installs a new revision using the specified builder, location and module
-	 * @param module the module for which the revision is being installed for
-	 * @param location the location to use for the installation
-	 * @param builder the builder to use to create the new revision
-	 */
-	/**
 	 * Updates the specified module with anew revision using the specified builder.
+	 * <p>
+	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param module the module for which the revision provides an update for
 	 * @param builder the builder to use to create the new revision
 	 */
 	final void update(Module module, ModuleRevisionBuilder builder) {
-		ModuleRevision oldRevision = module.getCurrentRevision();
-		ModuleRevision newRevision = builder.addRevision(module.getRevisions());
-		String name = newRevision.getSymbolicName();
-		Collection<ModuleRevision> sameName = revisionByName.get(name);
-		if (sameName == null) {
-			sameName = new ArrayList<ModuleRevision>(1);
-			revisionByName.put(name, sameName);
-		}
-		sameName.add(newRevision);
-		addCapabilities(newRevision);
-
-		// remove the old revision by name
-		String oldName = oldRevision.getSymbolicName();
-		if (oldName != null) {
-			Collection<ModuleRevision> oldSameName = revisionByName.get(oldName);
-			if (oldSameName != null) {
-				oldSameName.remove(oldRevision);
+		lockWrite();
+		try {
+			ModuleRevision oldRevision = module.getCurrentRevision();
+			ModuleRevision newRevision = builder.addRevision(module.getRevisions());
+			String name = newRevision.getSymbolicName();
+			Collection<ModuleRevision> sameName = revisionByName.get(name);
+			if (sameName == null) {
+				sameName = new ArrayList<ModuleRevision>(1);
+				revisionByName.put(name, sameName);
 			}
-		}
+			sameName.add(newRevision);
+			addCapabilities(newRevision);
 
-		// if the old revision does not have a wiring it can safely be removed
-		ModuleWiring oldWiring = wirings.get(oldRevision);
-		if (oldWiring == null) {
-			module.getRevisions().removeRevision(oldRevision);
-			removeCapabilities(oldRevision);
-		}
-		// attempt to clean up removal pendings
-		cleanupRemovalPending();
+			// remove the old revision by name
+			String oldName = oldRevision.getSymbolicName();
+			if (oldName != null) {
+				Collection<ModuleRevision> oldSameName = revisionByName.get(oldName);
+				if (oldSameName != null) {
+					oldSameName.remove(oldRevision);
+				}
+			}
 
-		incrementTimestamp();
+			// if the old revision does not have a wiring it can safely be removed
+			ModuleWiring oldWiring = wirings.get(oldRevision);
+			if (oldWiring == null) {
+				module.getRevisions().removeRevision(oldRevision);
+				removeCapabilities(oldRevision);
+			}
+			// attempt to clean up removal pendings
+			cleanupRemovalPending();
+
+			incrementTimestamp();
+		} finally {
+			unlockWrite();
+		}
 	}
 
 	/**
@@ -289,6 +339,8 @@ public abstract class ModuleDataBase {
 	 * wiring are also removal pending.
 	 */
 	private void cleanupRemovalPending() {
+		// sanity check
+		checkWrite();
 		Collection<ModuleRevision> removalPending = getRemovalPending();
 		for (ModuleRevision removed : removalPending) {
 			if (wirings.get(removed) == null)
@@ -313,13 +365,20 @@ public abstract class ModuleDataBase {
 
 	/**
 	 * Gets all revisions with a removal pending wiring.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return all revisions with a removal pending wiring.
 	 */
 	final Collection<ModuleRevision> getRemovalPending() {
 		Collection<ModuleRevision> removalPending = new ArrayList<ModuleRevision>();
-		for (ModuleWiring wiring : wirings.values()) {
-			if (!wiring.isCurrent())
-				removalPending.add(wiring.getRevision());
+		lockRead();
+		try {
+			for (ModuleWiring wiring : wirings.values()) {
+				if (!wiring.isCurrent())
+					removalPending.add(wiring.getRevision());
+			}
+		} finally {
+			unlockRead();
 		}
 		return removalPending;
 	}
@@ -327,20 +386,34 @@ public abstract class ModuleDataBase {
 	/**
 	 * Returns the current wiring for the specified revision or
 	 * null of no wiring exists for the revision.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @param revision the revision to get the wiring for
 	 * @return the current wiring for the specified revision.
 	 */
 	final ModuleWiring getWiring(ModuleRevision revision) {
-		return wirings.get(revision);
+		lockRead();
+		try {
+			return wirings.get(revision);
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
 	 * Returns a snapshot of the wirings for all revisions.  This
 	 * performs a shallow copy of each entry in the wirings map.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return a snapshot of the wirings for all revisions.
 	 */
 	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
-		return new HashMap<ModuleRevision, ModuleWiring>(wirings);
+		lockRead();
+		try {
+			return new HashMap<ModuleRevision, ModuleWiring>(wirings);
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
@@ -357,64 +430,111 @@ public abstract class ModuleDataBase {
 	 * any read or write locks on this database.  This is useful for doing
 	 * {@link Resolver#resolve(org.osgi.service.resolver.ResolveContext) resolve}
 	 * operations without holding the read or write lock on this database.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return a cloned snapshot of the wirings of all revisions.
 	 */
 	final Map<ModuleRevision, ModuleWiring> getWiringsClone() {
-		Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<ModuleRevision, ModuleWiring>();
-		for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
-			ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null));
-			clonedWirings.put(entry.getKey(), wiring);
+		lockRead();
+		try {
+			Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<ModuleRevision, ModuleWiring>();
+			for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
+				ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null));
+				clonedWirings.put(entry.getKey(), wiring);
+			}
+			return clonedWirings;
+		} finally {
+			unlockRead();
 		}
-		return clonedWirings;
 	}
 
 	/**
 	 * Replaces the complete wiring map with the specified wiring
+	 * <p>
+	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param newWiring the new wiring to take effect.  The values
 	 * from the new wiring are copied.
 	 */
 	final void setWiring(Map<ModuleRevision, ModuleWiring> newWiring) {
-		wirings.clear();
-		wirings.putAll(newWiring);
-		incrementTimestamp();
+		lockWrite();
+		try {
+			wirings.clear();
+			wirings.putAll(newWiring);
+			incrementTimestamp();
+		} finally {
+			unlockWrite();
+		}
 	}
 
 	/**
 	 * Adds all the values from the specified delta wirings to the
 	 * wirings current wirings
+	 * <p>
+	 * A write operation protected by the {@link #lockWrite() write} lock.
 	 * @param deltaWiring the new wiring values to take effect.
 	 * The values from the delta wiring are copied.
 	 */
 	final void mergeWiring(Map<ModuleRevision, ModuleWiring> deltaWiring) {
-		wirings.putAll(deltaWiring);
-		incrementTimestamp();
+		lockWrite();
+		try {
+			wirings.putAll(deltaWiring);
+			incrementTimestamp();
+		} finally {
+			unlockWrite();
+		}
 	}
 
 	/**
 	 * Returns a snapshot of all modules.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return a snapshot of all modules.
 	 */
 	protected final List<Module> getModules() {
-		List<Module> modules = new ArrayList<Module>(modulesByLocations.values());
-		Collections.sort(modules, new Comparator<Module>() {
-			@Override
-			public int compare(Module m1, Module m2) {
-				return m1.getId().compareTo(m2.getId());
-			}
-		});
+		List<Module> modules;
+		lockRead();
+		try {
+			modules = new ArrayList<Module>(modulesByLocations.values());
+			Collections.sort(modules, new Comparator<Module>() {
+				@Override
+				public int compare(Module m1, Module m2) {
+					return m1.getId().compareTo(m2.getId());
+				}
+			});
+		} finally {
+			unlockRead();
+		}
 		return modules;
 	}
 
 	/**
 	 * Increments by one the next module ID
-	 * @return the previous module ID
 	 */
 	private long getNextIdAndIncrement() {
+		// sanity check
+		checkWrite();
 		return nextId.getAndIncrement();
+
 	}
 
+	private void checkWrite() {
+		if (monitor.getWriteHoldCount() == 0)
+			throw new IllegalMonitorStateException("Must hold the write lock.");
+	}
+
+	/**
+	 * returns the next module ID
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
+	 * @return the next module ID
+	 */
 	public final long getNextId() {
-		return nextId.get();
+		lockRead();
+		try {
+			return nextId.get();
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
@@ -427,16 +547,25 @@ public abstract class ModuleDataBase {
 	 *   <li> uninstalling a module
 	 *   <li> modifying the wirings
 	 * </ul>
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
 	 * @return the current timestamp of this database.
 	 */
 	final public long getTimestamp() {
-		return timeStamp.get();
+		lockRead();
+		try {
+			return timeStamp.get();
+		} finally {
+			unlockRead();
+		}
 	}
 
 	/**
 	 * Increments the timestamp of this database.
 	 */
 	private void incrementTimestamp() {
+		// sanity check
+		checkWrite();
 		timeStamp.incrementAndGet();
 	}
 
@@ -452,14 +581,14 @@ public abstract class ModuleDataBase {
 	 * state exception is thrown if the current thread holds
 	 * one or more read locks.
 	 * @see WriteLock#lock()
-	 * @throws IllegalStateException if the current thread holds
+	 * @throws IllegalMonitorStateException if the current thread holds
 	 * one or more read locks.
 	 */
 	public final void lockWrite() {
 		if (monitor.getReadHoldCount() > 0) {
 			// this is not supported and will cause deadlock if allowed to proceed.
 			// fail fast instead of deadlocking
-			throw new IllegalStateException("Requesting upgrade to write lock."); //$NON-NLS-1$
+			throw new IllegalMonitorStateException("Requesting upgrade to write lock."); //$NON-NLS-1$
 		}
 		monitor.writeLock().lock();
 	}
@@ -483,6 +612,8 @@ public abstract class ModuleDataBase {
 	 * provided by the specified revision to this database.  These capabilities must 
 	 * become available for lookup with the {@link ModuleDataBase#findCapabilities(ModuleRequirement)}
 	 * method.
+	 * <p>
+	 * This method must be called while holding the {@link #lockWrite() write} lock.
 	 * @param revision the revision which has capabilities to add
 	 */
 	protected abstract void addCapabilities(ModuleRevision revision);
@@ -492,6 +623,8 @@ public abstract class ModuleDataBase {
 	 * provided by the specified revision from this database.  These capabilities
 	 * must no longer be available for lookup with the 
 	 * {@link ModuleDataBase#findCapabilities(ModuleRequirement)} method.
+	 * <p>
+	 * This method must be called while holding the {@link #lockWrite() write} lock.
 	 * @param revision
 	 */
 	protected abstract void removeCapabilities(ModuleRevision revision);
@@ -499,6 +632,10 @@ public abstract class ModuleDataBase {
 	/**
 	 * Returns a mutable snapshot of capabilities that are candidates for 
 	 * satisfying the specified requirement.
+	 * <p>
+	 * A read operation protected by the {@link #lockRead() read} lock.
+	 * Implementers of this method should acquire the read lock while
+	 * finding capabilities.
 	 * @param requirement the requirement
 	 * @return the candidates for the requirement
 	 */
