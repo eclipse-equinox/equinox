@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.osgi.framework.Version;
 import org.osgi.resource.*;
+import org.osgi.service.resolver.Resolver;
 
 /**
  * A database for storing modules, their revisions and wiring states.  The
@@ -27,8 +28,8 @@ import org.osgi.resource.*;
  * <p>
  * This database is not thread safe.  Unless otherwise noted all read and
  * write access must be protected by acquiring the appropriate locks.  
- * All read access must be protected by the {@link #lockRead(boolean)} and 
- * {@link #unlockRead(boolean)} methods.
+ * All read access must be protected by the {@link #lockRead()} and 
+ * {@link #unlockRead()} methods.
  * All write access must be protected by the {@link #lockWrite()} and 
  * {@link #unlockWrite()} methods.
  * <p>
@@ -321,11 +322,37 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
-	 * Returns a snapshot of the wirings for all revisions.
+	 * Returns a snapshot of the wirings for all revisions.  This
+	 * performs a shallow copy of each entry in the wirings map.
 	 * @return a snapshot of the wirings for all revisions.
 	 */
 	final Map<ModuleRevision, ModuleWiring> getWiringsCopy() {
 		return new HashMap<ModuleRevision, ModuleWiring>(wirings);
+	}
+
+	/**
+	 * Returns a cloned snapshot of the wirings of all revisions.  This
+	 * performs a clone of each {@link ModuleWiring}.  The 
+	 * {@link ModuleWiring#getRevision() revision},
+	 * {@link ModuleWiring#getModuleCapabilities(String) capabilities},
+	 * {@link ModuleWiring#getModuleRequirements(String) requirements},
+	 * {@link ModuleWiring#getProvidedModuleWires(String) provided wires}, and
+	 * {@link ModuleWiring#getRequiredModuleWires(String) required wires} of 
+	 * each wiring are copied into a cloned copy of the wiring.
+	 * <p>
+	 * The returned map of wirings may be safely read from while not holding
+	 * any read or write locks on this database.  This is useful for doing
+	 * {@link Resolver#resolve(org.osgi.service.resolver.ResolveContext) resolve}
+	 * operations without holding the read or write lock on this database.
+	 * @return a cloned snapshot of the wirings of all revisions.
+	 */
+	final Map<ModuleRevision, ModuleWiring> getWiringsClone() {
+		Map<ModuleRevision, ModuleWiring> clonedWirings = new HashMap<ModuleRevision, ModuleWiring>();
+		for (Map.Entry<ModuleRevision, ModuleWiring> entry : wirings.entrySet()) {
+			ModuleWiring wiring = new ModuleWiring(entry.getKey(), entry.getValue().getModuleCapabilities(null), entry.getValue().getModuleRequirements(null), entry.getValue().getProvidedModuleWires(null), entry.getValue().getRequiredModuleWires(null));
+			clonedWirings.put(entry.getKey(), wiring);
+		}
+		return clonedWirings;
 	}
 
 	/**
@@ -409,11 +436,10 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
-	 * @param reserveUpgrade
-	 * @see UpgradeableReadWriteLock#lockRead(boolean)
+	 * @see UpgradeableReadWriteLock#lockRead()
 	 */
-	public final void lockRead(boolean reserveUpgrade) {
-		monitor.lockRead(reserveUpgrade);
+	public final void lockRead() {
+		monitor.lockRead();
 	}
 
 	/**
@@ -424,12 +450,10 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
-	 * 
-	 * @param unreserveUpgrade
-	 * @see UpgradeableReadWriteLock#unlockRead(boolean)
+	 * @see UpgradeableReadWriteLock#unlockRead()
 	 */
-	public final void unlockRead(boolean unreserveUpgrade) {
-		monitor.unlockRead(unreserveUpgrade);
+	public final void unlockRead() {
+		monitor.unlockRead();
 	}
 
 	/**
@@ -481,7 +505,7 @@ public abstract class ModuleDataBase {
 	 * may be stored.  Wiring can only be stored if there are no {@link #getRemovalPending()
 	 * removal pending} revisions.
 	 * <p>
-	 * This method acquires the {@link #lockRead(boolean) read} lock while writing this
+	 * This method acquires the {@link #lockRead() read} lock while writing this
 	 * database.
 	 * <p>
 	 * After this database have been written, the output stream is flushed.  
@@ -492,11 +516,11 @@ public abstract class ModuleDataBase {
 	 * @throws IOException if writing this database to the specified output stream throws an IOException
 	 */
 	public final void store(DataOutputStream out, boolean persistWirings) throws IOException {
-		lockRead(false);
+		lockRead();
 		try {
 			Persistence.store(this, out, persistWirings);
 		} finally {
-			unlockRead(false);
+			unlockRead();
 		}
 	}
 
@@ -578,7 +602,7 @@ public abstract class ModuleDataBase {
 				return;
 			}
 
-			Map<ModuleRevision, ModuleWiring> wirings = moduleDataBase.getWiringsCopy();
+			Map<ModuleRevision, ModuleWiring> wirings = moduleDataBase.wirings;
 			// prime the object table with all the required wires
 			out.writeInt(wirings.size());
 			for (ModuleWiring wiring : wirings.values()) {

@@ -107,7 +107,7 @@ public class UpgradeableReadWriteLock {
 			if (reserveUpgradeThread == Thread.currentThread()) {
 				// re-obtain the read locks that got released during the write upgrade
 				for (int i = 0; i < readLocksHeldByUpgrade; i++)
-					lockRead(false);
+					lockRead();
 				readLocksHeldByUpgrade = 0;
 			}
 		}
@@ -116,54 +116,68 @@ public class UpgradeableReadWriteLock {
 	}
 
 	/**
-	 * Acquires the read lock.
+	 * Acquires the upgradeable read lock.
 	 * <p>
-	 * Acquires the read lock if the write lock and upgrade reservation is not held by another thread.
+	 * Acquires an upgradeable read lock if the write lock and upgradeable read lock are not held by another thread.
 	 * <p>
-	 * If the write lock or upgrade reservation are held by another thread then the current thread 
-	 * becomes disabled for thread scheduling purposes and lies dormant until the read lock has been acquired. 
+	 * If the write lock or upgradeable read lock are held by another thread then the current thread 
+	 * becomes disabled for thread scheduling purposes and lies dormant until the upgradeable read lock has been acquired. 
 	 * <p>
-	 * A read lock may be acquired with a request to also acquire the upgrade reservation.  Only a single
-	 * thread may hold the upgrade reservation
-	 * @param reserveUpgrade true if the upgrade reservation is to be acquired also
+	 * Only a single thread may hold the upgradeable read lock
 	 * @see ReadLock#lock()
 	 */
-	public void lockRead(boolean reserveUpgrade) {
-		if (reserveUpgrade) {
-			synchronized (reservationMonitor) {
-				if (reserveUpgradeThread == Thread.currentThread())
-					throw new IllegalStateException("Thread already requested write upgrade."); //$NON-NLS-1$
-				while (reserveUpgradeThread != null)
-					try {
-						// wait for the reserve thread to give up its upgrade request
-						reservationMonitor.wait();
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
-				reserveUpgradeThread = Thread.currentThread();
-			}
+	public void lockUpgradeableRead() {
+		synchronized (reservationMonitor) {
+			if (reserveUpgradeThread == Thread.currentThread())
+				throw new IllegalStateException("Thread already requested write upgrade."); //$NON-NLS-1$
+			while (reserveUpgradeThread != null)
+				try {
+					// wait for the reserve thread to give up its upgrade request
+					reservationMonitor.wait();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			reserveUpgradeThread = Thread.currentThread();
 		}
 		lock.readLock().lock();
+	}
+
+	/**
+	 * Acquires the read lock.
+	 * <p>
+	 * Acquires the read lock if the write lock is not held by another thread.
+	 * <p>
+	 * If the write lock is held by another thread then the current thread 
+	 * becomes disabled for thread scheduling purposes and lies dormant until the read lock has been acquired. 
+	 * @see ReadLock#lock()
+	 */
+	public void lockRead() {
+		lock.readLock().lock();
+	}
+
+	/**
+	 * Attempts to release the upgradeable read lock.
+	 * <p>
+	 * If the number of readers is now zero then the lock is made available for write lock and upgradeable read lock attempts.
+	 * @see ReadLock#unlock()
+	 */
+	public void unlockUpgradeableRead() {
+		synchronized (reservationMonitor) {
+			if (reserveUpgradeThread != Thread.currentThread())
+				throw new IllegalStateException("The current thread does not own the upgrade reservation."); //$NON-NLS-1$
+			reserveUpgradeThread = null;
+			reservationMonitor.notifyAll();
+		}
+		lock.readLock().unlock();
 	}
 
 	/**
 	 * Attempts to release the read lock.
 	 * <p>
 	 * If the number of readers is now zero then the lock is made available for write lock attempts.
-	 * <p>
-	 * A release of the read lock may also request to release the upgrade reservation.
-	 * @param unreserveUpgrade true of the upgrade reservation is to be released also
 	 * @see ReadLock#unlock()
 	 */
-	public void unlockRead(boolean unreserveUpgrade) {
-		if (unreserveUpgrade) {
-			synchronized (reservationMonitor) {
-				if (reserveUpgradeThread != Thread.currentThread())
-					throw new IllegalStateException("The current thread does not own the upgrade reservation."); //$NON-NLS-1$
-				reserveUpgradeThread = null;
-				reservationMonitor.notifyAll();
-			}
-		}
+	public void unlockRead() {
 		lock.readLock().unlock();
 	}
 

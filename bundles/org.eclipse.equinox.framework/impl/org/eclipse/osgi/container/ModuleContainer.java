@@ -81,11 +81,11 @@ public class ModuleContainer {
 	 */
 	public List<Module> getModules() {
 		List<Module> result;
-		moduleDataBase.lockRead(false);
+		moduleDataBase.lockRead();
 		try {
 			result = moduleDataBase.getModules();
 		} finally {
-			moduleDataBase.unlockRead(false);
+			moduleDataBase.unlockRead();
 		}
 		return result;
 	}
@@ -97,11 +97,11 @@ public class ModuleContainer {
 	 * @return the module with the specified id, or null of no such module is installed.
 	 */
 	public Module getModule(long id) {
-		moduleDataBase.lockRead(false);
+		moduleDataBase.lockRead();
 		try {
 			return moduleDataBase.getModule(id);
 		} finally {
-			moduleDataBase.unlockRead(false);
+			moduleDataBase.unlockRead();
 		}
 	}
 
@@ -112,11 +112,11 @@ public class ModuleContainer {
 	 * @return the module with the specified location, or null of no such module is installed.
 	 */
 	public Module getModule(String location) {
-		moduleDataBase.lockRead(false);
+		moduleDataBase.lockRead();
 		try {
 			return moduleDataBase.getModule(location);
 		} finally {
-			moduleDataBase.unlockRead(false);
+			moduleDataBase.unlockRead();
 		}
 	}
 
@@ -128,9 +128,9 @@ public class ModuleContainer {
 	 * <p>
 	 * If a module already exists with the specified location then the 
 	 * existing module is returned and the builder is not used.
-	 * @param origin
-	 * @param location
-	 * @param builder
+	 * @param origin the context performing the install, may be {@code null}.
+	 * @param location The location identifier of the module to install. 
+	 * @param builder the builder used to create the revision to install.
 	 * @return a new module or a existing module if one exists at the 
 	 *     specified location.
 	 * @throws BundleException if some error occurs installing the module
@@ -142,7 +142,7 @@ public class ModuleContainer {
 		try {
 			Module existingLocation = null;
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			moduleDataBase.lockRead(false);
+			moduleDataBase.lockRead();
 			try {
 				existingLocation = moduleDataBase.getModule(location);
 				if (existingLocation == null) {
@@ -171,7 +171,7 @@ public class ModuleContainer {
 					}
 				}
 			} finally {
-				moduleDataBase.unlockRead(false);
+				moduleDataBase.unlockRead();
 			}
 			// Check that the existing location is visible from the origin bundle
 			if (existingLocation != null) {
@@ -187,10 +187,11 @@ public class ModuleContainer {
 			// This is from the perspective of the origin bundle
 			if (origin != null && !collisionCandidates.isEmpty()) {
 				bundleCollisionHook.filterCollisions(CollisionHook.INSTALLING, origin.getBundle(), collisionCandidates);
-				if (!collisionCandidates.isEmpty()) {
-					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
-				}
 			}
+			if (!collisionCandidates.isEmpty()) {
+				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
+			}
+
 			Module result;
 			moduleDataBase.lockWrite();
 			try {
@@ -210,12 +211,21 @@ public class ModuleContainer {
 		}
 	}
 
+	/**
+	 * Updates the specified module with a new revision.  The specified
+	 * builder is used to create a new {@link ModuleRevision revision} 
+	 * which will become the {@link Module#getCurrentRevision() current}
+	 * revision of the new module.
+	 * @param module the module to update
+	 * @param builder the builder used to create the revision for the update.
+	 * @throws BundleException if some error occurs updating the module
+	 */
 	public void update(Module module, ModuleRevisionBuilder builder) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
 			Collection<Bundle> collisionCandidates = Collections.emptyList();
-			moduleDataBase.lockRead(false);
+			moduleDataBase.lockRead();
 			try {
 				// Attempt to lock the name
 				try {
@@ -241,7 +251,7 @@ public class ModuleContainer {
 				}
 
 			} finally {
-				moduleDataBase.unlockRead(false);
+				moduleDataBase.unlockRead();
 			}
 
 			// Check that the bundle does not collide with other bundles with the same name and version
@@ -249,9 +259,10 @@ public class ModuleContainer {
 			Bundle origin = module.getBundle();
 			if (origin != null && !collisionCandidates.isEmpty()) {
 				bundleCollisionHook.filterCollisions(CollisionHook.UPDATING, origin, collisionCandidates);
-				if (!collisionCandidates.isEmpty()) {
-					throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
-				}
+			}
+
+			if (!collisionCandidates.isEmpty()) {
+				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
 			}
 
 			// TODO stop the module and acquire its state change lock
@@ -270,6 +281,10 @@ public class ModuleContainer {
 		}
 	}
 
+	/**
+	 * Uninstalls the specified module.
+	 * @param module the module to uninstall
+	 */
 	public void uninstall(Module module) {
 		moduleDataBase.lockWrite();
 		try {
@@ -281,11 +296,11 @@ public class ModuleContainer {
 	}
 
 	ModuleWiring getWiring(ModuleRevision revision) {
-		moduleDataBase.lockRead(false);
+		moduleDataBase.lockRead();
 		try {
 			return moduleDataBase.getWiring(revision);
 		} finally {
-			moduleDataBase.unlockRead(false);
+			moduleDataBase.unlockRead();
 		}
 	}
 
@@ -305,56 +320,85 @@ public class ModuleContainer {
 	 * @see FrameworkWiring#resolveBundles(Collection)
 	 */
 	public void resolve(Collection<Module> triggers) throws ResolutionException {
-		moduleDataBase.lockRead(true);
+		while (!resolve0(triggers)) {
+			// nothing
+		}
+	}
+
+	public boolean resolve0(Collection<Module> triggers) throws ResolutionException {
+		if (triggers == null)
+			triggers = new ArrayList<Module>(0);
+		Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
+		Map<ModuleRevision, ModuleWiring> wiringClone;
+		long timestamp;
+		moduleDataBase.lockRead();
 		try {
-			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
-			if (triggers == null)
-				triggers = new ArrayList<Module>(0);
-			Collection<ModuleRevision> triggerRevisions = new ArrayList<ModuleRevision>(triggers.size());
+			timestamp = moduleDataBase.getTimestamp();
+			wiringClone = moduleDataBase.getWiringsClone();
 			for (Module module : triggers) {
 				ModuleRevision current = module.getCurrentRevision();
 				if (current != null)
 					triggerRevisions.add(current);
 			}
-			Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, wiringCopy, moduleDataBase);
-			if (deltaWiring.isEmpty())
-				return; // nothing to do
-			Collection<Module> newlyResolved = new ArrayList<Module>();
-			// now attempt to apply the delta
-			// TODO acquire the state change lock of the newly resolved modules
-			moduleDataBase.lockWrite();
-			try {
-				for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
-					ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
-					if (current != null) {
-						// only need to update the provided and required wires for currently resolved
-						current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
-						current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
-						deltaEntry.setValue(current); // set the real wiring into the delta
-					} else {
-						newlyResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
-					}
-				}
-				moduleDataBase.mergeWiring(deltaWiring);
-			} finally {
-				moduleDataBase.unlockWrite();
-			}
-			// TODO set modules to resolved and release their state change lock
-			// TODO send out resolved events
 		} finally {
-			moduleDataBase.unlockRead(true);
+			moduleDataBase.unlockRead();
 		}
+
+		Map<ModuleRevision, ModuleWiring> deltaWiring = moduleResolver.resolveDelta(triggerRevisions, wiringClone, moduleDataBase);
+		if (deltaWiring.isEmpty())
+			return true; // nothing to do
+
+		Collection<Module> newlyResolved = new ArrayList<Module>();
+		// now attempt to apply the delta
+		// TODO acquire the state change lock of the newly resolved modules
+		moduleDataBase.lockWrite();
+		try {
+			if (timestamp != moduleDataBase.getTimestamp())
+				return false; // need to try again TODO release state change locks
+			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
+			for (Map.Entry<ModuleRevision, ModuleWiring> deltaEntry : deltaWiring.entrySet()) {
+				ModuleWiring current = wiringCopy.get(deltaEntry.getKey());
+				if (current != null) {
+					// only need to update the provided and required wires for currently resolved
+					current.setProvidedWires(deltaEntry.getValue().getProvidedModuleWires(null));
+					current.setRequiredWires(deltaEntry.getValue().getRequiredModuleWires(null));
+					deltaEntry.setValue(current); // set the real wiring into the delta
+				} else {
+					newlyResolved.add(deltaEntry.getValue().getRevision().getRevisions().getModule());
+				}
+			}
+			moduleDataBase.mergeWiring(deltaWiring);
+		} finally {
+			moduleDataBase.unlockWrite();
+		}
+		// TODO set modules to resolved and release their state change lock
+		// TODO send out resolved events
+		return true;
 	}
 
 	private Collection<Module> unresolve(Collection<Module> initial) {
+		Collection<Module> refreshTriggers = null;
+		while (refreshTriggers == null) {
+			refreshTriggers = unresolve0(initial);
+		}
+		return refreshTriggers;
+	}
+
+	private Collection<Module> unresolve0(Collection<Module> initial) {
+		Map<ModuleRevision, ModuleWiring> wiringCopy;
 		Collection<Module> refreshTriggers;
-		moduleDataBase.lockRead(true);
+		Collection<ModuleRevision> toRemoveRevisions;
+		Collection<ModuleWiring> toRemoveWirings;
+		Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists;
+		long timestamp;
+		moduleDataBase.lockRead();
 		try {
-			Map<ModuleRevision, ModuleWiring> wiringCopy = moduleDataBase.getWiringsCopy();
+			timestamp = moduleDataBase.getTimestamp();
+			wiringCopy = moduleDataBase.getWiringsCopy();
 			refreshTriggers = getRefreshClosure(initial, wiringCopy);
-			Collection<ModuleRevision> toRemoveRevisions = new ArrayList<ModuleRevision>();
-			Collection<ModuleWiring> toRemoveWirings = new ArrayList<ModuleWiring>();
-			Map<ModuleWiring, Collection<ModuleWire>> toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
+			toRemoveRevisions = new ArrayList<ModuleRevision>();
+			toRemoveWirings = new ArrayList<ModuleWiring>();
+			toRemoveWireLists = new HashMap<ModuleWiring, Collection<ModuleWire>>();
 			for (Module module : refreshTriggers) {
 				boolean first = true;
 				for (ModuleRevision revision : module.getRevisions().getModuleRevisions()) {
@@ -376,34 +420,37 @@ public class ModuleContainer {
 					}
 					first = false;
 				}
-				// TODO acquire module state change locks and stop modules
-				// TODO remove any non-active modules from the refreshTriggers
-			}
-
-			moduleDataBase.lockWrite();
-			try {
-				// remove any wires from unresolved wirings that got removed
-				for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
-					List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
-					provided.removeAll(entry.getValue());
-					entry.getKey().setProvidedWires(provided);
-				}
-				// remove any revisions that got removed as part of the refresh
-				for (ModuleRevision removed : toRemoveRevisions) {
-					removed.getRevisions().removeRevision(removed);
-					moduleDataBase.removeCapabilities(removed);
-				}
-				// invalidate any removed wiring objects
-				for (ModuleWiring moduleWiring : toRemoveWirings) {
-					moduleWiring.invalidate();
-				}
-				moduleDataBase.setWiring(wiringCopy);
-			} finally {
-				moduleDataBase.unlockWrite();
 			}
 		} finally {
-			moduleDataBase.unlockRead(true);
+			moduleDataBase.unlockRead();
 		}
+		// TODO acquire module state change locks and stop modules
+		// TODO remove any non-active modules from the refreshTriggers
+
+		moduleDataBase.lockWrite();
+		try {
+			if (timestamp != moduleDataBase.getTimestamp())
+				return null; // need to try again
+			// remove any wires from unresolved wirings that got removed
+			for (Map.Entry<ModuleWiring, Collection<ModuleWire>> entry : toRemoveWireLists.entrySet()) {
+				List<ModuleWire> provided = entry.getKey().getProvidedModuleWires(null);
+				provided.removeAll(entry.getValue());
+				entry.getKey().setProvidedWires(provided);
+			}
+			// remove any revisions that got removed as part of the refresh
+			for (ModuleRevision removed : toRemoveRevisions) {
+				removed.getRevisions().removeRevision(removed);
+				moduleDataBase.removeCapabilities(removed);
+			}
+			// invalidate any removed wiring objects
+			for (ModuleWiring moduleWiring : toRemoveWirings) {
+				moduleWiring.invalidate();
+			}
+			moduleDataBase.setWiring(wiringCopy);
+		} finally {
+			moduleDataBase.unlockWrite();
+		}
+
 		// TODO set unresolved status of modules and release module state change locks
 		// TODO fire unresolved events
 		return refreshTriggers;
@@ -491,12 +538,12 @@ public class ModuleContainer {
 
 		@Override
 		public Bundle getBundle() {
-			moduleDataBase.lockRead(false);
+			moduleDataBase.lockRead();
 			try {
 				Module systemModule = moduleDataBase.getModule(Constants.SYSTEM_BUNDLE_LOCATION);
 				return systemModule == null ? null : systemModule.getBundle();
 			} finally {
-				moduleDataBase.unlockRead(false);
+				moduleDataBase.unlockRead();
 			}
 		}
 
@@ -530,7 +577,7 @@ public class ModuleContainer {
 
 		@Override
 		public Collection<Bundle> getRemovalPendingBundles() {
-			moduleDataBase.lockRead(false);
+			moduleDataBase.lockRead();
 			try {
 				Collection<Bundle> removalPendingBundles = new HashSet<Bundle>();
 				Collection<ModuleRevision> removalPending = moduleDataBase.getRemovalPending();
@@ -539,14 +586,14 @@ public class ModuleContainer {
 				}
 				return removalPendingBundles;
 			} finally {
-				moduleDataBase.unlockRead(false);
+				moduleDataBase.unlockRead();
 			}
 		}
 
 		@Override
 		public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
 			Collection<Module> modules = getModules(bundles);
-			moduleDataBase.lockRead(false);
+			moduleDataBase.lockRead();
 			try {
 				Collection<Module> closure = getRefreshClosure(modules, moduleDataBase.getWiringsCopy());
 				Collection<Bundle> result = new ArrayList<Bundle>(closure.size());
@@ -555,7 +602,7 @@ public class ModuleContainer {
 				}
 				return result;
 			} finally {
-				moduleDataBase.unlockRead(false);
+				moduleDataBase.unlockRead();
 			}
 		}
 
