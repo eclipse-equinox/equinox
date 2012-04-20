@@ -26,27 +26,15 @@ import org.osgi.framework.wiring.BundleRevisions;
  */
 public class ModuleRevisions implements BundleRevisions {
 	private final Object monitor = new Object();
-	private final Long id;
-	private final String location;
 	private final Module module;
 	private final ModuleContainer container;
 	/* @GuardedBy("monitor") */
 	private final List<ModuleRevision> revisions = new ArrayList<ModuleRevision>(1);
 	private volatile boolean uninstalled = false;
 
-	ModuleRevisions(Long id, String location, Module module, ModuleContainer container) {
-		this.id = id;
-		this.location = location;
+	ModuleRevisions(Module module, ModuleContainer container) {
 		this.module = module;
 		this.container = container;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public String getLocation() {
-		return location;
 	}
 
 	Module getModule() {
@@ -98,6 +86,6 @@ public class ModuleRevisions implements BundleRevisions {
 	}
 
 	public String toString() {
-		return "moduleID=" + id; //$NON-NLS-1$
+		return "moduleID=" + module.getId(); //$NON-NLS-1$
 	}
 }

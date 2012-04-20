@@ -541,8 +541,8 @@ class ModuleResolver {
 				return versionCompare;
 
 			// We assume all resources here come from us and are ModuleRevision objects
-			Long id1 = ((ModuleRevision) c1.getResource()).getRevisions().getId();
-			Long id2 = ((ModuleRevision) c2.getResource()).getRevisions().getId();
+			Long id1 = ((ModuleRevision) c1.getResource()).getRevisions().getModule().getId();
+			Long id2 = ((ModuleRevision) c2.getResource()).getRevisions().getModule().getId();
 
 			return id1.compareTo(id2);
 		}

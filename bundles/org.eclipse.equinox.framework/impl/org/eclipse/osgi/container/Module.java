@@ -18,17 +18,30 @@ import org.osgi.framework.BundleReference;
  * module {@link ModuleContainer container}.
  */
 public abstract class Module implements BundleReference {
-	private volatile ModuleRevisions revisions;
+	private final Long id;
+	private final String location;
+	private final ModuleRevisions revisions;
+
+	public Module(Long id, String location, ModuleContainer container) {
+		this.id = id;
+		this.location = location;
+		this.revisions = new ModuleRevisions(this, container);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public String getLocation() {
+		return location;
+	}
 
 	/**
 	 * Returns the {@link ModuleRevisions} associated with this module.
 	 * @return the {@link ModuleRevisions} associated with this module
 	 */
 	public final ModuleRevisions getRevisions() {
-		ModuleRevisions current = revisions;
-		if (current == null)
-			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
-		return current;
+		return revisions;
 	}
 
 	/**
@@ -36,21 +49,8 @@ public abstract class Module implements BundleReference {
 	 * @return the current {@link ModuleRevision revision} associated with this module.
 	 */
 	public final ModuleRevision getCurrentRevision() {
-		ModuleRevisions current = revisions;
-		if (current == null)
-			throw new IllegalStateException("Module installation is not complete."); //$NON-NLS-1$
-		List<ModuleRevision> revisionList = current.getModuleRevisions();
-		return revisionList.isEmpty() || current.isUninstalled() ? null : revisionList.get(0);
-	}
-
-	/**
-	 * Sets the {@link ModuleRevisions revisions} for this module.  This is done by the container when
-	 * {@link ModuleContainer#install(Module, org.osgi.framework.BundleContext, String, ModuleRevisionBuilder) install}
-	 * is called with this module.
-	 * @param revisions The revisions to associate with this module.
-	 */
-	final void setRevisions(ModuleRevisions revisions) {
-		this.revisions = revisions;
+		List<ModuleRevision> revisionList = revisions.getModuleRevisions();
+		return revisionList.isEmpty() || revisions.isUninstalled() ? null : revisionList.get(0);
 	}
 
 }

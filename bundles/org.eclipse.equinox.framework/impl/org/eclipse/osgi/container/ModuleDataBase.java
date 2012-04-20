@@ -97,15 +97,24 @@ public abstract class ModuleDataBase {
 	 * Sets the container for this database.  A database can only
 	 * be associated with a single container and that container must
 	 * have been constructed with this database.
+	 * <p>
+	 * This method modifies this database and is considered a write operation.
+	 * This method acquires the {@link #lockWrite() write} lock while setting
+	 * the container for this database.
 	 * @param container the container to associate this database with.
 	 */
 	public final void setContainer(ModuleContainer container) {
-		if (this.container != null)
-			throw new IllegalStateException("The container is already set."); //$NON-NLS-1$
-		if (container.moduleDataBase != this) {
-			throw new IllegalArgumentException("Container is already using a different database."); //$NON-NLS-1$
+		lockWrite();
+		try {
+			if (this.container != null)
+				throw new IllegalStateException("The container is already set."); //$NON-NLS-1$
+			if (container.moduleDataBase != this) {
+				throw new IllegalArgumentException("Container is already using a different database."); //$NON-NLS-1$
+			}
+			this.container = container;
+		} finally {
+			unlockWrite();
 		}
-		this.container = container;
 	}
 
 	/**
@@ -169,12 +178,14 @@ public abstract class ModuleDataBase {
 	final Module load(String location, ModuleRevisionBuilder builder, long id) {
 		if (container == null)
 			throw new IllegalStateException("Container is not set."); //$NON-NLS-1$
-		if (modulesByLocations.get(location) != null)
-			throw new IllegalArgumentException("Location is already used."); //$NON-NLS-1$
-		Module module = createModule(location, id);
-		ModuleRevision newRevision = builder.buildRevision(id, location, module, container);
+		if (modulesByLocations.containsKey(location))
+			throw new IllegalArgumentException("Location is already used: " + location); //$NON-NLS-1$
+		if (modulesById.containsKey(id))
+			throw new IllegalArgumentException("Id is already used: " + id); //$NON-NLS-1$
+		Module module = builder.buildModule(id, location, container);
 		modulesByLocations.put(location, module);
 		modulesById.put(id, module);
+		ModuleRevision newRevision = module.getCurrentRevision();
 		addToRevisionByName(newRevision);
 		addCapabilities(newRevision);
 		return module;
@@ -199,8 +210,8 @@ public abstract class ModuleDataBase {
 	final void uninstall(Module module) {
 		ModuleRevisions uninstalling = module.getRevisions();
 		// remove the location
-		modulesByLocations.remove(uninstalling.getLocation());
-		modulesById.remove(uninstalling.getId());
+		modulesByLocations.remove(module.getLocation());
+		modulesById.remove(module.getId());
 		// remove the revisions by name
 		List<ModuleRevision> revisions = uninstalling.getModuleRevisions();
 		for (ModuleRevision revision : revisions) {
@@ -388,7 +399,7 @@ public abstract class ModuleDataBase {
 		Collections.sort(modules, new Comparator<Module>() {
 			@Override
 			public int compare(Module m1, Module m2) {
-				return m1.getRevisions().getId().compareTo(m2.getRevisions().getId());
+				return m1.getId().compareTo(m2.getId());
 			}
 		});
 		return modules;
@@ -665,10 +676,8 @@ public abstract class ModuleDataBase {
 				return;
 			out.writeInt(addToWriteTable(current, objectTable));
 
-			ModuleRevisions revisions = module.getRevisions();
-
-			writeString(revisions.getLocation(), out);
-			out.writeLong(revisions.getId());
+			writeString(module.getLocation(), out);
+			out.writeLong(module.getId());
 
 			writeString(current.getSymbolicName(), out);
 			writeVersion(current.getVersion(), out);

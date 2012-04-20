@@ -66,7 +66,7 @@ public class ModuleContainer {
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
 	 * @param bundleCollisionHook the collision hook
-	 * @param resolverHookFactory the resovler hook
+	 * @param resolverHookFactory the resolver hook
 	 * @param resolver the resolver
 	 * @param moduleDataBase the module database
 	 */
@@ -177,7 +177,7 @@ public class ModuleContainer {
 			// Check that the existing location is visible from the origin bundle
 			if (existingLocation != null) {
 				if (origin != null) {
-					if (origin.getBundle(existingLocation.getRevisions().getId()) == null) {
+					if (origin.getBundle(existingLocation.getId()) == null) {
 						Bundle b = existingLocation.getBundle();
 						throw new BundleException("Bundle \"" + b.getSymbolicName() + "\" version \"" + b.getVersion() + "\" is already installed at location: " + location, BundleException.REJECTED_BY_HOOK);
 					}
