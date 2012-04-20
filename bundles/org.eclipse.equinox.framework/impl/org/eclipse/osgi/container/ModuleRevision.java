@@ -13,6 +13,7 @@ package org.eclipse.osgi.container;
 import java.util.*;
 import java.util.Map.Entry;
 import org.eclipse.osgi.container.ModuleRevisionBuilder.GenericInfo;
+import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;

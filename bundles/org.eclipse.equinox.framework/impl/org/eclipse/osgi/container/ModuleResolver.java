@@ -11,6 +11,7 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
+import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Version;
 import org.osgi.framework.hooks.resolver.ResolverHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;

@@ -12,6 +12,7 @@ package org.eclipse.osgi.container;
 
 import java.net.URL;
 import java.util.*;
+import org.eclipse.osgi.internal.container.Converters;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.*;

@@ -8,14 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.container;
+package org.eclipse.osgi.internal.container;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LockSet<T> {
-	private final HashMap<T, ReentrantLock> locks = new HashMap<T, ReentrantLock>();
+	private final Map<T, ReentrantLock> locks = new WeakHashMap<T, ReentrantLock>();
 	private final Object monitor = new Object();
 	private final boolean reentrant;
 
@@ -60,7 +61,12 @@ public class LockSet<T> {
 	}
 
 	public void unlock(T t) {
-		getLock(t).unlock();
+		synchronized (monitor) {
+			ReentrantLock lock = locks.get(t);
+			if (lock == null)
+				throw new IllegalStateException("No lock found."); //$NON-NLS-1$
+			lock.unlock();
+		}
 	}
 
 	private ReentrantLock getLock(T t) {
