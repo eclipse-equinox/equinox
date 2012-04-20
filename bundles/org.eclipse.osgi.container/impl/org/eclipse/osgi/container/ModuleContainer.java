@@ -16,7 +16,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.osgi.internal.container.LockSet;
 import org.osgi.framework.*;
-import org.osgi.framework.hooks.bundle.CollisionHook;
 import org.osgi.framework.hooks.resolver.ResolverHookFactory;
 import org.osgi.framework.namespace.HostNamespace;
 import org.osgi.framework.wiring.BundleRevision;
@@ -53,9 +52,9 @@ public final class ModuleContainer {
 	final ModuleDataBase moduleDataBase;
 
 	/**
-	 * Hook used to determine if a bundle being installed or updated will cause a collision
+	 * Hook used to determine if a module revision being installed or updated will cause a collision
 	 */
-	private final CollisionHook bundleCollisionHook;
+	private final ModuleCollisionHook moduleCollisionHook;
 
 	/**
 	 * The module resolver which implements the ResolverContext and handles calling the 
@@ -65,13 +64,13 @@ public final class ModuleContainer {
 
 	/**
 	 * Constructs a new container with the specified collision hook, resolver hook, resolver and module database.
-	 * @param bundleCollisionHook the collision hook
+	 * @param moduleCollisionHook the collision hook
 	 * @param resolverHookFactory the resolver hook
 	 * @param resolver the resolver
 	 * @param moduleDataBase the module database
 	 */
-	public ModuleContainer(CollisionHook bundleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver, ModuleDataBase moduleDataBase) {
-		this.bundleCollisionHook = bundleCollisionHook;
+	public ModuleContainer(ModuleCollisionHook moduleCollisionHook, ResolverHookFactory resolverHookFactory, Resolver resolver, ModuleDataBase moduleDataBase) {
+		this.moduleCollisionHook = moduleCollisionHook;
 		this.moduleResolver = new ModuleResolver(resolverHookFactory, resolver);
 		this.moduleDataBase = moduleDataBase;
 	}
@@ -112,20 +111,20 @@ public final class ModuleContainer {
 	 * <p>
 	 * If a module already exists with the specified location then the 
 	 * existing module is returned and the builder is not used.
-	 * @param origin the context performing the install, may be {@code null}.
+	 * @param origin the module performing the install, may be {@code null}.
 	 * @param location The location identifier of the module to install. 
 	 * @param builder the builder used to create the revision to install.
 	 * @return a new module or a existing module if one exists at the 
 	 *     specified location.
 	 * @throws BundleException if some error occurs installing the module
 	 */
-	public Module install(BundleContext origin, String location, ModuleRevisionBuilder builder) throws BundleException {
+	public Module install(Module origin, String location, ModuleRevisionBuilder builder) throws BundleException {
 		String name = builder.getSymbolicName();
 		boolean locationLocked = false;
 		boolean nameLocked = false;
 		try {
 			Module existingLocation = null;
-			Collection<Bundle> collisionCandidates = Collections.emptyList();
+			Collection<Module> collisionCandidates = Collections.emptyList();
 			moduleDataBase.lockRead();
 			try {
 				existingLocation = moduleDataBase.getModule(location);
@@ -141,26 +140,29 @@ public final class ModuleContainer {
 						Thread.currentThread().interrupt();
 						throw new BundleException("Failed to obtain id locks for installation.", BundleException.STATECHANGE_ERROR, e);
 					}
-					// Collect existing bundles with the same name and version as the bundle we want to install
+					// Collect existing current revisions with the same name and version as the revision we want to install
 					// This is to perform the collision check below
 					Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
 					if (!existingRevisionNames.isEmpty()) {
-						collisionCandidates = new ArrayList<Bundle>(1);
+						collisionCandidates = new ArrayList<Module>(1);
 						for (ModuleRevision equinoxRevision : existingRevisionNames) {
-							Bundle b = equinoxRevision.getBundle();
+							if (!equinoxRevision.isCurrent())
+								continue; // only pay attention to current revisions
 							// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
-							if (b != null && !collisionCandidates.contains(b))
-								collisionCandidates.add(b);
+							if (!collisionCandidates.contains(equinoxRevision.getRevisions().getModule()))
+								collisionCandidates.add(equinoxRevision.getRevisions().getModule());
 						}
 					}
 				}
 			} finally {
 				moduleDataBase.unlockRead();
 			}
-			// Check that the existing location is visible from the origin bundle
+			// Check that the existing location is visible from the origin module
 			if (existingLocation != null) {
 				if (origin != null) {
-					if (origin.getBundle(existingLocation.getId()) == null) {
+					Bundle bundle = origin.getBundle();
+					BundleContext context = bundle == null ? null : bundle.getBundleContext();
+					if (context != null && context.getBundle(existingLocation.getId()) == null) {
 						Bundle b = existingLocation.getBundle();
 						throw new BundleException("Bundle \"" + b.getSymbolicName() + "\" version \"" + b.getVersion() + "\" is already installed at location: " + location, BundleException.REJECTED_BY_HOOK);
 					}
@@ -170,7 +172,7 @@ public final class ModuleContainer {
 			// Check that the bundle does not collide with other bundles with the same name and version
 			// This is from the perspective of the origin bundle
 			if (origin != null && !collisionCandidates.isEmpty()) {
-				bundleCollisionHook.filterCollisions(CollisionHook.INSTALLING, origin.getBundle(), collisionCandidates);
+				moduleCollisionHook.filterCollisions(ModuleCollisionHook.INSTALLING, origin, collisionCandidates);
 			}
 			if (!collisionCandidates.isEmpty()) {
 				throw new BundleException("A bundle is already installed with name \"" + name + "\" and version \"" + builder.getVersion(), BundleException.DUPLICATE_BUNDLE_ERROR);
@@ -202,7 +204,7 @@ public final class ModuleContainer {
 		String name = builder.getSymbolicName();
 		boolean nameLocked = false;
 		try {
-			Collection<Bundle> collisionCandidates = Collections.emptyList();
+			Collection<Module> collisionCandidates = Collections.emptyList();
 			moduleDataBase.lockRead();
 			try {
 				// Attempt to lock the name
@@ -219,12 +221,16 @@ public final class ModuleContainer {
 				// This is to perform the collision check below
 				Collection<ModuleRevision> existingRevisionNames = moduleDataBase.getRevisions(name, builder.getVersion());
 				if (!existingRevisionNames.isEmpty()) {
-					collisionCandidates = new ArrayList<Bundle>(1);
+					collisionCandidates = new ArrayList<Module>(1);
 					for (ModuleRevision equinoxRevision : existingRevisionNames) {
-						Bundle b = equinoxRevision.getBundle();
+						if (!equinoxRevision.isCurrent())
+							continue;
+						Module m = equinoxRevision.getRevisions().getModule();
+						if (m.equals(module))
+							continue; // don't worry about the updating modules revisions
 						// need to prevent duplicates here; this is in case a revisions object contains multiple revision objects.
-						if (b != null && !collisionCandidates.contains(b))
-							collisionCandidates.add(b);
+						if (!collisionCandidates.contains(m))
+							collisionCandidates.add(m);
 					}
 				}
 
@@ -232,11 +238,10 @@ public final class ModuleContainer {
 				moduleDataBase.unlockRead();
 			}
 
-			// Check that the bundle does not collide with other bundles with the same name and version
-			// This is from the perspective of the origin bundle being updated
-			Bundle origin = module.getBundle();
-			if (origin != null && !collisionCandidates.isEmpty()) {
-				bundleCollisionHook.filterCollisions(CollisionHook.UPDATING, origin, collisionCandidates);
+			// Check that the module does not collide with other modules with the same name and version
+			// This is from the perspective of the module being updated
+			if (module != null && !collisionCandidates.isEmpty()) {
+				moduleCollisionHook.filterCollisions(ModuleCollisionHook.UPDATING, module, collisionCandidates);
 			}
 
 			if (!collisionCandidates.isEmpty()) {
@@ -506,7 +511,7 @@ public final class ModuleContainer {
 		}
 	}
 
-	private class ModuleFrameworkWiring implements FrameworkWiring {
+	class ModuleFrameworkWiring implements FrameworkWiring {
 
 		@Override
 		public Bundle getBundle() {

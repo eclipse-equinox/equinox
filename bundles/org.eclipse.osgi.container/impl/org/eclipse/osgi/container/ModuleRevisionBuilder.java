@@ -11,13 +11,12 @@
 package org.eclipse.osgi.container;
 
 import java.util.*;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 
 /**
  * A builder for creating module {@link ModuleRevision} objects.  A builder can only be used by 
  * the module {@link ModuleContainer container} to build revisions when 
- * {@link ModuleContainer#install(BundleContext, String, ModuleRevisionBuilder) 
+ * {@link ModuleContainer#install(Module, String, ModuleRevisionBuilder) 
  * installing} or {@link ModuleContainer#update(Module, ModuleRevisionBuilder) updating} a module.
  * <p>
  * The builder provides the instructions to the container for creating a {@link ModuleRevision}.
