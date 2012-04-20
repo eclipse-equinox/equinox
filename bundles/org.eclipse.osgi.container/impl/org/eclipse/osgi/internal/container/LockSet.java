@@ -40,6 +40,8 @@ public class LockSet<T> {
 		ReentrantLock lock = getLock(t);
 		boolean obtained = lock.tryLock();
 		if (obtained) {
+			if (reentrant)
+				return true;
 			if (lock.getHoldCount() > 1) {
 				lock.unlock();
 				return false;
@@ -52,6 +54,8 @@ public class LockSet<T> {
 		ReentrantLock lock = getLock(t);
 		boolean obtained = lock.tryLock(time, unit);
 		if (obtained) {
+			if (reentrant)
+				return true;
 			if (lock.getHoldCount() > 1) {
 				lock.unlock();
 				return false;
