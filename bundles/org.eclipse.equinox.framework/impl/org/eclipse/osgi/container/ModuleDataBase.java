@@ -15,7 +15,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import org.eclipse.osgi.framework.util.ObjectPool;
 import org.osgi.framework.Version;
 import org.osgi.resource.*;
@@ -77,7 +79,7 @@ public abstract class ModuleDataBase {
 	/**
 	 * Monitors read and write access to this database
 	 */
-	private final UpgradeableReadWriteLock monitor = new UpgradeableReadWriteLock();
+	private final ReentrantReadWriteLock monitor = new ReentrantReadWriteLock(true);
 
 	/**
 	 * Constructs a new empty database.
@@ -428,39 +430,41 @@ public abstract class ModuleDataBase {
 	}
 
 	/**
-	 * @return the number of read holds the current thread has.
-	 * @see ReentrantReadWriteLock#getReadHoldCount()
-	 */
-	final int getReadHoldCount() {
-		return monitor.getReadHoldCount();
-	}
-
-	/**
-	 * @see UpgradeableReadWriteLock#lockRead()
+	 * @see ReadLock#lock()
 	 */
 	public final void lockRead() {
-		monitor.lockRead();
+		monitor.readLock().lock();
 	}
 
 	/**
-	 * @see UpgradeableReadWriteLock#lockWrite()
+	 * Same as {@link WriteLock#lock()} except an illegal
+	 * state exception is thrown if the current thread holds
+	 * one or more read locks.
+	 * @see WriteLock#lock()
+	 * @throws IllegalStateException if the current thread holds
+	 * one or more read locks.
 	 */
 	public final void lockWrite() {
-		monitor.lockWrite();
+		if (monitor.getReadHoldCount() > 0) {
+			// this is not supported and will cause deadlock if allowed to proceed.
+			// fail fast instead of deadlocking
+			throw new IllegalStateException("Requesting upgrade to write lock."); //$NON-NLS-1$
+		}
+		monitor.writeLock().lock();
 	}
 
 	/**
-	 * @see UpgradeableReadWriteLock#unlockRead()
+	 * @see ReadLock#unlock()
 	 */
 	public final void unlockRead() {
-		monitor.unlockRead();
+		monitor.readLock().unlock();
 	}
 
 	/**
-	 * @see UpgradeableReadWriteLock#unlockWrite()
+	 * @see WriteLock#unlock()
 	 */
 	public final void unlockWrite() {
-		monitor.unlockWrite();
+		monitor.writeLock().unlock();
 	}
 
 	/**
