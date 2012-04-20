@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.osgi.bundle.manifest;
+package org.eclipse.osgi.container.builders;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,7 +22,7 @@ import org.osgi.framework.*;
 import org.osgi.framework.namespace.*;
 import org.osgi.framework.wiring.BundleRevision;
 
-public class OSGiManifestModuleBuilder {
+public class OSGiManifestBuilderFactory {
 	private static final String ATTR_TYPE_STRING = "string"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_VERSION = "version"; //$NON-NLS-1$
 	private static final String ATTR_TYPE_URI = "uri"; //$NON-NLS-1$
