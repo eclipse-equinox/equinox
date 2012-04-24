@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.osgi.internal.container;
 
+import java.util.Collection;
 import java.util.List;
 import org.osgi.framework.wiring.*;
 import org.osgi.resource.*;
@@ -91,5 +92,16 @@ public class Converters {
 	@SuppressWarnings("unchecked")
 	public static List<BundleRevision> asListBundleRevision(List<? extends BundleRevision> l) {
 		return (List<BundleRevision>) l;
+	}
+
+	/**
+	 * Coerce the generic type of a collection from Collection<? extends Resource>
+	 * to Collection<Resource>
+	 * @param c List to be coerced.
+	 * @return c coerced to Collection<Resource>
+	 */
+	@SuppressWarnings("unchecked")
+	public static Collection<Resource> asCollectionResource(Collection<? extends Resource> c) {
+		return (Collection<Resource>) c;
 	}
 }

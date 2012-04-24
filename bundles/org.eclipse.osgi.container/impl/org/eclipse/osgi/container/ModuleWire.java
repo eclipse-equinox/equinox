@@ -20,6 +20,9 @@ public class ModuleWire implements BundleWire {
 	private final ModuleRevision hostingProvider;
 	private final ModuleRequirement requirement;
 	private final ModuleRevision hostingRequirer;
+	// indicates that the wire points to valid wirings
+	// technically this should be a separate flag for requirer vs provider but that seems like overkill
+	private volatile boolean isValid = true;
 
 	ModuleWire(ModuleCapability capability, ModuleRevision hostingProvider, ModuleRequirement requirement, ModuleRevision hostingRequirer) {
 		super();
@@ -41,11 +44,17 @@ public class ModuleWire implements BundleWire {
 
 	@Override
 	public ModuleWiring getProviderWiring() {
+		if (!isValid) {
+			return null;
+		}
 		return hostingProvider.getWiring();
 	}
 
 	@Override
 	public ModuleWiring getRequirerWiring() {
+		if (!isValid) {
+			return null;
+		}
 		return hostingRequirer.getWiring();
 	}
 
@@ -62,4 +71,9 @@ public class ModuleWire implements BundleWire {
 	public String toString() {
 		return getRequirement() + " -> " + getCapability(); //$NON-NLS-1$
 	}
+
+	void invalidate() {
+		this.isValid = false;
+	}
+
 }

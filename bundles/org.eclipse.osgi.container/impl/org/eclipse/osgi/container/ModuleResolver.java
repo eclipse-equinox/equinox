@@ -55,6 +55,7 @@ class ModuleResolver {
 	 * directly by this method.  The returned wirings need to be merged into 
 	 * the database.
 	 * @param triggers the triggers that caused the resolver operation to occur
+	 * @param triggersMandatory true if the triggers must be resolved by the resolve process
 	 * @param unresolved a snapshot of unresolved revisions
 	 * @param wiringCopy the wirings snapshot of the currently resolved revisions
 	 * @param moduleDataBase the module database.
@@ -62,8 +63,8 @@ class ModuleResolver {
 	 * merged into the moduleDatabase
 	 * @throws ResolutionException
 	 */
-	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
-		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, wiringCopy, moduleDataBase);
+	Map<ModuleRevision, ModuleWiring> resolveDelta(Collection<ModuleRevision> triggers, boolean triggersMandatory, Collection<ModuleRevision> unresolved, Map<ModuleRevision, ModuleWiring> wiringCopy, ModuleDataBase moduleDataBase) throws ResolutionException {
+		ResolveProcess resolveProcess = new ResolveProcess(unresolved, triggers, triggersMandatory, wiringCopy, moduleDataBase);
 		Map<Resource, List<Wire>> result = resolveProcess.resolve();
 		return generateDelta(result, wiringCopy, unresolved);
 	}
@@ -331,15 +332,22 @@ class ModuleResolver {
 		private final Collection<ModuleRevision> unresolved;
 		private final Collection<ModuleRevision> disabled;
 		private final Collection<ModuleRevision> triggers;
+		private final Collection<ModuleRevision> optionals;
+		private final boolean triggersMandatory;
 		private final ModuleDataBase moduleDataBase;
 		private final Map<ModuleRevision, ModuleWiring> wirings;
 		private volatile ResolverHook hook = null;
 		private volatile Map<String, Collection<ModuleRevision>> byName = null;
 
-		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
+		ResolveProcess(Collection<ModuleRevision> unresolved, Collection<ModuleRevision> triggers, boolean triggersMandatory, Map<ModuleRevision, ModuleWiring> wirings, ModuleDataBase moduleDataBase) {
 			this.unresolved = unresolved;
 			this.disabled = new HashSet<ModuleRevision>(unresolved);
 			this.triggers = triggers;
+			this.triggersMandatory = triggersMandatory;
+			this.optionals = new ArrayList<ModuleRevision>(unresolved);
+			if (this.triggersMandatory) {
+				this.optionals.removeAll(triggers);
+			}
 			this.wirings = wirings;
 			this.moduleDataBase = moduleDataBase;
 		}
@@ -383,10 +391,16 @@ class ModuleResolver {
 		}
 
 		@Override
+		public Collection<Resource> getMandatoryResources() {
+			if (triggersMandatory) {
+				return Converters.asCollectionResource(triggers);
+			}
+			return super.getMandatoryResources();
+		}
+
+		@Override
 		public Collection<Resource> getOptionalResources() {
-			@SuppressWarnings("unchecked")
-			Collection<Resource> results = (Collection<Resource>) ((Collection<? extends Resource>) unresolved);
-			return results;
+			return Converters.asCollectionResource(optionals);
 		}
 
 		Map<Resource, List<Wire>> resolve() throws ResolutionException {
@@ -561,9 +575,19 @@ class ModuleResolver {
 				return versionCompare;
 
 			// We assume all resources here come from us and are ModuleRevision objects
-			Long id1 = ((ModuleRevision) c1.getResource()).getRevisions().getModule().getId();
-			Long id2 = ((ModuleRevision) c2.getResource()).getRevisions().getModule().getId();
+			ModuleRevision m1 = (ModuleRevision) c1.getResource();
+			ModuleRevision m2 = (ModuleRevision) c2.getResource();
+			Long id1 = m1.getRevisions().getModule().getId();
+			Long id2 = m2.getRevisions().getModule().getId();
 
+			if (id1.equals(id2) && !m1.equals(m2)) {
+				// sort based on revision ordering
+				List<ModuleRevision> revisions = m1.getRevisions().getModuleRevisions();
+				int index1 = revisions.indexOf(m1);
+				int index2 = revisions.indexOf(m2);
+				// we want to sort the indexes from highest to lowest
+				return index2 - index1;
+			}
 			return id1.compareTo(id2);
 		}
 	}
